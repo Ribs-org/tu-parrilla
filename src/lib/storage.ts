@@ -88,6 +88,11 @@ function getCliente(): S3Client {
     // esto cada PUT vuelve con un error de firma que no menciona el checksum.
     requestChecksumCalculation: 'WHEN_REQUIRED',
     responseChecksumValidation: 'WHEN_REQUIRED',
+    // Sin tope, una petición que R2 deja colgada retiene la función hasta su `maxDuration`:
+    // así murieron por 504 todas las corridas del cron de publicación, colgadas en el
+    // barrido. Con tope es un error, y quien llama ya sabe qué hacer con un error. Treinta
+    // segundos sin respuesta cubren de sobra un PUT de 50 MB, que va enviando mientras tanto.
+    requestHandler: { connectionTimeout: 5_000, requestTimeout: 30_000 },
   })
   return cliente
 }
