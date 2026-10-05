@@ -229,6 +229,10 @@ empieza cada escena, que se sacan del archivo grabado y no se adivinan.
 
 ## La auditoría de Direct Post (2026-09-30)
 
+**Enviada el 2026-10-04**, con un video armado de dos tomas: la primera muestra el flujo de
+programar; la segunda, con la cuenta ya en privada, la publicación hecha y vista en TikTok
+Studio. Esperando respuesta.
+
 La app está aprobada y en producción desde el 2026-09-28 (Login Kit y Content Posting
 API). Lo que falta es la **auditoría de Direct Post**: sin ella, TikTok solo acepta
 publicaciones de **cuentas privadas** y en «Solo yo», y la app tiene un cupo de **5 usuarios

@@ -30,6 +30,8 @@ no espera a que alguien lo pida.
 | el flujo de alta de un usuario | los pasos de puesta en marcha del `README.md` |
 | el árbol de archivos, si agregaste un módulo con responsabilidad propia | el árbol del final del `README.md` |
 | algo que dejaste a medias a propósito | `docs/deuda-tecnica.md`, con la fecha, el porqué y lo que costaría terminarlo |
+| algo que se decidió posponer: un bug visto y no arreglado, una feature, un trámite, algo por revisar | `docs/pendientes.md`, una entrada corta con la fecha y dónde está el detalle |
+| algo que estaba en `docs/pendientes.md` y quedó hecho | bórralo de `docs/pendientes.md` en el mismo commit |
 | el despliegue, las migraciones o la reja de pull requests | la sección correspondiente del `README.md` |
 
 Dos reglas que hacen que esto funcione:
@@ -64,3 +66,16 @@ comportamiento visible, y el README pasó días describiendo una pantalla que ya
   solo.
 - **Si de verdad no toca nada, dilo en el informe** —«revisé README y docs/, nada que
   actualizar»— para que quien revise sepa que lo miraste y no que se te olvidó.
+
+# Lo pendiente vive en `docs/pendientes.md`
+
+Las sesiones se cierran y lo que se habló en ellas se pierde; el backlog no puede depender
+de eso. `docs/pendientes.md` es la lista única de lo que se decidió posponer.
+
+- **Cuando pregunten qué está pendiente**, la respuesta sale de leer `docs/pendientes.md`
+  —y, si hace falta el detalle, de los documentos a los que apunta—, no de la memoria.
+- **Si ves un bug o algo raro que no es parte de lo que estás haciendo**, no lo dejes solo en
+  el chat: anótalo ahí con la fecha y lo que viste, y dilo en el informe.
+- **Lo que solo el dueño puede cerrar** (un panel externo, un formulario, un pago) va
+  marcado **[dueño]**.
+- **Al terminar algo que estaba ahí, se borra en el mismo commit.** Lo hecho queda en git.
