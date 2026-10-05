@@ -5,7 +5,7 @@ sus redes (Instagram, Facebook, YouTube): seguidores, alcance, publicaciones
 recientes y el detalle de cada post, y desde la versión 1.1 también **publica**:
 eliges fotos o un video de la galería, escribes el texto, marcas las cuentas y lo
 programas, o lo mandas a salir ahora. Los datos son los mismos que ve el panel web,
-leídos desde `https://www.vicente-pareja.cl/api/mobile/*`.
+leídos desde `https://tu-parrilla.cl/api/mobile/*`.
 
 No se publica en Google Play ni en la App Store. Se instala directamente en el
 teléfono desde un archivo `.apk` que se genera bajo pedido.

@@ -63,6 +63,25 @@ Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataf
 - **[dueño] Vercel Pro antes de abrir a terceros.** El plan Hobby es de uso personal y no
   comercial (`docs/levantamiento-terceros.md` §5).
 
+## Lo que todavía depende de `vicente-pareja.cl`
+
+`vicente-pareja.cl` queda como la página personal de Vicente; el producto vive en
+`tu-parrilla.cl`. Desde el 2026-10-04 la app del teléfono apunta a `tu-parrilla.cl`
+(`mobile/src/lib/config.ts`), pero el dominio viejo no se puede soltar todavía:
+
+- **Las instalaciones que aún no recibieron la actualización** siguen llamando a
+  `www.vicente-pareja.cl/api/mobile/*`. Una actualización OTA se aplica en la segunda
+  apertura de la app; mientras haya teléfonos sin abrirla, ese dominio tiene que seguir
+  sirviendo la API (hoy lo hace: es el mismo despliegue).
+- **La media vive en `media-bucket.vicente-pareja.cl`** (el dominio propio del bucket de
+  R2, `R2_PUBLIC_BASE`). Moverla a algo como `media.tu-parrilla.cl` pide: el dominio nuevo
+  en R2, `R2_PUBLIC_BASE` en Vercel, verificarlo como *URL property* en las dos apps de
+  TikTok (si no, `PULL_FROM_URL` falla), y decidir qué pasa con las URLs ya guardadas en la
+  base, que apuntan al dominio viejo.
+- **El panel también responde en `www.vicente-pareja.cl/admin`.** Meta ya solo acepta los
+  retornos de OAuth de `tu-parrilla.cl` (2026-10-04), así que conectar Instagram o Facebook
+  desde el dominio viejo falla. Redirigir `/admin` del dominio viejo al nuevo lo cerraría.
+
 ## Features y trabajo de código
 
 - **Cupos y reparto de los crons por usuario** (`docs/levantamiento-terceros.md` §5.4). Hace

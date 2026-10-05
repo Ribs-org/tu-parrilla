@@ -822,7 +822,7 @@ es el mismo en los dos casos, cambia solo quién lo dispara.
 `public/docs/api-editor.md` documenta ambos endpoints en detalle, escrito para que un
 LLM que crea contenido lo lea entero y no necesite explicaciones: contratos, reglas
 por red, todas las frases de error y qué significa cada métrica. Se sirve tal cual en
-<https://www.vicente-pareja.cl/docs/api-editor.md>. No contiene secretos — la clave
+<https://tu-parrilla.cl/docs/api-editor.md>. No contiene secretos — la clave
 viaja aparte — pero es público: si prefieres que no lo sea, muévelo fuera de
 `public/`.
 
