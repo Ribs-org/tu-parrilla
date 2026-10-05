@@ -22,13 +22,13 @@ Cómo se usa:
 
 ## Bugs
 
-- **El barrido de huérfanos no logra leer la base** (2026-10-04). Hasta el 2026-10-05 cada
-  corrida del cron moría en 504 colgada en el barrido; ahora el barrido tiene un plazo de un
-  minuto, se rinde sin borrar nada y la corrida termina en 200. Lo que se sabe: R2 lista sus
-  ~290 objetos en menos de medio segundo, y la lectura de las columnas con URLs
-  (`urlsReferenciadas`) no vuelve. `pg_stat_activity` no mostró bloqueos. Las seis
-  consultas corren de a una con su línea `[barrido] <tabla>.<columna>`: la que falta es la
-  colgada. Mientras no se arregle, R2 no se limpia solo.
+- **Por revisar: seis consultas en paralelo contra la base no volvían nunca** (2026-10-05).
+  El barrido de huérfanos leía seis columnas con un `Promise.all` y la lectura se colgaba en
+  cada corrida —por eso el cron moría en 504—, sin bloqueos en `pg_stat_activity`. En serie
+  las mismas seis tardan milisegundos, y así quedaron (`urlsReferenciadas`). Lo distintivo es
+  que eran más consultas a la vez que conexiones en el pool (`max: 5` en `src/db/index.ts`),
+  contra el pooler de Supabase en modo transacción. La causa no está explicada: cualquier
+  otro `Promise.all` con más de cinco consultas podría colgarse igual.
 - **El motivo de un intento fallido que se va a reintentar no se ve en ningún lado**
   (2026-10-04). Un destino que falla y vuelve a `scheduled` guarda `lastError`, pero el panel
   solo lo muestra cuando el destino ya quedó en `failed` (`page.tsx`, `queue.tsx`). En la
