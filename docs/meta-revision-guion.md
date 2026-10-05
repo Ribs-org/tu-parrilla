@@ -76,8 +76,8 @@ enlace a `https://tu-parrilla.cl`). El compositor no adjunta PDF —eso solo ent
 de lote—, y mientras el privado esté apagado el mensaje completo sale como respuesta pública.
 
 Y en Vercel, `COMENTARIOS_MODELO` apuntando a un modelo que exista (o borrada, para el de
-por defecto): con un modelo que la pasarela ya no tiene, cada tarjeta de La Mesa dice «No se
-pudo redactar la respuesta» en cámara.
+por defecto), y la pasarela con créditos cargados, porque el modelo por defecto es de pago:
+sin eso las tarjetas de La Mesa salen sin borrador en cámara.
 
 ### El ensayo, entero y sin grabar
 

@@ -507,7 +507,10 @@ razonamiento sin miedo. Sin la variable se usa `anthropic/claude-haiku-4.5`. Los
 gratuitos de la pasarela desaparecen sin aviso —`inclusionai/ling-3.0-flash-fin-free` dejó
 de existir en octubre de 2026—, y entonces cada borrador falla con «No se pudo redactar la
 respuesta» y el log dice `GatewayModelNotFoundError`: se arregla cambiando o borrando
-`COMENTARIOS_MODELO` en Vercel, sin desplegar.
+`COMENTARIOS_MODELO` en Vercel, sin desplegar. El modelo por defecto, en cambio, es de pago:
+con la pasarela en el plan gratuito, sin créditos cargados, cada borrador falla igual y el log
+dice «Free tier users do not have access to this model». Se arregla cargando créditos en la
+sección AI Gateway del equipo en Vercel.
 
 De tu infraestructura salen tres cosas hacia el proveedor del modelo: el texto del
 comentario, el nombre de quien lo dejó y el texto de la publicación. Nada más: ni tus

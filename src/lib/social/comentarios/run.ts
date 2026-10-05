@@ -223,12 +223,14 @@ export async function sondearComentarios(now: Date = new Date()): Promise<Sondeo
       reporte.sinSondear = aSondear.length - i
       break
     }
+    const desdeCuenta = Date.now()
     try {
       reporte.cuentas.push({
         network: cuenta.network,
         handle: cuenta.handle,
         ...(await sondearCuenta(cuenta, now, cupo, inicio)),
       })
+      console.log(`[comentarios] ${cuenta.network} ${cuenta.handle ?? ''}: ${Date.now() - desdeCuenta} ms`)
     } catch (error) {
       // El detalle de la red se queda en el log: la respuesta del cron lleva una frase fija.
       console.error(`[comentarios] ${cuenta.network}:`, String(error).slice(0, 300))
@@ -243,8 +245,10 @@ export async function sondearComentarios(now: Date = new Date()): Promise<Sondeo
       })
     }
   }
+  const desdeRedaccion = Date.now()
   try {
     reporte.redaccion = await redactarPendientes(inicio)
+    console.log(`[comentarios] redacción: ${Date.now() - desdeRedaccion} ms`)
   } catch (error) {
     // Publicar y descubrir mandan sobre redactar: si la fase entera revienta, la corrida
     // conserva lo que ya descubrió y los borradores esperan la pasada siguiente.

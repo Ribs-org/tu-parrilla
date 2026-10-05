@@ -24,10 +24,12 @@ Cómo se usa:
 
 - **El cron de publicación termina en 504 en cada corrida** (2026-10-04). Los logs de
   Vercel muestran `/api/cron/publish-social` cortado por `maxDuration` (240 s) en todas las
-  corridas. No es el modelo de los borradores —cada uno tiene un tope de 20 s—; la causa no
-  está aislada. Publicar corre primero y sale igual; lo que se arriesga es el sondeo de
-  comentarios y el barrido de huérfanos. Empezar midiendo cuánto tarda cada fase
-  (`publishDue`, `sondearComentarios`, `barrerHuerfanos`) en `src/app/api/cron/publish-social/route.ts`.
+  corridas. No es el modelo de los borradores —cada uno tiene un tope de 20 s, y la fase se
+  abandona tras tres fallos—; la causa no está aislada. Desde el 2026-10-05 la corrida escribe
+  `[cron] <fase> listo a los N ms` al terminar cada fase, y `[comentarios] <red> <cuenta>: N ms`
+  por cuenta: la fase colgada es la primera que no deja su línea (`vercel logs --query
+  publish-social`; el plan Hobby guarda una hora). Mientras tanto, un reel de Instagram se
+  quedó más de seis minutos en «saliendo» en el ensayo de Meta: puede ser el mismo problema.
 - **El motivo de un intento fallido que se va a reintentar no se ve en ningún lado**
   (2026-10-04). Un destino que falla y vuelve a `scheduled` guarda `lastError`, pero el panel
   solo lo muestra cuando el destino ya quedó en `failed` (`page.tsx`, `queue.tsx`). En la
@@ -40,10 +42,11 @@ Cómo se usa:
 
 ## Configuración pendiente del dueño
 
-- **[dueño] Borrar `COMENTARIOS_MODELO` en Vercel** (2026-10-04). Apunta a
-  `inclusionai/ling-3.0-flash-fin-free`, que la pasarela ya no tiene: cada borrador de
-  respuesta falla con `GatewayModelNotFoundError`. Sin la variable se usa el modelo por
-  defecto (ver README, «Responder comentarios»). No requiere desplegar.
+- **[dueño] Cargar créditos en la pasarela de IA de Vercel** (2026-10-05). El modelo por
+  defecto de los borradores (`anthropic/claude-haiku-4.5`) es de pago y el equipo está en el
+  plan gratuito: cada borrador falla con «Free tier users do not have access to this model»
+  y La Mesa queda sin borradores. Bloquea la grabación del App Review de Meta. Ver README,
+  «Responder comentarios».
 
 ## Trámites con las plataformas
 
