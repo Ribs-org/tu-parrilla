@@ -174,14 +174,25 @@ export async function borrar(url: string): Promise<void> {
   await getCliente().send(new DeleteObjectCommand({ Bucket: conf.bucket, Key: key }))
 }
 
-/** Enumera el bucket entero, paginando. Lo que el barrido necesita para decidir. */
-export async function listar(): Promise<ObjetoAlmacenado[]> {
+/**
+ * Enumera el bucket entero, paginando. Lo que el barrido necesita para decidir.
+ *
+ * `hasta` es un instante (ms) pasado el cual se deja de paginar y se lanza: el tope por
+ * petición no acota un listado que pagina sin fin, y un listado a medias no sirve para
+ * decidir qué borrar. Un token de continuación repetido también lanza, por la misma razón.
+ */
+export async function listar(hasta: number = Infinity): Promise<ObjetoAlmacenado[]> {
   const conf = config()
   if (!conf) throw new Error(SIN_ALMACEN)
   const s3 = getCliente()
   const objetos: ObjetoAlmacenado[] = []
   let token: string | undefined
+  let paginas = 0
   do {
+    if (Date.now() > hasta) {
+      throw new Error(`listado de R2 sin terminar: ${paginas} páginas y ${objetos.length} objetos`)
+    }
+    paginas += 1
     const pagina = await s3.send(
       new ListObjectsV2Command({ Bucket: conf.bucket, ContinuationToken: token }),
     )
@@ -198,7 +209,11 @@ export async function listar(): Promise<ObjetoAlmacenado[]> {
         uploadedAt: o.LastModified ?? new Date(),
       })
     }
-    token = pagina.IsTruncated ? pagina.NextContinuationToken : undefined
+    const siguiente = pagina.IsTruncated ? pagina.NextContinuationToken : undefined
+    if (siguiente && siguiente === token) {
+      throw new Error(`R2 repitió el token de continuación en la página ${paginas}`)
+    }
+    token = siguiente
   } while (token)
   return objetos
 }

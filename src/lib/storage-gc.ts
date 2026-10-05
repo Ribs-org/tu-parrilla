@@ -10,6 +10,17 @@ export const GRACIA_MS = 60 * 60 * 1000
 
 export type Barrido = { borrados: number; bytes: number; error?: string }
 
+/** Lo más que puede tardar cada lectura del barrido antes de rendirse hasta la pasada siguiente. */
+const PLAZO_MS = 60_000
+
+function conPlazo<T>(promesa: Promise<T>, ms: number, que: string): Promise<T> {
+  let reloj: ReturnType<typeof setTimeout> | undefined
+  const vencida = new Promise<never>((_, rechazar) => {
+    reloj = setTimeout(() => rechazar(new Error(`${que} no terminó en ${ms} ms`)), ms)
+  })
+  return Promise.race([promesa, vencida]).finally(() => clearTimeout(reloj))
+}
+
 /**
  * La regla: se va lo que ninguna fila referencia y lleva más de `graciaMs` subido.
  *
@@ -94,8 +105,18 @@ export async function urlsReferenciadas(): Promise<Set<string>> {
 export async function barrerHuerfanos(ahora: Date = new Date()): Promise<Barrido> {
   const inicio = Date.now()
   try {
-    const [objetos, urls] = await Promise.all([listar(), urlsReferenciadas()])
-    console.log(`[barrido] ${objetos.length} objetos y ${urls.size} URLs leídos en ${Date.now() - inicio} ms`)
+    // Cada lectura con su línea y su plazo: la corrida que lo llama muere a los 240 s, y un
+    // barrido que no termina se la llevaba entera (los 504 de octubre de 2026).
+    const [objetos, urls] = await Promise.all([
+      listar(inicio + PLAZO_MS).then((o) => {
+        console.log(`[barrido] R2: ${o.length} objetos en ${Date.now() - inicio} ms`)
+        return o
+      }),
+      conPlazo(urlsReferenciadas(), PLAZO_MS, 'la lectura de la base').then((u) => {
+        console.log(`[barrido] base: ${u.size} URLs en ${Date.now() - inicio} ms`)
+        return u
+      }),
+    ])
     // listar() ya lanzó SIN_ALMACEN si no hay base configurada, así que en la
     // práctica esto siempre es no-null acá. El `?? new Set()` es solo para que el
     // tipo cierre sin forzar un throw redundante.

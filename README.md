@@ -825,8 +825,9 @@ Cada corrida hace tres cosas, en orden: publica lo vencido, sondea comentarios (
 mitad del presupuesto como mucho) y barre los archivos huérfanos de R2. Al terminar cada
 fase escribe `[cron] <fase> listo a los N ms` en el log, y el barrido dice cuántos objetos
 leyó: si una corrida muere por `maxDuration` (240 s), la fase colgada es la primera que no
-dejó su línea. Las llamadas a R2 tienen tope de tiempo para que un bucket que no responde
-no se lleve la corrida entera.
+dejó su línea. El barrido tiene un plazo de un minuto por lectura —el listado de R2 y la
+consulta a la base, cada una con su línea `[barrido]`— y, si no le alcanza, se rinde hasta la
+pasada siguiente sin borrar nada: un barrido que no termina no puede llevarse la corrida.
 
 ### Guía para el editor de contenido
 
