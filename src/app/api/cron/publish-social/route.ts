@@ -18,10 +18,17 @@ export async function GET(request: Request) {
     return new NextResponse('No autorizado', { status: 401 })
   }
 
+  // Una línea por fase con el tiempo acumulado. Si la corrida muere por `maxDuration`, la
+  // fase que se colgó es la primera que no alcanzó a escribir la suya: sin esto, el log de
+  // un 504 no dice dónde se fueron los 240 segundos.
+  const inicio = Date.now()
+  const marca = (fase: string) => console.log(`[cron] ${fase} listo a los ${Date.now() - inicio} ms`)
+
   try {
     // Failed targets answer 200 on purpose: each one wrote its own lastError and the
     // calendar shows it. A non-2xx here means the orchestrator itself broke.
     const report = await publishDue()
+    marca('publicar')
     // Después de publicar y antes de barrer: publicar a tiempo manda sobre responder a
     // tiempo, y el sondeo no debe quitarle segundos a la publicación de esta pasada.
     // Su fallo no puede tumbar la corrida, que ya publicó.
@@ -35,10 +42,12 @@ export async function GET(request: Request) {
     } catch (error) {
       console.error('Falló el sondeo de comentarios:', String(error).slice(0, 300))
     }
+    marca('comentarios')
     // Después de publicar, no antes: `limpiarMedia` acaba de liberar los videos del
     // día y el barrido no tiene por qué esperar otras 24 horas para verlo. No hace
     // falta envolverlo: `barrerHuerfanos` no lanza nunca.
     const barrido = await barrerHuerfanos()
+    marca('barrido')
     return NextResponse.json({ report, comentarios, barrido })
   } catch (error) {
     console.error('Falló la corrida de publicación:', error)
