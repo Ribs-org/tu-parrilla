@@ -3,13 +3,15 @@ import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'Términos',
-  description: 'Condiciones de uso de este sitio.',
+  description: 'Condiciones de uso de Tu Parrilla y de este sitio.',
 }
 
-/** Must match the address in the privacy page — a fork changes both. */
-const CONTACTO = 'vicente.pareja.jones@gmail.com'
+/** Tienen que calzar con los de la página de privacidad: un fork cambia las dos. */
+const RESPONSABLE = 'PYXIS SpA'
+const RUT = '78.459.631-1'
+const CONTACTO = 'pyxis.latam@gmail.com'
 
-const ACTUALIZADO = '26 de agosto de 2026'
+const ACTUALIZADO = '5 de octubre de 2026'
 
 export default function TerminosPage() {
   return (
@@ -20,57 +22,78 @@ export default function TerminosPage() {
       </header>
 
       <p className="leading-relaxed text-fg-muted">
-        Este es un sitio personal que reúne enlaces a los perfiles, proyectos y publicaciones de
-        su dueño. Es gratuito, no requiere registro y no vende nada. Usarlo implica aceptar lo
-        que sigue.
+        Tu Parrilla es un panel privado para que creadores de contenido programen, publiquen y
+        midan sus publicaciones en sus propias redes, y este sitio también sirve las páginas
+        públicas de enlaces de sus usuarios. Lo opera{' '}
+        <span className="text-fg">{RESPONSABLE}</span> (RUT {RUT}). Usarlo implica aceptar lo que
+        sigue.
       </p>
 
       <section className="space-y-3">
         <h2 className="font-titulo text-lg font-semibold uppercase tracking-[0.03em]">Qué ofrece</h2>
         <p className="leading-relaxed text-fg-muted">
-          Una página con enlaces. El contenido —textos, imágenes y la selección de enlaces— es del
-          dueño del sitio, que puede cambiarlo, reorganizarlo o retirarlo cuando quiera, sin
-          aviso.
+          Un panel donde cada usuario conecta sus propias cuentas de redes sociales para ver sus
+          métricas, programar publicaciones que salen solas a la hora elegida y responder los
+          comentarios que recibe. Y páginas públicas con enlaces, cuyo contenido —textos,
+          imágenes y la selección de enlaces— es de cada usuario, que puede cambiarlo o retirarlo
+          cuando quiera.
         </p>
       </section>
 
       <section className="space-y-3">
-        <h2 className="font-titulo text-lg font-semibold uppercase tracking-[0.03em]">Enlaces a terceros</h2>
+        <h2 className="font-titulo text-lg font-semibold uppercase tracking-[0.03em]">El acceso al panel</h2>
         <p className="leading-relaxed text-fg-muted">
-          Casi todo lo que hay acá lleva a otro sitio: redes sociales, tiendas, plataformas de
-          video. Esos sitios no son de este dueño y se rigen por sus propios términos y sus
-          propias políticas de privacidad. Lo que hagas allí queda entre tú y ellos.
+          El panel no tiene registro público: se entra solo por invitación, con el correo invitado
+          y un código de un solo uso que llega a ese correo. El acceso es personal; no lo
+          compartas. Intentar entrar sin invitación, o a cuentas de otra persona, no está
+          permitido.
+        </p>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="font-titulo text-lg font-semibold uppercase tracking-[0.03em]">Tus cuentas y tu contenido</h2>
+        <p className="leading-relaxed text-fg-muted">
+          Solo conectes cuentas que sean tuyas o que estés autorizado a administrar. Lo que
+          programas, publicas o respondes desde el panel lo publicas tú, en tu nombre: eres
+          responsable de ese contenido y de que cumpla los términos y las normas de cada red
+          social. El panel publica únicamente lo que tú escribiste y subiste, a la hora que
+          elegiste, y puedes desconectar cualquier cuenta cuando quieras.
+        </p>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="font-titulo text-lg font-semibold uppercase tracking-[0.03em]">Las redes sociales</h2>
+        <p className="leading-relaxed text-fg-muted">
+          Instagram, Facebook, TikTok, YouTube, Threads y X no son de {RESPONSABLE} y se rigen por
+          sus propios términos y sus propias políticas de privacidad. Cada una decide qué permite
+          publicar y cuándo, y puede limitar o cambiar lo que el panel puede hacer con tu cuenta.
+          Lo mismo vale para los enlaces de las páginas públicas: lo que hagas en el sitio al que
+          llevan queda entre tú y ese sitio.
         </p>
       </section>
 
       <section className="space-y-3">
         <h2 className="font-titulo text-lg font-semibold uppercase tracking-[0.03em]">Sin garantías</h2>
         <p className="leading-relaxed text-fg-muted">
-          El sitio se ofrece tal como está. Puede quedar fuera de servicio, un enlace puede
-          apuntar a algo que ya no existe, y la información puede quedar desactualizada. No se
-          asume responsabilidad por daños derivados de usarlo o de no poder usarlo.
-        </p>
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="font-titulo text-lg font-semibold uppercase tracking-[0.03em]">El panel privado</h2>
-        <p className="leading-relaxed text-fg-muted">
-          La sección de administración es de uso exclusivo del dueño y está protegida con
-          contraseña. Intentar acceder a ella sin autorización no está permitido.
+          El servicio se ofrece tal como está. Puede quedar fuera de servicio, una publicación
+          programada puede no salir si la red la rechaza o deja de permitirla, y la información
+          puede quedar desactualizada. Cuando una publicación falla, el panel lo muestra y te
+          avisa por correo. No se asume responsabilidad por daños derivados de usarlo o de no
+          poder usarlo.
         </p>
       </section>
 
       <section className="space-y-3">
         <h2 className="font-titulo text-lg font-semibold uppercase tracking-[0.03em]">Datos</h2>
         <p className="leading-relaxed text-fg-muted">
-          Qué se mide y qué no está descrito en la{' '}
+          Qué se guarda, para qué y cómo se borra está descrito en la{' '}
           <Link
             href="/privacidad"
             className="text-fg underline decoration-white/20 underline-offset-4 transition-colors hover:decoration-white/50"
           >
             política de privacidad
           </Link>
-          . El resumen es que no hay cookies de seguimiento ni analítica de terceros.
+          .
         </p>
       </section>
 
@@ -78,7 +101,7 @@ export default function TerminosPage() {
         <h2 className="font-titulo text-lg font-semibold uppercase tracking-[0.03em]">Cambios y contacto</h2>
         <p className="leading-relaxed text-fg-muted">
           Estos términos pueden cambiar; la fecha de arriba indica la última versión. Para
-          cualquier consulta:{' '}
+          cualquier consulta, escribe a {RESPONSABLE}:{' '}
           <a
             href={`mailto:${CONTACTO}`}
             className="text-fg underline decoration-white/20 underline-offset-4 transition-colors hover:decoration-white/50"

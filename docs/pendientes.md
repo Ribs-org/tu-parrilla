@@ -63,10 +63,6 @@ Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataf
   Falta: revisar los casos de uso, la cuenta de prueba del revisor (un Instagram y una
   página propios, distintos de los de Vicente), la puerta del revisor en Vercel, grabar y
   enviar el App Review.
-- **El sitio a nombre de Pyxis SpA** (2026-10-04). Meta revisa que el sitio calce con el
-  negocio verificado, y hoy `/privacidad` y `/terminos` no nombran a ninguna empresa.
-  Esperando de Vicente el nombre legal exacto, el RUT y el correo de contacto para
-  privacidad; con eso es un cambio de texto. Hacerlo antes de grabar el video de Meta.
 - **[dueño] Un segundo administrador en el portafolio Pyxis spa.** Hoy hay uno solo: si
   Vicente pierde el acceso a su Facebook, se pierden el portafolio y la app de Meta.
 - **[dueño] Google — verificación del OAuth y auditoría de cuota de YouTube**, en paralelo.
@@ -99,6 +95,9 @@ Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataf
 El producto es de Pyxis SpA, pero varias piezas siguen a nombre de Vicente como persona.
 Nada de esto bloquea un trámite hoy; conviene ordenarlo antes de abrir a terceros.
 
+- **[dueño] Que un abogado revise `/privacidad` y `/terminos`.** Desde el 2026-10-05 nombran
+  a PYXIS SpA como responsable y describen el servicio tal como funciona hoy, pero los
+  redactó Claude a partir del código, no alguien con criterio legal.
 - **[dueño] El código.** Lo escribió Vicente; lo prolijo es cederlo o licenciarlo a Pyxis
   con un documento simple. Verlo con el contador o un abogado: es una decisión legal, no
   técnica.

@@ -7,10 +7,12 @@ export const metadata: Metadata = {
   description: 'Qué datos guarda este sitio y qué no.',
 }
 
-/** The one value a fork has to change before deploying these pages. */
-const CONTACTO = 'vicente.pareja.jones@gmail.com'
+/** Quién responde por estos datos: lo que un fork cambia antes de desplegar estas páginas. */
+const RESPONSABLE = 'PYXIS SpA'
+const RUT = '78.459.631-1'
+const CONTACTO = 'pyxis.latam@gmail.com'
 
-const ACTUALIZADO = '30 de septiembre de 2026'
+const ACTUALIZADO = '5 de octubre de 2026'
 
 export default function PrivacidadPage() {
   return (
@@ -21,9 +23,16 @@ export default function PrivacidadPage() {
       </header>
 
       <p className="leading-relaxed text-fg-muted">
-        Este es un sitio personal. Mide su propio tráfico para saber qué contenido funciona, y
-        nada más. No usa cookies de seguimiento, no hay analítica de terceros, y no se vende ni
-        se comparte ningún dato con nadie.
+        Tu Parrilla es un panel privado, por invitación, para que creadores de contenido
+        programen, publiquen y midan sus publicaciones en sus propias redes. Lo opera{' '}
+        <span className="text-fg">{RESPONSABLE}</span> (RUT {RUT}), responsable de los datos que
+        se describen aquí.
+      </p>
+
+      <p className="leading-relaxed text-fg-muted">
+        Las páginas públicas del sitio miden su propio tráfico para saber qué contenido
+        funciona, y nada más. No usan cookies de seguimiento, no hay analítica de terceros, y no
+        se vende ni se comparte ningún dato con nadie.
       </p>
 
       <section className="space-y-3">
@@ -70,8 +79,7 @@ export default function PrivacidadPage() {
         <h2 className="font-titulo text-lg font-semibold uppercase tracking-[0.03em]">Sin cookies</h2>
         <p className="leading-relaxed text-fg-muted">
           No se instala ninguna cookie para medir tráfico. La única cookie que este sitio puede
-          poner es la sesión del panel de administración, y solo aparece si el dueño inicia
-          sesión.
+          poner es la sesión del panel, y solo aparece si inicias sesión en él.
         </p>
         <p className="leading-relaxed text-fg-muted">
           Esto tiene una consecuencia que conviene decir en voz alta: como el identificador
@@ -85,24 +93,27 @@ export default function PrivacidadPage() {
           Cuentas de redes sociales conectadas
         </h2>
         <p className="leading-relaxed text-fg-muted">
-          El panel privado puede conectarse a las cuentas de Instagram, Facebook, TikTok,
-          YouTube, Threads y X <span className="text-fg">del propio dueño del sitio</span>, para
-          leer las métricas de sus publicaciones y para publicar en ellas. La de Instagram se
-          conecta{' '}
+          Al panel solo se entra por invitación: cada persona invitada ingresa con su correo y
+          un código de un solo uso que le llega por correo, y puede conectar{' '}
+          <span className="text-fg">sus propias cuentas</span> de Instagram, Facebook, TikTok,
+          YouTube, Threads y X para leer las métricas de sus publicaciones, publicar en ellas y
+          responder sus comentarios. Cada usuario ve solo las cuentas que él conectó. La de
+          Instagram se conecta{' '}
           <span className="text-fg">mediante un inicio de sesión de Facebook</span>: eso lee la
-          lista de páginas de Facebook del dueño, y solo para encontrar cuál de ellas tiene
-          asociada la cuenta de Instagram. De esa lista no se guarda nada —ni nombres de
+          lista de páginas de Facebook de quien conecta, y solo para encontrar cuál de ellas
+          tiene asociada la cuenta de Instagram. De esa lista no se guarda nada —ni nombres de
           páginas, ni sus datos, ni nada de la cuenta de Facebook— salvo el identificador y el
-          nombre de usuario de la cuenta de Instagram que quedó conectada. Si eso está activo:
+          nombre de usuario de la cuenta de Instagram que quedó conectada. Con una cuenta
+          conectada:
         </p>
         <ul className="space-y-2 leading-relaxed text-fg-muted">
           <li>
             Los tokens de acceso se guardan <span className="text-fg">cifrados</span> (AES-256-GCM),
             y se usan para dos cosas: pedir las métricas de esas publicaciones y{' '}
-            <span className="text-fg">publicar en esas mismas cuentas</span> lo que el dueño
+            <span className="text-fg">publicar en esas mismas cuentas</span> lo que su dueño
             haya programado desde el panel o desde la aplicación del teléfono. La publicación
-            ocurre <span className="text-fg">a la hora que el dueño eligió</span>, sin que haga
-            falta que esté presente, y solo con el contenido que él mismo escribió y subió.
+            ocurre <span className="text-fg">a la hora que él eligió</span>, sin que haga falta
+            que esté presente, y solo con el contenido que él mismo escribió y subió.
           </li>
           <li>
             Se guardan los datos públicos de esas publicaciones: identificador, enlace,
@@ -110,8 +121,21 @@ export default function PrivacidadPage() {
             reproducciones, «me gusta», comentarios, veces compartido, guardados y alcance.
           </li>
           <li>
-            <span className="text-fg">Solo de las cuentas del dueño.</span> No se leen datos de
-            otras personas, ni el contenido de los comentarios, ni información de seguidores.
+            <span className="text-fg">Los comentarios que otras personas dejan</span> en esas
+            publicaciones: el texto, el nombre de usuario y el identificador de quien comentó, y
+            la fecha. Se guardan para mostrarlos en la cola de comentarios del panel y para
+            mandar la respuesta que decida el dueño de la cuenta, o la respuesta automática de
+            una regla de palabra clave que él mismo configuró.
+          </li>
+          <li>
+            Para proponer un borrador de respuesta, el texto del comentario, el nombre de quien
+            lo dejó y el texto de la publicación se envían a un modelo de lenguaje a través de la
+            pasarela de IA de Vercel. No se le envían métricas, otros comentarios ni ningún otro
+            dato. Ningún borrador se publica sin que el dueño de la cuenta lo mande.
+          </li>
+          <li>
+            <span className="text-fg">Solo de las cuentas que cada usuario conectó.</span> No se
+            leen seguidores, mensajes privados ni datos de cuentas que nadie conectó.
           </li>
         </ul>
         <p className="leading-relaxed text-fg-muted">
@@ -192,24 +216,29 @@ export default function PrivacidadPage() {
         <h2 className="font-titulo text-lg font-semibold uppercase tracking-[0.03em]">Dónde vive todo</h2>
         <p className="leading-relaxed text-fg-muted">
           El sitio está alojado en Vercel y los datos en una base de datos Postgres gestionada por
-          Supabase. Los archivos que el dueño sube —fotos, videos y los documentos que
-          adjunta a una regla de comentarios— se almacenan en Cloudflare R2. Ninguno
-          de esos proveedores recibe los datos para usarlos por su cuenta: los alojan.
+          Supabase. Los archivos que cada usuario sube —fotos, videos y los documentos que
+          adjunta a una regla de comentarios— se almacenan en Cloudflare R2. Los códigos de
+          ingreso y los avisos se mandan por correo con Resend, que recibe la dirección de
+          destino, y los borradores de respuesta los redacta un modelo de lenguaje a través de
+          la pasarela de IA de Vercel, con lo descrito arriba. Ninguno de esos proveedores
+          recibe los datos para usarlos por su cuenta: los procesan por encargo.
         </p>
       </section>
 
       <section className="space-y-3">
         <h2 className="font-titulo text-lg font-semibold uppercase tracking-[0.03em]">Contacto</h2>
         <p className="leading-relaxed text-fg-muted">
-          Si quieres saber qué hay asociado a ti, o pedir que se borre, escribe a{' '}
+          El responsable de estos datos es {RESPONSABLE} (RUT {RUT}). Si quieres saber qué hay
+          asociado a ti, o pedir que se borre, escribe a{' '}
           <a
             href={`mailto:${CONTACTO}`}
             className="text-fg underline decoration-white/20 underline-offset-4 transition-colors hover:decoration-white/50"
           >
             {CONTACTO}
           </a>
-          . Ten en cuenta que, por el diseño descrito arriba, lo más probable es que no exista
-          forma de vincular ningún registro contigo: no se guardan identificadores estables.
+          . Si solo visitaste las páginas públicas, ten en cuenta que, por el diseño descrito
+          arriba, lo más probable es que no exista forma de vincular ningún registro contigo: de
+          las visitas no se guardan identificadores estables.
         </p>
         <p className="leading-relaxed text-fg-muted">
           Si conectaste Instagram o Facebook, hay dos caminos desde Facebook, y no son lo mismo.{' '}
