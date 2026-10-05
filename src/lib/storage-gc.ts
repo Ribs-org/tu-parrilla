@@ -3,8 +3,8 @@ import { basePublica, borrar, keyDesdeUrl, listar, type ObjetoAlmacenado } from 
 
 /**
  * Entre el `guardar()` y el `insert()` de la fila hay una ventana real. Una hora es
- * holgadísima para la más lenta de esas escrituras y sigue siendo corta frente a la
- * cadencia diaria del barrido.
+ * holgadísima para la más lenta de esas escrituras; el barrido corre en cada pasada del
+ * cron de publicación, así que lo que quede pasada la hora se va en minutos.
  */
 export const GRACIA_MS = 60 * 60 * 1000
 
@@ -92,8 +92,10 @@ export async function urlsReferenciadas(): Promise<Set<string>> {
  * que es el trabajo real del cron que lo llama.
  */
 export async function barrerHuerfanos(ahora: Date = new Date()): Promise<Barrido> {
+  const inicio = Date.now()
   try {
     const [objetos, urls] = await Promise.all([listar(), urlsReferenciadas()])
+    console.log(`[barrido] ${objetos.length} objetos y ${urls.size} URLs leídos en ${Date.now() - inicio} ms`)
     // listar() ya lanzó SIN_ALMACEN si no hay base configurada, así que en la
     // práctica esto siempre es no-null acá. El `?? new Set()` es solo para que el
     // tipo cierre sin forzar un throw redundante.
@@ -101,7 +103,9 @@ export async function barrerHuerfanos(ahora: Date = new Date()): Promise<Barrido
     const referenciadas = base ? keysReferenciadas(urls, base) : new Set<string>()
     let borrados = 0
     let bytes = 0
-    for (const objeto of objetosABorrar(objetos, referenciadas, ahora)) {
+    const aBorrar = objetosABorrar(objetos, referenciadas, ahora)
+    if (aBorrar.length > 0) console.log(`[barrido] ${aBorrar.length} huérfanos por borrar`)
+    for (const objeto of aBorrar) {
       await borrar(objeto.url)
       borrados += 1
       bytes += objeto.size

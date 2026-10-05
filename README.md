@@ -90,9 +90,10 @@ En tu proyecto de Vercel, pestaña **Storage**:
 - **Almacenamiento de media** — no es de Vercel: un bucket de Cloudflare R2, porque
   su plan gratis son 10 GB con egress $0 y los videos programados no caben en menos.
   En dash.cloudflare.com → R2: crea el bucket, cuélgale un subdominio propio y emite
-  un token con permiso solo sobre él. No lo compartas con nada más: un barrido diario
-  borra del bucket todo lo que la base de datos no referencia, así que cualquier otra
-  cosa que guardes ahí dura menos de 24 horas. Después carga `R2_ACCOUNT_ID`,
+  un token con permiso solo sobre él. No lo compartas con nada más: un barrido que va
+  en cada corrida del cron de publicación borra del bucket todo lo que la base de datos no
+  referencia y lleva más de una hora subido, así que cualquier otra cosa que guardes ahí
+  dura poco más que eso. Después carga `R2_ACCOUNT_ID`,
   `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET` y `R2_PUBLIC_BASE` (ver
   `.env.example`). Opcional: sin esto todo funciona, solo que no puedes subir media.
 
@@ -444,7 +445,7 @@ https://TU-DOMINIO/api/social/tiktok/callback
 
 En *URL properties* verifica tu dominio raíz por registro TXT en el DNS: cubre el sitio y
 el subdominio de R2 (`R2_PUBLIC_BASE`), de donde TikTok descarga los archivos. No uses el
-archivo de firma dentro del bucket: el barrido diario lo borraría.
+archivo de firma dentro del bucket: el barrido de huérfanos lo borraría.
 
 Mientras TikTok no apruebe la app, solo el **sandbox** deja autorizar cuentas: créalo en
 la pestaña Sandbox, agrega tu usuario como *target user*, y usa **sus** credenciales.
@@ -819,6 +820,13 @@ La cadencia real de `/api/cron/publish-social` la da un pinger externo (por ejem
 diarios, así que `vercel.json` declara apenas una corrida diaria de respaldo. En plan
 Pro puedes cambiar ese schedule a `*/5 * * * *` y prescindir del pinger: el endpoint
 es el mismo en los dos casos, cambia solo quién lo dispara.
+
+Cada corrida hace tres cosas, en orden: publica lo vencido, sondea comentarios (con la
+mitad del presupuesto como mucho) y barre los archivos huérfanos de R2. Al terminar cada
+fase escribe `[cron] <fase> listo a los N ms` en el log, y el barrido dice cuántos objetos
+leyó: si una corrida muere por `maxDuration` (240 s), la fase colgada es la primera que no
+dejó su línea. Las llamadas a R2 tienen tope de tiempo para que un bucket que no responde
+no se lleve la corrida entera.
 
 ### Guía para el editor de contenido
 
