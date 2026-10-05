@@ -65,7 +65,7 @@ Cada permiso se pide en el review con una explicación de para qué se usa y un 
 | `instagram_manage_insights` | Alcance, impresiones, seguidores por día | Los Números |
 | `instagram_content_publish` | Publicar reels y fotos programados (incluidos trial reels) | Programar un corte y verlo salir |
 | `instagram_manage_comments`, `pages_manage_engagement`, `pages_read_user_content` | Leer comentarios, responder, respuesta automática por palabra clave | La cola de comentarios y una regla de palabra clave |
-| `pages_manage_posts`, `publish_video` | Publicar en la página de Facebook | Programar un corte a Facebook |
+| `pages_manage_posts` | Publicar en la página de Facebook (`publish_video` no se pide mientras la app no lo incluya al conectar) | Programar un corte a Facebook |
 | `business_management` | Que aparezcan páginas administradas desde un Business Manager | Conectar con una cuenta que administra por Business |
 | `instagram_manage_messages`, `pages_messaging` | **Todavía no se piden.** Son los del privado (mandar el PDF por DM), que hoy está apagado a la espera de este mismo trámite | Solo si se incluye el privado en esta vuelta |
 
