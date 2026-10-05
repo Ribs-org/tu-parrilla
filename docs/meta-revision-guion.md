@@ -49,7 +49,10 @@ encendido por variables de entorno mientras dure la revisión:
   correo que pide entrar es ese, el código que vale es el fijo y no se manda nada.
 - Ese usuario existe en Los Maestros, invitado como cualquier otro, con **su propia**
   cuenta de Instagram Business de prueba conectada (una cuenta que administres tú, con
-  página de Facebook, y con dos o tres publicaciones y comentarios).
+  página de Facebook, y con dos o tres publicaciones y comentarios). Tiene que ser **otra**
+  cuenta que la del admin, no la misma conectada dos veces: `social_accounts` es única por
+  `(network, external_id)`, así que una cuenta de Instagram o una página solo pueden estar
+  en el panel de un usuario.
 - Se quita la variable el día que la app pasa a Live.
 
 Está hecho (entrega D, `codigoDeRevision` en `src/lib/ingreso.ts`; las variables se
@@ -67,15 +70,23 @@ administres, con:
 - la cuenta agregada como **Tester** de la app (App Roles) hasta que esté en Live, porque
   en desarrollo solo los roles pueden autorizar.
 
-Y en el panel: una regla de palabra clave en La Mesa (por ejemplo «GUÍA» → responde con un
-texto y manda un enlace público a un PDF), para la escena de comentarios.
+La regla de palabra clave no se arma en La Mesa: se le pone al reel **al programarlo**, en
+«Respuesta automática por palabra clave» del compositor (palabra «GUIA», un mensaje con un
+enlace a `https://tu-parrilla.cl`). El compositor no adjunta PDF —eso solo entra por la API
+de lote—, y mientras el privado esté apagado el mensaje completo sale como respuesta pública.
+
+Y en Vercel, `COMENTARIOS_MODELO` apuntando a un modelo que exista (o borrada, para el de
+por defecto): con un modelo que la pasarela ya no tiene, cada tarjeta de La Mesa dice «No se
+pudo redactar la respuesta» en cámara.
 
 ### El ensayo, entero y sin grabar
 
 Recorrer las diez escenas una vez sin grabar. Lo que más se traba: el diálogo de Meta
 saltándose la pantalla de permisos porque la app ya estaba autorizada (revocarla antes en
 facebook.com → Configuración → Apps y sitios web), y el sync de comentarios, que corre cada
-cinco minutos (La Mesa no muestra un comentario nuevo al instante).
+cinco minutos (La Mesa no muestra un comentario nuevo al instante). Y el computador sin
+suspensión: si se duerme a mitad de la toma, la barra de juegos pierde el archivo entero
+(pasó en la toma de TikTok del 2026-10-04).
 
 ### Justo antes de rodar
 
@@ -100,7 +111,7 @@ Tu Parrilla is a private scheduling and analytics dashboard for content creators
 | `instagram_basic` | «We read the creator's own Instagram professional account (id, username) and their media list to label the account and show their posts. 1:05–1:30.» |
 | `instagram_manage_insights` | «We read reach, impressions and follower counts of the creator's own account and media, once a day, to draw the charts in the Numbers tab. 1:50–2:10.» |
 | `instagram_content_publish` | «The creator schedules a reel, a photo or a carousel from the Calendar; at the scheduled time we create the media container and publish it to their own account. Includes the optional trial-reel flag chosen by the creator. 2:10–3:00.» |
-| `instagram_manage_comments` | «We fetch new comments on the creator's own recent media and show them in a queue; the creator approves a reply with one tap, and can set a keyword rule that replies automatically with a fixed public text. 3:00–3:40.» |
+| `instagram_manage_comments` | «We fetch new comments on the creator's own recent media and show them in a queue; the creator sends a reply with one tap, and can set a keyword rule that replies automatically with a fixed public text. 3:00–3:40.» |
 | `pages_manage_engagement` | «Same as above for comments on the creator's own Page posts: read them and post the creator's reply. 3:40–3:55.» |
 | `pages_read_user_content` | «Needed to read comments left by other people on the creator's own Page posts, so the queue can show them. 3:40–3:55.» |
 | `pages_manage_posts` / `publish_video` | «The creator schedules a video or photo to their own Page from the Calendar; we publish it at the scheduled time. 3:55–4:20.» |
@@ -123,10 +134,10 @@ permisos si cada uno tiene su tramo claro.
 | 6 | **Facebook → Conectar →**, mismo diálogo, misma página. Tarjeta de Facebook. | 6 |
 | 7 | Pulsar **Sincronizar**. Pestaña **Los Cortes**: las tres publicaciones con sus números. | 7 |
 | 8 | Pestaña **Los Números**: alcance, seguidores, la serie por día. | 8 |
-| 9 | **El Fuego → «Poner al fuego»** (abre el compositor en La Parrilla): subir el video, marcar **Instagram**, elegir «Ahora», **Programar**. Mostrar el corte en la parrilla y, de vuelta en El Fuego, pasar a publicado. Abrir Instagram y mostrar el reel. | 9 |
+| 9 | **El Fuego → «Poner al fuego»** (abre el compositor en La Parrilla): subir el video, marcar **Instagram**, abrir «Respuesta automática por palabra clave» con la palabra «GUIA» y un mensaje con enlace, elegir «Ahora», **Programar**. Mostrar el corte en la parrilla y, de vuelta en El Fuego, pasar a publicado. Abrir Instagram y mostrar el reel. | 9 |
 | 10 | Lo mismo con la foto marcando **Facebook**; mostrar la publicación en la página. | 10 |
-| 11 | Desde otra cuenta, comentar «GUÍA» en el reel recién publicado. Esperar la corrida (hasta cinco minutos). | |
-| 12 | Pestaña **La Mesa**: el comentario en la cola, la respuesta propuesta, **Aprobar**; y la regla de palabra clave que ya respondió sola. Abrir Instagram y mostrar las dos respuestas. | 11 |
+| 11 | Desde otra cuenta, comentar «GUIA» en el reel recién publicado, y un comentario cualquiera en otra publicación. Esperar la corrida (hasta cinco minutos). | |
+| 12 | Pestaña **La Mesa**: el comentario cualquiera en la cola con el borrador propuesto, **Enviar**; y el «GUIA», marcado «Automática», que ya respondió solo. Abrir Instagram y mostrar las dos respuestas. | 11 |
 | 13 | El comentario de la página de Facebook, mismo flujo. | 12 |
 | 14 | Engranaje → **Tu Cuenta** (nombre y zona) y **La Vitrina**, para que se vea que es un panel de una persona. | 13 |
 | 15 | Los Fierros → **Desconectar** en Instagram: la tarjeta queda sin credencial. | 14 |
