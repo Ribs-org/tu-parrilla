@@ -83,7 +83,9 @@ sin eso las tarjetas de La Mesa salen sin borrador en cámara.
 
 Recorrer las diez escenas una vez sin grabar. Lo que más se traba: el diálogo de Meta
 saltándose la pantalla de permisos porque la app ya estaba autorizada (revocarla antes en
-facebook.com → Configuración → Apps y sitios web), y el sync de comentarios, que corre cada
+desde el perfil personal —no desde la página— en facebook.com → Configuración →
+Integraciones comerciales, `facebook.com/settings/?tab=business_tools`: con permisos de
+páginas y de Business la app no aparece en «Apps y sitios web»), y el sync de comentarios, que corre cada
 cinco minutos (La Mesa no muestra un comentario nuevo al instante). Y el computador sin
 suspensión: si se duerme a mitad de la toma, la barra de juegos pierde el archivo entero
 (pasó en la toma de TikTok del 2026-10-04).
@@ -143,7 +145,7 @@ permisos si cada uno tiene su tramo claro.
 | 13 | El comentario de la página de Facebook, mismo flujo. | 12 |
 | 14 | Engranaje → **Tu Cuenta** (nombre y zona) y **La Vitrina**, para que se vea que es un panel de una persona. | 13 |
 | 15 | Los Fierros → **Desconectar** en Instagram: la tarjeta queda sin credencial. | 14 |
-| 16 | facebook.com → Configuración → Apps y sitios web → quitar Tu Parrilla; y «Enviar solicitud» de borrado. Mostrar la página `/borrado/<código>` que devuelve. | 15 |
+| 16 | Desde el perfil personal: facebook.com → Configuración → Integraciones comerciales → Tu Parrilla → Eliminar. Meta llama a la URL de baja; el formulario de Integraciones comerciales no ofrece pedir el borrado. | 15 |
 | 17 | `/privacidad`: qué se guarda, qué borra desconectar y qué borra el borrado. | 16 |
 | 18 | Terminar la grabación. | |
 
