@@ -24,9 +24,10 @@ export type PublishOutcome =
   // La red pidió esperar (cupo por minuto): se vuelve a intentar en la próxima corrida
   // sin gastar intento ni dejar motivo, porque nada salió mal con el post.
   | { kind: 'deferred' }
-  // `definitivo` solo lo pone `createContainer` (instagram.ts), y solo cuando
-  // `motivoDeRechazo` reconoció el rechazo (Meta ya decidió que no, no es un fallo de
-  // red). Un `failed` sin `definitivo` es indistinguible del de siempre.
+  // `definitivo` lo ponen dos sitios, y solo ante un rechazo que reintentar no cambia:
+  // `createContainer` (instagram.ts) cuando `motivoDeRechazo` lo reconoció, y el init de
+  // TikTok cuando la app sin auditar choca con una cuenta pública (tiktok.ts). Un `failed`
+  // sin `definitivo` es indistinguible del de siempre.
   | { kind: 'failed'; reason: string; definitivo?: true }
 
 /** Adding a network in later phases is a file plus a line, same as Connector. */
@@ -62,8 +63,9 @@ export const STALE_PROCESSING_HOURS = 24
  * `due` query in run.ts only ever selects 'scheduled' or 'publishing', so once a target
  * reaches 'failed' this function never runs on it again for that rejection.
  *
- * `definitivo` short-circuits that count: a rejection Meta already decided (today, only
- * a recognised trial-reel rejection) lands on 'failed' on this very attempt, no matter
+ * `definitivo` short-circuits that count: a rejection the network already decided (today,
+ * a recognised Instagram trial-reel rejection, or TikTok refusing a public account while
+ * the app is unaudited) lands on 'failed' on this very attempt, no matter
  * how many are left. It still goes through the same 'failed' branch as the third
  * ordinary failure, so the email-fires-once property above holds unchanged — it is
  * still the transition into 'failed', and only into it, that sends the alert.

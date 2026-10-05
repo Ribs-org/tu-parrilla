@@ -118,8 +118,8 @@ export function TikTokOpciones({ cuenta, soloFotos }: { cuenta: CuentaDestino; s
           */}
           {privacidad !== '' && privacidad !== 'SELF_ONLY' ? (
             <p className="text-[0.72rem] text-fg-faint">
-              Mientras TikTok no apruebe la app, solo «Solo yo» llega a publicarse: las demás
-              fallan con «solo deja publicar en privado».
+              Mientras TikTok no apruebe la app, solo «Solo yo» llega a publicarse, y solo desde
+              una cuenta de TikTok privada.
             </p>
           ) : null}
 

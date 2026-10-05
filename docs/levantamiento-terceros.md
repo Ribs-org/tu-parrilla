@@ -105,9 +105,9 @@ portal de desarrolladores.
 
 ### 3.2 Lo que falta: la auditoría de Direct Post
 
-Sin auditoría, todo video publicado por la API queda **privado** («Solo yo») aunque el
-usuario pida público, y la app tiene un cupo de **5 usuarios distintos por día** que
-publican. Con varios usuarios eso es inservible, así que la auditoría es la única puerta.
+Sin auditoría, TikTok solo acepta publicaciones de **cuentas privadas** y en «Solo yo»
+—con la cuenta pública rechaza el post entero, no lo deja en privado—, y la app tiene un
+cupo de **5 usuarios distintos por día** que publican. Con varios usuarios eso es inservible, así que la auditoría es la única puerta.
 
 La auditoría es un formulario en el portal (el que quedó a medias el 2026-09-28 en este
 mismo proyecto; las respuestas en inglés están redactadas y el guion del video en

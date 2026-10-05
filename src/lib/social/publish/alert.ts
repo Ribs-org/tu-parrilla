@@ -9,7 +9,7 @@ export function failureEmail(
   const excerpt = caption.length > 120 ? `${caption.slice(0, 120)}…` : caption
   return {
     subject: `No se pudo publicar en ${name}`,
-    text: `La publicación «${excerpt}» falló sus tres intentos en ${name}.\n\nMotivo: ${reason}\n\nRevisa el calendario en /admin/schedule para reprogramarla.`,
+    text: `La publicación «${excerpt}» no se pudo publicar en ${name}.\n\nMotivo: ${reason}\n\nRevisa el calendario en /admin/schedule para reprogramarla.`,
   }
 }
 

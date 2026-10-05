@@ -335,6 +335,21 @@ describe('tiktokPublisher.publish', () => {
     expect(new URL(llamadas[llamadas.length - 1]!.url).pathname).toBe('/v2/post/publish/video/init/')
   })
 
+  it('cuenta pública con la app sin auditar: falla definitivo, porque reintentar no cambia nada', async () => {
+    stub({
+      '/post/publish/creator_info/query/': { body: fixture },
+      '/post/publish/video/init/': {
+        status: 403,
+        body: { error: { code: 'unaudited_client_can_only_post_to_private_accounts', message: 'x' } },
+      },
+    })
+    expect(await tiktokPublisher.publish({ ...base, accountExternalId: cuenta() })).toEqual({
+      kind: 'failed',
+      reason: TIKTOK_NO_AUDITADA,
+      definitivo: true,
+    })
+  })
+
   it('el séptimo init en el mismo minuto para la misma cuenta se difiere sin llamar', async () => {
     stub({
       '/post/publish/creator_info/query/': { body: fixture },

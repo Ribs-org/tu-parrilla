@@ -108,7 +108,7 @@ export const AVISO_ANTES_DE_CONECTAR: Partial<Record<SocialNetwork, string>> = {
   instagram: 'Cuenta Business o Creator, enlazada a una página de Facebook. Una cuenta personal no puede conectar.',
   facebook: 'Una página, no un perfil personal.',
   youtube: 'Hasta que Google apruebe la cuota de la app, lo que publiques sale privado.',
-  tiktok: 'Hasta que TikTok apruebe la publicación directa, lo que publiques sale como “Solo yo”.',
+  tiktok: 'Hasta que TikTok apruebe la publicación directa, solo publica en cuentas privadas: pon tu cuenta de TikTok en privada y elige “Solo yo”.',
 }
 export const AVISO_META_EN_REVISION =
   'Mientras Meta revisa la app, solo pueden conectar las cuentas que invitamos como testers. Si Facebook dice que la función no está disponible, escríbenos.'

@@ -464,7 +464,10 @@ TIKTOK_CLIENT_SECRET=
 Al pasar de solo lectura a publicar, las cuentas ya conectadas deben **reconectarse una
 vez** desde Los Fierros para otorgar los scopes nuevos; el compositor lo pide con «Reconecta
 TikTok para autorizar la publicación». Hasta la auditoría de Content Posting, TikTok solo
-permite publicar como «Solo yo».
+publica en **cuentas privadas** y como «Solo yo»: con la cuenta pública rechaza el init con
+`unaudited_client_can_only_post_to_private_accounts`, aunque la publicación pida «Solo yo».
+Ese rechazo no se reintenta —falla al primer intento, con la frase que pide poner la cuenta
+en privada—, porque reintentar da lo mismo hasta que el dueño cambie su cuenta.
 
 ### Responder comentarios
 
@@ -500,7 +503,11 @@ Con `COMENTARIOS_MODELO` cambias el modelo sin desplegar, con la forma `proveedo
 El borrador tiene un tope de salida corto, así que la petición sale siempre con el
 razonamiento apagado: un modelo de razonamiento se gastaría el tope pensando y te
 devolvería el pensamiento a medias en vez de la frase. Con eso puedes usar uno de
-razonamiento sin miedo, y funciona hasta el gratuito `inclusionai/ling-3.0-flash-fin-free`.
+razonamiento sin miedo. Sin la variable se usa `anthropic/claude-haiku-4.5`. Los modelos
+gratuitos de la pasarela desaparecen sin aviso —`inclusionai/ling-3.0-flash-fin-free` dejó
+de existir en octubre de 2026—, y entonces cada borrador falla con «No se pudo redactar la
+respuesta» y el log dice `GatewayModelNotFoundError`: se arregla cambiando o borrando
+`COMENTARIOS_MODELO` en Vercel, sin desplegar.
 
 De tu infraestructura salen tres cosas hacia el proveedor del modelo: el texto del
 comentario, el nombre de quien lo dejó y el texto de la publicación. Nada más: ni tus
