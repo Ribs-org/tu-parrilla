@@ -24,10 +24,11 @@ Cómo se usa:
 
 - **El barrido de huérfanos se colgaba y cada corrida del cron moría en 504** (2026-10-04).
   Medido el 2026-10-05 con las líneas `[cron] <fase> listo a los N ms`: publicar tarda
-  0,1 s y comentarios 11 s; el barrido de R2 (`barrerHuerfanos`) nunca terminaba. Las
-  llamadas a R2 ahora tienen tope de tiempo y el barrido loguea qué leyó. Falta confirmar en
-  los logs que las corridas vuelven a 200 y, si el barrido falla por el tope, averiguar por
-  qué R2 no responde al listado.
+  0,1 s y comentarios 5 a 16 s; el barrido (`barrerHuerfanos`) nunca terminaba. Un tope de
+  30 s por petición a R2 no lo cortó, así que no es una petición colgada: o el listado
+  pagina sin fin o la consulta a la base no vuelve. Ahora cada lectura tiene un plazo de un
+  minuto y su línea `[barrido]`. Falta mirar en los logs cuál de las dos no llega y
+  arreglar esa causa; el plazo solo evita que se lleve la corrida.
 - **El motivo de un intento fallido que se va a reintentar no se ve en ningún lado**
   (2026-10-04). Un destino que falla y vuelve a `scheduled` guarda `lastError`, pero el panel
   solo lo muestra cuando el destino ya quedó en `failed` (`page.tsx`, `queue.tsx`). En la
