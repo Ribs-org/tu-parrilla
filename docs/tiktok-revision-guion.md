@@ -230,9 +230,11 @@ empieza cada escena, que se sacan del archivo grabado y no se adivinan.
 ## La auditoría de Direct Post (2026-09-30)
 
 La app está aprobada y en producción desde el 2026-09-28 (Login Kit y Content Posting
-API). Lo que falta es la **auditoría de Direct Post**: sin ella, todo lo que la app publica
-queda como «Solo yo» aunque el usuario pida otra privacidad, y la app tiene un cupo de
-**5 usuarios distintos por día**. Se pide desde el portal: Manage apps → tu app → Content
+API). Lo que falta es la **auditoría de Direct Post**: sin ella, TikTok solo acepta
+publicaciones de **cuentas privadas** y en «Solo yo», y la app tiene un cupo de **5 usuarios
+distintos por día**. Con la cuenta pública rechaza el init con
+`unaudited_client_can_only_post_to_private_accounts` aunque se elija «Solo yo»: así fallaron
+los tres posts de la primera toma del 2026-10-04, y el log de Vercel fue lo único que lo dijo. Se pide desde el portal: Manage apps → tu app → Content
 Posting API → **Apply** (bajo *Direct Post*). Es un formulario y un video; no depende de
 ningún otro trámite y se puede mandar hoy.
 
@@ -242,6 +244,10 @@ ningún otro trámite y se puede mandar hoy.
   `TIKTOK_CLIENT_SECRET` de la app real, no del sandbox).
 - Una cuenta de TikTok tuya conectada en Los Fierros, con el aviso «Hasta que TikTok
   apruebe la publicación directa…» visible bajo el título de la red.
+- **Esa cuenta en privada** (app de TikTok → Ajustes y privacidad → Privacidad → Cuenta
+  privada). Sin eso no se publica nada y no hay escena 8.
+- El computador sin suspensión mientras graba: si se duerme, la barra de juegos pierde el
+  archivo entero.
 - Un video vertical y tres fotos, como en el guion de arriba.
 - El vídeo de la aprobación anterior sirve de base: TikTok quiere ver **el mismo flujo**,
   esta vez con la privacidad elegida por el usuario y las opciones de interacción y de
@@ -287,22 +293,24 @@ las opciones.
 | 3 | Los Fierros → TikTok, el aviso bajo el título, **Conectar →**; pantalla de permisos con los cuatro scopes; autorizar. | 3 |
 | 4 | **El Fuego → «Poner al fuego»** (abre el compositor en La Parrilla): subir el video, marcar TikTok. Mostrar el bloque **sin tocar**: privacidad sin elegir (las opciones vienen de `creator_info`), comentarios/dúo/pegar apagados, contenido comercial, el aviso de TikTok. | 4 |
 | 5 | Intentar **Programar** sin privacidad: se bloquea. | 5 |
-| 6 | Elegir **«Público»** (o la más abierta que devuelva la cuenta), encender comentarios, marcar «Contenido comercial → Tu marca». | 6 |
-| 7 | «Ahora», **Programar**. Sin esperar: el carrusel de tres fotos, TikTok, «Amigos», Programar. | 7 |
-| 8 | El Fuego: el video pasa a publicado. Abrir TikTok y mostrarlo **con la privacidad elegida** y la etiqueta de contenido comercial. Y el carrusel. | 8 |
-| 9 | Los Fierros → Desconectar; Ajustes de TikTok → Seguridad y permisos → revocar. | 9 |
+| 6 | Elegir **«Solo yo»** —es lo único que TikTok publica antes de la auditoría—, marcar «Contenido comercial → Tu marca». | 6 |
+| 7 | «Ahora», **Programar**. | 7 |
+| 8 | El Fuego: el video pasa a publicado. Abrir **TikTok Studio** (`tiktok.com/tiktokstudio/content`) y mostrarlo con su privacidad «Only me»: el perfil de tiktok.com no muestra los videos privados. Mostrar también la cuenta privada en los ajustes de TikTok. | 8 |
+| 9 | Los Fierros → Desconectar; y revocar desde la app del teléfono (Ajustes y privacidad → Seguridad y permisos → Apps): tiktok.com no tiene esa lista. | 9 |
 | 10 | `/privacidad`. Terminar. | 10 |
 
 Subtítulos: 1 «Production app, Direct Post enabled.» 2 «Invite-only sign-in.» 3 «The
 creator connects their own account; four scopes.» 4 «Privacy options come from
 creator_info; nothing is pre-selected.» 5 «Publishing is blocked until the creator picks
 a privacy level.» 6 «The creator chooses privacy, interactions and commercial
-disclosure.» 7 «Scheduled now.» 8 «Published with the chosen privacy level.» 9 «Disconnect
-and revoke.» 10 «Privacy policy.»
+disclosure.» 7 «Scheduled now.» 8 «Published with the chosen privacy level; until the
+audit, TikTok only accepts private accounts.» 9 «Disconnect and revoke.» 10 «Privacy
+policy.»
 
 ### Después de aprobar
 
-- El cupo de 5 usuarios/día desaparece y la privacidad elegida se respeta.
+- El cupo de 5 usuarios/día desaparece, las cuentas públicas pueden publicar y la
+  privacidad elegida se respeta.
 - Quitar la frase de TikTok de `AVISO_ANTES_DE_CONECTAR` (`src/lib/networks.ts`) y su test,
   y la nota del bloque de TikTok «Mientras TikTok no apruebe la app…» (`schedule/tiktok-opciones.tsx`),
   y las frases correspondientes del README.

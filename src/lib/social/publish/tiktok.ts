@@ -9,7 +9,8 @@ export const TIKTOK_DOMINIO = 'TikTok no reconoce el dominio de tus archivos; ve
 export const TIKTOK_ARCHIVO = 'TikTok no acepta el archivo: revisa formato, tamaño o duración.'
 export const TIKTOK_PRIVACIDAD_NO_DISPONIBLE = 'TikTok ya no permite esa privacidad en tu cuenta; edita la publicación.'
 export const TIKTOK_BANDEJA_LLENA = 'Tienes 5 borradores pendientes en TikTok; publica alguno antes.'
-export const TIKTOK_NO_AUDITADA = 'TikTok solo deja publicar en privado hasta que apruebe la app.'
+export const TIKTOK_NO_AUDITADA =
+  'TikTok solo publica en cuentas privadas hasta que apruebe la app: pon tu cuenta de TikTok en privada y reprograma.'
 
 export const MAX_INITS_POR_MINUTO = 6
 export const MAX_TITULO_FOTO = 90
@@ -331,7 +332,12 @@ export const tiktokPublisher: Publisher = {
     if (!esOk(r)) {
       console.error('TikTok init:', path, estado(r), codigo(r), mensaje(r).slice(0, 300))
       const frase = fraseDeInit(codigo(r))
-      return frase === 'deferred' ? { kind: 'deferred' } : { kind: 'failed', reason: frase }
+      if (frase === 'deferred') return { kind: 'deferred' }
+      // Cuenta pública con la app sin auditar: reintentar da lo mismo hasta que el dueño
+      // cambie su cuenta, y los reintentos solo tapan el motivo con el que viniera después.
+      return frase === TIKTOK_NO_AUDITADA
+        ? { kind: 'failed', reason: frase, definitivo: true }
+        : { kind: 'failed', reason: frase }
     }
     const publishId = (r.body?.data as { publish_id?: unknown } | undefined)?.publish_id
     if (typeof publishId !== 'string' || !publishId) {
