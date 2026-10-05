@@ -87,11 +87,15 @@ export async function urlsReferenciadas(): Promise<Set<string>> {
   // A propósito sin dueño: el bucket es uno solo, así que lo referenciado por cualquier
   // usuario protege el archivo. Filtrar por dueño aquí borraría los archivos de los demás.
   const db = getDb()
-  const filas = await Promise.all(
-    COLUMNAS_DE_ARCHIVO.map((c) => db.select({ valor: c.ref }).from(c.ref.table)),
-  )
   const urls = new Set<string>()
-  for (const grupo of filas) for (const f of grupo) if (f.valor) urls.add(f.valor)
+  // De a una y con su línea: una de estas lecturas no volvía nunca (octubre de 2026) y,
+  // en paralelo, el log no decía cuál. Son seis consultas chicas; en serie no cuesta nada.
+  for (const c of COLUMNAS_DE_ARCHIVO) {
+    const desde = Date.now()
+    const filas = await db.select({ valor: c.ref }).from(c.ref.table)
+    console.log(`[barrido] ${c.tabla}.${c.columna}: ${filas.length} filas en ${Date.now() - desde} ms`)
+    for (const f of filas) if (f.valor) urls.add(f.valor)
+  }
   return urls
 }
 
