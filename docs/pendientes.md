@@ -22,13 +22,13 @@ Cómo se usa:
 
 ## Bugs
 
-- **El barrido de huérfanos se colgaba y cada corrida del cron moría en 504** (2026-10-04).
-  Medido el 2026-10-05 con las líneas `[cron] <fase> listo a los N ms`: publicar tarda
-  0,1 s y comentarios 5 a 16 s; el barrido (`barrerHuerfanos`) nunca terminaba. Un tope de
-  30 s por petición a R2 no lo cortó, así que no es una petición colgada: o el listado
-  pagina sin fin o la consulta a la base no vuelve. Ahora cada lectura tiene un plazo de un
-  minuto y su línea `[barrido]`. Falta mirar en los logs cuál de las dos no llega y
-  arreglar esa causa; el plazo solo evita que se lleve la corrida.
+- **El barrido de huérfanos no logra leer la base** (2026-10-04). Hasta el 2026-10-05 cada
+  corrida del cron moría en 504 colgada en el barrido; ahora el barrido tiene un plazo de un
+  minuto, se rinde sin borrar nada y la corrida termina en 200. Lo que se sabe: R2 lista sus
+  ~290 objetos en menos de medio segundo, y la lectura de las columnas con URLs
+  (`urlsReferenciadas`) no vuelve. `pg_stat_activity` no mostró bloqueos. Las seis
+  consultas corren de a una con su línea `[barrido] <tabla>.<columna>`: la que falta es la
+  colgada. Mientras no se arregle, R2 no se limpia solo.
 - **El motivo de un intento fallido que se va a reintentar no se ve en ningún lado**
   (2026-10-04). Un destino que falla y vuelve a `scheduled` guarda `lastError`, pero el panel
   solo lo muestra cuando el destino ya quedó en `failed` (`page.tsx`, `queue.tsx`). En la
