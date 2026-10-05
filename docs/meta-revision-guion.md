@@ -114,7 +114,9 @@ Tu Parrilla is a private scheduling and analytics dashboard for content creators
 | `instagram_manage_comments` | «We fetch new comments on the creator's own recent media and show them in a queue; the creator sends a reply with one tap, and can set a keyword rule that replies automatically with a fixed public text. 3:00–3:40.» |
 | `pages_manage_engagement` | «Same as above for comments on the creator's own Page posts: read them and post the creator's reply. 3:40–3:55.» |
 | `pages_read_user_content` | «Needed to read comments left by other people on the creator's own Page posts, so the queue can show them. 3:40–3:55.» |
-| `pages_manage_posts` / `publish_video` | «The creator schedules a video or photo to their own Page from the Calendar; we publish it at the scheduled time. 3:55–4:20.» |
+| `pages_manage_posts` | «The creator schedules a video or photo to their own Page from the Calendar; we publish it at the scheduled time. 3:55–4:20.» |
+
+`publish_video` y `read_insights` **no se piden**: la app no los incluye al conectar (`SCOPES.facebook` en `src/app/api/social/[network]/connect/route.ts`), y pedir en la revisión un permiso que la app no usa es motivo de rechazo. Si algún día se suma `publish_video` al conectar, se pide en una vuelta aparte.
 | `business_management` | «Some creators manage their Page through a Business Manager; without this permission those Pages do not appear in the list at connection time. 0:40–1:05.» |
 
 Los minutos son orientativos: se ajustan al video final y se pegan iguales en cada nota.
