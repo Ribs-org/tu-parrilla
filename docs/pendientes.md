@@ -54,9 +54,9 @@ Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataf
   verificado desde el 2026-07-30, así que la verificación de negocio ya está; la ficha
   básica (nombre «Tu Parrilla», ícono, privacidad, términos, borrado de datos) y el inicio
   de sesión (retornos de OAuth solo en `tu-parrilla.cl`, baja) quedaron configurados.
-  Falta: revisar los casos de uso, la cuenta de prueba del revisor (un Instagram y una
-  página propios, distintos de los de Vicente), la puerta del revisor en Vercel, grabar y
-  enviar el App Review.
+  El 2026-10-05 quedó grabado el video (`meta-app-review-demo.mp4`, 4:47, en esa carpeta,
+  junto a `TEXTOS-FORMULARIO.txt` con los minutos de cada permiso), con la cuenta del
+  revisor, @vicente_edits2 y la página Tu-Parrilla. Falta: llenar y enviar el App Review.
 - **[dueño] Un segundo administrador en el portafolio Pyxis spa.** Hoy hay uno solo: si
   Vicente pierde el acceso a su Facebook, se pierden el portafolio y la app de Meta.
 - **[dueño] Google — verificación del OAuth y auditoría de cuota de YouTube**, en paralelo.
