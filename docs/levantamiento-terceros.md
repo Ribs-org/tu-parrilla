@@ -18,7 +18,7 @@ panel de la plataforma correspondiente.
 | **Instagram** | `instagram_basic`, `instagram_manage_insights`, `pages_show_list`, `pages_read_engagement`, `instagram_content_publish`, `business_management`, `instagram_manage_comments` | App de Meta en **modo desarrollo** | El diálogo de Facebook le dice que la función no está disponible; no puede conectar (es lo que le pasó a una usuaria el 2026-09-29). Solo entran cuentas con un rol en la app. |
 | **Facebook** | `pages_show_list`, `pages_read_engagement`, `pages_read_user_content`, `pages_manage_posts`, `business_management`, `pages_manage_engagement` (+ `publish_video` al confirmar) | La misma app de Meta, mismo modo | Igual que Instagram. |
 | **TikTok** | `user.info.basic`, `video.list`, `video.upload`, `video.publish` | App **aprobada y en producción** desde el 2026-09-28 (Login Kit + Content Posting API); la **auditoría de Direct Post** no está hecha | Puede conectar. Puede publicar, pero **solo como privado** (`SELF_ONLY`) y la app entera tiene un cupo de **5 usuarios por día** mientras no pase la auditoría. |
-| **YouTube** | `youtube.upload`, `youtube.force-ssl` (OAuth), más una API key para métricas | Proyecto de Google Cloud con la pantalla de consentimiento **en pruebas** (*Testing*) | Solo entra si está en la lista de **test users** (máximo 100). Aunque entre, su token **caduca a los 7 días** y tiene que reconectar; y los videos que suba un proyecto no verificado quedan **privados** aunque pida público. |
+| **YouTube** | `youtube.upload`, `youtube.force-ssl` (OAuth), más una API key para métricas | Proyecto de Google Cloud *In production* pero **sin verificar** | Entra pasando por el cartel «Google no ha verificado esta app», y cuenta para un tope de **100 usuarios** en toda la vida del proyecto; los videos que suba un proyecto sin auditoría de cuota quedan **privados** aunque pida público. |
 
 Lo que ya está resuelto del lado del producto y no hay que rehacer: usuarios invitados por
 correo con código, cada uno con su página y sus cuentas aisladas por dueño (`owner_id` en
@@ -140,9 +140,10 @@ tercero en YouTube.
 
 ### 4.1 Verificación del OAuth (pantalla de consentimiento a *Production*)
 
-Hoy el proyecto está en *Testing*: hasta 100 usuarios de prueba, tokens que caducan a los
-**7 días** (el usuario tendría que reconectar cada semana) y la pantalla «Google no ha
-verificado esta app». Para pasar a *Production* con `youtube.upload` y `youtube.force-ssl`
+El proyecto está *In production* pero sin verificar (comprobado el 2026-10-06; este
+párrafo decía *Testing*): cualquiera puede conectar pasando por la pantalla «Google no ha
+verificado esta app», con un tope de 100 usuarios en toda la vida del proyecto, y sin la
+caducidad de 7 días, que es solo de *Testing*. Para quedar verificado con `youtube.upload` y `youtube.force-ssl`
 —que Google clasifica como **sensibles**, no restringidos— Google pide:
 
 - **Dominio verificado** en Search Console (`tu-parrilla.cl`) y que la página principal
@@ -236,8 +237,8 @@ ninguno depende de otro. Lo de código se intercala por lo que cada trámite pid
   todos los permisos actuales van con acceso estándar. Sirve para una beta cerrada de hasta
   unas decenas de personas.
 - TikTok: pueden conectar y publicar en privado; 5 por día.
-- YouTube: agregarlos como **test users** en la pantalla de consentimiento (hasta 100),
-  con la molestia de reconectar cada semana y sin poder publicar.
+- YouTube: conectan pasando por el cartel de app no verificada (cuentan para el tope de
+  100 usuarios del proyecto) y lo que publiquen sale privado hasta la auditoría de cuota.
 
 Eso da una beta cerrada útil para Instagram y Facebook (el uso principal) en la semana 1,
 y la apertura de verdad al mes para Meta y TikTok, y al mes o dos para YouTube.

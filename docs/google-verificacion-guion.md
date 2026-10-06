@@ -3,9 +3,12 @@
 Fecha: 2026-09-30; revisado contra el código el 2026-10-06. Son **dos trámites** en Google Cloud y **uno** en YouTube, y conviene
 hacerlos en paralelo porque cada uno tarda semanas:
 
-1. **Verificación del OAuth** (pantalla de consentimiento de *Testing* a *Production*).
-   Sin ella: solo 100 *test users*, tokens que caducan a los 7 días, y el cartel «Google no
-   ha verificado esta app».
+1. **Verificación del OAuth.** El proyecto ya está *In production*, pero sin verificar
+   (visto el 2026-10-06): cualquiera puede conectar, pasando por el cartel «Google no ha
+   verificado esta app», con un tope de **100 usuarios en toda la vida del proyecto** que
+   no se reinicia (iban 3), y la pantalla de Google muestra el dominio en vez del nombre y
+   el logo. No hay lista de *test users*: eso es solo de *Testing*, y los tokens de 7 días
+   también.
 2. **Auditoría y extensión de cuota de la YouTube Data API.** Sin ella: 10.000 unidades al
    día para todos los usuarios juntos (subir un video cuesta 1.600) y **los videos subidos
    quedan privados** aunque el usuario pida público.
@@ -20,7 +23,7 @@ Verification» del escritorio de Vicente, como los de Meta y TikTok.
 
 Google reordenó la consola en 2025: lo que antes era «Pantalla de consentimiento de OAuth»
 ahora es **Google Auth Platform**, con las secciones *Branding* (marca), *Audience*
-(público y test users), *Clients* (clientes OAuth), *Data Access* (permisos) y
+(estado de publicación y tope de usuarios), *Clients* (clientes OAuth), *Data Access* (permisos) y
 *Verification Center*. Los nombres de abajo son los nuevos.
 
 ## Antes de apretar grabar
@@ -82,8 +85,8 @@ Dos preguntas que la auditoría puede hacer y que conviene tener contestadas:
 ### La cuenta de prueba y su contenido
 
 Un canal de YouTube que administres, con dos videos subidos y un par de comentarios de
-otra cuenta. La cuenta de Google del canal agregada como **test user** en *Audience*
-(hasta que esté en producción). Para grabar se entra con el usuario revisor
+otra cuenta. Es el canal «Pyxis oficial» de pyxis.latam@gmail.com, con dos videos de
+prueba (2026-10-06). Para grabar se entra con el usuario revisor
 (`REVISION_CORREO`, el mismo de Meta; ver la sección de Meta del README): así el video
 muestra un panel sin cuentas de nadie más, y si Google pide credenciales de prueba, son
 esas.
@@ -178,8 +181,7 @@ publicar en público**: el aviso de Los Fierros lo dice hasta que pase.
 
 ## Después de aprobar
 
-- *Audience* en **In production**: los tokens dejan de caducar a los 7 días
-  (los usuarios ya conectados tienen que **reconectar una vez** para recibir un refresh
-  token de larga duración).
+- Verificación aprobada: desaparecen el cartel de app no verificada y el tope de 100
+  usuarios, y la pantalla de Google muestra «Tu Parrilla» con su logo.
 - Con la cuota aprobada: quitar el aviso de YouTube en `AVISO_ANTES_DE_CONECTAR`
   (`src/lib/networks.ts`) y su test, y la frase del README.
