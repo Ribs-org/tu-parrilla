@@ -53,7 +53,8 @@ encendido por variables de entorno mientras dure la revisión:
   cuenta que la del admin, no la misma conectada dos veces: `social_accounts` es única por
   `(network, external_id)`, así que una cuenta de Instagram o una página solo pueden estar
   en el panel de un usuario.
-- Se quita la variable el día que la app pasa a Live.
+- Se queda puesta también con la app en Live: Meta pide credenciales de prueba activas
+  por un año y revisa las apps de nuevo cada cierto tiempo.
 
 Está hecho (entrega D, `codigoDeRevision` en `src/lib/ingreso.ts`; las variables se
 documentan en `.env.example` y en la sección de Meta del README). Sin esa puerta, Meta
@@ -190,6 +191,8 @@ reel publicado por la app, y la corrida de comentarios tarda hasta cinco minutos
 ## Después de aprobar
 
 - Pasar la app a **Live** (interruptor arriba del panel).
-- Quitar `META_EN_REVISION` y `REVISION_CORREO`/`REVISION_CODIGO` de Vercel; redesplegar.
+- Quitar `META_EN_REVISION` de Vercel y redesplegar. `REVISION_CORREO`/`REVISION_CODIGO`
+  se quedan, con las cuentas del revisor conectadas: Meta vuelve a revisar la app y pide
+  que las credenciales de prueba sigan activas un año.
 - Actualizar el aviso de Los Fierros si cambia lo que exige Instagram (hoy: cuenta Business
   con página), y la sección de Meta del README («Mientras la app esté en modo desarrollo…»).
