@@ -63,11 +63,9 @@ Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataf
   Review de Meta, Pyxis declaró revisar la legalidad de cada solicitud, poder impugnarla,
   entregar lo mínimo y documentarla. Que el abogado la deje por escrito, junto con la
   revisión de `/privacidad` y `/terminos`.
-- **Mientras Meta revisa, en este orden** (2026-10-06): verificación en dos pasos en
-  Cloudflare **[dueño]**, la única que falta (Facebook, GitHub, Vercel y Supabase la tienen
-  desde el 2026-10-06), porque Meta la espera de los administradores de un proveedor de
-  tecnología; y la beta con creadores reales como evaluadores de la app (developers → Roles
-  de la app → Evaluador, y después invitarlos en Los Maestros) **[dueño]**.
+- **[dueño] Mientras Meta revisa: la beta con creadores reales** (2026-10-06), como
+  evaluadores de la app (developers → Roles de la app → Evaluador, y después invitarlos en
+  Los Maestros).
 - **Meta, segunda vuelta: mensajes privados** (el privado con el enlace de la regla de
   palabra clave, `instagram_manage_messages` y `pages_messaging`) y, aparte, **Threads**
   (`threads_basic`, `threads_content_publish`). Se sacaron de la primera solicitud porque
