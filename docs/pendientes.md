@@ -38,10 +38,12 @@ Cómo se usa:
 
 Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataforma.
 
-- **TikTok — auditoría de Direct Post: enviada el 2026-10-04, esperando respuesta.** Mientras
-  no se apruebe, solo publican cuentas privadas en «Solo yo» y hay un cupo de 5 usuarios por
-  día. Al aprobarse: lo que dice «Después de aprobar» en `docs/tiktok-revision-guion.md`, y
-  la cuenta `vicente.pareja` puede volver a ser pública.
+- **TikTok — auditoría de Direct Post aprobada** (avisado el 2026-10-06). Ya no hay cupo de 5
+  usuarios por día y las cuentas públicas pueden publicar con la privacidad que elijan. En
+  código queda quitar los avisos de «mientras TikTok no apruebe»: lo que dice «Después de
+  aprobar» en `docs/tiktok-revision-guion.md` (el aviso de `AVISO_ANTES_DE_CONECTAR` en
+  `src/lib/networks.ts` y su test, la nota de `schedule/tiktok-opciones.tsx` y las frases del
+  README). **[dueño]** La cuenta `vicente.pareja` puede volver a ser pública.
 - **[dueño] Meta (Instagram y Facebook) — salir de modo desarrollo.** Guion y textos:
   `docs/meta-revision-guion.md`; el paso a paso de trabajo vive en la carpeta
   «Meta - Verification» del escritorio de Vicente. Hecho el 2026-10-04: la app
@@ -63,11 +65,14 @@ Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataf
   Review de Meta, Pyxis declaró revisar la legalidad de cada solicitud, poder impugnarla,
   entregar lo mínimo y documentarla. Que el abogado la deje por escrito, junto con la
   revisión de `/privacidad` y `/terminos`.
-- **Mientras Meta revisa, en este orden** (2026-10-06): verificación en dos pasos en
-  Cloudflare **[dueño]**, la única que falta (Facebook, GitHub, Vercel y Supabase la tienen
-  desde el 2026-10-06), porque Meta la espera de los administradores de un proveedor de
-  tecnología; y la beta con creadores reales como evaluadores de la app (developers → Roles
-  de la app → Evaluador, y después invitarlos en Los Maestros) **[dueño]**.
+- **[dueño] Mientras Meta revisa: la beta con creadores reales** (2026-10-06). Mientras la
+  app de Meta esté en modo desarrollo, solo conectan su Instagram o su Facebook las cuentas
+  con un rol en la app, así que cada creador tiene que pasar dos puertas: la de Meta, como
+  **evaluador** (developers → Roles de la app → Evaluador, con su cuenta de Facebook, y él
+  acepta), y la de Tu Parrilla, invitado en **Los Maestros** con su correo. Con una sola no
+  alcanza. No es requisito para la aprobación —a diferencia de los probadores de la Play
+  Store—: sirve para tener creadores reales usando la app antes de que Meta responda. Cuando
+  Meta apruebe, la lista deja de importar.
 - **Meta, segunda vuelta: mensajes privados** (el privado con el enlace de la regla de
   palabra clave, `instagram_manage_messages` y `pages_messaging`) y, aparte, **Threads**
   (`threads_basic`, `threads_content_publish`). Se sacaron de la primera solicitud porque
@@ -75,7 +80,13 @@ Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataf
   `docs/levantamiento-terceros.md` §2.2 y §7.
 - **[dueño] Google — verificación del OAuth y auditoría de cuota de YouTube**, en paralelo.
   Sin la primera, solo 100 test users y tokens de 7 días; sin la segunda, 10.000 unidades al
-  día para todos y videos siempre privados. Guion: `docs/google-verificacion-guion.md`.
+  día para todos y videos siempre privados. Guion: `docs/google-verificacion-guion.md`; el
+  paso a paso de trabajo, en la carpeta «YouTube - Verification» del escritorio de Vicente
+  (2026-10-06). La portada y las páginas legales ya cumplen lo que piden Google y YouTube.
+- **Por revisar: qué se borra al desconectar YouTube** (2026-10-06). Desconectar borra las
+  credenciales y conserva el historial de métricas (`disconnectAccount`). Si la auditoría
+  de cuota pide borrar también los datos de la API al revocar, hay que cambiar eso y
+  `/privacidad`. Ver `docs/google-verificacion-guion.md`.
 - **[dueño] Vercel Pro antes de abrir a terceros.** El plan Hobby es de uso personal y no
   comercial (`docs/levantamiento-terceros.md` §5).
 
