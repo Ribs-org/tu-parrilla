@@ -121,7 +121,7 @@ la app y del proyecto visibles**, cada permiso en uso, y cómo se revoca.
 | 5 | Volver a Los Fierros con la tarjeta del canal. Pulsar **Sincronizar**; **Los Cortes** muestra los videos con sus números. | 5 |
 | 6 | **El Fuego → «Poner al fuego»** (abre el compositor en La Parrilla): subir el video, marcar **YouTube**, título, «Ahora», **Programar**. De vuelta en El Fuego, verlo pasar a publicado. Abrir YouTube Studio y mostrar el video (privado, hasta la auditoría de cuota: decirlo en el subtítulo). | 6 |
 | 7 | Desde otra cuenta, comentar en el video. Esperar la corrida de YouTube (cada media hora: mejor tener un comentario **anterior** ya en la cola y usar ese). | |
-| 8 | **La Mesa**: el comentario, la respuesta propuesta, **Aprobar**. Abrir YouTube y mostrar la respuesta publicada. | 7 |
+| 8 | **La Mesa**: el comentario, la respuesta propuesta, **Enviar**. Abrir YouTube y mostrar la respuesta publicada. | 7 |
 | 9 | Los Fierros → **Desconectar**. Y myaccount.google.com → Seguridad → Acceso de terceros → quitar Tu Parrilla. | 8 |
 | 10 | `/privacidad`, en la parte que nombra a Google y el *Limited Use*. | 9 |
 | 11 | Terminar la grabación. | |
@@ -147,12 +147,15 @@ Es el «YouTube API Services – Audit and Quota Extension Form». Pide:
   subir videos programados (`videos.insert`), (c) leer comentarios de los propios videos
   (`commentThreads.list`) y responder (`comments.insert`). Las mismas escenas 5, 6 y 8.
 - **Cuánta cuota y por qué.** Cálculo honesto, por creador y día: un sync de métricas
-  (≈ 3 llamadas × 1 unidad); la corrida de comentarios cada media hora, que hace **una
+  (≈ 4 llamadas × 1 unidad); la corrida de comentarios cada media hora, que hace **una
   llamada `commentThreads.list` por video** hasta un tope de 20 videos por pasada
   (`MAX_POSTS_POR_PASADA` en `src/lib/social/comentarios/ventana.ts`): hasta 48 × 20 =
-  960 unidades; y las subidas (1.600 cada una). Con 30 creadores y un video diario cada
-  uno: 30 × (3 + 960 + 1.600) ≈ **77.000 unidades/día**. Pedir **150.000** con ese cálculo
-  escrito, para que quepa el doble de creadores sin volver a pedir.
+  960 unidades; las respuestas (`comments.insert`, 50 cada una: unas diez al día, 500); y
+  las subidas (1.600 cada una, más unas diez consultas de estado). Con 30 creadores y un
+  video diario cada uno: 30 × (4 + 960 + 500 + 1.610) ≈ **92.000 unidades/día**. Pedir
+  **200.000** con ese cálculo escrito, para que quepa el doble de creadores sin volver a
+  pedir. El costo de cada llamada hay que confirmarlo en la calculadora de cuota de Google
+  antes de enviar: lo cambian de vez en cuando.
 - **Cumplimiento de los términos de YouTube**: que los datos de la API se muestran solo al
   dueño del canal; que los contadores se refrescan al menos cada 30 días (se refrescan a
   diario); que el usuario puede revocar (Los Fierros y Google); que no se venden ni se
