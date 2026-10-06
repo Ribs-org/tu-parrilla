@@ -29,11 +29,6 @@ Cómo se usa:
   que eran más consultas a la vez que conexiones en el pool (`max: 5` en `src/db/index.ts`),
   contra el pooler de Supabase en modo transacción. La causa no está explicada: cualquier
   otro `Promise.all` con más de cinco consultas podría colgarse igual.
-- **El motivo de un intento fallido que se va a reintentar no se ve en ningún lado**
-  (2026-10-04). Un destino que falla y vuelve a `scheduled` guarda `lastError`, pero el panel
-  solo lo muestra cuando el destino ya quedó en `failed` (`page.tsx`, `queue.tsx`). En la
-  toma del video de TikTok eso escondió durante diez minutos el motivo real, y al final lo
-  tapó otro. Mostrarlo en la tarjeta del calendario («reintentando: …»).
 - **La Parrilla abierta pide decenas de páginas `/admin/schedule/<id>` cada pocos
   segundos** (2026-10-04). En los logs de Vercel, unas 60 peticiones por tanda, una por cada
   corte del calendario: parece el prefetch de los `Link` combinado con un refresco
@@ -73,7 +68,7 @@ Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataf
   **[dueño]**, porque Meta la espera de los administradores de un proveedor de
   tecnología; y la beta con creadores reales como evaluadores de la app (developers → Roles
   de la app → Evaluador, y después invitarlos en Los Maestros) **[dueño]**. En código: el
-  motivo visible del reintento (sección Bugs) y el redirect de `/admin` del dominio viejo.
+  redirect de `/admin` del dominio viejo.
 - **Meta, segunda vuelta: mensajes privados** (el privado con el enlace de la regla de
   palabra clave, `instagram_manage_messages` y `pages_messaging`) y, aparte, **Threads**
   (`threads_basic`, `threads_content_publish`). Se sacaron de la primera solicitud porque
