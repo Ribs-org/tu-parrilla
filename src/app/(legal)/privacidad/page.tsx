@@ -1,16 +1,12 @@
 import type { Metadata } from 'next'
 
 import { nombreDe } from '@/lib/vocabulario'
+import { CONTACTO, RESPONSABLE, RUT } from '@/lib/empresa'
 
 export const metadata: Metadata = {
   title: 'Privacidad',
   description: 'Qué datos guarda este sitio y qué no.',
 }
-
-/** Quién responde por estos datos: lo que un fork cambia antes de desplegar estas páginas. */
-const RESPONSABLE = 'PYXIS SpA'
-const RUT = '78.459.631-1'
-const CONTACTO = 'pyxis.latam@gmail.com'
 
 const ACTUALIZADO = '5 de octubre de 2026'
 

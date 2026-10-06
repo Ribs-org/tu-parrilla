@@ -248,6 +248,10 @@ npx vercel           # cuando quieras subirlo
 Sin `RESEND_API_KEY` en desarrollo, el código de ingreso no se manda por correo: aparece
 en la consola del servidor, y con eso basta para entrar en local.
 
+Antes de publicar un fork, cambia `src/lib/empresa.ts`: el nombre legal, el RUT y el
+correo de quien presta el servicio. Lo muestran el pie de la portada, la política de
+privacidad y los términos, y Meta exige que coincida con el negocio que verificaste.
+
 </details>
 
 ---
@@ -935,6 +939,7 @@ src/
     tracking.ts            contexto de la visita desde headers
     analytics.ts           consultas del dashboard
     auth.ts                sesión del panel
+    empresa.ts             quién presta el servicio: lo leen la portada, privacidad y términos
 scripts/
   setup.ts                 genera el .env.local
   seed.ts                  perfiles iniciales
