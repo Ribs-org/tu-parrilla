@@ -5,7 +5,7 @@ import { useState, useTransition } from 'react'
 import { deleteScheduledPost, subirAhora } from '@/app/admin/actions'
 import type { ScheduledPost, ScheduledPostTarget } from '@/db/schema'
 import { cn } from '@/lib/utils'
-import { nombreDestino } from './etiqueta'
+import { motivoDestino, nombreDestino } from './etiqueta'
 import { cortarCola } from './orden'
 import { Redes } from './redes'
 import { Reprogramar } from './reprogramar'
@@ -111,7 +111,9 @@ export function Queue({
                 )}
               >
                 <Redes targets={[target]} detalle />
-                {target.status === 'failed' && target.lastError && ` — ${target.lastError}`}
+                {/* Quemado o esperando el siguiente intento: en los dos casos el motivo es
+                    lo único que dice qué hacer. */}
+                {motivoDestino(target) && ` — ${motivoDestino(target)}`}
                 {target.status === 'failed' && <Reprogramar targetId={target.id} titulo={nombreDestino(target)} />}
               </span>
             ))}

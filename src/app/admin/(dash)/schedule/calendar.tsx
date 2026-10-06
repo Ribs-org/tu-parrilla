@@ -5,7 +5,7 @@ import type { ScheduledPost, ScheduledPostTarget } from '@/db/schema'
 import { dayLabel, dayKey, groupByDay, hourLabel, weekDays, weekLabel } from '@/lib/schedule-week'
 import { NOMBRE_COCCION, calorDelDia, coccionDe, type Coccion } from '@/lib/parrilla'
 import { cn } from '@/lib/utils'
-import { etiquetaDestino, nombreDestino } from './etiqueta'
+import { etiquetaDestino, motivoDestino, nombreDestino } from './etiqueta'
 import { Redes } from './redes'
 
 type Item = {
@@ -122,6 +122,10 @@ export function WeekCalendar({
                       // cualquier destino gana, todos publicados es «a punto», algo en
                       // curso es «sellada», el resto queda cruda.
                       const coccion = coccionDe(targets.map((t) => t.status))
+                      // Los destinos que fallaron y esperan otro intento. La cocción no los
+                      // distingue de uno que nunca se intentó —los dos quedan crudos—, así
+                      // que el motivo va escrito en la tarjeta.
+                      const reintentos = targets.filter((t) => t.status === 'scheduled' && motivoDestino(t))
                       return (
                         <Link
                           key={post.id}
@@ -130,7 +134,10 @@ export function WeekCalendar({
                           // punto de color. La cocción dice que algo falló; esto dice
                           // cuál, sin tener que entrar al editor.
                           title={targets
-                            .map((t) => `${nombreDestino(t)}: ${etiquetaDestino(t)}`)
+                            .map((t) => {
+                              const motivo = motivoDestino(t)
+                              return `${nombreDestino(t)}: ${etiquetaDestino(t)}${motivo ? ` — ${motivo}` : ''}`
+                            })
                             .join(' · ')}
                           className={cn(
                             'corte block p-2 transition-transform hover:-translate-y-0.5',
@@ -189,6 +196,11 @@ export function WeekCalendar({
                           <p className="mt-1 line-clamp-2 text-[0.75rem] leading-snug text-fg">
                             {post.caption || '(sin texto)'}
                           </p>
+                          {reintentos.map((t) => (
+                            <p key={t.id} className="mt-1 text-[0.68rem] leading-snug text-fg">
+                              Reintentando {nombreDestino(t)}: {motivoDestino(t)}
+                            </p>
+                          ))}
                           {/*
                             El estado en palabras, una sola vez. El `title` no sirve para
                             esto: sobre un enlace con contenido es descripción y no
