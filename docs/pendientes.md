@@ -56,7 +56,18 @@ Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataf
   de sesión (retornos de OAuth solo en `tu-parrilla.cl`, baja) quedaron configurados.
   El 2026-10-05 quedó grabado el video (`meta-app-review-demo.mp4`, 4:47, en esa carpeta,
   junto a `TEXTOS-FORMULARIO.txt` con los minutos de cada permiso), con la cuenta del
-  revisor, @vicente_edits2 y la página Tu-Parrilla. Falta: llenar y enviar el App Review.
+  revisor, @vicente_edits2 y la página Tu-Parrilla. El 2026-10-06 Pyxis pasó a
+  «proveedor de tecnología» (irreversible: los usuarios conectan sus propias páginas, que
+  viven en sus portafolios) y envió la **verificación de acceso** (Meta tarda unos cinco
+  días hábiles). La solicitud del App Review quedó llena y sin enviar: 11 permisos (los 10
+  del video y `public_profile`; se sacaron los de Threads, los de mensajes privados y las
+  variantes `instagram_business_*`, que la app no pide), tratamiento de datos y
+  credenciales del revisor. Falta: cuando aprueben el acceso, conectar de nuevo las
+  cuentas del revisor y enviar.
+- **[dueño] Política interna ante solicitudes de autoridades** (2026-10-06). En el App
+  Review de Meta, Pyxis declaró revisar la legalidad de cada solicitud, poder impugnarla,
+  entregar lo mínimo y documentarla. Que el abogado la deje por escrito, junto con la
+  revisión de `/privacidad` y `/terminos`.
 - **[dueño] Un segundo administrador en el portafolio Pyxis spa.** Hoy hay uno solo: si
   Vicente pierde el acceso a su Facebook, se pierden el portafolio y la app de Meta.
 - **[dueño] Google — verificación del OAuth y auditoría de cuota de YouTube**, en paralelo.
