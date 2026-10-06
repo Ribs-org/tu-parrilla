@@ -83,6 +83,13 @@ Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataf
   día para todos y videos siempre privados. Guion: `docs/google-verificacion-guion.md`; el
   paso a paso de trabajo, en la carpeta «YouTube - Verification» del escritorio de Vicente
   (2026-10-06). La portada y las páginas legales ya cumplen lo que piden Google y YouTube.
+  Hecho el 2026-10-06 (fases 1 a 3): el proyecto (`portafolio-page`, número 306430930448)
+  tiene a pyxis.latam@gmail.com como dueña; `tu-parrilla.cl` está verificado en Search
+  Console (registro TXT en Cloudflare: no borrarlo); la marca dice «Tu Parrilla», con Pyxis
+  de contacto y solo `tu-parrilla.cl` autorizado; el cliente OAuth solo acepta
+  `https://tu-parrilla.cl/api/social/youtube/callback`; y los permisos son exactamente
+  `youtube.upload` y `youtube.force-ssl`. Falta: el canal de prueba del revisor, el video y
+  enviar los dos trámites.
 - **Por revisar: qué se borra al desconectar YouTube** (2026-10-06). Desconectar borra las
   credenciales y conserva el historial de métricas (`disconnectAccount`). Si la auditoría
   de cuota pide borrar también los datos de la API al revocar, hay que cambiar eso y
