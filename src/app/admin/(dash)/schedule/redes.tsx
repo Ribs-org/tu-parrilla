@@ -3,7 +3,14 @@ import { networkLabel } from '@/lib/networks'
 import { cn } from '@/lib/utils'
 import { colorDeDestino, etiquetaDestino, nombreDestino } from './etiqueta'
 
-type Destino = { network: string; handle: string | null; status: string; externalId: string | null; opciones: unknown }
+type Destino = {
+  network: string
+  handle: string | null
+  status: string
+  externalId: string | null
+  opciones: unknown
+  lastError?: string | null
+}
 
 const CLASE_COLOR: Record<ReturnType<typeof colorDeDestino>, string> = {
   gris: 'text-fg',

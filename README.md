@@ -843,6 +843,12 @@ dejó su línea. El barrido tiene un plazo de un minuto por lectura —el listad
 consulta a la base, cada una con su línea `[barrido]`— y, si no le alcanza, se rinde hasta la
 pasada siguiente sin borrar nada: un barrido que no termina no puede llevarse la corrida.
 
+Un destino que falla se reintenta en las corridas siguientes, hasta tres intentos, salvo
+los rechazos que la red ya decidió, que se queman al primero. Mientras espera el siguiente,
+el panel lo muestra como **Reintentando** con el motivo del intento anterior —en la tarjeta
+del calendario y en la cola—, y el correo de aviso llega solo cuando se quema: sin ese
+motivo a la vista, un reintento escondía el error real hasta agotar los intentos.
+
 ### Guía para el editor de contenido
 
 `public/docs/api-editor.md` documenta ambos endpoints en detalle, escrito para que un
@@ -912,7 +918,8 @@ y `hasta` (`YYYY-MM-DD` en la zona horaria del dueño, la de Tu Cuenta; ambos in
 días). Devuelve `{ desde, hasta, posts }` con lo programado cuya **hora de salida** cae
 en la ventana, salido o no: texto, `fecha` (ISO con offset), portada, media en orden,
 `atributos`, y por cada destino su estado (`scheduled`, `publishing`, `published`,
-`failed`), el `externalId` si ya salió, los intentos, la frase de error si falló, y
+`failed`), el `externalId` si ya salió, los intentos, la frase de error del último intento fallido (también en un `scheduled`
+que espera reintentarse), y
 `cuentaId`/`handle` de la cuenta — útil para recuperar el id de una cuenta que ya tiene
 algún destino programado. Para una cuenta recién conectada, que todavía no tiene
 ninguno, el id está en su tarjeta en **Los Fierros** (Cuentas, en Ajustes) del panel, con un botón para
