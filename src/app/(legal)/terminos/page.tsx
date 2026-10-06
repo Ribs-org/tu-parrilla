@@ -1,15 +1,11 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { CONTACTO, RESPONSABLE, RUT } from '@/lib/empresa'
 
 export const metadata: Metadata = {
   title: 'Términos',
   description: 'Condiciones de uso de Tu Parrilla y de este sitio.',
 }
-
-/** Tienen que calzar con los de la página de privacidad: un fork cambia las dos. */
-const RESPONSABLE = 'PYXIS SpA'
-const RUT = '78.459.631-1'
-const CONTACTO = 'pyxis.latam@gmail.com'
 
 const ACTUALIZADO = '5 de octubre de 2026'
 

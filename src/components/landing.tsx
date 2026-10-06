@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { CONTACTO, RESPONSABLE, RUT } from '@/lib/empresa'
 
 /**
  * La cara pública del producto, en el dominio del producto.
@@ -148,7 +149,13 @@ export function Landing() {
             </Link>
             .
           </p>
-          <p className="mt-6 flex gap-5 text-fg-faint">
+          <p className="mt-6 text-fg-faint">
+            Un servicio de {RESPONSABLE} (RUT {RUT}), Chile ·{' '}
+            <a href={`mailto:${CONTACTO}`} className="hover:text-fg">
+              {CONTACTO}
+            </a>
+          </p>
+          <p className="mt-3 flex gap-5 text-fg-faint">
             <Link href="/terminos" className="hover:text-fg">Términos</Link>
             <Link href="/privacidad" className="hover:text-fg">Privacidad</Link>
           </p>
