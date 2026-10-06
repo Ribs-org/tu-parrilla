@@ -68,19 +68,17 @@ Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataf
   Review de Meta, Pyxis declaró revisar la legalidad de cada solicitud, poder impugnarla,
   entregar lo mínimo y documentarla. Que el abogado la deje por escrito, junto con la
   revisión de `/privacidad` y `/terminos`.
-- **Mientras Meta revisa, en este orden** (2026-10-06): el segundo administrador de Pyxis
-  (abajo); verificación en dos pasos en Facebook, Vercel, Supabase, GitHub y Cloudflare
-  **[dueño]**, porque Meta la espera de los administradores de un proveedor de
-  tecnología; y la beta con creadores reales como evaluadores de la app (developers → Roles
-  de la app → Evaluador, y después invitarlos en Los Maestros) **[dueño]**. En código: el
-  motivo visible del reintento (sección Bugs) y el redirect de `/admin` del dominio viejo.
+- **Mientras Meta revisa, en este orden** (2026-10-06): verificación en dos pasos en
+  Facebook, Vercel, Supabase, GitHub y Cloudflare **[dueño]**, porque Meta la espera de los
+  administradores de un proveedor de tecnología; y la beta con creadores reales como
+  evaluadores de la app (developers → Roles de la app → Evaluador, y después invitarlos en
+  Los Maestros) **[dueño]**. En código: el motivo visible del reintento (sección Bugs) y el
+  redirect de `/admin` del dominio viejo.
 - **Meta, segunda vuelta: mensajes privados** (el privado con el enlace de la regla de
   palabra clave, `instagram_manage_messages` y `pages_messaging`) y, aparte, **Threads**
   (`threads_basic`, `threads_content_publish`). Se sacaron de la primera solicitud porque
   no salen en su video; cada una necesita su guion y su grabación. Ver
   `docs/levantamiento-terceros.md` §2.2 y §7.
-- **[dueño] Un segundo administrador en el portafolio Pyxis spa.** Hoy hay uno solo: si
-  Vicente pierde el acceso a su Facebook, se pierden el portafolio y la app de Meta.
 - **[dueño] Google — verificación del OAuth y auditoría de cuota de YouTube**, en paralelo.
   Sin la primera, solo 100 test users y tokens de 7 días; sin la segunda, 10.000 unidades al
   día para todos y videos siempre privados. Guion: `docs/google-verificacion-guion.md`.
