@@ -79,7 +79,8 @@ Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataf
   no salen en su video; cada una necesita su guion y su grabación. Ver
   `docs/levantamiento-terceros.md` §2.2 y §7.
 - **[dueño] Google — verificación del OAuth y auditoría de cuota de YouTube**, en paralelo.
-  Sin la primera, solo 100 test users y tokens de 7 días; sin la segunda, 10.000 unidades al
+  Sin la primera, el cartel de app no verificada y un tope de 100 usuarios en toda la vida
+  del proyecto (iban 3 el 2026-10-06); sin la segunda, 10.000 unidades al
   día para todos y videos siempre privados. Guion: `docs/google-verificacion-guion.md`; el
   paso a paso de trabajo, en la carpeta «YouTube - Verification» del escritorio de Vicente
   (2026-10-06). La portada y las páginas legales ya cumplen lo que piden Google y YouTube.
@@ -88,8 +89,9 @@ Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataf
   Console (registro TXT en Cloudflare: no borrarlo); la marca dice «Tu Parrilla», con Pyxis
   de contacto y solo `tu-parrilla.cl` autorizado; el cliente OAuth solo acepta
   `https://tu-parrilla.cl/api/social/youtube/callback`; y los permisos son exactamente
-  `youtube.upload` y `youtube.force-ssl`. Falta: el canal de prueba del revisor, el video y
-  enviar los dos trámites.
+  `youtube.upload` y `youtube.force-ssl`. El canal de prueba es «Pyxis oficial», de
+  pyxis.latam@gmail.com, con dos videos. Falta: conectarlo desde el usuario revisor, el
+  video y enviar los dos trámites.
 - **Por revisar: qué se borra al desconectar YouTube** (2026-10-06). Desconectar borra las
   credenciales y conserva el historial de métricas (`disconnectAccount`). Si la auditoría
   de cuota pide borrar también los datos de la API al revocar, hay que cambiar eso y
