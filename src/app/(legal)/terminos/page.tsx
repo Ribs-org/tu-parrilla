@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: 'Condiciones de uso de Tu Parrilla y de este sitio.',
 }
 
-const ACTUALIZADO = '5 de octubre de 2026'
+const ACTUALIZADO = '6 de octubre de 2026'
 
 export default function TerminosPage() {
   return (
@@ -65,6 +65,14 @@ export default function TerminosPage() {
           publicar y cuándo, y puede limitar o cambiar lo que el panel puede hacer con tu cuenta.
           Lo mismo vale para los enlaces de las páginas públicas: lo que hagas en el sitio al que
           llevan queda entre tú y ese sitio.
+        </p>
+        <p className="leading-relaxed text-fg-muted">
+          Para conectar tu canal de YouTube, el panel usa los Servicios de API de YouTube. Al
+          conectarlo aceptas también los{' '}
+          <a href="https://www.youtube.com/t/terms" target="_blank" rel="noopener noreferrer" className="text-fg underline decoration-white/20 underline-offset-4 transition-colors hover:decoration-white/50">
+            Términos de Servicio de YouTube
+          </a>
+          .
         </p>
       </section>
 

@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: 'Qué datos guarda este sitio y qué no.',
 }
 
-const ACTUALIZADO = '5 de octubre de 2026'
+const ACTUALIZADO = '6 de octubre de 2026'
 
 export default function PrivacidadPage() {
   return (
@@ -149,7 +149,17 @@ export default function PrivacidadPage() {
           >
             Google API Services User Data Policy
           </a>
-          , incluidos los requisitos de <span className="text-fg">Limited Use</span>. De YouTube
+          , incluidos los requisitos de <span className="text-fg">Limited Use</span>. Para tu
+          canal de YouTube, el panel usa los Servicios de API de YouTube, y lo que Google hace con
+          esos datos se rige por la{' '}
+          <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="text-fg underline decoration-white/20 underline-offset-4 transition-colors hover:decoration-white/50">
+            Política de Privacidad de Google
+          </a>
+          ; al conectarlo aceptas también los{' '}
+          <a href="https://www.youtube.com/t/terms" target="_blank" rel="noopener noreferrer" className="text-fg underline decoration-white/20 underline-offset-4 transition-colors hover:decoration-white/50">
+            Términos de Servicio de YouTube
+          </a>
+          . De YouTube
           se guardan el identificador, el título, la miniatura y los contadores de{' '}
           <span className="text-fg">tus propios videos</span>, y los comentarios de esos videos.
           Se refrescan a diario, y se borran al desconectar la cuenta —las credenciales— o si lo
