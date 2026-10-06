@@ -69,8 +69,9 @@ Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataf
   entregar lo mínimo y documentarla. Que el abogado la deje por escrito, junto con la
   revisión de `/privacidad` y `/terminos`.
 - **Mientras Meta revisa, en este orden** (2026-10-06): verificación en dos pasos en
-  Facebook, Vercel, Supabase, GitHub y Cloudflare **[dueño]**, porque Meta la espera de los
-  administradores de un proveedor de tecnología; y la beta con creadores reales como
+  Cloudflare **[dueño]**, la única que falta (Facebook, GitHub, Vercel y Supabase la tienen
+  desde el 2026-10-06), porque Meta la espera de los administradores de un proveedor de
+  tecnología; y la beta con creadores reales como
   evaluadores de la app (developers → Roles de la app → Evaluador, y después invitarlos en
   Los Maestros) **[dueño]**. En código: el motivo visible del reintento (sección Bugs) y el
   redirect de `/admin` del dominio viejo.
