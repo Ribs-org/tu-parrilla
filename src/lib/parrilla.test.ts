@@ -161,6 +161,16 @@ describe('estadoDelFierro', () => {
     expect(estadoDelFierro({ ...sano, red: 'instagram', expiraEn: en(3) }, AHORA)).toBe('enfriandose')
   })
 
+  it('YouTube tampoco se mide por su token de una hora', () => {
+    // Google entrega uno de acceso que dura una hora y lo renueva con el de refresco
+    // (`social/publish/youtube.ts`). Medido por la hora, la cuenta decía «vence hoy» recién
+    // conectada y quedaba fría a la hora siguiente.
+    expect(estadoDelFierro({ ...sano, red: 'youtube', expiraEn: en(0.04) }, AHORA)).toBe('al-rojo')
+    expect(estadoDelFierro({ ...sano, red: 'youtube', expiraEn: en(-1) }, AHORA)).toBe('al-rojo')
+    expect(estadoDelFierro({ ...sano, red: 'youtube', connected: false }, AHORA)).toBe('frio')
+    expect(estadoDelFierro({ ...sano, red: 'youtube', ultimoError: 'x' }, AHORA)).toBe('frio')
+  })
+
   // Los dos bordes explícitos: mover el aviso es una decisión, no un ajuste.
   it('el aviso empieza justo en el día siete', () => {
     expect(estadoDelFierro({ ...sano, expiraEn: en(7) }, AHORA)).toBe('enfriandose')

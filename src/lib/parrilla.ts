@@ -162,7 +162,11 @@ export function estadoDelFierro(
   // Medirlo por ahí hacía que toda cuenta de TikTok dijera «vence mañana» siempre, recién
   // conectada o no. Lo que de verdad dice si vive es que tenga credencial y que la última
   // sincronización no haya fallado — y eso ya se comprobó arriba.
-  if (cuenta.red === 'tiktok') return 'al-rojo'
+  //
+  // YouTube es el mismo caso con una hora en vez de un día (`social/publish/youtube.ts`
+  // lo renueva antes de publicar). Google no dice cuándo muere el de refresco: con la app
+  // en «Testing» son siete días, y en producción no vence mientras se use.
+  if (cuenta.red === 'tiktok' || cuenta.red === 'youtube') return 'al-rojo'
   if (!cuenta.expiraEn) return 'al-rojo'
 
   const faltan = new Date(cuenta.expiraEn).getTime() - ahora.getTime()
