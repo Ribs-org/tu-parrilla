@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { networkLabel } from '@/lib/networks'
-import { colorDeDestino, etiquetaDestino, nombreDestino } from './etiqueta'
+import { colorDeDestino, etiquetaDestino, motivoDestino, nombreDestino } from './etiqueta'
 
 describe('nombreDestino', () => {
   it('nombra la red y el handle, para que dos destinos de la misma red se distingan', () => {
@@ -33,6 +33,28 @@ describe('etiquetaDestino', () => {
     expect(
       etiquetaDestino({ network: 'tiktok', status: 'published', externalId: null, opciones: { modo: 'directo', privacidad: 'SELF_ONLY' } }),
     ).toBe('Publicado')
+  })
+  it('un destino programado con un motivo guardado está esperando reintento', () => {
+    expect(
+      etiquetaDestino({ network: 'tiktok', status: 'scheduled', externalId: null, opciones: null, lastError: 'La red rechazó el video.' }),
+    ).toBe('Reintentando')
+    expect(etiquetaDestino({ network: 'tiktok', status: 'scheduled', externalId: null, opciones: null, lastError: null })).toBe(
+      'Programado',
+    )
+  })
+})
+
+describe('motivoDestino', () => {
+  it('el motivo se ve mientras se reintenta y cuando ya se quemó', () => {
+    expect(motivoDestino({ status: 'scheduled', lastError: 'La red rechazó el video.' })).toBe('La red rechazó el video.')
+    expect(motivoDestino({ status: 'failed', lastError: 'La red rechazó el video.' })).toBe('La red rechazó el video.')
+  })
+
+  it('sin motivo, o en un estado donde no aplica, no hay nada que mostrar', () => {
+    expect(motivoDestino({ status: 'scheduled', lastError: null })).toBeNull()
+    expect(motivoDestino({ status: 'failed', lastError: null })).toBeNull()
+    expect(motivoDestino({ status: 'published', lastError: 'viejo' })).toBeNull()
+    expect(motivoDestino({ status: 'publishing', lastError: 'viejo' })).toBeNull()
   })
 })
 
