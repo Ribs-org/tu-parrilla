@@ -63,3 +63,31 @@ export function dominioProducto(
   const [primero] = configurado.split(',').map(normalizar).filter(Boolean)
   return primero ?? null
 }
+
+/**
+ * Adónde mandar a quien abre el panel (`/admin`, `/ingresar`) en un dominio que no es el
+ * del producto: la misma ruta y la misma consulta, en el dominio del producto. `null` es
+ * «quédate donde estás».
+ *
+ * Todos los dominios apuntan al mismo despliegue, así que el panel responde en cualquiera,
+ * pero Meta solo acepta los retornos de OAuth de `tu-parrilla.cl` (2026-10-04): conectar
+ * Instagram o Facebook desde otro dominio falla con un error que no explica nada.
+ *
+ * Los previews de Vercel y local quedan fuera aunque no sean el dominio del producto: ahí
+ * el panel se abre para probar una rama, y mandarlo a producción sería probar otra cosa.
+ * Sin `DOMINIO_PRODUCTO`, como el resto del módulo, no cambia nada.
+ */
+export function panelEnElProducto(
+  host: string | null | undefined,
+  rutaConConsulta: string,
+  configurado: string | null | undefined = process.env.DOMINIO_PRODUCTO,
+): string | null {
+  const destino = dominioProducto(configurado)
+  if (!destino || !host) return null
+
+  const actual = normalizar(host)
+  if (!actual || esDominioDelProducto(host, configurado)) return null
+  if (actual === 'localhost' || actual === '127.0.0.1' || actual.endsWith('.vercel.app')) return null
+
+  return `https://${destino}${rutaConConsulta}`
+}

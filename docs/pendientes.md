@@ -63,19 +63,16 @@ Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataf
   Review de Meta, Pyxis declaró revisar la legalidad de cada solicitud, poder impugnarla,
   entregar lo mínimo y documentarla. Que el abogado la deje por escrito, junto con la
   revisión de `/privacidad` y `/terminos`.
-- **Mientras Meta revisa, en este orden** (2026-10-06): el segundo administrador de Pyxis
-  (abajo); verificación en dos pasos en Facebook, Vercel, Supabase, GitHub y Cloudflare
-  **[dueño]**, porque Meta la espera de los administradores de un proveedor de
+- **Mientras Meta revisa, en este orden** (2026-10-06): verificación en dos pasos en
+  Cloudflare **[dueño]**, la única que falta (Facebook, GitHub, Vercel y Supabase la tienen
+  desde el 2026-10-06), porque Meta la espera de los administradores de un proveedor de
   tecnología; y la beta con creadores reales como evaluadores de la app (developers → Roles
-  de la app → Evaluador, y después invitarlos en Los Maestros) **[dueño]**. En código: el
-  redirect de `/admin` del dominio viejo.
+  de la app → Evaluador, y después invitarlos en Los Maestros) **[dueño]**.
 - **Meta, segunda vuelta: mensajes privados** (el privado con el enlace de la regla de
   palabra clave, `instagram_manage_messages` y `pages_messaging`) y, aparte, **Threads**
   (`threads_basic`, `threads_content_publish`). Se sacaron de la primera solicitud porque
   no salen en su video; cada una necesita su guion y su grabación. Ver
   `docs/levantamiento-terceros.md` §2.2 y §7.
-- **[dueño] Un segundo administrador en el portafolio Pyxis spa.** Hoy hay uno solo: si
-  Vicente pierde el acceso a su Facebook, se pierden el portafolio y la app de Meta.
 - **[dueño] Google — verificación del OAuth y auditoría de cuota de YouTube**, en paralelo.
   Sin la primera, solo 100 test users y tokens de 7 días; sin la segunda, 10.000 unidades al
   día para todos y videos siempre privados. Guion: `docs/google-verificacion-guion.md`.
@@ -97,9 +94,6 @@ Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataf
   en R2, `R2_PUBLIC_BASE` en Vercel, verificarlo como *URL property* en las dos apps de
   TikTok (si no, `PULL_FROM_URL` falla), y decidir qué pasa con las URLs ya guardadas en la
   base, que apuntan al dominio viejo.
-- **El panel también responde en `www.vicente-pareja.cl/admin`.** Meta ya solo acepta los
-  retornos de OAuth de `tu-parrilla.cl` (2026-10-04), así que conectar Instagram o Facebook
-  desde el dominio viejo falla. Redirigir `/admin` del dominio viejo al nuevo lo cerraría.
 
 ## Que todo quede a nombre de Pyxis
 

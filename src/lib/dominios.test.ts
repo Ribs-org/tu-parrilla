@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { dominioProducto, esDominioDelProducto } from './dominios'
+import { dominioProducto, esDominioDelProducto, panelEnElProducto } from './dominios'
 
 /**
  * La raíz pública sirve la página de un creador desde hace meses, en cuatro dominios. Esta
@@ -92,5 +92,43 @@ describe('dominioProducto', () => {
 
   it('con varios hosts separados por coma, usa el primero: el que de verdad se comparte', () => {
     expect(dominioProducto('tu-parrilla.cl, localhost:3000')).toBe('tu-parrilla.cl')
+  })
+})
+
+/**
+ * Meta solo acepta los retornos de OAuth de `tu-parrilla.cl` desde el 2026-10-04: conectar
+ * Instagram o Facebook desde el panel abierto en otro dominio falla. El panel entero se va
+ * al dominio del producto, con la misma ruta y la misma consulta.
+ */
+describe('panelEnElProducto', () => {
+  const conf = 'tu-parrilla.cl'
+
+  it('desde otro dominio, la misma ruta en el del producto', () => {
+    expect(panelEnElProducto('www.vicente-pareja.cl', '/admin', conf)).toBe('https://tu-parrilla.cl/admin')
+    expect(panelEnElProducto('vicente-pareja.cl', '/admin/schedule?vista=calendario', conf)).toBe(
+      'https://tu-parrilla.cl/admin/schedule?vista=calendario',
+    )
+    expect(panelEnElProducto('octavio-parejamiranda.com', '/ingresar', conf)).toBe('https://tu-parrilla.cl/ingresar')
+  })
+
+  it('en el dominio del producto no hay a dónde ir', () => {
+    expect(panelEnElProducto('tu-parrilla.cl', '/admin', conf)).toBeNull()
+    expect(panelEnElProducto('www.tu-parrilla.cl', '/admin', conf)).toBeNull()
+  })
+
+  it('sin la variable puesta no cambia nada, como el resto de este módulo', () => {
+    expect(panelEnElProducto('www.vicente-pareja.cl', '/admin', undefined)).toBeNull()
+    expect(panelEnElProducto('www.vicente-pareja.cl', '/admin', '')).toBeNull()
+  })
+
+  it('los previews de Vercel y local se quedan donde están, para poder probar ahí el panel', () => {
+    expect(panelEnElProducto('tu-parrilla-git-rama-ribs.vercel.app', '/admin', conf)).toBeNull()
+    expect(panelEnElProducto('localhost:3000', '/admin', conf)).toBeNull()
+    expect(panelEnElProducto('127.0.0.1:3000', '/admin', conf)).toBeNull()
+  })
+
+  it('sin host no se adivina', () => {
+    expect(panelEnElProducto(null, '/admin', conf)).toBeNull()
+    expect(panelEnElProducto('', '/admin', conf)).toBeNull()
   })
 })

@@ -10,7 +10,7 @@ quede con tus números.
 | --- | --- |
 | `/` | La página principal del dueño del dominio. Cada usuario tiene una principal, pero solo la del admin se sirve en la raíz |
 | `/<slug>` | La página de un usuario. Cada dominio sirve solo las de su dueño; el del producto las sirve todas |
-| `/admin` | Tu panel: El Fuego, lo que pide una acción hoy; adentro, la parrilla, los números y el editor |
+| `/admin` | Tu panel: El Fuego, lo que pide una acción hoy; adentro, la parrilla, los números y el editor. Se abre en el dominio del producto: en cualquier otro, `/admin` e `/ingresar` redirigen ahí con la misma ruta |
 | `/borrado/<código>` | El estado de un borrado que pidió Meta: cuándo fue y cuántas cuentas. Pública, sin sesión; el código es la llave |
 | `/api/social/meta/baja` | `POST` de Meta cuando alguien quita la app desde Facebook: deja sin credencial sus cuentas de Instagram y Facebook |
 | `/api/social/meta/borrado` | `POST` de Meta cuando alguien pide borrar sus datos: borra lo que vino de esas dos redes y devuelve el código de estado |
@@ -226,6 +226,13 @@ averiguar qué usuarios hay.
 
 Sin `DOMINIO_PRODUCTO` configurada no hay dominio del producto: todos sirven solo lo del
 dueño, que es como funcionaba antes de que existiera la landing.
+
+**El panel vive solo en el dominio del producto.** Abrir `/admin` o `/ingresar` en otro
+dominio redirige al del producto con la misma ruta (`src/proxy.ts`), porque Meta solo
+acepta los retornos de OAuth del dominio que registraste, y conectar Instagram o Facebook
+desde otro falla sin explicar por qué. La API no se redirige —la app del teléfono puede
+seguir llamando a un dominio viejo—, y tampoco los previews de Vercel ni local, donde el
+panel se abre para probar una rama. Sin `DOMINIO_PRODUCTO`, nada se redirige.
 
 <details>
 <summary>Sin el botón (fork manual)</summary>
@@ -782,7 +789,7 @@ Vercel y bajan con `vercel env pull .env.local`.
 | `R2_SECRET_ACCESS_KEY` | Llave secreta para R2 | No — sin ella no puedes subir media |
 | `R2_BUCKET` | Nombre del bucket de R2 | No — sin ella no puedes subir media |
 | `R2_PUBLIC_BASE` | URL pública del bucket de R2 | No — sin ella no puedes subir media |
-| `DOMINIO_PRODUCTO` | El dominio donde vive la landing del producto. Ese dominio sirve las páginas de todos; los demás, solo las de su dueño | No — sin ella ningún dominio es el del producto y todos sirven solo lo del dueño |
+| `DOMINIO_PRODUCTO` | El dominio donde vive la landing del producto. Ese dominio sirve las páginas de todos; los demás, solo las de su dueño. Es también el único donde se abre el panel | No — sin ella ningún dominio es el del producto y todos sirven solo lo del dueño |
 | `SITE_TIMEZONE` | Zona por defecto de los usuarios nuevos y del sitio público; cada usuario cambia la suya en Tu Cuenta. Si no es una zona IANA conocida, se avisa por consola y se usa `America/Santiago` | No — por defecto `America/Santiago` |
 | `YOUTUBE_API_KEY` | Métricas de YouTube | No — sin ella esa red aparece como no conectada |
 | `YOUTUBE_CHANNEL_ID` | Métricas de YouTube | No — sin ella esa red aparece como no conectada |
@@ -930,6 +937,7 @@ edición por API: para cambiar algo se borra y se programa de nuevo.
 
 ```
 src/
+  proxy.ts                 manda el panel abierto en otro dominio al del producto
   app/
     page.tsx               la landing en el dominio del producto; el perfil principal en el resto
     [slug]/                la página de un usuario, acotada al dueño del dominio
@@ -945,7 +953,7 @@ src/
     charts/                gráficos y paleta validada
   lib/
     slugs.ts               qué direcciones están reservadas y cuál le toca a cada correo
-    dominios.ts            si un host es el del producto
+    dominios.ts            si un host es el del producto, y adónde va el panel si no lo es
     tracking.ts            contexto de la visita desde headers
     analytics.ts           consultas del dashboard
     auth.ts                sesión del panel
