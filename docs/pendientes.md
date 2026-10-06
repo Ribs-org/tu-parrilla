@@ -90,8 +90,13 @@ Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataf
   de contacto y solo `tu-parrilla.cl` autorizado; el cliente OAuth solo acepta
   `https://tu-parrilla.cl/api/social/youtube/callback`; y los permisos son exactamente
   `youtube.upload` y `youtube.force-ssl`. El canal de prueba es «Pyxis oficial», de
-  pyxis.latam@gmail.com, con dos videos. Falta: conectarlo desde el usuario revisor, el
-  video y enviar los dos trámites.
+  pyxis.latam@gmail.com, con dos videos y tres comentarios de parejavice@gmail.com, y ya
+  está conectado desde el usuario revisor (Los Cortes muestra los dos videos). **Sigue**
+  (fase 5 de `PASOS.txt`): el ensayo sin grabar —la respuesta desde La Mesa y una subida
+  desde El Fuego—; después desconectar el canal, quitarle el acceso en
+  myaccount.google.com/permissions, grabar (fase 6), y enviar los dos trámites el mismo día
+  (fases 7 y 8). Antes de enviar la cuota, confirmar en la calculadora de Google que subir
+  un video sigue costando 1.600 unidades.
 - **Por revisar: qué se borra al desconectar YouTube** (2026-10-06). Desconectar borra las
   credenciales y conserva el historial de métricas (`disconnectAccount`). Si la auditoría
   de cuota pide borrar también los datos de la API al revocar, hay que cambiar eso y
