@@ -10,8 +10,11 @@ hacerlos en paralelo porque cada uno tarda semanas:
    el logo. No hay lista de *test users*: eso es solo de *Testing*, y los tokens de 7 días
    también.
 2. **Auditoría y extensión de cuota de la YouTube Data API.** Sin ella: 10.000 unidades al
-   día para todos los usuarios juntos (subir un video cuesta 1.600) y **los videos subidos
-   quedan privados** aunque el usuario pida público.
+   día para todos los usuarios juntos, y subir un video cuesta 1.600, así que caben unas
+   seis subidas al día entre todos. Lo que se sube sale **público** igual: el bloqueo a
+   privado que YouTube aplica a proyectos sin auditar no le toca a este (una subida de
+   prueba del 2026-10-09 quedó pública). La auditoría hace falta por la cuota, no por la
+   visibilidad.
 3. El proyecto ya usa `youtube.upload` y `youtube.force-ssl` (`SCOPES.youtube` en
    `src/app/api/social/[network]/connect/route.ts`); son *sensibles*, no *restringidos*: no
    hay auditoría de seguridad externa (CASA).
@@ -119,10 +122,10 @@ la app y del proyecto visibles**, cada permiso en uso, y cómo se revoca.
 |---|---|---|
 | 1 | `tu-parrilla.cl` con la barra de direcciones visible; bajar al párrafo que explica la app y su enlace a privacidad. | 1 |
 | 2 | `/ingresar`: correo, código, entrar. | 2 |
-| 3 | Engranaje → **Los Fierros**. Bajo YouTube, el aviso «Hasta que Google apruebe la cuota…». Pulsar **Conectar →**. | 3 |
+| 3 | Engranaje → **Los Fierros**, bloque YouTube. Pulsar **Conectar →**. | 3 |
 | 4 | Pantalla de consentimiento de Google: **detenerse tres segundos** en el nombre «Tu Parrilla» y en los dos permisos con su descripción. Continuar. | 4 |
 | 5 | Volver a Los Fierros con la tarjeta del canal. Pulsar **Sincronizar**; **Los Cortes** muestra los videos con sus números. | 5 |
-| 6 | **El Fuego → «Poner al fuego»** (abre el compositor en La Parrilla): subir el video, marcar **YouTube**, título, «Ahora», **Programar**. De vuelta en El Fuego, verlo pasar a publicado. Abrir YouTube Studio y mostrar el video (privado, hasta la auditoría de cuota: decirlo en el subtítulo). | 6 |
+| 6 | **El Fuego → «Poner al fuego»** (abre el compositor en La Parrilla): subir el video, marcar **YouTube**, título, «Ahora», **Programar**. De vuelta en El Fuego, verlo pasar a publicado. Abrir YouTube Studio y mostrar el video recién subido. | 6 |
 | 7 | Desde otra cuenta, comentar en el video. Esperar la corrida de YouTube (cada media hora: mejor tener un comentario **anterior** ya en la cola y usar ese). | |
 | 8 | **La Mesa**: el comentario, la respuesta propuesta, **Enviar**. Abrir YouTube y mostrar la respuesta publicada. | 7 |
 | 9 | Los Fierros → **Desconectar**. Y myaccount.google.com → Seguridad → Acceso de terceros → quitar Tu Parrilla. | 8 |
@@ -165,8 +168,10 @@ Es el «YouTube API Services – Audit and Quota Extension Form». Pide:
   cruzan con otras fuentes; que se borran al desconectar (credenciales) y a petición.
 - **Enlaces**: privacidad, términos, y el video de arriba sirve.
 
-Sin esta auditoría, la app funciona para leer y responder comentarios, pero **no para
-publicar en público**: el aviso de Los Fierros lo dice hasta que pase.
+Sin esta auditoría la app funciona entera —sube en público, lee y responde comentarios—,
+pero con 10.000 unidades al día para todos los creadores juntos: unas seis subidas, menos
+lo que gastan los comentarios y las métricas. Con más de un par de creadores activos la
+cuota se acaba, y por eso hace falta la auditoría.
 
 ## Errores que Google castiga
 
@@ -183,5 +188,6 @@ publicar en público**: el aviso de Los Fierros lo dice hasta que pase.
 
 - Verificación aprobada: desaparecen el cartel de app no verificada y el tope de 100
   usuarios, y la pantalla de Google muestra «Tu Parrilla» con su logo.
-- Con la cuota aprobada: quitar el aviso de YouTube en `AVISO_ANTES_DE_CONECTAR`
-  (`src/lib/networks.ts`) y su test, y la frase del README.
+- Con la cuota aprobada: se puede revisar la cadencia de comentarios de YouTube, que mira
+  cada media hora para no agotar las 10.000 unidades (`PASADAS_YOUTUBE` en
+  `src/lib/social/comentarios/ventana.ts`).
