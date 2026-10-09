@@ -18,7 +18,7 @@ panel de la plataforma correspondiente.
 | **Instagram** | `instagram_basic`, `instagram_manage_insights`, `pages_show_list`, `pages_read_engagement`, `instagram_content_publish`, `business_management`, `instagram_manage_comments` | App de Meta en **modo desarrollo** | El diálogo de Facebook le dice que la función no está disponible; no puede conectar (es lo que le pasó a una usuaria el 2026-09-29). Solo entran cuentas con un rol en la app. |
 | **Facebook** | `pages_show_list`, `pages_read_engagement`, `pages_read_user_content`, `pages_manage_posts`, `business_management`, `pages_manage_engagement` (+ `publish_video` al confirmar) | La misma app de Meta, mismo modo | Igual que Instagram. |
 | **TikTok** | `user.info.basic`, `video.list`, `video.upload`, `video.publish` | App **aprobada y en producción** desde el 2026-09-28 (Login Kit + Content Posting API); la **auditoría de Direct Post** no está hecha | Puede conectar. Puede publicar, pero **solo como privado** (`SELF_ONLY`) y la app entera tiene un cupo de **5 usuarios por día** mientras no pase la auditoría. |
-| **YouTube** | `youtube.upload`, `youtube.force-ssl` (OAuth), más una API key para métricas | Proyecto de Google Cloud *In production* pero **sin verificar** | Entra pasando por el cartel «Google no ha verificado esta app», y cuenta para un tope de **100 usuarios** en toda la vida del proyecto; los videos que suba un proyecto sin auditoría de cuota quedan **privados** aunque pida público. |
+| **YouTube** | `youtube.upload`, `youtube.force-ssl` (OAuth), más una API key para métricas | Proyecto de Google Cloud *In production* pero **sin verificar** | Entra pasando por el cartel «Google no ha verificado esta app», y cuenta para un tope de **100 usuarios** en toda la vida del proyecto; sin auditoría de cuota, **10.000 unidades al día** para todos juntos (unas seis subidas). Lo que sube sale público igual (§4.3). |
 
 Lo que ya está resuelto del lado del producto y no hay que rehacer: usuarios invitados por
 correo con código, cada uno con su página y sus cuentas aisladas por dueño (`owner_id` en
@@ -168,12 +168,17 @@ Services**: revisan que la app cumple los términos de YouTube (cómo muestra lo
 guarda, por cuánto tiempo, que el usuario pueda revocar) y piden un video y capturas.
 Tarda semanas y se puede pedir en paralelo con la verificación del OAuth.
 
-### 4.3 Videos privados hasta la auditoría
+### 4.3 Los videos salen públicos, aun sin auditoría
 
-Los videos subidos por un proyecto que no ha pasado esa auditoría quedan **privados**
-aunque se pidan públicos (política de YouTube desde 2020). O sea: sin §4.2, YouTube sirve
-para leer métricas y comentarios, pero **no para publicar**. Vale la pena decirlo en la
-tarjeta de YouTube mientras tanto, como se hace con TikTok.
+La política de YouTube desde 2020 es dejar **privados** los videos que sube un proyecto sin
+auditar, aunque se pidan públicos, y este levantamiento lo daba por hecho. Con este
+proyecto no pasa: el 2026-10-09 una subida de prueba de la app (`privacyStatus: 'public'`)
+quedó pública, visible en el feed público del canal. Por qué no le aplica no está
+comprobado —la política habla de proyectos creados después de julio de 2020, y quizá este
+es anterior—. Por eso Los Fierros no advierte nada para YouTube. Si un día YouTube
+empezara a bloquear, el síntoma es el video recién subido en «Private» en Studio, y habría
+que volver a poner el aviso en `AVISO_ANTES_DE_CONECTAR` (`src/lib/networks.ts`). Sin
+auditoría, lo que sí limita es la cuota de §4.2.
 
 ### 4.4 Tiempo
 
@@ -204,7 +209,8 @@ Ordenado por lo que bloquea un trámite primero.
    dueño: eso quedó anotado en `docs/deuda-tecnica.md`.
 3. **Avisos honestos antes de conectar.** En Los Fierros, junto a cada botón: Instagram
    pide cuenta Business/Creator con página de Facebook; TikTok publica en privado hasta la
-   auditoría (ya está); YouTube publica en privado hasta la auditoría de cuota. Y en el
+   auditoría (ya está). YouTube no lleva aviso: publica en público aun sin auditoría
+   (§4.3). Y en el
    error del diálogo de Meta, un mensaje que diga «esta app todavía no está abierta a todos»
    en vez del genérico de Facebook.
 4. **Cupos y reparto de los crons.** Los crons de sync, comentarios y publicación recorren
@@ -238,7 +244,8 @@ ninguno depende de otro. Lo de código se intercala por lo que cada trámite pid
   unas decenas de personas.
 - TikTok: pueden conectar y publicar en privado; 5 por día.
 - YouTube: conectan pasando por el cartel de app no verificada (cuentan para el tope de
-  100 usuarios del proyecto) y lo que publiquen sale privado hasta la auditoría de cuota.
+  100 usuarios del proyecto) y publican en público, dentro de las 10.000 unidades diarias
+  que comparten todos (§4.2).
 
 Eso da una beta cerrada útil para Instagram y Facebook (el uso principal) en la semana 1,
 y la apertura de verdad al mes para Meta y TikTok, y al mes o dos para YouTube.

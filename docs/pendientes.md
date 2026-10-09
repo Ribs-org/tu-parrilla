@@ -81,7 +81,8 @@ Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataf
 - **[dueño] Google — verificación del OAuth y auditoría de cuota de YouTube**, en paralelo.
   Sin la primera, el cartel de app no verificada y un tope de 100 usuarios en toda la vida
   del proyecto (iban 3 el 2026-10-06); sin la segunda, 10.000 unidades al
-  día para todos y videos siempre privados. Guion: `docs/google-verificacion-guion.md`; el
+  día para todos, unas seis subidas (lo subido sale público igual: comprobado el
+  2026-10-09). Guion: `docs/google-verificacion-guion.md`; el
   paso a paso de trabajo, en la carpeta «YouTube - Verification» del escritorio de Vicente
   (2026-10-06). La portada y las páginas legales ya cumplen lo que piden Google y YouTube.
   Hecho el 2026-10-06 (fases 1 a 3): el proyecto (`portafolio-page`, número 306430930448)

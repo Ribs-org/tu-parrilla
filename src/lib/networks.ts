@@ -100,14 +100,16 @@ export function detectNetwork(
  * error. Frases fijas: cada una tiene test letra por letra. La de Meta en revisión va
  * aparte porque se apaga sola al quitar `META_EN_REVISION` cuando la app pase a Live.
  *
- * Las de YouTube y TikTok caducan por su cuenta: cuando pasen la auditoría de cuota de
- * Google y la de Direct Post de TikTok (pendientes al 2026-09-30), esas dos líneas se
- * quitan de acá.
+ * La de TikTok caduca con la auditoría de Direct Post: aprobada el 2026-10-06, quitarla
+ * está anotado en `docs/pendientes.md`.
+ *
+ * YouTube no lleva aviso: aun sin la auditoría de cuota, lo que sube la app sale público
+ * (comprobado el 2026-10-09). Lo que limita es la cuota diaria que comparten todos, y eso
+ * no es algo que el creador pueda resolver antes de conectar.
  */
 export const AVISO_ANTES_DE_CONECTAR: Partial<Record<SocialNetwork, string>> = {
   instagram: 'Cuenta Business o Creator, enlazada a una página de Facebook. Una cuenta personal no puede conectar.',
   facebook: 'Una página, no un perfil personal.',
-  youtube: 'Hasta que Google apruebe la cuota de la app, lo que publiques sale privado.',
   tiktok: 'Hasta que TikTok apruebe la publicación directa, solo publica en cuentas privadas: pon tu cuenta de TikTok en privada y elige “Solo yo”.',
 }
 export const AVISO_META_EN_REVISION =
