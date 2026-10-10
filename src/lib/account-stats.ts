@@ -1,6 +1,7 @@
 // Puro: recibe las filas ya leídas y arma lo que la sección dibuja. La zona no entra
 // acá — los `day` ya vienen como fecha local desde la sincronización.
 import { periodChange } from './social/delta'
+import { sinMetricasDerivadas } from './social/politica-youtube'
 
 export type AccountMetricRow = {
   network: string
@@ -57,7 +58,9 @@ export function buildAccountCards(
     return {
       network,
       followers: followers.current,
-      followersChange: followers.change,
+      // Los suscriptores ganados de YouTube salen de restar dos lecturas: una métrica
+      // derivada, que sus políticas no permiten (`politica-youtube`). El total sí.
+      followersChange: sinMetricasDerivadas(network) ? null : followers.change,
       profileViews: last?.profileViews ?? null,
       reach: last?.reach ?? null,
       dayLabel: last ? formatShortDay(last.day) : null,
@@ -80,7 +83,8 @@ function sumOrNull(a: number | null, b: number | null): number | null {
 /**
  * Serie diaria de visitas al perfil y alcance, sumada entre redes cuando más de una
  * aporte el dato. Hoy solo Instagram lo entrega, pero la suma no lo asume: un día sin
- * ninguna lectura queda en null, no en cero.
+ * ninguna lectura queda en null, no en cero. YouTube nunca entra en la suma: sumar sus
+ * datos con los de otra red sería una métrica derivada (`politica-youtube`).
  */
 export function buildAccountSeries(
   rows: AccountMetricRow[],
@@ -90,6 +94,7 @@ export function buildAccountSeries(
   const byDay = new Map<string, { profileViews: number | null; reach: number | null }>()
   for (const row of rows) {
     if (row.day < from || row.day > to) continue
+    if (sinMetricasDerivadas(row.network)) continue
     const existing = byDay.get(row.day) ?? { profileViews: null, reach: null }
     byDay.set(row.day, {
       profileViews: sumOrNull(existing.profileViews, row.profileViews),

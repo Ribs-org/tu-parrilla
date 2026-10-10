@@ -16,8 +16,10 @@ import { connectorFor } from './index'
 export type SyncReport = Array<{ network: string; handle: string | null; ok: boolean; posts: number; error?: string }>
 
 /**
- * YouTube has no OAuth to complete, so its account row is born the first time a sync
- * runs with the two variables present. The other two arrive through the callback.
+ * La fila de YouTube del despliegue nace la primera vez que corre un sync con las dos
+ * variables puestas; las demás cuentas llegan por el callback. Nace sin tokens, y un
+ * canal sin conectar no se sincroniza (`youtubeConnector.ensureCredential`): sirve para
+ * que la tarjeta ya esté ahí, esperando el Conectar de su dueño.
  */
 async function ensureYouTubeAccount(): Promise<void> {
   const channelId = env('YOUTUBE_CHANNEL_ID')

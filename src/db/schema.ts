@@ -188,8 +188,9 @@ export type SocialNetwork = (typeof SOCIAL_NETWORKS)[number]
 
 /**
  * One connected account. Several rows can share a network; `(network, external_id)` is
- * the identity. Tokens are stored encrypted — see `lib/social/crypto`. YouTube needs no
- * OAuth, so it lands here with both tokens null and only a channel id.
+ * the identity. Tokens are stored encrypted — see `lib/social/crypto`. La fila de YouTube
+ * que nace de `YOUTUBE_CHANNEL_ID` llega con los dos tokens en null y solo el id del
+ * canal: queda desconectada hasta que su dueño la conecte con OAuth.
  */
 export const socialAccounts = pgTable(
   'social_accounts',

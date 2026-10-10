@@ -87,8 +87,14 @@ async function uploadsPlaylistId(channelId: string, apiKey: string): Promise<str
 export const youtubeConnector: Connector = {
   network: 'youtube',
 
-  // No OAuth: the Data API serves public statistics against an API key alone.
-  async ensureCredential() {
+  // Las estadísticas públicas se leen con la API key, no con el token de OAuth. Pero solo
+  // de un canal que su dueño tiene conectado: sin esa condición, un canal desconectado se
+  // seguiría leyendo a diario con la key, y su tarjeta diría «Sincronizado recién» bajo un
+  // botón de Conectar. Sin credencial, `syncAccount` lo trata como desconectado y no
+  // escribe nada; lo que ya estaba guardado lo borra la retención a los 30 días
+  // (`retencion-youtube`).
+  async ensureCredential(account: SocialAccount) {
+    if (!account.refreshToken) return null
     return env('YOUTUBE_API_KEY') ?? null
   },
 
@@ -145,8 +151,8 @@ export const youtubeConnector: Connector = {
     }
   },
 
-  // `ensureCredential` above never hands back an OAuth token for this connector — only
-  // the read-side API key — so `token` here is that key, same as `uploadsPlaylistId`.
+  // `ensureCredential` above never hands back the OAuth token — only the read-side API
+  // key, once the channel is connected — so `token` here is that key, same as `uploadsPlaylistId`.
   // channels.list authenticates it the same way: a `key=` query param, not a header.
   async fetchAccountMetrics(
     account: SocialAccount,

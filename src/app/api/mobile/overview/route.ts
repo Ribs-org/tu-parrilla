@@ -15,6 +15,7 @@ import { requireMobileUser } from '@/lib/mobile-guardia'
 import { MAX_POSTS, parseRango } from '@/lib/mobile-api'
 import { getPostRows } from '@/lib/posts'
 import { postKpisFrom } from '@/lib/posts-kpis'
+import { sinMetricasDerivadas } from '@/lib/social/politica-youtube'
 
 export const dynamic = 'force-dynamic'
 
@@ -110,8 +111,11 @@ export async function GET(request: Request) {
   // La última lectura *conocida* por red, no la última fila. Una sincronización que
   // falla a medias graba el día con `followers: null` (cada llamada de la red trae su
   // propio catch), y tomar esa fila borraría un conteo que sí sabíamos de antes.
+  // Sin YouTube: sumar sus suscriptores con los seguidores de otra red sería una métrica
+  // derivada, y sus políticas no la permiten (`politica-youtube`).
   const ultimoPorRed = new Map<string, number>()
   for (const fila of seguidores) {
+    if (sinMetricasDerivadas(fila.network)) continue
     if (fila.followers !== null) ultimoPorRed.set(fila.network, fila.followers)
   }
   const seguidoresTotal = [...ultimoPorRed.values()].reduce<number | null>(

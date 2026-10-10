@@ -89,6 +89,19 @@ export function PostTable({ rows }: { rows: PostRow[] }) {
     <div className="-mx-1 overflow-x-auto px-1">
       <table className="w-full min-w-[46rem] border-collapse text-[0.85rem]">
         <thead>
+          {/*
+            Las cuatro de la derecha las mide Tu Parrilla en la página del dueño, no la red.
+            Dicho sobre las columnas y no en una nota al pie: las políticas de YouTube piden
+            que un dato propio al lado de los suyos se lea claramente como no suyo.
+          */}
+          <tr>
+            <td colSpan={5} aria-hidden />
+            <th scope="colgroup" colSpan={4} className="pb-1 text-right font-normal">
+              <span className="border-b border-white/[0.08] pb-0.5 font-mono text-[0.6rem] uppercase tracking-[0.14em] text-fg-faint">
+                Medido por Tu Parrilla
+              </span>
+            </th>
+          </tr>
           <tr>
             <th scope="col" className="pb-2 text-left font-normal">
               <span className="font-mono text-[0.65rem] uppercase tracking-[0.14em] text-fg-faint">

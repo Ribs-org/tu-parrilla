@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: 'Qué datos guarda este sitio y qué no.',
 }
 
-const ACTUALIZADO = '6 de octubre de 2026'
+const ACTUALIZADO = '10 de octubre de 2026'
 
 export default function PrivacidadPage() {
   return (
@@ -135,8 +135,9 @@ export default function PrivacidadPage() {
           </li>
         </ul>
         <p className="leading-relaxed text-fg-muted">
-          Desconectar una cuenta desde el panel borra sus credenciales. El historial de métricas
-          ya recogido se conserva.
+          Desconectar una cuenta desde el panel borra sus credenciales y deja de leerla. El
+          historial de métricas ya recogido se conserva, salvo el de YouTube, que tiene su plazo
+          propio (abajo).
         </p>
         <p className="leading-relaxed text-fg-muted">
           El uso que hace este sitio de la información que recibe de las APIs de Google se ajusta
@@ -162,8 +163,15 @@ export default function PrivacidadPage() {
           . De YouTube
           se guardan el identificador, el título, la miniatura y los contadores de{' '}
           <span className="text-fg">tus propios videos</span>, y los comentarios de esos videos.
-          Se refrescan a diario, y se borran al desconectar la cuenta —las credenciales— o si lo
-          pides. Puedes revocarlo desde {nombreDe('/admin/accounts')} o desde{' '}
+          Se refrescan a diario mientras el canal esté conectado, y{' '}
+          <span className="text-fg">nada de eso se guarda más de 30 días</span> sin refrescarse:
+          las lecturas diarias de los contadores, los comentarios y los títulos y miniaturas que
+          dejaron de llegar se borran al cumplir ese plazo. Con los datos de YouTube no se
+          calculan métricas nuevas: el panel muestra sus contadores tal como los entrega
+          YouTube, y al lado las visitas y los clics que mide Tu Parrilla en tu página,
+          marcados como propios. Al desconectar el canal se borran las credenciales y deja de
+          leerse; si lo pides, se borra todo antes. Puedes revocarlo desde{' '}
+          {nombreDe('/admin/accounts')} o desde{' '}
           <a
             href="https://myaccount.google.com/permissions"
             target="_blank"

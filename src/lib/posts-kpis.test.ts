@@ -125,6 +125,21 @@ describe('postKpisFrom', () => {
     // these two formulas apart.
     expect(postKpisFrom(rows).pull).toBeCloseTo((50 / 1100) * 100, 10)
   })
+
+  it('las visitas de YouTube cuentan en el total, pero no en el arrastre', () => {
+    // `getPostRows` ya le anula lo ganado a YouTube (sus políticas no permiten métricas
+    // derivadas); si sus visitas siguieran en el numerador, el arrastre de las otras
+    // redes se inflaría con visitas cuyas views no están en el denominador.
+    const rows = [
+      row({ network: 'instagram', viewsChange: 1000, visits: 10 }),
+      row({ network: 'youtube', views: 5000, viewsChange: null, visits: 90 }),
+    ]
+
+    const kpis = postKpisFrom(rows)
+    expect(kpis.visits).toBe(100)
+    expect(kpis.views).toBe(1000)
+    expect(kpis.pull).toBeCloseTo((10 / 1000) * 100, 10)
+  })
 })
 
 describe('activeRows', () => {

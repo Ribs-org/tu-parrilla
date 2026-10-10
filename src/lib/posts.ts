@@ -20,6 +20,7 @@ import {
 } from './posts-kpis'
 import { contarPorDia } from './schedule-week'
 import { periodChange, type Snapshot } from './social/delta'
+import { REDES_SIN_DERIVADAS, sinMetricasDerivadas } from './social/politica-youtube'
 
 // Re-exported so server call sites only need one import line; the types and the pure
 // summing function actually live in `posts-kpis.ts`, which stays free of
@@ -168,6 +169,11 @@ export async function getPostRows(
     const likes = periodChange(snapshotsOf('likes'), from, to, publishedDay)
     const comments = periodChange(snapshotsOf('comments'), from, to, publishedDay)
     const shares = periodChange(snapshotsOf('shares'), from, to, publishedDay)
+    // De YouTube solo salen los contadores tal como los da la API: lo ganado y el
+    // arrastre son métricas derivadas, que sus políticas no permiten (`politica-youtube`).
+    // Anularlos aquí los saca de todo lo que se construye encima —la tabla, los totales,
+    // el ranking, la API de métricas y la app— sin que cada uno tenga que acordarse.
+    const derivadas = !sinMetricasDerivadas(post.network)
     const pasted = seen.has(post.campaign)
     const traffic = visitMap.get(post.campaign)
     const visitCount = pasted ? (traffic?.total ?? 0) : null
@@ -186,10 +192,10 @@ export async function getPostRows(
       campaign: post.campaign,
       archived: post.archivedAt !== null,
       views: views.current,
-      viewsChange: views.change,
-      likesChange: likes.change,
-      commentsChange: comments.change,
-      sharesChange: shares.change,
+      viewsChange: derivadas ? views.change : null,
+      likesChange: derivadas ? likes.change : null,
+      commentsChange: derivadas ? comments.change : null,
+      sharesChange: derivadas ? shares.change : null,
       isNew: views.isNew,
       likes: likes.current,
       comments: comments.current,
@@ -207,7 +213,7 @@ export async function getPostRows(
       // visits above are counted inside the window, so the divisor has to be too.
       // A post that gained nothing yields null, which is the honest answer.
       pull:
-        views.change !== null && views.change > 0 && visitCount !== null
+        derivadas && views.change !== null && views.change > 0 && visitCount !== null
           ? (visitCount / views.change) * 100
           : null,
     }
@@ -235,6 +241,9 @@ function seriesGranularity(f: Filters): Granularity {
 
 /**
  * Views gained per bucket against the visits they drove.
+ *
+ * Sin YouTube en las views: lo ganado es una métrica derivada y sus políticas no la
+ * permiten (`politica-youtube`). Las visitas sí van todas, porque las mide Tu Parrilla.
  *
  * The `lag` window is what turns cumulative counters into daily gains, and the
  * `greatest(0, …)` absorbs the downward revisions Instagram occasionally publishes.
@@ -270,6 +279,7 @@ export async function getPostSeries(f: Filters): Promise<PostSeriesPoint[]> {
       from ${postMetrics} m
       join ${socialPosts} p on p.id = m.post_id
       where p.archived_at is null and m.views is not null and m.day <= ${to} and p.owner_id = ${f.ownerId}
+        ${sql.join(REDES_SIN_DERIVADAS.map((red) => sql`and p.network <> ${red}`), sql` `)}
     ),
     g as (
       select date_trunc(${unit}, day::timestamp) as bucket, sum(gained)::int as total

@@ -2,6 +2,8 @@
 // a unit test — and the client components of the panel (`content`, `accounts`) — can
 // import directly, without dragging in the DB layer that the rest of `posts.ts` depends on.
 
+import { sinMetricasDerivadas } from './social/politica-youtube'
+
 export type CuentaRow = {
   id: string
   network: string
@@ -88,20 +90,29 @@ export type PostKpis = {
  *
  * Nulls contribute nothing to the sums: a metric the network never reported must
  * not become a zero that drags a total down.
+ *
+ * YouTube no entra en views, interacciones ni arrastre: `getPostRows` ya le anula lo
+ * ganado (`politica-youtube`). Sus visitas sí cuentan en el total de visitas, que es de
+ * Tu Parrilla, pero no en el numerador del arrastre: dividirlas por views que no las
+ * incluyen inflaría el resultado de las otras redes.
  */
 export function postKpisFrom(rows: PostRow[]): PostKpis {
-  const sum = (pick: (row: PostRow) => number | null) =>
-    rows.reduce((total, row) => total + (pick(row) ?? 0), 0)
+  const sum = (pick: (row: PostRow) => number | null, from: PostRow[] = rows) =>
+    from.reduce((total, row) => total + (pick(row) ?? 0), 0)
 
   const views = sum((r) => r.viewsChange)
   const visitTotal = sum((r) => r.visits)
+  const visitasConViews = sum(
+    (r) => r.visits,
+    rows.filter((r) => !sinMetricasDerivadas(r.network)),
+  )
 
   return {
     views,
     engagement:
       sum((r) => r.likesChange) + sum((r) => r.commentsChange) + sum((r) => r.sharesChange),
     visits: visitTotal,
-    pull: views > 0 ? (visitTotal / views) * 100 : null,
+    pull: views > 0 ? (visitasConViews / views) * 100 : null,
   }
 }
 

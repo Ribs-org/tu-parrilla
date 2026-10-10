@@ -155,11 +155,11 @@ export default async function ContentPage({
       <FilterBar profiles={profiles} />
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatTile label="Views" value={formatNumber(kpis.views)} hint="Ganadas en el período" />
+        <StatTile label="Views" value={formatNumber(kpis.views)} hint="Ganadas en el período, sin YouTube" />
         <StatTile
           label="Interacciones"
           value={formatNumber(kpis.engagement)}
-          hint="Likes, comentarios y compartidos del período"
+          hint="Likes, comentarios y compartidos del período, sin YouTube"
         />
         <StatTile
           label="Visitas desde posts"
@@ -169,7 +169,7 @@ export default async function ContentPage({
         <StatTile
           label="Arrastre"
           value={kpis.pull === null ? '—' : formatPercent(kpis.pull, 2)}
-          hint="De quienes vieron, cuántos llegaron"
+          hint="De quienes vieron, cuántos llegaron; sin YouTube"
         />
       </div>
 
@@ -183,7 +183,7 @@ export default async function ContentPage({
       <div className="mt-4 grid gap-4">
         <Panel
           title="Tus posts"
-          hint="Lo publicado dentro del rango elegido; «Incluir anteriores» suma lo más viejo que siga teniendo actividad. Ordena por cualquier columna. La columna Views muestra el acumulado, con lo ganado al lado — y un «—» cuando el post existía antes de la primera medición y su crecimiento no se puede saber. Arrastre es visitas sobre views ganadas."
+          hint="Lo publicado dentro del rango elegido; «Incluir anteriores» suma lo más viejo que siga teniendo actividad. Ordena por cualquier columna. La columna Views muestra el acumulado, con lo ganado al lado — y un «—» cuando el post existía antes de la primera medición y su crecimiento no se puede saber. Arrastre es visitas sobre views ganadas. Visitas, clicks, CTR y arrastre los mide Tu Parrilla en tu página, no la red. En YouTube solo van los contadores que entrega la red, sin lo ganado ni arrastre: sus reglas no permiten calcular métricas nuevas con sus datos."
           action={
             // Los tres son controles y estaban pintados como notas al pie: `fg-faint`
             // sobre la superficie da 3,5:1, por debajo de lo legible a este tamaño.
@@ -265,7 +265,7 @@ export default async function ContentPage({
 
         <Panel
           title="Views ganadas por día"
-          hint="Cuánto creció el alcance contra cuánta gente llegó efectivamente a tu página. La serie siempre cubre el catálogo completo, sin importar los filtros de la tabla."
+          hint="Cuánto creció el alcance contra cuánta gente llegó efectivamente a tu página. La serie siempre cubre el catálogo completo, sin importar los filtros de la tabla. Las views no incluyen YouTube; las visitas, sí."
         >
           <TrafficChart
             data={series}
@@ -276,7 +276,7 @@ export default async function ContentPage({
           />
         </Panel>
 
-        <Panel title="Top posts del período" hint="Los que más views ganaron, con su arrastre al lado">
+        <Panel title="Top posts del período" hint="Los que más views ganaron, con su arrastre al lado. YouTube no entra: lo ganado no se calcula con sus datos.">
           <BarList
             items={topPosts.map((post) => ({
               key: post.id,

@@ -10,8 +10,11 @@ hacerlos en paralelo porque cada uno tarda semanas:
    el logo. No hay lista de *test users*: eso es solo de *Testing*, y los tokens de 7 días
    también.
 2. **Auditoría y extensión de cuota de la YouTube Data API.** Sin ella: 10.000 unidades al
-   día para todos los usuarios juntos (subir un video cuesta 1.600) y **los videos subidos
-   quedan privados** aunque el usuario pida público.
+   día para todos los usuarios juntos, más un cupo aparte de 100 subidas al día (desde el
+   1 de junio de 2026 `videos.insert` cuenta en su propio cupo; antes costaba 1.600
+   unidades del general). Según la documentación, además, **los videos subidos quedan
+   privados** aunque el usuario pida público; en la grabación del 2026-10-09 el video
+   subido salió público, y eso está por revisar en `docs/pendientes.md`.
 3. El proyecto ya usa `youtube.upload` y `youtube.force-ssl` (`SCOPES.youtube` en
    `src/app/api/social/[network]/connect/route.ts`); son *sensibles*, no *restringidos*: no
    hay auditoría de seguridad externa (CASA).
@@ -71,16 +74,37 @@ Las dos cosas están desde el 2026-10-06.
 
 Dos preguntas que la auditoría puede hacer y que conviene tener contestadas:
 
-- **Qué pasa con los datos al desconectar.** Desconectar borra las credenciales, pero el
-  historial de métricas ya recogido se conserva (`disconnectAccount`, en
-  `src/app/admin/actions.ts`), y la privacidad lo dice así. Si YouTube pide borrar también
-  los datos de la API al revocar, hay que cambiar el código y la página: está anotado en
-  `docs/pendientes.md`.
+- **Qué pasa con los datos al desconectar.** Desconectar borra las credenciales
+  (`disconnectAccount`, en `src/app/admin/actions.ts`) y el canal deja de leerse; lo ya
+  guardado se borra solo en 30 días, como todo dato de YouTube que nadie refresca (ver
+  abajo). La privacidad lo dice así. Si YouTube pide borrarlo en el acto, hay que cambiar
+  el código y la página: está anotado en `docs/pendientes.md`.
 - **Los borradores de respuesta con IA.** El texto de un comentario de YouTube se manda a un
   modelo de lenguaje para proponer la respuesta, y la privacidad lo cuenta. *Limited Use*
   prohíbe usar datos de Google para entrenar modelos, no para una función que el usuario
   ve y aprueba; la respuesta honesta es esa: se usa solo para el borrador que el dueño del
   canal aprueba, y no se entrena nada con él.
+
+### Lo que la auditoría mira de los datos guardados
+
+Las políticas para desarrolladores de YouTube (§III.E.4) tienen dos reglas que Los Cortes
+no cumplía hasta el 2026-10-10, y la declaración final del formulario de cuota pide
+afirmar que se cumplen:
+
+- **Nada de métricas derivadas** (§III.E.4.h). Lo ganado en un período sale de restar dos
+  lecturas, y el arrastre divide visitas por eso: las dos son derivadas, igual que sumar
+  suscriptores de YouTube con seguidores de otra red. Desde entonces, las filas de YouTube
+  traen solo los contadores de la API, y las visitas, clicks y CTR —que son de Tu Parrilla—
+  van bajo «Medido por Tu Parrilla», porque un dato propio al lado de los de YouTube tiene
+  que leerse claro como no suyo.
+- **Nada guardado más de 30 días sin refrescar** (§III.E.4.b–d). Las estadísticas se leen
+  con la API key, y leídas así no pueden pasar de 30 días; el resto de los datos se borra
+  o se refresca dentro de ese plazo. La sincronización diaria termina borrando lo que se
+  pasó: lecturas diarias, comentarios y los títulos y miniaturas de videos que ya no llegan.
+
+La regla vive en `src/lib/social/politica-youtube.ts` y el borrado en
+`retencion-youtube.ts`. Existe un permiso aparte (§III.L) para que un desarrollador de
+analítica calcule métricas propias y guarde historia; no se pidió en la primera auditoría.
 
 ### La cuenta de prueba y su contenido
 
@@ -149,20 +173,24 @@ Es el «YouTube API Services – Audit and Quota Extension Form». Pide:
   listar los videos y contadores del propio canal (`videos.list`, `channels.list`), (b)
   subir videos programados (`videos.insert`), (c) leer comentarios de los propios videos
   (`commentThreads.list`) y responder (`comments.insert`). Las mismas escenas 5, 6 y 8.
-- **Cuánta cuota y por qué.** Cálculo honesto, por creador y día: un sync de métricas
-  (≈ 4 llamadas × 1 unidad); la corrida de comentarios cada media hora, que hace **una
-  llamada `commentThreads.list` por video** hasta un tope de 20 videos por pasada
-  (`MAX_POSTS_POR_PASADA` en `src/lib/social/comentarios/ventana.ts`): hasta 48 × 20 =
-  960 unidades; las respuestas (`comments.insert`, 50 cada una: unas diez al día, 500); y
-  las subidas (1.600 cada una, más unas diez consultas de estado). Con 30 creadores y un
-  video diario cada uno: 30 × (4 + 960 + 500 + 1.610) ≈ **92.000 unidades/día**. Pedir
-  **200.000** con ese cálculo escrito, para que quepa el doble de creadores sin volver a
-  pedir. El costo de cada llamada hay que confirmarlo en la calculadora de cuota de Google
-  antes de enviar: lo cambian de vez en cuando.
+- **Cuánta cuota y por qué.** Cálculo honesto, por creador y día, en el cupo general: un
+  sync de métricas (≈ 4 llamadas × 1 unidad); la corrida de comentarios cada media hora,
+  que hace **una llamada `commentThreads.list` por video** hasta un tope de 20 videos por
+  pasada (`MAX_POSTS_POR_PASADA` en `src/lib/social/comentarios/ventana.ts`): hasta
+  48 × 20 = 960 unidades; las respuestas (`comments.insert`, 50 cada una: unas diez al
+  día, 500); y unas diez consultas de estado por subida. Con 30 creadores:
+  30 × (4 + 960 + 500 + 10) ≈ **44.000 unidades/día**. Se piden **100.000**, para que
+  quepan unos 65 creadores sin volver a pedir. Las subidas van en su cupo propio de 100
+  al día, que alcanza para un video diario de cada creador; no se pide más. Google cambia
+  estos costos de vez en cuando (el de subir pasó de 1.600 unidades a un cupo aparte entre
+  diciembre de 2025 y junio de 2026): antes de una reauditoría, mirar la página de cuotas
+  del proyecto en Cloud Console, que muestra los dos cupos.
 - **Cumplimiento de los términos de YouTube**: que los datos de la API se muestran solo al
-  dueño del canal; que los contadores se refrescan al menos cada 30 días (se refrescan a
-  diario); que el usuario puede revocar (Los Fierros y Google); que no se venden ni se
-  cruzan con otras fuentes; que se borran al desconectar (credenciales) y a petición.
+  dueño del canal; que se refrescan a diario y nada se guarda más de 30 días sin
+  refrescar; que no se calculan métricas con ellos y lo propio va marcado como propio (ver
+  «Lo que la auditoría mira de los datos guardados»); que el usuario puede revocar (Los
+  Fierros y Google); que no se venden; que al desconectar se borran las credenciales y se
+  deja de leer, y que se borra todo a petición.
 - **Enlaces**: privacidad, términos, y el video de arriba sirve.
 
 Sin esta auditoría, la app funciona para leer y responder comentarios, pero **no para
@@ -178,6 +206,8 @@ publicar en público**: el aviso de Los Fierros lo dice hasta que pase.
 - **La privacidad no nombra la User Data Policy / Limited Use.**
 - Para la cuota: un cálculo sin números, o números que no cuadran con las funciones
   mostradas.
+- Para la cuota también: métricas calculadas con datos de YouTube, o estadísticas
+  guardadas más de 30 días (ver «Lo que la auditoría mira de los datos guardados»).
 
 ## Después de aprobar
 

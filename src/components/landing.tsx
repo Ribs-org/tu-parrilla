@@ -124,8 +124,8 @@ export function Landing() {
           >
             Conecta Instagram, Facebook, TikTok y tu canal de YouTube: programas, lees y
             respondes comentarios, y solo se toca lo tuyo. Un programador de posts te dice
-            cuántos vieron. Este cruza esas vistas con las visitas que llegaron a tu página, y
-            ahí se ve cuál de tus cortes trabajó.
+            cuántos vieron. Este pone al lado las visitas que llegaron a tu página por cada
+            uno, y ahí se ve cuál de tus cortes trabajó.
           </Rasgo>
 
           <Rasgo

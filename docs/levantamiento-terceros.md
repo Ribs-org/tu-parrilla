@@ -158,22 +158,28 @@ eso es solo para Gmail, Drive y similares. Tarda de dos a seis semanas.
 
 ### 4.2 Cuota de la YouTube Data API
 
-Cada proyecto nace con **10.000 unidades al día** para todos sus usuarios juntos. Subir un
-video cuesta **1.600**: son **seis videos al día en total**, no por usuario. Leer comentarios
-y métricas también gasta (el sync de comentarios ya se acota a media hora por eso, ver
-`src/lib/social/comentarios/ventana.ts`). Con tres usuarios activos se acaba.
+Cada proyecto nace con **10.000 unidades al día** para todos sus usuarios juntos, y desde
+el 1 de junio de 2026 con un cupo aparte de **100 subidas al día** (`videos.insert`; antes
+cada subida gastaba 1.600 unidades del general, o sea seis videos al día en total). Lo que
+se come el cupo general es leer comentarios: hasta unas 960 unidades por creador al día,
+aun acotado a media hora (ver `src/lib/social/comentarios/ventana.ts`), más 50 por cada
+respuesta. Con unos seis creadores activos se acaba.
 
 Pedir más cuota es el **formulario de auditoría y extensión de cuota de YouTube API
 Services**: revisan que la app cumple los términos de YouTube (cómo muestra los datos, qué
-guarda, por cuánto tiempo, que el usuario pueda revocar) y piden un video y capturas.
-Tarda semanas y se puede pedir en paralelo con la verificación del OAuth.
+guarda, por cuánto tiempo, que no calcula métricas con ellos, que el usuario pueda
+revocar) y piden un video y capturas. Tarda semanas y se puede pedir en paralelo con la
+verificación del OAuth. Lo que la app hace para cumplir está en
+`docs/google-verificacion-guion.md`, «Lo que la auditoría mira de los datos guardados».
 
 ### 4.3 Videos privados hasta la auditoría
 
 Los videos subidos por un proyecto que no ha pasado esa auditoría quedan **privados**
 aunque se pidan públicos (política de YouTube desde 2020). O sea: sin §4.2, YouTube sirve
 para leer métricas y comentarios, pero **no para publicar**. Vale la pena decirlo en la
-tarjeta de YouTube mientras tanto, como se hace con TikTok.
+tarjeta de YouTube mientras tanto, como se hace con TikTok. Ojo: en la grabación del
+2026-10-09 el video que subió Tu Parrilla salió público; está por revisar en
+`docs/pendientes.md`.
 
 ### 4.4 Tiempo
 
