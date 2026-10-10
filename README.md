@@ -268,14 +268,16 @@ privacidad y los términos, y Meta exige que coincida con el negocio que verific
 El panel puede traer las métricas de tus posts desde Instagram, TikTok y YouTube y
 cruzarlas con el tráfico que cada uno te trajo. La columna que importa es **arrastre**:
 de cada mil personas que vieron el post, cuántas llegaron efectivamente a tu página.
+YouTube es la excepción: ver abajo.
 
 Sin configurar nada, **Los Cortes** (Contenido) aparece vacía y el resto del sitio funciona
 igual. Cada red se activa por separado.
 
-### YouTube — sin trámite
+### YouTube
 
 En [Google Cloud Console](https://console.cloud.google.com), crea un proyecto, habilita
-**YouTube Data API v3** y genera una API key. El channel id sale de
+**YouTube Data API v3** y genera una API key: con ella se leen las estadísticas públicas
+de los videos. El channel id sale de
 [youtube.com/account_advanced](https://www.youtube.com/account_advanced).
 
 ```
@@ -283,10 +285,26 @@ YOUTUBE_API_KEY=AIza...
 YOUTUBE_CHANNEL_ID=UC...
 ```
 
-Cambiar el id ahora no reemplaza la cuenta: crea una segunda fila de YouTube. La vieja
-queda en **Los Fierros** (Cuentas, en Ajustes) y sigue sincronizando con la API key —ahí se ve su fecha,
-marcada **Sin credencial**, porque nunca pasó por un login—, así que no tiene botón
-*Desconectar*: para que deje de traer posts hay que borrar la fila a mano.
+Un canal se sincroniza **solo mientras su dueño lo tiene conectado** con el OAuth de
+Google desde **Los Fierros** (Cuentas, en Ajustes); eso pide además `GOOGLE_CLIENT_ID` y
+`GOOGLE_CLIENT_SECRET` (ver «Variables de entorno»). `YOUTUBE_CHANNEL_ID` solo deja
+creada la tarjeta del canal del dueño del despliegue, esperando su *Conectar*. Desconectar
+borra las credenciales y el canal deja de leerse. Cambiar el id no reemplaza la cuenta:
+crea una segunda fila de YouTube, sin conectar, que no se sincroniza.
+
+**Lo que YouTube no deja hacer con sus datos.** Las políticas de los Servicios de API de
+YouTube (§III.E.4) prohíben calcular métricas nuevas con sus datos y guardarlos más de 30
+días sin refrescarlos, y la auditoría de cuota lo revisa. Por eso, en Los Cortes, Los
+Números, la API de métricas y la app del teléfono, las filas de YouTube traen sus
+contadores tal como los da la API, **sin lo ganado, sin arrastre y sin entrar en los
+totales**; sus suscriptores van sin «ganados» y fuera de la suma de seguidores. Las
+visitas, los clicks y el CTR los mide Tu Parrilla y la tabla los marca como propios
+(«Medido por Tu Parrilla»), que es lo que la política pide para un dato propio al lado de
+los de YouTube. Y al final de la sincronización diaria se borra lo que pasó el plazo: las
+lecturas diarias de más de 30 días, los comentarios guardados hace más de 30 días, y el
+título y la miniatura de los videos que llevan 30 días sin llegar. La regla vive en
+`src/lib/social/politica-youtube.ts` y el borrado en `retencion-youtube.ts`. Si algún día
+se pide y se obtiene el permiso de analítica de §III.L, es ahí donde se afloja.
 
 ### Instagram — cuenta profesional y página de Facebook
 
@@ -791,8 +809,8 @@ Vercel y bajan con `vercel env pull .env.local`.
 | `R2_PUBLIC_BASE` | URL pública del bucket de R2 | No — sin ella no puedes subir media |
 | `DOMINIO_PRODUCTO` | El dominio donde vive la landing del producto. Ese dominio sirve las páginas de todos; los demás, solo las de su dueño. Es también el único donde se abre el panel | No — sin ella ningún dominio es el del producto y todos sirven solo lo del dueño |
 | `SITE_TIMEZONE` | Zona por defecto de los usuarios nuevos y del sitio público; cada usuario cambia la suya en Tu Cuenta. Si no es una zona IANA conocida, se avisa por consola y se usa `America/Santiago` | No — por defecto `America/Santiago` |
-| `YOUTUBE_API_KEY` | Métricas de YouTube | No — sin ella esa red aparece como no conectada |
-| `YOUTUBE_CHANNEL_ID` | Métricas de YouTube | No — sin ella esa red aparece como no conectada |
+| `YOUTUBE_API_KEY` | Lee las estadísticas públicas de los canales conectados | No — sin ella YouTube no trae métricas |
+| `YOUTUBE_CHANNEL_ID` | Deja creada la tarjeta del canal del dueño del despliegue; se sincroniza recién cuando lo conecta con OAuth | No |
 | `GOOGLE_CLIENT_ID` | Conectar YouTube para publicar (OAuth de Google) | El OAuth Client tipo Web del mismo proyecto de la API key |
 | `GOOGLE_CLIENT_SECRET` | El secreto de ese OAuth Client | Junto con el anterior; el sync de solo lectura sigue usando `YOUTUBE_API_KEY` |
 | `INSTAGRAM_APP_ID` | Conectar Instagram | No — sin ella esa red aparece como no conectada |
@@ -905,8 +923,10 @@ permalink, texto, `publicadoEl` (ISO con el offset de la zona del dueño), la et
 `atributos` (o `null` si el post no salió del calendario) y `metricas`: `views`
 (acumulado), `viewsGanadas` (dentro del rango), `likes`, `comentarios`, `compartidos`,
 `alcance`, `visitasAlSitio`, `clicks`, `ctr` y `arrastre`. Un `null` significa que la
-red no reportó ese número — nunca cero. `truncado: true` avisa que el tope de filas
-mordió y la respuesta es parcial.
+red no reportó ese número — nunca cero. En YouTube, `viewsGanadas` y `arrastre` vienen
+siempre en `null`: sus políticas no permiten calcular métricas nuevas con sus datos (ver
+«Analítica de posts»). `truncado: true` avisa que el tope de filas mordió y la respuesta
+es parcial.
 
 Las métricas las trae la sincronización diaria, así que lo publicado hoy aparece con
 números recién al día siguiente.
@@ -958,6 +978,9 @@ src/
     analytics.ts           consultas del dashboard
     auth.ts                sesión del panel
     empresa.ts             quién presta el servicio: lo leen la portada, privacidad y términos
+    social/
+      politica-youtube.ts  lo que las políticas de YouTube no dejan hacer con sus datos
+      retencion-youtube.ts borra lo de YouTube que lleva 30 días sin refrescarse
 scripts/
   setup.ts                 genera el .env.local
   seed.ts                  perfiles iniciales

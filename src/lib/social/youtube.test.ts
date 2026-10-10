@@ -1,6 +1,7 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import type { SocialAccount } from '@/db'
 import fixture from './fixtures/youtube-videos.json'
-import { normalizeYouTubeVideo, type YouTubeVideo } from './youtube'
+import { normalizeYouTubeVideo, youtubeConnector, type YouTubeVideo } from './youtube'
 
 const [video, short] = fixture.items as YouTubeVideo[]
 
@@ -34,5 +35,23 @@ describe('normalizeYouTubeVideo', () => {
   it('llama short a lo que dura menos de un minuto', () => {
     expect(normalizeYouTubeVideo(short!).mediaType).toBe('short')
     expect(normalizeYouTubeVideo(video!).mediaType).toBe('video')
+  })
+})
+
+describe('youtubeConnector.ensureCredential', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
+  const cuenta = (refreshToken: string | null) => ({ refreshToken }) as SocialAccount
+
+  it('con el canal conectado, entrega la API key con la que se leen las estadísticas', async () => {
+    vi.stubEnv('YOUTUBE_API_KEY', 'AIza-prueba')
+    expect(await youtubeConnector.ensureCredential(cuenta('cifrado'))).toBe('AIza-prueba')
+  })
+
+  it('con el canal desconectado no entrega nada, aunque la key exista: no se sigue leyendo', async () => {
+    vi.stubEnv('YOUTUBE_API_KEY', 'AIza-prueba')
+    expect(await youtubeConnector.ensureCredential(cuenta(null))).toBeNull()
   })
 })

@@ -3,6 +3,7 @@ import { TrafficChart } from '@/components/charts/traffic-chart'
 import type { AccountCard, AccountSeriesPoint } from '@/lib/account-stats'
 import { formatShortDay } from '@/lib/account-stats'
 import { networkLabel } from '@/lib/networks'
+import { sinMetricasDerivadas } from '@/lib/social/politica-youtube'
 import { formatNumber } from '@/lib/utils'
 
 /** `—` y nunca `0`: una red que no entrega el dato no reportó cero. */
@@ -35,7 +36,11 @@ export function AccountCards({ cards }: { cards: AccountCard[] }) {
           </p>
           <p className="mt-1 font-mono text-2xl tabular-nums">{num(card.followers)}</p>
           <p className="text-[0.75rem] text-fg-muted">
-            seguidores · {followersChangeLabel(card.followersChange)}
+            {/* YouTube no deja calcular lo ganado (`politica-youtube`): un «—» al lado
+                diría «no lo sé», cuando la verdad es «no se calcula». */}
+            {sinMetricasDerivadas(card.network)
+              ? 'suscriptores, según YouTube'
+              : `seguidores · ${followersChangeLabel(card.followersChange)}`}
           </p>
           <div className="mt-3 flex gap-4 text-[0.75rem] text-fg-faint">
             <span>

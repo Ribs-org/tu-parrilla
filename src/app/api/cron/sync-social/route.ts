@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { purgarYoutubeViejo } from '@/lib/social/retencion-youtube'
 import { syncAll } from '@/lib/social/sync'
 import { env } from '@/lib/env'
 
@@ -18,7 +19,18 @@ export async function GET(request: Request) {
     // the orchestrator running correctly and telling us three connectors failed: each one
     // wrote its own `lastSyncError`, so the connection cards will say so. Nothing is lost.
     const report = await syncAll()
-    return NextResponse.json({ report })
+    // Después del sync y por su cuenta: si la retención falla, el sync del día ya quedó
+    // escrito, y lo que no se borró hoy se borra mañana. El error va al log con su
+    // nombre, porque es la única señal de que un dato de YouTube se está pasando del
+    // plazo que sus políticas permiten (`retencion-youtube`).
+    let retencion: Awaited<ReturnType<typeof purgarYoutubeViejo>> | { error: string }
+    try {
+      retencion = await purgarYoutubeViejo()
+    } catch (error) {
+      console.error('Falló la retención de datos de YouTube:', error)
+      retencion = { error: 'La retención de YouTube falló; ver el log.' }
+    }
+    return NextResponse.json({ report, retencion })
   } catch (error) {
     // Reaching here is the other case entirely: syncAll settles every network on its own,
     // so a throw is the orchestrator itself breaking, before any per-network catch could

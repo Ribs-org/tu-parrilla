@@ -190,7 +190,7 @@ async function PanelesDeOrigen({ filters, visits }: { filters: Filters; visits: 
     <>
       <Panel
         title="Tus cuentas"
-        hint="Seguidores por red, con lo ganado en el período. Visitas al perfil y alcance son del último día leído — Instagram es la única que los entrega hoy."
+        hint="Seguidores por red, con lo ganado en el período; en YouTube, solo el total, porque sus reglas no permiten calcular lo ganado. Visitas al perfil y alcance son del último día leído — Instagram es la única que los entrega hoy."
       >
         <AccountCards cards={cards} />
         <div className="mt-4">

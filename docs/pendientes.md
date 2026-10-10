@@ -81,7 +81,8 @@ Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataf
 - **[dueño] Google — verificación del OAuth y auditoría de cuota de YouTube**, en paralelo.
   Sin la primera, el cartel de app no verificada y un tope de 100 usuarios en toda la vida
   del proyecto (iban 3 el 2026-10-06); sin la segunda, 10.000 unidades al
-  día para todos y videos siempre privados. Guion: `docs/google-verificacion-guion.md`; el
+  día para todos (las subidas tienen un cupo aparte de 100) y, según la documentación,
+  videos siempre privados. Guion: `docs/google-verificacion-guion.md`; el
   paso a paso de trabajo, en la carpeta «YouTube - Verification» del escritorio de Vicente
   (2026-10-06). La portada y las páginas legales ya cumplen lo que piden Google y YouTube.
   Hecho el 2026-10-06 (fases 1 a 3): el proyecto (`portafolio-page`, número 306430930448)
@@ -90,17 +91,28 @@ Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataf
   de contacto y solo `tu-parrilla.cl` autorizado; el cliente OAuth solo acepta
   `https://tu-parrilla.cl/api/social/youtube/callback`; y los permisos son exactamente
   `youtube.upload` y `youtube.force-ssl`. El canal de prueba es «Pyxis oficial», de
-  pyxis.latam@gmail.com, con dos videos y tres comentarios de parejavice@gmail.com, y ya
-  está conectado desde el usuario revisor (Los Cortes muestra los dos videos). **Sigue**
-  (fase 5 de `PASOS.txt`): el ensayo sin grabar —la respuesta desde La Mesa y una subida
-  desde El Fuego—; después desconectar el canal, quitarle el acceso en
-  myaccount.google.com/permissions, grabar (fase 6), y enviar los dos trámites el mismo día
-  (fases 7 y 8). Antes de enviar la cuota, confirmar en la calculadora de Google que subir
-  un video sigue costando 1.600 unidades.
+  pyxis.latam@gmail.com, con dos videos y tres comentarios de parejavice@gmail.com.
+  El 2026-10-10 quedó el video (`youtube-verificacion-demo.mp4`, 5:10, subido como no
+  listado: https://youtu.be/SPKKA8rCO4k), con los minutos en `TEXTOS-FORMULARIO.txt` y las
+  capturas en `evidencia/` y `capturas/` de esa carpeta, y la página de cuotas del proyecto
+  confirmó los dos cupos (10.000 unidades y 100 subidas al día). Ese mismo día, llenando el
+  formulario de cuota, se vio que Los Cortes calculaba métricas derivadas con datos de
+  YouTube y guardaba su historia sin plazo, dos cosas que sus políticas prohíben y que la
+  declaración final pide afirmar; se corrigió antes de enviar (ver
+  `docs/google-verificacion-guion.md`, «Lo que la auditoría mira de los datos guardados»).
+  **Sigue:** enviar el trámite A (fase 7 de `PASOS.txt`) y, con esa corrección en
+  producción, el B (fase 8), con lo que pide la cuota rehecho: 100.000 unidades al día.
+  Antes de enviar el B, reconectar «Pyxis oficial» desde el usuario revisor, para que la
+  cuenta de prueba tenga datos.
+- **Por revisar: el video de prueba salió público** (2026-10-10). En la grabación, YouTube
+  Studio muestra «Public» el video que subió Tu Parrilla, cuando según la documentación un
+  proyecto sin auditoría de cuota sube todo en privado, y el aviso de Los Fierros
+  (`AVISO_ANTES_DE_CONECTAR` en `src/lib/networks.ts`) dice eso mismo. Si Google ya no lo
+  aplica a este proyecto, el aviso sobra.
 - **Por revisar: qué se borra al desconectar YouTube** (2026-10-06). Desconectar borra las
-  credenciales y conserva el historial de métricas (`disconnectAccount`). Si la auditoría
-  de cuota pide borrar también los datos de la API al revocar, hay que cambiar eso y
-  `/privacidad`. Ver `docs/google-verificacion-guion.md`.
+  credenciales y el canal deja de leerse; lo guardado se borra solo a los 30 días
+  (`retencion-youtube`). Si la auditoría de cuota pide borrarlo en el acto, hay que cambiar
+  `disconnectAccount` y `/privacidad`. Ver `docs/google-verificacion-guion.md`.
 - **[dueño] Vercel Pro antes de abrir a terceros.** El plan Hobby es de uso personal y no
   comercial (`docs/levantamiento-terceros.md` §5).
 
@@ -143,3 +155,8 @@ Nada de esto bloquea un trámite hoy; conviene ordenarlo antes de abrir a tercer
 - **El privado de Meta (DM con el PDF)** necesita `instagram_manage_messages` y
   `pages_messaging` en una segunda vuelta de App Review (`docs/levantamiento-terceros.md`
   §2.2 y §7).
+- **El arrastre de YouTube** (2026-10-10). Desde que se acató la regla de métricas
+  derivadas de YouTube, sus filas no tienen lo ganado ni arrastre, que es justo lo que
+  vende la portada. Para recuperarlo hay que pedir el permiso de analítica de §III.L de sus
+  políticas, una vez aprobada la primera auditoría; si lo dan, se afloja
+  `src/lib/social/politica-youtube.ts`. Ver `docs/google-verificacion-guion.md`.

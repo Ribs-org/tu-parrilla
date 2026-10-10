@@ -34,6 +34,16 @@ describe('buildAccountCards', () => {
     ])
   })
 
+  it('YouTube muestra el total de suscriptores, nunca lo ganado: es una métrica derivada', () => {
+    const conHistoria: AccountMetricRow[] = [
+      { network: 'youtube', day: '2026-09-01', followers: 200, profileViews: null, reach: null },
+      { network: 'youtube', day: '2026-09-03', followers: 240, profileViews: null, reach: null },
+    ]
+    const [youtube] = buildAccountCards(conHistoria, '2026-09-02', '2026-09-03')
+    expect(youtube!.followers).toBe(240)
+    expect(youtube!.followersChange).toBeNull()
+  })
+
   it('sin lectura previa el crecimiento es desconocido, no el total', () => {
     const cards = buildAccountCards(rows, '2026-08-01', '2026-09-03')
     expect(cards[0]!.followersChange).toBeNull()
@@ -54,11 +64,21 @@ describe('buildAccountSeries', () => {
     const withOverlap: AccountMetricRow[] = [
       { network: 'instagram', day: '2026-09-03', followers: 1540, profileViews: 122, reach: 3206 },
       { network: 'instagram', day: '2026-09-01', followers: 1500, profileViews: 100, reach: 2000 },
-      { network: 'youtube', day: '2026-09-01', followers: 240, profileViews: 10, reach: 5 },
+      { network: 'facebook', day: '2026-09-01', followers: 240, profileViews: 10, reach: 5 },
     ]
     expect(buildAccountSeries(withOverlap, '2026-09-01', '2026-09-03')).toEqual([
       { date: '2026-09-01', profileViews: 110, reach: 2005 },
       { date: '2026-09-03', profileViews: 122, reach: 3206 },
+    ])
+  })
+
+  it('YouTube no entra en la suma entre redes', () => {
+    const conYoutube: AccountMetricRow[] = [
+      { network: 'instagram', day: '2026-09-01', followers: 1500, profileViews: 100, reach: 2000 },
+      { network: 'youtube', day: '2026-09-01', followers: 240, profileViews: 10, reach: 5 },
+    ]
+    expect(buildAccountSeries(conYoutube, '2026-09-01', '2026-09-01')).toEqual([
+      { date: '2026-09-01', profileViews: 100, reach: 2000 },
     ])
   })
 
@@ -70,7 +90,7 @@ describe('buildAccountSeries', () => {
 
   it('un día sin ninguna red con dato queda en null, no en cero', () => {
     const noData: AccountMetricRow[] = [
-      { network: 'youtube', day: '2026-09-02', followers: 240, profileViews: null, reach: null },
+      { network: 'tiktok', day: '2026-09-02', followers: 240, profileViews: null, reach: null },
     ]
     expect(buildAccountSeries(noData, '2026-09-02', '2026-09-02')).toEqual([
       { date: '2026-09-02', profileViews: null, reach: null },
