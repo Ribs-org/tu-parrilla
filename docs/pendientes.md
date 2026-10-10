@@ -155,8 +155,19 @@ Nada de esto bloquea un trámite hoy; conviene ordenarlo antes de abrir a tercer
 - **El privado de Meta (DM con el PDF)** necesita `instagram_manage_messages` y
   `pages_messaging` en una segunda vuelta de App Review (`docs/levantamiento-terceros.md`
   §2.2 y §7).
-- **El arrastre de YouTube** (2026-10-10). Desde que se acató la regla de métricas
-  derivadas de YouTube, sus filas no tienen lo ganado ni arrastre, que es justo lo que
-  vende la portada. Para recuperarlo hay que pedir el permiso de analítica de §III.L de sus
-  políticas, una vez aprobada la primera auditoría; si lo dan, se afloja
-  `src/lib/social/politica-youtube.ts`. Ver `docs/google-verificacion-guion.md`.
+- **YouTube: la historia y el arrastre de las cuentas propias** (2026-10-10). Para cumplir
+  las políticas de YouTube (PR #157), todo dato suyo se borra a los 30 días sin refrescar
+  y sus filas van sin lo ganado ni arrastre, para todos los usuarios. Es un parche para
+  pasar la auditoría: Vicente quiere que sus propias cuentas guarden la historia completa,
+  como antes, y que el plazo de 30 días valga solo para los demás usuarios. Ojo al
+  hacerlo: las políticas valen para todo dato que pase por el proyecto de API, sea de
+  quien sea el canal, así que una excepción por usuario con el mismo proyecto seguiría
+  siendo un incumplimiento, y una reauditoría puede verlo. Lo que sí calza:
+  (1) **leer las estadísticas con el token OAuth del dueño** en vez de la API key: leídas
+  así son datos autorizados, que se pueden guardar mientras él siga autorizando (hay que
+  revisarlo cada 30 días); vale para el canal propio y para cualquier usuario, y devuelve
+  la historia, pero no lo ganado ni el arrastre; (2) **pedir el permiso de analítica de
+  §III.L**, una vez aprobada la primera auditoría, que además devuelve lo ganado y el
+  arrastre, lo que vende la portada. Se afloja en `src/lib/social/politica-youtube.ts` y
+  `retencion-youtube.ts`. Ver `docs/google-verificacion-guion.md`, «Lo que la auditoría
+  mira de los datos guardados».
