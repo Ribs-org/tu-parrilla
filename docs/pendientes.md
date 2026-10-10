@@ -78,32 +78,36 @@ Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataf
   (`threads_basic`, `threads_content_publish`). Se sacaron de la primera solicitud porque
   no salen en su video; cada una necesita su guion y su grabación. Ver
   `docs/levantamiento-terceros.md` §2.2 y §7.
-- **[dueño] Google — verificación del OAuth y auditoría de cuota de YouTube**, en paralelo.
-  Sin la primera, el cartel de app no verificada y un tope de 100 usuarios en toda la vida
-  del proyecto (iban 3 el 2026-10-06); sin la segunda, 10.000 unidades al
-  día para todos (las subidas tienen un cupo aparte de 100) y, según la documentación,
-  videos siempre privados. Guion: `docs/google-verificacion-guion.md`; el
-  paso a paso de trabajo, en la carpeta «YouTube - Verification» del escritorio de Vicente
-  (2026-10-06). La portada y las páginas legales ya cumplen lo que piden Google y YouTube.
-  Hecho el 2026-10-06 (fases 1 a 3): el proyecto (`portafolio-page`, número 306430930448)
-  tiene a pyxis.latam@gmail.com como dueña; `tu-parrilla.cl` está verificado en Search
-  Console (registro TXT en Cloudflare: no borrarlo); la marca dice «Tu Parrilla», con Pyxis
-  de contacto y solo `tu-parrilla.cl` autorizado; el cliente OAuth solo acepta
-  `https://tu-parrilla.cl/api/social/youtube/callback`; y los permisos son exactamente
-  `youtube.upload` y `youtube.force-ssl`. El canal de prueba es «Pyxis oficial», de
-  pyxis.latam@gmail.com, con dos videos y tres comentarios de parejavice@gmail.com.
-  El 2026-10-10 quedó el video (`youtube-verificacion-demo.mp4`, 5:10, subido como no
-  listado: https://youtu.be/SPKKA8rCO4k), con los minutos en `TEXTOS-FORMULARIO.txt` y las
-  capturas en `evidencia/` y `capturas/` de esa carpeta, y la página de cuotas del proyecto
-  confirmó los dos cupos (10.000 unidades y 100 subidas al día). Ese mismo día, llenando el
-  formulario de cuota, se vio que Los Cortes calculaba métricas derivadas con datos de
-  YouTube y guardaba su historia sin plazo, dos cosas que sus políticas prohíben y que la
-  declaración final pide afirmar; se corrigió antes de enviar (ver
-  `docs/google-verificacion-guion.md`, «Lo que la auditoría mira de los datos guardados»).
-  **Sigue:** enviar el trámite A (fase 7 de `PASOS.txt`) y, con esa corrección en
-  producción, el B (fase 8), con lo que pide la cuota rehecho: 100.000 unidades al día.
-  Antes de enviar el B, reconectar «Pyxis oficial» desde el usuario revisor, para que la
-  cuenta de prueba tenga datos.
+- **[dueño] Google — verificación del OAuth (trámite A): falta enviarla.** Sin ella, el
+  cartel de app no verificada y un tope de 100 usuarios en toda la vida del proyecto
+  (iban 3–4 el 2026-10-06). Lo previo está hecho desde el 2026-10-06: el proyecto
+  (`portafolio-page`, número 306430930448) tiene a pyxis.latam@gmail.com como dueña;
+  `tu-parrilla.cl` está verificado en Search Console (registro TXT en Cloudflare: no
+  borrarlo); la marca dice «Tu Parrilla», con Pyxis de contacto; el cliente OAuth solo
+  acepta `https://tu-parrilla.cl/api/social/youtube/callback`; los permisos son
+  exactamente `youtube.upload` y `youtube.force-ssl`, y su justificación ya está pegada en
+  Data Access. El video está grabado y subido como no listado (https://youtu.be/SPKKA8rCO4k,
+  5:10, del 2026-10-09). **Falta:** en Google Auth Platform → Data Access, agregar el enlace
+  del video; en Verification Center, pegar el bloque «TRÁMITE A» de
+  `TEXTOS-FORMULARIO.txt` cambiando `<REVISION_CODIGO>` por el código fijo, y enviar (fase 7
+  de `PASOS.txt`, en la carpeta «YouTube - Verification» del escritorio de Vicente). Guion:
+  `docs/google-verificacion-guion.md`.
+- **[dueño] Google — auditoría de cuota de YouTube (trámite B): enviada el 2026-10-10,
+  esperando respuesta.** YouTube acusó recibo por correo a pyxis.latam@gmail.com, sin número
+  de caso; suele tardar semanas. Se pidieron 100.000 unidades al día del cupo general (el
+  cálculo está en el guion) y ningún aumento del cupo de subidas. Lo enviado está al final
+  de `TEXTOS-FORMULARIO.txt`, sección por sección, y la evidencia en `evidencia/`, en la
+  misma carpeta. Antes de enviar se corrigió lo que las políticas de YouTube prohíben (#157;
+  ver «Lo que la auditoría mira de los datos guardados» en el guion). Quedaron sin
+  confirmar tres cosas de lo enviado: si se marcó «Analytics & Reporting» (se recomendó,
+  pero la captura nueva de Los Cortes que pide esa opción no se llegó a hacer); si el cupo
+  de `videos.insert` quedó en 100 (un borrador lo tenía en 1000), y si «Pyxis oficial» se
+  reconectó al usuario revisor antes de enviar. Si la respuesta toca alguna, se aclara en el
+  mismo hilo. **Mientras tanto:** que «Pyxis oficial» esté conectado al usuario revisor
+  (las instrucciones de acceso lo dan por conectado; verificarlo en Los Fierros entrando
+  como `revision@tu-parrilla.cl`) y que haya algún comentario pendiente en La Mesa (los de
+  YouTube se borran a los 30 días). Contestar siempre en el mismo hilo del correo. Al
+  aprobarse, ver «Después de aprobar» en el guion.
 - **Por revisar: el video de prueba salió público** (2026-10-10). En la grabación, YouTube
   Studio muestra «Public» el video que subió Tu Parrilla, cuando según la documentación un
   proyecto sin auditoría de cuota sube todo en privado, y el aviso de Los Fierros

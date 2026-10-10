@@ -196,6 +196,28 @@ Es el «YouTube API Services – Audit and Quota Extension Form». Pide:
 Sin esta auditoría, la app funciona para leer y responder comentarios, pero **no para
 publicar en público**: el aviso de Los Fierros lo dice hasta que pase.
 
+### Cómo es el formulario de verdad
+
+El que se envió el 2026-10-10 tenía siete secciones: tipo de pedido, organización y
+contactos, modelo de negocio, el cliente de la API (con una cuenta de prueba que tenga
+datos), casos de uso y cuota por método, materiales de apoyo opcionales y declaraciones.
+Cuatro cosas que no se ven venir:
+
+- **No guarda borradores.** Si se recarga la página o se navega hacia atrás, se pierde todo.
+  Conviene tener las respuestas escritas antes y dejar lista la cuenta de prueba (el canal
+  conectado al usuario revisor) antes de abrirlo.
+- **No hay dónde subir el video.** El enlace va en las instrucciones de acceso y en un PDF
+  de materiales de apoyo con los minutos de cada parte.
+- **Cada campo de archivo acepta uno solo**, imagen o PDF, de menos de 10 MB, y pide
+  capturas con la barra de direcciones a la vista. Lo que son varias capturas va en un PDF.
+- **El cupo de `videos.insert` se pide aparte**, en un campo propio que aparece al marcarlo
+  entre los métodos; el cupo general se elige por rango. Los dos tienen que cuadrar con la
+  justificación.
+
+Las respuestas que se mandaron están, sección por sección, al final de
+`TEXTOS-FORMULARIO.txt` en la carpeta «YouTube - Verification» del escritorio de Vicente, y
+la evidencia en `evidencia/` de la misma carpeta: son la base para una reauditoría.
+
 ## Errores que Google castiga
 
 - **La portada no explica la app** o no enlaza a la privacidad: rechazo inmediato.
