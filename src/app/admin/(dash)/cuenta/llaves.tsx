@@ -10,8 +10,9 @@ import { POSITIVE } from '@/components/charts/theme'
 const AVISO_MS = 2000
 
 /**
- * Lo que se le pega al agente de una vez: dónde está la API, con qué llave entra y qué
- * leer para saber usarla. La guía para LLM es la compacta; la larga la cita.
+ * Lo que se le pega al agente de una vez: dónde está la API, con qué llave entra, qué
+ * leer para saber usarla y dónde está la wiki del panel para cuando la persona se pierda.
+ * La guía para LLM es la compacta; la larga la cita.
  */
 function instrucciones(base: string, llave: string): string {
   return [
@@ -20,6 +21,7 @@ function instrucciones(base: string, llave: string): string {
     `Llave: ${llave}`,
     `Va en cada petición como el header «Authorization: Bearer ${llave}».`,
     `Antes de llamar, lee la guía: ${base}/docs/api-llm.md`,
+    `Si la persona se pierde en su panel, la wiki de la interfaz: ${base}/docs/ui/index.md`,
   ].join('\n')
 }
 

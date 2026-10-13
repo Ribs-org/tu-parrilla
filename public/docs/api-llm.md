@@ -7,7 +7,10 @@ sus tipos y sus límites numéricos; esta guía es la tarea: qué mandar, qué f
 no existe.
 
 Base: `https://tu-parrilla.cl`. Las otras dos guías están al lado:
-`https://tu-parrilla.cl/docs/api-editor.md` y `https://tu-parrilla.cl/docs/api.json`.
+`https://tu-parrilla.cl/docs/api-editor.md` y `https://tu-parrilla.cl/docs/api.json`. Si la
+persona con la que trabajas se pierde en su panel —dónde se conecta una red, dónde se genera
+la llave, qué significa un error que le salió—, la wiki de la interfaz está en
+`https://tu-parrilla.cl/docs/ui/index.md`: cada pantalla, con el texto literal de cada botón.
 
 Dos endpoints de escritura: `POST /api/schedule/batch` programa, y `DELETE /api/schedule/posts/{id}` saca lo programado (sección 3b). Autenticación en todos los
 endpoints:

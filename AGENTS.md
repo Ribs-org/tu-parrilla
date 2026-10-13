@@ -33,6 +33,8 @@ no espera a que alguien lo pida.
 | algo que se decidió posponer: un bug visto y no arreglado, una feature, un trámite, algo por revisar | `docs/pendientes.md`, una entrada corta con la fecha y dónde está el detalle |
 | algo que estaba en `docs/pendientes.md` y quedó hecho | bórralo de `docs/pendientes.md` en el mismo commit |
 | el despliegue, las migraciones o la reja de pull requests | la sección correspondiente del `README.md` |
+| algo que una persona ve en el panel o en la app del teléfono: un texto, un botón, un campo, un mensaje, un paso, una pantalla nueva o renombrada | la página de esa pantalla en `public/docs/ui/`, y `index.md` si cambió la navegación o el vocabulario — ver «La wiki de la UI», abajo |
+| la API: un endpoint, un campo, un límite o una frase de error | `public/docs/api-editor.md`, `api-llm.md` y `api.json` |
 
 Dos reglas que hacen que esto funcione:
 
@@ -66,6 +68,27 @@ comportamiento visible, y el README pasó días describiendo una pantalla que ya
   solo.
 - **Si de verdad no toca nada, dilo en el informe** —«revisé README y docs/, nada que
   actualizar»— para que quien revise sepa que lo miraste y no que se te olvidó.
+
+## La wiki de la UI
+
+`public/docs/ui/` describe cada pantalla del panel y de la app del teléfono, botón por botón
+y con los textos literales, para que un LLM —el agente que le edita los videos a un
+creador, por ejemplo— pueda guiar a una persona que se perdió sin ver la pantalla. Ese LLM
+cree lo que la wiki dice: si un botón cambió de nombre y la wiki no, manda a la persona a
+buscar algo que no existe.
+
+**Al terminar cualquier cambio que toque algo que una persona ve**, antes del commit:
+
+1. Encuentra la página que lo cuenta: `grep -rl "<archivo que tocaste>" public/docs/ui/`
+   (cada página lista sus archivos al final, en «Para quien mantiene esta página»).
+2. Corrige lo que cambió para quien mira —textos, pasos, mensajes, condiciones— en el mismo
+   commit. Una pantalla nueva lleva su página y su enlace en `index.md`.
+3. Dilo en el informe: «Wiki de la UI: actualicé `x.md`» o «Wiki de la UI: revisé, nada que
+   actualizar».
+
+El formato de una página, las reglas de escritura y lo que comprueba el test
+(`src/lib/docs-ui.test.ts`) están en `docs/wiki-ui.md`. El test solo ve la estructura; que
+el texto diga la verdad depende de esta revisión.
 
 # Lo pendiente vive en `docs/pendientes.md`
 

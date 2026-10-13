@@ -7,8 +7,9 @@ eliges fotos o un video de la galería, escribes el texto, marcas las cuentas y 
 programas, o lo mandas a salir ahora. Los datos son los mismos que ve el panel web,
 leídos desde `https://tu-parrilla.cl/api/mobile/*`.
 
-No se publica en Google Play ni en la App Store. Se instala directamente en el
-teléfono desde un archivo `.apk` que se genera bajo pedido.
+No está en la Play Store pública ni en la App Store: se instala desde la pista interna
+de Google Play (ver `docs/play-store.md`) o directamente desde un archivo `.apk` que se
+genera bajo pedido.
 
 ## Qué necesitas
 
@@ -107,7 +108,8 @@ reintento, pero no publica hasta que la web la alcance.
 
 ## Cómo entrar
 
-La primera vez que se abre, pide la **misma contraseña del panel web**. Se escribe
+La primera vez que se abre, pide la **contraseña de la app** (`ADMIN_PASSWORD` del
+despliegue; el panel web ya no la usa, entra con correo y código). Se escribe
 una sola vez: después la sesión queda abierta. Si el teléfono tiene huella
 digital o PIN configurado, la app usa ese candado para protegerse cada vez que se
 abre — no hay que volver a escribir la contraseña.

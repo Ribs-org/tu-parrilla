@@ -256,7 +256,7 @@ export function ProfileView({ profile, links, preview }: Props) {
         </div>
 
         {rest.length === 0 && socials.length === 0 ? (
-          <p className="mt-10 text-center text-sm text-fg-faint">TodavÃ­a no hay links acÃ¡.</p>
+          <p className="mt-10 text-center text-sm text-fg-faint">Todavía no hay links acá.</p>
         ) : null}
       </main>
     </div>

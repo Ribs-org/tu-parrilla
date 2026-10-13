@@ -1,0 +1,261 @@
+# La app del teléfono
+
+Una app para Android que muestra de un vistazo cómo van las redes del dueño del sitio y le deja publicar desde la galería del teléfono. Lee los mismos datos que el panel web, pero hace mucho menos: mira números, mira lo programado y programa o publica fotos y videos en Instagram, Facebook y YouTube. Todo lo demás —conectar redes, corregir o borrar lo programado, TikTok, comentarios, la página pública— se hace en el panel web.
+
+## Cómo se llega
+
+- Es solo para Android; no hay versión para iPhone. No se encuentra buscándola en una tienda: se instala con el archivo `.apk` que entrega quien administra el sitio, o por la prueba interna de Google Play si a la persona la invitaron. En el teléfono, el ícono se llama «Vicente · Números».
+- Hoy la app es solo para el dueño del sitio. Se entra con la contraseña de la app, que define quien administra el sitio; no es el código por correo con que se entra al panel web ([Entrar al panel](ingresar.md)). Con esa contraseña se entra siempre a las cuentas del dueño. Un usuario invitado no tiene cómo entrar con su correo.
+- La primera vez pide la contraseña. Después la sesión queda abierta: no la vuelve a pedir.
+- Si el teléfono tiene PIN, patrón, huella o reconocimiento de cara, cada vez que se abre la app pide desbloquear con el aviso «Desbloquea para ver tus números». Si se cancela, la app muestra la pantalla de la contraseña.
+- Si la sesión deja de valer (por ejemplo, porque quien administra el sitio revocó el acceso de los teléfonos), la app vuelve sola a la pantalla de la contraseña, sin ningún mensaje.
+
+## Qué se ve
+
+Los títulos y rótulos se ven en mayúsculas por diseño; aquí van escritos como están en el código.
+
+### La pantalla de la contraseña
+
+El título «Tus números», la frase «Escribe tu contraseña una vez.», un campo con el texto de ayuda «Contraseña» y el botón «Entrar» (mientras comprueba, «Entrando…»). Si algo falla, el mensaje sale en rojo debajo del campo.
+
+### La barra de pestañas
+
+Abajo, cinco pestañas en este orden: «Resumen», «Contenido», «Publicar», «Cuentas» y «Calendario». La pestaña activa se ve en naranjo y su nombre sale también como título arriba de la pantalla.
+
+En «Resumen», «Contenido», «Cuentas» y «Calendario», la app muestra al instante lo último que descargó y lo actualiza por detrás; por eso funciona sin señal, con datos viejos. Arriba dice cuándo se actualizó: «Actualizado recién», «Actualizado hace 5 min», «Actualizado hace 2 h» o «Actualizado hace 1 d». Para actualizar a mano, se arrastra la pantalla hacia abajo.
+
+### Resumen
+
+- Tres botones de período: «Hoy», «7 días» (el que viene marcado) y «30 días».
+- Cuatro cifras del período: «Views ganadas», «Visitas al sitio», «Arrastre» y «Seguidores». Una raya «—» quiere decir que la red no informó ese número, no que sea cero. «Arrastre» es visitas a la página sobre views ganadas. «Seguidores» suma la última lectura de cada red, sin YouTube.
+- «Qué salió hoy»: lo programado cuya hora fue en las últimas 24 horas (no depende del período elegido). Si no hay: «Nada salió en las últimas 24 horas.»
+- «Qué viene»: los próximos cinco posts programados. Si no hay: «No queda nada programado. Carga el próximo lote cuando quieras.»
+- Cada post de esas dos listas muestra la fecha y hora (por ejemplo «14 oct, 19:00»), el texto (o «(sin texto)») y una línea por cuenta de destino, del estilo «Instagram · nombre_de_cuenta» (o «sin nombre»), con un punto de color: verde publicado, gris programado, ámbar publicándose, rojo falló. Estas filas no se pueden tocar.
+- Si la actualización falla y hay datos viejos, debajo de la fecha aparece en chico «No se pudo actualizar.».
+
+### Contenido
+
+- Los mismos botones de período: «Hoy», «7 días», «30 días».
+- Botones de red: «Todas», «Instagram», «Facebook», «YouTube», «Threads» y «X». Se pueden marcar varios; «Todas» quita el filtro. No hay botón de TikTok, y Tu Parrilla hoy no conecta Threads ni X, así que esos dos filtros salen vacíos.
+- La lista de lo publicado en el período, ordenada de más a menos views ganadas. Cada fila: la miniatura, el texto, «Red · fecha», la marca «Se pasó» cuando el post sacó al menos el doble de views ganadas que la mediana (el valor del medio) de los posts que se están mirando, y abajo «N views» y «P% arrastre».
+- Si no hay nada: «No publicaste nada en este período.»
+- Tocar una fila abre su detalle.
+
+### El detalle de un post
+
+Arriba, la barra con el título «Detalle» y la flecha para volver. Después: la red y la fecha, el texto completo, y una tarjeta con «Views (acumulado)», «Views ganadas», «Likes», «Comentarios», «Compartidos», «Alcance», «Visitas al sitio», «Clicks», «CTR» y «Arrastre». Si el post tiene atributos, una tarjeta «Atributos» con cada uno. Al final, si existe, «Abrir en Instagram ↗» (o la red que corresponda), que abre el post en su red.
+
+Si el post no está entre lo descargado: «Vuelve a la lista y ábrelo de nuevo: este post no está en lo descargado.» y el botón «Volver».
+
+### Publicar
+
+De arriba abajo:
+
+- Un cuadro de texto con la ayuda «Texto del post…» (hasta 2200 caracteres). Debajo, a la izquierda, «En YouTube el primer renglón es el título» y, a la derecha, el contador, por ejemplo «120 / 2200».
+- Los archivos elegidos, como miniaturas (un video se ve como un cuadro que dice «Video»), cada uno con una «✕» para quitarlo, y el botón «+ Fotos o video» mientras queden menos de diez.
+- Las cuentas a las que se puede publicar, como botones «Red · nombre_de_cuenta». Solo salen cuentas de Instagram, Facebook y YouTube conectadas en el panel; TikTok no aparece nunca. Con una sola cuenta conectada, viene marcada; con dos o más, ninguna. Una cuenta que se desconectó sale como «Instagram · nombre_de_cuenta · reconéctala», con «reconéctala» en rojo, y no se puede marcar. Mientras no haya ninguna marcada: «Elige al menos una cuenta.»
+- Solo si hay una cuenta de Instagram marcada y exactamente un video (sin fotos): un botón «Trial reel · nombre_de_cuenta» por cada cuenta de Instagram marcada, y la explicación «Un trial reel solo lo ven quienes no te siguen. Tú decides desde Instagram cuándo compartirlo con todos.»
+- El botón «Cuándo: 14/10 a las 19:00» (con el día y la hora elegidos). De partida trae la próxima hora en punto.
+- Los mensajes, en rojo si son problemas y en gris si son el avance del envío.
+- Mientras se sube un archivo, una barra de avance.
+- Abajo, «Programar» y «Publicar ahora». Los dos están apagados hasta que haya texto o algún archivo, y al menos una cuenta marcada. Durante el envío, en su lugar sale «Cancelar» (solo se puede tocar mientras sube un archivo); si el envío se cayó, sale «Reintentar».
+
+Mientras se cargan las cuentas dice «Cargando cuentas…». Si no se pudieron cargar: «No se pudieron cargar las cuentas.» con «Reintentar». Si no hay ninguna que sirva: «No hay ninguna cuenta lista para publicar desde el teléfono. Conecta una en la pestaña Cuentas.» (ver más abajo: la pestaña «Cuentas» no conecta nada).
+
+### Cuentas
+
+Siempre de los últimos 30 días; no tiene botones de período.
+
+- Una tarjeta por red, con su nombre, el número de seguidores y debajo «seguidores · +12 en el período», «seguidores · sin cambio» o «seguidores · — en el período» (cuando no se sabe). Debajo, «Visitas al perfil: N · Alcance: N», a veces con el día de la lectura entre paréntesis después de «Visitas al perfil».
+- Si hay más de un día de datos, un gráfico de barras «Visitas al perfil por día».
+- Si todavía no hay datos: «Todavía no hay lecturas de cuenta. La primera llega con la sincronización de esta noche.»
+
+Esta pestaña solo muestra números: no conecta, desconecta ni reconecta cuentas.
+
+### Calendario
+
+Lo programado desde siete días atrás hasta treinta días adelante, agrupado por día.
+
+- Cada día lleva su fecha (por ejemplo «14 oct») y, a la derecha, «Prendida» si tiene uno o dos posts, o «Parrilla llena» si tiene tres o más.
+- Cada post es una tarjeta color carne, de la más clara (programada) a la más oscura (falló): la hora (con «  ·  SALIENDO» al lado mientras se publica), la miniatura si hay, el texto (o «(sin texto)»), una línea por cuenta «Red · nombre_de_cuenta» y, si esa cuenta falló, « — » seguido del error. Al final, el estado en palabras: «Programada», «Saliendo ahora», «Publicada» o «Falló».
+- Si no hay nada: «No hay nada programado en esta ventana.»
+- Las tarjetas no se pueden tocar ni editar.
+
+Las horas de «Resumen» y «Calendario» están en la zona horaria de [Tu Cuenta](tu-cuenta.md).
+
+## Qué se puede hacer
+
+### Para entrar por primera vez
+
+1. Abre la app.
+2. Escribe la contraseña de la app en «Contraseña».
+3. Toca «Entrar» (o la tecla de enviar del teclado). Se abre «Resumen».
+
+### Para ver cómo va una semana o un mes
+
+1. En «Resumen» o «Contenido», toca «Hoy», «7 días» o «30 días».
+
+### Para ver cómo le fue a un post
+
+1. Pestaña «Contenido».
+2. Si hace falta, elige el período y la red.
+3. Toca el post: se abre su detalle. Para verlo en su red, «Abrir en … ↗».
+
+### Para programar un post
+
+1. Pestaña «Publicar».
+2. Escribe el texto en el cuadro «Texto del post…». En YouTube, el primer renglón es el título del video.
+3. Toca «+ Fotos o video», da permiso para ver la galería si lo pide y elige hasta diez archivos en total (un video puede pesar hasta 500 MB). Para sacar uno, toca su «✕».
+4. Toca las cuentas a las que debe salir: quedan marcadas en naranjo.
+5. Toca «Cuándo: …», elige el día y después la hora (en formato de 24 horas). La hora es la del reloj del teléfono.
+6. Toca «Programar».
+7. Abajo se ve el avance: «Comprobando…», «Subiendo 1 de 2 · 45 %», «Guardando…» y «Listo». Un segundo después el formulario se vacía y la app salta a «Calendario», donde ya aparece el post si cae dentro de los próximos treinta días.
+
+Instagram y YouTube necesitan al menos un archivo; Facebook acepta solo texto. YouTube necesita un video: con solo fotos, el post se programa igual, pero el destino de YouTube falla al publicarse con «YouTube solo recibe video.», que se ve en «Calendario».
+
+### Para publicar de inmediato
+
+1. Arma el post como en los pasos 1 a 4 de arriba.
+2. Toca «Publicar ahora».
+3. Aparece la pregunta «Publicar ahora» con el texto «¿Publicar ahora en nombre_de_cuenta y otra_cuenta? Saldrá en los próximos 5 minutos.».
+4. Toca «Publicar» (o «Cancelar» para no hacer nada).
+
+### Para mandar un trial reel a Instagram
+
+Un trial reel lo ven solo quienes no siguen la cuenta; después, desde la app de Instagram, la persona decide si lo comparte con todos.
+
+1. En «Publicar», elige un solo video, sin fotos.
+2. Marca la cuenta de Instagram.
+3. Toca «Trial reel · nombre_de_cuenta» para encenderlo (queda en naranjo).
+4. «Programar» o «Publicar ahora».
+
+Si Instagram no tiene la función habilitada para esa cuenta, el destino falla al publicarse y en «Calendario» sale «Instagram no permite trial reels en esta cuenta.». Corregirlo se hace en el panel web, en [La Parrilla](la-parrilla.md).
+
+### Si se corta la señal mientras se envía
+
+1. Aparece en rojo «No se pudo subir el archivo. Revisa tu señal.» o «No se pudo conectar. Revisa tu señal.», y el botón «Reintentar».
+2. Cuando vuelva la señal, toca «Reintentar». Sigue desde el archivo que falló, sin volver a subir los anteriores.
+
+Ojo: si el corte fue durante la subida o al guardar, «Reintentar» manda el texto, las cuentas y la hora que había al primer intento, aunque se hayan cambiado después. Para mandar algo distinto, reinicia el envío quitando un archivo y volviendo a agregarlo (o, si el post no tiene archivos, agregando uno y quitándolo) y toca de nuevo «Programar».
+
+### Para cancelar una subida
+
+1. Mientras sube un archivo, toca «Cancelar». El formulario vuelve a quedar listo, con todo lo que tenía.
+
+### Para corregir o borrar algo programado desde el teléfono
+
+No se puede desde la app. Se hace en el panel web, en [La Parrilla](la-parrilla.md).
+
+## Mensajes que puede ver
+
+| Lo que dice la pantalla | Qué significa | Qué hacer |
+|---|---|---|
+| «Desbloquea para ver tus números» | La app pide el bloqueo del teléfono. | Usar el PIN, patrón, huella o cara del teléfono. Si se cancela, pide la contraseña de la app. |
+| «Contraseña incorrecta.» | La contraseña no es la de la app. También sale si el servidor tuvo un problema al preparar el ingreso. | Revisarla con quien administra el sitio; no es el código por correo del panel. |
+| «Demasiados intentos. Espera unos minutos.» | Muchos intentos de contraseña seguidos. | Esperar unos diez minutos. |
+| «No se pudo conectar. Revisa tu señal.» | Sin conexión al entrar, al comprobar el post o al guardarlo. | Revisar la señal; en «Publicar», tocar «Reintentar». |
+| «No se pudo actualizar.» | Falló la descarga de datos nuevos; lo que se ve puede ser viejo. | Arrastrar hacia abajo o tocar «Reintentar» cuando haya señal. |
+| «No se pudo cargar.» | No hay datos guardados y no se pudieron descargar. | «Reintentar». |
+| «Sin permiso para ver la galería.» | El teléfono no le dio permiso a la app para ver fotos y videos. | Dar el permiso en los ajustes del teléfono y volver a tocar «+ Fotos o video». |
+| «Ese tipo de archivo no se puede publicar.» | Uno de los archivos elegidos no es una imagen ni un video que se pueda publicar. | Elegir otro archivo. |
+| «El archivo supera los 500 MB.» | Un archivo es demasiado grande. | Elegir uno más liviano. |
+| «Elige al menos una cuenta.» | No hay ninguna cuenta marcada. | Tocar al menos una. |
+| «No se pudieron cargar las cuentas.» | Falló la descarga de la lista de cuentas. | «Reintentar». |
+| «No hay ninguna cuenta lista para publicar desde el teléfono. Conecta una en la pestaña Cuentas.» | No hay ninguna cuenta de Instagram, Facebook o YouTube. La pestaña «Cuentas» de la app no conecta nada. | Conectar la cuenta en el panel web, en [Los Fierros](los-fierros.md). Si solo hay TikTok, desde el teléfono no se puede publicar. |
+| «… · reconéctala» | Esa cuenta perdió la conexión. | Reconectarla en el panel web, en [Los Fierros](los-fierros.md). |
+| «Comprobando…», «Subiendo 1 de 2 · 45 %», «Guardando…», «Listo» | El avance del envío. | Esperar; con «Listo» el post quedó programado. |
+| «No se pudo subir el archivo. Revisa tu señal.» | Se cortó la subida de un archivo. | «Reintentar» cuando haya señal. |
+| «Publicar ahora» / «¿Publicar ahora en …? Saldrá en los próximos 5 minutos.» | Confirmación de publicar de inmediato. | «Publicar» o «Cancelar». |
+| «Instagram, YouTube y TikTok necesitan al menos un archivo.» | Hay una cuenta de Instagram o YouTube marcada y ningún archivo. | Agregar una foto o video, o desmarcar esas cuentas. |
+| «Escribe un texto o adjunta un archivo.» | El post está vacío. | Escribir texto o agregar un archivo. |
+| «Máximo diez archivos por publicación.» | Hay más de diez archivos. | Quitar algunos. |
+| «La hora debe estar en el futuro.» | La hora elegida ya pasó. | Tocar «Cuándo: …» y elegir una hora futura. |
+| «La fecha no se entendió.» | La fecha no llegó bien al servidor. | Volver a elegirla. |
+| «Un trial reel es un solo video, sin fotos.» | El trial reel quedó con más de un archivo o con fotos. | Dejar un solo video. |
+| «La cuenta x no está conectada. Vuelve a conectarla en Cuentas.» (con el nombre de la cuenta en lugar de x) | La cuenta elegida perdió la conexión. «Cuentas» aquí es [Los Fierros](los-fierros.md) del panel web, no la pestaña de la app. | Reconectarla en el panel web. |
+| «Una de las cuentas elegidas no es tuya.» | Una cuenta ya no pertenece a quien publica (por ejemplo, se borró). | Cerrar la app del todo y volver a abrirla: la lista de cuentas de «Publicar» se carga al abrir. |
+| «Red desconocida o sin publicación: x.» | Se intentó publicar en una red que el teléfono no maneja (hoy, TikTok). | Publicar en esa red desde el panel web, en [La Parrilla](la-parrilla.md). |
+| «Falta subir un archivo.» | Uno de los archivos subidos ya no está en el servidor. | Tocar de nuevo «Programar» o «Publicar ahora»: los archivos se vuelven a subir. |
+| «No se pudo guardar. Intenta de nuevo.» | Falla del servidor al guardar el post. | Volver a tocar «Programar» o «Publicar ahora». |
+| «Falta configurar Cloudflare R2 (R2_*).» | El sitio no tiene configurado dónde guardar archivos. | Avisar a quien administra el sitio. |
+| «Un archivo no es del almacén.», «El cuerpo no se entendió.», «Las opciones de la red no se entendieron.» | Errores internos que no deberían verse. | Cerrar y abrir la app, armar el post de nuevo; si se repite, avisar a quien administra el sitio. |
+| «Se pasó» (en «Contenido») | Ese post sacó al menos el doble de views ganadas que la mediana de la lista. | Nada; es una marca para ubicar lo que anduvo mejor. |
+| «Programada», «Saliendo ahora», «Publicada», «Falló» (en «Calendario») | El estado del post. «Falló» lleva al lado de la cuenta el error de la red. | Si falló, revisarlo en el panel web, en [La Parrilla](la-parrilla.md). |
+| En «Calendario», después de la cuenta: «YouTube solo recibe video.», «Instagram no permite trial reels en esta cuenta.», «Instagram rechazó la publicación.», «La red no terminó de procesar el video.», «La cuenta no está conectada. Reconéctala y reprograma.» | Por qué falló ese destino al publicarse. | Corregir en el panel web: reconectar en [Los Fierros](los-fierros.md) si es la conexión, y corregir el post en [La Parrilla](la-parrilla.md). |
+| En «Calendario», después de la cuenta: «No se pudo hablar con la red. Se reintentará.» | Falla pasajera de la red. | Esperar: se reintenta solo. |
+| «Todavía no hay lecturas de cuenta. La primera llega con la sincronización de esta noche.» | Las cuentas aún no tienen números guardados. | Esperar al día siguiente. |
+| «Vuelve a la lista y ábrelo de nuevo: este post no está en lo descargado.» | El detalle no encontró el post entre lo descargado. | «Volver», actualizar la lista y tocarlo de nuevo. |
+
+## Si el humano dice…
+
+- «No me acepta la contraseña» → es la contraseña de la app, que define quien administra el sitio; no es el código que llega por correo para el panel web. Si la persona es un usuario invitado, hoy la app no es para ella: usa el panel web.
+- «Me pide desbloquear cada vez» → es el bloqueo del propio teléfono; se usa el PIN, patrón, huella o cara del teléfono.
+- «Quiero cerrar sesión» → la app no tiene botón para eso.
+- «Perdí el teléfono» → quien administra el sitio puede revocar el acceso de todos los teléfonos a la vez; las conexiones con las redes no se tocan.
+- «No me aparece TikTok para publicar» → desde el teléfono no se publica en TikTok; se hace en el panel web, en [La Parrilla](la-parrilla.md).
+- «No aparece mi cuenta» o «dice reconéctala» → las cuentas se conectan y reconectan en el panel web, en [Los Fierros](los-fierros.md). La pestaña «Cuentas» de la app solo muestra números, aunque un mensaje diga «Conecta una en la pestaña Cuentas».
+- «Los botones Programar y Publicar ahora están grises» → falta texto o un archivo, o falta marcar una cuenta.
+- «No me sale el botón de trial reel» → hace falta una cuenta de Instagram marcada y exactamente un video, sin fotos.
+- «Programé algo mal desde el teléfono» → se corrige o se borra en el panel web, en [La Parrilla](la-parrilla.md).
+- «No veo el post que acabo de programar» → abre «Calendario» (la app salta sola ahí al terminar); si no aparece, arrastra la pantalla hacia abajo para actualizar.
+- «Un post dice Falló» → en «Calendario», al lado de la cuenta, va el error de la red; se revisa y se corrige en el panel web, en [La Parrilla](la-parrilla.md).
+- «Los números no cambian» → mirar «Actualizado hace…» arriba y arrastrar hacia abajo para actualizar.
+- «Quiero ver los comentarios» → no están en la app; se ven en el panel web, en [La Mesa](la-mesa.md).
+- «Quiero cambiar mi página de links desde el teléfono» → no se puede en la app; se hace en el panel web, en [La Vitrina](la-vitrina.md), que también funciona en el navegador del teléfono.
+- «No encuentro la app» → en el teléfono se llama «Vicente · Números». Si no está instalada, hay que pedirle el instalador a quien administra el sitio. En iPhone no existe.
+
+## Lo que esta pantalla no hace
+
+Comparada con el panel web, la app no:
+
+- conecta, desconecta ni reconecta redes ([Los Fierros](los-fierros.md));
+- publica en TikTok;
+- edita, mueve ni borra lo programado ([La Parrilla](la-parrilla.md));
+- pone portada a un video, atributos a un post ni reglas de respuesta a comentarios con palabra clave;
+- carga posts por lote;
+- muestra ni responde comentarios ([La Mesa](la-mesa.md));
+- muestra las visitas de la página por origen ni los clics por link ([Los Números](los-numeros.md));
+- edita la página pública ([La Vitrina](la-vitrina.md));
+- cambia la zona horaria ni genera llaves ([Tu Cuenta](tu-cuenta.md));
+- invita usuarios ([Los Maestros](los-maestros.md));
+- deja entrar con correo y código, ni a usuarios invitados;
+- cierra sesión desde la propia app;
+- manda notificaciones;
+- existe para iPhone.
+
+## Para quien mantiene esta página
+
+Lo que describe sale de estos archivos:
+
+- `mobile/app.json` (el nombre del ícono)
+- `mobile/src/app/_layout.tsx`
+- `mobile/src/app/login.tsx`
+- `mobile/src/app/(tabs)/_layout.tsx`
+- `mobile/src/app/(tabs)/index.tsx`
+- `mobile/src/app/(tabs)/contenido.tsx`
+- `mobile/src/app/(tabs)/publicar.tsx`
+- `mobile/src/app/(tabs)/cuentas.tsx`
+- `mobile/src/app/(tabs)/calendario.tsx`
+- `mobile/src/app/post/[id].tsx`
+- `mobile/src/components/ui.tsx`
+- `mobile/src/components/parrilla.tsx`
+- `mobile/src/components/iconos.tsx`
+- `mobile/src/lib/publicar.ts`
+- `mobile/src/lib/subir.ts`
+- `mobile/src/lib/session.ts`
+- `mobile/src/lib/api.ts`
+- `mobile/src/lib/cache.ts`
+- `mobile/src/lib/useScreenData.ts`
+- `mobile/src/lib/format.ts`
+- `mobile/src/lib/tipos.ts`
+- `mobile/src/lib/parrilla.ts`
+- `src/app/api/mobile/` (las rutas que la app llama, con sus frases de error)
+- `src/lib/mobile-api.ts`
+- `src/lib/social/publish/validate.ts`
+- `src/lib/social/publish/opciones.ts`
+- `src/lib/social/publish/youtube.ts`
+- `src/lib/social/publish/publisher.ts`
+- `src/lib/social/cuentas.ts`
+- `src/lib/storage.ts`
+
+Si cambias lo que se ve en alguno de ellos, actualiza esta página en el mismo commit.

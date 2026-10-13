@@ -114,7 +114,7 @@ export function WeekCalendar({
                 >
                   {cortes.length === 0 ? (
                     <p className="text-center text-[0.72rem] italic text-fg-muted">
-                      No hay nada puesto. Prendela.
+                      No hay nada puesto. Préndela.
                     </p>
                   ) : (
                     cortes.map(({ post, targets, media }) => {
