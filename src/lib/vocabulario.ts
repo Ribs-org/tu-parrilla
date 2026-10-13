@@ -22,7 +22,7 @@ export const PANTALLAS: readonly Pantalla[] = [
   { ruta: '/admin/accounts', nombre: 'Los Fierros', subtitulo: 'tus redes conectadas', grupo: 'ajustes' },
   { ruta: '/admin/profiles', nombre: 'La Vitrina', subtitulo: 'tus páginas públicas', grupo: 'ajustes' },
   { ruta: '/admin/usuarios', nombre: 'Los Maestros', subtitulo: 'quién puede entrar', grupo: 'ajustes', soloAdmin: true },
-  { ruta: '/admin/cuenta', nombre: 'Tu Cuenta', subtitulo: 'tu nombre y tu hora', grupo: 'ajustes' },
+  { ruta: '/admin/cuenta', nombre: 'Tu Cuenta', subtitulo: 'tu nombre, tu hora y tus llaves', grupo: 'ajustes' },
 ]
 
 function visibles(esAdmin: boolean): Pantalla[] {

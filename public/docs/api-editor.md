@@ -1,4 +1,4 @@
-# API del calendario de Vicente Pareja — guía para el editor de contenido
+# API del calendario de Tu Parrilla — guía para el editor de contenido
 
 Escrita para un LLM que programa y analiza contenido. Es autosuficiente: todo lo que
 puedes hacer, con qué forma exacta, y qué significa cada respuesta. Si algo no está
@@ -6,7 +6,8 @@ aquí, el sistema no lo hace.
 
 ## Qué es este sistema
 
-Un calendario de publicación propio, conectado a las cuentas reales de Vicente. Tú
+Un calendario de publicación, conectado a las cuentas reales del dueño de tu llave —la
+persona que te la dio—. Tú
 programas posts por API; un proceso automático los publica a su hora en cada red y
 guarda el resultado. Otro proceso sincroniza a diario las métricas de lo publicado.
 Cierras el ciclo leyendo esas métricas junto a las etiquetas que tú mismo pusiste al
@@ -19,15 +20,20 @@ dueño de la llave — la que tiene puesta en Tu Cuenta (`/admin/cuenta`).
 
 ## Autenticación
 
-Un solo secreto para ambos endpoints:
+Una sola llave para todos los endpoints, en cada petición:
 
 ```
-Authorization: Bearer <SCHEDULE_API_KEY>
+Authorization: Bearer <tu llave>
 ```
 
-Sin él, o con uno incorrecto: `401` con el cuerpo `No autorizado`.
+La llave te la da el dueño: la genera en Tu Cuenta (`/admin/cuenta`), y las que salen de
+ahí empiezan con `tp_`.
+Todo lo que hagas con ella lo haces a su nombre —sus cuentas, sus posts, su zona horaria—,
+y no ves nada de nadie más. Sin ella, con una incorrecta o con una que el dueño revocó:
+`401` con el cuerpo `No autorizado`. Un `401` con una llave que antes andaba significa que
+la revocaron: pídele una nueva al dueño, no reintentes.
 
-Base: `https://www.vicente-pareja.cl`
+Base: `https://tu-parrilla.cl`
 
 ---
 
@@ -35,7 +41,7 @@ Base: `https://www.vicente-pareja.cl`
 
 ```http
 POST /api/schedule/batch
-Authorization: Bearer <SCHEDULE_API_KEY>
+Authorization: Bearer <tu llave>
 Content-Type: application/json
 ```
 
@@ -354,7 +360,7 @@ quedaron programadas. Verifica antes de reintentar, o duplicarás posts.
 
 ```http
 GET /api/metrics/posts?desde=2026-09-01&hasta=2026-09-30&red=instagram
-Authorization: Bearer <SCHEDULE_API_KEY>
+Authorization: Bearer <tu llave>
 ```
 
 Parámetros, todos opcionales:
@@ -402,8 +408,8 @@ Parámetros, todos opcionales:
   posts entre sí, esta es casi siempre la métrica correcta: `views` favorece a lo
   viejo solo por llevar más tiempo publicado.
 - **`likes`, `comentarios`, `compartidos`, `alcance`** — lo que reporta la red.
-- **`visitasAlSitio`, `clicks`, `ctr`** — tráfico real que ese post llevó a
-  vicente-pareja.cl, atribuido por la etiqueta `?s=` (ver abajo). Ninguna red te da
+- **`visitasAlSitio`, `clicks`, `ctr`** — tráfico real que ese post llevó a la
+  página pública del dueño, atribuido por la etiqueta `?s=` (ver abajo). Ninguna red te da
   esto: es la métrica de negocio.
 - **`arrastre`** — `visitasAlSitio / viewsGanadas` en porcentaje: de la gente que vio
   el post en el período, qué fracción llegó efectivamente al sitio. Mide capacidad de
@@ -413,7 +419,9 @@ Parámetros, todos opcionales:
   publicado antes de que la cuenta fuera profesional.
 
 **`etiqueta`** es el identificador `?s=` del post: el link que se pega en la red
-lleva `https://www.vicente-pareja.cl/?s=<etiqueta>`, y así se atribuyen visitas y
+lleva la página pública del dueño con `?s=<etiqueta>` al final
+(`https://tu-parrilla.cl/<su-página>?s=<etiqueta>`, o su dominio propio si tiene uno), y
+así se atribuyen visitas y
 clicks. Si un post nunca tuvo su link pegado, `visitasAlSitio` viene `null`.
 
 **`atributos`** trae exactamente lo que enviaste al programar; es `null` para posts
@@ -436,7 +444,7 @@ parte el rango en trozos más chicos.
 
 ```http
 GET /api/schedule/posts?desde=2026-09-10&hasta=2026-09-30
-Authorization: Bearer <SCHEDULE_API_KEY>
+Authorization: Bearer <tu llave>
 ```
 
 Lo que hay en el calendario entre dos días, **por fecha de salida** y sin importar si
@@ -500,7 +508,7 @@ lo que decidiste y lo que rindió.
 1. **Mira** `/api/schedule/posts` para saber qué ya está puesto en la ventana.
 2. **Programa** con `atributos` describiendo tus decisiones creativas.
 3. El sistema **publica** a la hora indicada, en cada red. Si un destino falla, se
-   reintenta hasta 3 veces; al tercer fallo Vicente recibe un correo y el post queda
+   reintenta hasta 3 veces; al tercer fallo el dueño recibe un correo y el post queda
    marcado en rojo en su calendario, y en `failed` en `/api/schedule/posts`.
 4. La sincronización diaria trae **métricas reales**.
 5. **Lee** `/api/metrics/posts` sobre un rango con suficiente historia.
@@ -523,7 +531,7 @@ patrones. Con menos de ~10 posts por valor de atributo, desconfía de la diferen
 - **No deduplica**: reenviar el mismo lote programa todo de nuevo.
 - **No programa en el pasado** ni acepta media que no esté en una URL pública.
 - **No edita por API**: para corregir un post ya programado, o lo borras con
-  `DELETE /api/schedule/posts/{id}` y lo programas de nuevo, o Vicente lo cambia en su
+  `DELETE /api/schedule/posts/{id}` y lo programas de nuevo, o el dueño lo cambia en su
   panel (`/admin/schedule`), donde puede tocar texto, hora, redes, media, portada y
   atributos, y ver la semana en calendario.
 - **Sí borra por API**, con la regla del panel: `DELETE /api/schedule/posts/{id}` (el `postId`
@@ -542,15 +550,15 @@ patrones. Con menos de ~10 posts por valor de atributo, desconfía de la diferen
 Ver qué hay en el calendario las próximas dos semanas:
 
 ```bash
-curl -s "https://www.vicente-pareja.cl/api/schedule/posts?hasta=$(date -d '+14 days' +%F)" \
-  -H "Authorization: Bearer $SCHEDULE_API_KEY"
+curl -s "https://tu-parrilla.cl/api/schedule/posts?hasta=$(date -d '+14 days' +%F)" \
+  -H "Authorization: Bearer $LLAVE_PARRILLA"
 ```
 
 Programar dos posts:
 
 ```bash
-curl -X POST https://www.vicente-pareja.cl/api/schedule/batch \
-  -H "Authorization: Bearer $SCHEDULE_API_KEY" \
+curl -X POST https://tu-parrilla.cl/api/schedule/batch \
+  -H "Authorization: Bearer $LLAVE_PARRILLA" \
   -H "Content-Type: application/json" \
   -d '{
     "posts": [
@@ -576,16 +584,16 @@ curl -X POST https://www.vicente-pareja.cl/api/schedule/batch \
 Leer el mes:
 
 ```bash
-curl -s "https://www.vicente-pareja.cl/api/metrics/posts?desde=2026-09-01&hasta=2026-09-30" \
-  -H "Authorization: Bearer $SCHEDULE_API_KEY"
+curl -s "https://tu-parrilla.cl/api/metrics/posts?desde=2026-09-01&hasta=2026-09-30" \
+  -H "Authorization: Bearer $LLAVE_PARRILLA"
 ```
 
 Programar a una cuenta exacta (útil cuando hay dos cuentas de la misma red — acá, dos
 de TikTok — y nombrar solo `tiktok` sería ambiguo):
 
 ```bash
-curl -X POST https://www.vicente-pareja.cl/api/schedule/batch \
-  -H "Authorization: Bearer $SCHEDULE_API_KEY" \
+curl -X POST https://tu-parrilla.cl/api/schedule/batch \
+  -H "Authorization: Bearer $LLAVE_PARRILLA" \
   -H "Content-Type: application/json" \
   -d '{
     "posts": [

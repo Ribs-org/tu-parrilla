@@ -146,12 +146,23 @@ las ventanas de los links— y en lo que guardas desde ahí: si escribes «19:00
 19:00 tuyas. También manda por dentro: Los Números y Los Cortes agrupan los días en tu
 zona.
 
+En Tu Cuenta también generas las **llaves para tus agentes**: una llave deja que un
+programa —el agente que te edita los videos, un script— use la API a tu nombre sin entrar al
+panel. Le pones un nombre (el del agente), aprietas «Generar llave» y la ves **una sola
+vez**, con un botón que la copia junto con las instrucciones para el agente (la base de la
+API, el header y dónde está la guía). En la base se guarda solo su hash, así que no hay forma
+de volver a leerla: si se pierde, se revoca y se genera otra. La lista muestra cada llave
+por su nombre y sus últimos cuatro caracteres, cuándo se creó y cuándo se usó por última
+vez; revocar la borra y lo que la use deja de entrar en su próxima petición. Hasta diez por
+usuario. Cerrar las sesiones de alguien desde Los Maestros no toca sus llaves: son
+credenciales aparte, y las maneja cada uno.
+
 Fuera del panel, «el dueño» no siempre eres tú, así que conviene el detalle:
 
 - La **API con llave** (`/api/schedule/posts`, `/api/metrics/posts`) habla en la zona del
-  dueño de la llave, que hoy es siempre el admin del despliegue: la llave es del sitio, no
-  de una persona. Lo que el editor-LLM escribe como «19:00» son las 19:00 del admin, y los
-  días de `desde`/`hasta` son sus días.
+  dueño de la llave: la tuya si el agente usa una llave que generaste tú, la del admin si
+  usa `SCHEDULE_API_KEY`, la llave del despliegue. Lo que el agente escribe como «19:00»
+  son las 19:00 del dueño, y los días de `desde`/`hasta` son sus días.
 - El **lote de publicación** hace las dos cosas en la zona del dueño del lote: lee la
   `fecha` que le mandas como hora de pared suya y devuelve en la misma.
 - La **app móvil** solo lee horas en la zona del dueño. Lo que manda al programar es un
@@ -188,10 +199,12 @@ borra su página, y las dos cosas pasan juntas o no pasa ninguna.
 Los dos perfiles de ejemplo están para que los edites, no para que los borres y empieces
 de cero.
 
-Cada fila de cada tabla (perfiles, cuentas, posts, comentarios, ajustes) tiene dueño: el
-panel solo te muestra lo tuyo, nunca lo de otro usuario invitado. Los crons (sync,
+Cada fila de cada tabla (perfiles, cuentas, posts, comentarios, ajustes, llaves de API)
+tiene dueño: el panel solo te muestra lo tuyo, nunca lo de otro usuario invitado. Lo mismo
+la API: lo que entra con una llave es del dueño de la llave, y un agente con la tuya no ve
+ni toca lo de nadie más. Los crons (sync,
 publicación, comentarios) siguen recorriendo *todo* el despliegue sin filtrar por
-dueño — un cron por inquilino es otro subproyecto, no esta entrega. La llave de API
+dueño — un cron por inquilino es otro subproyecto, no esta entrega. La llave del despliegue
 (`SCHEDULE_API_KEY`) y la raíz pública (`/`) siguen siendo del admin. Y hasta la entrega
 3, dos usuarios todavía no pueden conectar la misma cuenta de la misma red: quien llega
 segundo recibe un aviso, no la cuenta de otro. Eso es entre dos usuarios distintos: un
@@ -826,7 +839,7 @@ Vercel y bajan con `vercel env pull .env.local`.
 | `X_CLIENT_SECRET` | El secreto de esa app | Junto con el anterior |
 | `CRON_SECRET` | Autoriza las corridas programadas (sync diario y publicación cada 5 minutos) | No — la pone Vercel solo, al declarar el cron |
 | `MIGRAR_PREVIEWS` | Que los previews migren la base | Solo cuando el preview tenga una base propia; contra la de producción, no |
-| `SCHEDULE_API_KEY` | Autoriza `POST /api/schedule/batch` (carga masiva), `DELETE /api/schedule/posts/{id}` (sacar lo programado), `GET /api/schedule/posts` (calendario) y `GET /api/metrics/posts` (métricas) | Sin ella los cuatro endpoints quedan cerrados; genérala igual que `CRON_SECRET` |
+| `SCHEDULE_API_KEY` | La llave del despliegue: abre `POST /api/schedule/batch` (carga masiva), `DELETE /api/schedule/posts/{id}` (sacar lo programado), `GET /api/schedule/posts` (calendario) y `GET /api/metrics/posts` (métricas) a nombre del admin. Es anterior a las llaves por usuario y sigue para el agente que ya la usa | No — sin ella los cuatro endpoints aceptan solo las llaves que cada usuario genera en Tu Cuenta; si la pones, genérala igual que `CRON_SECRET` |
 | `RESEND_API_KEY` | Manda los códigos de ingreso y el aviso de publicación fallida | Sí — sin ella nadie puede entrar al panel |
 | `PUBLISH_ALERT_TO` | A qué correo llega el aviso de fallo | Sin ella no se envía ningún email; el calendario sigue mostrando el fallo |
 | `PUBLISH_ALERT_FROM` | Remitente del aviso | Opcional; default `onboarding@resend.dev` |
@@ -869,12 +882,13 @@ motivo a la vista, un reintento escondía el error real hasta agotar los intento
 
 ### Guía para el editor de contenido
 
-`public/docs/api-editor.md` documenta ambos endpoints en detalle, escrito para que un
+`public/docs/api-editor.md` documenta los cuatro endpoints en detalle, escrito para que un
 LLM que crea contenido lo lea entero y no necesite explicaciones: contratos, reglas
 por red, todas las frases de error y qué significa cada métrica. Se sirve tal cual en
-<https://tu-parrilla.cl/docs/api-editor.md>. No contiene secretos — la clave
-viaja aparte — pero es público: si prefieres que no lo sea, muévelo fuera de
-`public/`.
+<https://tu-parrilla.cl/docs/api-editor.md>. No contiene secretos — la llave
+viaja aparte: cada usuario la genera en Tu Cuenta, y el botón que la copia pega al lado
+la dirección de la guía compacta — pero es público: si prefieres que no lo sea, muévelo
+fuera de `public/`.
 
 Al lado, para un LLM que llama a la API a ciegas y no tiene este repositorio delante:
 `public/docs/api.json` (el JSON Schema exacto del cuerpo del lote, con los límites que
@@ -883,9 +897,23 @@ con las frases de error literales y lo que Meta no permite en el mensaje privado
 prueba (`src/lib/docs-api.test.ts`) falla si cualquiera de los dos se aparta de las
 constantes reales del código.
 
+### La llave de la API
+
+Los cuatro endpoints de abajo piden el header `Authorization: Bearer <llave>`, y lo que
+hacen lo hacen a nombre del dueño de la llave: sus cuentas, sus posts, su zona. Valen dos
+clases de llave:
+
+- **Las de cada usuario** (`tp_…`), que se generan y se revocan en Tu Cuenta. Viven en
+  `llaves_api`, de la que solo se guarda el hash; cada uso anota la fecha en la fila.
+- **La del despliegue**, `SCHEDULE_API_KEY`, que actúa como el admin. Es la que existía
+  antes de las llaves por usuario y sigue andando para no romper al agente que ya la usa.
+
+Sin header, con una llave que no es ninguna de las dos o con una revocada: `401` con el
+cuerpo `No autorizado`. La lógica vive en `duenoDeLaLlave` (`src/lib/llaves.ts`).
+
 ### Carga masiva por API
 
-`POST /api/schedule/batch` con header `Authorization: Bearer <SCHEDULE_API_KEY>` y
+`POST /api/schedule/batch` con header `Authorization: Bearer <llave>` y
 cuerpo `{ "posts": [{ "fecha": "2026-09-03 10:00", "texto": "Hola", "redes": ["x"], "media": [] }] }`
 (máximo 50). Cada item elige su destino de dos formas: `cuentas` (identificadores de
 cuenta) o `redes` (nombres de red). Si la fila trae `cuentas`, esas mandan y `redes` se
@@ -912,7 +940,7 @@ coincide con ninguno se acepta como nombre de red — resuelta solo si la fila t
 
 ### Métricas por API
 
-`GET /api/metrics/posts` con el mismo `Authorization: Bearer <SCHEDULE_API_KEY>`.
+`GET /api/metrics/posts` con el mismo `Authorization: Bearer <llave>`.
 Parámetros opcionales: `desde` y `hasta` (`YYYY-MM-DD` en la zona horaria del dueño, la de Tu Cuenta; ambos
 inclusive; por defecto los últimos 30 días) y `red` (una de las conocidas).
 
@@ -943,8 +971,7 @@ que espera reintentarse), y
 `cuentaId`/`handle` de la cuenta — útil para recuperar el id de una cuenta que ya tiene
 algún destino programado. Para una cuenta recién conectada, que todavía no tiene
 ninguno, el id está en su tarjeta en **Los Fierros** (Cuentas, en Ajustes) del panel, con un botón para
-copiarlo: es la única superficie que no pide llave de API, solo la sesión de quien
-entra al panel.
+copiarlo: ahí no hace falta llave de API, solo la sesión de quien entra al panel.
 
 `DELETE /api/schedule/posts/{id}` con el mismo `Authorization` saca un post programado
 entero —destinos, media y regla— con la regla del panel, que comparten en
@@ -977,6 +1004,8 @@ src/
     tracking.ts            contexto de la visita desde headers
     analytics.ts           consultas del dashboard
     auth.ts                sesión del panel
+    llaves.ts              las llaves de API de cada usuario, y a nombre de quién entra cada petición
+    llaves-api.ts          cómo se ve, se guarda y se lee una llave (sin base: lo prueban los tests)
     empresa.ts             quién presta el servicio: lo leen la portada, privacidad y términos
     social/
       politica-youtube.ts  lo que las políticas de YouTube no dejan hacer con sus datos

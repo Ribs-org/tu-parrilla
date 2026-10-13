@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server'
-import { env } from '@/lib/env'
+import { duenoDeLaLlave } from '@/lib/llaves'
 import { BORRADO_YA_PUBLICADO } from '@/lib/schedule-api'
 import { borrarPostProgramado } from '@/lib/social/publish/borrar'
-import { adminId } from '@/lib/usuarios'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,20 +12,15 @@ export const dynamic = 'force-dynamic'
  * borrar la fila no despublica nada en la red, así que un post con algún destino ya
  * publicado o publicando se rechaza con la frase de siempre.
  *
- * `404` no distingue «no existe» de «no es del dueño» a propósito: la llave es del
- * despliegue y lo que entra por ella es del admin; nombrar la diferencia solo le diría a
- * quien no tiene la llave qué ids existen.
+ * `404` no distingue «no existe» de «no es del dueño» a propósito: lo que entra por una
+ * llave es de su dueño, y nombrar la diferencia le diría a quien tiene la llave de un
+ * usuario qué ids existen entre los posts de otro.
  */
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const key = env('SCHEDULE_API_KEY')
-  // Sin llave configurada el endpoint queda cerrado — molde del batch.
-  if (!key || request.headers.get('authorization') !== `Bearer ${key}`) {
-    return new NextResponse('No autorizado', { status: 401 })
-  }
+  const ownerId = await duenoDeLaLlave(request)
+  if (!ownerId) return new NextResponse('No autorizado', { status: 401 })
 
   const { id } = await params
-  // La llave de API es del despliegue, no de una persona: lo que entra por ahí es del admin.
-  const ownerId = await adminId()
 
   const resultado = await borrarPostProgramado(ownerId, id)
   if (resultado === 'no-existe') return NextResponse.json({ error: 'Ese post no existe.' }, { status: 404 })

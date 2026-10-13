@@ -1,18 +1,16 @@
 import { NextResponse } from 'next/server'
 import { MAX_BATCH_ITEMS, scheduleBatch, type BatchItem } from '@/lib/social/publish/batch'
-import { env } from '@/lib/env'
-import { adminId } from '@/lib/usuarios'
+import { duenoDeLaLlave } from '@/lib/llaves'
 
 export const dynamic = 'force-dynamic'
 // Downloads ride inside this function; same budget as the publish cron.
 export const maxDuration = 240
 
 export async function POST(request: Request) {
-  const key = env('SCHEDULE_API_KEY')
-  // Same discipline as the crons: without a key the endpoint stays shut.
-  if (!key || request.headers.get('authorization') !== `Bearer ${key}`) {
-    return new NextResponse('No autorizado', { status: 401 })
-  }
+  // Lo que entra por acá es del dueño de la llave: el usuario que la generó en Tu Cuenta,
+  // o el admin si es la del despliegue.
+  const ownerId = await duenoDeLaLlave(request)
+  if (!ownerId) return new NextResponse('No autorizado', { status: 401 })
 
   let posts: BatchItem[]
   try {
@@ -47,9 +45,6 @@ export async function POST(request: Request) {
       { status: 400 },
     )
   }
-
-  // La llave de API es del despliegue, no de una persona: lo que entra por ahí es del admin.
-  const ownerId = await adminId()
 
   // Rejected rows are data, not an endpoint failure — same rule as the cron report.
   const resultados = await scheduleBatch(ownerId, posts)

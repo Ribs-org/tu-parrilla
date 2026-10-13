@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server'
 import { SOCIAL_NETWORKS } from '@/db/schema'
-import { env } from '@/lib/env'
+import { duenoDeLaLlave } from '@/lib/llaves'
 import { buildMetricPost, parseRango } from '@/lib/metrics-api'
 import { attributesFor } from '@/lib/post-attributes'
 import { getPostRows } from '@/lib/posts'
-import { adminId, buscarPorId } from '@/lib/usuarios'
+import { buscarPorId } from '@/lib/usuarios'
 import { ZONA_POR_DEFECTO } from '@/lib/zona'
 
 export const dynamic = 'force-dynamic'
@@ -14,16 +14,10 @@ export const dynamic = 'force-dynamic'
 const MAX_POSTS = 2000
 
 export async function GET(request: Request) {
-  const key = env('SCHEDULE_API_KEY')
-  // Sin llave configurada el endpoint queda cerrado — molde del batch.
-  if (!key || request.headers.get('authorization') !== `Bearer ${key}`) {
-    return new NextResponse('No autorizado', { status: 401 })
-  }
-
   // El dueño antes que el rango: `desde`/`hasta` son días, y un día solo existe en una
-  // zona. La llave de API es del despliegue, no de una persona, así que el dueño es el
-  // admin y la zona, la suya (la de Tu Cuenta).
-  const ownerId = await adminId()
+  // zona. El dueño es el de la llave, y la zona, la suya (la de Tu Cuenta).
+  const ownerId = await duenoDeLaLlave(request)
+  if (!ownerId) return new NextResponse('No autorizado', { status: 401 })
   const zone = (await buscarPorId(ownerId))?.zona ?? ZONA_POR_DEFECTO
 
   const url = new URL(request.url)

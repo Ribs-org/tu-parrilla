@@ -6,14 +6,20 @@ El esquema formal está en `api.json` — léelo una vez y sabrás la forma exac
 sus tipos y sus límites numéricos; esta guía es la tarea: qué mandar, qué falla y cómo, y qué
 no existe.
 
+Base: `https://tu-parrilla.cl`. Las otras dos guías están al lado:
+`https://tu-parrilla.cl/docs/api-editor.md` y `https://tu-parrilla.cl/docs/api.json`.
+
 Dos endpoints de escritura: `POST /api/schedule/batch` programa, y `DELETE /api/schedule/posts/{id}` saca lo programado (sección 3b). Autenticación en todos los
 endpoints:
 
 ```
-Authorization: Bearer <SCHEDULE_API_KEY>
+Authorization: Bearer <tu llave>
 ```
 
-Sin ella, o con una incorrecta: `401` con el cuerpo `No autorizado`.
+La llave te la da la persona dueña de las cuentas, que la genera en su panel (las que salen
+de ahí empiezan con `tp_`). Todo lo que hagas con ella es a su nombre: sus cuentas, sus posts, su zona horaria.
+Sin ella, con una incorrecta o con una revocada: `401` con el cuerpo `No autorizado`. Un
+`401` con una llave que antes andaba es que la revocaron: no reintentes, pide una nueva.
 
 ## 1. El cuerpo mínimo que funciona
 
@@ -35,8 +41,8 @@ conectada de esa red; con dos, hay que usar `cuentas` con el identificador exact
 ## 2. Una sola petición: video, regla y documento
 
 ```bash
-curl -X POST https://www.vicente-pareja.cl/api/schedule/batch \
-  -H "Authorization: Bearer $SCHEDULE_API_KEY" \
+curl -X POST https://tu-parrilla.cl/api/schedule/batch \
+  -H "Authorization: Bearer $LLAVE_PARRILLA" \
   -H "Content-Type: application/json" \
   -d '{
     "posts": [
@@ -111,8 +117,8 @@ fila ya programada la programa otra vez.
 ## 3b. Sacar un post programado
 
 ```bash
-curl -X DELETE https://www.vicente-pareja.cl/api/schedule/posts/<id> \
-  -H "Authorization: Bearer $SCHEDULE_API_KEY"
+curl -X DELETE https://tu-parrilla.cl/api/schedule/posts/<id> \
+  -H "Authorization: Bearer $LLAVE_PARRILLA"
 ```
 
 `<id>` es el del post: el `postId` que `POST /api/schedule/batch` devolvió en esa fila, o el
@@ -153,8 +159,8 @@ hacer nada con ellos.
 ## 5. Trial reels de Instagram
 
 ```bash
-curl -X POST https://www.vicente-pareja.cl/api/schedule/batch \
-  -H "Authorization: Bearer $SCHEDULE_API_KEY" \
+curl -X POST https://tu-parrilla.cl/api/schedule/batch \
+  -H "Authorization: Bearer $LLAVE_PARRILLA" \
   -H "Content-Type: application/json" \
   -d '{
     "posts": [

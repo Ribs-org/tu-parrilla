@@ -46,6 +46,7 @@ import { tiktokConnector } from '@/lib/social/tiktok'
 import { TIKTOK_SIN_CUENTA, consultarCreador, type CreadorTikTok } from '@/lib/social/publish/tiktok-creador'
 import { COOKIE_PENDIENTE, LOGIN_VENCIDO, elegidas, leerPendiente } from '@/lib/social/pendiente'
 import { networkLabel } from '@/lib/networks'
+import { crearLlave, revocarLlave } from '@/lib/llaves'
 import { ARCHIVO_AJENO, ARCHIVO_FALTANTE, CUERPO_ILEGIBLE, parseMediaMovil, type MediaMovil } from '@/lib/mobile-api'
 import { esReservado } from '@/lib/slugs'
 import { cerrarSesiones, esChoqueDeUnicidad, invitar, pedir, quitar } from '@/lib/usuarios'
@@ -1346,4 +1347,29 @@ export async function guardarCuenta(_prev: FormState, formData: FormData): Promi
   revalidatePath('/admin')
   revalidatePath('/admin/cuenta')
   return { ok: true }
+}
+
+/* ------------------------------------------------------------ llaves de API -- */
+
+export type LlaveState = { error?: string; llave?: string; nombre?: string }
+
+/**
+ * Genera una llave a nombre de quien está en la sesión. La llave completa viaja de vuelta
+ * en el estado del formulario y es la única vez que se ve: la pantalla la muestra para
+ * copiarla, y al recargar ya no está —en la tabla vive solo su hash—.
+ */
+export async function generarLlaveApi(_prev: LlaveState, formData: FormData): Promise<LlaveState> {
+  const { id: ownerId } = await requireUser()
+  const nombre = String(formData.get('nombre') ?? '')
+  const resultado = await crearLlave(ownerId, nombre)
+  if ('error' in resultado) return { error: resultado.error }
+  revalidatePath('/admin/cuenta')
+  return { llave: resultado.llave, nombre: nombre.trim() }
+}
+
+export async function revocarLlaveApi(id: string): Promise<{ error?: string }> {
+  const { id: ownerId } = await requireUser()
+  await revocarLlave(ownerId, id)
+  revalidatePath('/admin/cuenta')
+  return {}
 }
