@@ -47,6 +47,8 @@ import { TIKTOK_SIN_CUENTA, consultarCreador, type CreadorTikTok } from '@/lib/s
 import { COOKIE_PENDIENTE, LOGIN_VENCIDO, elegidas, leerPendiente } from '@/lib/social/pendiente'
 import { networkLabel } from '@/lib/networks'
 import { crearLlave, revocarLlave } from '@/lib/llaves'
+import { camposDesdeFormulario, idDeBorrador, primero } from '@/lib/borrador'
+import { borrarBorrador, guardarBorrador, type MediaDeBorrador } from '@/lib/borradores'
 import { ARCHIVO_AJENO, ARCHIVO_FALTANTE, CUERPO_ILEGIBLE, parseMediaMovil, type MediaMovil } from '@/lib/mobile-api'
 import { esReservado } from '@/lib/slugs'
 import { cerrarSesiones, esChoqueDeUnicidad, invitar, pedir, quitar } from '@/lib/usuarios'
@@ -765,8 +767,69 @@ export async function createScheduledPost(_prev: FormState, formData: FormData):
     regla: reglaCheck.regla,
   })
 
+  // Si salió de un borrador, el borrador ya cumplió: se saca, atado al dueño. Después del
+  // post y no antes, para que un fallo al crearlo no se lleve también lo escrito.
+  const borradorId = idDeBorrador(formData.get('borradorId'))
+  if (borradorId) await borrarBorrador(ownerId, borradorId)
+
   revalidatePath('/admin/schedule')
   return { ok: true }
+}
+
+/* -------------------------------------------------------------- borradores -- */
+
+export type BorradorGuardado = { id?: string; perdido?: boolean; error?: string }
+
+/**
+ * Lo que el compositor manda mientras se escribe, cada vez que se detiene un momento. Sin
+ * `revalidatePath` a propósito: corre a cada pausa, y repintar la parrilla entera en cada
+ * una no le sirve a nadie. La parrilla se pone al día al cerrar el panel, que navega.
+ *
+ * La media se revisa como en `mediaYaSubida` salvo por la existencia de cada archivo: un
+ * HEAD por archivo en cada pausa es caro, y al programar se comprueba igual.
+ */
+export async function guardarBorradorAccion(formData: FormData): Promise<BorradorGuardado> {
+  const { id: ownerId, zona } = await requireUser()
+
+  let crudo: unknown
+  try {
+    crudo = JSON.parse(String(formData.get('mediaSubida') ?? '[]'))
+  } catch {
+    return { error: CUERPO_ILEGIBLE }
+  }
+  const lista = parseMediaMovil({ media: crudo })
+  if ('error' in lista) return { error: lista.error }
+  const base = basePublica()
+  for (const m of lista) {
+    const key = base ? keyDesdeUrl(base, m.url) : null
+    if (!key || !key.startsWith('scheduled/')) return { error: ARCHIVO_AJENO }
+  }
+  const nombres = Array.isArray(crudo) ? crudo : []
+  const media: MediaDeBorrador[] = lista.map((m, i) => {
+    const nombre = (nombres[i] as { nombre?: unknown } | undefined)?.nombre
+    return { ...m, nombre: typeof nombre === 'string' && nombre !== '' ? nombre : (m.url.split('/').pop() ?? '') }
+  })
+
+  const campos = camposDesdeFormulario(formData)
+  // La fecha del calendario sale del mismo campo y en la misma zona que al programar. Con
+  // «Ahora» no hay día en que ponerlo: el borrador queda sin fecha.
+  const fecha = primero(campos, 'cuandoAhora') === 'on' ? null : fromZonedInput(primero(campos, 'scheduledAt'), zona)
+
+  const resultado = await guardarBorrador(ownerId, {
+    id: idDeBorrador(formData.get('borradorId')),
+    campos,
+    fecha,
+    media,
+  })
+  return 'perdido' in resultado ? { perdido: true } : { id: resultado.id }
+}
+
+export async function descartarBorrador(id: string): Promise<{ error?: string }> {
+  const { id: ownerId } = await requireUser()
+  const borradorId = idDeBorrador(id)
+  if (borradorId) await borrarBorrador(ownerId, borradorId)
+  revalidatePath('/admin/schedule')
+  return {}
 }
 
 export async function updateScheduledPost(
@@ -1134,10 +1197,9 @@ export async function rescheduleTarget(targetId: string, localDatetime: string):
     .set({ status: 'scheduled', attemptCount: 0, lastError: null, containerId: null, updatedAt: new Date() })
     .where(and(eq(scheduledPostTargets.id, targetId), eq(scheduledPostTargets.status, 'failed')))
 
-  revalidatePath('/admin/schedule')
-  // El Fuego («Se quemó») muestra los mismos destinos quemados con el mismo botón: sin
+  // «Se quemó», arriba del calendario, muestra los mismos destinos con el mismo botón: sin
   // esto, la fila que se acaba de arreglar sigue pidiendo una acción que ya se hizo.
-  revalidatePath('/admin')
+  revalidatePath('/admin/schedule')
   return { ok: true }
 }
 

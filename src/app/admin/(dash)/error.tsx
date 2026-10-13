@@ -21,7 +21,7 @@ export default function PanelError({
   retry: () => void
 }) {
   // La salida de emergencia no sirve cuando la que se rompió es la pantalla de llegada.
-  const enElFuego = usePathname() === '/admin'
+  const enLaEntrada = usePathname() === '/admin/schedule'
 
   // El mensaje puede venir de una fila de la base o de la respuesta de una red: a la
   // consola, donde lo lee quien depura, y nunca a la pantalla.
@@ -40,9 +40,9 @@ export default function PanelError({
         <Button type="button" variant="primary" onClick={() => retry()}>
           Reintentar
         </Button>
-        {enElFuego ? null : (
-          <Link href="/admin" className="text-sm text-fg-muted transition-colors hover:text-fg">
-            Ir a {nombreDe('/admin')}
+        {enLaEntrada ? null : (
+          <Link href="/admin/schedule" className="text-sm text-fg-muted transition-colors hover:text-fg">
+            Ir a {nombreDe('/admin/schedule')}
           </Link>
         )}
       </div>

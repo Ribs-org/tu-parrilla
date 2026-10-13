@@ -31,6 +31,11 @@ Cómo se usa:
 - **Los Fierros: falsa alarma en X** (2026-10-13). La tarjeta dice «vence hoy» al conectar y
   a las dos horas queda gris, aunque X se renueva sola al publicar: falta eximirla en
   `estadoDelFierro` como a TikTok y YouTube (#154). Ver la auditoría, §1.4.
+- **En local no se puede entrar al panel sin Resend** (2026-10-13). `pedir()`
+  (`src/lib/usuarios.ts`) imprime el código en la consola del servidor justo para probar el
+  ingreso en local, pero si el correo no sale borra la fila del código, así que el código
+  impreso nunca sirve. Mientras tanto, en local se entra con `REVISION_CORREO` y
+  `REVISION_CODIGO`. El arreglo es no borrar la fila fuera de producción.
 - **Por revisar: el resto de la auditoría de la wiki de la UI** (2026-10-13). Al escribir
   `public/docs/ui/` salieron unos cuarenta defectos más —textos que nombran pantallas
   viejas, validaciones que dejan programar lo que va a fallar, borrar sin confirmar, números
@@ -46,7 +51,10 @@ Cómo se usa:
 - **La Parrilla abierta pide decenas de páginas `/admin/schedule/<id>` cada pocos
   segundos** (2026-10-04). En los logs de Vercel, unas 60 peticiones por tanda, una por cada
   corte del calendario: parece el prefetch de los `Link` combinado con un refresco
-  periódico. No rompe nada, pero gasta invocaciones y entierra los logs útiles.
+  periódico. No rompe nada, pero gasta invocaciones y entierra los logs útiles. El
+  2026-10-13, con el calendario como vista de entrada, se apagó el prefetch de los enlaces
+  al editor (calendario, lista y «Se quemó»); falta mirar en los logs si dejó de pasar y, si
+  no, buscar el refresco.
 
 ## Trámites con las plataformas
 

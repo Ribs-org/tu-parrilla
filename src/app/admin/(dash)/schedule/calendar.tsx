@@ -1,12 +1,15 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
 import type { ScheduledPost, ScheduledPostTarget } from '@/db/schema'
 import { dayLabel, dayKey, groupByDay, hourLabel, weekDays, weekLabel } from '@/lib/schedule-week'
 import { NOMBRE_COCCION, calorDelDia, coccionDe, type Coccion } from '@/lib/parrilla'
 import { cn } from '@/lib/utils'
 import { etiquetaDestino, motivoDestino, nombreDestino } from './etiqueta'
 import { Redes } from './redes'
+
+/** Un borrador con fecha, ya con su enlace: el calendario solo lo pone en su día. */
+export type BorradorEnCalendario = { id: string; href: string; fecha: Date; texto: string }
 
 type Item = {
   post: ScheduledPost
@@ -28,20 +31,32 @@ const CLASE_COCCION: Record<Coccion, string> = {
   quemada: 'corte-quemada',
 }
 
+/**
+ * La semana de lunes a domingo: la vista con que abre La Parrilla.
+ *
+ * Además de los cortes, cada día que no pasó trae un «+» que abre el compositor con ese día
+ * puesto (`nuevoEnDia`), y los borradores con fecha aparecen en el suyo con borde punteado.
+ * Los borradores no cuentan para el calor del día: todavía no van a salir.
+ */
 export function WeekCalendar({
   monday,
   items,
+  borradores = [],
   zone,
   volver,
   prevHref,
   nextHref,
+  nuevoEnDia,
 }: {
   monday: string
   items: Item[]
+  borradores?: BorradorEnCalendario[]
   zone: string
   volver: string
   prevHref: string
   nextHref: string
+  /** El enlace que abre el compositor en ese día. */
+  nuevoEnDia: (dia: string) => string
 }) {
   const days = weekDays(monday)
   const today = dayKey(new Date(), zone)
@@ -50,6 +65,12 @@ export function WeekCalendar({
     items
       .map((item) => ({ ...item, scheduledAt: item.post.scheduledAt }))
       .filter((item) => week.has(dayKey(item.scheduledAt, zone))),
+    zone,
+  )
+  const borradoresPorDia = groupByDay(
+    borradores
+      .map((b) => ({ ...b, scheduledAt: b.fecha }))
+      .filter((b) => week.has(dayKey(b.scheduledAt, zone))),
     zone,
   )
 
@@ -72,11 +93,19 @@ export function WeekCalendar({
           <ChevronRight className="h-4 w-4" aria-hidden />
         </Link>
       </div>
-      <div className="-mx-1 overflow-x-auto px-1">
+      {/*
+        `relative` no es decorativo: los textos `sr-only` de adentro (el «+» de cada día) se
+        posicionan en absoluto, y sin un ancestro posicionado dentro de esta caja se escapaban
+        de su scroll y estiraban la página entera al ancho de la semana en el teléfono.
+      */}
+      <div className="relative -mx-1 overflow-x-auto px-1">
         <div className="grid min-w-[52rem] grid-cols-7 gap-2">
           {days.map((day, index) => {
             const cortes = grouped.get(day) ?? []
+            const enBorrador = borradoresPorDia.get(day) ?? []
             const calor = calorDelDia(cortes.length)
+            // En un día que ya pasó no se programa: ni el «+» ni la invitación a prenderlo.
+            const abierto = day >= today
             return (
               <div key={day} className="flex flex-col gap-2">
                 <div className="flex items-baseline justify-between gap-2">
@@ -99,6 +128,16 @@ export function WeekCalendar({
                   >
                     {ROTULO_CALOR[calor]}
                   </span>
+                  {abierto ? (
+                    <Link
+                      href={nuevoEnDia(day)}
+                      scroll={false}
+                      className="-my-1 rounded p-0.5 text-fg-faint transition-colors hover:bg-white/[0.08] hover:text-fg"
+                    >
+                      <Plus className="h-3.5 w-3.5" aria-hidden />
+                      <span className="sr-only">Programar el {dayLabel(day, index)}</span>
+                    </Link>
+                  ) : null}
                 </div>
 
                 <div
@@ -112,10 +151,18 @@ export function WeekCalendar({
                     day === today && 'ring-1 ring-inset ring-white/25',
                   )}
                 >
-                  {cortes.length === 0 ? (
-                    <p className="text-center text-[0.72rem] italic text-fg-muted">
-                      No hay nada puesto. Préndela.
-                    </p>
+                  {cortes.length === 0 && enBorrador.length === 0 ? (
+                    abierto ? (
+                      <Link
+                        href={nuevoEnDia(day)}
+                        scroll={false}
+                        className="text-center text-[0.72rem] italic text-fg-muted underline-offset-2 hover:text-fg hover:underline"
+                      >
+                        No hay nada puesto. Préndela.
+                      </Link>
+                    ) : (
+                      <p className="text-center text-[0.72rem] italic text-fg-muted">No hay nada puesto.</p>
+                    )
                   ) : (
                     cortes.map(({ post, targets, media }) => {
                       // Misma precedencia que antes, solo que ahora vestida: un fallo en
@@ -130,6 +177,9 @@ export function WeekCalendar({
                         <Link
                           key={post.id}
                           href={`/admin/schedule/${post.id}?volver=${encodeURIComponent(volver)}`}
+                          // Sin prefetch: una semana cargada son decenas de tarjetas, y cada
+                          // una pedía su editor por adelantado (ver `docs/pendientes.md`).
+                          prefetch={false}
                           // El detalle por red, que antes vivía en el `title` de cada
                           // punto de color. La cocción dice que algo falló; esto dice
                           // cuál, sin tener que entrar al editor.
@@ -213,6 +263,27 @@ export function WeekCalendar({
                       )
                     })
                   )}
+                  {/*
+                    Los borradores, después de los cortes y con borde punteado: no están en la
+                    parrilla todavía, solo apartados para ese día. Abren el compositor, no el
+                    editor.
+                  */}
+                  {enBorrador.map((b) => (
+                    <Link
+                      key={b.id}
+                      href={b.href}
+                      scroll={false}
+                      prefetch={false}
+                      className="block rounded-md border border-dashed border-white/30 p-2 transition-colors hover:border-white/60"
+                    >
+                      <p className="font-titulo text-[0.6rem] tracking-[0.12em] text-fg-muted">
+                        Borrador · {hourLabel(b.fecha, zone)}
+                      </p>
+                      <p className="mt-1 line-clamp-2 text-[0.75rem] leading-snug text-fg-muted">
+                        {b.texto || '(sin texto)'}
+                      </p>
+                    </Link>
+                  ))}
                 </div>
               </div>
             )

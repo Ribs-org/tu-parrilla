@@ -47,7 +47,7 @@ De arriba abajo:
    TikTok y YouTube nunca se ponen en ámbar, porque se renuevan solos; Facebook tampoco, porque el permiso de una página no vence. X / Twitter sí, y por otro motivo: ver «Para conectar X / Twitter».
 2. **El nombre de la cuenta**: el @usuario en Instagram, el nombre de la página en Facebook, el título del canal en YouTube, el nombre visible en TikTok, el usuario en Threads y en X. Si la red no dio nombre, se ve el número que la red le da a la cuenta, o «Sin nombre». Al lado, un triángulo rojo si la última sincronización falló, un visto verde si está conectada y sin error, y nada si no tiene credencial.
 3. En letra chica, el identificador que la red le da a la cuenta. Es solo informativo.
-4. Debajo, el **id de la cuenta en Tu Parrilla**, con un ícono de copiar. Es un botón: al apretarlo copia el id y el ícono pasa a un visto durante dos segundos. Al pasar el mouse dice «Id de cuenta — para «cuentas» en la carga masiva o la API».
+4. Debajo, el **id de la cuenta en Tu Parrilla**, con un ícono de copiar. Es un botón: al apretarlo copia el id y el ícono pasa a un visto durante dos segundos. Al pasar el mouse dice «Id de cuenta — para «cuentas» en el CSV o la API».
 5. Cuándo se trajeron sus números por última vez: «Sincronizado recién», «Sincronizado hace 3 horas», «Sincronizado ayer», «Sincronizado hace 4 días»… o «Sin sincronizar» si nunca se trajeron. Threads y X / Twitter dicen siempre «Sin sincronizar», porque de ellas no se traen números.
 6. «Sin credencial», solo si la cuenta no está conectada: se desconectó, o quedó de una conexión anterior.
 7. Solo con el fierro en ámbar: «Este fierro se está enfriando: la conexión vence hoy. Reconéctala antes de que se apague.» En lugar de «hoy» puede decir «mañana», «pasado mañana» o «dentro de 5 días».
@@ -155,7 +155,7 @@ La tarjeta no desaparece. Una cuenta desconectada deja de traer números y comen
 1. En la tarjeta, aprieta el id que tiene el ícono de copiar (el segundo número de la tarjeta, no el de arriba).
 2. El ícono pasa a un visto por dos segundos: quedó copiado. Si no cambia, no se copió.
 
-Ese id es el que piden el campo «cuentas» de la carga masiva en [La Parrilla](la-parrilla.md) y la API (ver [la guía de la API](../api-llm.md)) cuando hay dos cuentas conectadas de la misma red. El número de arriba, el de la red, no sirve para eso.
+Ese id es el que piden la columna `cuentas` de la carga por CSV (el botón «Subir CSV» de [La Parrilla](la-parrilla.md)) y la API (ver [la guía de la API](../api-llm.md)) cuando hay dos cuentas conectadas de la misma red. El número de arriba, el de la red, no sirve para eso.
 
 ### Para fusionar una cuenta repetida
 

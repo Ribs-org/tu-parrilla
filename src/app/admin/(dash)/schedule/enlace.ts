@@ -5,8 +5,14 @@
 const UN_SOLO_USO = new Set([
   // El desenlace de una vuelta de OAuth.
   'mensaje',
-  // La orden de abrir el compositor con que llega «Poner al fuego» desde El Fuego.
+  // Los que abren el panel lateral: el compositor (nuevo, en un día o con un borrador), la
+  // lista de borradores y la carga por CSV. Cerrar el panel es navegar sin ellos.
   'componer',
+  'dia',
+  'borrador',
+  'panel',
+  // El aviso de que algo se programó, que se lee una vez al volver del compositor.
+  'hecho',
 ])
 
 /**

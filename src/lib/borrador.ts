@@ -1,0 +1,113 @@
+// Las piezas puras de los borradores del compositor: qué se guarda de un formulario, cuándo
+// hay algo que valga la pena guardar, y cómo se lee de vuelta cada campo para volver a
+// llenar el formulario. Sin base ni `server-only`: lo usan el compositor (navegador), la
+// acción que guarda y los tests.
+import { addDays, dayKey } from './schedule-week'
+
+/** Los valores de un formulario, nombre por nombre, tal como los entrega `FormData.getAll`. */
+export type Campos = Record<string, string[]>
+
+/**
+ * Los campos que no son del post sino del transporte: la media va aparte (en su tabla, por
+ * el barrido de huérfanos), el id del borrador es la llave misma, y React planta los suyos
+ * con `$` adelante cuando una acción va directa a un `<form>`.
+ */
+const INTERNOS = new Set(['mediaSubida', 'borradorId'])
+
+/** Todo lo que el formulario dice, menos archivos y campos de transporte. */
+export function camposDesdeFormulario(formData: FormData): Campos {
+  const campos: Campos = {}
+  for (const [nombre, valor] of formData.entries()) {
+    if (typeof valor !== 'string' || INTERNOS.has(nombre) || nombre.startsWith('$')) continue
+    ;(campos[nombre] ??= []).push(valor)
+  }
+  return campos
+}
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+/**
+ * El id de un borrador tal como llega del navegador, o null si no tiene forma de id. Va
+ * antes de cualquier consulta: Postgres rechaza con un error —no con cero filas— un texto
+ * que no es uuid en una columna uuid.
+ */
+export function idDeBorrador(valor: unknown): string | null {
+  return typeof valor === 'string' && UUID.test(valor) ? valor : null
+}
+
+/** El primer valor de un campo, o cadena vacía. */
+export function primero(campos: Campos, nombre: string): string {
+  return campos[nombre]?.[0] ?? ''
+}
+
+/**
+ * Si un formulario tiene algo que guardar. Abrir el compositor y cerrarlo sin escribir no
+ * deja un borrador vacío: hace falta texto, un archivo o una palabra clave. Elegir cuentas
+ * o una fecha sola no alcanza, porque eso viene puesto solo (la cuenta única, el día en
+ * que se hizo clic en el calendario).
+ */
+export function tieneContenido(campos: Campos, archivos: number): boolean {
+  return primero(campos, 'caption').trim() !== '' || archivos > 0 || primero(campos, 'reglaPalabra').trim() !== ''
+}
+
+/** Lo que el bloque de TikTok de una cuenta tenía elegido, para volver a mostrarlo. */
+export type TikTokInicial = {
+  borrador: boolean
+  privacidad: string
+  comentarios: boolean
+  duo: boolean
+  pegar: boolean
+  comercial: 'no' | 'marca_propia' | 'patrocinado'
+}
+
+export function tiktokInicial(campos: Campos, cuentaId: string): TikTokInicial | null {
+  if (!(`tiktokModo:${cuentaId}` in campos)) return null
+  const comercial = primero(campos, `tiktokComercial:${cuentaId}`)
+  return {
+    borrador: primero(campos, `tiktokModo:${cuentaId}`) === 'borrador',
+    privacidad: primero(campos, `tiktokPrivacidad:${cuentaId}`),
+    comentarios: primero(campos, `tiktokComentarios:${cuentaId}`) === 'on',
+    duo: primero(campos, `tiktokDuo:${cuentaId}`) === 'on',
+    pegar: primero(campos, `tiktokPegar:${cuentaId}`) === 'on',
+    comercial: comercial === 'marca_propia' || comercial === 'patrocinado' ? comercial : 'no',
+  }
+}
+
+/** Si el reel de esa cuenta de Instagram iba como trial reel. */
+export function instagramTrialInicial(campos: Campos, cuentaId: string): boolean {
+  return primero(campos, `instagramTrial:${cuentaId}`) === 'on'
+}
+
+/** La regla de palabra clave guardada, o null si no tenía palabra. */
+export function reglaInicial(campos: Campos): { palabra: string; mensaje: string; respuestaPublica: string } | null {
+  const palabra = primero(campos, 'reglaPalabra')
+  if (palabra.trim() === '') return null
+  return { palabra, mensaje: primero(campos, 'reglaMensaje'), respuestaPublica: primero(campos, 'reglaRespuesta') }
+}
+
+/** Las primeras líneas del texto, para la lista de borradores y el calendario. */
+export function textoDe(campos: Campos): string {
+  return primero(campos, 'caption').trim()
+}
+
+/** La hora con que nace un post creado desde un día del calendario, si no hay otra. */
+export const HORA_POR_DEFECTO = '09:00'
+
+/**
+ * El valor inicial del campo «Fecha y hora» cuando se programa desde un día del
+ * calendario: ese día a las 9, o, si el día es hoy y las 9 ya pasaron, la hora en punto
+ * siguiente. Si esa hora ya cae mañana, el día queda sin hora sugerida (vacío) en vez de
+ * proponer otro día: se hizo clic en hoy. Un día pasado no tiene fecha que sugerir.
+ */
+export function fechaParaDia(dia: string, ahora: Date, zona: string): string {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dia) || addDays(dia, 0) !== dia) return ''
+  const hoy = dayKey(ahora, zona)
+  if (dia < hoy) return ''
+  if (dia > hoy) return `${dia}T${HORA_POR_DEFECTO}`
+  const hora = Number(
+    new Intl.DateTimeFormat('en-GB', { timeZone: zona, hour: '2-digit', hour12: false }).format(ahora),
+  )
+  const siguiente = Math.max(hora + 1, Number(HORA_POR_DEFECTO.slice(0, 2)))
+  if (siguiente > 23) return ''
+  return `${dia}T${String(siguiente).padStart(2, '0')}:00`
+}

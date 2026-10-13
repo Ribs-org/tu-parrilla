@@ -10,7 +10,7 @@ quede con tus números.
 | --- | --- |
 | `/` | La página principal del dueño del dominio. Cada usuario tiene una principal, pero solo la del admin se sirve en la raíz |
 | `/<slug>` | La página de un usuario. Cada dominio sirve solo las de su dueño; el del producto las sirve todas |
-| `/admin` | Tu panel: El Fuego, lo que pide una acción hoy; adentro, la parrilla, los números y el editor. Se abre en el dominio del producto: en cualquier otro, `/admin` e `/ingresar` redirigen ahí con la misma ruta |
+| `/admin` | Tu panel: entra a La Parrilla, el calendario con lo que se quemó arriba; adentro, los números, los comentarios y el editor. Se abre en el dominio del producto: en cualquier otro, `/admin` e `/ingresar` redirigen ahí con la misma ruta |
 | `/borrado/<código>` | El estado de un borrado que pidió Meta: cuándo fue y cuántas cuentas. Pública, sin sesión; el código es la llave |
 | `/docs/…` | Las guías para LLMs, públicas y sin sesión: la de la API (`api-llm.md`, `api-editor.md`, `api.json`) y la wiki de la interfaz (`ui/index.md`), para guiar a quien se pierde en el panel |
 | `/api/social/meta/baja` | `POST` de Meta cuando alguien quita la app desde Facebook: deja sin credencial sus cuentas de Instagram y Facebook |
@@ -132,8 +132,8 @@ Abre el sitio: ahora se ve un perfil de ejemplo.
 Entra en `/ingresar` con tu correo (el de `ADMIN_EMAIL`): te llega un código de seis
 dígitos que vale diez minutos.
 
-El panel tiene cinco pestañas —El Fuego, La Parrilla (Calendario), Los Cortes
-(Contenido), La Mesa (Comentarios) y Los Números (Analítica)— y el engranaje de Ajustes,
+El panel tiene cuatro pestañas —La Parrilla (Calendario), Los Cortes (Contenido), La Mesa
+(Comentarios) y Los Números (Analítica)— y el engranaje de Ajustes,
 con Los Fierros (Cuentas), La Vitrina (Perfiles), Los Maestros (Usuarios, solo el admin) y
 Tu Cuenta. Las rutas no cambiaron. Cada pantalla lleva su subtítulo en llano por si el
 nombre no dice nada.
@@ -142,8 +142,8 @@ En **Tu Cuenta** (`/admin/cuenta`) cambias dos cosas tuyas: el nombre con el que
 y tu zona horaria. La zona es de cada usuario, no del sitio: naces con la de
 `SITE_TIMEZONE` y la cambias cuando quieras, y debajo del selector se ve qué hora es en la
 tuya ahora mismo, calculada en el servidor. El correo con el que entras no se cambia desde
-ahí. Tu zona manda en el panel —El Fuego, el calendario, la cola, el editor de un corte y
-las ventanas de los links— y en lo que guardas desde ahí: si escribes «19:00», son las
+ahí. Tu zona manda en el panel —el calendario, la lista, el editor de un corte y las
+ventanas de los links— y en lo que guardas desde ahí: si escribes «19:00», son las
 19:00 tuyas. También manda por dentro: Los Números y Los Cortes agrupan los días en tu
 zona.
 
@@ -172,16 +172,24 @@ Fuera del panel, «el dueño» no siempre eres tú, así que conviene el detalle
 
 `SITE_TIMEZONE` solo queda como la zona con la que naces y la del sitio público.
 
-**El Fuego es la entrada**, y muestra solo lo que pide una acción hoy: los próximos siete
-días con su carga, los cortes de hoy —hora, logos de sus redes, el texto en una línea y
-cómo van—, lo que se quemó con el motivo y el botón para darle hora nueva, el botón de
-poner algo al fuego, y al pie cuántos cortes salieron ayer. Lo que no pide una acción hoy
-está un clic más adentro y no se perdió: el tráfico, los links, el embudo y qué contenido
-te trae gente viven en **Los Números**, y tus páginas públicas en **La Vitrina**. Las
-miradas de ayer solo aparecen si la sincronización ya trajo las métricas de esos cortes;
-un cero inventado diría «nadie miró» cuando lo cierto es «todavía no se sabe». Y sin
-ninguna red conectada El Fuego no dibuja nada de eso: una sola tarjeta que te manda a Los
-Fierros, porque hasta ahí no hay nada que poner al fuego.
+**La Parrilla es la entrada** (`/admin` lleva ahí). Arriba va lo único que pide una acción
+sin que la busques: lo que se quemó, con su motivo y el botón para darle hora nueva; sin
+ninguna red conectada, una tarjeta que te manda a Los Fierros. Debajo, el calendario de la
+semana —la lista queda a un clic—, con un «+» en cada día que abre el compositor con ese
+día puesto. Al pie, cuántos cortes salieron ayer; las miradas solo si la sincronización ya
+trajo sus métricas, porque un cero inventado diría «nadie miró» cuando lo cierto es
+«todavía no se sabe». Lo que no pide una acción está un clic más adentro: el tráfico, los
+links y qué contenido te trae gente viven en **Los Números**, y tus páginas públicas en
+**La Vitrina**.
+
+**Componer** pasa en un panel que se abre desde la derecha con «+ Nueva publicación», sin
+perder de vista el calendario; ahí mismo están «Subir CSV» y «Borradores». Lo que escribes
+se guarda solo como **borrador** un segundo después de la última tecla, como un correo, y los
+archivos se suben apenas los eliges para que el borrador los conserve. «Programar» lo
+convierte en publicación y lo saca de los borradores; «Descartar» lo borra. Los borradores
+con fecha aparecen en su día del calendario con borde punteado. Viven en sus propias tablas
+(`borradores` y `borrador_media`): el publicador y la API no los ven. El porqué de todo
+esto está en `docs/superpowers/specs/2026-10-13-parrilla-entrada-y-borradores-design.md`.
 
 Solo entran los correos invitados; desde **Los Maestros** (Usuarios, dentro de Ajustes),
 visible para el admin, invitas a más gente. Ya adentro cambias foto, bio, colores, links y
@@ -200,8 +208,8 @@ borra su página, y las dos cosas pasan juntas o no pasa ninguna.
 Los dos perfiles de ejemplo están para que los edites, no para que los borres y empieces
 de cero.
 
-Cada fila de cada tabla (perfiles, cuentas, posts, comentarios, ajustes, llaves de API)
-tiene dueño: el panel solo te muestra lo tuyo, nunca lo de otro usuario invitado. Lo mismo
+Cada fila de cada tabla (perfiles, cuentas, posts, borradores, comentarios, ajustes, llaves
+de API) tiene dueño: el panel solo te muestra lo tuyo, nunca lo de otro usuario invitado. Lo mismo
 la API: lo que entra con una llave es del dueño de la llave, y un agente con la tuya no ve
 ni toca lo de nadie más. Los crons (sync,
 publicación, comentarios) siguen recorriendo *todo* el despliegue sin filtrar por
@@ -457,10 +465,9 @@ texto aparte; en el teléfono, sin poder tocarse y con «reconéctala» al lado 
 donde antes se leía solo la red —el calendario, la cola, el editor, y en el teléfono el
 Calendario y el Resumen— ahora se leen la red **y** el handle: `Instagram · @vicenteclips`.
 Las dos cosas, porque casi ninguna de esas pantallas dibuja un icono de la red —el
-calendario, la cola y El Fuego son la excepción: el calendario con un logo por destino bajo
-la hora del corte, la cola con ese mismo logo junto al handle y el estado, El Fuego con él
-en cada fila de hoy y de lo quemado, y en las tres el handle en el `title` o al lado del
-icono—, así que en el resto (el editor, y en el teléfono el Calendario y el Resumen) el
+calendario, la cola y «Se quemó» son la excepción: el calendario con un logo por destino
+bajo la hora del corte, la cola con ese mismo logo junto al handle y el estado, «Se quemó»
+con él en cada fila, y en las tres el handle en el `title` o al lado del icono—, así que en el resto (el editor, y en el teléfono el Calendario y el Resumen) el
 handle sigue siendo lo que distingue cada destino, y la red sola no distingue dos cuentas
 de la misma red en el mismo corte.
 
@@ -1023,6 +1030,8 @@ src/
     auth.ts                sesión del panel
     llaves.ts              las llaves de API de cada usuario, y a nombre de quién entra cada petición
     llaves-api.ts          cómo se ve, se guarda y se lee una llave (sin base: lo prueban los tests)
+    borradores.ts          los borradores del compositor: guardar, cargar, listar y borrar, siempre por dueño
+    borrador.ts            qué se guarda de un formulario y cómo se restaura (sin base)
     empresa.ts             quién presta el servicio: lo leen la portada, privacidad y términos
     social/
       politica-youtube.ts  lo que las políticas de YouTube no dejan hacer con sus datos

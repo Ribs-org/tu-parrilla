@@ -11,9 +11,8 @@ post, las visitas que llegan por él se le cuentan a ese post. Es la pantalla pa
 
 ## Cómo se llega
 
-- En la barra de arriba, la pestaña «Los Cortes» (la tercera: «El Fuego», «La Parrilla»,
-  «Los Cortes», «La Mesa», «Los Números»). En un teléfono, si no se ve, la barra se desliza
-  hacia el lado.
+- En la barra de arriba, la pestaña «Los Cortes» (la segunda: «La Parrilla», «Los Cortes»,
+  «La Mesa», «Los Números»). En un teléfono, si no se ve, la barra se desliza hacia el lado.
 - Desde [Los Números](los-numeros.md), en el panel «Qué contenido te trae gente», el enlace
   «Ver por post →». Llega con los filtros de siempre, no con los que tenía Los Números.
 - Apretar la pestaña estando ya en la pantalla la deja como al entrar: 30 días, todos los
@@ -354,7 +353,7 @@ por API: ver `GET /api/metrics/posts` en [la guía de la API](../api-editor.md).
 | «La etiqueta no puede quedar vacía.» | Lo escrito quedó vacío después de limpiar los caracteres no permitidos (por ejemplo, solo emojis). | Escribir letras o números. |
 | «Otra pieza de contenido ya usa esa etiqueta.» | Dos publicaciones no pueden compartir etiqueta. | Elegir otra. |
 | «No se pudo guardar. Intenta de nuevo.» | Falló el guardado. | Volver a intentar. |
-| «Algo se rompió» y «No fue nada que hicieras: una consulta no respondió. Vuelve a intentarlo; el detalle quedó en la consola del navegador.» | Una consulta de la pantalla falló. | Apretar «Reintentar»; si sigue, «Ir a El Fuego». |
+| «Algo se rompió» y «No fue nada que hicieras: una consulta no respondió. Vuelve a intentarlo; el detalle quedó en la consola del navegador.» | Una consulta de la pantalla falló. | Apretar «Reintentar»; si sigue, «Ir a La Parrilla». |
 
 Mientras la pantalla carga se ven rectángulos grises sin texto: es la carga, no un error.
 

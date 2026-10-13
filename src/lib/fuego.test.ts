@@ -1,15 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { formatNumber } from './utils'
-import {
-  avisoDelSiguiente,
-  cortesDeHoy,
-  horaConDia,
-  miradasDe,
-  pieDeAyer,
-  quemados,
-  siguienteCorte,
-  type Corte,
-} from './fuego'
+import { horaConDia, miradasDe, pieDeAyer, quemados, type Corte } from './fuego'
 
 const ZONE = 'America/Santiago'
 // 29 de septiembre de 2026, 15:00 en Chile (UTC-3 en horario de verano).
@@ -26,46 +17,6 @@ const destino = (status: string, lastError: string | null = null): Corte['target
   externalId: null,
   opciones: null,
   lastError,
-})
-
-describe('cortesDeHoy', () => {
-  it('es lo programado para el día de hoy en la zona que recibe, en orden de hora, salido o no', () => {
-    const manana = corte('m', '2026-09-30T12:00:00Z')
-    const tarde = corte('t', '2026-09-29T22:00:00Z') // 19:00 en Chile
-    const ya = corte('y', '2026-09-29T13:00:00Z') // 10:00 en Chile, ya pasó
-    const ayerNoche = corte('a', '2026-09-29T02:30:00Z') // 23:30 del 28 en Chile
-    expect(cortesDeHoy([manana, tarde, ya, ayerNoche], AHORA, ZONE).map((c) => c.post.id)).toEqual(['y', 't'])
-  })
-})
-
-describe('siguienteCorte', () => {
-  it('el primero después de ahora, o null si la parrilla está fría hacia adelante', () => {
-    const pasado = corte('p', '2026-09-29T13:00:00Z')
-    const proximo = corte('n', '2026-10-02T12:00:00Z')
-    const lejano = corte('l', '2026-10-05T12:00:00Z')
-    expect(siguienteCorte([lejano, pasado, proximo], AHORA)?.post.id).toBe('n')
-    expect(siguienteCorte([pasado], AHORA)).toBeNull()
-  })
-})
-
-describe('avisoDelSiguiente', () => {
-  it('mañana se dice «mañana»; más allá, el día con su mes', () => {
-    // «mar 30» obliga a mirar un calendario para entender que es mañana, y la ventana de
-    // El Fuego llega a treinta días: sin el mes, «mar 3» no dice de cuál.
-    expect(avisoDelSiguiente(new Date('2026-09-30T13:00:00Z'), AHORA, ZONE)).toBe(
-      'El siguiente sale mañana a las 10:00.',
-    )
-    expect(avisoDelSiguiente(new Date('2026-10-23T12:15:00Z'), AHORA, ZONE)).toBe(
-      'El siguiente sale el vie 23 de oct a las 09:15.',
-    )
-  })
-
-  it('el día es el de la zona que recibe, no el del servidor', () => {
-    // 02:30 UTC del 1 de octubre son las 23:30 del 30 de septiembre en Chile: mañana.
-    expect(avisoDelSiguiente(new Date('2026-10-01T02:30:00Z'), AHORA, ZONE)).toBe(
-      'El siguiente sale mañana a las 23:30.',
-    )
-  })
 })
 
 describe('horaConDia', () => {

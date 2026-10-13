@@ -1,4 +1,4 @@
-import { getDb, links, profiles, reglasClave, scheduledPostMedia, scheduledPosts } from '@/db'
+import { borradorMedia, getDb, links, profiles, reglasClave, scheduledPostMedia, scheduledPosts } from '@/db'
 import { basePublica, borrar, keyDesdeUrl, listar, type ObjetoAlmacenado } from '@/lib/storage'
 
 /**
@@ -81,6 +81,9 @@ export const COLUMNAS_DE_ARCHIVO = [
   { tabla: 'scheduled_posts', columna: 'cover_url', ref: scheduledPosts.coverUrl },
   { tabla: 'scheduled_post_media', columna: 'blob_url', ref: scheduledPostMedia.blobUrl },
   { tabla: 'reglas_clave', columna: 'documento_url', ref: reglasClave.documentoUrl },
+  // La media de los borradores: el compositor la sube apenas se elige, y el borrador puede
+  // esperar días. Sin esta línea el barrido la borraría a la hora.
+  { tabla: 'borrador_media', columna: 'blob_url', ref: borradorMedia.blobUrl },
 ] as const
 
 export async function urlsReferenciadas(): Promise<Set<string>> {
@@ -89,7 +92,7 @@ export async function urlsReferenciadas(): Promise<Set<string>> {
   const db = getDb()
   const urls = new Set<string>()
   // De a una y con su línea: una de estas lecturas no volvía nunca (octubre de 2026) y,
-  // en paralelo, el log no decía cuál. Son seis consultas chicas; en serie no cuesta nada.
+  // en paralelo, el log no decía cuál. Son consultas chicas; en serie no cuesta nada.
   for (const c of COLUMNAS_DE_ARCHIVO) {
     const desde = Date.now()
     const filas = await db.select({ valor: c.ref }).from(c.ref.table)

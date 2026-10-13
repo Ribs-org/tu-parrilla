@@ -87,9 +87,8 @@ function dowDe(key: string): string {
 /**
  * El rótulo de un día suelto, «vie 2 de oct», sin saber su posición en ninguna semana.
  *
- * Lo necesita El Fuego, que nombra días que caen en cualquier parte: el siguiente corte
- * —hasta treinta días adelante— y los quemados, que no tienen ventana ninguna. El mes no
- * es opcional por eso mismo: «mar 3» a secas no dice de qué mes es. Va abreviado y en
+ * Lo necesitan «Se quemó», que no tiene ventana ninguna, y la lista de borradores, que
+ * nombra días que caen en cualquier parte. El mes no es opcional por eso mismo: «mar 3» a secas no dice de qué mes es. Va abreviado y en
  * minúscula, como en `weekLabel` («7 – 13 sep»).
  */
 export function dayLabelConMes(key: string): string {
@@ -97,32 +96,11 @@ export function dayLabelConMes(key: string): string {
 }
 
 /**
- * Los próximos `cuantos` días a partir de hoy, con su rótulo.
- *
- * El calendario reparte lunes a domingo; el termómetro de El Fuego mira hacia adelante
- * desde hoy, que es lo que sirve para decidir dónde poner lo próximo. Por eso el día de
- * la semana no puede venir de la posición en el arreglo como en `dayLabel`, y se saca
- * de la clave: es una fecha de calendario, así que leerla en UTC no la corre de día.
- */
-export function proximosDias(
-  desde: Date,
-  zone: string,
-  cuantos: number,
-): Array<{ clave: string; dia: string; numero: number }> {
-  const hoy = dayKey(desde, zone)
-  return Array.from({ length: cuantos }, (_, i) => {
-    const clave = addDays(hoy, i)
-    return { clave, dia: dowDe(clave), numero: Number(clave.slice(8)) }
-  })
-}
-
-/**
  * Cuántos hay por día. El mismo reparto que `groupByDay`, solo que contando.
  *
- * Es una función y no dos líneas repetidas en cada pantalla porque la usan el
- * termómetro de El Fuego, el aviso del compositor y el calendario, y tres maneras de
- * decidir a qué día pertenece una hora es como se llega a que se contradigan entre
- * ellas.
+ * Es una función y no dos líneas repetidas en cada pantalla porque la usan el aviso del
+ * compositor y el calendario, y dos maneras de decidir a qué día pertenece una hora es
+ * como se llega a que se contradigan entre ellas.
  */
 export function contarPorDia<T extends { scheduledAt: Date }>(
   items: T[],

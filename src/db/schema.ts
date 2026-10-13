@@ -579,6 +579,51 @@ export const ajustes = pgTable(
 ).enableRLS()
 
 /**
+ * Lo que alguien dejó a medio escribir en el compositor de La Parrilla. Se guarda solo
+ * mientras escribe, como un borrador de correo, y se borra al programarlo o descartarlo.
+ *
+ * Es estado del formulario, no una publicación: por eso vive aparte de `scheduled_posts` y
+ * ni el publicador ni la API lo ven. `campos` son los valores del formulario tal como los
+ * lee `createScheduledPost` (nombre → valores), y `fecha` es la de su campo «Fecha y hora»
+ * ya resuelta en la zona del dueño, que es lo que el calendario necesita para ponerlo en
+ * su día. Sin fecha, el borrador solo aparece en la lista de borradores.
+ */
+export const borradores = pgTable(
+  'borradores',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    ownerId: uuid('owner_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    campos: jsonb('campos').$type<Record<string, string[]>>().notNull().default({}),
+    fecha: timestamp('fecha', { withTimezone: true }),
+    creadoEn: timestamp('creado_en', { withTimezone: true }).notNull().defaultNow(),
+    actualizadoEn: timestamp('actualizado_en', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('borradores_owner_idx').on(t.ownerId)],
+).enableRLS()
+
+/**
+ * Los archivos de un borrador, ya subidos a R2: el compositor sube cada uno apenas se elige,
+ * para que el borrador lo conserve. Tabla y no un campo dentro de `campos` porque el
+ * barrido de huérfanos solo protege lo que una columna nombra (`storage-gc.ts`).
+ */
+export const borradorMedia = pgTable(
+  'borrador_media',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    borradorId: uuid('borrador_id')
+      .notNull()
+      .references(() => borradores.id, { onDelete: 'cascade' }),
+    blobUrl: text('blob_url').notNull(),
+    mediaType: text('media_type').$type<'image' | 'video'>().notNull(),
+    nombre: text('nombre').notNull(),
+    position: integer('position').notNull(),
+  },
+  (t) => [index('borrador_media_borrador_idx').on(t.borradorId)],
+).enableRLS()
+
+/**
  * Las llaves de API que un usuario genera en Tu Cuenta para dárselas a un programa —su
  * agente que edita videos, un script—. Quien llama con una actúa como su dueño.
  *
@@ -635,3 +680,5 @@ export type SolicitudBorrado = typeof solicitudesBorrado.$inferSelect
 export type Usuario = typeof users.$inferSelect
 export type CodigoIngreso = typeof codigosIngreso.$inferSelect
 export type LlaveApi = typeof llavesApi.$inferSelect
+export type Borrador = typeof borradores.$inferSelect
+export type BorradorMedia = typeof borradorMedia.$inferSelect

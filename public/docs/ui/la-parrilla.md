@@ -1,16 +1,19 @@
 # La Parrilla — lo que viene y cómo salió lo que ya se fue
 
-`/admin/schedule` es la pestaña «La Parrilla» de la barra del panel. El editor de cada
-publicación vive en `/admin/schedule/<id>`.
+`/admin/schedule` es la pestaña «La Parrilla», la primera de la barra del panel, y es la
+entrada del panel: `/admin` lleva acá. El editor de cada publicación vive en
+`/admin/schedule/<id>`.
 
-La Parrilla es el calendario de publicación. Aquí se programa un post para una o varias
-cuentas (Instagram, Facebook, YouTube, Threads, X y TikTok), se programan muchos de una vez
-con un CSV, y se ve cómo va cada uno —programado, saliendo, publicado o quemado— en una lista
-o en una semana. También es donde se corrige, se reintenta o se borra lo que falló. El panel
-llama «corte» a cada publicación programada, y «quemado» a lo que no salió. Todas las horas
-son las de la zona horaria que la persona eligió en [Tu Cuenta](tu-cuenta.md), aunque su
-computador esté en otra. Aparece aquí todo lo programado, venga de esta pantalla, de la
-[app del teléfono](app-movil.md) o de la API.
+La Parrilla es el calendario de publicación y la pantalla con que abre el panel. Aquí se
+programa un post para una o varias cuentas (Instagram, Facebook, YouTube, Threads, X y
+TikTok), se retoma lo que quedó a medio escribir (los borradores, que se guardan solos), se
+programan muchos de una vez con un CSV, y se ve cómo va cada uno —programado, saliendo,
+publicado o quemado— en una semana o en una lista. Arriba aparece lo que falló, para
+reprogramarlo, y al pie cuánto salió ayer. También es donde se corrige, se reintenta o se
+borra lo que falló. El panel llama «corte» a cada publicación programada, y «quemado» a lo
+que no salió. Todas las horas son las de la zona horaria que la persona eligió en [Tu
+Cuenta](tu-cuenta.md), aunque su computador esté en otra. Aparece aquí todo lo programado,
+venga de esta pantalla, de la [app del teléfono](app-movil.md) o de la API.
 
 En esta página, lo que va entre ángulos (`<usuario>`, `<N>`) es un dato que la pantalla
 reemplaza por el real. Los títulos y los rótulos de los campos se ven en mayúsculas por
@@ -18,63 +21,194 @@ estilo; aquí van escritos como están en el código.
 
 ## Cómo se llega
 
-- En la barra de arriba, la pestaña «La Parrilla», la segunda después de «El Fuego».
-- Desde [El Fuego](el-fuego.md) (`/admin`, la pantalla de entrada):
-  - «Poner al fuego» abre La Parrilla con el formulario «Programar una publicación» ya
-    desplegado y el cursor en «Texto».
-  - Cada fila de «Ahora en la parrilla» abre el editor de esa publicación.
-  - En la sección «Se quemó», el texto de cada fila abre su editor, y el botón «Reprogramar»
-    de la fila es el mismo que el de la lista de aquí.
-  - Cada día del termómetro de la semana abre el «Calendario» en la semana de ese día.
+- Al entrar al panel con el código ([ingresar.md](ingresar.md)) se llega siempre acá, y
+  `https://tu-parrilla.cl/admin` también lleva acá.
+- En la barra de arriba, la pestaña «La Parrilla», la primera.
+- Desde la pantalla de error de cualquier otra pantalla del panel (y del editor de un post),
+  el enlace «Ir a La Parrilla».
+- Quien no es admin y abre la dirección de [Los Maestros](los-maestros.md) vuelve acá.
 - El correo que avisa que algo no salió termina con «Revisa el calendario en /admin/schedule
   para reprogramarla.»
-- Por dirección: `https://tu-parrilla.cl/admin/schedule`. Con `?vista=calendario` abre el
-  calendario; con `?componer=1`, el formulario desplegado.
+- Por dirección: `https://tu-parrilla.cl/admin/schedule` abre el calendario en la semana de
+  hoy. Se le puede agregar:
+  - `?vista=lista`: la lista en vez del calendario (los enlaces viejos con
+    `?vista=calendario` abren el calendario igual);
+  - `?semana=AAAA-MM-DD`: el calendario en la semana que contiene ese día;
+  - `?componer=1`: el panel «Nueva publicación»; con `&dia=AAAA-MM-DD`, con ese día puesto
+    en «Fecha y hora»;
+  - `?borrador=<id>`: ese borrador, abierto en el compositor;
+  - `?panel=borradores`: el panel «Borradores»;
+  - `?panel=csv`: el panel «Subir CSV».
 
 ## Qué se ve
 
-De arriba abajo: el título, dos bloques plegables («Programar una publicación» y «Carga
-masiva (CSV)») y, debajo, lo programado en lista o en calendario.
+De arriba abajo: el encabezado con sus botones, el aviso «Programado.» (solo cuando se acaba
+de programar), la tarjeta «Conecta tu primera red» (solo sin ninguna red conectada), la
+sección «Se quemó» (solo si algo falló), los botones «Calendario» y «Lista» con lo programado
+debajo, y el pie de ayer. El formulario para programar, la lista de borradores y la carga por
+CSV no están en la página: se abren en un panel que se desliza desde la derecha (ver «El panel
+lateral», más abajo).
 
 ### Encabezado
 
-«La Parrilla», y debajo, en chico, «lo que viene y cómo salió lo que ya se fue».
+«La Parrilla», y debajo, en chico, «lo que viene y cómo salió lo que ya se fue». A la derecha
+(en un teléfono, debajo del título), en este orden:
 
-### «Programar una publicación»
+- **«Borradores (<N>)»**, solo si hay al menos un borrador guardado. Abre el panel
+  «Borradores».
+- **«Subir CSV»**. Abre el panel «Subir CSV».
+- **«Nueva publicación»**, con un signo + delante: el botón naranjo. Abre el panel «Nueva
+  publicación» con un formulario nuevo.
 
-Viene plegado: se abre con un clic en el título (llega abierto si se vino desde «Poner al
-fuego»). Adentro, en este orden:
+### «Programado.»
+
+En verde, bajo el encabezado, justo después de programar algo desde el panel lateral. Se va
+al cambiar de semana o de vista, o al abrir otro panel.
+
+### «Conecta tu primera red»
+
+Solo mientras no haya ninguna red conectada: una tarjeta arriba de todo con el título
+«Conecta tu primera red», la frase «Sin una red conectada no hay nada que poner al fuego.» y
+el botón «Ir a Los Fierros →», que lleva a [Los Fierros](los-fierros.md) (tus redes
+conectadas). Con una sola red conectada, la tarjeta se va. El resto de la pantalla se ve
+igual debajo de ella.
+
+### «Se quemó»
+
+El título va en rojo. Aparece solo si hay algo que falló, de cualquier fecha; si no falló
+nada, la sección no existe. Cada fila es una red donde un corte falló: un corte que falló en
+dos redes da dos filas. Van de la más reciente a la más vieja. Cada fila trae:
+
+- la hora, solo HH:MM si el corte era de hoy, o con día y mes delante si no
+  («<día> <número> de <mes> · HH:MM», por ejemplo «vie 25 de sep · 09:15»);
+- el ícono de la red que falló;
+- el texto del post, que es un enlace a su editor (o «(sin texto)»);
+- debajo, en rojo, el motivo, cuando lo hay: una frase fija en español que dice por qué no
+  salió (ver «Motivos de un destino que no salió», más abajo);
+- el botón «Reprogramar», que abre la misma ventana que el de la lista (ver «La ventana
+  «Reprogramar»», más abajo).
+
+### «Calendario» y «Lista»
+
+Dos botoncitos sobre lo programado. «Calendario» es la vista con que abre la pantalla;
+«Lista» cambia a la lista.
+
+### El calendario
+
+Arriba, «Semana anterior», el rango de la semana (por ejemplo `12 – 18 oct`) y «Semana
+siguiente». Abre en la semana de hoy. Debajo, siete columnas de lunes a domingo. Cada una
+lleva arriba el día abreviado y su número (por ejemplo `lun 12`), cuánto fuego tiene
+—«Apagada» (nada), «Prendida» (uno o dos cortes) o «Parrilla llena» (tres o más)— y, en los
+días de hoy en adelante, un «+» chico que abre el panel «Nueva publicación» con ese día puesto
+(un lector de pantalla lo lee «Programar el <día> <número>», por ejemplo «Programar el lun
+12»). El día de hoy tiene el nombre más claro y un borde fino. Un día vacío de hoy en
+adelante dice «No hay nada puesto. Préndela.», y esa frase es un enlace que hace lo mismo que
+el «+»; un día vacío que ya pasó dice «No hay nada puesto.», sin enlace y sin «+». En el
+teléfono, la semana se desliza de lado.
+
+Cada corte es una tarjeta con la hora (y «saliendo» al lado si se está publicando), los
+íconos de sus redes (rojo el que se quemó, verde el que salió), una miniatura (la foto, la
+portada o el primer cuadro del video), el texto en dos líneas o «(sin texto)», y una línea
+«Reintentando <Red> · <usuario>: <motivo>» por cada destino que falló y espera otro intento.
+El color de la tarjeta dice cómo va, de claro a oscuro: programada, saliendo ahora,
+publicada en todas y, casi negra, falló alguna. Al dejar el mouse encima aparece el estado de
+cada red. Un clic abre el editor.
+
+Los borradores que tienen fecha aparecen en su día, debajo de los cortes, como tarjetas con
+borde punteado: arriba «Borrador · HH:MM» y debajo el texto en dos líneas (o «(sin texto)»).
+Un clic abre ese borrador en el compositor, no en el editor. Un borrador no está programado:
+no sale a ninguna red hasta que se abre y se aprieta «Programar». Por eso no cuenta para el
+fuego del día: un día que solo tiene borradores sigue diciendo «Apagada». Los borradores sin
+fecha no salen en el calendario; están en «Borradores (<N>)».
+
+El calendario no tiene botones de «Subir ahora», «Eliminar» ni «Reprogramar»: esos están en
+la lista (y «Reprogramar», también en «Se quemó»).
+
+### La lista
+
+Primero lo que todavía tiene algo pendiente (incluido lo quemado), de lo más próximo a lo más
+lejano; después lo que ya salió en todas sus redes, de lo más reciente a lo más viejo. Se ven
+los primeros 20; debajo, «Ver el restante» o «Ver los <N> restantes», que se vuelve «Mostrar
+menos». Sin nada: «Nada programado todavía.» Los borradores no aparecen en la lista.
+
+Cada publicación es una tarjeta con:
+
+- El texto (dos líneas como mucho), o «(sin texto)», y debajo el día y la hora.
+- A la derecha: **«Editar»** (abre el editor), **«Subir ahora»** (solo si a alguna red le
+  falta salir: programada, publicándose o quemada) y **«Eliminar»**.
+- Abajo, una píldora por cada destino: el ícono de la red, el usuario, « · » y el estado
+  (ver la tabla de estados, más abajo). Si hay un motivo de falla, sigue « — <motivo>». Si el
+  destino se quemó, la píldora es roja y termina en el botón subrayado **«Reprogramar»**.
+
+El resultado de «Subir ahora» y los errores de «Eliminar» aparecen arriba de la lista, en
+verde o en rojo; un post eliminado simplemente desaparece. Mientras una de esas acciones
+trabaja, los botones de la lista se bloquean y los «Subir ahora» dicen «Subiendo…».
+
+### El pie
+
+Al final de la pantalla, en letra chica y solo con al menos una red conectada: «Ayer no salió
+nada.», «Ayer: 1 corte servido» o «Ayer: <N> cortes servidos». Cuando las redes ya informaron
+vistas de esos posts, se agrega « · <M> miradas» (desde diez mil, abreviado: «12 mil»).
+Cuenta cortes y no redes: uno que salió en tres redes es un corte.
+
+### El panel lateral
+
+El formulario para programar, la lista de borradores y la carga por CSV se abren en un panel
+que se desliza desde la derecha, encima de la pantalla, que queda oscurecida detrás. En un
+teléfono ocupa la pantalla entera. Arriba lleva su título —«Nueva publicación», «Borrador»,
+«Borradores» o «Subir CSV»— y a la derecha una ✕ para cerrarlo (un lector de pantalla la lee
+«Cerrar»). También se cierra con la tecla Escape o con un clic en la parte oscurecida, fuera
+del panel. Cerrar el compositor no pierde lo escrito: queda como borrador (ver «Los
+borradores», más abajo).
+
+### El compositor: «Nueva publicación» o «Borrador»
+
+El panel se llama «Nueva publicación» cuando se abre con ese botón, con el «+» de un día o con
+«No hay nada puesto. Préndela.», y «Borrador» cuando se abre un borrador guardado. El
+formulario viene abierto, con el cursor en «Texto». En este orden:
 
 1. **«Texto»**, con el placeholder «Texto del post…». No deja escribir más de 2200
    caracteres.
 2. **«Archivos»**, el botón de archivos del navegador, que acepta varios a la vez; debajo
-   dice «Imágenes o video, opcional». Solo deja elegir imágenes y videos. El carrusel sale en
-   el orden en que quedaron elegidos; para reordenarlo después está el editor.
+   dice «Imágenes o video, opcional. Se suben apenas los eliges.» Solo deja elegir imágenes y
+   videos. Empiezan a subir en cuanto se eligen: mientras tanto dice «Subiendo…» o «Subiendo
+   <N> de <M>…», y el botón de archivos y «Programar» quedan apagados (con un video puede
+   tardar). Lo subido aparece debajo en una lista numerada, en el orden del carrusel: el
+   número, el nombre del archivo, «imagen» o «video», y una ✕ para quitarlo (un lector de
+   pantalla la lee «Quitar <nombre del archivo>»). Se pueden elegir más después: se agregan al
+   final. Para cambiar el orden hay que quitar y volver a elegir, o usar el editor después de
+   programar. Si una subida falla, el error sale en rojo debajo de la lista, y no queda
+   ninguno de los archivos de esa tanda.
 3. **La revisión para TikTok**, solo si hay una cuenta de TikTok marcada y archivos elegidos.
    Mide cada archivo en el navegador y dice, en verde, «El archivo cumple lo que pide
    TikTok.» o «Los archivos cumplen lo que pide TikTok.»; o, en un recuadro rojo, «TikTok va
    a rechazar esto:» con una línea por archivo, «<nombre del archivo>: <problema>.». Es un
-   aviso: no impide programar.
+   aviso: no impide programar. Solo mide lo elegido desde que se abrió el panel: los archivos
+   que vienen de un borrador guardado no se vuelven a medir.
 4. **«Cuentas»**, una casilla por cuenta, rotulada «<Red> · <usuario>» (X aparece como «X /
    Twitter»; una cuenta sin usuario dice «sin nombre»). Una cuenta desconectada sale
-   atenuada, no se puede marcar y lleva al lado «reconéctala». Si hay una sola cuenta
-   conectada viene marcada; con dos o más no viene ninguna. Sin ninguna cuenta, el bloque
-   dice «Todavía no tienes cuentas conectadas. Conecta una para poder programar.», y «Conecta
-   una» lleva a [Los Fierros](los-fierros.md) (tus redes conectadas).
+   atenuada, no se puede marcar y lleva al lado «reconéctala». En un formulario nuevo, si hay
+   una sola cuenta conectada viene marcada; con dos o más no viene ninguna. En un borrador
+   vienen marcadas las que tenía marcadas, si siguen conectadas. Sin ninguna cuenta, el
+   bloque dice «Todavía no tienes cuentas conectadas. Conecta una para poder programar.», y
+   «Conecta una» lleva a [Los Fierros](los-fierros.md) (tus redes conectadas).
 5. **Un bloque «TikTok · <usuario>»** por cada cuenta de TikTok marcada (ver abajo).
 6. **Un bloque «Instagram · <usuario>»** por cada cuenta de Instagram marcada, solo cuando
-   se eligió exactamente un archivo y es un video (ver abajo).
-7. **«Respuesta automática por palabra clave»**, plegado (ver abajo).
-8. **«Fecha y hora»**, un selector de día y hora con el botón «Ahora» al lado. Al elegir el
-   día aparece debajo cómo está ese día según lo que ya hay programado para adelante: «Ese
-   día está apagado. Buen lugar para este.» (nada), «Ese día ya tiene un corte.» o «Ese día
-   ya tiene <N> cortes.» (uno o dos), o «Ese día ya va lleno, con <N>. Mira si te sirve uno
-   más flojo.» (tres o más). «Ahora» se enciende y se apaga con un clic; encendido, el
-   selector queda vacío y bloqueado y el post queda para el minuto siguiente.
-9. Mientras suben los archivos, «Subiendo…» o «Subiendo <N> de <M>…». Los errores salen en
-   rojo justo encima del botón; si todo salió bien, «Programado.» en verde.
-10. **El botón «Programar»**, que dice «Guardando…» mientras trabaja (también mientras
-    suben los archivos, que con un video puede tardar).
+   hay exactamente un archivo y es un video (ver abajo).
+7. **«Respuesta automática por palabra clave»**, plegado (ver abajo); viene abierto y lleno si
+   el borrador tenía una palabra.
+8. **«Fecha y hora»**, un selector de día y hora con el botón «Ahora» al lado. Al abrir desde
+   un día del calendario, viene puesto ese día a las 09:00; si el día es hoy, la hora en punto
+   siguiente (o las 09:00, si todavía no son las nueve), y vacío desde las 23:00. Al abrir un
+   borrador, viene la fecha que tenía. Al elegir el día aparece debajo cómo está ese día según
+   lo que ya hay programado para adelante: «Ese día está apagado. Buen lugar para este.»
+   (nada), «Ese día ya tiene un corte.» o «Ese día ya tiene <N> cortes.» (uno o dos), o «Ese
+   día ya va lleno, con <N>. Mira si te sirve uno más flojo.» (tres o más). Los borradores no
+   cuentan. «Ahora» se enciende y se apaga con un clic; encendido, el selector queda vacío y
+   bloqueado y el post queda para el minuto siguiente.
+9. **El pie del panel**, fijo abajo: los errores en rojo, encima de los botones; **«Programar»**,
+   que dice «Programando…» mientras trabaja; **«Descartar»**; y a la derecha, en chico, cómo va
+   el guardado del borrador (ver abajo).
 
 #### El bloque «TikTok · <usuario>»
 
@@ -83,14 +217,17 @@ fuego»). Adentro, en este orden:
   ahí sale el error (ver la tabla de TikTok en los mensajes, más abajo).
 - El interruptor **«Enviar como borrador a mi bandeja de TikTok»**. Encendido, dice «Te
   llegará una notificación en TikTok para terminar la publicación desde el teléfono.» y el
-  resto del bloque desaparece: no hay nada más que elegir.
+  resto del bloque desaparece: no hay nada más que elegir. Ojo: este «borrador» es de TikTok
+  (el post llega a la app de TikTok sin publicar) y no tiene que ver con los borradores de
+  Tu Parrilla.
 - Apagado (publicación directa), aparece:
   - **«Quién puede verlo»**, una lista que parte en «Elige quién puede verlo» y ofrece
     «Todos», «Amigos mutuos», «Seguidores» y «Solo yo» (solo las que la cuenta permite). Es
     obligatoria: sin elegir, el navegador no deja programar.
   - **«Permitir»**, con las casillas «Comentarios», «Dúos» y «Pegar (Stitch)», todas
-    desmarcadas al partir. «Dúos» y «Pegar (Stitch)» no aparecen cuando todos los archivos
-    son fotos. Una casilla gris es algo que la cuenta tiene bloqueado en TikTok.
+    desmarcadas al partir (en un borrador, como quedaron). «Dúos» y «Pegar (Stitch)» no
+    aparecen cuando todos los archivos son fotos. Una casilla gris es algo que la cuenta tiene
+    bloqueado en TikTok.
   - El interruptor **«Este contenido promociona una marca»**. Encendido, ofrece «Mi marca»
     («Se etiquetará como Contenido promocional») y «Contenido patrocinado» («Se etiquetará
     como Colaboración pagada»). Con «Contenido patrocinado», «Solo yo» queda deshabilitado
@@ -104,8 +241,9 @@ Con dos cuentas de TikTok marcadas hay dos bloques, y cada uno se llena por sepa
 
 #### El bloque «Instagram · <usuario>»
 
-Un solo interruptor, **«Publicar como trial reel»**, apagado al partir, con «Solo lo ven
-quienes no te siguen. Tú decides desde Instagram cuándo compartirlo con todos.»
+Un solo interruptor, **«Publicar como trial reel»**, apagado al partir (en un borrador, como
+quedó), con «Solo lo ven quienes no te siguen. Tú decides desde Instagram cuándo compartirlo
+con todos.»
 
 #### «Respuesta automática por palabra clave»
 
@@ -125,13 +263,54 @@ quienes no te siguen. Tú decides desde Instagram cuándo compartirlo con todos.
 Sin palabra no hay regla, aunque el mensaje esté escrito. Aquí no hay dónde adjuntar un PDF:
 eso solo se puede por API o en la columna `regla` del CSV.
 
-### «Carga masiva (CSV)»
+### Los borradores
 
-También plegado. Adentro, un párrafo de ayuda que resume el formato y termina en «Máximo 50
-filas.», con un enlace «Cuentas» que lleva a [Los Fierros](los-fierros.md); un ejemplo de
-tres filas en letra de máquina; el botón de archivo del navegador (solo deja elegir `.csv`), y
-el botón **«Cargar lote»**, que dice «Cargando…» mientras procesa. Las fechas del ejemplo ya
-pasaron: copiado tal cual, todas las filas fallan por hora.
+Lo que se escribe en el compositor se guarda solo, como borrador, un segundo después del
+último cambio (una tecla, un archivo, una casilla). Hace falta algo propio: texto, un archivo
+o una palabra clave. Abrir el panel y cerrarlo sin escribir, o solo marcar cuentas o elegir
+una fecha, no deja borrador. A la derecha del pie del panel se ve cómo va: «Guardando
+borrador…», «Borrador guardado.» o, en rojo, «No se pudo guardar el borrador.» o «Este
+borrador ya no existe: se programó o se descartó en otra pestaña. Cierra el panel para ver
+cómo quedó.» (desde ese aviso, el panel ya no guarda nada más y «Programar» queda apagado:
+si se programó en la otra pestaña, saldría dos veces).
+
+Un borrador guarda el texto, los archivos, las cuentas marcadas, lo elegido en los bloques de
+TikTok y de Instagram, la respuesta automática y la fecha. «Ahora» no se guarda: un borrador
+que se guardó con «Ahora» encendido vuelve sin fecha y con «Ahora» apagado.
+
+- **Cerrar el panel** (la ✕, Escape, un clic fuera, o el botón Atrás del navegador) guarda lo
+  que faltaba y deja el borrador.
+- **«Programar»** convierte el borrador en publicación y lo saca de los borradores. Si sale
+  bien, el panel se cierra y la pantalla dice «Programado.». Si no, el error sale en rojo en el
+  pie, el panel sigue abierto y el borrador se guarda de nuevo, con lo último que se escribió.
+- **«Descartar»** pregunta «¿Descartar este borrador? Lo escrito y los archivos elegidos se
+  pierden.»; al aceptar, borra el borrador y cierra el panel. En un formulario nuevo y vacío no
+  pregunta: solo lo cierra.
+
+Los borradores viven solo en el panel web: la app del teléfono y la API no los ven.
+
+### El panel «Borradores»
+
+Lista los borradores, del guardado más recientemente al más viejo. Cada fila trae el texto en
+dos líneas como mucho (o «(sin texto)») y, debajo, en chico:
+
+- «para el <día> <número> de <mes> a las HH:MM» (por ejemplo «para el vie 16 de oct a las
+  19:00»), o «sin fecha»;
+- « · 1 archivo» o « · <N> archivos», si tiene;
+- « · guardado el <día> <número> de <mes> a las HH:MM», la última vez que se guardó (por ejemplo «guardado el mar 13 de oct a las 14:05»).
+
+Un clic en la fila abre ese borrador en el compositor. Sin borradores dice «No tienes
+borradores.» (el botón «Borradores» no aparece sin borradores, así que eso solo se ve al
+llegar por un enlace). Si se abre un enlace a un borrador que ya no existe —se programó o se
+descartó—, se abre esta lista en su lugar.
+
+### El panel «Subir CSV»
+
+Adentro, un párrafo de ayuda que resume el formato y termina en «Máximo 50 filas.», con un
+enlace «Los Fierros» que lleva a [Los Fierros](los-fierros.md); un ejemplo de tres filas en
+letra de máquina; el botón de archivo del navegador (solo deja elegir `.csv`), y el botón
+**«Cargar lote»**, que dice «Cargando…» mientras procesa. Las fechas del ejemplo ya pasaron:
+copiado tal cual, todas las filas fallan por hora.
 
 Al terminar aparece una línea por fila: «Fila <N>: Programado» en verde, o «Fila <N>:
 <motivo>» en rojo. La fila 1 del archivo es el encabezado, así que la primera fila de datos es
@@ -153,49 +332,7 @@ anteriores, aunque vayan vacías.
 | `cuentas` | Identificadores de cuenta separados por `\|`; hace falta cuando hay dos cuentas de la misma red. Cada tarjeta de Los Fierros trae el suyo con un botón para copiarlo |
 
 La forma exacta de `opciones` y `regla` es la misma de la API: ver [la guía de la
-API](../api-llm.md).
-
-### «Lista» y «Calendario»
-
-Dos botoncitos sobre lo programado. «Lista» es la vista de entrada.
-
-### La lista
-
-Primero lo que todavía tiene algo pendiente (incluido lo quemado), de lo más próximo a lo más
-lejano; después lo que ya salió en todas sus redes, de lo más reciente a lo más viejo. Se ven
-los primeros 20; debajo, «Ver el restante» o «Ver los <N> restantes», que se vuelve «Mostrar
-menos». Sin nada: «Nada programado todavía.»
-
-Cada publicación es una tarjeta con:
-
-- El texto (dos líneas como mucho), o «(sin texto)», y debajo el día y la hora.
-- A la derecha: **«Editar»** (abre el editor), **«Subir ahora»** (solo si a alguna red le
-  falta salir: programada, publicándose o quemada) y **«Eliminar»**.
-- Abajo, una píldora por cada destino: el ícono de la red, el usuario, « · » y el estado
-  (ver la tabla de estados, más abajo). Si hay un motivo de falla, sigue « — <motivo>». Si el
-  destino se quemó, la píldora es roja y termina en el botón subrayado **«Reprogramar»**.
-
-El resultado de «Subir ahora» y los errores de «Eliminar» aparecen arriba de la lista, en
-verde o en rojo; un post eliminado simplemente desaparece. Mientras una de esas acciones
-trabaja, los botones de la lista se bloquean y los «Subir ahora» dicen «Subiendo…».
-
-### El calendario
-
-Arriba, «Semana anterior», el rango de la semana (por ejemplo `12 – 18 oct`) y «Semana
-siguiente». Debajo, siete columnas de lunes a domingo, cada una con el día abreviado y su
-número (por ejemplo `lun 12`) y cuánto fuego tiene: «Apagada» (nada), «Prendida» (uno o
-dos cortes) o «Parrilla llena» (tres o más). El día de hoy tiene el nombre más claro y un
-borde fino. Un día vacío dice «No hay nada puesto. Préndela.» En el teléfono, la semana se
-desliza de lado.
-
-Cada corte es una tarjeta con la hora (y «saliendo» al lado si se está publicando), los
-íconos de sus redes (rojo el que se quemó, verde el que salió), una miniatura (la foto, la
-portada o el primer cuadro del video), el texto en dos líneas o «(sin texto)», y una línea
-«Reintentando <Red> · <usuario>: <motivo>» por cada destino que falló y espera otro intento.
-El color de la tarjeta dice cómo va, de claro a oscuro: programada, saliendo ahora,
-publicada en todas y, casi negra, falló alguna. Al dejar el mouse encima aparece el estado de
-cada red. Un clic abre el editor. El calendario no tiene botones de «Subir ahora»,
-«Eliminar» ni «Reprogramar»: esos están en la lista.
+API](../api-llm.md). La carga por CSV no crea borradores: cada fila buena queda programada.
 
 ### Estados de un destino
 
@@ -207,8 +344,8 @@ Cada publicación tiene un destino por cuenta, y cada destino va por su lado.
 | «Reintentando» | Píldora gris con « — <motivo>»; en el calendario, la línea «Reintentando <Red> · <usuario>: <motivo>» | Falló un intento y se volverá a probar solo. Son tres intentos en total; algunos rechazos se queman al primero |
 | «Publicando…» | Píldora gris; «saliendo» en la tarjeta | La red recibió el archivo y lo está procesando. Si pasan 24 horas así, cuenta como un intento fallido |
 | «Publicado» | Píldora verde; ícono verde | Ya salió en esa red |
-| «En tu bandeja de TikTok» | Píldora verde | Se mandó como borrador: hay que terminarlo en la app de TikTok |
-| «Falló» | Píldora roja con « — <motivo>» y «Reprogramar»; ícono rojo; tarjeta casi negra | Se quemó: no se volverá a intentar sola. Aparece también en «Se quemó» de El Fuego, y puede llegar un correo con el asunto «No se pudo publicar en <Red>» |
+| «En tu bandeja de TikTok» | Píldora verde | Se mandó como borrador de TikTok: hay que terminarlo en la app de TikTok |
+| «Falló» | Píldora roja con « — <motivo>» y «Reprogramar»; ícono rojo; tarjeta casi negra | Se quemó: no se volverá a intentar sola. Aparece también en «Se quemó», arriba del calendario, y puede llegar un correo con el asunto «No se pudo publicar en <Red>» |
 
 Lo programado sale en la pasada siguiente del publicador, que corre cada pocos minutos: no
 en el segundo exacto de la hora elegida.
@@ -216,7 +353,7 @@ en el segundo exacto de la hora elegida.
 ### El editor de un post (`/admin/schedule/<id>`)
 
 Arriba, el título «Editar post» y el enlace «Volver», que regresa a la vista desde la que se
-entró (la lista o la semana del calendario). Debajo, según el caso:
+entró (la semana del calendario o la lista). Debajo, según el caso:
 
 - «Hay una publicación en curso. Vuelve en un minuto.», en amarillo, si algún destino está
   «Publicando…». Mientras tanto todo el formulario queda bloqueado, también «Eliminar».
@@ -253,14 +390,16 @@ El formulario, en orden:
 8. Los errores, en rojo, y los botones **«Guardar»** («Guardando…») y **«Eliminar»**
    («Eliminando…»). Guardar bien devuelve a la vista de donde se vino; eliminar bien, también.
 
-Si el post no existe o ya se borró, el editor muestra la página «No encontramos esa página».
+El editor no es un panel lateral: es una pantalla aparte, y no guarda borradores. Si el post
+no existe o ya se borró, el editor muestra la página «No encontramos esa página».
 
-### El panel «Reprogramar»
+### La ventana «Reprogramar»
 
-Se abre al apretar «Reprogramar» en una píldora roja (o en «Se quemó» de El Fuego) y queda
-encima de todo, con el fondo oscurecido. Arriba dice de qué destino se trata, «<Red> ·
-<usuario>»; debajo, un selector de fecha y hora, **«Guardar»** (bloqueado hasta elegir una
-hora) y **«Cancelar»**. Se cierra también con Esc o con un clic fuera.
+Se abre al apretar «Reprogramar» en una píldora roja de la lista o en una fila de «Se quemó», y
+queda al centro, encima de todo, con el fondo oscurecido. Arriba dice de qué destino se trata,
+«<Red> · <usuario>»; debajo, un selector de fecha y hora, **«Guardar»** (bloqueado hasta
+elegir una hora) y **«Cancelar»**. Se cierra también con Esc o con un clic fuera. Al guardar
+bien, la ventana se cierra y la fila sale de «Se quemó».
 
 ## Qué se puede hacer
 
@@ -269,27 +408,51 @@ se puede por API: ver [la guía de la API](../api-llm.md).
 
 ### Para programar una publicación
 
-1. Ir a «La Parrilla» y abrir «Programar una publicación».
+1. En La Parrilla, apretar «Nueva publicación» (arriba a la derecha). Se abre el panel con el
+   cursor en «Texto».
 2. Escribir en «Texto».
-3. Si lleva fotos o video, apretar el botón de «Archivos» y elegirlos.
+3. Si lleva fotos o video, apretar el botón de «Archivos» y elegirlos. Esperar a que terminen
+   de subir: aparecen en la lista numerada.
 4. En «Cuentas», marcar cada cuenta donde tiene que salir.
 5. Si apareció un bloque de TikTok o de Instagram, llenarlo (ver las tareas de abajo).
 6. En «Fecha y hora», elegir día y hora. Mirar el aviso de debajo: si dice que el día va
    lleno, conviene otro.
-7. Apretar «Programar» y esperar «Programado.». El post aparece en la lista.
+7. Apretar «Programar». El panel se cierra, arriba dice «Programado.» y el post aparece en el
+   calendario.
 
-Si después se va a programar otro, conviene recargar la página para que el formulario parta
-de cero.
+Si hay que dejarlo a medias, basta con cerrar el panel: queda como borrador.
+
+### Para programar en un día del calendario
+
+1. En «Calendario», ir a la semana con «Semana anterior» o «Semana siguiente».
+2. Apretar el «+» junto al nombre del día o, si el día está vacío, «No hay nada puesto.
+   Préndela.». Los días que ya pasaron no tienen ninguno de los dos.
+3. Se abre «Nueva publicación» con la fecha puesta: ese día a las 09:00 (si es hoy, la hora
+   en punto siguiente). Cambiar la hora si hace falta y seguir como en la tarea anterior.
+
+### Para retomar un borrador
+
+1. Apretar «Borradores (<N>)», arriba a la derecha. Si el borrador tiene fecha, también se
+   puede apretar su tarjeta punteada en el calendario.
+2. Apretar el borrador. Se abre el panel «Borrador» con todo lo que tenía.
+3. Seguir escribiendo (se sigue guardando solo) y, cuando esté listo, «Programar». Si se
+   había usado «Ahora», volver a encenderlo.
+
+### Para descartar un borrador
+
+1. Abrirlo, como en la tarea anterior.
+2. Apretar «Descartar» y aceptar la pregunta. Se borra con sus archivos y no se puede
+   deshacer.
 
 ### Para programar un video para TikTok
 
-1. Abrir «Programar una publicación» y escribir el «Texto».
-2. En «Archivos», elegir un solo video (MP4, MOV o WebM). Si aparece «TikTok va a rechazar
-   esto:», cambiar el archivo antes de seguir.
+1. Apretar «Nueva publicación» y escribir el «Texto».
+2. En «Archivos», elegir un solo video (MP4, MOV o WebM) y esperar a que suba. Si aparece
+   «TikTok va a rechazar esto:», quitarlo con su ✕ y elegir otro antes de seguir.
 3. En «Cuentas», marcar «TikTok · <usuario>». Aparece su bloque.
 4. Elegir el camino:
    - Para terminarlo desde el teléfono: encender «Enviar como borrador a mi bandeja de
-     TikTok». Llega a la app como borrador.
+     TikTok». Llega a la app de TikTok como borrador.
    - Para publicarlo directo: en «Quién puede verlo», elegir quién lo ve; sale con esa
      privacidad, desde una cuenta pública o privada. Marcar en «Permitir» lo que se quiera
      dejar abierto.
@@ -302,14 +465,14 @@ post va también a otra red).
 
 ### Para publicar un reel como trial reel de Instagram
 
-1. En «Programar una publicación», elegir en «Archivos» un solo video, nada más.
+1. En «Nueva publicación», elegir en «Archivos» un solo video, nada más.
 2. Marcar la cuenta de Instagram en «Cuentas». Aparece «Instagram · <usuario>».
 3. Encender «Publicar como trial reel».
 4. Fecha y hora, y «Programar». Después, se comparte con todos desde la app de Instagram.
 
 ### Para que salga ya
 
-- Si todavía no está programado: en el formulario, apretar «Ahora» y luego «Programar».
+- Si todavía no está programado: en el compositor, apretar «Ahora» y luego «Programar».
   Queda para el minuto siguiente y sale en la pasada siguiente del publicador, en unos
   minutos.
 - Si ya está programado (o se quemó) y tiene que salir en el acto: en «Lista», apretar
@@ -320,7 +483,7 @@ post va también a otra red).
 
 ### Para agregar una respuesta automática por palabra clave
 
-1. En el formulario (o en el editor de un post ya programado), abrir «Respuesta automática
+1. En el compositor (o en el editor de un post ya programado), abrir «Respuesta automática
    por palabra clave».
 2. Escribir la palabra en «Palabra clave»: una sola, sin espacios ni símbolos.
 3. Escribir en «Mensaje» lo que se responde, con el enlace.
@@ -337,7 +500,7 @@ Para quitarla, borrar la palabra y guardar.
    en `AAAA-MM-DD HH:MM` y en el futuro.
 2. Si alguna red tiene dos cuentas conectadas, agregar la columna `cuentas` con el
    identificador de cada una, copiado de su tarjeta en [Los Fierros](los-fierros.md).
-3. En La Parrilla, abrir «Carga masiva (CSV)», elegir el archivo y apretar «Cargar lote».
+3. En La Parrilla, apretar «Subir CSV», elegir el archivo y apretar «Cargar lote».
 4. Leer las líneas «Fila <N>: …». Las que dicen «Programado» ya quedaron. Para las rojas,
    corregir y volver a subir un CSV solo con esas filas: subir de nuevo las buenas las
    duplica.
@@ -347,13 +510,14 @@ suben archivos sueltos.
 
 ### Para ver qué hay en una semana
 
-1. Apretar «Calendario».
+1. Mirar el «Calendario», que es la vista con que abre la pantalla.
 2. Moverse con «Semana anterior» y «Semana siguiente».
-3. Un clic en una tarjeta abre su editor.
+3. Un clic en una tarjeta abre su editor (o, si es punteada, el borrador).
 
 ### Para cambiar algo de un post programado
 
-1. Abrirlo: «Editar» en la lista, o un clic en su tarjeta del calendario.
+1. Abrirlo: «Editar» en la lista, un clic en su tarjeta del calendario o en su texto en «Se
+   quemó».
 2. Cambiar lo que haga falta: texto, fecha y hora, cuentas, orden de los archivos (flechas),
    quitar («Quitar») o agregar archivos, portada, respuesta automática.
 3. Apretar «Guardar».
@@ -370,15 +534,18 @@ el botón «Agregar archivos» del editor falla cuando lo elegido suma más de u
 
 ### Para arreglar un post quemado
 
-Primero leer el motivo, que está en la píldora roja de la lista (y en «Se quemó» de El Fuego
-y en el correo). Si dice que hay que reconectar, hacerlo antes en [Los Fierros](los-fierros.md).
-Después, una de tres:
+Primero leer el motivo, que está en «Se quemó», arriba de la pantalla, en la píldora roja de
+la lista y en el correo. Si dice que hay que reconectar, hacerlo antes en [Los
+Fierros](los-fierros.md). Después, una de tres:
 
-- **Darle otra hora:** en «Lista», apretar «Reprogramar» en la píldora roja, elegir una
-  fecha y hora futuras y «Guardar». Ojo: cambia la hora del post entero, así que si otra de
-  sus redes todavía esperaba, también se mueve.
-- **Reintentar ya:** «Subir ahora» en la tarjeta. Devuelve los destinos quemados a la cola y
-  publica en el acto.
+- **Darle otra hora:** apretar «Reprogramar» en su fila de «Se quemó» (o en la píldora roja de
+  la lista), elegir una fecha y hora futuras, en la zona de Tu Cuenta, y «Guardar». La ventana
+  se cierra y la fila sale de «Se quemó». Ojo: la hora nueva es la del post entero, así que
+  si otra de sus redes todavía esperaba, también se mueve. Las redes donde ya salió no se
+  vuelven a publicar; si el post había fallado en otra red más, esa sigue en «Se quemó» con
+  su propio «Reprogramar».
+- **Reintentar ya:** «Subir ahora» en la tarjeta de la lista. Devuelve los destinos quemados a
+  la cola y publica en el acto.
 - **Corregirlo y reintentar:** «Editar», arreglar lo que dice el motivo (por ejemplo, acortar
   el texto para X) y «Guardar» sin tocar la fecha. Los destinos quemados que sigan marcados
   vuelven a «Programado» y salen en la pasada siguiente (o a su hora, si todavía no llega).
@@ -402,24 +569,55 @@ ninguna red; si ya salió en alguna, hay que borrarlo en la red misma.
 
 ## Mensajes que puede ver
 
-### Al programar o guardar
+### En la pantalla
 
 | Lo que dice la pantalla | Qué significa | Qué hacer |
 |---|---|---|
-| «Programado.» | Quedó guardado | Nada; está en la lista |
+| «Programado.» | Lo que se programó desde el panel quedó guardado | Nada; está en el calendario |
+| «Conecta tu primera red» | No hay ninguna red conectada | «Ir a Los Fierros →» y conectar una |
+| «No hay nada puesto. Préndela.» | Ese día, de hoy en adelante, no tiene nada programado | Apretarlo para programar ahí |
+| «No hay nada puesto.» | Ese día ya pasó y no tuvo nada | Nada |
+| «Ayer no salió nada.» | Ningún corte de ayer salió en ninguna red | Si algo debía salir, mirar «Se quemó» |
+| El motivo en rojo bajo una fila de «Se quemó» | Por qué no salió en esa red (ver «Motivos de un destino que no salió») | Si pide reconectar, ir a Los Fierros; después «Reprogramar» |
+| «Algo se rompió», con «No fue nada que hicieras: una consulta no respondió. Vuelve a intentarlo; el detalle quedó en la consola del navegador.» y el botón «Reintentar» | Una consulta del servidor falló; no fue la persona. Si falló la pantalla principal de La Parrilla, no aparece «Ir a La Parrilla» | «Reintentar» |
+
+### Al programar
+
+| Lo que dice la pantalla | Qué significa | Qué hacer |
+|---|---|---|
 | «Elige al menos una cuenta.» | No hay ninguna cuenta marcada | Marcar al menos una en «Cuentas» |
 | «Escribe un texto o adjunta un archivo.» | No hay ni texto ni archivos | Agregar uno de los dos |
 | «La fecha no se entendió.» | La fecha está vacía o incompleta | Completar día y hora |
-| «La hora debe estar en el futuro.» | La hora elegida ya pasó | Elegir una futura, o «Ahora» |
-| «Máximo diez archivos por publicación.» | Más de diez archivos (si TikTok es la única red, admite hasta 35 fotos) | Quitar archivos |
-| «Una de las cuentas elegidas no es tuya.» | Una cuenta dejó de existir mientras la pantalla estaba abierta | Recargar la página |
-| «La cuenta <usuario> no está conectada. Vuelve a conectarla en Cuentas.» | Se desconectó; «Cuentas» es Los Fierros | Reconectarla en Los Fierros y volver |
-| «Subiendo…» o «Subiendo <N> de <M>…» | Están subiendo los archivos | Esperar |
+| «La hora debe estar en el futuro.» | La hora elegida ya pasó (pasa con un borrador que tenía una fecha que ya llegó) | Elegir una futura, o «Ahora» |
+| «Máximo diez archivos por publicación.» | Más de diez archivos (si TikTok es la única red, admite hasta 35 fotos) | Quitar archivos con su ✕ |
+| «Una de las cuentas elegidas no es tuya.» | Una cuenta dejó de existir mientras la pantalla estaba abierta | Cerrar el panel (queda el borrador) y volver a abrirlo desde «Borradores (<N>)» |
+| «La cuenta <usuario> no está conectada. Vuelve a conectarla en Cuentas.» | Se desconectó; «Cuentas» es Los Fierros | Reconectarla en Los Fierros y volver: lo escrito sigue en «Borradores» |
+| «Espera a que terminen de subir los archivos.» | Se intentó programar mientras subían archivos | Esperar a que aparezcan en la lista y volver a apretar «Programar» |
+| «Un archivo no es del almacén.», «Falta subir un archivo.» o «El cuerpo no se entendió.» | Un archivo de la lista ya no está en el almacenamiento, o la subida quedó a medias | Quitar los archivos de la lista con su ✕, volver a elegirlos y programar |
+
+### Al subir archivos
+
+Salen en rojo debajo de la lista de archivos, apenas falla la subida. Ninguno de los archivos
+de esa tanda queda: hay que volver a elegirlos.
+
+| Lo que dice la pantalla | Qué significa | Qué hacer |
+|---|---|---|
+| «Subiendo…» o «Subiendo <N> de <M>…» | Están subiendo los archivos recién elegidos | Esperar: «Programar» se enciende al terminar |
 | «El archivo supera los 500 MB.» | Un archivo pasa del máximo | Achicarlo |
 | «Ese tipo de archivo no se puede publicar.» | No es imagen ni video | Elegir otro |
-| «No se pudo preparar la subida. (<código>)», «No se pudo subir el archivo. (<código>)» o «No se pudo subir el archivo.» | Falló la conexión al subir | Volver a apretar «Programar»; si se repite, avisar a quien administra el sitio |
-| «Un archivo no es del almacén.», «Falta subir un archivo.» o «El cuerpo no se entendió.» | La subida quedó a medias | Volver a elegir los archivos y programar |
+| «No se pudo preparar la subida. (<código>)», «No se pudo subir el archivo. (<código>)» o «No se pudo subir el archivo.» | Falló la conexión al subir | Volver a elegirlos; si se repite, avisar a quien administra el sitio |
 | «Falta configurar Cloudflare R2 (R2_*).» | El sitio no tiene almacenamiento configurado | Avisar a quien administra el sitio |
+
+### Borradores
+
+| Lo que dice la pantalla | Qué significa | Qué hacer |
+|---|---|---|
+| «Guardando borrador…» | Se está guardando lo escrito | Nada |
+| «Borrador guardado.» | Lo escrito quedó guardado; se puede cerrar el panel sin perderlo | Nada |
+| «No se pudo guardar el borrador.» | El último guardado falló | Hacer cualquier cambio para que lo intente de nuevo; si sigue fallando, copiar el texto antes de cerrar |
+| «Este borrador ya no existe: se programó o se descartó en otra pestaña. Cierra el panel para ver cómo quedó.» | Ese mismo borrador se programó o se descartó en otra pestaña o ventana; este panel dejó de guardar y «Programar» quedó apagado | Cerrar el panel y mirar el calendario. Si no estaba programado y se quiere, abrir «Nueva publicación» y escribirlo de nuevo |
+| «¿Descartar este borrador? Lo escrito y los archivos elegidos se pierden.» | La pregunta de «Descartar» | Aceptar para borrarlo; cancelar para seguir escribiendo |
+| «No tienes borradores.» | No hay ningún borrador guardado (o el que se pidió ya no existe y era el último) | Nada |
 
 ### Por red
 
@@ -450,7 +648,7 @@ final de esta sección).
 | «No pude leer tu cuenta de TikTok.» | TikTok no contestó | Se puede programar igual: se ofrecen las cuatro privacidades y se vuelve a comprobar al publicar |
 | «TikTok necesita que elijas la privacidad.» | Falta «Quién puede verlo» | Elegirla en el bloque de esa cuenta |
 | «Un contenido patrocinado no puede ser privado. Vuelve a elegir quién puede verlo.» o «Un contenido patrocinado no puede ser privado.» | «Contenido patrocinado» con «Solo yo», o sin privacidad elegida | Elegir otra privacidad, o «Mi marca» |
-| «Las opciones de la red no se entendieron.» | El formulario llegó raro | Recargar y volver a llenarlo |
+| «Las opciones de la red no se entendieron.» | El formulario llegó raro | Cerrar el panel, volver a abrir el borrador desde «Borradores (<N>)» y revisar el bloque de TikTok |
 | «El archivo cumple lo que pide TikTok.» / «Los archivos cumplen lo que pide TikTok.» | La revisión no encontró problemas | Nada |
 | «TikTok va a rechazar esto:» seguido de «<archivo>: pesa <N> MB y TikTok acepta hasta 20 MB por foto.» | Foto muy pesada | Comprimirla |
 | «<archivo>: mide <ancho>×<alto> y TikTok no pasa de 1080p en fotos: redúcela a 1080 px de lado corto.» | Foto de más de 1080 px en su lado corto | Achicarla |
@@ -473,7 +671,7 @@ separados por punto y coma.
 | «La respuesta pública va de 1 a 300 caracteres.» | La «Respuesta pública» es muy larga | Acortarla |
 | «El documento tiene que ser una URL absoluta a un PDF de hasta 25 MB.» | Solo en el CSV: el PDF de la columna `regla` no se pudo leer o no es un PDF que quepa | Usar un enlace de descarga directa a un PDF de hasta 25 MB |
 
-### Carga masiva
+### Carga por CSV
 
 Además de las frases de las tablas de red, de TikTok y de respuesta automática, cada fila
 puede decir:
@@ -501,7 +699,7 @@ puede decir:
 | ««<clave1>» y «<clave2>» en opciones nombran el mismo destino. Deja una sola clave por destino.» | Dos claves de `opciones` apuntan a la misma cuenta | Dejar una |
 | «No se pudo guardar la fila. Inténtalo de nuevo.» | Falla pasajera | Subir de nuevo solo esa fila |
 
-### Lista, «Subir ahora», «Reprogramar» y «Eliminar»
+### Lista, «Se quemó», «Subir ahora», «Reprogramar» y «Eliminar»
 
 | Lo que dice la pantalla | Qué significa | Qué hacer |
 |---|---|---|
@@ -512,7 +710,7 @@ puede decir:
 | «El post ya no existe.» | Se borró antes | Recargar |
 | «Ya se publicó (o está publicando): elimínalo en la red.» | Se intentó eliminar algo que ya salió en alguna red | Borrarlo en la red misma; para sacar solo las redes que no salieron, desmarcarlas en el editor |
 | «La hora debe estar en el futuro.» | En «Reprogramar», la hora ya pasó | Elegir una futura |
-| «Ese destino ya no existe.» | El destino se borró mientras tanto | Recargar |
+| «Ese destino ya no existe.» | En «Reprogramar»: esa red del post, o el post entero, se borró mientras la ventana estaba abierta | Recargar |
 
 ### Editor
 
@@ -525,16 +723,16 @@ puede decir:
 | «La portada requiere un video en media.» | Portada sin video | Quitar la portada o agregar el video |
 | «La portada debe ser una imagen.» / «La portada debe ser JPG o PNG.» | La portada no sirve | Usar una imagen JPG o PNG |
 | «Los atributos deben ser un objeto plano de valores simples.» | El JSON de «Atributos» está mal escrito o es demasiado grande | Corregirlo, o dejar el cuadro vacío |
-| «El post ya no existe.» | Se borró mientras estaba abierto | Volver a la lista |
-| «Algo se rompió», con «No fue nada que hicieras: una consulta no respondió. Vuelve a intentarlo; el detalle quedó en la consola del navegador.» y los botones «Reintentar» e «Ir a El Fuego» | Algo falló en el servidor. Si se estaba guardando con «Agregar archivos», lo más probable es que lo elegido pese más de unos 4 MB, que el editor no alcanza a subir | Volver al editor, quitar el archivo y agregarlo con «Agregar por URL»; si no había archivo, «Reintentar» |
+| «El post ya no existe.» | Se borró mientras estaba abierto | Volver a La Parrilla |
+| «Algo se rompió», con «No fue nada que hicieras: una consulta no respondió. Vuelve a intentarlo; el detalle quedó en la consola del navegador.» y los botones «Reintentar» e «Ir a La Parrilla» | Algo falló en el servidor. Si se estaba guardando con «Agregar archivos», lo más probable es que lo elegido pese más de unos 4 MB, que el editor no alcanza a subir | Volver al editor, quitar el archivo y agregarlo con «Agregar por URL»; si no había archivo, «Reintentar» |
 | «No encontramos esa página» | El post no existe o no es de esta persona | Volver a La Parrilla |
 
 ### Motivos de un destino que no salió
 
-Aparecen en la píldora de la lista, en la línea «Reintentando <Red> · <usuario>: <motivo>»
-del calendario, en «Se quemó» de El Fuego y en el correo. Mientras el destino dice
-«Reintentando», se reintenta solo; cuando dice «Falló», hay que actuar (ver la tarea de
-arreglar un post quemado, más arriba).
+Aparecen en «Se quemó», en la píldora de la lista, en la línea «Reintentando <Red> ·
+<usuario>: <motivo>» del calendario y en el correo. Mientras el destino dice «Reintentando»,
+se reintenta solo; cuando dice «Falló», hay que actuar (ver la tarea de arreglar un post
+quemado, más arriba).
 
 | Lo que dice la pantalla | Qué significa | Qué hacer |
 |---|---|---|
@@ -555,17 +753,49 @@ arreglar un post quemado, más arriba).
 | «TikTok no acepta el archivo: revisa formato, tamaño o duración.» | El archivo no pasó los límites de TikTok | Cambiar el archivo |
 | «TikTok ya no permite esa privacidad en tu cuenta; edita la publicación.» | La privacidad elegida ya no está permitida | El editor no cambia la privacidad: si nada salió, eliminar y programar de nuevo; si no, desmarcar TikTok y programarlo aparte |
 | «TikTok solo publica en cuentas privadas hasta que apruebe la app: pon tu cuenta de TikTok en privada y reprograma.» | TikTok rechazó publicar desde una cuenta pública, como hace con las apps sin auditoría. La de Tu Parrilla ya está auditada, así que no debería aparecer | Avisar a quien administra el sitio y, mientras tanto, ponerla en privada en TikTok y «Reprogramar» |
-| «Tienes 5 borradores pendientes en TikTok; publica alguno antes.» | La bandeja de TikTok está llena | Publicar o borrar borradores en la app y «Reprogramar» |
+| «Tienes 5 borradores pendientes en TikTok; publica alguno antes.» | La bandeja de TikTok está llena (son borradores de la app de TikTok, no los de Tu Parrilla) | Publicar o borrar borradores en la app de TikTok y «Reprogramar» |
 | «Reconecta TikTok para autorizar la publicación.» | TikTok quitó el permiso | Reconectar en Los Fierros y «Reprogramar» |
 | «TikTok no reconoce el dominio de tus archivos; verifícalo en el portal.» | Problema de configuración del sitio con TikTok | Avisar a quien administra el sitio |
 | «TikTok necesita que elijas la privacidad.» / «TikTok recibe un video, o hasta 35 fotos JPG o WebP.» | Las opciones o los archivos no sirven para TikTok | Si nada salió, «Eliminar» y programarlo de nuevo; si no, desmarcar TikTok y programarlo aparte |
 
 ## Si el humano dice…
 
-- **No encuentro dónde programar.** Pestaña «La Parrilla», y abrir «Programar una
-  publicación», que viene plegado. Desde El Fuego, «Poner al fuego» lo abre directo.
+- **¿Dónde está El Fuego? / No encuentro el botón Poner al fuego.** Ya no existen: El Fuego
+  se fundió en La Parrilla, que es ahora la entrada del panel. Lo que falló está en «Se
+  quemó», arriba; la semana, en el calendario; lo de ayer, en el pie; y para programar está
+  «Nueva publicación».
+- **No encuentro dónde programar.** «Nueva publicación», el botón naranjo arriba a la derecha
+  de La Parrilla, o el «+» de un día en el calendario.
+- **Perdí lo que estaba escribiendo / se me cerró el panel.** Se guarda solo como borrador:
+  «Borradores (<N>)», arriba a la derecha. Si ese botón no aparece, no quedó nada guardado: no
+  tenía texto, archivo ni palabra clave, el guardado falló («No se pudo guardar el
+  borrador.»), o se descartó.
+- **No veo el botón Borradores.** Solo aparece cuando hay al menos un borrador.
+- **Hay una tarjeta punteada en el calendario.** Es un borrador con fecha: todavía no está
+  programado y no va a salir hasta abrirlo y apretar «Programar».
+- **El día dice Apagada pero tiene algo.** Lo que tiene son borradores, que no cuentan para
+  el fuego del día porque no van a salir solos.
+- **Abrí un borrador y me salió la lista de borradores.** Ese borrador ya no existe: se
+  programó o se descartó.
+- **Programé un borrador y desapareció de Borradores.** Es lo esperado: ahora es una
+  publicación y está en el calendario.
+- **Mi borrador no aparece en el calendario.** Solo salen los que tienen fecha, en su semana;
+  los demás están en «Borradores (<N>)».
+- **El borrador volvió sin Ahora / sin fecha.** «Ahora» no se guarda en el borrador: hay que
+  encenderlo de nuevo.
+- **No veo el + en un día.** Solo lo tienen hoy y los días que vienen.
+- **La fecha viene puesta a las 9.** Es lo que propone al abrir desde un día del calendario;
+  se cambia en «Fecha y hora».
+- **Elegí un archivo y el botón Programar está gris.** Está subiendo («Subiendo…»): esperar
+  a que aparezca en la lista.
+- **Quiero cambiar el orden de los archivos.** En el compositor, quitarlos con su ✕ y volver a
+  elegirlos en el orden que se quiere; o programar y reordenar en el editor con las flechas.
+- **¿Dónde subo un CSV? / No encuentro la carga masiva.** «Subir CSV», arriba a la derecha de
+  La Parrilla.
 - **No me deja marcar una cuenta.** Dice «reconéctala» al lado: hay que reconectarla en
   [Los Fierros](los-fierros.md). Si no aparece ninguna, no hay cuentas conectadas.
+- **La pantalla dice Conecta tu primera red.** No hay ninguna red conectada. Se conecta en
+  Los Fierros, dentro del engranaje «Ajustes».
 - **El botón Programar no hace nada / el navegador me marca un campo.** Falta «Fecha y
   hora» (o apretar «Ahora»), o falta «Quién puede verlo» en un bloque de TikTok.
 - **No veo lo de trial reel.** Solo aparece con exactamente un archivo, que sea video, y
@@ -576,8 +806,19 @@ arreglar un post quemado, más arriba).
   en unos minutos. Para que sea ya: «Subir ahora» en la lista.
 - **Dice Reintentando.** Falló un intento y se va a volver a probar solo; el motivo va al
   lado. Si el motivo pide reconectar, conviene hacerlo ya.
-- **Se me quemó un post.** Leer el motivo en la píldora roja y seguir la tarea de arreglar
-  un post quemado.
+- **Se me quemó un post.** Leer el motivo en «Se quemó», arriba de la pantalla, y seguir la
+  tarea de arreglar un post quemado.
+- **No veo la sección Se quemó.** No hay nada que haya fallado: la sección solo aparece cuando
+  hay algo.
+- **Quiero quitar algo de Se quemó sin reprogramarlo.** No hay botón para descartarlo. La fila
+  sale cuando ese destino vuelve a la cola (con «Reprogramar», «Subir ahora» o desde el editor),
+  cuando se desmarca esa red en el editor o cuando se borra el post.
+- **Hay fallos viejos de hace semanas en Se quemó.** Es lo esperado: la sección no tiene fecha
+  límite, y un fallo se queda hasta que alguien lo arregla.
+- **Ayer salió algo y el pie no dice miradas.** Las redes todavía no informaron las vistas; el
+  número aparece cuando llegan.
+- **No veo mis números / ¿dónde están las visitas?** No están acá: [Los
+  Números](los-numeros.md) y [Los Cortes](los-cortes.md).
 - **No puedo borrar un post.** Ya salió (o se está publicando) en alguna red: hay que
   borrarlo en la red. Para sacar solo las redes que faltan, desmarcarlas en el editor.
 - **Borré uno sin querer.** No hay deshacer: hay que programarlo de nuevo.
@@ -602,16 +843,17 @@ arreglar un post quemado, más arriba).
 - **Publiqué en YouTube y salió privado.** Los Fierros lo advierte: «Hasta que Google
   apruebe la cuota de la app, lo que publiques sale privado.»
 - **En TikTok no aparece en mi perfil.** TikTok puede tardar unos minutos. Si se mandó como
-  borrador, dice «En tu bandeja de TikTok»: hay que terminarlo en la app.
+  borrador de TikTok, dice «En tu bandeja de TikTok»: hay que terminarlo en la app.
 - **No veo el video en el editor de un post que ya salió.** Cuando un post sale en todas sus
   redes, el video se borra del almacenamiento del sitio; las fotos y la portada se quedan.
-- **La hora está corrida.** Las horas son las de la zona de [Tu Cuenta](tu-cuenta.md).
+- **La hora está corrida / el «hoy» no calza.** Las horas son las de la zona de [Tu
+  Cuenta](tu-cuenta.md).
 - **No encuentro un post en el calendario.** Puede estar en otra semana: «Semana anterior» /
   «Semana siguiente», o mirar la «Lista», que tiene todo.
 - **En el calendario no está el botón para borrar o subir.** Esos botones están en la
   «Lista»; en el calendario, un clic en la tarjeta abre el editor, que tiene «Eliminar».
 - **¿Qué significa el color de la tarjeta?** Clara, programada; más oscura, saliendo o ya
-  publicada; casi negra, se quemó alguna red.
+  publicada; casi negra, se quemó alguna red. Con borde punteado y sin color, es un borrador.
 - **Cambié la fecha de un post ya publicado.** No lo vuelve a publicar: solo cambia el día
   en que aparece en el calendario.
 
@@ -619,16 +861,21 @@ arreglar un post quemado, más arriba).
 
 - No publica en el segundo exacto: lo programado, incluso con «Ahora», sale en la pasada
   siguiente del publicador. Solo «Subir ahora» publica en el acto.
+- No publica borradores: un borrador no sale nunca solo, aunque tenga fecha y esa fecha pase.
 - No cambia ni borra nada en las redes: editar lo ya publicado no toca la red, y lo publicado
   no se puede eliminar desde aquí.
-- No pregunta antes de «Eliminar», ni deja deshacer un borrado.
+- No pregunta antes de «Eliminar», ni deja deshacer un borrado ni un «Descartar».
 - No tiene una forma de descartar un destino quemado: se reprograma, se sube, se desmarca en el
   editor o se borra el post entero.
 - No cambia las opciones de TikTok ni el trial reel de algo ya programado, ni agrega TikTok
   desde el editor.
+- No reordena los archivos en el compositor: se quitan y se vuelven a elegir, o se ordenan en
+  el editor después de programar.
+- No guarda «Ahora» en un borrador, ni cuenta los borradores en el fuego del día.
+- No muestra los borradores en la lista, en la app del teléfono ni en la API.
 - No sube la portada como archivo, ni adjunta el PDF de la respuesta automática.
-- No sube archivos sueltos en la carga masiva: solo por dirección.
-- No duplica un post ni arrastra tarjetas en el calendario.
+- No sube archivos sueltos en la carga por CSV: solo por dirección.
+- No duplica un post ni arrastra tarjetas en el calendario, ni programa en un día que ya pasó.
 - No publica video en X.
 - No conecta cuentas: eso es [Los Fierros](los-fierros.md). No muestra cómo le fue a lo
   publicado: eso es [Los Cortes](los-cortes.md) (cada publicación, lo que hizo en la red y lo
@@ -640,10 +887,13 @@ arreglar un post quemado, más arriba).
 
 Lo que describe esta página sale de:
 
-- La pantalla y el editor:
+- La pantalla, sus paneles y el editor:
   - `src/app/admin/(dash)/schedule/page.tsx`
+  - `src/app/admin/(dash)/schedule/panel-lateral.tsx`
   - `src/app/admin/(dash)/schedule/composer.tsx`
+  - `src/app/admin/(dash)/schedule/lista-borradores.tsx`
   - `src/app/admin/(dash)/schedule/batch-upload.tsx`
+  - `src/app/admin/(dash)/schedule/se-quemo.tsx`
   - `src/app/admin/(dash)/schedule/calendar.tsx`
   - `src/app/admin/(dash)/schedule/queue.tsx`
   - `src/app/admin/(dash)/schedule/reprogramar.tsx`
@@ -657,15 +907,21 @@ Lo que describe esta página sale de:
   - `src/app/admin/(dash)/schedule/enlace.ts`
   - `src/app/admin/(dash)/schedule/[id]/page.tsx`
   - `src/app/admin/(dash)/schedule/[id]/editor.tsx`
-- Lo que hacen sus botones (programar, guardar, reprogramar, eliminar, «Subir ahora», la carga masiva y la lectura de la cuenta de TikTok):
+- Lo que hacen sus botones (programar, guardar y descartar un borrador, guardar en el editor, reprogramar, eliminar, «Subir ahora», la carga por CSV y la lectura de la cuenta de TikTok):
   - `src/app/admin/actions.ts`
+- Los borradores (qué se guarda, cuándo hay algo que guardar, la fecha que se propone para un día):
+  - `src/lib/borrador.ts`
+  - `src/lib/borradores.ts`
+- «Se quemó» y el pie de ayer:
+  - `src/lib/fuego.ts`
+  - `src/lib/social/publish/cortes.ts`
 - Cómo se llega y lo que rodea a la pantalla:
   - `src/app/admin/(dash)/page.tsx`
-  - `src/app/admin/(dash)/termometro.tsx`
   - `src/app/admin/(dash)/nav.tsx`
   - `src/app/admin/(dash)/accounts/cuentas.tsx`
   - `src/app/admin/(dash)/error.tsx`
   - `src/app/not-found.tsx`
+  - `src/lib/auth.ts`
 - La subida de archivos:
   - `src/app/api/admin/upload-url/route.ts`
   - `src/lib/subida-directa.ts`
@@ -698,6 +954,8 @@ Lo que describe esta página sale de:
   - `src/lib/parrilla.ts`
   - `src/lib/networks.ts`
   - `src/lib/vocabulario.ts`
+  - `src/lib/utils.ts`
   - `src/components/ui.tsx`
+  - `src/components/boton.ts`
 
 Si cambias lo que se ve en alguno de ellos, actualiza esta página en el mismo commit.

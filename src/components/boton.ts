@@ -23,8 +23,15 @@ export const BOTON_FORMA =
  * `<Link>` de Next quiere ser él quien renderice el `<a>`, y porque `Button` es un
  * `<button>`: envolverlo daría un botón dentro de un enlace.
  *
- * Existe porque esta misma cadena estaba copiada carácter por carácter en El Fuego y en la
- * página de 404, y el aspecto de un botón repartido en tres archivos termina diciendo tres
- * cosas distintas.
+ * Existe porque esta misma cadena estaba copiada carácter por carácter en la pantalla de
+ * entrada y en la página de 404, y el aspecto de un botón repartido en tres archivos termina
+ * diciendo tres cosas distintas.
  */
 export const ENLACE_BOTON = `${BOTON_FORMA} bg-brasa text-acero-950 transition-[filter] hover:brightness-110`
+
+/**
+ * Un enlace con pinta de botón secundario: el borde y el gris del `Button` `ghost` de
+ * `ui.tsx`, para acciones que conviven con una primaria (La Parrilla: «Borradores» y «Subir
+ * CSV» junto a «Nueva publicación»).
+ */
+export const ENLACE_BOTON_SECUNDARIO = `${BOTON_FORMA} border border-acero-700 text-fg-muted transition-colors hover:bg-acero-800 hover:text-fg`

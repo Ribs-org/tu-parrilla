@@ -2,8 +2,8 @@
 
 `/admin/usuarios`, dentro del engranaje «Ajustes» de la barra de arriba, **solo para el admin**
 (la persona dueña de esta instalación de Tu Parrilla; hay una sola). Los demás usuarios no la
-ven en el menú, y si abren la dirección, el panel los devuelve a El Fuego (la portada del
-panel, [el-fuego.md](el-fuego.md)) sin aviso.
+ven en el menú, y si abren la dirección, el panel los devuelve a La Parrilla (la entrada del
+panel, [la-parrilla.md](la-parrilla.md)) sin aviso.
 
 Tu Parrilla es por invitación. Los Maestros es la lista de quién puede entrar: acá el admin
 invita a alguien por su correo, ve quién está invitado y quién ya entró, quita una invitación
@@ -150,7 +150,7 @@ Sale de:
 - `src/lib/ingreso.ts`: «Ese correo no se ve bien.», «Ese correo ya está invitado.» y «Ese
   usuario ya entró alguna vez; no se puede quitar todavía.».
 - `src/lib/slugs.ts`: la dirección de la página nueva.
-- `src/lib/auth.ts`: quién no es admin vuelve a El Fuego.
+- `src/lib/auth.ts` y `src/app/admin/(dash)/page.tsx`: quién no es admin vuelve a La Parrilla.
 - `src/lib/vocabulario.ts` y `src/app/admin/(dash)/nav.tsx`: el nombre, el subtítulo y que solo
   el admin la vea en «Ajustes».
 

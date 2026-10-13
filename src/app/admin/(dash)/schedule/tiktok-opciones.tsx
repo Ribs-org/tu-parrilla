@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { leerCreadorTikTok } from '@/app/admin/actions'
 import { Field, GroupLabel, Select, Toggle } from '@/components/ui'
+import type { TikTokInicial } from '@/lib/borrador'
 import type { CuentaDestino } from '@/lib/social/cuentas'
 import { TIKTOK_CREADOR_ILEGIBLE, type CreadorTikTok } from '@/lib/social/publish/tiktok-creador'
 import { ETIQUETA_PRIVACIDAD, PRIVACIDADES_TIKTOK, type PrivacidadTikTok } from '@/lib/social/publish/opciones'
@@ -26,14 +27,31 @@ const creadorPromesas = new Map<string, ReturnType<typeof leerCreadorTikTok>>()
  * mismo formulario.
  *
  * `soloFotos` esconde dúo y pegar: TikTok no los ofrece en carruseles.
+ *
+ * `inicial` es lo que tenía elegido un borrador del compositor. Sin él todo nace como la guía
+ * de TikTok exige; con él vuelve lo que la persona ya había elegido ella misma.
  */
-export function TikTokOpciones({ cuenta, soloFotos }: { cuenta: CuentaDestino; soloFotos: boolean }) {
+export function TikTokOpciones({
+  cuenta,
+  soloFotos,
+  inicial,
+}: {
+  cuenta: CuentaDestino
+  soloFotos: boolean
+  inicial?: TikTokInicial | null
+}) {
   const [creador, setCreador] = useState<CreadorTikTok | null>(null)
   const [aviso, setAviso] = useState<string | null>(null)
-  const [borrador, setBorrador] = useState(false)
-  const [privacidad, setPrivacidad] = useState<PrivacidadTikTok | ''>('')
-  const [comercial, setComercial] = useState(false)
-  const [tipoComercial, setTipoComercial] = useState<'marca_propia' | 'patrocinado'>('marca_propia')
+  const [borrador, setBorrador] = useState(inicial?.borrador ?? false)
+  const [privacidad, setPrivacidad] = useState<PrivacidadTikTok | ''>(() =>
+    (PRIVACIDADES_TIKTOK as readonly string[]).includes(inicial?.privacidad ?? '')
+      ? (inicial!.privacidad as PrivacidadTikTok)
+      : '',
+  )
+  const [comercial, setComercial] = useState(inicial ? inicial.comercial !== 'no' : false)
+  const [tipoComercial, setTipoComercial] = useState<'marca_propia' | 'patrocinado'>(
+    inicial?.comercial === 'patrocinado' ? 'patrocinado' : 'marca_propia',
+  )
 
   useEffect(() => {
     let vivo = true
@@ -117,14 +135,21 @@ export function TikTokOpciones({ cuenta, soloFotos }: { cuenta: CuentaDestino; s
                 name={`tiktokComentarios:${cuenta.id}`}
                 label="Comentarios"
                 bloqueada={creador?.comentariosDeshabilitados}
+                marcada={inicial?.comentarios}
               />
               {soloFotos ? null : (
                 <>
-                  <Casilla name={`tiktokDuo:${cuenta.id}`} label="Dúos" bloqueada={creador?.duoDeshabilitado} />
+                  <Casilla
+                    name={`tiktokDuo:${cuenta.id}`}
+                    label="Dúos"
+                    bloqueada={creador?.duoDeshabilitado}
+                    marcada={inicial?.duo}
+                  />
                   <Casilla
                     name={`tiktokPegar:${cuenta.id}`}
                     label="Pegar (Stitch)"
                     bloqueada={creador?.pegarDeshabilitado}
+                    marcada={inicial?.pegar}
                   />
                 </>
               )}
@@ -207,11 +232,24 @@ export function TikTokOpciones({ cuenta, soloFotos }: { cuenta: CuentaDestino; s
   )
 }
 
-/** Apagada al nacer; gris y sin enviar si creator_info dice que la cuenta la tiene bloqueada. */
-function Casilla({ name, label, bloqueada }: { name: string; label: string; bloqueada?: boolean }) {
+/**
+ * Apagada al nacer —salvo que un borrador la traiga marcada—; gris y sin enviar si
+ * creator_info dice que la cuenta la tiene bloqueada.
+ */
+function Casilla({
+  name,
+  label,
+  bloqueada,
+  marcada,
+}: {
+  name: string
+  label: string
+  bloqueada?: boolean
+  marcada?: boolean
+}) {
   return (
     <label className={bloqueada ? 'flex items-center gap-2 opacity-40' : 'flex items-center gap-2'}>
-      <input type="checkbox" name={name} disabled={bloqueada} />
+      <input type="checkbox" name={name} disabled={bloqueada} defaultChecked={marcada} />
       {label}
     </label>
   )
