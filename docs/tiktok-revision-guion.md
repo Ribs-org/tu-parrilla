@@ -229,12 +229,13 @@ empieza cada escena, que se sacan del archivo grabado y no se adivinan.
 
 ## La auditoría de Direct Post (2026-09-30)
 
-**Enviada el 2026-10-04**, con un video armado de dos tomas: la primera muestra el flujo de
-programar; la segunda, con la cuenta ya en privada, la publicación hecha y vista en TikTok
-Studio. Esperando respuesta.
+**Enviada el 2026-10-04 y aprobada** (aviso del 2026-10-06), con un video armado de dos
+tomas: la primera muestra el flujo de programar; la segunda, con la cuenta ya en privada, la
+publicación hecha y vista en TikTok Studio. Lo que sigue queda como referencia para una
+revisión futura.
 
 La app está aprobada y en producción desde el 2026-09-28 (Login Kit y Content Posting
-API). Lo que falta es la **auditoría de Direct Post**: sin ella, TikTok solo acepta
+API). Lo que faltaba era la **auditoría de Direct Post**: sin ella, TikTok solo acepta
 publicaciones de **cuentas privadas** y en «Solo yo», y la app tiene un cupo de **5 usuarios
 distintos por día**. Con la cuenta pública rechaza el init con
 `unaudited_client_can_only_post_to_private_accounts` aunque se elija «Solo yo»: así fallaron
@@ -246,10 +247,10 @@ ningún otro trámite y se puede mandar hoy.
 
 - La app de producción con las credenciales desplegadas (ya está: `TIKTOK_CLIENT_KEY` y
   `TIKTOK_CLIENT_SECRET` de la app real, no del sandbox).
-- Una cuenta de TikTok tuya conectada en Los Fierros, con el aviso «Hasta que TikTok
-  apruebe la publicación directa…» visible bajo el título de la red.
+- Una cuenta de TikTok tuya conectada en Los Fierros.
 - **Esa cuenta en privada** (app de TikTok → Ajustes y privacidad → Privacidad → Cuenta
-  privada). Sin eso no se publica nada y no hay escena 8.
+  privada), solo si Direct Post no está aprobado: sin eso no se publica nada y no hay
+  escena 8.
 - El computador sin suspensión mientras graba: si se duerme, la barra de juegos pierde el
   archivo entero.
 - Un video vertical y tres fotos, como en el guion de arriba.
@@ -311,10 +312,12 @@ disclosure.» 7 «Scheduled now.» 8 «Published with the chosen privacy level; 
 audit, TikTok only accepts private accounts.» 9 «Disconnect and revoke.» 10 «Privacy
 policy.»
 
-### Después de aprobar
+### Después de aprobar (hecho)
 
 - El cupo de 5 usuarios/día desaparece, las cuentas públicas pueden publicar y la
   privacidad elegida se respeta.
-- Quitar la frase de TikTok de `AVISO_ANTES_DE_CONECTAR` (`src/lib/networks.ts`) y su test,
-  y la nota del bloque de TikTok «Mientras TikTok no apruebe la app…» (`schedule/tiktok-opciones.tsx`),
-  y las frases correspondientes del README.
+- Se quitaron la frase de TikTok de `AVISO_ANTES_DE_CONECTAR` (`src/lib/networks.ts`) y su
+  test, la nota del bloque de TikTok en `schedule/tiktok-opciones.tsx`, y lo que repetían
+  el README, las guías de la API y la wiki de la UI. Queda la frase de error
+  `TIKTOK_NO_AUDITADA` (`src/lib/social/publish/tiktok.ts`), que solo sale si TikTok
+  devuelve justo ese rechazo.

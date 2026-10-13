@@ -110,19 +110,6 @@ export function TikTokOpciones({ cuenta, soloFotos }: { cuenta: CuentaDestino; s
             </Select>
           </Field>
 
-          {/*
-            creator_info devuelve lo que el creador puede elegir, no lo que la app puede
-            publicar: con la app sin aprobar ofrece las cuatro y TikTok rechaza todas menos
-            la privada, quince minutos después y por correo. Avisarlo aquí es lo único que
-            podemos hacer sin cerrarle la puerta al día en que aprueben.
-          */}
-          {privacidad !== '' && privacidad !== 'SELF_ONLY' ? (
-            <p className="text-[0.72rem] text-fg-faint">
-              Mientras TikTok no apruebe la app, solo «Solo yo» llega a publicarse, y solo desde
-              una cuenta de TikTok privada.
-            </p>
-          ) : null}
-
           <div>
             <GroupLabel>Permitir</GroupLabel>
             <div className="flex flex-wrap gap-4 text-sm">

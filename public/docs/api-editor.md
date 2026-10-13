@@ -222,8 +222,8 @@ el JSON.
   fotos en la bandeja de TikTok del dueño para terminarlos desde el teléfono. En `borrador`
   los demás campos se ignoran.
 - `privacidad` (obligatoria en `directo`): `PUBLIC_TO_EVERYONE`, `MUTUAL_FOLLOW_FRIENDS`,
-  `FOLLOWER_OF_CREATOR` o `SELF_ONLY`. Mientras TikTok no audite la app, solo `SELF_ONLY`
-  llega a publicarse.
+  `FOLLOWER_OF_CREATOR` o `SELF_ONLY`, siempre que la cuenta la ofrezca (TikTok decide cuáles
+  ofrece cada cuenta).
 - `comentarios`, `duo`, `pegar`: booleanos, ausentes valen `false`. `duo` y `pegar` no
   aplican a fotos.
 - `comercial`: `no`, `marca_propia` (etiqueta «Contenido promocional») o `patrocinado`
@@ -529,9 +529,6 @@ patrones. Con menos de ~10 posts por valor de atributo, desconfía de la diferen
 
 # 5. Lo que el sistema NO hace
 
-- **En TikTok, la publicación directa sale solo como «Solo yo»** hasta que TikTok audite
-  Direct Post; la app ya está aprobada, esa auditoría es aparte. El borrador a la bandeja no
-  tiene esa limitación.
 - **No deduplica**: reenviar el mismo lote programa todo de nuevo.
 - **No programa en el pasado** ni acepta media que no esté en una URL pública.
 - **No edita por API**: para corregir un post ya programado, o lo borras con

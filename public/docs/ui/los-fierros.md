@@ -31,9 +31,8 @@ En este orden: Instagram, TikTok, YouTube, Facebook, Threads, X / Twitter. Cada 
   - Instagram: «Cuenta Business o Creator, enlazada a una página de Facebook. Una cuenta personal no puede conectar.»
   - Facebook: «Una página, no un perfil personal.»
   - YouTube: «Hasta que Google apruebe la cuota de la app, lo que publiques sale privado.»
-  - TikTok: «Hasta que TikTok apruebe la publicación directa, solo publica en cuentas privadas: pon tu cuenta de TikTok en privada y elige “Solo yo”.»
   - Instagram y Facebook, además, solo mientras la instalación tenga marcada la revisión de Meta: «Mientras Meta revisa la app, solo pueden conectar las cuentas que invitamos como testers. Si Facebook dice que la función no está disponible, escríbenos.»
-  - Threads y X / Twitter no tienen aviso.
+  - TikTok, Threads y X / Twitter no tienen aviso.
 - «Sin cuentas.» si la red no tiene ninguna; si tiene, una tarjeta por cuenta.
 
 ### La tarjeta de una cuenta
@@ -237,7 +236,7 @@ Trae los posts y los números de las cuentas de Instagram, TikTok, YouTube y Fac
 - **«Reconecté y apareció una tarjeta nueva»** → En la ventana de la red se entró con otra cuenta, o la red le dio un identificador nuevo a la misma. Si es la misma cuenta, desconectar la vieja y fusionarla (ver «Para fusionar una cuenta repetida»).
 - **«Tengo dos tarjetas de la misma cuenta»** → «Para fusionar una cuenta repetida».
 - **«Mi TikTok aparece con un número largo en vez del nombre»** → TikTok no entregó el nombre al conectar; «Reconectar» lo vuelve a pedir.
-- **«¿Tengo que poner mi TikTok en privada para conectarlo?»** → Para conectar, no: el aviso habla de publicar. Qué privacidad se puede elegir al publicar lo muestra el compositor de [La Parrilla](la-parrilla.md).
+- **«¿Tengo que poner mi TikTok en privada?»** → No, ni para conectar ni para publicar: la publicación directa está aprobada y sale con la privacidad que se elija en el compositor de [La Parrilla](la-parrilla.md).
 - **«La tarjeta de X dice que vence hoy»** → En X es lo normal; ver «Para conectar X / Twitter».
 - **«Threads o X dicen "Sin sincronizar"»** → Es lo normal: de esas redes no se traen números, solo se publica.
 - **«Sincronizar ahora no hace nada» o «me dice que espere»** → Se puede apretar una vez cada cinco minutos. Los números de Threads y X no se traen nunca.

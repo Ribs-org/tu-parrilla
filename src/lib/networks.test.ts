@@ -8,7 +8,6 @@ describe('avisosDe', () => {
     ])
     expect(avisosDe('facebook', false)).toEqual(['Una página, no un perfil personal.'])
     expect(avisosDe('youtube', false)).toEqual(['Hasta que Google apruebe la cuota de la app, lo que publiques sale privado.'])
-    expect(avisosDe('tiktok', false)).toEqual(['Hasta que TikTok apruebe la publicación directa, solo publica en cuentas privadas: pon tu cuenta de TikTok en privada y elige “Solo yo”.'])
   })
 
   it('mientras Meta revisa la app, Instagram y Facebook llevan la segunda línea; las demás no', () => {
@@ -18,12 +17,14 @@ describe('avisosDe', () => {
     expect(avisosDe('instagram', true)).toHaveLength(2)
     expect(avisosDe('instagram', true)[1]).toBe(AVISO_META_EN_REVISION)
     expect(avisosDe('facebook', true)).toHaveLength(2)
-    expect(avisosDe('tiktok', true)).toHaveLength(1)
     expect(avisosDe('youtube', true)).toHaveLength(1)
   })
 
-  it('una red sin aviso fijo —threads— no dice nada, revise o no revise Meta', () => {
+  it('una red sin aviso fijo —threads, tiktok— no dice nada, revise o no revise Meta', () => {
     expect(avisosDe('threads', false)).toEqual([])
     expect(avisosDe('threads', true)).toEqual([])
+    // Con la auditoría de Direct Post aprobada, TikTok publica en público: nada que advertir.
+    expect(avisosDe('tiktok', false)).toEqual([])
+    expect(avisosDe('tiktok', true)).toEqual([])
   })
 })

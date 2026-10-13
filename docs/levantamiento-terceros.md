@@ -17,7 +17,7 @@ panel de la plataforma correspondiente.
 |---|---|---|---|
 | **Instagram** | `instagram_basic`, `instagram_manage_insights`, `pages_show_list`, `pages_read_engagement`, `instagram_content_publish`, `business_management`, `instagram_manage_comments` | App de Meta en **modo desarrollo** | El diálogo de Facebook le dice que la función no está disponible; no puede conectar (es lo que le pasó a una usuaria el 2026-09-29). Solo entran cuentas con un rol en la app. |
 | **Facebook** | `pages_show_list`, `pages_read_engagement`, `pages_read_user_content`, `pages_manage_posts`, `business_management`, `pages_manage_engagement` (+ `publish_video` al confirmar) | La misma app de Meta, mismo modo | Igual que Instagram. |
-| **TikTok** | `user.info.basic`, `video.list`, `video.upload`, `video.publish` | App **aprobada y en producción** desde el 2026-09-28 (Login Kit + Content Posting API); la **auditoría de Direct Post** no está hecha | Puede conectar. Puede publicar, pero **solo como privado** (`SELF_ONLY`) y la app entera tiene un cupo de **5 usuarios por día** mientras no pase la auditoría. |
+| **TikTok** | `user.info.basic`, `video.list`, `video.upload`, `video.publish` | App **aprobada y en producción** desde el 2026-09-28 (Login Kit + Content Posting API); **auditoría de Direct Post aprobada** (aviso del 2026-10-06) | Puede conectar y publicar con la privacidad que elija, desde una cuenta pública o privada, sin cupo de usuarios por día. |
 | **YouTube** | `youtube.upload`, `youtube.force-ssl` (OAuth), más una API key para métricas | Proyecto de Google Cloud *In production* pero **sin verificar** | Entra pasando por el cartel «Google no ha verificado esta app», y cuenta para un tope de **100 usuarios** en toda la vida del proyecto; los videos que suba un proyecto sin auditoría de cuota quedan **privados** aunque pida público. |
 
 Lo que ya está resuelto del lado del producto y no hay que rehacer: usuarios invitados por
@@ -103,15 +103,17 @@ La app está aprobada y en producción: Login Kit y Content Posting API funciona
 cualquier usuario. Términos, privacidad y el dominio verificado ya están cargados en el
 portal de desarrolladores.
 
-### 3.2 Lo que falta: la auditoría de Direct Post
+### 3.2 La auditoría de Direct Post: aprobada
 
-Sin auditoría, TikTok solo acepta publicaciones de **cuentas privadas** y en «Solo yo»
-—con la cuenta pública rechaza el post entero, no lo deja en privado—, y la app tiene un
-cupo de **5 usuarios distintos por día** que publican. Con varios usuarios eso es inservible, así que la auditoría es la única puerta.
+Aprobada, con aviso del 2026-10-06. Sin ella, TikTok solo acepta publicaciones de **cuentas
+privadas** y en «Solo yo» —con la cuenta pública rechaza el post entero, no lo deja en
+privado—, y la app tiene un cupo de **5 usuarios distintos por día** que publican. Con ella
+el cupo desaparece y cada cuenta publica con la privacidad que elija; los avisos que lo
+advertían en Los Fierros y en el compositor se quitaron.
 
-La auditoría es un formulario en el portal (el que quedó a medias el 2026-09-28 en este
-mismo proyecto; las respuestas en inglés están redactadas y el guion del video en
-`docs/tiktok-revision-guion.md` sirve de base) más un **video demostrativo** del flujo
+Para una revisión futura: la auditoría es un formulario en el portal (las respuestas en
+inglés y el guion del video están en `docs/tiktok-revision-guion.md`) más un **video
+demostrativo** del flujo
 completo: conectar, programar un video con la privacidad que el usuario eligió, verlo
 salir con esa privacidad, y el aviso que la app muestra sobre las reglas de TikTok
 (el compositor ya lo muestra). Pide también el detalle de los campos de la respuesta que se
@@ -178,7 +180,7 @@ verificación del OAuth. Lo que la app hace para cumplir está en
 Los videos subidos por un proyecto que no ha pasado esa auditoría quedan **privados**
 aunque se pidan públicos (política de YouTube desde 2020). O sea: sin §4.2, YouTube sirve
 para leer métricas y comentarios, pero **no para publicar**. Vale la pena decirlo en la
-tarjeta de YouTube mientras tanto, como se hace con TikTok. Ojo: en la grabación del
+tarjeta de YouTube mientras tanto, como se hizo con TikTok hasta su auditoría. Ojo: en la grabación del
 2026-10-09 el video que subió Tu Parrilla salió público; está por revisar en
 `docs/pendientes.md`.
 
@@ -211,8 +213,9 @@ Ordenado por lo que bloquea un trámite primero.
    del sitio público. Lo que la app móvil no hace es *componer* la hora en la zona del
    dueño: eso quedó anotado en `docs/deuda-tecnica.md`.
 3. **Avisos honestos antes de conectar.** En Los Fierros, junto a cada botón: Instagram
-   pide cuenta Business/Creator con página de Facebook; TikTok publica en privado hasta la
-   auditoría (ya está); YouTube publica en privado hasta la auditoría de cuota. Y en el
+   pide cuenta Business/Creator con página de Facebook; YouTube publica en privado hasta la
+   auditoría de cuota. (TikTok llevó el suyo, «solo en privado», hasta que se aprobó su
+   auditoría de Direct Post, y se quitó.) Y en el
    error del diálogo de Meta, un mensaje que diga «esta app todavía no está abierta a todos»
    en vez del genérico de Facebook.
 4. **Cupos y reparto de los crons.** Los crons de sync, comentarios y publicación recorren
@@ -244,7 +247,8 @@ ninguno depende de otro. Lo de código se intercala por lo que cada trámite pid
 - Meta: agregarlos como **Testers** de la app (App Roles); con rol, el diálogo funciona y
   todos los permisos actuales van con acceso estándar. Sirve para una beta cerrada de hasta
   unas decenas de personas.
-- TikTok: pueden conectar y publicar en privado; 5 por día.
+- TikTok: pueden conectar y publicar con la privacidad que elijan (la auditoría de Direct
+  Post ya pasó).
 - YouTube: conectan pasando por el cartel de app no verificada (cuentan para el tope de
   100 usuarios del proyecto) y lo que publiquen sale privado hasta la auditoría de cuota.
 
