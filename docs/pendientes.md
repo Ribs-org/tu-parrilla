@@ -22,10 +22,6 @@ Cómo se usa:
 
 ## Bugs
 
-- **Los Cortes: el link copiado pierde la atribución** (2026-10-13). El botón de copiar
-  entrega `tu-parrilla.cl/?s=<etiqueta>`, y esa raíz es la portada del producto, que no
-  anota visitas: todo post con ese link suma cero. Debería copiar la página pública del dueño,
-  como ya hace el editor de perfil. Detalle en `docs/auditoria-wiki-ui-2026-10-13.md`, §1.1.
 - **La app del teléfono dice «Contraseña incorrecta.» para cualquier error**, también cuando
   el servidor falla (2026-10-13). `mobile/src/lib/session.ts:34`; ver la auditoría, §1.2.
 - **Los Fierros: falsa alarma en X** (2026-10-13). La tarjeta dice «vence hoy» al conectar y

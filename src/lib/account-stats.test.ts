@@ -17,6 +17,7 @@ describe('buildAccountCards', () => {
     expect(buildAccountCards(rows, '2026-09-02', '2026-09-03')).toEqual([
       {
         network: 'instagram',
+        accountId: null,
         followers: 1540,
         followersChange: 40,
         profileViews: 122,
@@ -25,6 +26,7 @@ describe('buildAccountCards', () => {
       },
       {
         network: 'youtube',
+        accountId: null,
         followers: 240,
         followersChange: null,
         profileViews: null,
@@ -42,6 +44,22 @@ describe('buildAccountCards', () => {
     const [youtube] = buildAccountCards(conHistoria, '2026-09-02', '2026-09-03')
     expect(youtube!.followers).toBe(240)
     expect(youtube!.followersChange).toBeNull()
+  })
+
+  it('por cuenta, dos cuentas de la misma red no se mezclan', () => {
+    // Por red, la tarjeta de Instagram tomaría la última lectura de cualquiera de las dos y
+    // restaría lecturas de cuentas distintas: 900 - 1500 no es lo que ganó nadie.
+    const dos: AccountMetricRow[] = [
+      { network: 'instagram', accountId: 'a', day: '2026-09-01', followers: 1500, profileViews: null, reach: null },
+      { network: 'instagram', accountId: 'a', day: '2026-09-03', followers: 1540, profileViews: null, reach: null },
+      { network: 'instagram', accountId: 'b', day: '2026-09-01', followers: 880, profileViews: null, reach: null },
+      { network: 'instagram', accountId: 'b', day: '2026-09-03', followers: 900, profileViews: null, reach: null },
+    ]
+    const cards = buildAccountCards(dos, '2026-09-02', '2026-09-03', 'cuenta')
+    expect(cards.map((c) => [c.accountId, c.followers, c.followersChange])).toEqual([
+      ['a', 1540, 40],
+      ['b', 900, 20],
+    ])
   })
 
   it('sin lectura previa el crecimiento es desconocido, no el total', () => {

@@ -610,7 +610,7 @@ export async function updatePostCampaign(
     return { error: 'No se pudo guardar. Intenta de nuevo.' }
   }
 
-  revalidatePath('/admin/content')
+  revalidatePath('/admin/analytics/publicaciones')
   revalidatePath('/admin/analytics')
   // Return the normalised value: the caller's typed text and what actually got
   // stored can differ (spaces become hyphens, etc), and the copy button must hand

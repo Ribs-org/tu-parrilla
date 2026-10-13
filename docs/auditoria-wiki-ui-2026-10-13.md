@@ -11,14 +11,7 @@ está mal y dónde está.
 
 ## 1. Cambian resultados o dejan a la persona sin salida
 
-1. **Los Cortes: el link copiado pierde la atribución.** El botón de copiar entrega
-   `<dominio del panel>/?s=<etiqueta>`, y en tu-parrilla.cl —el único dominio donde se abre
-   el panel— la raíz es la portada del producto, que no anota visitas. Todo post que lleve
-   ese link suma cero en «Visitas». Es el mismo error que ya se corrigió en el editor de
-   perfil (ver `urlPublicaDe` en `src/lib/utils.ts`). Lo empujan además el aviso de
-   `content/page.tsx:136` y el ejemplo `/?s=reel-gimnasio` de
-   `src/components/charts/campaign-table.tsx:40`. Origen:
-   `src/app/admin/(dash)/content/post-table.tsx:333`.
+1. ~~**Los Cortes: el link copiado pierde la atribución.** El botón de copiar entrega `<dominio del panel>/?s=<etiqueta>`, y en tu-parrilla.cl —el único dominio donde se abre el panel— la raíz es la portada del producto, que no anota visitas. Todo post que lleve ese link suma cero en «Visitas». Es el mismo error que ya se corrigió en el editor de perfil (ver `urlPublicaDe` en `src/lib/utils.ts`). Lo empujan además el aviso de `content/page.tsx:136` y el ejemplo `/?s=reel-gimnasio` de `src/components/charts/campaign-table.tsx:40`. Origen: `src/app/admin/(dash)/content/post-table.tsx:333`.~~ **Resuelto el 2026-10-13** (tablero de Los Números).
 2. **App: «Contraseña incorrecta.» para cualquier error**, incluido el 503 «El servidor no
    pudo preparar tu ingreso.»: la persona cree que se equivocó de contraseña cuando el
    problema es el servidor. Es justo lo que el comentario de
@@ -90,16 +83,10 @@ está mal y dónde está.
 - **La Parrilla: el ejemplo del CSV** tiene fechas de septiembre (copiado tal cual, todas las
   filas fallan por hora) y la ayuda no nombra las columnas sexta y séptima, que hacen falta
   en el encabezado para usar la octava. `schedule/batch-upload.tsx:8-11, 23-31`.
-- **Los Cortes: la explicación de «Tus posts»** dice que sale «—» cuando el crecimiento no se
-  puede saber (lo que pasa es que falta el «+N»), y que «Incluir anteriores» suma lo que
-  sigue con actividad (trae las 200 más recientes). El mensaje de lista vacía pide activar
-  «Incluir anteriores» aunque ya esté activo. `content/page.tsx:186, 256`.
-- **Los Cortes: «Views ganadas por día»** con el rango «Todo», donde cada punto es una semana.
-  `content/page.tsx:267`.
-- **Los Cortes: «Se pasó»** dice «Más del doble», pero alcanza con el doble justo.
-  `content/post-table.tsx:199`.
-- **Los Números: «la sincronización de esta noche»** (`analytics/accounts.tsx:25`): corre a las
-  9:00 UTC, de madrugada en Chile.
+- ~~**Los Cortes: la explicación de «Tus posts»** dice que sale «—» cuando el crecimiento no se puede saber (lo que pasa es que falta el «+N»), y que «Incluir anteriores» suma lo que sigue con actividad (trae las 200 más recientes). El mensaje de lista vacía pide activar «Incluir anteriores» aunque ya esté activo. `content/page.tsx:186, 256`.~~ **Resuelto el 2026-10-13** (tablero de Los Números). La explicación y el mensaje se reescribieron con la pantalla.
+- ~~**Los Cortes: «Views ganadas por día»** con el rango «Todo», donde cada punto es una semana. `content/page.tsx:267`.~~ **Resuelto el 2026-10-13** (tablero de Los Números). El panel ahora se llama «Views ganadas y visitas, día a día».
+- ~~**Los Cortes: «Se pasó»** dice «Más del doble», pero alcanza con el doble justo. `content/post-table.tsx:199`.~~ **Resuelto el 2026-10-13** (tablero de Los Números).
+- ~~**Los Números: «la sincronización de esta noche»** (`analytics/accounts.tsx:25`): corre a las 9:00 UTC, de madrugada en Chile.~~ **Resuelto el 2026-10-13** (tablero de Los Números).
 - **Los Números: «Sin tráfico en este período.»** bajo las tarjetas de cuentas cuando solo hay
   Facebook: esas cifras no son tráfico. `analytics/accounts.tsx:75`.
 - **404: «Ir al inicio»** lleva a `/`, que en tu-parrilla.cl es la portada del producto, también
@@ -110,12 +97,10 @@ está mal y dónde está.
 
 - **Una baja de seguidores se ve como «sin cambio»**: el cálculo lleva los negativos a cero.
   `src/lib/account-stats.ts:51`, `src/lib/social/delta.ts:51`.
-- **Dos cuentas de la misma red mezclan sus lecturas** en una tarjeta (ya en
-  `docs/deuda-tecnica.md`, «Las métricas siguen agrupadas por red»).
+- ~~**Dos cuentas de la misma red mezclan sus lecturas** en una tarjeta (ya en `docs/deuda-tecnica.md`, «Las métricas siguen agrupadas por red»).~~ **Resuelto el 2026-10-13** (tablero de Los Números). En el panel van una tarjeta por cuenta; la app del teléfono sigue por red.
 - **El arrastre total puede salir inflado**: el numerador cuenta visitas de filas sin views
   ganadas. `src/lib/posts-kpis.ts:105`.
-- **Las tres primeras cifras de Los Cortes muestran «0» sin datos**, contra la regla de «—,
-  nunca 0». `content/page.tsx:158-166`.
+- ~~**Las tres primeras cifras de Los Cortes muestran «0» sin datos**, contra la regla de «—, nunca 0». `content/page.tsx:158-166`.~~ **Resuelto el 2026-10-13** (tablero de Los Números). La lista de publicaciones ya no tiene cifras, y «Views ganadas» del tablero dice «—» sin datos.
 - **«Todavía no llega tráfico etiquetado.»** sale solo cuando no hay ninguna visita: las sin
   etiqueta van a «(sin etiqueta)». `campaign-table.tsx`.
 - **El anillo puede mostrar dos «Otro».** `src/components/charts/donut.tsx:21`.
@@ -133,12 +118,7 @@ está mal y dónde está.
 - **La Parrilla:** un solo estado de espera para toda la lista: al «Eliminar» un post, todos
   los «Subir ahora» dicen «Subiendo…» (`queue.tsx:26, 88`); y el aviso del contenido
   patrocinado sale antes de elegir privacidad (`tiktok-opciones.tsx:184-187`).
-- **Los Cortes:** con el filtro de red puesto y una sola red en la lista, desaparecen los
-  botones de red y con ellos «Todas» (`content/page.tsx:212`); un post de Instagram con texto
-  vacío deja la línea en blanco en vez de «Sin descripción» (`post-table.tsx:180, 184`;
-  `campaign-table.tsx:111`); en la vista normal casi todas las filas llevan «nuevo»; el
-  mensaje «Todavía no hay posts sincronizados…» nunca se ve, porque la página muestra antes
-  el suyo (`post-table.tsx:56-69`, `content/page.tsx:253`).
+- ~~**Los Cortes:** con el filtro de red puesto y una sola red en la lista, desaparecen los botones de red y con ellos «Todas» (`content/page.tsx:212`); un post de Instagram con texto vacío deja la línea en blanco en vez de «Sin descripción» (`post-table.tsx:180, 184`; `campaign-table.tsx:111`); en la vista normal casi todas las filas llevan «nuevo»; el mensaje «Todavía no hay posts sincronizados…» nunca se ve, porque la página muestra antes el suyo (`post-table.tsx:56-69`, `content/page.tsx:253`).~~ **Resuelto el 2026-10-13** (tablero de Los Números). El filtro de red se reemplazó por uno de cuenta, el texto vacío de Instagram dice «Sin descripción» y el mensaje de lista vacía ya se ve; queda el «nuevo» en casi todas las filas.
 - **La Vitrina:** la vista previa muestra los links fuera de sus fechas
   (`profiles/[id]/editor.tsx:107-121`); el interruptor de un link guarda también lo editado
   sin «Guardar link» y se traga los errores (`link-row.tsx:99-117`); los tipos de link se

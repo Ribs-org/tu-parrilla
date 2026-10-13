@@ -817,8 +817,9 @@ quemado, más arriba).
   límite, y un fallo se queda hasta que alguien lo arregla.
 - **Ayer salió algo y el pie no dice miradas.** Las redes todavía no informaron las vistas; el
   número aparece cuando llegan.
-- **No veo mis números / ¿dónde están las visitas?** No están acá: [Los
-  Números](los-numeros.md) y [Los Cortes](los-cortes.md).
+- **No veo mis números / ¿dónde están las visitas?** No están acá: en [Los
+  Números](los-numeros.md), y cada publicación con los suyos en «Tus publicaciones», dentro de
+  esa misma pantalla.
 - **No puedo borrar un post.** Ya salió (o se está publicando) en alguna red: hay que
   borrarlo en la red. Para sacar solo las redes que faltan, desmarcarlas en el editor.
 - **Borré uno sin querer.** No hay deshacer: hay que programarlo de nuevo.
@@ -878,8 +879,8 @@ quemado, más arriba).
 - No duplica un post ni arrastra tarjetas en el calendario, ni programa en un día que ya pasó.
 - No publica video en X.
 - No conecta cuentas: eso es [Los Fierros](los-fierros.md). No muestra cómo le fue a lo
-  publicado: eso es [Los Cortes](los-cortes.md) (cada publicación, lo que hizo en la red y lo
-  que trajo) y [Los Números](los-numeros.md) (visitas, clics y de dónde vienen). No responde
+  publicado: eso es [Los Números](los-numeros.md) (cómo te fue en las redes y en tu página; cada
+  publicación, en «Tus publicaciones», un clic adentro). No responde
   comentarios: eso es [La Mesa](la-mesa.md) (lo que te responden y tus respuestas). No cambia
   la zona horaria: eso es [Tu Cuenta](tu-cuenta.md).
 

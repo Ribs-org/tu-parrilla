@@ -16,6 +16,7 @@ function row(overrides: Partial<PostRow>): PostRow {
   return {
     id: 'post-1',
     network: 'instagram',
+    accountId: 'acc-1',
     externalId: 'ext-1',
     permalink: null,
     caption: null,
