@@ -35,6 +35,10 @@ la revocaron: pídele una nueva al dueño, no reintentes.
 
 Base: `https://tu-parrilla.cl`
 
+**Si el dueño se pierde en su panel** (dónde se conecta una red, dónde se genera la llave, qué
+significa un error que le salió), la wiki de la interfaz lo cuenta pantalla por pantalla,
+con el texto literal de cada botón: `https://tu-parrilla.cl/docs/ui/index.md`.
+
 ---
 
 # 1. Programar posts — `POST /api/schedule/batch`

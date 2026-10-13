@@ -307,8 +307,9 @@ Envolverlos todos en una transacción de drizzle lo cierra.
 
 `api/mobile/accounts` (`src/app/api/mobile/accounts/route.ts`) y
 `src/lib/account-stats.ts` agrupan las filas por `network`, no por cuenta: con dos
-cuentas de Instagram conectadas, sus seguidores y sus métricas se suman en una sola
-tarjeta, como si fueran una cuenta. Es la misma limitación que ya advertía el README antes
+cuentas de Instagram conectadas, sus lecturas se mezclan en una sola tarjeta, como si
+fueran una cuenta. No se suman: la cifra que se ve es la última lectura de una de las dos,
+cualquiera, y lo ganado en el período puede salir de restar lecturas de cuentas distintas. Es la misma limitación que ya advertía el README antes
 de esta entrega («la analítica todavía agrupa por red»), y elegir a qué cuenta sale cada
 publicación no la tocó — programar y medir son caminos distintos.
 

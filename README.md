@@ -12,6 +12,7 @@ quede con tus números.
 | `/<slug>` | La página de un usuario. Cada dominio sirve solo las de su dueño; el del producto las sirve todas |
 | `/admin` | Tu panel: El Fuego, lo que pide una acción hoy; adentro, la parrilla, los números y el editor. Se abre en el dominio del producto: en cualquier otro, `/admin` e `/ingresar` redirigen ahí con la misma ruta |
 | `/borrado/<código>` | El estado de un borrado que pidió Meta: cuándo fue y cuántas cuentas. Pública, sin sesión; el código es la llave |
+| `/docs/…` | Las guías para LLMs, públicas y sin sesión: la de la API (`api-llm.md`, `api-editor.md`, `api.json`) y la wiki de la interfaz (`ui/index.md`), para guiar a quien se pierde en el panel |
 | `/api/social/meta/baja` | `POST` de Meta cuando alguien quita la app desde Facebook: deja sin credencial sus cuentas de Instagram y Facebook |
 | `/api/social/meta/borrado` | `POST` de Meta cuando alguien pide borrar sus datos: borra lo que vino de esas dos redes y devuelve el código de estado |
 
@@ -150,7 +151,7 @@ En Tu Cuenta también generas las **llaves para tus agentes**: una llave deja qu
 programa —el agente que te edita los videos, un script— use la API a tu nombre sin entrar al
 panel. Le pones un nombre (el del agente), aprietas «Generar llave» y la ves **una sola
 vez**, con un botón que la copia junto con las instrucciones para el agente (la base de la
-API, el header y dónde está la guía). En la base se guarda solo su hash, así que no hay forma
+API, el header, dónde está la guía y dónde la wiki del panel). En la base se guarda solo su hash, así que no hay forma
 de volver a leerla: si se pierde, se revoca y se genera otra. La lista muestra cada llave
 por su nombre y sus últimos cuatro caracteres, cuándo se creó y cuándo se usó por última
 vez; revocar la borra y lo que la use deja de entrar en su próxima petición. Hasta diez por
@@ -280,7 +281,7 @@ privacidad y los términos, y Meta exige que coincida con el negocio que verific
 
 El panel puede traer las métricas de tus posts desde Instagram, TikTok y YouTube y
 cruzarlas con el tráfico que cada uno te trajo. La columna que importa es **arrastre**:
-de cada mil personas que vieron el post, cuántas llegaron efectivamente a tu página.
+qué porcentaje de quienes vieron el post llegó efectivamente a tu página.
 YouTube es la excepción: ver abajo.
 
 Sin configurar nada, **Los Cortes** (Contenido) aparece vacía y el resto del sitio funciona
@@ -369,8 +370,9 @@ Data deletion request URL:   https://TU-DOMINIO/api/social/meta/borrado
 Meta les hace `POST` con un `signed_request` firmado con `INSTAGRAM_APP_SECRET`; sin ese
 secreto configurado, o con una firma que no calza, las rutas responden `400` y no tocan
 nada. La **baja** deja sin credencial tus cuentas de Instagram y Facebook, igual que
-*Desconectar* en Los Fierros, y la tarjeta queda con «Quitaste la app desde Facebook:
-vuelve a conectar.»; el historial de métricas se conserva. El **borrado** sí borra lo que
+*Desconectar* en Los Fierros, y la tarjeta queda con «La conexión falló; reconecta la
+cuenta.» —el motivo, «Quitaste la app desde Facebook: vuelve a conectar.», sale solo al
+pasar el mouse—; el historial de métricas se conserva. El **borrado** sí borra lo que
 vino de esas dos redes —posts, comentarios, métricas y los destinos programados de esas
 cuentas— y devuelve a Meta un código y la dirección `https://TU-DOMINIO/borrado/<código>`,
 una página pública donde ese código confirma cuándo fue y cuántas cuentas se borraron. Lo
@@ -572,7 +574,8 @@ modelo no pudo redactar, la tarjeta lo dice y tiene **Reintentar borrador**. Arr
 campo con las instrucciones que sigue el modelo: las editas ahí y rigen desde el siguiente
 borrador.
 
-Nada sale sin tu toque. Dos toques, o el panel y el teléfono a la vez, mandan una sola vez:
+Nada sale sin tu toque. Dos toques, o el panel abierto en dos pestañas, mandan una sola vez
+(la app del teléfono no tiene comentarios):
 antes de enviar se relee el comentario y si ya salió no pasa nada.
 
 El mensaje privado a quien comentó está escrito y **apagado**. Meta exige para eso
@@ -587,7 +590,8 @@ dos columnas para el estado del privado.
 
 Al programar un post puedes ponerle una palabra clave, un mensaje con enlace y una
 respuesta pública. Funciona en Instagram, Facebook y YouTube: cuando alguien comenta esa
-palabra, la corrida siguiente del cron (cinco minutos como mucho) responde sola, sin pasar
+palabra, la corrida siguiente del cron que la sondea (cinco minutos como mucho en Instagram y
+Facebook; en YouTube, media hora) responde sola, sin pasar
 por la cola de aprobación, y la cola lo marca como «Automática». Hoy el mensaje con el
 enlace se publica siempre como la respuesta pública; el privado (respuesta corta en público
 y el mensaje por DM, en Instagram y Facebook) llega en la próxima entrega, y va a depender
@@ -898,6 +902,15 @@ con las frases de error literales y lo que Meta no permite en el mensaje privado
 prueba (`src/lib/docs-api.test.ts`) falla si cualquiera de los dos se aparta de las
 constantes reales del código.
 
+Y para cuando la persona —no el agente— se pierde en el panel: `public/docs/ui/`, la wiki
+de la interfaz, una página por pantalla del panel y otra para la app del teléfono, con cada
+botón por su texto literal, los mensajes que puede ver y qué hacer con cada uno. La lee el
+mismo LLM para guiarla («¿dónde genero una llave?») sin ver la pantalla; se sirve en
+<https://tu-parrilla.cl/docs/ui/index.md>. Se actualiza en el mismo commit que cambia lo que
+se ve (`AGENTS.md`, «La wiki de la UI»; el formato, en `docs/wiki-ui.md`), y
+`src/lib/docs-ui.test.ts` falla si una pantalla del vocabulario no tiene su página o si una
+página cita archivos que ya no existen.
+
 ### La llave de la API
 
 Los cuatro endpoints de abajo piden el header `Authorization: Bearer <llave>`, y lo que
@@ -1011,6 +1024,9 @@ src/
     social/
       politica-youtube.ts  lo que las políticas de YouTube no dejan hacer con sus datos
       retencion-youtube.ts borra lo de YouTube que lleva 30 días sin refrescarse
+public/docs/
+  api-llm.md, api-editor.md, api.json   las guías de la API para un LLM
+  ui/                      la wiki de la interfaz: una página por pantalla, para guiar a quien se pierde
 scripts/
   setup.ts                 genera el .env.local
   seed.ts                  perfiles iniciales
