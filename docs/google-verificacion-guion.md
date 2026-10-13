@@ -6,9 +6,10 @@ hacerlos en paralelo porque cada uno tarda semanas:
 1. **Verificación del OAuth.** El proyecto ya está *In production*, pero sin verificar
    (visto el 2026-10-06): cualquiera puede conectar, pasando por el cartel «Google no ha
    verificado esta app», con un tope de **100 usuarios en toda la vida del proyecto** que
-   no se reinicia (iban 3), y la pantalla de Google muestra el dominio en vez del nombre y
-   el logo. No hay lista de *test users*: eso es solo de *Testing*, y los tokens de 7 días
-   también.
+   no se reinicia (iban 3). No hay lista de *test users*: eso es solo de *Testing*, y los
+   tokens de 7 días también. La marca quedó verificada y publicada el 2026-10-12 —desde
+   ahí la pantalla de Google muestra «Tu Parrilla» con su logo, y no el dominio— y la
+   verificación se envió ese mismo día; el estado vive en `docs/pendientes.md`.
 2. **Auditoría y extensión de cuota de la YouTube Data API.** Sin ella: 10.000 unidades al
    día para todos los usuarios juntos, más un cupo aparte de 100 subidas al día (desde el
    1 de junio de 2026 `videos.insert` cuenta en su propio cupo; antes costaba 1.600
@@ -165,6 +166,31 @@ la app y del proyecto visibles**, cada permiso en uso, y cómo se revoca.
 8. Disconnect removes the stored tokens; revoking in Google works too.
 9. Privacy policy: Google API Services User Data Policy, Limited Use.
 
+### Cómo es el Verification Center de verdad
+
+Así estaba el 2026-10-12, cuando se envió. Lo que no se ve venir:
+
+- **La marca se verifica primero, y el botón está escondido.** El Verification Center no
+  deja pedir nada («You need to verify and publish your branding…») hasta que la marca esté
+  verificada y publicada, y la página *Branding* no muestra ningún botón para hacerlo: está
+  detrás del **círculo azul con una «i»** a la derecha del título «Branding», que abre el
+  panel *Verification status* con **Verify branding**. Tardó minutos. Después hay que
+  apretar **Publish branding** antes de siete días, o el resultado vence.
+- **El video va en Data Access**, en un campo *YouTube link* debajo de la justificación, y
+  Google exige que muestre **todos los clientes OAuth del proyecto**: hoy hay uno solo,
+  `portafolio-web`, el del video. Si se agrega otro cliente, el video ya no alcanza.
+- **«Prepare for verification» es un resumen** de la marca, los permisos, la justificación
+  y el video, más una caja *Additional info* de **1000 caracteres** como máximo, donde van
+  las credenciales del revisor. Las notas largas de arriba no caben: se mandó un resumen.
+- **Después pregunta cuatro cosas** (uso personal, interno, solo pruebas, plugin SMTP de
+  WordPress) —las cuatro van en *No*— y pide dos confirmaciones; la de CASA no aplica,
+  porque los dos permisos son sensibles y no restringidos.
+- **El aviso de facturación de *Project Checkup* no es requisito.** Dice que el proyecto no
+  tiene cuenta de facturación; es una recomendación, y la API de YouTube no cobra.
+
+Lo que se pegó está en `TEXTOS-FORMULARIO.txt` de la carpeta «YouTube - Verification» del
+escritorio de Vicente: sirve si Google pide reenviar.
+
 ## La auditoría de cuota de YouTube (formulario aparte)
 
 Es el «YouTube API Services – Audit and Quota Extension Form». Pide:
@@ -195,6 +221,28 @@ Es el «YouTube API Services – Audit and Quota Extension Form». Pide:
 
 Sin esta auditoría, la app funciona para leer y responder comentarios, pero **no para
 publicar en público**: el aviso de Los Fierros lo dice hasta que pase.
+
+### Cómo es el formulario de verdad
+
+El que se envió el 2026-10-10 tenía siete secciones: tipo de pedido, organización y
+contactos, modelo de negocio, el cliente de la API (con una cuenta de prueba que tenga
+datos), casos de uso y cuota por método, materiales de apoyo opcionales y declaraciones.
+Cuatro cosas que no se ven venir:
+
+- **No guarda borradores.** Si se recarga la página o se navega hacia atrás, se pierde todo.
+  Conviene tener las respuestas escritas antes y dejar lista la cuenta de prueba (el canal
+  conectado al usuario revisor) antes de abrirlo.
+- **No hay dónde subir el video.** El enlace va en las instrucciones de acceso y en un PDF
+  de materiales de apoyo con los minutos de cada parte.
+- **Cada campo de archivo acepta uno solo**, imagen o PDF, de menos de 10 MB, y pide
+  capturas con la barra de direcciones a la vista. Lo que son varias capturas va en un PDF.
+- **El cupo de `videos.insert` se pide aparte**, en un campo propio que aparece al marcarlo
+  entre los métodos; el cupo general se elige por rango. Los dos tienen que cuadrar con la
+  justificación.
+
+Las respuestas que se mandaron están, sección por sección, al final de
+`TEXTOS-FORMULARIO.txt` en la carpeta «YouTube - Verification» del escritorio de Vicente, y
+la evidencia en `evidencia/` de la misma carpeta: son la base para una reauditoría.
 
 ## Errores que Google castiga
 

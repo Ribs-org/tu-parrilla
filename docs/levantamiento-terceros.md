@@ -154,7 +154,8 @@ caducidad de 7 días, que es solo de *Testing*. Para quedar verificado con `yout
   verificación, sin logo se puede publicar sin ella pero con aviso al usuario.
 
 Por ser sensibles y no restringidos, **no** pide la auditoría de seguridad externa (CASA);
-eso es solo para Gmail, Drive y similares. Tarda de dos a seis semanas.
+eso es solo para Gmail, Drive y similares. Tarda de dos a seis semanas. La marca quedó
+verificada y la verificación se envió el 2026-10-12; el estado vive en `docs/pendientes.md`.
 
 ### 4.2 Cuota de la YouTube Data API
 
