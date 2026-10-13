@@ -96,8 +96,9 @@ afirmar que se cumplen:
   lecturas, y el arrastre divide visitas por eso: las dos son derivadas, igual que sumar
   suscriptores de YouTube con seguidores de otra red. Desde entonces, las filas de YouTube
   traen solo los contadores de la API, y las visitas, clicks y CTR —que son de Tu Parrilla—
-  van bajo «Medido por Tu Parrilla», porque un dato propio al lado de los de YouTube tiene
-  que leerse claro como no suyo.
+  van bajo «En tu página · lo mide Tu Parrilla» (hasta el 2026-10-13, «Medido por Tu
+  Parrilla»), porque un dato propio al lado de los de YouTube tiene que leerse claro como no
+  suyo.
 - **Nada guardado más de 30 días sin refrescar** (§III.E.4.b–d). Las estadísticas se leen
   con la API key, y leídas así no pueden pasar de 30 días; el resto de los datos se borra
   o se refresca dentro de ese plazo. La sincronización diaria termina borrando lo que se
@@ -146,7 +147,7 @@ la app y del proyecto visibles**, cada permiso en uso, y cómo se revoca.
 | 2 | `/ingresar`: correo, código, entrar. | 2 |
 | 3 | Engranaje → **Los Fierros**. Bajo YouTube, el aviso «Hasta que Google apruebe la cuota…». Pulsar **Conectar →**. | 3 |
 | 4 | Pantalla de consentimiento de Google: **detenerse tres segundos** en el nombre «Tu Parrilla» y en los dos permisos con su descripción. Continuar. | 4 |
-| 5 | Volver a Los Fierros con la tarjeta del canal. Pulsar **Sincronizar**; **Los Cortes** muestra los videos con sus números. | 5 |
+| 5 | Volver a Los Fierros con la tarjeta del canal. Pulsar **Sincronizar**; **Los Números** → «Ver todas las publicaciones →» muestra los videos con sus números (hasta el 2026-10-13 era la pestaña Los Cortes). | 5 |
 | 6 | **El Fuego → «Poner al fuego»** (abre el compositor en La Parrilla): subir el video, marcar **YouTube**, título, «Ahora», **Programar**. De vuelta en El Fuego, verlo pasar a publicado. Abrir YouTube Studio y mostrar el video (privado, hasta la auditoría de cuota: decirlo en el subtítulo). | 6 |
 | 7 | Desde otra cuenta, comentar en el video. Esperar la corrida de YouTube (cada media hora: mejor tener un comentario **anterior** ya en la cola y usar ese). | |
 | 8 | **La Mesa**: el comentario, la respuesta propuesta, **Enviar**. Abrir YouTube y mostrar la respuesta publicada. | 7 |

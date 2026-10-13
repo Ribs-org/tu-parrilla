@@ -37,7 +37,7 @@ export function CampaignTable({
         <p className="text-sm text-fg-faint">Todavía no llega tráfico etiquetado.</p>
         <p className="mx-auto mt-2 max-w-sm text-[0.8rem] leading-relaxed text-fg-faint">
           Agrega <code className="font-mono text-fg-muted">?s=nombre</code> al link de tu bio —
-          por ejemplo <code className="font-mono text-fg-muted">/?s=reel-gimnasio</code> — y cada
+          por ejemplo <code className="font-mono text-fg-muted">/tu-pagina?s=reel-gimnasio</code> — y cada
           pieza de contenido aparecerá acá por separado.
         </p>
       </div>
@@ -108,7 +108,7 @@ export function CampaignTable({
                       />
                     ) : null}
                     <span className="truncate text-[0.8rem]">
-                      {posts[row.campaign]!.caption ?? row.campaign}
+                      {posts[row.campaign]!.caption || row.campaign}
                     </span>
                   </span>
                 ) : (

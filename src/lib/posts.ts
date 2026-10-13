@@ -66,7 +66,7 @@ function publishedLabel(date: Date, zone: string): string {
 export async function getPostRows(
   f: Filters,
   includeArchived = false,
-  opts: { publishedFrom?: Date; publishedTo?: Date; limit?: number } = {},
+  opts: { publishedFrom?: Date; publishedTo?: Date; limit?: number; accountId?: string } = {},
 ): Promise<PostRow[]> {
   const db = getDb()
   const from = localDay(f.from, f.zone)
@@ -76,6 +76,9 @@ export async function getPostRows(
   if (!includeArchived) postConds.push(isNull(socialPosts.archivedAt))
   if (opts.publishedFrom) postConds.push(gte(socialPosts.publishedAt, opts.publishedFrom))
   if (opts.publishedTo) postConds.push(lte(socialPosts.publishedAt, opts.publishedTo))
+  // En la consulta y no después: filtrar tras el tope le quitaba sus publicaciones a una
+  // cuenta poco activa al lado de otra que publica mucho.
+  if (opts.accountId) postConds.push(eq(socialPosts.accountId, opts.accountId))
 
   const posts = await db
     .select()
@@ -180,6 +183,7 @@ export async function getPostRows(
     return {
       id: post.id,
       network: post.network,
+      accountId: post.accountId,
       externalId: post.externalId,
       permalink: post.permalink,
       caption: post.caption,

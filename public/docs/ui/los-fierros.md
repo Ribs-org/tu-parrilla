@@ -250,7 +250,7 @@ Trae los posts y los números de las cuentas de Instagram, TikTok, YouTube y Fac
 - No borra cuentas ni su historial. «Desconectar» deja la tarjeta y sus números; la única forma de que una tarjeta desaparezca es fusionarla en otra.
 - No deshace una fusión.
 - No elige a qué cuenta sale cada publicación: eso se marca en el compositor de [La Parrilla](la-parrilla.md).
-- No muestra los números de las cuentas: están en [Los Cortes](los-cortes.md) y [Los Números](los-numeros.md).
+- No muestra los números de las cuentas ni de sus publicaciones: están en [Los Números](los-numeros.md).
 - No muestra ni responde comentarios: eso es [La Mesa](la-mesa.md).
 - No conecta otras redes que las seis de la lista (ni LinkedIn, ni WhatsApp, ni otras).
 - No trae números de Threads ni de X / Twitter, ni comentarios de TikTok, Threads o X.
