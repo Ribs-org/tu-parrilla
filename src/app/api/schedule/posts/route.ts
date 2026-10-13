@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server'
 import { and, asc, eq, gte, inArray, lt } from 'drizzle-orm'
 import { getDb, scheduledPosts, scheduledPostMedia, scheduledPostTargets, socialAccounts } from '@/db'
-import { env } from '@/lib/env'
+import { duenoDeLaLlave } from '@/lib/llaves'
 import { armarProgramados, parseVentana } from '@/lib/schedule-api'
-import { adminId, buscarPorId } from '@/lib/usuarios'
+import { buscarPorId } from '@/lib/usuarios'
 import { ZONA_POR_DEFECTO } from '@/lib/zona'
 
 export const dynamic = 'force-dynamic'
@@ -15,16 +15,11 @@ export const dynamic = 'force-dynamic'
  * próxima tanda sabiendo qué ya está puesto.
  */
 export async function GET(request: Request) {
-  const key = env('SCHEDULE_API_KEY')
-  // Sin llave configurada el endpoint queda cerrado — molde del batch.
-  if (!key || request.headers.get('authorization') !== `Bearer ${key}`) {
-    return new NextResponse('No autorizado', { status: 401 })
-  }
-
-  // La llave de API es del despliegue, no de una persona: lo que entra por ahí es del
-  // admin, y las horas que salen van en la zona suya (la de Tu Cuenta). Se resuelve antes
-  // de la ventana porque `desde`/`hasta` son días, y un día solo existe en una zona.
-  const ownerId = await adminId()
+  // Lo que se lee es del dueño de la llave, y las horas que salen van en su zona (la de Tu
+  // Cuenta). Se resuelve antes de la ventana porque `desde`/`hasta` son días, y un día solo
+  // existe en una zona.
+  const ownerId = await duenoDeLaLlave(request)
+  if (!ownerId) return new NextResponse('No autorizado', { status: 401 })
   const zone = (await buscarPorId(ownerId))?.zona ?? ZONA_POR_DEFECTO
 
   const url = new URL(request.url)

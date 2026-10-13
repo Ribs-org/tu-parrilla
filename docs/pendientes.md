@@ -42,8 +42,9 @@ Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataf
   usuarios por día y las cuentas públicas pueden publicar con la privacidad que elijan. En
   código queda quitar los avisos de «mientras TikTok no apruebe»: lo que dice «Después de
   aprobar» en `docs/tiktok-revision-guion.md` (el aviso de `AVISO_ANTES_DE_CONECTAR` en
-  `src/lib/networks.ts` y su test, la nota de `schedule/tiktok-opciones.tsx` y las frases del
-  README). **[dueño]** La cuenta `vicente.pareja` puede volver a ser pública.
+  `src/lib/networks.ts` y su test, la nota de `schedule/tiktok-opciones.tsx`, las frases del
+  README y «Lo que el sistema NO hace» en `public/docs/api-editor.md`, que los agentes leen).
+  **[dueño]** La cuenta `vicente.pareja` puede volver a ser pública.
 - **[dueño] Meta (Instagram y Facebook) — salir de modo desarrollo.** Guion y textos:
   `docs/meta-revision-guion.md`; el paso a paso de trabajo vive en la carpeta
   «Meta - Verification» del escritorio de Vicente. Hecho el 2026-10-04: la app
@@ -173,3 +174,13 @@ Nada de esto bloquea un trámite hoy; conviene ordenarlo antes de abrir a tercer
   arrastre, lo que vende la portada. Se afloja en `src/lib/social/politica-youtube.ts` y
   `retencion-youtube.ts`. Ver `docs/google-verificacion-guion.md`, «Lo que la auditoría
   mira de los datos guardados».
+- **[dueño] Pasar el agente del admin a una llave propia y retirar `SCHEDULE_API_KEY`**
+  (2026-10-13). Desde que cada usuario genera sus llaves en Tu Cuenta, la del despliegue
+  solo sigue para no romper al agente que ya la usa. Pasos: generar una llave en Tu Cuenta,
+  ponerla en ese agente y, cuando ande, borrar la variable en Vercel. En código no hay nada
+  que hacer: sin la variable, la API ya acepta solo las llaves de usuario.
+- **Por decidir: que el admin pueda cortar las llaves de otro usuario** (2026-10-13). Hoy
+  solo el dueño de una llave la revoca, y «Cerrar sesiones» en Los Maestros no las toca (son
+  credenciales aparte, y cortarlas en silencio rompería su agente). Si una se filtra y el
+  usuario no responde, el admin no tiene cómo cortarla sin tocar la base. Opciones: que
+  «Cerrar sesiones» también las borre, o una lista de llaves por usuario en Los Maestros.

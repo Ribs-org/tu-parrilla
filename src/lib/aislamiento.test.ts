@@ -117,7 +117,10 @@ const { getCola } = await import('./comentarios-cola')
 const { verificarCuentas, cuentaUnicaPorRed } = await import('./social/cuentas')
 const { todosLosCortes, cortesEntre, quemadosDe, servidosAyer } = await import('./social/publish/cortes')
 const { leerAjuste } = await import('./ajustes')
-const { makeDefault, updateProfile, deleteScheduledPost, guardarCuenta } = await import('@/app/admin/actions')
+const { listarLlaves, crearLlave } = await import('./llaves')
+const { makeDefault, updateProfile, deleteScheduledPost, guardarCuenta, revocarLlaveApi } = await import(
+  '@/app/admin/actions'
+)
 // `guardarCuenta` son dos funciones distintas con el mismo nombre: la de `admin/actions`
 // guarda la cuenta *del usuario* y la de `social/conectar`, una cuenta *de una red*.
 const { guardarCuenta: guardarCuentaDeRed } = await import('./social/conectar')
@@ -353,6 +356,13 @@ describe('aislamiento por dueño (SQL generado, sin base)', () => {
     for (const c of consultas) esperarFiltradoPorDueno(c)
   })
 
+  it('llaves: listarLlaves solo trae las del dueño, y nunca su hash', async () => {
+    const consultas = await todasLasConsultas(() => listarLlaves(DUENO))
+    expect(consultas).toHaveLength(1)
+    esperarFiltradoPorDueno(consultas[0]!)
+    expect(consultas[0]!.sql.split(/\bfrom\b/i)[0]).not.toMatch(/"hash"/)
+  })
+
   /**
    * `getPostRows` hace cinco consultas encadenadas: posts, sus snapshots de métricas,
    * las visitas, los clics y el "alguna vez visto". Solo la primera (`social_posts`) y
@@ -497,6 +507,28 @@ describe('aislamiento por dueño, escrituras (SQL generado, sin base)', () => {
     expect(escritura.params).toContain(DUENO)
     // Y el dueño va como parámetro ligado, nunca escrito en el texto de la consulta.
     expect(escritura.sql).not.toContain(DUENO)
+  })
+
+  /**
+   * El id de la llave viaja desde el navegador: sin el dueño en el WHERE, cualquiera con
+   * sesión revocaría la llave de otro sabiendo su id.
+   */
+  it('admin/actions: revocarLlaveApi ata su DELETE al dueño de la sesión', async () => {
+    const consultas = await consultasEncadenadas(() => revocarLlaveApi('llave-x'), [[]])
+    expect(consultas).toHaveLength(1)
+    expect(consultas[0]!.sql).toMatch(/delete from "llaves_api"/i)
+    esperarFiltradoPorDueno(consultas[0]!)
+    expect(consultas[0]!.params).toContain('llave-x')
+  })
+
+  it('llaves: crearLlave cuenta el tope sobre las llaves del dueño y escribe a su nombre', async () => {
+    const consultas = await consultasEncadenadas(() => crearLlave(DUENO, 'Editor de videos'), [[[0]], []])
+    expect(consultas).toHaveLength(2)
+    const [conteo, insercion] = consultas as [Captura, Captura]
+    esperarFiltradoPorDueno(conteo)
+    expect(insercion.sql).toMatch(/insert into "llaves_api"/i)
+    expect(insercion.params).toContain(DUENO)
+    expect(insercion.sql).not.toContain(DUENO)
   })
 
   it('api/mobile/schedule/accounts: lista solo las cuentas del dueño', async () => {

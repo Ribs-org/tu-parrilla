@@ -579,6 +579,30 @@ export const ajustes = pgTable(
 ).enableRLS()
 
 /**
+ * Las llaves de API que un usuario genera en Tu Cuenta para dárselas a un programa —su
+ * agente que edita videos, un script—. Quien llama con una actúa como su dueño.
+ *
+ * Nunca la llave, solo su hash: se muestra una vez al generarla y no se puede volver a
+ * leer. `final` son sus últimos caracteres, para reconocerla en la lista. Revocar es
+ * borrar la fila; quitar al usuario se lleva sus llaves.
+ */
+export const llavesApi = pgTable(
+  'llaves_api',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    ownerId: uuid('owner_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    nombre: text('nombre').notNull(),
+    hash: text('hash').notNull().unique(),
+    final: text('final').notNull(),
+    creadaEn: timestamp('creada_en', { withTimezone: true }).notNull().defaultNow(),
+    usadaEn: timestamp('usada_en', { withTimezone: true }),
+  },
+  (t) => [index('llaves_api_owner_idx').on(t.ownerId)],
+).enableRLS()
+
+/**
  * Cada borrado que Meta nos pidió (data deletion callback): el código que devolvimos y
  * cuántas cuentas cayeron. Sin dueño a propósito: cuando se inserta, el dueño ya no tiene
  * cuentas de Meta y Meta no sabe quién es; la página de estado solo muestra fecha y número.
@@ -610,3 +634,4 @@ export type Ajuste = typeof ajustes.$inferSelect
 export type SolicitudBorrado = typeof solicitudesBorrado.$inferSelect
 export type Usuario = typeof users.$inferSelect
 export type CodigoIngreso = typeof codigosIngreso.$inferSelect
+export type LlaveApi = typeof llavesApi.$inferSelect
