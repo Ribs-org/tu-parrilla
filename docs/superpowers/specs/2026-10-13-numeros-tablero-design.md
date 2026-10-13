@@ -13,8 +13,8 @@ o visitas? ¿CTR?—. Que el usuario normal vea cuatro cosas y que lo demás apa
 Que se note la diferencia entre las publicaciones y la página de links. Y poder comparar un
 mismo post con sus versiones (hooks, trial reels, multicuentas).
 
-Este documento cubre el tablero (primera entrega). La comparación de versiones —la vista de
-una pieza y «comparar por etiqueta»— va en la segunda.
+El tablero fue la primera entrega (secciones 1 a 3). La comparación de versiones —la vista
+de una pieza y la comparación por atributo— es la segunda (secciones 4 y 5).
 
 ## 1. Lo que estaba mal
 
@@ -62,3 +62,49 @@ la tabla, los avisos de link sin pegar y de métricas que faltan, la etiqueta ed
 
 `/admin/content` redirige ahí con sus filtros. Los Cortes deja de ser pestaña: quedan tres
 (La Parrilla, La Mesa, Los Números).
+
+## 4. La pieza y sus versiones
+
+Al abrir una publicación —desde «Tus publicaciones», «Lo que más creció» o «Qué publicación
+te trajo gente»— se llega a `/admin/analytics/publicaciones/<id>`: la pieza, con cada lugar
+donde salió en una fila y sus números lado a lado.
+
+**Qué es una versión.** Un post programado en La Parrilla sale a uno o más destinos (una
+cuenta cada uno; en Instagram, quizá como trial reel). Cada destino es una versión, y se une
+a su publicación sincronizada por la cuenta y el id que la red le dio
+(`scheduled_post_targets.account_id, external_id` contra `social_posts`). Un destino que
+todavía no sale aparece igual, con su estado y sin números.
+
+**Las versiones que no caben en un post.** Un post programado no puede ir dos veces a la
+misma cuenta (`scheduled_post_targets_post_account_key`), y sus atributos son uno solo: dos
+hooks del mismo video, o el trial reel y el reel normal en la misma cuenta, son por fuerza
+dos posts programados. Para juntarlos, el panel lee **una** clave de los atributos, `pieza`:
+todos los posts programados del dueño con el mismo valor son versiones de la misma pieza.
+
+| Decisión | Alternativa descartada | Razón |
+|---|---|---|
+| La clave `pieza` en los atributos | Una columna `version_de` con su migración; agrupar por el mismo archivo | Los atributos ya los escriben el agente (por la API) y el dueño (en el editor); una columna pedía cambiar la API, el CSV y el compositor; el mismo archivo no junta dos hooks, que son dos cortes de video distintos |
+| Una columna por cada atributo que cambia entre versiones; los iguales, arriba como etiquetas | Todos los atributos en cada fila | Lo que hay que mirar es en qué se diferencian |
+| Los números del período elegido, con «Todo» a un clic | Siempre de toda la vida | Es el mismo motor que la lista, y «Todo» responde la pregunta de toda la vida |
+
+Una publicación que no salió de La Parrilla —subida a mano en la red— es una pieza de una sola
+versión, sin atributos, y la pantalla lo dice.
+
+## 5. Comparar por atributo
+
+`/admin/analytics/comparar`, enlazada desde «Lo que más creció». Se elige un atributo (al
+entrar, `hook` si existe, y si no el más usado) y cada valor muestra cuántas publicaciones lo
+llevan y sus medianas de views ganadas, visitas y arrastre. Abajo, «sin <atributo>»: lo
+publicado en el período que no lo lleva, como vara.
+
+- **Se llama «atributo» y no «etiqueta»**, aunque en la conversación de diseño se dijo
+  «comparar por etiqueta»: en todo el panel, «etiqueta» es el `?s=` del link de cada
+  publicación, y usar la misma palabra para dos cosas era la confusión que este rediseño
+  vino a quitar. «Atributos» es como los llaman el editor y la API.
+- **Lo publicado en el período**, como `GET /api/metrics/posts`: comparar el reel de ayer
+  con uno de hace seis meses por lo ganado este mes no compara hooks.
+- **Medianas y no promedios**: un reel que se pasó no arrastra a su valor entero.
+- **Con menos de diez publicaciones en un valor**, la fila se atenúa: la guía de la API ya
+  le dice al agente que desconfíe de esa diferencia.
+- **YouTube no entra** en las medianas de views ni de arrastre (sus políticas no dejan
+  calcular métricas con sus datos); sí en las de visitas, que son de Tu Parrilla.

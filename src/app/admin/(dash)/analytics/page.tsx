@@ -134,6 +134,7 @@ export default async function NumerosPage({ searchParams }: { searchParams: Prom
             filters={filters}
             params={params}
             profiles={profiles}
+            cuentas={cuentas}
             abierta={abiertas.has('pagina')}
           />
         </Suspense>
@@ -258,12 +259,20 @@ async function EnLasRedes({
         title="Lo que más creció"
         hint="Las publicaciones que más views ganaron en el período, de cualquier fecha."
         action={
-          <Link
-            href={numerosHref(`${RUTA}/publicaciones`, params, { mas: null })}
-            className="text-[0.75rem] text-fg-muted transition-colors hover:text-fg"
-          >
-            Ver todas las publicaciones →
-          </Link>
+          <div className="flex flex-col items-end gap-1 sm:flex-row sm:gap-4">
+            <Link
+              href={numerosHref(`${RUTA}/comparar`, params, { mas: null })}
+              className="text-[0.75rem] text-fg-muted transition-colors hover:text-fg"
+            >
+              Comparar por atributo →
+            </Link>
+            <Link
+              href={numerosHref(`${RUTA}/publicaciones`, params, { mas: null })}
+              className="text-[0.75rem] text-fg-muted transition-colors hover:text-fg"
+            >
+              Ver todas las publicaciones →
+            </Link>
+          </div>
         }
       >
         <BarList
@@ -276,7 +285,8 @@ async function EnLasRedes({
               label: post.caption || post.campaign,
               value: post.viewsChange ?? 0,
               note: deQuien ? nombreDeCuenta(deQuien) : networkLabel(post.network),
-              href: post.permalink ?? undefined,
+              // A su pieza, donde están sus versiones y el enlace a la red.
+              href: numerosHref(`${RUTA}/publicaciones/${post.id}`, params, { de: 'numeros' }),
             }
           })}
           color={seriesColor(0)}
@@ -392,11 +402,13 @@ async function EnTuPagina({
   filters,
   params,
   profiles,
+  cuentas,
   abierta,
 }: {
   filters: Filters
   params: Params
   profiles: Awaited<ReturnType<typeof getAllProfiles>>
+  cuentas: CuentaRow[]
   abierta: boolean
 }) {
   const kpis = await getKpis(filters)
@@ -404,6 +416,7 @@ async function EnTuPagina({
   const campanas = await getCampaigns(filters, 6)
   const conEtiqueta = campanas.filter((c) => c.campaign !== '(sin etiqueta)').slice(0, 5)
   const posts = await getCampaignPosts(filters.ownerId, conEtiqueta.map((c) => c.campaign))
+  const handles = new Map(cuentas.map((c) => [c.id, c]))
 
   return (
     <section aria-label="En tu página">
@@ -445,11 +458,14 @@ async function EnTuPagina({
         <BarList
           items={conEtiqueta.map((c) => {
             const post = posts.get(c.campaign)
+            const deQuien = post ? handles.get(post.accountId) : undefined
             return {
               key: c.campaign,
               label: post?.caption || `?s=${c.campaign}`,
               value: c.visits,
-              note: post ? networkLabel(post.network) : undefined,
+              note: deQuien ? nombreDeCuenta(deQuien) : post ? networkLabel(post.network) : undefined,
+              // Una etiqueta de mensaje privado o escrita a mano no es de ninguna publicación.
+              href: post ? numerosHref(`${RUTA}/publicaciones/${post.id}`, params, { de: 'numeros' }) : undefined,
             }
           })}
           color={seriesColor(1)}
@@ -457,12 +473,22 @@ async function EnTuPagina({
         />
       </Panel>
 
-      {abierta ? <PaginaEnDetalle filters={filters} kpis={kpis} anterior={anterior} /> : null}
+      {abierta ? <PaginaEnDetalle filters={filters} params={params} kpis={kpis} anterior={anterior} /> : null}
     </section>
   )
 }
 
-async function PaginaEnDetalle({ filters, kpis, anterior }: { filters: Filters; kpis: Kpis; anterior: Kpis }) {
+async function PaginaEnDetalle({
+  filters,
+  params,
+  kpis,
+  anterior,
+}: {
+  filters: Filters
+  params: Params
+  kpis: Kpis
+  anterior: Kpis
+}) {
   const serie = await getTimeSeries(filters)
   const campanas = await getCampaigns(filters)
   const posts = await getCampaignPosts(filters.ownerId, campanas.map((c) => c.campaign))
@@ -490,7 +516,11 @@ async function PaginaEnDetalle({ filters, kpis, anterior }: { filters: Filters; 
         title="Todas las etiquetas"
         hint="Cada etiqueta ?s= es un link etiquetado: el de una publicación, el de un mensaje privado (dm-…) o uno escrito a mano. Ordena por CTR para ver cuál convierte."
       >
-        <CampaignTable rows={campanas} posts={Object.fromEntries(posts)} />
+        <CampaignTable
+          rows={campanas}
+          posts={Object.fromEntries(posts)}
+          consulta={numerosHref('', params, { de: 'numeros' })}
+        />
       </Panel>
 
       <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">

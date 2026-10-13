@@ -55,31 +55,35 @@ export function RangoBar() {
 }
 
 /**
- * Un selector atado a una clave de la URL: la cuenta en las redes, la página en tu Vitrina.
- * `todas` es la opción sin filtro, que borra la clave.
+ * Un selector atado a una clave de la URL: la cuenta en las redes, la página en tu Vitrina,
+ * el atributo que se compara. `todas` es la opción sin filtro, que borra la clave; sin ella,
+ * siempre hay una elegida, y `porDefecto` dice cuál cuando la URL no trae ninguna.
  */
 export function SelectorEnUrl({
   clave,
   todas,
+  porDefecto,
   opciones,
   etiqueta,
 }: {
   clave: string
-  todas: string
+  todas?: string
+  porDefecto?: string
   opciones: Array<{ valor: string; texto: string }>
   /** El nombre accesible del selector. */
   etiqueta: string
 }) {
   const { params, pending, cambiar } = useFiltro()
   const actual = params.get(clave) ?? ''
+  const sinElegir = todas === undefined ? (porDefecto ?? opciones[0]?.valor ?? '') : ''
   return (
     <select
       aria-label={etiqueta}
-      value={opciones.some((o) => o.valor === actual) ? actual : ''}
+      value={opciones.some((o) => o.valor === actual) ? actual : sinElegir}
       onChange={(event) => cambiar(clave, event.target.value === '' ? null : event.target.value)}
       className={cn('chapa rounded-xl px-3 py-2 text-xs text-fg-muted outline-none transition-opacity', pending && 'opacity-60')}
     >
-      <option value="">{todas}</option>
+      {todas === undefined ? null : <option value="">{todas}</option>}
       {opciones.map((o) => (
         <option key={o.valor} value={o.valor}>
           {o.texto}

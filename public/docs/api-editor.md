@@ -167,13 +167,27 @@ Un objeto plano, de valores simples (texto, número o booleano), máximo 20 clav
 "atributos": { "hook": "pregunta-polemica", "tema": "negocios", "serie": "mut", "duracion_seg": 42 }
 ```
 
-**Las claves y los valores los inventas tú.** El sistema no interpreta ninguno: los
-guarda tal cual y te los devuelve junto a las métricas. Ese es el mecanismo con el
-que puedes descubrir qué funciona: etiqueta de forma consistente lo que decides
-(hook, tema, formato, estructura, duración, serie…) y después correlaciona.
+**Las claves y los valores los inventas tú.** El sistema los guarda tal cual y te los
+devuelve junto a las métricas. Ese es el mecanismo con el que puedes descubrir qué
+funciona: etiqueta de forma consistente lo que decides (hook, tema, formato, estructura,
+duración, serie…) y después correlaciona. El dueño ve lo mismo en su panel: Los Números
+tiene «Comparar por atributo», con las medianas de cada valor.
 
 Recomendación práctica: mantén un vocabulario estable entre posts. `"hook": "pregunta"`
 en unos y `"gancho": "pregunta-directa"` en otros hace imposible comparar.
+
+**Una sola clave tiene significado: `pieza`.** Los posts con el mismo valor de `pieza` son
+versiones de una misma pieza, y el panel los muestra juntos, lado a lado. Úsala cuando
+pruebes variantes de un mismo video: dos hooks, o el trial reel y el reel normal en la
+misma cuenta. Cada variante es un post aparte —un post no puede ir dos veces a la misma
+cuenta, y sus atributos son uno solo—, así que sin `pieza` nada las une:
+
+```json
+{ "atributos": { "pieza": "chimichurri-30s", "hook": "pregunta" } }
+{ "atributos": { "pieza": "chimichurri-30s", "hook": "listado" } }
+```
+
+No la uses como `serie`: es para variantes del mismo contenido, no para un tema que se repite.
 
 ### `opciones` (obligatorio si algún destino es una cuenta de TikTok; opcional para Instagram)
 
