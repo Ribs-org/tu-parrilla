@@ -191,7 +191,14 @@ lista; el resto (interacciones, arrastre, tus cuentas, la audiencia, los links, 
 vienen…) espera detrás de su «⋯ Más», que no se consulta mientras está cerrado. La lista de
 todas las publicaciones, que antes era la pestaña Los Cortes, está un clic adentro («Ver todas
 las publicaciones →», `/admin/analytics/publicaciones`; `/admin/content` redirige ahí), con
-filtro por cuenta, dos columnas a la vista y las demás con «⋯ Más». El porqué, en
+filtro por cuenta, dos columnas a la vista y las demás con «⋯ Más». Cada publicación abre su
+**pieza** (`/admin/analytics/publicaciones/<id>`): cada lugar donde salió —cada cuenta, cada
+red, si fue trial reel— con sus números lado a lado. Las versiones son los destinos del post
+programado del que salió y, si sus atributos traen `pieza`, los de todos los posts
+programados con el mismo valor: dos hooks del mismo video, o el trial reel y el reel normal
+en una cuenta, son por fuerza dos posts. **Comparar por atributo** (`/admin/analytics/comparar`)
+muestra, para cada valor de un atributo —el hook, el tema, la serie—, cuántas publicaciones
+lo llevan y sus medianas de views ganadas, visitas y arrastre. El porqué, en
 `docs/superpowers/specs/2026-10-13-numeros-tablero-design.md`.
 
 **Componer** pasa en un panel que se abre desde la derecha con «+ Nueva publicación», sin
@@ -964,7 +971,9 @@ Cada item acepta además `atributos`: un objeto plano de valores simples
 (`{"hook": "pregunta-polemica", "tema": "negocios", "serie": "mut"}`, máximo 20
 claves) que el sistema guarda sin interpretar y devuelve junto a las métricas. Es la
 taxonomía de quien crea el contenido: sirve para correlacionar decisiones creativas
-con resultados. El CSV no lo lleva; el editor de un post programado lo muestra y
+con resultados, y el panel la usa en «Comparar por atributo». Una sola clave tiene
+significado para el panel: `pieza`, que junta como versiones de una misma pieza a los
+posts que comparten su valor. El CSV no lo lleva; el editor de un post programado lo muestra y
 permite corregirlo.
 
 Y `opciones`, obligatorio cuando algún destino de la fila es una cuenta de TikTok (el
@@ -1041,6 +1050,8 @@ src/
     tracking.ts            contexto de la visita desde headers
     analytics.ts           consultas del dashboard
     tablero.ts             las reglas de Los Números sin base: cuenta elegida, «⋯ Más» abiertos, la URL
+    pieza.ts               qué junta las versiones de una pieza y las medianas por atributo (sin base)
+    piezas.ts              la pieza de una publicación: sus destinos programados unidos a lo publicado
     auth.ts                sesión del panel
     llaves.ts              las llaves de API de cada usuario, y a nombre de quién entra cada petición
     llaves-api.ts          cómo se ve, se guarda y se lee una llave (sin base: lo prueban los tests)

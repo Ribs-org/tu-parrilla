@@ -44,6 +44,11 @@ Cómo se usa:
   que eran más consultas a la vez que conexiones en el pool (`max: 5` en `src/db/index.ts`),
   contra el pooler de Supabase en modo transacción. La causa no está explicada: cualquier
   otro `Promise.all` con más de cinco consultas podría colgarse igual.
+- **En el teléfono, la pestaña activa queda cortada** (2026-10-13). La barra de pestañas del
+  panel (`src/app/admin/(dash)/nav.tsx`) se desliza de lado, y a 390 px «Los Números» queda
+  medio fuera de la pantalla aunque sea la pestaña en la que uno está. El arreglo es llevar
+  la activa a la vista al cargar (`scrollIntoView`), o achicar las pestañas en pantallas
+  angostas.
 - **La Parrilla abierta pide decenas de páginas `/admin/schedule/<id>` cada pocos
   segundos** (2026-10-04). En los logs de Vercel, unas 60 peticiones por tanda, una por cada
   corte del calendario: parece el prefetch de los `Link` combinado con un refresco

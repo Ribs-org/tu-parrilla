@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { formatNumber } from '@/lib/utils'
 import { Empty } from './panel'
 import { seriesColor } from './theme'
@@ -8,6 +9,7 @@ export type BarItem = {
   value: number
   /** Optional second figure shown to the right, e.g. a CTR. */
   note?: string
+  /** Una ruta del panel (empieza con `/`) se abre en la misma pestaña; un enlace de afuera, en otra. */
   href?: string
 }
 
@@ -54,7 +56,14 @@ export function BarList({
 
         return (
           <li key={item.key}>
-            {item.href ? (
+            {item.href?.startsWith('/') ? (
+              <Link
+                href={item.href}
+                className="relative flex items-center gap-3 overflow-hidden rounded-md px-2.5 py-1.5 text-[0.85rem] transition-colors hover:bg-white/[0.04]"
+              >
+                {row}
+              </Link>
+            ) : item.href ? (
               <a
                 href={item.href}
                 target="_blank"

@@ -22,7 +22,8 @@ const RUTA = '/admin/analytics/publicaciones'
 
 /**
  * Todas las publicaciones, una por fila: lo que fue la pantalla Los Cortes, ahora un clic
- * adentro de Los Números («Ver todas las publicaciones →»). Muestra poco al entrar —views y
+ * adentro de Los Números («Ver todas las publicaciones →»). Cada fila abre su pieza
+ * (`[id]/page.tsx`). Muestra poco al entrar —views y
  * visitas— y el resto de las columnas, «Solo con métricas» y «Ver borrados» esperan detrás
  * de «⋯ Más» (`?mas=1`). Se filtra por cuenta y no por red: con dos cuentas de Instagram,
  * la red sola no dice de cuál es cada fila.
@@ -180,7 +181,13 @@ export default async function PublicacionesPage({ searchParams }: { searchParams
               : 'No publicaste nada en este período. Amplía el período, o mira «Todas las recientes».'}
           </Empty>
         ) : (
-          <PostTable rows={visibles} columnas={mas ? 'todas' : 'pocas'} baseEnlace={baseEnlace} nombres={nombres} />
+          <PostTable
+            rows={visibles}
+            columnas={mas ? 'todas' : 'pocas'}
+            baseEnlace={baseEnlace}
+            nombres={nombres}
+            consulta={numerosHref('', params, {})}
+          />
         )}
       </Panel>
     </>

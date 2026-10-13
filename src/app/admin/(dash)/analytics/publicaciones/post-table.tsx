@@ -1,8 +1,9 @@
 'use client'
 
 import Image from 'next/image'
+import Link from 'next/link'
 import { useRef, useState, useTransition } from 'react'
-import { ArrowDown, ArrowUp, Check, Copy } from 'lucide-react'
+import { ArrowDown, ArrowUp, ArrowUpRight, Check, Copy } from 'lucide-react'
 import { updatePostCampaign } from '@/app/admin/actions'
 import { comoSalio, medianaDe, type Marca } from '@/lib/parrilla'
 import { useSortedRows } from '@/components/charts/use-sorted-rows'
@@ -61,18 +62,21 @@ const PREVIEW_COUNT = 20
  * comentarios, compartidos, clicks, CTR y arrastre. `baseEnlace` es la dirección pública de
  * la página principal del dueño: el link copiado tiene que llevar a ella y no al host del
  * panel, cuya raíz en tu-parrilla.cl es la portada y no anota visitas. `nombres` trae «Red ·
- * handle» por cuenta, para distinguir dos cuentas de la misma red.
+ * handle» por cuenta, para distinguir dos cuentas de la misma red. El texto de cada fila abre
+ * su pieza; `consulta` es lo que se le acarrea (`?range=…`), para volver con los filtros.
  */
 export function PostTable({
   rows,
   columnas = 'pocas',
   baseEnlace,
   nombres = {},
+  consulta = '',
 }: {
   rows: PostRow[]
   columnas?: 'pocas' | 'todas'
   baseEnlace: string
   nombres?: Record<string, string>
+  consulta?: string
 }) {
   const visibles = COLUMNS.filter((c) => columnas === 'todas' || POCAS.has(c.key))
   const deLaRed = visibles.filter((c) => c.grupo === 'red').length
@@ -205,23 +209,29 @@ export function PostTable({
                     <span className="corte-mini h-9 w-9 shrink-0 bg-white/[0.06]" aria-hidden />
                   )}
                   <div className="min-w-0">
-                    {row.permalink ? (
-                      <a
-                        href={row.permalink}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="block max-w-[18rem] truncate text-fg transition-colors hover:text-fg-muted"
-                      >
-                        {row.caption || 'Sin descripción'}
-                      </a>
-                    ) : (
-                      <span className="block max-w-[18rem] truncate text-fg">
-                        {row.caption || 'Sin descripción'}
-                      </span>
-                    )}
+                    {/* Sin prefetch: son hasta doscientas filas (ver `docs/pendientes.md`). */}
+                    <Link
+                      prefetch={false}
+                      href={`/admin/analytics/publicaciones/${row.id}${consulta}`}
+                      className="block max-w-[18rem] truncate text-fg transition-colors hover:text-fg-muted"
+                    >
+                      {row.caption || 'Sin descripción'}
+                    </Link>
                     <span className="font-mono text-[0.65rem] text-fg-faint">
                       {nombres[row.accountId] ?? networkLabel(row.network)} · {row.publishedLabel}
                       {row.isNew ? ' · nuevo' : ''}
+                      {row.permalink ? (
+                        <a
+                          href={row.permalink}
+                          target="_blank"
+                          rel="noreferrer"
+                          title={`Ver en ${networkLabel(row.network)}`}
+                          aria-label={`Ver en ${networkLabel(row.network)}`}
+                          className="ml-1 inline-flex align-middle text-fg-faint transition-colors hover:text-fg"
+                        >
+                          <ArrowUpRight className="h-3 w-3" aria-hidden />
+                        </a>
+                      ) : null}
                     </span>
                     {/*
                       El sello de los que corrieron el doble de la mediana. Es lo que el

@@ -55,7 +55,7 @@ se ve arriba, grande y en mayúsculas.
 |---|---|---|---|---|
 | La Parrilla | lo que viene y cómo salió lo que ya se fue | `/admin/schedule` | Primera pestaña. Es la entrada: se llega acá al entrar, y `/admin` lleva acá. El calendario: programar, borradores, lo que se quemó, editar, reprogramar | [la-parrilla.md](la-parrilla.md) |
 | La Mesa | lo que te responden y tus respuestas | `/admin/comments` | Pestaña. Los comentarios y sus respuestas | [la-mesa.md](la-mesa.md) |
-| Los Números | cómo te fue en las redes y en tu página | `/admin/analytics` | Pestaña. Un tablero con dos mitades: «En las redes» (views y seguidores ganados) y «En tu página» (visitas y clicks en su página de links). Un clic adentro, «Tus publicaciones» (`/admin/analytics/publicaciones`): cada publicación con sus números y su etiqueta `?s=` | [los-numeros.md](los-numeros.md) |
+| Los Números | cómo te fue en las redes y en tu página | `/admin/analytics` | Pestaña. Un tablero con dos mitades: «En las redes» (views y seguidores ganados) y «En tu página» (visitas y clicks en su página de links). Un clic adentro, «Tus publicaciones» (`/admin/analytics/publicaciones`): cada publicación con sus números y su etiqueta `?s=`; la pieza de cada una, con sus versiones (`/admin/analytics/publicaciones/<id>`); y «Comparar por atributo» (`/admin/analytics/comparar`) | [los-numeros.md](los-numeros.md) |
 | Los Fierros | tus redes conectadas | `/admin/accounts` | Engranaje «Ajustes». Conectar y desconectar redes | [los-fierros.md](los-fierros.md) |
 | La Vitrina | tus páginas públicas | `/admin/profiles` | Engranaje «Ajustes». Su página de links | [la-vitrina.md](la-vitrina.md) |
 | Los Maestros | quién puede entrar | `/admin/usuarios` | Engranaje «Ajustes», solo el admin. Invitar gente | [los-maestros.md](los-maestros.md) |
@@ -68,7 +68,8 @@ teléfono](app-movil.md).
 
 1. **Pregúntale qué título grande ve arriba.** Es el nombre de la pantalla (en mayúsculas) y
    debajo va el subtítulo. Con eso sabes en qué página de esta wiki está. Si dice «Tus
-   publicaciones», está dentro de Los Números ([los-numeros.md](los-numeros.md)).
+   publicaciones» o «Comparar por atributo», o si arriba del título dice «Pieza» en chico y el
+   título es el texto de un post, está dentro de Los Números ([los-numeros.md](los-numeros.md)).
 2. **Si no sabe el nombre, tradúcelo desde lo que quiere hacer** (la tabla de abajo).
 3. **Si ve «Algo se rompió»**, es la pantalla de error del panel: una consulta falló, no fue
    culpa suya. Tiene el botón «Reintentar» y, salvo que la que falló sea la pantalla principal
@@ -96,6 +97,9 @@ teléfono](app-movil.md).
 | Ver vistas, likes, visitas y clics de cada publicación; cambiar su etiqueta `?s=` o copiar su link | Los Números → «Ver todas las publicaciones →», la pantalla «Tus publicaciones» ([los-numeros.md](los-numeros.md)) |
 | Ver cuánta gente visitó su página y de dónde vino | Los Números, mitad «En tu página» y su «⋯ Más» ([los-numeros.md](los-numeros.md)) |
 | Ver los seguidores de cada cuenta | Los Números, «⋯ Más» de «En las redes», panel «Tus cuentas» ([los-numeros.md](los-numeros.md)) |
+| Ver todas las versiones de un post (en otras cuentas, con otro hook, el trial reel) con sus números lado a lado | Los Números, la pieza de esa publicación: se abre desde su fila en «Tus publicaciones» o en «Lo que más creció» ([los-numeros.md](los-numeros.md)) |
+| Juntar dos versiones del mismo video (dos hooks, o el trial reel y el reel normal) | Darles el mismo atributo `pieza` en el editor de cada post, en La Parrilla («Editar atributos» desde la pieza) ([los-numeros.md](los-numeros.md), [la-parrilla.md](la-parrilla.md)) |
+| Comparar qué hook, tema o serie funciona mejor | Los Números → «Comparar por atributo →» ([los-numeros.md](los-numeros.md)); los atributos se anotan en el editor de cada post, en La Parrilla |
 | Responder comentarios; darle instrucciones a la IA que redacta los borradores | La Mesa ([la-mesa.md](la-mesa.md)) |
 | Editar su página de links: foto, bio, colores, links, dirección | La Vitrina ([la-vitrina.md](la-vitrina.md)) |
 | Cambiar su nombre o su zona horaria | Tu Cuenta ([tu-cuenta.md](tu-cuenta.md)) |
@@ -127,6 +131,17 @@ esto es lo que quiere decir:
   (enfriándose: vence en siete días o menos) o gris apagado (frío: desconectada, rota o
   vencida, hay que reconectar).
 - **Servido:** un corte que salió. El pie de La Parrilla cuenta los de ayer.
+
+Y tres palabras de Los Números que no son del asado pero se confunden:
+
+- **Etiqueta:** el `?s=` del link de cada publicación, el que dice por cuál llegó la gente a su
+  página. Se cambia en «Tus publicaciones».
+- **Atributo:** lo que se le anota a un post programado —el hook, el tema, la serie—, en su
+  editor de La Parrilla o por la API. Se comparan en «Comparar por atributo». No es lo mismo que
+  la etiqueta.
+- **Pieza:** una publicación con todas sus versiones (otras cuentas, otro hook, el trial reel),
+  en Los Números. Dos posts programados distintos se juntan en una pieza si comparten el
+  atributo `pieza`.
 
 ## Lo que no existe (no la mandes a buscarlo)
 
