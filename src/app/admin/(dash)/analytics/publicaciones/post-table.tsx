@@ -1,8 +1,9 @@
 'use client'
 
 import Image from 'next/image'
+import Link from 'next/link'
 import { useRef, useState, useTransition } from 'react'
-import { ArrowDown, ArrowUp, Check, Copy } from 'lucide-react'
+import { ArrowDown, ArrowUp, ArrowUpRight, Check, Copy } from 'lucide-react'
 import { updatePostCampaign } from '@/app/admin/actions'
 import { comoSalio, medianaDe, type Marca } from '@/lib/parrilla'
 import { useSortedRows } from '@/components/charts/use-sorted-rows'
@@ -13,16 +14,25 @@ import { nombreDe } from '@/lib/vocabulario'
 
 type Column = 'views' | 'likes' | 'comments' | 'shares' | 'visits' | 'clicks' | 'ctr' | 'pull'
 
-const COLUMNS: Array<{ key: Column; label: string; hint?: string }> = [
-  { key: 'views', label: 'Views' },
-  { key: 'likes', label: 'Likes' },
-  { key: 'comments', label: 'Coment.' },
-  { key: 'shares', label: 'Compart.' },
-  { key: 'visits', label: 'Visitas' },
-  { key: 'clicks', label: 'Clicks' },
-  { key: 'ctr', label: 'CTR' },
-  { key: 'pull', label: 'Arrastre' },
+/**
+ * `red`: lo cuenta la red. `nuestra`: lo mide Tu Parrilla en la página del dueño. La tabla
+ * lo dice sobre cada grupo de columnas, porque views (en la red) y visitas (en tu página)
+ * se confundían —y las políticas de YouTube piden que un dato propio al lado de los suyos
+ * se lea claramente como no suyo—.
+ */
+const COLUMNS: Array<{ key: Column; label: string; grupo: 'red' | 'nuestra' }> = [
+  { key: 'views', label: 'Views', grupo: 'red' },
+  { key: 'likes', label: 'Likes', grupo: 'red' },
+  { key: 'comments', label: 'Coment.', grupo: 'red' },
+  { key: 'shares', label: 'Compart.', grupo: 'red' },
+  { key: 'visits', label: 'Visitas', grupo: 'nuestra' },
+  { key: 'clicks', label: 'Clicks', grupo: 'nuestra' },
+  { key: 'ctr', label: 'CTR', grupo: 'nuestra' },
+  { key: 'pull', label: 'Arrastre', grupo: 'nuestra' },
 ]
+
+/** Lo que se ve sin pedir más: lo que creció en la red y la gente que llegó a tu página. */
+const POCAS: ReadonlySet<Column> = new Set(['views', 'visits'])
 
 /** `—` and never `0`: no data and no traffic are different answers. */
 function num(value: number | null): string {
@@ -47,7 +57,30 @@ const CLASE_CORRIO: Record<Marca, string> = {
 // resets on reload rather than in the URL.
 const PREVIEW_COUNT = 20
 
-export function PostTable({ rows }: { rows: PostRow[] }) {
+/**
+ * La tabla de publicaciones. `columnas` 'pocas' muestra views y visitas; 'todas' suma likes,
+ * comentarios, compartidos, clicks, CTR y arrastre. `baseEnlace` es la dirección pública de
+ * la página principal del dueño: el link copiado tiene que llevar a ella y no al host del
+ * panel, cuya raíz en tu-parrilla.cl es la portada y no anota visitas. `nombres` trae «Red ·
+ * handle» por cuenta, para distinguir dos cuentas de la misma red. El texto de cada fila abre
+ * su pieza; `consulta` es lo que se le acarrea (`?range=…`), para volver con los filtros.
+ */
+export function PostTable({
+  rows,
+  columnas = 'pocas',
+  baseEnlace,
+  nombres = {},
+  consulta = '',
+}: {
+  rows: PostRow[]
+  columnas?: 'pocas' | 'todas'
+  baseEnlace: string
+  nombres?: Record<string, string>
+  consulta?: string
+}) {
+  const visibles = COLUMNS.filter((c) => columnas === 'todas' || POCAS.has(c.key))
+  const deLaRed = visibles.filter((c) => c.grupo === 'red').length
+  const nuestras = visibles.length - deLaRed
   const { sorted, sortKey, descending, toggle } = useSortedRows(rows, 'views')
   const [expanded, setExpanded] = useState(false)
   const visible = expanded ? sorted : sorted.slice(0, PREVIEW_COUNT)
@@ -87,18 +120,24 @@ export function PostTable({ rows }: { rows: PostRow[] }) {
 
   return (
     <div className="-mx-1 overflow-x-auto px-1">
-      <table className="w-full min-w-[46rem] border-collapse text-[0.85rem]">
+      <table
+        className={cn(
+          'w-full border-collapse text-[0.85rem]',
+          columnas === 'todas' ? 'min-w-[46rem]' : 'min-w-[26rem]',
+        )}
+      >
         <thead>
-          {/*
-            Las cuatro de la derecha las mide Tu Parrilla en la página del dueño, no la red.
-            Dicho sobre las columnas y no en una nota al pie: las políticas de YouTube piden
-            que un dato propio al lado de los suyos se lea claramente como no suyo.
-          */}
+          {/* Quién cuenta cada grupo de columnas, dicho sobre ellas y no en una nota al pie. */}
           <tr>
-            <td colSpan={5} aria-hidden />
-            <th scope="colgroup" colSpan={4} className="pb-1 text-right font-normal">
+            <td aria-hidden />
+            <th scope="colgroup" colSpan={deLaRed} className="pb-1 text-right font-normal">
               <span className="border-b border-white/[0.08] pb-0.5 font-mono text-[0.6rem] uppercase tracking-[0.14em] text-fg-faint">
-                Medido por Tu Parrilla
+                En la red
+              </span>
+            </th>
+            <th scope="colgroup" colSpan={nuestras} className="pb-1 text-right font-normal">
+              <span className="border-b border-white/[0.08] pb-0.5 font-mono text-[0.6rem] uppercase tracking-[0.14em] text-fg-faint">
+                En tu página · lo mide Tu Parrilla
               </span>
             </th>
           </tr>
@@ -108,7 +147,7 @@ export function PostTable({ rows }: { rows: PostRow[] }) {
                 Post
               </span>
             </th>
-            {COLUMNS.map((column) => (
+            {visibles.map((column) => (
               <th
                 key={column.key}
                 scope="col"
@@ -170,23 +209,29 @@ export function PostTable({ rows }: { rows: PostRow[] }) {
                     <span className="corte-mini h-9 w-9 shrink-0 bg-white/[0.06]" aria-hidden />
                   )}
                   <div className="min-w-0">
-                    {row.permalink ? (
-                      <a
-                        href={row.permalink}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="block max-w-[18rem] truncate text-fg transition-colors hover:text-fg-muted"
-                      >
-                        {row.caption ?? 'Sin descripción'}
-                      </a>
-                    ) : (
-                      <span className="block max-w-[18rem] truncate text-fg">
-                        {row.caption ?? 'Sin descripción'}
-                      </span>
-                    )}
+                    {/* Sin prefetch: son hasta doscientas filas (ver `docs/pendientes.md`). */}
+                    <Link
+                      prefetch={false}
+                      href={`/admin/analytics/publicaciones/${row.id}${consulta}`}
+                      className="block max-w-[18rem] truncate text-fg transition-colors hover:text-fg-muted"
+                    >
+                      {row.caption || 'Sin descripción'}
+                    </Link>
                     <span className="font-mono text-[0.65rem] text-fg-faint">
-                      {networkLabel(row.network)} · {row.publishedLabel}
+                      {nombres[row.accountId] ?? networkLabel(row.network)} · {row.publishedLabel}
                       {row.isNew ? ' · nuevo' : ''}
+                      {row.permalink ? (
+                        <a
+                          href={row.permalink}
+                          target="_blank"
+                          rel="noreferrer"
+                          title={`Ver en ${networkLabel(row.network)}`}
+                          aria-label={`Ver en ${networkLabel(row.network)}`}
+                          className="ml-1 inline-flex align-middle text-fg-faint transition-colors hover:text-fg"
+                        >
+                          <ArrowUpRight className="h-3 w-3" aria-hidden />
+                        </a>
+                      ) : null}
                     </span>
                     {/*
                       El sello de los que corrieron el doble de la mediana. Es lo que el
@@ -196,57 +241,54 @@ export function PostTable({ rows }: { rows: PostRow[] }) {
                     {comoSalio(row.viewsChange, mediana) === 'se-paso' ? (
                       <span
                         className="ml-1.5 font-titulo text-[0.6rem] uppercase tracking-[0.12em] text-brasa"
-                        title="Más del doble de vistas ganadas que la mitad de tus posts del período"
+                        title="El doble o más de las vistas ganadas por la mitad de tus posts del período"
                       >
                         Se pasó
                       </span>
                     ) : null}
-                    <CampaignCell postId={row.id} campaign={row.campaign} />
+                    <CampaignCell postId={row.id} campaign={row.campaign} baseEnlace={baseEnlace} />
                   </div>
                 </div>
               </td>
 
-              <td className="relative py-2 text-right font-mono tabular-nums">
-                {/*
-                  La barra ya existía y era siempre del mismo color: decía el tamaño,
-                  no si era mucho o poco para este dueño. Ahora se pinta según cómo
-                  corrió contra la mediana del período, que es la comparación que
-                  ninguna columna hace.
-                */}
-                {row.views !== null && maxViews > 0 ? (
-                  <span
-                    aria-hidden
+              {visibles.map((column) =>
+                column.key === 'views' ? (
+                  <td key="views" className="relative py-2 text-right font-mono tabular-nums">
+                    {/*
+                      La barra ya existía y era siempre del mismo color: decía el tamaño,
+                      no si era mucho o poco para este dueño. Ahora se pinta según cómo
+                      corrió contra la mediana del período, que es la comparación que
+                      ninguna columna hace.
+                    */}
+                    {row.views !== null && maxViews > 0 ? (
+                      <span
+                        aria-hidden
+                        className={cn(
+                          'absolute inset-y-1 left-0 -z-10 rounded',
+                          CLASE_CORRIO[comoSalio(row.viewsChange, mediana)],
+                        )}
+                        style={{ width: `${(row.views / maxViews) * 100}%` }}
+                      />
+                    ) : null}
+                    {num(row.views)}
+                    {row.viewsChange !== null && row.viewsChange > 0 && !row.isNew ? (
+                      <span className="ml-1 text-[0.68rem] text-fg-faint">
+                        +{formatNumber(row.viewsChange)}
+                      </span>
+                    ) : null}
+                  </td>
+                ) : (
+                  <td
+                    key={column.key}
                     className={cn(
-                      'absolute inset-y-1 left-0 -z-10 rounded',
-                      CLASE_CORRIO[comoSalio(row.viewsChange, mediana)],
+                      'py-2 text-right font-mono tabular-nums',
+                      column.key !== 'visits' && column.key !== 'pull' && 'text-fg-muted',
                     )}
-                    style={{ width: `${(row.views / maxViews) * 100}%` }}
-                  />
-                ) : null}
-                {num(row.views)}
-                {row.viewsChange !== null && row.viewsChange > 0 && !row.isNew ? (
-                  <span className="ml-1 text-[0.68rem] text-fg-faint">
-                    +{formatNumber(row.viewsChange)}
-                  </span>
-                ) : null}
-              </td>
-              <td className="py-2 text-right font-mono tabular-nums text-fg-muted">
-                {num(row.likes)}
-              </td>
-              <td className="py-2 text-right font-mono tabular-nums text-fg-muted">
-                {num(row.comments)}
-              </td>
-              <td className="py-2 text-right font-mono tabular-nums text-fg-muted">
-                {num(row.shares)}
-              </td>
-              <td className="py-2 text-right font-mono tabular-nums">{num(row.visits)}</td>
-              <td className="py-2 text-right font-mono tabular-nums text-fg-muted">
-                {num(row.clicks)}
-              </td>
-              <td className="py-2 text-right font-mono tabular-nums text-fg-muted">
-                {pct(row.ctr)}
-              </td>
-              <td className="py-2 text-right font-mono tabular-nums">{pct(row.pull, 2)}</td>
+                  >
+                    {celda(row, column.key)}
+                  </td>
+                ),
+              )}
             </tr>
           ))}
         </tbody>
@@ -270,7 +312,29 @@ export function PostTable({ rows }: { rows: PostRow[] }) {
   )
 }
 
-function CampaignCell({ postId, campaign }: { postId: string; campaign: string }) {
+/** El texto de una celda que no es la de views (esa lleva su barra). */
+function celda(row: PostRow, columna: Column): string {
+  switch (columna) {
+    case 'likes':
+      return num(row.likes)
+    case 'comments':
+      return num(row.comments)
+    case 'shares':
+      return num(row.shares)
+    case 'visits':
+      return num(row.visits)
+    case 'clicks':
+      return num(row.clicks)
+    case 'ctr':
+      return pct(row.ctr)
+    case 'pull':
+      return pct(row.pull, 2)
+    default:
+      return num(row.views)
+  }
+}
+
+function CampaignCell({ postId, campaign, baseEnlace }: { postId: string; campaign: string; baseEnlace: string }) {
   const [value, setValue] = useState(campaign)
   const [editing, setEditing] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -325,12 +389,12 @@ function CampaignCell({ postId, campaign }: { postId: string; campaign: string }
       return
     }
 
-    // Built here rather than on the server so the URL matches whatever host the
-    // dashboard is actually being used on. Chained off the actual write instead of
-    // assumed: a denied permission rejects, and a checkmark that lies is worse than no
-    // checkmark.
+    // La página principal del dueño y no `window.location.origin`: el panel vive en
+    // tu-parrilla.cl, cuya raíz es la portada del producto y no anota visitas, así que ese
+    // link perdía toda la atribución. Encadenado a la escritura real: un permiso negado
+    // rechaza, y un visto que miente es peor que ninguno.
     clipboard
-      .writeText(`${window.location.origin}/?s=${value}`)
+      .writeText(`${baseEnlace}?s=${value}`)
       .then(() => {
         setCopied(true)
         setError(null)

@@ -10,6 +10,7 @@ import { getDb, links, profiles, socialAccounts, socialPosts, scheduledPosts, sc
 import { LINK_KINDS, type LinkKind } from '@/db/schema'
 import { destroySession, requireAdmin, requireUser } from '@/lib/auth'
 import { normalizeCampaignTag } from '@/lib/social/campaign'
+import { volverDelEditor } from './(dash)/schedule/enlace'
 import { columnasEditablesDeRegla, validarRegla } from '@/lib/social/comentarios/reglas'
 import { FUSION_FALLO, FUSION_NO_ES_TUYA, decidirFusion, pasosDeFusion } from '@/lib/social/fusion'
 import { BORRADO_YA_PUBLICADO } from '@/lib/schedule-api'
@@ -610,7 +611,7 @@ export async function updatePostCampaign(
     return { error: 'No se pudo guardar. Intenta de nuevo.' }
   }
 
-  revalidatePath('/admin/content')
+  revalidatePath('/admin/analytics/publicaciones')
   revalidatePath('/admin/analytics')
   // Return the normalised value: the caller's typed text and what actually got
   // stored can differ (spaces become hyphens, etc), and the copy button must hand
@@ -1154,10 +1155,9 @@ export async function updateScheduledPost(
 
   revalidatePath('/admin/schedule')
 
-  // Only our own schedule views are valid return targets; anything else in `volver`
-  // (a crafted form) falls back to the plain page.
-  const volver = String(formData.get('volver') ?? '')
-  redirect(volver.startsWith('/admin/schedule') ? volver : '/admin/schedule')
+  // Solo las vistas propias valen como vuelta (`volverDelEditor`); un formulario armado a
+  // mano cae en la parrilla pelada.
+  redirect(volverDelEditor(formData.get('volver')))
 }
 
 export async function rescheduleTarget(targetId: string, localDatetime: string): Promise<FormState> {

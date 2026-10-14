@@ -1,5 +1,5 @@
 // Kept free of `server-only` on purpose: these are the pieces of the posts module that
-// a unit test — and the client components of the panel (`content`, `accounts`) — can
+// a unit test — and the client components of the panel (`analytics/publicaciones`, `accounts`) — can
 // import directly, without dragging in the DB layer that the rest of `posts.ts` depends on.
 
 import { sinMetricasDerivadas } from './social/politica-youtube'
@@ -25,6 +25,8 @@ export type CuentaRow = {
 export type PostRow = {
   id: string
   network: string
+  /** La cuenta conectada de la que salió: con dos cuentas de una red, la red sola no alcanza. */
+  accountId: string
   /** El id del post en la red — la llave que une métricas con lo programado. */
   externalId: string
   permalink: string | null

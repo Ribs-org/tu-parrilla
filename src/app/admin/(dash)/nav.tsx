@@ -7,7 +7,7 @@ import { ajustes, pantallaDe, pestanas } from '@/lib/vocabulario'
 import { cn } from '@/lib/utils'
 
 /**
- * Cinco pestañas y un engranaje. Lo que no pide una acción todos los días —las cuentas, las
+ * Tres pestañas y un engranaje. Lo que no pide una acción todos los días —las cuentas, las
  * páginas públicas, quién entra— va dentro de Ajustes: sigue a un clic, pero ya no ocupa la
  * barra. Los nombres y las rutas salen del vocabulario; acá no se escribe ninguno.
  */

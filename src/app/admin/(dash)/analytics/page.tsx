@@ -9,10 +9,10 @@ import { Donut } from '@/components/charts/donut'
 import { Funnel } from '@/components/charts/funnel'
 import { Heatmap } from '@/components/charts/heatmap'
 import { Empty, Panel, PanelSkeleton } from '@/components/charts/panel'
-import { StatTile, delta } from '@/components/charts/stat-tile'
+import { StatTile, StatTileSkeleton, delta } from '@/components/charts/stat-tile'
 import { seriesColor } from '@/components/charts/theme'
 import { TrafficChart } from '@/components/charts/traffic-chart'
-import { FilterBar } from '@/components/filter-bar'
+import { BotonBots, RangoBar, SelectorEnUrl } from '@/components/filter-bar'
 import { Encabezado } from '@/components/ui'
 import { buildAccountCards, buildAccountSeries } from '@/lib/account-stats'
 import { requireUser } from '@/lib/auth'
@@ -38,11 +38,30 @@ import {
 } from '@/lib/analytics'
 import { parseFilters } from '@/lib/filters'
 import { networkLabel } from '@/lib/networks'
-import { getCampaignPosts } from '@/lib/posts'
+import { getCampaignPosts, getCuentas, getPostRows, getPostSeries, postKpisFrom } from '@/lib/posts'
+import { topPostsByGain, type CuentaRow } from '@/lib/posts-kpis'
 import { getAllProfiles } from '@/lib/profiles'
+import {
+  alternarSeccion,
+  cuentaElegida,
+  numerosHref,
+  seccionesAbiertas,
+  seguidoresGanados,
+  type Params,
+  type Seccion,
+} from '@/lib/tablero'
 import { countryName, flagEmoji, formatNumber, formatPercent } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
+
+const RUTA = '/admin/analytics'
+
+/**
+ * Cuántas publicaciones se leen para sumar lo ganado en el período. Sin ventana de
+ * publicación —un reel de agosto que crece en octubre cuenta en octubre—, así que el tope
+ * va por las más recientes; lo viejo que ya no crece no mueve la suma.
+ */
+const PUBLICACIONES_LEIDAS = 500
 
 const RELATIVE = new Intl.RelativeTimeFormat('es', { numeric: 'auto' })
 
@@ -64,159 +83,450 @@ const DEVICE_LABELS: Record<string, string> = {
   Desconocido: 'Desconocido',
 }
 
-export default async function AnalyticsPage({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>
-}) {
+/** Los filtros sin los de «En tu página»: para lo que se cuenta en las redes. */
+function sinFiltrosDePagina(filters: Filters): Filters {
+  return { ...filters, profileId: null, includeBots: false }
+}
+
+/** «Instagram · @handle», o solo la red si la cuenta no tiene handle. */
+function nombreDeCuenta(cuenta: Pick<CuentaRow, 'network' | 'handle'>): string {
+  return cuenta.handle ? `${networkLabel(cuenta.network)} · ${cuenta.handle}` : networkLabel(cuenta.network)
+}
+
+/**
+ * Los Números: un solo tablero con dos mitades que miden cosas distintas y lo dicen. «En las
+ * redes» es lo que hicieron tus publicaciones donde se publicaron, y lo cuentan las redes;
+ * «En tu página» es quién entró a tu página de links y qué apretó, y lo cuenta Tu Parrilla.
+ * Cada mitad muestra dos números y una lista; el resto espera detrás de su «⋯ Más», que la
+ * URL abre (`?mas=redes`, `?mas=pagina`) para que no se consulte lo que no se va a ver.
+ *
+ * Reemplaza a dos pantallas que compartían barra de filtros y no se explicaban entre sí (ver
+ * `docs/superpowers/specs/2026-10-13-numeros-tablero-design.md`).
+ */
+export default async function NumerosPage({ searchParams }: { searchParams: Promise<Params> }) {
   const params = await searchParams
   const { id: ownerId, zona } = await requireUser()
   const filters = parseFilters(params, ownerId, zona)
-
-  // Solo lo que hace falta para pintar algo: la barra de filtros, las cuatro cifras y el
-  // gráfico de tráfico. Los otros once paneles esperan abajo, cada grupo en su propio
-  // `Suspense`, para que la consulta más lenta de la página no retenga a las tres más
-  // rápidas.
-  const [profiles, kpis, previous, series] = await Promise.all([
-    getAllProfiles(ownerId),
-    getKpis(filters),
-    getKpis(previousPeriod(filters)),
-    getTimeSeries(filters),
-  ])
+  const abiertas = seccionesAbiertas(params)
+  // En serie: más consultas a la vez que conexiones en el pool se colgaron una vez contra
+  // el pooler de Supabase (`docs/pendientes.md`).
+  const cuentas = await getCuentas(ownerId)
+  const profiles = await getAllProfiles(ownerId)
 
   return (
     <>
-      <header className="mb-6">
+      <header className="mb-4">
         <Encabezado ruta="/admin/analytics" />
-        <p className="mt-1 text-sm text-fg-muted">
-          Todo lo que pasa en tus perfiles, sin cookies ni terceros.
+        <p className="mt-1 max-w-2xl text-sm text-fg-muted">
+          Dos cosas distintas: lo que hicieron tus publicaciones en las redes, y quién entró a tu
+          página de links. El período vale para las dos.
         </p>
       </header>
 
-      <FilterBar profiles={profiles} />
+      <RangoBar />
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatTile label="Visitas" value={formatNumber(kpis.visits)} delta={delta(kpis.visits, previous.visits)} />
-        <StatTile label="Únicos" value={formatNumber(kpis.uniques)} delta={delta(kpis.uniques, previous.uniques)} />
-        <StatTile label="Clicks" value={formatNumber(kpis.clicks)} delta={delta(kpis.clicks, previous.clicks)} />
-        <StatTile label="CTR" value={formatPercent(kpis.ctr)} delta={delta(kpis.ctr, previous.ctr)} />
-      </div>
-
-      <div className="mt-4 grid gap-4">
-        <Panel title="Tráfico en el tiempo" hint="Visitas y clicks, comparables en la misma escala">
-          <TrafficChart data={series} />
-        </Panel>
-
-        <Suspense
-          fallback={
-            // La grilla anidada repite el `gap-4` del contenedor: los huecos tienen que
-            // caer donde caerán los paneles.
-            <div role="status" aria-label="Cargando" className="grid gap-4">
-              <PanelSkeleton />
-              <PanelSkeleton />
-              <div className="grid gap-4 lg:grid-cols-2">
-                <PanelSkeleton />
-                <PanelSkeleton />
-              </div>
-            </div>
-          }
-        >
-          <PanelesDeOrigen filters={filters} visits={kpis.visits} />
+      <div className="mt-6 space-y-10">
+        <Suspense fallback={<SeccionCargando />}>
+          <EnLasRedes filters={filters} params={params} cuentas={cuentas} abierta={abiertas.has('redes')} />
         </Suspense>
-
-        <Suspense
-          fallback={
-            <div role="status" aria-label="Cargando" className="grid gap-4">
-              <div className="grid gap-4 lg:grid-cols-2">
-                <PanelSkeleton />
-                <PanelSkeleton />
-              </div>
-              <div className="grid gap-4 lg:grid-cols-3">
-                <PanelSkeleton />
-                <PanelSkeleton />
-                <PanelSkeleton />
-              </div>
-              <PanelSkeleton />
-              <div className="grid gap-4 lg:grid-cols-2">
-                <PanelSkeleton />
-                <PanelSkeleton />
-              </div>
-              <PanelSkeleton />
-            </div>
-          }
-        >
-          <PanelesDeAudiencia filters={filters} kpis={kpis} />
+        <Suspense fallback={<SeccionCargando />}>
+          <EnTuPagina
+            filters={filters}
+            params={params}
+            profiles={profiles}
+            cuentas={cuentas}
+            abierta={abiertas.has('pagina')}
+          />
         </Suspense>
       </div>
     </>
   )
 }
 
-/** Quién trae el tráfico: las cuentas, las etiquetas `?s=`, los links y la red de origen. */
-async function PanelesDeOrigen({ filters, visits }: { filters: Filters; visits: number }) {
-  const [campaigns, networks, topLinks, accountRows] = await Promise.all([
-    getCampaigns(filters),
-    getNetworks(filters),
-    getTopLinks(filters, visits),
-    // Sin filtro de fecha a propósito: la variación necesita la lectura anterior a la
-    // ventana, y la tabla crece una fila por red y día — nada que paginar.
-    getDb()
-      .select({
-        network: accountMetrics.network,
-        day: accountMetrics.day,
-        followers: accountMetrics.followers,
-        profileViews: accountMetrics.profileViews,
-        reach: accountMetrics.reach,
-      })
-      .from(accountMetrics)
-      .where(
-        inArray(
-          accountMetrics.accountId,
-          getDb().select({ id: socialAccounts.id }).from(socialAccounts).where(eq(socialAccounts.ownerId, filters.ownerId)),
-        ),
-      )
-      .orderBy(asc(accountMetrics.day), asc(accountMetrics.network)),
-  ])
+/** El título de una mitad, su bajada, su filtro propio y el «⋯ Más» que la abre. */
+function CabezaDeSeccion({
+  seccion,
+  titulo,
+  bajada,
+  params,
+  abierta,
+  filtro,
+}: {
+  seccion: Seccion
+  titulo: string
+  bajada: string
+  params: Params
+  abierta: boolean
+  filtro?: React.ReactNode
+}) {
+  return (
+    <div className="mb-3 flex flex-wrap items-end gap-3">
+      <div className="min-w-0 flex-1">
+        <h2 className="font-titulo text-lg font-semibold uppercase tracking-[0.04em]">{titulo}</h2>
+        <p className="text-[0.8rem] text-fg-muted">{bajada}</p>
+      </div>
+      {filtro}
+      <Link
+        href={numerosHref(RUTA, params, { mas: alternarSeccion(params, seccion) })}
+        scroll={false}
+        aria-expanded={abierta}
+        className="rounded-xl px-3 py-2 text-xs text-fg-muted transition-colors hover:bg-acero-800 hover:text-fg"
+      >
+        {abierta ? 'Menos' : '⋯ Más'}
+      </Link>
+    </div>
+  )
+}
 
-  // Este sí depende del anterior: los posts se piden por las campañas que volvieron.
-  const campaignPosts = await getCampaignPosts(filters.ownerId, campaigns.map((c) => c.campaign))
+function SeccionCargando() {
+  return (
+    <div role="status" aria-label="Cargando" className="grid grid-cols-1 gap-3">
+      <div className="h-10 w-64 rounded bg-white/[0.04]" />
+      <div className="grid grid-cols-2 gap-3">
+        <StatTileSkeleton />
+        <StatTileSkeleton />
+      </div>
+      <PanelSkeleton />
+    </div>
+  )
+}
 
-  const accountFrom = localDay(filters.from, filters.zone)
-  const accountTo = localDay(filters.to, filters.zone)
-  const cards = buildAccountCards(accountRows, accountFrom, accountTo)
-  const accountSeries = buildAccountSeries(accountRows, accountFrom, accountTo)
+/* ------------------------------------------------------------- en las redes -- */
+
+async function EnLasRedes({
+  filters,
+  params,
+  cuentas,
+  abierta,
+}: {
+  filters: Filters
+  params: Params
+  cuentas: CuentaRow[]
+  abierta: boolean
+}) {
+  const cuenta = cuentaElegida(params, cuentas)
+  // La página y los bots son filtros de «En tu página»: las visitas de cada publicación se
+  // cuentan en todas tus páginas y sin bots, digan lo que digan esos dos filtros.
+  const deLasRedes = sinFiltrosDePagina(filters)
+  const filas = await getPostRows(deLasRedes, false, {
+    limit: PUBLICACIONES_LEIDAS,
+    ...(cuenta ? { accountId: cuenta.id } : {}),
+  })
+  const lecturas = (await lecturasDeCuentas(filters.ownerId)).filter((l) => cuenta === null || l.accountId === cuenta.id)
+  const desde = localDay(filters.from, filters.zone)
+  const hasta = localDay(filters.to, filters.zone)
+  const tarjetas = buildAccountCards(lecturas, desde, hasta, 'cuenta')
+  const kpis = postKpisFrom(filas)
+  const ganados = seguidoresGanados(tarjetas)
+  const top = topPostsByGain(filas, 5)
+  const handles = new Map(cuentas.map((c) => [c.id, c]))
 
   return (
-    <>
+    <section aria-label="En las redes">
+      <CabezaDeSeccion
+        seccion="redes"
+        titulo="En las redes"
+        bajada="Lo que hicieron tus publicaciones donde las publicaste. Lo cuentan las redes."
+        params={params}
+        abierta={abierta}
+        filtro={
+          cuentas.length > 1 ? (
+            <SelectorEnUrl
+              clave="cuenta"
+              etiqueta="Cuenta"
+              todas="Todas las cuentas"
+              opciones={cuentas.map((c) => ({ valor: c.id, texto: nombreDeCuenta(c) }))}
+            />
+          ) : null
+        }
+      />
+      <div className="grid grid-cols-2 gap-3">
+        {/* «—» y no «0» cuando ninguna publicación tiene lo ganado: no se sabe no es cero. */}
+        <StatTile
+          label="Views ganadas"
+          value={filas.some((f) => f.viewsChange !== null) ? formatNumber(kpis.views) : '—'}
+          hint="En el período · sin YouTube"
+        />
+        <StatTile
+          label="Seguidores ganados"
+          value={ganados === null ? '—' : `${ganados > 0 ? '+' : ''}${formatNumber(ganados)}`}
+          hint="En el período · sin YouTube"
+        />
+      </div>
+
+      <Panel
+        className="mt-3"
+        title="Lo que más creció"
+        hint="Las publicaciones que más views ganaron en el período, de cualquier fecha."
+        action={
+          <div className="flex flex-col items-end gap-1 sm:flex-row sm:gap-4">
+            <Link
+              href={numerosHref(`${RUTA}/comparar`, params, { mas: null })}
+              className="text-[0.75rem] text-fg-muted transition-colors hover:text-fg"
+            >
+              Comparar por atributo →
+            </Link>
+            <Link
+              href={numerosHref(`${RUTA}/publicaciones`, params, { mas: null })}
+              className="text-[0.75rem] text-fg-muted transition-colors hover:text-fg"
+            >
+              Ver todas las publicaciones →
+            </Link>
+          </div>
+        }
+      >
+        <BarList
+          items={top.map((post) => {
+            const deQuien = handles.get(post.accountId)
+            return {
+              key: post.id,
+              // La etiqueta cuando no hay texto: es lo que escribió el dueño, y dice más que
+              // un «sin texto». `||` y no `??`: Instagram guarda el texto vacío como cadena.
+              label: post.caption || post.campaign,
+              value: post.viewsChange ?? 0,
+              note: deQuien ? nombreDeCuenta(deQuien) : networkLabel(post.network),
+              // A su pieza, donde están sus versiones y el enlace a la red.
+              href: numerosHref(`${RUTA}/publicaciones/${post.id}`, params, { de: 'numeros' }),
+            }
+          })}
+          color={seriesColor(0)}
+          emptyLabel="Ninguna publicación ganó views en este período. Las métricas llegan con la sincronización diaria, así que lo publicado hoy aparece mañana."
+        />
+      </Panel>
+
+      {abierta ? (
+        <RedesEnDetalle
+          filters={deLasRedes}
+          filas={filas}
+          tarjetas={tarjetas}
+          serieCuentas={buildAccountSeries(lecturas, desde, hasta)}
+          cuentas={cuentas}
+          cuenta={cuenta}
+        />
+      ) : null}
+    </section>
+  )
+}
+
+/** Las lecturas diarias de cada cuenta del dueño, con su cuenta: el panel agrupa por ella. */
+async function lecturasDeCuentas(ownerId: string) {
+  // Sin filtro de fecha a propósito: la variación necesita la lectura anterior a la ventana,
+  // y la tabla crece una fila por cuenta y día — nada que paginar.
+  return getDb()
+    .select({
+      network: accountMetrics.network,
+      accountId: accountMetrics.accountId,
+      day: accountMetrics.day,
+      followers: accountMetrics.followers,
+      profileViews: accountMetrics.profileViews,
+      reach: accountMetrics.reach,
+    })
+    .from(accountMetrics)
+    .where(
+      inArray(
+        accountMetrics.accountId,
+        getDb().select({ id: socialAccounts.id }).from(socialAccounts).where(eq(socialAccounts.ownerId, ownerId)),
+      ),
+    )
+    .orderBy(asc(accountMetrics.day), asc(accountMetrics.network))
+}
+
+async function RedesEnDetalle({
+  filters,
+  filas,
+  tarjetas,
+  serieCuentas,
+  cuentas,
+  cuenta,
+}: {
+  filters: Filters
+  filas: Awaited<ReturnType<typeof getPostRows>>
+  tarjetas: ReturnType<typeof buildAccountCards>
+  serieCuentas: ReturnType<typeof buildAccountSeries>
+  cuentas: CuentaRow[]
+  cuenta: CuentaRow | null
+}) {
+  const kpis = postKpisFrom(filas)
+  const serie = await getPostSeries(filters)
+
+  return (
+    <div className="mt-3 grid grid-cols-1 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <StatTile
+          label="Interacciones"
+          value={formatNumber(kpis.engagement)}
+          hint="Likes, comentarios y compartidos ganados · sin YouTube"
+        />
+        <StatTile label="Visitas desde posts" value={formatNumber(kpis.visits)} hint="Llegaron a tu página por su link" />
+        <StatTile
+          label="Arrastre"
+          value={kpis.pull === null ? '—' : formatPercent(kpis.pull, 2)}
+          hint="De quienes vieron, cuántos llegaron a tu página · sin YouTube"
+        />
+      </div>
+
       <Panel
         title="Tus cuentas"
-        hint="Seguidores por red, con lo ganado en el período; en YouTube, solo el total, porque sus reglas no permiten calcular lo ganado. Visitas al perfil y alcance son del último día leído — Instagram es la única que los entrega hoy."
+        hint="Seguidores por cuenta, con lo ganado en el período; en YouTube, solo el total, porque sus reglas no permiten calcular lo ganado. Visitas al perfil y alcance son del último día leído — Instagram es la única que los entrega hoy."
       >
-        <AccountCards cards={cards} />
+        <AccountCards
+          cards={tarjetas}
+          nombres={Object.fromEntries(cuentas.map((c) => [c.id, nombreDeCuenta(c)]))}
+        />
         <div className="mt-4">
-          <AccountSeriesChart series={accountSeries} />
+          <AccountSeriesChart series={serieCuentas} />
         </div>
       </Panel>
 
       <Panel
-        title="Qué contenido te trae gente"
-        hint="Cada etiqueta ?s= es una pieza de contenido. Ordena por CTR para ver cuál convierte."
-        action={
-          <Link
-            href="/admin/content"
-            className="text-[0.75rem] text-fg-faint transition-colors hover:text-fg"
-          >
-            Ver por post →
-          </Link>
-        }
+        title="Views ganadas y visitas, día a día"
+        hint={`Cuánto creció lo que se vio en las redes contra cuánta gente llegó a tu página.${
+          cuenta ? ' Esta serie es de todas tus cuentas, no solo de la elegida.' : ''
+        } Las views no incluyen YouTube; las visitas, sí.`}
       >
-        <CampaignTable rows={campaigns} posts={Object.fromEntries(campaignPosts)} />
+        <TrafficChart
+          data={serie}
+          series={[
+            { key: 'views', name: 'Views ganadas' },
+            { key: 'visits', name: 'Visitas' },
+          ]}
+        />
+      </Panel>
+    </div>
+  )
+}
+
+/* ------------------------------------------------------------- en tu página -- */
+
+async function EnTuPagina({
+  filters,
+  params,
+  profiles,
+  cuentas,
+  abierta,
+}: {
+  filters: Filters
+  params: Params
+  profiles: Awaited<ReturnType<typeof getAllProfiles>>
+  cuentas: CuentaRow[]
+  abierta: boolean
+}) {
+  const kpis = await getKpis(filters)
+  const anterior = await getKpis(previousPeriod(filters))
+  const campanas = await getCampaigns(filters, 6)
+  const conEtiqueta = campanas.filter((c) => c.campaign !== '(sin etiqueta)').slice(0, 5)
+  const posts = await getCampaignPosts(filters.ownerId, conEtiqueta.map((c) => c.campaign))
+  const handles = new Map(cuentas.map((c) => [c.id, c]))
+
+  return (
+    <section aria-label="En tu página">
+      <CabezaDeSeccion
+        seccion="pagina"
+        titulo="En tu página"
+        bajada="Quién entró a tu página de links —tu Vitrina— y qué apretó. Lo cuenta Tu Parrilla, sin cookies ni terceros."
+        params={params}
+        abierta={abierta}
+        filtro={
+          <>
+            {profiles.length > 1 ? (
+              <SelectorEnUrl
+                clave="profile"
+                etiqueta="Página"
+                todas="Todas tus páginas"
+                opciones={profiles.map((p) => ({ valor: p.id, texto: `${p.displayName} · /${p.slug}` }))}
+              />
+            ) : null}
+            {/* Prendido, se ve siempre: un filtro activo que no se ve es un filtro que engaña. */}
+            {filters.includeBots ? <BotonBots /> : null}
+          </>
+        }
+      />
+      <div className="grid grid-cols-2 gap-3">
+        <StatTile label="Visitas" value={formatNumber(kpis.visits)} delta={delta(kpis.visits, anterior.visits)} />
+        <StatTile
+          label="Clicks en tus links"
+          value={formatNumber(kpis.clicks)}
+          delta={delta(kpis.clicks, anterior.clicks)}
+        />
+      </div>
+
+      <Panel
+        className="mt-3"
+        title="Qué publicación te trajo gente"
+        hint="Visitas que llegaron por el link de una publicación (su etiqueta ?s=)."
+      >
+        <BarList
+          items={conEtiqueta.map((c) => {
+            const post = posts.get(c.campaign)
+            const deQuien = post ? handles.get(post.accountId) : undefined
+            return {
+              key: c.campaign,
+              label: post?.caption || `?s=${c.campaign}`,
+              value: c.visits,
+              note: deQuien ? nombreDeCuenta(deQuien) : post ? networkLabel(post.network) : undefined,
+              // Una etiqueta de mensaje privado o escrita a mano no es de ninguna publicación.
+              href: post ? numerosHref(`${RUTA}/publicaciones/${post.id}`, params, { de: 'numeros' }) : undefined,
+            }
+          })}
+          color={seriesColor(1)}
+          emptyLabel="Ninguna visita llegó todavía por el link de una publicación."
+        />
       </Panel>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      {abierta ? <PaginaEnDetalle filters={filters} params={params} kpis={kpis} anterior={anterior} /> : null}
+    </section>
+  )
+}
+
+async function PaginaEnDetalle({
+  filters,
+  params,
+  kpis,
+  anterior,
+}: {
+  filters: Filters
+  params: Params
+  kpis: Kpis
+  anterior: Kpis
+}) {
+  const serie = await getTimeSeries(filters)
+  const campanas = await getCampaigns(filters)
+  const posts = await getCampaignPosts(filters.ownerId, campanas.map((c) => c.campaign))
+  const redes = await getNetworks(filters)
+  const links = await getTopLinks(filters, kpis.visits)
+
+  return (
+    <div className="mt-3 grid grid-cols-1 gap-3">
+      {filters.includeBots ? null : (
+        <div className="flex flex-wrap items-center gap-2">
+          <BotonBots />
+        </div>
+      )}
+
+      <div className="grid grid-cols-2 gap-3">
+        <StatTile label="Únicos" value={formatNumber(kpis.uniques)} delta={delta(kpis.uniques, anterior.uniques)} />
+        <StatTile label="CTR" value={formatPercent(kpis.ctr)} delta={delta(kpis.ctr, anterior.ctr)} />
+      </div>
+
+      <Panel title="Visitas y clicks en el tiempo" hint="Comparables en la misma escala">
+        <TrafficChart data={serie} />
+      </Panel>
+
+      <Panel
+        title="Todas las etiquetas"
+        hint="Cada etiqueta ?s= es un link etiquetado: el de una publicación, el de un mensaje privado (dm-…) o uno escrito a mano. Ordena por CTR para ver cuál convierte."
+      >
+        <CampaignTable
+          rows={campanas}
+          posts={Object.fromEntries(posts)}
+          consulta={numerosHref('', params, { de: 'numeros' })}
+        />
+      </Panel>
+
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
         <Panel title="Links más clickeados" hint="CTR calculado sobre las visitas del período">
           <BarList
-            items={topLinks.map((link) => ({
+            items={links.map((link) => ({
               key: link.linkId ?? link.label,
               label: link.label,
               value: link.clicks,
@@ -229,37 +539,41 @@ async function PanelesDeOrigen({ filters, visits }: { filters: Filters; visits: 
         </Panel>
 
         <Panel title="De dónde vienen" hint="Red de origen inferida del referrer y de utm_source">
-          <Donut
-            slices={networks.map((n) => ({
-              key: n.key,
-              label: networkLabel(n.key),
-              value: n.visits,
-            }))}
-          />
+          <Donut slices={redes.map((n) => ({ key: n.key, label: networkLabel(n.key), value: n.visits }))} />
         </Panel>
       </div>
-    </>
+
+      <Suspense
+        fallback={
+          <div role="status" aria-label="Cargando" className="grid grid-cols-1 gap-3">
+            <PanelSkeleton />
+            <PanelSkeleton />
+          </div>
+        }
+      >
+        <Audiencia filters={filters} kpis={kpis} />
+      </Suspense>
+    </div>
   )
 }
 
-/** Quién es y cuándo llega: geografía, equipo, hora, embudo e idioma. */
-async function PanelesDeAudiencia({ filters, kpis }: { filters: Filters; kpis: Kpis }) {
-  const [countries, cities, devices, systems, browsers, languages, heatmap, funnel, recent] =
-    await Promise.all([
-      getCountries(filters),
-      getCities(filters),
-      getDevices(filters),
-      getOperatingSystems(filters),
-      getBrowsers(filters),
-      getLanguages(filters),
-      getHeatmap(filters),
-      getFunnel(filters, kpis),
-      getRecentVisits(filters),
-    ])
+/** Quién es y cuándo llega: geografía, equipo, hora, embudo, idioma y las últimas visitas. */
+async function Audiencia({ filters, kpis }: { filters: Filters; kpis: Kpis }) {
+  const [countries, cities, devices, systems, browsers, languages, heatmap, funnel, recent] = [
+    await getCountries(filters),
+    await getCities(filters),
+    await getDevices(filters),
+    await getOperatingSystems(filters),
+    await getBrowsers(filters),
+    await getLanguages(filters),
+    await getHeatmap(filters),
+    await getFunnel(filters, kpis),
+    await getRecentVisits(filters),
+  ]
 
   return (
     <>
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
         <Panel title="Países">
           <BarList
             items={countries.map((c) => ({
@@ -275,7 +589,7 @@ async function PanelesDeAudiencia({ filters, kpis }: { filters: Filters; kpis: K
         </Panel>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
         <Panel title="Dispositivo">
           <BarList
             items={devices.map((d) => ({
@@ -297,7 +611,7 @@ async function PanelesDeAudiencia({ filters, kpis }: { filters: Filters; kpis: K
         <Heatmap cells={heatmap} />
       </Panel>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
         <Panel title="Embudo" hint="De llegar a la página a hacer click">
           <Funnel data={funnel} />
         </Panel>
@@ -342,9 +656,7 @@ async function PanelesDeAudiencia({ filters, kpis }: { filters: Filters; kpis: K
                     bot
                   </span>
                 ) : null}
-                <span className="ml-auto font-mono text-[0.7rem] text-fg-faint">
-                  {timeAgo(visit.createdAt)}
-                </span>
+                <span className="ml-auto font-mono text-[0.7rem] text-fg-faint">{timeAgo(visit.createdAt)}</span>
               </li>
             ))}
           </ul>

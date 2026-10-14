@@ -352,8 +352,12 @@ en el segundo exacto de la hora elegida.
 
 ### El editor de un post (`/admin/schedule/<id>`)
 
+Además de desde el calendario y la lista, se llega desde la pieza de una publicación en
+[Los Números](los-numeros.md), con su enlace «Editar atributos».
+
 Arriba, el título «Editar post» y el enlace «Volver», que regresa a la vista desde la que se
-entró (la semana del calendario o la lista). Debajo, según el caso:
+entró: la semana del calendario, la lista o, si se entró con «Editar atributos», esa pieza de
+Los Números. Debajo, según el caso:
 
 - «Hay una publicación en curso. Vuelve en un minuto.», en amarillo, si algún destino está
   «Publicando…». Mientras tanto todo el formulario queda bloqueado, también «Eliminar».
@@ -384,11 +388,18 @@ El formulario, en orden:
 6. **«Respuesta automática por palabra clave»**, igual que al programar; viene abierta y
    llena si el post ya tenía una.
 7. **«Atributos (JSON del editor de contenido)»**, un cuadro de texto con el placeholder
-   `{"hook": "pregunta-polemica", "tema": "negocios"}`. Es para el agente que analiza las
-   publicaciones por la API: el panel no los muestra en otra parte. Hasta 20 claves con
-   valores simples.
+   `{"hook": "pregunta-polemica", "tema": "negocios"}`. Son anotaciones libres sobre el post
+   —el hook, el tema, la serie—, hasta 20 claves con valores simples (texto, número, o `true` /
+   `false`). Los lee el agente que analiza las publicaciones por la API, y el panel los muestra
+   en [Los Números](los-numeros.md): en la pieza de cada publicación y en «Comparar por
+   atributo». Una sola clave cambia algo en el panel, **`pieza`**: los posts programados con el
+   mismo valor (por ejemplo `{"pieza": "chimichurri-30s"}`) se muestran juntos, como versiones
+   de una misma pieza. Sirve para juntar dos hooks del mismo video, o el trial reel y el reel
+   normal en la misma cuenta, que por fuerza son dos posts programados. Se puede agregar o
+   cambiar también en un post que ya salió: no toca lo publicado.
 8. Los errores, en rojo, y los botones **«Guardar»** («Guardando…») y **«Eliminar»**
-   («Eliminando…»). Guardar bien devuelve a la vista de donde se vino; eliminar bien, también.
+   («Eliminando…»). Guardar bien devuelve a la vista de donde se vino —también a la pieza de
+   Los Números, si se entró desde ahí—; eliminar bien, también.
 
 El editor no es un panel lateral: es una pantalla aparte, y no guarda borradores. Si el post
 no existe o ya se borró, el editor muestra la página «No encontramos esa página».
@@ -817,8 +828,9 @@ quemado, más arriba).
   límite, y un fallo se queda hasta que alguien lo arregla.
 - **Ayer salió algo y el pie no dice miradas.** Las redes todavía no informaron las vistas; el
   número aparece cuando llegan.
-- **No veo mis números / ¿dónde están las visitas?** No están acá: [Los
-  Números](los-numeros.md) y [Los Cortes](los-cortes.md).
+- **No veo mis números / ¿dónde están las visitas?** No están acá: en [Los
+  Números](los-numeros.md), y cada publicación con los suyos en «Tus publicaciones», dentro de
+  esa misma pantalla.
 - **No puedo borrar un post.** Ya salió (o se está publicando) en alguna red: hay que
   borrarlo en la red. Para sacar solo las redes que faltan, desmarcarlas en el editor.
 - **Borré uno sin querer.** No hay deshacer: hay que programarlo de nuevo.
@@ -830,6 +842,12 @@ quemado, más arriba).
   más probable es que pese más de unos 4 MB: agregarlo con «Agregar por URL».
 - **¿Dónde pongo la portada?** Al programar no hay campo: se pone después en el editor,
   «Portada (solo para video)», con la dirección de una imagen JPG o PNG.
+- **¿Dónde anoto el hook o el tema de un post?** Al programar no hay campo (tampoco en el
+  CSV): se anota después en el editor, «Atributos (JSON del editor de contenido)», o por [la
+  API](../api-llm.md). Se comparan en Los Números, «Comparar por atributo».
+- **Quiero que dos posts se vean como versiones del mismo video.** En el editor de cada uno,
+  ponerles en «Atributos» la misma clave `pieza`, por ejemplo `{"pieza": "chimichurri-30s"}`.
+  Aparecen juntos en la pieza de cualquiera de los dos, en [Los Números](los-numeros.md).
 - **¿Dónde adjunto el PDF de la respuesta automática?** En el panel no se puede; solo por
   [la API](../api-llm.md) o en la columna `regla` del CSV.
 - **El CSV me dice que la hora debe estar en el futuro y copié el ejemplo.** Las fechas
@@ -878,8 +896,8 @@ quemado, más arriba).
 - No duplica un post ni arrastra tarjetas en el calendario, ni programa en un día que ya pasó.
 - No publica video en X.
 - No conecta cuentas: eso es [Los Fierros](los-fierros.md). No muestra cómo le fue a lo
-  publicado: eso es [Los Cortes](los-cortes.md) (cada publicación, lo que hizo en la red y lo
-  que trajo) y [Los Números](los-numeros.md) (visitas, clics y de dónde vienen). No responde
+  publicado: eso es [Los Números](los-numeros.md) (cómo te fue en las redes y en tu página; cada
+  publicación, en «Tus publicaciones», un clic adentro). No responde
   comentarios: eso es [La Mesa](la-mesa.md) (lo que te responden y tus respuestas). No cambia
   la zona horaria: eso es [Tu Cuenta](tu-cuenta.md).
 
@@ -919,6 +937,9 @@ Lo que describe esta página sale de:
   - `src/app/admin/(dash)/page.tsx`
   - `src/app/admin/(dash)/nav.tsx`
   - `src/app/admin/(dash)/accounts/cuentas.tsx`
+  - `src/app/admin/(dash)/analytics/publicaciones/[id]/page.tsx` («Editar atributos», que
+    abre el editor desde una pieza de Los Números)
+  - `src/lib/piezas.ts` (la clave `pieza` de los atributos, que el panel lee)
   - `src/app/admin/(dash)/error.tsx`
   - `src/app/not-found.tsx`
   - `src/lib/auth.ts`

@@ -22,10 +22,6 @@ Cómo se usa:
 
 ## Bugs
 
-- **Los Cortes: el link copiado pierde la atribución** (2026-10-13). El botón de copiar
-  entrega `tu-parrilla.cl/?s=<etiqueta>`, y esa raíz es la portada del producto, que no
-  anota visitas: todo post con ese link suma cero. Debería copiar la página pública del dueño,
-  como ya hace el editor de perfil. Detalle en `docs/auditoria-wiki-ui-2026-10-13.md`, §1.1.
 - **La app del teléfono dice «Contraseña incorrecta.» para cualquier error**, también cuando
   el servidor falla (2026-10-13). `mobile/src/lib/session.ts:34`; ver la auditoría, §1.2.
 - **Los Fierros: falsa alarma en X** (2026-10-13). La tarjeta dice «vence hoy» al conectar y
@@ -48,6 +44,11 @@ Cómo se usa:
   que eran más consultas a la vez que conexiones en el pool (`max: 5` en `src/db/index.ts`),
   contra el pooler de Supabase en modo transacción. La causa no está explicada: cualquier
   otro `Promise.all` con más de cinco consultas podría colgarse igual.
+- **En el teléfono, la pestaña activa queda cortada** (2026-10-13). La barra de pestañas del
+  panel (`src/app/admin/(dash)/nav.tsx`) se desliza de lado, y a 390 px «Los Números» queda
+  medio fuera de la pantalla aunque sea la pestaña en la que uno está. El arreglo es llevar
+  la activa a la vista al cargar (`scrollIntoView`), o achicar las pestañas en pantallas
+  angostas.
 - **La Parrilla abierta pide decenas de páginas `/admin/schedule/<id>` cada pocos
   segundos** (2026-10-04). En los logs de Vercel, unas 60 peticiones por tanda, una por cada
   corte del calendario: parece el prefetch de los `Link` combinado con un refresco

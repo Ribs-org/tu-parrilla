@@ -28,6 +28,9 @@ export type { CuentaRow, PostKpis, PostRow }
 export { postKpisFrom }
 
 export type CampaignPost = {
+  /** El id de la publicación, para abrir su pieza. */
+  id: string
+  accountId: string
   network: string
   caption: string | null
   thumbnailUrl: string | null
@@ -66,8 +69,9 @@ function publishedLabel(date: Date, zone: string): string {
 export async function getPostRows(
   f: Filters,
   includeArchived = false,
-  opts: { publishedFrom?: Date; publishedTo?: Date; limit?: number } = {},
+  opts: { publishedFrom?: Date; publishedTo?: Date; limit?: number; accountId?: string; ids?: string[] } = {},
 ): Promise<PostRow[]> {
+  if (opts.ids?.length === 0) return []
   const db = getDb()
   const from = localDay(f.from, f.zone)
   const to = localDay(f.to, f.zone)
@@ -76,6 +80,11 @@ export async function getPostRows(
   if (!includeArchived) postConds.push(isNull(socialPosts.archivedAt))
   if (opts.publishedFrom) postConds.push(gte(socialPosts.publishedAt, opts.publishedFrom))
   if (opts.publishedTo) postConds.push(lte(socialPosts.publishedAt, opts.publishedTo))
+  // En la consulta y no después: filtrar tras el tope le quitaba sus publicaciones a una
+  // cuenta poco activa al lado de otra que publica mucho.
+  if (opts.accountId) postConds.push(eq(socialPosts.accountId, opts.accountId))
+  // Las versiones de una pieza: unas pocas publicaciones con nombre y apellido.
+  if (opts.ids) postConds.push(inArray(socialPosts.id, opts.ids))
 
   const posts = await db
     .select()
@@ -180,6 +189,7 @@ export async function getPostRows(
     return {
       id: post.id,
       network: post.network,
+      accountId: post.accountId,
       externalId: post.externalId,
       permalink: post.permalink,
       caption: post.caption,
@@ -345,6 +355,8 @@ export async function getCampaignPosts(
 
   const rows = await getDb()
     .select({
+      id: socialPosts.id,
+      accountId: socialPosts.accountId,
       campaign: socialPosts.campaign,
       network: socialPosts.network,
       caption: socialPosts.caption,

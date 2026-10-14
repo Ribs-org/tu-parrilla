@@ -132,8 +132,8 @@ Abre el sitio: ahora se ve un perfil de ejemplo.
 Entra en `/ingresar` con tu correo (el de `ADMIN_EMAIL`): te llega un código de seis
 dígitos que vale diez minutos.
 
-El panel tiene cuatro pestañas —La Parrilla (Calendario), Los Cortes (Contenido), La Mesa
-(Comentarios) y Los Números (Analítica)— y el engranaje de Ajustes,
+El panel tiene tres pestañas —La Parrilla (Calendario), La Mesa (Comentarios) y Los Números
+(Analítica)— y el engranaje de Ajustes,
 con Los Fierros (Cuentas), La Vitrina (Perfiles), Los Maestros (Usuarios, solo el admin) y
 Tu Cuenta. Las rutas no cambiaron. Cada pantalla lleva su subtítulo en llano por si el
 nombre no dice nada.
@@ -144,7 +144,7 @@ y tu zona horaria. La zona es de cada usuario, no del sitio: naces con la de
 tuya ahora mismo, calculada en el servidor. El correo con el que entras no se cambia desde
 ahí. Tu zona manda en el panel —el calendario, la lista, el editor de un corte y las
 ventanas de los links— y en lo que guardas desde ahí: si escribes «19:00», son las
-19:00 tuyas. También manda por dentro: Los Números y Los Cortes agrupan los días en tu
+19:00 tuyas. También manda por dentro: Los Números y su lista de publicaciones agrupan los días en tu
 zona.
 
 En Tu Cuenta también generas las **llaves para tus agentes**: una llave deja que un
@@ -181,6 +181,25 @@ trajo sus métricas, porque un cero inventado diría «nadie miró» cuando lo c
 «todavía no se sabe». Lo que no pide una acción está un clic más adentro: el tráfico, los
 links y qué contenido te trae gente viven en **Los Números**, y tus páginas públicas en
 **La Vitrina**.
+
+**Los Números es un solo tablero** con dos mitades que dicen qué miden. **En las redes**: lo
+que hicieron tus publicaciones donde las publicaste —views y seguidores ganados en el
+período, y lo que más creció—, filtrable por cuenta. **En tu página**: quién entró a tu
+página de links y qué apretó —visitas y clicks, y qué publicación te trajo gente—,
+filtrable por página. El período vale para las dos. Cada mitad muestra dos números y una
+lista; el resto (interacciones, arrastre, tus cuentas, la audiencia, los links, de dónde
+vienen…) espera detrás de su «⋯ Más», que no se consulta mientras está cerrado. La lista de
+todas las publicaciones, que antes era la pestaña Los Cortes, está un clic adentro («Ver todas
+las publicaciones →», `/admin/analytics/publicaciones`; `/admin/content` redirige ahí), con
+filtro por cuenta, dos columnas a la vista y las demás con «⋯ Más». Cada publicación abre su
+**pieza** (`/admin/analytics/publicaciones/<id>`): cada lugar donde salió —cada cuenta, cada
+red, si fue trial reel— con sus números lado a lado. Las versiones son los destinos del post
+programado del que salió y, si sus atributos traen `pieza`, los de todos los posts
+programados con el mismo valor: dos hooks del mismo video, o el trial reel y el reel normal
+en una cuenta, son por fuerza dos posts. **Comparar por atributo** (`/admin/analytics/comparar`)
+muestra, para cada valor de un atributo —el hook, el tema, la serie—, cuántas publicaciones
+lo llevan y sus medianas de views ganadas, visitas y arrastre. El porqué, en
+`docs/superpowers/specs/2026-10-13-numeros-tablero-design.md`.
 
 **Componer** pasa en un panel que se abre desde la derecha con «+ Nueva publicación», sin
 perder de vista el calendario; ahí mismo están «Subir CSV» y «Borradores». Lo que escribes
@@ -292,7 +311,7 @@ cruzarlas con el tráfico que cada uno te trajo. La columna que importa es **arr
 qué porcentaje de quienes vieron el post llegó efectivamente a tu página.
 YouTube es la excepción: ver abajo.
 
-Sin configurar nada, **Los Cortes** (Contenido) aparece vacía y el resto del sitio funciona
+Sin configurar nada, la mitad «En las redes» de **Los Números** aparece vacía y el resto del sitio funciona
 igual. Cada red se activa por separado.
 
 ### YouTube
@@ -316,12 +335,12 @@ crea una segunda fila de YouTube, sin conectar, que no se sincroniza.
 
 **Lo que YouTube no deja hacer con sus datos.** Las políticas de los Servicios de API de
 YouTube (§III.E.4) prohíben calcular métricas nuevas con sus datos y guardarlos más de 30
-días sin refrescarlos, y la auditoría de cuota lo revisa. Por eso, en Los Cortes, Los
-Números, la API de métricas y la app del teléfono, las filas de YouTube traen sus
+días sin refrescarlos, y la auditoría de cuota lo revisa. Por eso, en Los Números (el
+tablero y la lista de publicaciones), la API de métricas y la app del teléfono, las filas de YouTube traen sus
 contadores tal como los da la API, **sin lo ganado, sin arrastre y sin entrar en los
 totales**; sus suscriptores van sin «ganados» y fuera de la suma de seguidores. Las
 visitas, los clicks y el CTR los mide Tu Parrilla y la tabla los marca como propios
-(«Medido por Tu Parrilla»), que es lo que la política pide para un dato propio al lado de
+(«En tu página · lo mide Tu Parrilla»), que es lo que la política pide para un dato propio al lado de
 los de YouTube. Y al final de la sincronización diaria se borra lo que pasó el plazo: las
 lecturas diarias de más de 30 días, los comentarios guardados hace más de 30 días, y el
 título y la miniatura de los videos que llevan 30 días sin llegar. La regla vive en
@@ -608,7 +627,7 @@ y el mensaje por DM, en Instagram y Facebook) llega en la próxima entrega, y va
 de que Meta apruebe `pages_messaging` con acceso avanzado y de `COMENTARIOS_DM=1`. TikTok
 todavía no tiene cola de comentarios, así que una regla en un post que solo va a TikTok no
 hace nada. Si el enlace es de tu sitio, se le agrega `?s=dm-<palabra>` y aparece como fila
-propia en **Los Números** (Analítica) → «Qué contenido te trae gente». Para eso el servidor necesita saber
+propia en **Los Números** (Analítica) → «En tu página» → «⋯ Más» → «Todas las etiquetas». Para eso el servidor necesita saber
 cuál es tu dominio: `SITE_URL=https://www.tu-dominio.cl` (si falta, usa el dominio de
 producción que Vercel inyecta).
 
@@ -726,7 +745,8 @@ tudominio.com/?s=reel-agosto
 tudominio.com/?s=tiktok-rutina
 ```
 
-Cada etiqueta aparece por separado en **Los Números** (Analítica) → Qué contenido te trae gente, con sus
+Cada etiqueta aparece por separado en **Los Números** (Analítica): las cinco que más traen en
+«Qué publicación te trajo gente», y todas en el «⋯ Más» de «En tu página», con sus
 visitas, únicos, clicks y CTR. Es el mecanismo principal de atribución porque Instagram y
 TikTok abren los links en su navegador interno y borran el referrer.
 
@@ -951,7 +971,9 @@ Cada item acepta además `atributos`: un objeto plano de valores simples
 (`{"hook": "pregunta-polemica", "tema": "negocios", "serie": "mut"}`, máximo 20
 claves) que el sistema guarda sin interpretar y devuelve junto a las métricas. Es la
 taxonomía de quien crea el contenido: sirve para correlacionar decisiones creativas
-con resultados. El CSV no lo lleva; el editor de un post programado lo muestra y
+con resultados, y el panel la usa en «Comparar por atributo». Una sola clave tiene
+significado para el panel: `pieza`, que junta como versiones de una misma pieza a los
+posts que comparten su valor. El CSV no lo lleva; el editor de un post programado lo muestra y
 permite corregirlo.
 
 Y `opciones`, obligatorio cuando algún destino de la fila es una cuenta de TikTok (el
@@ -1027,6 +1049,9 @@ src/
     dominios.ts            si un host es el del producto, y adónde va el panel si no lo es
     tracking.ts            contexto de la visita desde headers
     analytics.ts           consultas del dashboard
+    tablero.ts             las reglas de Los Números sin base: cuenta elegida, «⋯ Más» abiertos, la URL
+    pieza.ts               qué junta las versiones de una pieza y las medianas por atributo (sin base)
+    piezas.ts              la pieza de una publicación: sus destinos programados unidos a lo publicado
     auth.ts                sesión del panel
     llaves.ts              las llaves de API de cada usuario, y a nombre de quién entra cada petición
     llaves-api.ts          cómo se ve, se guarda y se lee una llave (sin base: lo prueban los tests)

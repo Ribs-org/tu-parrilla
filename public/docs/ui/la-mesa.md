@@ -8,7 +8,7 @@ Los comentarios llegan solos: cada cinco minutos Tu Parrilla revisa las publicac
 
 ## Cómo se llega
 
-1. En la barra de arriba del panel, aprieta la pestaña «La Mesa» (entre «Los Cortes» y «Los Números»). En un teléfono la fila de pestañas se desliza hacia el lado si no cabe entera.
+1. En la barra de arriba del panel, aprieta la pestaña «La Mesa» (entre «La Parrilla» y «Los Números»). En un teléfono la fila de pestañas se desliza hacia el lado si no cabe entera.
 
 También se entra directo a `https://tu-parrilla.cl/admin/comments`. Sin sesión abierta, primero hay que entrar (ver [Ingresar](ingresar.md)).
 

@@ -38,7 +38,7 @@ describe('isoInZone', () => {
 
 describe('buildMetricPost', () => {
   const row: PostRow = {
-    id: 'uuid-1', network: 'instagram', externalId: 'ext-9',
+    id: 'uuid-1', network: 'instagram', accountId: 'acc-1', externalId: 'ext-9',
     permalink: 'https://instagram.com/p/x', caption: 'Hola', thumbnailUrl: null,
     mediaType: 'video', publishedLabel: '3 sep', publishedAt: new Date('2026-01-15T14:15:00Z'),
     campaign: 'reel-42', archived: false,

@@ -18,11 +18,15 @@ function followersChangeLabel(change: number | null): string {
   return `+${formatNumber(change)} en el período`
 }
 
-export function AccountCards({ cards }: { cards: AccountCard[] }) {
+/**
+ * Una tarjeta por cuenta. `nombres` trae «Red · handle» por id de cuenta; una tarjeta
+ * agrupada por red (o de una cuenta que ya no está) cae al nombre de la red.
+ */
+export function AccountCards({ cards, nombres = {} }: { cards: AccountCard[]; nombres?: Record<string, string> }) {
   if (cards.length === 0) {
     return (
       <Empty>
-        Todavía no hay lecturas de cuenta. La primera llega con la sincronización de esta noche.
+        Todavía no hay lecturas de cuenta. La primera llega con la próxima sincronización diaria.
       </Empty>
     )
   }
@@ -30,9 +34,9 @@ export function AccountCards({ cards }: { cards: AccountCard[] }) {
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
       {cards.map((card) => (
-        <div key={card.network} className="rounded-2xl bg-white/[0.04] p-4">
+        <div key={card.accountId ?? card.network} className="rounded-2xl bg-white/[0.04] p-4">
           <p className="font-mono text-[0.65rem] uppercase tracking-[0.14em] text-fg-faint">
-            {networkLabel(card.network)}
+            {(card.accountId && nombres[card.accountId]) || networkLabel(card.network)}
           </p>
           <p className="mt-1 font-mono text-2xl tabular-nums">{num(card.followers)}</p>
           <p className="text-[0.75rem] text-fg-muted">
