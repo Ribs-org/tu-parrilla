@@ -15,12 +15,13 @@ export type Pantalla = {
 
 // La Parrilla va primera porque es la entrada: `/admin` lleva a ella. Hasta el 2026-10-13
 // la entrada era El Fuego, con su propia pestaña; se fundió en La Parrilla (ver
-// `docs/superpowers/specs/2026-10-13-parrilla-entrada-y-borradores-design.md`).
+// `docs/superpowers/specs/2026-10-13-parrilla-entrada-y-borradores-design.md`). Ese mismo
+// día Los Cortes dejó de ser pestaña: sus publicaciones viven dentro de Los Números
+// (`docs/superpowers/specs/2026-10-13-numeros-tablero-design.md`).
 export const PANTALLAS: readonly Pantalla[] = [
   { ruta: '/admin/schedule', nombre: 'La Parrilla', subtitulo: 'lo que viene y cómo salió lo que ya se fue', grupo: 'pestana' },
-  { ruta: '/admin/content', nombre: 'Los Cortes', subtitulo: 'cada publicación, lo que hizo en la red y lo que trajo', grupo: 'pestana' },
   { ruta: '/admin/comments', nombre: 'La Mesa', subtitulo: 'lo que te responden y tus respuestas', grupo: 'pestana' },
-  { ruta: '/admin/analytics', nombre: 'Los Números', subtitulo: 'visitas, clics y de dónde vienen', grupo: 'pestana' },
+  { ruta: '/admin/analytics', nombre: 'Los Números', subtitulo: 'cómo te fue en las redes y en tu página', grupo: 'pestana' },
   { ruta: '/admin/accounts', nombre: 'Los Fierros', subtitulo: 'tus redes conectadas', grupo: 'ajustes' },
   { ruta: '/admin/profiles', nombre: 'La Vitrina', subtitulo: 'tus páginas públicas', grupo: 'ajustes' },
   { ruta: '/admin/usuarios', nombre: 'Los Maestros', subtitulo: 'quién puede entrar', grupo: 'ajustes', soloAdmin: true },
