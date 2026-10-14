@@ -161,8 +161,8 @@ export function idsDesdeTexto(texto: string): string[] {
 
 /**
  * Solo PUBLISH_COMPLETE, SEND_TO_USER_INBOX y FAILED son veredictos; lo demás sigue
- * esperando. Un COMPLETE sin id no se queda esperando: los posts privados (los únicos
- * posibles hasta la auditoría) pueden no recibir `publicaly_available_post_id` nunca,
+ * esperando. Un COMPLETE sin id no se queda esperando: los posts privados («Solo yo»)
+ * pueden no recibir `publicaly_available_post_id` nunca,
  * y 24 h de «publicando» para terminar en fallo sería mentir sobre un post que salió.
  * `ids` son los leídos del texto crudo (ver `idsDesdeTexto`) y mandan sobre `data`.
  */

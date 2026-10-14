@@ -147,10 +147,6 @@ hacer nada con ellos.
   pasar por un post.
 - **No manda nada de inmediato.** Todo lo que entra por `POST /api/schedule/batch` espera a su
   `fecha`; no existe una forma de publicar ahora mismo por esta vía.
-- **En TikTok, la publicación directa sale solo como «Solo yo»** hasta que TikTok audite
-  Direct Post (la app ya está aprobada; esa auditoría es aparte). Cualquier otra
-  `privacidad` se acepta al programar y falla al publicar. El borrador a la bandeja
-  (`modo: borrador`) no tiene esa limitación.
 - **Solo tres redes leen comentarios: Instagram, Facebook y YouTube.** Una `regla` en un post que
   va únicamente a TikTok, Threads o X **no hace nada** —no falla, no avisa: nunca se dispara,
   porque nadie lee esos comentarios—. La regla vale la pena solo si el post sale a alguna de esas

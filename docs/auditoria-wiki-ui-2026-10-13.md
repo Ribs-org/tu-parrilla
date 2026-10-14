@@ -88,9 +88,6 @@ está mal y dónde está.
   solo se sabe que el envío salió, no que llegó.
 - **La Mesa: «Los nuevos llegan cada cinco minutos.»** (`comments/cola.tsx:142`): YouTube se
   revisa cada media hora.
-- **La Parrilla: el aviso de TikTok** dice «Mientras TikTok no apruebe la app» y la auditoría
-  de Direct Post ya está aprobada (ver la entrada de TikTok en `docs/pendientes.md`).
-  `schedule/tiktok-opciones.tsx`.
 - **La Parrilla: el ejemplo del CSV** tiene fechas de septiembre (copiado tal cual, todas las
   filas fallan por hora) y la ayuda no nombra las columnas sexta y séptima, que hacen falta
   en el encabezado para usar la octava. `schedule/batch-upload.tsx:8-11, 23-31`.

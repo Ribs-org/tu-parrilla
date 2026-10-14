@@ -494,14 +494,15 @@ En *URL properties* verifica tu dominio raíz por registro TXT en el DNS: cubre 
 el subdominio de R2 (`R2_PUBLIC_BASE`), de donde TikTok descarga los archivos. No uses el
 archivo de firma dentro del bucket: el barrido de huérfanos lo borraría.
 
-Mientras TikTok no apruebe la app, solo el **sandbox** deja autorizar cuentas: créalo en
-la pestaña Sandbox, agrega tu usuario como *target user*, y usa **sus** credenciales.
-(La app se aprobó el 2026-09-28: producción usa desde entonces las llaves de la app real
-y cualquier cuenta puede autorizar. El sandbox queda solo para grabar una revisión futura.)
-Lo que la aprobación **no** incluye es la auditoría de Direct Post: hasta que se pida y
-pase, la publicación directa sale solo como «Solo yo» en cuentas privadas. Y ojo al cambiar
-de app: TikTok da un id distinto por app, así que cada cuenta vuelve como tarjeta nueva y
-la vieja se fusiona desde Los Fierros («Es la misma cuenta →»).
+Una app nueva pasa por dos aprobaciones. Mientras TikTok no apruebe la app, solo el
+**sandbox** deja autorizar cuentas: créalo en la pestaña Sandbox, agrega tu usuario como
+*target user*, y usa **sus** credenciales. Y esa aprobación **no** incluye la auditoría de
+Direct Post: hasta que se pida y pase, la publicación directa sale solo como «Solo yo» en
+cuentas privadas, para un cupo de cinco usuarios al día. La app de este despliegue pasó las
+dos —la app el 2026-09-28, Direct Post con aviso del 2026-10-06—: cualquier cuenta autoriza
+y publica con la privacidad que elija, y el sandbox queda solo para grabar una revisión
+futura. Y ojo al cambiar de app: TikTok da un id distinto por app, así que cada cuenta
+vuelve como tarjeta nueva y la vieja se fusiona desde Los Fierros («Es la misma cuenta →»).
 
 
 ```
@@ -511,11 +512,13 @@ TIKTOK_CLIENT_SECRET=
 
 Al pasar de solo lectura a publicar, las cuentas ya conectadas deben **reconectarse una
 vez** desde Los Fierros para otorgar los scopes nuevos; el compositor lo pide con «Reconecta
-TikTok para autorizar la publicación». Hasta la auditoría de Content Posting, TikTok solo
-publica en **cuentas privadas** y como «Solo yo»: con la cuenta pública rechaza el init con
-`unaudited_client_can_only_post_to_private_accounts`, aunque la publicación pida «Solo yo».
-Ese rechazo no se reintenta —falla al primer intento, con la frase que pide poner la cuenta
-en privada—, porque reintentar da lo mismo hasta que el dueño cambie su cuenta.
+TikTok para autorizar la publicación». A una app sin la auditoría de Direct Post, TikTok le
+publica solo en **cuentas privadas** y como «Solo yo»: con la cuenta pública rechaza el init
+con `unaudited_client_can_only_post_to_private_accounts`, aunque la publicación pida «Solo
+yo». Ese rechazo no se reintenta —falla al primer intento, con la frase que pide poner la
+cuenta en privada—, porque reintentar da lo mismo hasta que el dueño cambie su cuenta. Con
+la auditoría aprobada, como la de este despliegue, ese rechazo no debería llegar, y el panel
+ya no avisa nada de esto ni al conectar ni al elegir la privacidad.
 
 ### Responder comentarios
 

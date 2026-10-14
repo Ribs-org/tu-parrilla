@@ -52,13 +52,11 @@ Cómo se usa:
 
 Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataforma.
 
-- **TikTok — auditoría de Direct Post aprobada** (avisado el 2026-10-06). Ya no hay cupo de 5
-  usuarios por día y las cuentas públicas pueden publicar con la privacidad que elijan. En
-  código queda quitar los avisos de «mientras TikTok no apruebe»: lo que dice «Después de
-  aprobar» en `docs/tiktok-revision-guion.md` (el aviso de `AVISO_ANTES_DE_CONECTAR` en
-  `src/lib/networks.ts` y su test, la nota de `schedule/tiktok-opciones.tsx`, las frases del
-  README y «Lo que el sistema NO hace» en `public/docs/api-editor.md`, que los agentes leen).
-  **[dueño]** La cuenta `vicente.pareja` puede volver a ser pública.
+- **[dueño] TikTok: la cuenta `vicente.pareja` puede volver a ser pública** (2026-10-13). Se
+  puso en privada para grabar la revisión de Direct Post, que ya está aprobada, y los avisos
+  de «solo en privado» ya se quitaron del panel. Opcional, en el portal de TikTok: dejar en
+  *Redirect URI* solo `https://tu-parrilla.cl/api/social/tiktok/callback` (las de
+  `www.vicente-pareja.cl` y `portafolio-page-inky.vercel.app` ya no se usan para conectar).
 - **[dueño] Meta (Instagram y Facebook) — salir de modo desarrollo.** Guion y textos:
   `docs/meta-revision-guion.md`; el paso a paso de trabajo vive en la carpeta
   «Meta - Verification» del escritorio de Vicente. Hecho el 2026-10-04: la app

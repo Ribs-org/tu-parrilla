@@ -87,9 +87,7 @@ fuego»). Adentro, en este orden:
 - Apagado (publicación directa), aparece:
   - **«Quién puede verlo»**, una lista que parte en «Elige quién puede verlo» y ofrece
     «Todos», «Amigos mutuos», «Seguidores» y «Solo yo» (solo las que la cuenta permite). Es
-    obligatoria: sin elegir, el navegador no deja programar. Si se elige algo distinto de
-    «Solo yo», aparece: «Mientras TikTok no apruebe la app, solo «Solo yo» llega a
-    publicarse, y solo desde una cuenta de TikTok privada.»
+    obligatoria: sin elegir, el navegador no deja programar.
   - **«Permitir»**, con las casillas «Comentarios», «Dúos» y «Pegar (Stitch)», todas
     desmarcadas al partir. «Dúos» y «Pegar (Stitch)» no aparecen cuando todos los archivos
     son fotos. Una casilla gris es algo que la cuenta tiene bloqueado en TikTok.
@@ -292,9 +290,9 @@ de cero.
 4. Elegir el camino:
    - Para terminarlo desde el teléfono: encender «Enviar como borrador a mi bandeja de
      TikTok». Llega a la app como borrador.
-   - Para publicarlo directo: en «Quién puede verlo», elegir. Hoy solo «Solo yo», con la
-     cuenta de TikTok puesta en privada, llega a publicarse. Marcar en «Permitir» lo que se
-     quiera dejar abierto.
+   - Para publicarlo directo: en «Quién puede verlo», elegir quién lo ve; sale con esa
+     privacidad, desde una cuenta pública o privada. Marcar en «Permitir» lo que se quiera
+     dejar abierto.
 5. Si el video promociona una marca, encender «Este contenido promociona una marca» y elegir
    «Mi marca» o «Contenido patrocinado» (este último no admite «Solo yo»).
 6. Elegir «Fecha y hora» (o «Ahora») y apretar «Programar».
@@ -453,7 +451,6 @@ final de esta sección).
 | «TikTok necesita que elijas la privacidad.» | Falta «Quién puede verlo» | Elegirla en el bloque de esa cuenta |
 | «Un contenido patrocinado no puede ser privado. Vuelve a elegir quién puede verlo.» o «Un contenido patrocinado no puede ser privado.» | «Contenido patrocinado» con «Solo yo», o sin privacidad elegida | Elegir otra privacidad, o «Mi marca» |
 | «Las opciones de la red no se entendieron.» | El formulario llegó raro | Recargar y volver a llenarlo |
-| «Mientras TikTok no apruebe la app, solo «Solo yo» llega a publicarse, y solo desde una cuenta de TikTok privada.» | Aviso: otra privacidad se acepta ahora pero falla al publicar | Elegir «Solo yo» con la cuenta en privada, o mandarlo como borrador |
 | «El archivo cumple lo que pide TikTok.» / «Los archivos cumplen lo que pide TikTok.» | La revisión no encontró problemas | Nada |
 | «TikTok va a rechazar esto:» seguido de «<archivo>: pesa <N> MB y TikTok acepta hasta 20 MB por foto.» | Foto muy pesada | Comprimirla |
 | «<archivo>: mide <ancho>×<alto> y TikTok no pasa de 1080p en fotos: redúcela a 1080 px de lado corto.» | Foto de más de 1080 px en su lado corto | Achicarla |
@@ -557,7 +554,7 @@ arreglar un post quemado, más arriba).
 | «TikTok rechazó la publicación.» | TikTok dijo que no | «Subir ahora» o «Reprogramar»; si vuelve a fallar, revisar el archivo |
 | «TikTok no acepta el archivo: revisa formato, tamaño o duración.» | El archivo no pasó los límites de TikTok | Cambiar el archivo |
 | «TikTok ya no permite esa privacidad en tu cuenta; edita la publicación.» | La privacidad elegida ya no está permitida | El editor no cambia la privacidad: si nada salió, eliminar y programar de nuevo; si no, desmarcar TikTok y programarlo aparte |
-| «TikTok solo publica en cuentas privadas hasta que apruebe la app: pon tu cuenta de TikTok en privada y reprograma.» | La cuenta de TikTok es pública | Ponerla en privada en TikTok y «Reprogramar» |
+| «TikTok solo publica en cuentas privadas hasta que apruebe la app: pon tu cuenta de TikTok en privada y reprograma.» | TikTok rechazó publicar desde una cuenta pública, como hace con las apps sin auditoría. La de Tu Parrilla ya está auditada, así que no debería aparecer | Avisar a quien administra el sitio y, mientras tanto, ponerla en privada en TikTok y «Reprogramar» |
 | «Tienes 5 borradores pendientes en TikTok; publica alguno antes.» | La bandeja de TikTok está llena | Publicar o borrar borradores en la app y «Reprogramar» |
 | «Reconecta TikTok para autorizar la publicación.» | TikTok quitó el permiso | Reconectar en Los Fierros y «Reprogramar» |
 | «TikTok no reconoce el dominio de tus archivos; verifícalo en el portal.» | Problema de configuración del sitio con TikTok | Avisar a quien administra el sitio |
