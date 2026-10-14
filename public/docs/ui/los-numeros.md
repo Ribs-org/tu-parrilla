@@ -1,6 +1,6 @@
 # Los Números — cómo te fue en las redes y en tu página
 
-`/admin/analytics` — pestaña «Los Números» de la barra de arriba del panel, la tercera y última (en el README y en documentos viejos se llama «Analítica»). Un clic adentro está `/admin/analytics/publicaciones`, «Tus publicaciones»: la lista de cada publicación, que hasta el 2026-10-13 era la pestaña «Los Cortes» (`/admin/content`, que ahora lleva ahí).
+`/admin/analytics` — pestaña «Los Números» de la barra de arriba del panel, la tercera y última (en el README y en documentos viejos se llama «Analítica»). Un clic adentro están `/admin/analytics/publicaciones`, «Tus publicaciones»: la lista de cada publicación, que hasta el 2026-10-13 era la pestaña «Los Cortes» (`/admin/content`, que ahora lleva ahí); `/admin/analytics/publicaciones/<id>`, la pieza de una publicación con sus versiones; y `/admin/analytics/comparar`, «Comparar por atributo».
 
 Un tablero con dos mitades que miden cosas distintas y lo dicen. «En las redes» es lo que
 hicieron las publicaciones de la persona donde se publicaron —views ganadas, seguidores,
@@ -11,7 +11,14 @@ Tu Parrilla, sin cookies. Las une la etiqueta `?s=` de cada publicación: si el 
 etiqueta está pegado en el post, las visitas que llegan por él se le cuentan a ese post. Cada
 mitad muestra dos números y una lista corta; el resto aparece al apretar su «⋯ Más». La lista
 completa, una publicación por fila, con su etiqueta editable y el botón para copiar su link,
-está en «Tus publicaciones».
+está en «Tus publicaciones». Cada publicación abre su **pieza**: cada lugar donde salió (otra
+cuenta, otro hook, el trial reel) con sus números lado a lado. Y «Comparar por atributo» junta
+lo publicado por hook, tema o serie para ver qué funciona.
+
+Dos palabras que no hay que mezclar: la **etiqueta** es el `?s=` del link de cada publicación,
+que dice por cuál llegó la gente a la página; los **atributos** son lo que se le anota a un post
+programado —el hook, el tema, la serie— en su editor de [La Parrilla](la-parrilla.md) o por la
+API.
 
 ## Cómo se llega
 
@@ -31,6 +38,12 @@ está en «Tus publicaciones».
 - De «Tus publicaciones» al tablero: arriba a la izquierda, una flecha hacia la izquierda y
   «Los Números». Vuelve con el período y la cuenta (y con la página y «Bots» que estuvieran
   elegidos en el tablero), y con los «⋯ Más» cerrados.
+- A la pieza de una publicación: el texto de su fila en «Tus publicaciones», una fila de «Lo
+  que más creció», o, cuando la etiqueta es de una publicación, una fila de «Qué publicación te
+  trajo gente» o el texto de una fila de «Todas las etiquetas». Se abre en la misma pestaña, con
+  el mismo período.
+- A «Comparar por atributo»: en el tablero, el enlace «Comparar por atributo →», a la derecha
+  del título «Lo que más creció»; o, en una pieza, uno de los atributos de arriba.
 
 ## Qué se ve
 
@@ -72,11 +85,12 @@ publicaste. Lo cuentan las redes.» A la derecha:
 mostrar «—» (ver «Cómo leer cada número»).
 
 **Panel «Lo que más creció»**, explicación «Las publicaciones que más views ganaron en el
-período, de cualquier fecha.» A la derecha del título, el enlace «Ver todas las publicaciones
-→». Hasta cinco filas, de más a menos views ganadas, cada una con una barra detrás que compara
-con la primera: el texto del post (o su etiqueta, si no tiene texto), en chico la cuenta con
-el patrón «<red> · <nombre de la cuenta>», y a la derecha las views ganadas. Si la red dio el
-enlace del post, la fila lo abre en otra pestaña.
+período, de cualquier fecha.» A la derecha del título, dos enlaces: «Comparar por atributo
+→» y «Ver todas las publicaciones →» (uno encima del otro en el teléfono). Hasta cinco filas,
+de más a menos views ganadas, cada una con una barra detrás que compara con la primera: el
+texto del post (o su etiqueta, si no tiene texto), en chico la cuenta con el patrón «<red> ·
+<nombre de la cuenta>», y a la derecha las views ganadas. Cada fila abre la pieza de esa
+publicación, en la misma pestaña (el enlace a la red está ahí).
 
 **Con «⋯ Más» abierto**, debajo aparece:
 
@@ -133,8 +147,10 @@ rojo. Si no hay con qué comparar, en vez de eso hay un «—».
 una publicación (su etiqueta ?s=).» Hasta cinco filas: las etiquetas que más visitas trajeron
 en el período, sin contar las visitas que llegaron sin etiqueta, cada una con una barra
 detrás. Si la etiqueta es de una publicación sincronizada, se ve el texto del post y, en chico,
-su red; si no lo es, o el post no tiene texto, se ve «?s=<etiqueta>». A la derecha, las
-visitas. Estas filas no son enlaces.
+su cuenta con el patrón «<red> · <nombre de la cuenta>»; si no lo es, o el post no tiene texto,
+se ve «?s=<etiqueta>». A la derecha, las visitas. Las filas de una publicación abren su pieza,
+en la misma pestaña; las de una etiqueta que no es de ninguna publicación (un `dm-…`, una
+escrita a mano) no son enlaces.
 
 **Con «⋯ Más» abierto**, debajo aparece, en este orden:
 
@@ -156,7 +172,8 @@ visitas. Estas filas no son enlaces.
   menor. En cada fila, detrás de la etiqueta, una barra cuyo largo compara sus visitas con las
   de la fila con más. En la columna «Etiqueta»: si la etiqueta es de una publicación
   sincronizada, su miniatura chica y el texto del post (o la etiqueta, si el post no tiene
-  texto); si no, la etiqueta sola, en letra de máquina de escribir. Las visitas que llegaron sin
+  texto), que es un enlace a la pieza de esa publicación, en la misma pestaña; si no, la
+  etiqueta sola, en letra de máquina de escribir, sin enlace. Las visitas que llegaron sin
   etiqueta van juntas en la fila «(sin etiqueta)». Hasta 50 filas, las de más visitas.
 - **Paneles «Links más clickeados» y «De dónde vienen»**, lado a lado en pantalla ancha, uno
   encima del otro en el teléfono.
@@ -258,11 +275,13 @@ entrar, la tabla va ordenada por «Views» de mayor a menor.
 Cada fila, en la columna «Post»:
 
 - La miniatura del post (un cuadro gris si no hay).
-- El texto del post en una línea, cortado si es largo. Si la red dio el enlace, el texto es un
-  link que abre el post en la red en otra pestaña. Si no hay texto: «Sin descripción».
+- El texto del post en una línea, cortado si es largo. Es un enlace que abre la pieza de esa
+  publicación, en la misma pestaña. Si no hay texto: «Sin descripción».
 - Debajo, en chico: la cuenta y la fecha de publicación corta, con el patrón «<red> · <nombre
   de la cuenta> · <fecha>» (por ejemplo «Instagram · @juan · 3 sept»; sin nombre de cuenta,
   solo la red y la fecha), y « · nuevo» al final si la publicación salió dentro del período.
+  Si la red dio el enlace del post, al final va una flechita en diagonal (al pasar el mouse:
+  «Ver en <red>», por ejemplo «Ver en Instagram») que abre el post en la red, en otra pestaña.
 - En esa misma línea, **solo en algunas filas**, el sello «Se pasó» (al pasar el mouse: «El
   doble o más de las vistas ganadas por la mitad de tus posts del período»).
 - Debajo, la etiqueta como un botoncito que dice «?s=<etiqueta>» (al pasar el mouse: «Editar
@@ -280,6 +299,139 @@ número, se ven semitransparentes.
 La tabla muestra 20 filas. Si hay más, al pie hay un botón «Ver las <N> restantes» (o «Ver la
 publicación restante» si falta una sola); expandida, el botón dice «Mostrar menos». Al recargar
 la página vuelve a mostrar 20.
+
+### La pieza (`/admin/analytics/publicaciones/<id>`)
+
+Una publicación y todas sus versiones: cada lugar donde salió, una fila por versión, con sus
+números lado a lado. Una **versión** es cada cuenta a la que salió un post programado en La
+Parrilla (en Instagram, quizá como trial reel); si los atributos del post traen la clave
+`pieza`, también las de todos los posts programados con el mismo valor. Así se juntan dos
+hooks del mismo video, o el trial reel y el reel normal en la misma cuenta, que por fuerza son
+dos posts programados. Una publicación subida a mano en la red, fuera de La Parrilla, es una
+pieza de una sola versión, sin atributos.
+
+Se llega desde el texto de una fila de «Tus publicaciones», desde una fila de «Lo que más
+creció», o, si la etiqueta es de una publicación, desde una de «Qué publicación te trajo gente»
+o de «Todas las etiquetas». No tiene pestaña propia ni subtítulo: la barra sigue marcando «Los
+Números».
+
+**Encabezado.** Arriba a la izquierda, una flecha que vuelve a donde se entró: «Los Números»
+si se llegó desde el tablero («Lo que más creció», «Qué publicación te trajo gente» o «Todas
+las etiquetas»), que vuelve al tablero como estaba, con los mismos «⋯ Más» abiertos; o «Tus
+publicaciones» si se llegó desde la lista. Debajo, en chico, «Pieza»; el título es el texto de la
+publicación que se abrió (cortado a dos líneas), o «?s=<etiqueta>» si no tiene texto. Debajo,
+«Cada lugar donde salió, con sus números lado a lado. Las views las cuenta cada red; las
+visitas, Tu Parrilla, cuando alguien entra por el link de esa versión.»
+
+**Los atributos de arriba.** Solo si hay algo que mostrar, una fila de cápsulas con el patrón
+«<atributo>: <valor>» (por ejemplo «tema: negocios»):
+
+- «pieza: <valor>», si las versiones se juntaron por esa clave. No es un enlace.
+- Una por cada atributo que **todas** las versiones tienen con el mismo valor. Cada una es un
+  enlace (al pasar el mouse: «Comparar por <atributo>») que abre «Comparar por atributo» con
+  ese atributo elegido.
+
+Un valor `true` o `false` se lee «sí» o «no».
+
+**El período.** Los cinco botones de siempre: «Hoy», «7 días», «30 días», «90 días», «Todo».
+
+**Panel «Una versión»** (o «<N> versiones»), explicación: «Los números del período elegido; con
+«Todo», los de toda la vida. Views: el total en la red, con lo ganado en el período al lado. En
+YouTube no hay ganado ni arrastre: sus reglas no permiten calcular métricas con sus datos.»
+
+La tabla. Sobre las columnas, «En la red» sobre «Views» y «En tu página · lo mide Tu Parrilla»
+sobre «Visitas» y «Arrastre». Las columnas, de izquierda a derecha:
+
+- «Versión».
+- Una columna por cada atributo que **cambia** entre versiones (o que falta en alguna),
+  rotulada con el nombre del atributo tal como se escribió (por ejemplo «hook»). En cada fila,
+  el valor de esa versión (sin los espacios de los bordes), «sí» / «no», o «—» si no lo tiene o
+  lo tiene vacío.
+- «Views»: el acumulado en la red, con «+<N>» chico al lado si ganó en el período y no salió
+  dentro de él; «—» si la red no dio números.
+- «Visitas»: las que llegaron por el link de esa versión en el período; «—» si su link nunca
+  trajo una visita, o si la versión todavía no tiene publicación sincronizada.
+- «Arrastre», en porcentaje con dos decimales, o «—».
+
+Cada fila, en la columna «Versión»:
+
+- La cuenta, con el patrón «<red> · <nombre de la cuenta>», y la cápsula «Trial reel» si salió
+  así en Instagram.
+- Debajo, en chico: cómo va, la fecha y hora programada (en una publicación fuera de La
+  Parrilla, la de publicación) y, si hay más de una versión, « · la que abriste» en la que se
+  abrió (que además se ve un poco más clara). Cómo va es una de estas: «Programado»,
+  «Publicando…», «Publicado», «Falló», «Reintentando», «En tu bandeja de TikTok», «Borrada en la
+  red» o «Fuera de La Parrilla».
+- Si falló o se está reintentando, el error de la red, en rojo.
+- Si ya se publicó pero la red todavía no la entrega: «Sin números todavía: llegan con la
+  sincronización diaria.», y en un trial reel además «Un trial reel puede no aparecer hasta que
+  lo compartas.» No aparece en un borrador mandado a la bandeja de TikTok («En tu bandeja de
+  TikTok»): ese no tiene números hasta que se publique desde la app.
+- Dos enlaces chicos: «Ver en <red>» con una flechita en diagonal, que abre la publicación en
+  la red en otra pestaña (si la red dio el enlace), y «Editar atributos», que abre el editor
+  del post programado en [La Parrilla](la-parrilla.md) (solo si salió de La Parrilla). Desde
+  ese editor, «Volver», «Guardar» y «Eliminar» regresan a esta pieza.
+
+Las versiones con números van primero, de más a menos views; después las que todavía no
+salieron o no trajeron nada, por fecha. Una versión borrada en la red se ve semitransparente.
+
+**Al pie del panel**, una de tres frases:
+
+- En una publicación fuera de La Parrilla: «Esta publicación no salió de La Parrilla: no tiene
+  versiones ni atributos. Lo que programas desde La Parrilla sí los tiene.»
+- Si las versiones se juntaron por `pieza`: «Juntas por el atributo pieza: un post programado
+  con el mismo valor. Para sumar otra versión, dale ese mismo valor en sus atributos.» (con
+  varios: «<N> posts programados»).
+- Si no: «¿Otra versión con otro hook, o el trial reel en la misma cuenta? Son otro post
+  programado: dales a los dos el mismo atributo pieza —por ejemplo {"pieza":
+  "chimichurri-30s"}— en «Editar atributos» o por la API, y aparecen juntos acá.»
+
+### Comparar por atributo (`/admin/analytics/comparar`)
+
+Para cada valor de un atributo —el hook, el tema, la serie—, cuántas publicaciones lo llevan y
+cómo les fue, en medianas. Responde «¿qué hook funciona mejor?». Cuenta solo lo **publicado en
+el período**, como la API de métricas.
+
+Se llega con el enlace «Comparar por atributo →» de «Lo que más creció», en el tablero, o
+desde una cápsula de atributo en una pieza. No tiene pestaña propia: la barra sigue marcando
+«Los Números».
+
+**Encabezado.** Arriba a la izquierda, una flecha y «Los Números», que vuelve al tablero. El
+título «Comparar por atributo» y la línea «Los atributos son lo que le anotas a un post
+programado —el hook, el tema, la serie—, en su editor o por la API. Acá ves, para cada valor,
+cómo le fue a lo que publicaste en el período.»
+
+**La fila de controles:**
+
+- Los cinco botones del período.
+- El selector de cuenta, **solo con más de una cuenta**: «Todas las cuentas» y una opción por
+  cuenta con el patrón «<red> · <nombre de la cuenta>».
+- El selector de atributo, **solo si alguna publicación del período tiene atributos**: una
+  opción por atributo con el patrón «Por <atributo>» (por ejemplo «Por hook»), del más usado al
+  menos usado, con «Por pieza» al final si existe. Siempre hay uno elegido: no tiene opción «todos». Al
+  entrar es «hook» si existe; si no, el más usado.
+
+**El aviso del atributo que falta.** Si la dirección pide un atributo (por ejemplo, al apretar
+una cápsula en una pieza) que nada de lo publicado en el período lleva, aparece un recuadro:
+«Nada de lo publicado en este período lleva «<atributo>». Amplía el período, o mira otro
+atributo.», y la pantalla muestra otro: «hook» si existe, o el más usado.
+
+**Panel «Por <atributo>»** (o «Por atributo» si no hay ninguno), explicación: «Medianas de lo
+publicado en el período: la publicación del medio, para que un reel que se pasó no arrastre a
+todo su valor. Cada mediana cuenta solo a quien tiene ese número; YouTube no entra en views ni
+en arrastre.»
+
+La tabla. Sobre las columnas, «En la red» sobre «Views ganadas» y «En tu página · lo mide Tu
+Parrilla» sobre «Visitas» y «Arrastre». Las columnas: el nombre del atributo (por ejemplo
+«hook»), «Publicaciones», «Views ganadas», «Visitas», «Arrastre». Una fila por valor, de la que
+tiene más publicaciones a la que tiene menos; al final, «sin <atributo>» (por ejemplo «sin
+hook»): lo publicado en el período que no lo lleva, incluido lo que no salió de La Parrilla,
+como vara. Las filas con menos de 10 publicaciones se ven tenues.
+
+Debajo de la tabla: «<N> publicaciones en el período, <M> con atributos. Las filas tenues
+tienen menos de 10 publicaciones: con tan pocas, la diferencia puede ser suerte.» Si el período
+tiene 2000 publicaciones o más, se suma «Se leyeron las 2000 más recientes: acorta el período
+para verlas todas.»
 
 ## Cómo leer cada número
 
@@ -491,6 +643,60 @@ ganó views (o no se sabe cuántas), cuando el link nunca se pegó, y siempre en
 | Link nunca pegado | «—» en «Visitas», «Clicks», «CTR», «Arrastre»; entra en el aviso del link. |
 | Borrado en la red | Oculto; con «Ver borrados», semitransparente. |
 
+### En la pieza
+
+**Qué filtros le aplican.** Solo el período. La cuenta no (la pieza muestra todas sus
+versiones, de cualquier cuenta), y la página y «Bots» tampoco: las visitas se cuentan en todas
+las páginas y sin bots. Las versiones borradas en la red entran, semitransparentes.
+
+**Los números de cada versión** son los mismos de «Tus publicaciones» —«Views» acumuladas con
+lo ganado al lado, «Visitas» por la etiqueta de esa versión, «Arrastre» como visitas sobre
+views ganadas—, medidos en el período elegido. Con «Todo», son los de toda la vida. YouTube no
+tiene lo ganado ni arrastre.
+
+**Qué versiones salen.** Las cuentas a las que salió el post programado del que viene la
+publicación, incluidas las que todavía no salen o fallaron (con su estado y sin números). Si
+sus atributos traen `pieza`, también las de todos los posts programados del dueño con el mismo
+valor: escrito igual, con las mismas mayúsculas (los espacios al principio y al final no
+importan). Como mucho 100 versiones; si hay más, las del post de la publicación abierta van
+primero, así que esa nunca queda fuera.
+
+**Los atributos.** Los que todas las versiones comparten van arriba, una vez; los que cambian
+de una a otra —o que alguna no tiene— van en columnas, porque eso es lo que hay que comparar.
+
+### En «Comparar por atributo»
+
+**Qué publicaciones cuenta.** Las publicadas dentro del período (no las que solo tuvieron
+actividad en él), de la cuenta elegida o de todas, sin las borradas. La página y «Bots» no le
+aplican. Cada publicación sincronizada cuenta una vez: un post programado que salió a tres
+cuentas son tres publicaciones, cada una con los atributos del post. Lee como mucho las 2000
+más recientes.
+
+**Los valores.** Los espacios al principio y al final no cuentan, pero el resto sí: un valor se
+agrupa con otro solo si está escrito igual, con las mismas mayúsculas y tildes («Pregunta» y
+«pregunta» son dos filas). Un valor vacío cuenta como no tenerlo: va a «sin <atributo>». `true`
+y `false` se leen «sí» y «no».
+
+**Las medianas.** De las publicaciones de esa fila, la del medio: la mitad tuvo menos, la mitad
+más. Se usa la mediana y no el promedio para que un reel que se pasó no arrastre a todo su
+valor. Cada mediana cuenta solo a las publicaciones que tienen ese número:
+
+- «Views ganadas»: lo ganado en el período por cada publicación. Como todas salieron dentro
+  del período, es casi siempre su contador entero. Sin YouTube.
+- «Visitas»: las visitas que trajo cada publicación por su link en el período, solo de las que
+  tienen el link pegado (alguna vez trajo una visita). YouTube incluido.
+- «Arrastre»: el arrastre de cada publicación. Sin YouTube. No es «Visitas» dividido por
+  «Views ganadas» de la misma fila.
+
+Una mediana es «—» cuando ninguna publicación de la fila tiene ese número.
+
+**«sin <atributo>».** Lo publicado en el período que no lleva ese atributo —también lo subido a
+mano, que no tiene ninguno—. Sirve de vara: un hook que no le gana a «sin hook» no está
+ayudando.
+
+**Las filas tenues.** Menos de 10 publicaciones: con tan pocas, una diferencia puede ser
+suerte.
+
 ## Qué se puede hacer
 
 ### Para saber cómo le fue en el período
@@ -623,6 +829,48 @@ vuelve a aparecer en la red, deja de estar borrada sola.
 
 Apretar «Ver las <N> restantes» al pie de la tabla. «Mostrar menos» vuelve a 20.
 
+### Para ver las versiones de una publicación
+
+1. Abrir su pieza: en «Tus publicaciones», apretar el texto de su fila (o, en el tablero, su
+   fila en «Lo que más creció»).
+2. Cada fila del panel es una versión: otra cuenta, otro hook, el trial reel. Las columnas
+   entre «Versión» y «Views» son los atributos en que se diferencian.
+3. Elegir el período arriba; «Todo» para los números de toda la vida.
+
+### Para juntar dos versiones del mismo video
+
+Dos hooks del mismo video, o el trial reel y el reel normal en la misma cuenta, son dos posts
+programados distintos: no se ven juntos hasta que comparten el atributo `pieza`.
+
+1. Abrir la pieza de una de las dos y apretar «Editar atributos». Se abre su editor, en La
+   Parrilla.
+2. En «Atributos (JSON del editor de contenido)», agregar la clave `pieza` con un nombre
+   cualquiera, conservando lo que ya hubiera. Por ejemplo, de `{"hook": "pregunta"}` a
+   `{"hook": "pregunta", "pieza": "chimichurri-30s"}`.
+3. Apretar «Guardar». Vuelve a la pieza.
+4. Hacer lo mismo con la otra versión, con el mismo valor de `pieza`, escrito igual.
+5. Desde ese momento, la pieza de cualquiera de las dos muestra las dos, y al pie dice «Juntas
+   por el atributo pieza…».
+
+Si una de las dos se subió a mano en la red, fuera de La Parrilla, no se puede: no tiene
+atributos. Los atributos también se ponen por la API: ver [la guía de la API](../api-llm.md).
+
+### Para ver qué hook funciona (o qué tema, o qué serie)
+
+1. En el tablero, mitad «En las redes», apretar «Comparar por atributo →».
+2. Elegir el período: cuenta lo publicado en él. Con más de una cuenta, se puede elegir una.
+3. En el selector de atributo, elegir «Por hook» (u otro).
+4. Comparar las medianas de cada valor con las de «sin hook», y desconfiar de las filas tenues.
+
+Para que haya algo que comparar, los posts tienen que llevar atributos: se anotan en el editor
+de cada post en [La Parrilla](la-parrilla.md), en «Editar atributos» de una pieza, o por la API.
+
+### Para corregir un atributo de una publicación
+
+1. Abrir su pieza y apretar «Editar atributos».
+2. Cambiar el JSON de «Atributos (JSON del editor de contenido)» y apretar «Guardar». Vuelve a
+   la pieza. Cambiar los atributos de un post que ya salió no toca lo publicado.
+
 Los mismos datos por publicación, con el alcance y los atributos de cada post, salen también por
 API: ver `GET /api/metrics/posts` en [la guía de la API](../api-editor.md).
 
@@ -658,6 +906,15 @@ API: ver `GET /api/metrics/posts` en [la guía de la API](../api-editor.md).
 | «La etiqueta no puede quedar vacía.» | Lo escrito quedó vacío después de limpiar los caracteres no permitidos (por ejemplo, solo emojis). | Escribir letras o números. |
 | «Otra pieza de contenido ya usa esa etiqueta.» | Dos publicaciones no pueden compartir etiqueta. | Elegir otra. |
 | «No se pudo guardar. Intenta de nuevo.» | Falló el guardado de la etiqueta. | Volver a intentar. |
+| «Sin números todavía: llegan con la sincronización diaria.» (en una versión de la pieza) | Esa versión ya se publicó, pero la red todavía no la entrega en la sincronización. | Esperar la del día siguiente, o apretar «Sincronizar ahora» en [Los Fierros](los-fierros.md). |
+| «Un trial reel puede no aparecer hasta que lo compartas.» (junto a la anterior) | Instagram no siempre entrega un trial reel antes de que se comparta con los seguidores. | Si se quiere ver sus números, compartirlo desde Instagram. |
+| «Falló», con el error de la red en rojo debajo (en una versión de la pieza) | Esa versión no salió. | Corregirla o reprogramarla en [La Parrilla](la-parrilla.md); el error se explica ahí. |
+| «Fuera de La Parrilla» y «Esta publicación no salió de La Parrilla: no tiene versiones ni atributos. Lo que programas desde La Parrilla sí los tiene.» | La publicación se subió a mano en la red. | Nada: no se le pueden poner atributos ni juntarla con otras. |
+| «No encontramos esa página» (al abrir una pieza) | La dirección no es de una publicación de esta persona, o está mal copiada. | Entrar de nuevo desde «Tus publicaciones». |
+| «No publicaste nada en este período. Amplía el período.» (en «Comparar por atributo») | No hay publicaciones publicadas en el período (de la cuenta elegida, si hay una). | Elegir un período más largo, o «Todas las cuentas». |
+| «Ninguna publicación del período tiene atributos. Se anotan en el editor de un post de La Parrilla (el campo «Atributos»), desde «Editar atributos» en una pieza, o por la API.» | Hay publicaciones en el período, pero ninguna tiene atributos. | Anotarlos (ver «Para juntar dos versiones…» y «Para ver qué hook funciona»), o ampliar el período. |
+| «Nada de lo publicado en este período lleva «<atributo>». Amplía el período, o mira otro atributo.» | Se pidió un atributo (por ejemplo, desde una cápsula de una pieza) que nada de lo publicado en el período lleva; la tabla muestra otro. | Elegir un período más largo, u otro atributo en el selector. |
+| «Se leyeron las 2000 más recientes: acorta el período para verlas todas.» | El período tiene 2000 publicaciones o más y la comparación usó solo las más recientes. | Elegir un período más corto. |
 | «Algo se rompió» y «No fue nada que hicieras: una consulta no respondió. Vuelve a intentarlo; el detalle quedó en la consola del navegador.» | Una consulta de la pantalla falló. | Apretar «Reintentar»; si sigue, «Ir a La Parrilla». |
 
 ## Si el humano dice…
@@ -750,13 +1007,47 @@ API: ver `GET /api/metrics/posts` en [la guía de la API](../api-editor.md).
 - **«Una visita dice bot»**: solo se ven con «Bots» activo; apretarlo otra vez las saca.
 - **«La pantalla se queda gris un rato»**: cada mitad carga por su lado, y los paneles de
   audiencia del «⋯ Más» de «En tu página» llegan después; esperar.
+- **«Antes apretaba un post y se abría Instagram»**: ahora el texto de la fila abre la pieza,
+  dentro del panel. La red se abre con la flechita en diagonal al final de la línea de abajo
+  («Ver en <red>»), o desde la pieza, con «Ver en <red>».
+- **«Quiero ver qué hook funciona» / «¿qué tema me trae más gente?»**: «Comparar por atributo
+  →», en el tablero, y elegir «Por hook» o «Por tema». Ver «Para ver qué hook funciona».
+- **«No me aparece hook (o tema) en el selector»**: ninguna publicación del período lo tiene.
+  Ampliar el período, o anotarlo en los posts (editor de La Parrilla, o por la API).
+- **«Dice: Nada de lo publicado en este período lleva…»**: ese atributo no está en nada
+  publicado dentro del período elegido (pasa al apretar una cápsula en una pieza vieja), y la
+  pantalla muestra otro, «hook» o el más usado. Elegir un período que incluya esa publicación
+  (por ejemplo «Todo»), o elegir otro atributo en el selector.
+- **«Me salen dos filas para el mismo hook»**: están escritos distinto (una mayúscula, una
+  tilde, un espacio en medio; los de los bordes no cuentan). Corregir el atributo en el editor
+  de los posts que lo tienen mal.
+- **«Comparar dice 3 publicaciones y programé un solo post»**: el post salió a tres cuentas, y
+  cada una cuenta como una publicación.
+- **«Quiero juntar dos versiones del mismo video» / «el trial reel y el reel normal salen por
+  separado»**: darles a los dos posts programados el mismo atributo `pieza`. Ver «Para juntar
+  dos versiones del mismo video».
+- **«Les puse pieza y no salen juntas»**: el valor tiene que ser idéntico, con las mismas
+  mayúsculas. Si una se subió a mano en la red, no tiene atributos y no se puede juntar.
+- **«¿Etiqueta o atributo?»**: la etiqueta es el `?s=` del link, el que cuenta las visitas de
+  cada publicación; se cambia en «Tus publicaciones». Los atributos (hook, tema, serie,
+  `pieza`) se anotan en el editor del post, en La Parrilla.
+- **«La pieza dice Sin números todavía»**: la versión ya salió, pero la red la entrega en la
+  sincronización diaria. Si es un trial reel, puede no aparecer hasta que se comparta.
+- **«Una versión de TikTok dice En tu bandeja de TikTok y no tiene números»**: se mandó como
+  borrador a la bandeja; no existe en TikTok hasta que se publique desde la app.
+- **«Una versión dice Fuera de La Parrilla»**: se subió a mano en la red; no tiene atributos ni
+  versiones.
 
 ## Lo que esta pantalla no hace
 
 - No acepta fechas exactas: solo los cinco períodos.
 - No filtra por red: filtra por cuenta.
-- No compara las versiones de un mismo post (otro hook, un trial reel, la misma pieza en otra
-  cuenta) lado a lado.
+- No adivina versiones: dos posts programados se ven juntos solo si comparten el atributo
+  `pieza`. Una publicación subida a mano en la red no se junta con nada.
+- No edita los atributos aquí: «Editar atributos» lleva al editor del post, en
+  [La Parrilla](la-parrilla.md).
+- «Comparar por atributo» no cruza dos atributos a la vez (hook y tema juntos), ni muestra qué
+  publicaciones forman cada fila.
 - No muestra publicaciones de Threads ni de X: esas redes publican, pero no se sincronizan.
 - No muestra lo programado que todavía no sale: eso está en [La Parrilla](la-parrilla.md).
 - No consulta la red en vivo ni tiene botón para sincronizar: eso está en
@@ -767,13 +1058,15 @@ API: ver `GET /api/metrics/posts` en [la guía de la API](../api-editor.md).
 - No pega el link en la red, ni edita ni borra la publicación allá: lo único que se edita aquí
   es la etiqueta, en «Tus publicaciones».
 - No crea ni edita los links de la página: eso es [La Vitrina](la-vitrina.md).
-- No tiene columna de guardados, de alcance ni de los atributos del post; el alcance y los
-  atributos salen por la API de métricas.
+- No tiene columna de guardados ni de alcance; salen por la API de métricas. Los atributos no
+  van en «Tus publicaciones»: se ven en la pieza y en «Comparar por atributo».
 - No ordena la lista por views ganadas (la columna «Views» ordena por el acumulado; las que más
   ganaron están en «Lo que más creció»).
 - No exporta a planilla.
 - Tiene topes y no avisa cuando se pasan: «En las redes» suma las 500 publicaciones más
-  recientes de la cuenta elegida (o de todas); «Tus publicaciones» muestra como mucho 200; 50 etiquetas, 25 links, 12 orígenes,
+  recientes de la cuenta elegida (o de todas); «Tus publicaciones» muestra como mucho 200; la
+  pieza, 100 versiones; «Comparar por atributo» lee 2000 publicaciones (esa sí avisa); 50
+  etiquetas, 25 links, 12 orígenes,
   países o ciudades, 8 dispositivos, sistemas, navegadores o idiomas, 40 últimas visitas.
 - No se lee con las llaves de la API: la API de métricas es por publicación, ver
   [la guía de la API](../api-editor.md). La app del teléfono tiene su propio resumen
@@ -789,6 +1082,17 @@ Sale de:
 - `src/app/admin/(dash)/analytics/publicaciones/page.tsx` («Tus publicaciones»: controles,
   avisos, estados vacíos, el link que se copia)
 - `src/app/admin/(dash)/analytics/publicaciones/post-table.tsx` (la tabla, la etiqueta, copiar)
+- `src/app/admin/(dash)/analytics/publicaciones/[id]/page.tsx` (la pieza: encabezado,
+  atributos, versiones, frases del pie)
+- `src/app/admin/(dash)/analytics/comparar/page.tsx` («Comparar por atributo»)
+- `src/lib/pieza.ts` (qué atributos son comunes y cuáles cambian, el orden de las versiones,
+  el trial reel, las medianas, el atributo elegido al entrar, las filas tenues) y
+  `src/lib/piezas.ts` (qué versiones junta una pieza, la clave `pieza`, el tope de 100)
+- `src/lib/post-attributes.ts` (los atributos de cada publicación)
+- `src/app/admin/(dash)/schedule/etiqueta.ts` (cómo va cada versión: «Programado», «Falló»…)
+- `src/app/admin/(dash)/schedule/enlace.ts` (que el editor vuelva a la pieza)
+- `src/lib/social/publish/atributos.ts` y `src/lib/social/publish/opciones.ts` (qué atributos
+  valen; qué es un trial reel)
 - `src/app/admin/(dash)/content/page.tsx` (la redirección desde la dirección de Los Cortes)
 - `src/components/filter-bar.tsx` y `src/lib/filters.ts` (período, selectores, bots)
 - `src/lib/tablero.ts` (cuenta elegida, qué «⋯ Más» están abiertos, seguidores ganados, qué

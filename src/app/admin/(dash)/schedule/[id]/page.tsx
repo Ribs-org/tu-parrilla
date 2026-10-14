@@ -5,6 +5,7 @@ import { requireUser } from '@/lib/auth'
 import { getCuentas } from '@/lib/posts'
 import { toZonedInput } from '@/lib/utils'
 import { resumenOpciones } from '@/lib/social/publish/opciones'
+import { volverDelEditor } from '../enlace'
 import { Editor } from './editor'
 
 export const dynamic = 'force-dynamic'
@@ -18,10 +19,7 @@ export default async function EditScheduledPostPage({
 }) {
   const { id } = await params
   const query = await searchParams
-  const volver =
-    typeof query.volver === 'string' && query.volver.startsWith('/admin/schedule')
-      ? query.volver
-      : '/admin/schedule'
+  const volver = volverDelEditor(query.volver)
 
   // `zona` pinta la hora del campo en la zona del dueño, que es la misma en la que
   // `updateScheduledPost` la vuelve a leer: si no coincidieran, guardar sin tocar la hora

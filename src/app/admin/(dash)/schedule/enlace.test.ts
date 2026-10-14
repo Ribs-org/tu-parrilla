@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { scheduleHref } from './enlace'
+import { scheduleHref, volverDelEditor } from './enlace'
 
 describe('scheduleHref', () => {
   it('sin parámetros ni cambios, la ruta pelada', () => {
@@ -47,5 +47,18 @@ describe('scheduleHref', () => {
 
   it('una clave repetida viaja entera', () => {
     expect(scheduleHref({ red: ['tiktok', 'instagram'] }, {})).toBe('/admin/schedule?red=tiktok&red=instagram')
+  })
+})
+
+describe('volverDelEditor', () => {
+  it('vuelve a la parrilla o a una pieza de Los Números', () => {
+    expect(volverDelEditor('/admin/schedule?vista=lista')).toBe('/admin/schedule?vista=lista')
+    expect(volverDelEditor('/admin/analytics/publicaciones/abc?range=all')).toBe('/admin/analytics/publicaciones/abc?range=all')
+  })
+
+  it('a otra parte, o sin valor, la parrilla pelada', () => {
+    expect(volverDelEditor('https://otro.sitio/admin/schedule')).toBe('/admin/schedule')
+    expect(volverDelEditor('/admin/analytics')).toBe('/admin/schedule')
+    expect(volverDelEditor(null)).toBe('/admin/schedule')
   })
 })

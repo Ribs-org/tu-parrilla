@@ -35,3 +35,15 @@ export function scheduleHref(
   const query = next.toString()
   return query ? `/admin/schedule?${query}` : '/admin/schedule'
 }
+
+/**
+ * A dónde vuelve el editor de un post programado al guardar, eliminar o apretar «Volver»:
+ * a la parrilla, o a la pieza de Los Números desde la que se entró a corregir un atributo.
+ * Cualquier otra cosa —un formulario armado a mano— cae en la parrilla pelada.
+ */
+export function volverDelEditor(valor: unknown): string {
+  if (typeof valor !== 'string') return '/admin/schedule'
+  return valor.startsWith('/admin/schedule') || valor.startsWith('/admin/analytics/publicaciones/')
+    ? valor
+    : '/admin/schedule'
+}
