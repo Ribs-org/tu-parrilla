@@ -172,7 +172,7 @@ describe('objetosABorrar + keysReferenciadas: un cambio de base no vacía el buc
 })
 
 describe('urlsReferenciadas', () => {
-  it('consulta las seis tablas de la lista y recoge el valor de cada una', async () => {
+  it('consulta cada tabla de la lista y recoge el valor de cada una', async () => {
     // La lista dejó de estar *al lado* de las consultas: ahora las genera, con la tabla
     // sacada de `c.ref.table`. Eso quita el riesgo de que lista y consultas se
     // desincronicen, y pone otro en su lugar: una entrada cuya `ref` no pertenezca a la
@@ -185,7 +185,7 @@ describe('urlsReferenciadas', () => {
     expect(tablasConsultadas.map((t) => getTableName(t as never)).sort()).toEqual(
       COLUMNAS_DE_ARCHIVO.map((c) => c.tabla).sort(),
     )
-    // Y que ninguna se pierda por el camino: seis consultas, seis URLs en el conjunto.
+    // Y que ninguna se pierda por el camino: una URL por consulta en el conjunto.
     expect(urls.size).toBe(COLUMNAS_DE_ARCHIVO.length)
   })
 })

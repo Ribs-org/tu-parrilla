@@ -13,8 +13,10 @@ export type Pantalla = {
   soloAdmin?: true
 }
 
+// La Parrilla va primera porque es la entrada: `/admin` lleva a ella. Hasta el 2026-10-13
+// la entrada era El Fuego, con su propia pestaña; se fundió en La Parrilla (ver
+// `docs/superpowers/specs/2026-10-13-parrilla-entrada-y-borradores-design.md`).
 export const PANTALLAS: readonly Pantalla[] = [
-  { ruta: '/admin', nombre: 'El Fuego', subtitulo: 'qué se está cocinando ahora', grupo: 'pestana' },
   { ruta: '/admin/schedule', nombre: 'La Parrilla', subtitulo: 'lo que viene y cómo salió lo que ya se fue', grupo: 'pestana' },
   { ruta: '/admin/content', nombre: 'Los Cortes', subtitulo: 'cada publicación, lo que hizo en la red y lo que trajo', grupo: 'pestana' },
   { ruta: '/admin/comments', nombre: 'La Mesa', subtitulo: 'lo que te responden y tus respuestas', grupo: 'pestana' },
@@ -38,13 +40,12 @@ export function ajustes(esAdmin: boolean): Pantalla[] {
 }
 
 /**
- * La pantalla a la que pertenece una ruta: `/admin` solo exacta; las demás, por segmento
- * (`/admin/schedule/abc` es La Parrilla, `/admin/scheduleX` no es nada). Devuelve todas las
- * pantallas, incluida la de admin, porque decide qué se marca activo, no qué se muestra.
+ * La pantalla a la que pertenece una ruta, por segmento (`/admin/schedule/abc` es La
+ * Parrilla, `/admin/scheduleX` no es nada). Devuelve todas las pantallas, incluida la de
+ * admin, porque decide qué se marca activo, no qué se muestra.
  */
 export function pantallaDe(pathname: string): Pantalla | null {
-  if (pathname === '/admin') return PANTALLAS.find((p) => p.ruta === '/admin') ?? null
-  return PANTALLAS.find((p) => p.ruta !== '/admin' && (pathname === p.ruta || pathname.startsWith(`${p.ruta}/`))) ?? null
+  return PANTALLAS.find((p) => pathname === p.ruta || pathname.startsWith(`${p.ruta}/`)) ?? null
 }
 
 /**

@@ -9,7 +9,7 @@ describe('el vocabulario del panel', () => {
     // pestaña llevaría a un 404 y ningún typecheck lo vería. El sistema de archivos sí.
     const base = join(process.cwd(), 'src', 'app', 'admin', '(dash)')
     for (const p of PANTALLAS) {
-      const carpeta = p.ruta === '/admin' ? base : join(base, p.ruta.replace('/admin/', ''))
+      const carpeta = join(base, p.ruta.replace('/admin/', ''))
       expect(existsSync(join(carpeta, 'page.tsx')), `${p.ruta} no tiene page.tsx`).toBe(true)
     }
   })
@@ -21,9 +21,8 @@ describe('el vocabulario del panel', () => {
     expect(new Set(nombres).size).toBe(nombres.length)
   })
 
-  it('cinco pestañas, y Ajustes con tres entradas para un usuario y cuatro para el admin', () => {
+  it('cuatro pestañas con La Parrilla primera, y Ajustes con tres entradas para un usuario y cuatro para el admin', () => {
     expect(pestanas(false).map((p) => p.ruta)).toEqual([
-      '/admin',
       '/admin/schedule',
       '/admin/content',
       '/admin/comments',
@@ -39,8 +38,9 @@ describe('el vocabulario del panel', () => {
     ])
   })
 
-  it('pantallaDe resuelve por prefijo, y /admin solo exacto', () => {
-    expect(pantallaDe('/admin')?.ruta).toBe('/admin')
+  it('pantallaDe resuelve por segmento, y /admin solo no es ninguna (redirige a La Parrilla)', () => {
+    expect(pantallaDe('/admin')).toBeNull()
+    expect(pantallaDe('/admin/schedule')?.ruta).toBe('/admin/schedule')
     expect(pantallaDe('/admin/schedule/abc')?.ruta).toBe('/admin/schedule')
     expect(pantallaDe('/admin/accounts/elegir')?.ruta).toBe('/admin/accounts')
     expect(pantallaDe('/admin/profiles/xyz')?.ruta).toBe('/admin/profiles')
@@ -60,7 +60,7 @@ describe('el vocabulario del panel', () => {
     // equivocado sin que nada más lo viera — ni el typecheck, ni la prueba de arriba.
     const base = join(process.cwd(), 'src', 'app', 'admin', '(dash)')
     for (const p of PANTALLAS) {
-      const carpeta = p.ruta === '/admin' ? base : join(base, p.ruta.replace('/admin/', ''))
+      const carpeta = join(base, p.ruta.replace('/admin/', ''))
       const archivo = join(carpeta, 'page.tsx')
       const texto = readFileSync(archivo, 'utf8')
       const match = texto.match(/<Encabezado\s+ruta="([^"]+)"/)

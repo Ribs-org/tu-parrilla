@@ -19,12 +19,18 @@ describe('scheduleHref', () => {
   })
 
   it('«componer» no viaja: la orden de abrir el compositor es de un solo uso', () => {
-    // Es de lo que depende «Poner al fuego» de El Fuego: llega con componer=1, y cualquier
-    // clic de ahí en adelante —una pestaña, el «volver» del editor— tiene que dejarlo atrás.
+    // «Nueva publicación» llega con componer=1, y cualquier clic de ahí en adelante —una
+    // pestaña, el «volver» del editor, cerrar el panel— tiene que dejarlo atrás.
     expect(scheduleHref({ componer: '1' }, {})).toBe('/admin/schedule')
     expect(scheduleHref({ componer: '1', vista: 'calendario' }, { vista: 'calendario' })).toBe(
       '/admin/schedule?vista=calendario',
     )
+  })
+
+  it('lo que abre el panel lateral y el aviso de «programado» tampoco viajan', () => {
+    expect(
+      scheduleHref({ componer: '1', dia: '2026-10-16', borrador: 'b1', panel: 'csv', hecho: 'programado', semana: '2026-10-12' }, {}),
+    ).toBe('/admin/schedule?semana=2026-10-12')
   })
 
   it('«mensaje» tampoco, que es el desenlace de una vuelta de OAuth', () => {

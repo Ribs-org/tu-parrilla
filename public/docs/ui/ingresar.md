@@ -15,11 +15,11 @@ después hay que pedir un código otra vez.
   hay registro abierto. Si ya te invitaron, entra con tu correo.», el enlace «entra con tu
   correo».
 - Abriendo cualquier dirección del panel (`/admin` o lo que cuelgue de ahí) sin sesión: lleva a
-  `/ingresar`. Al entrar se llega siempre a El Fuego, la portada del panel
-  ([el-fuego.md](el-fuego.md)), no a la dirección que se había abierto.
+  `/ingresar`. Al entrar se llega siempre a La Parrilla, la entrada del panel
+  ([la-parrilla.md](la-parrilla.md)), no a la dirección que se había abierto.
 - Con «Salir», en la barra de arriba del panel: cierra la sesión y deja en `/ingresar`.
 - `/admin/login`, la dirección antigua, lleva a `/ingresar`.
-- Con la sesión abierta, `/ingresar` y `/ingresar/codigo` llevan directo a El Fuego.
+- Con la sesión abierta, `/ingresar` y `/ingresar/codigo` llevan directo a La Parrilla.
 
 **El panel se abre solo en tu-parrilla.cl.** Hay otros dominios que llevan a la misma app (por
 ejemplo, el dominio propio de un creador, que muestra su página pública). Si alguien abre
@@ -74,7 +74,7 @@ botón «Reintentar».
 2. Escribir el correo con el que te invitaron y apretar «Mandarme un código».
 3. Buscar en el correo el mensaje «… es tu código para entrar a Parrilla». Puede tardar un
    minuto; si no aparece, mirar en spam o promociones.
-4. Escribir los seis dígitos, sin espacios, y apretar «Entrar». Se abre El Fuego.
+4. Escribir los seis dígitos, sin espacios, y apretar «Entrar». Se abre La Parrilla.
 
 ### Para pedir otro código
 
@@ -143,7 +143,7 @@ tiene forma de correo o el código no son seis dígitos: viene del navegador, no
   otra red.
 - No dice si el correo está invitado ni si el correo con el código salió.
 - No tiene botón de reenviar: otro código se pide repitiendo el paso 1.
-- Después de entrar no vuelve a la página que se había abierto: siempre llega a El Fuego.
+- Después de entrar no vuelve a la página que se había abierto: siempre llega a La Parrilla.
 - «Salir» no cierra la sesión del teléfono ni la de otros navegadores. Cerrar todas las
   sesiones de una persona lo hace solo el admin, en Los Maestros.
 
@@ -160,6 +160,7 @@ Sale de:
 - `src/lib/usuarios.ts`: pedir y canjear el código, y el texto del correo.
 - `src/lib/limite-ip.ts`: el freno por conexión.
 - `src/lib/sesion-token.ts` y `src/lib/auth.ts`: los treinta días y adónde manda sin sesión.
+- `src/app/admin/(dash)/page.tsx`: `/admin` lleva a La Parrilla.
 - `src/app/admin/actions.ts` (`logout`) y `src/app/admin/(dash)/layout.tsx`: «Salir».
 - `src/proxy.ts` y `src/lib/dominios.ts`: el panel solo en el dominio del producto.
 - `src/components/landing.tsx`: el enlace desde la portada.

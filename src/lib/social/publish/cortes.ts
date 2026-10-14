@@ -1,5 +1,5 @@
 import 'server-only'
-import { and, asc, eq, gte, inArray, lt, type SQL } from 'drizzle-orm'
+import { and, asc, eq, gte, inArray, lt } from 'drizzle-orm'
 import {
   getDb,
   postMetrics,
@@ -13,18 +13,11 @@ import { miradasDe } from '@/lib/fuego'
 import { addDays, dayKey } from '@/lib/schedule-week'
 import { fromZonedInput } from '@/lib/utils'
 
-// Las lecturas de El Fuego, atadas al dueño en cada `where` — nunca en el `on` de un
+// Las lecturas de La Parrilla, atadas al dueño en cada `where` — nunca en el `on` de un
 // join, que es lo que vigila el arnés de aislamiento (`src/lib/aislamiento.test.ts`).
-
-/** Qué trae cada lectura además de los destinos. Sin decir nada, la media viene. */
-type Opciones = { media?: boolean }
 
 /**
  * Un corte tal como lo arma el calendario: el post, sus destinos con handle, y su media.
- *
- * `media` llega vacía cuando quien lee pidió `{ media: false }`: una lista vacía y no un
- * tipo condicional, porque la única pantalla que la omite (El Fuego) tampoco la dibuja, y
- * un tipo que cambia de forma según un booleano costaría más de leer que este comentario.
  */
 export type CorteCargado = {
   post: typeof scheduledPosts.$inferSelect
@@ -33,32 +26,22 @@ export type CorteCargado = {
 }
 
 /**
- * Lo que el calendario (`schedule/page.tsx`) armaba con su propia consulta: posts +
- * destinos + el handle de la cuenta por `leftJoin`, y la media en una segunda consulta
- * aparte. Vive acá para que El Fuego la comparta; `condiciones` acota sin cambiar la forma.
- *
- * `media: false` se salta esa segunda consulta entera. El Fuego no dibuja miniaturas (el
- * spec, §3.2: «Sin miniatura»), y pedirlas igual serían dos o tres viajes a la base por
- * carga de la pantalla de entrada que no pintan nada.
+ * Posts + destinos + el handle de la cuenta por `leftJoin`, y la media en una segunda
+ * consulta aparte.
  *
  * El `leftJoin` con `socialAccounts` es a propósito: un destino cuya cuenta ya no exista
  * no debe desaparecer, debe seguir mostrándose por su red (ver `nombreDestino` en
  * `schedule/etiqueta.ts`). El dueño va al final del `where`, nunca en el `on` de ese join:
- * el arnés mira lo que queda tras el último «where» del SQL, y una subconsulta en
- * `condiciones` trae el suyo.
+ * el arnés mira lo que queda tras el último «where» del SQL.
  */
-async function cargar(
-  ownerId: string,
-  { media = true }: Opciones,
-  ...condiciones: SQL[]
-): Promise<CorteCargado[]> {
+async function cargar(ownerId: string): Promise<CorteCargado[]> {
   const db = getDb()
   const rows = await db
     .select({ post: scheduledPosts, target: scheduledPostTargets, handle: socialAccounts.handle })
     .from(scheduledPosts)
     .innerJoin(scheduledPostTargets, eq(scheduledPostTargets.postId, scheduledPosts.id))
     .leftJoin(socialAccounts, eq(socialAccounts.id, scheduledPostTargets.accountId))
-    .where(and(...condiciones, eq(scheduledPosts.ownerId, ownerId)))
+    .where(eq(scheduledPosts.ownerId, ownerId))
     .orderBy(asc(scheduledPosts.scheduledAt))
 
   const posts = new Map<string, CorteCargado>()
@@ -72,7 +55,7 @@ async function cargar(
   // para nada, y solo hace falta la primera miniatura de cada post. Va por los ids que la
   // consulta de arriba ya filtró por dueño, como `post_metrics` en `getPostRows`.
   const ids = [...posts.keys()]
-  if (media && ids.length > 0) {
+  if (ids.length > 0) {
     const filas = await db
       .select()
       .from(scheduledPostMedia)
@@ -86,31 +69,7 @@ async function cargar(
 
 /** Todo lo programado del dueño, sin ventana: es lo que el calendario siempre mostró. */
 export function todosLosCortes(ownerId: string): Promise<CorteCargado[]> {
-  return cargar(ownerId, {})
-}
-
-/** Los cortes con `scheduledAt` en `[desde, hasta)`, en orden de hora. */
-export function cortesEntre(
-  ownerId: string,
-  desde: Date,
-  hasta: Date,
-  opciones: Opciones = {},
-): Promise<CorteCargado[]> {
-  return cargar(ownerId, opciones, gte(scheduledPosts.scheduledAt, desde), lt(scheduledPosts.scheduledAt, hasta))
-}
-
-/**
- * Los cortes con algún destino que se quemó, sin ventana de fecha: un fallo viejo sigue
- * pidiendo la acción hasta que alguien lo reprograma. El corte viene entero, con todos
- * sus destinos, para que El Fuego lo muestre como en la parrilla.
- */
-export function quemadosDe(ownerId: string, opciones: Opciones = {}): Promise<CorteCargado[]> {
-  const db = getDb()
-  const conFallo = db
-    .select({ postId: scheduledPostTargets.postId })
-    .from(scheduledPostTargets)
-    .where(eq(scheduledPostTargets.status, 'failed'))
-  return cargar(ownerId, opciones, inArray(scheduledPosts.id, conFallo))
+  return cargar(ownerId)
 }
 
 /**

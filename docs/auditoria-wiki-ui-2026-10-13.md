@@ -69,7 +69,7 @@ está mal y dónde está.
     ahora» sí pregunta. `src/app/admin/(dash)/schedule/queue.tsx:91-97`,
     `schedule/[id]/editor.tsx:290`.
 15. **La Parrilla: «Reprogramar» mueve el post entero**, no solo la red que falló: las redes
-    que ya salieron no se republican, pero su hora en el calendario, en El Fuego y en el
+    que ya salieron no se republican, pero su hora en el calendario, en «Se quemó» y en el
     pie de «ayer» se corre a la nueva. Y con todo publicado, el editor deja cambiar la fecha.
     `src/app/admin/actions.ts:898-906, 1124`.
 
@@ -77,8 +77,7 @@ está mal y dónde está.
 
 - **Nombres viejos de pantallas.** «Cuentas» por Los Fierros: `src/lib/social/cuentas.ts:32`
   (llega también por la API: revisar `public/docs/api-llm.md` al cambiarla),
-  `src/app/admin/actions.ts:461`, `src/lib/social/publish/tiktok-creador.ts:21` y el enlace
-  de `schedule/batch-upload.tsx`. «Perfiles» por La Vitrina: `profiles/[id]/editor.tsx:420`,
+  `src/app/admin/actions.ts:461` y `src/lib/social/publish/tiktok-creador.ts:21`. «Perfiles» por La Vitrina: `profiles/[id]/editor.tsx:420`,
   `src/app/admin/actions.ts:225`.
 - **La Vitrina: «El perfil principal se sirve en /…»** (`profiles/page.tsx:38-41, 100, 104`):
   falso para los invitados y para cualquiera en tu-parrilla.cl, donde la raíz es la portada.

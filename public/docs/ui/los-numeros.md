@@ -10,9 +10,9 @@ cada publicación en la red (views, likes) no está aquí: está en [Los Cortes]
 
 ## Cómo se llega
 
-- En la barra de arriba, la pestaña «Los Números» (la quinta y última: «El Fuego», «La
-  Parrilla», «Los Cortes», «La Mesa», «Los Números»). En un teléfono, si no se ve, la barra se
-  desliza hacia el lado.
+- En la barra de arriba, la pestaña «Los Números» (la cuarta y última: «La Parrilla», «Los
+  Cortes», «La Mesa», «Los Números»). En un teléfono, si no se ve, la barra se desliza hacia
+  el lado.
 - Apretar la pestaña estando ya en la pantalla la deja como al entrar: 30 días, todos los
   perfiles, sin bots.
 
@@ -278,7 +278,7 @@ copiar). Para un link hecho a mano, la dirección de la página está en [La Vit
 | «Sin visitas en este período.» | El embudo no tiene visitas en el rango. | Ampliar el rango. |
 | «Nada todavía.» | «Últimas visitas» no tiene visitas en el rango. | Ampliar el rango. |
 | «—» bajo una cifra, en vez del porcentaje | El período anterior tuvo cero, o el rango es «Todo». | Nada: no hay con qué comparar. |
-| «Algo se rompió» y «No fue nada que hicieras: una consulta no respondió. Vuelve a intentarlo; el detalle quedó en la consola del navegador.» | Una consulta de la pantalla falló. | Apretar «Reintentar»; si sigue, «Ir a El Fuego». |
+| «Algo se rompió» y «No fue nada que hicieras: una consulta no respondió. Vuelve a intentarlo; el detalle quedó en la consola del navegador.» | Una consulta de la pantalla falló. | Apretar «Reintentar»; si sigue, «Ir a La Parrilla». |
 
 ## Si el humano dice…
 

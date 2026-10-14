@@ -35,8 +35,8 @@ describe('calorDelDia', () => {
 describe('NOMBRE_COCCION', () => {
   it('cada cocción tiene su nombre en palabras, que es la lectura que no depende del color', () => {
     // El color es la primera señal y las palabras la segunda: el calendario las pone en un
-    // `sr-only` y El Fuego las pinta en la fila. Una cocción sin nombre dejaría una fila
-    // muda, y eso el typecheck no lo ve porque `Record` admite la cadena vacía.
+    // `sr-only` bajo cada corte. Una cocción sin nombre dejaría un corte mudo para el lector
+    // de pantalla, y eso el typecheck no lo ve porque `Record` admite la cadena vacía.
     for (const coccion of ORDEN_COCCION) expect(NOMBRE_COCCION[coccion].length).toBeGreaterThan(0)
     expect(NOMBRE_COCCION.quemada).toBe('Falló')
   })

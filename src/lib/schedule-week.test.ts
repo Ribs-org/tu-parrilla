@@ -86,8 +86,8 @@ describe('weekLabel y dayLabel', () => {
   })
 
   it('un día suelto se rotula sin saber su posición en la semana, y con su mes', () => {
-    // El Fuego nombra días que caen en cualquier parte —el siguiente corte, un fallo de
-    // hace meses—: no hay arreglo del que sacar el índice, y el día de la semana sale de
+    // «Se quemó» y la lista de borradores nombran días que caen en cualquier parte —un fallo
+    // de hace meses, un borrador para dentro de tres semanas—: no hay arreglo del que sacar el índice, y el día de la semana sale de
     // la clave. El mes va abreviado y en minúscula, el mismo que ya usa `weekLabel`.
     expect(dayLabelConMes('2026-09-07')).toBe('lun 7 de sep')
     expect(dayLabelConMes('2026-09-13')).toBe('dom 13 de sep')

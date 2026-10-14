@@ -19,9 +19,10 @@ registro abierto.
 
 ## Dónde está
 
-- **El panel:** `https://tu-parrilla.cl/admin`. Se entra con el correo y un código de seis
-  dígitos que llega por correo, en `https://tu-parrilla.cl/ingresar` ([Entrar al
-  panel](ingresar.md)). Si la persona lo abre en otro dominio, la manda sola a tu-parrilla.cl.
+- **El panel:** `https://tu-parrilla.cl/admin`, que lleva a La Parrilla, la entrada. Se entra
+  con el correo y un código de seis dígitos que llega por correo, en
+  `https://tu-parrilla.cl/ingresar` ([Entrar al panel](ingresar.md)). Si la persona lo abre en
+  otro dominio, la manda sola a tu-parrilla.cl.
 - **La app del teléfono** (Android): hace una parte de lo mismo, con otra navegación ([La app
   del teléfono](app-movil.md)).
 - **Su página pública**, la que ve su audiencia: `https://tu-parrilla.cl/<su-dirección>`. Se
@@ -32,8 +33,8 @@ registro abierto.
 Está siempre, fija arriba, en todas las pantallas del panel. De izquierda a derecha:
 
 1. **«Panel»**, en mayúsculas. Es un rótulo, no un botón.
-2. **Cinco pestañas**, iguales para todos: «El Fuego», «La Parrilla», «Los Cortes», «La Mesa»
-   y «Los Números». La activa se pinta con fondo naranjo. En una pantalla angosta (un
+2. **Cuatro pestañas**, iguales para todos: «La Parrilla», «Los Cortes», «La Mesa» y «Los
+   Números». La activa se pinta con fondo naranjo. En una pantalla angosta (un
    teléfono) la fila se desplaza de lado: si no ve una pestaña, que deslice la barra.
 3. **El engranaje «Ajustes»**, a la derecha. En pantallas angostas se ve solo el ícono, sin la
    palabra. Abre un menú con cuatro entradas, cada una con su subtítulo debajo: «Los Fierros»
@@ -42,7 +43,8 @@ Está siempre, fija arriba, en todas las pantallas del panel. De izquierda a der
    persona está en una de esas pantallas, el engranaje queda pintado de naranjo. El menú se
    cierra con Escape, al elegir una entrada o volviendo a apretar el engranaje; un clic afuera
    no lo cierra.
-4. **«Salir»**, al final, en mayúsculas. Cierra la sesión y deja en la pantalla de entrada.
+4. **«Salir»**, al final, en mayúsculas. Cierra la sesión y deja en la pantalla para entrar con
+   el correo ([ingresar.md](ingresar.md)).
 
 ## Las pantallas
 
@@ -51,8 +53,7 @@ se ve arriba, grande y en mayúsculas.
 
 | Nombre en pantalla | Subtítulo (lo que es en llano) | Dirección | Dónde está | Página |
 |---|---|---|---|---|
-| El Fuego | qué se está cocinando ahora | `/admin` | Primera pestaña. Es la portada: se llega acá al entrar | [el-fuego.md](el-fuego.md) |
-| La Parrilla | lo que viene y cómo salió lo que ya se fue | `/admin/schedule` | Pestaña. El calendario: programar, editar, reprogramar | [la-parrilla.md](la-parrilla.md) |
+| La Parrilla | lo que viene y cómo salió lo que ya se fue | `/admin/schedule` | Primera pestaña. Es la entrada: se llega acá al entrar, y `/admin` lleva acá. El calendario: programar, borradores, lo que se quemó, editar, reprogramar | [la-parrilla.md](la-parrilla.md) |
 | Los Cortes | cada publicación, lo que hizo en la red y lo que trajo | `/admin/content` | Pestaña. Las métricas de cada publicación | [los-cortes.md](los-cortes.md) |
 | La Mesa | lo que te responden y tus respuestas | `/admin/comments` | Pestaña. Los comentarios y sus respuestas | [la-mesa.md](la-mesa.md) |
 | Los Números | visitas, clics y de dónde vienen | `/admin/analytics` | Pestaña. El tráfico de su página pública | [los-numeros.md](los-numeros.md) |
@@ -70,8 +71,8 @@ teléfono](app-movil.md).
    debajo va el subtítulo. Con eso sabes en qué página de esta wiki está.
 2. **Si no sabe el nombre, tradúcelo desde lo que quiere hacer** (la tabla de abajo).
 3. **Si ve «Algo se rompió»**, es la pantalla de error del panel: una consulta falló, no fue
-   culpa suya. Tiene el botón «Reintentar» y, salvo que la que falló sea El Fuego, el enlace
-   «Ir a El Fuego». La barra de arriba sigue ahí.
+   culpa suya. Tiene el botón «Reintentar» y, salvo que la que falló sea la pantalla principal
+   de La Parrilla, el enlace «Ir a La Parrilla». La barra de arriba sigue ahí.
 4. **Si ve «No encontramos esa página»** («La dirección no existe, o la página dejó de estar
    publicada.»), la dirección no existe. «Ir al inicio» lleva a la portada del sitio, no al
    panel: que entre de nuevo a `https://tu-parrilla.cl/admin`.
@@ -85,10 +86,11 @@ teléfono](app-movil.md).
 | Lo que quiere | Dónde |
 |---|---|
 | Entrar; no le llega el código | [Entrar al panel](ingresar.md) |
-| Ver qué sale hoy, qué falló, cómo viene la semana | El Fuego ([el-fuego.md](el-fuego.md)) |
+| Ver qué sale hoy, qué falló, cómo viene la semana | La Parrilla: el calendario de la semana y, arriba, «Se quemó» ([la-parrilla.md](la-parrilla.md)) |
 | Conectar Instagram, Facebook, YouTube, TikTok, Threads o X; reconectar una que venció | Los Fierros ([los-fierros.md](los-fierros.md)) |
-| Programar un post o un video; subir varios por CSV | La Parrilla ([la-parrilla.md](la-parrilla.md)) |
-| Cambiar o borrar algo programado; reprogramar lo que falló | La Parrilla, abriendo el post ([la-parrilla.md](la-parrilla.md)); lo que falló, también desde El Fuego |
+| Programar un post o un video; subir varios por CSV | La Parrilla, botones «Nueva publicación» y «Subir CSV», o el «+» de un día del calendario ([la-parrilla.md](la-parrilla.md)) |
+| Retomar algo que dejó a medias; ver lo que escribió y no programó | La Parrilla, botón «Borradores (N)» ([la-parrilla.md](la-parrilla.md)) |
+| Cambiar o borrar algo programado; reprogramar lo que falló | La Parrilla, abriendo el post ([la-parrilla.md](la-parrilla.md)); lo que falló, también desde «Se quemó», arriba del calendario |
 | Una palabra clave que responde comentarios sola | Al programar el post, en La Parrilla; las respuestas se ven en La Mesa |
 | Ver vistas, likes, visitas y clics de cada publicación; cambiar su etiqueta `?s=` | Los Cortes ([los-cortes.md](los-cortes.md)) |
 | Ver cuánta gente visitó su página y de dónde vino | Los Números ([los-numeros.md](los-numeros.md)) |
@@ -105,19 +107,24 @@ El panel habla en términos de parrilla. Cuando la persona repite una de estas p
 esto es lo que quiere decir:
 
 - **Corte:** una publicación programada (un post, con una o varias redes de destino).
-- **Poner al fuego:** programar una publicación. Es el botón «Poner al fuego» de El Fuego.
+- **Poner al fuego:** programar una publicación. Ya no es un botón: se programa con «Nueva
+  publicación» o con el «+» de un día, en La Parrilla.
+- **Borrador:** en La Parrilla, una publicación a medio escribir que se guardó sola; se retoma
+  con «Borradores (N)». No es lo mismo que «Enviar como borrador a mi bandeja de TikTok», que
+  manda el post a la app de TikTok, ni que el borrador de respuesta que propone la IA en La Mesa.
 - **La cocción de un corte**, que el calendario pinta del más claro al más oscuro y siempre
   dice también en palabras: cruda = «Programada», sellada = «Saliendo ahora», a punto =
   «Publicada», quemada = «Falló».
-- **Se quemó / quemado:** falló al publicarse en alguna red. Lo que se quemó se ve en El
-  Fuego, en el bloque «Se quemó», con su motivo y el botón «Reprogramar».
+- **Se quemó / quemado:** falló al publicarse en alguna red. Lo que se quemó se ve en La
+  Parrilla, en la sección «Se quemó», arriba del calendario, con su motivo y el botón
+  «Reprogramar».
 - **El calor de un día:** apagado (nada programado), prendido (uno o dos cortes) o lleno (tres
   o más).
 - **Fierro:** una red conectada. Su tarjeta en Los Fierros lleva una barra de color, el
   fierro, que dice cómo está la conexión: naranja encendido (al rojo: viva), ámbar
   (enfriándose: vence en siete días o menos) o gris apagado (frío: desconectada, rota o
   vencida, hay que reconectar).
-- **Servido:** un corte que salió. El pie de El Fuego cuenta los de ayer.
+- **Servido:** un corte que salió. El pie de La Parrilla cuenta los de ayer.
 
 ## Lo que no existe (no la mandes a buscarlo)
 
@@ -127,6 +134,9 @@ esto es lo que quiere decir:
   tiene pantalla todavía.
 - **Ver una llave de API ya generada.** Se ve una sola vez al crearla; después solo se revoca
   y se genera otra (Tu Cuenta).
+- **El Fuego** (la pantalla de entrada de antes, con el botón «Poner al fuego»). Ya no está:
+  lo que mostraba —lo que se quemó, la tarjeta para conectar la primera red y lo que salió
+  ayer— está en La Parrilla, que es ahora la entrada.
 
 ## Para quien mantiene esta página
 
@@ -134,6 +144,7 @@ Sale de:
 
 - `src/app/admin/(dash)/layout.tsx` y `src/app/admin/(dash)/nav.tsx`: la barra, las pestañas,
   el engranaje y «Salir».
+- `src/app/admin/(dash)/page.tsx`: `/admin` lleva a La Parrilla.
 - `src/lib/vocabulario.ts`: los nombres, subtítulos y rutas de cada pantalla, y quién las ve.
 - `src/lib/parrilla.ts`: la cocción, el calor del día y la temperatura del fierro.
 - `src/app/admin/(dash)/error.tsx`, `src/app/admin/(dash)/loading.tsx` y

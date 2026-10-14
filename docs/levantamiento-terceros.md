@@ -201,7 +201,7 @@ Ordenado por lo que bloquea un trámite primero.
    que es la misma verificación con otra acción (marcar sin credencial). Alcance: una ruta,
    una página, tests de la firma y del aislamiento por dueño; un día.
 2. **Zona horaria por usuario.** Hecho. Existe el campo `users.zona`, el selector en Tu
-   Cuenta (`/admin/cuenta`), y la zona pasa por el panel entero (El Fuego, el calendario,
+   Cuenta (`/admin/cuenta`), y la zona pasa por el panel entero (el calendario,
    la cola, el editor de un corte, las ventanas de los links), por las acciones que
    guardan horas —quien está en Madrid escribe «19:00» y salen las 19:00 de Madrid— y por
    dentro: Los Números y Los Cortes agrupan en ella. La API con llave

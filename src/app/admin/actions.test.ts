@@ -625,9 +625,9 @@ describe('rescheduleTarget: la hora nueva solo alcanza a un destino todavía que
 
     await rescheduleTarget('target-1', futuro)
 
-    // El Fuego («Se quemó») vive en `/admin` y su botón de reprogramar es el mismo que el
-    // de la cola: sin este revalidado, la fila que se acaba de arreglar sigue ahí.
-    expect(revalidados).toEqual(['/admin/schedule', '/admin'])
+    // «Se quemó» vive en La Parrilla, arriba del calendario: con este revalidado, la fila que
+    // se acaba de arreglar deja de pedir la acción.
+    expect(revalidados).toEqual(['/admin/schedule'])
   })
 
   it('una hora pasada no escribe nada y devuelve la frase de siempre', async () => {

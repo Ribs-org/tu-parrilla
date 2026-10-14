@@ -9,9 +9,10 @@ import type { CuentaDestino } from '@/lib/social/cuentas'
  * monta con exactamente un video elegido (lo decide el compositor), así que con fotos o
  * carrusel el interruptor ni existe y no manda nada. El campo lleva el id de la cuenta
  * como sufijo, igual que los de TikTok: puede haber dos bloques en el mismo formulario.
+ * `inicial` es lo que tenía un borrador.
  */
-export function InstagramOpciones({ cuenta }: { cuenta: CuentaDestino }) {
-  const [trial, setTrial] = useState(false)
+export function InstagramOpciones({ cuenta, inicial = false }: { cuenta: CuentaDestino; inicial?: boolean }) {
+  const [trial, setTrial] = useState(inicial)
   return (
     <div className="space-y-3 rounded-xl bg-white/[0.04] p-4">
       <GroupLabel>Instagram · {cuenta.handle ?? 'sin nombre'}</GroupLabel>

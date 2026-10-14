@@ -5,7 +5,6 @@ import {
   getDb,
   postMetrics,
   profiles,
-  scheduledPosts,
   socialAccounts,
   socialPosts,
   visits,
@@ -18,7 +17,6 @@ import {
   type PostKpis,
   type PostRow,
 } from './posts-kpis'
-import { contarPorDia } from './schedule-week'
 import { periodChange, type Snapshot } from './social/delta'
 import { REDES_SIN_DERIVADAS, sinMetricasDerivadas } from './social/politica-youtube'
 
@@ -336,33 +334,6 @@ export async function getCuentas(ownerId: string): Promise<CuentaRow[]> {
     lastSyncError: a.lastSyncError,
     expiresAt: a.expiresAt?.toISOString() ?? null,
   }))
-}
-
-/**
- * Cuántas publicaciones tiene agendadas cada día, en la zona que recibe (la del dueño).
- *
- * Alimenta el termómetro de la semana en El Fuego y el aviso de carga del compositor:
- * los dos preguntan lo mismo —¿qué tan llena está la parrilla ese día?— y una sola
- * consulta les sirve a ambos.
- *
- * Agrupa en JavaScript y no en SQL con `AT TIME ZONE` para reusar `dayKey`, que es la
- * misma función con la que el calendario reparte los posts en columnas y ya está
- * probada. Dos maneras distintas de decidir a qué día pertenece una hora es exactamente
- * como se llega a que el termómetro y el calendario se contradigan.
- *
- * Solo mira hacia adelante: la carga pasada no ayuda a decidir dónde poner lo próximo.
- */
-export async function cargaPorDia(
-  ownerId: string,
-  zone: string,
-  desde: Date,
-): Promise<Record<string, number>> {
-  const filas = await getDb()
-    .select({ scheduledAt: scheduledPosts.scheduledAt })
-    .from(scheduledPosts)
-    .where(and(eq(scheduledPosts.ownerId, ownerId), gte(scheduledPosts.scheduledAt, desde)))
-
-  return contarPorDia(filas, zone)
 }
 
 /** Lets the analytics campaign table show a post's caption instead of a bare tag. */

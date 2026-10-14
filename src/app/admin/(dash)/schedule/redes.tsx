@@ -21,7 +21,7 @@ const CLASE_COLOR: Record<ReturnType<typeof colorDeDestino>, string> = {
 /**
  * Los logos de un corte: un icono por destino, en el orden de los destinos, teñido solo si
  * se quemó o si ya salió. Con `detalle`, cada icono lleva al lado el handle y el estado en
- * palabras (la cola); sin él, solo los iconos (la parrilla, El Fuego). Lo que decía el chip
+ * palabras (la cola); sin él, solo los iconos (el calendario y «Se quemó»). Lo que decía el chip
  * de texto sigue diciéndose: en el `title` de cada icono, y en un `sr-only` — de la fila sin
  * `detalle`, o delante de cada icono con `detalle`, porque ahí el texto visible ya dice el
  * handle y el estado y solo falta la red; un `sr-only` de fila repetiría los dos.

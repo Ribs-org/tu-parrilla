@@ -98,9 +98,10 @@ Sin ninguna llave, en lugar de la lista dice «Todavía no tienes llaves.».
 2. Apretar «Guardar». Sale «Guardado.» y la línea «Ahora son las…» pasa a la zona nueva: ahí se
    comprueba que la hora sea la del reloj de la persona.
 
-La zona manda en todo el panel: qué es hoy y qué es ayer en El Fuego (la portada del panel), las horas del calendario y
-del formulario para programar, y las fechas que recibe la API. Lo ya programado no se mueve:
-sale en el mismo momento de siempre, solo que el panel lo muestra con la hora de la zona nueva.
+La zona manda en todo el panel: qué es hoy y qué es ayer en La Parrilla (la entrada del
+panel), las horas del calendario y del formulario para programar, y las fechas que recibe la
+API. Lo ya programado no se mueve: sale en el mismo momento de siempre, solo que el panel lo
+muestra con la hora de la zona nueva.
 
 ### Para darle una llave a un agente
 

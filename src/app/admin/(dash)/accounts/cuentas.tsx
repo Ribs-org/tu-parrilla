@@ -231,7 +231,7 @@ function Tarjeta({ row, network, vivas }: { row: CuentaRow; network: string; viv
       <button
         type="button"
         onClick={copiarId}
-        title="Id de cuenta — para «cuentas» en la carga masiva o la API"
+        title="Id de cuenta — para «cuentas» en el CSV o la API"
         className="mt-0.5 flex max-w-full items-center gap-1 font-mono text-[0.68rem] text-fg-faint transition-colors hover:text-fg-muted"
       >
         <span className="truncate">{row.id}</span>

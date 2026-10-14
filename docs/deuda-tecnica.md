@@ -410,33 +410,12 @@ escribir primero el destino, mirar si casó alguna fila, y solo entonces mover l
 post —o envolver las dos escrituras en una transacción—. Es media hora de trabajo con su
 test del orden nuevo, y nada de lo que hoy se ve en pantalla lo pide.
 
-## El Fuego mira treinta días para nombrar el siguiente corte
-
-**Abierto desde 2026-09-29.**
-
-Cuando hoy no hay nada puesto, El Fuego dice «La parrilla está fría hoy.» y nombra el
-siguiente corte. Ese siguiente sale de una segunda lectura acotada a **treinta días**
-(`DIAS_ADELANTE` en `src/app/admin/(dash)/page.tsx`), no de toda la agenda. Con algo
-programado al día treinta y uno, la pantalla dice que la parrilla está fría y **no dice
-nada más**, que es indistinguible de no tener nada agendado nunca.
-
-La ventana existe porque la alternativa era leer la agenda entera del dueño para pintar una
-frase: `cortesEntre` trae posts y destinos, y sin tope eso crece con cada publicación
-programada de la historia. Treinta días cubre el caso real —un hueco de una semana o dos— a
-cambio de un borde que casi nadie toca.
-
-Cerrarlo pide una consulta distinta a la que hay: en vez de una ventana, el **primer** corte
-después de mañana ordenado por hora y con `limit 1`, que no depende de ningún tope. Es una
-función nueva en `src/lib/social/publish/cortes.ts` con su entrada en el arnés de
-aislamiento; media hora. Lo que no conviene es agrandar el número y seguir con una ventana:
-mueve el borde, no lo quita.
-
 ## «Se quemó» no tiene ventana de fecha ni forma de podarse
 
 **Abierto desde 2026-09-29.**
 
-`quemadosDe` (`src/lib/social/publish/cortes.ts`) trae **todo** destino en `failed` del
-dueño, sin mirar la fecha, y El Fuego los lista enteros. Es a propósito: un fallo viejo
+`quemados` (`src/lib/fuego.ts`), sobre todo lo programado del dueño, toma **todo** destino
+en `failed`, sin mirar la fecha, y La Parrilla los lista enteros arriba del calendario. Es a propósito: un fallo viejo
 sigue pidiendo la acción hasta que alguien lo reprograma, y esconderlo a los siete días
 sería perderlo en silencio. Desde esta entrega la lista va del más reciente al más viejo y
 cada fila que no es de hoy lleva su día y su mes delante, así que al menos se sabe qué es

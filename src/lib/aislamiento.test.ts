@@ -111,11 +111,12 @@ process.env.AUTH_SECRET = 'secreto-de-prueba-para-el-arnes'
 // terminar antes de `testTimeout`. Mismo motivo que en `usuarios.test.ts` (ver el
 // comentario de sus líneas 50-54).
 const { getRecentVisits } = await import('./analytics')
-const { getCuentas, cargaPorDia, getPostRows } = await import('./posts')
+const { getCuentas, getPostRows } = await import('./posts')
 const { getAllProfiles, getProfileBySlug } = await import('./profiles')
 const { getCola } = await import('./comentarios-cola')
 const { verificarCuentas, cuentaUnicaPorRed } = await import('./social/cuentas')
-const { todosLosCortes, cortesEntre, quemadosDe, servidosAyer } = await import('./social/publish/cortes')
+const { todosLosCortes, servidosAyer } = await import('./social/publish/cortes')
+const { listarBorradores, cargarBorrador, guardarBorrador, borrarBorrador } = await import('./borradores')
 const { leerAjuste } = await import('./ajustes')
 const { listarLlaves, crearLlave } = await import('./llaves')
 const { makeDefault, updateProfile, deleteScheduledPost, guardarCuenta, revocarLlaveApi } = await import(
@@ -228,14 +229,6 @@ describe('aislamiento por dueño (SQL generado, sin base)', () => {
     for (const c of consultas) esperarFiltradoPorDueno(c)
   })
 
-  it('posts: cargaPorDia filtra la agenda por dueño', async () => {
-    const consultas = await todasLasConsultas(() =>
-      cargaPorDia(DUENO, 'America/Santiago', new Date('2026-01-01')),
-    )
-    expect(consultas).toHaveLength(1)
-    for (const c of consultas) esperarFiltradoPorDueno(c)
-  })
-
   it('profiles: getAllProfiles filtra los perfiles por dueño', async () => {
     const consultas = await todasLasConsultas(() => getAllProfiles(DUENO))
     expect(consultas).toHaveLength(1)
@@ -299,11 +292,9 @@ describe('aislamiento por dueño (SQL generado, sin base)', () => {
   })
 
   /**
-   * Las tres lecturas de cortes comparten un cargador: posts + destinos + handle en una
-   * consulta, y la media en otra por los ids que esa ya filtró (mismo criterio que
-   * `post_metrics` en `getPostRows`). Sin filas, la de media no se construye: por eso
-   * cada caso ve una sola consulta, y `quemadosDe` lleva su subconsulta de fallos
-   * *antes* del dueño en el `where` — el arnés mira lo que queda tras el último «where».
+   * Posts + destinos + handle en una consulta, y la media en otra por los ids que esa ya
+   * filtró (mismo criterio que `post_metrics` en `getPostRows`). Sin filas, la de media no
+   * se construye: por eso el caso ve una sola consulta.
    */
   it('social/publish/cortes: todosLosCortes ata su consulta al dueño', async () => {
     const consultas = await todasLasConsultas(() => todosLosCortes(DUENO))
@@ -311,19 +302,23 @@ describe('aislamiento por dueño (SQL generado, sin base)', () => {
     for (const c of consultas) esperarFiltradoPorDueno(c)
   })
 
-  it('social/publish/cortes: cortesEntre ata su consulta al dueño', async () => {
-    const consultas = await todasLasConsultas(() =>
-      cortesEntre(DUENO, new Date('2026-01-01'), new Date('2026-01-31')),
-    )
-    expect(consultas).toHaveLength(1)
-    for (const c of consultas) esperarFiltradoPorDueno(c)
+  /**
+   * Los borradores: la lista y la carga de uno atan su lectura al dueño; la media de la
+   * lista va por los ids que esa lectura ya filtró (`borrador_media` no tiene dueño propio).
+   */
+  it('borradores: listarBorradores filtra por dueño, y su media va por los ids ya filtrados', async () => {
+    const consultas = await consultasEncadenadas(() => listarBorradores(DUENO), [
+      [['borrador-1', {}, null, new Date('2026-01-01')]],
+    ])
+    expect(consultas).toHaveLength(2)
+    esperarFiltradoPorDueno(consultas[0]!)
+    expect(consultas[1]!.params).toContain('borrador-1')
   })
 
-  it('social/publish/cortes: quemadosDe ata su consulta al dueño, con la subconsulta de fallos dentro', async () => {
-    const consultas = await todasLasConsultas(() => quemadosDe(DUENO))
-    expect(consultas).toHaveLength(1)
-    for (const c of consultas) esperarFiltradoPorDueno(c)
-    expect(consultas[0]!.params).toContain('failed')
+  it('borradores: cargarBorrador solo devuelve el borrador si es del dueño', async () => {
+    const consultas = await consultasEncadenadas(() => cargarBorrador(DUENO, 'borrador-x'))
+    esperarFiltradoPorDueno(consultas[0]!)
+    expect(consultas[0]!.params).toContain('borrador-x')
   })
 
   /**
@@ -529,6 +524,40 @@ describe('aislamiento por dueño, escrituras (SQL generado, sin base)', () => {
     expect(insercion.sql).toMatch(/insert into "llaves_api"/i)
     expect(insercion.params).toContain(DUENO)
     expect(insercion.sql).not.toContain(DUENO)
+  })
+
+  /**
+   * El id del borrador viaja desde el navegador a cada pausa del compositor: sin el dueño en
+   * el WHERE del UPDATE, cualquiera con sesión pisaría el borrador de otro sabiendo su id.
+   * El UPDATE que no encuentra fila corta ahí (`perdido`) y no toca la media.
+   */
+  it('borradores: guardarBorrador con id ata su UPDATE al dueño y, sin fila, no sigue', async () => {
+    const consultas = await consultasEncadenadas(
+      () => guardarBorrador(DUENO, { id: 'borrador-x', campos: {}, fecha: null, media: [] }),
+      [[]],
+    )
+    expect(consultas).toHaveLength(1)
+    expect(consultas[0]!.sql).toMatch(/update "borradores"/i)
+    esperarFiltradoPorDueno(consultas[0]!)
+  })
+
+  it('borradores: guardarBorrador sin id crea el borrador a nombre del dueño', async () => {
+    const consultas = await consultasEncadenadas(
+      () => guardarBorrador(DUENO, { id: null, campos: {}, fecha: null, media: [] }),
+      [[['borrador-nuevo']], []],
+    )
+    expect(consultas[0]!.sql).toMatch(/insert into "borradores"/i)
+    expect(consultas[0]!.params).toContain(DUENO)
+    expect(consultas[0]!.sql).not.toContain(DUENO)
+    // La media se reescribe por el id que el INSERT devolvió, no por uno del navegador.
+    expect(consultas[1]!.params).toContain('borrador-nuevo')
+  })
+
+  it('borradores: borrarBorrador ata su DELETE al dueño', async () => {
+    const consultas = await consultasEncadenadas(() => borrarBorrador(DUENO, 'borrador-x'), [[]])
+    expect(consultas).toHaveLength(1)
+    expect(consultas[0]!.sql).toMatch(/delete from "borradores"/i)
+    esperarFiltradoPorDueno(consultas[0]!)
   })
 
   it('api/mobile/schedule/accounts: lista solo las cuentas del dueño', async () => {

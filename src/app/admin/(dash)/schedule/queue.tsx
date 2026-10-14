@@ -62,6 +62,9 @@ export function Queue({
             <div className="flex shrink-0 items-center gap-3">
               <Link
                 href={`/admin/schedule/${post.id}?volver=${encodeURIComponent(volver)}`}
+                // Sin prefetch, como en el calendario: veinte filas eran veinte editores
+                // pedidos por adelantado.
+                prefetch={false}
                 className="text-xs text-fg-faint hover:text-fg"
               >
                 Editar

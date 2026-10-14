@@ -1,9 +1,10 @@
-import { addDays, dayKey, dayLabelConMes, hourLabel } from '@/lib/schedule-week'
+import { dayKey, dayLabelConMes, hourLabel } from '@/lib/schedule-week'
 import { formatNumber } from '@/lib/utils'
 
-// Lo que El Fuego decide, sin tocar la base: qué es «hoy», cuál es el siguiente corte, qué
-// se quemó, y qué dice el pie (cuántos cortes y cuántas miradas). La página solo compone;
-// esto se prueba con fixtures.
+// Lo que La Parrilla decide sin tocar la base para lo que pide una acción: qué se quemó, a
+// qué hora y día, y qué dice el pie de ayer (cuántos cortes y cuántas miradas). La página
+// solo compone; esto se prueba con fixtures. El nombre viene de El Fuego, la pantalla de
+// entrada que lo usaba antes de fundirse en La Parrilla.
 
 /**
  * Lo mínimo que estas funciones necesitan de un corte. Las tres que seleccionan son
@@ -25,29 +26,13 @@ export type Corte = {
   }>
 }
 
-/** Lo programado para hoy en la zona que recibe (la del dueño), salido o no, en orden de hora. */
-export function cortesDeHoy<T extends Corte>(cortes: T[], now: Date, zone: string): T[] {
-  const hoy = dayKey(now, zone)
-  return cortes
-    .filter((c) => dayKey(c.post.scheduledAt, zone) === hoy)
-    .sort((a, b) => a.post.scheduledAt.getTime() - b.post.scheduledAt.getTime())
-}
-
-/** El primer corte después de ahora, o null: «la parrilla está fría» hacia adelante. */
-export function siguienteCorte<T extends Corte>(cortes: T[], now: Date): T | null {
-  const futuros = cortes
-    .filter((c) => c.post.scheduledAt.getTime() > now.getTime())
-    .sort((a, b) => a.post.scheduledAt.getTime() - b.post.scheduledAt.getTime())
-  return futuros[0] ?? null
-}
-
 /**
- * Cada destino que se quemó, con su corte: es lo único de El Fuego que pide una acción.
+ * Cada destino que se quemó, con su corte: es lo único de La Parrilla que pide una acción
+ * sin que nadie la busque.
  *
  * Del más reciente al más viejo, y el orden es la información: esta lectura no tiene
  * ventana de fecha —un fallo viejo sigue pidiendo la acción hasta que alguien lo
- * reprograma—, así que sin ordenarla lo de la semana pasada quedaría arriba de lo de hoy
- * en la pantalla que promete decir qué pide una acción **hoy**. Se ordena acá y no en la
+ * reprograma—, así que sin ordenarla lo de la semana pasada quedaría arriba de lo de hoy. Se ordena acá y no en la
  * página para no depender del orden en que la base los entregue.
  */
 export function quemados<T extends Corte>(cortes: T[]): Array<{ corte: T; destino: T['targets'][number] }> {
@@ -57,26 +42,12 @@ export function quemados<T extends Corte>(cortes: T[]): Array<{ corte: T; destin
 }
 
 /**
- * Cuándo sale el siguiente corte, en una frase.
- *
- * Mañana se dice «mañana»: es el caso más común y «mar 30» obliga a mirar un calendario
- * para entenderlo. Más allá va el día con su mes, porque la ventana que alimenta esta
- * frase es de treinta días y «mar 3» a secas puede ser dentro de cuatro días o dentro de
- * cinco semanas.
- */
-export function avisoDelSiguiente(scheduledAt: Date, now: Date, zone: string): string {
-  const dia = dayKey(scheduledAt, zone)
-  const cuando = dia === addDays(dayKey(now, zone), 1) ? 'mañana' : `el ${dayLabelConMes(dia)}`
-  return `El siguiente sale ${cuando} a las ${hourLabel(scheduledAt, zone)}.`
-}
-
-/**
  * La hora de un corte, con su día y su mes delante si no es de hoy: «vie 25 de sep · 09:15».
  *
  * Lo pide «Se quemó», que no tiene ventana de fecha ninguna: sin el día, un fallo de la
  * semana pasada se lee «09:15», idéntico a uno de esta mañana. Y el mes va **siempre** que
  * no sea de hoy, sin regla de «si cae fuera de esta semana»: es la única lista de la
- * pantalla que puede traer algo de hace dos meses, así que «mié 12» a secas sería otra vez
+ * parrilla que puede traer algo de hace dos meses, así que «mié 12» a secas sería otra vez
  * el problema que el mes vino a resolver — con la agravante de que acá no hay ventana que
  * acote cuánto puede alejarse.
  */
