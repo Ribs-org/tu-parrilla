@@ -18,7 +18,7 @@ panel de la plataforma correspondiente.
 | **Instagram** | `instagram_basic`, `instagram_manage_insights`, `pages_show_list`, `pages_read_engagement`, `instagram_content_publish`, `business_management`, `instagram_manage_comments` | App de Meta en **modo desarrollo** | El diálogo de Facebook le dice que la función no está disponible; no puede conectar (es lo que le pasó a una usuaria el 2026-09-29). Solo entran cuentas con un rol en la app. |
 | **Facebook** | `pages_show_list`, `pages_read_engagement`, `pages_read_user_content`, `pages_manage_posts`, `business_management`, `pages_manage_engagement` (+ `publish_video` al confirmar) | La misma app de Meta, mismo modo | Igual que Instagram. |
 | **TikTok** | `user.info.basic`, `video.list`, `video.upload`, `video.publish` | App **aprobada y en producción** desde el 2026-09-28 (Login Kit + Content Posting API); **auditoría de Direct Post aprobada** (aviso del 2026-10-06) | Puede conectar y publicar con la privacidad que elija, desde una cuenta pública o privada, sin cupo de usuarios por día. |
-| **YouTube** | `youtube.upload`, `youtube.force-ssl` (OAuth), más una API key para métricas | Proyecto de Google Cloud *In production* pero **sin verificar** | Entra pasando por el cartel «Google no ha verificado esta app», y cuenta para un tope de **100 usuarios** en toda la vida del proyecto; los videos que suba un proyecto sin auditoría de cuota quedan **privados** aunque pida público. |
+| **YouTube** | `youtube.upload`, `youtube.force-ssl` (OAuth), más una API key para métricas | Proyecto de Google Cloud *In production* y **verificado** (2026-10-14) | Entra sin cartel ni tope de usuarios; falta la auditoría de cuota, y según la documentación los videos que suba un proyecto sin ella quedan **privados** aunque pida público. |
 
 Lo que ya está resuelto del lado del producto y no hay que rehacer: usuarios invitados por
 correo con código, cada uno con su página y sus cuentas aisladas por dueño (`owner_id` en
@@ -142,11 +142,11 @@ tercero en YouTube.
 
 ### 4.1 Verificación del OAuth (pantalla de consentimiento a *Production*)
 
-El proyecto está *In production* pero sin verificar (comprobado el 2026-10-06; este
-párrafo decía *Testing*): cualquiera puede conectar pasando por la pantalla «Google no ha
-verificado esta app», con un tope de 100 usuarios en toda la vida del proyecto, y sin la
-caducidad de 7 días, que es solo de *Testing*. Para quedar verificado con `youtube.upload` y `youtube.force-ssl`
-—que Google clasifica como **sensibles**, no restringidos— Google pide:
+**Aprobada el 2026-10-14.** Hasta entonces el proyecto estaba *In production* sin
+verificar: se conectaba pasando por la pantalla «Google no ha verificado esta app», con un
+tope de 100 usuarios en toda la vida del proyecto. Para quedar verificado con
+`youtube.upload` y `youtube.force-ssl` —que Google clasifica como **sensibles**, no
+restringidos— Google pidió:
 
 - **Dominio verificado** en Search Console (`tu-parrilla.cl`) y que la página principal
   explique qué hace la app y enlace a la privacidad.
@@ -156,8 +156,9 @@ caducidad de 7 días, que es solo de *Testing*. Para quedar verificado con `yout
   verificación, sin logo se puede publicar sin ella pero con aviso al usuario.
 
 Por ser sensibles y no restringidos, **no** pide la auditoría de seguridad externa (CASA);
-eso es solo para Gmail, Drive y similares. Tarda de dos a seis semanas. La marca quedó
-verificada y la verificación se envió el 2026-10-12; el estado vive en `docs/pendientes.md`.
+eso es solo para Gmail, Drive y similares. Se envió el 2026-10-12 y se aprobó en dos días.
+La aprobación no se hereda: un permiso nuevo o un cambio en la pantalla de consentimiento
+pide verificar de nuevo.
 
 ### 4.2 Cuota de la YouTube Data API
 
@@ -249,8 +250,8 @@ ninguno depende de otro. Lo de código se intercala por lo que cada trámite pid
   unas decenas de personas.
 - TikTok: pueden conectar y publicar con la privacidad que elijan (la auditoría de Direct
   Post ya pasó).
-- YouTube: conectan pasando por el cartel de app no verificada (cuentan para el tope de
-  100 usuarios del proyecto) y lo que publiquen sale privado hasta la auditoría de cuota.
+- YouTube: conectan sin cartel ni tope (la verificación del OAuth se aprobó el
+  2026-10-14); lo que publiquen sale privado hasta la auditoría de cuota.
 
 Eso da una beta cerrada útil para Instagram y Facebook (el uso principal) en la semana 1,
 y la apertura de verdad al mes para Meta y TikTok, y al mes o dos para YouTube.

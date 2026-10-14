@@ -3,13 +3,14 @@
 Fecha: 2026-09-30; revisado contra el código el 2026-10-06. Son **dos trámites** en Google Cloud y **uno** en YouTube, y conviene
 hacerlos en paralelo porque cada uno tarda semanas:
 
-1. **Verificación del OAuth.** El proyecto ya está *In production*, pero sin verificar
-   (visto el 2026-10-06): cualquiera puede conectar, pasando por el cartel «Google no ha
-   verificado esta app», con un tope de **100 usuarios en toda la vida del proyecto** que
-   no se reinicia (iban 3). No hay lista de *test users*: eso es solo de *Testing*, y los
-   tokens de 7 días también. La marca quedó verificada y publicada el 2026-10-12 —desde
-   ahí la pantalla de Google muestra «Tu Parrilla» con su logo, y no el dominio— y la
-   verificación se envió ese mismo día; el estado vive en `docs/pendientes.md`.
+1. **Verificación del OAuth: aprobada el 2026-10-14**, para `youtube.upload` y
+   `youtube.force-ssl` (correo de Google a pyxis.latam@gmail.com). Hasta entonces el
+   proyecto estaba *In production* sin verificar: se conectaba pasando por el cartel «Google
+   no ha verificado esta app», con un tope de 100 usuarios en toda la vida del proyecto. La
+   marca quedó verificada el 2026-10-12, y la pantalla de Google muestra «Tu Parrilla» con
+   su logo. **La aprobación no se hereda:** un permiso nuevo, o cualquier cambio en la
+   configuración de la pantalla de consentimiento (nombre, logo, dominios, enlaces,
+   permisos), pide una verificación nueva antes de usarse.
 2. **Auditoría y extensión de cuota de la YouTube Data API.** Sin ella: 10.000 unidades al
    día para todos los usuarios juntos, más un cupo aparte de 100 subidas al día (desde el
    1 de junio de 2026 `videos.insert` cuenta en su propio cupo; antes costaba 1.600
@@ -260,7 +261,7 @@ la evidencia en `evidencia/` de la misma carpeta: son la base para una reauditor
 
 ## Después de aprobar
 
-- Verificación aprobada: desaparecen el cartel de app no verificada y el tope de 100
-  usuarios, y la pantalla de Google muestra «Tu Parrilla» con su logo.
+- Verificación aprobada (2026-10-14): desaparecen el cartel de app no verificada y el tope
+  de 100 usuarios. No tocar la pantalla de consentimiento sin pedir otra verificación.
 - Con la cuota aprobada: quitar el aviso de YouTube en `AVISO_ANTES_DE_CONECTAR`
   (`src/lib/networks.ts`) y su test, y la frase del README.

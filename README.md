@@ -567,8 +567,7 @@ comentarios; nada más se rompe.
 Los permisos que se agregan son `instagram_manage_comments`, `pages_manage_engagement` y,
 en YouTube, `youtube.force-ssl` en vez de `youtube.readonly`. Con tus propias cuentas
 ninguno espera un trámite: la app de Meta, en modo desarrollo, se los da a quien tenga un
-rol en ella, y el proyecto de Google, en producción y sin verificar, a cualquiera que pase
-por el cartel de app no verificada, hasta 100 usuarios.
+rol en ella, y el proyecto de Google, verificado desde el 2026-10-14, a cualquiera.
 
 Si al reconectar te sale **«Invalid Scopes»**, es que el caso de uso que da ese permiso no
 está activado en tu app de Meta. Actívalo en el panel de desarrolladores y vuelve a
