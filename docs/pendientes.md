@@ -100,18 +100,6 @@ Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataf
   (`threads_basic`, `threads_content_publish`). Se sacaron de la primera solicitud porque
   no salen en su video; cada una necesita su guion y su grabación. Ver
   `docs/levantamiento-terceros.md` §2.2 y §7.
-- **[dueño] Google — verificación del OAuth (trámite A): enviada el 2026-10-12, en
-  revisión.** El Verification Center dice «Your app's data access is under review»; Google
-  escribe a pyxis.latam@gmail.com, y se contesta siempre en el mismo hilo. Mientras no
-  se apruebe siguen el cartel de app no verificada y el tope de 100 usuarios en toda la
-  vida del proyecto (iban 3–4 el 2026-10-06). Ese mismo día quedó **verificada y
-  publicada la marca**, que era requisito para poder enviar: la pantalla de Google ya
-  muestra «Tu Parrilla» con su logo. Se envió con el video no listado
-  (https://youtu.be/SPKKA8rCO4k), la justificación de Data Access y, en «Additional info»,
-  un resumen de 1000 caracteres con el acceso del revisor; todo está en
-  `TEXTOS-FORMULARIO.txt`, en la carpeta «YouTube - Verification» del escritorio de
-  Vicente. Cómo es el formulario por dentro: «Cómo es el Verification Center de verdad» en
-  `docs/google-verificacion-guion.md`. Al aprobarse, ver «Después de aprobar» en el guion.
 - **[dueño] Google — auditoría de cuota de YouTube (trámite B): enviada el 2026-10-10,
   esperando respuesta.** YouTube acusó recibo por correo a pyxis.latam@gmail.com, sin número
   de caso; suele tardar semanas. Se pidieron 100.000 unidades al día del cupo general (el
