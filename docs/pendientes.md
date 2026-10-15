@@ -22,8 +22,6 @@ Cómo se usa:
 
 ## Bugs
 
-- **La app del teléfono dice «Contraseña incorrecta.» para cualquier error**, también cuando
-  el servidor falla (2026-10-13). `mobile/src/lib/session.ts:34`; ver la auditoría, §1.2.
 - **Los Fierros: falsa alarma en X** (2026-10-13). La tarjeta dice «vence hoy» al conectar y
   a las dos horas queda gris, aunque X se renueva sola al publicar: falta eximirla en
   `estadoDelFierro` como a TikTok y YouTube (#154). Ver la auditoría, §1.4.

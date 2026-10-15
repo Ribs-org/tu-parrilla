@@ -12,10 +12,12 @@ está mal y dónde está.
 ## 1. Cambian resultados o dejan a la persona sin salida
 
 1. ~~**Los Cortes: el link copiado pierde la atribución.** El botón de copiar entrega `<dominio del panel>/?s=<etiqueta>`, y en tu-parrilla.cl —el único dominio donde se abre el panel— la raíz es la portada del producto, que no anota visitas. Todo post que lleve ese link suma cero en «Visitas». Es el mismo error que ya se corrigió en el editor de perfil (ver `urlPublicaDe` en `src/lib/utils.ts`). Lo empujan además el aviso de `content/page.tsx:136` y el ejemplo `/?s=reel-gimnasio` de `src/components/charts/campaign-table.tsx:40`. Origen: `src/app/admin/(dash)/content/post-table.tsx:333`.~~ **Resuelto el 2026-10-13** (tablero de Los Números).
-2. **App: «Contraseña incorrecta.» para cualquier error**, incluido el 503 «El servidor no
+2. ~~**App: «Contraseña incorrecta.» para cualquier error**, incluido el 503 «El servidor no
    pudo preparar tu ingreso.»: la persona cree que se equivocó de contraseña cuando el
    problema es el servidor. Es justo lo que el comentario de
-   `src/app/api/mobile/session/route.ts:50-52` quería evitar. `mobile/src/lib/session.ts:34`.
+   `src/app/api/mobile/session/route.ts:50-52` quería evitar. `mobile/src/lib/session.ts:34`.~~
+   **Resuelto el 2026-10-15**: la app entra con correo y código, y muestra la frase del
+   servidor o, si no la hay, una que no culpa a la persona.
 3. **App: «Conecta una en la pestaña Cuentas.»** manda a una pestaña que solo muestra
    números; las redes se conectan en Los Fierros, en el panel web.
    `mobile/src/app/(tabs)/publicar.tsx:338-340`.

@@ -4,7 +4,7 @@ export class SesionCaducada extends Error {}
 
 /**
  * Un 401 no es un error de pantalla: es la sesión que dejó de valer (token revocado
- * o contraseña cambiada). Sube distinto para que la app vuelva a pedir la contraseña
+ * o usuario quitado). Sube distinto para que la app vuelva a la pantalla de entrada
  * en vez de mostrar un mensaje rojo sin salida.
  */
 export async function apiGet<T>(path: string, token: string): Promise<T> {

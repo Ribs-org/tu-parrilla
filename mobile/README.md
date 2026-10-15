@@ -108,11 +108,17 @@ reintento, pero no publica hasta que la web la alcance.
 
 ## Cómo entrar
 
-La primera vez que se abre, pide la **contraseña de la app** (`ADMIN_PASSWORD` del
-despliegue; el panel web ya no la usa, entra con correo y código). Se escribe
-una sola vez: después la sesión queda abierta. Si el teléfono tiene huella
-digital o PIN configurado, la app usa ese candado para protegerse cada vez que se
-abre — no hay que volver a escribir la contraseña.
+Igual que el panel web: la primera vez que se abre, pide el **correo** y después el
+**código de seis dígitos** que llega a ese correo. Entra cualquier usuario invitado en
+Los Maestros, y cada uno ve sus propias cuentas. Se hace una sola vez: después la
+sesión queda abierta. Si el teléfono tiene huella digital o PIN configurado, la app
+usa ese candado para protegerse cada vez que se abre — no hay que volver a pedir un
+código.
+
+Hasta la versión del 2026-10-15 se entraba con una contraseña del despliegue
+(`ADMIN_PASSWORD`). Ya no existe: una app que todavía la pida es una instalación sin
+actualizar, y se pone al día sola al abrirla dos veces con señal. La sesión que ya
+tenía abierta sigue valiendo mientras tanto.
 
 ## Cómo publicar desde el teléfono
 

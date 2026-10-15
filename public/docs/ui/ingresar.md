@@ -97,8 +97,10 @@ navegadores ni en la app del teléfono.
 
 ### Para entrar desde el teléfono
 
-La app del teléfono todavía no entra con código: pide la contraseña de la app y entra siempre
-a las cuentas del dueño. Su pantalla está en [app-movil.md](app-movil.md).
+La app del teléfono entra igual: el correo, y después el código que llega a ese correo. Los
+códigos y los topes son los mismos de la web —vale solo el último código pedido, venga de
+donde venga, y los errores del teléfono suman para el tope del día—. Su pantalla está en
+[app-movil.md](app-movil.md).
 
 ## Mensajes que puede ver
 
@@ -167,6 +169,7 @@ Sale de:
 - `src/app/admin/actions.ts` (`logout`) y `src/app/admin/(dash)/layout.tsx`: «Salir».
 - `src/proxy.ts` y `src/lib/dominios.ts`: el panel solo en el dominio del producto.
 - `src/components/landing.tsx`: el enlace desde la portada.
-- `src/app/api/mobile/session/codigo/route.ts`: el código del teléfono, que comparte tope.
+- `src/app/api/mobile/session/codigo/route.ts` y `src/app/api/mobile/session/route.ts`: pedir
+  y canjear el código desde el teléfono, con los mismos topes.
 
 Si cambias lo que se ve en alguno de ellos, actualiza esta página en el mismo commit.
