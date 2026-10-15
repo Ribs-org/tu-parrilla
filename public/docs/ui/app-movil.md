@@ -41,7 +41,7 @@ En «Resumen», «Contenido», «Cuentas» y «Calendario», la app muestra al i
 ### Contenido
 
 - Los mismos botones de período: «Hoy», «7 días», «30 días».
-- Botones de red: «Todas», «Instagram», «Facebook», «YouTube», «Threads» y «X». Se pueden marcar varios; «Todas» quita el filtro. No hay botón de TikTok, y Tu Parrilla hoy no conecta Threads ni X, así que esos dos filtros salen vacíos.
+- Botones de red: «Todas», «Instagram», «Facebook», «YouTube», «Threads» y «X». Se pueden marcar varios; «Todas» quita el filtro. No hay botón de TikTok. Threads y X se conectan en el panel web, pero Tu Parrilla no trae sus publicaciones ni sus números, así que esos dos filtros salen vacíos.
 - La lista de lo publicado en el período, ordenada de más a menos views ganadas. Cada fila: la miniatura, el texto, «Red · fecha», la marca «Se pasó» cuando el post sacó al menos el doble de views ganadas que la mediana (el valor del medio) de los posts que se están mirando, y abajo «N views» y «P% arrastre».
 - Si no hay nada: «No publicaste nada en este período.»
 - Tocar una fila abre su detalle.
