@@ -434,6 +434,10 @@ acceso a nuestro correo). Para dejarla entrar:
    tiempo; sin la puerta, esa revisión no puede entrar y la app arriesga restricciones. La
    puerta solo abre el panel de ese usuario, con sus propias cuentas de prueba. Si cambias
    el código, cámbialo también en las instrucciones para revisores de la app de Meta.
+   Como cualquier código, el fijo cuenta para el tope de diez errores por día
+   (`MAX_FALLOS_POR_DIA` en `src/lib/ingreso.ts`): es lo que impide adivinarlo, y también
+   quiere decir que quien pruebe códigos con ese correo deja al revisor fuera hasta el día
+   siguiente.
 
 El guion completo del video y de los pasos que el revisor sigue en el panel está en
 `docs/meta-revision-guion.md`.

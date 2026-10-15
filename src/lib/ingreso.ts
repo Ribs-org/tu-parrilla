@@ -8,6 +8,7 @@ export const CORREO_INVALIDO = 'Ese correo no se ve bien.'
 export const CODIGO_ENVIADO = 'Si tu correo está invitado, te llegará un código en un minuto.'
 export const CODIGO_INCORRECTO = 'Ese código no es válido o ya venció.'
 export const DEMASIADOS_INTENTOS = 'Demasiados intentos. Pide un código nuevo.'
+export const DEMASIADOS_FALLOS = 'Demasiados intentos en las últimas 24 horas. Prueba de nuevo más tarde.'
 export const SESION_CADUCADA = 'Tu sesión terminó. Vuelve a entrar.'
 export const USUARIO_YA_INVITADO = 'Ese correo ya está invitado.'
 export const USUARIO_CON_INGRESOS = 'Ese usuario ya entró alguna vez; no se puede quitar todavía.'
@@ -16,6 +17,17 @@ export const VIGENCIA_MS = 10 * 60_000
 export const MAX_INTENTOS = 5
 export const MAX_CODIGOS_POR_VENTANA = 3
 export const VENTANA_MS = 15 * 60_000
+
+/**
+ * Los códigos equivocados que una persona puede escribir en un día, sumando todos sus
+ * códigos. Los cinco intentos de cada uno no bastan solos: pedir otro código da cinco más,
+ * y a tres códigos cada quince minutos son 1.440 al día contra un millón de combinaciones
+ * —contra el código fijo del revisor, siempre el mismo, la mitad en un año—. Con diez, un
+ * año entero de intentos no llega a cubrir el 0,4 %. El costo: quien conozca un correo
+ * invitado puede dejarlo sin entrar por un día; una sesión ya abierta no se entera.
+ */
+export const MAX_FALLOS_POR_DIA = 10
+export const VENTANA_FALLOS_MS = 24 * 60 * 60_000
 
 const CORREO = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
 const MAX_CORREO = 254
