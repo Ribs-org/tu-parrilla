@@ -4,6 +4,12 @@
 # De paso cuenta como actividad contra la pausa por 7 días de inactividad del plan gratis,
 # que es una segunda red además del pinger de cron-job.org — y el pinger ya se cayó en
 # silencio una vez.
+#
+# El volcado sale cifrado y nunca toca el disco en claro: el repositorio es público, y los
+# artefactos de un repositorio público los baja cualquiera con cuenta de GitHub. Se cifra
+# con `age` para la llave pública de abajo; la privada no está en GitHub —la guarda el
+# dueño—, así que ni un secreto de Actions filtrado abre un respaldo. Cómo restaurar:
+# «Respaldos», en el README.
 name: Respaldo de la base
 
 on:
@@ -22,8 +28,19 @@ concurrency:
 jobs:
   volcar:
     runs-on: ubuntu-latest
+    env:
+      # Publicarla no abre nada: solo sirve para cifrar.
+      DESTINATARIO: age1pksey0x576yzrqauqwf8sh564dhy7lzzh46knyhwxdtaagrvdqeq37nght
     steps:
-      - name: Volcar la base a un archivo
+      - name: Instalar age
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq age
+
+      - name: Volcar la base, cifrada
+        # `bash` explícito trae `pipefail`: si `pg_dump` se cae a mitad, el paso falla en vez
+        # de subir un respaldo trunco que parece bueno.
+        shell: bash
         env:
           # El "session pooler" (puerto 5432), no la conexión directa: la directa del plan
           # gratis es solo IPv6 y los runners de GitHub son IPv4 — ni siquiera resuelven
@@ -38,16 +55,18 @@ jobs:
           # `pg_dump` va en contenedor en vez del que trae el runner: el cliente tiene que
           # ser de una versión igual o mayor que el servidor, y la del runner va por detrás.
           # La URL viaja como variable de entorno y no como argumento para que no quede
-          # escrita en la línea de comandos del proceso.
-          docker run --rm -e PGURL="$URL" -v "$PWD/respaldo:/salida" postgres:17 \
-            sh -c 'pg_dump "$PGURL" --format=custom --no-owner --no-privileges --file=/salida/parrilla.dump'
-          ls -lh respaldo/parrilla.dump
+          # escrita en la línea de comandos del proceso. El volcado sale por la salida
+          # estándar directo a `age`: en claro no existe ni en el disco del runner.
+          docker run --rm -e PGURL="$URL" postgres:17 \
+            sh -c 'pg_dump "$PGURL" --format=custom --no-owner --no-privileges' \
+            | age -r "$DESTINATARIO" -o respaldo/parrilla.dump.age
+          ls -lh respaldo/parrilla.dump.age
 
       - name: Guardar el respaldo
         uses: actions/upload-artifact@v4
         with:
           name: respaldo-${{ github.run_id }}
-          path: respaldo/parrilla.dump
+          path: respaldo/parrilla.dump.age
           # El tope del plan gratis. Deja unos noventa respaldos diarios vivos a la vez.
           retention-days: 90
           if-no-files-found: error
