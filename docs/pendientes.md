@@ -57,6 +57,17 @@ Cómo se usa:
   al editor (calendario, lista y «Se quemó»); falta mirar en los logs si dejó de pasar y, si
   no, buscar el refresco.
 
+## Seguridad
+
+- **Quedan hallazgos abiertos de la auditoría de seguridad del 2026-10-14.** El detalle no
+  va acá: el repositorio es público, y escribir una vulnerabilidad sin arreglar es
+  publicarla. Está en la carpeta privada del dueño, `tu-parrilla-privado`, fuera del repo;
+  cada arreglo la cuenta en su propio PR, cuando ya está cerrada.
+- **Reactivar el workflow «Respaldo de la base»** (2026-10-15) cuando el cambio que cifra
+  los volcados esté en `main`: quedó apagado para que no suba otro en claro. `gh workflow
+  enable respaldo.yml`, y una corrida a mano (`gh workflow run respaldo.yml`) para ver que
+  sale el `.age`.
+
 ## Trámites con las plataformas
 
 Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataforma.

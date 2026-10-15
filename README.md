@@ -836,6 +836,33 @@ se inserta la fila correspondiente en `drizzle.__drizzle_migrations`, con el has
 archivo y el `when` del journal. Por eso conviene una sola sentencia por migración: así una
 falla a medias dura cero sentencias aplicadas.
 
+## Respaldos
+
+El plan gratis de Supabase no respalda nada, así que `.github/workflows/respaldo.yml` vuelca
+la base entera cada día a las 06:40 UTC y la deja como artefacto de GitHub Actions por 90
+días. Necesita el secreto `DATABASE_URL_UNPOOLED` en el repositorio.
+
+**El volcado sale cifrado, y tiene que seguir así.** El repositorio es público, y los
+artefactos de un repositorio público los baja cualquiera con cuenta de GitHub: un respaldo
+en claro es la base entera —correos, publicaciones, comentarios de terceros— a la vista.
+El workflow cifra con [`age`](https://age-encryption.org) para la llave pública que tiene
+escrita (`DESTINATARIO`); la privada no está en GitHub ni en el repositorio, la guarda el
+dueño. Sin ella los respaldos no se abren, así que va en un gestor de contraseñas o en un
+lugar con copia.
+
+Para restaurar, en una base nueva o local (nunca encima de producción sin pensarlo):
+
+```bash
+gh run download <id-de-la-corrida> -R Ribs-org/tu-parrilla   # o bájalo desde la pestaña Actions
+age -d -i clave-respaldos.txt parrilla.dump.age > parrilla.dump
+pg_restore --no-owner --no-privileges -d "<url-de-la-base>" parrilla.dump
+```
+
+`pg_restore` tiene que ser de la versión 17 o mayor, como el `pg_dump` que lo generó; el de
+un contenedor `postgres:17` sirve. Si la llave privada se pierde, se genera otra con
+`age-keygen`, se cambia `DESTINATARIO` en el workflow, y los respaldos viejos quedan
+perdidos.
+
 ## Variables de entorno
 
 La plantilla comentada está en [`.env.example`](.env.example). En producción viven en
