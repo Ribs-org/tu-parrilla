@@ -67,10 +67,6 @@ Cómo se usa:
   los volcados esté en `main`: quedó apagado para que no suba otro en claro. `gh workflow
   enable respaldo.yml`, y una corrida a mano (`gh workflow run respaldo.yml`) para ver que
   sale el `.age`.
-- **[dueño] Copiar la llave privada de los respaldos a un gestor de contraseñas**
-  (2026-10-15). Hoy vive en un solo archivo, `tu-parrilla-privado/clave-respaldos.txt`, en
-  el computador de Vicente; si se pierde, ningún respaldo se abre. Ver «Respaldos» en el
-  README.
 
 ## Trámites con las plataformas
 
