@@ -84,8 +84,7 @@ No hay botón de reenviar.
 2. Escribir el mismo correo y apretar «Mandarme un código».
 
 Cada código nuevo anula los anteriores: vale solo el último que llegó. Se pueden pedir hasta
-tres códigos cada quince minutos por persona, sumando los de la web y los de la app del
-teléfono. Pasado ese tope la pantalla dice lo mismo de siempre, pero no llega nada hasta que
+tres códigos cada quince minutos por persona. Pasado ese tope la pantalla dice lo mismo de siempre, pero no llega nada hasta que
 pasen los quince minutos. Muchos pedidos seguidos desde la misma conexión también se frenan
 unos minutos, con la misma pantalla.
 
@@ -98,8 +97,8 @@ navegadores ni en la app del teléfono.
 
 ### Para entrar desde el teléfono
 
-La app usa el mismo correo y el mismo código; su pantalla está en [app-movil.md](app-movil.md).
-Pedir un código en la app anula el que se haya pedido en la web, y al revés.
+La app del teléfono todavía no entra con código: pide la contraseña de la app y entra siempre
+a las cuentas del dueño. Su pantalla está en [app-movil.md](app-movil.md).
 
 ## Mensajes que puede ver
 
@@ -109,6 +108,7 @@ Pedir un código en la app anula el que se haya pedido en la web, y al revés.
 | «Si tu correo está invitado, te llegará un código en un minuto. Vale diez minutos.» | Sale **siempre**, esté o no invitado el correo, y aunque no se haya mandado nada por el tope de pedidos. No confirma nada. | Esperar el correo. Si no llega, ver más abajo, en Si el humano dice…, el caso del código que no llega. |
 | «Ese código no es válido o ya venció.» | El código está mal escrito, pasaron más de diez minutos, ya se usó, se pidió uno más nuevo después, o ese correo no está invitado. | Usar el último código que llegó. Si venció, pedir otro. |
 | «Demasiados intentos. Pide un código nuevo.» | Se probaron cinco códigos equivocados contra el mismo código, o hubo muchos intentos seguidos desde la misma conexión. Ese código ya no sirve aunque se escriba bien. | Pedir un código nuevo (ver arriba). Si el mensaje sigue saliendo con el código nuevo, esperar unos diez minutos. |
+| «Demasiados intentos en las últimas 24 horas. Prueba de nuevo más tarde.» | Con ese correo se escribieron diez códigos equivocados en el último día, sumando todos los códigos pedidos. Mientras dure, no entra ni con el código correcto. Una sesión ya abierta, en otro navegador, sigue andando. | Esperar: se libera solo, a más tardar un día después de pedir el código con que empezaron los errores. Si la persona no escribió esos códigos, alguien está probando con su correo: avisarle al admin. |
 | «Algo se rompió» | Falló el servidor, no la persona. | Apretar «Reintentar». Si se repite, avisarle al admin. |
 
 El navegador puede mostrar además su propio aviso, en el idioma del navegador, si el correo no
@@ -124,6 +124,9 @@ tiene forma de correo o el código no son seis dígitos: viene del navegador, no
   o lo revise en Los Maestros (quién puede entrar, [los-maestros.md](los-maestros.md)).
 - **«¿Por qué no me dice si mi correo está invitado?».** Es a propósito: así nadie puede
   averiguar quién usa Tu Parrilla probando correos.
+- **«Me dice que espere 24 horas».** Se equivocó diez veces en el día, o alguien probó códigos
+  con su correo. Es un freno contra quien intenta adivinar: no hay forma de saltárselo desde
+  el panel, ni siquiera el admin. Se libera solo.
 - **«El código llegó pero dice que no es válido».** Casi siempre es un código anterior (se
   pidieron dos y se escribió el primero) o pasaron más de diez minutos. Usar el último, o pedir
   otro.
@@ -155,8 +158,8 @@ Sale de:
   `src/app/ingresar/formularios.tsx`, `src/app/ingresar/acciones.ts` y
   `src/app/ingresar/error.tsx`: las dos pantallas, sus textos y la de error.
 - `src/app/admin/login/page.tsx`: la dirección antigua.
-- `src/lib/ingreso.ts`: las frases, los diez minutos, los cinco intentos y los tres códigos
-  cada quince minutos.
+- `src/lib/ingreso.ts`: las frases, los diez minutos, los cinco intentos, los tres códigos
+  cada quince minutos y los diez errores por día.
 - `src/lib/usuarios.ts`: pedir y canjear el código, y el texto del correo.
 - `src/lib/limite-ip.ts`: el freno por conexión.
 - `src/lib/sesion-token.ts` y `src/lib/auth.ts`: los treinta días y adónde manda sin sesión.

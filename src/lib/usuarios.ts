@@ -1,6 +1,6 @@
 import 'server-only'
 import { hkdfSync } from 'node:crypto'
-import { and, asc, desc, eq, gt, isNull, sql } from 'drizzle-orm'
+import { and, asc, desc, eq, gt, isNull, lt, sql } from 'drizzle-orm'
 import { codigosIngreso, getDb, profiles, users, type Usuario } from '@/db'
 import { enviarCorreo } from './correo'
 import { env } from './env'
@@ -8,10 +8,13 @@ import { direccionBase, primeraDireccionLibre } from './slugs'
 import {
   CODIGO_INCORRECTO,
   CORREO_INVALIDO,
+  DEMASIADOS_FALLOS,
   DEMASIADOS_INTENTOS,
+  MAX_FALLOS_POR_DIA,
   MAX_INTENTOS,
   USUARIO_CON_INGRESOS,
   USUARIO_YA_INVITADO,
+  VENTANA_FALLOS_MS,
   VENTANA_MS,
   VIGENCIA_MS,
   codigoCoincide,
@@ -268,6 +271,19 @@ export async function canjear(correo: string, codigo: string): Promise<{ usuario
 
   const db = getDb()
   const now = new Date()
+  // `intentos` cuenta solo fallos (un acierto devuelve el suyo, abajo), así que la suma de
+  // las filas del día es lo que esta persona erró hoy, con todos sus códigos.
+  const [{ fallos } = { fallos: 0 }] = await db
+    .select({ fallos: sql<number>`coalesce(sum(${codigosIngreso.intentos}), 0)::int` })
+    .from(codigosIngreso)
+    .where(
+      and(
+        eq(codigosIngreso.userId, usuario.id),
+        gt(codigosIngreso.createdAt, new Date(now.getTime() - VENTANA_FALLOS_MS)),
+      ),
+    )
+  if (fallos >= MAX_FALLOS_POR_DIA) return { error: DEMASIADOS_FALLOS }
+
   const [fila] = await db
     .select()
     .from(codigosIngreso)
@@ -279,18 +295,30 @@ export async function canjear(correo: string, codigo: string): Promise<{ usuario
   if (fila.intentos >= MAX_INTENTOS) return { error: DEMASIADOS_INTENTOS }
   if (!vigente(fila, now)) return { error: CODIGO_INCORRECTO }
 
+  // El intento se gasta antes de comparar, y en una sola sentencia que solo pasa si quedan:
+  // leer el contador, comparar y recién después sumarle dejaba que cien intentos a la vez
+  // leyeran todos «quedan cinco» y se compararan todos.
+  const [gastado] = await db
+    .update(codigosIngreso)
+    .set({ intentos: sql`${codigosIngreso.intentos} + 1` })
+    .where(
+      and(eq(codigosIngreso.id, fila.id), isNull(codigosIngreso.usadoEn), lt(codigosIngreso.intentos, MAX_INTENTOS)),
+    )
+    .returning({ intentos: codigosIngreso.intentos })
+  if (!gastado) return { error: DEMASIADOS_INTENTOS }
+
   if (!codigoCoincide(codigo, fila.hash, claveCodigos())) {
-    // En SQL y no en memoria: dos intentos a la vez leerían el mismo número y el tope de cinco no se cumpliría.
-    const [actualizada] = await db
-      .update(codigosIngreso)
-      .set({ intentos: sql`${codigosIngreso.intentos} + 1` })
-      .where(eq(codigosIngreso.id, fila.id))
-      .returning({ intentos: codigosIngreso.intentos })
-    const intentos = actualizada?.intentos ?? fila.intentos + 1
-    return { error: intentos >= MAX_INTENTOS ? DEMASIADOS_INTENTOS : CODIGO_INCORRECTO }
+    return { error: gastado.intentos >= MAX_INTENTOS ? DEMASIADOS_INTENTOS : CODIGO_INCORRECTO }
   }
 
-  await db.update(codigosIngreso).set({ usadoEn: now }).where(eq(codigosIngreso.id, fila.id))
+  // Acertó: el intento gastado no era un fallo y se devuelve. Solo si nadie lo usó antes:
+  // dos canjes del mismo código a la vez abren una sesión, no dos.
+  const [usada] = await db
+    .update(codigosIngreso)
+    .set({ usadoEn: now, intentos: sql`${codigosIngreso.intentos} - 1` })
+    .where(and(eq(codigosIngreso.id, fila.id), isNull(codigosIngreso.usadoEn)))
+    .returning({ id: codigosIngreso.id })
+  if (!usada) return { error: CODIGO_INCORRECTO }
   await db
     .update(users)
     .set({ primerIngresoEn: usuario.primerIngresoEn ?? now, updatedAt: now })
