@@ -63,10 +63,6 @@ Cómo se usa:
   va acá: el repositorio es público, y escribir una vulnerabilidad sin arreglar es
   publicarla. Está en la carpeta privada del dueño, `tu-parrilla-privado`, fuera del repo;
   cada arreglo la cuenta en su propio PR, cuando ya está cerrada.
-- **Reactivar el workflow «Respaldo de la base»** (2026-10-15) cuando el cambio que cifra
-  los volcados esté en `main`: quedó apagado para que no suba otro en claro. `gh workflow
-  enable respaldo.yml`, y una corrida a mano (`gh workflow run respaldo.yml`) para ver que
-  sale el `.age`.
 
 ## Trámites con las plataformas
 
