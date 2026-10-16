@@ -1,5 +1,12 @@
 import { cn } from '@/lib/utils'
 
+/**
+ * Un panel de Los Números: título, bajada, una acción opcional a la derecha y su contenido.
+ *
+ * En el teléfono la acción baja debajo del título: al lado, con `shrink-0`, se quedaba con el
+ * ancho y el título se apretaba a una palabra por renglón («Lo que más creció» con sus tres
+ * enlaces).
+ */
 export function Panel({
   title,
   hint,
@@ -15,12 +22,12 @@ export function Panel({
 }) {
   return (
     <section className={cn('chapa rounded-xl p-5', className)}>
-      <header className="mb-4 flex items-start gap-3">
-        <div className="min-w-0">
+      <header className="mb-4 flex flex-wrap items-start gap-x-3 gap-y-2">
+        <div className="min-w-0 grow basis-full sm:basis-0">
           <h2 className="font-titulo text-[0.95rem] font-semibold uppercase tracking-[0.08em]">{title}</h2>
           {hint ? <p className="mt-0.5 text-[0.78rem] text-fg-faint">{hint}</p> : null}
         </div>
-        {action ? <div className="ml-auto shrink-0">{action}</div> : null}
+        {action ? <div className="shrink-0 sm:ml-auto">{action}</div> : null}
       </header>
       {children}
     </section>

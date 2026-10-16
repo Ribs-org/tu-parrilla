@@ -64,6 +64,11 @@ const PREVIEW_COUNT = 20
  * panel, cuya raíz en tu-parrilla.cl es la portada y no anota visitas. `nombres` trae «Red ·
  * handle» por cuenta, para distinguir dos cuentas de la misma red. El texto de cada fila abre
  * su pieza; `consulta` es lo que se le acarrea (`?range=…`), para volver con los filtros.
+ *
+ * Con 'pocas', en el teléfono las dos cifras bajan debajo del título y las columnas se van: la
+ * tabla pedía 26 rem de ancho mínimo, y a 390 px la columna de views —la cifra de la
+ * pantalla— quedaba escondida a la derecha y «Se pasó» se cortaba en el borde. Ordenar, ahí,
+ * es con los dos botones de arriba.
  */
 export function PostTable({
   rows,
@@ -79,6 +84,9 @@ export function PostTable({
   consulta?: string
 }) {
   const visibles = COLUMNS.filter((c) => columnas === 'todas' || POCAS.has(c.key))
+  // Las columnas que en el teléfono se van, porque sus cifras bajan debajo del título.
+  const compacta = columnas === 'pocas'
+  const enAncho = compacta ? 'hidden sm:table-cell' : undefined
   const deLaRed = visibles.filter((c) => c.grupo === 'red').length
   const nuestras = visibles.length - deLaRed
   const { sorted, sortKey, descending, toggle } = useSortedRows(rows, 'views')
@@ -120,15 +128,39 @@ export function PostTable({
 
   return (
     <div className="-mx-1 overflow-x-auto px-1">
+      {compacta ? (
+        <div className="mb-2 flex items-center gap-2 sm:hidden" role="group" aria-label="Ordenar por">
+          <span className="font-mono text-[0.65rem] uppercase tracking-[0.14em] text-fg-faint">Ordenar</span>
+          {visibles.map((column) => (
+            <button
+              key={column.key}
+              type="button"
+              aria-pressed={sortKey === column.key}
+              onClick={() => toggle(column.key)}
+              className={cn(
+                'inline-flex items-center gap-1 rounded-full border px-2.5 py-1 font-mono text-[0.68rem] uppercase tracking-[0.1em] transition-colors',
+                sortKey === column.key ? 'border-acero-600 text-fg' : 'border-acero-700 text-fg-faint hover:text-fg-muted',
+              )}
+            >
+              {column.label}
+              {sortKey === column.key ? (
+                descending ? <ArrowDown className="h-3 w-3" aria-hidden /> : <ArrowUp className="h-3 w-3" aria-hidden />
+              ) : null}
+            </button>
+          ))}
+        </div>
+      ) : null}
       <table
         className={cn(
           'w-full border-collapse text-[0.85rem]',
-          columnas === 'todas' ? 'min-w-[46rem]' : 'min-w-[26rem]',
+          // En el teléfono queda una sola columna, y con `table-fixed` mide lo que la pantalla:
+          // en automático crecía hasta el título más largo y se cortaba a la derecha.
+          columnas === 'todas' ? 'min-w-[46rem]' : 'table-fixed sm:table-auto sm:min-w-[26rem]',
         )}
       >
         <thead>
           {/* Quién cuenta cada grupo de columnas, dicho sobre ellas y no en una nota al pie. */}
-          <tr>
+          <tr className={cn(compacta && 'hidden sm:table-row')}>
             <td aria-hidden />
             <th scope="colgroup" colSpan={deLaRed} className="pb-1 text-right font-normal">
               <span className="border-b border-white/[0.08] pb-0.5 font-mono text-[0.6rem] uppercase tracking-[0.14em] text-fg-faint">
@@ -154,7 +186,7 @@ export function PostTable({
                 aria-sort={
                   sortKey === column.key ? (descending ? 'descending' : 'ascending') : 'none'
                 }
-                className="pb-2 text-right font-normal"
+                className={cn('pb-2 text-right font-normal', enAncho)}
               >
                 <button
                   type="button"
@@ -240,10 +272,19 @@ export function PostTable({
                     */}
                     {comoSalio(row.viewsChange, mediana) === 'se-paso' ? (
                       <span
-                        className="ml-1.5 font-titulo text-[0.6rem] uppercase tracking-[0.12em] text-brasa"
+                        className="ml-1.5 whitespace-nowrap font-titulo text-[0.6rem] uppercase tracking-[0.12em] text-brasa"
                         title="El doble o más de las vistas ganadas por la mitad de tus posts del período"
                       >
                         Se pasó
+                      </span>
+                    ) : null}
+                    {compacta ? (
+                      // En el teléfono, las dos cifras de las columnas, con quién las cuenta.
+                      <span className="mt-0.5 block font-mono text-[0.7rem] text-fg-muted sm:hidden">
+                        {num(row.views)} views
+                        {row.viewsChange !== null && row.viewsChange > 0 && !row.isNew ? ` (+${formatNumber(row.viewsChange)})` : ''}
+                        {' · '}
+                        {num(row.visits)} visitas a tu página
                       </span>
                     ) : null}
                     <CampaignCell postId={row.id} campaign={row.campaign} baseEnlace={baseEnlace} />
@@ -253,7 +294,7 @@ export function PostTable({
 
               {visibles.map((column) =>
                 column.key === 'views' ? (
-                  <td key="views" className="relative py-2 text-right font-mono tabular-nums">
+                  <td key="views" className={cn('relative py-2 text-right font-mono tabular-nums', enAncho)}>
                     {/*
                       La barra ya existía y era siempre del mismo color: decía el tamaño,
                       no si era mucho o poco para este dueño. Ahora se pinta según cómo
@@ -283,6 +324,7 @@ export function PostTable({
                     className={cn(
                       'py-2 text-right font-mono tabular-nums',
                       column.key !== 'visits' && column.key !== 'pull' && 'text-fg-muted',
+                      enAncho,
                     )}
                   >
                     {celda(row, column.key)}

@@ -3,7 +3,9 @@
 import { ArrowDown, ArrowUp } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { Icon } from '@/components/icon'
 import type { CampaignRow } from '@/lib/analytics'
+import { networkLabel } from '@/lib/networks'
 import type { CampaignPost } from '@/lib/posts'
 import { cn, formatNumber } from '@/lib/utils'
 import { SERIES } from './theme'
@@ -25,14 +27,20 @@ const COLUMNS: Array<{ key: Column; label: string; numeric: boolean; hint?: stri
  *
  * Una etiqueta que es de una publicación abre su pieza; `consulta` es lo que se le acarrea
  * (`?range=…`). Sin `consulta`, la fila no enlaza.
+ *
+ * Debajo del texto de la publicación va su red y su cuenta (`cuentas`: «Red · handle» por id de
+ * cuenta). Sin eso, el mismo post subido a tres redes eran tres filas idénticas, y no había
+ * cómo saber cuál era cuál.
  */
 export function CampaignTable({
   rows,
   posts = {},
+  cuentas = {},
   consulta,
 }: {
   rows: CampaignRow[]
   posts?: Record<string, CampaignPost>
+  cuentas?: Record<string, string>
   consulta?: string
 }) {
   const { sorted, sortKey, descending, toggle } = useSortedRows(rows, 'visits')
@@ -113,19 +121,27 @@ export function CampaignTable({
                         className="h-5 w-5 shrink-0 rounded object-cover"
                       />
                     ) : null}
-                    {consulta !== undefined ? (
-                      <Link
-                        prefetch={false}
-                        href={`/admin/analytics/publicaciones/${posts[row.campaign]!.id}${consulta}`}
-                        className="truncate text-[0.8rem] transition-colors hover:text-fg-muted"
-                      >
-                        {posts[row.campaign]!.caption || row.campaign}
-                      </Link>
-                    ) : (
-                      <span className="truncate text-[0.8rem]">
-                        {posts[row.campaign]!.caption || row.campaign}
+                    <span className="min-w-0">
+                      {consulta !== undefined ? (
+                        <Link
+                          prefetch={false}
+                          href={`/admin/analytics/publicaciones/${posts[row.campaign]!.id}${consulta}`}
+                          className="block truncate text-[0.8rem] transition-colors hover:text-fg-muted"
+                        >
+                          {posts[row.campaign]!.caption || row.campaign}
+                        </Link>
+                      ) : (
+                        <span className="block truncate text-[0.8rem]">
+                          {posts[row.campaign]!.caption || row.campaign}
+                        </span>
+                      )}
+                      <span className="flex items-center gap-1 text-[0.68rem] text-fg-faint">
+                        <Icon name={posts[row.campaign]!.network} className="h-3 w-3 shrink-0" />
+                        <span className="truncate">
+                          {cuentas[posts[row.campaign]!.accountId] ?? networkLabel(posts[row.campaign]!.network)}
+                        </span>
                       </span>
-                    )}
+                    </span>
                   </span>
                 ) : (
                   <span className="font-mono text-[0.8rem]">{row.campaign}</span>

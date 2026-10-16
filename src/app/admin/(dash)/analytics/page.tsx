@@ -160,7 +160,9 @@ function CabezaDeSeccion({
 }) {
   return (
     <div className="mb-3 flex flex-wrap items-end gap-3">
-      <div className="min-w-0 flex-1">
+      {/* `basis-full` en el teléfono: con `flex-1` sola, el selector de cuentas y «⋯ Más»
+          cabían al lado y el título se apretaba a una palabra por renglón. */}
+      <div className="min-w-0 grow basis-full sm:basis-0">
         <h2 className="font-titulo text-lg font-semibold uppercase tracking-[0.04em]">{titulo}</h2>
         <p className="text-[0.8rem] text-fg-muted">{bajada}</p>
       </div>
@@ -367,8 +369,11 @@ async function RedesEnDetalle({
           cuenta ? ' Esta serie es de todas tus cuentas, no solo de la elegida.' : ''
         } Las views no incluyen YouTube; las visitas, sí.`}
       >
+        {/* Separadas: views en miles contra visitas en decenas, en un mismo eje, dejaban las
+            visitas planas en cero. */}
         <TrafficChart
           data={serie}
+          separadas
           series={[
             { key: 'views', name: 'Views ganadas' },
             { key: 'visits', name: 'Visitas' },
@@ -456,7 +461,9 @@ async function EnTuPagina({
         />
       </Panel>
 
-      {abierta ? <PaginaEnDetalle filters={filters} params={params} kpis={kpis} anterior={anterior} /> : null}
+      {abierta ? (
+        <PaginaEnDetalle filters={filters} params={params} kpis={kpis} anterior={anterior} cuentas={cuentas} />
+      ) : null}
     </section>
   )
 }
@@ -466,11 +473,13 @@ async function PaginaEnDetalle({
   params,
   kpis,
   anterior,
+  cuentas,
 }: {
   filters: Filters
   params: Params
   kpis: Kpis
   anterior: Kpis
+  cuentas: CuentaRow[]
 }) {
   const serie = await getTimeSeries(filters)
   const campanas = await getCampaigns(filters)
@@ -502,6 +511,7 @@ async function PaginaEnDetalle({
         <CampaignTable
           rows={campanas}
           posts={Object.fromEntries(posts)}
+          cuentas={Object.fromEntries(cuentas.map((c) => [c.id, nombreDeCuenta(c)]))}
           consulta={numerosHref('', params, { de: 'numeros' })}
         />
       </Panel>

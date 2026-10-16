@@ -4,10 +4,16 @@ import { NEGATIVE, POSITIVE } from './theme'
 type Props = {
   label: string
   value: string
-  /** Percentage change against the previous period of equal length. */
+  /**
+   * Percentage change against the previous period of equal length. `null` es «se quiso
+   * comparar y no se pudo»: el período anterior no tuvo nada (ver `delta`, abajo).
+   */
   delta?: number | null
   hint?: string
 }
+
+/** Lo que dice una cifra que se compara cuando el período anterior no tuvo nada. */
+export const SIN_ANTERIOR = 'Nada en el período anterior para comparar'
 
 export function StatTile({ label, value, delta, hint }: Props) {
   const hasDelta = typeof delta === 'number' && Number.isFinite(delta)
@@ -32,7 +38,9 @@ export function StatTile({ label, value, delta, hint }: Props) {
             <span className="text-fg-faint">vs. período anterior</span>
           </>
         ) : (
-          <span className="text-fg-faint">{hint ?? '—'}</span>
+          // Un «—» suelto debajo de la cifra no decía qué faltaba: cuando lo que falta es el
+          // período anterior, se dice.
+          <span className="text-fg-faint">{hint ?? (delta === null ? SIN_ANTERIOR : '—')}</span>
         )}
       </div>
     </div>
