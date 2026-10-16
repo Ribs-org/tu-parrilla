@@ -218,6 +218,8 @@ export function Corte({
   coccion,
   sellos,
   chico = false,
+  llenado = 1,
+  idDeLlenado = 'tp-llenado',
   className,
 }: {
   formato: Formato
@@ -227,6 +229,14 @@ export function Corte({
   sellos: readonly Sello[]
   /** El de «Se quemó», a 48 px: marcas más gruesas. */
   chico?: boolean
+  /**
+   * Cuánta carne tiene, de 0 a 1, de izquierda a derecha: el corte del compositor se va
+   * llenando a medida que llegan sus archivos. Lo que falta se ve como la silueta punteada,
+   * para que la forma final esté desde que se eligen.
+   */
+  llenado?: number
+  /** El id del recorte del llenado: único por página si hay más de un corte a medio llenar. */
+  idDeLlenado?: string
   className?: string
 }) {
   const quemado = coccion === 'parcial' || coccion === 'quemada'
@@ -234,6 +244,8 @@ export function Corte({
   const v = VETAS[carne]
   const xs = posiciones(sellos.length)
   const silueta = SILUETA[formato]
+  const lleno = Math.max(0, Math.min(1, llenado))
+  const aMedias = lleno < 1
   return (
     <span className={cn('relative block', className)} aria-hidden>
       {/* El humo: lo único que se repite, y solo mientras algo está saliendo. */}
@@ -253,7 +265,19 @@ export function Corte({
         </svg>
       ) : null}
       <svg viewBox="0 0 120 64" className="block h-auto w-full overflow-visible">
+        {aMedias ? (
+          <defs>
+            <clipPath id={idDeLlenado}>
+              <rect x="-4" y="-12" width={128 * lleno} height="90" />
+            </clipPath>
+          </defs>
+        ) : null}
         <ellipse cx="60" cy="59" rx="46" ry="4.5" fill="#000" opacity=".55" filter="url(#tp-sombra)" />
+        {/* Lo que todavía no llegó: la silueta punteada, debajo de la carne que ya está. */}
+        {aMedias ? (
+          <path d={silueta} fill="rgba(242,235,226,.04)" stroke="rgba(242,235,226,.34)" strokeWidth="1.1" strokeDasharray="3 3" />
+        ) : null}
+        <g clipPath={aMedias ? `url(#${idDeLlenado})` : undefined}>
         {formato === 'chori' ? (
           <>
             <path d="M15 31L6 26.5L6.8 35.5Z" fill={v.nudo} />
@@ -281,6 +305,7 @@ export function Corte({
           ))}
         </g>
         <path d={silueta} fill="none" stroke="rgba(0,0,0,.45)" strokeWidth="1" />
+        </g>
         {quemado ? (
           <>
             {/* El halo late tres veces y después queda encendido hasta que se resuelva. */}

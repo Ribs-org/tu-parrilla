@@ -180,8 +180,9 @@ Nada de esto bloquea un trámite hoy; conviene ordenarlo antes de abrir a tercer
 
 - **Llevar el resto de la interfaz al nivel del corte** (2026-10-16). La auditoría de ese
   día propone seis tandas que se publican solas. La primera, lo roto, ya está. Quedan: el
-  corte en los flujos (sobre todo el compositor, con los archivos que llegan como carne cruda
-  mientras suben y el corte que cae en su día); la carne que se asa al ritmo de cada etapa de
+  corte en los flujos (del compositor ya están los archivos que llegan como carne cruda y «Así
+  va a quedar»; faltan los fierros como fichas, la semana con su fuego y el corte que cae en su
+  día, la parrilla fría, el esqueleto tibio y La Mesa como conversación); la carne que se asa al ritmo de cada etapa de
   la publicación (toca el publicador); Los Números con brasas donde se mide calor; la puerta
   de entrada; y lo nativo de la app. Detalle y tiempos a ojo en
   `docs/auditoria-ui-2026-10-16.md`.
