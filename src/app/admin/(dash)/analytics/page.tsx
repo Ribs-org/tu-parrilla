@@ -1,8 +1,6 @@
 import { Suspense } from 'react'
-import { asc, eq, inArray } from 'drizzle-orm'
 import Link from 'next/link'
 import { AccountCards, AccountSeriesChart } from './accounts'
-import { accountMetrics, getDb, socialAccounts } from '@/db'
 import { BarList } from '@/components/charts/bar-list'
 import { CampaignTable } from '@/components/charts/campaign-table'
 import { Donut } from '@/components/charts/donut'
@@ -40,6 +38,7 @@ import { parseFilters } from '@/lib/filters'
 import { networkLabel } from '@/lib/networks'
 import { getCampaignPosts, getCuentas, getPostRows, getPostSeries, postKpisFrom } from '@/lib/posts'
 import { topPostsByGain, type CuentaRow } from '@/lib/posts-kpis'
+import { lecturasDeCuentas } from '@/lib/lecturas-cuentas'
 import { getAllProfiles } from '@/lib/profiles'
 import {
   alternarSeccion,
@@ -315,28 +314,6 @@ async function EnLasRedes({
 }
 
 /** Las lecturas diarias de cada cuenta del dueño, con su cuenta: el panel agrupa por ella. */
-async function lecturasDeCuentas(ownerId: string) {
-  // Sin filtro de fecha a propósito: la variación necesita la lectura anterior a la ventana,
-  // y la tabla crece una fila por cuenta y día — nada que paginar.
-  return getDb()
-    .select({
-      network: accountMetrics.network,
-      accountId: accountMetrics.accountId,
-      day: accountMetrics.day,
-      followers: accountMetrics.followers,
-      profileViews: accountMetrics.profileViews,
-      reach: accountMetrics.reach,
-    })
-    .from(accountMetrics)
-    .where(
-      inArray(
-        accountMetrics.accountId,
-        getDb().select({ id: socialAccounts.id }).from(socialAccounts).where(eq(socialAccounts.ownerId, ownerId)),
-      ),
-    )
-    .orderBy(asc(accountMetrics.day), asc(accountMetrics.network))
-}
-
 async function RedesEnDetalle({
   filters,
   filas,

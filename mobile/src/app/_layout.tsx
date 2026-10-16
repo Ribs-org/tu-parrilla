@@ -46,7 +46,7 @@ export default function RootLayout() {
     const nivel = await LocalAuthentication.getEnrolledLevelAsync()
     if (nivel !== LocalAuthentication.SecurityLevel.NONE) {
       const { success } = await LocalAuthentication.authenticateAsync({
-        promptMessage: 'Desbloquea para ver tus números',
+        promptMessage: 'Desbloquea para entrar a Tu Parrilla',
       })
       if (!success) {
         setListo(true)
@@ -84,7 +84,19 @@ export default function RootLayout() {
             name="post/[id]"
             options={{
               headerShown: true,
-              title: 'Detalle',
+              title: 'Publicación',
+              headerTitleStyle: { color: COLORES.texto, fontFamily: TIPO_TITULO },
+              headerTintColor: COLORES.brasa,
+              headerStyle: { backgroundColor: COLORES.tarjeta },
+              contentStyle: { backgroundColor: COLORES.fondo },
+            }}
+          />
+          {/* «Tus publicaciones» se abre desde Los Números y vuelve ahí: la misma cabecera. */}
+          <Stack.Screen
+            name="publicaciones"
+            options={{
+              headerShown: true,
+              title: 'Tus publicaciones',
               headerTitleStyle: { color: COLORES.texto, fontFamily: TIPO_TITULO },
               headerTintColor: COLORES.brasa,
               headerStyle: { backgroundColor: COLORES.tarjeta },

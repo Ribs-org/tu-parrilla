@@ -9,6 +9,7 @@ import {
   type ScheduledPost,
   type ScheduledPostTarget,
 } from '@/db'
+import { localDay } from '@/lib/analytics'
 import { isoInZone } from '@/lib/metrics-api'
 import { requireMobileUser } from '@/lib/mobile-guardia'
 import {
@@ -114,7 +115,9 @@ export async function GET(request: Request) {
     }
   }
 
-  return NextResponse.json({ posts: agruparPostsMovil(filas, miniaturaPorPost, usuario.zona) })
+  // `hoy`, el día en la zona del dueño: la app arma La Parrilla desde hoy y no puede usar
+  // el reloj del teléfono, que puede estar en otra zona.
+  return NextResponse.json({ hoy: localDay(now, usuario.zona), posts: agruparPostsMovil(filas, miniaturaPorPost, usuario.zona) })
 }
 
 /**

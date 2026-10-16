@@ -33,6 +33,11 @@ describe('parseRango', () => {
     expect(parseRango('30d', now).from).toEqual(new Date('2026-05-16T18:00:00Z'))
   })
 
+  it('90d cuenta hacia atrás y «todo» empieza donde empieza en el panel', () => {
+    expect(parseRango('90d', now).from).toEqual(new Date('2026-03-17T18:00:00Z'))
+    expect(parseRango('todo', now).from).toEqual(new Date('2020-01-01T00:00:00Z'))
+  })
+
   it('cualquier otra cosa cae en 7d: la app nunca queda sin datos por un typo', () => {
     expect(parseRango(null, now).from).toEqual(parseRango('7d', now).from)
     expect(parseRango('mañana', now).from).toEqual(parseRango('7d', now).from)

@@ -77,7 +77,7 @@ export default function Login() {
       <View style={{ flex: 1, justifyContent: 'center', padding: 24, gap: 12 }}>
         {paso === 'correo' ? (
           <>
-            <Titulo>Tus números</Titulo>
+            <Titulo>Tu Parrilla</Titulo>
             <Text style={{ color: COLORES.suave }}>Entra con tu correo: te mandamos un código.</Text>
             <TextInput
               key="correo"

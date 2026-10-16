@@ -1,13 +1,13 @@
 import { Tabs } from 'expo-router'
 import { COLORES, TIPO_TITULO } from '../../components/ui'
-import {
-  IconoCorte,
-  IconoCuentas,
-  IconoFuego,
-  IconoParrilla,
-  IconoPoner,
-} from '../../components/iconos'
+import { BotonPublicar, IconoNumeros, IconoParrilla } from '../../components/iconos'
 
+/**
+ * Las tres pestañas del panel web, en el mismo orden de importancia: La Parrilla es la
+ * entrada, Publicar va al medio porque es la acción principal, y Los Números cierra. Hasta
+ * el 2026-10-16 eran cinco con nombres propios (Resumen, Contenido, Publicar, Cuentas,
+ * Calendario); lo que mostraban vive ahora en estas tres, con el vocabulario del panel.
+ */
 export default function TabsLayout() {
   return (
     <Tabs
@@ -30,38 +30,23 @@ export default function TabsLayout() {
         tabBarLabelStyle: { fontFamily: TIPO_TITULO, fontSize: 11, letterSpacing: 0.6 },
       }}
     >
-      {/*
-        Los cinco `tabBarIcon`: sin ellos la barra reservaba el hueco del icono y lo
-        dejaba en blanco, con el rótulo flotando sobre nada. `color` ya llega resuelto
-        por `tabBarActiveTintColor` / `tabBarInactiveTintColor`, así que el icono no
-        decide su color, solo lo usa.
-      */}
+      {/* `color` ya llega resuelto por los dos tintes de arriba: el icono no decide su color. */}
       <Tabs.Screen
         name="index"
-        options={{ title: 'Resumen', tabBarIcon: ({ color }) => <IconoFuego color={color} /> }}
-      />
-      <Tabs.Screen
-        name="contenido"
-        options={{
-          title: 'Contenido',
-          // El corte necesita el color del fondo de la barra para la veta de grasa.
-          tabBarIcon: ({ color }) => <IconoCorte color={color} fondo={COLORES.tarjeta} />,
-        }}
+        options={{ title: 'La Parrilla', tabBarIcon: ({ color }) => <IconoParrilla color={color} /> }}
       />
       <Tabs.Screen
         name="publicar"
-        options={{ title: 'Publicar', tabBarIcon: ({ color }) => <IconoPoner color={color} /> }}
-      />
-      <Tabs.Screen
-        name="cuentas"
-        options={{ title: 'Cuentas', tabBarIcon: ({ color }) => <IconoCuentas color={color} /> }}
-      />
-      <Tabs.Screen
-        name="calendario"
         options={{
-          title: 'Calendario',
-          tabBarIcon: ({ color }) => <IconoParrilla color={color} />,
+          title: 'Publicar',
+          tabBarIcon: ({ focused }) => (
+            <BotonPublicar fondo={COLORES.tarjeta} brasa={COLORES.brasa} activo={focused} />
+          ),
         }}
+      />
+      <Tabs.Screen
+        name="numeros"
+        options={{ title: 'Los Números', tabBarIcon: ({ color }) => <IconoNumeros color={color} /> }}
       />
     </Tabs>
   )

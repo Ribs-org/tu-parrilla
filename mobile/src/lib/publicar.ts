@@ -172,6 +172,19 @@ export function proximaHoraEnPunto(now: Date): Date {
 }
 
 /**
+ * La fecha con que abre Publicar desde el «+» de un día de La Parrilla: ese día, a la hora
+ * en punto que viene. Si el día es hoy, o ya pasó, la próxima hora en punto sin más. El día
+ * es `YYYY-MM-DD`; uno que no se entiende no cambia nada.
+ */
+export function fechaParaElDia(dia: string, now: Date): Date {
+  const base = proximaHoraEnPunto(now)
+  const partes = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dia)
+  if (!partes) return base
+  const fecha = new Date(Number(partes[1]), Number(partes[2]) - 1, Number(partes[3]), base.getHours(), 0, 0, 0)
+  return fecha.getTime() > base.getTime() ? fecha : base
+}
+
+/**
  * Las dos reglas que la app aplica sola, antes de que el servidor diga nada: algo que
  * mandar (texto o archivo) y al menos un destino elegido. Sin la segunda, el envío
  * llegaba a rechazarse recién en el servidor con «Elige al menos una plataforma»

@@ -1,6 +1,6 @@
 /**
  * La marca en memoria de «la app escribió algo en el servidor». Las pantallas que
- * muestran lo programado (Resumen, Calendario) la comparan con la fecha de su caché al
+ * muestran lo programado (La Parrilla) la comparan con la fecha de su caché al
  * recibir foco: si la caché es anterior al cambio, refrescan aunque parezca fresca.
  * En memoria a propósito: al reabrir la app la caché se refresca sola por edad.
  */

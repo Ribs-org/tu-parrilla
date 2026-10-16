@@ -16,11 +16,24 @@ function fraseRedNoPublicable(red: string): string {
   return `Red desconocida o sin publicación: ${red}.`
 }
 
-/** Los tres rangos que ofrece la app; el resto del panel no viaja al teléfono. */
-export const RANGOS = ['hoy', '7d', '30d'] as const
+/**
+ * Los rangos que ofrece la app: los cinco del panel. Hasta el 2026-10-16 eran tres; las
+ * versiones viejas de la app siguen mandando solo esos, y valen igual.
+ */
+export const RANGOS = ['hoy', '7d', '30d', '90d', 'todo'] as const
 export type Rango = (typeof RANGOS)[number]
 
-const DIAS: Record<Rango, number> = { hoy: 1, '7d': 7, '30d': 30 }
+const DIAS: Record<Rango, number | null> = { hoy: 1, '7d': 7, '30d': 30, '90d': 90, todo: null }
+
+/** El mismo período con el nombre que le da el panel (`src/lib/filters.ts`). */
+export const RANGO_DEL_PANEL = { hoy: 'today', '7d': '7d', '30d': '30d', '90d': '90d', todo: 'all' } as const
+
+/** «Todo» empieza donde empieza en el panel: antes de que existiera el producto. */
+const INICIO_DE_TODO = new Date('2020-01-01T00:00:00Z')
+
+export function leerRango(value: string | null, porDefecto: Rango = '7d'): Rango {
+  return (RANGOS as readonly string[]).includes(value ?? '') ? (value as Rango) : porDefecto
+}
 
 // Iguala al tope de la API del editor-LLM (src/app/api/metrics/posts/route.ts): mismo
 // catálogo, misma parrilla — no hay razón para que el móvil vea menos posts que el editor.
@@ -31,8 +44,8 @@ export const MAX_POSTS = 2000
  * por un parámetro mal escrito es peor que una ventana distinta a la pedida.
  */
 export function parseRango(value: string | null, now: Date): { from: Date; to: Date } {
-  const rango = (RANGOS as readonly string[]).includes(value ?? '') ? (value as Rango) : '7d'
-  return { from: new Date(now.getTime() - DIAS[rango] * 864e5), to: now }
+  const dias = DIAS[leerRango(value)]
+  return { from: dias === null ? INICIO_DE_TODO : new Date(now.getTime() - dias * 864e5), to: now }
 }
 
 /* ------------------------------------------------- publicar desde el teléfono -- */

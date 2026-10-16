@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Linking, Pressable, ScrollView, Text, View } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { Boton, COLORES, Cargando, Etiqueta, Tarjeta } from '../../components/ui'
-import { readCache } from '../../lib/cache'
+import { POST_ABIERTO, readCache } from '../../lib/cache'
 import { capitalizar, num, pct, shortDate } from '../../lib/format'
 import { NOMBRE_RED, RANGOS, type PostMetrica, type Posts } from '../../lib/tipos'
 
@@ -18,6 +18,14 @@ export default function DetallePost() {
     // efecto, así que la regla `react-hooks/set-state-in-effect` no aplica: es un
     // arranque asíncrono legítimo (leer la caché no tiene versión síncrona).
     async function buscar() {
+      // Primero la que se acaba de tocar en Los Números: esa lista no vive en las
+      // cachés de «Tus publicaciones».
+      const abierta = await readCache<PostMetrica>(POST_ABIERTO)
+      if (abierta && abierta.data.externalId === id && abierta.data.red === red) {
+        setPost(abierta.data)
+        setBuscado(true)
+        return
+      }
       for (const rango of RANGOS) {
         const guardado = await readCache<Posts>(`posts:rango=${rango}`)
         const encontrado = guardado?.data.posts.find(

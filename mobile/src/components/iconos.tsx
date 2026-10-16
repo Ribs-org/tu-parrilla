@@ -3,15 +3,14 @@ import { View, type ColorValue } from 'react-native'
 /**
  * Los iconos de la barra de abajo, dibujados con `View`.
  *
- * Las cinco pestañas no declaraban `tabBarIcon`, así que la barra reservaba el hueco del
- * icono y lo dejaba vacío: se veía el rótulo flotando sobre nada. Eso es lo que no cargaba.
- *
  * Dibujados y no de una librería por dos razones. La primera es que ni
  * `@expo/vector-icons` ni `react-native-svg` están instalados, y los dos son dependencia
  * nativa: agregarlos obliga a compilar un build nuevo y a reinstalarlo a mano, mientras
  * que esto viaja en una actualización por aire al build que ya está en el teléfono. La
- * segunda es que un set genérico no tiene un corte de carne ni una parrilla, y son
- * justo los dos que cuentan acá.
+ * segunda es que un set genérico no tiene una parrilla, y es justo la que cuenta acá.
+ *
+ * Desde el 2026-10-16 la barra tiene tres pestañas, las del panel —La Parrilla, Publicar y
+ * Los Números—; el fuego, el corte y la silueta de las cinco de antes se fueron con ellas.
  *
  * `tabBarIcon` recibe `{ color, focused, size }` y devuelve cualquier nodo de React
  * (ver https://docs.expo.dev/router/advanced/tabs/), así que no hace falta más.
@@ -28,69 +27,9 @@ function Caja({ children }: { children: React.ReactNode }) {
 }
 
 /**
- * El fuego, para el Resumen. Un cuadrado con tres esquinas redondas y la cuarta en
- * punta, girado para que la punta quede arriba: la gota clásica, al revés.
- */
-export function IconoFuego({ color }: { color: ColorValue }) {
-  return (
-    <Caja>
-      <View
-        style={{
-          width: 15,
-          height: 15,
-          backgroundColor: color,
-          borderTopLeftRadius: 0,
-          borderTopRightRadius: 8,
-          borderBottomRightRadius: 8,
-          borderBottomLeftRadius: 8,
-          transform: [{ rotate: '45deg' }],
-        }}
-      />
-    </Caja>
-  )
-}
-
-/**
- * Un corte, para Contenido. Las cuatro esquinas con radios distintos para que no se
- * lea como una pastilla, y una veta de grasa cruzada que es lo que lo vuelve carne y
- * no una mancha. La veta va en el color del fondo, no en blanco: así funciona igual
- * con la pestaña activa en brasa y con la inactiva en gris.
- */
-export function IconoCorte({ color, fondo }: { color: ColorValue; fondo: ColorValue }) {
-  return (
-    <Caja>
-      <View
-        style={{
-          width: 20,
-          height: 15,
-          backgroundColor: color,
-          borderTopLeftRadius: 9,
-          borderTopRightRadius: 4,
-          borderBottomRightRadius: 9,
-          borderBottomLeftRadius: 4,
-          overflow: 'hidden',
-          justifyContent: 'center',
-        }}
-      >
-        <View
-          style={{
-            height: 2.5,
-            marginLeft: 4,
-            marginRight: 6,
-            borderRadius: 2,
-            backgroundColor: fondo,
-            transform: [{ rotate: '-12deg' }],
-          }}
-        />
-      </View>
-    </Caja>
-  )
-}
-
-/**
- * La parrilla vista desde arriba, para el Calendario: el marco y los tres fierros.
- * Es el icono que más se parece a lo que la pantalla hace, que es repartir cortes
- * sobre los fierros de cada día.
+ * La parrilla vista desde arriba, para La Parrilla: el marco y los tres fierros. Es el
+ * icono que más se parece a lo que la pantalla hace, que es repartir cortes sobre los
+ * fierros de cada día.
  */
 export function IconoParrilla({ color }: { color: ColorValue }) {
   return (
@@ -147,25 +86,39 @@ export function IconoPoner({ color }: { color: ColorValue }) {
 }
 
 /**
- * Una silueta, para Cuentas. Es el único de los cinco que no sale del mundo de la
- * parrilla, y es a propósito: la pantalla habla de perfiles y seguidores, y forzar un
- * fierro o una tenaza acá dejaría el icono bonito y mudo.
+ * Publicar en la barra: la cruz sobre un círculo de brasa, más grande que los otros dos.
+ * Es la acción principal y va al medio; activa o no, el círculo es siempre brasa y la cruz
+ * del color del fondo, para que no dependa del tinte de la pestaña.
  */
-export function IconoCuentas({ color }: { color: ColorValue }) {
+export function BotonPublicar({ fondo, brasa, activo }: { fondo: ColorValue; brasa: ColorValue; activo: boolean }) {
+  return (
+    <View
+      style={{
+        width: 30,
+        height: 30,
+        borderRadius: 15,
+        backgroundColor: brasa,
+        alignItems: 'center',
+        justifyContent: 'center',
+        // Activo, un aro del color del fondo lo separa de la barra: el mismo «estoy acá»
+        // que el tinte les da a las otras dos.
+        borderWidth: activo ? 3 : 0,
+        borderColor: fondo,
+      }}
+    >
+      <IconoPoner color={fondo} />
+    </View>
+  )
+}
+
+/** Tres barras de distinta altura, para Los Números. */
+export function IconoNumeros({ color }: { color: ColorValue }) {
   return (
     <Caja>
-      <View style={{ width: 20, height: 19, alignItems: 'center' }}>
-        <View style={{ width: 8.5, height: 8.5, borderRadius: 4.25, backgroundColor: color }} />
-        <View
-          style={{
-            width: 17,
-            height: 8,
-            marginTop: 2.5,
-            borderTopLeftRadius: 8.5,
-            borderTopRightRadius: 8.5,
-            backgroundColor: color,
-          }}
-        />
+      <View style={{ width: 18, height: 18, flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+        {[9, 18, 13].map((alto, i) => (
+          <View key={i} style={{ width: 4, height: alto, borderRadius: 1.5, backgroundColor: color }} />
+        ))}
       </View>
     </Caja>
   )
