@@ -116,6 +116,7 @@ const { getAllProfiles, getProfileBySlug } = await import('./profiles')
 const { getCola } = await import('./comentarios-cola')
 const { verificarCuentas, cuentaUnicaPorRed } = await import('./social/cuentas')
 const { todosLosCortes, servidosAyer } = await import('./social/publish/cortes')
+const { quitarCuenta, CUENTA_CONECTADA } = await import('./social/quitar')
 const { listarBorradores, cargarBorrador, guardarBorrador, borrarBorrador } = await import('./borradores')
 const { cuentasParaElTelefono } = await import('./borradores-movil')
 const { leerAjuste } = await import('./ajustes')
@@ -619,5 +620,23 @@ describe('aislamiento por dueño, escrituras (SQL generado, sin base)', () => {
     const where = sql.split(/\bwhere\b/i).pop()!
     expect(where).toMatch(/"network"\s+in\s*\(/i)
     expect(params).not.toContain('tiktok')
+  })
+
+  /**
+   * «Quitar» borra una cuenta con su historial, y el id llega desde el navegador: la lectura
+   * que decide si se puede tiene que estar atada al dueño, o cualquiera borraría la cuenta de
+   * otro sabiendo su id.
+   */
+  it('social/quitar: quitarCuenta lee la cuenta atada al dueño antes de borrar nada', async () => {
+    const consultas = await consultasEncadenadas(() => quitarCuenta(DUENO, '9692387a-41cc-4a81-9f8f-7b07135d742a'))
+    esperarFiltradoPorDueno(consultas[0]!)
+    expect(consultas[0]!.params).toContain('9692387a-41cc-4a81-9f8f-7b07135d742a')
+    expect(consultas.every((c) => !/^\s*delete/i.test(c.sql))).toBe(true)
+  })
+
+  it('social/quitar: una cuenta conectada no se quita, y no se borra nada', async () => {
+    colaRespuestas.push([['@vicente', '1784', true]])
+    expect(await quitarCuenta(DUENO, '9692387a-41cc-4a81-9f8f-7b07135d742a')).toEqual({ error: CUENTA_CONECTADA })
+    expect(capturas).toHaveLength(1)
   })
 })

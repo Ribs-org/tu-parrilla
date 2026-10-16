@@ -38,6 +38,7 @@ import { extensionDe, validateScheduleDraft } from '@/lib/social/publish/validat
 import { validateAtributos, ATRIBUTOS_ERROR, type Atributos } from '@/lib/social/publish/atributos'
 import { diffMedia, diffTargets } from '@/lib/social/publish/edit'
 import { crearPostProgramado } from '@/lib/social/publish/crear'
+import { quitarCuenta } from '@/lib/social/quitar'
 import { CuentaInvalida, verificarCuentas, type CuentaDestino } from '@/lib/social/cuentas'
 // `guardarCuenta` de `social/conectar` guarda una cuenta *de una red*; la acción de abajo,
 // con el mismo nombre, guarda la cuenta *del usuario*. Se renombra la de la red al
@@ -471,6 +472,20 @@ export async function syncSocialNow(): Promise<{ ok?: boolean; error?: string }>
     return { error: 'Ninguna red respondió. Revisa las tarjetas en Cuentas.' }
   }
   return { ok: true }
+}
+
+/**
+ * «Quitar» en Los Fierros: la cuenta sale de Tu Parrilla con su historial y queda libre para
+ * otro usuario. Las reglas —solo desconectada, sin publicaciones por salir— viven en
+ * `quitarCuenta`. Al salir bien vuelve a Los Fierros con el aviso; la tarjeta ya no está.
+ */
+export async function quitarCuentaAccion(accountId: string): Promise<{ error: string }> {
+  const usuario = await requireUser()
+  const resultado = await quitarCuenta(usuario.id, accountId)
+  if ('error' in resultado) return resultado
+  // Lo que se borró se veía también en La Parrilla y en Los Números.
+  revalidatePath('/admin', 'layout')
+  redirect(`/admin/accounts?mensaje=${encodeURIComponent(`«${resultado.nombre}» quitada de Tu Parrilla.`)}`)
 }
 
 export async function disconnectAccount(accountId: string): Promise<void> {

@@ -54,7 +54,7 @@ De arriba abajo:
 8. Solo si la última sincronización falló, en rojo: «La conexión falló; reconecta la cuenta.» Al pasar el mouse sobre esa frase aparece el error original de la red, a veces en inglés.
 9. Avisos de un momento: «Desconectada.» después de desconectar (se va sola), y el resultado de fusionar.
 10. Solo en una tarjeta «Sin credencial» cuando la misma red tiene otra cuenta conectada: «¿Es la misma cuenta con otro identificador? Fusiónala y su historial pasa a la viva.», una lista desplegable con las cuentas conectadas de esa red y el botón «Es la misma cuenta →» (dice «Fusionando…» mientras trabaja).
-11. Al pie: «Reconectar» y «Desconectar» si la cuenta está conectada («Desconectar» dice «Desconectando…» mientras trabaja); solo «Conectar →» si no lo está.
+11. Al pie: «Reconectar» y «Desconectar» si la cuenta está conectada («Desconectar» dice «Desconectando…» mientras trabaja); «Conectar →» y «Quitar» si no lo está. «Quitar» abre una ventana que pregunta antes de borrar nada (ver «Para quitar una cuenta»).
 
 ### Abajo de todo
 
@@ -149,7 +149,19 @@ Cuándo: la tarjeta está en ámbar, dice «La conexión falló; reconecta la cu
 2. El navegador pregunta: «Se desconecta «<nombre>» de <red>. Sus posts y métricas ya bajados se quedan, pero no se sincroniza nada más hasta que la vuelvas a conectar. ¿Seguir?». Acepta.
 3. Aparece «Desconectada.» un momento, y la tarjeta queda con «Sin credencial» y «Conectar →».
 
-La tarjeta no desaparece. Una cuenta desconectada deja de traer números y comentarios, sus comentarios pendientes en La Mesa ya no se pueden responder, y no se puede publicar en ella hasta reconectarla.
+La tarjeta no desaparece. Una cuenta desconectada deja de traer números y comentarios, sus comentarios pendientes en La Mesa ya no se pueden responder, y no se puede publicar en ella hasta reconectarla. Para sacarla del todo, «Quitar» (abajo).
+
+### Para quitar una cuenta
+
+Saca la cuenta de Tu Parrilla con todo lo que se bajó de ella, y la deja libre para que tú u otro usuario la vuelvan a conectar. Es lo que hace falta, por ejemplo, cuando al conectar sale «… ya está conectada por otra persona en Tu Parrilla.»: quien la tiene la quita desde su usuario.
+
+1. Si la cuenta está conectada, primero «Desconectar» (ver arriba). «Quitar» solo aparece en una tarjeta con «Sin credencial».
+2. En la tarjeta, aprieta «Quitar».
+3. Se abre la ventana «¿Quitar «<nombre>» de Tu Parrilla?», con «Se borran la cuenta, sus publicaciones y números ya bajados, sus comentarios y su historial en La Parrilla. No se puede deshacer. En <red> no se borra nada.» y «La cuenta queda libre: tú u otro usuario de Tu Parrilla la pueden volver a conectar, desde cero.».
+4. Aprieta «Quitar para siempre» (dice «Quitando…» mientras trabaja), o «Cancelar», Esc o un clic fuera de la ventana para no hacer nada.
+5. Vuelve a Los Fierros con ««<nombre>» quitada de Tu Parrilla.» arriba, y la tarjeta ya no está.
+
+Lo que se borra: la tarjeta, las publicaciones y los números que se trajeron de esa cuenta, sus comentarios en [La Mesa](la-mesa.md) y, en [La Parrilla](la-parrilla.md), sus destinos ya publicados o quemados. Una publicación que iba también a otras cuentas se queda con esas; una que iba solo a esta desaparece. No deja quitar una cuenta con publicaciones por salir hacia ella: primero hay que borrarlas en La Parrilla, o esperar a que salgan.
 
 ### Para copiar el id de una cuenta
 
@@ -212,6 +224,10 @@ Trae los posts y los números de las cuentas de Instagram, TikTok, YouTube y Fac
 | «Sin credencial» | La cuenta no está conectada; su historial se conserva. | «Conectar →» en la tarjeta, o fusionarla si es una repetida. |
 | «Se desconecta «<nombre>» de <red>. Sus posts y métricas ya bajados se quedan, pero no se sincroniza nada más hasta que la vuelvas a conectar. ¿Seguir?» | Confirmación antes de desconectar. | Aceptar para desconectar, cancelar para dejarla. |
 | «Desconectada.» | Se desconectó. | Nada. |
+| ««<nombre>» quitada de Tu Parrilla.» | Se quitó la cuenta con su historial. | Nada. Para volver a tenerla, «Conectar →» en el bloque de su red. |
+| «Desconecta la cuenta antes de quitarla.» (en la ventana de «Quitar») | La cuenta se volvió a conectar mientras la ventana estaba abierta (por ejemplo, en otra pestaña). | Cerrar la ventana, «Desconectar» y volver a «Quitar». |
+| «Tiene una publicación programada hacia esta cuenta: bórrala en La Parrilla, o espera a que salga, antes de quitarla.» (o «Tiene N publicaciones programadas…») | Hay publicaciones por salir hacia esa cuenta; quitarla las dejaría sin ese destino. | Borrarlas en [La Parrilla](la-parrilla.md), o esperar a que salgan, y volver a «Quitar». |
+| «Esa cuenta ya no está.» (en la ventana de «Quitar») | Se quitó o se fusionó mientras la ventana estaba abierta. | Recargar la página. |
 | ««<la vieja>» se fusiona en «<la conectada>»: sus posts, sus métricas y su historial de publicaciones pasan a esa cuenta, y esta tarjeta desaparece. No se puede deshacer. ¿Seguir?» | Confirmación antes de fusionar. | Aceptar solo si de verdad son la misma cuenta. |
 | «Fusionada en «<la conectada>».» | Se fusionó. | Nada. |
 | «La cuenta que se absorbe tiene que estar sin credencial. Desconéctala primero si es lo que quieres.» | La tarjeta vieja quedó conectada mientras tanto. | Recargar la página; si de verdad es la misma cuenta, desconectarla primero. |
@@ -246,11 +262,13 @@ Trae los posts y los números de las cuentas de Instagram, TikTok, YouTube y Fac
 - **«¿Dónde saco el id de la cuenta para la API o la carga masiva?»** → Es el segundo número de la tarjeta, el del ícono de copiar.
 - **«No me llegan los comentarios de Instagram, Facebook o YouTube»** → Si la cuenta se conectó antes de que existieran los comentarios, hay que apretar «Reconectar» una vez para dar ese permiso. Más en [La Mesa](la-mesa.md).
 - **«Hay una tarjeta de YouTube con un código que empieza con UC y dice "Sin credencial"»** → Solo le pasa a quien administra la instalación: es el canal configurado en ella, esperando que lo conecten. «Conectar →» con la cuenta de Google de ese canal la activa.
-- **«Quiero borrar una cuenta del todo»** → No se puede desde aquí; ver «Lo que esta pantalla no hace».
+- **«Quiero borrar una cuenta del todo»** o **«quiero sacar una cuenta»** → «Desconectar» y después «Quitar» en su tarjeta. Ver «Para quitar una cuenta».
+- **«No me aparece Quitar»** → Solo sale en una tarjeta desconectada («Sin credencial»): primero «Desconectar».
 
 ## Lo que esta pantalla no hace
 
-- No borra cuentas ni su historial. «Desconectar» deja la tarjeta y sus números; la única forma de que una tarjeta desaparezca es fusionarla en otra.
+- No quita una cuenta conectada, ni una con publicaciones por salir hacia ella. «Desconectar» deja la tarjeta y sus números; para que la tarjeta desaparezca hay que quitarla (con su historial) o fusionarla en otra (que conserva su historial).
+- No quita una cuenta que está en otro usuario: la quita ese usuario desde su sesión.
 - No deshace una fusión.
 - No elige a qué cuenta sale cada publicación: eso se marca en el compositor de [La Parrilla](la-parrilla.md).
 - No muestra los números de las cuentas ni de sus publicaciones: están en [Los Números](los-numeros.md).
@@ -269,7 +287,7 @@ Lo que describe sale de:
 - `src/app/admin/(dash)/accounts/page.tsx`
 - `src/app/admin/(dash)/accounts/cuentas.tsx`
 - `src/app/admin/(dash)/accounts/elegir/page.tsx`
-- `src/app/admin/actions.ts` (`syncSocialNow`, `disconnectAccount`, `fusionarCuenta`, `conectarElegidas`)
+- `src/app/admin/actions.ts` (`syncSocialNow`, `disconnectAccount`, `quitarCuentaAccion`, `fusionarCuenta`, `conectarElegidas`)
 - `src/app/api/social/[network]/connect/route.ts`
 - `src/app/api/social/[network]/callback/route.ts`
 - `src/lib/networks.ts` (nombres de las redes, avisos, `META_EN_REVISION`)
@@ -281,6 +299,7 @@ Lo que describe sale de:
 - `src/lib/social/oauth-state.ts` (los diez minutos)
 - `src/lib/social/facebook.ts` y `src/lib/social/instagram.ts` (frases de la conexión de Meta)
 - `src/lib/social/meta-bajas.ts` (la frase de la baja desde Facebook)
+- `src/lib/social/quitar.ts` (las reglas y las frases de «Quitar»)
 - `src/lib/social/sync.ts` y `src/lib/social/index.ts` (qué redes traen números)
 - `src/lib/social/publish/x.ts` y `src/lib/social/publish/threads.ts` (la renovación al publicar)
 - `src/lib/social/publish/publisher.ts`, `src/lib/social/publish/tiktok-creador.ts` y `src/app/admin/(dash)/schedule/composer.tsx` (las frases de otras pantallas que mandan a reconectar)
