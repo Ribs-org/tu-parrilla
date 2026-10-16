@@ -219,3 +219,43 @@ adjunto — eso lo impone Meta, no la bandera.
 de acceso ni caducidad: quien consiga el enlace —lo intercepte, lo reenvíe, lo adivine— puede
 abrirlo, sin sesión ni credencial. Es una decisión de producto para este caso de uso (una
 guía que se regala a cambio de un comentario), no un descuido ni algo pendiente de arreglar.
+
+## 7. Leer cómo le fue: métricas y el mejor X %
+
+Dos endpoints de lectura, con la misma llave. El detalle de cada número está en
+`api-editor.md`, secciones 2 y 2b; esto es lo que hace falta para pedirlos bien.
+
+- `GET /api/metrics/posts?desde=YYYY-MM-DD&hasta=YYYY-MM-DD` — una fila por publicación
+  **publicada** en el rango (no por actividad en él), con sus métricas. Cada fila trae
+  `cuenta` (`id`, `red`, `nombre`).
+- `GET /api/metrics/mejores?desde=…&hasta=…&metrica=viewsGanadas&percentil=10` — el mejor X %
+  de lo publicado en el rango: `corte` (lo que había que sacar para entrar), `compiten`,
+  `mejores` (filas como las de arriba, con `puesto` y `valor`), `medianas` de arriba contra
+  el resto, `rinden` (cuántas veces más rinde la mediana de arriba) y `enComun` (lo que se
+  repite más entre las de arriba: un atributo, la red, el formato, el día o la franja
+  horaria, con `veces`).
+
+Filtros que valen en los dos: `red`, y `cuenta` —su `id` o su nombre en la red, con o sin
+«@»—. Para «el mejor 10 % de esta cuenta», pasa `cuenta`: sin ella, la cuenta más grande
+llena la tajada de arriba. `metrica` es `viewsGanadas` (por defecto), `visitas`, `clicks`,
+`interacciones` o `arrastre`; `percentil`, un entero de 1 a 50 (por defecto 10).
+
+Frases de error (`400`):
+
+| Frase | Causa |
+|---|---|
+| `El rango de fechas no se entendió (usa YYYY-MM-DD).` | `desde`/`hasta` ilegibles o invertidos |
+| `Red desconocida: <valor>.` | `red` que no es una de las seis |
+| `Cuenta desconocida: <valor>.` | ninguna cuenta del dueño tiene ese id ni ese nombre |
+| `Hay más de una cuenta llamada <valor>: usa su id, o agrega red=.` | el nombre se repite en dos redes |
+| `La métrica no se entendió (usa viewsGanadas, visitas, clicks, interacciones o arrastre).` | `metrica` desconocida |
+| `El percentil tiene que ser un entero entre 1 y 50.` | `percentil` fuera de rango o con decimales |
+
+Tres reglas que cambian la lectura:
+
+- **Un `null` es «no se sabe», nunca cero**, y no compite en el mejor X %.
+- **YouTube no entra en `viewsGanadas`, `interacciones` ni `arrastre`**: sus políticas no
+  permiten calcular métricas con sus datos. Sí entra en `visitas` y `clicks`, que mide Tu
+  Parrilla.
+- **`pocas: true`** (compiten menos de 20) quiere decir que el mejor 10 % son una o dos
+  publicaciones: no concluyas nada; amplía el rango o sube `percentil`.

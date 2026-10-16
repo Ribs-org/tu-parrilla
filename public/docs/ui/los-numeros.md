@@ -1,6 +1,6 @@
 # Los Números — cómo te fue en las redes y en tu página
 
-`/admin/analytics` — pestaña «Los Números» de la barra de arriba del panel, la tercera y última (en el README y en documentos viejos se llama «Analítica»). Un clic adentro están `/admin/analytics/publicaciones`, «Tus publicaciones»: la lista de cada publicación, que hasta el 2026-10-13 era la pestaña «Los Cortes» (`/admin/content`, que ahora lleva ahí); `/admin/analytics/publicaciones/<id>`, la pieza de una publicación con sus versiones; y `/admin/analytics/comparar`, «Comparar por atributo».
+`/admin/analytics` — pestaña «Los Números» de la barra de arriba del panel, la tercera y última (en el README y en documentos viejos se llama «Analítica»). Un clic adentro están `/admin/analytics/publicaciones`, «Tus publicaciones»: la lista de cada publicación, que hasta el 2026-10-13 era la pestaña «Los Cortes» (`/admin/content`, que ahora lleva ahí); `/admin/analytics/publicaciones/<id>`, la pieza de una publicación con sus versiones; `/admin/analytics/comparar`, «Comparar por atributo»; y `/admin/analytics/mejores`, «Tu mejor 10 %».
 
 Un tablero con dos mitades que miden cosas distintas y lo dicen. «En las redes» es lo que
 hicieron las publicaciones de la persona donde se publicaron —views ganadas, seguidores,
@@ -12,8 +12,10 @@ etiqueta está pegado en el post, las visitas que llegan por él se le cuentan a
 mitad muestra dos números y una lista corta; el resto aparece al apretar su «⋯ Más». La lista
 completa, una publicación por fila, con su etiqueta editable y el botón para copiar su link,
 está en «Tus publicaciones». Cada publicación abre su **pieza**: cada lugar donde salió (otra
-cuenta, otro hook, el trial reel) con sus números lado a lado. Y «Comparar por atributo» junta
-lo publicado por hook, tema o serie para ver qué funciona.
+cuenta, otro hook, el trial reel) con sus números lado a lado. «Comparar por atributo» junta
+lo publicado por hook, tema o serie para ver qué funciona. Y «Tu mejor 10 %» muestra lo que más
+rindió en el período, cuánto había que sacar para estar ahí y qué tienen en común esas
+publicaciones.
 
 Dos palabras que no hay que mezclar: la **etiqueta** es el `?s=` del link de cada publicación,
 que dice por cuál llegó la gente a la página; los **atributos** son lo que se le anota a un post
@@ -44,6 +46,8 @@ API.
   el mismo período.
 - A «Comparar por atributo»: en el tablero, el enlace «Comparar por atributo →», a la derecha
   del título «Lo que más creció»; o, en una pieza, uno de los atributos de arriba.
+- A «Tu mejor 10 %»: en el tablero, el enlace «Tu mejor 10 % →», el primero de los tres a la
+  derecha del título «Lo que más creció». Llega con el mismo período y la misma cuenta.
 
 ## Qué se ve
 
@@ -85,8 +89,9 @@ publicaste. Lo cuentan las redes.» A la derecha:
 mostrar «—» (ver «Cómo leer cada número»).
 
 **Panel «Lo que más creció»**, explicación «Las publicaciones que más views ganaron en el
-período, de cualquier fecha.» A la derecha del título, dos enlaces: «Comparar por atributo
-→» y «Ver todas las publicaciones →» (uno encima del otro en el teléfono). Hasta cinco filas,
+período, de cualquier fecha.» A la derecha del título, tres enlaces: «Tu mejor 10 % →»,
+«Comparar por atributo →» y «Ver todas las publicaciones →» (uno encima del otro en el
+teléfono). Hasta cinco filas,
 de más a menos views ganadas, cada una con una barra detrás que compara con la primera: el
 texto del post (o su etiqueta, si no tiene texto), en chico la cuenta con el patrón «<red> ·
 <nombre de la cuenta>», y a la derecha las views ganadas. Cada fila abre la pieza de esa
@@ -311,13 +316,14 @@ dos posts programados. Una publicación subida a mano en la red, fuera de La Par
 pieza de una sola versión, sin atributos.
 
 Se llega desde el texto de una fila de «Tus publicaciones», desde una fila de «Lo que más
-creció», o, si la etiqueta es de una publicación, desde una de «Qué publicación te trajo gente»
-o de «Todas las etiquetas». No tiene pestaña propia ni subtítulo: la barra sigue marcando «Los
+creció», desde una de «Tu mejor 10 %», o, si la etiqueta es de una publicación, desde una de
+«Qué publicación te trajo gente» o de «Todas las etiquetas». No tiene pestaña propia ni subtítulo: la barra sigue marcando «Los
 Números».
 
 **Encabezado.** Arriba a la izquierda, una flecha que vuelve a donde se entró: «Los Números»
 si se llegó desde el tablero («Lo que más creció», «Qué publicación te trajo gente» o «Todas
-las etiquetas»), que vuelve al tablero como estaba, con los mismos «⋯ Más» abiertos; o «Tus
+las etiquetas»), que vuelve al tablero como estaba, con los mismos «⋯ Más» abiertos; «Tu mejor
+<N> %» (con el porcentaje que estaba elegido) si se llegó desde esa pantalla; o «Tus
 publicaciones» si se llegó desde la lista. Debajo, en chico, «Pieza»; el título es el texto de la
 publicación que se abrió (cortado a dos líneas), o «?s=<etiqueta>» si no tiene texto. Debajo,
 «Cada lugar donde salió, con sus números lado a lado. Las views las cuenta cada red; las
@@ -432,6 +438,70 @@ Debajo de la tabla: «<N> publicaciones en el período, <M> con atributos. Las f
 tienen menos de 10 publicaciones: con tan pocas, la diferencia puede ser suerte.» Si el período
 tiene 2000 publicaciones o más, se suma «Se leyeron las 2000 más recientes: acorta el período
 para verlas todas.»
+
+### Tu mejor 10 % (`/admin/analytics/mejores`)
+
+De lo publicado en el período, las publicaciones que más rindieron en una métrica, cuánto había
+que sacar para entrar, cuánto más rinden que el resto y qué tienen en común. Responde «¿cuáles
+fueron mis mejores posts del mes?» y, con una cuenta elegida, «¿cuál fue lo mejor de esta
+cuenta?». Cuenta solo lo **publicado en el período**, como «Comparar por atributo».
+
+Se llega con el enlace «Tu mejor 10 % →» de «Lo que más creció», en el tablero. No tiene pestaña
+propia: la barra sigue marcando «Los Números».
+
+**Encabezado.** Arriba a la izquierda, una flecha y «Los Números», que vuelve al tablero. El
+título es «Tu mejor 10 %» (o 5, 20 o 25, según el porcentaje elegido) y debajo: «Lo que
+publicaste en el período que más rindió, cuánto había que sacar para entrar y qué tienen en
+común esas publicaciones frente al resto.»
+
+**La fila de controles:**
+
+- Los cinco botones del período.
+- El selector de cuenta, **solo con más de una cuenta**: «Todas las cuentas» y una opción por
+  cuenta con el patrón «<red> · <nombre de la cuenta>».
+- El selector de métrica: «Por views ganadas» (el de entrada), «Por visitas a tu página», «Por
+  clicks en tus links», «Por interacciones» y «Por arrastre».
+- El selector de porcentaje: «El mejor 5 %», «El mejor 10 %» (el de entrada), «El mejor 20 %»
+  y «El mejor 25 %».
+
+**Tres cifras:**
+
+| Rótulo | Valor | Aclaración debajo |
+|---|---|---|
+| «Entran» | «<N> de <M>»: cuántas entraron de cuántas compiten | «Publicaciones con <métrica>», y « · sin YouTube» en views ganadas, interacciones y arrastre |
+| «El corte» | El número de la última que entró | «<Métrica> para entrar» |
+| «Rinden» | «×4,6»: cuántas veces más rinde la publicación del medio de arriba que la del medio del resto | «La mediana de arriba contra la del resto» |
+
+Cualquiera puede ser «—» si no hay con qué calcularla.
+
+**El aviso de pocas.** Si compiten menos de 20 publicaciones, un recuadro: «Compiten solo <N>
+publicaciones: con tan pocas, el mejor <P> % sirve para mirarlas, no para sacar conclusiones.
+Amplía el período o sube el porcentaje.»
+
+**Panel «Las publicaciones»**, explicación «De la que más <métrica> sumó a la que menos. Cada
+una abre su pieza.» Una fila por publicación que entró: su puesto, su miniatura, el texto (o
+«?s=<etiqueta>» si no tiene), debajo en chico «<red> · <nombre de la cuenta> · <fecha>», y a la
+derecha su número en la métrica elegida (en porcentaje con dos decimales si es el arrastre).
+El texto abre la pieza en la misma pestaña.
+
+**Panel «Qué tienen en común»**, explicación «Lo que se repite más entre las de arriba que
+entre todas las que compiten: los atributos, la red, el formato, el día y la hora de
+publicación. Que se repita no prueba que sea la causa.» Hasta ocho filas, de la más marcada a
+la menos: «<rasgo>: <valor>» (por ejemplo «hook: pregunta», «formato: Reel», «día: martes»,
+«hora: noche (18 a 24)»), en chico «<n> de <m> arriba · <N> de <M> entre todas», y a la
+derecha, en naranjo, cuántas veces más frecuente es arriba («×2,4»).
+
+**Panel «Arriba y el resto»**, explicación «Medianas: la publicación del medio de cada grupo.
+Cada una cuenta solo a quien tiene ese número; YouTube no entra en views ganadas, interacciones
+ni arrastre.» Una tabla con las columnas «Tu mejor <N> %» y «El resto», y las filas «Views
+ganadas», «Visitas a tu página», «Interacciones» y «Arrastre».
+
+**Al pie**, en chico: con views ganadas, interacciones o arrastre, «YouTube no compite en
+<métrica>: sus reglas no permiten calcular métricas con sus datos. Sí compite en visitas y
+clicks, que mide Tu Parrilla.»; con el arrastre, además, «En el arrastre solo compiten las que
+ganaron al menos la mediana de views del período: con pocas views, una visita ya es un
+porcentaje alto.»; y si el período tiene 2000 publicaciones o más, «Se leyeron las 2000 más
+recientes: acorta el período para verlas todas.»
 
 ## Cómo leer cada número
 
@@ -697,6 +767,36 @@ ayudando.
 **Las filas tenues.** Menos de 10 publicaciones: con tan pocas, una diferencia puede ser
 suerte.
 
+### En «Tu mejor 10 %»
+
+**Qué publicaciones compiten.** Las publicadas dentro del período, de la cuenta elegida o de
+todas, sin las borradas, que **tienen** la métrica elegida. Un número que no se sabe no
+compite: en «views ganadas», «interacciones» y «arrastre» no compite YouTube (sus reglas no lo
+permiten); en «visitas» y «clicks» no compite una publicación cuyo link con su etiqueta nunca
+trajo una visita. En el arrastre compiten solo las que ganaron al menos la mediana de views del
+período.
+
+**Quién entra.** Se ordenan de mayor a menor y entran las primeras: el porcentaje elegido de
+las que compiten, redondeado hacia arriba, y al menos una. Si hay empate con la última, entran
+todas las empatadas. Nunca entra una con cero.
+
+**Las métricas.** «Views ganadas»: lo ganado en el período. «Visitas a tu página» y «Clicks en
+tus links»: lo que trajo cada publicación por su link, en el período. «Interacciones»: likes,
+comentarios y compartidos ganados en el período. «Arrastre»: el de cada publicación.
+
+**«Rinden».** La mediana de arriba dividida por la del resto, en la métrica elegida: «×4,6» es
+que una publicación típica de arriba sacó 4,6 veces lo de una típica del resto.
+
+**«Qué tienen en común».** Cada rasgo cuenta una vez por publicación: los atributos (menos
+`pieza`, que junta versiones de un mismo video), la red, el formato («Reel», «Video», «Short»,
+«Foto», «Carrusel», «Enlace»), el día de la semana y la franja de la hora de publicación, en la
+zona de [Tu Cuenta](tu-cuenta.md). Entra si está en al menos dos de arriba y es al menos 1,5
+veces más frecuente arriba que entre todas las que compiten. Con menos de tres arriba, no
+aparece nada.
+
+**Con «Todas las cuentas»**, una cuenta grande llena la tajada de arriba y las chicas no
+aparecen nunca: para ver lo mejor de cada una, elegirla en el selector.
+
 ## Qué se puede hacer
 
 ### Para saber cómo le fue en el período
@@ -865,6 +965,22 @@ atributos. Los atributos también se ponen por la API: ver [la guía de la API](
 Para que haya algo que comparar, los posts tienen que llevar atributos: se anotan en el editor
 de cada post en [La Parrilla](la-parrilla.md), en «Editar atributos» de una pieza, o por la API.
 
+### Para ver tus mejores publicaciones
+
+1. En el tablero, mitad «En las redes», apretar «Tu mejor 10 % →».
+2. Elegir el período: cuenta lo publicado en él.
+3. Si hace falta, elegir otra métrica (por ejemplo «Por visitas a tu página», para ver qué
+   trajo gente a la página) u otro porcentaje.
+4. Mirar «Las publicaciones» y, debajo, «Qué tienen en común».
+
+### Para ver el mejor 10 % de una sola cuenta
+
+1. En «Tu mejor 10 %», en el selector de cuenta, elegir la cuenta. Solo aparece con más de una
+   cuenta conectada.
+
+Lo mismo sale por API, para el agente: `GET /api/metrics/mejores` en
+[la guía de la API](../api-editor.md).
+
 ### Para corregir un atributo de una publicación
 
 1. Abrir su pieza y apretar «Editar atributos».
@@ -915,9 +1031,24 @@ API: ver `GET /api/metrics/posts` en [la guía de la API](../api-editor.md).
 | «Ninguna publicación del período tiene atributos. Se anotan en el editor de un post de La Parrilla (el campo «Atributos»), desde «Editar atributos» en una pieza, o por la API.» | Hay publicaciones en el período, pero ninguna tiene atributos. | Anotarlos (ver «Para juntar dos versiones…» y «Para ver qué hook funciona»), o ampliar el período. |
 | «Nada de lo publicado en este período lleva «<atributo>». Amplía el período, o mira otro atributo.» | Se pidió un atributo (por ejemplo, desde una cápsula de una pieza) que nada de lo publicado en el período lleva; la tabla muestra otro. | Elegir un período más largo, u otro atributo en el selector. |
 | «Se leyeron las 2000 más recientes: acorta el período para verlas todas.» | El período tiene 2000 publicaciones o más y la comparación usó solo las más recientes. | Elegir un período más corto. |
+| «No publicaste nada en este período. Amplía el período.» (en «Tu mejor 10 %») | No hay publicaciones publicadas en el período (de la cuenta elegida, si hay una). | Elegir un período más largo, o «Todas las cuentas». |
+| «Ninguna publicación del período tiene <métrica>. YouTube no entra en esta métrica.» | Hay publicaciones, pero ninguna tiene la métrica elegida: por ejemplo, todo es de YouTube y la métrica es views ganadas. | Elegir «Por visitas a tu página» o «Por clicks en tus links», donde YouTube sí compite. |
+| «Ninguna publicación del período tiene <métrica>. Las visitas y los clicks se cuentan cuando alguien entra por el link con la etiqueta de la publicación.» | Ninguna publicación del período tiene su link pegado con su etiqueta. | Pegar los links (ver «Para copiar el link…»), o elegir otra métrica. |
+| «Ninguna publicación del período sumó <métrica>.» | Todas las que compiten tienen cero. | Ampliar el período, u otra métrica. |
+| «Compiten solo <N> publicaciones: con tan pocas, el mejor <P> % sirve para mirarlas, no para sacar conclusiones. Amplía el período o sube el porcentaje.» | Compiten menos de 20. | Elegir un período más largo o un porcentaje mayor. |
+| «Con menos de 3 publicaciones arriba no hay con qué comparar. Amplía el período o sube el porcentaje.» (en «Qué tienen en común») | Entraron una o dos. | Igual que arriba. |
+| «Nada se repite más entre las de arriba que en el resto.» | Ningún rasgo está en al menos dos de arriba y es 1,5 veces más frecuente ahí. | Nada: las mejores no comparten nada que las distinga. Anotar atributos ayuda a que aparezca algo. |
+| «Sin publicaciones que comparar.» (en «Arriba y el resto») | No compite ninguna publicación. | Ampliar el período, u otra métrica. |
 | «Algo se rompió» y «No fue nada que hicieras: una consulta no respondió. Vuelve a intentarlo; el detalle quedó en la consola del navegador.» | Una consulta de la pantalla falló. | Apretar «Reintentar»; si sigue, «Ir a La Parrilla». |
 
 ## Si el humano dice…
+
+- **«¿Cuáles fueron mis mejores posts?» / «quiero ver mi top 10 %»**: en Los Números, «Tu mejor
+  10 % →» (a la derecha de «Lo que más creció»). Ahí se elige la métrica, el porcentaje y, con
+  más de una cuenta, la cuenta.
+- **«Mi video de YouTube no aparece en mi mejor 10 %»**: en views ganadas, interacciones y
+  arrastre YouTube no compite, porque sus reglas no permiten calcular métricas con sus datos.
+  Con «Por visitas a tu página» o «Por clicks en tus links» sí aparece.
 
 - **«¿Dónde está Los Cortes?» / «desapareció la pestaña de mis posts»**: ya no es pestaña. La
   lista de publicaciones está en Los Números → «Ver todas las publicaciones →», en la pantalla
@@ -1048,6 +1179,9 @@ API: ver `GET /api/metrics/posts` en [la guía de la API](../api-editor.md).
   [La Parrilla](la-parrilla.md).
 - «Comparar por atributo» no cruza dos atributos a la vez (hook y tema juntos), ni muestra qué
   publicaciones forman cada fila.
+- «Tu mejor 10 %» no acepta un porcentaje distinto de 5, 10, 20 o 25 (la API, cualquiera de 1 a
+  50), no ordena por views acumuladas, y «Qué tienen en común» no dice qué causó el
+  resultado: dice qué se repite.
 - No muestra publicaciones de Threads ni de X: esas redes publican, pero no se sincronizan.
 - No muestra lo programado que todavía no sale: eso está en [La Parrilla](la-parrilla.md).
 - No consulta la red en vivo ni tiene botón para sincronizar: eso está en
@@ -1065,11 +1199,11 @@ API: ver `GET /api/metrics/posts` en [la guía de la API](../api-editor.md).
 - No exporta a planilla.
 - Tiene topes y no avisa cuando se pasan: «En las redes» suma las 500 publicaciones más
   recientes de la cuenta elegida (o de todas); «Tus publicaciones» muestra como mucho 200; la
-  pieza, 100 versiones; «Comparar por atributo» lee 2000 publicaciones (esa sí avisa); 50
+  pieza, 100 versiones; «Comparar por atributo» y «Tu mejor 10 %» leen 2000 publicaciones (esas sí avisan); 50
   etiquetas, 25 links, 12 orígenes,
   países o ciudades, 8 dispositivos, sistemas, navegadores o idiomas, 40 últimas visitas.
-- No se lee con las llaves de la API: la API de métricas es por publicación, ver
-  [la guía de la API](../api-editor.md). La app del teléfono tiene su propio resumen
+- No se lee con las llaves de la API: la API de métricas es por publicación, más el mejor X %
+  (`GET /api/metrics/mejores`), ver [la guía de la API](../api-editor.md). La app del teléfono tiene su propio resumen
   ([La app del teléfono](app-movil.md)).
 
 ## Para quien mantiene esta página
@@ -1085,6 +1219,8 @@ Sale de:
 - `src/app/admin/(dash)/analytics/publicaciones/[id]/page.tsx` (la pieza: encabezado,
   atributos, versiones, frases del pie)
 - `src/app/admin/(dash)/analytics/comparar/page.tsx` («Comparar por atributo»)
+- `src/app/admin/(dash)/analytics/mejores/page.tsx` («Tu mejor 10 %») y `src/lib/mejores.ts`
+  (quién compite, quién entra, el corte, las medianas, «Rinden» y «Qué tienen en común»)
 - `src/lib/pieza.ts` (qué atributos son comunes y cuáles cambian, el orden de las versiones,
   el trial reel, las medianas, el atributo elegido al entrar, las filas tenues) y
   `src/lib/piezas.ts` (qué versiones junta una pieza, la clave `pieza`, el tope de 100)

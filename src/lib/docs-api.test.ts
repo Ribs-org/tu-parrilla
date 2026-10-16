@@ -14,6 +14,8 @@ import { MAX_BATCH_ITEMS } from './social/publish/batch'
 import { TRIAL_REEL_NO_DISPONIBLE } from './social/publish/publisher'
 import { BORRADO_YA_PUBLICADO } from './schedule-api'
 import { TRIAL_REEL_MEDIA } from './social/publish/opciones'
+import { METRICA_ERROR, PERCENTIL_ERROR } from './mejores'
+import { RANGO_ERROR, cuentaAmbigua, cuentaDesconocida } from './metrics-api'
 
 // `batch.ts` importa `@/lib/usuarios` (la zona del dueño del lote), que trae
 // `server-only` y no resuelve bajo Vitest. Mismo arreglo que en `aislamiento.test.ts`.
@@ -37,6 +39,21 @@ describe('la documentación para LLM no le miente al código', () => {
       BORRADO_YA_PUBLICADO,
     ]) {
       expect(guia).toContain(frase)
+    }
+  })
+
+  it('las frases de error de la lectura de métricas son las del código, en las dos guías', () => {
+    for (const archivo of ['public/docs/api-llm.md', 'public/docs/api-editor.md']) {
+      const guia = readFileSync(archivo, 'utf8')
+      for (const frase of [
+        RANGO_ERROR,
+        METRICA_ERROR,
+        PERCENTIL_ERROR,
+        cuentaDesconocida('<valor>'),
+        cuentaAmbigua('<valor>'),
+      ]) {
+        expect(guia, `${archivo}: ${frase}`).toContain(frase)
+      }
     }
   })
 

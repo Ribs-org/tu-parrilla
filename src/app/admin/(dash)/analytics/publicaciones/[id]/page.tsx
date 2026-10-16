@@ -6,6 +6,7 @@ import { Panel } from '@/components/charts/panel'
 import { RangoBar } from '@/components/filter-bar'
 import { requireUser } from '@/lib/auth'
 import { parseFilters } from '@/lib/filters'
+import { PERCENTIL_POR_DEFECTO, leerPercentil } from '@/lib/mejores'
 import { networkLabel } from '@/lib/networks'
 import { CLAVE_PIEZA, ordenarVersiones, repartirAtributos, textoDeAtributo } from '@/lib/pieza'
 import { getPieza, type VersionDePieza } from '@/lib/piezas'
@@ -59,7 +60,14 @@ export default async function PiezaPage({
   const organica = versiones.length === 1 && versiones[0]!.scheduledPostId === null
   const programados = new Set(versiones.map((v) => v.scheduledPostId).filter(Boolean)).size
 
-  const desdeElTablero = query.de === 'numeros'
+  // Vuelve a donde se entró: el tablero marca sus enlaces con `de=numeros`, y «Tu mejor
+  // 10 %» con `de=mejores`; sin marca, a Tus publicaciones.
+  const vuelta =
+    query.de === 'numeros'
+      ? { ruta: '/admin/analytics', texto: nombreDe('/admin/analytics') }
+      : query.de === 'mejores'
+        ? { ruta: '/admin/analytics/mejores', texto: `Tu mejor ${leerPercentil(typeof query.percentil === 'string' ? query.percentil : null) ?? PERCENTIL_POR_DEFECTO} %` }
+        : { ruta: '/admin/analytics/publicaciones', texto: 'Tus publicaciones' }
   const aqui = numerosHref(`/admin/analytics/publicaciones/${pieza.abierta.id}`, query, {})
   const fecha = new Intl.DateTimeFormat('es', {
     day: 'numeric',
@@ -72,13 +80,12 @@ export default async function PiezaPage({
   return (
     <>
       <header className="mb-4">
-        {/* Vuelve a donde se entró: el tablero marca sus enlaces con `de=numeros`. */}
         <Link
-          href={numerosHref(desdeElTablero ? '/admin/analytics' : '/admin/analytics/publicaciones', query, { de: null })}
+          href={numerosHref(vuelta.ruta, query, { de: null })}
           className="inline-flex items-center gap-1 text-[0.8rem] text-fg-muted transition-colors hover:text-fg"
         >
           <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
-          {desdeElTablero ? nombreDe('/admin/analytics') : 'Tus publicaciones'}
+          {vuelta.texto}
         </Link>
         <p className="mt-2 font-mono text-[0.65rem] uppercase tracking-[0.16em] text-fg-faint">Pieza</p>
         <h1 className="line-clamp-2 max-w-3xl font-titulo text-2xl font-semibold uppercase tracking-[0.03em]">

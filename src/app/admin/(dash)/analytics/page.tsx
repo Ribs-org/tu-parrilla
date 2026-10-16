@@ -261,6 +261,12 @@ async function EnLasRedes({
         action={
           <div className="flex flex-col items-end gap-1 sm:flex-row sm:gap-4">
             <Link
+              href={numerosHref(`${RUTA}/mejores`, params, { mas: null })}
+              className="text-[0.75rem] text-fg-muted transition-colors hover:text-fg"
+            >
+              Tu mejor 10 % →
+            </Link>
+            <Link
               href={numerosHref(`${RUTA}/comparar`, params, { mas: null })}
               className="text-[0.75rem] text-fg-muted transition-colors hover:text-fg"
             >
