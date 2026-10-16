@@ -23,7 +23,7 @@ const GENERATED = ['AUTH_SECRET', 'FINGERPRINT_SALT'] as const
  * RESEND_API_KEY is only strictly required in production: in development the sign-in code
  * is printed to the server console.
  */
-const REQUIRED = ['DATABASE_URL', 'ADMIN_PASSWORD', 'ADMIN_EMAIL', 'RESEND_API_KEY', 'AUTH_SECRET', 'FINGERPRINT_SALT'] as const
+const REQUIRED = ['DATABASE_URL', 'ADMIN_EMAIL', 'RESEND_API_KEY', 'AUTH_SECRET', 'FINGERPRINT_SALT'] as const
 
 const secret = () => randomBytes(32).toString('base64url')
 
@@ -50,9 +50,8 @@ function create() {
   console.log('.env.local creado.\n')
   console.log(`  ${GENERATED.join(' y ')} ya vienen generadas.\n`)
   console.log('Te falta llenar a mano:')
-  console.log('  DATABASE_URL          → la copias de Neon, o `vercel env pull .env.local`')
+  console.log('  DATABASE_URL          → la copias de Supabase, o `vercel env pull .env.local`')
   console.log('  ADMIN_EMAIL           → tu correo; con él entras al panel en /ingresar')
-  console.log('  ADMIN_PASSWORD        → la eliges tú, es la puerta de la app del teléfono')
   console.log('  RESEND_API_KEY        → manda los códigos de ingreso; en local puedes dejarla vacía y leer el código en la consola')
   console.log('  R2_*                  → opcional, solo para subir imágenes (ver .env.example)\n')
   console.log('Después:')
