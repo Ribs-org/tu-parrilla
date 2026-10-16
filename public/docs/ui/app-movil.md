@@ -251,6 +251,7 @@ Lo que describe sale de estos archivos:
 - `mobile/src/app/(tabs)/calendario.tsx`
 - `mobile/src/app/post/[id].tsx`
 - `mobile/src/components/ui.tsx`
+- `mobile/src/components/selector-fecha.tsx` (solo iPhone, que todavía no se distribuye: la hoja «Cuándo sale» con «Cancelar» y «Listo»)
 - `mobile/src/components/parrilla.tsx`
 - `mobile/src/components/iconos.tsx`
 - `mobile/src/lib/publicar.ts`

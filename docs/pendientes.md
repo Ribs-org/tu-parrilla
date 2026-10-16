@@ -132,6 +132,10 @@ Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataf
   `disconnectAccount` y `/privacidad`. Ver `docs/google-verificacion-guion.md`.
 - **[dueño] Vercel Pro antes de abrir a terceros.** El plan Hobby es de uso personal y no
   comercial (`docs/levantamiento-terceros.md` §5).
+- **[dueño] La app en iPhone** (2026-10-16). El código ya está listo para iOS; faltan la
+  cuenta del Apple Developer Program, confirmar el identificador `cl.tuparrilla.app`
+  (queda fijo al registrarlo), la ficha en App Store Connect y el primer build a
+  TestFlight. Pasos y comandos en `mobile/README.md`, «iPhone (iOS)».
 
 ## Lo que todavía depende de `vicente-pareja.cl`
 
@@ -164,6 +168,15 @@ Nada de esto bloquea un trámite hoy; conviene ordenarlo antes de abrir a tercer
 - **[dueño] TikTok y Google con la misma entidad.** El formulario de Direct Post de TikTok
   dice «Tu Parrilla, built by Vicente Pareja Jones»; al pedir la verificación de Google
   conviene usar ya la razón social.
+- **[dueño] La app del teléfono en Expo** (2026-10-16). El proyecto (`vicente-numeros`)
+  está en la cuenta personal `vicentepareja`, y la de Pyxis (`pyxis-team`) no tiene acceso:
+  para publicar una actualización hay que entrar con la personal. Se puede traspasar en
+  expo.dev (*Project settings → General → Transfer project*), pero antes: agregar al
+  usuario `vicentepareja` como administrador de `pyxis-team` (Expo exige mandar en las dos
+  cuentas) y **bajar el respaldo de la llave de firma de Android** desde *Credentials*,
+  porque la documentación no dice si viaja con el traspaso y sin ella la Play Store no
+  acepta más versiones. Después, `owner` en `mobile/app.json` y los enlaces de
+  `mobile/README.md`. La cuenta de Apple para iPhone conviene sacarla ya a nombre de Pyxis.
 
 ## Features y trabajo de código
 

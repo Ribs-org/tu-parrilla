@@ -153,6 +153,51 @@ con el orden de siempre (web primero), como se explica en
 Lo que no se puede hacer desde el teléfono, y sigue siendo del panel web: poner una
 portada, etiquetar con atributos, y editar o borrar lo ya programado.
 
+## iPhone (iOS)
+
+**El código ya está listo para iOS; falta todo lo que pide Apple.** Lo que se hizo
+(2026-10-16):
+
+- `app.json` tiene la sección `ios`: el identificador `cl.tuparrilla.app`, solo
+  iPhone (`supportsTablet: false`), sin cifrado propio que declarar
+  (`ITSAppUsesNonExemptEncryption: false`), conexiones solo por HTTPS salvo la red local
+  de desarrollo, y su propio ícono, `assets/images/icon-ios.png`: el mismo de Android pero
+  cuadrado y sin transparencia, porque iOS le pone las esquinas solo y el App Store
+  rechaza un ícono con canal alfa.
+- Los permisos que iOS exige escribir: el de Face ID (`expo-local-authentication`; sin
+  ese texto, la app se cerraría al pedir la cara) y el de las fotos. Cámara y micrófono
+  quedan fuera: la app no los usa, y Apple rechaza permisos que no se usan.
+- Lo que en el código era solo de Android: el día y la hora se eligen en una hoja con
+  el selector del sistema (`src/components/selector-fecha.tsx`) en vez de los dos
+  diálogos de Android; el teclado empuja la pantalla con `padding`, que es lo que
+  corresponde en iOS; la cabecera mide 44 puntos; las fotos llegan en JPEG y no en HEIC
+  (Instagram y Facebook rechazan HEIC), y no se pide acceso a la galería entera.
+- `npx expo export --platform ios` arma el paquete de iOS sin errores. Ninguna de estas
+  pantallas se ha visto todavía en un iPhone de verdad.
+
+**Lo que falta, y por qué no se hizo:**
+
+1. **Una cuenta del Apple Developer Program** (USD 99 al año). Lo ordenado es sacarla a
+   nombre de Pyxis SpA, que pide el número D-U-N-S de la empresa; a nombre de una persona
+   sale más rápido. Ver «Que todo quede a nombre de Pyxis» en `docs/pendientes.md`.
+2. **Confirmar el identificador** antes del primer build: `cl.tuparrilla.app` queda
+   registrado en Apple para siempre. Android sigue con `cl.vicentepareja.numeros`, que ya
+   no se puede cambiar.
+3. **La ficha en App Store Connect** (nombre, privacidad, capturas) y la primera subida a
+   TestFlight:
+
+   ```bash
+   npx eas-cli build -p ios --profile production   # pide entrar con la cuenta de Apple; crea los certificados
+   npx eas-cli submit -p ios --profile production  # sube el build a App Store Connect / TestFlight
+   ```
+
+   Sin cuenta de Apple sí se puede armar un build para el simulador de un Mac:
+   `npx eas-cli build -p ios --profile simulador`.
+4. **Las actualizaciones por aire valen igual** una vez que haya un build de iOS: los
+   comandos de «Cómo mandar un cambio sin reinstalar», sin `--platform`, publican para
+   las dos plataformas. El build de TestFlight y del App Store escucha el canal
+   `production`; uno armado con el perfil `preview` o `simulador`, el canal `preview`.
+
 ## Si se pierde el teléfono
 
 Para revocar el acceso de un teléfono perdido o robado, sin tener que hacer nada
@@ -172,4 +217,5 @@ falta volver a autorizar nada de eso, solo se cierra el acceso desde el celular.
 
 - No pone portada ni atributos, y no edita lo ya programado: eso sigue en el panel.
 - No manda notificaciones (no avisa solo cuando hay un dato nuevo).
-- No existe versión para iPhone, solo Android.
+- No hay versión para iPhone que se pueda instalar: el código está listo, falta la
+  cuenta de Apple (ver «iPhone (iOS)», arriba).

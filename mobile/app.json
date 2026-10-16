@@ -11,7 +11,16 @@
     "scheme": "vicentenumeros",
     "userInterfaceStyle": "dark",
     "ios": {
-      "icon": "./assets/images/icon.png"
+      "bundleIdentifier": "cl.tuparrilla.app",
+      "icon": "./assets/images/icon-ios.png",
+      "supportsTablet": false,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": false,
+          "NSAllowsLocalNetworking": true
+        }
+      }
     },
     "android": {
       "package": "cl.vicentepareja.numeros",
@@ -39,9 +48,17 @@
       ],
       "expo-secure-store",
       [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Para abrir la app con tu cara, igual que el resto del teléfono."
+        }
+      ],
+      [
         "expo-image-picker",
         {
-          "photosPermission": "Para elegir las fotos y videos que vas a publicar."
+          "photosPermission": "Para elegir las fotos y videos que vas a publicar.",
+          "cameraPermission": false,
+          "microphonePermission": false
         }
       ],
       "@react-native-community/datetimepicker"
