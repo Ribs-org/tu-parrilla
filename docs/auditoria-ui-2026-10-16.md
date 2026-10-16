@@ -46,16 +46,22 @@ Por arreglar:
    `src/app/admin/(dash)/schedule/[id]/editor.tsx`.~~ **Resuelto el 2026-10-16**: arriba del
    editor, una línea por destino con su marca, su motivo y su arreglo
    (`schedule/[id]/destinos.tsx`).
-2. **Los gráficos de línea cortan las cifras del eje vertical** («)00» por «2000»): margen
-   izquierdo negativo con un eje de 44 px. `src/components/charts/traffic-chart.tsx`.
-3. **Dos series de escalas distintas comparten eje** —visitas al perfil contra alcance,
-   views contra visitas— y la chica queda plana en cero. Mismo archivo.
-4. **«Todas las etiquetas» repite el mismo título** en filas seguidas sin decir de qué red
-   es cada una. `src/components/charts/campaign-table.tsx`.
-5. **Tus publicaciones, a 390 px, pierde la columna de views** y «SE PASÓ» se corta en el
-   borde. `src/app/admin/(dash)/analytics/publicaciones/post-table.tsx`.
-6. **Los Números, a 390 px: «En las redes» queda en una columna de una palabra por
-   renglón**, apretada por el selector de cuentas. `src/app/admin/(dash)/analytics/page.tsx`.
+2. ~~**Los gráficos de línea cortan las cifras del eje vertical** («)00» por «2000»): margen
+   izquierdo negativo con un eje de 44 px. `src/components/charts/traffic-chart.tsx`.~~
+   **Resuelto el 2026-10-16**: el eje mide lo que su cifra más larga, abreviada desde diez mil.
+3. ~~**Dos series de escalas distintas comparten eje** —visitas al perfil contra alcance,
+   views contra visitas— y la chica queda plana en cero. Mismo archivo.~~ **Resuelto el
+   2026-10-16**: esas dos van cada una en su gráfico, uno debajo del otro (`separadas`).
+4. ~~**«Todas las etiquetas» repite el mismo título** en filas seguidas sin decir de qué red
+   es cada una. `src/components/charts/campaign-table.tsx`.~~ **Resuelto el 2026-10-16**:
+   cada fila lleva el ícono de su red y su cuenta.
+5. ~~**Tus publicaciones, a 390 px, pierde la columna de views** y «SE PASÓ» se corta en el
+   borde. `src/app/admin/(dash)/analytics/publicaciones/post-table.tsx`.~~ **Resuelto el
+   2026-10-16**: en el teléfono las cifras van debajo del título, con dos botones para ordenar.
+6. ~~**Los Números, a 390 px: «En las redes» queda en una columna de una palabra por
+   renglón**, apretada por el selector de cuentas. `src/app/admin/(dash)/analytics/page.tsx`.~~
+   **Resuelto el 2026-10-16**: el título baja a su línea, y lo mismo en los paneles («Lo que
+   más creció» con sus tres enlaces) y en las listas con barra, cuya nota baja bajo el texto.
 7. ~~**La Parrilla, a 390 px, abre la semana en el lunes** y hoy queda fuera de la pantalla.
    `src/app/admin/(dash)/schedule/calendar.tsx`.~~ **Resuelto el 2026-10-16**: abre corrida
    hasta hoy (`schedule/desplazar-a-hoy.tsx`).
@@ -63,8 +69,9 @@ Por arreglar:
    «jue 15 de oct · 20:00» en Se quemó y «15 oct · 20:00» en la app. Desde el 2026-10-16 la
    lista la escribe como Se quemó, siempre con el día (`diaYHora`, en
    `src/lib/schedule-week.ts`); falta la app.
-9. **Un «—» suelto bajo Visitas, Clicks, Únicos y CTR** cuando no hay período anterior para
-   comparar. `src/components/charts/stat-tile.tsx`.
+9. ~~**Un «—» suelto bajo Visitas, Clicks, Únicos y CTR** cuando no hay período anterior para
+   comparar. `src/components/charts/stat-tile.tsx`.~~ **Resuelto el 2026-10-16**: dice «Nada
+   en el período anterior para comparar».
 10. **Por revisar en el teléfono:** en la versión web de la app, las etiquetas de la barra de
     pestañas se cortan por abajo. Puede ser solo la web.
 
