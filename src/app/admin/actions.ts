@@ -37,12 +37,12 @@ import { extensionDe, validateScheduleDraft } from '@/lib/social/publish/validat
 import { validateAtributos, ATRIBUTOS_ERROR, type Atributos } from '@/lib/social/publish/atributos'
 import { diffMedia, diffTargets } from '@/lib/social/publish/edit'
 import { crearPostProgramado } from '@/lib/social/publish/crear'
+import { quitarCuenta } from '@/lib/social/quitar'
 import { CuentaInvalida, verificarCuentas, type CuentaDestino } from '@/lib/social/cuentas'
 // `guardarCuenta` de `social/conectar` guarda una cuenta *de una red*; la acción de abajo,
 // con el mismo nombre, guarda la cuenta *del usuario*. Se renombra la de la red al
 // importarla porque la acción es la que el formulario nombra desde fuera.
 import { CUENTA_DE_OTRO, CuentaDeOtro, guardarCuenta as guardarCuentaDeRed, tokensDePaginas } from '@/lib/social/conectar'
-import { quitarCuenta } from '@/lib/social/quitar'
 import { SIN_TOKEN_DE_PAGINA } from '@/lib/social/facebook'
 import { tiktokConnector } from '@/lib/social/tiktok'
 import { TIKTOK_SIN_CUENTA, consultarCreador, type CreadorTikTok } from '@/lib/social/publish/tiktok-creador'
