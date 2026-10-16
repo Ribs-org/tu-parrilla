@@ -160,7 +160,7 @@ credenciales aparte, y las maneja cada uno.
 
 Fuera del panel, «el dueño» no siempre eres tú, así que conviene el detalle:
 
-- La **API con llave** (`/api/schedule/posts`, `/api/metrics/posts`) habla en la zona del
+- La **API con llave** (`/api/schedule/posts`, `/api/metrics/posts`, `/api/metrics/mejores`) habla en la zona del
   dueño de la llave: la tuya si el agente usa una llave que generaste tú, la del admin si
   usa `SCHEDULE_API_KEY`, la llave del despliegue. Lo que el agente escribe como «19:00»
   son las 19:00 del dueño, y los días de `desde`/`hasta` son sus días.
@@ -198,7 +198,12 @@ programado del que salió y, si sus atributos traen `pieza`, los de todos los po
 programados con el mismo valor: dos hooks del mismo video, o el trial reel y el reel normal
 en una cuenta, son por fuerza dos posts. **Comparar por atributo** (`/admin/analytics/comparar`)
 muestra, para cada valor de un atributo —el hook, el tema, la serie—, cuántas publicaciones
-lo llevan y sus medianas de views ganadas, visitas y arrastre. El porqué, en
+lo llevan y sus medianas de views ganadas, visitas y arrastre. **Tu mejor 10 %**
+(`/admin/analytics/mejores`) ordena lo publicado en el período por una métrica —views
+ganadas, visitas, clicks, interacciones o arrastre—, muestra el 5, 10, 20 o 25 % de arriba
+con el corte para entrar, sus medianas contra las del resto y lo que se repite más entre
+ellas (un atributo, la red, el formato, el día o la franja horaria); la misma cuenta la hace
+`GET /api/metrics/mejores` para un agente. El porqué del tablero, en
 `docs/superpowers/specs/2026-10-13-numeros-tablero-design.md`.
 
 **Componer** pasa en un panel que se abre desde la derecha con «+ Nueva publicación», sin
@@ -904,7 +909,7 @@ Vercel y bajan con `vercel env pull .env.local`.
 | `X_CLIENT_SECRET` | El secreto de esa app | Junto con el anterior |
 | `CRON_SECRET` | Autoriza las corridas programadas (sync diario y publicación cada 5 minutos) | No — la pone Vercel solo, al declarar el cron |
 | `MIGRAR_PREVIEWS` | Que los previews migren la base | Solo cuando el preview tenga una base propia; contra la de producción, no |
-| `SCHEDULE_API_KEY` | La llave del despliegue: abre `POST /api/schedule/batch` (carga masiva), `DELETE /api/schedule/posts/{id}` (sacar lo programado), `GET /api/schedule/posts` (calendario) y `GET /api/metrics/posts` (métricas) a nombre del admin. Es anterior a las llaves por usuario y sigue para el agente que ya la usa | No — sin ella los cuatro endpoints aceptan solo las llaves que cada usuario genera en Tu Cuenta; si la pones, genérala igual que `CRON_SECRET` |
+| `SCHEDULE_API_KEY` | La llave del despliegue: abre `POST /api/schedule/batch` (carga masiva), `DELETE /api/schedule/posts/{id}` (sacar lo programado), `GET /api/schedule/posts` (calendario), `GET /api/metrics/posts` (métricas) y `GET /api/metrics/mejores` (el mejor X %) a nombre del admin. Es anterior a las llaves por usuario y sigue para el agente que ya la usa | No — sin ella los cinco endpoints aceptan solo las llaves que cada usuario genera en Tu Cuenta; si la pones, genérala igual que `CRON_SECRET` |
 | `RESEND_API_KEY` | Manda los códigos de ingreso y el aviso de publicación fallida | Sí — sin ella nadie puede entrar al panel |
 | `PUBLISH_ALERT_TO` | A qué correo llega el aviso de fallo | Sin ella no se envía ningún email; el calendario sigue mostrando el fallo |
 | `PUBLISH_ALERT_FROM` | Remitente del aviso | Opcional; default `onboarding@resend.dev` |
@@ -947,7 +952,7 @@ motivo a la vista, un reintento escondía el error real hasta agotar los intento
 
 ### Guía para el editor de contenido
 
-`public/docs/api-editor.md` documenta los cuatro endpoints en detalle, escrito para que un
+`public/docs/api-editor.md` documenta los cinco endpoints en detalle, escrito para que un
 LLM que crea contenido lo lea entero y no necesite explicaciones: contratos, reglas
 por red, todas las frases de error y qué significa cada métrica. Se sirve tal cual en
 <https://tu-parrilla.cl/docs/api-editor.md>. No contiene secretos — la llave
@@ -973,7 +978,7 @@ página cita archivos que ya no existen.
 
 ### La llave de la API
 
-Los cuatro endpoints de abajo piden el header `Authorization: Bearer <llave>`, y lo que
+Los cinco endpoints de abajo piden el header `Authorization: Bearer <llave>`, y lo que
 hacen lo hacen a nombre del dueño de la llave: sus cuentas, sus posts, su zona. Valen dos
 clases de llave:
 
@@ -1018,11 +1023,14 @@ coincide con ninguno se acepta como nombre de red — resuelta solo si la fila t
 
 `GET /api/metrics/posts` con el mismo `Authorization: Bearer <llave>`.
 Parámetros opcionales: `desde` y `hasta` (`YYYY-MM-DD` en la zona horaria del dueño, la de Tu Cuenta; ambos
-inclusive; por defecto los últimos 30 días) y `red` (una de las conocidas).
+inclusive; por defecto los últimos 30 días), `red` (una de las conocidas) y `cuenta` (el id
+de una cuenta, o su nombre en la red con o sin «@»; si el nombre se repite en dos redes, va
+con `red`).
 
 Devuelve `{ truncado, posts: [...] }` con una fila por publicación **publicada dentro
 del rango** — no por métrica movida en él: un video de agosto que crece en septiembre
-aparece en una consulta de agosto, no de septiembre. Cada fila trae red, `externalId`,
+aparece en una consulta de agosto, no de septiembre. Cada fila trae red, `cuenta` (`id`,
+`red` y `nombre`), `externalId`,
 permalink, texto, `publicadoEl` (ISO con el offset de la zona del dueño), la etiqueta `?s=`, sus
 `atributos` (o `null` si el post no salió del calendario) y `metricas`: `views`
 (acumulado), `viewsGanadas` (dentro del rango), `likes`, `comentarios`, `compartidos`,
@@ -1034,6 +1042,13 @@ es parcial.
 
 Las métricas las trae la sincronización diaria, así que lo publicado hoy aparece con
 números recién al día siguiente.
+
+`GET /api/metrics/mejores`, con los mismos parámetros más `metrica` (`viewsGanadas` por
+defecto, `visitas`, `clicks`, `interacciones` o `arrastre`) y `percentil` (entero de 1 a 50,
+10 por defecto), devuelve el mejor X % de lo publicado en el rango: el corte para entrar,
+cuántas compiten, las de arriba con sus métricas, las medianas de arriba contra las del
+resto y lo que se repite más entre las de arriba. Las mismas reglas que la pantalla «Tu
+mejor 10 %»; la lógica, sin base, está en `src/lib/mejores.ts`.
 
 ### Calendario por API
 
@@ -1081,6 +1096,8 @@ src/
     analytics.ts           consultas del dashboard
     tablero.ts             las reglas de Los Números sin base: cuenta elegida, «⋯ Más» abiertos, la URL
     pieza.ts               qué junta las versiones de una pieza y las medianas por atributo (sin base)
+    mejores.ts             el mejor X % de lo publicado: el corte, las medianas y lo que se repite (sin base)
+    metrics-consulta.ts    lo que comparten las rutas de /api/metrics: la llave, el rango, la red y la cuenta
     piezas.ts              la pieza de una publicación: sus destinos programados unidos a lo publicado
     auth.ts                sesión del panel
     llaves.ts              las llaves de API de cada usuario, y a nombre de quién entra cada petición

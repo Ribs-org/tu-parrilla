@@ -1,11 +1,8 @@
 import { NextResponse } from 'next/server'
-import { SOCIAL_NETWORKS } from '@/db/schema'
-import { duenoDeLaLlave } from '@/lib/llaves'
-import { buildMetricPost, parseRango } from '@/lib/metrics-api'
+import { buildMetricPost } from '@/lib/metrics-api'
+import { leerConsultaDeMetricas } from '@/lib/metrics-consulta'
 import { attributesFor } from '@/lib/post-attributes'
 import { getPostRows } from '@/lib/posts'
-import { buscarPorId } from '@/lib/usuarios'
-import { ZONA_POR_DEFECTO } from '@/lib/zona'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,33 +11,18 @@ export const dynamic = 'force-dynamic'
 const MAX_POSTS = 2000
 
 export async function GET(request: Request) {
-  // El dueño antes que el rango: `desde`/`hasta` son días, y un día solo existe en una
-  // zona. El dueño es el de la llave, y la zona, la suya (la de Tu Cuenta).
-  const ownerId = await duenoDeLaLlave(request)
-  if (!ownerId) return new NextResponse('No autorizado', { status: 401 })
-  const zone = (await buscarPorId(ownerId))?.zona ?? ZONA_POR_DEFECTO
-
-  const url = new URL(request.url)
-  const rango = parseRango(
-    url.searchParams.get('desde'),
-    url.searchParams.get('hasta'),
-    new Date(),
-    zone,
-  )
-  if ('error' in rango) return NextResponse.json({ error: rango.error }, { status: 400 })
-
-  const red = url.searchParams.get('red')
-  if (red !== null && !(SOCIAL_NETWORKS as readonly string[]).includes(red)) {
-    return NextResponse.json({ error: `Red desconocida: ${red}.` }, { status: 400 })
-  }
+  const consulta = await leerConsultaDeMetricas(request)
+  if (consulta instanceof NextResponse) return consulta
+  const { ownerId, zone, from, to, red, cuenta, cuentasPorId } = consulta
 
   // Mismo motor que el panel: acumulado + ganado en la ventana, visitas por ?s=. La
   // ventana viaja además como filtro de publicación, para que el tope acote lo pedido
-  // y no las 200 filas más nuevas del catálogo entero.
+  // y no las 200 filas más nuevas del catálogo entero. La cuenta, también en la consulta:
+  // filtrar después del tope le quitaría sus publicaciones a una cuenta poco activa.
   const all = await getPostRows(
-    { ownerId, zone, from: rango.from, to: rango.to, profileId: null, includeBots: false },
+    { ownerId, zone, from, to, profileId: null, includeBots: false },
     false,
-    { publishedFrom: rango.from, publishedTo: rango.to, limit: MAX_POSTS },
+    { publishedFrom: from, publishedTo: to, limit: MAX_POSTS, ...(cuenta ? { accountId: cuenta.id } : {}) },
   )
   const rows = red === null ? all : all.filter((row) => row.network === red)
 
@@ -51,7 +33,12 @@ export async function GET(request: Request) {
   return NextResponse.json({
     truncado: all.length >= MAX_POSTS,
     posts: rows.map((row) =>
-      buildMetricPost(row, atributosByKey.get(`${row.network}:${row.externalId}`) ?? null, zone),
+      buildMetricPost(
+        row,
+        atributosByKey.get(`${row.network}:${row.externalId}`) ?? null,
+        zone,
+        cuentasPorId.get(row.accountId) ?? null,
+      ),
     ),
   })
 }

@@ -7,6 +7,40 @@ import type { PostRow } from '@/lib/posts-kpis'
 
 export const RANGO_ERROR = 'El rango de fechas no se entendió (usa YYYY-MM-DD).'
 
+export function cuentaDesconocida(pedida: string): string {
+  return `Cuenta desconocida: ${pedida}.`
+}
+
+export function cuentaAmbigua(pedida: string): string {
+  return `Hay más de una cuenta llamada ${pedida}: usa su id, o agrega red=.`
+}
+
+/** La cuenta como la ve quien llama a la API: su id, su red y su nombre en la red. */
+export type CuentaApi = { id: string; red: string; nombre: string | null }
+
+/**
+ * La cuenta que pide `?cuenta=`: por su id, o por su nombre en la red con o sin «@» y sin
+ * distinguir mayúsculas, porque es lo que un agente tiene a mano. Con `red`, solo entre las
+ * de esa red: el mismo nombre en Instagram y en TikTok son dos cuentas.
+ */
+export function resolverCuenta<C extends { id: string; network: string; handle: string | null }>(
+  pedida: string,
+  cuentas: C[],
+  red: string | null,
+): { cuenta: C } | { error: string } {
+  const candidatas = red === null ? cuentas : cuentas.filter((c) => c.network === red)
+  const porId = candidatas.find((c) => c.id === pedida.trim())
+  if (porId) return { cuenta: porId }
+  const limpia = (texto: string) => texto.trim().replace(/^@/, '').toLowerCase()
+  const porNombre = candidatas.filter((c) => c.handle !== null && limpia(c.handle) === limpia(pedida))
+  if (porNombre.length === 1) return { cuenta: porNombre[0]! }
+  return { error: porNombre.length > 1 ? cuentaAmbigua(pedida) : cuentaDesconocida(pedida) }
+}
+
+export function cuentaApi(cuenta: { id: string; network: string; handle: string | null }): CuentaApi {
+  return { id: cuenta.id, red: cuenta.network, nombre: cuenta.handle }
+}
+
 const DAY_KEY = /^\d{4}-\d{2}-\d{2}$/
 
 /** `hasta` cubre el día completo: el corte es el inicio del día siguiente en la zona. */
@@ -55,6 +89,8 @@ export function isoInZone(date: Date, zone: string): string {
 
 export type MetricPost = {
   red: string
+  /** La cuenta de la que salió; null si ya no está entre las del dueño. */
+  cuenta: CuentaApi | null
   externalId: string
   permalink: string | null
   texto: string | null
@@ -81,9 +117,11 @@ export function buildMetricPost(
   row: PostRow,
   atributos: Atributos | null,
   zone: string,
+  cuenta: CuentaApi | null = null,
 ): MetricPost {
   return {
     red: row.network,
+    cuenta,
     externalId: row.externalId,
     permalink: row.permalink,
     texto: row.caption,

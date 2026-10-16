@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildMetricPost, isoInZone, parseRango, RANGO_ERROR } from './metrics-api'
+import { buildMetricPost, cuentaAmbigua, cuentaDesconocida, isoInZone, parseRango, RANGO_ERROR, resolverCuenta } from './metrics-api'
 import type { PostRow } from './posts-kpis'
 
 const ZONE = 'America/Santiago'
@@ -49,7 +49,7 @@ describe('buildMetricPost', () => {
 
   it('mapea al shape en español preservando nulls', () => {
     expect(buildMetricPost(row, { hook: 'pregunta' }, ZONE)).toEqual({
-      red: 'instagram', externalId: 'ext-9',
+      red: 'instagram', cuenta: null, externalId: 'ext-9',
       permalink: 'https://instagram.com/p/x', texto: 'Hola',
       publicadoEl: '2026-01-15T11:15:00-03:00',
       etiqueta: 'reel-42', atributos: { hook: 'pregunta' }, archivado: false,
@@ -68,5 +68,30 @@ describe('buildMetricPost', () => {
     expect(built.metricas.views).toBeNull()
     expect(built.metricas.visitasAlSitio).toBeNull()
     expect(built.metricas.arrastre).toBeNull()
+  })
+})
+
+describe('resolverCuenta', () => {
+  const cuentas = [
+    { id: 'id-ig', network: 'instagram', handle: '@Vicente' },
+    { id: 'id-tt', network: 'tiktok', handle: 'vicente' },
+    { id: 'id-yt', network: 'youtube', handle: 'Mi canal' },
+  ]
+
+  it('por id', () => {
+    expect(resolverCuenta('id-yt', cuentas, null)).toEqual({ cuenta: cuentas[2] })
+  })
+
+  it('por nombre, con o sin @ y sin mayúsculas', () => {
+    expect(resolverCuenta('mi canal', cuentas, null)).toEqual({ cuenta: cuentas[2] })
+  })
+
+  it('el mismo nombre en dos redes es ambiguo, salvo que venga la red', () => {
+    expect(resolverCuenta('vicente', cuentas, null)).toEqual({ error: cuentaAmbigua('vicente') })
+    expect(resolverCuenta('@vicente', cuentas, 'instagram')).toEqual({ cuenta: cuentas[0] })
+  })
+
+  it('una que no existe', () => {
+    expect(resolverCuenta('otra', cuentas, null)).toEqual({ error: cuentaDesconocida('otra') })
   })
 })

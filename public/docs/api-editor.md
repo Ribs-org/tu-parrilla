@@ -386,6 +386,11 @@ Parámetros, todos opcionales:
   los últimos 30 días. Formato inválido o rango invertido: `400` con
   `El rango de fechas no se entendió (usa YYYY-MM-DD).`
 - `red`: una de las conocidas. Otra cosa: `400` con `Red desconocida: <valor>.`
+- `cuenta`: solo las publicaciones de una cuenta. Va su `id` (el `cuenta.id` de cualquier
+  fila de esta misma respuesta, o el `cuentaId` de `/api/schedule/posts`) o su nombre en la
+  red, con o sin «@» y sin importar mayúsculas (`cuenta=@vicente`). Si ninguna calza: `400`
+  con `Cuenta desconocida: <valor>.` Si el nombre lo tienen dos cuentas de redes distintas:
+  `400` con `Hay más de una cuenta llamada <valor>: usa su id, o agrega red=.`
 
 ## Respuesta
 
@@ -395,6 +400,7 @@ Parámetros, todos opcionales:
   "posts": [
     {
       "red": "instagram",
+      "cuenta": { "id": "3f1c…", "red": "instagram", "nombre": "@vicente" },
       "externalId": "18114074218999893",
       "permalink": "https://www.instagram.com/p/…",
       "texto": "¿Cómo sacar plata con software…",
@@ -445,6 +451,10 @@ clicks. Si un post nunca tuvo su link pegado, `visitasAlSitio` viene `null`.
 **`atributos`** trae exactamente lo que enviaste al programar; es `null` para posts
 subidos a mano fuera del calendario (también aparecen: también enseñan).
 
+**`cuenta`** es la cuenta de la que salió el post: su `id` (el que va en `cuenta=` y en
+`cuentas` al programar), su `red` y su `nombre` en la red. Es `null` si esa cuenta ya no
+está entre las del dueño.
+
 **`truncado: true`** avisa que el tope de filas mordió y la respuesta es parcial —
 parte el rango en trozos más chicos.
 
@@ -455,6 +465,97 @@ parte el rango en trozos más chicos.
    (con sus views ganadas dentro del rango que pidas), no en una de septiembre.
 2. **Las métricas llegan con la sincronización diaria.** Lo publicado hoy tendrá
    números recién mañana. No concluyas nada de un post de hace dos horas.
+
+---
+
+# 2b. Tu mejor X % — `GET /api/metrics/mejores`
+
+```http
+GET /api/metrics/mejores?desde=2026-09-01&hasta=2026-09-30&cuenta=@vicente&metrica=viewsGanadas&percentil=10
+Authorization: Bearer <tu llave>
+```
+
+La pregunta que más se hace con las métricas, ya respondida: de lo publicado en el rango,
+¿qué fue lo mejor, cuánto había que sacar para estar ahí, cuánto más rindió que el resto, y
+qué tiene en común? Es la misma cuenta que la pantalla «Tu mejor 10 %» del panel.
+
+Parámetros, todos opcionales:
+- `desde`, `hasta`, `red`, `cuenta`: igual que en `/api/metrics/posts`, con las mismas
+  frases de error. El rango filtra por **fecha de publicación**.
+- `metrica`: por cuál se ordena. `viewsGanadas` (por defecto), `visitas` (visitas a la
+  página del dueño), `clicks`, `interacciones` (likes, comentarios y compartidos ganados en
+  el rango) o `arrastre`. Otra cosa: `400` con `La métrica no se entendió (usa viewsGanadas, visitas, clicks, interacciones o arrastre).`
+- `percentil`: qué tajada de arriba, un entero de 1 a 50; por defecto `10`. Otra cosa:
+  `400` con `El percentil tiene que ser un entero entre 1 y 50.`
+
+## Respuesta
+
+```json
+{
+  "metrica": "viewsGanadas",
+  "percentil": 10,
+  "cuenta": { "id": "3f1c…", "red": "instagram", "nombre": "@vicente" },
+  "publicaciones": 64,
+  "compiten": 58,
+  "pocas": false,
+  "corte": 4200,
+  "rinden": 4.6,
+  "truncado": false,
+  "mejores": [
+    {
+      "puesto": 1,
+      "valor": 21000,
+      "red": "instagram",
+      "cuenta": { "id": "3f1c…", "red": "instagram", "nombre": "@vicente" },
+      "externalId": "18114074218999893",
+      "texto": "Tres errores al editar reels",
+      "atributos": { "hook": "pregunta", "tema": "edicion" },
+      "metricas": { "viewsGanadas": 21000, "visitasAlSitio": 214, "arrastre": 1.02, "…": "…" }
+    }
+  ],
+  "medianas": {
+    "mejores": { "viewsGanadas": 9800, "visitas": 120, "interacciones": 640, "arrastre": 1.1 },
+    "resto": { "viewsGanadas": 2100, "visitas": 18, "interacciones": 95, "arrastre": 0.8 }
+  },
+  "enComun": [
+    { "rasgo": "hook", "valor": "pregunta", "enMejores": 4, "mejores": 6, "enTodas": 9, "todas": 58, "veces": 4.3 },
+    { "rasgo": "hora", "valor": "noche (18 a 24)", "enMejores": 5, "mejores": 6, "enTodas": 20, "todas": 58, "veces": 2.4 }
+  ]
+}
+```
+
+Cada elemento de `mejores` es una fila con la misma forma que las de `/api/metrics/posts`,
+más `puesto` y `valor` (el número de la métrica elegida).
+
+## Cómo leerla
+
+- **`compiten`** son las publicaciones del rango que tienen la métrica; `publicaciones`,
+  todas. Las que no la tienen no compiten (un `null` es «no se sabe», nunca cero):
+  - En `viewsGanadas`, `interacciones` y `arrastre`, **YouTube no compite**: sus políticas
+    no permiten calcular métricas con sus datos. En `visitas` y `clicks` sí, porque esas las
+    mide Tu Parrilla.
+  - En `visitas` y `clicks` no compite un post cuyo link con `?s=` nunca se usó.
+  - En `arrastre` solo compiten las que ganaron al menos la mediana de views del rango:
+    con 30 views, una visita ya es un 3 %, y el ranking se llenaría de casualidades.
+- **Quién entra:** las primeras `ceil(compiten × percentil / 100)` —al menos una— y todas
+  las empatadas con la última. Nunca una con valor cero. **`corte`** es el valor de la
+  última que entra (`null` si ninguna).
+- **`rinden`**: la mediana de la métrica entre las de arriba dividida por la del resto.
+  `4.6` es «rinden 4,6 veces más que una publicación típica».
+- **`medianas`**: la publicación del medio de cada grupo, en cuatro métricas. Mediana y no
+  promedio: un viral no arrastra al grupo entero.
+- **`enComun`**: lo que se repite más entre las de arriba que entre todas las que compiten.
+  `rasgo` es una clave de tus `atributos` (sin `pieza`) o uno de `red`, `formato`, `día`,
+  `hora` (franja: madrugada, mañana, tarde o noche, en la zona del dueño). Entra si está en
+  al menos dos de arriba y es al menos 1,5 veces más frecuente ahí (`veces`). Viene vacío
+  con menos de tres arriba. Que se repita no prueba que sea la causa: es la pista para la
+  próxima prueba.
+- **`pocas: true`** cuando compiten menos de 20: el mejor 10 % son una o dos publicaciones,
+  que sirven para mirarlas, no para concluir. Amplía el rango o sube `percentil`.
+- **`truncado`**, como en `/api/metrics/posts`.
+
+Para mirar una cuenta sola, pasa `cuenta`: con «todas», una cuenta grande llena la tajada
+de arriba y las chicas no aparecen nunca.
 
 ---
 
@@ -529,7 +630,8 @@ lo que decidiste y lo que rindió.
    reintenta hasta 3 veces; al tercer fallo el dueño recibe un correo y el post queda
    marcado en rojo en su calendario, y en `failed` en `/api/schedule/posts`.
 4. La sincronización diaria trae **métricas reales**.
-5. **Lee** `/api/metrics/posts` sobre un rango con suficiente historia.
+5. **Lee** `/api/metrics/posts` sobre un rango con suficiente historia, o pide directo
+   `/api/metrics/mejores` para ver lo mejor de cada cuenta y qué lo distingue.
 6. **Correlaciona** `atributos` contra `viewsGanadas` y `arrastre`, y decide la
    próxima parrilla. Ejemplos de preguntas que el dato responde:
    - ¿qué `hook` gana en views, y cuál gana en visitas al sitio? (rara vez es el mismo)
@@ -557,8 +659,9 @@ patrones. Con menos de ~10 posts por valor de atributo, desconfía de la diferen
   `{ "ok": true, "id" }`.
 - **No republica lo ya publicado**: corregir un post afecta solo a los destinos que
   aún no salieron.
-- **No entrega agregados**: este endpoint devuelve filas crudas y el análisis es tuyo,
-  a propósito.
+- **Entrega un solo agregado**: `/api/metrics/mejores`, el mejor X % con sus medianas y lo
+  que se repite. Todo lo demás —promedios por red, tendencias, cruces de atributos— sale de
+  las filas crudas de `/api/metrics/posts`, y el análisis es tuyo, a propósito.
 
 # 6. Ejemplos ejecutables
 
@@ -601,6 +704,12 @@ Leer el mes:
 ```bash
 curl -s "https://tu-parrilla.cl/api/metrics/posts?desde=2026-09-01&hasta=2026-09-30" \
   -H "Authorization: Bearer $LLAVE_PARRILLA"
+```
+
+El mejor 10 % de una cuenta en el mes, por visitas que trajo a la página:
+
+```bash
+curl -s "https://tu-parrilla.cl/api/metrics/mejores?desde=2026-09-01&hasta=2026-09-30&cuenta=@vicente&metrica=visitas"   -H "Authorization: Bearer $LLAVE_PARRILLA"
 ```
 
 Programar a una cuenta exacta (útil cuando hay dos cuentas de la misma red — acá, dos
