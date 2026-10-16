@@ -2,7 +2,7 @@
 // navegador, y acá se lo prueba sin pintar nada.
 
 /** Cuántas filas se ven de entrada, y cuántas suma cada «Ver más». */
-export const PAGINA_QUEMADOS = 15
+export const PAGINA_QUEMADOS = 10
 
 /**
  * Las redes que tienen algo quemado, con cuántas filas cada una, en el orden en que aparecen

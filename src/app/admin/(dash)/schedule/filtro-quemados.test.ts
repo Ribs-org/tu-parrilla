@@ -16,12 +16,12 @@ describe('redesQuemadas', () => {
 describe('quemadosVisibles', () => {
   const muchas = Array.from({ length: 40 }, (_, i) => fila(i, i % 4 === 0 ? 'instagram' : 'tiktok'))
 
-  it('de entrada, las primeras quince, y cuántas quedan', () => {
+  it('de entrada, las primeras diez, y cuántas quedan', () => {
     const { visibles, total, quedan } = quemadosVisibles(muchas, new Set(), PAGINA_QUEMADOS)
-    expect(PAGINA_QUEMADOS).toBe(15)
-    expect(visibles.map((f) => f.id)).toEqual(muchas.slice(0, 15).map((f) => f.id))
+    expect(PAGINA_QUEMADOS).toBe(10)
+    expect(visibles.map((f) => f.id)).toEqual(muchas.slice(0, 10).map((f) => f.id))
     expect(total).toBe(40)
-    expect(quedan).toBe(25)
+    expect(quedan).toBe(30)
   })
 
   it('«Ver más» suma otra tanda, y al final no queda nada', () => {
@@ -30,7 +30,7 @@ describe('quemadosVisibles', () => {
   })
 
   it('una red apagada sale de la vista y de la cuenta', () => {
-    const { visibles, total } = quemadosVisibles(muchas, new Set(['tiktok']), PAGINA_QUEMADOS)
+    const { visibles, total } = quemadosVisibles(muchas, new Set(['tiktok']), 15)
     expect(total).toBe(10)
     expect(visibles.every((f) => f.red === 'instagram')).toBe(true)
   })

@@ -15,9 +15,11 @@ import { Reprogramar } from './reprogramar'
  * quemado la sección no existe: un «no se quemó nada» sería una fila que hay que leer todos
  * los días para enterarse de que no pasa nada.
  *
- * Esta lista no tiene ventana de fecha, así que puede crecer: se ven quince y el resto detrás
- * de «Ver más», y se puede apagar una red para mirar las otras (`ListaQuemados`). Las filas se
- * dibujan acá, en el servidor; la lista solo elige cuáles se ven.
+ * Esta lista no tiene ventana de fecha, así que puede crecer: parte plegada en una línea, y
+ * abierta muestra diez y el resto detrás de «Ver más»; se puede apagar una red para mirar las
+ * otras (`ListaQuemados`). Las filas se dibujan acá, en el servidor; la lista solo elige
+ * cuáles se ven. Cada fila ocupa dos líneas: la hora, la red y el texto arriba, el motivo
+ * abajo, y «Reprogramar» al costado.
  */
 export function SeQuemo({
   filas,
@@ -40,28 +42,35 @@ export function SeQuemo({
           id: destino.id,
           red: destino.network,
           fila: (
-            <li key={destino.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 py-2">
+            <li key={destino.id} className="flex items-start gap-3 py-2">
               {/* Todas las marcas del corte, para ver que lo demás salió: solo esta se quemó. */}
               <Corte {...dibujoDe(corte.targets, corte.media, frias)} chico className="mt-1.5 w-12 shrink-0" />
-              {/* Con el día delante si no es de hoy: esta lista no tiene ventana de fecha y
-                  un fallo viejo se leería igual que uno de esta mañana. */}
-              <span className="font-mono text-[0.8rem] text-fg-muted">{horaConDia(corte.post.scheduledAt, now, zone)}</span>
-              <Redes targets={[destino]} />
-              {/* `basis-full` a ancho de teléfono lo baja a su propia línea: es el único trozo
-                  que puede encogerse, y compartiendo línea con la hora se estrechaba hasta
-                  quince caracteres. */}
-              <Link
-                href={`/admin/schedule/${corte.post.id}?volver=${encodeURIComponent(volver)}`}
-                prefetch={false}
-                className="line-clamp-1 min-w-0 basis-full text-[0.85rem] text-fg hover:underline sm:flex-1 sm:basis-auto"
-              >
-                {corte.post.caption || '(sin texto)'}
-              </Link>
-              {/* El motivo, una de nuestras frases fijas —`lastError` nunca trae texto de la
-                  red; ver `scheduledPostTargets` en `db/schema.ts`—. `w-full` lo baja a su
-                  propia línea, que a 360 px es la única forma de que se lea entero. */}
-              {destino.lastError ? <span className="w-full text-[0.78rem] text-negative">{destino.lastError}</span> : null}
-              <Reprogramar targetId={destino.id} titulo={nombreDestino(destino)} />
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                  {/* Con el día delante si no es de hoy: esta lista no tiene ventana de fecha y
+                      un fallo viejo se leería igual que uno de esta mañana. */}
+                  <span className="font-mono text-[0.78rem] text-fg-muted">{horaConDia(corte.post.scheduledAt, now, zone)}</span>
+                  <Redes targets={[destino]} />
+                  {/* `basis-full` a ancho de teléfono lo baja a su propia línea: es el único
+                      trozo que puede encogerse, y compartiendo línea con la hora se estrechaba
+                      hasta quince caracteres. */}
+                  <Link
+                    href={`/admin/schedule/${corte.post.id}?volver=${encodeURIComponent(volver)}`}
+                    prefetch={false}
+                    className="line-clamp-1 min-w-0 basis-full text-[0.85rem] text-fg hover:underline sm:flex-1 sm:basis-auto"
+                  >
+                    {corte.post.caption || '(sin texto)'}
+                  </Link>
+                </div>
+                {/* El motivo, una de nuestras frases fijas —`lastError` nunca trae texto de la
+                    red; ver `scheduledPostTargets` en `db/schema.ts`—. */}
+                {destino.lastError ? (
+                  <p className="mt-0.5 line-clamp-2 text-[0.75rem] text-negative">{destino.lastError}</p>
+                ) : null}
+              </div>
+              <span className="shrink-0 text-[0.78rem] text-fg-muted hover:text-fg">
+                <Reprogramar targetId={destino.id} titulo={nombreDestino(destino)} />
+              </span>
             </li>
           ),
         }))}
