@@ -40,7 +40,9 @@ está mal y dónde está.
 8. **Los Fierros: una cuenta tomada por otro usuario no se libera nunca.** «Esa cuenta ya
    está conectada por otra persona.» sigue aunque el otro la desconecte, porque la fila
    conserva su dueño. Es la limitación conocida de la entrega 3, pero la persona no tiene
-   salida desde el panel. `src/lib/social/conectar.ts:487`.
+   salida desde el panel. Desde el 2026-10-16 la tiene quien la conectó: «Quitar» en su
+   tarjeta desconectada la borra y la libera. Quien choca con ella sigue sin poder hacer
+   nada desde su usuario. `src/lib/social/conectar.ts:487`.
 9. **Tu Cuenta: el selector cambia la zona sin que nadie lo note.** Si la zona guardada es un
    alias que `Intl.supportedValuesOf` no lista (por ejemplo `UTC`, con
    `SITE_TIMEZONE=UTC`), el selector muestra «Africa/Abidjan» y «Guardar» la cambia aunque

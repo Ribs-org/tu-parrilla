@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useState, useTransition } from 'react'
+import { useEffect, useId, useRef, useState, useTransition } from 'react'
 import { AlertTriangle, Check, Copy, RefreshCw } from 'lucide-react'
-import { disconnectAccount, fusionarCuenta, syncSocialNow } from '@/app/admin/actions'
+import { disconnectAccount, fusionarCuenta, quitarCuentaAccion, syncSocialNow } from '@/app/admin/actions'
+import { Button } from '@/components/ui'
 import { NEGATIVE, POSITIVE } from '@/components/charts/theme'
 import { SOCIAL_NETWORKS } from '@/db/schema'
 import type { CuentaRow } from '@/lib/posts-kpis'
@@ -329,8 +330,82 @@ function Tarjeta({ row, network, vivas }: { row: CuentaRow; network: string; viv
           >
             {pending ? 'Desconectando…' : 'Desconectar'}
           </button>
-        ) : null}
+        ) : (
+          <Quitar id={row.id} nombre={nombre} red={networkLabel(network)} />
+        )}
       </div>
     </div>
+  )
+}
+
+/**
+ * «Quitar», solo en una tarjeta desconectada: saca la cuenta de Tu Parrilla con todo lo que
+ * se bajó de ella, y la deja libre para que otro usuario la conecte. No tiene vuelta, así que
+ * pregunta en una ventana que dice qué se borra —el mismo `<dialog>` modal de «Reprogramar»
+ * (`schedule/reprogramar.tsx`), por las mismas razones: Esc lo cierra, el foco no se escapa y
+ * el velo se traga los clics—.
+ */
+function Quitar({ id, nombre, red }: { id: string; nombre: string; red: string }) {
+  const ventana = useRef<HTMLDialogElement>(null)
+  const titulo = useId()
+  const [error, setError] = useState<string | null>(null)
+  const [quitando, startQuitar] = useTransition()
+
+  function quitar() {
+    startQuitar(async () => {
+      setError(null)
+      // Si sale bien, la acción redirige a Los Fierros con el aviso y no vuelve.
+      const resultado = await quitarCuentaAccion(id)
+      if (resultado?.error) setError(resultado.error)
+    })
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => {
+          setError(null)
+          ventana.current?.showModal()
+        }}
+        className="text-[0.75rem] text-fg-faint transition-colors hover:text-negative"
+      >
+        Quitar
+      </button>
+      <dialog
+        ref={ventana}
+        aria-labelledby={titulo}
+        onClick={(event) => {
+          if (event.target === event.currentTarget && !quitando) ventana.current?.close()
+        }}
+        className="m-auto w-[24rem] max-w-[calc(100vw-2rem)] rounded-xl border border-white/10 bg-acero-900/95 text-fg shadow-xl backdrop-blur backdrop:bg-acero-950/80"
+      >
+        <div className="space-y-3 p-4">
+          <p id={titulo} className="font-titulo text-sm font-semibold uppercase tracking-[0.03em]">
+            ¿Quitar «{nombre}» de Tu Parrilla?
+          </p>
+          <p className="text-sm text-fg-muted">
+            Se borran la cuenta, sus publicaciones y números ya bajados, sus comentarios y su historial en La
+            Parrilla. No se puede deshacer. En {red} no se borra nada.
+          </p>
+          <p className="text-sm text-fg-muted">
+            La cuenta queda libre: tú u otro usuario de Tu Parrilla la pueden volver a conectar, desde cero.
+          </p>
+          {error ? (
+            <p role="alert" className="text-sm text-negative">
+              {error}
+            </p>
+          ) : null}
+          <div className="flex flex-wrap items-center gap-2">
+            <Button type="button" variant="danger" disabled={quitando} onClick={quitar}>
+              {quitando ? 'Quitando…' : 'Quitar para siempre'}
+            </Button>
+            <Button type="button" disabled={quitando} onClick={() => ventana.current?.close()}>
+              Cancelar
+            </Button>
+          </div>
+        </div>
+      </dialog>
+    </>
   )
 }

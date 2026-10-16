@@ -117,6 +117,7 @@ const { getCola } = await import('./comentarios-cola')
 const { verificarCuentas, cuentaUnicaPorRed } = await import('./social/cuentas')
 const { todosLosCortes, servidosAyer } = await import('./social/publish/cortes')
 const { listarBorradores, cargarBorrador, guardarBorrador, borrarBorrador } = await import('./borradores')
+const { quitarCuenta, CUENTA_CONECTADA } = await import('./social/quitar')
 const { leerAjuste } = await import('./ajustes')
 const { listarLlaves, crearLlave } = await import('./llaves')
 const { makeDefault, updateProfile, deleteScheduledPost, guardarCuenta, revocarLlaveApi } = await import(
@@ -558,6 +559,24 @@ describe('aislamiento por dueño, escrituras (SQL generado, sin base)', () => {
     expect(consultas).toHaveLength(1)
     expect(consultas[0]!.sql).toMatch(/delete from "borradores"/i)
     esperarFiltradoPorDueno(consultas[0]!)
+  })
+
+  /**
+   * «Quitar» borra una cuenta con su historial, y el id llega desde el navegador: la lectura
+   * que decide si se puede tiene que estar atada al dueño, o cualquiera borraría la cuenta de
+   * otro sabiendo su id.
+   */
+  it('social/quitar: quitarCuenta lee la cuenta atada al dueño antes de borrar nada', async () => {
+    const consultas = await consultasEncadenadas(() => quitarCuenta(DUENO, '9692387a-41cc-4a81-9f8f-7b07135d742a'))
+    esperarFiltradoPorDueno(consultas[0]!)
+    expect(consultas[0]!.params).toContain('9692387a-41cc-4a81-9f8f-7b07135d742a')
+    expect(consultas.every((c) => !/^\s*delete/i.test(c.sql))).toBe(true)
+  })
+
+  it('social/quitar: una cuenta conectada no se quita, y no se borra nada', async () => {
+    colaRespuestas.push([['@vicente', '1784', true]])
+    expect(await quitarCuenta(DUENO, '9692387a-41cc-4a81-9f8f-7b07135d742a')).toEqual({ error: CUENTA_CONECTADA })
+    expect(capturas).toHaveLength(1)
   })
 
   it('api/mobile/schedule/accounts: lista solo las cuentas del dueño', async () => {

@@ -467,7 +467,11 @@ historial de métricas ya recogido no se toca. Cuenta con hacerlo cada dos meses
 
 Desconectar borra las credenciales de esa cuenta y conserva su historial. Para volver,
 **Reconectar** en su tarjeta; para sumar otra cuenta de la misma red, **Agregar
-cuenta** en el bloque de la red.
+cuenta** en el bloque de la red. Una tarjeta ya desconectada tiene además **Quitar**, que
+pregunta en una ventana y borra la cuenta con su historial (sus publicaciones, números,
+comentarios y destinos ya publicados); no deja si tiene publicaciones por salir. Es la
+forma de liberar una cuenta para otro usuario: mientras su fila exista, queda atada a
+quien la conectó.
 
 #### Varias cuentas de una misma red
 
