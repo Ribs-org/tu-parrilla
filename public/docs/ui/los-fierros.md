@@ -64,7 +64,8 @@ El botón «Sincronizar ahora», con un ícono de flechas que gira mientras trab
 
 - El título «¿Qué cuentas de Instagram conectar?», con el nombre de la red que corresponda (Instagram, Facebook o YouTube).
 - «Marca las que quieres ver en el panel. Las ya conectadas solo renuevan su acceso.»
-- Una casilla por cuenta, con su nombre: el @usuario en Instagram, el nombre de la página en Facebook, el título del canal en YouTube. Las que ya están conectadas vienen marcadas y dicen «ya conectada» a la derecha.
+- Solo si alguna de las cuentas ya la tiene otro usuario de Tu Parrilla: «Las que dicen «conectada por otra persona» ya están en otro usuario de Tu Parrilla y no se pueden marcar.»
+- Una casilla por cuenta, con su nombre: el @usuario en Instagram, el nombre de la página en Facebook, el título del canal en YouTube. Las que ya están conectadas vienen marcadas y dicen «ya conectada» a la derecha. Las de otro usuario salen con el nombre atenuado, la casilla apagada y «conectada por otra persona» a la derecha: el login de Meta trae todas las cuentas de las páginas que administra quien entra, también las que conectó otro.
 - El botón «Conectar» (dice «Conectando…» mientras trabaja, que puede tardar unos segundos) y el enlace «Cancelar», que vuelve a Los Fierros sin conectar nada.
 - Si se aprieta «Conectar» sin marcar nada, en rojo: «Elige al menos una cuenta.»
 - Si pasaron más de diez minutos desde el login en la red, en lugar de la lista: «El login venció. Vuelve a conectar.» y el enlace «← Volver a Los Fierros».
@@ -187,7 +188,8 @@ Trae los posts y los números de las cuentas de Instagram, TikTok, YouTube y Fac
 | «La conexión con X expiró. Inténtalo de nuevo.» | Pasaron más de diez minutos en la ventana de X, o se terminó en otro navegador. | Volver a apretar «Conectar →» en el bloque de X / Twitter. |
 | «El login venció. Vuelve a conectar.» | Pasaron más de diez minutos entre el login y apretar «Conectar» en la lista. | Volver a apretar «Conectar →» en esa red. |
 | «Elige al menos una cuenta.» | Se apretó «Conectar» en la lista sin marcar ninguna casilla. | Marcar al menos una, o «Cancelar». |
-| «Esa cuenta ya está conectada por otra persona.» | Otro usuario de Tu Parrilla ya tiene esa cuenta conectada. Una cuenta solo puede estar en un usuario. | No se arregla desde esta pantalla: avisar a quien administra Tu Parrilla. |
+| ««@cuenta» ya está conectada por otra persona en Tu Parrilla.» (con el nombre de la cuenta), a veces seguido de «Si querías conectar otra, vuelve a conectar y, en la ventana de Facebook, elige la página de esa cuenta.» o «Si querías conectar otra, vuelve a conectar entrando con esa cuenta.» | Otro usuario de Tu Parrilla ya tiene esa cuenta conectada; una cuenta solo puede estar en un usuario. Con la segunda frase, era la única cuenta que entregó la red: casi siempre se quería otra. No se guardó nada. | Si se quería otra cuenta, hacer lo que dice la segunda frase. Si es esa misma, no se arregla desde esta pantalla: avisar a quien administra Tu Parrilla. |
+| ««@a» y «@b» ya están conectadas por otra persona en Tu Parrilla.» (en la lista para elegir) | Entre las marcadas había cuentas de otro usuario. No se guardó ninguna. | Desmarcar esas y volver a apretar «Conectar». |
 | «Ninguna página de Facebook tiene una cuenta de Instagram asociada.» | Ninguna página que administra esa cuenta de Facebook tiene una cuenta de Instagram Business o Creator enlazada. | Pasar la cuenta de Instagram a Business o Creator, enlazarla a una página de Facebook y conectar con la cuenta de Facebook que administra esa página. |
 | «Esta cuenta no administra ninguna página de Facebook.» | La cuenta de Facebook con que se entró no tiene páginas. | Entrar con la cuenta que administra la página, o crear una. |
 | «Facebook no entregó el token de la página. Inténtalo de nuevo.» | Facebook no dio el permiso de la página. | Volver a conectar. |
@@ -232,6 +234,7 @@ Trae los posts y los números de las cuentas de Instagram, TikTok, YouTube y Fac
 - **«Facebook dice "Invalid Scopes"»** → Es un problema de configuración de la app de Meta de Tu Parrilla, no de la cuenta: avisar a quien administra Tu Parrilla.
 - **«Google dice que la app no está verificada»** → Mientras Google no termine de verificar la app de Tu Parrilla, muestra ese cartel; hay que pasarlo para seguir.
 - **«Conecté Instagram y no aparece mi página de Facebook»** → Son conexiones separadas: hay que apretar también «Conectar →» en el bloque «Facebook».
+- **«Me dice que la cuenta ya está conectada por otra persona»** → Mirar qué cuenta nombra: suele ser otra cuenta que la red trajo junto con la que se quería (en Meta, la de otra página que administra la misma persona en Facebook). En la lista para elegir, marcar solo la propia; si el error salió sin lista, volver a conectar y, en la ventana de Facebook, elegir la página de la cuenta que se quiere. Si nombra la cuenta propia, la tiene otro usuario de Tu Parrilla: avisar a quien administra Tu Parrilla.
 - **«Apreté "Agregar cuenta" y no apareció otra tarjeta»** → La red entró con la cuenta que ya estaba conectada y solo la renovó. Ver «Para agregar otra cuenta de la misma red».
 - **«Reconecté y apareció una tarjeta nueva»** → En la ventana de la red se entró con otra cuenta, o la red le dio un identificador nuevo a la misma. Si es la misma cuenta, desconectar la vieja y fusionarla (ver «Para fusionar una cuenta repetida»).
 - **«Tengo dos tarjetas de la misma cuenta»** → «Para fusionar una cuenta repetida».

@@ -38,7 +38,7 @@ está mal y dónde está.
    reconecta la cuenta.»; el motivo («Quitaste la app desde Facebook: vuelve a conectar.»,
    que deja `src/lib/social/meta-bajas.ts:22-24`) sale solo al pasar el mouse.
 8. **Los Fierros: una cuenta tomada por otro usuario no se libera nunca.** «Esa cuenta ya
-   está conectada por otra persona.» sigue aunque el otro la desconecte, porque la fila
+   está conectada por otra persona.» (desde el 2026-10-16, con el nombre de la cuenta) sigue aunque el otro la desconecte, porque la fila
    conserva su dueño. Es la limitación conocida de la entrega 3, pero la persona no tiene
    salida desde el panel. `src/lib/social/conectar.ts:487`.
 9. **Tu Cuenta: el selector cambia la zona sin que nadie lo note.** Si la zona guardada es un

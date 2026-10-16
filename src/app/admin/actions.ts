@@ -42,7 +42,14 @@ import { CuentaInvalida, verificarCuentas, type CuentaDestino } from '@/lib/soci
 // `guardarCuenta` de `social/conectar` guarda una cuenta *de una red*; la acción de abajo,
 // con el mismo nombre, guarda la cuenta *del usuario*. Se renombra la de la red al
 // importarla porque la acción es la que el formulario nombra desde fuera.
-import { CUENTA_DE_OTRO, CuentaDeOtro, guardarCuenta as guardarCuentaDeRed, tokensDePaginas } from '@/lib/social/conectar'
+import {
+  CuentaDeOtro,
+  fraseCuentaDeOtro,
+  guardarCuenta as guardarCuentaDeRed,
+  nombreDeCandidata,
+  tokensDePaginas,
+  tomadasPorOtro,
+} from '@/lib/social/conectar'
 import { SIN_TOKEN_DE_PAGINA } from '@/lib/social/facebook'
 import { tiktokConnector } from '@/lib/social/tiktok'
 import { TIKTOK_SIN_CUENTA, consultarCreador, type CreadorTikTok } from '@/lib/social/publish/tiktok-creador'
@@ -535,6 +542,15 @@ export async function conectarElegidas(formData: FormData): Promise<void> {
     redirect(`/admin/accounts/elegir?mensaje=${encodeURIComponent('Elige al menos una cuenta.')}`)
   }
 
+  // Una cuenta que ya es de otro usuario no se puede marcar en la lista, pero el formulario
+  // puede llegar igual (una pestaña vieja). Se revisan todas antes de guardar ninguna: si
+  // no, las que iban antes en la lista quedaban guardadas y las de después no.
+  const tomadas = await tomadasPorOtro(usuario.id, pendiente.network, marcadas.map((c) => c.externalId))
+  if (tomadas.size > 0) {
+    const nombres = marcadas.filter((c) => tomadas.has(c.externalId)).map(nombreDeCandidata)
+    redirect(`/admin/accounts/elegir?mensaje=${encodeURIComponent(fraseCuentaDeOtro(nombres))}`)
+  }
+
   // Facebook: el token de cada página no viajó en la cookie; se pide ahora con el de usuario.
   let tokens = new Map<string, string>()
   if (pendiente.network === 'facebook') {
@@ -567,7 +583,8 @@ export async function conectarElegidas(formData: FormData): Promise<void> {
     }
   } catch (error) {
     if (error instanceof CuentaDeOtro) {
-      fallo = CUENTA_DE_OTRO
+      // Solo si otro la tomó entre la revisión de arriba y este guardado.
+      fallo = error.message
     } else {
       console.error('conectarElegidas:', String(error).slice(0, 300))
       fallo = 'No se pudo guardar la cuenta. Inténtalo de nuevo.'
