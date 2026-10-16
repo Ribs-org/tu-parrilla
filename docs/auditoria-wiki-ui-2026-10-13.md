@@ -22,10 +22,10 @@ está mal y dónde está.
    números; las redes se conectan en Los Fierros, en el panel web.
    `mobile/src/app/(tabs)/publicar.tsx:338-340`.~~ **Resuelto el 2026-10-16**: ahora dice
    «Conéctala en el panel web, en Los Fierros.», y la pestaña Cuentas ya no existe.
-4. **Los Fierros: falsa alarma en X.** La tarjeta dice «vence hoy» apenas se conecta y a las
+4. ~~**Los Fierros: falsa alarma en X.** La tarjeta dice «vence hoy» apenas se conecta y a las
    dos horas queda gris, aunque X renueva su credencial sola al publicar. Es el mismo caso
    que se arregló para TikTok y YouTube en #154: `src/lib/parrilla.ts:291` exime solo a esas
-   dos.
+   dos.~~ **Resuelto el 2026-10-16**: `estadoDelFierro` exime también a X.
 5. **Los Fierros: conexión vencida sin explicación.** Una cuenta vencida sin error de
    sincronización queda con la barra gris, el visto verde y ninguna frase; el color es la
    única señal, contra lo que pide el propio comentario de `cuentas.tsx:241-245`. En

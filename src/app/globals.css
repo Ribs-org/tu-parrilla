@@ -241,8 +241,14 @@
    */
   .acerado {
     --color-fg: #f2ebe2;
-    --color-fg-muted: #948a80;
-    --color-fg-faint: #6b7076;
+    /*
+     * El secundario y el tenue, medidos sobre la chapa (`acero-900`): 5,85:1 y 5,03:1. Los de
+     * antes (#948a80 y #6b7076) daban 4,79 y 3,25, y el tenue es el de las fechas, los ids y
+     * el subtítulo de cada entrada de Ajustes: texto chico, que WCAG pide a 4,5. La app y los
+     * gráficos repiten los dos y `src/lib/paleta.test.ts` compara las copias.
+     */
+    --color-fg-muted: #a39a8f;
+    --color-fg-faint: #8a9096;
     /*
      * El rojo de «se quemó», el mismo del halo del corte (`QUEMO`, en `src/lib/parrilla.ts`).
      * El de afuera (#f0614f) es casi el naranjo de la brasa: con deuteranopía, «saliendo» y

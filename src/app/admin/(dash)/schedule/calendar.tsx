@@ -141,9 +141,9 @@ export function WeekCalendar({
                     <span className="sr-only">: ver por cuenta</span>
                   </Link>
                   <span
-                    // `text-fg-muted` y no `text-fg-faint`: a 0.55rem el tenue da 3.56:1
-                    // sobre el panel y este rótulo es copy nuevo, así que entra al
-                    // mínimo de 4.5:1 que el spec puso para esta entrega.
+                    // En el secundario y no en el tenue: a 0.55rem es el texto más chico
+                    // de la pantalla, y el secundario es el que más le sobra sobre el
+                    // mínimo de 4.5:1 (5,85 contra 5,03 sobre la chapa).
                     className={cn(
                       'font-titulo text-[0.55rem] uppercase tracking-[0.12em]',
                       calor === 'llena' ? 'text-brasa' : 'text-fg-muted',

@@ -28,9 +28,10 @@ export const CHART = {
   surface: '#1d2124',
   grid: '#242a2f',
   axis: '#2a2e33',
-  muted: '#6b7076',
+  // Los textos secundario y tenue de `.acerado` (globals.css): `paleta.test.ts` los compara.
+  muted: '#8a9096',
   text: '#f2ebe2',
-  secondary: '#948a80',
+  secondary: '#a39a8f',
 } as const
 
 /** Sequential blue, low → high. On a dark surface, near-zero recedes to the plane. */

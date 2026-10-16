@@ -40,9 +40,13 @@ Está siempre, fija arriba, en todas las pantallas del panel. De izquierda a der
    palabra. Abre un menú con cuatro entradas, cada una con su subtítulo debajo: «Los Fierros»
    (tus redes conectadas), «La Vitrina» (tus páginas públicas), «Los Maestros» (quién puede
    entrar; **solo lo ve el admin**) y «Tu Cuenta» (tu nombre, tu hora y tus llaves). Cuando la
-   persona está en una de esas pantallas, el engranaje queda pintado de naranjo. El menú se
-   cierra con Escape, al elegir una entrada o volviendo a apretar el engranaje; un clic afuera
-   no lo cierra.
+   persona está en una de esas pantallas, el engranaje queda pintado de naranjo. Si el permiso
+   de alguna cuenta conectada vence en la semana, el engranaje lleva un punto ámbar; si alguna
+   ya se apagó (venció o dejó de sincronizar), un punto rojo. Adentro, la entrada «Los Fierros»
+   lo dice al lado del nombre: «1 se enfría», «2 se enfrían», «1 se apagó» o «2 se apagaron»
+   (un lector de pantalla lee el engranaje «Ajustes: en Los Fierros, 1 se enfría»). Sin nada
+   que avisar no hay punto. El menú se cierra con Escape, al elegir una entrada o volviendo a
+   apretar el engranaje; un clic afuera no lo cierra.
 4. **«Salir»**, al final, en mayúsculas. Cierra la sesión y deja en la pantalla para entrar con
    el correo ([ingresar.md](ingresar.md)).
 
@@ -170,7 +174,8 @@ Sale de:
 - `src/app/admin/(dash)/content/page.tsx`: la dirección de la antigua pestaña Los Cortes lleva a
   «Tus publicaciones», dentro de Los Números.
 - `src/lib/vocabulario.ts`: los nombres, subtítulos y rutas de cada pantalla, y quién las ve.
-- `src/lib/parrilla.ts`: la cocción, el calor del día y la temperatura del fierro.
+- `src/lib/parrilla.ts`: la cocción, el calor del día, la temperatura del fierro y el aviso del
+  engranaje (`avisoDeFierros`).
 - `src/app/admin/(dash)/error.tsx`, `src/app/admin/(dash)/loading.tsx` y
   `src/app/not-found.tsx`: el error, la carga y el 404.
 - `src/proxy.ts`: que el panel solo se abre en tu-parrilla.cl.

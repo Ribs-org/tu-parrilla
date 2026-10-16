@@ -102,7 +102,7 @@ no por subcadena parcial ni regex:
 | `Un trial reel es un solo video, sin fotos.` | `opciones.<destino>.trialReel: true` con fotos, carrusel, dos videos o sin ningún video en `media` |
 | `Instagram no permite trial reels en esta cuenta.` | no es un error de fila — la fila con `trialReel: true` se acepta al programar; esta frase aparece después, como el `error` de ese destino en `GET /api/schedule/posts`, porque Instagram solo revela la elegibilidad al publicar |
 | `Una de las cuentas elegidas no es tuya.` | `cuentas` con un identificador que no es del dueño |
-| `La cuenta <handle> no está conectada. Vuelve a conectarla en Cuentas.` | `cuentas` con un identificador válido pero desconectado |
+| `La cuenta <handle> no está conectada. Vuelve a conectarla en Los Fierros.` | `cuentas` con un identificador válido pero desconectado |
 | `No hay una cuenta de <red> conectada.` | `redes` con un nombre sin ninguna cuenta conectada de esa red |
 | `Tienes N cuentas de <red> (<handles>). Elige cuál con «cuentas».` | `redes` con un nombre ambiguo (dos o más cuentas conectadas) |
 | `La palabra clave es una sola palabra, sin espacios, hasta 30 letras.` | `regla.palabra` vacía con mensaje, con espacios/símbolos, o `regla` que no es un objeto |

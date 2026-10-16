@@ -340,7 +340,7 @@ Instagram acepta: 1 foto, 1 video, o 2–10 fotos (carrusel).
 | `Un trial reel es un solo video, sin fotos.` | `opciones.<destino>.trialReel: true` con fotos, carrusel, dos videos o sin ningún video en `media` |
 | `Instagram no permite trial reels en esta cuenta.` | **no es un error de fila:** la fila con `trialReel: true` se acepta al programar; esta frase aparece después, en el `error` del destino que ya publicó (panel y `GET /api/schedule/posts`), porque Instagram solo revela la elegibilidad al crear el contenedor |
 | `Una de las cuentas elegidas no es tuya.` | un identificador en `cuentas` que no es una cuenta del dueño (o no existe) |
-| `La cuenta <handle> no está conectada. Vuelve a conectarla en Cuentas.` | un identificador en `cuentas` que existe pero perdió la credencial — **solo con `cuentas`**: con `redes`, una cuenta desconectada da la frase de abajo |
+| `La cuenta <handle> no está conectada. Vuelve a conectarla en Los Fierros.` | un identificador en `cuentas` que existe pero perdió la credencial — **solo con `cuentas`**: con `redes`, una cuenta desconectada da la frase de abajo |
 | `No hay una cuenta de <red> conectada.` | un nombre en `redes` sin ninguna cuenta *conectada* de esa red — no tiene ninguna, o la única que tiene está desconectada; las dos dan la misma frase |
 | `Tienes N cuentas de <red> (<handles>). Elige cuál con «cuentas».` | un nombre en `redes` con dos o más cuentas conectadas de esa red — hay que repetir la fila usando `cuentas` |
 | `La palabra clave es una sola palabra, sin espacios, hasta 30 letras.` | `regla.palabra` vacía con mensaje, con espacios o símbolos, o `regla` que no es objeto |

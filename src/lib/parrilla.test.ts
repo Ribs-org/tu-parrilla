@@ -12,10 +12,12 @@ import {
   calorDelDia,
   carneDe,
   coccionDe,
+  avisoDeFierros,
   comoSalio,
   cuentasFrias,
   estadoDelFierro,
   formatoDe,
+  fraseDelAviso,
   medianaDe,
   selloDe,
   type Coccion,
@@ -261,6 +263,15 @@ describe('estadoDelFierro', () => {
     expect(estadoDelFierro({ ...sano, red: 'youtube', ultimoError: 'x' }, AHORA)).toBe('frio')
   })
 
+  // Su token dura dos horas y se renueva al publicar. Medido por ahí, decía «vence hoy» al
+  // conectarla y quedaba fría a las dos horas (la auditoría de la wiki, §1.4).
+  it('X tampoco se mide por su token de dos horas', () => {
+    expect(estadoDelFierro({ ...sano, red: 'x', expiraEn: en(0.05) }, AHORA)).toBe('al-rojo')
+    expect(estadoDelFierro({ ...sano, red: 'x', expiraEn: en(-1) }, AHORA)).toBe('al-rojo')
+    expect(estadoDelFierro({ ...sano, red: 'x', connected: false }, AHORA)).toBe('frio')
+    expect(estadoDelFierro({ ...sano, red: 'x', ultimoError: 'x' }, AHORA)).toBe('frio')
+  })
+
   // Los dos bordes explícitos: mover el aviso es una decisión, no un ajuste.
   it('el aviso empieza justo en el día siete', () => {
     expect(estadoDelFierro({ ...sano, expiraEn: en(7) }, AHORA)).toBe('enfriandose')
@@ -299,6 +310,37 @@ describe('cuentasFrias', () => {
       ahora,
     )
     expect([...frias].sort()).toEqual(['desconectada', 'rota', 'vencida'])
+  })
+})
+
+describe('avisoDeFierros', () => {
+  const ahora = new Date('2026-10-16T12:00:00Z')
+  const cuenta = { network: 'instagram', connected: true, expiresAt: null, lastSyncError: null }
+
+  it('sin nada que avisar, no hay aviso', () => {
+    expect(avisoDeFierros([cuenta], ahora)).toBeNull()
+  })
+
+  it('una desconectada a propósito no enciende nada', () => {
+    expect(avisoDeFierros([{ ...cuenta, connected: false }], ahora)).toBeNull()
+  })
+
+  it('cuenta las que se enfrían', () => {
+    const porVencer = { ...cuenta, expiresAt: '2026-10-19T00:00:00Z' }
+    expect(avisoDeFierros([porVencer, porVencer, cuenta], ahora)).toEqual({ nivel: 'enfriandose', cuantos: 2 })
+  })
+
+  it('apagada gana sobre enfriándose', () => {
+    const porVencer = { ...cuenta, expiresAt: '2026-10-19T00:00:00Z' }
+    const rota = { ...cuenta, lastSyncError: 'x' }
+    expect(avisoDeFierros([porVencer, rota], ahora)).toEqual({ nivel: 'apagado', cuantos: 1 })
+  })
+
+  it('lo dice en palabras', () => {
+    expect(fraseDelAviso({ nivel: 'enfriandose', cuantos: 1 })).toBe('1 se enfría')
+    expect(fraseDelAviso({ nivel: 'enfriandose', cuantos: 3 })).toBe('3 se enfrían')
+    expect(fraseDelAviso({ nivel: 'apagado', cuantos: 1 })).toBe('1 se apagó')
+    expect(fraseDelAviso({ nivel: 'apagado', cuantos: 2 })).toBe('2 se apagaron')
   })
 })
 
