@@ -1,13 +1,16 @@
-import { useCallback } from 'react'
-import { Pressable, Text, View } from 'react-native'
+import { useCallback, useState } from 'react'
+import { Alert, Pressable, Text, View } from 'react-native'
 import { useFocusEffect, useRouter } from 'expo-router'
 import { CorteProgramado } from '../../components/corte-programado'
 import { IconoPoner } from '../../components/iconos'
 import { Grilla, RotuloDia } from '../../components/parrilla'
-import { COLORES, Cargando, ErrorConReintento, Pantalla, Sello, TIPO_TITULO, Tarjeta } from '../../components/ui'
+import { useSelectorFecha } from '../../components/selector-fecha'
+import { Boton, COLORES, Cargando, ErrorConReintento, Pantalla, Sello, TIPO_TITULO, Tarjeta } from '../../components/ui'
 import { cuandoQuemado, diasDeLaAgenda, marcaDeToque, pieDeAyer, rotuloDelDia, seQuemo, servidosAyer } from '../../lib/agenda'
+import { RechazoApi, SesionCaducada, apiPost } from '../../lib/api'
+import { anotarCambio } from '../../lib/cambios'
 import { calorDelDia } from '../../lib/parrilla'
-import { etiquetaCuenta } from '../../lib/publicar'
+import { SIN_SENAL, etiquetaCuenta, proximaHoraEnPunto } from '../../lib/publicar'
 import { clearToken } from '../../lib/session'
 import { type Calendario } from '../../lib/tipos'
 import { useScreenData } from '../../lib/useScreenData'
@@ -42,6 +45,11 @@ export default function LaParrilla() {
     salir,
   )
 
+  // Los diálogos de Android o la hoja de iOS para la hora nueva de «Reprogramar».
+  const { abrir: abrirSelector, selector } = useSelectorFecha()
+  // El destino que se está reprogramando: mientras viaja, los botones esperan.
+  const [reprogramando, setReprogramando] = useState<string | null>(null)
+
   // Al volver a esta pestaña: si Publicar acaba de crear un post, o la caché ya es vieja,
   // refresca sola. Es lo que hace aparecer el post recién programado.
   useFocusEffect(refrescarSiVieja)
@@ -57,6 +65,30 @@ export default function LaParrilla() {
 
   const hoy = data.hoy ?? hoyEnElTelefono()
   const quemados = seQuemo(data.posts)
+
+  /**
+   * «Reprogramar» un destino quemado: se elige la hora nueva y el servidor aplica la regla
+   * del panel —el post entero pasa a esa hora y el destino vuelve a la cola—.
+   */
+  function reprogramar(destino: string) {
+    abrirSelector(proximaHoraEnPunto(new Date()), async (cuando) => {
+      if (!token) return
+      setReprogramando(destino)
+      try {
+        await apiPost('/api/mobile/schedule/reprogramar', token, { destino, cuando: cuando.toISOString() })
+        anotarCambio()
+        await refrescar()
+      } catch (e) {
+        if (e instanceof SesionCaducada) {
+          await salir()
+          return
+        }
+        Alert.alert('No se pudo reprogramar', e instanceof RechazoApi ? e.message : SIN_SENAL)
+      } finally {
+        setReprogramando(null)
+      }
+    })
+  }
 
   function prender(dia: string) {
     router.navigate({ pathname: '/(tabs)/publicar', params: { dia, n: marcaDeToque() } })
@@ -89,7 +121,13 @@ export default function LaParrilla() {
                 {post.texto || '(sin texto)'}
               </Text>
               {destino.error ? <Text style={{ color: COLORES.rojo, fontSize: 12 }}>{destino.error}</Text> : null}
-              <Text style={{ color: COLORES.tenue, fontSize: 12 }}>Se reprograma en el panel web, en La Parrilla.</Text>
+              <View style={{ flexDirection: 'row', marginTop: 4 }}>
+                <Boton
+                  texto={reprogramando === destino.id ? 'Reprogramando…' : 'Reprogramar'}
+                  onPress={() => reprogramar(destino.id)}
+                  deshabilitado={reprogramando !== null}
+                />
+              </View>
             </Tarjeta>
           ))}
         </View>
@@ -139,6 +177,7 @@ export default function LaParrilla() {
       <Text style={{ color: COLORES.suave, fontSize: 12, textAlign: 'center', marginTop: 8 }}>
         {pieDeAyer(servidosAyer(data.posts, hoy))}
       </Text>
+      {selector}
     </Pantalla>
   )
 }

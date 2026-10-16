@@ -181,8 +181,9 @@ Nada de esto bloquea un trámite hoy; conviene ordenarlo antes de abrir a tercer
 ## Features y trabajo de código
 
 - **El rediseño de la app del teléfono, partes 2 a 5** (2026-10-16). La parte 1 dejó las
-  tres pestañas del panel (La Parrilla, Publicar, Los Números). Faltan: (2) borradores
-  compartidos con la web y «Reprogramar» en «Se quemó», con rutas nuevas en el servidor;
+  tres pestañas del panel (La Parrilla, Publicar, Los Números), y «Reprogramar» en «Se
+  quemó» ya funciona en el teléfono. Faltan: (2) borradores compartidos con la web, con
+  rutas nuevas en el servidor;
   (3) La Mesa como cuarta pestaña, para leer y responder comentarios; (4) TikTok, Threads
   y X desde Publicar —TikTok exige mostrar los datos de la cuenta (`creator_info`) antes
   de publicar—; (5) el nombre y el ícono «Tu Parrilla», que piden un build nativo nuevo y
