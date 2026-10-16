@@ -162,8 +162,8 @@ más:
 2. Sube en 1 la variable de entorno `MOBILE_TOKEN_VERSION` (por defecto vale `1`;
    súbela a `2`).
 3. Eso invalida de inmediato todas las sesiones de la app ya abiertas en
-   cualquier teléfono — van a pedir la contraseña de nuevo la próxima vez que se
-   abran.
+   cualquier teléfono — van a pedir el correo y el código de nuevo la próxima vez
+   que se abran.
 
 Este paso **no afecta** las conexiones con Instagram, Facebook o YouTube: no hace
 falta volver a autorizar nada de eso, solo se cierra el acceso desde el celular.
