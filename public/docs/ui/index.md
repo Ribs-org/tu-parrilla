@@ -90,7 +90,7 @@ teléfono](app-movil.md).
 | Ver qué sale hoy, qué falló, cómo viene la semana | La Parrilla: el calendario de la semana y, arriba, «Se quemó» ([la-parrilla.md](la-parrilla.md)) |
 | Conectar Instagram, Facebook, YouTube, TikTok, Threads o X; reconectar una que venció | Los Fierros ([los-fierros.md](los-fierros.md)) |
 | Programar un post o un video; subir varios por CSV | La Parrilla, botones «Nueva publicación» y «Subir CSV», o el «+» de un día del calendario ([la-parrilla.md](la-parrilla.md)) |
-| Retomar algo que dejó a medias; ver lo que escribió y no programó | La Parrilla, botón «Borradores (N)» ([la-parrilla.md](la-parrilla.md)) |
+| Retomar algo que dejó a medias; ver lo que escribió y no programó | La Parrilla, botón «Borradores (N)» ([la-parrilla.md](la-parrilla.md)); en el teléfono, La Parrilla → «Borradores (N)» ([app-movil.md](app-movil.md)) |
 | Cambiar o borrar algo programado; reprogramar lo que falló | La Parrilla, abriendo el post ([la-parrilla.md](la-parrilla.md)); lo que falló, también desde «Se quemó», arriba del calendario |
 | Una palabra clave que responde comentarios sola | Al programar el post, en La Parrilla; las respuestas se ven en La Mesa |
 | Saber cómo le fue en el período: views y seguidores ganados, visitas a su página | Los Números, el tablero ([los-numeros.md](los-numeros.md)) |
@@ -116,7 +116,7 @@ esto es lo que quiere decir:
 - **Poner al fuego:** programar una publicación. Ya no es un botón: se programa con «Nueva
   publicación» o con el «+» de un día, en La Parrilla.
 - **Borrador:** en La Parrilla, una publicación a medio escribir que se guardó sola; se retoma
-  con «Borradores (N)». No es lo mismo que «Enviar como borrador a mi bandeja de TikTok», que
+  con «Borradores (N)», en el panel o en la app del teléfono: son los mismos. No es lo mismo que «Enviar como borrador a mi bandeja de TikTok», que
   manda el post a la app de TikTok, ni que el borrador de respuesta que propone la IA en La Mesa.
 - **La cocción de un corte**, que el calendario pinta del más claro al más oscuro y siempre
   dice también en palabras: cruda = «Programada», sellada = «Saliendo ahora», a punto =

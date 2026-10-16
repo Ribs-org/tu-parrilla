@@ -117,6 +117,7 @@ const { getCola } = await import('./comentarios-cola')
 const { verificarCuentas, cuentaUnicaPorRed } = await import('./social/cuentas')
 const { todosLosCortes, servidosAyer } = await import('./social/publish/cortes')
 const { listarBorradores, cargarBorrador, guardarBorrador, borrarBorrador } = await import('./borradores')
+const { cuentasParaElTelefono } = await import('./borradores-movil')
 const { leerAjuste } = await import('./ajustes')
 const { listarLlaves, crearLlave } = await import('./llaves')
 const { makeDefault, updateProfile, deleteScheduledPost, guardarCuenta, revocarLlaveApi } = await import(
@@ -557,6 +558,16 @@ describe('aislamiento por dueño, escrituras (SQL generado, sin base)', () => {
     const consultas = await consultasEncadenadas(() => borrarBorrador(DUENO, 'borrador-x'), [[]])
     expect(consultas).toHaveLength(1)
     expect(consultas[0]!.sql).toMatch(/delete from "borradores"/i)
+    esperarFiltradoPorDueno(consultas[0]!)
+  })
+
+  /**
+   * Un borrador guardado desde el teléfono solo puede elegir cuentas que esta lectura
+   * devuelva: sin el dueño, cualquiera metería en su borrador la cuenta de otro.
+   */
+  it('borradores: cuentasParaElTelefono lee solo las cuentas del dueño', async () => {
+    const consultas = await todasLasConsultas(() => cuentasParaElTelefono(DUENO))
+    expect(consultas).toHaveLength(1)
     esperarFiltradoPorDueno(consultas[0]!)
   })
 

@@ -67,8 +67,30 @@ export type Cuentas = {
   serie: { fecha: string; visitasAlPerfil: number | null; alcance: number | null }[]
 }
 
-/** `hoy` es el día en la zona del dueño; falta en lo guardado antes del 2026-10-16. */
-export type Calendario = { hoy?: string; posts: PostProgramado[] }
+/**
+ * Un borrador en La Parrilla, el mismo que lista el panel. `cuando` es el instante con la
+ * zona del dueño, como el de un post, o null sin fecha; `guardado`, igual.
+ */
+export type BorradorResumido = { id: string; texto: string; cuando: string | null; guardado: string; archivos: number }
+
+/** Un borrador abierto en Publicar (`GET /api/mobile/borradores/:id`). */
+export type BorradorAbierto = {
+  id: string
+  texto: string
+  /** Sin las cuentas de redes que el teléfono no publica: esas las conserva el servidor. */
+  cuentas: string[]
+  cuando: string | null
+  trial: string[]
+  media: { url: string; mediaType: 'image' | 'video'; nombre: string }[]
+  /** Por qué este borrador se programa solo en el panel web, o null si se puede desde acá. */
+  soloEnElPanel: string | null
+}
+
+/**
+ * `hoy` es el día en la zona del dueño; falta en lo guardado antes del 2026-10-16.
+ * `borradores` falta en lo guardado antes de que la app los mostrara.
+ */
+export type Calendario = { hoy?: string; posts: PostProgramado[]; borradores?: BorradorResumido[] }
 
 /** Una cuenta como la nombra la API: su id, su red y su nombre en la red. */
 export type CuentaNombrada = { id: string; red: string; nombre: string | null }

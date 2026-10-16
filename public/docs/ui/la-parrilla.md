@@ -270,7 +270,7 @@ Lo que se escribe en el compositor se guarda solo, como borrador, un segundo des
 o una palabra clave. Abrir el panel y cerrarlo sin escribir, o solo marcar cuentas o elegir
 una fecha, no deja borrador. A la derecha del pie del panel se ve cómo va: «Guardando
 borrador…», «Borrador guardado.» o, en rojo, «No se pudo guardar el borrador.» o «Este
-borrador ya no existe: se programó o se descartó en otra pestaña. Cierra el panel para ver
+borrador ya no existe: se programó o se descartó en otra pestaña o en el teléfono. Cierra el panel para ver
 cómo quedó.» (desde ese aviso, el panel ya no guarda nada más y «Programar» queda apagado:
 si se programó en la otra pestaña, saldría dos veces).
 
@@ -287,7 +287,11 @@ que se guardó con «Ahora» encendido vuelve sin fecha y con «Ahora» apagado.
   pierden.»; al aceptar, borra el borrador y cierra el panel. En un formulario nuevo y vacío no
   pregunta: solo lo cierra.
 
-Los borradores viven solo en el panel web: la app del teléfono y la API no los ven.
+Los borradores son los mismos que los de la app del teléfono ([La app del teléfono](app-movil.md)):
+lo empezado en Publicar, en el teléfono, aparece acá en «Borradores (<N>)» y se sigue acá, y al
+revés. El teléfono no tiene las opciones de TikTok ni la respuesta automática: un borrador que
+las tiene se puede editar allá sin perderlas, pero se programa acá. La API no ve los
+borradores.
 
 ### El panel «Borradores»
 
@@ -626,7 +630,7 @@ de esa tanda queda: hay que volver a elegirlos.
 | «Guardando borrador…» | Se está guardando lo escrito | Nada |
 | «Borrador guardado.» | Lo escrito quedó guardado; se puede cerrar el panel sin perderlo | Nada |
 | «No se pudo guardar el borrador.» | El último guardado falló | Hacer cualquier cambio para que lo intente de nuevo; si sigue fallando, copiar el texto antes de cerrar |
-| «Este borrador ya no existe: se programó o se descartó en otra pestaña. Cierra el panel para ver cómo quedó.» | Ese mismo borrador se programó o se descartó en otra pestaña o ventana; este panel dejó de guardar y «Programar» quedó apagado | Cerrar el panel y mirar el calendario. Si no estaba programado y se quiere, abrir «Nueva publicación» y escribirlo de nuevo |
+| «Este borrador ya no existe: se programó o se descartó en otra pestaña o en el teléfono. Cierra el panel para ver cómo quedó.» | Ese mismo borrador se programó o se descartó en otra pestaña o ventana, o en la app del teléfono; este panel dejó de guardar y «Programar» quedó apagado | Cerrar el panel y mirar el calendario. Si no estaba programado y se quiere, abrir «Nueva publicación» y escribirlo de nuevo |
 | «¿Descartar este borrador? Lo escrito y los archivos elegidos se pierden.» | La pregunta de «Descartar» | Aceptar para borrarlo; cancelar para seguir escribiendo |
 | «No tienes borradores.» | No hay ningún borrador guardado (o el que se pidió ya no existe y era el último) | Nada |
 
@@ -788,6 +792,8 @@ quemado, más arriba).
   el fuego del día porque no van a salir solos.
 - **Abrí un borrador y me salió la lista de borradores.** Ese borrador ya no existe: se
   programó o se descartó.
+- **Empecé algo en el teléfono y quiero terminarlo acá (o al revés).** Es el mismo borrador:
+  está en «Borradores (<N>)» en los dos lados ([La app del teléfono](app-movil.md)).
 - **Programé un borrador y desapareció de Borradores.** Es lo esperado: ahora es una
   publicación y está en el calendario.
 - **Mi borrador no aparece en el calendario.** Solo salen los que tienen fecha, en su semana;

@@ -1,10 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import {
   camposDesdeFormulario,
+  camposDesdeTelefono,
   fechaParaDia,
   idDeBorrador,
   instagramTrialInicial,
   reglaInicial,
+  soloEnElPanel,
+  telefonoDesdeCampos,
   textoDe,
   tieneContenido,
   tiktokInicial,
@@ -121,5 +124,83 @@ describe('fechaParaDia', () => {
     expect(fechaParaDia('mañana', AHORA, ZONA)).toBe('')
     expect(fechaParaDia('2026-02-30', AHORA, ZONA)).toBe('')
     expect(fechaParaDia('', AHORA, ZONA)).toBe('')
+  })
+})
+
+const TIKTOK = new Map([['tt-1', 'TikTok']])
+
+describe('camposDesdeTelefono', () => {
+  const telefono = { texto: 'Hola', cuentas: ['ig-1'], scheduledAt: '2026-10-20T19:00', trial: ['ig-1'] }
+
+  it('un borrador nuevo lleva solo lo que el teléfono sabe', () => {
+    expect(camposDesdeTelefono(null, telefono, new Map())).toEqual({
+      caption: ['Hola'],
+      cuentas: ['ig-1'],
+      scheduledAt: ['2026-10-20T19:00'],
+      'instagramTrial:ig-1': ['on'],
+    })
+  })
+
+  it('conserva lo que solo el panel sabe: TikTok, sus opciones y la palabra clave', () => {
+    const anteriores = {
+      caption: ['Viejo'],
+      cuentas: ['ig-1', 'fb-1', 'tt-1'],
+      scheduledAt: ['2026-10-19T09:00'],
+      cuandoAhora: ['on'],
+      'instagramTrial:ig-1': ['on'],
+      'tiktokModo:tt-1': ['directo'],
+      'tiktokPrivacidad:tt-1': ['SELF_ONLY'],
+      reglaPalabra: ['GUIA'],
+      reglaMensaje: ['Te la mando'],
+    }
+    const campos = camposDesdeTelefono(anteriores, { ...telefono, trial: [] }, TIKTOK)
+    expect(campos).toEqual({
+      caption: ['Hola'],
+      // fb-1 se desmarcó en el teléfono; tt-1 el teléfono no la ve, así que sigue.
+      cuentas: ['ig-1', 'tt-1'],
+      scheduledAt: ['2026-10-20T19:00'],
+      'tiktokModo:tt-1': ['directo'],
+      'tiktokPrivacidad:tt-1': ['SELF_ONLY'],
+      reglaPalabra: ['GUIA'],
+      reglaMensaje: ['Te la mando'],
+    })
+  })
+
+  it('sin fecha, el campo va vacío como lo deja el panel; el trial de una cuenta no elegida no viaja', () => {
+    const campos = camposDesdeTelefono(null, { texto: '', cuentas: [], scheduledAt: '', trial: ['ig-1'] }, new Map())
+    expect(campos).toEqual({ caption: [''], cuentas: [], scheduledAt: [''] })
+  })
+})
+
+describe('telefonoDesdeCampos', () => {
+  it('devuelve el texto, las cuentas y los trial reels encendidos', () => {
+    expect(
+      telefonoDesdeCampos({ caption: ['Hola'], cuentas: ['ig-1', 'ig-2'], 'instagramTrial:ig-2': ['on'] }),
+    ).toEqual({ texto: 'Hola', cuentas: ['ig-1', 'ig-2'], trial: ['ig-2'] })
+  })
+
+  it('de un borrador vacío, todo vacío', () => {
+    expect(telefonoDesdeCampos({})).toEqual({ texto: '', cuentas: [], trial: [] })
+  })
+})
+
+describe('soloEnElPanel', () => {
+  it('sin TikTok ni palabra clave, el teléfono lo puede programar', () => {
+    expect(soloEnElPanel({ caption: ['Hola'], cuentas: ['ig-1'], reglaPalabra: ['  '] }, TIKTOK)).toBeNull()
+  })
+
+  it('nombra la red que el teléfono no publica', () => {
+    expect(soloEnElPanel({ cuentas: ['ig-1', 'tt-1'] }, TIKTOK)).toBe(
+      'Este borrador va también a TikTok: eso se programa en el panel web.',
+    )
+  })
+
+  it('nombra la palabra clave, y junta las dos razones', () => {
+    expect(soloEnElPanel({ cuentas: ['ig-1'], reglaPalabra: [' GUIA '] }, TIKTOK)).toBe(
+      'Este borrador tiene la palabra clave «GUIA»: eso se programa en el panel web.',
+    )
+    expect(soloEnElPanel({ cuentas: ['tt-1'], reglaPalabra: ['GUIA'] }, TIKTOK)).toBe(
+      'Este borrador va también a TikTok y tiene la palabra clave «GUIA»: eso se programa en el panel web.',
+    )
   })
 })

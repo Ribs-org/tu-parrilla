@@ -68,3 +68,8 @@ punteado, sin contar para el calor.
 
 El editor de un post programado, la lista, los estados de cada destino, las validaciones,
 «Subir ahora» y «Reprogramar». La API no ve los borradores, y la app del teléfono tampoco.
+
+**Después (2026-10-16):** la app del teléfono sí los ve. Publicar guarda en las mismas
+tablas por `/api/mobile/borradores`; lo que el teléfono no sabe editar se conserva al
+guardar, y un borrador con TikTok o palabra clave se programa solo en el panel. Ver
+`mobile/README.md`, «Los borradores».

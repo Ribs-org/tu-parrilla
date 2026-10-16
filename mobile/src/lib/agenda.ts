@@ -1,5 +1,5 @@
 import { agruparPorDia } from './agrupar'
-import type { PostProgramado } from './tipos'
+import type { BorradorResumido, PostProgramado } from './tipos'
 
 // Las reglas de La Parrilla en el teléfono, sin pantalla: qué días se muestran, qué se quemó
 // y cuántos cortes salieron ayer. Los días son `YYYY-MM-DD` en la zona del dueño, como los
@@ -26,17 +26,34 @@ export function rotuloDelDia(dia: string, hoy: string): string {
   return corto
 }
 
+export type DiaDeLaAgenda = { dia: string; posts: PostProgramado[]; borradores: BorradorResumido[] }
+
 /**
  * De hoy en adelante: los siete primeros días siempre, aunque estén vacíos —para poder
  * prenderlos con su «+»—, y después solo los que tienen algo. Lo que ya pasó no está:
  * lo que falló sale arriba, en «Se quemó».
+ *
+ * Un borrador con fecha va también en su día, como en el calendario del panel, y alcanza
+ * para que el día aparezca; pero no es un corte: no cuenta para el calor.
  */
-export function diasDeLaAgenda(posts: PostProgramado[], hoy: string): { dia: string; posts: PostProgramado[] }[] {
+export function diasDeLaAgenda(
+  posts: PostProgramado[],
+  hoy: string,
+  borradores: BorradorResumido[] = [],
+): DiaDeLaAgenda[] {
   const porDia = new Map(agruparPorDia(posts).map((g) => [g.dia, g.posts]))
+  const borradoresPorDia = new Map<string, BorradorResumido[]>()
+  for (const b of [...borradores].sort((x, y) => (x.cuando ?? '').localeCompare(y.cuando ?? ''))) {
+    if (!b.cuando) continue
+    const dia = b.cuando.slice(0, 10)
+    borradoresPorDia.set(dia, [...(borradoresPorDia.get(dia) ?? []), b])
+  }
   const dias = new Set<string>()
   for (let i = 0; i < DIAS_FIJOS; i++) dias.add(sumarDias(hoy, i))
-  for (const dia of porDia.keys()) if (dia >= hoy) dias.add(dia)
-  return [...dias].sort().map((dia) => ({ dia, posts: porDia.get(dia) ?? [] }))
+  for (const dia of [...porDia.keys(), ...borradoresPorDia.keys()]) if (dia >= hoy) dias.add(dia)
+  return [...dias]
+    .sort()
+    .map((dia) => ({ dia, posts: porDia.get(dia) ?? [], borradores: borradoresPorDia.get(dia) ?? [] }))
 }
 
 export type Quemado = { post: PostProgramado; destino: PostProgramado['redes'][number] }

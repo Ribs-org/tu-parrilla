@@ -492,7 +492,9 @@ fecha de `mobile/src/app/(tabs)/publicar.tsx` corre en la zona del teléfono y m
 cual, y hace bien —un ISO con offset no necesita zona ninguna—.
 
 El resultado es que, con el teléfono y Tu Cuenta en zonas distintas, uno elige «19:00» y la
-app se lo confirma a otra hora. Ninguna pantalla de la app dice en qué zona vive la cuenta,
+app se lo confirma a otra hora. Desde el 2026-10-16 pasa lo mismo con los borradores: el que
+se guarda en el teléfono a las «19:00» de su reloj se abre en el panel a la hora de Tu Cuenta,
+y al revés. Ninguna pantalla de la app dice en qué zona vive la cuenta,
 así que no hay dónde darse cuenta. Con el dueño y su teléfono en el mismo sitio —el caso de
 hoy— no se nota, y por eso quedó fuera del alcance de la entrega, que nombraba `api/mobile/*`
 y no la app.
