@@ -65,6 +65,7 @@ export function WeekCalendar({
   nuevoEnDia,
   verDia,
   frias,
+  recien = null,
 }: {
   monday: string
   items: Item[]
@@ -79,6 +80,8 @@ export function WeekCalendar({
   verDia: (dia: string) => string
   /** Las cuentas con el fierro frío: lo programado ahí lleva la marca fría. */
   frias: ReadonlySet<string>
+  /** El post recién programado: su tarjeta cae en su día, encendida una vez. */
+  recien?: string | null
 }) {
   const days = weekDays(monday)
   const today = dayKey(new Date(), zone)
@@ -215,9 +218,11 @@ export function WeekCalendar({
                               return `${nombreDestino(t)}: ${etiquetaDestino(t)}${motivo ? ` — ${motivo}` : ''}`
                             })
                             .join(' · ')}
+                          data-recien={post.id === recien ? '' : undefined}
                           className={cn(
                             'block rounded-md border bg-acero-900 p-1.5 transition-transform hover:-translate-y-0.5',
                             CLASE_BORDE[bordeDe(dibujo.coccion, dibujo.sellos)],
+                            post.id === recien && 'recien',
                           )}
                         >
                           {/*
