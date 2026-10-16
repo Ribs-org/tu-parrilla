@@ -65,10 +65,11 @@ Por arreglar:
 7. ~~**La Parrilla, a 390 px, abre la semana en el lunes** y hoy queda fuera de la pantalla.
    `src/app/admin/(dash)/schedule/calendar.tsx`.~~ **Resuelto el 2026-10-16**: abre corrida
    hasta hoy (`schedule/desplazar-a-hoy.tsx`).
-8. **La misma fecha se escribe de tres formas**: «15-10-2026, 1:00 p. m.» en la lista,
-   «jue 15 de oct · 20:00» en Se quemó y «15 oct · 20:00» en la app. Desde el 2026-10-16 la
-   lista la escribe como Se quemó, siempre con el día (`diaYHora`, en
-   `src/lib/schedule-week.ts`); falta la app.
+8. ~~**La misma fecha se escribe de tres formas**: «15-10-2026, 1:00 p. m.» en la lista,
+   «jue 15 de oct · 20:00» en Se quemó y «15 oct · 20:00» en la app.~~ **Resuelto el
+   2026-10-16**: la lista la escribe como Se quemó, siempre con el día (`diaYHora`, en
+   `src/lib/schedule-week.ts`), y la app también (`cuandoQuemado`, en
+   `mobile/src/lib/agenda.ts`).
 9. ~~**Un «—» suelto bajo Visitas, Clicks, Únicos y CTR** cuando no hay período anterior para
    comparar. `src/components/charts/stat-tile.tsx`.~~ **Resuelto el 2026-10-16**: dice «Nada
    en el período anterior para comparar».
@@ -83,13 +84,13 @@ la página se corría de lado, porque un `<fieldset>` crece por defecto hasta su
 
 Cada tanda se puede publicar sola. Los tiempos son a ojo.
 
-**Tanda 1, lo roto y lo que casi no cuesta (1 a 2 días).** Los defectos de arriba. El Se
-quemó de la app con su corte, y las fichas de cuenta de la app con borde (hoy son texto gris
-sin borde y no se ve que se tocan). Hecho el 2026-10-16, en La Parrilla del panel: Se quemó
+**Tanda 1, lo roto y lo que casi no cuesta.** Hecha el 2026-10-16, salvo el defecto 10, que
+hay que mirar en el teléfono: los defectos de arriba; en La Parrilla del panel, Se quemó
 plegado con sus corticos quemados en fila y el arreglo junto a la frase del error
 («Reconectar», «Cambiar el archivo»; `schedule/arreglo.ts`), el aviso de reintento del
 calendario en un renglón, la vista Lista con el corte chico en cada fila, y «Eliminar» que
-pregunta antes.
+pregunta antes; en la app, Se quemó con su corte quemado, y las fichas y los botones
+secundarios con borde (eran texto gris sobre nada y no se veía que se tocaban).
 
 **Tanda 2, el corte en los flujos (3 a 5 días).** El compositor (Nueva publicación y
 Borrador) es la distancia más grande del producto entre el cariño del corte y el de la

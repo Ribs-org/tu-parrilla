@@ -77,11 +77,17 @@ export function pieDeAyer(servidos: number): string {
   return servidos === 1 ? 'Ayer: 1 corte servido' : `Ayer: ${servidos} cortes servidos`
 }
 
-/** La hora del corte, o el día y la hora si no es de hoy: «19:00» o «14 oct · 19:00». */
+/**
+ * La hora del corte, o el día y la hora si no es de hoy: «19:00» o «mar 14 de oct · 19:00»,
+ * como «Se quemó» en el panel (`horaConDia`, en `src/lib/fuego.ts`). Antes decía «14 oct ·
+ * 19:00», y el mismo fallo se escribía distinto en el teléfono y en el panel.
+ */
 export function cuandoQuemado(cuando: string, hoy: string): string {
   const hora = cuando.slice(11, 16)
   if (cuando.slice(0, 10) === hoy) return hora
-  return `${Number(cuando.slice(8, 10))} ${MESES[Number(cuando.slice(5, 7)) - 1]} · ${hora}`
+  const [a, m, d] = cuando.slice(0, 10).split('-').map(Number)
+  const semana = DIAS_SEMANA[new Date(Date.UTC(a!, m! - 1, d!)).getUTCDay()]
+  return `${semana} ${d} de ${MESES[m! - 1]} · ${hora}`
 }
 
 let toques = 0
