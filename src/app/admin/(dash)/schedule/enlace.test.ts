@@ -33,6 +33,12 @@ describe('scheduleHref', () => {
     ).toBe('/admin/schedule?semana=2026-10-12')
   })
 
+  it('la cuenta del «+» de la vista «Día» no viaja; el día que se mira, sí', () => {
+    expect(scheduleHref({ vista: 'dia', fecha: '2026-10-17', componer: '1', dia: '2026-10-17', cuenta: 'c1' }, {})).toBe(
+      '/admin/schedule?vista=dia&fecha=2026-10-17',
+    )
+  })
+
   it('«mensaje» tampoco, que es el desenlace de una vuelta de OAuth', () => {
     expect(scheduleHref({ mensaje: 'cuenta-conectada', vista: 'calendario' }, {})).toBe(
       '/admin/schedule?vista=calendario',

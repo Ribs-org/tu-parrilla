@@ -128,6 +128,7 @@ export function Composer({
   cuentas,
   borrador,
   fechaInicial = '',
+  cuentaInicial = '',
   listoHref,
   cerrarHref,
 }: {
@@ -137,6 +138,11 @@ export function Composer({
   borrador?: { id: string; campos: Campos; media: MediaSubida[] } | null
   /** «YYYY-MM-DDTHH:MM» en la zona del dueño: la del borrador, o la del día del calendario. */
   fechaInicial?: string
+  /**
+   * La cuenta que viene marcada sola, sin borrador: el «+» de una columna de la vista «Día».
+   * Una que no está o no está conectada no marca nada, y vale la regla de siempre.
+   */
+  cuentaInicial?: string
   /** Adónde ir al programar: la parrilla con el aviso de que salió. */
   listoHref: string
   /** Adónde ir al cerrar o descartar. */
@@ -149,20 +155,26 @@ export function Composer({
   // Cuentas cuya red todavía publica desde aquí. Una cuenta de una red que no está en
   // `ENABLED` no se ofrece, esté o no conectada.
   const publicables = cuentas.filter((c) => ENABLED.has(c.network))
-  // Las marcadas al abrir: las del borrador, o la única conectada si no hay borrador.
+  // Las marcadas al abrir: las del borrador; si no, la que pidió la vista «Día»; si no, la
+  // única conectada.
+  const pedida = publicables.find((c) => c.id === cuentaInicial && c.connected)
   const marcadaAlAbrir = (cuenta: CuentaRow) =>
-    campos ? cuenta.connected && (campos.cuentas ?? []).includes(cuenta.id) : vieneMarcada(cuenta, publicables)
+    campos
+      ? cuenta.connected && (campos.cuentas ?? []).includes(cuenta.id)
+      : pedida
+        ? cuenta.id === pedida.id
+        : vieneMarcada(cuenta, publicables)
 
   // Con dos cuentas de TikTok marcadas, cada una necesita su propio bloque de opciones. Se
   // siembra con las que nacen marcadas: `onChange` no corre en el primer render para
   // ponerlas de acuerdo. Instagram funciona igual.
   const [cuentasTikTok, setCuentasTikTok] = useState<CuentaRow[]>(() =>
-    campos
+    campos || pedida
       ? publicables.filter((c) => c.network === 'tiktok' && marcadaAlAbrir(c))
       : cuentasInicialesDe(publicables, 'tiktok'),
   )
   const [cuentasInstagram, setCuentasInstagram] = useState<CuentaRow[]>(() =>
-    campos
+    campos || pedida
       ? publicables.filter((c) => c.network === 'instagram' && marcadaAlAbrir(c))
       : cuentasInicialesDe(publicables, 'instagram'),
   )

@@ -33,9 +33,11 @@ estilo; aquí van escritos como están en el código.
   hoy. Se le puede agregar:
   - `?vista=lista`: la lista en vez del calendario (los enlaces viejos con
     `?vista=calendario` abren el calendario igual);
+  - `?vista=dia`: un solo día, por cuenta (ver «El día»); con `&fecha=AAAA-MM-DD`, ese día, y
+    sin ella, hoy;
   - `?semana=AAAA-MM-DD`: el calendario en la semana que contiene ese día;
   - `?componer=1`: el panel «Nueva publicación»; con `&dia=AAAA-MM-DD`, con ese día puesto
-    en «Fecha y hora»;
+    en «Fecha y hora», y con `&cuenta=<id de la cuenta>`, con esa cuenta marcada;
   - `?borrador=<id>`: ese borrador, abierto en el compositor;
   - `?panel=borradores`: el panel «Borradores»;
   - `?panel=csv`: el panel «Subir CSV».
@@ -44,8 +46,8 @@ estilo; aquí van escritos como están en el código.
 
 De arriba abajo: el encabezado con sus botones, el aviso «Programado.» (solo cuando se acaba
 de programar), la tarjeta «Conecta tu primera red» (solo sin ninguna red conectada), la
-sección «Se quemó» (solo si algo falló), los botones «Calendario» y «Lista» con lo programado
-debajo, y el pie de ayer. El formulario para programar, la lista de borradores y la carga por
+sección «Se quemó» (solo si algo falló), los botones «Calendario», «Día» y «Lista» con lo
+programado debajo, y el pie de ayer. El formulario para programar, la lista de borradores y la carga por
 CSV no están en la página: se abren en un panel que se desliza desde la derecha (ver «El panel
 lateral», más abajo).
 
@@ -88,16 +90,19 @@ dos redes da dos filas. Van de la más reciente a la más vieja. Cada fila trae:
 - el botón «Reprogramar», que abre la misma ventana que el de la lista (ver «La ventana
   «Reprogramar»», más abajo).
 
-### «Calendario» y «Lista»
+### «Calendario», «Día» y «Lista»
 
-Dos botoncitos sobre lo programado. «Calendario» es la vista con que abre la pantalla;
-«Lista» cambia a la lista.
+Tres botoncitos sobre lo programado. «Calendario» es la vista con que abre la pantalla: la
+semana. «Día» muestra un solo día, separado por cuenta; abre en el día que se estaba mirando
+(hoy, si la semana a la vista es la de hoy, y si no, el lunes de esa semana). «Lista» cambia a
+la lista. Desde «Día», «Calendario» vuelve a la semana que contiene ese día.
 
 ### El calendario
 
 Arriba, «Semana anterior», el rango de la semana (por ejemplo `12 – 18 oct`) y «Semana
 siguiente». Abre en la semana de hoy. Debajo, siete columnas de lunes a domingo. Cada una
-lleva arriba el día abreviado y su número (por ejemplo `lun 12`), cuánto fuego tiene
+lleva arriba el día abreviado y su número (por ejemplo `lun 12`) —es un enlace: abre ese día
+en la vista «Día», y un lector de pantalla lo lee «lun 12: ver por cuenta»—, cuánto fuego tiene
 —«Apagada» (nada), «Prendida» (uno o dos cortes) o «Parrilla llena» (tres o más)— y, en los
 días de hoy en adelante, un «+» chico que abre el panel «Nueva publicación» con ese día puesto
 (un lector de pantalla lo lee «Programar el <día> <número>», por ejemplo «Programar el lun
@@ -123,6 +128,44 @@ fecha no salen en el calendario; están en «Borradores (<N>)».
 
 El calendario no tiene botones de «Subir ahora», «Eliminar» ni «Reprogramar»: esos están en
 la lista (y «Reprogramar», también en «Se quemó»).
+
+### El día
+
+Un solo día, con una columna por cuenta. Sirve para ver qué sale en cada cuenta ese día y
+dónde hay huecos: cuántas veces sale una misma cuenta en un día no se ve en la semana.
+
+Arriba, «Día anterior», el día —«Hoy · vie 16 de oct», «Mañana · sáb 17 de oct», «Ayer · jue
+15 de oct» o solo «mar 20 de oct»— con el fuego del día entero al lado («Apagada»,
+«Prendida» o «Parrilla llena», contando cada corte una vez aunque salga a varias cuentas),
+«Ir a hoy» si el día no es hoy, y «Día siguiente». En el teléfono las flechas dicen
+«Anterior» y «Siguiente».
+
+Debajo, una columna por cuenta, en el orden de [Los Fierros](los-fierros.md). Cada cuenta
+conectada tiene la suya aunque ese día no tenga nada; una desconectada aparece solo si ese
+día tiene algo, con «reconéctala» al lado del nombre. En el teléfono las columnas van una
+debajo de otra. Cada columna lleva arriba el ícono de la red y el @usuario (o el nombre de la
+página), el fuego de esa cuenta ese día —con las mismas reglas que el día: uno o dos,
+«Prendida»; tres o más, «Parrilla llena»— y, si el día no pasó y la cuenta está conectada, un
+«+» que abre «Nueva publicación» con ese día puesto y esa cuenta ya marcada (un lector de
+pantalla lo lee «Programar en <Red> · <usuario>»).
+
+En cada columna, por hora, una tarjeta por cada publicación que sale a esa cuenta: una que
+sale a tres cuentas aparece en las tres. La tarjeta trae la hora (y «saliendo» si se está
+publicando), la miniatura, el texto en tres líneas o «(sin texto)», el estado de ese destino
+en palabras («Programado», «Reintentando», «Publicando…», «Publicado», «En tu bandeja de
+TikTok» o «Falló», con el motivo después de dos puntos si lo hay) y, si sale también a otras
+cuentas, «También en» con sus íconos. El color de la tarjeta es el de ese destino solo: la
+misma publicación puede verse publicada en una columna y quemada en otra. Un clic abre el
+editor.
+
+Los borradores con fecha de ese día van en la columna de cada cuenta que tienen marcada, con
+borde punteado, como en la semana; los que no tienen ninguna cuenta marcada, en una columna
+«Sin cuenta elegida» al final. No cuentan para el fuego.
+
+Una columna vacía dice «Nada para esta cuenta. Préndela.» —un enlace que hace lo mismo que su
+«+»— si todavía se puede programar en ella; en un día que ya pasó, «No salió nada en esta
+cuenta.». Sin ninguna cuenta conectada y sin nada ese día: «No tienes cuentas conectadas, y
+ese día no hay nada puesto.».
 
 ### La lista
 
@@ -529,6 +572,15 @@ suben archivos sueltos.
 2. Moverse con «Semana anterior» y «Semana siguiente».
 3. Un clic en una tarjeta abre su editor (o, si es punteada, el borrador).
 
+### Para ver qué sale en cada cuenta un día
+
+1. Un clic en el nombre del día en el calendario (por ejemplo `sáb 17`), o el botoncito «Día»
+   arriba de lo programado.
+2. Cada columna es una cuenta. Moverse con «Día anterior» y «Día siguiente»; «Ir a hoy»
+   vuelve a hoy.
+3. Para programar algo en una cuenta ese día, el «+» de su columna: abre «Nueva publicación»
+   con el día y la cuenta ya puestos.
+
 ### Para cambiar algo de un post programado
 
 1. Abrirlo: «Editar» en la lista, un clic en su tarjeta del calendario o en su texto en «Se
@@ -801,6 +853,12 @@ quemado, más arriba).
 - **El borrador volvió sin Ahora / sin fecha.** «Ahora» no se guarda en el borrador: hay que
   encenderlo de nuevo.
 - **No veo el + en un día.** Solo lo tienen hoy y los días que vienen.
+- **Quiero ver un día cuenta por cuenta** o **¿cuántas veces sale cada cuenta mañana?** El
+  nombre del día en el calendario, o «Día»: una columna por cuenta, con su propio fuego.
+- **En la vista Día un post aparece dos veces.** Sale a dos cuentas: es una tarjeta por
+  cuenta, y «También en» dice cuáles son las otras.
+- **En la vista Día no aparece una cuenta.** Está desconectada y ese día no tiene nada:
+  reconectarla en [Los Fierros](los-fierros.md).
 - **La fecha viene puesta a las 9.** Es lo que propone al abrir desde un día del calendario;
   se cambia en «Fecha y hora».
 - **Elegí un archivo y el botón Programar está gris.** Está subiendo («Subiendo…»): esperar
@@ -900,6 +958,9 @@ quemado, más arriba).
 - No sube la portada como archivo, ni adjunta el PDF de la respuesta automática.
 - No sube archivos sueltos en la carga por CSV: solo por dirección.
 - No duplica un post ni arrastra tarjetas en el calendario, ni programa en un día que ya pasó.
+- La vista «Día» no tiene «Subir ahora», «Eliminar» ni «Reprogramar» (están en la lista), no
+  alinea las horas entre columnas —cada columna va en su orden, de la más temprana a la más
+  tarde— y no muestra varios días a la vez: para eso está la semana.
 - No publica video en X.
 - No conecta cuentas: eso es [Los Fierros](los-fierros.md). No muestra cómo le fue a lo
   publicado: eso es [Los Números](los-numeros.md) (cómo te fue en las redes y en tu página; cada
@@ -919,6 +980,7 @@ Lo que describe esta página sale de:
   - `src/app/admin/(dash)/schedule/batch-upload.tsx`
   - `src/app/admin/(dash)/schedule/se-quemo.tsx`
   - `src/app/admin/(dash)/schedule/calendar.tsx`
+  - `src/app/admin/(dash)/schedule/vista-dia.tsx` y `src/app/admin/(dash)/schedule/dia.ts` (la vista «Día»)
   - `src/app/admin/(dash)/schedule/queue.tsx`
   - `src/app/admin/(dash)/schedule/reprogramar.tsx`
   - `src/app/admin/(dash)/schedule/revision-media.tsx`
