@@ -77,9 +77,24 @@ igual debajo de ella.
 
 ### «Se quemó»
 
-El título va en rojo. Aparece solo si hay algo que falló, de cualquier fecha; si no falló
-nada, la sección no existe. Cada fila es una red donde un corte falló: un corte que falló en
-dos redes da dos filas. Van de la más reciente a la más vieja. Cada fila trae:
+Aparece solo si hay algo que falló, de cualquier fecha; si no falló nada, la sección no existe.
+Parte plegada, en una sola línea: «Se quemó» en rojo, cuántas hay (por ejemplo «22») y «Ver»
+con una flecha. Un clic en esa línea la abre (y la flecha pasa a «Ocultar»); otro la vuelve a
+plegar. Si se deja abierta, la próxima vez que se entre en ese navegador abre abierta.
+
+Abierta, cada fila es una red donde un corte falló: un corte que falló en dos redes da dos
+filas. Van de la más reciente a la más vieja.
+
+Si lo quemado es de dos redes o más, al lado del título hay un botón por red, con su ícono, su
+nombre y cuántas tiene (por ejemplo «TikTok 8»). Todos parten encendidos, con borde rojo; un
+clic apaga esa red —el botón queda con borde punteado y gris— y sus filas salen de la vista, y
+otro clic la vuelve a encender. Apagar una red no borra ni arregla nada: solo deja de
+mostrarla, y al recargar la página vuelven a estar todas. Con todas apagadas, la sección dice
+«Apagaste todas las redes.» y «Encender todas».
+
+De entrada se ven las primeras diez filas; si hay más, abajo aparece «Ver más (quedan <N>)»,
+que suma otras diez. Cambiar el filtro vuelve a las primeras diez. Cada fila trae, en dos
+líneas:
 
 - el corte en chico, con todas sus marcas: se ve cuál se quemó y si las demás salieron (ver
   «El corte», más abajo);
@@ -89,8 +104,8 @@ dos redes da dos filas. Van de la más reciente a la más vieja. Cada fila trae:
 - el texto del post, que es un enlace a su editor (o «(sin texto)»);
 - debajo, en rojo, el motivo, cuando lo hay: una frase fija en español que dice por qué no
   salió (ver «Motivos de un destino que no salió», más abajo);
-- el botón «Reprogramar», que abre la misma ventana que el de la lista (ver «La ventana
-  «Reprogramar»», más abajo).
+- al costado, el botón «Reprogramar», que abre la misma ventana que el de la lista (ver «La
+  ventana «Reprogramar»», más abajo).
 
 ### El corte
 
@@ -959,6 +974,8 @@ quemado, más arriba).
   descartan repetidos. Borrar los sobrantes con «Eliminar».
 - **¿De dónde saco el identificador para la columna cuentas?** De la tarjeta de la cuenta
   en Los Fierros: el código chico con el ícono de copiar.
+- **«Se quemó» es una sola línea y no veo qué falló.** Está plegada: un clic en «Ver», al lado
+  del número. Queda abierta para la próxima vez en ese navegador.
 - **El engranaje «Ajustes» tiene un punto.** Ámbar: el permiso de alguna cuenta vence en
   la semana. Rojo: alguna se apagó (venció o dejó de sincronizar) y lo que se programe ahí no
   va a salir. Adentro, la entrada «Los Fierros» dice cuántas («1 se enfría», «2 se
@@ -1026,9 +1043,9 @@ Lo que describe esta página sale de:
   - `src/app/admin/(dash)/schedule/composer.tsx`
   - `src/app/admin/(dash)/schedule/lista-borradores.tsx`
   - `src/app/admin/(dash)/schedule/batch-upload.tsx`
-  - `src/app/admin/(dash)/schedule/se-quemo.tsx`
   - `src/app/admin/(dash)/schedule/calendar.tsx`
   - `src/app/admin/(dash)/schedule/vista-dia.tsx` y `src/app/admin/(dash)/schedule/dia.ts` (la vista «Día»)
+  - `src/app/admin/(dash)/schedule/se-quemo.tsx`, `src/app/admin/(dash)/schedule/lista-quemados.tsx` y `src/app/admin/(dash)/schedule/filtro-quemados.ts` («Se quemó»)
   - `src/app/admin/(dash)/schedule/queue.tsx`
   - `src/app/admin/(dash)/schedule/reprogramar.tsx`
   - `src/app/admin/(dash)/schedule/revision-media.tsx`
