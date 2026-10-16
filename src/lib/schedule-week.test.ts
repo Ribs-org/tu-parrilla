@@ -4,6 +4,7 @@ import {
   dayKey,
   dayLabel,
   dayLabelConMes,
+  diaYHora,
   groupByDay,
   hourLabel,
   mondayOf,
@@ -105,5 +106,12 @@ describe('groupByDay', () => {
     const grouped = groupByDay(items, ZONE)
     expect(grouped.get('2026-09-07')?.map((i) => i.id)).toEqual(['a'])
     expect(grouped.get('2026-09-08')?.map((i) => i.id)).toEqual(['b'])
+  })
+})
+
+describe('diaYHora', () => {
+  it('siempre el día con su mes y la hora, en la zona del dueño', () => {
+    // 16:00 UTC son las 13:00 en Santiago en octubre (UTC−3).
+    expect(diaYHora(new Date('2026-10-15T16:00:00Z'), 'America/Santiago')).toBe('jue 15 de oct · 13:00')
   })
 })

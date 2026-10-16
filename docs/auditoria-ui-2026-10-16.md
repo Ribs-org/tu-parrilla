@@ -41,9 +41,11 @@ herramientas, y en el teléfono la pestaña activa quedaba debajo del botón de 
 
 Por arreglar:
 
-1. **Editar post no dice qué destino falló ni por qué.** Solo muestra el aviso verde del que
+1. ~~**Editar post no dice qué destino falló ni por qué.** Solo muestra el aviso verde del que
    salió («Ya publicado en Instagram»). El editor recibe los destinos sin `lastError`.
-   `src/app/admin/(dash)/schedule/[id]/editor.tsx`.
+   `src/app/admin/(dash)/schedule/[id]/editor.tsx`.~~ **Resuelto el 2026-10-16**: arriba del
+   editor, una línea por destino con su marca, su motivo y su arreglo
+   (`schedule/[id]/destinos.tsx`).
 2. **Los gráficos de línea cortan las cifras del eje vertical** («)00» por «2000»): margen
    izquierdo negativo con un eje de 44 px. `src/components/charts/traffic-chart.tsx`.
 3. **Dos series de escalas distintas comparten eje** —visitas al perfil contra alcance,
@@ -54,25 +56,33 @@ Por arreglar:
    borde. `src/app/admin/(dash)/analytics/publicaciones/post-table.tsx`.
 6. **Los Números, a 390 px: «En las redes» queda en una columna de una palabra por
    renglón**, apretada por el selector de cuentas. `src/app/admin/(dash)/analytics/page.tsx`.
-7. **La Parrilla, a 390 px, abre la semana en el lunes** y hoy queda fuera de la pantalla.
-   `src/app/admin/(dash)/schedule/calendar.tsx`.
+7. ~~**La Parrilla, a 390 px, abre la semana en el lunes** y hoy queda fuera de la pantalla.
+   `src/app/admin/(dash)/schedule/calendar.tsx`.~~ **Resuelto el 2026-10-16**: abre corrida
+   hasta hoy (`schedule/desplazar-a-hoy.tsx`).
 8. **La misma fecha se escribe de tres formas**: «15-10-2026, 1:00 p. m.» en la lista,
-   «jue 15 de oct · 20:00» en Se quemó y «15 oct · 20:00» en la app.
+   «jue 15 de oct · 20:00» en Se quemó y «15 oct · 20:00» en la app. Desde el 2026-10-16 la
+   lista la escribe como Se quemó, siempre con el día (`diaYHora`, en
+   `src/lib/schedule-week.ts`); falta la app.
 9. **Un «—» suelto bajo Visitas, Clicks, Únicos y CTR** cuando no hay período anterior para
    comparar. `src/components/charts/stat-tile.tsx`.
 10. **Por revisar en el teléfono:** en la versión web de la app, las etiquetas de la barra de
     pestañas se cortan por abajo. Puede ser solo la web.
 
+Encontrado y resuelto al arreglar el primero, el 2026-10-16: a 390 px el editor medía 464 px y
+la página se corría de lado, porque un `<fieldset>` crece por defecto hasta su línea más larga
+(el resumen de las opciones de TikTok, una URL).
+
 ## Lo que más comunica, en tandas
 
 Cada tanda se puede publicar sola. Los tiempos son a ojo.
 
-**Tanda 1, lo roto y lo que casi no cuesta (1 a 2 días).** Los defectos de arriba. Se quemó
-plegado con sus corticos quemados en fila, y el arreglo junto a la frase del error
-(«Cambiar el archivo», «Reconectar») en vez de un «Reprogramar» lejano. El aviso de
-reintento del calendario en un renglón. La vista Lista con el corte chico en cada fila. El
-Se quemó de la app con su corte, y las fichas de cuenta de la app con borde (hoy son texto
-gris sin borde y no se ve que se tocan).
+**Tanda 1, lo roto y lo que casi no cuesta (1 a 2 días).** Los defectos de arriba. El Se
+quemó de la app con su corte, y las fichas de cuenta de la app con borde (hoy son texto gris
+sin borde y no se ve que se tocan). Hecho el 2026-10-16, en La Parrilla del panel: Se quemó
+plegado con sus corticos quemados en fila y el arreglo junto a la frase del error
+(«Reconectar», «Cambiar el archivo»; `schedule/arreglo.ts`), el aviso de reintento del
+calendario en un renglón, la vista Lista con el corte chico en cada fila, y «Eliminar» que
+pregunta antes.
 
 **Tanda 2, el corte en los flujos (3 a 5 días).** El compositor (Nueva publicación y
 Borrador) es la distancia más grande del producto entre el cariño del corte y el de la

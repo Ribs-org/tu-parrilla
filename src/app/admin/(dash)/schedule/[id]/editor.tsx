@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useActionState, useState, useTransition } from 'react'
+import { useActionState, useState, useTransition, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowDown, ArrowLeft, ArrowUp, Check, Copy, ExternalLink } from 'lucide-react'
 import { deleteScheduledPost, updateScheduledPost, type FormState } from '@/app/admin/actions'
@@ -10,6 +10,7 @@ import { Button, Field, GroupLabel, Input, Textarea } from '@/components/ui'
 import { networkLabel } from '@/lib/networks'
 import type { CuentaRow } from '@/lib/posts-kpis'
 import { cn } from '@/lib/utils'
+import { CONFIRMAR_ELIMINAR } from '../etiqueta'
 import { ReglaClave } from '../regla-clave'
 
 // Gemelo de PUBLISHABLE (publish/batch.ts) y de ENABLED en el compositor
@@ -23,6 +24,7 @@ type MediaRow = { id: string; blobUrl: string; mediaType: string }
 export function Editor({
   postId,
   volver,
+  cabecera,
   caption,
   scheduledAtLocal,
   cuentas,
@@ -34,6 +36,8 @@ export function Editor({
 }: {
   postId: string
   volver: string
+  /** Cómo va en cada red (`DestinosDelPost`), dibujado en el servidor. */
+  cabecera: ReactNode
   caption: string
   scheduledAtLocal: string
   cuentas: CuentaRow[]
@@ -89,28 +93,14 @@ export function Editor({
         </Link>
       </div>
 
-      {publishing ? (
-        <p className="mb-4 rounded-xl bg-caution/10 px-4 py-3 text-sm text-caution">
-          Hay una publicación en curso. Vuelve en un minuto.
-        </p>
-      ) : null}
-      {published.size > 0 ? (
-        <p className="mb-4 rounded-xl bg-positive/10 px-4 py-3 text-sm text-positive">
-          Ya publicado en{' '}
-          {[...published]
-            .map((accountId) => {
-              const cuenta = porId.get(accountId)
-              return cuenta
-                ? `${networkLabel(cuenta.network)} · ${cuenta.handle ?? 'sin nombre'}`
-                : networkLabel(networkPorAccountId.get(accountId)!)
-            })
-            .join(', ')}
-          . Los cambios no tocan lo publicado.
-        </p>
-      ) : null}
+      {/* Lo publicado, lo quemado y lo que está saliendo lo dice la cabecera, red por red. */}
+      {cabecera}
 
       <form action={formAction}>
-        <fieldset disabled={publishing || pending} className="space-y-4">
+        {/* `min-w-0`: un `<fieldset>` trae de fábrica `min-inline-size: min-content`, y crecía
+            hasta su línea más larga —el resumen de las opciones de TikTok, una URL—: a 390 px el
+            editor medía 464 y la página se corría de lado. */}
+        <fieldset disabled={publishing || pending} className="min-w-0 space-y-4">
           <input type="hidden" name="volver" value={volver} />
           <Field label="Texto">
             <Textarea name="caption" defaultValue={caption} rows={4} />
@@ -176,7 +166,8 @@ export function Editor({
             </div>
           </div>
 
-          <div>
+          {/* `#media`: adonde lleva «Cambiar el archivo» desde un destino quemado. */}
+          <div id="media" className="scroll-mt-24">
             <GroupLabel>Media</GroupLabel>
             {kept.length > 0 ? (
               <ul className="mb-2 space-y-2">
@@ -277,14 +268,16 @@ export function Editor({
               type="button"
               variant="danger"
               disabled={deleting}
-              onClick={() =>
+              onClick={() => {
+                // Pregunta antes, como en la lista: borrar no se deshace.
+                if (!confirm(CONFIRMAR_ELIMINAR)) return
                 startDelete(async () => {
                   setDeleteError(null)
                   const result = await deleteScheduledPost(postId)
                   if (result.error) setDeleteError(result.error)
                   else router.push(volver)
                 })
-              }
+              }}
             >
               {deleting ? 'Eliminando…' : 'Eliminar'}
             </Button>

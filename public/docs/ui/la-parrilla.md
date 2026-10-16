@@ -78,8 +78,9 @@ igual debajo de ella.
 ### «Se quemó»
 
 Aparece solo si hay algo que falló, de cualquier fecha; si no falló nada, la sección no existe.
-Parte plegada, en una sola línea: «Se quemó» en rojo, cuántas hay (por ejemplo «22») y «Ver»
-con una flecha. Un clic en esa línea la abre (y la flecha pasa a «Ocultar»); otro la vuelve a
+Parte plegada, en una sola línea: «Se quemó» en rojo, cuántas hay (por ejemplo «22»), los
+cortes quemados en chico —uno por cada uno, hasta cinco, y «+<N>» si hay más— y «Ver» con una
+flecha. Un clic en esa línea la abre (y la flecha pasa a «Ocultar»); otro la vuelve a
 plegar. Si se deja abierta, la próxima vez que se entre en ese navegador abre abierta.
 
 Abierta, cada fila es una red donde un corte falló: un corte que falló en dos redes da dos
@@ -104,8 +105,11 @@ líneas:
 - el texto del post, que es un enlace a su editor (o «(sin texto)»);
 - debajo, en rojo, el motivo, cuando lo hay: una frase fija en español que dice por qué no
   salió (ver «Motivos de un destino que no salió», más abajo);
-- al costado, el botón «Reprogramar», que abre la misma ventana que el de la lista (ver «La
-  ventana «Reprogramar»», más abajo).
+- debajo del motivo, los botones. Si el motivo dice cómo se arregla, primero el arreglo, en
+  naranjo: **«Reconectar»** cuando la cuenta perdió la conexión (lleva a [Los
+  Fierros](los-fierros.md)) o **«Cambiar el archivo»** cuando la red no acepta los archivos
+  (abre el editor del post, en sus archivos). Al lado, siempre, **«Reprogramar»**, que abre la
+  misma ventana que el de la lista (ver «La ventana «Reprogramar»», más abajo).
 
 ### El corte
 
@@ -160,14 +164,17 @@ días de hoy en adelante, un «+» chico que abre el panel «Nueva publicación�
 12»). El día de hoy tiene el nombre más claro y un borde fino. Un día vacío de hoy en
 adelante dice «No hay nada puesto. Préndela.», y esa frase es un enlace que hace lo mismo que
 el «+»; un día vacío que ya pasó dice «No hay nada puesto.», sin enlace y sin «+». En el
-teléfono, la semana se desliza de lado.
+teléfono la semana se desliza de lado, y abre corrida hasta hoy, con el día de antes asomado a
+la izquierda.
 
 Cada publicación es una tarjeta con el corte arriba (ver «El corte»), la hora con su estado al
 lado cuando no es solo programado —«· saliendo», «· publicado» en verde, «· falló en <N> de
 <M>» o «· falló» en rojo—, los chips de sus destinos, el texto en dos líneas o «(sin texto)»,
-y una línea en ámbar «Reintentando <Red> · <usuario>: <motivo>» por cada destino que falló y
-espera otro intento. La tarjeta no lleva miniatura: la foto o el video se ven en el editor. Al
-dejar el mouse encima aparece el estado de cada red, con su motivo. Un clic abre el editor.
+y, si algún destino falló y espera otro intento, una línea en ámbar «Reintentando · <Red>»
+con las redes que reintentan (en dos renglones como mucho). El motivo no va en la tarjeta: al
+dejar el mouse encima aparece el estado de cada red, con su motivo, y está también en el
+editor. La tarjeta no lleva miniatura: la foto o el video se ven en el editor. Un clic abre el
+editor.
 
 Los borradores que tienen fecha aparecen en su día, debajo de los cortes, como tarjetas con
 borde punteado: arriba «Borrador · HH:MM» y debajo el texto en dos líneas (o «(sin texto)»).
@@ -177,7 +184,7 @@ fuego del día: un día que solo tiene borradores sigue diciendo «Apagada». Lo
 fecha no salen en el calendario; están en «Borradores (<N>)».
 
 El calendario no tiene botones de «Subir ahora», «Eliminar» ni «Reprogramar»: esos están en
-la lista (y «Reprogramar», también en «Se quemó»).
+la lista (y «Reprogramar», también en «Se quemó» y en el editor).
 
 ### El día
 
@@ -226,9 +233,15 @@ menos». Sin nada: «Nada programado todavía.» Los borradores no aparecen en l
 
 Cada publicación es una tarjeta con:
 
-- El texto (dos líneas como mucho), o «(sin texto)», y debajo el día y la hora.
-- A la derecha: **«Editar»** (abre el editor), **«Subir ahora»** (solo si a alguna red le
-  falta salir: programada, publicándose o quemada) y **«Eliminar»**.
+- A la izquierda, el corte en chico, con todas sus marcas, como en «Se quemó» (ver «El
+  corte», más arriba).
+- El texto (dos líneas como mucho), o «(sin texto)», y debajo el día y la hora, en la misma
+  forma que «Se quemó» pero siempre con el día: «<día> <número> de <mes> · HH:MM», por
+  ejemplo «jue 15 de oct · 13:00».
+- A la derecha (en un teléfono, debajo del texto): **«Editar»** (abre el editor), **«Subir
+  ahora»** (solo si a alguna red le falta salir: programada, publicándose o quemada) y
+  **«Eliminar»**, que pregunta antes «¿Eliminar este post? Se borra de La Parrilla y ya no
+  sale en ninguna red.».
 - Abajo, una píldora por cada destino: el ícono de la red, el usuario, « · » y el estado
   (ver la tabla de estados, más abajo). Si hay un motivo de falla, sigue « — <motivo>». Si el
   destino se quemó, la píldora es roja y termina en el botón subrayado **«Reprogramar»**.
@@ -438,7 +451,7 @@ Cada publicación tiene un destino por cuenta, y cada destino va por su lado.
 | Lo que dice | Cómo se ve | Qué está pasando |
 |---|---|---|
 | «Programado» | Píldora gris; en el corte, marca punteada y chip sin signo | Espera su hora |
-| «Reintentando» | Píldora gris con « — <motivo>»; en el corte, marca punteada en ámbar y chip «↻»; en el calendario, la línea «Reintentando <Red> · <usuario>: <motivo>» | Falló un intento y se volverá a probar solo. Son tres intentos en total; algunos rechazos se queman al primero |
+| «Reintentando» | Píldora gris con « — <motivo>»; en el corte, marca punteada en ámbar y chip «↻»; en el calendario, la línea «Reintentando · <Red>» | Falló un intento y se volverá a probar solo. Son tres intentos en total; algunos rechazos se queman al primero |
 | «Publicando…» | Píldora gris; humo sobre el corte, chip «…» y «· saliendo» al lado de la hora | La red recibió el archivo y lo está procesando. Si pasan 24 horas así, cuenta como un intento fallido |
 | «Publicado» | Píldora verde; marca llena en el corte y chip verde «✓» | Ya salió en esa red |
 | «En tu bandeja de TikTok» | Píldora verde; marca quemada hasta la mitad con un punto ámbar, chip «◐» y la tarjeta con borde ámbar | Se mandó como borrador de TikTok: hay que terminarlo en la app de TikTok. Cuando se publica desde allá, la sincronización siguiente (la diaria, o «Sincronizar ahora» en [Los Fierros](los-fierros.md)) encuentra el video y pasa a «Publicado» |
@@ -458,12 +471,21 @@ Además de desde el calendario y la lista, se llega desde la pieza de una public
 
 Arriba, el título «Editar post» y el enlace «Volver», que regresa a la vista desde la que se
 entró: la semana del calendario, la lista o, si se entró con «Editar atributos», esa pieza de
-Los Números. Debajo, según el caso:
+Los Números.
+
+Debajo, un recuadro con cómo va el post en cada red: a la izquierda, su corte con todas sus
+marcas (ver «El corte»); al lado, una línea por destino con su chip, «<Red> · <usuario>» y el
+estado en palabras («· Programado», «· Reintentando», «· Publicando…», «· Publicado», «· En tu
+bandeja de TikTok», «· Falló» o «· Su fierro está frío: reconéctala»). Si el destino reintenta
+o falló, debajo va el motivo, en ámbar o en rojo. Si falló, debajo del motivo van los mismos
+botones que en «Se quemó»: el arreglo cuando el motivo lo dice —**«Reconectar»**, que lleva a
+Los Fierros, o **«Cambiar el archivo»**, que baja a «Media» en este mismo editor— y
+**«Reprogramar»**. Si el fierro de su cuenta está frío, **«Reconectar»**. Al pie del
+recuadro, según el caso:
 
 - «Hay una publicación en curso. Vuelve en un minuto.», en amarillo, si algún destino está
   «Publicando…». Mientras tanto todo el formulario queda bloqueado, también «Eliminar».
-- «Ya publicado en <Red> · <usuario>, <…>. Los cambios no tocan lo publicado.», en verde, si
-  alguna red ya salió.
+- «Los cambios no tocan lo publicado.», si alguna red ya salió.
 
 El formulario, en orden:
 
@@ -499,15 +521,17 @@ El formulario, en orden:
    normal en la misma cuenta, que por fuerza son dos posts programados. Se puede agregar o
    cambiar también en un post que ya salió: no toca lo publicado.
 8. Los errores, en rojo, y los botones **«Guardar»** («Guardando…») y **«Eliminar»**
-   («Eliminando…»). Guardar bien devuelve a la vista de donde se vino —también a la pieza de
-   Los Números, si se entró desde ahí—; eliminar bien, también.
+   («Eliminando…»), que pregunta antes, como en la lista. Guardar bien devuelve a la vista de
+   donde se vino —también a la pieza de Los Números, si se entró desde ahí—; eliminar bien,
+   también.
 
 El editor no es un panel lateral: es una pantalla aparte, y no guarda borradores. Si el post
 no existe o ya se borró, el editor muestra la página «No encontramos esa página».
 
 ### La ventana «Reprogramar»
 
-Se abre al apretar «Reprogramar» en una píldora roja de la lista o en una fila de «Se quemó», y
+Se abre al apretar «Reprogramar» en una píldora roja de la lista, en una fila de «Se quemó» o
+en un destino quemado del editor, y
 queda al centro, encima de todo, con el fondo oscurecido. Arriba dice de qué destino se trata,
 «<Red> · <usuario>»; debajo, un selector de fecha y hora, **«Guardar»** (bloqueado hasta
 elegir una hora) y **«Cancelar»**. Se cierra también con Esc o con un clic fuera. Al guardar
@@ -655,9 +679,11 @@ el botón «Agregar archivos» del editor falla cuando lo elegido suma más de u
 
 ### Para arreglar un post quemado
 
-Primero leer el motivo, que está en «Se quemó», arriba de la pantalla, en la píldora roja de
-la lista y en el correo. Si dice que hay que reconectar, hacerlo antes en [Los
-Fierros](los-fierros.md). Después, una de tres:
+Primero leer el motivo, que está en «Se quemó», arriba de la pantalla, en el editor del post,
+en la píldora roja de la lista y en el correo. Si dice que hay que reconectar, hacerlo antes en
+[Los Fierros](los-fierros.md): el botón «Reconectar» de su fila en «Se quemó» lleva ahí. Si la
+red no acepta el archivo, «Cambiar el archivo» abre el editor en sus archivos. Después, una de
+tres:
 
 - **Darle otra hora:** apretar «Reprogramar» en su fila de «Se quemó» (o en la píldora roja de
   la lista), elegir una fecha y hora futuras, en la zona de Tu Cuenta, y «Guardar». La ventana
@@ -684,9 +710,10 @@ de un post que ya salió en otras redes.
 
 ### Para borrar un post
 
-Apretar «Eliminar» en su tarjeta de la lista, o «Eliminar» en el editor. **No pide
-confirmación** y no se puede deshacer. Solo funciona si no salió ni se está publicando en
-ninguna red; si ya salió en alguna, hay que borrarlo en la red misma.
+Apretar «Eliminar» en su tarjeta de la lista, o «Eliminar» en el editor, y aceptar la
+pregunta «¿Eliminar este post? Se borra de La Parrilla y ya no sale en ninguna red.». No se
+puede deshacer. Solo funciona si no salió ni se está publicando en ninguna red; si ya salió en
+alguna, hay que borrarlo en la red misma.
 
 ## Mensajes que puede ver
 
@@ -699,7 +726,7 @@ ninguna red; si ya salió en alguna, hay que borrarlo en la red misma.
 | «No hay nada puesto. Préndela.» | Ese día, de hoy en adelante, no tiene nada programado | Apretarlo para programar ahí |
 | «No hay nada puesto.» | Ese día ya pasó y no tuvo nada | Nada |
 | «Ayer no salió nada.» | Ningún corte de ayer salió en ninguna red | Si algo debía salir, mirar «Se quemó» |
-| El motivo en rojo bajo una fila de «Se quemó» | Por qué no salió en esa red (ver «Motivos de un destino que no salió») | Si pide reconectar, ir a Los Fierros; después «Reprogramar» |
+| El motivo en rojo bajo una fila de «Se quemó» | Por qué no salió en esa red (ver «Motivos de un destino que no salió») | El botón de abajo: «Reconectar» o «Cambiar el archivo» cuando el motivo lo pide; si no, «Reprogramar» |
 | «Algo se rompió», con «No fue nada que hicieras: una consulta no respondió. Vuelve a intentarlo; el detalle quedó en la consola del navegador.» y el botón «Reintentar» | Una consulta del servidor falló; no fue la persona. Si falló la pantalla principal de La Parrilla, no aparece «Ir a La Parrilla» | «Reintentar» |
 
 ### Al programar
@@ -826,6 +853,7 @@ puede decir:
 |---|---|---|
 | «Nada programado todavía.» | No hay nada programado | Programar algo |
 | «¿Subirlo ahora, sin esperar la hora programada? Se publica en tus redes de inmediato.» | Pregunta de «Subir ahora» | Aceptar para publicar ya; cancelar para dejarlo como estaba |
+| «¿Eliminar este post? Se borra de La Parrilla y ya no sale en ninguna red.» | Pregunta de «Eliminar», en la lista y en el editor | Aceptar para borrarlo; cancelar para dejarlo como estaba |
 | Una lista con las partes que apliquen, separadas por comas y con punto final: «<N> publicado» (o «publicados»), «<N> en proceso», «<N> en espera de la red», «<N> para reintentar», «<N> con error» | Cómo le fue a «Subir ahora» | Lo que está en proceso o en espera de la red termina solo; para lo que quedó para reintentar o con error, leer el motivo en la píldora |
 | «Este post no tenía destinos pendientes.» | Ya había salido en todas sus redes | Nada |
 | «El post ya no existe.» | Se borró antes | Recargar |
@@ -838,7 +866,7 @@ puede decir:
 | Lo que dice la pantalla | Qué significa | Qué hacer |
 |---|---|---|
 | «Hay una publicación en curso. Vuelve en un minuto.» | Una red está procesando la publicación; el editor queda bloqueado | Esperar y recargar |
-| «Ya publicado en <…>. Los cambios no tocan lo publicado.» | Algo ya salió | Lo que se cambie solo vale para lo que falta salir |
+| «Los cambios no tocan lo publicado.» | Algo ya salió (el recuadro de arriba dice dónde) | Lo que se cambie solo vale para lo que falta salir |
 | «No se puede quitar una cuenta en la que ya se publicó.» | Se intentó desmarcar una red donde ya salió | Dejarla marcada |
 | «No se pudo leer una media por URL.» | Un enlace de «Agregar por URL» o de la portada no se pudo descargar | Usar un enlace de descarga directa |
 | «La portada requiere un video en media.» | Portada sin video | Quitar la portada o agregar el video |
@@ -850,8 +878,8 @@ puede decir:
 
 ### Motivos de un destino que no salió
 
-Aparecen en «Se quemó», en la píldora de la lista, en la línea «Reintentando <Red> ·
-<usuario>: <motivo>» del calendario y en el correo. Mientras el destino dice «Reintentando»,
+Aparecen en «Se quemó», en el editor del post, en la píldora de la lista, al dejar el mouse
+sobre su tarjeta del calendario y en el correo. Mientras el destino dice «Reintentando»,
 se reintenta solo; cuando dice «Falló», hay que actuar (ver la tarea de arreglar un post
 quemado, más arriba).
 
@@ -1061,6 +1089,9 @@ Lo que describe esta página sale de:
   - `src/app/admin/(dash)/schedule/enlace.ts`
   - `src/app/admin/(dash)/schedule/[id]/page.tsx`
   - `src/app/admin/(dash)/schedule/[id]/editor.tsx`
+  - `src/app/admin/(dash)/schedule/[id]/destinos.tsx` (cómo va el post en cada red, arriba del editor)
+  - `src/app/admin/(dash)/schedule/arreglo.ts` (qué arreglo se ofrece junto a un destino quemado)
+  - `src/app/admin/(dash)/schedule/desplazar-a-hoy.tsx` (la semana corrida hasta hoy en el teléfono)
 - Lo que hacen sus botones (programar, guardar y descartar un borrador, guardar en el editor, reprogramar, eliminar, «Subir ahora», la carga por CSV y la lectura de la cuenta de TikTok):
   - `src/app/admin/actions.ts`
 - Los borradores (qué se guarda, cuándo hay algo que guardar, la fecha que se propone para un día):
