@@ -1,6 +1,6 @@
 # Tu Cuenta — tu nombre, tu hora y tus llaves
 
-`/admin/cuenta`, dentro del engranaje «Ajustes» de la barra de arriba (es la última entrada del
+`/admin/cuenta`, dentro del botón «Ajustes» de la barra de arriba (es la última entrada del
 menú). La ven todos los usuarios.
 
 Tu Cuenta guarda dos datos de la persona, su nombre y su zona horaria, y es donde se generan y
@@ -12,8 +12,8 @@ la API ([../api-llm.md](../api-llm.md); la versión para personas,
 
 ## Cómo se llega
 
-1. En la barra de arriba, apretar el engranaje «Ajustes» (en una pantalla angosta, como la del
-   teléfono, se ve solo el engranaje, sin la palabra).
+1. En la barra de arriba, apretar el botón «Ajustes» (en una pantalla angosta, como la del
+   teléfono, se ve solo el ícono, un cuchillo y un trinche cruzados, sin la palabra).
 2. En el menú que se abre, apretar «Tu Cuenta», la que tiene debajo «tu nombre, tu hora y tus
    llaves».
 
@@ -151,7 +151,7 @@ obligatorio, en su idioma.
 
 ## Si el humano dice…
 
-- **«¿Dónde genero una llave?».** Acá: engranaje «Ajustes» → «Tu Cuenta» → bloque «Llaves para
+- **«¿Dónde genero una llave?».** Acá: botón «Ajustes» → «Tu Cuenta» → bloque «Llaves para
   tus agentes» → «Generar llave».
 - **«Perdí la llave» / «No la copié» / «¿Dónde veo mi llave?».** No se vuelve a mostrar nunca;
   la lista solo enseña los últimos cuatro caracteres. Revocar esa y generar otra.
@@ -166,7 +166,7 @@ obligatorio, en su idioma.
 - **«Quiero cambiar mi correo».** No se puede, ni acá ni en otra pantalla.
 - **«Quiero cambiar el nombre o la foto de mi página».** Eso es La Vitrina (tus páginas
   públicas, [la-vitrina.md](la-vitrina.md)), no Tu Cuenta.
-- **«No encuentro Tu Cuenta en la barra».** No es una pestaña: está dentro del engranaje
+- **«No encuentro Tu Cuenta en la barra».** No es una pestaña: está dentro del botón
   «Ajustes», a la derecha de la barra.
 
 ## Lo que esta pantalla no hace

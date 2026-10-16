@@ -426,7 +426,7 @@ anteriores, aunque vayan vacías.
 | `portada` | Dirección de una imagen JPG o PNG; solo vale si hay un video en `media` |
 | `opciones` | JSON con lo que piden TikTok (privacidad, borrador) o Instagram (trial reel) |
 | `regla` | JSON con la palabra clave, el mensaje, la respuesta pública y, si se quiere, el PDF |
-| `cuentas` | Identificadores de cuenta separados por `\|`; hace falta cuando hay dos cuentas de la misma red. Cada tarjeta de Los Fierros trae el suyo con un botón para copiarlo |
+| `cuentas` | Identificadores de cuenta separados por `\|`; hace falta cuando hay dos cuentas de la misma red. Cada cuenta de Los Fierros trae el suyo en su detalle (la flecha de su fila), con un botón para copiarlo |
 
 La forma exacta de `opciones` y `regla` es la misma de la API: ver [la guía de la
 API](../api-llm.md). La carga por CSV no crea borradores: cada fila buena queda programada.
@@ -924,7 +924,7 @@ quemado, más arriba).
 - **No me deja marcar una cuenta.** Dice «reconéctala» al lado: hay que reconectarla en
   [Los Fierros](los-fierros.md). Si no aparece ninguna, no hay cuentas conectadas.
 - **La pantalla dice Conecta tu primera red.** No hay ninguna red conectada. Se conecta en
-  Los Fierros, dentro del engranaje «Ajustes».
+  Los Fierros, dentro del botón «Ajustes».
 - **El botón Programar no hace nada / el navegador me marca un campo.** Falta «Fecha y
   hora» (o apretar «Ahora»), o falta «Quién puede verlo» en un bloque de TikTok.
 - **No veo lo de trial reel.** Solo aparece con exactamente un archivo, que sea video, y
@@ -972,11 +972,12 @@ quemado, más arriba).
   del ejemplo ya pasaron: cambiarlas.
 - **Se me duplicaron posts con el CSV.** Se subió dos veces el mismo archivo: no se
   descartan repetidos. Borrar los sobrantes con «Eliminar».
-- **¿De dónde saco el identificador para la columna cuentas?** De la tarjeta de la cuenta
-  en Los Fierros: el código chico con el ícono de copiar.
+- **¿De dónde saco el identificador para la columna cuentas?** De la cuenta en Los Fierros:
+  la flecha de su fila abre el detalle, y es el código de «En Tu Parrilla: », con el ícono de
+  copiar.
 - **«Se quemó» es una sola línea y no veo qué falló.** Está plegada: un clic en «Ver», al lado
   del número. Queda abierta para la próxima vez en ese navegador.
-- **El engranaje «Ajustes» tiene un punto.** Ámbar: el permiso de alguna cuenta vence en
+- **El botón «Ajustes» tiene un punto.** Ámbar: el permiso de alguna cuenta vence en
   la semana. Rojo: alguna se apagó (venció o dejó de sincronizar) y lo que se programe ahí no
   va a salir. Adentro, la entrada «Los Fierros» dice cuántas («1 se enfría», «2 se
   apagaron»); en [Los Fierros](los-fierros.md), «Reconectar» en esa tarjeta.

@@ -132,7 +132,7 @@ Entra en `/ingresar` con tu correo (el de `ADMIN_EMAIL`): te llega un código de
 dígitos que vale diez minutos.
 
 El panel tiene tres pestañas —La Parrilla (Calendario), La Mesa (Comentarios) y Los Números
-(Analítica)— y el engranaje de Ajustes,
+(Analítica)— y el botón de Ajustes (un cuchillo y un trinche cruzados),
 con Los Fierros (Cuentas), La Vitrina (Perfiles), Los Maestros (Usuarios, solo el admin) y
 Tu Cuenta. Las rutas no cambiaron. Cada pantalla lleva su subtítulo en llano por si el
 nombre no dice nada.
@@ -413,7 +413,7 @@ Data deletion request URL:   https://TU-DOMINIO/api/social/meta/borrado
 Meta les hace `POST` con un `signed_request` firmado con `INSTAGRAM_APP_SECRET`; sin ese
 secreto configurado, o con una firma que no calza, las rutas responden `400` y no tocan
 nada. La **baja** deja sin credencial tus cuentas de Instagram y Facebook, igual que
-*Desconectar* en Los Fierros, y la tarjeta queda con «La conexión falló; reconecta la
+*Desconectar* en Los Fierros, y su fila queda con «La conexión falló; reconecta la
 cuenta.» —el motivo, «Quitaste la app desde Facebook: vuelve a conectar.», sale solo al
 pasar el mouse—; el historial de métricas se conserva. El **borrado** sí borra lo que
 vino de esas dos redes —posts, comentarios, métricas y los destinos programados de esas
@@ -553,7 +553,7 @@ cuentas privadas, para un cupo de cinco usuarios al día. La app de este desplie
 dos —la app el 2026-09-28, Direct Post con aviso del 2026-10-06—: cualquier cuenta autoriza
 y publica con la privacidad que elija, y el sandbox queda solo para grabar una revisión
 futura. Y ojo al cambiar de app: TikTok da un id distinto por app, así que cada cuenta
-vuelve como tarjeta nueva y la vieja se fusiona desde Los Fierros («Es la misma cuenta →»).
+vuelve como fila nueva y la vieja se fusiona desde Los Fierros (en su detalle, «Es la misma cuenta →»).
 
 
 ```
@@ -1078,7 +1078,7 @@ en la ventana, salido o no: texto, `fecha` (ISO con offset), portada, media en o
 que espera reintentarse), y
 `cuentaId`/`handle` de la cuenta — útil para recuperar el id de una cuenta que ya tiene
 algún destino programado. Para una cuenta recién conectada, que todavía no tiene
-ninguno, el id está en su tarjeta en **Los Fierros** (Cuentas, en Ajustes) del panel, con un botón para
+ninguno, el id está en el detalle de su fila en **Los Fierros** (Cuentas, en Ajustes) del panel —la flecha de la fila—, con un botón para
 copiarlo: ahí no hace falta llave de API, solo la sesión de quien entra al panel.
 
 `DELETE /api/schedule/posts/{id}` con el mismo `Authorization` saca un post programado

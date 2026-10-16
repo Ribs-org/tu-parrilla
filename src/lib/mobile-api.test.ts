@@ -354,7 +354,7 @@ describe('fierrosParaElTelefono', () => {
   const ahora = new Date('2026-10-16T12:00:00Z')
   const cuenta = { id: 'a', network: 'instagram', handle: '@a', connected: true, expiresAt: null, lastSyncError: null }
 
-  it('trae todas las cuentas con su fierro, y el aviso del engranaje', () => {
+  it('trae todas las cuentas con su fierro, y el aviso del botón de Ajustes', () => {
     const respuesta = fierrosParaElTelefono(
       [
         cuenta,

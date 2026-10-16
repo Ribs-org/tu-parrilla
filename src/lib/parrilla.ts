@@ -252,7 +252,7 @@ export function estadoDelFierro(
   //
   // Y X, con dos horas: `social/publish/x.ts` lo renueva al publicar con el de refresco, que
   // rota en cada uso. Medido por ahí, X decía «vence hoy» al conectarla y quedaba fría a las
-  // dos horas; con el punto del engranaje, eso habría sido una alarma encendida para siempre.
+  // dos horas; con el punto del botón de Ajustes, eso habría sido una alarma encendida para siempre.
   if (cuenta.red === 'tiktok' || cuenta.red === 'youtube' || cuenta.red === 'x') return 'al-rojo'
   if (!cuenta.expiraEn) return 'al-rojo'
 
@@ -282,7 +282,7 @@ export function cuentasFrias(
 }
 
 /**
- * Lo que dice el engranaje de Ajustes: si algún fierro se apagó o se está enfriando, y
+ * Lo que dice el botón de Ajustes: si algún fierro se apagó o se está enfriando, y
  * cuántos. Solo las cuentas con credencial: una que el dueño desconectó a propósito guarda su
  * historia y no tiene por qué encender un aviso todos los días. «apagado» gana sobre
  * «enfriandose», porque es el que ya está dejando de publicar.

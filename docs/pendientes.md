@@ -193,7 +193,7 @@ Nada de esto bloquea un trámite hoy; conviene ordenarlo antes de abrir a tercer
 - **La propuesta de diseño 2.1: lo que falta** (2026-10-16). De la propuesta externa del 16
   de octubre (no está en el repo) entró el corte dibujado
   (`docs/superpowers/specs/2026-10-16-el-corte-que-se-lee-design.md`), el texto secundario y
-  tenue a 4,5:1, el engranaje que avisa cuando un fierro se enfría y Ajustes en la app.
+  tenue a 4,5:1, el botón de Ajustes que avisa cuando un fierro se enfría y Ajustes en la app.
   Quedan, de lo más barato a lo más caro: «Mientras no mirabas» —qué cambió desde la última visita, con lo que pasa una sola
   vez: el sellado de una marca y el chisporroteo— (necesita guardar la última visita por
   usuario); la semana como días × franjas, con las zonas calientes de cada creador (necesita

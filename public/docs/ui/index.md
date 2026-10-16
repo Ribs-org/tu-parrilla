@@ -36,17 +36,18 @@ Está siempre, fija arriba, en todas las pantallas del panel. De izquierda a der
 2. **Tres pestañas**, iguales para todos: «La Parrilla», «La Mesa» y «Los Números». La activa
    se pinta con fondo naranjo. En una pantalla angosta (un
    teléfono) la fila se desplaza de lado: si no ve una pestaña, que deslice la barra.
-3. **El engranaje «Ajustes»**, a la derecha. En pantallas angostas se ve solo el ícono, sin la
+3. **El botón «Ajustes»**, a la derecha, con el ícono de un cuchillo y un trinche cruzados (antes era un engranaje:
+   si alguien dice «el engranaje», es este). En pantallas angostas se ve solo el ícono, sin la
    palabra. Abre un menú con cuatro entradas, cada una con su subtítulo debajo: «Los Fierros»
    (tus redes conectadas), «La Vitrina» (tus páginas públicas), «Los Maestros» (quién puede
    entrar; **solo lo ve el admin**) y «Tu Cuenta» (tu nombre, tu hora y tus llaves). Cuando la
-   persona está en una de esas pantallas, el engranaje queda pintado de naranjo. Si el permiso
-   de alguna cuenta conectada vence en la semana, el engranaje lleva un punto ámbar; si alguna
+   persona está en una de esas pantallas, el botón queda pintado de naranjo. Si el permiso
+   de alguna cuenta conectada vence en la semana, el botón lleva un punto ámbar; si alguna
    ya se apagó (venció o dejó de sincronizar), un punto rojo. Adentro, la entrada «Los Fierros»
    lo dice al lado del nombre: «1 se enfría», «2 se enfrían», «1 se apagó» o «2 se apagaron»
-   (un lector de pantalla lee el engranaje «Ajustes: en Los Fierros, 1 se enfría»). Sin nada
+   (un lector de pantalla lee el botón «Ajustes: en Los Fierros, 1 se enfría»). Sin nada
    que avisar no hay punto. El menú se cierra con Escape, al elegir una entrada o volviendo a
-   apretar el engranaje; un clic afuera no lo cierra.
+   apretar el botón; un clic afuera no lo cierra.
 4. **«Salir»**, al final, en mayúsculas. Cierra la sesión y deja en la pantalla para entrar con
    el correo ([ingresar.md](ingresar.md)).
 
@@ -60,10 +61,10 @@ se ve arriba, grande y en mayúsculas.
 | La Parrilla | lo que viene y cómo salió lo que ya se fue | `/admin/schedule` | Primera pestaña. Es la entrada: se llega acá al entrar, y `/admin` lleva acá. El calendario: programar, borradores, lo que se quemó, editar, reprogramar | [la-parrilla.md](la-parrilla.md) |
 | La Mesa | lo que te responden y tus respuestas | `/admin/comments` | Pestaña. Los comentarios y sus respuestas | [la-mesa.md](la-mesa.md) |
 | Los Números | cómo te fue en las redes y en tu página | `/admin/analytics` | Pestaña. Un tablero con dos mitades: «En las redes» (views y seguidores ganados) y «En tu página» (visitas y clicks en su página de links). Un clic adentro, «Tus publicaciones» (`/admin/analytics/publicaciones`): cada publicación con sus números y su etiqueta `?s=`; la pieza de cada una, con sus versiones (`/admin/analytics/publicaciones/<id>`); «Comparar por atributo» (`/admin/analytics/comparar`); y «Tu mejor 10 %» (`/admin/analytics/mejores`), lo que más rindió y qué tiene en común | [los-numeros.md](los-numeros.md) |
-| Los Fierros | tus redes conectadas | `/admin/accounts` | Engranaje «Ajustes». Conectar y desconectar redes | [los-fierros.md](los-fierros.md) |
-| La Vitrina | tus páginas públicas | `/admin/profiles` | Engranaje «Ajustes». Su página de links | [la-vitrina.md](la-vitrina.md) |
-| Los Maestros | quién puede entrar | `/admin/usuarios` | Engranaje «Ajustes», solo el admin. Invitar gente | [los-maestros.md](los-maestros.md) |
-| Tu Cuenta | tu nombre, tu hora y tus llaves | `/admin/cuenta` | Engranaje «Ajustes». Nombre, zona horaria y llaves de API | [tu-cuenta.md](tu-cuenta.md) |
+| Los Fierros | tus redes conectadas | `/admin/accounts` | Botón «Ajustes». Conectar y desconectar redes | [los-fierros.md](los-fierros.md) |
+| La Vitrina | tus páginas públicas | `/admin/profiles` | Botón «Ajustes». Su página de links | [la-vitrina.md](la-vitrina.md) |
+| Los Maestros | quién puede entrar | `/admin/usuarios` | Botón «Ajustes», solo el admin. Invitar gente | [los-maestros.md](los-maestros.md) |
+| Tu Cuenta | tu nombre, tu hora y tus llaves | `/admin/cuenta` | Botón «Ajustes». Nombre, zona horaria y llaves de API | [tu-cuenta.md](tu-cuenta.md) |
 
 Y dos páginas que no son una pantalla del panel: [Entrar al panel](ingresar.md) y [La app del
 teléfono](app-movil.md).
@@ -131,7 +132,7 @@ esto es lo que quiere decir:
   «Reprogramar».
 - **El calor de un día:** apagado (nada programado), prendido (uno o dos cortes) o lleno (tres
   o más).
-- **Fierro:** una red conectada. Su tarjeta en Los Fierros lleva una barra de color, el
+- **Fierro:** una red conectada. Su fila en Los Fierros lleva una barra de color, el
   fierro, que dice cómo está la conexión: naranja encendido (al rojo: viva), ámbar
   (enfriándose: vence en siete días o menos) o gris apagado (frío: desconectada, rota o
   vencida, hay que reconectar).
@@ -169,13 +170,13 @@ Y tres palabras de Los Números que no son del asado pero se confunden:
 Sale de:
 
 - `src/app/admin/(dash)/layout.tsx` y `src/app/admin/(dash)/nav.tsx`: la barra, las pestañas,
-  el engranaje y «Salir».
+  el botón «Ajustes» y «Salir». El ícono de Ajustes, en `src/components/icono-ajustes.tsx`.
 - `src/app/admin/(dash)/page.tsx`: `/admin` lleva a La Parrilla.
 - `src/app/admin/(dash)/content/page.tsx`: la dirección de la antigua pestaña Los Cortes lleva a
   «Tus publicaciones», dentro de Los Números.
 - `src/lib/vocabulario.ts`: los nombres, subtítulos y rutas de cada pantalla, y quién las ve.
 - `src/lib/parrilla.ts`: la cocción, el calor del día, la temperatura del fierro y el aviso del
-  engranaje (`avisoDeFierros`).
+  botón «Ajustes» (`avisoDeFierros`).
 - `src/app/admin/(dash)/error.tsx`, `src/app/admin/(dash)/loading.tsx` y
   `src/app/not-found.tsx`: el error, la carga y el 404.
 - `src/proxy.ts`: que el panel solo se abre en tu-parrilla.cl.

@@ -18,7 +18,7 @@ export type PostProgramado = {
 
 /**
  * Lo que trae `GET /api/mobile/fierros`: todas tus cuentas con la temperatura de su fierro,
- * y el aviso del engranaje con su frase ya armada («1 se enfría»).
+ * y el aviso del botón de Ajustes con su frase ya armada («1 se enfría»).
  */
 export type Fierros = {
   cuentas: { id: string; red: string; handle: string | null; conectada: boolean; fierro: 'al-rojo' | 'enfriandose' | 'frio' }[]

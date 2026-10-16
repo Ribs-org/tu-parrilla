@@ -4,7 +4,7 @@ import Constants from 'expo-constants'
 import * as Updates from 'expo-updates'
 import { useFocusEffect, useRouter } from 'expo-router'
 import { Boton, BotonTexto, COLORES, Etiqueta, Pantalla, Sello, Tarjeta } from '../components/ui'
-import { useFierros } from '../components/engranaje'
+import { useFierros } from '../components/boton-ajustes'
 import { API_BASE } from '../lib/config'
 import { clearToken } from '../lib/session'
 import { NOMBRE_RED, type Fierros } from '../lib/tipos'
@@ -22,7 +22,7 @@ function fierroDe(cuenta: Fierros['cuentas'][number]): { color: string; barra: s
 }
 
 /**
- * Ajustes, detrás del engranaje de cada pestaña: Los Fierros, tus cuentas con su temperatura
+ * Ajustes, detrás del botón de la cabecera de cada pestaña (un cuchillo y un trinche cruzados): Los Fierros, tus cuentas con su temperatura
  * —las mismas tarjetas de Los Fierros, para leer; conectar y reconectar se hace en el panel,
  * que abre en el navegador— y «Cerrar sesión», que la app no tenía: hasta acá, la única forma
  * de salir era borrar la app.

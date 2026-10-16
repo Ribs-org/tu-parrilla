@@ -1,12 +1,12 @@
 # Los Fierros — tus redes conectadas
 
-`/admin/accounts`, dentro del engranaje «Ajustes» de la barra del panel (no es una pestaña). La lista para elegir cuentas, que aparece sola cuando una red devuelve varias, vive en `/admin/accounts/elegir`.
+`/admin/accounts`, dentro del botón «Ajustes» de la barra del panel (no es una pestaña). La lista para elegir cuentas, que aparece sola cuando una red devuelve varias, vive en `/admin/accounts/elegir`.
 
-Los Fierros (en llano: las cuentas conectadas) es donde se conectan a Tu Parrilla las cuentas de Instagram, TikTok, YouTube, Facebook, Threads y X / Twitter, donde se renuevan cuando su permiso vence y donde se desconectan. Cada cuenta es una tarjeta con su «fierro», una barra de color que dice si la conexión está viva. Sin una cuenta conectada aquí, el panel no puede publicar en esa red. Las seis redes sirven para publicar; los números de los posts se traen de Instagram, TikTok, YouTube y Facebook; los comentarios (en [La Mesa](la-mesa.md)) llegan de Instagram, Facebook y YouTube.
+Los Fierros (en llano: las cuentas conectadas) es donde se conectan a Tu Parrilla las cuentas de Instagram, TikTok, YouTube, Facebook, Threads y X / Twitter, donde se renuevan cuando su permiso vence y donde se desconectan. Cada cuenta es una fila con su «fierro», una barra corta de color que dice si la conexión está viva; lo que se usa poco se abre con la flecha de la fila. Sin una cuenta conectada aquí, el panel no puede publicar en esa red. Las seis redes sirven para publicar; los números de los posts se traen de Instagram, TikTok, YouTube y Facebook; los comentarios (en [La Mesa](la-mesa.md)) llegan de Instagram, Facebook y YouTube.
 
 ## Cómo se llega
 
-1. En la barra de arriba del panel, abre el engranaje «Ajustes», a la derecha. En un teléfono se ve solo el ícono del engranaje, sin la palabra.
+1. En la barra de arriba del panel, abre el botón «Ajustes», a la derecha. En un teléfono se ve solo el ícono, un cuchillo y un trinche cruzados, sin la palabra.
 2. En el menú que se despliega, elige «Los Fierros» (debajo dice «tus redes conectadas»).
 
 También se entra directo a `https://tu-parrilla.cl/admin/accounts`. Sin sesión abierta, primero hay que entrar (ver [Ingresar](ingresar.md)).
@@ -22,38 +22,51 @@ Los títulos de la pantalla se ven en mayúsculas; aquí van como están escrito
 - El título «Los Fierros» y debajo «tus redes conectadas».
 - Solo al volver de conectar, o de un intento fallido: una franja con una frase, por ejemplo «Instagram conectado.». Todas las posibles están en «Mensajes que puede ver». La frase viaja en la dirección de la página: si se recarga, vuelve a aparecer, y eso no significa que se haya conectado otra vez.
 
-### Un bloque por red
+### Las redes con cuentas
 
-En este orden: Instagram, TikTok, YouTube, Facebook, Threads, X / Twitter. Cada bloque tiene:
+Arriba, en un solo recuadro, un bloque por cada red que tiene al menos una cuenta, en este orden: Instagram, TikTok, YouTube, Facebook, Threads, X / Twitter. Cada bloque tiene:
 
-- El nombre de la red y, a su lado, un enlace: «Conectar →» si la red no tiene ninguna cuenta, «Agregar cuenta →» si ya tiene alguna. Los dos llevan al mismo lugar: la ventana de la red.
-- Debajo, en letra chica, los avisos de esa red:
-  - Instagram: «Cuenta Business o Creator, enlazada a una página de Facebook. Una cuenta personal no puede conectar.»
-  - Facebook: «Una página, no un perfil personal.»
-  - Instagram y Facebook, además, solo mientras la instalación tenga marcada la revisión de Meta: «Mientras Meta revisa la app, solo pueden conectar las cuentas que invitamos como testers. Si Facebook dice que la función no está disponible, escríbenos.»
-  - TikTok, YouTube, Threads y X / Twitter no tienen aviso.
-- «Sin cuentas.» si la red no tiene ninguna; si tiene, una tarjeta por cuenta.
+- El ícono y el nombre de la red y, a la derecha, «Agregar cuenta →», que abre la ventana de la red para conectar otra.
+- Solo en las redes que tienen avisos, debajo, «Requisitos para agregar otra»: un clic los muestra (ver «Las redes sin conectar», abajo, para el texto de cada uno).
+- Una fila por cuenta (ver «La fila de una cuenta»).
 
-### La tarjeta de una cuenta
+### La fila de una cuenta
 
-De arriba abajo:
+Cada cuenta es una fila de una o dos líneas. De izquierda a derecha:
 
-1. **El fierro**, una barra delgada de color:
+1. **El fierro**, una barra corta de color:
    - naranja encendido, con brillo («al rojo»): la conexión está viva;
    - ámbar («enfriándose»): la conexión vence en siete días o menos;
    - gris apagado, sin brillo («frío»): la cuenta no tiene credencial, su última sincronización falló, o la conexión ya venció.
 
-   TikTok y YouTube nunca se ponen en ámbar, porque se renuevan solos; Facebook tampoco, porque el permiso de una página no vence. X / Twitter sí, y por otro motivo: ver «Para conectar X / Twitter».
+   TikTok, YouTube y X / Twitter nunca se ponen en ámbar, porque se renuevan solos; Facebook tampoco, porque el permiso de una página no vence.
 2. **El nombre de la cuenta**: el @usuario en Instagram, el nombre de la página en Facebook, el título del canal en YouTube, el nombre visible en TikTok, el usuario en Threads y en X. Si la red no dio nombre, se ve el número que la red le da a la cuenta, o «Sin nombre». Al lado, un triángulo rojo si la última sincronización falló, un visto verde si está conectada y sin error, y nada si no tiene credencial.
-3. En letra chica, el identificador que la red le da a la cuenta. Es solo informativo.
-4. Debajo, el **id de la cuenta en Tu Parrilla**, con un ícono de copiar. Es un botón: al apretarlo copia el id y el ícono pasa a un visto durante dos segundos. Al pasar el mouse dice «Id de cuenta — para «cuentas» en el CSV o la API».
-5. Cuándo se trajeron sus números por última vez: «Sincronizado recién», «Sincronizado hace 3 horas», «Sincronizado ayer», «Sincronizado hace 4 días»… o «Sin sincronizar» si nunca se trajeron. Threads y X / Twitter dicen siempre «Sin sincronizar», porque de ellas no se traen números.
-6. «Sin credencial», solo si la cuenta no está conectada: se desconectó, o quedó de una conexión anterior.
-7. Solo con el fierro en ámbar: «Este fierro se está enfriando: la conexión vence hoy. Reconéctala antes de que se apague.» En lugar de «hoy» puede decir «mañana», «pasado mañana» o «dentro de 5 días».
-8. Solo si la última sincronización falló, en rojo: «La conexión falló; reconecta la cuenta.» Al pasar el mouse sobre esa frase aparece el error original de la red, a veces en inglés.
-9. Avisos de un momento: «Desconectada.» después de desconectar (se va sola), y el resultado de fusionar.
-10. Solo en una tarjeta «Sin credencial» cuando la misma red tiene otra cuenta conectada: «¿Es la misma cuenta con otro identificador? Fusiónala y su historial pasa a la viva.», una lista desplegable con las cuentas conectadas de esa red y el botón «Es la misma cuenta →» (dice «Fusionando…» mientras trabaja).
-11. Al pie: «Reconectar» y «Desconectar» si la cuenta está conectada («Desconectar» dice «Desconectando…» mientras trabaja); «Conectar →» y «Quitar» si no lo está. «Quitar» abre una ventana que pregunta antes de borrar nada (ver «Para quitar una cuenta»).
+3. **Debajo del nombre, una línea que dice cómo está**, una sola de estas, en este orden:
+   - en rojo, si la última sincronización falló: «La conexión falló; reconecta la cuenta.» Al pasar el mouse aparece el error original de la red, a veces en inglés;
+   - en ámbar, si se está enfriando: «Este fierro se está enfriando: la conexión vence hoy. Reconéctala antes de que se apague.» En lugar de «hoy» puede decir «mañana», «pasado mañana» o «dentro de 5 días»;
+   - si no: cuándo se trajeron sus números por última vez —«Sincronizado recién», «Sincronizado hace 3 horas», «Sincronizado ayer», «Sincronizado hace 4 días»…— o «Sin sincronizar» si nunca se trajeron, con «Sin credencial · » delante si la cuenta no está conectada. Threads y X / Twitter dicen siempre «Sin sincronizar», porque de ellas no se traen números.
+4. A la derecha, «Reconectar» si la cuenta está conectada, o «Conectar →» si no.
+5. Una **flecha** hacia abajo, que abre el detalle de la cuenta (un lector de pantalla la lee «Más de <nombre>»). Abierta, la flecha mira hacia arriba y otro clic lo cierra.
+
+Avisos de un momento, debajo de la fila: «Desconectada.» después de desconectar (se va sola), y el resultado de fusionar.
+
+**El detalle**, al abrir la flecha:
+
+- «En la red: » y el identificador que la red le da a la cuenta. Es solo informativo.
+- «En Tu Parrilla: » y el **id de la cuenta en Tu Parrilla**, con un ícono de copiar. Es un botón: al apretarlo copia el id y el ícono pasa a un visto durante dos segundos. Al pasar el mouse dice «Id de cuenta — para «cuentas» en el CSV o la API».
+- Solo si la cuenta no tiene credencial y la misma red tiene otra cuenta conectada: «¿Es la misma cuenta con otro identificador? Fusiónala y su historial pasa a la viva.», una lista desplegable con las cuentas conectadas de esa red y el botón «Es la misma cuenta →» (dice «Fusionando…» mientras trabaja).
+- «Desconectar» si la cuenta está conectada (dice «Desconectando…» mientras trabaja), o «Quitar» si no lo está. «Quitar» abre una ventana que pregunta antes de borrar nada (ver «Para quitar una cuenta»).
+
+### Las redes sin conectar
+
+Debajo, en otro recuadro, «Sin conectar» y una línea por cada red que no tiene ninguna cuenta: su ícono, su nombre y «Conectar →» a la derecha. Debajo del nombre, en letra chica, los avisos de esa red, si tiene:
+
+- Instagram: «Cuenta Business o Creator, enlazada a una página de Facebook. Una cuenta personal no puede conectar.»
+- Facebook: «Una página, no un perfil personal.»
+- Instagram y Facebook, además, solo mientras la instalación tenga marcada la revisión de Meta: «Mientras Meta revisa la app, solo pueden conectar las cuentas que invitamos como testers. Si Facebook dice que la función no está disponible, escríbenos.»
+- TikTok, YouTube, Threads y X / Twitter no tienen aviso.
+
+Cuando una red ya tiene cuentas, esos mismos avisos se ven en su bloque, con «Requisitos para agregar otra».
 
 ### Abajo de todo
 
@@ -80,11 +93,11 @@ Hace falta una cuenta de Instagram Business o Creator enlazada a una página de 
 1. En el bloque «Instagram», aprieta «Conectar →» (o «Agregar cuenta →» si ya hay una).
 2. Se abre la ventana de Facebook. Entra con la cuenta de Facebook que administra la página enlazada y acepta los permisos que pida: se piden todos juntos, y uno que falte después obliga a reconectar.
 3. Vuelve solo al panel:
-   - si Facebook encontró una sola cuenta de Instagram, vuelve a Los Fierros con «Instagram conectado.» y la tarjeta nueva (o renovada);
+   - si Facebook encontró una sola cuenta de Instagram, vuelve a Los Fierros con «Instagram conectado.» y la fila nueva (o renovada);
    - si encontró varias, aparece «¿Qué cuentas de Instagram conectar?»: marca las que quieras y aprieta «Conectar». Vuelve con «Instagram conectado.» o «2 cuentas conectadas.» (con el número que corresponda).
 4. Si vuelve con «Ninguna página de Facebook tiene una cuenta de Instagram asociada.», la cuenta de Instagram no es Business o Creator, o no está enlazada a ninguna página que administre esa cuenta de Facebook.
 
-La conexión de Instagram dura unos 60 días; la semana anterior la tarjeta se pone en ámbar y hay que apretar «Reconectar». Conectar Instagram no conecta la página de Facebook, ni al revés: son dos bloques y dos conexiones.
+La conexión de Instagram dura unos 60 días; la semana anterior su fierro se pone en ámbar y hay que apretar «Reconectar». Conectar Instagram no conecta la página de Facebook, ni al revés: son dos bloques y dos conexiones.
 
 ### Para conectar Facebook
 
@@ -108,7 +121,7 @@ Se conecta una página de Facebook, no un perfil personal.
 2. En la ventana de TikTok, entra con la cuenta y autoriza.
 3. Vuelve con «TikTok conectado.». TikTok conecta siempre una cuenta por vez.
 
-El aviso del bloque habla de publicar, no de conectar: una cuenta pública se conecta igual. Si la tarjeta muestra un número largo en vez del nombre, TikTok no entregó el nombre; «Reconectar» lo vuelve a pedir.
+El aviso del bloque habla de publicar, no de conectar: una cuenta pública se conecta igual. Si la fila muestra un número largo en vez del nombre, TikTok no entregó el nombre; «Reconectar» lo vuelve a pedir.
 
 ### Para conectar Threads
 
@@ -116,7 +129,7 @@ El aviso del bloque habla de publicar, no de conectar: una cuenta pública se co
 2. En la ventana de Threads, entra y autoriza.
 3. Vuelve con «Threads conectado.».
 
-La conexión de Threads dura unos 60 días. En la última semana se renueva sola si se publica en Threads; si no, la tarjeta se pone en ámbar y hay que apretar «Reconectar».
+La conexión de Threads dura unos 60 días. En la última semana se renueva sola si se publica en Threads; si no, su fierro se pone en ámbar y hay que apretar «Reconectar».
 
 ### Para conectar X / Twitter
 
@@ -124,61 +137,61 @@ La conexión de Threads dura unos 60 días. En la última semana se renueva sola
 2. En la ventana de X, entra y autoriza, en menos de diez minutos.
 3. Vuelve con «X / Twitter conectado.».
 
-El acceso que entrega X dura dos horas y Tu Parrilla lo renueva solo cada vez que publica en X, así que la tarjeta de X no se mide por esa hora: queda al rojo mientras tenga su conexión y la última sincronización no haya fallado. Hay que reconectar si una publicación a X falla con «La cuenta no está conectada. Reconéctala y reprograma.».
+El acceso que entrega X dura dos horas y Tu Parrilla lo renueva solo cada vez que publica en X, así que el fierro de X no se mide por esa hora: queda al rojo mientras tenga su conexión y la última sincronización no haya fallado. Hay que reconectar si una publicación a X falla con «La cuenta no está conectada. Reconéctala y reprograma.».
 
 ### Para agregar otra cuenta de la misma red
 
 1. Aprieta «Agregar cuenta →» al lado del nombre de la red.
-2. En la ventana de la red, entra con la otra cuenta. Si la red entra sola con la cuenta que ya estaba conectada, solo se renueva esa y no aparece tarjeta nueva: hay que cambiar de cuenta en la ventana de la red (o cerrar la sesión de la red en ese navegador) y repetir.
+2. En la ventana de la red, entra con la otra cuenta. Si la red entra sola con la cuenta que ya estaba conectada, solo se renueva esa y no aparece una fila nueva: hay que cambiar de cuenta en la ventana de la red (o cerrar la sesión de la red en ese navegador) y repetir.
 3. En Instagram, Facebook y YouTube, si el login ve varias cuentas aparece la lista: marca la nueva. Las ya conectadas vienen marcadas, y dejarlas así solo renueva su acceso.
 
-Cada cuenta queda como una tarjeta aparte. Con dos cuentas de una red, el compositor de [La Parrilla](la-parrilla.md) las lista por separado, y la carga masiva o la API piden el id de la cuenta (ver «Para copiar el id de una cuenta»).
+Cada cuenta queda como una fila aparte. Con dos cuentas de una red, el compositor de [La Parrilla](la-parrilla.md) las lista por separado, y la carga masiva o la API piden el id de la cuenta (ver «Para copiar el id de una cuenta»).
 
 ### Para renovar una conexión
 
-Cuándo: la tarjeta está en ámbar, dice «La conexión falló; reconecta la cuenta.», dice «Sin credencial», o otra pantalla pide reconectar.
+Cuándo: el fierro está en ámbar, dice «La conexión falló; reconecta la cuenta.», dice «Sin credencial», o otra pantalla pide reconectar.
 
-1. En la tarjeta, aprieta «Reconectar» (o «Conectar →» si dice «Sin credencial»).
-2. En la ventana de la red, entra con **la misma cuenta** de esa tarjeta. El botón no está atado a la tarjeta: la red decide qué cuenta vuelve, y si vuelve otra, aparece una tarjeta nueva en vez de renovarse esta.
-3. Vuelve con la frase «… conectado.» de esa red, la tarjeta al rojo y sin el error. Los posts y números ya traídos no se tocan.
+1. En la fila de la cuenta, aprieta «Reconectar» (o «Conectar →» si dice «Sin credencial»).
+2. En la ventana de la red, entra con **la misma cuenta** de esa fila. El botón no está atado a la fila: la red decide qué cuenta vuelve, y si vuelve otra, aparece una fila nueva en vez de renovarse esta.
+3. Vuelve con la frase «… conectado.» de esa red, el fierro al rojo y sin el error. Los posts y números ya traídos no se tocan.
 
 ### Para desconectar una cuenta
 
-1. En la tarjeta, aprieta «Desconectar».
+1. Abre el detalle de la cuenta con la flecha de su fila y aprieta «Desconectar».
 2. El navegador pregunta: «Se desconecta «<nombre>» de <red>. Sus posts y métricas ya bajados se quedan, pero no se sincroniza nada más hasta que la vuelvas a conectar. ¿Seguir?». Acepta.
-3. Aparece «Desconectada.» un momento, y la tarjeta queda con «Sin credencial» y «Conectar →».
+3. Aparece «Desconectada.» un momento, y la fila queda con «Sin credencial» y «Conectar →».
 
-La tarjeta no desaparece. Una cuenta desconectada deja de traer números y comentarios, sus comentarios pendientes en La Mesa ya no se pueden responder, y no se puede publicar en ella hasta reconectarla. Para sacarla del todo, «Quitar» (abajo).
+La fila no desaparece. Una cuenta desconectada deja de traer números y comentarios, sus comentarios pendientes en La Mesa ya no se pueden responder, y no se puede publicar en ella hasta reconectarla. Para sacarla del todo, «Quitar» (abajo).
 
 ### Para quitar una cuenta
 
 Saca la cuenta de Tu Parrilla con todo lo que se bajó de ella, y la deja libre para que tú u otro usuario la vuelvan a conectar. Es lo que hace falta, por ejemplo, cuando al conectar sale «… ya está conectada por otra persona en Tu Parrilla.»: quien la tiene la quita desde su usuario.
 
-1. Si la cuenta está conectada, primero «Desconectar» (ver arriba). «Quitar» solo aparece en una tarjeta con «Sin credencial».
-2. En la tarjeta, aprieta «Quitar».
+1. Si la cuenta está conectada, primero «Desconectar» (ver arriba). «Quitar» solo aparece en una cuenta con «Sin credencial».
+2. Abre el detalle con la flecha de su fila y aprieta «Quitar».
 3. Se abre la ventana «¿Quitar «<nombre>» de Tu Parrilla?», con «Se borran la cuenta, sus publicaciones y números ya bajados, sus comentarios y su historial en La Parrilla. No se puede deshacer. En <red> no se borra nada.» y «La cuenta queda libre: tú u otro usuario de Tu Parrilla la pueden volver a conectar, desde cero.».
 4. Aprieta «Quitar para siempre» (dice «Quitando…» mientras trabaja), o «Cancelar», Esc o un clic fuera de la ventana para no hacer nada.
-5. Vuelve a Los Fierros con ««<nombre>» quitada de Tu Parrilla.» arriba, y la tarjeta ya no está.
+5. Vuelve a Los Fierros con ««<nombre>» quitada de Tu Parrilla.» arriba, y la fila ya no está.
 
-Lo que se borra: la tarjeta, las publicaciones y los números que se trajeron de esa cuenta, sus comentarios en [La Mesa](la-mesa.md) y, en [La Parrilla](la-parrilla.md), sus destinos ya publicados o quemados. Una publicación que iba también a otras cuentas se queda con esas; una que iba solo a esta desaparece. No deja quitar una cuenta con publicaciones por salir hacia ella: primero hay que borrarlas en La Parrilla, o esperar a que salgan.
+Lo que se borra: la cuenta, las publicaciones y los números que se trajeron de esa cuenta, sus comentarios en [La Mesa](la-mesa.md) y, en [La Parrilla](la-parrilla.md), sus destinos ya publicados o quemados. Una publicación que iba también a otras cuentas se queda con esas; una que iba solo a esta desaparece. No deja quitar una cuenta con publicaciones por salir hacia ella: primero hay que borrarlas en La Parrilla, o esperar a que salgan.
 
 ### Para copiar el id de una cuenta
 
-1. En la tarjeta, aprieta el id que tiene el ícono de copiar (el segundo número de la tarjeta, no el de arriba).
+1. Abre el detalle de la cuenta con la flecha de su fila y aprieta el id de «En Tu Parrilla: », el que tiene el ícono de copiar (no el de «En la red: »).
 2. El ícono pasa a un visto por dos segundos: quedó copiado. Si no cambia, no se copió.
 
 Ese id es el que piden la columna `cuentas` de la carga por CSV (el botón «Subir CSV» de [La Parrilla](la-parrilla.md)) y la API (ver [la guía de la API](../api-llm.md)) cuando hay dos cuentas conectadas de la misma red. El número de arriba, el de la red, no sirve para eso.
 
 ### Para fusionar una cuenta repetida
 
-Cuándo: hay dos tarjetas de la misma cuenta, una «Sin credencial» y otra conectada. Pasa cuando la red le da a la misma cuenta un identificador nuevo (TikTok, Instagram y Facebook dan uno distinto por cada app) y la cuenta vuelve como tarjeta nueva.
+Cuándo: hay dos filas de la misma cuenta, una «Sin credencial» y otra conectada. Pasa cuando la red le da a la misma cuenta un identificador nuevo (TikTok, Instagram y Facebook dan uno distinto por cada app) y la cuenta vuelve como fila nueva.
 
-1. En la tarjeta «Sin credencial», bajo «¿Es la misma cuenta con otro identificador? …», elige en la lista desplegable la cuenta conectada.
+1. Abre el detalle de la cuenta «Sin credencial» con la flecha de su fila y, bajo «¿Es la misma cuenta con otro identificador? …», elige en la lista desplegable la cuenta conectada.
 2. Aprieta «Es la misma cuenta →».
-3. El navegador pregunta: ««<la vieja>» se fusiona en «<la conectada>»: sus posts, sus métricas y su historial de publicaciones pasan a esa cuenta, y esta tarjeta desaparece. No se puede deshacer. ¿Seguir?». Acepta.
-4. Aparece «Fusionada en «<la conectada>».» y la tarjeta vieja desaparece. Sus comentarios también pasan a la conectada.
+3. El navegador pregunta: ««<la vieja>» se fusiona en «<la conectada>»: sus posts, sus métricas y su historial de publicaciones pasan a esa cuenta, y esta desaparece de la lista. No se puede deshacer. ¿Seguir?». Acepta.
+4. Aparece «Fusionada en «<la conectada>».» y la fila vieja desaparece. Sus comentarios también pasan a la conectada.
 
-No se puede deshacer. Si las dos tarjetas están conectadas, la opción no aparece: primero hay que desconectar la vieja.
+No se puede deshacer. Si las dos están conectadas, la opción no aparece: primero hay que desconectar la vieja.
 
 ### Para traer los números ahora
 
@@ -191,7 +204,7 @@ Trae los posts y los números de las cuentas de Instagram, TikTok, YouTube y Fac
 
 | Lo que dice la pantalla | Qué significa | Qué hacer |
 |---|---|---|
-| «Instagram conectado.» (o «Facebook conectado.», «YouTube conectado.», «TikTok conectado.», «Threads conectado.», «X / Twitter conectado.») | Se conectó una cuenta, o se renovó una que ya estaba. | Nada. Si no apareció tarjeta nueva, se renovó la que ya estaba. |
+| «Instagram conectado.» (o «Facebook conectado.», «YouTube conectado.», «TikTok conectado.», «Threads conectado.», «X / Twitter conectado.») | Se conectó una cuenta, o se renovó una que ya estaba. | Nada. Si no apareció una fila nueva, se renovó la que ya estaba. |
 | «2 cuentas conectadas.» (con el número que corresponda) | Se conectaron o renovaron varias desde la lista. | Nada. |
 | «La red no devolvió el código de autorización.» | La ventana de la red devolvió al panel sin la autorización; pasa, por ejemplo, al cancelar en ella. | Volver a apretar «Conectar →» y aceptar en la ventana de la red. |
 | «El estado no corresponde a esa red.» | La vuelta no calza con la conexión que se empezó: pasaron más de diez minutos, o en medio se empezó a conectar otra red o se cambió de sesión. | Volver a apretar «Conectar →» y terminar de corrido, en el mismo navegador. |
@@ -218,55 +231,55 @@ Trae los posts y los números de las cuentas de Instagram, TikTok, YouTube y Fac
 | «Esa red no usa OAuth» o «Esa red no usa OAuth.» | Se abrió una dirección de conexión de una red que no existe. | Volver a Los Fierros y usar los enlaces de cada bloque. |
 | «No se pudo conectar. Inténtalo de nuevo.» | Falló algo inesperado al guardar la conexión. | Volver a conectar; si se repite, avisar a quien administra Tu Parrilla. |
 | «No se pudo guardar la cuenta. Inténtalo de nuevo.» | Falló guardar las cuentas elegidas en la lista. | Volver a conectar. |
-| «Este fierro se está enfriando: la conexión vence <hoy / mañana / pasado mañana / dentro de N días>. Reconéctala antes de que se apague.» | El permiso de esa cuenta vence pronto. Mientras tanto, el engranaje «Ajustes» lleva un punto ámbar. | «Reconectar» en esa tarjeta, con la misma cuenta. |
-| «La conexión falló; reconecta la cuenta.» | La última vez que se trajeron sus números, la red rechazó la conexión (permiso vencido o quitado desde la red). Si al pasar el mouse dice «Quitaste la app desde Facebook: vuelve a conectar.», alguien quitó Tu Parrilla desde la configuración de Facebook. | «Reconectar» (o «Conectar →») en esa tarjeta. |
-| «Sin credencial» | La cuenta no está conectada; su historial se conserva. | «Conectar →» en la tarjeta, o fusionarla si es una repetida. |
+| «Este fierro se está enfriando: la conexión vence <hoy / mañana / pasado mañana / dentro de N días>. Reconéctala antes de que se apague.» | El permiso de esa cuenta vence pronto. Mientras tanto, el botón «Ajustes» lleva un punto ámbar. | «Reconectar» en esa fila, con la misma cuenta. |
+| «La conexión falló; reconecta la cuenta.» | La última vez que se trajeron sus números, la red rechazó la conexión (permiso vencido o quitado desde la red). Si al pasar el mouse dice «Quitaste la app desde Facebook: vuelve a conectar.», alguien quitó Tu Parrilla desde la configuración de Facebook. | «Reconectar» (o «Conectar →») en esa fila. |
+| «Sin credencial» | La cuenta no está conectada; su historial se conserva. | «Conectar →» en la fila, o fusionarla si es una repetida (en su detalle). |
 | «Se desconecta «<nombre>» de <red>. Sus posts y métricas ya bajados se quedan, pero no se sincroniza nada más hasta que la vuelvas a conectar. ¿Seguir?» | Confirmación antes de desconectar. | Aceptar para desconectar, cancelar para dejarla. |
 | «Desconectada.» | Se desconectó. | Nada. |
 | ««<nombre>» quitada de Tu Parrilla.» | Se quitó la cuenta con su historial. | Nada. Para volver a tenerla, «Conectar →» en el bloque de su red. |
 | «Desconecta la cuenta antes de quitarla.» (en la ventana de «Quitar») | La cuenta se volvió a conectar mientras la ventana estaba abierta (por ejemplo, en otra pestaña). | Cerrar la ventana, «Desconectar» y volver a «Quitar». |
 | «Tiene una publicación programada hacia esta cuenta: bórrala en La Parrilla, o espera a que salga, antes de quitarla.» (o «Tiene N publicaciones programadas…») | Hay publicaciones por salir hacia esa cuenta; quitarla las dejaría sin ese destino. | Borrarlas en [La Parrilla](la-parrilla.md), o esperar a que salgan, y volver a «Quitar». |
 | «Esa cuenta ya no está.» (en la ventana de «Quitar») | Se quitó o se fusionó mientras la ventana estaba abierta. | Recargar la página. |
-| ««<la vieja>» se fusiona en «<la conectada>»: sus posts, sus métricas y su historial de publicaciones pasan a esa cuenta, y esta tarjeta desaparece. No se puede deshacer. ¿Seguir?» | Confirmación antes de fusionar. | Aceptar solo si de verdad son la misma cuenta. |
+| ««<la vieja>» se fusiona en «<la conectada>»: sus posts, sus métricas y su historial de publicaciones pasan a esa cuenta, y esta desaparece de la lista. No se puede deshacer. ¿Seguir?» | Confirmación antes de fusionar. | Aceptar solo si de verdad son la misma cuenta. |
 | «Fusionada en «<la conectada>».» | Se fusionó. | Nada. |
-| «La cuenta que se absorbe tiene que estar sin credencial. Desconéctala primero si es lo que quieres.» | La tarjeta vieja quedó conectada mientras tanto. | Recargar la página; si de verdad es la misma cuenta, desconectarla primero. |
+| «La cuenta que se absorbe tiene que estar sin credencial. Desconéctala primero si es lo que quieres.» | La cuenta vieja quedó conectada mientras tanto. | Recargar la página; si de verdad es la misma cuenta, desconectarla primero. |
 | «La cuenta que absorbe tiene que estar conectada.» | La cuenta elegida en la lista perdió su conexión. | Reconectarla y repetir. |
 | «Una cuenta no se fusiona en sí misma.», «Una de las cuentas no es tuya.», «Solo se fusionan dos cuentas de la misma red.» | La pantalla quedó desactualizada. | Recargar la página y repetir. |
 | «No se pudo fusionar. Inténtalo de nuevo.» | Falló la fusión; no se cambió nada. | Repetir. |
 | «Listo.» | Se trajeron los números. | Nada. |
 | «Espera unos minutos antes de volver a sincronizar.» | Se apretó «Sincronizar ahora» hace menos de cinco minutos. | Esperar cinco minutos. |
-| «Ninguna red respondió. Revisa las tarjetas de abajo.» | Fallaron todas las cuentas. | Buscar las tarjetas con la frase roja y reconectarlas. |
+| «Ninguna red respondió. Revisa las cuentas de abajo.» | Fallaron todas las cuentas. | Buscar las filas con la frase roja y reconectarlas. |
 | «No se pudo sincronizar. Intenta de nuevo.» | Falló todo el proceso. | Repetir más tarde. |
 
 ## Si el humano dice…
 
-- **«¿Cómo conecto mi Instagram?»** → Engranaje «Ajustes» → «Los Fierros» → bloque «Instagram» → «Conectar →». Ver «Para conectar Instagram».
-- **«No encuentro Los Fierros» o «no encuentro Cuentas»** → No es una pestaña: está dentro del engranaje «Ajustes», a la derecha de la barra. En el teléfono el engranaje no tiene texto.
-- **«Me dice que el token venció»**, **«la tarjeta está gris»** o **«dice que se está enfriando»** → «Reconectar» en esa tarjeta, entrando con la misma cuenta en la ventana de la red.
-- **«En La Parrilla me sale "reconéctala" al lado de una cuenta»** o **«una publicación falló con "La cuenta no está conectada. Reconéctala y reprograma."»** → Esa cuenta perdió la conexión: «Reconectar» o «Conectar →» en su tarjeta, y después volver a programar.
-- **«El compositor me pide "Reconecta TikTok para autorizar la publicación."»** → «Reconectar» en la tarjeta de TikTok.
+- **«¿Cómo conecto mi Instagram?»** → Botón «Ajustes» → «Los Fierros» → bloque «Instagram» → «Conectar →». Ver «Para conectar Instagram».
+- **«No encuentro Los Fierros» o «no encuentro Cuentas»** → No es una pestaña: está dentro del botón «Ajustes», a la derecha de la barra. En el teléfono el botón no tiene texto, solo el ícono.
+- **«Me dice que el token venció»**, **«el fierro está gris»** o **«dice que se está enfriando»** → «Reconectar» en esa fila, entrando con la misma cuenta en la ventana de la red.
+- **«En La Parrilla me sale "reconéctala" al lado de una cuenta»** o **«una publicación falló con "La cuenta no está conectada. Reconéctala y reprograma."»** → Esa cuenta perdió la conexión: «Reconectar» o «Conectar →» en su fila, y después volver a programar.
+- **«El compositor me pide "Reconecta TikTok para autorizar la publicación."»** → «Reconectar» en la fila de TikTok.
 - **«Facebook dice que la función no está disponible»** → Mientras Meta revisa la app, solo pueden conectar las cuentas invitadas como testers, y ese error no vuelve al panel. Hay que pedirle a quien administra Tu Parrilla que la invite.
 - **«Facebook dice "Invalid Scopes"»** → Es un problema de configuración de la app de Meta de Tu Parrilla, no de la cuenta: avisar a quien administra Tu Parrilla.
 - **«Google dice que la app no está verificada»** → Mientras Google no termine de verificar la app de Tu Parrilla, muestra ese cartel; hay que pasarlo para seguir.
 - **«Conecté Instagram y no aparece mi página de Facebook»** → Son conexiones separadas: hay que apretar también «Conectar →» en el bloque «Facebook».
 - **«Me dice que la cuenta ya está conectada por otra persona»** → Mirar qué cuenta nombra: suele ser otra cuenta que la red trajo junto con la que se quería (en Meta, la de otra página que administra la misma persona en Facebook). En la lista para elegir, marcar solo la propia; si el error salió sin lista, volver a conectar y, en la ventana de Facebook, elegir la página de la cuenta que se quiere. Si nombra la cuenta propia, la tiene otro usuario de Tu Parrilla: avisar a quien administra Tu Parrilla.
-- **«Apreté "Agregar cuenta" y no apareció otra tarjeta»** → La red entró con la cuenta que ya estaba conectada y solo la renovó. Ver «Para agregar otra cuenta de la misma red».
-- **«Reconecté y apareció una tarjeta nueva»** → En la ventana de la red se entró con otra cuenta, o la red le dio un identificador nuevo a la misma. Si es la misma cuenta, desconectar la vieja y fusionarla (ver «Para fusionar una cuenta repetida»).
-- **«Tengo dos tarjetas de la misma cuenta»** → «Para fusionar una cuenta repetida».
+- **«Apreté "Agregar cuenta" y no apareció otra cuenta»** → La red entró con la cuenta que ya estaba conectada y solo la renovó. Ver «Para agregar otra cuenta de la misma red».
+- **«Reconecté y apareció una cuenta nueva»** → En la ventana de la red se entró con otra cuenta, o la red le dio un identificador nuevo a la misma. Si es la misma cuenta, desconectar la vieja y fusionarla (ver «Para fusionar una cuenta repetida»).
+- **«Tengo dos filas de la misma cuenta»** → «Para fusionar una cuenta repetida».
 - **«Mi TikTok aparece con un número largo en vez del nombre»** → TikTok no entregó el nombre al conectar; «Reconectar» lo vuelve a pedir.
 - **«¿Tengo que poner mi TikTok en privada?»** → No, ni para conectar ni para publicar: la publicación directa está aprobada y sale con la privacidad que se elija en el compositor de [La Parrilla](la-parrilla.md).
-- **«El engranaje "Ajustes" tiene un punto ámbar (o rojo)»** → Una cuenta se está enfriando (o se apagó). Abrir el engranaje: la entrada «Los Fierros» dice cuántas, por ejemplo «1 se enfría». Aquí, la tarjeta con el fierro ámbar o gris → «Reconectar». Una cuenta desconectada a propósito no enciende el punto.
+- **«El botón "Ajustes" (o "el engranaje") tiene un punto ámbar (o rojo)»** → Una cuenta se está enfriando (o se apagó). Abrir el botón: la entrada «Los Fierros» dice cuántas, por ejemplo «1 se enfría». Aquí, la fila con el fierro ámbar o gris → «Reconectar». Una cuenta desconectada a propósito no enciende el punto.
 - **«Threads o X dicen "Sin sincronizar"»** → Es lo normal: de esas redes no se traen números, solo se publica.
 - **«Sincronizar ahora no hace nada» o «me dice que espere»** → Se puede apretar una vez cada cinco minutos. Los números de Threads y X no se traen nunca.
-- **«¿Dónde saco el id de la cuenta para la API o la carga masiva?»** → Es el segundo número de la tarjeta, el del ícono de copiar.
+- **«¿Dónde saco el id de la cuenta para la API o la carga masiva?»** → En el detalle de la cuenta (la flecha de su fila): el de «En Tu Parrilla: », con el ícono de copiar.
 - **«No me llegan los comentarios de Instagram, Facebook o YouTube»** → Si la cuenta se conectó antes de que existieran los comentarios, hay que apretar «Reconectar» una vez para dar ese permiso. Más en [La Mesa](la-mesa.md).
-- **«Hay una tarjeta de YouTube con un código que empieza con UC y dice "Sin credencial"»** → Solo le pasa a quien administra la instalación: es el canal configurado en ella, esperando que lo conecten. «Conectar →» con la cuenta de Google de ese canal la activa.
-- **«Quiero borrar una cuenta del todo»** o **«quiero sacar una cuenta»** → «Desconectar» y después «Quitar» en su tarjeta. Ver «Para quitar una cuenta».
-- **«No me aparece Quitar»** → Solo sale en una tarjeta desconectada («Sin credencial»): primero «Desconectar».
+- **«Hay una cuenta de YouTube con un código que empieza con UC y dice "Sin credencial"»** → Solo le pasa a quien administra la instalación: es el canal configurado en ella, esperando que lo conecten. «Conectar →» con la cuenta de Google de ese canal la activa.
+- **«Quiero borrar una cuenta del todo»** o **«quiero sacar una cuenta»** → «Desconectar» y después «Quitar», en el detalle de la cuenta (la flecha de su fila). Ver «Para quitar una cuenta».
+- **«No me aparece Quitar»** → Está en el detalle de la cuenta (la flecha de su fila), y solo en una desconectada («Sin credencial»): primero «Desconectar».
 
 ## Lo que esta pantalla no hace
 
-- No quita una cuenta conectada, ni una con publicaciones por salir hacia ella. «Desconectar» deja la tarjeta y sus números; para que la tarjeta desaparezca hay que quitarla (con su historial) o fusionarla en otra (que conserva su historial).
+- No quita una cuenta conectada, ni una con publicaciones por salir hacia ella. «Desconectar» deja la fila y sus números; para que la fila desaparezca hay que quitarla (con su historial) o fusionarla en otra (que conserva su historial).
 - No quita una cuenta que está en otro usuario: la quita ese usuario desde su sesión.
 - No deshace una fusión.
 - No elige a qué cuenta sale cada publicación: eso se marca en el compositor de [La Parrilla](la-parrilla.md).
@@ -274,7 +287,7 @@ Trae los posts y los números de las cuentas de Instagram, TikTok, YouTube y Fac
 - No muestra ni responde comentarios: eso es [La Mesa](la-mesa.md).
 - No conecta otras redes que las seis de la lista (ni LinkedIn, ni WhatsApp, ni otras).
 - No trae números de Threads ni de X / Twitter, ni comentarios de TikTok, Threads o X.
-- No elige con qué cuenta se entra en la ventana de la red: eso lo decide la red, y «Reconectar» no está atado a la tarjeta.
+- No elige con qué cuenta se entra en la ventana de la red: eso lo decide la red, y «Reconectar» no está atado a la fila.
 - Desmarcar una cuenta ya conectada en la lista no la desconecta: solo no la renueva.
 - No genera llaves de API: eso es [Tu Cuenta](tu-cuenta.md).
 - No existe en la app del teléfono: las redes se conectan solo desde el panel web (ver [la app del teléfono](app-movil.md)).

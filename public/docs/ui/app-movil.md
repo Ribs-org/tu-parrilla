@@ -1,6 +1,6 @@
 # La app del teléfono
 
-Una app para Android que muestra de un vistazo lo programado y cómo van las redes de quien entra, y le deja publicar desde la galería del teléfono. Tiene las mismas tres pestañas que el panel web —La Parrilla, Publicar en el medio y Los Números— y, como el panel, un engranaje de Ajustes, pero hace mucho menos: mira lo programado y los números, y programa o publica fotos y videos en Instagram, Facebook y YouTube. También reprograma lo que se quemó, y guarda solo lo que se está escribiendo como borrador: los borradores son los mismos del panel web, así que lo empezado en un lado se sigue en el otro. Todo lo demás —conectar redes, corregir o borrar lo programado, TikTok, comentarios, la página pública— se hace en el panel web.
+Una app para Android que muestra de un vistazo lo programado y cómo van las redes de quien entra, y le deja publicar desde la galería del teléfono. Tiene las mismas tres pestañas que el panel web —La Parrilla, Publicar en el medio y Los Números— y, como el panel, un botón de Ajustes, pero hace mucho menos: mira lo programado y los números, y programa o publica fotos y videos en Instagram, Facebook y YouTube. También reprograma lo que se quemó, y guarda solo lo que se está escribiendo como borrador: los borradores son los mismos del panel web, así que lo empezado en un lado se sigue en el otro. Todo lo demás —conectar redes, corregir o borrar lo programado, TikTok, comentarios, la página pública— se hace en el panel web.
 
 ## Cómo se llega
 
@@ -9,7 +9,7 @@ Una app para Android que muestra de un vistazo lo programado y cómo van las red
 - La primera vez pide el correo y el código. Después la sesión queda abierta: no los vuelve a pedir.
 - Si el teléfono tiene PIN, patrón, huella o reconocimiento de cara, cada vez que se abre la app pide desbloquear con el aviso «Desbloquea para entrar a Tu Parrilla». Si se cancela, la app muestra la pantalla de entrada.
 - Si la sesión deja de valer (por ejemplo, porque quien administra el sitio revocó el acceso de los teléfonos), la app vuelve sola a la pantalla de entrada, sin ningún mensaje.
-- Para salir: el engranaje de arriba a la derecha → «Ajustes» → «Cerrar sesión» (ver «Ajustes», más abajo).
+- Para salir: el botón de arriba a la derecha → «Ajustes» → «Cerrar sesión» (ver «Ajustes», más abajo).
 - Al entrar se abre La Parrilla.
 
 ## Qué se ve
@@ -29,7 +29,7 @@ Si algo falla, el mensaje sale en rojo debajo del campo.
 
 Abajo, tres pestañas en este orden: «La Parrilla», «Publicar» y «Los Números». «Publicar» va al medio y se ve como un círculo naranjo con una cruz. La pestaña activa se ve en naranjo y su nombre sale también como título arriba de la pantalla.
 
-Arriba a la derecha de las tres, al lado del título, un botón redondo con un engranaje: abre «Ajustes». Si alguna cuenta conectada necesita que la reconecten, el engranaje lleva un punto: ámbar si su permiso vence esta semana, rojo si ya se apagó (venció o dejó de sincronizar). Sin nada que avisar, no hay punto. Un lector de pantalla lo lee «Ajustes» o, con aviso, «Ajustes: 1 se enfría» (o «2 se apagaron», etc.).
+Arriba a la derecha de las tres, al lado del título, un botón redondo con un cuchillo y un trinche cruzados: abre «Ajustes». Si alguna cuenta conectada necesita que la reconecten, el botón lleva un punto: ámbar si su permiso vence esta semana, rojo si ya se apagó (venció o dejó de sincronizar). Sin nada que avisar, no hay punto. Un lector de pantalla lo lee «Ajustes» o, con aviso, «Ajustes: 1 se enfría» (o «2 se apagaron», etc.).
 
 En «La Parrilla», «Los Números» y «Tus publicaciones», la app muestra al instante lo último que descargó y lo actualiza por detrás; por eso funciona sin señal, con datos viejos. Arriba dice cuándo se actualizó: «Actualizado recién», «Actualizado hace 5 min», «Actualizado hace 2 h» o «Actualizado hace 1 d». Para actualizar a mano, se arrastra la pantalla hacia abajo.
 
@@ -80,7 +80,7 @@ Las dos mitades del tablero del panel ([Los Números](los-numeros.md)), más cor
 
 ### Ajustes
 
-Se abre con el engranaje de cualquier pestaña. Arriba, la flecha para volver y el título «Ajustes». Debajo:
+Se abre con el botón de Ajustes de cualquier pestaña. Arriba, la flecha para volver y el título «Ajustes». Debajo:
 
 - **«Los Fierros»**, con «Actualizado …» debajo, y una tarjeta por cada cuenta conectada a Tu Parrilla, de todas las redes (también TikTok, X y Threads, aunque desde el teléfono no se publique en ellas). Cada tarjeta trae «Red · nombre_de_cuenta», el fierro —una barra delgada: naranja si la conexión está viva, ámbar si se enfría, gris si se apagó o está desconectada— y una frase:
   - «Al rojo: conectada.»
@@ -276,7 +276,7 @@ No se puede desde la app. Se hace en el panel web, en [La Parrilla](la-parrilla.
 | «La hora debe estar en el futuro.» | La hora elegida ya pasó. | Tocar «Cuándo: …» y elegir una hora futura. |
 | «La fecha no se entendió.» | La fecha no llegó bien al servidor. | Volver a elegirla. |
 | «Un trial reel es un solo video, sin fotos.» | El trial reel quedó con más de un archivo o con fotos. | Dejar un solo video. |
-| «La cuenta x no está conectada. Vuelve a conectarla en Los Fierros.» (con el nombre de la cuenta en lugar de x) | La cuenta elegida perdió la conexión. Los Fierros está en el panel web, en el engranaje «Ajustes»: la app no tiene esa pantalla. | Reconectarla en el panel web. |
+| «La cuenta x no está conectada. Vuelve a conectarla en Los Fierros.» (con el nombre de la cuenta en lugar de x) | La cuenta elegida perdió la conexión. Los Fierros está en el panel web, en el botón «Ajustes»: la app no tiene esa pantalla. | Reconectarla en el panel web. |
 | «Una de las cuentas elegidas no es tuya.» | Una cuenta ya no pertenece a quien publica (por ejemplo, se borró). | Cerrar la app del todo y volver a abrirla: la lista de cuentas de «Publicar» se carga al abrir. |
 | «Red desconocida o sin publicación: x.» | Se intentó publicar en una red que el teléfono no maneja (hoy, TikTok). | Publicar en esa red desde el panel web, en [La Parrilla](la-parrilla.md). |
 | «Falta subir un archivo.» | Uno de los archivos subidos ya no está en el servidor. | Los elegidos en el teléfono se vuelven a subir solos: esperar y tocar de nuevo «Programar». Si el archivo venía de un borrador, quitarlo con su «✕» y volver a elegirlo. |
@@ -295,8 +295,8 @@ No se puede desde la app. Se hace en el panel web, en [La Parrilla](la-parrilla.
 - «Me dice que espere 24 horas» → se equivocó diez veces en un día con el código; ver [Entrar al panel](ingresar.md).
 - «¿Dónde quedó el Resumen?», «el Calendario», «Contenido» o «Cuentas» → desde el 2026-10-16 la app tiene las pestañas del panel. Lo programado y lo que salió está en «La Parrilla»; los números, en «Los Números»; la lista de publicaciones, en «Los Números» → «Ver todas las publicaciones →»; los seguidores de cada red, en «Los Números» → «⋯ Más: tus cuentas».
 - «Me pide desbloquear cada vez» → es el bloqueo del propio teléfono; se usa el PIN, patrón, huella o cara del teléfono.
-- «Quiero cerrar sesión» → el engranaje de arriba a la derecha → «Cerrar sesión», y confirmar.
-- «El engranaje tiene un punto» → una cuenta se está enfriando (ámbar) o se apagó (rojo). En «Ajustes» se ve cuál; se reconecta en el panel web, con «Abrir Los Fierros en el panel».
+- «Quiero cerrar sesión» → el botón de arriba a la derecha (el cuchillo y el trinche) → «Cerrar sesión», y confirmar.
+- «El botón de Ajustes (o "el engranaje") tiene un punto» → una cuenta se está enfriando (ámbar) o se apagó (rojo). En «Ajustes» se ve cuál; se reconecta en el panel web, con «Abrir Los Fierros en el panel».
 - «¿Qué versión tengo?» → «Ajustes», al pie.
 - «Perdí el teléfono» → quien administra el sitio puede revocar el acceso de todos los teléfonos a la vez; las conexiones con las redes no se tocan.
 - «No me aparece TikTok para publicar» → desde el teléfono no se publica en TikTok; se hace en el panel web, en [La Parrilla](la-parrilla.md).
@@ -350,7 +350,7 @@ Lo que describe sale de estos archivos:
 - `mobile/src/app/post/[id].tsx`
 - `mobile/src/components/ui.tsx`
 - `mobile/src/components/corte-programado.tsx`
-- `mobile/src/app/ajustes.tsx` y `mobile/src/components/engranaje.tsx` (Ajustes y el engranaje de la cabecera)
+- `mobile/src/app/ajustes.tsx` y `mobile/src/components/boton-ajustes.tsx` (Ajustes y su botón en la cabecera)
 - `src/app/api/mobile/fierros/route.ts` (lo que muestran)
 - `mobile/src/components/pieza.tsx` (el corte dibujado)
 - `mobile/src/components/tus-cuentas.tsx`

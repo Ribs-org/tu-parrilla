@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Settings } from 'lucide-react'
+import { IconoAjustes } from '@/components/icono-ajustes'
 import { fraseDelAviso, type avisoDeFierros } from '@/lib/parrilla'
 import { ajustes, pantallaDe, pestanas } from '@/lib/vocabulario'
 import { cn } from '@/lib/utils'
@@ -11,11 +11,11 @@ import { cn } from '@/lib/utils'
 const RUTA_FIERROS = '/admin/accounts'
 
 /**
- * Tres pestañas y un engranaje. Lo que no pide una acción todos los días —las cuentas, las
+ * Tres pestañas y el botón de Ajustes —un cuchillo y un trinche cruzados—. Lo que no pide una acción todos los días —las cuentas, las
  * páginas públicas, quién entra— va dentro de Ajustes: sigue a un clic, pero ya no ocupa la
  * barra. Los nombres y las rutas salen del vocabulario; acá no se escribe ninguno.
  *
- * El engranaje lleva un punto cuando algo adentro necesita al dueño: ámbar si un fierro se
+ * El botón de Ajustes lleva un punto cuando algo adentro necesita al dueño: ámbar si un fierro se
  * enfría, rojo si se apagó (`avisoDeFierros`). Adentro, la entrada de Los Fierros lo dice en
  * palabras. Sin nada que avisar, no hay punto.
  */
@@ -58,7 +58,7 @@ export function AdminNav({
         al navegar porque se remonta con la ruta (`key={pathname}`), no porque la página cambie:
         `AdminNav` vive en el layout, y el layout no se remonta solo al navegar entre rutas
         hijas — el `open` es estado del DOM que React no toca por su cuenta. Una ruta de
-        Ajustes activa marca el engranaje, no una pestaña — el usuario tiene que poder ver
+        Ajustes activa marca el botón de Ajustes, no una pestaña — el usuario tiene que poder ver
         dónde está aunque el menú esté cerrado.
       */}
       <details
@@ -82,12 +82,12 @@ export function AdminNav({
           )}
           aria-label={frase ? `Ajustes: en Los Fierros, ${frase}` : 'Ajustes'}
         >
-          <Settings className="h-4 w-4" aria-hidden />
+          <IconoAjustes className="h-4 w-4" />
           <span className="hidden sm:inline">Ajustes</span>
           {aviso ? (
             <span
               aria-hidden
-              className={cn('absolute right-1 top-1 h-2 w-2 rounded-full ring-2 ring-acero-950', colorAviso)}
+              className={cn('absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-acero-950', colorAviso)}
             />
           ) : null}
         </summary>
