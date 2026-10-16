@@ -1,6 +1,8 @@
 import Link from 'next/link'
+import { Corte } from '@/components/corte'
 import { horaConDia } from '@/lib/fuego'
 import type { CorteCargado } from '@/lib/social/publish/cortes'
+import { dibujoDe } from './dibujo'
 import { nombreDestino } from './etiqueta'
 import { Redes } from './redes'
 import { Reprogramar } from './reprogramar'
@@ -8,19 +10,22 @@ import { Reprogramar } from './reprogramar'
 /**
  * Lo que se quemó, arriba del calendario: es lo único de La Parrilla que pide una acción
  * sin que nadie la busque. Una fila por destino que falló, del más reciente al más viejo,
- * con su motivo y «Reprogramar». Sin nada quemado la sección no existe: un «no se quemó
- * nada» sería una fila que hay que leer todos los días para enterarse de que no pasa nada.
+ * con el corte en chico —cuál de sus marcas se quemó—, su motivo y «Reprogramar». Sin nada
+ * quemado la sección no existe: un «no se quemó nada» sería una fila que hay que leer todos
+ * los días para enterarse de que no pasa nada.
  */
 export function SeQuemo({
   filas,
   now,
   zone,
   volver,
+  frias,
 }: {
   filas: Array<{ corte: CorteCargado; destino: CorteCargado['targets'][number] }>
   now: Date
   zone: string
   volver: string
+  frias: ReadonlySet<string>
 }) {
   if (filas.length === 0) return null
   return (
@@ -29,6 +34,8 @@ export function SeQuemo({
       <ul className="divide-y divide-white/[0.06]">
         {filas.map(({ corte, destino }) => (
           <li key={destino.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 py-2">
+            {/* Todas las marcas del corte, para ver que lo demás salió: solo esta se quemó. */}
+            <Corte {...dibujoDe(corte.targets, corte.media, frias)} chico className="mt-1.5 w-12 shrink-0" />
             {/* Con el día delante si no es de hoy: esta lista no tiene ventana de fecha y
                 un fallo viejo se leería igual que uno de esta mañana. */}
             <span className="font-mono text-[0.8rem] text-fg-muted">{horaConDia(corte.post.scheduledAt, now, zone)}</span>

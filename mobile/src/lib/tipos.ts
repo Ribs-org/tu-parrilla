@@ -1,13 +1,19 @@
+import type { Formato, Sello } from './parrilla'
+
 export type PostProgramado = {
   id: string
   texto: string
   cuando: string
   // `id` es el del destino (`scheduled_post_targets.id`), no el de la cuenta: es la
   // clave de React en La Parrilla. Con dos cuentas de una red, `red` ya
-  // no es única dentro de un post — solo el destino lo es.
-  redes: { id: string; red: string; handle: string | null; estado: string; error?: string | null }[]
+  // no es única dentro de un post — solo el destino lo es. `sello` es la marca de ese
+  // destino en el corte; un servidor de antes no lo manda.
+  redes: { id: string; red: string; handle: string | null; estado: string; error?: string | null; sello?: Sello }[]
   portada?: string | null
   miniatura?: string | null
+  /** Qué corte se dibuja; un servidor de antes no lo manda y queda el bife. */
+  formato?: Formato
+  huesos?: number
 }
 
 /** Una cuenta del dueño, para elegir destino por cuenta y no por red (Tarea 7). */

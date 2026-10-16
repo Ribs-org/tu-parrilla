@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { calorDelDia, coccionDe, comoSalio, medianaDe } from './parrilla'
+import { bordeDe, calorDelDia, carneDe, coccionDe, comoSalio, medianaDe, selloPorEstado } from './parrilla'
 
 describe('calorDelDia', () => {
   it('sin cortes la parrilla está apagada', () => {
@@ -76,10 +76,10 @@ describe('coccionDe', () => {
     expect(coccionDe(['published', 'scheduled'])).toBe('cruda')
   })
 
-  it('un fallo gana sobre publicado y sobre en curso', () => {
-    expect(coccionDe(['published', 'failed'])).toBe('quemada')
-    expect(coccionDe(['publishing', 'failed'])).toBe('quemada')
-    expect(coccionDe(['failed', 'published', 'publishing'])).toBe('quemada')
+  it('un fallo entre otros destinos lo quema en parte; todos, entero', () => {
+    expect(coccionDe(['published', 'failed'])).toBe('parcial')
+    expect(coccionDe(['scheduled', 'failed'])).toBe('parcial')
+    expect(coccionDe(['failed', 'failed'])).toBe('quemada')
   })
 
   /*
@@ -89,5 +89,32 @@ describe('coccionDe', () => {
    */
   it('un estado desconocido cae en cruda sin romperse', () => {
     expect(coccionDe(['inventado'])).toBe('cruda')
+  })
+})
+
+describe('carneDe', () => {
+  it('quemado en parte se pinta con lo que no se quemó', () => {
+    expect(carneDe(['published', 'failed'])).toBe('punto')
+    expect(carneDe(['scheduled', 'failed'])).toBe('cruda')
+    expect(carneDe(['failed'])).toBe('quemada')
+  })
+})
+
+describe('selloPorEstado', () => {
+  it('sin el sello del servidor, el estado alcanza para lo básico', () => {
+    expect(selloPorEstado('scheduled')).toBe('pendiente')
+    expect(selloPorEstado('scheduled', 'Instagram no respondió.')).toBe('reintento')
+    expect(selloPorEstado('publishing')).toBe('saliendo')
+    expect(selloPorEstado('published')).toBe('servido')
+    expect(selloPorEstado('failed', 'x')).toBe('quemado')
+  })
+})
+
+describe('bordeDe', () => {
+  it('rojo cuando se quemó, ámbar cuando pide atención, acero el resto', () => {
+    expect(bordeDe('parcial', ['servido', 'quemado'])).toBe('mano')
+    expect(bordeDe('punto', ['servido', 'bandeja'])).toBe('atencion')
+    expect(bordeDe('cruda', ['frio'])).toBe('atencion')
+    expect(bordeDe('cruda', ['pendiente'])).toBe('cuenta')
   })
 })

@@ -39,25 +39,6 @@
   --color-brasa: #e8621f;
 
   --font-titulo: var(--font-oswald), 'Arial Narrow', sans-serif;
-
-  /*
-   * La carne. Cada cocción con su extremo claro y su extremo hondo, que son los dos
-   * topes del degradado del corte. Ordenadas de clara a oscura: ese orden es la
-   * información, y es lo que hace que la escala se siga leyendo con daltonismo.
-   *
-   * Los mismos valores viven en `src/lib/parrilla.ts` y un test compara los dos lados.
-   */
-  --color-carne-cruda: #a84c46;
-  --color-carne-cruda-honda: #8f453f;
-  --color-carne-sellada: #8c3f36;
-  --color-carne-sellada-honda: #73342c;
-  --color-carne-punto: #6e3128;
-  --color-carne-punto-honda: #4e231c;
-  --color-carne-quemada: #3a2a26;
-  --color-carne-quemada-honda: #241a17;
-
-  /* El veteado del corte y las marcas de red encima. */
-  --color-grasa: #e8d7b8;
 }
 
 @layer base {
@@ -262,6 +243,13 @@
     --color-fg: #f2ebe2;
     --color-fg-muted: #948a80;
     --color-fg-faint: #6b7076;
+    /*
+     * El rojo de «se quemó», el mismo del halo del corte (`QUEMO`, en `src/lib/parrilla.ts`).
+     * El de afuera (#f0614f) es casi el naranjo de la brasa: con deuteranopía, «saliendo» y
+     * «se quemó» quedaban como dos tonos del mismo color. Afuera queda el de siempre: la
+     * página pública de cada creador no cambia.
+     */
+    --color-negative: #f2557a;
 
     /*
      * `color` hay que declararlo aquí y no basta con redefinir la variable: `body` ya
@@ -345,146 +333,34 @@
   }
 
   /*
-   * Un corte. Las cuatro esquinas con radios distintos para que no se lea como una
-   * pastilla redondeada más.
-   */
-  .corte {
-    position: relative;
-    /*
-     * `isolation` crea el contexto de apilamiento del corte. Sin él, los z-index 1/2/3
-     * de aquí adentro se resuelven en el contexto raíz y compiten con el resto del
-     * panel, y el `multiply` de las marcas compone contra el grupo raíz en vez de
-     * contra el corte. Hoy no se nota porque `overflow: hidden` recorta el pintado y la
-     * cabecera pegajosa lleva `z-30`; se rompería con el primer menú o tooltip sin
-     * z-index explícito, que se vería por debajo del texto de los cortes.
-     */
-    isolation: isolate;
-    border-radius: 13px 5px 14px 6px;
-    border: 1px solid rgb(0 0 0 / 0.35);
-    box-shadow:
-      0 5px 12px rgb(0 0 0 / 0.5),
-      inset 0 1px 0 rgb(255 255 255 / 0.1);
-    overflow: hidden;
-  }
-
-  /*
-   * El veteado de la grasa: tres elipses difusas. Va debajo de las marcas del fierro.
+   * El corte dibujado (`src/components/corte.tsx`) trae sus colores escritos en el SVG,
+   * desde `src/lib/parrilla.ts`. Acá viven solo sus dos movimientos, cada uno con un solo
+   * significado:
    *
-   * Sale de `--color-grasa` con `color-mix` y no de un `rgb()` escrito a mano, porque
-   * el hex ya vive en dos lados (el token y `src/lib/parrilla.ts`) y una tercera copia
-   * acá dejaría el guardia contra la deriva mirando valores que nadie usa.
-   */
-  .corte::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background:
-      radial-gradient(
-        ellipse 22px 4px at 28% 34%,
-        color-mix(in srgb, var(--color-grasa) 30%, transparent),
-        transparent 70%
-      ),
-      radial-gradient(
-        ellipse 16px 3px at 66% 62%,
-        color-mix(in srgb, var(--color-grasa) 24%, transparent),
-        transparent 72%
-      ),
-      radial-gradient(
-        ellipse 12px 3px at 44% 76%,
-        color-mix(in srgb, var(--color-grasa) 18%, transparent),
-        transparent 74%
-      );
-    pointer-events: none;
-    z-index: 1;
-  }
-
-  /*
-   * Las marcas del fierro, quemadas sobre todo el corte incluida la miniatura. El 34%
-   * es el tope del spec: por encima de eso la foto deja de reconocerse, y reconocer el
-   * post de un vistazo es justamente para lo que está la miniatura.
-   */
-  .corte::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: repeating-linear-gradient(to bottom, rgb(0 0 0 / 0.34) 0 3px, transparent 3px 14px);
-    mix-blend-mode: multiply;
-    pointer-events: none;
-    z-index: 2;
-  }
-
-  /* El contenido por encima del veteado y de las marcas. */
-  .corte > * {
-    position: relative;
-    z-index: 3;
-  }
-
-  /*
-   * La miniatura lleva sus propias marcas.
+   * - el humo, en bucle, mientras algún destino está saliendo: lo único que se repite;
+   * - el latido del halo y de la brasa de lo quemado: tres veces al cargar, y después
+   *   queda encendido. Lo quemado es lo único que pide la mano del dueño.
    *
-   * `.corte::after` no le llega: la imagen es hija directa del corte, así que cae en la
-   * regla de arriba y se pinta en z-index 3, por encima de las marcas que están en 2.
-   * Sin este envoltorio la foto sale limpia sobre un rectángulo rayado — exactamente lo
-   * que el spec quería evitar, una foto pegada encima de un dibujo de carne en vez de
-   * algo puesto sobre la parrilla.
+   * Los dos tienen su versión quieta al final del archivo, y esa versión también dice el
+   * estado: dos volutas fijas, el halo prendido.
    */
-  .corte-media {
-    position: relative;
-    display: block;
+  .voluta {
+    opacity: 0;
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+    animation: voluta 2.4s ease-out infinite;
   }
 
-  .corte-media::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: 0.25rem;
-    background: repeating-linear-gradient(to bottom, rgb(0 0 0 / 0.34) 0 3px, transparent 3px 14px);
-    mix-blend-mode: multiply;
-    pointer-events: none;
+  .voluta-2 {
+    animation-delay: 0.8s;
   }
 
-  .corte-cruda {
-    background: linear-gradient(145deg, var(--color-carne-cruda), var(--color-carne-cruda-honda));
+  .voluta-3 {
+    animation-delay: 1.6s;
   }
 
-  /* La cruda casi no toca el fierro todavía: las marcas se insinúan. */
-  .corte-cruda::after,
-  .corte-cruda .corte-media::after {
-    opacity: 0.25;
-  }
-
-  .corte-sellada {
-    background: linear-gradient(
-      145deg,
-      var(--color-carne-sellada),
-      var(--color-carne-sellada-honda)
-    );
-  }
-
-  .corte-punto {
-    background: linear-gradient(145deg, var(--color-carne-punto), var(--color-carne-punto-honda));
-  }
-
-  .corte-quemada {
-    background: linear-gradient(
-      145deg,
-      var(--color-carne-quemada),
-      var(--color-carne-quemada-honda)
-    );
-  }
-
-  .corte-quemada::after,
-  .corte-quemada .corte-media::after {
-    opacity: 0.9;
-  }
-
-  /*
-   * El humo del corte sellado. Es la única animación de la entrega y es informativa:
-   * dice que algo está saliendo en este momento. El bloque de `prefers-reduced-motion`
-   * al final del archivo la apaga.
-   */
-  .humo {
-    animation: humo 2.8s ease-in-out infinite;
+  .late {
+    animation: late 1.6s ease-in-out 3 both;
   }
 
   /*
@@ -603,15 +479,27 @@
   }
 }
 
-@keyframes humo {
+@keyframes voluta {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.7, 0.6);
+  }
+  25% {
+    opacity: 0.75;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-16px) scale(1.5, 1.1);
+  }
+}
+
+@keyframes late {
   0%,
   100% {
-    opacity: 0.55;
-    transform: translateY(0);
+    opacity: 1;
   }
   50% {
-    opacity: 1;
-    transform: translateY(-2px);
+    opacity: 0.25;
   }
 }
 
@@ -637,5 +525,22 @@
   .destination {
     max-height: 1.5rem;
     opacity: 0.55;
+  }
+
+  /*
+   * El humo quieto: la regla de arriba lo dejaría en su último cuadro, que es invisible.
+   * Dos volutas fijas siguen diciendo que algo está saliendo.
+   */
+  .voluta {
+    animation: none !important;
+    opacity: 0.42;
+  }
+
+  .voluta-3 {
+    opacity: 0;
+  }
+
+  .late {
+    animation: none !important;
   }
 }

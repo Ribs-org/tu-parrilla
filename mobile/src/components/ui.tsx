@@ -19,7 +19,8 @@ export const COLORES = {
   brasa: '#e8621f',
   verde: '#74bf6a',
   gris: '#6b7076',
-  rojo: '#f0614f',
+  // El de «se quemó», como en el panel: el de antes (#f0614f) era casi el naranjo de la brasa.
+  rojo: '#f2557a',
   ambar: '#e5a52a',
 }
 

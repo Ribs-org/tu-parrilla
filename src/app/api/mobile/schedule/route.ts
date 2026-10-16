@@ -14,6 +14,8 @@ import { idDeBorrador, soloEnElPanel } from '@/lib/borrador'
 import { borrarBorrador, cargarBorrador, listarBorradores } from '@/lib/borradores'
 import { cuentasParaElTelefono, resumirParaElTelefono } from '@/lib/borradores-movil'
 import { isoInZone } from '@/lib/metrics-api'
+import { cuentasFrias, formatoDe, selloDe, type Formato, type Sello } from '@/lib/parrilla'
+import { getCuentas } from '@/lib/posts'
 import { requireMobileUser } from '@/lib/mobile-guardia'
 import {
   ARCHIVO_AJENO,
@@ -47,7 +49,15 @@ export type PostMovil = {
   cuando: string
   portada: string | null
   miniatura: string | null
-  redes: Array<{ id: string; red: string; handle: string | null; estado: string; error: string | null }>
+  /** Qué corte dibuja el teléfono: la misma silueta que el panel (`formatoDe`). */
+  formato: Formato
+  huesos: number
+  /**
+   * `sello` es la marca de ese destino en el corte (`selloDe`): la decide el servidor, que
+   * es el que sabe si la cuenta se enfrió y si TikTok recibió un borrador, para que el
+   * teléfono no repita la regla.
+   */
+  redes: Array<{ id: string; red: string; handle: string | null; estado: string; error: string | null; sello: Sello }>
 }
 
 /**
@@ -58,23 +68,36 @@ export type PostMovil = {
  * dos cuentas de la misma red, dos destinos del mismo post comparten `red` y solo el
  * `id` los distingue — es la clave que el Resumen y el Calendario del teléfono usan
  * para no repetir la de React entre ellos (repaso final de la rama).
+ *
+ * `mediaPorPost` son los archivos de cada post en su orden: la miniatura es la primera foto
+ * y el formato sale de todos. `frias`, las cuentas con el fierro frío (`cuentasFrias`).
  */
 export function agruparPostsMovil(
   filas: FilaDestinoMovil[],
-  miniaturaPorPost: Map<string, string>,
+  mediaPorPost: Map<string, Array<{ blobUrl: string; mediaType: string }>>,
   zone: string,
+  frias: ReadonlySet<string> = new Set(),
 ): PostMovil[] {
   const mapa = new Map<string, PostMovil>()
   for (const { post, target, handle } of filas) {
+    const media = mediaPorPost.get(post.id) ?? []
     const entrada = mapa.get(post.id) ?? {
       id: post.id,
       texto: post.caption,
       cuando: isoInZone(post.scheduledAt, zone),
       portada: post.coverUrl,
-      miniatura: miniaturaPorPost.get(post.id) ?? null,
+      miniatura: media.find((m) => m.mediaType === 'image')?.blobUrl ?? null,
+      ...formatoDe(media),
       redes: [],
     }
-    entrada.redes.push({ id: target.id, red: target.network, handle, estado: target.status, error: target.lastError })
+    entrada.redes.push({
+      id: target.id,
+      red: target.network,
+      handle,
+      estado: target.status,
+      error: target.lastError,
+      sello: selloDe(target, frias.has(target.accountId) ? 'frio' : 'al-rojo'),
+    })
     mapa.set(post.id, entrada)
   }
   return [...mapa.values()]
@@ -112,12 +135,9 @@ export async function GET(request: Request) {
         .where(inArray(scheduledPostMedia.postId, ids))
         .orderBy(asc(scheduledPostMedia.position))
     : []
-  const miniaturaPorPost = new Map<string, string>()
-  for (const media of medias) {
-    if (!miniaturaPorPost.has(media.postId) && media.mediaType === 'image') {
-      miniaturaPorPost.set(media.postId, media.blobUrl)
-    }
-  }
+  const mediaPorPost = new Map<string, Array<{ blobUrl: string; mediaType: string }>>()
+  for (const media of medias) mediaPorPost.set(media.postId, [...(mediaPorPost.get(media.postId) ?? []), media])
+  const frias = cuentasFrias(await getCuentas(usuario.id), now)
 
   // Los borradores, los mismos del panel: La Parrilla los lista y pone en su día los que
   // tienen fecha. Una app sin actualizar no lee el campo.
@@ -127,7 +147,7 @@ export async function GET(request: Request) {
   // el reloj del teléfono, que puede estar en otra zona.
   return NextResponse.json({
     hoy: localDay(now, usuario.zona),
-    posts: agruparPostsMovil(filas, miniaturaPorPost, usuario.zona),
+    posts: agruparPostsMovil(filas, mediaPorPost, usuario.zona, frias),
     borradores,
   })
 }

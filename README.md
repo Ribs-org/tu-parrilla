@@ -177,8 +177,15 @@ ninguna red conectada, una tarjeta que te manda a Los Fierros. Debajo, el calend
 semana —la lista queda a un clic—, con un «+» en cada día que abre el compositor con ese
 día puesto. El nombre de cada día abre la vista **Día** (`?vista=dia&fecha=…`): ese día con
 una columna por cuenta, cada una con su propio fuego y un «+» que abre el compositor con el
-día y la cuenta puestos; un post que sale a varias cuentas aparece en cada una, teñido por el
-estado de ese destino. Al pie, cuántos cortes salieron ayer; las miradas solo si la sincronización ya
+día y la cuenta puestos; un post que sale a varias cuentas aparece en cada una, cocido según
+el estado de ese destino. Cada post se dibuja como un **corte** (`src/components/corte.tsx`):
+la silueta dice el formato —entraña video, tira de asado carrusel con un hueso por archivo,
+bife foto, chori texto—, la carne cómo va, una marca por destino que se quema cuando ese
+destino sale, y un halo rojo con banderita si algo se quemó; humo mientras sale. El texto va
+al lado, en la chapa, nunca sobre la carne. La app del teléfono dibuja el mismo corte con
+vistas (`mobile/src/components/pieza.tsx`), con el formato y el sello de cada destino que le
+manda `GET /api/mobile/schedule`. El porqué, en
+`docs/superpowers/specs/2026-10-16-el-corte-que-se-lee-design.md`. Al pie, cuántos cortes salieron ayer; las miradas solo si la sincronización ya
 trajo sus métricas, porque un cero inventado diría «nadie miró» cuando lo cierto es
 «todavía no se sabe». Lo que no pide una acción está un clic más adentro: el tráfico, los
 links y qué contenido te trae gente viven en **Los Números**, y tus páginas públicas en
@@ -501,9 +508,10 @@ texto aparte; en el teléfono, sin poder tocarse y con «reconéctala» al lado 
 donde antes se leía solo la red —el calendario, la cola, el editor, y en el teléfono La
 Parrilla— ahora se leen la red **y** el handle: `Instagram · @vicenteclips`.
 Las dos cosas, porque casi ninguna de esas pantallas dibuja un icono de la red —el
-calendario, la cola y «Se quemó» son la excepción: el calendario con un logo por destino
-bajo la hora del corte, la cola con ese mismo logo junto al handle y el estado, «Se quemó»
-con él en cada fila, y en las tres el handle en el `title` o al lado del icono—, así que en el resto (el editor, y en el teléfono La Parrilla) el
+calendario, la vista «Día», la cola y «Se quemó» son la excepción: el calendario, el día y «Se
+quemó» con un chip por destino bajo el corte (el logo y un signo de cómo le fue), la cola con
+ese mismo logo junto al handle y el estado, y en todas el handle en el `title` o al lado del
+icono—, así que en el resto (el editor, y en el teléfono La Parrilla) el
 handle sigue siendo lo que distingue cada destino, y la red sola no distingue dos cuentas
 de la misma red en el mismo corte.
 
@@ -1093,6 +1101,7 @@ src/
       login/               redirige a /ingresar
       (dash)/              panel protegido
   components/
+    corte.tsx              el corte dibujado de La Parrilla: silueta, carne, marcas, halo y humo
     profile-view.tsx       la página pública (también alimenta la vista previa del editor)
     click-tracker.tsx      escucha delegada de clicks
     charts/                gráficos y paleta validada

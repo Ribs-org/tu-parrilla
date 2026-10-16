@@ -1,58 +1,72 @@
 /**
- * Las reglas de la parrilla: cuánto fuego tiene un día y qué tan cocido está un post.
+ * Las reglas de la parrilla: cuánto fuego tiene un día, qué tan cocido está un post, qué
+ * corte es y cómo le fue en cada destino.
  *
  * Están acá y no dentro de `calendar.tsx` porque son reglas, no estilos: las miran el
- * calendario y el compositor, y un umbral mágico escrito dentro
- * de un `className` es exactamente el tipo de decisión que después nadie encuentra.
+ * calendario, la vista «Día», «Se quemó» y la API del teléfono, y un umbral mágico escrito
+ * dentro de un `className` es exactamente el tipo de decisión que después nadie encuentra.
  *
- * Ver `docs/superpowers/specs/2026-09-18-parrilla-de-verdad-design.md`.
+ * Ver `docs/superpowers/specs/2026-09-18-parrilla-de-verdad-design.md` y
+ * `docs/superpowers/specs/2026-10-16-el-corte-que-se-lee-design.md`.
  */
 
 import type { TargetStatus } from '@/db/schema'
 
-export type Coccion = 'cruda' | 'sellada' | 'punto' | 'quemada'
+/**
+ * La cocción de un corte. «parcial» es «se quemó en una red»: algo salió o sigue en la
+ * parrilla y algo falló. Antes no existía, y un corte que salió en Instagram y falló en
+ * TikTok se pintaba entero quemado, como si no hubiera salido en ninguna.
+ */
+export type Coccion = 'cruda' | 'sellada' | 'punto' | 'parcial' | 'quemada'
+/** Las cuatro carnes que se pintan. Un corte «parcial» se pinta con la de lo que no se quemó. */
+export type Carne = 'cruda' | 'sellada' | 'punto' | 'quemada'
 export type Calor = 'apagada' | 'prendida' | 'llena'
 
 /**
- * Los dos extremos del degradado de cada cocción.
+ * Los tres topes del degradado de cada carne, de la esquina clara a la honda.
  *
- * Están ordenados de claro a oscuro y ese orden es la información: cruda es la más
- * clara y quemada la más oscura. Contar la cocción por luminosidad y no por tono es lo
- * que hace que la escala sobreviva a un daltonismo protán o deután, donde los cuatro
- * rojos se vuelven cuatro pardos pero siguen ordenados.
+ * Ordenadas de clara a oscura, y ese orden es la información: contar la cocción por
+ * luminosidad y no por tono es lo que hace que la escala sobreviva a un daltonismo, donde
+ * los rojos se vuelven pardos pero siguen ordenados. La escala de antes iba de un café a
+ * otro (1,32:1 entre vecinas); esta abre a 6,75:1 entre la cruda y la quemada, y puede
+ * hacerlo porque ya ningún texto va encima de la carne: va debajo, en la chapa.
  *
- * `globals.css` repite estos mismos hexes como tokens porque las clases los necesitan.
- * El test de este módulo lee el CSS y comprueba que los dos lados no se separaron.
+ * El dibujo (`src/components/corte.tsx`) lee estos hexes directo; el teléfono los repite en
+ * `mobile/src/lib/parrilla.ts` y el test de este módulo comprueba que no se separaron.
  */
-export const COCCION: Record<Coccion, { claro: string; oscuro: string }> = {
-  cruda: { claro: '#a84c46', oscuro: '#8f453f' },
-  sellada: { claro: '#8c3f36', oscuro: '#73342c' },
-  punto: { claro: '#6e3128', oscuro: '#4e231c' },
-  quemada: { claro: '#3a2a26', oscuro: '#241a17' },
+export const CARNE: Record<Carne, { claro: string; medio: string; hondo: string }> = {
+  cruda: { claro: '#f0a08f', medio: '#e8907f', hondo: '#c45a52' },
+  sellada: { claro: '#d47d50', medio: '#c46a40', hondo: '#9a4a2e' },
+  punto: { claro: '#b47640', medio: '#8f5326', hondo: '#6a3a1a' },
+  quemada: { claro: '#3a2722', medio: '#2b1d1a', hondo: '#150e0c' },
 }
 
-/**
- * El veteado de la grasa del corte. `globals.css` lo consume como `--color-grasa` y le
- * aplica la opacidad ahí; acá vive el color pleno, que es lo que se puede comprobar.
- */
+/** El veteado de la grasa y los huesos de la tira. */
 export const GRASA = '#e8d7b8'
+
+/**
+ * El rojo de «se quemó»: el halo y la banderita de un corte quemado. Tira a frambuesa a
+ * propósito: el rojo de los mensajes (#f0614f) es casi el naranjo de la brasa, y con
+ * deuteranopía «saliendo» y «se quemó» quedan como dos tonos del mismo color.
+ */
+export const QUEMO = '#f2557a'
 
 /**
  * La cocción en palabras.
  *
- * El color es la primera señal y esto la segunda, que es la que no depende de ver: el
- * calendario la pone en un `sr-only` bajo cada corte. Vive acá y no en `calendar.tsx`
- * porque es una regla del producto, como los colores de la cocción, y no un estilo.
+ * El color es la primera señal y esto la segunda, que es la que no depende de ver. Vive acá
+ * y no en `calendar.tsx` porque es una regla del producto, como los colores, y no un estilo.
  */
 export const NOMBRE_COCCION: Record<Coccion, string> = {
   cruda: 'Programada',
   sellada: 'Saliendo ahora',
   punto: 'Publicada',
+  parcial: 'Falló en parte',
   quemada: 'Falló',
 }
 
-/** De claro a oscuro. El test de luminosidad recorre este orden. */
-export const ORDEN_COCCION: readonly Coccion[] = ['cruda', 'sellada', 'punto', 'quemada']
+/** De clara a oscura. El test de luminosidad recorre este orden. */
+export const ORDEN_CARNE: readonly Carne[] = ['cruda', 'sellada', 'punto', 'quemada']
 
 /**
  * Cuánto fuego tiene un día según cuántos cortes lleve.
@@ -69,9 +83,9 @@ export function calorDelDia(cortes: number): Calor {
 /**
  * La cocción de un post según el estado de sus destinos.
  *
- * Misma precedencia que tenía `calendar.tsx` antes del rediseño, solo que ahora vestida:
- * un fallo en cualquier destino gana sobre todo lo demás porque es lo que necesita el
- * ojo; todos publicados es «a punto»; algo en curso es «sellada»; el resto queda cruda.
+ * Un fallo gana sobre todo lo demás porque es lo que necesita el ojo: si fallaron todos es
+ * «quemada», y si falló alguno, «parcial» —se quemó en una red—. Sin fallos: todos
+ * publicados es «a punto»; algo en curso es «sellada»; el resto queda cruda.
  *
  * Un post sin destinos queda crudo y no «a punto»: `every` sobre una lista vacía devuelve
  * `true`, así que sin el largo explícito un post sin destinos se vería como publicado.
@@ -81,10 +95,78 @@ export function calorDelDia(cortes: number): Calor {
  * caería en `'cruda'` sin que nada se queje.
  */
 export function coccionDe(estados: readonly TargetStatus[]): Coccion {
-  if (estados.some((estado) => estado === 'failed')) return 'quemada'
+  const fallidos = estados.filter((estado) => estado === 'failed').length
+  if (fallidos > 0) return fallidos === estados.length ? 'quemada' : 'parcial'
   if (estados.length > 0 && estados.every((estado) => estado === 'published')) return 'punto'
   if (estados.some((estado) => estado === 'publishing')) return 'sellada'
   return 'cruda'
+}
+
+/**
+ * Con qué carne se pinta un post: la de su cocción y, si se quemó en una red, la de lo que
+ * no se quemó. Un corte que salió en Instagram y falló en TikTok se ve a punto con el halo
+ * rojo; uno que falló en TikTok y espera la hora de Instagram, crudo con el halo.
+ */
+export function carneDe(estados: readonly TargetStatus[]): Carne {
+  const coccion = coccionDe(estados)
+  if (coccion !== 'parcial') return coccion
+  // Sin los fallidos no queda ninguno que falle, así que no vuelve «parcial» ni «quemada».
+  return coccionDe(estados.filter((estado) => estado !== 'failed')) as Carne
+}
+
+/**
+ * Qué corte es un post, por sus archivos: la silueta dice el formato antes de leer nada.
+ * Un video es una entraña; dos archivos o más, una tira de asado con un hueso por archivo;
+ * una foto, un bife; sin archivos —un tuit, un post de Threads—, un chori.
+ */
+export type Formato = 'entrana' | 'tira' | 'bife' | 'chori'
+
+/** Los huesos que se dibujan, como mucho: a 120 de ancho, once ya no se cuentan. */
+export const MAX_HUESOS = 10
+
+/** El formato en palabras: lo que lee el lector de pantalla en vez de la silueta. */
+export const NOMBRE_FORMATO: Record<Formato, string> = {
+  entrana: 'Video',
+  tira: 'Carrusel',
+  bife: 'Foto',
+  chori: 'Texto',
+}
+
+export function formatoDe(media: readonly { mediaType: string }[]): { formato: Formato; huesos: number } {
+  if (media.length === 0) return { formato: 'chori', huesos: 0 }
+  if (media.length > 1) return { formato: 'tira', huesos: Math.min(media.length, MAX_HUESOS) }
+  return { formato: media[0]!.mediaType === 'video' ? 'entrana' : 'bife', huesos: 0 }
+}
+
+/**
+ * Cómo le fue a un destino, para su marca en el corte y su chip debajo. Una marca por
+ * destino, que se quema cuando ese destino confirma: es lo que deja leer «salió en dos de
+ * tres» sin abrir nada.
+ *
+ * - `bandeja`: TikTok recibió el borrador y falta que el dueño lo termine en su app. Salió,
+ *   pero falta su mano: queda a medio quemar y en ámbar, sin que nada haya fallado.
+ * - `reintento`: falló y espera otro intento (vuelve a `scheduled` con su `lastError`; ver
+ *   `etiquetaDestino` en `schedule/etiqueta.ts`).
+ * - `frio`: programado en una cuenta con el fierro frío —desconectada, vencida o con la
+ *   sincronización rota—: así como está, no va a salir.
+ */
+export type Sello = 'pendiente' | 'saliendo' | 'servido' | 'bandeja' | 'reintento' | 'quemado' | 'frio'
+
+export function selloDe(
+  destino: { network: string; status: string; lastError?: string | null; opciones: unknown },
+  fierro: Fierro = 'al-rojo',
+): Sello {
+  if (destino.status === 'failed') return 'quemado'
+  if (destino.status === 'published') {
+    const borrador =
+      typeof destino.opciones === 'object' &&
+      destino.opciones !== null &&
+      (destino.opciones as { modo?: unknown }).modo === 'borrador'
+    return destino.network === 'tiktok' && borrador ? 'bandeja' : 'servido'
+  }
+  if (destino.status === 'publishing') return 'saliendo'
+  if (destino.lastError) return 'reintento'
+  return fierro === 'frio' ? 'frio' : 'pendiente'
 }
 
 /** Cómo salió un corte comparado con los demás del período. */
@@ -172,4 +254,23 @@ export function estadoDelFierro(
   if (faltan <= 0) return 'frio'
   if (faltan <= DIAS_AVISO_FIERRO * 86_400_000) return 'enfriandose'
   return 'al-rojo'
+}
+
+/**
+ * Las cuentas con el fierro frío —desconectadas, vencidas o con la sincronización rota—: lo
+ * que se programó ahí no va a salir así como está, y su marca lo dice antes de que falle.
+ */
+export function cuentasFrias(
+  cuentas: ReadonlyArray<{ id: string; network: string; connected: boolean; expiresAt: string | null; lastSyncError: string | null }>,
+  ahora: Date,
+): Set<string> {
+  return new Set(
+    cuentas
+      .filter(
+        (c) =>
+          estadoDelFierro({ connected: c.connected, expiraEn: c.expiresAt, ultimoError: c.lastSyncError, red: c.network }, ahora) ===
+          'frio',
+      )
+      .map((c) => c.id),
+  )
 }

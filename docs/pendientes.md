@@ -191,6 +191,22 @@ Nada de esto bloquea un trámite hoy; conviene ordenarlo antes de abrir a tercer
   instalación vieja las pida, salen `/api/mobile/overview` y `/api/mobile/schedule/check`,
   que la app nueva ya no usa.
 
+- **La propuesta de diseño 2.1: lo que falta** (2026-10-16). De la propuesta externa del 16
+  de octubre (no está en el repo) entró el corte dibujado
+  (`docs/superpowers/specs/2026-10-16-el-corte-que-se-lee-design.md`). Quedan, de lo más
+  barato a lo más caro: el texto secundario y tenue del panel y de la app a 4,5:1
+  (`--color-fg-muted`/`--color-fg-faint` en `.acerado`, `COLORES` en `mobile/src/components/ui.tsx`);
+  el engranaje con un punto ámbar o rojo cuando un fierro se enfría o se apaga, con «1 se
+  enfría» en la entrada de Los Fierros; los mensajes que todavía dicen «Cuentas» por Los
+  Fierros; una pantalla de Ajustes en la app con tus cuentas y «Cerrar sesión», que hoy no
+  existe; «Mientras no mirabas» —qué cambió desde la última visita, con lo que pasa una sola
+  vez: el sellado de una marca y el chisporroteo— (necesita guardar la última visita por
+  usuario); la semana como días × franjas, con las zonas calientes de cada creador (necesita
+  decidir las franjas y qué mide una zona); el cierre del domingo («Aplauso para el
+  asador»); las familias de cuentas, con su subíndice (TikTok₁, TikTok₂) y el corte
+  trinchado (necesita tabla nueva y decidir si una familia admite dos cuentas de la misma
+  red); un archivo de tokens común para el panel y la app; y, con un build nativo, el corte
+  en SVG y la vibración en la app.
 - **Cupos y reparto de los crons por usuario** (`docs/levantamiento-terceros.md` §5.4). Hace
   falta cuando la beta pase de unos diez usuarios.
 - **El privado de Meta (DM con el PDF)** necesita `instagram_manage_messages` y
