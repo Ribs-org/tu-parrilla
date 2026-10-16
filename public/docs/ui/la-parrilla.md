@@ -956,6 +956,7 @@ Lo que describe esta página sale de:
   - `src/lib/social/publish/csv.ts`
   - `src/lib/social/publish/edit.ts`
   - `src/lib/social/publish/borrar.ts`
+  - `src/lib/social/publish/reprogramar.ts` (la regla de «Reprogramar», compartida con la app del teléfono)
   - `src/lib/social/publish/tiktok-creador.ts`
   - `src/lib/social/publish/publisher.ts`
   - `src/lib/social/publish/run.ts`

@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, View } from 'react-native'
-import { DateTimePickerAndroid } from '@react-native-community/datetimepicker'
 import * as ImagePicker from 'expo-image-picker'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { SelectorFechaIOS } from '../../components/selector-fecha'
+import { useSelectorFecha } from '../../components/selector-fecha'
 import { Boton, COLORES, Chip, ErrorConReintento, Miniatura } from '../../components/ui'
 import { SesionCaducada, apiGet } from '../../lib/api'
 import { anotarCambio } from '../../lib/cambios'
@@ -86,8 +85,8 @@ export default function Publicar() {
     setMarcaAplicada(n)
     setFecha(fechaParaElDia(dia, new Date()))
   }
-  // Solo en iOS: la hoja con el selector de día y hora está abierta.
-  const [eligiendoFecha, setEligiendoFecha] = useState(false)
+  // Los diálogos de Android o la hoja de iOS: el mismo `abrir` para las dos.
+  const { abrir: abrirSelector, selector } = useSelectorFecha()
   const [envio, despachar] = useReducer(reducirEnvio, ENVIO_INICIAL)
   const [aviso, setAviso] = useState<string | null>(null)
   // Lo que ya subió en un intento anterior y el AbortController del envío en curso.
@@ -183,31 +182,7 @@ export default function Publicar() {
   }
 
   function elegirFecha() {
-    // iOS sí tiene un selector de fecha y hora en uno, y no tiene los diálogos de abajo.
-    if (Platform.OS === 'ios') {
-      setEligiendoFecha(true)
-      return
-    }
-    // Android no tiene un selector de fecha y hora en uno: primero el día, luego la hora.
-    // onValueChange (no onChange, que la versión instalada marca deprecado) solo se
-    // dispara cuando el usuario confirma: cancelar el diálogo no llama a nada.
-    DateTimePickerAndroid.open({
-      value: fecha,
-      mode: 'date',
-      minimumDate: new Date(),
-      onValueChange: (_evento, dia) => {
-        if (!dia) return
-        DateTimePickerAndroid.open({
-          value: dia,
-          mode: 'time',
-          is24Hour: true,
-          onValueChange: (_evento2, conHora) => {
-            if (!conHora) return
-            setFecha(conHora)
-          },
-        })
-      },
-    })
+    abrirSelector(fecha, setFecha)
   }
 
   async function enviar(ahora: boolean, retomar: Retomar) {
@@ -459,17 +434,7 @@ export default function Publicar() {
           )}
         </View>
       </ScrollView>
-      {eligiendoFecha ? (
-        <SelectorFechaIOS
-          valor={fecha}
-          minimo={new Date()}
-          onListo={(elegida) => {
-            setFecha(elegida)
-            setEligiendoFecha(false)
-          }}
-          onCancelar={() => setEligiendoFecha(false)}
-        />
-      ) : null}
+      {selector}
     </KeyboardAvoidingView>
   )
 }

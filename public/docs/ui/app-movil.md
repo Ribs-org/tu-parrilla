@@ -1,6 +1,6 @@
 # La app del teléfono
 
-Una app para Android que muestra de un vistazo lo programado y cómo van las redes de quien entra, y le deja publicar desde la galería del teléfono. Tiene las mismas tres pestañas que el panel web —La Parrilla, Publicar en el medio y Los Números—, pero hace mucho menos: mira lo programado y los números, y programa o publica fotos y videos en Instagram, Facebook y YouTube. Todo lo demás —conectar redes, corregir, reprogramar o borrar lo programado, TikTok, comentarios, la página pública— se hace en el panel web.
+Una app para Android que muestra de un vistazo lo programado y cómo van las redes de quien entra, y le deja publicar desde la galería del teléfono. Tiene las mismas tres pestañas que el panel web —La Parrilla, Publicar en el medio y Los Números—, pero hace mucho menos: mira lo programado y los números, y programa o publica fotos y videos en Instagram, Facebook y YouTube. También reprograma lo que se quemó. Todo lo demás —conectar redes, corregir o borrar lo programado, TikTok, comentarios, la página pública— se hace en el panel web.
 
 ## Cómo se llega
 
@@ -35,7 +35,7 @@ En «La Parrilla», «Los Números» y «Tus publicaciones», la app muestra al 
 Lo programado, de hoy en adelante, y lo que se quemó. De arriba abajo:
 
 - La línea «lo que viene y cómo salió lo que ya se fue».
-- **«Se quemó»**, en rojo, solo si algo falló en los últimos siete días. Una tarjeta por cada red donde un corte falló (un corte que falló en dos redes da dos tarjetas), de la más reciente a la más vieja: arriba la hora —solo «19:00» si era de hoy, o «14 oct · 19:00»— y la cuenta, «Instagram · nombre_de_cuenta»; el texto del post (o «(sin texto)»); el motivo en rojo, cuando lo hay, y «Se reprograma en el panel web, en La Parrilla.». Las tarjetas no se pueden tocar.
+- **«Se quemó»**, en rojo, solo si algo falló en los últimos siete días. Una tarjeta por cada red donde un corte falló (un corte que falló en dos redes da dos tarjetas), de la más reciente a la más vieja: arriba la hora —solo «19:00» si era de hoy, o «14 oct · 19:00»— y la cuenta, «Instagram · nombre_de_cuenta»; el texto del post (o «(sin texto)»); el motivo en rojo, cuando lo hay, y el botón «Reprogramar» (mientras trabaja, «Reprogramando…», y los demás botones esperan).
 - **Los días**, uno debajo del otro: siempre hoy y los seis siguientes, aunque estén vacíos, y después solo los que tienen algo, hasta treinta días adelante. Cada día lleva su rótulo —«Hoy · jue 15», «Mañana · vie 16», «sáb 17»—, a la derecha cuánto fuego tiene —«Apagada» (nada), «Prendida» (uno o dos posts) o «Parrilla llena» (tres o más)— y un botón redondo con una cruz, que abre «Publicar» con ese día puesto (un lector de pantalla lo lee «Programar el jue 15»). Un día vacío dice «No hay nada puesto. Préndela.», en naranjo, y hace lo mismo que la cruz.
 - Cada post es una tarjeta color carne, de la más clara (programada) a la más oscura (falló): la hora (con «  ·  SALIENDO» al lado mientras se publica), la miniatura si hay, el texto (o «(sin texto)»), una línea por cuenta «Red · nombre_de_cuenta» y, si esa cuenta falló, « — » seguido del error. Al final, el estado en palabras: «Programada», «Saliendo ahora», «Publicada» o «Falló». Las tarjetas no se pueden tocar ni editar.
 - Al pie: «Ayer no salió nada.», «Ayer: 1 corte servido» o «Ayer: N cortes servidos». Cuenta cortes y no redes: uno que salió en tres redes es un corte.
@@ -98,7 +98,14 @@ Si el código no llega, revisa el spam y que el correo esté bien escrito; «Usa
 ### Para ver qué viene y qué se quemó
 
 1. Pestaña «La Parrilla». Lo que falló está arriba, en «Se quemó», con el motivo; lo que viene, día por día debajo.
-2. Para reprogramar o corregir lo quemado: en el panel web, en [La Parrilla](la-parrilla.md), botón «Reprogramar».
+
+### Para reprogramar lo que se quemó
+
+1. En «La Parrilla», en la tarjeta de «Se quemó», toca «Reprogramar».
+2. Elige el día y después la hora (en Android son dos ventanas, una detrás de la otra). De partida trae la próxima hora en punto.
+3. El post entero pasa a esa hora y el destino que falló vuelve a la cola, sin intentos gastados. La tarjeta sale de «Se quemó» y el post aparece en su día.
+
+Reprogramar no arregla la causa: si falló porque la cuenta se desconectó o el archivo no sirve, va a volver a fallar. Eso se corrige en el panel web —reconectar en [Los Fierros](los-fierros.md), o el post en [La Parrilla](la-parrilla.md)—.
 
 ### Para ver cómo va una semana o un mes
 
@@ -156,7 +163,7 @@ Ojo: si el corte fue durante la subida o al guardar, «Reintentar» manda el tex
 
 1. Mientras sube un archivo, toca «Cancelar». El formulario vuelve a quedar listo, con todo lo que tenía.
 
-### Para corregir, reprogramar o borrar algo programado desde el teléfono
+### Para corregir o borrar algo programado desde el teléfono
 
 No se puede desde la app. Se hace en el panel web, en [La Parrilla](la-parrilla.md).
 
@@ -174,7 +181,9 @@ No se puede desde la app. Se hace en el panel web, en [La Parrilla](la-parrilla.
 | «No se pudo conectar. Revisa tu señal.» | Sin conexión al pedir el código, al entrar, al comprobar el post o al guardarlo. | Revisar la señal; en «Publicar», tocar «Reintentar». |
 | «No se pudo actualizar.» | Falló la descarga de datos nuevos; lo que se ve puede ser viejo. | Arrastrar hacia abajo o tocar «Reintentar» cuando haya señal. |
 | «No se pudo cargar.» | No hay datos guardados y no se pudieron descargar. | «Reintentar». |
-| «Se reprograma en el panel web, en La Parrilla.» (en «Se quemó») | Ese destino falló y la app no lo reprograma. | En el panel web, [La Parrilla](la-parrilla.md), botón «Reprogramar». |
+| «No se pudo reprogramar» con «La hora debe estar en el futuro.» | La hora elegida ya pasó. | Volver a tocar «Reprogramar» y elegir una hora futura. |
+| «No se pudo reprogramar» con «Ese destino ya no existe.» | El post se borró (por ejemplo, desde el panel web). | Arrastrar hacia abajo para actualizar. |
+| «No se pudo reprogramar» con «No se pudo conectar. Revisa tu señal.» | Sin conexión. | Volver a intentarlo cuando haya señal. |
 | «No hay nada puesto. Préndela.» | Ese día no tiene nada programado. | Tocarlo (o la cruz) para programar algo ese día. |
 | «Ayer no salió nada.» / «Ayer: N cortes servidos» | Cuántos posts de ayer salieron en al menos una red. | Nada. |
 | «Ninguna publicación ganó views en este período. Las métricas llegan con la sincronización diaria, así que lo publicado hoy aparece mañana.» (en «Lo que más creció») | Ninguna publicación ganó views conocidas en el período. | Elegir un período más largo, o esperar la sincronización del día siguiente. |
@@ -227,7 +236,7 @@ No se puede desde la app. Se hace en el panel web, en [La Parrilla](la-parrilla.
 - «No me sale el botón de trial reel» → hace falta una cuenta de Instagram marcada y exactamente un video, sin fotos.
 - «Programé algo mal desde el teléfono» → se corrige o se borra en el panel web, en [La Parrilla](la-parrilla.md).
 - «No veo el post que acabo de programar» → abre «La Parrilla» (la app salta sola ahí al terminar); si no aparece, arrastra la pantalla hacia abajo para actualizar. Si es para más de treinta días adelante, la app no lo muestra.
-- «Un post dice Falló» → está arriba, en «Se quemó», con el motivo; se reprograma en el panel web, en [La Parrilla](la-parrilla.md).
+- «Un post dice Falló» → está arriba, en «Se quemó», con el motivo y el botón «Reprogramar». Si falló por la conexión o por el archivo, primero se arregla eso en el panel web.
 - «Los números no cambian» → mirar «Actualizado hace…» arriba y arrastrar hacia abajo para actualizar.
 - «Quiero ver los comentarios» → no están en la app; se ven en el panel web, en [La Mesa](la-mesa.md).
 - «Quiero cambiar mi página de links desde el teléfono» → no se puede en la app; se hace en el panel web, en [La Vitrina](la-vitrina.md), que también funciona en el navegador del teléfono.
@@ -239,7 +248,7 @@ Comparada con el panel web, la app no:
 
 - conecta, desconecta ni reconecta redes ([Los Fierros](los-fierros.md));
 - publica en TikTok;
-- edita, mueve, reprograma ni borra lo programado ([La Parrilla](la-parrilla.md));
+- edita, mueve ni borra lo programado ([La Parrilla](la-parrilla.md)); solo reprograma lo quemado;
 - guarda borradores;
 - pone portada a un video, atributos a un post ni reglas de respuesta a comentarios con palabra clave;
 - carga posts por lote;
@@ -268,7 +277,7 @@ Lo que describe sale de estos archivos:
 - `mobile/src/components/ui.tsx`
 - `mobile/src/components/corte-programado.tsx`
 - `mobile/src/components/tus-cuentas.tsx`
-- `mobile/src/components/selector-fecha.tsx` (solo iPhone, que todavía no se distribuye: la hoja «Cuándo sale» con «Cancelar» y «Listo»)
+- `mobile/src/components/selector-fecha.tsx` (elegir día y hora: los dos diálogos de Android, o en iPhone —que todavía no se distribuye— la hoja «Cuándo sale» con «Cancelar» y «Listo»)
 - `mobile/src/components/parrilla.tsx`
 - `mobile/src/components/iconos.tsx`
 - `mobile/src/lib/agenda.ts` (qué días se ven, «Se quemó», el pie de ayer)
