@@ -257,7 +257,7 @@ No se puede desde la app. Se hace en el panel web, en [La Parrilla](la-parrilla.
 | «La hora debe estar en el futuro.» | La hora elegida ya pasó. | Tocar «Cuándo: …» y elegir una hora futura. |
 | «La fecha no se entendió.» | La fecha no llegó bien al servidor. | Volver a elegirla. |
 | «Un trial reel es un solo video, sin fotos.» | El trial reel quedó con más de un archivo o con fotos. | Dejar un solo video. |
-| «La cuenta x no está conectada. Vuelve a conectarla en Cuentas.» (con el nombre de la cuenta en lugar de x) | La cuenta elegida perdió la conexión. «Cuentas» aquí es [Los Fierros](los-fierros.md) del panel web: la app no tiene una pestaña con ese nombre. | Reconectarla en el panel web. |
+| «La cuenta x no está conectada. Vuelve a conectarla en Los Fierros.» (con el nombre de la cuenta en lugar de x) | La cuenta elegida perdió la conexión. Los Fierros está en el panel web, en el engranaje «Ajustes»: la app no tiene esa pantalla. | Reconectarla en el panel web. |
 | «Una de las cuentas elegidas no es tuya.» | Una cuenta ya no pertenece a quien publica (por ejemplo, se borró). | Cerrar la app del todo y volver a abrirla: la lista de cuentas de «Publicar» se carga al abrir. |
 | «Red desconocida o sin publicación: x.» | Se intentó publicar en una red que el teléfono no maneja (hoy, TikTok). | Publicar en esa red desde el panel web, en [La Parrilla](la-parrilla.md). |
 | «Falta subir un archivo.» | Uno de los archivos subidos ya no está en el servidor. | Los elegidos en el teléfono se vuelven a subir solos: esperar y tocar de nuevo «Programar». Si el archivo venía de un borrador, quitarlo con su «✕» y volver a elegirlo. |

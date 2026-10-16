@@ -3,18 +3,34 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Settings } from 'lucide-react'
+import { fraseDelAviso, type avisoDeFierros } from '@/lib/parrilla'
 import { ajustes, pantallaDe, pestanas } from '@/lib/vocabulario'
 import { cn } from '@/lib/utils'
+
+/** Dónde vive el aviso de los fierros dentro del menú: la entrada de Los Fierros. */
+const RUTA_FIERROS = '/admin/accounts'
 
 /**
  * Tres pestañas y un engranaje. Lo que no pide una acción todos los días —las cuentas, las
  * páginas públicas, quién entra— va dentro de Ajustes: sigue a un clic, pero ya no ocupa la
  * barra. Los nombres y las rutas salen del vocabulario; acá no se escribe ninguno.
+ *
+ * El engranaje lleva un punto cuando algo adentro necesita al dueño: ámbar si un fierro se
+ * enfría, rojo si se apagó (`avisoDeFierros`). Adentro, la entrada de Los Fierros lo dice en
+ * palabras. Sin nada que avisar, no hay punto.
  */
-export function AdminNav({ esAdmin }: { esAdmin?: boolean }) {
+export function AdminNav({
+  esAdmin,
+  aviso = null,
+}: {
+  esAdmin?: boolean
+  aviso?: ReturnType<typeof avisoDeFierros>
+}) {
   const pathname = usePathname()
   const actual = pantallaDe(pathname)
   const enAjustes = actual?.grupo === 'ajustes'
+  const frase = aviso ? fraseDelAviso(aviso) : null
+  const colorAviso = aviso?.nivel === 'apagado' ? 'bg-negative' : 'bg-caution'
 
   return (
     <nav className="flex min-w-0 flex-1 items-center gap-1" aria-label="Secciones del panel">
@@ -61,13 +77,19 @@ export function AdminNav({ esAdmin }: { esAdmin?: boolean }) {
       >
         <summary
           className={cn(
-            'flex cursor-pointer list-none items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm transition-colors [&::-webkit-details-marker]:hidden',
+            'relative flex cursor-pointer list-none items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm transition-colors [&::-webkit-details-marker]:hidden',
             enAjustes ? 'bg-brasa text-acero-950' : 'text-fg-muted hover:text-fg',
           )}
-          aria-label="Ajustes"
+          aria-label={frase ? `Ajustes: en Los Fierros, ${frase}` : 'Ajustes'}
         >
           <Settings className="h-4 w-4" aria-hidden />
           <span className="hidden sm:inline">Ajustes</span>
+          {aviso ? (
+            <span
+              aria-hidden
+              className={cn('absolute right-1 top-1 h-2 w-2 rounded-full ring-2 ring-acero-950', colorAviso)}
+            />
+          ) : null}
         </summary>
         <ul className="chapa absolute right-0 z-40 mt-2 w-64 rounded-xl p-2">
           {ajustes(Boolean(esAdmin)).map((p) => {
@@ -82,7 +104,23 @@ export function AdminNav({ esAdmin }: { esAdmin?: boolean }) {
                     active ? 'bg-brasa text-acero-950' : 'hover:bg-white/[0.06]',
                   )}
                 >
-                  <span className="block text-sm">{p.nombre}</span>
+                  <span className="flex items-center justify-between gap-2">
+                    <span className="block text-sm">{p.nombre}</span>
+                    {frase && p.ruta === RUTA_FIERROS ? (
+                      <span
+                        className={cn(
+                          'shrink-0 rounded-full border px-1.5 py-px font-mono text-[0.62rem]',
+                          active
+                            ? 'border-acero-950/40 text-acero-950'
+                            : aviso?.nivel === 'apagado'
+                              ? 'border-negative/60 text-negative'
+                              : 'border-caution/60 text-caution',
+                        )}
+                      >
+                        {frase}
+                      </span>
+                    ) : null}
+                  </span>
                   <span className={cn('block text-[0.72rem]', active ? 'text-acero-950/80' : 'text-fg-faint')}>
                     {p.subtitulo}
                   </span>

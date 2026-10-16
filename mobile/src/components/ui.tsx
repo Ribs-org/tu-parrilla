@@ -14,11 +14,12 @@ export const COLORES = {
   fondo: '#16181a',
   tarjeta: '#1d2124',
   texto: '#f2ebe2',
-  suave: '#948a80',
-  tenue: '#6b7076',
+  // El secundario y el tenue del panel, a 5,85:1 y 5,03:1 sobre la tarjeta. Antes el tenue
+  // daba 3,25:1, y se repetía con otro nombre (`gris`). `src/lib/paleta.test.ts` compara.
+  suave: '#a39a8f',
+  tenue: '#8a9096',
   brasa: '#e8621f',
   verde: '#74bf6a',
-  gris: '#6b7076',
   // El de «se quemó», como en el panel: el de antes (#f0614f) era casi el naranjo de la brasa.
   rojo: '#f2557a',
   ambar: '#e5a52a',
@@ -159,7 +160,7 @@ export function Vacio({ texto }: { texto: string }) {
 
 const COLOR_ESTADO: Record<string, string> = {
   published: COLORES.verde,
-  scheduled: COLORES.gris,
+  scheduled: COLORES.tenue,
   failed: COLORES.rojo,
   publishing: COLORES.ambar,
 }
@@ -172,7 +173,7 @@ export function PuntoEstado({ estado }: { estado: string }) {
         width: 8,
         height: 8,
         borderRadius: 4,
-        backgroundColor: COLOR_ESTADO[estado] ?? COLORES.gris,
+        backgroundColor: COLOR_ESTADO[estado] ?? COLORES.tenue,
       }}
     />
   )

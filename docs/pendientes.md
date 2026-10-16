@@ -22,9 +22,6 @@ Cómo se usa:
 
 ## Bugs
 
-- **Los Fierros: falsa alarma en X** (2026-10-13). La tarjeta dice «vence hoy» al conectar y
-  a las dos horas queda gris, aunque X se renueva sola al publicar: falta eximirla en
-  `estadoDelFierro` como a TikTok y YouTube (#154). Ver la auditoría, §1.4.
 - **En local no se puede entrar al panel sin Resend** (2026-10-13). `pedir()`
   (`src/lib/usuarios.ts`) imprime el código en la consola del servidor justo para probar el
   ingreso en local, pero si el correo no sale borra la fila del código, así que el código
@@ -193,12 +190,9 @@ Nada de esto bloquea un trámite hoy; conviene ordenarlo antes de abrir a tercer
 
 - **La propuesta de diseño 2.1: lo que falta** (2026-10-16). De la propuesta externa del 16
   de octubre (no está en el repo) entró el corte dibujado
-  (`docs/superpowers/specs/2026-10-16-el-corte-que-se-lee-design.md`). Quedan, de lo más
-  barato a lo más caro: el texto secundario y tenue del panel y de la app a 4,5:1
-  (`--color-fg-muted`/`--color-fg-faint` en `.acerado`, `COLORES` en `mobile/src/components/ui.tsx`);
-  el engranaje con un punto ámbar o rojo cuando un fierro se enfría o se apaga, con «1 se
-  enfría» en la entrada de Los Fierros; los mensajes que todavía dicen «Cuentas» por Los
-  Fierros; una pantalla de Ajustes en la app con tus cuentas y «Cerrar sesión», que hoy no
+  (`docs/superpowers/specs/2026-10-16-el-corte-que-se-lee-design.md`), el texto secundario y
+  tenue a 4,5:1 y el engranaje que avisa cuando un fierro se enfría. Quedan, de lo más barato
+  a lo más caro: una pantalla de Ajustes en la app con tus cuentas y «Cerrar sesión», que hoy no
   existe; «Mientras no mirabas» —qué cambió desde la última visita, con lo que pasa una sola
   vez: el sellado de una marca y el chisporroteo— (necesita guardar la última visita por
   usuario); la semana como días × franjas, con las zonas calientes de cada creador (necesita

@@ -125,7 +125,7 @@ La conexión de Threads dura unos 60 días. En la última semana se renueva sola
 2. En la ventana de X, entra y autoriza, en menos de diez minutos.
 3. Vuelve con «X / Twitter conectado.».
 
-El acceso que entrega X dura dos horas y Tu Parrilla lo renueva solo cada vez que publica en X. Por eso, apenas conectada, la tarjeta de X dice «Este fierro se está enfriando: la conexión vence hoy…», y pasadas dos horas la barra queda gris sin ninguna frase. En X eso no significa que la conexión murió: hay que reconectar solo si una publicación a X falla con «La cuenta no está conectada. Reconéctala y reprograma.».
+El acceso que entrega X dura dos horas y Tu Parrilla lo renueva solo cada vez que publica en X, así que la tarjeta de X no se mide por esa hora: queda al rojo mientras tenga su conexión y la última sincronización no haya fallado. Hay que reconectar si una publicación a X falla con «La cuenta no está conectada. Reconéctala y reprograma.».
 
 ### Para agregar otra cuenta de la misma red
 
@@ -219,7 +219,7 @@ Trae los posts y los números de las cuentas de Instagram, TikTok, YouTube y Fac
 | «Esa red no usa OAuth» o «Esa red no usa OAuth.» | Se abrió una dirección de conexión de una red que no existe. | Volver a Los Fierros y usar los enlaces de cada bloque. |
 | «No se pudo conectar. Inténtalo de nuevo.» | Falló algo inesperado al guardar la conexión. | Volver a conectar; si se repite, avisar a quien administra Tu Parrilla. |
 | «No se pudo guardar la cuenta. Inténtalo de nuevo.» | Falló guardar las cuentas elegidas en la lista. | Volver a conectar. |
-| «Este fierro se está enfriando: la conexión vence <hoy / mañana / pasado mañana / dentro de N días>. Reconéctala antes de que se apague.» | El permiso de esa cuenta vence pronto. En X / Twitter aparece siempre, ver «Para conectar X / Twitter». | «Reconectar» en esa tarjeta, con la misma cuenta. |
+| «Este fierro se está enfriando: la conexión vence <hoy / mañana / pasado mañana / dentro de N días>. Reconéctala antes de que se apague.» | El permiso de esa cuenta vence pronto. Mientras tanto, el engranaje «Ajustes» lleva un punto ámbar. | «Reconectar» en esa tarjeta, con la misma cuenta. |
 | «La conexión falló; reconecta la cuenta.» | La última vez que se trajeron sus números, la red rechazó la conexión (permiso vencido o quitado desde la red). Si al pasar el mouse dice «Quitaste la app desde Facebook: vuelve a conectar.», alguien quitó Tu Parrilla desde la configuración de Facebook. | «Reconectar» (o «Conectar →») en esa tarjeta. |
 | «Sin credencial» | La cuenta no está conectada; su historial se conserva. | «Conectar →» en la tarjeta, o fusionarla si es una repetida. |
 | «Se desconecta «<nombre>» de <red>. Sus posts y métricas ya bajados se quedan, pero no se sincroniza nada más hasta que la vuelvas a conectar. ¿Seguir?» | Confirmación antes de desconectar. | Aceptar para desconectar, cancelar para dejarla. |
@@ -236,7 +236,7 @@ Trae los posts y los números de las cuentas de Instagram, TikTok, YouTube y Fac
 | «No se pudo fusionar. Inténtalo de nuevo.» | Falló la fusión; no se cambió nada. | Repetir. |
 | «Listo.» | Se trajeron los números. | Nada. |
 | «Espera unos minutos antes de volver a sincronizar.» | Se apretó «Sincronizar ahora» hace menos de cinco minutos. | Esperar cinco minutos. |
-| «Ninguna red respondió. Revisa las tarjetas en Cuentas.» | Fallaron todas las cuentas. «Cuentas» es esta misma pantalla. | Buscar las tarjetas con la frase roja y reconectarlas. |
+| «Ninguna red respondió. Revisa las tarjetas de abajo.» | Fallaron todas las cuentas. | Buscar las tarjetas con la frase roja y reconectarlas. |
 | «No se pudo sincronizar. Intenta de nuevo.» | Falló todo el proceso. | Repetir más tarde. |
 
 ## Si el humano dice…
@@ -256,7 +256,7 @@ Trae los posts y los números de las cuentas de Instagram, TikTok, YouTube y Fac
 - **«Tengo dos tarjetas de la misma cuenta»** → «Para fusionar una cuenta repetida».
 - **«Mi TikTok aparece con un número largo en vez del nombre»** → TikTok no entregó el nombre al conectar; «Reconectar» lo vuelve a pedir.
 - **«¿Tengo que poner mi TikTok en privada?»** → No, ni para conectar ni para publicar: la publicación directa está aprobada y sale con la privacidad que se elija en el compositor de [La Parrilla](la-parrilla.md).
-- **«La tarjeta de X dice que vence hoy»** → En X es lo normal; ver «Para conectar X / Twitter».
+- **«El engranaje "Ajustes" tiene un punto ámbar (o rojo)»** → Una cuenta se está enfriando (o se apagó). Abrir el engranaje: la entrada «Los Fierros» dice cuántas, por ejemplo «1 se enfría». Aquí, la tarjeta con el fierro ámbar o gris → «Reconectar». Una cuenta desconectada a propósito no enciende el punto.
 - **«Threads o X dicen "Sin sincronizar"»** → Es lo normal: de esas redes no se traen números, solo se publica.
 - **«Sincronizar ahora no hace nada» o «me dice que espere»** → Se puede apretar una vez cada cinco minutos. Los números de Threads y X no se traen nunca.
 - **«¿Dónde saco el id de la cuenta para la API o la carga masiva?»** → Es el segundo número de la tarjeta, el del ícono de copiar.

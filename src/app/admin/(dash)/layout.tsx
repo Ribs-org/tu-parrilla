@@ -1,5 +1,7 @@
 import { CorteDefs } from '@/components/corte'
 import { requireUser } from '@/lib/auth'
+import { avisoDeFierros } from '@/lib/parrilla'
+import { getCuentas } from '@/lib/posts'
 import { logout } from '../actions'
 import { AdminNav } from './nav'
 
@@ -11,6 +13,9 @@ export const dynamic = 'force-dynamic'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const usuario = await requireUser()
+  // El engranaje avisa si un fierro se enfría o se apagó: Los Fierros vive adentro de
+  // Ajustes, y un aviso que solo se ve ahí no lo ve nadie.
+  const aviso = avisoDeFierros(await getCuentas(usuario.id), new Date())
 
   return (
     <div className="acerado min-h-dvh bg-acero-950">
@@ -19,7 +24,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <header className="sticky top-0 z-30 border-b border-acero-700 bg-acero-950/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3 sm:px-6">
           <span className="font-titulo text-sm font-semibold uppercase tracking-[0.1em]">Panel</span>
-          <AdminNav esAdmin={usuario.rol === 'admin'} />
+          <AdminNav esAdmin={usuario.rol === 'admin'} aviso={aviso} />
           <form action={logout}>
             <button
               type="submit"

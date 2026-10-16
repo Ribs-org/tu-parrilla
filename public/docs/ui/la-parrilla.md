@@ -697,7 +697,7 @@ ninguna red; si ya salió en alguna, hay que borrarlo en la red misma.
 | «La hora debe estar en el futuro.» | La hora elegida ya pasó (pasa con un borrador que tenía una fecha que ya llegó) | Elegir una futura, o «Ahora» |
 | «Máximo diez archivos por publicación.» | Más de diez archivos (si TikTok es la única red, admite hasta 35 fotos) | Quitar archivos con su ✕ |
 | «Una de las cuentas elegidas no es tuya.» | Una cuenta dejó de existir mientras la pantalla estaba abierta | Cerrar el panel (queda el borrador) y volver a abrirlo desde «Borradores (<N>)» |
-| «La cuenta <usuario> no está conectada. Vuelve a conectarla en Cuentas.» | Se desconectó; «Cuentas» es Los Fierros | Reconectarla en Los Fierros y volver: lo escrito sigue en «Borradores» |
+| «La cuenta <usuario> no está conectada. Vuelve a conectarla en Los Fierros.» | Se desconectó | Reconectarla en Los Fierros y volver: lo escrito sigue en «Borradores» |
 | «Espera a que terminen de subir los archivos.» | Se intentó programar mientras subían archivos | Esperar a que aparezcan en la lista y volver a apretar «Programar» |
 | «Un archivo no es del almacén.», «Falta subir un archivo.» o «El cuerpo no se entendió.» | Un archivo de la lista ya no está en el almacenamiento, o la subida quedó a medias | Quitar los archivos de la lista con su ✕, volver a elegirlos y programar |
 
@@ -749,7 +749,7 @@ final de esta sección).
 |---|---|---|
 | «Leyendo tu cuenta…» | Está preguntando a TikTok | Esperar |
 | «Se publicará en la cuenta <nombre>» | TikTok contestó; esa es la cuenta | Nada |
-| «Conecta TikTok en Cuentas antes de programar.» | La cuenta no tiene conexión válida | Reconectarla en Los Fierros |
+| «Conecta TikTok en Los Fierros antes de programar.» | La cuenta no tiene conexión válida | Reconectarla en Los Fierros |
 | «Reconecta TikTok para autorizar la publicación.» | TikTok quitó o venció el permiso | Reconectarla en Los Fierros |
 | «No pude leer tu cuenta de TikTok.» | TikTok no contestó | Se puede programar igual: se ofrecen las cuatro privacidades y se vuelve a comprobar al publicar |
 | «TikTok necesita que elijas la privacidad.» | Falta «Quién puede verlo» | Elegirla en el bloque de esa cuenta |
@@ -800,7 +800,7 @@ puede decir:
 | «La portada debe ser una imagen.» | La portada es un video u otra cosa | Usar una imagen |
 | «La portada debe ser JPG o PNG.» | Portada GIF, WebP u otro formato | Convertirla |
 | «Una de las cuentas elegidas no es tuya.» | Un identificador de `cuentas` no es de esta persona | Copiarlo de nuevo desde Los Fierros |
-| «La cuenta <usuario> no está conectada. Vuelve a conectarla en Cuentas.» | La cuenta de `cuentas` está desconectada | Reconectarla en Los Fierros |
+| «La cuenta <usuario> no está conectada. Vuelve a conectarla en Los Fierros.» | La cuenta de `cuentas` está desconectada | Reconectarla en Los Fierros |
 | ««<red>» en opciones es ambiguo: la fila tiene <N> cuentas de esa red (<usuarios>). Usa el id de cada cuenta como clave.» | `opciones` nombra una red que tiene dos cuentas en la fila | Usar el identificador de cada cuenta |
 | ««<clave1>» y «<clave2>» en opciones nombran el mismo destino. Deja una sola clave por destino.» | Dos claves de `opciones` apuntan a la misma cuenta | Dejar una |
 | «No se pudo guardar la fila. Inténtalo de nuevo.» | Falla pasajera | Subir de nuevo solo esa fila |
@@ -959,8 +959,10 @@ quemado, más arriba).
   descartan repetidos. Borrar los sobrantes con «Eliminar».
 - **¿De dónde saco el identificador para la columna cuentas?** De la tarjeta de la cuenta
   en Los Fierros: el código chico con el ícono de copiar.
-- **Un mensaje me dice que vaya a Cuentas.** «Cuentas» es [Los Fierros](los-fierros.md),
-  en el engranaje «Ajustes».
+- **El engranaje «Ajustes» tiene un punto.** Ámbar: el permiso de alguna cuenta vence en
+  la semana. Rojo: alguna se apagó (venció o dejó de sincronizar) y lo que se programe ahí no
+  va a salir. Adentro, la entrada «Los Fierros» dice cuántas («1 se enfría», «2 se
+  apagaron»); en [Los Fierros](los-fierros.md), «Reconectar» en esa tarjeta.
 - **Publiqué en YouTube y salió privado.** Los Fierros lo advierte: «Hasta que Google
   apruebe la cuota de la app, lo que publiques sale privado.»
 - **En TikTok no aparece en mi perfil.** TikTok puede tardar unos minutos. Si se mandó como

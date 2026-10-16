@@ -29,7 +29,7 @@ export type CuentaDestino = { id: string; network: string; handle: string | null
 export const CUENTA_AJENA = 'Una de las cuentas elegidas no es tuya.'
 
 export function CUENTA_DESCONECTADA(handle: string | null, network: string): string {
-  return `La cuenta ${handle ?? network} no está conectada. Vuelve a conectarla en Cuentas.`
+  return `La cuenta ${handle ?? network} no está conectada. Vuelve a conectarla en Los Fierros.`
 }
 
 export function RED_AMBIGUA(network: string, handles: Array<string | null>): string {

@@ -247,7 +247,11 @@ export function estadoDelFierro(
   // YouTube es el mismo caso con una hora en vez de un día (`social/publish/youtube.ts`
   // lo renueva antes de publicar). Google no dice cuándo muere el de refresco: con la app
   // en «Testing» son siete días, y en producción no vence mientras se use.
-  if (cuenta.red === 'tiktok' || cuenta.red === 'youtube') return 'al-rojo'
+  //
+  // Y X, con dos horas: `social/publish/x.ts` lo renueva al publicar con el de refresco, que
+  // rota en cada uso. Medido por ahí, X decía «vence hoy» al conectarla y quedaba fría a las
+  // dos horas; con el punto del engranaje, eso habría sido una alarma encendida para siempre.
+  if (cuenta.red === 'tiktok' || cuenta.red === 'youtube' || cuenta.red === 'x') return 'al-rojo'
   if (!cuenta.expiraEn) return 'al-rojo'
 
   const faltan = new Date(cuenta.expiraEn).getTime() - ahora.getTime()
@@ -273,4 +277,29 @@ export function cuentasFrias(
       )
       .map((c) => c.id),
   )
+}
+
+/**
+ * Lo que dice el engranaje de Ajustes: si algún fierro se apagó o se está enfriando, y
+ * cuántos. Solo las cuentas con credencial: una que el dueño desconectó a propósito guarda su
+ * historia y no tiene por qué encender un aviso todos los días. «apagado» gana sobre
+ * «enfriandose», porque es el que ya está dejando de publicar.
+ */
+export function avisoDeFierros(
+  cuentas: ReadonlyArray<{ network: string; connected: boolean; expiresAt: string | null; lastSyncError: string | null }>,
+  ahora: Date,
+): { nivel: 'apagado' | 'enfriandose'; cuantos: number } | null {
+  const fierros = cuentas
+    .filter((c) => c.connected)
+    .map((c) => estadoDelFierro({ connected: true, expiraEn: c.expiresAt, ultimoError: c.lastSyncError, red: c.network }, ahora))
+  const apagados = fierros.filter((f) => f === 'frio').length
+  if (apagados > 0) return { nivel: 'apagado', cuantos: apagados }
+  const enfriandose = fierros.filter((f) => f === 'enfriandose').length
+  return enfriandose > 0 ? { nivel: 'enfriandose', cuantos: enfriandose } : null
+}
+
+/** El aviso en palabras: «1 se enfría», «2 se apagaron». */
+export function fraseDelAviso(aviso: { nivel: 'apagado' | 'enfriandose'; cuantos: number }): string {
+  if (aviso.nivel === 'apagado') return aviso.cuantos === 1 ? '1 se apagó' : `${aviso.cuantos} se apagaron`
+  return aviso.cuantos === 1 ? '1 se enfría' : `${aviso.cuantos} se enfrían`
 }

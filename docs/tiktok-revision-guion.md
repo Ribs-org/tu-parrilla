@@ -71,7 +71,7 @@ Lo que sí está verificado es la lectura, el `jsonb` de las opciones y la trans
 estado a nivel de base. El ensayo dejó de ser opcional.
 
 - [x] **Revocar la app desde TikTok** (Perfil → Ajustes y privacidad → Seguridad y permisos
-      → Aplicaciones conectadas) **y desconectar TikTok en Cuentas**. Sin esto, la pantalla
+      → Aplicaciones conectadas) **y desconectar TikTok en Los Fierros**. Sin esto, la pantalla
       de permisos solo pide lo que aún no concediste y saldrían dos permisos en vez de cuatro.
 - [x] **Reconectar** y comprobar que la pantalla muestra los cuatro permisos. Hecho el 2026-09-23: la pantalla dijo «Tu Parrilla (Sandbox)» y pidió los cuatro, que además confirma que el despliegue tiene las credenciales del sandbox.
 - [x] **Sincronizar** y ver los videos con contadores en Contenido. Hecho el 2026-09-23.

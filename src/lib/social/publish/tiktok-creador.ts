@@ -18,7 +18,7 @@ export type CreadorTikTok = {
 
 export const TIKTOK_RECONECTAR = 'Reconecta TikTok para autorizar la publicación.'
 export const TIKTOK_CREADOR_ILEGIBLE = 'No pude leer tu cuenta de TikTok.'
-export const TIKTOK_SIN_CUENTA = 'Conecta TikTok en Cuentas antes de programar.'
+export const TIKTOK_SIN_CUENTA = 'Conecta TikTok en Los Fierros antes de programar.'
 
 function esObjeto(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
