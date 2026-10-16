@@ -1,34 +1,55 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
-import { Alert, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, View } from 'react-native'
-import { DateTimePickerAndroid } from '@react-native-community/datetimepicker'
+import { Alert, AppState, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, View } from 'react-native'
 import * as ImagePicker from 'expo-image-picker'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { SelectorFechaIOS } from '../../components/selector-fecha'
-import { Boton, COLORES, Chip, ErrorConReintento, Miniatura } from '../../components/ui'
-import { SesionCaducada, apiGet } from '../../lib/api'
+import { useSelectorFecha } from '../../components/selector-fecha'
+import { Boton, BotonTexto, COLORES, Chip, ErrorConReintento, Miniatura } from '../../components/ui'
+import { RechazoApi, SesionCaducada, apiDelete, apiGet, apiPost } from '../../lib/api'
+import {
+  BORRADOR_NO_EXISTE,
+  FRASE_BORRADOR,
+  NO_SE_ABRIO,
+  NO_SE_DESCARTO,
+  PAUSA_MS,
+  YA_NO_EXISTE,
+  cuentasDelBorrador,
+  cuerpoDelBorrador,
+  tieneContenido,
+  type EstadoBorrador,
+  type Formulario,
+} from '../../lib/borradores'
 import { anotarCambio } from '../../lib/cambios'
 import {
+  ARCHIVO_FALTANTE,
   ENVIO_INICIAL,
   MAX_ARCHIVOS,
+  SIN_SENAL,
+  SIN_SENAL_SUBIDA,
+  archivoDelBorrador,
+  archivoElegido,
   cuentasConTrial,
   describirArchivo,
+  estadoSubidas,
   etiquetaCuenta,
   etiquetaEnvio,
   fechaParaElDia,
+  hayPendientes,
+  notaDeArchivo,
   opcionesDelBorrador,
   proximaHoraEnPunto,
   puedeEnviar,
   reducirEnvio,
+  subidos,
   textoConfirmacion,
   vieneMarcada,
-  type Elegido,
-  type Retomar,
+  volverASubir,
+  type Archivo,
 } from '../../lib/publicar'
 import { clearToken } from '../../lib/session'
-import { ejecutarEnvio, type BorradorApp, type SubidaHecha } from '../../lib/subir'
-import type { CuentaApp } from '../../lib/tipos'
+import { subirUno } from '../../lib/subir'
+import type { BorradorAbierto, CuentaApp } from '../../lib/tipos'
 import { useToken } from '../../lib/useToken'
 
 const MAX_TEXTO = 2200
@@ -54,12 +75,19 @@ function fechaLegible(fecha: Date): string {
   return `${dd}/${mm} a las ${hh}:${mi}`
 }
 
+/**
+ * Publicar, el compositor del teléfono. Como el del panel, lo que se escribe se guarda solo
+ * como borrador —un rato después del último cambio— y los archivos se suben apenas se
+ * eligen, para que el borrador los conserve. Los borradores son los mismos del panel: se
+ * abren desde La Parrilla y se siguen en cualquiera de los dos lados. «Programar» convierte
+ * el borrador en post y el servidor lo borra; «Descartar» lo borra sin programar.
+ */
 export default function Publicar() {
   const token = useToken()
   const router = useRouter()
   const insets = useSafeAreaInsets()
   const [texto, setTexto] = useState('')
-  const [archivos, setArchivos] = useState<Elegido[]>([])
+  const [archivos, setArchivosEnPantalla] = useState<Archivo[]>([])
   const [cuentas, setCuentas] = useState<string[]>([])
   // Solo ids de cuentas de Instagram con el interruptor de trial reel encendido. No hay
   // que limpiarlo cuando el chip deja de ofrecerse (sin video, o cuenta desmarcada):
@@ -70,41 +98,307 @@ export default function Publicar() {
   const [cuentasEstado, setCuentasEstado] = useState<EstadoCuentas>({ paso: 'cargando' })
   // Solo cuando ya se supo qué cuentas hay: mientras carga o si falló, no hay ninguna
   // que ofrecer — el estado de arriba es el que distingue esos dos casos de «ninguna».
-  // Memoizada: un `[]` nuevo en cada render volvía a disparar el efecto de abajo que
-  // la usa como dependencia.
+  // Memoizada: un `[]` nuevo en cada render volvía a disparar los efectos que la usan.
   const disponibles = useMemo(
     () => (cuentasEstado.paso === 'listo' ? cuentasEstado.disponibles : []),
     [cuentasEstado],
   )
   const [fecha, setFecha] = useState<Date>(() => proximaHoraEnPunto(new Date()))
-  // El «+» de un día de La Parrilla llega con ese día y una marca `n` que cambia en cada
-  // toque. La fecha se pone una vez por marca, durante el render —el patrón de React para
-  // ajustar estado cuando cambia una entrada—, sin un efecto que la pise después.
-  const { dia, n } = useLocalSearchParams<{ dia?: string; n?: string }>()
-  const [marcaAplicada, setMarcaAplicada] = useState<string | undefined>(undefined)
-  if (dia && n && n !== marcaAplicada) {
-    setMarcaAplicada(n)
-    setFecha(fechaParaElDia(dia, new Date()))
-  }
-  // Solo en iOS: la hoja con el selector de día y hora está abierta.
-  const [eligiendoFecha, setEligiendoFecha] = useState(false)
+  // Si la fecha la puso alguien (el selector, el «+» de un día, un borrador). La de partida
+  // no se guarda en el borrador: ver `cuerpoDelBorrador`.
+  const [fechaPuesta, setFechaPuesta] = useState(false)
+  // Los diálogos de Android o la hoja de iOS: el mismo `abrir` para las dos.
+  const { abrir: abrirSelector, selector } = useSelectorFecha()
   const [envio, despachar] = useReducer(reducirEnvio, ENVIO_INICIAL)
   const [aviso, setAviso] = useState<string | null>(null)
-  // Lo que ya subió en un intento anterior y el AbortController del envío en curso.
-  // Refs, no estado: cambiarlos no debe redibujar, y el orquestador los lee entre awaits.
-  const subidas = useRef<(SubidaHecha | null)[]>([])
-  const ultimoBorrador = useRef<BorradorApp | null>(null)
-  const abortar = useRef<AbortController | null>(null)
+  const [abriendo, setAbriendo] = useState(false)
+  const [soloEnElPanel, setSoloEnElPanel] = useState<string | null>(null)
+  const [estadoBorrador, setEstadoBorrador] = useState<EstadoBorrador>('nada')
 
   const salir = useCallback(async () => {
     await clearToken()
     router.replace('/login')
   }, [router])
 
+  /* ---- los archivos: se suben apenas se eligen ---- */
+
+  // La lista vive también en un ref: la cola la lee y la cambia entre awaits, y un estado
+  // leído desde un cierre viejo pisaría lo que cambió mientras tanto.
+  const archivosRef = useRef<Archivo[]>([])
+  const enSubida = useRef<{ clave: string; control: AbortController } | null>(null)
+
+  const cambiarArchivos = useCallback((cambio: (lista: Archivo[]) => Archivo[]) => {
+    archivosRef.current = cambio(archivosRef.current)
+    setArchivosEnPantalla(archivosRef.current)
+  }, [])
+
+  /* ---- lo que hay en pantalla, para lo que corre después ---- */
+
+  // El guardado corre un rato después del último cambio, y la cola de subida entre awaits:
+  // los dos leen lo de ahora y no lo del render en que empezaron. Se copia después de
+  // pintar, porque escribir un ref durante el render no está permitido.
+  const formRef = useRef<Formulario>({ texto, cuentas, trial, fecha, fechaPuesta, archivos })
+  const disponiblesRef = useRef<CuentaApp[]>([])
+  useEffect(() => {
+    formRef.current = { texto, cuentas, trial, fecha, fechaPuesta, archivos: archivosRef.current }
+    disponiblesRef.current = disponibles
+  })
+
+  /* ---- la cola de subida ---- */
+
+  /**
+   * La cola de subida: de a un archivo, en el orden elegido, hasta que no quede ninguno
+   * esperando. Quitar el que sube lo cancela y la cola sigue con el siguiente.
+   */
+  const bombear = useCallback(async () => {
+    if (enSubida.current || !token) return
+    for (;;) {
+      const siguiente = archivosRef.current.find((a) => a.estado === 'subiendo' && a.local)
+      if (!siguiente?.local) return
+      const control = new AbortController()
+      enSubida.current = { clave: siguiente.clave, control }
+      const cambiarEste = (cambio: Partial<Archivo>) =>
+        cambiarArchivos((lista) => lista.map((a) => (a.clave === siguiente.clave ? { ...a, ...cambio } : a)))
+      try {
+        const hecha = await subirUno(
+          token,
+          siguiente.local,
+          (progreso) => cambiarEste({ progreso: Math.min(1, Math.max(0, progreso)) }),
+          control.signal,
+        )
+        if (!control.signal.aborted) cambiarEste({ url: hecha.url, estado: 'listo', progreso: 1 })
+      } catch (e) {
+        if (e instanceof SesionCaducada) {
+          enSubida.current = null
+          await salir()
+          return
+        }
+        if (!(e instanceof RechazoApi) && !control.signal.aborted) console.warn('subida:', String(e).slice(0, 300))
+        // Cancelado porque se quitó, o porque se vació el formulario: ya no está, y no hay
+        // nada que marcar. Si sigue ahí, queda caído para reintentarlo a mano.
+        cambiarEste({ estado: 'fallo', error: e instanceof RechazoApi ? e.message : SIN_SENAL_SUBIDA })
+      } finally {
+        enSubida.current = null
+      }
+    }
+  }, [token, cambiarArchivos, salir])
+
+  /* ---- el borrador ---- */
+
+  const borradorId = useRef<string | null>(null)
+  // Lo último que se guardó: un cambio que vuelve a lo mismo no escribe de nuevo.
+  const ultimaFirma = useRef<string | null>(null)
+  // El guardado en curso, para no mandar dos a la vez ni programar antes de saber el id.
+  const enCurso = useRef<Promise<void>>(Promise.resolve())
+  const pausa = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Prendido mientras se programa, y de ahí en adelante si el borrador se perdió.
+  const quieto = useRef(false)
+  const perdido = useRef(false)
+  // Si lo que hay en pantalla quedó sin guardar porque el último intento falló.
+  const sinGuardar = useRef(false)
+
+  const guardar = useCallback((): Promise<void> => {
+    const siguiente = enCurso.current.then(async () => {
+      if (quieto.current || !token) return
+      const cuerpo = cuerpoDelBorrador(formRef.current)
+      const firma = JSON.stringify(cuerpo)
+      if ((!borradorId.current && !tieneContenido(cuerpo.texto, cuerpo.media)) || firma === ultimaFirma.current) {
+        sinGuardar.current = false
+        return
+      }
+      setEstadoBorrador('guardando')
+      try {
+        const { id } = await apiPost<{ id: string }>('/api/mobile/borradores', token, {
+          ...cuerpo,
+          id: borradorId.current,
+        })
+        borradorId.current = id
+        ultimaFirma.current = firma
+        sinGuardar.current = false
+        // La Parrilla lista los borradores: que se ponga al día cuando se vuelva a ella.
+        anotarCambio()
+        setEstadoBorrador('guardado')
+      } catch (e) {
+        if (e instanceof SesionCaducada) {
+          await salir()
+          return
+        }
+        if (e instanceof RechazoApi && e.message === BORRADOR_NO_EXISTE) {
+          // Se programó o se descartó en otro lado. Recrearlo resucitaría lo que alguien
+          // sacó, y programarlo desde acá podría publicarlo dos veces.
+          perdido.current = true
+          quieto.current = true
+          setEstadoBorrador('perdido')
+          return
+        }
+        sinGuardar.current = true
+        setEstadoBorrador('error')
+      }
+    })
+    enCurso.current = siguiente
+    return siguiente
+  }, [token, salir])
+
+  /** Lo pendiente, ya: antes de programar, de cambiar de borrador o de que la app se vaya. */
+  const guardarYa = useCallback(async () => {
+    if (pausa.current) {
+      clearTimeout(pausa.current)
+      pausa.current = null
+    }
+    await guardar()
+  }, [guardar])
+
+  // Cada cambio reinicia la espera; cuando se deja de tocar, se guarda.
+  const firmaMedia = subidos(archivos)
+    .map((m) => m.url)
+    .join('\n')
+  useEffect(() => {
+    if (quieto.current) return
+    if (pausa.current) clearTimeout(pausa.current)
+    pausa.current = setTimeout(() => {
+      pausa.current = null
+      void guardar()
+    }, PAUSA_MS)
+  }, [texto, cuentas, trial, fecha, fechaPuesta, firmaMedia, guardar])
+
+  // Si la app pasa a segundo plano, el sistema puede cerrarla sin avisar: lo pendiente se
+  // manda antes. Igual al desmontar, si quedó algo esperando la pausa.
+  useEffect(() => {
+    const suscripcion = AppState.addEventListener('change', (estado) => {
+      if (estado !== 'active' && pausa.current) void guardarYa()
+    })
+    return () => {
+      suscripcion.remove()
+      if (pausa.current) void guardarYa()
+    }
+  }, [guardarYa])
+
+  /** El formulario vacío, como al abrir la app: otra publicación, sin borrador. */
+  const reiniciar = useCallback(() => {
+    enSubida.current?.control.abort()
+    if (pausa.current) {
+      clearTimeout(pausa.current)
+      pausa.current = null
+    }
+    const lista = disponiblesRef.current
+    const marcadas = lista.filter((c) => vieneMarcada(c, lista)).map((c) => c.id)
+    const ahora = proximaHoraEnPunto(new Date())
+    cambiarArchivos(() => [])
+    setTexto('')
+    setCuentas(marcadas)
+    setTrial([])
+    setFecha(ahora)
+    setFechaPuesta(false)
+    setAviso(null)
+    setSoloEnElPanel(null)
+    setEstadoBorrador('nada')
+    despachar({ tipo: 'cancelar' })
+    borradorId.current = null
+    ultimaFirma.current = null
+    sinGuardar.current = false
+    perdido.current = false
+    quieto.current = false
+    formRef.current = { texto: '', cuentas: marcadas, trial: [], fecha: ahora, fechaPuesta: false, archivos: [] }
+  }, [cambiarArchivos])
+
+  /**
+   * Antes de dejar lo que hay en pantalla —por otro borrador, por un día nuevo, por «Nueva
+   * publicación»—, que quede guardado. Con un archivo que no terminó de subir no se suelta:
+   * el borrador lo perdería.
+   */
+  async function soltar(): Promise<boolean> {
+    if (hayPendientes(archivosRef.current)) {
+      Alert.alert(
+        'Hay un archivo que no terminó de subir',
+        'Espera a que termine, reinténtalo o quítalo antes de dejar esta publicación.',
+      )
+      return false
+    }
+    if (perdido.current) return true
+    await guardarYa()
+    if (!sinGuardar.current) return true
+    return new Promise<boolean>((resolve) =>
+      Alert.alert(
+        'No se pudo guardar el borrador',
+        'Si sigues, lo último que cambiaste se pierde.',
+        [
+          { text: 'Quedarme', style: 'cancel', onPress: () => resolve(false) },
+          { text: 'Seguir igual', style: 'destructive', onPress: () => resolve(true) },
+        ],
+        { cancelable: false },
+      ),
+    )
+  }
+
+  /** Lo que llegó de un borrador, en pantalla, ya guardado tal como está. */
+  function cargar(b: BorradorAbierto) {
+    const lista = b.media.map(archivoDelBorrador)
+    const listas = disponiblesRef.current.length > 0 ? disponiblesRef.current : null
+    const form: Formulario = {
+      texto: b.texto,
+      cuentas: cuentasDelBorrador(b.cuentas, listas),
+      trial: b.trial,
+      fecha: b.cuando ? new Date(b.cuando) : proximaHoraEnPunto(new Date()),
+      fechaPuesta: Boolean(b.cuando),
+      archivos: lista,
+    }
+    cambiarArchivos(() => lista)
+    setTexto(form.texto)
+    setCuentas(form.cuentas)
+    setTrial(form.trial)
+    setFecha(form.fecha)
+    setFechaPuesta(form.fechaPuesta)
+    setSoloEnElPanel(b.soloEnElPanel)
+    setEstadoBorrador('abierto')
+    borradorId.current = b.id
+    formRef.current = form
+    ultimaFirma.current = JSON.stringify(cuerpoDelBorrador(form))
+  }
+
+  /* ---- lo que llega desde La Parrilla ---- */
+
+  // El «+» de un día llega con ese día, y un borrador de la lista con su id. Los dos traen
+  // una marca `n` que cambia en cada toque: se atiende una vez por marca. Cada vez es otra
+  // publicación; lo que había en pantalla queda en los borradores.
+  const { dia, borrador, n } = useLocalSearchParams<{ dia?: string; borrador?: string; n?: string }>()
+  const atendida = useRef<string | undefined>(undefined)
+
+  async function atender(idBorrador: string | null, diaPedido: string | null) {
+    if (!(await soltar())) return
+    reiniciar()
+    if (diaPedido) {
+      setFecha(fechaParaElDia(diaPedido, new Date()))
+      setFechaPuesta(true)
+    }
+    if (!idBorrador || !token) return
+    setAbriendo(true)
+    try {
+      cargar(await apiGet<BorradorAbierto>(`/api/mobile/borradores/${encodeURIComponent(idBorrador)}`, token))
+    } catch (e) {
+      if (e instanceof SesionCaducada) {
+        await salir()
+        return
+      }
+      setAviso(e instanceof RechazoApi && e.message === BORRADOR_NO_EXISTE ? YA_NO_EXISTE : NO_SE_ABRIO)
+    } finally {
+      setAbriendo(false)
+    }
+  }
+
+  useEffect(() => {
+    if (!n || n === atendida.current || !token) return
+    atendida.current = n
+    void atender(borrador || null, dia || null)
+    // Solo cuando llega una marca nueva: `atender` cambia en cada render y la marca ya
+    // impide atender dos veces la misma.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [n, borrador, dia, token])
+
+  /* ---- las cuentas ---- */
+
   // La misma regla que la web: con una sola cuenta conectada viene marcada, porque no
-  // hay entre qué elegir; con dos o más no viene ninguna (`vieneMarcada`). Separada de
-  // `aviso` (avisos del selector de archivos) a propósito: `elegir()` no debe poder
-  // borrar un error de carga de cuentas que sigue siendo cierto, y viceversa.
+  // hay entre qué elegir; con dos o más no viene ninguna (`vieneMarcada`). Si ya hay un
+  // borrador en pantalla, se respetan las suyas, sin las que se desconectaron.
   const cargarCuentas = useCallback(async () => {
     if (!token) return
     setCuentasEstado({ paso: 'cargando' })
@@ -120,7 +414,12 @@ export default function Publicar() {
       return
     }
     setCuentasEstado({ paso: 'listo', disponibles: lista })
-    setCuentas(lista.filter((c) => vieneMarcada(c, lista)).map((c) => c.id))
+    const hayBorrador = borradorId.current !== null
+    setCuentas((antes) =>
+      hayBorrador || antes.length > 0
+        ? cuentasDelBorrador(antes, lista)
+        : lista.filter((c) => vieneMarcada(c, lista)).map((c) => c.id),
+    )
   }, [token, salir])
 
   useEffect(() => {
@@ -130,6 +429,8 @@ export default function Publicar() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void cargarCuentas()
   }, [cargarCuentas])
+
+  /* ---- los controles ---- */
 
   async function elegir() {
     // En iOS el selector del sistema entrega solo lo que la persona elige y no pide acceso a
@@ -144,34 +445,36 @@ export default function Publicar() {
     const resultado = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images', 'videos'],
       allowsMultipleSelection: true,
-      selectionLimit: MAX_ARCHIVOS - archivos.length,
+      selectionLimit: MAX_ARCHIVOS - archivosRef.current.length,
       // Solo iOS: el iPhone guarda las fotos en HEIC, que el servidor acepta pero Instagram
       // y Facebook rechazan al publicar. «Compatible» las entrega en JPEG. Android lo ignora.
       preferredAssetRepresentationMode: ImagePicker.UIImagePickerPreferredAssetRepresentationMode.Compatible,
     })
     if (resultado.canceled) return
-    const nuevos: Elegido[] = []
+    const nuevos: Archivo[] = []
     for (const asset of resultado.assets) {
       const descrito = describirArchivo(asset)
       if ('error' in descrito) {
         setAviso(descrito.error)
         return
       }
-      nuevos.push(descrito)
+      nuevos.push(archivoElegido(descrito))
     }
     setAviso(null)
-    setArchivos([...archivos, ...nuevos].slice(0, MAX_ARCHIVOS))
-    // Archivos distintos, subidas distintas: lo subido antes ya no corresponde. Y un
-    // reintento pendiente apuntaba a índices de la lista vieja, así que también se
-    // descarta: se vuelve a listo y el próximo envío arranca del chequeo.
-    subidas.current = []
-    despachar({ tipo: 'cancelar' })
+    cambiarArchivos((lista) => [...lista, ...nuevos].slice(0, MAX_ARCHIVOS))
+    void bombear()
   }
 
-  function quitar(indice: number) {
-    setArchivos(archivos.filter((_, i) => i !== indice))
-    subidas.current = []
-    despachar({ tipo: 'cancelar' })
+  function quitar(clave: string) {
+    if (enSubida.current?.clave === clave) enSubida.current.control.abort()
+    cambiarArchivos((lista) => lista.filter((a) => a.clave !== clave))
+  }
+
+  function reintentarSubida(clave: string) {
+    cambiarArchivos((lista) =>
+      lista.map((a) => (a.clave === clave ? { ...a, estado: 'subiendo', progreso: 0, error: null } : a)),
+    )
+    void bombear()
   }
 
   function alternarCuenta(id: string) {
@@ -183,91 +486,103 @@ export default function Publicar() {
   }
 
   function elegirFecha() {
-    // iOS sí tiene un selector de fecha y hora en uno, y no tiene los diálogos de abajo.
-    if (Platform.OS === 'ios') {
-      setEligiendoFecha(true)
-      return
-    }
-    // Android no tiene un selector de fecha y hora en uno: primero el día, luego la hora.
-    // onValueChange (no onChange, que la versión instalada marca deprecado) solo se
-    // dispara cuando el usuario confirma: cancelar el diálogo no llama a nada.
-    DateTimePickerAndroid.open({
-      value: fecha,
-      mode: 'date',
-      minimumDate: new Date(),
-      onValueChange: (_evento, dia) => {
-        if (!dia) return
-        DateTimePickerAndroid.open({
-          value: dia,
-          mode: 'time',
-          is24Hour: true,
-          onValueChange: (_evento2, conHora) => {
-            if (!conHora) return
-            setFecha(conHora)
-          },
-        })
-      },
+    abrirSelector(fecha, (elegida) => {
+      setFecha(elegida)
+      setFechaPuesta(true)
     })
   }
 
-  async function enviar(ahora: boolean, retomar: Retomar) {
+  async function enviar(ahora: boolean) {
     if (!token) return
-    const borrador =
-      retomar.paso === 'chequeando'
-        ? {
-            texto: texto.trim(),
-            cuentas,
-            cuando: ahora ? null : fecha.toISOString(),
-            ahora,
-            opciones: opcionesDelBorrador(disponibles, cuentas, trial, archivos),
-          }
-        : ultimoBorrador.current
-    if (!borrador) return
-    ultimoBorrador.current = borrador
-    const control = new AbortController()
-    abortar.current = control
+    despachar({ tipo: 'crear', ahora })
+    // Lo último que se escribió entra al borrador antes: el post sale de él y el servidor lo
+    // borra al crearlo. Si la respuesta se pierde y se vuelve a tocar, el borrador ya no
+    // está y el servidor no publica dos veces.
+    await guardarYa()
+    if (perdido.current) {
+      despachar({ tipo: 'cancelar' })
+      return
+    }
+    quieto.current = true
     try {
-      subidas.current = await ejecutarEnvio({
-        token,
-        borrador,
-        archivos,
-        subidas: subidas.current,
-        retomar,
-        despachar,
-        signal: control.signal,
+      await apiPost('/api/mobile/schedule', token, {
+        texto: texto.trim(),
+        cuentas,
+        cuando: ahora ? null : fecha.toISOString(),
+        ahora,
+        opciones: opcionesDelBorrador(disponibles, cuentas, trial, archivos),
+        media: subidos(archivos).map(({ url, mediaType }) => ({ url, mediaType })),
+        borradorId: borradorId.current ?? undefined,
       })
+      despachar({ tipo: 'hecho' })
     } catch (e) {
+      quieto.current = false
       if (e instanceof SesionCaducada) {
         await salir()
         return
       }
-      throw e
-    } finally {
-      abortar.current = null
+      if (!(e instanceof RechazoApi)) {
+        despachar({ tipo: 'rechazado', mensaje: SIN_SENAL })
+        return
+      }
+      if (e.message === BORRADOR_NO_EXISTE) {
+        perdido.current = true
+        quieto.current = true
+        setEstadoBorrador('perdido')
+        despachar({ tipo: 'cancelar' })
+        return
+      }
+      if (e.message === ARCHIVO_FALTANTE) {
+        cambiarArchivos(volverASubir)
+        void bombear()
+      }
+      despachar({ tipo: 'rechazado', mensaje: e.message })
     }
   }
 
   function programar() {
-    void enviar(false, { paso: 'chequeando' })
+    void enviar(false)
   }
 
   function publicarAhora() {
     const elegidas = disponibles.filter((c) => cuentas.includes(c.id))
     Alert.alert('Publicar ahora', textoConfirmacion(elegidas), [
       { text: 'Cancelar', style: 'cancel' },
-      { text: 'Publicar', onPress: () => void enviar(true, { paso: 'chequeando' }) },
+      { text: 'Publicar', onPress: () => void enviar(true) },
     ])
   }
 
-  function reintentar() {
-    if (envio.paso !== 'error') return
-    const retomar = envio.retomar
-    despachar({ tipo: 'reintentar' })
-    void enviar(ultimoBorrador.current?.ahora ?? false, retomar)
+  async function nueva() {
+    if (await soltar()) reiniciar()
   }
 
-  function cancelar() {
-    abortar.current?.abort()
+  function descartar() {
+    Alert.alert('Descartar', '¿Descartar este borrador? Lo escrito y los archivos elegidos se pierden.', [
+      { text: 'Cancelar', style: 'cancel' },
+      { text: 'Descartar', style: 'destructive', onPress: () => void descartarYa() },
+    ])
+  }
+
+  async function descartarYa() {
+    quieto.current = true
+    if (pausa.current) {
+      clearTimeout(pausa.current)
+      pausa.current = null
+    }
+    await enCurso.current
+    const id = borradorId.current
+    reiniciar()
+    if (!id || !token) return
+    try {
+      await apiDelete(`/api/mobile/borradores/${encodeURIComponent(id)}`, token)
+      anotarCambio()
+    } catch (e) {
+      if (e instanceof SesionCaducada) {
+        await salir()
+        return
+      }
+      setAviso(NO_SE_DESCARTO)
+    }
   }
 
   // Tras «hecho»: se vacía el formulario y se salta a La Parrilla, que refresca al
@@ -279,27 +594,24 @@ export default function Publicar() {
     // La espera es la confirmación: limpiar y navegar en el mismo tick borraba
     // «Listo» antes de que alcanzara a dibujarse, y el envío terminaba sin acuse.
     const salto = setTimeout(() => {
-      despachar({ tipo: 'cancelar' })
-      setTexto('')
-      setArchivos([])
-      // La misma regla que al abrir la pantalla: con una sola cuenta conectada, vuelve
-      // marcada; con dos o más, ninguna.
-      setCuentas(disponibles.filter((c) => vieneMarcada(c, disponibles)).map((c) => c.id))
-      setFecha(proximaHoraEnPunto(new Date()))
-      setAviso(null)
-      subidas.current = []
-      ultimoBorrador.current = null
+      reiniciar()
       router.navigate('/(tabs)')
     }, 1000)
     return () => clearTimeout(salto)
-  }, [envio.paso, router, disponibles])
+  }, [envio.paso, router, reiniciar])
 
   // 'hecho' también cuenta: durante el segundo que se ve «Listo» la pantalla ya no
   // acepta nada, para que un toque de más no despache el mismo post dos veces.
-  const ocupado =
-    envio.paso === 'chequeando' || envio.paso === 'subiendo' || envio.paso === 'creando' || envio.paso === 'hecho'
+  const ocupado = envio.paso === 'creando' || envio.paso === 'hecho' || abriendo
   const etiqueta = etiquetaEnvio(envio)
-  const error = envio.paso === 'listo' ? envio.error : envio.paso === 'error' ? envio.mensaje : null
+  const error = envio.paso === 'listo' ? envio.error : null
+  const subidas = estadoSubidas(archivos)
+  const sePuedeEnviar =
+    puedeEnviar(texto, archivos.length, cuentas.length) &&
+    !hayPendientes(archivos) &&
+    soloEnElPanel === null &&
+    estadoBorrador !== 'perdido'
+  const hayAlgo = texto.trim() !== '' || archivos.length > 0 || estadoBorrador !== 'nada'
 
   return (
     // `height` es el `behavior` de Android: la app dibuja de borde a borde, así que la
@@ -315,6 +627,9 @@ export default function Publicar() {
         contentContainerStyle={{ padding: 16, paddingBottom: 48, gap: 14 }}
         keyboardShouldPersistTaps="handled"
       >
+        {abriendo ? <Text style={{ color: COLORES.suave, fontSize: 12 }}>Abriendo borrador…</Text> : null}
+        {soloEnElPanel ? <Text style={{ color: COLORES.ambar, fontSize: 13 }}>{soloEnElPanel}</Text> : null}
+
         <TextInput
           value={texto}
           onChangeText={setTexto}
@@ -342,10 +657,12 @@ export default function Publicar() {
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
           {archivos.map((a, i) => (
             <Miniatura
-              key={`${a.uri}:${i}`}
-              uri={a.uri}
+              key={a.clave}
+              uri={a.vista}
               esVideo={a.mediaType === 'video'}
-              onQuitar={ocupado ? undefined : () => quitar(i)}
+              nota={notaDeArchivo(archivos, i)}
+              onTocar={a.estado === 'fallo' && !ocupado ? () => reintentarSubida(a.clave) : undefined}
+              onQuitar={ocupado ? undefined : () => quitar(a.clave)}
             />
           ))}
           {archivos.length < MAX_ARCHIVOS && !ocupado ? (
@@ -419,57 +736,45 @@ export default function Publicar() {
           </>
         )}
 
-        <Chip
-          texto={`Cuándo: ${fechaLegible(fecha)}`}
-          activo
-          onPress={elegirFecha}
-          deshabilitado={ocupado}
-        />
+        <Chip texto={`Cuándo: ${fechaLegible(fecha)}`} activo onPress={elegirFecha} deshabilitado={ocupado} />
 
         {aviso ? <Text style={{ color: COLORES.rojo }}>{aviso}</Text> : null}
         {error ? <Text style={{ color: COLORES.rojo }}>{error}</Text> : null}
+        {subidas ? <Text style={{ color: subidas.error ? COLORES.rojo : COLORES.suave }}>{subidas.texto}</Text> : null}
         {etiqueta ? <Text style={{ color: COLORES.suave }}>{etiqueta}</Text> : null}
-        {/* La barra se llena en brasa y no en verde: el verde es el «publicado» del semáforo
-            y acá todavía no se publicó nada — recién se está subiendo el archivo. */}
-        {envio.paso === 'subiendo' ? (
-          <View style={{ height: 4, backgroundColor: '#ffffff10', borderRadius: 2 }}>
-            <View style={{ height: 4, width: `${Math.round(envio.progreso * 100)}%`, backgroundColor: COLORES.brasa, borderRadius: 2 }} />
-          </View>
-        ) : null}
 
         <View style={{ flexDirection: 'row', gap: 10 }}>
-          {envio.paso === 'error' ? (
-            <Boton texto="Reintentar" onPress={reintentar} destacado />
-          ) : ocupado ? (
-            <Boton texto="Cancelar" onPress={cancelar} deshabilitado={envio.paso !== 'subiendo'} />
-          ) : (
-            <>
-              <Boton
-                texto="Programar"
-                onPress={programar}
-                deshabilitado={!puedeEnviar(texto, archivos.length, cuentas.length)}
-              />
-              <Boton
-                texto="Publicar ahora"
-                onPress={publicarAhora}
-                deshabilitado={!puedeEnviar(texto, archivos.length, cuentas.length)}
-                destacado
-              />
-            </>
-          )}
+          <Boton
+            texto="Programar"
+            onPress={programar}
+            deshabilitado={ocupado || !sePuedeEnviar}
+          />
+          <Boton
+            texto="Publicar ahora"
+            onPress={publicarAhora}
+            deshabilitado={ocupado || !sePuedeEnviar}
+            destacado
+          />
         </View>
-      </ScrollView>
-      {eligiendoFecha ? (
-        <SelectorFechaIOS
-          valor={fecha}
-          minimo={new Date()}
-          onListo={(elegida) => {
-            setFecha(elegida)
-            setEligiendoFecha(false)
+
+        <Text
+          style={{
+            color: estadoBorrador === 'error' || estadoBorrador === 'perdido' ? COLORES.rojo : COLORES.tenue,
+            fontSize: 11,
           }}
-          onCancelar={() => setEligiendoFecha(false)}
-        />
-      ) : null}
+        >
+          {FRASE_BORRADOR[estadoBorrador]}
+        </Text>
+        {hayAlgo ? (
+          <View style={{ flexDirection: 'row', gap: 20 }}>
+            <BotonTexto texto="Nueva publicación" onPress={() => void nueva()} deshabilitado={ocupado} />
+            {estadoBorrador === 'perdido' ? null : (
+              <BotonTexto texto="Descartar" onPress={descartar} deshabilitado={ocupado} peligro />
+            )}
+          </View>
+        ) : null}
+      </ScrollView>
+      {selector}
     </KeyboardAvoidingView>
   )
 }

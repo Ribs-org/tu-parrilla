@@ -15,6 +15,7 @@ import { columnasEditablesDeRegla, validarRegla } from '@/lib/social/comentarios
 import { FUSION_FALLO, FUSION_NO_ES_TUYA, decidirFusion, pasosDeFusion } from '@/lib/social/fusion'
 import { BORRADO_YA_PUBLICADO } from '@/lib/schedule-api'
 import { borrarPostProgramado } from '@/lib/social/publish/borrar'
+import { DESTINO_NO_EXISTE, REPROGRAMAR_PASADO, reprogramarDestino } from '@/lib/social/publish/reprogramar'
 import { csvToBatchItems } from '@/lib/social/publish/csv'
 import {
   scheduleBatch,
@@ -1183,36 +1184,13 @@ export async function rescheduleTarget(targetId: string, localDatetime: string):
   // La hora llega del formulario en pantalla, que la escribió en la zona del dueño.
   const scheduledAt = fromZonedInput(localDatetime, zona)
   if (!scheduledAt || scheduledAt.getTime() <= Date.now()) {
-    return { error: 'La hora debe estar en el futuro.' }
+    return { error: REPROGRAMAR_PASADO }
   }
 
-  const db = getDb()
-  const [target] = await db
-    .select()
-    .from(scheduledPostTargets)
-    .where(
-      and(
-        eq(scheduledPostTargets.id, targetId),
-        inArray(
-          scheduledPostTargets.postId,
-          db.select({ id: scheduledPosts.id }).from(scheduledPosts).where(eq(scheduledPosts.ownerId, ownerId)),
-        ),
-      ),
-    )
-  if (!target) return { error: 'Ese destino ya no existe.' }
-
-  await db.update(scheduledPosts).set({ scheduledAt, updatedAt: new Date() }).where(eq(scheduledPosts.id, target.postId))
-  // Back to square one: attempts spent against the old hour say nothing about the new one.
-  //
-  // `status = 'failed'` en el `where` —como el rearm del editor— es la reja contra la
-  // carrera con «Subir ahora»: entre la lectura de arriba y esta escritura el destino
-  // puede haber salido publicado, y devolverlo a `scheduled` con `containerId` en null lo
-  // haría publicar de nuevo en la vuelta siguiente del cron. Si ya no está quemado no casa
-  // ninguna fila, y el `revalidatePath` de abajo repinta lo que de verdad pasó.
-  await db
-    .update(scheduledPostTargets)
-    .set({ status: 'scheduled', attemptCount: 0, lastError: null, containerId: null, updatedAt: new Date() })
-    .where(and(eq(scheduledPostTargets.id, targetId), eq(scheduledPostTargets.status, 'failed')))
+  // La regla, compartida con la app del teléfono, vive en `reprogramarDestino`.
+  if ((await reprogramarDestino(ownerId, targetId, scheduledAt)) === 'no-existe') {
+    return { error: DESTINO_NO_EXISTE }
+  }
 
   // «Se quemó», arriba del calendario, muestra los mismos destinos con el mismo botón: sin
   // esto, la fila que se acaba de arreglar sigue pidiendo una acción que ya se hizo.

@@ -105,7 +105,8 @@ const FRASE_BORRADOR: Record<Exclude<EstadoBorrador, 'nada'>, string> = {
   guardando: 'Guardando borrador…',
   guardado: 'Borrador guardado.',
   error: 'No se pudo guardar el borrador.',
-  perdido: 'Este borrador ya no existe: se programó o se descartó en otra pestaña. Cierra el panel para ver cómo quedó.',
+  perdido:
+    'Este borrador ya no existe: se programó o se descartó en otra pestaña o en el teléfono. Cierra el panel para ver cómo quedó.',
 }
 
 /**
@@ -532,7 +533,7 @@ export function Composer({
             </p>
           ) : null}
           <div className="flex flex-wrap items-center gap-3">
-            {/* Con el borrador perdido no se programa: si se programó en otra pestaña, saldría
+            {/* Con el borrador perdido no se programa: si se programó en otro lado, saldría
                 dos veces. */}
             <Button type="submit" variant="primary" disabled={programando || Boolean(subiendo) || estado === 'perdido'}>
               {programando ? 'Programando…' : 'Programar'}

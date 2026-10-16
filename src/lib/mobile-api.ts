@@ -60,6 +60,8 @@ export const ARCHIVO_AJENO = 'Un archivo no es del almacén.'
 export const ARCHIVO_FALTANTE = 'Falta subir un archivo.'
 export const CUERPO_ILEGIBLE = 'El cuerpo no se entendió.'
 export const NO_SE_GUARDO = 'No se pudo guardar. Intenta de nuevo.'
+/** Se programó o se descartó en otro lado (el panel, otro teléfono) mientras este lo tenía abierto. */
+export const BORRADOR_NO_EXISTE = 'Ese borrador ya no existe.'
 
 // Las keys llevan el nombre que puso el teléfono; un nombre kilométrico no aporta y
 // alarga cada URL que Meta y YouTube van a descargar.
