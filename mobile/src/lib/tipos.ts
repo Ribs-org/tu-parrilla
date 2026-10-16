@@ -16,6 +16,15 @@ export type PostProgramado = {
   huesos?: number
 }
 
+/**
+ * Lo que trae `GET /api/mobile/fierros`: todas tus cuentas con la temperatura de su fierro,
+ * y el aviso del engranaje con su frase ya armada («1 se enfría»).
+ */
+export type Fierros = {
+  cuentas: { id: string; red: string; handle: string | null; conectada: boolean; fierro: 'al-rojo' | 'enfriandose' | 'frio' }[]
+  aviso: { nivel: 'apagado' | 'enfriandose'; cuantos: number; frase: string } | null
+}
+
 /** Una cuenta del dueño, para elegir destino por cuenta y no por red (Tarea 7). */
 export type CuentaApp = { id: string; red: string; handle: string | null; conectada: boolean }
 
