@@ -65,7 +65,9 @@ lateral», más abajo).
 ### «Programado.»
 
 En verde, bajo el encabezado, justo después de programar algo desde el panel lateral. Se va
-al cambiar de semana o de vista, o al abrir otro panel.
+al cambiar de semana o de vista, o al abrir otro panel. A la vez, el corte recién programado
+cae en su día y queda encendido un momento con un borde naranjo que se apaga solo (ver «El
+compositor», al final de «Fecha y hora»).
 
 ### «Conecta tu primera red»
 
@@ -307,13 +309,22 @@ formulario viene abierto, con el cursor en «Texto». En este orden:
    a rechazar esto:» con una línea por archivo, «<nombre del archivo>: <problema>.». Es un
    aviso: no impide programar. Solo mide lo elegido desde que se abrió el panel: los archivos
    que vienen de un borrador guardado no se vuelven a medir.
-5. **«Cuentas»**, una casilla por cuenta, rotulada «<Red> · <usuario>» (X aparece como «X /
-   Twitter»; una cuenta sin usuario dice «sin nombre»). Una cuenta desconectada sale
-   atenuada, no se puede marcar y lleva al lado «reconéctala». En un formulario nuevo, si hay
-   una sola cuenta conectada viene marcada; con dos o más no viene ninguna. En un borrador
-   vienen marcadas las que tenía marcadas, si siguen conectadas. Sin ninguna cuenta, el
-   bloque dice «Todavía no tienes cuentas conectadas. Conecta una para poder programar.», y
-   «Conecta una» lleva a [Los Fierros](los-fierros.md) (tus redes conectadas).
+5. **«Cuentas»**, una ficha redonda por cuenta: el fierro de la cuenta —la rayita que dice la
+   temperatura de su conexión, como en [Los Fierros](los-fierros.md): naranja al rojo, ámbar
+   si se enfría, gris si se apagó—, el ícono de la red y «<Red> · <usuario>» (X aparece como
+   «X / Twitter»; una cuenta sin usuario dice «sin nombre»). Un clic la marca o la desmarca;
+   la marcada se enciende con borde naranjo. Una que se está enfriando lleva al lado «se
+   enfría», en ámbar. Una cuenta desconectada sale atenuada, no se puede marcar y lleva al
+   lado «reconéctala». En un formulario nuevo, si hay una sola cuenta conectada viene
+   marcada; con dos o más no viene ninguna. En un borrador vienen marcadas las que tenía
+   marcadas, si siguen conectadas. Si el permiso de una cuenta marcada vence antes de la hora
+   elegida, debajo de las fichas aparece en ámbar «El permiso de <Red> · <usuario> vence el
+   <día> <número> de <mes> a las HH:MM, antes de que salga esto: así no va a salir ahí.
+   Reconéctala en Los Fierros antes, o elige un día anterior.», con «Reconéctala en Los
+   Fierros» como enlace, y su marca en «Así va a quedar» sale fría. No avisa por TikTok,
+   YouTube ni X, que renuevan su permiso solas. Sin ninguna cuenta, el bloque dice «Todavía
+   no tienes cuentas conectadas. Conecta una para poder programar.», y «Conecta una» lleva a
+   Los Fierros (tus redes conectadas).
 6. **Un bloque «TikTok · <usuario>»** por cada cuenta de TikTok marcada (ver abajo).
 7. **Un bloque «Instagram · <usuario>»** por cada cuenta de Instagram marcada, solo cuando
    hay exactamente un archivo y es un video (ver abajo).
@@ -328,6 +339,19 @@ formulario viene abierto, con el cursor en «Texto». En este orden:
    día ya va lleno, con <N>. Mira si te sirve uno más flojo.» (tres o más). Los borradores no
    cuentan. «Ahora» se enciende y se apaga con un clic; encendido, el selector queda vacío y
    bloqueado y el post queda para el minuto siguiente.
+
+   Debajo del selector, la semana en chico: hoy y los seis días que siguen, cada uno con su
+   nombre («hoy», «sáb», «dom»…), su número y una rayita con su fuego (apagada, prendida o
+   llena, con lo que ya hay programado; un lector de pantalla lee, por ejemplo, «sáb 17 de
+   oct: prendida, 2 cortes»). Un clic pone ese día en el selector, con la hora que ya tenía si
+   todavía no pasó; si no tenía hora, o ya pasó, la de siempre: las 09:00, o la hora en punto
+   siguiente si es hoy. El día elegido lleva borde naranjo. Con «Ahora» encendido, la semana
+   en chico no aparece.
+
+   Al programar, el panel se cierra y el corte cae en su día: en el calendario, la semana se
+   pasa a la de ese día y su tarjeta queda encendida un momento con un borde naranjo; en la
+   vista «Día», se va a ese día; en la lista, su fila se trae a la vista. En el teléfono, la
+   semana se corre hasta él.
 10. **El pie del panel**, fijo abajo: los errores en rojo, encima de los botones; **«Programar»**,
    que dice «Programando…» mientras trabaja; **«Descartar»**; y a la derecha, en chico, cómo va
    el guardado del borrador (ver abajo).
@@ -565,12 +589,14 @@ se puede por API: ver [la guía de la API](../api-llm.md).
 2. Escribir en «Texto».
 3. Si lleva fotos o video, apretar el botón de «Archivos» y elegirlos. Esperar a que terminen
    de subir: aparecen en la lista numerada.
-4. En «Cuentas», marcar cada cuenta donde tiene que salir.
+4. En «Cuentas», marcar la ficha de cada cuenta donde tiene que salir.
 5. Si apareció un bloque de TikTok o de Instagram, llenarlo (ver las tareas de abajo).
-6. En «Fecha y hora», elegir día y hora. Mirar el aviso de debajo: si dice que el día va
-   lleno, conviene otro.
-7. Apretar «Programar». El panel se cierra, arriba dice «Programado.» y el post aparece en el
-   calendario.
+6. En «Fecha y hora», elegir día y hora: en el selector, o con un clic en un día de la semana
+   en chico. Mirar el aviso de debajo: si dice que el día va lleno, conviene otro. Si aparece
+   en ámbar que el permiso de una cuenta vence antes, reconectarla en Los Fierros o elegir un
+   día anterior.
+7. Apretar «Programar». El panel se cierra, arriba dice «Programado.» y el post cae en su día
+   del calendario, encendido un momento.
 
 Si hay que dejarlo a medias, basta con cerrar el panel: queda como borrador.
 
@@ -750,6 +776,7 @@ alguna, hay que borrarlo en la red misma.
 | Lo que dice la pantalla | Qué significa | Qué hacer |
 |---|---|---|
 | «Elige al menos una cuenta.» | No hay ninguna cuenta marcada | Marcar al menos una en «Cuentas» |
+| «El permiso de <Red> · <usuario> vence el <día> a las HH:MM, antes de que salga esto: así no va a salir ahí. Reconéctala en Los Fierros antes, o elige un día anterior.», en ámbar debajo de las fichas | El permiso de esa cuenta vence antes de la hora elegida: así como está, el post se quemaría en esa red | Reconectarla en Los Fierros, o elegir un día anterior; no impide programar |
 | «Escribe un texto o adjunta un archivo.» | No hay ni texto ni archivos | Agregar uno de los dos |
 | «La fecha no se entendió.» | La fecha está vacía o incompleta | Completar día y hora |
 | «La hora debe estar en el futuro.» | La hora elegida ya pasó (pasa con un borrador que tenía una fecha que ya llegó) | Elegir una futura, o «Ahora» |
@@ -1091,6 +1118,7 @@ Lo que describe esta página sale de:
   - `src/app/admin/(dash)/schedule/panel-lateral.tsx`
   - `src/app/admin/(dash)/schedule/composer.tsx`
   - `src/app/admin/(dash)/schedule/vista-previa.tsx`, `src/app/admin/(dash)/schedule/archivos.tsx` y `src/app/admin/(dash)/schedule/subidas.ts` («Así va a quedar», los archivos y su cola)
+  - `src/app/admin/(dash)/schedule/vence.ts` (el aviso de que el permiso de una cuenta vence antes de la hora elegida)
   - `src/lib/subida-directa.ts` (la subida a R2, con su avance)
   - `src/app/admin/(dash)/schedule/lista-borradores.tsx`
   - `src/app/admin/(dash)/schedule/batch-upload.tsx`

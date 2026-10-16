@@ -87,6 +87,8 @@ export default async function SchedulePage({
   // `volver` lleva al editor de vuelta a esta misma vista y semana; los parámetros de un solo
   // uso (el panel abierto, el aviso de «programado») no viajan.
   const volver = scheduleHref(params, {})
+  // El post que se acaba de programar desde el compositor: se enciende una vez en su día.
+  const recien = texto('nuevo') || null
 
   // Lo que el compositor usa para decir cómo está el día que elegiste. Sale de estas
   // mismas filas y no de otra consulta, así el aviso y el calendario nunca se
@@ -123,6 +125,7 @@ export default async function SchedulePage({
           cuentaInicial={borrador ? '' : texto('cuenta')}
           listoHref={scheduleHref(params, { hecho: 'programado' })}
           cerrarHref={cerrarHref}
+          zona={zona}
         />
       )
     }
@@ -215,6 +218,7 @@ export default async function SchedulePage({
                 cuando: diaYHora(c.post.scheduledAt, zona),
               }))}
               volver={volver}
+              recien={recien}
             />
           ) : vista === 'dia' ? (
             <VistaDia
@@ -246,6 +250,7 @@ export default async function SchedulePage({
               hoyHref={scheduleHref(params, { fecha: hoy })}
               nuevoEnDia={(dia, cuenta) => scheduleHref(params, { componer: '1', dia, cuenta })}
               frias={frias}
+              recien={recien}
             />
           ) : (
             <WeekCalendar
@@ -261,6 +266,7 @@ export default async function SchedulePage({
               nuevoEnDia={(dia) => scheduleHref(params, { componer: '1', dia })}
               verDia={(dia) => scheduleHref(params, { vista: 'dia', fecha: dia, semana: null })}
               frias={frias}
+              recien={recien}
             />
           )}
         </div>
