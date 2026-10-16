@@ -80,11 +80,17 @@ Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataf
   revisor, @vicente_edits2 y la página Tu-Parrilla. El 2026-10-06 Pyxis pasó a
   «proveedor de tecnología» (irreversible: los usuarios conectan sus propias páginas, que
   viven en sus portafolios) y envió la **verificación de acceso** (Meta tarda unos cinco
-  días hábiles). La solicitud del App Review quedó llena y sin enviar: 11 permisos (los 10
-  del video y `public_profile`; se sacaron los de Threads, los de mensajes privados y las
-  variantes `instagram_business_*`, que la app no pide), tratamiento de datos y
-  credenciales del revisor. Falta: cuando aprueben el acceso, conectar de nuevo las
-  cuentas del revisor y enviar.
+  días hábiles). El mismo día se **envió el App Review**: 11 permisos (los 10 del video y
+  `public_profile`; se sacaron los de Threads, los de mensajes privados y las variantes
+  `instagram_business_*`, que la app no pide), tratamiento de datos y credenciales del
+  revisor. Visto el 2026-10-16: la verificación de acceso sigue «En revisión» (ya pasada de
+  los cinco días) y el App Review, «Revisión en curso» (Meta dice que la mayoría se revisa
+  en 20 días, o más si pide información). Mientras dure, el revisor puede entrar en
+  cualquier momento: no desconectar sus cuentas (@vicente_edits2 y la página Tu-Parrilla,
+  en `revision@tu-parrilla.cl`), dejar `REVISION_CORREO`, `REVISION_CODIGO` y
+  `META_EN_REVISION` en Vercel, y no cambiar el ícono ni la URL de privacidad de la app en
+  Meta, que también se revisan. Las alertas llegan a la campana de developers.facebook.com
+  y a pyxis.latam@gmail.com.
 - **[dueño] Política interna ante solicitudes de autoridades** (2026-10-06). En el App
   Review de Meta, Pyxis declaró revisar la legalidad de cada solicitud, poder impugnarla,
   entregar lo mínimo y documentarla. Que el abogado la deje por escrito, junto con la
