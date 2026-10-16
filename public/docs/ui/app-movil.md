@@ -1,22 +1,27 @@
 # La app del teléfono
 
-Una app para Android que muestra de un vistazo cómo van las redes del dueño del sitio y le deja publicar desde la galería del teléfono. Lee los mismos datos que el panel web, pero hace mucho menos: mira números, mira lo programado y programa o publica fotos y videos en Instagram, Facebook y YouTube. Todo lo demás —conectar redes, corregir o borrar lo programado, TikTok, comentarios, la página pública— se hace en el panel web.
+Una app para Android que muestra de un vistazo cómo van las redes de quien entra y le deja publicar desde la galería del teléfono. Lee los mismos datos que el panel web, pero hace mucho menos: mira números, mira lo programado y programa o publica fotos y videos en Instagram, Facebook y YouTube. Todo lo demás —conectar redes, corregir o borrar lo programado, TikTok, comentarios, la página pública— se hace en el panel web.
 
 ## Cómo se llega
 
 - Es solo para Android; no hay versión para iPhone. No se encuentra buscándola en una tienda: se instala con el archivo `.apk` que entrega quien administra el sitio, o por la prueba interna de Google Play si a la persona la invitaron. En el teléfono, el ícono se llama «Vicente · Números».
-- Hoy la app es solo para el dueño del sitio. Se entra con la contraseña de la app, que define quien administra el sitio; no es el código por correo con que se entra al panel web ([Entrar al panel](ingresar.md)). Con esa contraseña se entra siempre a las cuentas del dueño. Un usuario invitado no tiene cómo entrar con su correo.
-- La primera vez pide la contraseña. Después la sesión queda abierta: no la vuelve a pedir.
-- Si el teléfono tiene PIN, patrón, huella o reconocimiento de cara, cada vez que se abre la app pide desbloquear con el aviso «Desbloquea para ver tus números». Si se cancela, la app muestra la pantalla de la contraseña.
-- Si la sesión deja de valer (por ejemplo, porque quien administra el sitio revocó el acceso de los teléfonos), la app vuelve sola a la pantalla de la contraseña, sin ningún mensaje.
+- Se entra igual que al panel web ([Entrar al panel](ingresar.md)): con el correo y un código de seis dígitos que llega a ese correo. Entra solo quien está invitado, y cada persona ve sus propias cuentas. No hay contraseña.
+- La primera vez pide el correo y el código. Después la sesión queda abierta: no los vuelve a pedir.
+- Si el teléfono tiene PIN, patrón, huella o reconocimiento de cara, cada vez que se abre la app pide desbloquear con el aviso «Desbloquea para ver tus números». Si se cancela, la app muestra la pantalla de entrada.
+- Si la sesión deja de valer (por ejemplo, porque quien administra el sitio revocó el acceso de los teléfonos), la app vuelve sola a la pantalla de entrada, sin ningún mensaje.
 
 ## Qué se ve
 
 Los títulos y rótulos se ven en mayúsculas por diseño; aquí van escritos como están en el código.
 
-### La pantalla de la contraseña
+### La pantalla de entrada
 
-El título «Tus números», la frase «Escribe tu contraseña una vez.», un campo con el texto de ayuda «Contraseña» y el botón «Entrar» (mientras comprueba, «Entrando…»). Si algo falla, el mensaje sale en rojo debajo del campo.
+Tiene dos pasos, uno detrás del otro en la misma pantalla:
+
+- **El correo.** El título «Tus números», la frase «Entra con tu correo: te mandamos un código.», un campo con el texto de ayuda «tu@correo.cl» y el botón «Mandarme un código» (mientras lo pide, «Enviando…»; apagado mientras el campo esté vacío).
+- **El código.** El título «Tu código», la frase «Si tu correo está invitado, te llegará un código en un minuto. Vale diez minutos.», un campo con el texto de ayuda «000000» que solo acepta números, el botón «Entrar» (mientras comprueba, «Entrando…»; apagado hasta que haya seis dígitos) y, debajo, «Usar otro correo», que vuelve al paso del correo.
+
+Si algo falla, el mensaje sale en rojo debajo del campo.
 
 ### La barra de pestañas
 
@@ -36,7 +41,7 @@ En «Resumen», «Contenido», «Cuentas» y «Calendario», la app muestra al i
 ### Contenido
 
 - Los mismos botones de período: «Hoy», «7 días», «30 días».
-- Botones de red: «Todas», «Instagram», «Facebook», «YouTube», «Threads» y «X». Se pueden marcar varios; «Todas» quita el filtro. No hay botón de TikTok, y Tu Parrilla hoy no conecta Threads ni X, así que esos dos filtros salen vacíos.
+- Botones de red: «Todas», «Instagram», «Facebook», «YouTube», «Threads» y «X». Se pueden marcar varios; «Todas» quita el filtro. No hay botón de TikTok. Threads y X se conectan en el panel web, pero Tu Parrilla no trae sus publicaciones ni sus números, así que esos dos filtros salen vacíos.
 - La lista de lo publicado en el período, ordenada de más a menos views ganadas. Cada fila: la miniatura, el texto, «Red · fecha», la marca «Se pasó» cuando el post sacó al menos el doble de views ganadas que la mediana (el valor del medio) de los posts que se están mirando, y abajo «N views» y «P% arrastre».
 - Si no hay nada: «No publicaste nada en este período.»
 - Tocar una fila abre su detalle.
@@ -88,8 +93,11 @@ Las horas de «Resumen» y «Calendario» están en la zona horaria de [Tu Cuent
 ### Para entrar por primera vez
 
 1. Abre la app.
-2. Escribe la contraseña de la app en «Contraseña».
-3. Toca «Entrar» (o la tecla de enviar del teclado). Se abre «Resumen».
+2. Escribe tu correo en «tu@correo.cl» y toca «Mandarme un código».
+3. Abre el correo «… es tu código para entrar a Parrilla» y copia los seis dígitos.
+4. Escríbelos en «000000» y toca «Entrar» (o la tecla de enviar del teclado). Se abre «Resumen».
+
+Si el código no llega, revisa el spam y que el correo esté bien escrito; «Usar otro correo» vuelve al primer paso para pedir otro. Son a lo más tres códigos cada quince minutos.
 
 ### Para ver cómo va una semana o un mes
 
@@ -150,10 +158,14 @@ No se puede desde la app. Se hace en el panel web, en [La Parrilla](la-parrilla.
 
 | Lo que dice la pantalla | Qué significa | Qué hacer |
 |---|---|---|
-| «Desbloquea para ver tus números» | La app pide el bloqueo del teléfono. | Usar el PIN, patrón, huella o cara del teléfono. Si se cancela, pide la contraseña de la app. |
-| «Contraseña incorrecta.» | La contraseña no es la de la app. También sale si el servidor tuvo un problema al preparar el ingreso. | Revisarla con quien administra el sitio; no es el código por correo del panel. |
-| «Demasiados intentos. Espera unos minutos.» | Muchos intentos de contraseña seguidos. | Esperar unos diez minutos. |
-| «No se pudo conectar. Revisa tu señal.» | Sin conexión al entrar, al comprobar el post o al guardarlo. | Revisar la señal; en «Publicar», tocar «Reintentar». |
+| «Desbloquea para ver tus números» | La app pide el bloqueo del teléfono. | Usar el PIN, patrón, huella o cara del teléfono. Si se cancela, sale la pantalla de entrada. |
+| «Ese correo no se ve bien.» | Al correo le falta algo, como la @ o el dominio. | Revisarlo y volver a tocar «Mandarme un código». |
+| «Si tu correo está invitado, te llegará un código en un minuto. Vale diez minutos.» | Es lo mismo que dice el panel web, esté o no invitado el correo: no revela quién lo está. | Esperar el correo. Si no llega en unos minutos, revisar el spam y que el correo esté bien escrito, o pedirle a quien administra el sitio que lo invite. |
+| «Ese código no es válido o ya venció.» | El código está mal escrito, venció (dura diez minutos), ya se usó, se pidió otro después (vale solo el último) o ese correo no está invitado. | Revisarlo, o «Usar otro correo» y pedir uno nuevo. |
+| «Demasiados intentos. Pide un código nuevo.» | Cinco códigos equivocados seguidos agotan ese código; también sale con muchos intentos seguidos desde la misma conexión. | «Usar otro correo» y pedir un código nuevo. |
+| «Demasiados intentos en las últimas 24 horas. Prueba de nuevo más tarde.» | Diez códigos equivocados en un día, sumando la web y el teléfono. | Esperar; hasta un día después del primer error. Ver [Entrar al panel](ingresar.md). |
+| «El servidor no respondió bien. Prueba de nuevo en un rato.» | Falla del servidor, no de lo que se escribió. | Esperar y volver a intentar; si se repite, avisar a quien administra el sitio. |
+| «No se pudo conectar. Revisa tu señal.» | Sin conexión al pedir el código, al entrar, al comprobar el post o al guardarlo. | Revisar la señal; en «Publicar», tocar «Reintentar». |
 | «No se pudo actualizar.» | Falló la descarga de datos nuevos; lo que se ve puede ser viejo. | Arrastrar hacia abajo o tocar «Reintentar» cuando haya señal. |
 | «No se pudo cargar.» | No hay datos guardados y no se pudieron descargar. | «Reintentar». |
 | «Sin permiso para ver la galería.» | El teléfono no le dio permiso a la app para ver fotos y videos. | Dar el permiso en los ajustes del teléfono y volver a tocar «+ Fotos o video». |
@@ -188,7 +200,9 @@ No se puede desde la app. Se hace en el panel web, en [La Parrilla](la-parrilla.
 
 ## Si el humano dice…
 
-- «No me acepta la contraseña» → es la contraseña de la app, que define quien administra el sitio; no es el código que llega por correo para el panel web. Si la persona es un usuario invitado, hoy la app no es para ella: usa el panel web.
+- «Me pide una contraseña» → es una versión vieja de la app: la nueva llega sola al abrirla dos veces con señal. La contraseña ya no sirve; si no se actualiza, hay que pedirle el instalador nuevo a quien administra el sitio.
+- «No me llega el código» → revisar el spam y que el correo esté bien escrito. Si sigue sin llegar, ese correo puede no estar invitado: lo invita quien administra el sitio, en [Los Maestros](los-maestros.md).
+- «Me dice que espere 24 horas» → se equivocó diez veces en un día con el código; ver [Entrar al panel](ingresar.md).
 - «Me pide desbloquear cada vez» → es el bloqueo del propio teléfono; se usa el PIN, patrón, huella o cara del teléfono.
 - «Quiero cerrar sesión» → la app no tiene botón para eso.
 - «Perdí el teléfono» → quien administra el sitio puede revocar el acceso de todos los teléfonos a la vez; las conexiones con las redes no se tocan.
@@ -218,7 +232,6 @@ Comparada con el panel web, la app no:
 - edita la página pública ([La Vitrina](la-vitrina.md));
 - cambia la zona horaria ni genera llaves ([Tu Cuenta](tu-cuenta.md));
 - invita usuarios ([Los Maestros](los-maestros.md));
-- deja entrar con correo y código, ni a usuarios invitados;
 - cierra sesión desde la propia app;
 - manda notificaciones;
 - existe para iPhone.
@@ -243,6 +256,7 @@ Lo que describe sale de estos archivos:
 - `mobile/src/lib/publicar.ts`
 - `mobile/src/lib/subir.ts`
 - `mobile/src/lib/session.ts`
+- `mobile/src/lib/ingreso.ts`
 - `mobile/src/lib/api.ts`
 - `mobile/src/lib/cache.ts`
 - `mobile/src/lib/useScreenData.ts`

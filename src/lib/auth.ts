@@ -1,23 +1,10 @@
 import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
 import type { Usuario } from '@/db'
-import { env } from './env'
 import { firmarSesion, leerSesion, MAX_AGE_SECONDS } from './sesion-token'
 import { buscarPorId } from './usuarios'
 
 const COOKIE_NAME = 'pf_session'
-
-/** Sobrevive solo para la sesión móvil de transición: la app instalada entra con la contraseña. */
-export function passwordMatches(candidate: string): boolean {
-  const expected = env('ADMIN_PASSWORD')
-  if (!expected) return false
-  const a = new TextEncoder().encode(candidate)
-  const b = new TextEncoder().encode(expected)
-  const length = Math.max(a.length, b.length)
-  let diff = a.length ^ b.length
-  for (let i = 0; i < length; i++) diff |= (a[i] ?? 0) ^ (b[i] ?? 0)
-  return diff === 0
-}
 
 export async function createSession(usuario: Pick<Usuario, 'id' | 'rol' | 'sesionVersion'>): Promise<void> {
   const token = await firmarSesion({ sub: usuario.id, rol: usuario.rol, sv: usuario.sesionVersion })

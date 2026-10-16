@@ -108,7 +108,7 @@ export async function asegurarAdmin(): Promise<Usuario> {
     .returning()
 
   // Solo la primera vez. Esta función no corre en cada build —la llaman `pedir()`,
-  // `api/mobile/session` y `social/fuentes/run.ts`, no el build— y el dueño ya tiene sus
+  // `adminId()` y `social/fuentes/run.ts`, no el build— y el dueño ya tiene sus
   // páginas: crear otra en cada llamada sería una fila nueva por llamada. Si falla,
   // no hay invitación que quede a medias: la próxima llamada lo reintenta desde cero.
   const [tiene] = await db.select({ id: profiles.id }).from(profiles).where(eq(profiles.ownerId, fila!.id)).limit(1)

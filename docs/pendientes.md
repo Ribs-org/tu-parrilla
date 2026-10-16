@@ -22,8 +22,6 @@ Cómo se usa:
 
 ## Bugs
 
-- **La app del teléfono dice «Contraseña incorrecta.» para cualquier error**, también cuando
-  el servidor falla (2026-10-13). `mobile/src/lib/session.ts:34`; ver la auditoría, §1.2.
 - **Los Fierros: falsa alarma en X** (2026-10-13). La tarjeta dice «vence hoy» al conectar y
   a las dos horas queda gris, aunque X se renueva sola al publicar: falta eximirla en
   `estadoDelFierro` como a TikTok y YouTube (#154). Ver la auditoría, §1.4.
@@ -63,10 +61,6 @@ Cómo se usa:
   va acá: el repositorio es público, y escribir una vulnerabilidad sin arreglar es
   publicarla. Está en la carpeta privada del dueño, `tu-parrilla-privado`, fuera del repo;
   cada arreglo la cuenta en su propio PR, cuando ya está cerrada.
-- **Reactivar el workflow «Respaldo de la base»** (2026-10-15) cuando el cambio que cifra
-  los volcados esté en `main`: quedó apagado para que no suba otro en claro. `gh workflow
-  enable respaldo.yml`, y una corrida a mano (`gh workflow run respaldo.yml`) para ver que
-  sale el `.age`.
 
 ## Trámites con las plataformas
 
@@ -178,6 +172,17 @@ Nada de esto bloquea un trámite hoy; conviene ordenarlo antes de abrir a tercer
 - **El privado de Meta (DM con el PDF)** necesita `instagram_manage_messages` y
   `pages_messaging` en una segunda vuelta de App Review (`docs/levantamiento-terceros.md`
   §2.2 y §7).
+- **El privado con botón, y la guía solo para seguidores** (2026-10-15). En vez de mandar
+  el PDF de una en el privado, mandar un botón: «¿Quieres que te mande la guía?». Al
+  apretarlo, la guía llega solo si la persona sigue la cuenta; si no, recibe «Esta guía es
+  solo para mis seguidores, sígueme: @cuenta» con un botón «Ya te seguí» que vuelve a
+  revisar. Pedir el follow es un interruptor de cada regla de palabra clave (una columna
+  booleana en `reglas_clave`): apagado, el botón entrega la guía sin mirar. Depende del
+  privado de la entrada anterior y de sus mismos permisos. Por confirmar al hacerlo: que
+  la API de mensajes de Instagram diga si quien escribe sigue la cuenta (su perfil trae
+  `is_user_follow_business`); que en Facebook no hay equivalente; y que el toque del botón
+  llega por webhook, no por el sondeo con que hoy se leen los comentarios. El privado de
+  hoy está en `src/lib/social/comentarios/privado.ts`.
 - **YouTube: la historia y el arrastre de las cuentas propias** (2026-10-10). Para cumplir
   las políticas de YouTube (PR #157), todo dato suyo se borra a los 30 días sin refrescar
   y sus filas van sin lo ganado ni arrastre, para todos los usuarios. Es un parche para
