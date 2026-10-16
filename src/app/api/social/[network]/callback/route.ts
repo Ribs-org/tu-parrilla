@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { usuarioActual } from '@/lib/auth'
 import { env } from '@/lib/env'
 import { networkLabel } from '@/lib/networks'
-import { CuentaDeOtro, guardarCuenta } from '@/lib/social/conectar'
+import { CuentaDeOtro, guardarCuenta, siQueriasOtra } from '@/lib/social/conectar'
 import {
   NO_FACEBOOK_PAGE,
   SIN_TOKEN_DE_PAGINA,
@@ -481,7 +481,9 @@ export async function GET(
     // ourselves. Everything else — a non-JSON upstream body breaking `.json()`, a DB
     // write failure — gets logged server-side and a fixed fallback, never its raw
     // message, in the redirect.
-    if (error instanceof CuentaDeOtro) return back(error.message)
+    // Con una sola cuenta en el login, la de otro era lo único que la red entregó: la
+    // persona casi siempre quería otra, así que se le dice cómo pedirla.
+    if (error instanceof CuentaDeOtro) return back(`${error.message} ${siQueriasOtra(network)}`)
     if (error instanceof OAuthError) return back(error.message)
     console.error('Error conectando red social:', error)
     return back('No se pudo conectar. Inténtalo de nuevo.')
