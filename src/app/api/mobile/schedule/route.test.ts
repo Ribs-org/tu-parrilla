@@ -114,6 +114,26 @@ describe('agruparPostsMovil (GET /api/mobile/schedule)', () => {
     ])
   })
 
+  it('trae el corte que dibuja el teléfono: su formato y el sello de cada destino', () => {
+    const post = filaPost({ id: 'post-3' })
+    const filas = [
+      { post, target: filaTarget({ id: 'dest-1', postId: 'post-3', accountId: 'viva', status: 'published' }), handle: '@a' },
+      { post, target: filaTarget({ id: 'dest-2', postId: 'post-3', accountId: 'fria' }), handle: '@b' },
+    ]
+    const media = new Map([
+      [
+        'post-3',
+        [
+          { blobUrl: 'https://cdn.ejemplo.cl/1.mp4', mediaType: 'video' },
+          { blobUrl: 'https://cdn.ejemplo.cl/2.jpg', mediaType: 'image' },
+        ],
+      ],
+    ])
+    const [agrupado] = agruparPostsMovil(filas, media, 'America/Santiago', new Set(['fria']))
+    expect(agrupado).toMatchObject({ formato: 'tira', huesos: 2, miniatura: 'https://cdn.ejemplo.cl/2.jpg' })
+    expect(agrupado!.redes.map((r) => r.sello)).toEqual(['servido', 'frio'])
+  })
+
   it('agrupa por post, no por destino: dos filas del mismo post arman un post con dos redes', () => {
     const post = filaPost({ id: 'post-2' })
     const filas = [

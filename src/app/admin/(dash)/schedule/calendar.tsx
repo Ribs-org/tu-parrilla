@@ -1,10 +1,11 @@
-import Image from 'next/image'
 import Link from 'next/link'
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
+import { Corte } from '@/components/corte'
 import type { ScheduledPost, ScheduledPostTarget } from '@/db/schema'
 import { dayLabel, dayKey, groupByDay, hourLabel, weekDays, weekLabel } from '@/lib/schedule-week'
-import { NOMBRE_COCCION, calorDelDia, coccionDe, type Coccion } from '@/lib/parrilla'
+import { NOMBRE_COCCION, NOMBRE_FORMATO, calorDelDia, type Coccion } from '@/lib/parrilla'
 import { cn } from '@/lib/utils'
+import { bordeDe, dibujoDe, estadoCorto, type Borde } from './dibujo'
 import { etiquetaDestino, motivoDestino, nombreDestino } from './etiqueta'
 import { Redes } from './redes'
 
@@ -24,39 +25,24 @@ export const ROTULO_CALOR = {
   llena: 'Parrilla llena',
 } as const
 
-export const CLASE_COCCION: Record<Coccion, string> = {
-  cruda: 'corte-cruda',
-  sellada: 'corte-sellada',
-  punto: 'corte-punto',
-  quemada: 'corte-quemada',
+/**
+ * La tarjeta de un corte: chapa, y no carne. La carne es el dibujo de arriba; la tarjeta solo
+ * cambia de borde cuando necesita algo del dueño (`bordeDe`, en `dibujo.ts`). La comparten la
+ * semana y la vista «Día».
+ */
+export const CLASE_BORDE: Record<Borde, string> = {
+  cuenta: 'border-acero-700',
+  atencion: 'border-caution/75',
+  mano: 'border-negative/80',
 }
 
-/**
- * La miniatura de un corte: la foto, la portada del video o, sin ninguna, su primer cuadro.
- * Nada si no tiene archivos. La comparten la semana y la vista «Día».
- */
-export function MiniaturaCorte({
-  post,
-  media,
-}: {
-  post: Pick<ScheduledPost, 'coverUrl'>
-  media: Array<{ blobUrl: string; mediaType: string }>
-}) {
-  if (!media[0]) return null
-  return (
-    <span className="corte-media mt-1 block">
-      {media[0].mediaType === 'image' ? (
-        <Image src={media[0].blobUrl} alt="" width={120} height={64} unoptimized className="h-16 w-full rounded object-cover" />
-      ) : post.coverUrl ? (
-        // The designed cover IS the video's preview when there is one.
-        <Image src={post.coverUrl} alt="" width={120} height={64} unoptimized className="h-16 w-full rounded object-cover" />
-      ) : (
-        // No controls (the whole card is a link); preload="metadata"
-        // paints the first frame without pulling the file.
-        <video src={media[0].blobUrl} preload="metadata" muted playsInline className="h-16 w-full rounded bg-black object-cover" />
-      )}
-    </span>
-  )
+/** El color del estado en palabras, al lado de la hora. */
+export const CLASE_ESTADO: Record<Coccion, string> = {
+  cruda: 'text-fg',
+  sellada: 'text-fg',
+  punto: 'text-positive',
+  parcial: 'text-negative',
+  quemada: 'text-negative',
 }
 
 /**
@@ -76,6 +62,7 @@ export function WeekCalendar({
   nextHref,
   nuevoEnDia,
   verDia,
+  frias,
 }: {
   monday: string
   items: Item[]
@@ -88,6 +75,8 @@ export function WeekCalendar({
   nuevoEnDia: (dia: string) => string
   /** El enlace a ese día en la vista «Día», desgranado por cuenta. */
   verDia: (dia: string) => string
+  /** Las cuentas con el fierro frío: lo programado ahí lleva la marca fría. */
+  frias: ReadonlySet<string>
 }) {
   const days = weekDays(monday)
   const today = dayKey(new Date(), zone)
@@ -199,13 +188,10 @@ export function WeekCalendar({
                     )
                   ) : (
                     cortes.map(({ post, targets, media }) => {
-                      // Misma precedencia que antes, solo que ahora vestida: un fallo en
-                      // cualquier destino gana, todos publicados es «a punto», algo en
-                      // curso es «sellada», el resto queda cruda.
-                      const coccion = coccionDe(targets.map((t) => t.status))
-                      // Los destinos que fallaron y esperan otro intento. La cocción no los
-                      // distingue de uno que nunca se intentó —los dos quedan crudos—, así
-                      // que el motivo va escrito en la tarjeta.
+                      const dibujo = dibujoDe(targets, media, frias)
+                      const estado = estadoCorto(dibujo.coccion, dibujo.sellos)
+                      // Los destinos que fallaron y esperan otro intento. Su marca va en ámbar;
+                      // el motivo, escrito, porque es lo único que dice qué está pasando.
                       const reintentos = targets.filter((t) => t.status === 'scheduled' && motivoDestino(t))
                       return (
                         <Link
@@ -214,9 +200,7 @@ export function WeekCalendar({
                           // Sin prefetch: una semana cargada son decenas de tarjetas, y cada
                           // una pedía su editor por adelantado (ver `docs/pendientes.md`).
                           prefetch={false}
-                          // El detalle por red, que antes vivía en el `title` de cada
-                          // punto de color. La cocción dice que algo falló; esto dice
-                          // cuál, sin tener que entrar al editor.
+                          // El detalle por red, con el motivo si lo hay, sin entrar al editor.
                           title={targets
                             .map((t) => {
                               const motivo = motivoDestino(t)
@@ -224,42 +208,44 @@ export function WeekCalendar({
                             })
                             .join(' · ')}
                           className={cn(
-                            'corte block p-2 transition-transform hover:-translate-y-0.5',
-                            CLASE_COCCION[coccion],
+                            'block rounded-md border bg-acero-900 p-1.5 transition-transform hover:-translate-y-0.5',
+                            CLASE_BORDE[bordeDe(dibujo.coccion, dibujo.sellos)],
                           )}
                         >
                           {/*
-                            A opacidad plena y no al 70%: sobre la cruda, que es la
-                            cocción más clara, un 70% cae a 3.12:1 y no llega al mínimo.
-                            La jerarquía la hace el tamaño, no el desteñido.
+                            El humo y la banderita se asoman por arriba del dibujo: el margen
+                            les deja lugar sin tapar la tarjeta de encima.
                           */}
-                          <p className="font-titulo text-[0.6rem] tracking-[0.12em] text-fg">
+                          <Corte
+                            {...dibujo}
+                            className={cn(
+                              (dibujo.sellos.includes('saliendo') || dibujo.coccion === 'parcial' || dibujo.coccion === 'quemada') &&
+                                'mt-2.5',
+                            )}
+                          />
+                          <p className="mt-1.5 font-titulo text-[0.6rem] tracking-[0.12em] text-fg">
                             {hourLabel(post.scheduledAt, zone)}
-                            {coccion === 'sellada' ? (
-                              // En `text-fg` y no en brasa: la brasa sobre la carne
-                              // sellada da 2.15:1. Lo que llama la atención acá es el
-                              // humo, no el color.
-                              <span className="humo ml-1.5 inline-block">saliendo</span>
-                            ) : null}
+                            {estado ? <span className={CLASE_ESTADO[dibujo.coccion]}> · {estado}</span> : null}
                           </p>
-                          <Redes targets={targets} />
-                          <MiniaturaCorte post={post} media={media} />
+                          <span className="mt-1 block">
+                            <Redes targets={targets} sellos={dibujo.sellos} />
+                          </span>
                           <p className="mt-1 line-clamp-2 text-[0.75rem] leading-snug text-fg">
                             {post.caption || '(sin texto)'}
                           </p>
                           {reintentos.map((t) => (
-                            <p key={t.id} className="mt-1 text-[0.68rem] leading-snug text-fg">
+                            <p key={t.id} className="mt-1 text-[0.68rem] leading-snug text-caution">
                               Reintentando {nombreDestino(t)}: {motivoDestino(t)}
                             </p>
                           ))}
                           {/*
-                            El estado en palabras, una sola vez. El `title` no sirve para
-                            esto: sobre un enlace con contenido es descripción y no
-                            nombre, así que un lector de pantalla puede no leerlo. Los
+                            Lo que el dibujo dice, en palabras: el formato y la cocción. Los
                             destinos ya no van aquí: `Redes` trae su propio `sr-only`, y
                             decirlos dos veces sería un lector de pantalla repitiéndose.
                           */}
-                          <span className="sr-only">{NOMBRE_COCCION[coccion]}</span>
+                          <span className="sr-only">
+                            {NOMBRE_FORMATO[dibujo.formato]} · {NOMBRE_COCCION[dibujo.coccion]}
+                          </span>
                         </Link>
                       )
                     })

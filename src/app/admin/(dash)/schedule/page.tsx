@@ -6,6 +6,7 @@ import { requireUser } from '@/lib/auth'
 import { fechaParaDia, idDeBorrador, primero, textoDe } from '@/lib/borrador'
 import { cargarBorrador, listarBorradores } from '@/lib/borradores'
 import { pieDeAyer, quemados } from '@/lib/fuego'
+import { cuentasFrias } from '@/lib/parrilla'
 import { getCuentas } from '@/lib/posts'
 import {
   addDays,
@@ -78,6 +79,8 @@ export default async function SchedulePage({
   const borradores = await listarBorradores(ownerId)
 
   const hayConectada = cuentas.some((c) => c.connected)
+  // Las cuentas con el fierro frío: lo que se programó ahí lleva la marca fría en su corte.
+  const frias = cuentasFrias(cuentas, now)
   // `volver` lleva al editor de vuelta a esta misma vista y semana; los parámetros de un solo
   // uso (el panel abierto, el aviso de «programado») no viajan.
   const volver = scheduleHref(params, {})
@@ -175,7 +178,7 @@ export default async function SchedulePage({
       <div className="space-y-6">
         {hayConectada ? null : <PrimerDia />}
 
-        <SeQuemo filas={quemados(cortes)} now={now} zone={zona} volver={volver} />
+        <SeQuemo filas={quemados(cortes)} now={now} zone={zona} volver={volver} frias={frias} />
 
         <div>
           <div className="mb-3 flex items-center gap-1.5">
@@ -232,6 +235,7 @@ export default async function SchedulePage({
               nextHref={scheduleHref(params, { fecha: addDays(fecha, 1) })}
               hoyHref={scheduleHref(params, { fecha: hoy })}
               nuevoEnDia={(dia, cuenta) => scheduleHref(params, { componer: '1', dia, cuenta })}
+              frias={frias}
             />
           ) : (
             <WeekCalendar
@@ -246,6 +250,7 @@ export default async function SchedulePage({
               nextHref={scheduleHref(params, { semana: addDays(monday, 7) })}
               nuevoEnDia={(dia) => scheduleHref(params, { componer: '1', dia })}
               verDia={(dia) => scheduleHref(params, { vista: 'dia', fecha: dia, semana: null })}
+              frias={frias}
             />
           )}
         </div>

@@ -13,33 +13,55 @@
  * Ver `docs/superpowers/specs/2026-09-18-parrilla-de-verdad-design.md`.
  */
 
-export type Coccion = 'cruda' | 'sellada' | 'punto' | 'quemada'
+/** «parcial» es «se quemó en una red»: algo salió o sigue en la parrilla y algo falló. */
+export type Coccion = 'cruda' | 'sellada' | 'punto' | 'parcial' | 'quemada'
+/** Las cuatro carnes que se pintan. Un corte «parcial» se pinta con la de lo que no se quemó. */
+export type Carne = 'cruda' | 'sellada' | 'punto' | 'quemada'
 export type Calor = 'apagada' | 'prendida' | 'llena'
 
+/** Qué corte es un post: lo decide el servidor (`formatoDe` en el panel) y llega en la API. */
+export type Formato = 'entrana' | 'tira' | 'bife' | 'chori'
+
+/** Cómo le fue a cada destino: su marca en el corte. También llega decidido en la API. */
+export type Sello = 'pendiente' | 'saliendo' | 'servido' | 'bandeja' | 'reintento' | 'quemado' | 'frio'
+
 /**
- * Los dos extremos de cada cocción. Ordenados de claro a oscuro, y ese orden es la
- * información: contar la cocción por luminosidad y no por tono es lo que hace que la
- * escala se siga leyendo con daltonismo.
+ * Los tres topes de cada carne, de la esquina clara a la honda. Ordenadas de clara a
+ * oscura, y ese orden es la información: contar la cocción por luminosidad y no por tono
+ * es lo que hace que la escala se siga leyendo con daltonismo. Ningún texto va encima: va
+ * al lado, en la chapa.
  */
-export const COCCION: Record<Coccion, { claro: string; oscuro: string }> = {
-  cruda: { claro: '#a84c46', oscuro: '#8f453f' },
-  sellada: { claro: '#8c3f36', oscuro: '#73342c' },
-  punto: { claro: '#6e3128', oscuro: '#4e231c' },
-  quemada: { claro: '#3a2a26', oscuro: '#241a17' },
+export const CARNE: Record<Carne, { claro: string; medio: string; hondo: string }> = {
+  cruda: { claro: '#f0a08f', medio: '#e8907f', hondo: '#c45a52' },
+  sellada: { claro: '#d47d50', medio: '#c46a40', hondo: '#9a4a2e' },
+  punto: { claro: '#b47640', medio: '#8f5326', hondo: '#6a3a1a' },
+  quemada: { claro: '#3a2722', medio: '#2b1d1a', hondo: '#150e0c' },
 }
 
-/** El veteado de la grasa del corte. */
+/** El veteado de la grasa y los huesos de la tira. */
 export const GRASA = '#e8d7b8'
 
-/** De claro a oscuro. */
-export const ORDEN_COCCION: readonly Coccion[] = ['cruda', 'sellada', 'punto', 'quemada']
+/** El rojo de «se quemó»: el halo y la banderita. Se aleja del naranjo de la brasa. */
+export const QUEMO = '#f2557a'
+
+/** De clara a oscura. */
+export const ORDEN_CARNE: readonly Carne[] = ['cruda', 'sellada', 'punto', 'quemada']
 
 /** Cómo se llama cada cocción, para el lector de pantalla y para la leyenda. */
 export const NOMBRE_COCCION: Record<Coccion, string> = {
   cruda: 'Programada',
   sellada: 'Saliendo ahora',
   punto: 'Publicada',
+  parcial: 'Falló en parte',
   quemada: 'Falló',
+}
+
+/** El formato en palabras: lo que lee el lector de pantalla en vez de la silueta. */
+export const NOMBRE_FORMATO: Record<Formato, string> = {
+  entrana: 'Video',
+  tira: 'Carrusel',
+  bife: 'Foto',
+  chori: 'Texto',
 }
 
 /**
@@ -85,16 +107,49 @@ export function calorDelDia(cortes: number): Calor {
 }
 
 /**
- * La cocción de un post según el estado de sus destinos: un fallo en cualquiera gana
- * sobre todo lo demás, todos publicados es «a punto», algo en curso es «sellada», el
- * resto queda cruda.
+ * La cocción de un post según el estado de sus destinos: si fallaron todos es «quemada», y
+ * si falló alguno, «parcial»; sin fallos, todos publicados es «a punto», algo en curso es
+ * «sellada», el resto queda cruda.
  *
  * Un post sin destinos queda crudo y no «a punto»: `every` sobre una lista vacía
  * devuelve `true`, así que sin el largo explícito se vería como publicado.
  */
 export function coccionDe(estados: readonly string[]): Coccion {
-  if (estados.some((estado) => estado === 'failed')) return 'quemada'
+  const fallidos = estados.filter((estado) => estado === 'failed').length
+  if (fallidos > 0) return fallidos === estados.length ? 'quemada' : 'parcial'
   if (estados.length > 0 && estados.every((estado) => estado === 'published')) return 'punto'
   if (estados.some((estado) => estado === 'publishing')) return 'sellada'
   return 'cruda'
+}
+
+/** Con qué carne se pinta: la de la cocción y, si se quemó en una red, la de lo demás. */
+export function carneDe(estados: readonly string[]): Carne {
+  const coccion = coccionDe(estados)
+  if (coccion !== 'parcial') return coccion
+  return coccionDe(estados.filter((estado) => estado !== 'failed')) as Carne
+}
+
+/**
+ * El sello de un destino si la API no lo trae —una respuesta del servidor de antes de que
+ * existiera—: lo que se puede saber solo con el estado. Sin el servidor no se sabe si la
+ * cuenta se enfrió ni si TikTok recibió un borrador.
+ */
+export function selloPorEstado(estado: string, error?: string | null): Sello {
+  if (estado === 'failed') return 'quemado'
+  if (estado === 'published') return 'servido'
+  if (estado === 'publishing') return 'saliendo'
+  return error ? 'reintento' : 'pendiente'
+}
+
+/**
+ * Qué borde lleva la tarjeta de un corte, como en el panel (`bordeDe`, en
+ * `src/app/admin/(dash)/schedule/dibujo.ts`): la tarjeta no se pinta de colores, cambia de
+ * borde solo cuando necesita algo del dueño. Ámbar si pide atención, rojo si se quemó.
+ */
+export type Borde = 'cuenta' | 'atencion' | 'mano'
+
+export function bordeDe(coccion: Coccion, sellos: readonly Sello[]): Borde {
+  if (coccion === 'parcial' || coccion === 'quemada') return 'mano'
+  if (sellos.some((s) => s === 'bandeja' || s === 'reintento' || s === 'frio')) return 'atencion'
+  return 'cuenta'
 }

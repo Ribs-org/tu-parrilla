@@ -1,3 +1,4 @@
+import { CorteDefs } from '@/components/corte'
 import { requireUser } from '@/lib/auth'
 import { logout } from '../actions'
 import { AdminNav } from './nav'
@@ -13,6 +14,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <div className="acerado min-h-dvh bg-acero-950">
+      {/* Los degradados y siluetas que comparten todos los cortes dibujados del panel. */}
+      <CorteDefs />
       <header className="sticky top-0 z-30 border-b border-acero-700 bg-acero-950/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3 sm:px-6">
           <span className="font-titulo text-sm font-semibold uppercase tracking-[0.1em]">Panel</span>

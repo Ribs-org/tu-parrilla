@@ -81,14 +81,50 @@ El título va en rojo. Aparece solo si hay algo que falló, de cualquier fecha; 
 nada, la sección no existe. Cada fila es una red donde un corte falló: un corte que falló en
 dos redes da dos filas. Van de la más reciente a la más vieja. Cada fila trae:
 
+- el corte en chico, con todas sus marcas: se ve cuál se quemó y si las demás salieron (ver
+  «El corte», más abajo);
 - la hora, solo HH:MM si el corte era de hoy, o con día y mes delante si no
   («<día> <número> de <mes> · HH:MM», por ejemplo «vie 25 de sep · 09:15»);
-- el ícono de la red que falló;
+- el chip de la red que falló, con su ícono y una «✕»;
 - el texto del post, que es un enlace a su editor (o «(sin texto)»);
 - debajo, en rojo, el motivo, cuando lo hay: una frase fija en español que dice por qué no
   salió (ver «Motivos de un destino que no salió», más abajo);
 - el botón «Reprogramar», que abre la misma ventana que el de la lista (ver «La ventana
   «Reprogramar»», más abajo).
+
+### El corte
+
+El calendario, el día y «Se quemó» dibujan cada publicación como un corte de carne sobre la
+parrilla. El dibujo no lleva texto encima; lo dice todo en cuatro cosas que se leen sin leer:
+
+- **La forma es el formato.** Una entraña (larga y con la fibra en diagonal) es un video; una
+  tira de asado, con un hueso por archivo, es un carrusel (cinco huesos, cinco fotos; se
+  dibujan hasta diez); un bife (ovalado) es una foto; un chori, sin archivos, es solo texto.
+- **La carne es cómo va.** De clara a oscura: cruda (rosada), programada; sellada (naranjo),
+  saliendo ahora; a punto (dorada y café), publicada en todas; carbonizada y casi negra, falló
+  en todas.
+- **Las marcas son los destinos.** Una diagonal del fierro por cada cuenta, en el orden de sus
+  chips. Punteada, todavía no sale (o está saliendo); oscura y llena, ya salió; carbonizada y
+  con una brasa roja adentro, se quemó; quemada hasta la mitad con un punto ámbar, llegó a la
+  bandeja de TikTok y falta terminarla; punteada en ámbar, reintenta; punteada en gris acero,
+  su cuenta tiene el fierro frío y así no va a salir.
+- **El halo rojo y la banderita** dicen que algo se quemó. Si se quemó solo en una red, la
+  carne sigue con el color de lo demás (a punto si lo demás salió) y lleva el halo; si se
+  quemó en todas, además está carbonizada.
+
+Mientras algo está saliendo, sube humo por encima del corte: es lo único que se mueve todo
+el tiempo. El halo de lo quemado late tres veces al cargar la página y después queda
+encendido. Con «reducir movimiento» activado en el sistema, el humo queda en dos volutas
+quietas y el halo encendido sin latir.
+
+Debajo del corte, un chip por destino con el ícono de su red y un signo: «✓» salió, «…»
+saliendo, «✕» se quemó, «◐» en la bandeja de TikTok, «↻» reintentando, «!» fierro frío; sin
+signo, programado. Un lector de pantalla lee el formato y la cocción («Video · Programada»,
+«Carrusel · Falló en parte») y cada destino con su estado.
+
+La tarjeta en que va el corte es de acero, no del color de la carne, y cambia de borde solo
+cuando pide algo: ámbar si algo espera en la bandeja de TikTok, reintenta o tiene el fierro
+frío; rojo si se quemó.
 
 ### «Calendario», «Día» y «Lista»
 
@@ -111,13 +147,12 @@ adelante dice «No hay nada puesto. Préndela.», y esa frase es un enlace que h
 el «+»; un día vacío que ya pasó dice «No hay nada puesto.», sin enlace y sin «+». En el
 teléfono, la semana se desliza de lado.
 
-Cada corte es una tarjeta con la hora (y «saliendo» al lado si se está publicando), los
-íconos de sus redes (rojo el que se quemó, verde el que salió), una miniatura (la foto, la
-portada o el primer cuadro del video), el texto en dos líneas o «(sin texto)», y una línea
-«Reintentando <Red> · <usuario>: <motivo>» por cada destino que falló y espera otro intento.
-El color de la tarjeta dice cómo va, de claro a oscuro: programada, saliendo ahora,
-publicada en todas y, casi negra, falló alguna. Al dejar el mouse encima aparece el estado de
-cada red. Un clic abre el editor.
+Cada publicación es una tarjeta con el corte arriba (ver «El corte»), la hora con su estado al
+lado cuando no es solo programado —«· saliendo», «· publicado» en verde, «· falló en <N> de
+<M>» o «· falló» en rojo—, los chips de sus destinos, el texto en dos líneas o «(sin texto)»,
+y una línea en ámbar «Reintentando <Red> · <usuario>: <motivo>» por cada destino que falló y
+espera otro intento. La tarjeta no lleva miniatura: la foto o el video se ven en el editor. Al
+dejar el mouse encima aparece el estado de cada red, con su motivo. Un clic abre el editor.
 
 Los borradores que tienen fecha aparecen en su día, debajo de los cortes, como tarjetas con
 borde punteado: arriba «Borrador · HH:MM» y debajo el texto en dos líneas (o «(sin texto)»).
@@ -150,13 +185,13 @@ página), el fuego de esa cuenta ese día —con las mismas reglas que el día: 
 pantalla lo lee «Programar en <Red> · <usuario>»).
 
 En cada columna, por hora, una tarjeta por cada publicación que sale a esa cuenta: una que
-sale a tres cuentas aparece en las tres. La tarjeta trae la hora (y «saliendo» si se está
-publicando), la miniatura, el texto en tres líneas o «(sin texto)», el estado de ese destino
-en palabras («Programado», «Reintentando», «Publicando…», «Publicado», «En tu bandeja de
-TikTok» o «Falló», con el motivo después de dos puntos si lo hay) y, si sale también a otras
-cuentas, «También en» con sus íconos. El color de la tarjeta es el de ese destino solo: la
-misma publicación puede verse publicada en una columna y quemada en otra. Un clic abre el
-editor.
+sale a tres cuentas aparece en las tres. La tarjeta trae a la izquierda el corte, cocido según
+ese destino solo y con una sola marca, la suya; y al lado la hora (con «· saliendo»,
+«· publicado» o «· falló» si corresponde), el texto en tres líneas o «(sin texto)», el estado
+de ese destino en palabras («Programado», «Reintentando», «Publicando…», «Publicado», «En tu
+bandeja de TikTok», «Falló» o «Su fierro está frío: reconéctala», con el motivo después de
+dos puntos si lo hay) y, si sale también a otras cuentas, «También en» con sus chips. La misma
+publicación puede verse publicada en una columna y quemada en otra. Un clic abre el editor.
 
 Los borradores con fecha de ese día van en la columna de cada cuenta que tienen marcada, con
 borde punteado, como en la semana; los que no tienen ninguna cuenta marcada, en una columna
@@ -387,12 +422,16 @@ Cada publicación tiene un destino por cuenta, y cada destino va por su lado.
 
 | Lo que dice | Cómo se ve | Qué está pasando |
 |---|---|---|
-| «Programado» | Píldora gris; tarjeta clara | Espera su hora |
-| «Reintentando» | Píldora gris con « — <motivo>»; en el calendario, la línea «Reintentando <Red> · <usuario>: <motivo>» | Falló un intento y se volverá a probar solo. Son tres intentos en total; algunos rechazos se queman al primero |
-| «Publicando…» | Píldora gris; «saliendo» en la tarjeta | La red recibió el archivo y lo está procesando. Si pasan 24 horas así, cuenta como un intento fallido |
-| «Publicado» | Píldora verde; ícono verde | Ya salió en esa red |
-| «En tu bandeja de TikTok» | Píldora verde | Se mandó como borrador de TikTok: hay que terminarlo en la app de TikTok |
-| «Falló» | Píldora roja con « — <motivo>» y «Reprogramar»; ícono rojo; tarjeta casi negra | Se quemó: no se volverá a intentar sola. Aparece también en «Se quemó», arriba del calendario, y puede llegar un correo con el asunto «No se pudo publicar en <Red>» |
+| «Programado» | Píldora gris; en el corte, marca punteada y chip sin signo | Espera su hora |
+| «Reintentando» | Píldora gris con « — <motivo>»; en el corte, marca punteada en ámbar y chip «↻»; en el calendario, la línea «Reintentando <Red> · <usuario>: <motivo>» | Falló un intento y se volverá a probar solo. Son tres intentos en total; algunos rechazos se queman al primero |
+| «Publicando…» | Píldora gris; humo sobre el corte, chip «…» y «· saliendo» al lado de la hora | La red recibió el archivo y lo está procesando. Si pasan 24 horas así, cuenta como un intento fallido |
+| «Publicado» | Píldora verde; marca llena en el corte y chip verde «✓» | Ya salió en esa red |
+| «En tu bandeja de TikTok» | Píldora verde; marca quemada hasta la mitad con un punto ámbar, chip «◐» y la tarjeta con borde ámbar | Se mandó como borrador de TikTok: hay que terminarlo en la app de TikTok |
+| «Falló» | Píldora roja con « — <motivo>» y «Reprogramar»; marca carbonizada, chip rojo «✕», el corte con halo rojo y banderita, y la tarjeta con borde rojo | Se quemó: no se volverá a intentar sola. Aparece también en «Se quemó», arriba del calendario, y puede llegar un correo con el asunto «No se pudo publicar en <Red>» |
+
+Un destino programado en una cuenta con el fierro frío (desconectada, vencida o que no
+sincroniza; ver [Los Fierros](los-fierros.md)) lleva en el corte la marca punteada en gris
+acero, el chip «!» en ámbar y la tarjeta con borde ámbar: así como está, no va a salir.
 
 Lo programado sale en la pasada siguiente del publicador, que corre cada pocos minutos: no
 en el segundo exacto de la hora elegida.
@@ -934,8 +973,15 @@ quemado, más arriba).
   «Semana siguiente», o mirar la «Lista», que tiene todo.
 - **En el calendario no está el botón para borrar o subir.** Esos botones están en la
   «Lista»; en el calendario, un clic en la tarjeta abre el editor, que tiene «Eliminar».
-- **¿Qué significa el color de la tarjeta?** Clara, programada; más oscura, saliendo o ya
-  publicada; casi negra, se quemó alguna red. Con borde punteado y sin color, es un borrador.
+- **¿Qué significa el dibujo de la tarjeta?** La forma es el formato (entraña video, tira
+  carrusel, bife foto, chori texto); el color de la carne, cómo va (rosada programada, naranja
+  saliendo, dorada publicada, negra falló); cada diagonal, un destino (llena salió, punteada
+  todavía no). El halo rojo y la banderita, que algo se quemó. Con borde punteado y sin
+  dibujo, es un borrador. Detalle en «El corte».
+- **¿Por qué una tarjeta tiene el borde ámbar?** Algo espera en la bandeja de TikTok, un
+  destino está reintentando o una de sus cuentas tiene el fierro frío. Rojo: se quemó.
+- **¿Dónde quedó la miniatura de la foto en el calendario?** Ya no va en la tarjeta: el corte
+  dice el formato y el estado. La foto o el video están en el editor (un clic en la tarjeta).
 - **Cambié la fecha de un post ya publicado.** No lo vuelve a publicar: solo cambia el día
   en que aparece en el calendario.
 
@@ -1040,6 +1086,8 @@ Lo que describe esta página sale de:
   - `src/lib/social/comentarios/reglas.ts`
   - `src/lib/schedule-api.ts`
 - Fechas, colores, nombres y componentes:
+  - `src/components/corte.tsx` (el corte dibujado)
+  - `src/app/admin/(dash)/schedule/dibujo.ts` (qué se dibuja de cada corte)
   - `src/lib/schedule-week.ts`
   - `src/lib/parrilla.ts`
   - `src/lib/networks.ts`
