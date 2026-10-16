@@ -1,8 +1,15 @@
 # Publicar la app en la Play Store — paso a paso
 
 Este documento es para ti, no para el código. Son los trámites que hay que hacer una vez en
-la consola de Google para que «Vicente · Números» se instale desde la Play Store y se
-actualice como cualquier otra app del teléfono.
+la consola de Google para que «Tu Parrilla» se instale desde la Play Store y se actualice
+como cualquier otra app del teléfono. Su identificador es `cl.tuparrilla.app`, el mismo que
+tiene reservado iPhone: Google lo fija para siempre con el primer archivo que se sube. El APK
+de prueba que se instalaba a mano tenía otro (`cl.vicentepareja.numeros`) y se llamaba
+«Vicente · Números»: son dos apps distintas para el teléfono, y el APK se desinstala cuando la
+de la tienda esté funcionando.
+
+Lo que se pega en cada formulario, ya escrito, y los gráficos de la ficha están en la carpeta
+«Google Play» de `Social verifications`, en el escritorio de Vicente (fuera del repo).
 
 **La app va a la pista de pruebas internas, no a la tienda pública.** Nadie la va a encontrar
 buscando. Es lo correcto para un panel con tus números, y además evita la regla de Google que
@@ -33,7 +40,8 @@ sin eso.
 ## Parte 2 — Crear la app
 
 1. En la consola, **Crear app**.
-2. Nombre: `Vicente · Números`. Es el que se ve en el teléfono.
+2. Nombre: `Tu Parrilla`. El que se ve en el teléfono sale del build (`name` en
+   `mobile/app.json`); el de la ficha es este, y conviene que digan lo mismo.
 3. Idioma predeterminado: español.
 4. Marca que es una **app**, no un juego, y que es **gratuita**.
 5. Acepta las declaraciones de políticas y de leyes de exportación.

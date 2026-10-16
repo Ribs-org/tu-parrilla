@@ -4,7 +4,7 @@ Una app para Android que muestra de un vistazo lo programado y cómo van las red
 
 ## Cómo se llega
 
-- Es solo para Android; no hay versión para iPhone. No se encuentra buscándola en una tienda: se instala con el archivo `.apk` que entrega quien administra el sitio, o por la prueba interna de Google Play si a la persona la invitaron. En el teléfono, el ícono se llama «Vicente · Números».
+- Es solo para Android; no hay versión para iPhone. No se encuentra buscándola en una tienda: se instala con el archivo `.apk` que entrega quien administra el sitio, o por la prueba interna de Google Play si a la persona la invitaron. En el teléfono, la de la Play Store se llama «Tu Parrilla», con un bife sobre la reja de ícono; el APK de prueba de antes se llama «Vicente · Números», con la bandera de Chile. Son dos apps distintas para el teléfono: pueden estar las dos instaladas, y el APK se puede borrar cuando la de la tienda funcione.
 - Se entra igual que al panel web ([Entrar al panel](ingresar.md)): con el correo y un código de seis dígitos que llega a ese correo. Entra solo quien está invitado, y cada persona ve sus propias cuentas. No hay contraseña.
 - La primera vez pide el correo y el código. Después la sesión queda abierta: no los vuelve a pedir.
 - Si el teléfono tiene PIN, patrón, huella o reconocimiento de cara, cada vez que se abre la app pide desbloquear con el aviso «Desbloquea para entrar a Tu Parrilla». Si se cancela, la app muestra la pantalla de entrada.
@@ -314,7 +314,7 @@ No se puede desde la app. Se hace en el panel web, en [La Parrilla](la-parrilla.
 - «Los números no cambian» → mirar «Actualizado hace…» arriba y arrastrar hacia abajo para actualizar.
 - «Quiero ver los comentarios» → no están en la app; se ven en el panel web, en [La Mesa](la-mesa.md).
 - «Quiero cambiar mi página de links desde el teléfono» → no se puede en la app; se hace en el panel web, en [La Vitrina](la-vitrina.md), que también funciona en el navegador del teléfono.
-- «No encuentro la app» → en el teléfono se llama «Vicente · Números». Si no está instalada, hay que pedirle el instalador a quien administra el sitio. En iPhone no existe.
+- «No encuentro la app» → en el teléfono se llama «Tu Parrilla» (o «Vicente · Números», si es el APK de prueba de antes). Si no está instalada, hay que pedirle el instalador a quien administra el sitio. En iPhone no existe.
 
 ## Lo que esta pantalla no hace
 
