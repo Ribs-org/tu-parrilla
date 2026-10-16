@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { ScheduledPost, ScheduledPostTarget, Usuario } from '@/db'
 import { CuentaInvalida, type CuentaDestino } from '@/lib/social/cuentas'
+import { BORRADOR_NO_EXISTE } from '@/lib/mobile-api'
 import { OPCIONES_ERROR, TRIAL_REEL_MEDIA } from '@/lib/social/publish/opciones'
 
 // `route.ts` llega a `@/lib/usuarios` por `@/lib/mobile-api` → `publish/batch`, y ese
@@ -34,6 +35,18 @@ vi.mock('@/lib/mobile-api', async (importOriginal) => {
 const crearPostProgramado = vi.fn()
 vi.mock('@/lib/social/publish/crear', () => ({
   crearPostProgramado: (...args: unknown[]) => crearPostProgramado(...args),
+}))
+
+const cargarBorrador = vi.fn()
+const borrarBorrador = vi.fn()
+vi.mock('@/lib/borradores', () => ({
+  cargarBorrador: (...args: unknown[]) => cargarBorrador(...args),
+  borrarBorrador: (...args: unknown[]) => borrarBorrador(...args),
+  listarBorradores: async () => [],
+}))
+vi.mock('@/lib/borradores-movil', () => ({
+  cuentasParaElTelefono: async () => ({ propias: new Set(['c-ig']), ajenas: new Map([['tt-1', 'TikTok']]) }),
+  resumirParaElTelefono: () => null,
 }))
 
 // R2 no está configurado bajo test (sin `R2_*`): mockeado explícito, no implícito por
@@ -133,6 +146,9 @@ describe('POST /api/mobile/schedule', () => {
   beforeEach(() => {
     resolverDestinos.mockReset()
     crearPostProgramado.mockReset()
+    cargarBorrador.mockReset()
+    borrarBorrador.mockReset()
+    borrarBorrador.mockResolvedValue(undefined)
   })
 
   it('resuelve el destino con el borrador entero y crea el post con las cuentas resueltas', async () => {
@@ -227,5 +243,58 @@ describe('POST /api/mobile/schedule', () => {
     expect(res.status).toBe(400)
     expect(await res.json()).toEqual({ error: OPCIONES_ERROR })
     expect(crearPostProgramado).not.toHaveBeenCalled()
+  })
+
+  describe('desde un borrador', () => {
+    const BORRADOR = '6f1c2a54-9b1e-4c3d-8f00-0123456789ab'
+
+    it('crea el post y después saca el borrador, atado al dueño', async () => {
+      cargarBorrador.mockResolvedValueOnce({ id: BORRADOR, campos: { cuentas: ['c-ig'] }, fecha: null, media: [] })
+      resolverDestinos.mockResolvedValueOnce({ cuentas: [IG], networks: ['facebook'] })
+      crearPostProgramado.mockResolvedValueOnce('post-1')
+      const res = await POST(peticion({ texto: 'Hola', cuentas: ['c-ig'], ahora: true, media: [], borradorId: BORRADOR }))
+      expect(res.status).toBe(200)
+      expect(cargarBorrador).toHaveBeenCalledWith('owner-1', BORRADOR)
+      expect(borrarBorrador).toHaveBeenCalledWith('owner-1', BORRADOR)
+      expect(crearPostProgramado.mock.invocationCallOrder[0]).toBeLessThan(borrarBorrador.mock.invocationCallOrder[0]!)
+    })
+
+    it('si el borrador ya no existe, no se crea nada: puede ser el mismo envío repetido', async () => {
+      cargarBorrador.mockResolvedValueOnce(null)
+      for (const borradorId of [BORRADOR, 'no-es-uuid']) {
+        const res = await POST(peticion({ texto: 'Hola', cuentas: ['c-ig'], ahora: true, media: [], borradorId }))
+        expect(res.status).toBe(404)
+        expect(await res.json()).toEqual({ error: BORRADOR_NO_EXISTE })
+      }
+      expect(crearPostProgramado).not.toHaveBeenCalled()
+    })
+
+    it('con algo que el teléfono no programa, se rechaza con el motivo y el borrador sigue', async () => {
+      cargarBorrador.mockResolvedValueOnce({ id: BORRADOR, campos: { cuentas: ['c-ig', 'tt-1'] }, fecha: null, media: [] })
+      const res = await POST(peticion({ texto: 'Hola', cuentas: ['c-ig'], ahora: true, media: [], borradorId: BORRADOR }))
+      expect(res.status).toBe(400)
+      expect(await res.json()).toEqual({ error: 'Este borrador va también a TikTok: eso se programa en el panel web.' })
+      expect(crearPostProgramado).not.toHaveBeenCalled()
+      expect(borrarBorrador).not.toHaveBeenCalled()
+    })
+
+    it('un rechazo de validación no toca el borrador', async () => {
+      cargarBorrador.mockResolvedValueOnce({ id: BORRADOR, campos: {}, fecha: null, media: [] })
+      resolverDestinos.mockResolvedValueOnce({ cuentas: [], networks: [] })
+      const res = await POST(peticion({ texto: 'Hola', cuentas: [], ahora: true, media: [], borradorId: BORRADOR }))
+      expect(res.status).toBe(400)
+      expect(borrarBorrador).not.toHaveBeenCalled()
+    })
+
+    it('si sacar el borrador falla, el post igual quedó y se dice que salió', async () => {
+      cargarBorrador.mockResolvedValueOnce({ id: BORRADOR, campos: {}, fecha: null, media: [] })
+      resolverDestinos.mockResolvedValueOnce({ cuentas: [IG], networks: ['facebook'] })
+      crearPostProgramado.mockResolvedValueOnce('post-1')
+      borrarBorrador.mockRejectedValueOnce(new Error('se cayó la base'))
+      const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+      const res = await POST(peticion({ texto: 'Hola', cuentas: ['c-ig'], ahora: true, media: [], borradorId: BORRADOR }))
+      expect(res.status).toBe(200)
+      error.mockRestore()
+    })
   })
 })

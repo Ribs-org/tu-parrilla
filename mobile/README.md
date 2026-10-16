@@ -2,14 +2,15 @@
 
 Esta es la app del teléfono de Tu Parrilla. Desde el 2026-10-16 tiene las mismas tres
 pestañas que el panel web, en versión corta: **La Parrilla** (lo programado día por
-día, lo que se quemó y cuántos cortes salieron ayer), **Publicar** al medio (eliges
-fotos o un video de la galería, escribes el texto, marcas las cuentas y lo programas,
-o lo mandas a salir ahora) y **Los Números** (las dos mitades del tablero, con «Tus
+día, lo que se quemó, los borradores y cuántos cortes salieron ayer), **Publicar** al
+medio (eliges fotos o un video de la galería, escribes el texto, marcas las cuentas y lo
+programas, o lo mandas a salir ahora) y **Los Números** (las dos mitades del tablero, con «Tus
 publicaciones» un toque adentro y los seguidores de cada red detrás de «⋯ Más»).
 Antes eran cinco con nombres propios: Resumen, Contenido, Publicar, Cuentas y
 Calendario. Los datos son los mismos que ve el panel web, leídos desde
-`https://tu-parrilla.cl/api/mobile/*`; `/api/mobile/overview` ya no la usa la app
-nueva y sigue solo para las instalaciones que no se han actualizado.
+`https://tu-parrilla.cl/api/mobile/*`; `/api/mobile/overview` y
+`/api/mobile/schedule/check` ya no los usa la app nueva y siguen solo para las
+instalaciones que no se han actualizado.
 
 No está en la Play Store pública ni en la App Store: se instala desde la pista interna
 de Google Play (ver `docs/play-store.md`) o directamente desde un archivo `.apk` que se
@@ -146,16 +147,46 @@ En la pestaña **Publicar**:
 5. Toca **Cuándo** para elegir día y hora, y luego **Programar**. O toca
    **Publicar ahora**: confirma, y sale en los próximos cinco minutos.
 
-La subida muestra el avance de cada archivo. Si se corta la señal, **Reintentar**
-retoma desde el archivo que falló, sin volver a subir los anteriores. Al terminar, la
-app salta a La Parrilla con el post recién programado.
+Cada archivo se sube apenas lo eliges, de a uno, con su avance sobre la miniatura; si
+se corta la señal, esa miniatura queda en **Reintentar** y se toca para intentarlo de
+nuevo. **Programar** se enciende cuando todos terminaron, y es un solo pedido: al
+terminar, la app salta a La Parrilla con el post recién programado.
+
+### Los borradores
+
+Lo que escribes en Publicar se guarda solo como **borrador**, un momento después del
+último cambio y también si la app pasa a segundo plano, igual que en el compositor del
+panel. Son los mismos borradores del panel (`borradores` y `borrador_media`, por
+`/api/mobile/borradores`): lo empezado en un lado se sigue en el otro. En La Parrilla
+están en **Borradores (N)**, y los que tienen fecha, también en su día con borde
+punteado. **Programar** sale del borrador y el servidor lo borra al crear el post;
+**Nueva publicación** deja el que está en los borradores y vacía el formulario;
+**Descartar** lo borra.
+
+Por qué los archivos suben al elegirlos y no al programar, como antes: un borrador tiene
+que conservarlos para que el panel los vea. El costo es que las reglas de cada red se
+revisan al programar, con el archivo ya arriba: un video que X no acepta se entera
+después de subirlo. Antes la app preguntaba primero (`/api/mobile/schedule/check`)
+justamente para no gastar datos móviles en eso; el compositor del panel ya vivía con el
+mismo costo, y la razón es la misma.
+
+Dos reglas que protegen a los dos lados:
+
+- El teléfono no ve las opciones de TikTok ni la respuesta automática por palabra clave.
+  Al guardar, el servidor las conserva tal como las dejó el panel, y un borrador que las
+  tiene no se programa desde el teléfono —sale un aviso y los botones se apagan—, porque
+  programarlo dejaría eso fuera y el borrador, que lo guardaba, se borraría.
+- Programar con un borrador que ya no existe se rechaza. Cubre dos casos: que se haya
+  programado o descartado en el panel, y que este mismo envío ya haya salido y se haya
+  perdido la respuesta, en el que repetirlo publicaría dos veces.
 
 El trial reel es puro JavaScript, sin cambio nativo: llega por aire a los dos canales
 con el orden de siempre (web primero), como se explica en
 [«Cómo mandar un cambio sin reinstalar»](#cómo-mandar-un-cambio-sin-reinstalar).
 
 Lo que no se puede hacer desde el teléfono, y sigue siendo del panel web: poner una
-portada, etiquetar con atributos, y editar o borrar lo ya programado.
+portada, etiquetar con atributos, programar en TikTok o con una palabra clave, y editar o
+borrar lo ya programado.
 
 ## iPhone (iOS)
 

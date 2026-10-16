@@ -8,11 +8,12 @@ import { useSelectorFecha } from '../../components/selector-fecha'
 import { Boton, COLORES, Cargando, ErrorConReintento, Pantalla, Sello, TIPO_TITULO, Tarjeta } from '../../components/ui'
 import { cuandoQuemado, diasDeLaAgenda, marcaDeToque, pieDeAyer, rotuloDelDia, seQuemo, servidosAyer } from '../../lib/agenda'
 import { RechazoApi, SesionCaducada, apiPost } from '../../lib/api'
+import { detalleDelBorrador, rotuloBorradores } from '../../lib/borradores'
 import { anotarCambio } from '../../lib/cambios'
 import { calorDelDia } from '../../lib/parrilla'
 import { SIN_SENAL, etiquetaCuenta, proximaHoraEnPunto } from '../../lib/publicar'
 import { clearToken } from '../../lib/session'
-import { type Calendario } from '../../lib/tipos'
+import { type BorradorResumido, type Calendario } from '../../lib/tipos'
 import { useScreenData } from '../../lib/useScreenData'
 import { useToken } from '../../lib/useToken'
 
@@ -25,10 +26,39 @@ function hoyEnElTelefono(): string {
 }
 
 /**
- * La Parrilla, la entrada de la app como lo es del panel: arriba lo que se quemó, después lo
- * que viene día por día —con un «+» para prender cada uno— y al pie cuántos cortes salieron
- * ayer. Junta lo que antes repartían el Resumen («Qué salió hoy», «Qué viene») y el
- * Calendario.
+ * Un borrador puesto en su día: con borde punteado y sin la carne del corte, porque todavía
+ * no está en la parrilla, solo apartado para ese día. Como en el calendario del panel.
+ */
+function BorradorEnElDia({ borrador, onAbrir }: { borrador: BorradorResumido; onAbrir: () => void }) {
+  return (
+    <Pressable
+      onPress={onAbrir}
+      accessibilityRole="button"
+      style={({ pressed }) => ({
+        borderWidth: 1,
+        borderStyle: 'dashed',
+        borderColor: '#ffffff4d',
+        borderRadius: 6,
+        padding: 10,
+        gap: 4,
+        opacity: pressed ? 0.7 : 1,
+      })}
+    >
+      <Text style={{ color: COLORES.suave, fontSize: 10, fontFamily: TIPO_TITULO, letterSpacing: 1 }}>
+        BORRADOR · {borrador.cuando?.slice(11, 16)}
+      </Text>
+      <Text style={{ color: COLORES.suave, fontSize: 13 }} numberOfLines={2}>
+        {borrador.texto || '(sin texto)'}
+      </Text>
+    </Pressable>
+  )
+}
+
+/**
+ * La Parrilla, la entrada de la app como lo es del panel: arriba lo que se quemó y los
+ * borradores, después lo que viene día por día —con un «+» para prender cada uno— y al pie
+ * cuántos cortes salieron ayer. Junta lo que antes repartían el Resumen («Qué salió hoy»,
+ * «Qué viene») y el Calendario.
  */
 export default function LaParrilla() {
   const token = useToken()
@@ -49,6 +79,8 @@ export default function LaParrilla() {
   const { abrir: abrirSelector, selector } = useSelectorFecha()
   // El destino que se está reprogramando: mientras viaja, los botones esperan.
   const [reprogramando, setReprogramando] = useState<string | null>(null)
+  // La lista de borradores se abre con un toque, como «⋯ Más» en Los Números.
+  const [verBorradores, setVerBorradores] = useState(false)
 
   // Al volver a esta pestaña: si Publicar acaba de crear un post, o la caché ya es vieja,
   // refresca sola. Es lo que hace aparecer el post recién programado.
@@ -65,6 +97,7 @@ export default function LaParrilla() {
 
   const hoy = data.hoy ?? hoyEnElTelefono()
   const quemados = seQuemo(data.posts)
+  const borradores = data.borradores ?? []
 
   /**
    * «Reprogramar» un destino quemado: se elige la hora nueva y el servidor aplica la regla
@@ -90,8 +123,13 @@ export default function LaParrilla() {
     })
   }
 
+  // Los dos parámetros van siempre, uno vacío: así ninguno queda pegado de un toque anterior.
   function prender(dia: string) {
-    router.navigate({ pathname: '/(tabs)/publicar', params: { dia, n: marcaDeToque() } })
+    router.navigate({ pathname: '/(tabs)/publicar', params: { dia, borrador: '', n: marcaDeToque() } })
+  }
+
+  function abrirBorrador(id: string) {
+    router.navigate({ pathname: '/(tabs)/publicar', params: { dia: '', borrador: id, n: marcaDeToque() } })
   }
 
   return (
@@ -133,7 +171,40 @@ export default function LaParrilla() {
         </View>
       ) : null}
 
-      {diasDeLaAgenda(data.posts, hoy).map(({ dia, posts }) => {
+      {borradores.length > 0 ? (
+        <View style={{ gap: 8 }}>
+          <Pressable
+            onPress={() => setVerBorradores(!verBorradores)}
+            accessibilityRole="button"
+            accessibilityState={{ expanded: verBorradores }}
+            hitSlop={4}
+            style={({ pressed }) => ({ minHeight: 44, justifyContent: 'center', opacity: pressed ? 0.7 : 1 })}
+          >
+            <Text style={{ color: COLORES.texto, fontSize: 14, fontWeight: '600' }}>
+              {verBorradores ? '▾' : '▸'} {rotuloBorradores(borradores.length)}
+            </Text>
+          </Pressable>
+          {verBorradores
+            ? borradores.map((b) => (
+                <Pressable
+                  key={b.id}
+                  onPress={() => abrirBorrador(b.id)}
+                  accessibilityRole="button"
+                  style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+                >
+                  <Tarjeta>
+                    <Text style={{ color: COLORES.texto, fontSize: 14 }} numberOfLines={2}>
+                      {b.texto || '(sin texto)'}
+                    </Text>
+                    <Text style={{ color: COLORES.suave, fontSize: 12 }}>{detalleDelBorrador(b)}</Text>
+                  </Tarjeta>
+                </Pressable>
+              ))
+            : null}
+        </View>
+      ) : null}
+
+      {diasDeLaAgenda(data.posts, hoy, borradores).map(({ dia, posts, borradores: delDia }) => {
         const rotulo = rotuloDelDia(dia, hoy)
         return (
           <View key={dia}>
@@ -159,14 +230,18 @@ export default function LaParrilla() {
                 <IconoPoner color={COLORES.texto} />
               </Pressable>
             </View>
-            {posts.length === 0 ? (
+            {posts.length === 0 && delDia.length === 0 ? (
               <Pressable onPress={() => prender(dia)} hitSlop={4} style={{ paddingVertical: 6 }}>
                 <Text style={{ color: COLORES.brasa, fontSize: 14 }}>No hay nada puesto. Préndela.</Text>
               </Pressable>
             ) : (
+              // Los borradores no cuentan para el calor: todavía no van a salir.
               <Grilla calor={calorDelDia(posts.length)}>
                 {posts.map((post) => (
                   <CorteProgramado key={post.id} post={post} />
+                ))}
+                {delDia.map((b) => (
+                  <BorradorEnElDia key={b.id} borrador={b} onAbrir={() => abrirBorrador(b.id)} />
                 ))}
               </Grilla>
             )}

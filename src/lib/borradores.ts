@@ -68,11 +68,11 @@ export async function cargarBorrador(ownerId: string, id: string): Promise<Borra
 }
 
 /**
- * Crea o actualiza un borrador, con su media entera reemplazada: el compositor manda
- * siempre la lista completa, en orden.
+ * Crea o actualiza un borrador, con su media entera reemplazada: el compositor y Publicar en
+ * el teléfono mandan siempre la lista completa, en orden.
  *
- * Un id que ya no existe —se programó o se descartó en otra pestaña mientras esta seguía
- * escribiendo— no se recrea: vuelve `perdido`, y el compositor deja de guardar. Recrearlo
+ * Un id que ya no existe —se programó o se descartó en otra pestaña o en el teléfono mientras
+ * este seguía escribiendo— no se recrea: vuelve `perdido`, y el compositor deja de guardar. Recrearlo
  * resucitaría un borrador que alguien ya decidió sacar.
  */
 export async function guardarBorrador(

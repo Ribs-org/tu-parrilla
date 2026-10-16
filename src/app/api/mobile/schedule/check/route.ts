@@ -18,6 +18,10 @@ export const dynamic = 'force-dynamic'
  * recibe video» después de un video de 200 MB por datos móviles es tirar el tráfico
  * del dueño. Solo cuenta archivos; las URLs todavía no existen.
  *
+ * Desde el 2026-10-16 la app ya no la llama: sube cada archivo al elegirlo, como el
+ * compositor del panel, para que el borrador lo conserve (ver `mobile/README.md`, «Los
+ * borradores»). Queda para las instalaciones sin actualizar; ver `docs/pendientes.md`.
+ *
  * `resolverDestinos` (compartida con el `POST` de `schedule/route.ts` — ver su
  * comentario) resuelve el destino ANTES de validar por red: las reglas de
  * `validateScheduleDraft` son de la red, pero la red que cuenta es la de la cuenta

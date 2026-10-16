@@ -220,38 +220,70 @@ export function Chip({
  * Un archivo elegido: la imagen o un bloque con «video», y una equis para quitarlo.
  * Sin `onQuitar` la equis no se dibuja: es como el envío en curso marca un archivo
  * que ya viaja como no removible.
+ *
+ * `nota` es lo que dice sobre la imagen un archivo que todavía no está listo —«45 %»,
+ * «En cola», «Reintentar»— y `onTocar`, lo que pasa al tocarlo (reintentar la subida).
  */
 export function Miniatura({
   uri,
   esVideo,
   onQuitar,
+  nota,
+  onTocar,
 }: {
   uri: string
   esVideo: boolean
   onQuitar?: () => void
+  nota?: string | null
+  onTocar?: () => void
 }) {
   return (
     <View style={{ width: 72, height: 72 }}>
-      {esVideo ? (
-        <View
-          style={{
-            width: 72,
-            height: 72,
-            borderRadius: 10,
-            backgroundColor: '#ffffff10',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <Text style={{ color: COLORES.suave, fontSize: 11 }}>Video</Text>
-        </View>
-      ) : (
-        <Image source={{ uri }} style={{ width: 72, height: 72, borderRadius: 10 }} />
-      )}
+      <Pressable
+        onPress={onTocar}
+        disabled={!onTocar}
+        accessibilityRole={onTocar ? 'button' : undefined}
+        accessibilityLabel={nota ?? undefined}
+        style={{ width: 72, height: 72, borderRadius: 10, overflow: 'hidden' }}
+      >
+        {esVideo ? (
+          <View
+            style={{
+              width: 72,
+              height: 72,
+              backgroundColor: '#ffffff10',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <Text style={{ color: COLORES.suave, fontSize: 11 }}>Video</Text>
+          </View>
+        ) : (
+          <Image source={{ uri }} style={{ width: 72, height: 72 }} />
+        )}
+        {nota ? (
+          // Una franja oscura abajo, para que la nota se lea sobre cualquier foto.
+          <View
+            style={{
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              bottom: 0,
+              paddingVertical: 3,
+              backgroundColor: '#000000b3',
+              alignItems: 'center',
+            }}
+          >
+            <Text style={{ color: nota === 'Reintentar' ? COLORES.rojo : COLORES.texto, fontSize: 10 }}>{nota}</Text>
+          </View>
+        ) : null}
+      </Pressable>
       {onQuitar ? (
         <Pressable
           onPress={onQuitar}
           hitSlop={14}
+          accessibilityRole="button"
+          accessibilityLabel="Quitar"
           style={{
             position: 'absolute',
             top: -6,
@@ -301,6 +333,39 @@ export function Boton({
       })}
     >
       <Text style={{ color: destacado ? COLORES.fondo : COLORES.texto, fontWeight: '600' }}>{texto}</Text>
+    </Pressable>
+  )
+}
+
+/**
+ * Una acción secundaria, solo texto: acompaña a los botones sin competir con ellos. En rojo
+ * cuando lo que hace no tiene vuelta (descartar).
+ */
+export function BotonTexto({
+  texto,
+  onPress,
+  deshabilitado,
+  peligro,
+}: {
+  texto: string
+  onPress: () => void
+  deshabilitado?: boolean
+  peligro?: boolean
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={deshabilitado}
+      hitSlop={6}
+      accessibilityRole="button"
+      style={({ pressed }) => ({
+        minHeight: 44,
+        justifyContent: 'center',
+        paddingHorizontal: 4,
+        opacity: deshabilitado ? 0.5 : pressed ? 0.7 : 1,
+      })}
+    >
+      <Text style={{ color: peligro ? COLORES.rojo : COLORES.suave, fontSize: 13, fontWeight: '600' }}>{texto}</Text>
     </Pressable>
   )
 }

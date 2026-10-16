@@ -10,11 +10,15 @@ import {
   type ScheduledPostTarget,
 } from '@/db'
 import { localDay } from '@/lib/analytics'
+import { idDeBorrador, soloEnElPanel } from '@/lib/borrador'
+import { borrarBorrador, cargarBorrador, listarBorradores } from '@/lib/borradores'
+import { cuentasParaElTelefono, resumirParaElTelefono } from '@/lib/borradores-movil'
 import { isoInZone } from '@/lib/metrics-api'
 import { requireMobileUser } from '@/lib/mobile-guardia'
 import {
   ARCHIVO_AJENO,
   ARCHIVO_FALTANTE,
+  BORRADOR_NO_EXISTE,
   CUERPO_ILEGIBLE,
   NO_SE_GUARDO,
   parseBorradorMovil,
@@ -115,9 +119,17 @@ export async function GET(request: Request) {
     }
   }
 
+  // Los borradores, los mismos del panel: La Parrilla los lista y pone en su día los que
+  // tienen fecha. Una app sin actualizar no lee el campo.
+  const borradores = (await listarBorradores(usuario.id)).map((b) => resumirParaElTelefono(b, usuario.zona))
+
   // `hoy`, el día en la zona del dueño: la app arma La Parrilla desde hoy y no puede usar
   // el reloj del teléfono, que puede estar en otra zona.
-  return NextResponse.json({ hoy: localDay(now, usuario.zona), posts: agruparPostsMovil(filas, miniaturaPorPost, usuario.zona) })
+  return NextResponse.json({
+    hoy: localDay(now, usuario.zona),
+    posts: agruparPostsMovil(filas, miniaturaPorPost, usuario.zona),
+    borradores,
+  })
 }
 
 /**
@@ -131,6 +143,12 @@ export async function GET(request: Request) {
  * declarada aparte, y por último que cada objeto exista en R2 (un HEAD es un viaje de
  * ida y vuelta, y no vale la pena pagarlo si el post ya iba a rechazarse por otra
  * razón).
+ *
+ * Con `borradorId`, el post sale de ese borrador y el borrador se borra después de
+ * crearlo, como al programar en el panel. Antes, dos rechazos propios: que el borrador ya
+ * no exista —se programó o se descartó en otro lado, o este mismo envío ya salió y se
+ * perdió la respuesta: repetirlo sería publicar dos veces— y que tenga algo que el
+ * teléfono no programa (`soloEnElPanel`), que se perdería con el borrador.
  */
 export async function POST(request: Request) {
   const usuario = await requireMobileUser(request)
@@ -148,6 +166,16 @@ export async function POST(request: Request) {
   if ('error' in borrador) return NextResponse.json({ error: borrador.error }, { status: 400 })
   const media = parseMediaMovil(body)
   if ('error' in media) return NextResponse.json({ error: media.error }, { status: 400 })
+
+  const pedido = (body as { borradorId?: unknown }).borradorId
+  let borradorId: string | null = null
+  if (pedido !== undefined && pedido !== null) {
+    borradorId = idDeBorrador(pedido)
+    const deDonde = borradorId ? await cargarBorrador(usuario.id, borradorId) : null
+    if (!deDonde) return NextResponse.json({ error: BORRADOR_NO_EXISTE }, { status: 404 })
+    const motivo = soloEnElPanel(deDonde.campos, (await cuentasParaElTelefono(usuario.id)).ajenas)
+    if (motivo) return NextResponse.json({ error: motivo }, { status: 400 })
+  }
 
   const base = basePublica()
   for (const m of media) {
@@ -206,6 +234,13 @@ export async function POST(request: Request) {
       cuentas,
       opciones: opcionesCheck.opciones,
     })
+    // El borrador ya cumplió. Si no se puede sacar, el post igual quedó: se avisa que salió,
+    // y el borrador queda en la lista para descartarlo a mano.
+    if (borradorId) {
+      await borrarBorrador(usuario.id, borradorId).catch((error: unknown) =>
+        console.error('schedule/borrador:', String(error).slice(0, 300)),
+      )
+    }
     return NextResponse.json({ id, cuando: isoInZone(scheduledAt!, usuario.zona) })
   } catch (dbError) {
     console.error('schedule/crear:', String(dbError).slice(0, 300))

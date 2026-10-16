@@ -111,3 +111,74 @@ export function fechaParaDia(dia: string, ahora: Date, zona: string): string {
   if (siguiente > 23) return ''
   return `${dia}T${String(siguiente).padStart(2, '0')}:00`
 }
+
+/* ------------------------------------------------------------- el teléfono -- */
+
+/**
+ * Lo que la app del teléfono sabe editar de un borrador. Es menos que el compositor: no
+ * tiene las opciones de TikTok ni la palabra clave, así que esos campos no viajan.
+ */
+export type BorradorDelTelefono = {
+  texto: string
+  cuentas: string[]
+  /** «YYYY-MM-DDTHH:MM» en la zona del dueño, o vacío si no tiene fecha. */
+  scheduledAt: string
+  /** Las cuentas de Instagram que van como trial reel. */
+  trial: string[]
+}
+
+/** Los campos que el teléfono escribe enteros cada vez que guarda. */
+const DEL_TELEFONO = new Set(['caption', 'cuentas', 'scheduledAt', 'cuandoAhora'])
+const TRIAL = 'instagramTrial:'
+
+/**
+ * Los campos de un borrador después de que el teléfono lo guarda. El teléfono escribe lo
+ * suyo y todo lo demás queda como lo dejó el panel: las opciones de TikTok, la palabra
+ * clave. Así un borrador que empezó en el panel no pierde nada por tocarlo en el teléfono.
+ *
+ * `ajenas` son las cuentas que el teléfono no puede mostrar (hoy, las de TikTok), con el
+ * nombre de su red: no las ve, así que no puede haberlas desmarcado, y se conservan entre
+ * las elegidas.
+ */
+export function camposDesdeTelefono(
+  anteriores: Campos | null,
+  telefono: BorradorDelTelefono,
+  ajenas: ReadonlyMap<string, string>,
+): Campos {
+  const campos: Campos = {}
+  for (const [nombre, valores] of Object.entries(anteriores ?? {})) {
+    if (!DEL_TELEFONO.has(nombre) && !nombre.startsWith(TRIAL)) campos[nombre] = valores
+  }
+  const conservadas = (anteriores?.cuentas ?? []).filter((id) => ajenas.has(id))
+  const cuentas = [...new Set([...telefono.cuentas, ...conservadas])]
+  campos.caption = [telefono.texto]
+  campos.cuentas = cuentas
+  campos.scheduledAt = [telefono.scheduledAt]
+  for (const id of telefono.trial) if (cuentas.includes(id)) campos[`${TRIAL}${id}`] = ['on']
+  return campos
+}
+
+/** Lo que el teléfono necesita de los campos de un borrador para volver a llenar Publicar. */
+export function telefonoDesdeCampos(campos: Campos): Omit<BorradorDelTelefono, 'scheduledAt'> {
+  const cuentas = campos.cuentas ?? []
+  return {
+    texto: primero(campos, 'caption'),
+    cuentas,
+    trial: cuentas.filter((id) => instagramTrialInicial(campos, id)),
+  }
+}
+
+/**
+ * Por qué un borrador no se puede programar desde el teléfono, o null si se puede. Va a
+ * alguna cuenta que el teléfono no publica (`ajenas`, con el nombre de su red), o tiene
+ * una palabra clave, que el teléfono no muestra. Programarlo desde ahí dejaría eso fuera
+ * sin que nadie lo viera, y el borrador —que lo guardaba— se borraría al programar.
+ */
+export function soloEnElPanel(campos: Campos, ajenas: ReadonlyMap<string, string>): string | null {
+  const partes: string[] = []
+  const redes = [...new Set((campos.cuentas ?? []).flatMap((id) => (ajenas.has(id) ? [ajenas.get(id)!] : [])))]
+  if (redes.length > 0) partes.push(`va también a ${redes.join(' y ')}`)
+  const regla = reglaInicial(campos)
+  if (regla) partes.push(`tiene la palabra clave «${regla.palabra.trim()}»`)
+  return partes.length > 0 ? `Este borrador ${partes.join(' y ')}: eso se programa en el panel web.` : null
+}

@@ -1,6 +1,6 @@
 # La app del teléfono
 
-Una app para Android que muestra de un vistazo lo programado y cómo van las redes de quien entra, y le deja publicar desde la galería del teléfono. Tiene las mismas tres pestañas que el panel web —La Parrilla, Publicar en el medio y Los Números—, pero hace mucho menos: mira lo programado y los números, y programa o publica fotos y videos en Instagram, Facebook y YouTube. También reprograma lo que se quemó. Todo lo demás —conectar redes, corregir o borrar lo programado, TikTok, comentarios, la página pública— se hace en el panel web.
+Una app para Android que muestra de un vistazo lo programado y cómo van las redes de quien entra, y le deja publicar desde la galería del teléfono. Tiene las mismas tres pestañas que el panel web —La Parrilla, Publicar en el medio y Los Números—, pero hace mucho menos: mira lo programado y los números, y programa o publica fotos y videos en Instagram, Facebook y YouTube. También reprograma lo que se quemó, y guarda solo lo que se está escribiendo como borrador: los borradores son los mismos del panel web, así que lo empezado en un lado se sigue en el otro. Todo lo demás —conectar redes, corregir o borrar lo programado, TikTok, comentarios, la página pública— se hace en el panel web.
 
 ## Cómo se llega
 
@@ -36,8 +36,10 @@ Lo programado, de hoy en adelante, y lo que se quemó. De arriba abajo:
 
 - La línea «lo que viene y cómo salió lo que ya se fue».
 - **«Se quemó»**, en rojo, solo si algo falló en los últimos siete días. Una tarjeta por cada red donde un corte falló (un corte que falló en dos redes da dos tarjetas), de la más reciente a la más vieja: arriba la hora —solo «19:00» si era de hoy, o «14 oct · 19:00»— y la cuenta, «Instagram · nombre_de_cuenta»; el texto del post (o «(sin texto)»); el motivo en rojo, cuando lo hay, y el botón «Reprogramar» (mientras trabaja, «Reprogramando…», y los demás botones esperan).
-- **Los días**, uno debajo del otro: siempre hoy y los seis siguientes, aunque estén vacíos, y después solo los que tienen algo, hasta treinta días adelante. Cada día lleva su rótulo —«Hoy · jue 15», «Mañana · vie 16», «sáb 17»—, a la derecha cuánto fuego tiene —«Apagada» (nada), «Prendida» (uno o dos posts) o «Parrilla llena» (tres o más)— y un botón redondo con una cruz, que abre «Publicar» con ese día puesto (un lector de pantalla lo lee «Programar el jue 15»). Un día vacío dice «No hay nada puesto. Préndela.», en naranjo, y hace lo mismo que la cruz.
-- Cada post es una tarjeta color carne, de la más clara (programada) a la más oscura (falló): la hora (con «  ·  SALIENDO» al lado mientras se publica), la miniatura si hay, el texto (o «(sin texto)»), una línea por cuenta «Red · nombre_de_cuenta» y, si esa cuenta falló, « — » seguido del error. Al final, el estado en palabras: «Programada», «Saliendo ahora», «Publicada» o «Falló». Las tarjetas no se pueden tocar ni editar.
+- **«▸ Borradores (N)»**, solo si hay al menos un borrador guardado, del teléfono o del panel web. Al tocarlo se abre la lista (el triángulo pasa a «▾») y al tocarlo de nuevo se cierra. Cada borrador es una tarjeta con su texto en dos líneas (o «(sin texto)») y debajo, en chico, «para el vie 16 de oct a las 19:00» o «sin fecha», « · 1 archivo» o « · N archivos» si tiene, y « · guardado el mar 13 de oct a las 14:05». Van del guardado más recientemente al más viejo. Tocar uno lo abre en «Publicar».
+- **Los días**, uno debajo del otro: siempre hoy y los seis siguientes, aunque estén vacíos, y después solo los que tienen algo, hasta treinta días adelante. Cada día lleva su rótulo —«Hoy · jue 15», «Mañana · vie 16», «sáb 17»—, a la derecha cuánto fuego tiene —«Apagada» (nada), «Prendida» (uno o dos posts) o «Parrilla llena» (tres o más)— y un botón redondo con una cruz, que abre «Publicar» con ese día puesto (un lector de pantalla lo lee «Programar el jue 15»). Un día sin posts ni borradores dice «No hay nada puesto. Préndela.», en naranjo, y hace lo mismo que la cruz.
+- Cada post es una tarjeta color carne, de la más clara (programada) a la más oscura (falló): la hora (con «  ·  SALIENDO» al lado mientras se publica), la miniatura si hay, el texto (o «(sin texto)»), una línea por cuenta «Red · nombre_de_cuenta» y, si esa cuenta falló, « — » seguido del error. Al final, el estado en palabras: «Programada», «Saliendo ahora», «Publicada» o «Falló». Las tarjetas de los posts no se pueden tocar ni editar.
+- Un borrador con fecha aparece también en su día, debajo de los posts, como una tarjeta con borde punteado: arriba «BORRADOR · 19:00» y debajo su texto (o «(sin texto)»). Tocarla lo abre en «Publicar». Un borrador no está programado y no cuenta para el fuego del día: un día que solo tiene borradores sigue diciendo «Apagada».
 - Al pie: «Ayer no salió nada.», «Ayer: 1 corte servido» o «Ayer: N cortes servidos». Cuenta cortes y no redes: uno que salió en tres redes es un corte.
 
 Las horas y los días están en la zona horaria de [Tu Cuenta](tu-cuenta.md).
@@ -46,14 +48,19 @@ Las horas y los días están en la zona horaria de [Tu Cuenta](tu-cuenta.md).
 
 De arriba abajo:
 
+- Mientras se abre un borrador, «Abriendo borrador…», y no se puede tocar nada.
+- Si el borrador abierto tiene algo que el teléfono no programa, un aviso en amarillo: «Este borrador va también a TikTok: eso se programa en el panel web.», «Este borrador tiene la palabra clave «GUIA»: eso se programa en el panel web.» (con la palabra que tenga) o, con las dos cosas, «Este borrador va también a TikTok y tiene la palabra clave «GUIA»: eso se programa en el panel web.». Con ese aviso se puede seguir editando —se guarda igual, sin perder lo de TikTok ni la palabra clave—, pero «Programar» y «Publicar ahora» quedan apagados.
 - Un cuadro de texto con la ayuda «Texto del post…» (hasta 2200 caracteres). Debajo, a la izquierda, «En YouTube el primer renglón es el título» y, a la derecha, el contador, por ejemplo «120 / 2200».
-- Los archivos elegidos, como miniaturas (un video se ve como un cuadro que dice «Video»), cada uno con una «✕» para quitarlo, y el botón «+ Fotos o video» mientras queden menos de diez.
-- Las cuentas a las que se puede publicar, como botones «Red · nombre_de_cuenta». Solo salen cuentas de Instagram, Facebook y YouTube conectadas en el panel; TikTok no aparece nunca. Con una sola cuenta conectada, viene marcada; con dos o más, ninguna. Una cuenta que se desconectó sale como «Instagram · nombre_de_cuenta · reconéctala», con «reconéctala» en rojo, y no se puede marcar. Mientras no haya ninguna marcada: «Elige al menos una cuenta.»
+- Los archivos elegidos, como miniaturas (un video se ve como un cuadro que dice «Video»), cada uno con una «✕» para quitarlo, y el botón «+ Fotos o video» mientras queden menos de diez. Cada archivo se sube apenas se elige, uno detrás del otro; mientras tanto la miniatura lleva una franja abajo: «45 %» el que está subiendo, «En cola» los que esperan y, en rojo, «Reintentar» uno cuya subida falló (tocarlo la vuelve a intentar). Quitar uno que está subiendo cancela su subida.
+- Las cuentas a las que se puede publicar, como botones «Red · nombre_de_cuenta». Solo salen cuentas de Instagram, Facebook y YouTube conectadas en el panel; TikTok no aparece nunca. Con una sola cuenta conectada, viene marcada; con dos o más, ninguna. Un borrador abierto trae marcadas las suyas. Una cuenta que se desconectó sale como «Instagram · nombre_de_cuenta · reconéctala», con «reconéctala» en rojo, y no se puede marcar. Mientras no haya ninguna marcada: «Elige al menos una cuenta.»
 - Solo si hay una cuenta de Instagram marcada y exactamente un video (sin fotos): un botón «Trial reel · nombre_de_cuenta» por cada cuenta de Instagram marcada, y la explicación «Un trial reel solo lo ven quienes no te siguen. Tú decides desde Instagram cuándo compartirlo con todos.»
-- El botón «Cuándo: 14/10 a las 19:00» (con el día y la hora elegidos). De partida trae la próxima hora en punto; si se llegó desde la cruz de un día de La Parrilla, trae ese día a esa misma hora en punto.
-- Los mensajes, en rojo si son problemas y en gris si son el avance del envío.
-- Mientras se sube un archivo, una barra de avance.
-- Abajo, «Programar» y «Publicar ahora». Los dos están apagados hasta que haya texto o algún archivo, y al menos una cuenta marcada. Durante el envío, en su lugar sale «Cancelar» (solo se puede tocar mientras sube un archivo); si el envío se cayó, sale «Reintentar».
+- El botón «Cuándo: 14/10 a las 19:00» (con el día y la hora elegidos). De partida trae la próxima hora en punto; si se llegó desde la cruz de un día de La Parrilla, trae ese día a esa misma hora en punto, y un borrador con fecha trae la suya.
+- Los mensajes: en rojo los problemas; en gris cómo van las subidas («Subiendo el archivo…» o «Subiendo 3 archivos…») y el envío («Programando…» o «Publicando…», y después «Listo»).
+- Abajo, «Programar» y «Publicar ahora». Los dos están apagados mientras no haya texto o algún archivo y al menos una cuenta marcada, mientras algún archivo no haya terminado de subir, mientras se envía, y con el aviso amarillo de arriba.
+- Debajo, en chico, cómo va el borrador: «Lo que escribas se guarda solo como borrador.» (antes de escribir nada), «Abriste un borrador: lo que cambies se guarda solo.», «Guardando borrador…», «Borrador guardado.» o, en rojo, «No se pudo guardar el borrador.» o «Este borrador ya no existe: se programó o se descartó. Mira cómo quedó en La Parrilla.».
+- Si hay algo escrito, algún archivo o un borrador abierto, dos botones de texto: «Nueva publicación» y, en rojo, «Descartar». Con el borrador que ya no existe, solo «Nueva publicación».
+
+Lo que se escribe se guarda solo, como borrador, un momento después del último cambio, y también si la app pasa a segundo plano. Hace falta texto o un archivo ya subido: abrir «Publicar» y salir no deja un borrador vacío. El borrador guarda el texto, los archivos ya subidos, las cuentas marcadas, el trial reel y la fecha, pero la fecha solo si alguien la eligió (la próxima hora en punto con que abre no se guarda). Es el mismo borrador que se ve en el panel web.
 
 Mientras se cargan las cuentas dice «Cargando cuentas…». Si no se pudieron cargar: «No se pudieron cargar las cuentas.» con «Reintentar». Si no hay ninguna que sirva: «No hay ninguna cuenta lista para publicar desde el teléfono. Conéctala en el panel web, en Los Fierros.»
 
@@ -126,11 +133,11 @@ Reprogramar no arregla la causa: si falló porque la cuenta se desconectó o el 
 
 1. Pestaña «Publicar», o la cruz de un día en «La Parrilla» (así ya trae ese día puesto).
 2. Escribe el texto en el cuadro «Texto del post…». En YouTube, el primer renglón es el título del video.
-3. Toca «+ Fotos o video», da permiso para ver la galería si lo pide y elige hasta diez archivos en total (un video puede pesar hasta 500 MB). Para sacar uno, toca su «✕».
+3. Toca «+ Fotos o video», da permiso para ver la galería si lo pide y elige hasta diez archivos en total (un video puede pesar hasta 500 MB). Empiezan a subir solos: cada miniatura dice cuánto lleva. Para sacar uno, toca su «✕».
 4. Toca las cuentas a las que debe salir: quedan marcadas en naranjo.
 5. Toca «Cuándo: …», elige el día y después la hora (en formato de 24 horas). La hora es la del reloj del teléfono.
-6. Toca «Programar».
-7. Abajo se ve el avance: «Comprobando…», «Subiendo 1 de 2 · 45 %», «Guardando…» y «Listo». Un segundo después el formulario se vacía y la app salta a «La Parrilla», donde ya aparece el post si cae dentro de los próximos treinta días.
+6. Cuando los archivos terminaron de subir, toca «Programar».
+7. Abajo se ve «Programando…» y después «Listo». Un segundo después el formulario se vacía y la app salta a «La Parrilla», donde ya aparece el post si cae dentro de los próximos treinta días. Si venía de un borrador, el borrador sale de la lista.
 
 Instagram y YouTube necesitan al menos un archivo; Facebook acepta solo texto. YouTube necesita un video: con solo fotos, el post se programa igual, pero el destino de YouTube falla al publicarse con «YouTube solo recibe video.», que se ve en «La Parrilla».
 
@@ -152,16 +159,40 @@ Un trial reel lo ven solo quienes no siguen la cuenta; después, desde la app de
 
 Si Instagram no tiene la función habilitada para esa cuenta, el destino falla al publicarse y en «La Parrilla» sale «Instagram no permite trial reels en esta cuenta.». Corregirlo se hace en el panel web, en [La Parrilla](la-parrilla.md).
 
-### Si se corta la señal mientras se envía
+### Para dejar algo a medias y seguirlo después
 
-1. Aparece en rojo «No se pudo subir el archivo. Revisa tu señal.» o «No se pudo conectar. Revisa tu señal.», y el botón «Reintentar».
-2. Cuando vuelva la señal, toca «Reintentar». Sigue desde el archivo que falló, sin volver a subir los anteriores.
+No hay que hacer nada: lo escrito se guarda solo como borrador («Borrador guardado.»). Se puede cerrar la app, cambiar de pestaña o seguirlo en el panel web, en «Borradores (<N>)» de [La Parrilla](la-parrilla.md). Si un archivo todavía está subiendo, conviene esperar a que termine: el borrador guarda solo los archivos ya subidos.
 
-Ojo: si el corte fue durante la subida o al guardar, «Reintentar» manda el texto, las cuentas y la hora que había al primer intento, aunque se hayan cambiado después. Para mandar algo distinto, reinicia el envío quitando un archivo y volviendo a agregarlo (o, si el post no tiene archivos, agregando uno y quitándolo) y toca de nuevo «Programar».
+### Para retomar un borrador
+
+1. En «La Parrilla», toca «▸ Borradores (N)» y después el borrador. Si tiene fecha, también está como tarjeta punteada en su día.
+2. Se abre en «Publicar» con lo que tenía: el texto, los archivos, las cuentas, el trial reel y la fecha. Lo que estaba en «Publicar» antes queda en los borradores.
+3. Sigue escribiendo («Abriste un borrador: lo que cambies se guarda solo.»), o «Programar».
+
+Un borrador empezado en el panel web se abre igual. Si va también a TikTok o tiene una palabra clave, sale el aviso amarillo y se programa en el panel web; desde el teléfono se puede editar sin que eso se pierda.
+
+### Para empezar otra publicación sin perder la que está
+
+1. Toca «Nueva publicación». Lo que había queda en «Borradores (N)» y el formulario se vacía.
+
+La cruz de un día en «La Parrilla» hace lo mismo, con ese día ya puesto.
+
+### Para descartar un borrador
+
+1. Ábrelo en «Publicar» (o, si es el que se está escribiendo, quédate ahí).
+2. Toca «Descartar».
+3. Aparece «Descartar» con «¿Descartar este borrador? Lo escrito y los archivos elegidos se pierden.». Toca «Descartar» (o «Cancelar»).
+
+El borrador desaparece también del panel web.
+
+### Si se corta la señal
+
+- **Mientras sube un archivo:** la miniatura queda en rojo con «Reintentar» y abajo sale «No se pudo subir el archivo. Revisa tu señal. Toca el archivo para reintentar.». Cuando vuelva la señal, toca la miniatura. Los demás archivos siguen subiendo.
+- **Al programar:** sale en rojo «No se pudo conectar. Revisa tu señal.». Cuando vuelva, toca de nuevo «Programar» o «Publicar ahora»; los archivos ya subidos no se vuelven a subir. Si el primer intento sí había alcanzado a programarlo, el segundo no lo publica dos veces: sale «Este borrador ya no existe: se programó o se descartó. Mira cómo quedó en La Parrilla.».
 
 ### Para cancelar una subida
 
-1. Mientras sube un archivo, toca «Cancelar». El formulario vuelve a quedar listo, con todo lo que tenía.
+1. Toca la «✕» del archivo que está subiendo: se cancela y sale de la lista.
 
 ### Para corregir o borrar algo programado desde el teléfono
 
@@ -178,13 +209,15 @@ No se puede desde la app. Se hace en el panel web, en [La Parrilla](la-parrilla.
 | «Demasiados intentos. Pide un código nuevo.» | Cinco códigos equivocados seguidos agotan ese código; también sale con muchos intentos seguidos desde la misma conexión. | «Usar otro correo» y pedir un código nuevo. |
 | «Demasiados intentos en las últimas 24 horas. Prueba de nuevo más tarde.» | Diez códigos equivocados en un día, sumando la web y el teléfono. | Esperar; hasta un día después del primer error. Ver [Entrar al panel](ingresar.md). |
 | «El servidor no respondió bien. Prueba de nuevo en un rato.» | Falla del servidor, no de lo que se escribió. | Esperar y volver a intentar; si se repite, avisar a quien administra el sitio. |
-| «No se pudo conectar. Revisa tu señal.» | Sin conexión al pedir el código, al entrar, al comprobar el post o al guardarlo. | Revisar la señal; en «Publicar», tocar «Reintentar». |
+| «No se pudo conectar. Revisa tu señal.» | Sin conexión al pedir el código, al entrar o al programar el post. | Revisar la señal; en «Publicar», volver a tocar «Programar» o «Publicar ahora». |
 | «No se pudo actualizar.» | Falló la descarga de datos nuevos; lo que se ve puede ser viejo. | Arrastrar hacia abajo o tocar «Reintentar» cuando haya señal. |
 | «No se pudo cargar.» | No hay datos guardados y no se pudieron descargar. | «Reintentar». |
 | «No se pudo reprogramar» con «La hora debe estar en el futuro.» | La hora elegida ya pasó. | Volver a tocar «Reprogramar» y elegir una hora futura. |
 | «No se pudo reprogramar» con «Ese destino ya no existe.» | El post se borró (por ejemplo, desde el panel web). | Arrastrar hacia abajo para actualizar. |
 | «No se pudo reprogramar» con «No se pudo conectar. Revisa tu señal.» | Sin conexión. | Volver a intentarlo cuando haya señal. |
-| «No hay nada puesto. Préndela.» | Ese día no tiene nada programado. | Tocarlo (o la cruz) para programar algo ese día. |
+| «No hay nada puesto. Préndela.» | Ese día no tiene nada programado ni ningún borrador. | Tocarlo (o la cruz) para programar algo ese día. |
+| «▸ Borradores (N)» | Hay N borradores guardados, del teléfono o del panel web. | Tocarlo para ver la lista. |
+| «BORRADOR · 19:00» (tarjeta punteada en un día) | Un borrador con esa fecha. Todavía no está programado: no va a salir solo. | Tocarlo para abrirlo y programarlo. |
 | «Ayer no salió nada.» / «Ayer: N cortes servidos» | Cuántos posts de ayer salieron en al menos una red. | Nada. |
 | «Ninguna publicación ganó views en este período. Las métricas llegan con la sincronización diaria, así que lo publicado hoy aparece mañana.» (en «Lo que más creció») | Ninguna publicación ganó views conocidas en el período. | Elegir un período más largo, o esperar la sincronización del día siguiente. |
 | «Ninguna visita llegó todavía por el link de una publicación.» (en «Qué publicación te trajo gente») | En el período no llegó ninguna visita con etiqueta. | Elegir un período más largo; pegar los links con etiqueta (ver [Los Números](los-numeros.md)). |
@@ -200,8 +233,23 @@ No se puede desde la app. Se hace en el panel web, en [La Parrilla](la-parrilla.
 | «No se pudieron cargar las cuentas.» | Falló la descarga de la lista de cuentas. | «Reintentar». |
 | «No hay ninguna cuenta lista para publicar desde el teléfono. Conéctala en el panel web, en Los Fierros.» | No hay ninguna cuenta de Instagram, Facebook o YouTube. | Conectar la cuenta en el panel web, en [Los Fierros](los-fierros.md). Si solo hay TikTok, desde el teléfono no se puede publicar. |
 | «… · reconéctala» | Esa cuenta perdió la conexión. | Reconectarla en el panel web, en [Los Fierros](los-fierros.md). |
-| «Comprobando…», «Subiendo 1 de 2 · 45 %», «Guardando…», «Listo» | El avance del envío. | Esperar; con «Listo» el post quedó programado. |
-| «No se pudo subir el archivo. Revisa tu señal.» | Se cortó la subida de un archivo. | «Reintentar» cuando haya señal. |
+| «45 %», «En cola» (sobre una miniatura) | El archivo está subiendo, o espera su turno. | Esperar. |
+| «Subiendo el archivo…», «Subiendo N archivos…» | Faltan archivos por subir; mientras tanto «Programar» y «Publicar ahora» están apagados. | Esperar. |
+| «Reintentar» (en rojo, sobre una miniatura) y «No se pudo subir el archivo. Revisa tu señal. Toca el archivo para reintentar.» | Se cortó la subida de ese archivo. | Tocar la miniatura cuando haya señal, o quitarlo con su «✕». |
+| «Programando…», «Publicando…», «Listo» | El avance del envío. | Esperar; con «Listo» el post quedó programado. |
+| «Lo que escribas se guarda solo como borrador.» | Todavía no hay nada escrito. | Nada. |
+| «Abriste un borrador: lo que cambies se guarda solo.» | Se abrió un borrador desde «La Parrilla». | Seguir escribiendo, o «Programar». |
+| «Guardando borrador…», «Borrador guardado.» | Lo escrito se está guardando, o ya quedó guardado. | Nada. |
+| «No se pudo guardar el borrador.» | El último guardado falló (sin señal, por ejemplo). | Hacer cualquier cambio cuando haya señal para que lo intente de nuevo. |
+| «Este borrador ya no existe: se programó o se descartó. Mira cómo quedó en La Parrilla.» | Ese borrador se programó o se descartó en el panel web o en otro teléfono, o ya se programó desde acá y se perdió la respuesta. La pantalla dejó de guardar y los botones de enviar se apagan. | Mirar «La Parrilla». Para seguir, «Nueva publicación». |
+| «Abriendo borrador…» | Se está descargando el borrador que se tocó. | Esperar. |
+| «Ese borrador ya no existe: se programó o se descartó.» | Se tocó un borrador que ya no está. | Arrastrar «La Parrilla» hacia abajo para actualizar la lista. |
+| «No se pudo abrir el borrador. Revisa tu señal.» | Sin conexión al abrir un borrador. | Volver a tocarlo cuando haya señal. |
+| «Este borrador va también a TikTok: eso se programa en el panel web.» (o con «tiene la palabra clave «…»») | El borrador tiene algo que el teléfono no programa. Se puede editar, pero no enviar desde acá. | Programarlo en el panel web, en [La Parrilla](la-parrilla.md). |
+| «Descartar» / «¿Descartar este borrador? Lo escrito y los archivos elegidos se pierden.» | Confirmación de descartar. | «Descartar» o «Cancelar». |
+| «No se pudo descartar el borrador: sigue en la lista de borradores.» | Sin conexión al descartar; el formulario se vació, pero el borrador sigue guardado. | Abrirlo desde «Borradores (N)» y volver a descartarlo cuando haya señal. |
+| «Hay un archivo que no terminó de subir» / «Espera a que termine, reinténtalo o quítalo antes de dejar esta publicación.» | Se tocó «Nueva publicación», un borrador o la cruz de un día con un archivo todavía subiendo o caído. | Esperar a que suba, tocar «Reintentar» en la miniatura o quitarlo, y volver a intentar. |
+| «No se pudo guardar el borrador» / «Si sigues, lo último que cambiaste se pierde.» | Se quiso dejar la publicación, pero el último guardado falló. | «Quedarme» y esperar a tener señal, o «Seguir igual» si no importa perder lo último. |
 | «Publicar ahora» / «¿Publicar ahora en …? Saldrá en los próximos 5 minutos.» | Confirmación de publicar de inmediato. | «Publicar» o «Cancelar». |
 | «Instagram, YouTube y TikTok necesitan al menos un archivo.» | Hay una cuenta de Instagram o YouTube marcada y ningún archivo. | Agregar una foto o video, o desmarcar esas cuentas. |
 | «Escribe un texto o adjunta un archivo.» | El post está vacío. | Escribir texto o agregar un archivo. |
@@ -212,8 +260,8 @@ No se puede desde la app. Se hace en el panel web, en [La Parrilla](la-parrilla.
 | «La cuenta x no está conectada. Vuelve a conectarla en Cuentas.» (con el nombre de la cuenta en lugar de x) | La cuenta elegida perdió la conexión. «Cuentas» aquí es [Los Fierros](los-fierros.md) del panel web: la app no tiene una pestaña con ese nombre. | Reconectarla en el panel web. |
 | «Una de las cuentas elegidas no es tuya.» | Una cuenta ya no pertenece a quien publica (por ejemplo, se borró). | Cerrar la app del todo y volver a abrirla: la lista de cuentas de «Publicar» se carga al abrir. |
 | «Red desconocida o sin publicación: x.» | Se intentó publicar en una red que el teléfono no maneja (hoy, TikTok). | Publicar en esa red desde el panel web, en [La Parrilla](la-parrilla.md). |
-| «Falta subir un archivo.» | Uno de los archivos subidos ya no está en el servidor. | Tocar de nuevo «Programar» o «Publicar ahora»: los archivos se vuelven a subir. |
-| «No se pudo guardar. Intenta de nuevo.» | Falla del servidor al guardar el post. | Volver a tocar «Programar» o «Publicar ahora». |
+| «Falta subir un archivo.» | Uno de los archivos subidos ya no está en el servidor. | Los elegidos en el teléfono se vuelven a subir solos: esperar y tocar de nuevo «Programar». Si el archivo venía de un borrador, quitarlo con su «✕» y volver a elegirlo. |
+| «No se pudo guardar. Intenta de nuevo.» | Falla del servidor al programar el post. | Volver a tocar «Programar» o «Publicar ahora». |
 | «Falta configurar Cloudflare R2 (R2_*).» | El sitio no tiene configurado dónde guardar archivos. | Avisar a quien administra el sitio. |
 | «Un archivo no es del almacén.», «El cuerpo no se entendió.», «Las opciones de la red no se entendieron.» | Errores internos que no deberían verse. | Cerrar y abrir la app, armar el post de nuevo; si se repite, avisar a quien administra el sitio. |
 | «Programada», «Saliendo ahora», «Publicada», «Falló» (en «La Parrilla») | El estado del post. «Falló» lleva al lado de la cuenta el error de la red. | Si falló, revisarlo en el panel web, en [La Parrilla](la-parrilla.md). |
@@ -232,9 +280,14 @@ No se puede desde la app. Se hace en el panel web, en [La Parrilla](la-parrilla.
 - «Perdí el teléfono» → quien administra el sitio puede revocar el acceso de todos los teléfonos a la vez; las conexiones con las redes no se tocan.
 - «No me aparece TikTok para publicar» → desde el teléfono no se publica en TikTok; se hace en el panel web, en [La Parrilla](la-parrilla.md).
 - «No aparece mi cuenta» o «dice reconéctala» → las cuentas se conectan y reconectan en el panel web, en [Los Fierros](los-fierros.md). La app no conecta nada.
-- «Los botones Programar y Publicar ahora están grises» → falta texto o un archivo, o falta marcar una cuenta.
+- «Los botones Programar y Publicar ahora están grises» → falta texto o un archivo, falta marcar una cuenta, un archivo todavía está subiendo («Subiendo…») o falló («Reintentar» en la miniatura), o el borrador tiene el aviso amarillo de TikTok o palabra clave.
+- «Perdí lo que estaba escribiendo» → se guarda solo: está en «La Parrilla» → «▸ Borradores (N)». Si no está, no tenía texto ni archivos subidos, o el guardado falló («No se pudo guardar el borrador.»).
+- «Empecé en el computador y quiero terminar en el teléfono» (o al revés) → es el mismo borrador: en el teléfono, «La Parrilla» → «▸ Borradores (N)»; en el panel web, «Borradores (N)» en [La Parrilla](la-parrilla.md).
+- «Me dice que el borrador va también a TikTok» o «que tiene la palabra clave» → eso no se programa desde el teléfono; se programa en el panel web, en [La Parrilla](la-parrilla.md). Se puede seguir editando el texto en el teléfono sin perderlo.
+- «Toqué la cruz de un día y desapareció lo que estaba escribiendo» → la cruz empieza otra publicación; lo anterior quedó en «▸ Borradores (N)».
 - «No me sale el botón de trial reel» → hace falta una cuenta de Instagram marcada y exactamente un video, sin fotos.
 - «Programé algo mal desde el teléfono» → se corrige o se borra en el panel web, en [La Parrilla](la-parrilla.md).
+- «El borrador apareció hoy en La Parrilla y no le puse fecha» → no debería: solo guarda la fecha si se eligió con «Cuándo: …», o si se llegó desde la cruz de un día.
 - «No veo el post que acabo de programar» → abre «La Parrilla» (la app salta sola ahí al terminar); si no aparece, arrastra la pantalla hacia abajo para actualizar. Si es para más de treinta días adelante, la app no lo muestra.
 - «Un post dice Falló» → está arriba, en «Se quemó», con el motivo y el botón «Reprogramar». Si falló por la conexión o por el archivo, primero se arregla eso en el panel web.
 - «Los números no cambian» → mirar «Actualizado hace…» arriba y arrastrar hacia abajo para actualizar.
@@ -249,7 +302,7 @@ Comparada con el panel web, la app no:
 - conecta, desconecta ni reconecta redes ([Los Fierros](los-fierros.md));
 - publica en TikTok;
 - edita, mueve ni borra lo programado ([La Parrilla](la-parrilla.md)); solo reprograma lo quemado;
-- guarda borradores;
+- programa un borrador que va también a TikTok o tiene una palabra clave (se edita, pero se programa en el panel web);
 - pone portada a un video, atributos a un post ni reglas de respuesta a comentarios con palabra clave;
 - carga posts por lote;
 - muestra ni responde comentarios ([La Mesa](la-mesa.md));
@@ -280,7 +333,8 @@ Lo que describe sale de estos archivos:
 - `mobile/src/components/selector-fecha.tsx` (elegir día y hora: los dos diálogos de Android, o en iPhone —que todavía no se distribuye— la hoja «Cuándo sale» con «Cancelar» y «Listo»)
 - `mobile/src/components/parrilla.tsx`
 - `mobile/src/components/iconos.tsx`
-- `mobile/src/lib/agenda.ts` (qué días se ven, «Se quemó», el pie de ayer)
+- `mobile/src/lib/agenda.ts` (qué días se ven, «Se quemó», los borradores de cada día, el pie de ayer)
+- `mobile/src/lib/borradores.ts` (las frases del borrador, qué se guarda, la línea de cada borrador en la lista)
 - `mobile/src/lib/publicar.ts`
 - `mobile/src/lib/subir.ts`
 - `mobile/src/lib/session.ts`
@@ -293,6 +347,8 @@ Lo que describe sale de estos archivos:
 - `mobile/src/lib/parrilla.ts`
 - `src/app/api/mobile/` (las rutas que la app llama, con sus frases de error)
 - `src/lib/mobile-api.ts`
+- `src/lib/borrador.ts` (lo que el teléfono guarda de un borrador y el aviso de TikTok o palabra clave)
+- `src/lib/borradores-movil.ts`
 - `src/lib/social/publish/validate.ts`
 - `src/lib/social/publish/opciones.ts`
 - `src/lib/social/publish/youtube.ts`

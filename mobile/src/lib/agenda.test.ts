@@ -47,10 +47,21 @@ describe('diasDeLaAgenda', () => {
     ]
     const dias = diasDeLaAgenda(posts, HOY)
     expect(dias).toHaveLength(DIAS_FIJOS + 1)
-    expect(dias[0]).toEqual({ dia: HOY, posts: [posts[1]] })
+    expect(dias[0]).toEqual({ dia: HOY, posts: [posts[1]], borradores: [] })
     expect(dias[1]!.posts).toEqual([])
-    expect(dias.at(-1)).toEqual({ dia: '2026-11-02', posts: [posts[2]] })
+    expect(dias.at(-1)).toEqual({ dia: '2026-11-02', posts: [posts[2]], borradores: [] })
     expect(dias.some((d) => d.dia === '2026-10-14')).toBe(false)
+  })
+
+  it('un borrador con fecha va en su día, por hora, y basta para que un día lejano aparezca', () => {
+    const borrador = (id: string, cuando: string | null) => ({ id, texto: id, cuando, guardado: '2026-10-15T08:00:00-03:00', archivos: 0 })
+    const tarde = borrador('tarde', '2026-10-16T21:00:00-03:00')
+    const temprano = borrador('temprano', '2026-10-16T08:00:00-03:00')
+    const lejos = borrador('lejos', '2026-11-20T10:00:00-03:00')
+    const dias = diasDeLaAgenda([], HOY, [tarde, borrador('sin-fecha', null), lejos, temprano, borrador('viejo', '2026-10-01T09:00:00-03:00')])
+    expect(dias).toHaveLength(DIAS_FIJOS + 1)
+    expect(dias[1]).toEqual({ dia: '2026-10-16', posts: [], borradores: [temprano, tarde] })
+    expect(dias.at(-1)).toEqual({ dia: '2026-11-20', posts: [], borradores: [lejos] })
   })
 })
 

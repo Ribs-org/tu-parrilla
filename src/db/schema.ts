@@ -583,7 +583,8 @@ export const ajustes = pgTable(
  * mientras escribe, como un borrador de correo, y se borra al programarlo o descartarlo.
  *
  * Es estado del formulario, no una publicación: por eso vive aparte de `scheduled_posts` y
- * ni el publicador ni la API lo ven. `campos` son los valores del formulario tal como los
+ * ni el publicador ni la API lo ven. La app del teléfono sí: Publicar guarda en las mismas
+ * filas (`api/mobile/borradores`), así que lo empezado en un lado se sigue en el otro. `campos` son los valores del formulario tal como los
  * lee `createScheduledPost` (nombre → valores), y `fecha` es la de su campo «Fecha y hora»
  * ya resuelta en la zona del dueño, que es lo que el calendario necesita para ponerlo en
  * su día. Sin fecha, el borrador solo aparece en la lista de borradores.
