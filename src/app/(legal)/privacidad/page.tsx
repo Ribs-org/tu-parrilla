@@ -189,7 +189,7 @@ export default function PrivacidadPage() {
           La aplicación del teléfono
         </h2>
         <p className="leading-relaxed text-fg-muted">
-          Existe una aplicación para Android, «Vicente · Números», que es el mismo panel en el
+          Existe una aplicación para Android, «Tu Parrilla», que es el mismo panel en el
           teléfono. No es pública: se distribuye a una lista cerrada de probadores y hace falta
           una cuenta para usarla.
         </p>

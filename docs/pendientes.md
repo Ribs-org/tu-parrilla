@@ -177,14 +177,15 @@ Nada de esto bloquea un trámite hoy; conviene ordenarlo antes de abrir a tercer
 
 ## Features y trabajo de código
 
-- **El rediseño de la app del teléfono, partes 3 a 5** (2026-10-16). Las partes 1 y 2
+- **El rediseño de la app del teléfono, partes 3 y 4** (2026-10-16). Las partes 1 y 2
   dejaron las tres pestañas del panel, «Reprogramar» en «Se quemó» y los borradores
   compartidos con el panel. Faltan: (3) La Mesa como cuarta pestaña, para leer y responder
   comentarios; (4) TikTok, Threads y X desde Publicar —TikTok exige mostrar los datos de la
   cuenta (`creator_info`) antes de publicar—, y con eso la palabra clave: hoy un borrador
   con TikTok o con palabra clave se edita en el teléfono pero se programa en el panel
-  (`soloEnElPanel` en `src/lib/borrador.ts`); (5) el nombre y el ícono «Tu Parrilla», que
-  piden un build nativo nuevo y actualizar la ficha de la Play Store. Cuando ninguna
+  (`soloEnElPanel` en `src/lib/borrador.ts`). El nombre y el ícono «Tu Parrilla» ya están en
+  `mobile/app.json`, con el identificador `cl.tuparrilla.app`: llegan con el primer build de
+  la Play Store, no por aire. Cuando ninguna
   instalación vieja las pida, salen `/api/mobile/overview` y `/api/mobile/schedule/check`,
   que la app nueva ya no usa.
 

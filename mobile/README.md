@@ -1,6 +1,9 @@
-# Vicente · Números
+# Tu Parrilla, la app del teléfono
 
-Esta es la app del teléfono de Tu Parrilla. Desde el 2026-10-16 tiene las mismas tres
+Esta es la app del teléfono de Tu Parrilla. En el teléfono se llama **Tu Parrilla**, con el
+bife sobre la reja de ícono, desde el build de la Play Store (2026-10-16); el APK de prueba
+de antes se llama «Vicente · Números» y tiene otro identificador, así que las dos pueden
+convivir instaladas hasta que se borre el APK. Desde el 2026-10-16 tiene las mismas tres
 pestañas que el panel web, en versión corta: **La Parrilla** (lo programado día por
 día, lo que se quemó, los borradores y cuántos cortes salieron ayer), **Publicar** al
 medio (eliges fotos o un video de la galería, escribes el texto, marcas las cuentas y lo
@@ -111,7 +114,7 @@ reintento, pero no publica hasta que la web la alcance.
    permiso para "instalar apps desconocidas" (porque no viene de Google Play).
    Se acepta una vez; queda guardado para la próxima.
 3. Termina la instalación como cualquier app. Va a aparecer un ícono llamado
-   "Vicente · Números".
+   "Vicente · Números" (el APK de prueba; la de la Play Store se llama "Tu Parrilla").
 
 ## Cómo entrar
 
@@ -221,8 +224,8 @@ borrar lo ya programado.
    nombre de Pyxis SpA, que pide el número D-U-N-S de la empresa; a nombre de una persona
    sale más rápido. Ver «Que todo quede a nombre de Pyxis» en `docs/pendientes.md`.
 2. **Confirmar el identificador** antes del primer build: `cl.tuparrilla.app` queda
-   registrado en Apple para siempre. Android sigue con `cl.vicentepareja.numeros`, que ya
-   no se puede cambiar.
+   registrado en Apple para siempre. Android usa el mismo desde el primer build de la Play
+   Store (2026-10-16); el APK de prueba de antes tenía `cl.vicentepareja.numeros`.
 3. **La ficha en App Store Connect** (nombre, privacidad, capturas) y la primera subida a
    TestFlight:
 
