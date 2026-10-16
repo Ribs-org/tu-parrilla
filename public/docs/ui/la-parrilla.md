@@ -980,8 +980,10 @@ quemado, más arriba).
   la semana. Rojo: alguna se apagó (venció o dejó de sincronizar) y lo que se programe ahí no
   va a salir. Adentro, la entrada «Los Fierros» dice cuántas («1 se enfría», «2 se
   apagaron»); en [Los Fierros](los-fierros.md), «Reconectar» en esa tarjeta.
-- **Publiqué en YouTube y salió privado.** Los Fierros lo advierte: «Hasta que Google
-  apruebe la cuota de la app, lo que publiques sale privado.»
+- **Publiqué en YouTube y salió privado.** No debería: Tu Parrilla sube a YouTube como
+  público, y hasta ahora así sale. Si en YouTube Studio aparece «Privado» con un candado, es
+  una restricción de Google para apps sin una auditoría que todavía está en trámite: avisar
+  a quien administra el sitio. Sin candado, se puede cambiar a mano en YouTube Studio.
 - **En TikTok no aparece en mi perfil.** TikTok puede tardar unos minutos. Si se mandó como
   borrador de TikTok, dice «En tu bandeja de TikTok»: hay que terminarlo en la app.
 - **No veo el video en el editor de un post que ya salió.** Cuando un post sale en todas sus

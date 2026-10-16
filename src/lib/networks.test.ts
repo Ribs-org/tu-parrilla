@@ -7,7 +7,9 @@ describe('avisosDe', () => {
       'Cuenta Business o Creator, enlazada a una página de Facebook. Una cuenta personal no puede conectar.',
     ])
     expect(avisosDe('facebook', false)).toEqual(['Una página, no un perfil personal.'])
-    expect(avisosDe('youtube', false)).toEqual(['Hasta que Google apruebe la cuota de la app, lo que publiques sale privado.'])
+    // Lo que sube Tu Parrilla a YouTube sale público aunque la auditoría de cuota no esté
+    // aprobada (comprobado el 2026-10-09 y el 2026-10-16): no hay nada que advertir.
+    expect(avisosDe('youtube', false)).toEqual([])
   })
 
   it('mientras Meta revisa la app, Instagram y Facebook llevan la segunda línea; las demás no', () => {
@@ -17,7 +19,7 @@ describe('avisosDe', () => {
     expect(avisosDe('instagram', true)).toHaveLength(2)
     expect(avisosDe('instagram', true)[1]).toBe(AVISO_META_EN_REVISION)
     expect(avisosDe('facebook', true)).toHaveLength(2)
-    expect(avisosDe('youtube', true)).toHaveLength(1)
+    expect(avisosDe('youtube', true)).toHaveLength(0)
   })
 
   it('una red sin aviso fijo —threads, tiktok— no dice nada, revise o no revise Meta', () => {
