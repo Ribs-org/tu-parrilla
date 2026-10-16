@@ -1,8 +1,9 @@
 'use client'
 
 import { useEffect, useId, useRef, useState, useTransition } from 'react'
-import { AlertTriangle, Check, Copy, RefreshCw } from 'lucide-react'
+import { AlertTriangle, Check, ChevronDown, Copy, RefreshCw } from 'lucide-react'
 import { disconnectAccount, fusionarCuenta, quitarCuentaAccion, syncSocialNow } from '@/app/admin/actions'
+import { Icon } from '@/components/icon'
 import { Button } from '@/components/ui'
 import { NEGATIVE, POSITIVE } from '@/components/charts/theme'
 import { SOCIAL_NETWORKS } from '@/db/schema'
@@ -48,7 +49,16 @@ function nombreDe(row: CuentaRow): string {
   return row.handle ?? row.externalId ?? 'Sin nombre'
 }
 
-/** Un bloque por red, una tarjeta por cuenta. Conectar suma; la misma cuenta solo renueva. */
+/**
+ * Las redes con cuentas, una debajo de otra en una sola chapa, con una fila corta por
+ * cuenta; las redes sin ninguna, juntas al final en una lista de una línea cada una.
+ * Conectar suma; la misma cuenta solo renueva.
+ *
+ * Antes cada cuenta era una tarjeta alta con todo a la vista —dos ids, botones, avisos— y
+ * cada red sin cuentas ocupaba su propio bloque con «Sin cuentas.»: mucho volumen para lo que
+ * se mira casi siempre, que es si cada fierro está al rojo. Ahora la fila dice eso y, si hace
+ * falta, por qué no; lo demás se abre con la flecha de la fila (`Fila`).
+ */
 export function Cuentas({ rows, metaEnRevision }: { rows: CuentaRow[]; metaEnRevision: boolean }) {
   const [pending, startTransition] = useTransition()
   const [aviso, setAviso] = useState<{ texto: string; ok: boolean } | null>(null)
@@ -68,48 +78,87 @@ export function Cuentas({ rows, metaEnRevision }: { rows: CuentaRow[]; metaEnRev
     })
   }
 
+  const conCuentas = SOCIAL_NETWORKS.filter((network) => rows.some((r) => r.network === network))
+  const sinCuentas = SOCIAL_NETWORKS.filter((network) => !rows.some((r) => r.network === network))
+
   return (
-    <section className="space-y-6">
-      {SOCIAL_NETWORKS.map((network) => {
-        const cuentas = rows.filter((r) => r.network === network)
-        const avisos = avisosDe(network, metaEnRevision)
-        // El enlace describe sus avisos: quien llega tabulando a «Conectar →» los oye antes de
-        // pulsar, aunque en el DOM vayan después.
-        const idsDeAvisos = avisos.map((_, i) => `aviso-${network}-${i}`)
-        return (
-          <div key={network}>
-            <div className="mb-2 flex items-center gap-3">
-              <h2 className="font-titulo text-sm font-semibold uppercase tracking-[0.03em]">{networkLabel(network)}</h2>
-              <a
-                href={`/api/social/${network}/connect`}
-                aria-describedby={idsDeAvisos.length > 0 ? idsDeAvisos.join(' ') : undefined}
-                className="text-[0.75rem] text-fg-muted transition-colors hover:text-fg"
-              >
-                {cuentas.length === 0 ? 'Conectar →' : 'Agregar cuenta →'}
-              </a>
-            </div>
-            {avisos.map((aviso, i) => (
-              <p key={aviso} id={idsDeAvisos[i]} className="mb-2 text-[0.78rem] text-fg-faint">
-                {aviso}
-              </p>
-            ))}
-            {cuentas.length === 0 ? (
-              <p className="text-[0.78rem] text-fg-faint">Sin cuentas.</p>
-            ) : (
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                {cuentas.map((row) => (
-                  <Tarjeta
-                    key={row.id}
-                    row={row}
-                    network={network}
-                    vivas={cuentas.filter((c) => c.connected && c.id !== row.id)}
-                  />
-                ))}
+    <section className="max-w-3xl space-y-4">
+      {conCuentas.length > 0 ? (
+        <div className="chapa divide-y divide-acero-700 rounded-xl">
+          {conCuentas.map((network) => {
+            const cuentas = rows.filter((r) => r.network === network)
+            const avisos = avisosDe(network, metaEnRevision)
+            // El enlace describe sus avisos: quien llega tabulando a «Agregar cuenta →» los
+            // oye antes de pulsar, aunque en el DOM vayan después.
+            const idsDeAvisos = avisos.map((_, i) => `aviso-${network}-${i}`)
+            return (
+              <div key={network} className="px-4 py-3">
+                <div className="flex items-center gap-2">
+                  <Icon name={network} className="h-4 w-4 shrink-0" />
+                  <h2 className="font-titulo text-sm font-semibold uppercase tracking-[0.03em]">{networkLabel(network)}</h2>
+                  <a
+                    href={`/api/social/${network}/connect`}
+                    aria-describedby={idsDeAvisos.length > 0 ? idsDeAvisos.join(' ') : undefined}
+                    className="ml-auto text-[0.75rem] text-fg-muted transition-colors hover:text-fg"
+                  >
+                    Agregar cuenta →
+                  </a>
+                </div>
+                {/* Los avisos sirven antes de conectar: con la red ya conectada, a un clic. */}
+                {avisos.length > 0 ? (
+                  <details className="mt-1 text-[0.72rem] text-fg-faint">
+                    <summary className="w-fit cursor-pointer list-none hover:text-fg-muted [&::-webkit-details-marker]:hidden">
+                      Requisitos para agregar otra
+                    </summary>
+                    {avisos.map((aviso, i) => (
+                      <p key={aviso} id={idsDeAvisos[i]} className="mt-1">
+                        {aviso}
+                      </p>
+                    ))}
+                  </details>
+                ) : null}
+                <ul className="mt-2 space-y-1">
+                  {cuentas.map((row) => (
+                    <Fila key={row.id} row={row} network={network} vivas={cuentas.filter((c) => c.connected && c.id !== row.id)} />
+                  ))}
+                </ul>
               </div>
-            )}
-          </div>
-        )
-      })}
+            )
+          })}
+        </div>
+      ) : null}
+
+      {sinCuentas.length > 0 ? (
+        <div className="chapa rounded-xl px-4 py-3">
+          <h2 className="font-titulo text-[0.72rem] font-semibold uppercase tracking-[0.06em] text-fg-muted">Sin conectar</h2>
+          <ul className="mt-2 space-y-2">
+            {sinCuentas.map((network) => {
+              const avisos = avisosDe(network, metaEnRevision)
+              const idsDeAvisos = avisos.map((_, i) => `aviso-${network}-${i}`)
+              return (
+                <li key={network}>
+                  <div className="flex items-center gap-2">
+                    <Icon name={network} className="h-4 w-4 shrink-0 text-fg-muted" />
+                    <span className="text-sm">{networkLabel(network)}</span>
+                    <a
+                      href={`/api/social/${network}/connect`}
+                      aria-describedby={idsDeAvisos.length > 0 ? idsDeAvisos.join(' ') : undefined}
+                      className="ml-auto text-[0.75rem] text-fg-muted transition-colors hover:text-fg"
+                    >
+                      Conectar →
+                    </a>
+                  </div>
+                  {avisos.map((aviso, i) => (
+                    <p key={aviso} id={idsDeAvisos[i]} className="mt-0.5 pl-6 text-[0.72rem] text-fg-faint">
+                      {aviso}
+                    </p>
+                  ))}
+                </li>
+              )
+            })}
+          </ul>
+        </div>
+      ) : null}
 
       <div className="flex items-center gap-3">
         <button
@@ -132,17 +181,23 @@ export function Cuentas({ rows, metaEnRevision }: { rows: CuentaRow[]; metaEnRev
 }
 
 /**
- * Cada tarjeta lleva su propio pendiente: desconectar una cuenta no tiene por qué
- * apagar los botones de las otras siete.
- */
-/**
- * `vivas` son las otras cuentas conectadas de la misma red: con ellas una tarjeta sin
+ * Una cuenta, en una fila: el fierro en chico, el nombre, una línea que dice cómo está y
+ * «Reconectar». Lo que se usa poco —los dos ids, «Desconectar», «Quitar», fusionar— se abre
+ * con la flecha de la derecha. Lo que pide una acción —el fierro que se enfría, la conexión
+ * que falló— no se esconde: va en la línea de estado.
+ *
+ * Cada fila lleva su propio pendiente: desconectar una cuenta no tiene por qué apagar los
+ * botones de las otras siete.
+ *
+ * `vivas` son las otras cuentas conectadas de la misma red: con ellas una fila sin
  * credencial ofrece fusionarse. Es el caso de la identidad que dio otra app —TikTok, Meta
  * y compañía dan un id distinto por app—: al pasar del sandbox a la app real la misma
  * cuenta vuelve como fila nueva, y esta queda muerta con su historial colgando.
  */
-function Tarjeta({ row, network, vivas }: { row: CuentaRow; network: string; vivas: CuentaRow[] }) {
+function Fila({ row, network, vivas }: { row: CuentaRow; network: string; vivas: CuentaRow[] }) {
   const [pending, startTransition] = useTransition()
+  const [abierta, setAbierta] = useState(false)
+  const detalle = useId()
   const [desconectada, setDesconectada] = useState(false)
   const [idCopiado, setIdCopiado] = useState(false)
   const [destino, setDestino] = useState(vivas[0]?.id ?? '')
@@ -190,7 +245,7 @@ function Tarjeta({ row, network, vivas }: { row: CuentaRow; network: string; viv
     const viva = vivas.find((v) => v.id === destino)
     if (!viva) return
     const seguir = window.confirm(
-      `«${nombre}» se fusiona en «${nombreDe(viva)}»: sus posts, sus métricas y su historial de publicaciones pasan a esa cuenta, y esta tarjeta desaparece. No se puede deshacer. ¿Seguir?`,
+      `«${nombre}» se fusiona en «${nombreDe(viva)}»: sus posts, sus métricas y su historial de publicaciones pasan a esa cuenta, y esta desaparece de la lista. No se puede deshacer. ¿Seguir?`,
     )
     if (!seguir) return
     startTransition(async () => {
@@ -204,142 +259,153 @@ function Tarjeta({ row, network, vivas }: { row: CuentaRow; network: string; viv
     new Date(),
   )
 
+  // La línea de estado: lo que pide una acción primero, y si no, cuándo se sincronizó.
+  const estado = row.lastSyncError ? (
+    <span className="text-negative" title={row.lastSyncError}>
+      {FALLO_DE_SYNC}
+    </span>
+  ) : fierro === 'enfriandose' && row.expiresAt ? (
+    <span className="text-caution">
+      Este fierro se está enfriando: la conexión vence {venceEn(row.expiresAt)}. Reconéctala antes de que se apague.
+    </span>
+  ) : (
+    <span className="font-mono text-fg-faint">
+      {/* Una fila puede sincronizar sin credencial OAuth (YouTube lee con su API key): no
+          debe decir lo contrario, así que las dos cosas van juntas. */}
+      {!row.connected ? 'Sin credencial · ' : ''}
+      {row.lastSyncedAt ? `Sincronizado ${syncedAgo(row.lastSyncedAt)}` : 'Sin sincronizar'}
+    </span>
+  )
+
   return (
-    <div className="chapa rounded-xl p-4">
-      {/*
-        El fierro, arriba de todo. Dice la temperatura de la conexión antes de que la
-        leas: al rojo irradia, frío no. La frase de abajo la explica en palabras, porque
-        el color nunca es la única señal.
-      */}
-      <div className={cn('fierro mb-3', CLASE_FIERRO[fierro])} aria-hidden />
-      <div className="flex items-center gap-2">
-        <span className="truncate text-sm">{nombre}</span>
-        {row.lastSyncError ? (
-          <AlertTriangle className="h-3.5 w-3.5" style={{ color: NEGATIVE }} aria-hidden />
-        ) : row.connected ? (
-          <Check className="h-3.5 w-3.5" style={{ color: POSITIVE }} aria-hidden />
-        ) : null}
-      </div>
-      {row.externalId ? (
-        <p className="mt-0.5 truncate font-mono text-[0.68rem] text-fg-faint">{row.externalId}</p>
-      ) : null}
-      {/*
-        El id de la cuenta, discreto: no es protagonista de la tarjeta, pero tiene que
-        poder sacarse de ella. Es distinto del `externalId` de arriba (el id que le da
-        la red): este es el que la carga masiva y la API esperan en `cuentas` cuando
-        nombrar la red ya no alcanza.
-      */}
-      <button
-        type="button"
-        onClick={copiarId}
-        title="Id de cuenta — para «cuentas» en el CSV o la API"
-        className="mt-0.5 flex max-w-full items-center gap-1 font-mono text-[0.68rem] text-fg-faint transition-colors hover:text-fg-muted"
-      >
-        <span className="truncate">{row.id}</span>
-        {idCopiado ? (
-          <Check className="h-3 w-3 shrink-0" style={{ color: POSITIVE }} aria-hidden />
-        ) : (
-          <Copy className="h-3 w-3 shrink-0" aria-hidden />
-        )}
-        <span className="sr-only">Copiar id de cuenta</span>
-      </button>
-      <p className="mt-0.5 font-mono text-[0.68rem] text-fg-faint">
-        {row.lastSyncedAt ? `Sincronizado ${syncedAgo(row.lastSyncedAt)}` : 'Sin sincronizar'}
-      </p>
-      {/* Una fila puede sincronizar sin credencial OAuth (YouTube lee con su
-          API key): la tarjeta no debe decir lo contrario. */}
-      {!row.connected ? (
-        <p className="mt-0.5 font-mono text-[0.68rem] text-fg-faint">Sin credencial</p>
-      ) : null}
-      {/*
-        El aviso de caducidad. Solo aparece cuando falta poco: un fierro al rojo no
-        necesita decir que está al rojo, y un cartel encendido la mitad del tiempo se
-        vuelve paisaje. El error de sincronización ya tiene su propia frase más abajo,
-        así que acá no se repite.
-      */}
-      {fierro === 'enfriandose' && row.expiresAt ? (
-        <p className="mt-2 text-[0.72rem] text-caution">
-          Este fierro se está enfriando: la conexión vence {venceEn(row.expiresAt)}.
-          Reconéctala antes de que se apague.
-        </p>
-      ) : null}
-      {row.lastSyncError ? (
-        <p
-          className="mt-2 line-clamp-2 text-[0.72rem]"
-          style={{ color: NEGATIVE }}
-          title={row.lastSyncError}
-        >
-          {FALLO_DE_SYNC}
-        </p>
-      ) : null}
-      <div role="status">
-        {desconectada ? <p className="mt-2 text-[0.72rem] text-fg-muted">Desconectada.</p> : null}
-        {fusion ? (
-          <p className={cn('mt-2 text-[0.72rem]', fusion.ok ? 'text-fg-muted' : 'text-caution')}>{fusion.texto}</p>
-        ) : null}
-      </div>
-      {/*
-        Sin credencial y con otra cuenta viva de esta red: casi siempre es la misma persona
-        con el id que le dio otra app (al salir del sandbox, por ejemplo). Fusionar es lo que
-        conserva sus números en vez de empezar de cero; se ofrece solo aquí, donde ya no hay
-        nada que reconectar.
-      */}
-      {!row.connected && !fusion?.ok && vivas.length > 0 ? (
-        <div className="mt-3 space-y-1.5">
-          <p className="text-[0.72rem] text-fg-muted">
-            ¿Es la misma cuenta con otro identificador? Fusiónala y su historial pasa a la viva.
+    <li className="rounded-lg transition-colors hover:bg-white/[0.03]">
+      <div className="flex items-center gap-3 px-1 py-1.5">
+        {/*
+          El fierro, en chico y a la izquierda de todo. Dice la temperatura de la conexión
+          antes de que la leas: al rojo irradia, frío no. La línea de estado la explica en
+          palabras, porque el color nunca es la única señal.
+        */}
+        <span className={cn('fierro w-6 shrink-0', CLASE_FIERRO[fierro])} aria-hidden />
+        <div className="min-w-0 flex-1">
+          <p className="flex items-center gap-1.5 text-sm">
+            <span className="truncate">{nombre}</span>
+            {row.lastSyncError ? (
+              <AlertTriangle className="h-3.5 w-3.5 shrink-0" style={{ color: NEGATIVE }} aria-hidden />
+            ) : row.connected ? (
+              <Check className="h-3.5 w-3.5 shrink-0" style={{ color: POSITIVE }} aria-hidden />
+            ) : null}
           </p>
-          <div className="flex flex-wrap items-center gap-2">
-            <select
-              value={destino}
-              onChange={(e) => setDestino(e.target.value)}
-              disabled={pending}
-              aria-label="Cuenta en la que se fusiona"
-              className="chapa rounded-lg bg-transparent px-2 py-1 text-[0.75rem] text-fg"
-            >
-              {vivas.map((v) => (
-                <option key={v.id} value={v.id}>
-                  {nombreDe(v)}
-                </option>
-              ))}
-            </select>
-            <button
-              type="button"
-              onClick={fusionar}
-              disabled={pending}
-              className="text-[0.75rem] text-fg-muted transition-colors hover:text-fg disabled:opacity-50"
-            >
-              {pending ? 'Fusionando…' : 'Es la misma cuenta →'}
-            </button>
-          </div>
+          <p className="text-[0.72rem] leading-snug">{estado}</p>
         </div>
-      ) : null}
-      <div className="mt-3 flex items-center gap-3">
         <a
           href={`/api/social/${network}/connect`}
-          className="text-[0.75rem] text-fg-muted transition-colors hover:text-fg"
+          className="shrink-0 text-[0.75rem] text-fg-muted transition-colors hover:text-fg"
         >
           {row.connected ? 'Reconectar' : 'Conectar →'}
         </a>
-        {row.connected ? (
-          <button
-            type="button"
-            onClick={desconectar}
-            disabled={pending}
-            className="text-[0.75rem] text-fg-faint transition-colors hover:text-fg disabled:opacity-50"
-          >
-            {pending ? 'Desconectando…' : 'Desconectar'}
-          </button>
-        ) : (
-          <Quitar id={row.id} nombre={nombre} red={networkLabel(network)} />
-        )}
+        <button
+          type="button"
+          onClick={() => setAbierta(!abierta)}
+          aria-expanded={abierta}
+          aria-controls={detalle}
+          className="shrink-0 rounded p-1 text-fg-faint transition-colors hover:bg-white/[0.06] hover:text-fg"
+        >
+          <ChevronDown className={cn('h-4 w-4 transition-transform', abierta && 'rotate-180')} aria-hidden />
+          <span className="sr-only">Más de {nombre}</span>
+        </button>
       </div>
-    </div>
+
+      <div role="status" className="pl-10">
+        {desconectada ? <p className="pb-1 text-[0.72rem] text-fg-muted">Desconectada.</p> : null}
+        {fusion ? (
+          <p className={cn('pb-1 text-[0.72rem]', fusion.ok ? 'text-fg-muted' : 'text-caution')}>{fusion.texto}</p>
+        ) : null}
+      </div>
+
+      <div id={detalle} hidden={!abierta} className="space-y-1.5 pb-2.5 pl-10 pr-1">
+        {row.externalId ? (
+          <p className="truncate font-mono text-[0.68rem] text-fg-faint">
+            <span className="whitespace-nowrap text-fg-muted">En la red: </span>
+            {row.externalId}
+          </p>
+        ) : null}
+        {/*
+          El id de la cuenta en Tu Parrilla: el que la carga masiva y la API esperan en
+          `cuentas` cuando nombrar la red ya no alcanza. Es distinto del de arriba, el que le
+          da la red.
+        */}
+        <button
+          type="button"
+          onClick={copiarId}
+          title="Id de cuenta — para «cuentas» en el CSV o la API"
+          className="flex max-w-full items-center gap-1 font-mono text-[0.68rem] text-fg-faint transition-colors hover:text-fg-muted"
+        >
+          <span className="shrink-0 whitespace-nowrap text-fg-muted">En Tu Parrilla: </span>
+          <span className="truncate">{row.id}</span>
+          {idCopiado ? (
+            <Check className="h-3 w-3 shrink-0" style={{ color: POSITIVE }} aria-hidden />
+          ) : (
+            <Copy className="h-3 w-3 shrink-0" aria-hidden />
+          )}
+          <span className="sr-only">Copiar id de cuenta</span>
+        </button>
+        {/*
+          Sin credencial y con otra cuenta viva de esta red: casi siempre es la misma persona
+          con el id que le dio otra app (al salir del sandbox, por ejemplo). Fusionar es lo que
+          conserva sus números en vez de empezar de cero; se ofrece solo aquí, donde ya no hay
+          nada que reconectar.
+        */}
+        {!row.connected && !fusion?.ok && vivas.length > 0 ? (
+          <div className="space-y-1.5 pt-1">
+            <p className="text-[0.72rem] text-fg-muted">
+              ¿Es la misma cuenta con otro identificador? Fusiónala y su historial pasa a la viva.
+            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              <select
+                value={destino}
+                onChange={(e) => setDestino(e.target.value)}
+                disabled={pending}
+                aria-label="Cuenta en la que se fusiona"
+                className="chapa rounded-lg bg-transparent px-2 py-1 text-[0.75rem] text-fg"
+              >
+                {vivas.map((v) => (
+                  <option key={v.id} value={v.id}>
+                    {nombreDe(v)}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={fusionar}
+                disabled={pending}
+                className="text-[0.75rem] text-fg-muted transition-colors hover:text-fg disabled:opacity-50"
+              >
+                {pending ? 'Fusionando…' : 'Es la misma cuenta →'}
+              </button>
+            </div>
+          </div>
+        ) : null}
+        <div className="flex items-center gap-3 pt-1">
+          {row.connected ? (
+            <button
+              type="button"
+              onClick={desconectar}
+              disabled={pending}
+              className="text-[0.75rem] text-fg-faint transition-colors hover:text-fg disabled:opacity-50"
+            >
+              {pending ? 'Desconectando…' : 'Desconectar'}
+            </button>
+          ) : (
+            <Quitar id={row.id} nombre={nombre} red={networkLabel(network)} />
+          )}
+        </div>
+      </div>
+    </li>
   )
 }
 
 /**
- * «Quitar», solo en una tarjeta desconectada: saca la cuenta de Tu Parrilla con todo lo que
+ * «Quitar», solo en una cuenta desconectada: saca la cuenta de Tu Parrilla con todo lo que
  * se bajó de ella, y la deja libre para que otro usuario la conecte. No tiene vuelta, así que
  * pregunta en una ventana que dice qué se borra —el mismo `<dialog>` modal de «Reprogramar»
  * (`schedule/reprogramar.tsx`), por las mismas razones: Esc lo cierra, el foco no se escapa y

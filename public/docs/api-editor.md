@@ -102,8 +102,8 @@ la mandes igual, sigue debiendo tener nombres válidos y sin repetir (ver abajo)
 lo más simple es no mandarla en ese caso.
 
 **De dónde salen los identificadores:** no los inventas ni los adivinas. Cada cuenta
-conectada muestra el suyo en su tarjeta, en `/admin/accounts`, con un botón para
-copiarlo — es la forma de conseguir el de una cuenta recién conectada, incluso antes
+conectada muestra el suyo en Los Fierros (`/admin/accounts`), en el detalle que abre la
+flecha de su fila, con un botón para copiarlo — es la forma de conseguir el de una cuenta recién conectada, incluso antes
 de que tenga algo programado, y no pide llave de API, solo la sesión del panel. Si ya
 tienes acceso por API y la cuenta tiene al menos un destino programado, `GET
 /api/schedule/posts` (sección 3, más abajo) también lo trae: cada destino de `redes[]`

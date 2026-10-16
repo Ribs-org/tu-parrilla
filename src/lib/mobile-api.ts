@@ -236,7 +236,7 @@ export function resolverCuando(ahora: boolean, cuando: string | null, now: Date)
 /**
  * Lo que la pantalla Ajustes del teléfono muestra de tus cuentas: todas, de todas las redes
  * —también TikTok, X y Threads, que el teléfono no publica—, con la temperatura de su fierro
- * como en Los Fierros, y el aviso del engranaje como en el panel (`avisoDeFierros`). La
+ * como en Los Fierros, y el aviso del botón de Ajustes como en el panel (`avisoDeFierros`). La
  * respuesta de `GET /api/mobile/fierros`.
  */
 export function fierrosParaElTelefono(

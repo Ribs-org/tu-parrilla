@@ -8,7 +8,7 @@ export type Pantalla = {
   ruta: string
   nombre: string
   subtitulo: string
-  /** Pestaña de la barra, o entrada del engranaje de Ajustes. */
+  /** Pestaña de la barra, o entrada del menú de Ajustes. */
   grupo: 'pestana' | 'ajustes'
   soloAdmin?: true
 }

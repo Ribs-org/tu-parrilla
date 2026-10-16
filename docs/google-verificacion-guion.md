@@ -149,7 +149,7 @@ la app y del proyecto visibles**, cada permiso en uso, y cómo se revoca.
 |---|---|---|
 | 1 | `tu-parrilla.cl` con la barra de direcciones visible; bajar al párrafo que explica la app y su enlace a privacidad. | 1 |
 | 2 | `/ingresar`: correo, código, entrar. | 2 |
-| 3 | Engranaje → **Los Fierros**. Pulsar **Conectar →** bajo YouTube. | 3 |
+| 3 | Ajustes → **Los Fierros**. Pulsar **Conectar →** bajo YouTube. | 3 |
 | 4 | Pantalla de consentimiento de Google: **detenerse tres segundos** en el nombre «Tu Parrilla» y en los dos permisos con su descripción. Continuar. | 4 |
 | 5 | Volver a Los Fierros con la tarjeta del canal. Pulsar **Sincronizar**; **Los Números** → «Ver todas las publicaciones →» muestra los videos con sus números (hasta el 2026-10-13 era la pestaña Los Cortes). | 5 |
 | 6 | **El Fuego → «Poner al fuego»** (abre el compositor en La Parrilla): subir el video, marcar **YouTube**, título, «Ahora», **Programar**. De vuelta en El Fuego, verlo pasar a publicado. Abrir YouTube Studio y mostrar el video (privado, hasta la auditoría de cuota: decirlo en el subtítulo). | 6 |

@@ -9,8 +9,8 @@ día, lo que se quemó, los borradores y cuántos cortes salieron ayer), **Publi
 medio (eliges fotos o un video de la galería, escribes el texto, marcas las cuentas y lo
 programas, o lo mandas a salir ahora) y **Los Números** (las dos mitades del tablero, con «Tus
 publicaciones» un toque adentro y los seguidores de cada red detrás de «⋯ Más»). Arriba a
-la derecha de las tres, el engranaje de **Ajustes**: tus cuentas con la temperatura de su
-fierro (`/api/mobile/fierros`), con un punto en el engranaje si alguna se enfría o se apagó,
+la derecha de las tres, el botón de **Ajustes** (un cuchillo y un trinche cruzados): tus cuentas con la temperatura de su
+fierro (`/api/mobile/fierros`), con un punto en el botón si alguna se enfría o se apagó,
 y «Cerrar sesión». Antes eran cinco con nombres propios: Resumen, Contenido, Publicar, Cuentas y
 Calendario. Los datos son los mismos que ve el panel web, leídos desde
 `https://tu-parrilla.cl/api/mobile/*`; `/api/mobile/overview` y
@@ -130,7 +130,7 @@ Hasta la versión del 2026-10-15 se entraba con una contraseña del despliegue
 actualizar, y se pone al día sola al abrirla dos veces con señal. La sesión que ya
 tenía abierta sigue valiendo mientras tanto.
 
-Para salir: el engranaje → **Cerrar sesión**. Borra la sesión de este teléfono y nada más;
+Para salir: el botón de Ajustes → **Cerrar sesión**. Borra la sesión de este teléfono y nada más;
 para cortar todos los teléfonos a la vez, «Si se pierde el teléfono», abajo.
 
 ## Cómo publicar desde el teléfono

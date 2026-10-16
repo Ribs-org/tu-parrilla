@@ -1,6 +1,6 @@
 # Los Maestros — quién puede entrar
 
-`/admin/usuarios`, dentro del engranaje «Ajustes» de la barra de arriba, **solo para el admin**
+`/admin/usuarios`, dentro del botón «Ajustes» de la barra de arriba, **solo para el admin**
 (la persona dueña de esta instalación de Tu Parrilla; hay una sola). Los demás usuarios no la
 ven en el menú, y si abren la dirección, el panel los devuelve a La Parrilla (la entrada del
 panel, [la-parrilla.md](la-parrilla.md)) sin aviso.
@@ -11,8 +11,8 @@ que nunca se usó y corta las sesiones abiertas de una persona.
 
 ## Cómo se llega
 
-1. En la barra de arriba, apretar el engranaje «Ajustes» (en una pantalla angosta se ve solo el
-   engranaje, sin la palabra).
+1. En la barra de arriba, apretar el botón «Ajustes» (en una pantalla angosta se ve solo el
+   ícono, un cuchillo y un trinche cruzados, sin la palabra).
 2. En el menú, apretar «Los Maestros», la que tiene debajo «quién puede entrar». Está entre La
    Vitrina y Tu Cuenta.
 

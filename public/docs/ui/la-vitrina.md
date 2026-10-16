@@ -1,12 +1,12 @@
 # La Vitrina — tus páginas públicas
 
-`/admin/profiles` está dentro del engranaje «Ajustes» del panel web y la ven todos los usuarios, no solo el admin. El editor de cada página vive en `/admin/profiles/<id>`.
+`/admin/profiles` está dentro del botón «Ajustes» del panel web y la ven todos los usuarios, no solo el admin. El editor de cada página vive en `/admin/profiles/<id>`.
 
 La Vitrina es donde se arma la página pública de links (lo que en otras partes llaman «link en la bio»): una foto, un nombre, una bajada, una bio, un color y la lista de links que ve cualquiera que entre a tu dirección. Todo usuario nace con una página, su página principal, que ya está publicada con una dirección sacada de su correo; se pueden crear más, por ejemplo una privada que solo se comparte a mano. Las visitas y los clics que juntan estas páginas se miran en [Los Números](los-numeros.md).
 
 ## Cómo se llega
 
-1. En el panel, abre el engranaje «Ajustes», a la derecha de la barra de pestañas. En pantallas angostas se ve solo el ícono del engranaje, sin la palabra.
+1. En el panel, abre el botón «Ajustes», a la derecha de la barra de pestañas. En pantallas angostas se ve solo el ícono, un cuchillo y un trinche cruzados, sin la palabra.
 2. En el menú que se despliega, elige «La Vitrina» (debajo dice «tus páginas públicas»).
 3. Para editar una página, aprieta «Editar» en su tarjeta.
 
@@ -256,7 +256,7 @@ Sirve cuando una dirección privada circuló más de la cuenta.
 
 ## Si el humano dice…
 
-- «No encuentro dónde se edita mi página» → engranaje «Ajustes», «La Vitrina», «Editar».
+- «No encuentro dónde se edita mi página» → botón «Ajustes», «La Vitrina», «Editar».
 - «Cambié la foto y no sale» → falta apretar «Guardar perfil» después de subirla. La vista previa la muestra antes de guardar; la página real no.
 - «Edité un link y en la página sigue igual» → falta «Guardar link» en ese link.
 - «No puedo cambiar la URL, está gris» → es la página principal; ver más arriba cómo cambiar la dirección de la página principal.

@@ -27,7 +27,7 @@ Antes de dar por terminado un cambio —el mismo momento en que se revisa la tab
    más o uno menos, algo que ahora aparece solo en ciertos casos, una pantalla nueva. Eso se
    corrige en la página, en el mismo commit. Lo que no se ve —una consulta más rápida, un
    refactor— no se documenta.
-4. **Navegación o vocabulario:** si cambió la barra, el engranaje, el nombre o el subtítulo de
+4. **Navegación o vocabulario:** si cambió la barra, el botón de Ajustes, el nombre o el subtítulo de
    una pantalla (`src/lib/vocabulario.ts`), se actualizan `index.md` y la primera línea de la
    página de esa pantalla.
 5. **En el informe**, una línea: «Wiki de la UI: actualicé `la-parrilla.md` (el botón nuevo)»
@@ -44,7 +44,7 @@ puede ver —que el texto de un botón cambió— depende de la revisión de arr
 Cada pantalla del vocabulario tiene la suya. La primera línea es exactamente
 `# <nombre> — <subtítulo>`, tal como los dice `src/lib/vocabulario.ts`, y la segunda empieza
 con la ruta entre comillas invertidas y dice dónde está (pestaña de la barra, o dentro del
-engranaje Ajustes, y si es solo para el admin). Después, en este orden:
+botón de Ajustes, y si es solo para el admin). Después, en este orden:
 
 - Un párrafo: para qué sirve, en llano.
 - `## Cómo se llega`

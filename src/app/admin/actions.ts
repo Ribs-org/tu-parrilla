@@ -469,7 +469,7 @@ export async function syncSocialNow(): Promise<{ ok?: boolean; error?: string }>
   const failed = report.filter((r) => !r.ok)
   // Una instalación sin cuentas conectadas no tiene nada que fallar.
   if (report.length > 0 && failed.length === report.length) {
-    return { error: 'Ninguna red respondió. Revisa las tarjetas de abajo.' }
+    return { error: 'Ninguna red respondió. Revisa las cuentas de abajo.' }
   }
   return { ok: true }
 }

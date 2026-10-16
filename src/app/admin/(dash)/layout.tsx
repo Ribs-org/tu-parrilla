@@ -13,7 +13,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const usuario = await requireUser()
-  // El engranaje avisa si un fierro se enfría o se apagó: Los Fierros vive adentro de
+  // El botón de Ajustes avisa si un fierro se enfría o se apagó: Los Fierros vive adentro de
   // Ajustes, y un aviso que solo se ve ahí no lo ve nadie.
   const aviso = avisoDeFierros(await getCuentas(usuario.id), new Date())
 

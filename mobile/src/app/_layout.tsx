@@ -91,7 +91,7 @@ export default function RootLayout() {
               contentStyle: { backgroundColor: COLORES.fondo },
             }}
           />
-          {/* Ajustes se abre desde el engranaje de cualquier pestaña y vuelve ahí. */}
+          {/* Ajustes se abre desde el botón de Ajustes de cualquier pestaña y vuelve ahí. */}
           <Stack.Screen
             name="ajustes"
             options={{

@@ -133,7 +133,7 @@ permisos si cada uno tiene su tramo claro.
 |---|---|---|
 | 1 | `tu-parrilla.cl` (portada) y al lado App Settings → Basic con el mismo icono y el mismo nombre. Dos segundos. | 1 |
 | 2 | `/ingresar`: correo, «Mandarme un código», el código, entrar. (Con la cuenta de revisión y su código fijo.) | 2 |
-| 3 | Engranaje → **Los Fierros**. Bajo Instagram se lee el aviso «Cuenta Business o Creator, enlazada a una página de Facebook…». Pulsar **Conectar →**. | 3 |
+| 3 | Ajustes → **Los Fierros**. Bajo Instagram se lee el aviso «Cuenta Business o Creator, enlazada a una página de Facebook…». Pulsar **Conectar →**. | 3 |
 | 4 | Diálogo de Facebook: **detenerse tres segundos** en la pantalla de permisos; se ven todos los de la tabla. Continuar. | 4 |
 | 5 | Si hay varias páginas, la pantalla de elegir: marcar la de prueba. Volver a Los Fierros con la tarjeta de Instagram. | 5 |
 | 6 | **Facebook → Conectar →**, mismo diálogo, misma página. Tarjeta de Facebook. | 6 |
@@ -144,7 +144,7 @@ permisos si cada uno tiene su tramo claro.
 | 11 | Desde otra cuenta, comentar «GUIA» en el reel recién publicado, y un comentario cualquiera en otra publicación. Esperar la corrida (hasta cinco minutos). | |
 | 12 | Pestaña **La Mesa**: el comentario cualquiera en la cola con el borrador propuesto, **Enviar**; y el «GUIA», marcado «Automática», que ya respondió solo. Abrir Instagram y mostrar las dos respuestas. | 11 |
 | 13 | El comentario de la página de Facebook, mismo flujo. | 12 |
-| 14 | Engranaje → **Tu Cuenta** (nombre y zona) y **La Vitrina**, para que se vea que es un panel de una persona. | 13 |
+| 14 | Ajustes → **Tu Cuenta** (nombre y zona) y **La Vitrina**, para que se vea que es un panel de una persona. | 13 |
 | 15 | Los Fierros → **Desconectar** en Instagram: la tarjeta queda sin credencial. | 14 |
 | 16 | Desde el perfil personal: facebook.com → Configuración → Integraciones comerciales → Tu Parrilla → Eliminar. Meta llama a la URL de baja; el formulario de Integraciones comerciales no ofrece pedir el borrado. | 15 |
 | 17 | `/privacidad`: qué se guarda, qué borra desconectar y qué borra el borrado. | 16 |
