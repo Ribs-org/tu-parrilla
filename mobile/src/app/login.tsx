@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { KeyboardAvoidingView, Pressable, Text, TextInput, View } from 'react-native'
+import { KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Boton, COLORES, Titulo } from '../components/ui'
@@ -64,9 +64,9 @@ export default function Login() {
   return (
     // `height` es el `behavior` de Android: la app dibuja de borde a borde, así que la
     // ventana ya no se encoge sola al abrir el teclado. Y acá el teclado sale de
-    // entrada por el `autoFocus`, con lo que el botón nacía tapado.
+    // entrada por el `autoFocus`, con lo que el botón nacía tapado. En iOS corresponde `padding`.
     <KeyboardAvoidingView
-      behavior="height"
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={{
         flex: 1,
         backgroundColor: COLORES.fondo,

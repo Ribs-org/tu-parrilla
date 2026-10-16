@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
-import { Alert, KeyboardAvoidingView, ScrollView, Text, TextInput, View } from 'react-native'
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, View } from 'react-native'
 import { DateTimePickerAndroid } from '@react-native-community/datetimepicker'
 import * as ImagePicker from 'expo-image-picker'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { SelectorFechaIOS } from '../../components/selector-fecha'
 import { Boton, COLORES, Chip, ErrorConReintento, Miniatura } from '../../components/ui'
 import { SesionCaducada, apiGet } from '../../lib/api'
 import { anotarCambio } from '../../lib/cambios'
@@ -40,8 +41,9 @@ const MAX_TEXTO = 2200
 type EstadoCuentas = { paso: 'cargando' } | { paso: 'error' } | { paso: 'listo'; disponibles: CuentaApp[] }
 
 // El contenedor mide desde su padre y el teclado desde la pantalla; en medio está la
-// cabecera. Es el estándar de Android (expo-router no reexporta `useHeaderHeight`): confirmar en el teléfono la primera vez.
-const ALTO_CABECERA = 56
+// cabecera. Es el alto estándar de cada sistema —56 en Android, 44 en iOS— porque
+// expo-router no reexporta `useHeaderHeight`: confirmar en el teléfono la primera vez.
+const ALTO_CABECERA = Platform.OS === 'ios' ? 44 : 56
 
 function fechaLegible(fecha: Date): string {
   const dd = String(fecha.getDate()).padStart(2, '0')
@@ -74,6 +76,8 @@ export default function Publicar() {
     [cuentasEstado],
   )
   const [fecha, setFecha] = useState<Date>(() => proximaHoraEnPunto(new Date()))
+  // Solo en iOS: la hoja con el selector de día y hora está abierta.
+  const [eligiendoFecha, setEligiendoFecha] = useState(false)
   const [envio, despachar] = useReducer(reducirEnvio, ENVIO_INICIAL)
   const [aviso, setAviso] = useState<string | null>(null)
   // Lo que ya subió en un intento anterior y el AbortController del envío en curso.
@@ -118,15 +122,22 @@ export default function Publicar() {
   }, [cargarCuentas])
 
   async function elegir() {
-    const permiso = await ImagePicker.requestMediaLibraryPermissionsAsync()
-    if (!permiso.granted) {
-      setAviso('Sin permiso para ver la galería.')
-      return
+    // En iOS el selector del sistema entrega solo lo que la persona elige y no pide acceso a
+    // la galería entera; pedirlo igual sería un permiso de más, que Apple objeta.
+    if (Platform.OS !== 'ios') {
+      const permiso = await ImagePicker.requestMediaLibraryPermissionsAsync()
+      if (!permiso.granted) {
+        setAviso('Sin permiso para ver la galería.')
+        return
+      }
     }
     const resultado = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images', 'videos'],
       allowsMultipleSelection: true,
       selectionLimit: MAX_ARCHIVOS - archivos.length,
+      // Solo iOS: el iPhone guarda las fotos en HEIC, que el servidor acepta pero Instagram
+      // y Facebook rechazan al publicar. «Compatible» las entrega en JPEG. Android lo ignora.
+      preferredAssetRepresentationMode: ImagePicker.UIImagePickerPreferredAssetRepresentationMode.Compatible,
     })
     if (resultado.canceled) return
     const nuevos: Elegido[] = []
@@ -162,6 +173,11 @@ export default function Publicar() {
   }
 
   function elegirFecha() {
+    // iOS sí tiene un selector de fecha y hora en uno, y no tiene los diálogos de abajo.
+    if (Platform.OS === 'ios') {
+      setEligiendoFecha(true)
+      return
+    }
     // Android no tiene un selector de fecha y hora en uno: primero el día, luego la hora.
     // onValueChange (no onChange, que la versión instalada marca deprecado) solo se
     // dispara cuando el usuario confirma: cancelar el diálogo no llama a nada.
@@ -278,9 +294,9 @@ export default function Publicar() {
   return (
     // `height` es el `behavior` de Android: la app dibuja de borde a borde, así que la
     // ventana ya no se encoge sola al abrir el teclado y el texto largo dejaba
-    // «Programar» y «Publicar ahora» debajo de las teclas.
+    // «Programar» y «Publicar ahora» debajo de las teclas. En iOS corresponde `padding`.
     <KeyboardAvoidingView
-      behavior="height"
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={insets.top + ALTO_CABECERA}
       style={{ flex: 1, backgroundColor: COLORES.fondo }}
     >
@@ -433,6 +449,17 @@ export default function Publicar() {
           )}
         </View>
       </ScrollView>
+      {eligiendoFecha ? (
+        <SelectorFechaIOS
+          valor={fecha}
+          minimo={new Date()}
+          onListo={(elegida) => {
+            setFecha(elegida)
+            setEligiendoFecha(false)
+          }}
+          onCancelar={() => setEligiendoFecha(false)}
+        />
+      ) : null}
     </KeyboardAvoidingView>
   )
 }
