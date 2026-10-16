@@ -29,7 +29,7 @@ Si algo falla, el mensaje sale en rojo debajo del campo.
 
 Abajo, tres pestañas en este orden: «La Parrilla», «Publicar» y «Los Números». «Publicar» va al medio y se ve como un círculo naranjo con una cruz. La pestaña activa se ve en naranjo y su nombre sale también como título arriba de la pantalla.
 
-Arriba a la derecha de las tres, al lado del título, un botón redondo con un cuchillo y un trinche cruzados: abre «Ajustes». Si alguna cuenta conectada necesita que la reconecten, el botón lleva un punto: ámbar si su permiso vence esta semana, rojo si ya se apagó (venció o dejó de sincronizar). Sin nada que avisar, no hay punto. Un lector de pantalla lo lee «Ajustes» o, con aviso, «Ajustes: 1 se enfría» (o «2 se apagaron», etc.).
+Arriba a la derecha de las tres, al lado del título, un botón redondo con un trinche y un cuchillo, lado a lado: abre «Ajustes». Si alguna cuenta conectada necesita que la reconecten, el botón lleva un punto: ámbar si su permiso vence esta semana, rojo si ya se apagó (venció o dejó de sincronizar). Sin nada que avisar, no hay punto. Un lector de pantalla lo lee «Ajustes» o, con aviso, «Ajustes: 1 se enfría» (o «2 se apagaron», etc.).
 
 En «La Parrilla», «Los Números» y «Tus publicaciones», la app muestra al instante lo último que descargó y lo actualiza por detrás; por eso funciona sin señal, con datos viejos. Arriba dice cuándo se actualizó: «Actualizado recién», «Actualizado hace 5 min», «Actualizado hace 2 h» o «Actualizado hace 1 d». Para actualizar a mano, se arrastra la pantalla hacia abajo.
 

@@ -6,7 +6,7 @@ La Vitrina es donde se arma la página pública de links (lo que en otras partes
 
 ## Cómo se llega
 
-1. En el panel, abre el botón «Ajustes», a la derecha de la barra de pestañas. En pantallas angostas se ve solo el ícono, un cuchillo y un trinche cruzados, sin la palabra.
+1. En el panel, abre el botón «Ajustes», a la derecha de la barra de pestañas. En pantallas angostas se ve solo el ícono, un trinche y un cuchillo, lado a lado, sin la palabra.
 2. En el menú que se despliega, elige «La Vitrina» (debajo dice «tus páginas públicas»).
 3. Para editar una página, aprieta «Editar» en su tarjeta.
 

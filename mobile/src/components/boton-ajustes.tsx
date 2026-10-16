@@ -8,30 +8,45 @@ import { useScreenData } from '../lib/useScreenData'
 import { useToken } from '../lib/useToken'
 
 /**
- * El ícono de Ajustes, como el del panel (`src/components/icono-ajustes.tsx`): un cuchillo
- * parrillero y un trinche de dos puntas cruzados, con las cabezas arriba. Dibujado con vistas,
- * como los íconos de la barra (`iconos.tsx`): cada herramienta se arma derecha y se gira
- * sobre su centro.
+ * El ícono de Ajustes, como el del panel (`src/components/icono-ajustes.tsx`): un trinche de
+ * dos puntas y un cuchillo criollo, de pie y lado a lado. Dibujado con vistas, como los íconos
+ * de la barra (`iconos.tsx`), con las medidas del SVG del panel pasadas de 24 a 22.
+ *
+ * Cruzados en X se leían como herramientas —una llave y un destornillador— y no como cuchillo.
+ * De pie, la hoja es un rectángulo con la esquina de arriba a la derecha muy redondeada: el lomo
+ * queda recto, la punta arriba y el filo con panza, y es bastante más ancha que el mango, que
+ * lleva dos remaches del color del fondo.
  */
-export function IconoAjustes({ color }: { color: ColorValue }) {
+export function IconoAjustes({ color, fondo }: { color: ColorValue; fondo: ColorValue }) {
   const pieza = { position: 'absolute' as const, backgroundColor: color }
-  // Se giran sobre un punto bajo y no sobre su centro: así se cruzan por los mangos y las
-  // cabezas quedan separadas arriba, como en el panel.
-  const giro = (grados: number) => ({ transform: [{ rotate: `${grados}deg` }], transformOrigin: '50% 70%' })
   return (
     <View style={{ width: 22, height: 22 }}>
-      {/* El trinche: dos puntas, la U que las une y el mango. */}
-      <View style={{ position: 'absolute', left: 6, top: 0, width: 10, height: 22, ...giro(-40) }}>
-        <View style={{ ...pieza, left: 0, top: 0, width: 2, height: 8, borderRadius: 1 }} />
-        <View style={{ ...pieza, right: 0, top: 0, width: 2, height: 8, borderRadius: 1 }} />
-        <View style={{ ...pieza, left: 0, top: 7, width: 10, height: 2, borderBottomLeftRadius: 3, borderBottomRightRadius: 3 }} />
-        <View style={{ ...pieza, left: 4, top: 8, width: 2, height: 14, borderRadius: 1 }} />
-      </View>
-      {/* El cuchillo: la hoja con la punta redondeada de un lado, la guarda y el mango. */}
-      <View style={{ position: 'absolute', left: 8, top: 0, width: 6, height: 22, ...giro(40) }}>
-        <View style={{ ...pieza, left: 1, top: 0, width: 4, height: 10, borderTopLeftRadius: 1, borderTopRightRadius: 4 }} />
-        <View style={{ ...pieza, left: 0, top: 10, width: 6, height: 1.5, borderRadius: 1 }} />
-        <View style={{ ...pieza, left: 1.25, top: 11.5, width: 3.5, height: 10.5, borderRadius: 1.5 }} />
+      {/* El trinche: dos puntas, el puente que las une, el cuello y el mango. */}
+      <View style={{ ...pieza, left: 3.6, top: 1.5, width: 1.75, height: 7.6, borderTopLeftRadius: 0.9, borderTopRightRadius: 0.9 }} />
+      <View style={{ ...pieza, left: 7.5, top: 1.5, width: 1.75, height: 7.6, borderTopLeftRadius: 0.9, borderTopRightRadius: 0.9 }} />
+      <View style={{ ...pieza, left: 3.6, top: 7.8, width: 5.65, height: 2.55, borderBottomLeftRadius: 1.3, borderBottomRightRadius: 1.3 }} />
+      <View style={{ ...pieza, left: 5.6, top: 10.2, width: 1.65, height: 2.4 }} />
+      <View style={{ ...pieza, left: 4.9, top: 12.45, width: 3.05, height: 8.45, borderRadius: 1.45 }} />
+      {/* El cuchillo: la hoja con el filo hacia la punta, la guarda y el mango con sus remaches. */}
+      <View style={{ ...pieza, left: 12.2, top: 0.55, width: 6.3, height: 11.1, borderTopLeftRadius: 0.5, borderTopRightRadius: 5.8 }} />
+      <View style={{ ...pieza, left: 11.75, top: 11.55, width: 7.25, height: 1.65, borderRadius: 0.65 }} />
+      <View
+        style={{
+          ...pieza,
+          left: 13.05,
+          top: 13.2,
+          width: 4.2,
+          height: 7.9,
+          borderTopLeftRadius: 0.9,
+          borderTopRightRadius: 0.9,
+          borderBottomLeftRadius: 1.2,
+          borderBottomRightRadius: 1.2,
+          alignItems: 'center',
+          justifyContent: 'space-evenly',
+        }}
+      >
+        <View style={{ width: 1.2, height: 1.2, borderRadius: 0.6, backgroundColor: fondo }} />
+        <View style={{ width: 1.2, height: 1.2, borderRadius: 0.6, backgroundColor: fondo }} />
       </View>
     </View>
   )
@@ -77,7 +92,7 @@ export function BotonAjustes() {
         opacity: pressed ? 0.7 : 1,
       })}
     >
-      <IconoAjustes color={COLORES.texto} />
+      <IconoAjustes color={COLORES.texto} fondo={COLORES.tarjeta} />
       {aviso ? (
         <View
           style={{

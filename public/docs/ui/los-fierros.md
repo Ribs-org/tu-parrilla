@@ -6,7 +6,7 @@ Los Fierros (en llano: las cuentas conectadas) es donde se conectan a Tu Parrill
 
 ## Cómo se llega
 
-1. En la barra de arriba del panel, abre el botón «Ajustes», a la derecha. En un teléfono se ve solo el ícono, un cuchillo y un trinche cruzados, sin la palabra.
+1. En la barra de arriba del panel, abre el botón «Ajustes», a la derecha. En un teléfono se ve solo el ícono, un trinche y un cuchillo, lado a lado, sin la palabra.
 2. En el menú que se despliega, elige «Los Fierros» (debajo dice «tus redes conectadas»).
 
 También se entra directo a `https://tu-parrilla.cl/admin/accounts`. Sin sesión abierta, primero hay que entrar (ver [Ingresar](ingresar.md)).
