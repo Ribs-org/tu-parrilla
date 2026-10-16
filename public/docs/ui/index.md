@@ -23,8 +23,8 @@ registro abierto.
   con el correo y un código de seis dígitos que llega por correo, en
   `https://tu-parrilla.cl/ingresar` ([Entrar al panel](ingresar.md)). Si la persona lo abre en
   otro dominio, la manda sola a tu-parrilla.cl.
-- **La app del teléfono** (Android): hace una parte de lo mismo, con otra navegación ([La app
-  del teléfono](app-movil.md)).
+- **La app del teléfono** (Android): hace una parte de lo mismo, con las mismas tres pestañas
+  —La Parrilla, Publicar y Los Números— en versión corta ([La app del teléfono](app-movil.md)).
 - **Su página pública**, la que ve su audiencia: `https://tu-parrilla.cl/<su-dirección>`. Se
   edita en La Vitrina ([la-vitrina.md](la-vitrina.md)).
 

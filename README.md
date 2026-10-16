@@ -489,12 +489,12 @@ posibilidad no es una elección; dos sí, y las eliges tú.
 Una cuenta cuya credencial venció aparece igual, en vez de desaparecer sin explicación, con
 el mismo aviso de reconectarla en las dos superficies: en el panel, apagada y con el
 texto aparte; en el teléfono, sin poder tocarse y con «reconéctala» al lado del nombre. Y
-donde antes se leía solo la red —el calendario, la cola, el editor, y en el teléfono el
-Calendario y el Resumen— ahora se leen la red **y** el handle: `Instagram · @vicenteclips`.
+donde antes se leía solo la red —el calendario, la cola, el editor, y en el teléfono La
+Parrilla— ahora se leen la red **y** el handle: `Instagram · @vicenteclips`.
 Las dos cosas, porque casi ninguna de esas pantallas dibuja un icono de la red —el
 calendario, la cola y «Se quemó» son la excepción: el calendario con un logo por destino
 bajo la hora del corte, la cola con ese mismo logo junto al handle y el estado, «Se quemó»
-con él en cada fila, y en las tres el handle en el `title` o al lado del icono—, así que en el resto (el editor, y en el teléfono el Calendario y el Resumen) el
+con él en cada fila, y en las tres el handle en el `title` o al lado del icono—, así que en el resto (el editor, y en el teléfono La Parrilla) el
 handle sigue siendo lo que distingue cada destino, y la red sola no distingue dos cuentas
 de la misma red en el mismo corte.
 

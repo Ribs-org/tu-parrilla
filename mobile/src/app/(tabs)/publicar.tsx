@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'r
 import { Alert, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, View } from 'react-native'
 import { DateTimePickerAndroid } from '@react-native-community/datetimepicker'
 import * as ImagePicker from 'expo-image-picker'
-import { useRouter } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { SelectorFechaIOS } from '../../components/selector-fecha'
@@ -16,6 +16,7 @@ import {
   describirArchivo,
   etiquetaCuenta,
   etiquetaEnvio,
+  fechaParaElDia,
   opcionesDelBorrador,
   proximaHoraEnPunto,
   puedeEnviar,
@@ -76,6 +77,15 @@ export default function Publicar() {
     [cuentasEstado],
   )
   const [fecha, setFecha] = useState<Date>(() => proximaHoraEnPunto(new Date()))
+  // El «+» de un día de La Parrilla llega con ese día y una marca `n` que cambia en cada
+  // toque. La fecha se pone una vez por marca, durante el render —el patrón de React para
+  // ajustar estado cuando cambia una entrada—, sin un efecto que la pise después.
+  const { dia, n } = useLocalSearchParams<{ dia?: string; n?: string }>()
+  const [marcaAplicada, setMarcaAplicada] = useState<string | undefined>(undefined)
+  if (dia && n && n !== marcaAplicada) {
+    setMarcaAplicada(n)
+    setFecha(fechaParaElDia(dia, new Date()))
+  }
   // Solo en iOS: la hoja con el selector de día y hora está abierta.
   const [eligiendoFecha, setEligiendoFecha] = useState(false)
   const [envio, despachar] = useReducer(reducirEnvio, ENVIO_INICIAL)
@@ -260,7 +270,7 @@ export default function Publicar() {
     abortar.current?.abort()
   }
 
-  // Tras «hecho»: se vacía el formulario y se salta al Calendario, que refresca al
+  // Tras «hecho»: se vacía el formulario y se salta a La Parrilla, que refresca al
   // recibir foco porque anotamos el cambio. Un efecto y no un `if` en el render:
   // navegar es un efecto secundario.
   useEffect(() => {
@@ -279,7 +289,7 @@ export default function Publicar() {
       setAviso(null)
       subidas.current = []
       ultimoBorrador.current = null
-      router.navigate('/(tabs)/calendario')
+      router.navigate('/(tabs)')
     }, 1000)
     return () => clearTimeout(salto)
   }, [envio.paso, router, disponibles])
@@ -352,8 +362,8 @@ export default function Publicar() {
           // red que el teléfono no ofrece (hoy, TikTok): el endpoint ya las filtró, y
           // desde acá no se puede distinguir un caso del otro.
           <Text style={{ color: COLORES.tenue, fontSize: 12 }}>
-            No hay ninguna cuenta lista para publicar desde el teléfono. Conecta una en la
-            pestaña Cuentas.
+            No hay ninguna cuenta lista para publicar desde el teléfono. Conéctala en el panel
+            web, en Los Fierros.
           </Text>
         ) : (
           <>
@@ -370,7 +380,7 @@ export default function Publicar() {
                 ) : (
                   // No es un `Chip`: nunca se puede tocar, así que no lleva su
                   // `deshabilitado` (que atenúa con opacidad 0.5 un texto ya tenue —
-                  // el mismo contraste insuficiente que `calendario.tsx` evita para un
+                  // el mismo contraste insuficiente que `corte-programado.tsx` evita para un
                   // estado transitorio, y acá sería uno permanente). Texto a contraste
                   // completo más la palabra que falta, como «reconéctala» en el panel.
                   <View

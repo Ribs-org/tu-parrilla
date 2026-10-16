@@ -1,34 +1,33 @@
-import { useCallback, useState } from 'react'
-import { Text, View } from 'react-native'
+import { useCallback } from 'react'
+import { Pressable, Text, View } from 'react-native'
 import { useFocusEffect, useRouter } from 'expo-router'
-import {
-  COLORES,
-  Cargando,
-  Chip,
-  Cifra,
-  ErrorConReintento,
-  Etiqueta,
-  Pantalla,
-  PuntoEstado,
-  Sello,
-  Tarjeta,
-  Vacio,
-} from '../../components/ui'
-import { num, pct, shortDate } from '../../lib/format'
+import { CorteProgramado } from '../../components/corte-programado'
+import { IconoPoner } from '../../components/iconos'
+import { Grilla, RotuloDia } from '../../components/parrilla'
+import { COLORES, Cargando, ErrorConReintento, Pantalla, Sello, TIPO_TITULO, Tarjeta } from '../../components/ui'
+import { cuandoQuemado, diasDeLaAgenda, marcaDeToque, pieDeAyer, rotuloDelDia, seQuemo, servidosAyer } from '../../lib/agenda'
+import { calorDelDia } from '../../lib/parrilla'
 import { etiquetaCuenta } from '../../lib/publicar'
 import { clearToken } from '../../lib/session'
+import { type Calendario } from '../../lib/tipos'
 import { useScreenData } from '../../lib/useScreenData'
-import {
-  ETIQUETA_RANGO,
-  RANGOS,
-  type Overview,
-  type PostProgramado,
-  type Rango,
-} from '../../lib/tipos'
 import { useToken } from '../../lib/useToken'
 
-export default function Resumen() {
-  const [rango, setRango] = useState<Rango>('7d')
+/** El día de hoy en el teléfono: solo para lo guardado antes de que la API mandara `hoy`. */
+function hoyEnElTelefono(): string {
+  const ahora = new Date()
+  const mm = String(ahora.getMonth() + 1).padStart(2, '0')
+  const dd = String(ahora.getDate()).padStart(2, '0')
+  return `${ahora.getFullYear()}-${mm}-${dd}`
+}
+
+/**
+ * La Parrilla, la entrada de la app como lo es del panel: arriba lo que se quemó, después lo
+ * que viene día por día —con un «+» para prender cada uno— y al pie cuántos cortes salieron
+ * ayer. Junta lo que antes repartían el Resumen («Qué salió hoy», «Qué viene») y el
+ * Calendario.
+ */
+export default function LaParrilla() {
   const token = useToken()
   const router = useRouter()
   const salir = useCallback(async () => {
@@ -36,15 +35,15 @@ export default function Resumen() {
     router.replace('/login')
   }, [router])
 
-  const { data, cargando, error, sello, refrescar, refrescarSiVieja } = useScreenData<Overview>(
-    `overview:${rango}`,
-    `/api/mobile/overview?rango=${rango}`,
+  const { data, cargando, error, sello, refrescar, refrescarSiVieja } = useScreenData<Calendario>(
+    'calendario',
+    '/api/mobile/schedule',
     token,
     salir,
   )
 
-  // Al volver a esta pestaña: si Publicar acaba de crear un post, o la caché ya es
-  // vieja, refresca sola. Es lo que hace aparecer el post recién programado.
+  // Al volver a esta pestaña: si Publicar acaba de crear un post, o la caché ya es vieja,
+  // refresca sola. Es lo que hace aparecer el post recién programado.
   useFocusEffect(refrescarSiVieja)
 
   if (!data && cargando) return <Cargando />
@@ -56,69 +55,90 @@ export default function Resumen() {
     )
   }
 
+  const hoy = data.hoy ?? hoyEnElTelefono()
+  const quemados = seQuemo(data.posts)
+
+  function prender(dia: string) {
+    router.navigate({ pathname: '/(tabs)/publicar', params: { dia, n: marcaDeToque() } })
+  }
+
   return (
     <Pantalla refrescando={cargando} onRefrescar={refrescar}>
-      <View style={{ flexDirection: 'row', gap: 8 }}>
-        {RANGOS.map((r) => (
-          <Chip key={r} texto={ETIQUETA_RANGO[r]} activo={rango === r} onPress={() => setRango(r)} />
-        ))}
-      </View>
+      <Text style={{ color: COLORES.suave, fontSize: 13 }}>lo que viene y cómo salió lo que ya se fue</Text>
       <Sello texto={sello} />
-      {error ? <Text style={{ color: COLORES.tenue, fontSize: 11 }}>{error}</Text> : null}
 
-      <View style={{ flexDirection: 'row', gap: 8 }}>
-        <Cifra etiqueta="Views ganadas" valor={num(data.kpis.viewsGanadas)} />
-        <Cifra etiqueta="Visitas al sitio" valor={num(data.kpis.visitasAlSitio)} />
-      </View>
-      <View style={{ flexDirection: 'row', gap: 8 }}>
-        <Cifra etiqueta="Arrastre" valor={pct(data.kpis.arrastre)} />
-        <Cifra etiqueta="Seguidores" valor={num(data.kpis.seguidores)} />
-      </View>
+      {quemados.length > 0 ? (
+        <View style={{ gap: 8 }}>
+          <Text
+            style={{
+              color: COLORES.rojo,
+              fontFamily: TIPO_TITULO,
+              fontSize: 13,
+              letterSpacing: 1.2,
+              textTransform: 'uppercase',
+            }}
+          >
+            Se quemó
+          </Text>
+          {quemados.map(({ post, destino }) => (
+            <Tarjeta key={destino.id}>
+              <Text style={{ color: COLORES.suave, fontSize: 12 }}>
+                {cuandoQuemado(post.cuando, hoy)} · {etiquetaCuenta(destino)}
+              </Text>
+              <Text style={{ color: COLORES.texto, fontSize: 14 }} numberOfLines={2}>
+                {post.texto || '(sin texto)'}
+              </Text>
+              {destino.error ? <Text style={{ color: COLORES.rojo, fontSize: 12 }}>{destino.error}</Text> : null}
+              <Text style={{ color: COLORES.tenue, fontSize: 12 }}>Se reprograma en el panel web, en La Parrilla.</Text>
+            </Tarjeta>
+          ))}
+        </View>
+      ) : null}
 
-      <Etiqueta margenArriba>Qué salió hoy</Etiqueta>
-      {data.hoy.length === 0 ? (
-        <Vacio texto="Nada salió en las últimas 24 horas." />
-      ) : (
-        data.hoy.map((post) => <FilaProgramada key={post.id} post={post} />)
-      )}
-
-      <Etiqueta margenArriba>Qué viene</Etiqueta>
-      {data.proximos.length === 0 ? (
-        <Vacio texto="No queda nada programado. Carga el próximo lote cuando quieras." />
-      ) : (
-        data.proximos.map((post) => <FilaProgramada key={post.id} post={post} />)
-      )}
-    </Pantalla>
-  )
-}
-
-export function FilaProgramada({ post }: { post: PostProgramado }) {
-  return (
-    <Tarjeta>
-      <Text style={{ color: COLORES.tenue, fontSize: 11 }}>{shortDate(post.cuando)}</Text>
-      <Text style={{ color: COLORES.texto, fontSize: 14 }} numberOfLines={2}>
-        {post.texto || '(sin texto)'}
-      </Text>
-      {/* El punto solo tiene color, y el color no dice de qué red es. Con el nombre al
-          lado se lee igual que el calendario; envuelve porque tres redes no caben. */}
-      <View
-        style={{
-          flexDirection: 'row',
-          flexWrap: 'wrap',
-          gap: 10,
-          marginTop: 4,
-          alignItems: 'center',
-        }}
-      >
-        {post.redes.map((r) => (
-          // `r.id` es el destino, no la red: con dos cuentas de la misma red, `r.red`
-          // se repite dentro de un post y ya no sirve de clave.
-          <View key={r.id} style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
-            <PuntoEstado estado={r.estado} />
-            <Text style={{ color: COLORES.tenue, fontSize: 11 }}>{etiquetaCuenta(r)}</Text>
+      {diasDeLaAgenda(data.posts, hoy).map(({ dia, posts }) => {
+        const rotulo = rotuloDelDia(dia, hoy)
+        return (
+          <View key={dia}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+              <View style={{ flex: 1 }}>
+                <RotuloDia dia={rotulo} cortes={posts.length} />
+              </View>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={`Programar el ${rotulo.replace('Hoy · ', '').replace('Mañana · ', '')}`}
+                onPress={() => prender(dia)}
+                hitSlop={6}
+                style={({ pressed }) => ({
+                  width: 36,
+                  height: 36,
+                  borderRadius: 18,
+                  backgroundColor: COLORES.tarjeta,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  opacity: pressed ? 0.7 : 1,
+                })}
+              >
+                <IconoPoner color={COLORES.texto} />
+              </Pressable>
+            </View>
+            {posts.length === 0 ? (
+              <Pressable onPress={() => prender(dia)} hitSlop={4} style={{ paddingVertical: 6 }}>
+                <Text style={{ color: COLORES.brasa, fontSize: 14 }}>No hay nada puesto. Préndela.</Text>
+              </Pressable>
+            ) : (
+              <Grilla calor={calorDelDia(posts.length)}>
+                {posts.map((post) => (
+                  <CorteProgramado key={post.id} post={post} />
+                ))}
+              </Grilla>
+            )}
           </View>
-        ))}
-      </View>
-    </Tarjeta>
+        )
+      })}
+
+      <Text style={{ color: COLORES.suave, fontSize: 12, textAlign: 'center', marginTop: 8 }}>
+        {pieDeAyer(servidosAyer(data.posts, hoy))}
+      </Text>
+    </Pantalla>
   )
 }

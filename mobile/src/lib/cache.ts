@@ -2,6 +2,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 
 export type Cached<T> = { data: T; savedAt: number }
 
+/**
+ * La publicación que se acaba de tocar en Los Números: el detalle la busca acá primero,
+ * porque esa lista no vive en ninguna de las cachés de «Tus publicaciones».
+ */
+export const POST_ABIERTO = 'post-abierto'
+
 /** Cinco minutos: lo justo para que abrir dos veces seguidas no golpee la red. */
 const FRESH_MS = 5 * 60_000
 

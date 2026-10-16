@@ -27,3 +27,15 @@ export function capitalizar(texto: string): string {
   return texto ? texto[0].toUpperCase() + texto.slice(1) : texto
 }
 
+
+/**
+ * La comparación con el período anterior, como la escribe el panel: «+12%», «-8%» o «0%»
+ * cuando casi no cambió; null cuando no hay con qué comparar (el período anterior tuvo cero,
+ * o es «Todo»), que se pinta «—». `sube` dice el color: verde, rojo o ninguno.
+ */
+export function cambio(valor: number | null): { texto: string; sube: boolean | null } | null {
+  if (valor === null || !Number.isFinite(valor)) return null
+  if (Math.abs(valor) < 0.5) return { texto: '0%', sube: null }
+  const redondo = Math.round(valor)
+  return { texto: `${redondo > 0 ? '+' : ''}${redondo}%`, sube: redondo > 0 }
+}

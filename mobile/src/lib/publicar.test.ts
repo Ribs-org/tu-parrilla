@@ -10,6 +10,7 @@ import {
   describirArchivo,
   etiquetaCuenta,
   etiquetaEnvio,
+  fechaParaElDia,
   opcionesDelBorrador,
   proximaHoraEnPunto,
   puedeEnviar,
@@ -240,5 +241,23 @@ describe('cuentasConTrial y opcionesDelBorrador', () => {
     // Encendido pero desmarcada la cuenta: tampoco.
     expect(opcionesDelBorrador([ig1, yt], ['yt-1'], ['ig-1'], [video])).toEqual({})
     expect(opcionesDelBorrador([ig1, yt], ['ig-1'], [], [video])).toEqual({})
+  })
+})
+
+describe('fechaParaElDia', () => {
+  // Fechas locales a propósito: la regla trabaja en la hora del teléfono, igual que el selector.
+  const ahora = new Date(2026, 9, 15, 15, 20)
+
+  it('otro día, a la hora en punto que viene', () => {
+    expect(fechaParaElDia('2026-10-17', ahora)).toEqual(new Date(2026, 9, 17, 16, 0))
+  })
+
+  it('hoy, o un día que ya pasó, es la próxima hora en punto', () => {
+    expect(fechaParaElDia('2026-10-15', ahora)).toEqual(new Date(2026, 9, 15, 16, 0))
+    expect(fechaParaElDia('2026-10-01', ahora)).toEqual(new Date(2026, 9, 15, 16, 0))
+  })
+
+  it('un día ilegible no cambia nada', () => {
+    expect(fechaParaElDia('mañana', ahora)).toEqual(new Date(2026, 9, 15, 16, 0))
   })
 })

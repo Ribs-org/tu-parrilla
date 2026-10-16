@@ -18,9 +18,10 @@ está mal y dónde está.
    `src/app/api/mobile/session/route.ts:50-52` quería evitar. `mobile/src/lib/session.ts:34`.~~
    **Resuelto el 2026-10-15**: la app entra con correo y código, y muestra la frase del
    servidor o, si no la hay, una que no culpa a la persona.
-3. **App: «Conecta una en la pestaña Cuentas.»** manda a una pestaña que solo muestra
+3. ~~**App: «Conecta una en la pestaña Cuentas.»** manda a una pestaña que solo muestra
    números; las redes se conectan en Los Fierros, en el panel web.
-   `mobile/src/app/(tabs)/publicar.tsx:338-340`.
+   `mobile/src/app/(tabs)/publicar.tsx:338-340`.~~ **Resuelto el 2026-10-16**: ahora dice
+   «Conéctala en el panel web, en Los Fierros.», y la pestaña Cuentas ya no existe.
 4. **Los Fierros: falsa alarma en X.** La tarjeta dice «vence hoy» apenas se conecta y a las
    dos horas queda gris, aunque X renueva su credencial sola al publicar. Es el mismo caso
    que se arregló para TikTok y YouTube en #154: `src/lib/parrilla.ts:291` exime solo a esas

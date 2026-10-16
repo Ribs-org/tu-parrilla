@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { Pressable, Text, View } from 'react-native'
+import { Pressable, ScrollView, Text, View } from 'react-native'
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import {
@@ -12,19 +12,26 @@ import {
   TIPO_TITULO,
   Tarjeta,
   Vacio,
-} from '../../components/ui'
-import { MiniCorte } from '../../components/parrilla'
-import { num, pct, shortDate } from '../../lib/format'
-import { comoSalio, medianaDe } from '../../lib/parrilla'
-import { clearToken } from '../../lib/session'
-import { useScreenData } from '../../lib/useScreenData'
-import { useToken } from '../../lib/useToken'
-import { ETIQUETA_RANGO, NOMBRE_RED, RANGOS, type Posts, type Rango } from '../../lib/tipos'
+} from '../components/ui'
+import { MiniCorte } from '../components/parrilla'
+import { num, pct, shortDate } from '../lib/format'
+import { comoSalio, medianaDe } from '../lib/parrilla'
+import { clearToken } from '../lib/session'
+import { useScreenData } from '../lib/useScreenData'
+import { useToken } from '../lib/useToken'
+import { ETIQUETA_RANGO, NOMBRE_RED, RANGOS, type Posts, type Rango } from '../lib/tipos'
 
-const REDES = ['instagram', 'facebook', 'youtube', 'threads', 'x']
+// Las redes de las que Tu Parrilla trae publicaciones. Threads y X publican, pero no se
+// sincronizan: sus botones saldrían siempre vacíos.
+const REDES = ['instagram', 'tiktok', 'youtube', 'facebook']
 
-export default function Contenido() {
-  const [rango, setRango] = useState<Rango>('7d')
+/**
+ * Tus publicaciones: lo publicado en el período, de lo que más views ganó a lo que menos, con
+ * la marca «Se pasó». Era la pestaña Contenido; desde el 2026-10-16 vive un toque adentro de
+ * Los Números, como en el panel.
+ */
+export default function TusPublicaciones() {
+  const [rango, setRango] = useState<Rango>('30d')
   const [redes, setRedes] = useState<string[]>([])
   const token = useToken()
   const router = useRouter()
@@ -79,11 +86,12 @@ export default function Contenido() {
 
   return (
     <Pantalla refrescando={cargando} onRefrescar={refrescar}>
-      <View style={{ flexDirection: 'row', gap: 8 }}>
+      {/* Cinco períodos no caben en una fila angosta: se deslizan de lado. */}
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6 }}>
         {RANGOS.map((r) => (
           <Chip key={r} texto={ETIQUETA_RANGO[r]} activo={rango === r} onPress={() => setRango(r)} />
         ))}
-      </View>
+      </ScrollView>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
         <Chip texto="Todas" activo={redes.length === 0} onPress={() => setRedes([])} />
         {REDES.map((red) => (

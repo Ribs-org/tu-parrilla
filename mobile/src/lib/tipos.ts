@@ -3,7 +3,7 @@ export type PostProgramado = {
   texto: string
   cuando: string
   // `id` es el del destino (`scheduled_post_targets.id`), no el de la cuenta: es la
-  // clave de React en el Resumen y el Calendario. Con dos cuentas de una red, `red` ya
+  // clave de React en La Parrilla. Con dos cuentas de una red, `red` ya
   // no es única dentro de un post — solo el destino lo es.
   redes: { id: string; red: string; handle: string | null; estado: string; error?: string | null }[]
   portada?: string | null
@@ -67,17 +67,48 @@ export type Cuentas = {
   serie: { fecha: string; visitasAlPerfil: number | null; alcance: number | null }[]
 }
 
-export type Calendario = { posts: PostProgramado[] }
+/** `hoy` es el día en la zona del dueño; falta en lo guardado antes del 2026-10-16. */
+export type Calendario = { hoy?: string; posts: PostProgramado[] }
 
-export const RANGOS = ['hoy', '7d', '30d'] as const
+/** Una cuenta como la nombra la API: su id, su red y su nombre en la red. */
+export type CuentaNombrada = { id: string; red: string; nombre: string | null }
+
+/** Los Números: las dos mitades del tablero del panel (`/api/mobile/numeros`). */
+export type Numeros = {
+  rango: Rango
+  cuenta: string | null
+  cuentas: CuentaNombrada[]
+  redes: {
+    viewsGanadas: number | null
+    seguidoresGanados: number | null
+    loQueMasCrecio: (PostMetrica & { cuenta: CuentaNombrada | null })[]
+  }
+  pagina: {
+    visitas: number
+    cambioVisitas: number | null
+    clicks: number
+    cambioClicks: number | null
+    queTeTrajoGente: {
+      etiqueta: string
+      visitas: number
+      texto: string | null
+      red: string | null
+      cuenta: CuentaNombrada | null
+    }[]
+  }
+}
+
+export const RANGOS = ['hoy', '7d', '30d', '90d', 'todo'] as const
 
 export type Rango = (typeof RANGOS)[number]
 
-/** Resumen y Contenido ofrecen los mismos rangos; que también los llamen igual. */
+/** Los cinco períodos del panel, con sus mismos nombres. */
 export const ETIQUETA_RANGO: Record<Rango, string> = {
   hoy: 'Hoy',
   '7d': '7 días',
   '30d': '30 días',
+  '90d': '90 días',
+  todo: 'Todo',
 }
 
 export const NOMBRE_RED: Record<string, string> = {

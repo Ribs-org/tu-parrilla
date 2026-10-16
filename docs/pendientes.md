@@ -180,6 +180,15 @@ Nada de esto bloquea un trámite hoy; conviene ordenarlo antes de abrir a tercer
 
 ## Features y trabajo de código
 
+- **El rediseño de la app del teléfono, partes 2 a 5** (2026-10-16). La parte 1 dejó las
+  tres pestañas del panel (La Parrilla, Publicar, Los Números). Faltan: (2) borradores
+  compartidos con la web y «Reprogramar» en «Se quemó», con rutas nuevas en el servidor;
+  (3) La Mesa como cuarta pestaña, para leer y responder comentarios; (4) TikTok, Threads
+  y X desde Publicar —TikTok exige mostrar los datos de la cuenta (`creator_info`) antes
+  de publicar—; (5) el nombre y el ícono «Tu Parrilla», que piden un build nativo nuevo y
+  actualizar la ficha de la Play Store. Cuando ninguna instalación vieja la pida, sale
+  `/api/mobile/overview`, que la app nueva ya no usa.
+
 - **Cupos y reparto de los crons por usuario** (`docs/levantamiento-terceros.md` §5.4). Hace
   falta cuando la beta pase de unos diez usuarios.
 - **El privado de Meta (DM con el PDF)** necesita `instagram_manage_messages` y

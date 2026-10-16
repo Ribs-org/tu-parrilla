@@ -1,11 +1,15 @@
 # Vicente · Números
 
-Esta es la app para el celular de Vicente. Muestra, de un vistazo, los números de
-sus redes (Instagram, Facebook, YouTube): seguidores, alcance, publicaciones
-recientes y el detalle de cada post, y desde la versión 1.1 también **publica**:
-eliges fotos o un video de la galería, escribes el texto, marcas las cuentas y lo
-programas, o lo mandas a salir ahora. Los datos son los mismos que ve el panel web,
-leídos desde `https://tu-parrilla.cl/api/mobile/*`.
+Esta es la app del teléfono de Tu Parrilla. Desde el 2026-10-16 tiene las mismas tres
+pestañas que el panel web, en versión corta: **La Parrilla** (lo programado día por
+día, lo que se quemó y cuántos cortes salieron ayer), **Publicar** al medio (eliges
+fotos o un video de la galería, escribes el texto, marcas las cuentas y lo programas,
+o lo mandas a salir ahora) y **Los Números** (las dos mitades del tablero, con «Tus
+publicaciones» un toque adentro y los seguidores de cada red detrás de «⋯ Más»).
+Antes eran cinco con nombres propios: Resumen, Contenido, Publicar, Cuentas y
+Calendario. Los datos son los mismos que ve el panel web, leídos desde
+`https://tu-parrilla.cl/api/mobile/*`; `/api/mobile/overview` ya no la usa la app
+nueva y sigue solo para las instalaciones que no se han actualizado.
 
 No está en la Play Store pública ni en la App Store: se instala desde la pista interna
 de Google Play (ver `docs/play-store.md`) o directamente desde un archivo `.apk` que se
@@ -144,7 +148,7 @@ En la pestaña **Publicar**:
 
 La subida muestra el avance de cada archivo. Si se corta la señal, **Reintentar**
 retoma desde el archivo que falló, sin volver a subir los anteriores. Al terminar, la
-app salta al Calendario con el post recién programado.
+app salta a La Parrilla con el post recién programado.
 
 El trial reel es puro JavaScript, sin cambio nativo: llega por aire a los dos canales
 con el orden de siempre (web primero), como se explica en

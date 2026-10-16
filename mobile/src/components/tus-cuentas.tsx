@@ -1,25 +1,20 @@
 import { useCallback } from 'react'
 import { Text, View } from 'react-native'
 import { useRouter } from 'expo-router'
-import {
-  COLORES,
-  Cargando,
-  ErrorConReintento,
-  Etiqueta,
-  Pantalla,
-  Sello,
-  Tarjeta,
-  Vacio,
-} from '../../components/ui'
-import { num } from '../../lib/format'
-import { clearToken } from '../../lib/session'
-import { useScreenData } from '../../lib/useScreenData'
-import { useToken } from '../../lib/useToken'
-import { NOMBRE_RED, type Cuentas as CuentasData } from '../../lib/tipos'
+import { COLORES, Etiqueta, Tarjeta, Vacio } from './ui'
+import { num } from '../lib/format'
+import { clearToken } from '../lib/session'
+import { NOMBRE_RED, type Cuentas, type Rango } from '../lib/tipos'
+import { useScreenData } from '../lib/useScreenData'
+import { useToken } from '../lib/useToken'
 
-const RANGO = '30d'
-
-export default function Cuentas() {
+/**
+ * «Tus cuentas», detrás del «⋯ Más» de Los Números: los seguidores de cada red con lo ganado
+ * en el período, las visitas al perfil y el alcance del último día leído, y las visitas al
+ * perfil día a día. Era la pestaña Cuentas hasta el 2026-10-16; se monta recién al abrir el
+ * «⋯ Más», así que no se pide lo que no se va a ver.
+ */
+export function TusCuentas({ rango }: { rango: Rango }) {
   const token = useToken()
   const router = useRouter()
   const salir = useCallback(async () => {
@@ -27,52 +22,43 @@ export default function Cuentas() {
     router.replace('/login')
   }, [router])
 
-  const { data, cargando, error, sello, refrescar } = useScreenData<CuentasData>(
-    `cuentas:${RANGO}`,
-    `/api/mobile/accounts?rango=${RANGO}`,
+  const { data, cargando, error } = useScreenData<Cuentas>(
+    `cuentas:${rango}`,
+    `/api/mobile/accounts?rango=${rango}`,
     token,
     salir,
   )
 
-  if (!data && cargando) return <Cargando />
   if (!data) {
-    return (
-      <Pantalla refrescando={cargando} onRefrescar={refrescar}>
-        <ErrorConReintento mensaje={error ?? 'No se pudo cargar.'} onReintentar={refrescar} />
-      </Pantalla>
-    )
+    return <Text style={{ color: COLORES.suave, fontSize: 12 }}>{cargando ? 'Cargando tus cuentas…' : (error ?? 'No se pudo cargar.')}</Text>
   }
 
   const maximo = Math.max(1, ...data.serie.map((p) => p.visitasAlPerfil ?? 0))
 
   return (
-    <Pantalla refrescando={cargando} onRefrescar={refrescar}>
-      <Sello texto={sello} />
+    <View style={{ gap: 12 }}>
       {data.cuentas.length === 0 ? (
         <Vacio texto="Todavía no hay lecturas de cuenta. La primera llega con la sincronización de esta noche." />
       ) : (
         data.cuentas.map((cuenta) => (
           <Tarjeta key={cuenta.red}>
             <Etiqueta>{NOMBRE_RED[cuenta.red] ?? cuenta.red}</Etiqueta>
-            <Text style={{ color: COLORES.texto, fontSize: 24, fontWeight: '600' }}>
-              {num(cuenta.seguidores)}
-            </Text>
+            <Text style={{ color: COLORES.texto, fontSize: 24, fontWeight: '600' }}>{num(cuenta.seguidores)}</Text>
             <Text style={{ color: COLORES.suave, fontSize: 12 }}>
               seguidores
               {cuenta.seguidoresGanados === null
                 ? ' · — en el período'
                 : cuenta.seguidoresGanados === 0
                   ? ' · sin cambio'
-                  : // El backend acota a cero, así que esto no debería verse hoy: es
-                    // defensa para que un negativo salga con su propio signo («-5»)
-                    // en vez de duplicado («+-5»).
+                  : // El backend acota a cero, así que esto no debería verse hoy: es defensa
+                    // para que un negativo salga con su propio signo («-5») y no «+-5».
                     cuenta.seguidoresGanados < 0
                     ? ` · ${num(cuenta.seguidoresGanados)} en el período`
                     : ` · +${num(cuenta.seguidoresGanados)} en el período`}
             </Text>
             <Text style={{ color: COLORES.tenue, fontSize: 12, marginTop: 4 }}>
-              Visitas al perfil{cuenta.dia ? ` (${cuenta.dia})` : ''}: {num(cuenta.visitasAlPerfil)} ·
-              Alcance: {num(cuenta.alcance)}
+              Visitas al perfil{cuenta.dia ? ` (${cuenta.dia})` : ''}: {num(cuenta.visitasAlPerfil)} · Alcance:{' '}
+              {num(cuenta.alcance)}
             </Text>
           </Tarjeta>
         ))
@@ -81,8 +67,8 @@ export default function Cuentas() {
       {data.serie.length > 1 ? (
         <Tarjeta>
           <Etiqueta>Visitas al perfil por día</Etiqueta>
-          {/* Barras de vistas planas: una librería de gráficos sería una dependencia
-              nativa más que puede romper el build, y esto se lee igual de bien. */}
+          {/* Barras de vistas planas: una librería de gráficos sería una dependencia nativa
+              más que puede romper el build, y esto se lee igual de bien. */}
           <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 3, height: 80, marginTop: 8 }}>
             {data.serie.map((punto) => (
               <View
@@ -98,6 +84,6 @@ export default function Cuentas() {
           </View>
         </Tarjeta>
       ) : null}
-    </Pantalla>
+    </View>
   )
 }

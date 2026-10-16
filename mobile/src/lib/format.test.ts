@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { capitalizar, num, pct, shortDate } from './format'
+import { cambio, capitalizar, num, pct, shortDate } from './format'
 
 describe('num', () => {
   it('un null es un guion, nunca un cero', () => {
@@ -36,5 +36,20 @@ describe('capitalizar', () => {
 
   it('una cadena vacía sigue vacía', () => {
     expect(capitalizar('')).toBe('')
+  })
+})
+
+describe('cambio', () => {
+  it('con signo y redondeado', () => {
+    expect(cambio(12.4)).toEqual({ texto: '+12%', sube: true })
+    expect(cambio(-8.6)).toEqual({ texto: '-9%', sube: false })
+  })
+
+  it('casi nada es 0% sin color', () => {
+    expect(cambio(0.3)).toEqual({ texto: '0%', sube: null })
+  })
+
+  it('sin con qué comparar, no hay nada que decir', () => {
+    expect(cambio(null)).toBeNull()
   })
 })
