@@ -273,37 +273,53 @@ El panel se llama «Nueva publicación» cuando se abre con ese botón, con el �
 «No hay nada puesto. Préndela.», y «Borrador» cuando se abre un borrador guardado. El
 formulario viene abierto, con el cursor en «Texto». En este orden:
 
-1. **«Texto»**, con el placeholder «Texto del post…». No deja escribir más de 2200
+1. **«Así va a quedar»**: el corte del post mientras se arma (ver «El corte», más arriba),
+   sobre la parrilla del día elegido con este post encima. La silueta sale de los archivos
+   —también de los que todavía suben—: un chori sin archivos, un bife con una foto, una
+   entraña con un video, una tira con un hueso por archivo. Lleva una marca punteada por cada
+   cuenta marcada (fría, en gris acero, si el fierro de esa cuenta se apagó) y se llena de
+   carne cruda de izquierda a derecha a medida que llegan los archivos; lo que falta se ve
+   como la silueta punteada. Si un archivo no llegó, lleva el halo rojo y la banderita. Al
+   lado, en palabras: la forma («Solo texto.», «Una foto.», «Un video.» o «Un carrusel de
+   <N>.»), a quién va («A Instagram y TikTok.», con el usuario cuando hay dos cuentas de la
+   misma red, o «Todavía sin cuenta: elige al menos una.») y, mientras suben, «Llegando: <N>
+   de <M>.» o «Un archivo no llegó: reintenta o quítalo. Los que siguen esperan.».
+2. **«Texto»**, con el placeholder «Texto del post…». No deja escribir más de 2200
    caracteres.
-2. **«Archivos»**, el botón de archivos del navegador, que acepta varios a la vez; debajo
-   dice «Imágenes o video, opcional. Se suben apenas los eliges.» Solo deja elegir imágenes y
-   videos. Empiezan a subir en cuanto se eligen: mientras tanto dice «Subiendo…» o «Subiendo
-   <N> de <M>…», y el botón de archivos y «Programar» quedan apagados (con un video puede
-   tardar). Lo subido aparece debajo en una lista numerada, en el orden del carrusel: el
-   número, el nombre del archivo, «imagen» o «video», y una ✕ para quitarlo (un lector de
-   pantalla la lee «Quitar <nombre del archivo>»). Se pueden elegir más después: se agregan al
-   final. Para cambiar el orden hay que quitar y volver a elegir, o usar el editor después de
-   programar. Si una subida falla, el error sale en rojo debajo de la lista, y no queda
-   ninguno de los archivos de esa tanda.
-3. **La revisión para TikTok**, solo si hay una cuenta de TikTok marcada y archivos elegidos.
+3. **«Archivos»**: una zona con borde punteado que dice «Suelta fotos o un video acá, o
+   elígelos» y, debajo, «Opcional. Suben apenas los sueltas y se guardan con el borrador.»
+   Se puede soltar ahí archivos arrastrados desde la computadora (la zona se pinta de
+   naranjo mientras se arrastra encima) o apretarla para elegirlos; acepta varios a la vez,
+   solo imágenes y videos. Con algo elegido, la zona se achica y dice «Suelta más acá, o
+   elígelos». Debajo, una miniatura por archivo, en el orden del carrusel, con su número
+   arriba a la izquierda («· ▶» si es video) y una ✕ arriba a la derecha para quitarlo (un
+   lector de pantalla la lee «Quitar <nombre del archivo>»). Suben de a uno y en orden: el que
+   espera dice «En cola», el que sube dice cuánto lleva («45 %») con una barra del color de la
+   carne cruda, y los dos se ven apagados hasta que llegan. Uno que no llegó queda con borde
+   rojo, «No llegó» y el botón «Reintentar», y debajo de las miniaturas sale en rojo «<nombre
+   del archivo>: <error>»; los que venían atrás esperan hasta que se reintente o se quite. Lo
+   que ya llegó se queda. Quitar uno que está subiendo corta su subida. Se pueden agregar más
+   después: van al final. Para cambiar el orden hay que quitar y volver a elegir, o usar el
+   editor después de programar. Mientras algo sube o no llegó, «Programar» queda apagado.
+4. **La revisión para TikTok**, solo si hay una cuenta de TikTok marcada y archivos elegidos.
    Mide cada archivo en el navegador y dice, en verde, «El archivo cumple lo que pide
    TikTok.» o «Los archivos cumplen lo que pide TikTok.»; o, en un recuadro rojo, «TikTok va
    a rechazar esto:» con una línea por archivo, «<nombre del archivo>: <problema>.». Es un
    aviso: no impide programar. Solo mide lo elegido desde que se abrió el panel: los archivos
    que vienen de un borrador guardado no se vuelven a medir.
-4. **«Cuentas»**, una casilla por cuenta, rotulada «<Red> · <usuario>» (X aparece como «X /
+5. **«Cuentas»**, una casilla por cuenta, rotulada «<Red> · <usuario>» (X aparece como «X /
    Twitter»; una cuenta sin usuario dice «sin nombre»). Una cuenta desconectada sale
    atenuada, no se puede marcar y lleva al lado «reconéctala». En un formulario nuevo, si hay
    una sola cuenta conectada viene marcada; con dos o más no viene ninguna. En un borrador
    vienen marcadas las que tenía marcadas, si siguen conectadas. Sin ninguna cuenta, el
    bloque dice «Todavía no tienes cuentas conectadas. Conecta una para poder programar.», y
    «Conecta una» lleva a [Los Fierros](los-fierros.md) (tus redes conectadas).
-5. **Un bloque «TikTok · <usuario>»** por cada cuenta de TikTok marcada (ver abajo).
-6. **Un bloque «Instagram · <usuario>»** por cada cuenta de Instagram marcada, solo cuando
+6. **Un bloque «TikTok · <usuario>»** por cada cuenta de TikTok marcada (ver abajo).
+7. **Un bloque «Instagram · <usuario>»** por cada cuenta de Instagram marcada, solo cuando
    hay exactamente un archivo y es un video (ver abajo).
-7. **«Respuesta automática por palabra clave»**, plegado (ver abajo); viene abierto y lleno si
+8. **«Respuesta automática por palabra clave»**, plegado (ver abajo); viene abierto y lleno si
    el borrador tenía una palabra.
-8. **«Fecha y hora»**, un selector de día y hora con el botón «Ahora» al lado. Al abrir desde
+9. **«Fecha y hora»**, un selector de día y hora con el botón «Ahora» al lado. Al abrir desde
    un día del calendario, viene puesto ese día a las 09:00; si el día es hoy, la hora en punto
    siguiente (o las 09:00, si todavía no son las nueve), y vacío desde las 23:00. Al abrir un
    borrador, viene la fecha que tenía. Al elegir el día aparece debajo cómo está ese día según
@@ -312,7 +328,7 @@ formulario viene abierto, con el cursor en «Texto». En este orden:
    día ya va lleno, con <N>. Mira si te sirve uno más flojo.» (tres o más). Los borradores no
    cuentan. «Ahora» se enciende y se apaga con un clic; encendido, el selector queda vacío y
    bloqueado y el post queda para el minuto siguiente.
-9. **El pie del panel**, fijo abajo: los errores en rojo, encima de los botones; **«Programar»**,
+10. **El pie del panel**, fijo abajo: los errores en rojo, encima de los botones; **«Programar»**,
    que dice «Programando…» mientras trabaja; **«Descartar»**; y a la derecha, en chico, cómo va
    el guardado del borrador (ver abajo).
 
@@ -741,6 +757,7 @@ alguna, hay que borrarlo en la red misma.
 | «Una de las cuentas elegidas no es tuya.» | Una cuenta dejó de existir mientras la pantalla estaba abierta | Cerrar el panel (queda el borrador) y volver a abrirlo desde «Borradores (<N>)» |
 | «La cuenta <usuario> no está conectada. Vuelve a conectarla en Los Fierros.» | Se desconectó | Reconectarla en Los Fierros y volver: lo escrito sigue en «Borradores» |
 | «Espera a que terminen de subir los archivos.» | Se intentó programar mientras subían archivos | Esperar a que aparezcan en la lista y volver a apretar «Programar» |
+| «Un archivo no llegó: reintenta o quítalo antes de programar.» | Se apretó «Programar» con un archivo que no llegó (con borde rojo y «No llegó») | «Reintentar» en su miniatura, o quitarlo con su ✕ |
 | «Un archivo no es del almacén.», «Falta subir un archivo.» o «El cuerpo no se entendió.» | Un archivo de la lista ya no está en el almacenamiento, o la subida quedó a medias | Quitar los archivos de la lista con su ✕, volver a elegirlos y programar |
 
 ### Al subir archivos
@@ -750,7 +767,8 @@ de esa tanda queda: hay que volver a elegirlos.
 
 | Lo que dice la pantalla | Qué significa | Qué hacer |
 |---|---|---|
-| «Subiendo…» o «Subiendo <N> de <M>…» | Están subiendo los archivos recién elegidos | Esperar: «Programar» se enciende al terminar |
+| «Llegando: <N> de <M>.», en «Así va a quedar», y «En cola» o «<N> %» en las miniaturas | Están subiendo los archivos recién elegidos, de a uno | Esperar: «Programar» se enciende cuando llegan todos |
+| «Un archivo no llegó: reintenta o quítalo. Los que siguen esperan.», y «No llegó» en una miniatura con borde rojo | Ese archivo no pudo subir; el error exacto sale en rojo debajo de las miniaturas | «Reintentar» en esa miniatura, o quitarlo con su ✕ |
 | «El archivo supera los 500 MB.» | Un archivo pasa del máximo | Achicarlo |
 | «Ese tipo de archivo no se puede publicar.» | No es imagen ni video | Elegir otro |
 | «No se pudo preparar la subida. (<código>)», «No se pudo subir el archivo. (<código>)» o «No se pudo subir el archivo.» | Falló la conexión al subir | Volver a elegirlos; si se repite, avisar a quien administra el sitio |
@@ -943,8 +961,8 @@ quemado, más arriba).
   reconectarla en [Los Fierros](los-fierros.md).
 - **La fecha viene puesta a las 9.** Es lo que propone al abrir desde un día del calendario;
   se cambia en «Fecha y hora».
-- **Elegí un archivo y el botón Programar está gris.** Está subiendo («Subiendo…»): esperar
-  a que aparezca en la lista.
+- **Elegí un archivo y el botón Programar está gris.** Está subiendo («En cola» o «<N> %» en
+  su miniatura): esperar a que llegue. Si dice «No llegó», apretar «Reintentar» o quitarlo.
 - **Quiero cambiar el orden de los archivos.** En el compositor, quitarlos con su ✕ y volver a
   elegirlos en el orden que se quiere; o programar y reordenar en el editor con las flechas.
 - **¿Dónde subo un CSV? / No encuentro la carga masiva.** «Subir CSV», arriba a la derecha de
@@ -1072,6 +1090,8 @@ Lo que describe esta página sale de:
   - `src/app/admin/(dash)/schedule/page.tsx`
   - `src/app/admin/(dash)/schedule/panel-lateral.tsx`
   - `src/app/admin/(dash)/schedule/composer.tsx`
+  - `src/app/admin/(dash)/schedule/vista-previa.tsx`, `src/app/admin/(dash)/schedule/archivos.tsx` y `src/app/admin/(dash)/schedule/subidas.ts` («Así va a quedar», los archivos y su cola)
+  - `src/lib/subida-directa.ts` (la subida a R2, con su avance)
   - `src/app/admin/(dash)/schedule/lista-borradores.tsx`
   - `src/app/admin/(dash)/schedule/batch-upload.tsx`
   - `src/app/admin/(dash)/schedule/calendar.tsx`
