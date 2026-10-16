@@ -117,6 +117,7 @@ const { getCola } = await import('./comentarios-cola')
 const { verificarCuentas, cuentaUnicaPorRed } = await import('./social/cuentas')
 const { todosLosCortes, servidosAyer } = await import('./social/publish/cortes')
 const { quitarCuenta, CUENTA_CONECTADA } = await import('./social/quitar')
+const { vincularVideosTikTok } = await import('./social/vincular-tiktok')
 const { listarBorradores, cargarBorrador, guardarBorrador, borrarBorrador } = await import('./borradores')
 const { cuentasParaElTelefono } = await import('./borradores-movil')
 const { leerAjuste } = await import('./ajustes')
@@ -627,6 +628,18 @@ describe('aislamiento por dueño, escrituras (SQL generado, sin base)', () => {
    * que decide si se puede tiene que estar atada al dueño, o cualquiera borraría la cuenta de
    * otro sabiendo su id.
    */
+  it('social/vincular-tiktok: lee los destinos y los videos, y escribe el id, todo atado al dueño', async () => {
+    const consultas = await consultasEncadenadas(() => vincularVideosTikTok({ id: 'cuenta-tt', ownerId: DUENO }), [
+      // Un destino publicado sin id…
+      [['destino-1', null, 'published', null, null, 'Tres errores que cometí al lanzar mi producto', '2026-10-10T09:00:00.000Z']],
+      // …y un video de la cuenta con el mismo texto a esa hora.
+      [['7001', 'Tres errores que cometí al lanzar mi producto', '2026-10-10T09:05:00.000Z']],
+    ])
+    expect(consultas).toHaveLength(3)
+    for (const c of consultas) esperarFiltradoPorDueno(c)
+    expect(consultas[2]!.sql).toMatch(/^update "scheduled_post_targets"/)
+  })
+
   it('social/quitar: quitarCuenta lee la cuenta atada al dueño antes de borrar nada', async () => {
     const consultas = await consultasEncadenadas(() => quitarCuenta(DUENO, '9692387a-41cc-4a81-9f8f-7b07135d742a'))
     esperarFiltradoPorDueno(consultas[0]!)
