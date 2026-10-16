@@ -77,9 +77,20 @@ igual debajo de ella.
 
 ### «Se quemó»
 
-El título va en rojo. Aparece solo si hay algo que falló, de cualquier fecha; si no falló
-nada, la sección no existe. Cada fila es una red donde un corte falló: un corte que falló en
-dos redes da dos filas. Van de la más reciente a la más vieja. Cada fila trae:
+El título va en rojo, con cuántas filas hay al lado (por ejemplo «Se quemó 22»). Aparece solo
+si hay algo que falló, de cualquier fecha; si no falló nada, la sección no existe. Cada fila es
+una red donde un corte falló: un corte que falló en dos redes da dos filas. Van de la más
+reciente a la más vieja.
+
+Si lo quemado es de dos redes o más, al lado del título hay un botón por red, con su ícono, su
+nombre y cuántas tiene (por ejemplo «TikTok 8»). Todos parten encendidos, con borde rojo; un
+clic apaga esa red —el botón queda con borde punteado y gris— y sus filas salen de la vista, y
+otro clic la vuelve a encender. Apagar una red no borra ni arregla nada: solo deja de
+mostrarla, y al recargar la página vuelven a estar todas. Con todas apagadas, la sección dice
+«Apagaste todas las redes.» y «Encender todas».
+
+De entrada se ven las primeras quince filas; si hay más, abajo aparece «Ver más (quedan
+<N>)», que suma otras quince. Cambiar el filtro vuelve a las primeras quince. Cada fila trae:
 
 - el corte en chico, con todas sus marcas: se ve cuál se quemó y si las demás salieron (ver
   «El corte», más abajo);
@@ -1026,9 +1037,9 @@ Lo que describe esta página sale de:
   - `src/app/admin/(dash)/schedule/composer.tsx`
   - `src/app/admin/(dash)/schedule/lista-borradores.tsx`
   - `src/app/admin/(dash)/schedule/batch-upload.tsx`
-  - `src/app/admin/(dash)/schedule/se-quemo.tsx`
   - `src/app/admin/(dash)/schedule/calendar.tsx`
   - `src/app/admin/(dash)/schedule/vista-dia.tsx` y `src/app/admin/(dash)/schedule/dia.ts` (la vista «Día»)
+  - `src/app/admin/(dash)/schedule/se-quemo.tsx`, `src/app/admin/(dash)/schedule/lista-quemados.tsx` y `src/app/admin/(dash)/schedule/filtro-quemados.ts` («Se quemó»)
   - `src/app/admin/(dash)/schedule/queue.tsx`
   - `src/app/admin/(dash)/schedule/reprogramar.tsx`
   - `src/app/admin/(dash)/schedule/revision-media.tsx`
