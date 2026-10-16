@@ -32,11 +32,12 @@ registro abierto.
 
 Está siempre, fija arriba, en todas las pantallas del panel. De izquierda a derecha:
 
-1. **«Panel»**, en mayúsculas. Es un rótulo, no un botón.
+1. **«Panel»**, en mayúsculas. Es un rótulo, no un botón. En un teléfono no aparece: le deja el lugar a las pestañas.
 2. **Tres pestañas**, iguales para todos: «La Parrilla», «La Mesa» y «Los Números». La activa
    se pinta con fondo naranjo. En una pantalla angosta (un
-   teléfono) la fila se desplaza de lado: si no ve una pestaña, que deslice la barra.
-3. **El botón «Ajustes»**, a la derecha, con el ícono de un cuchillo y un trinche cruzados (antes era un engranaje:
+   teléfono) no caben las tres: la fila se desplaza de lado y la última se desvanece en el
+   borde. La pestaña en la que está se ve siempre entera; si no ve otra, que deslice la barra.
+3. **El botón «Ajustes»**, a la derecha, con el ícono de un trinche y un cuchillo, lado a lado (antes era un engranaje:
    si alguien dice «el engranaje», es este). En pantallas angostas se ve solo el ícono, sin la
    palabra. Abre un menú con cuatro entradas, cada una con su subtítulo debajo: «Los Fierros»
    (tus redes conectadas), «La Vitrina» (tus páginas públicas), «Los Maestros» (quién puede

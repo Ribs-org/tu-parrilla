@@ -22,7 +22,7 @@ function fierroDe(cuenta: Fierros['cuentas'][number]): { color: string; barra: s
 }
 
 /**
- * Ajustes, detrás del botón de la cabecera de cada pestaña (un cuchillo y un trinche cruzados): Los Fierros, tus cuentas con su temperatura
+ * Ajustes, detrás del botón de la cabecera de cada pestaña (un trinche y un cuchillo, lado a lado): Los Fierros, tus cuentas con su temperatura
  * —las mismas tarjetas de Los Fierros, para leer; conectar y reconectar se hace en el panel,
  * que abre en el navegador— y «Cerrar sesión», que la app no tenía: hasta acá, la única forma
  * de salir era borrar la app.
