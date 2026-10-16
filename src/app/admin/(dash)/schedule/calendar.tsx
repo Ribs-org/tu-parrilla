@@ -17,18 +17,46 @@ type Item = {
   media: Array<{ blobUrl: string; mediaType: string }>
 }
 
-/** Lo que dice la grilla de cada día, arriba a la derecha. */
-const ROTULO_CALOR = {
+/** Lo que dice la grilla de cada día, arriba a la derecha. También la vista «Día». */
+export const ROTULO_CALOR = {
   apagada: 'Apagada',
   prendida: 'Prendida',
   llena: 'Parrilla llena',
 } as const
 
-const CLASE_COCCION: Record<Coccion, string> = {
+export const CLASE_COCCION: Record<Coccion, string> = {
   cruda: 'corte-cruda',
   sellada: 'corte-sellada',
   punto: 'corte-punto',
   quemada: 'corte-quemada',
+}
+
+/**
+ * La miniatura de un corte: la foto, la portada del video o, sin ninguna, su primer cuadro.
+ * Nada si no tiene archivos. La comparten la semana y la vista «Día».
+ */
+export function MiniaturaCorte({
+  post,
+  media,
+}: {
+  post: Pick<ScheduledPost, 'coverUrl'>
+  media: Array<{ blobUrl: string; mediaType: string }>
+}) {
+  if (!media[0]) return null
+  return (
+    <span className="corte-media mt-1 block">
+      {media[0].mediaType === 'image' ? (
+        <Image src={media[0].blobUrl} alt="" width={120} height={64} unoptimized className="h-16 w-full rounded object-cover" />
+      ) : post.coverUrl ? (
+        // The designed cover IS the video's preview when there is one.
+        <Image src={post.coverUrl} alt="" width={120} height={64} unoptimized className="h-16 w-full rounded object-cover" />
+      ) : (
+        // No controls (the whole card is a link); preload="metadata"
+        // paints the first frame without pulling the file.
+        <video src={media[0].blobUrl} preload="metadata" muted playsInline className="h-16 w-full rounded bg-black object-cover" />
+      )}
+    </span>
+  )
 }
 
 /**
@@ -47,6 +75,7 @@ export function WeekCalendar({
   prevHref,
   nextHref,
   nuevoEnDia,
+  verDia,
 }: {
   monday: string
   items: Item[]
@@ -57,6 +86,8 @@ export function WeekCalendar({
   nextHref: string
   /** El enlace que abre el compositor en ese día. */
   nuevoEnDia: (dia: string) => string
+  /** El enlace a ese día en la vista «Día», desgranado por cuenta. */
+  verDia: (dia: string) => string
 }) {
   const days = weekDays(monday)
   const today = dayKey(new Date(), zone)
@@ -109,14 +140,17 @@ export function WeekCalendar({
             return (
               <div key={day} className="flex flex-col gap-2">
                 <div className="flex items-baseline justify-between gap-2">
-                  <p
+                  {/* El nombre del día abre ese día, cuenta por cuenta. */}
+                  <Link
+                    href={verDia(day)}
                     className={cn(
-                      'font-titulo text-[0.65rem] uppercase tracking-[0.14em]',
+                      'font-titulo text-[0.65rem] uppercase tracking-[0.14em] underline-offset-2 transition-colors hover:text-fg hover:underline',
                       day === today ? 'text-fg' : 'text-fg-faint',
                     )}
                   >
                     {dayLabel(day, index)}
-                  </p>
+                    <span className="sr-only">: ver por cuenta</span>
+                  </Link>
                   <span
                     // `text-fg-muted` y no `text-fg-faint`: a 0.55rem el tenue da 3.56:1
                     // sobre el panel y este rótulo es copy nuevo, así que entra al
@@ -209,40 +243,7 @@ export function WeekCalendar({
                             ) : null}
                           </p>
                           <Redes targets={targets} />
-                          {media[0] ? (
-                            <span className="corte-media mt-1 block">
-                              {media[0].mediaType === 'image' ? (
-                                <Image
-                                  src={media[0].blobUrl}
-                                  alt=""
-                                  width={120}
-                                  height={64}
-                                  unoptimized
-                                  className="h-16 w-full rounded object-cover"
-                                />
-                              ) : post.coverUrl ? (
-                                // The designed cover IS the video's preview when there is one.
-                                <Image
-                                  src={post.coverUrl}
-                                  alt=""
-                                  width={120}
-                                  height={64}
-                                  unoptimized
-                                  className="h-16 w-full rounded object-cover"
-                                />
-                              ) : (
-                                // No controls (the whole card is a link); preload="metadata"
-                                // paints the first frame without pulling the file.
-                                <video
-                                  src={media[0].blobUrl}
-                                  preload="metadata"
-                                  muted
-                                  playsInline
-                                  className="h-16 w-full rounded bg-black object-cover"
-                                />
-                              )}
-                            </span>
-                          ) : null}
+                          <MiniaturaCorte post={post} media={media} />
                           <p className="mt-1 line-clamp-2 text-[0.75rem] leading-snug text-fg">
                             {post.caption || '(sin texto)'}
                           </p>

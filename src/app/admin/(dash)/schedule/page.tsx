@@ -7,18 +7,29 @@ import { fechaParaDia, idDeBorrador, primero, textoDe } from '@/lib/borrador'
 import { cargarBorrador, listarBorradores } from '@/lib/borradores'
 import { pieDeAyer, quemados } from '@/lib/fuego'
 import { getCuentas } from '@/lib/posts'
-import { addDays, contarPorDia, dayKey, dayLabelConMes, hourLabel, normalizeWeekParam } from '@/lib/schedule-week'
+import {
+  addDays,
+  contarPorDia,
+  dayKey,
+  dayLabelConMes,
+  hourLabel,
+  mondayOfKey,
+  normalizeWeekParam,
+  weekDays,
+} from '@/lib/schedule-week'
 import { servidosAyer, todosLosCortes } from '@/lib/social/publish/cortes'
 import { cn, toZonedInput } from '@/lib/utils'
 import { nombreDe } from '@/lib/vocabulario'
 import { BatchUpload } from './batch-upload'
 import { WeekCalendar } from './calendar'
 import { Composer } from './composer'
+import { columnasDelDia, normalizarFecha } from './dia'
 import { scheduleHref } from './enlace'
 import { ListaBorradores } from './lista-borradores'
 import { ordenarCola } from './orden'
 import { Queue } from './queue'
 import { SeQuemo } from './se-quemo'
+import { VistaDia } from './vista-dia'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,7 +37,8 @@ export const dynamic = 'force-dynamic'
  * La Parrilla, que es también la entrada del panel (`/admin` lleva acá).
  *
  * De arriba abajo: lo que se quemó —lo único que pide una acción sin que nadie la busque—,
- * el calendario de la semana (o la lista, a un clic) y, al pie, cuánto salió ayer. Componer,
+ * el calendario de la semana (o un día por cuenta, o la lista, a un clic) y, al pie, cuánto
+ * salió ayer. Componer,
  * abrir un borrador y subir un CSV pasan en un panel lateral que la URL abre
  * (`?componer=1`, `?borrador=…`, `?panel=…`), para que el calendario siga a la vista detrás.
  */
@@ -37,15 +49,23 @@ export default async function SchedulePage({
 }) {
   const params = await searchParams
   const texto = (clave: string) => (typeof params[clave] === 'string' ? (params[clave] as string) : '')
-  // El calendario es la vista con que abre; la lista, a un clic. `vista=calendario`, de los
-  // enlaces de antes, sigue cayendo en el calendario.
-  const enLista = texto('vista') === 'lista'
+  // El calendario es la vista con que abre; el día y la lista, a un clic. `vista=calendario`,
+  // de los enlaces de antes, sigue cayendo en el calendario.
+  const vista = texto('vista') === 'lista' ? 'lista' : texto('vista') === 'dia' ? 'dia' : 'semana'
 
   // La parrilla entera —qué semana es «esta», en qué casilla cae cada corte, qué hora dice
   // la lista— se dibuja en la zona del dueño.
   const { id: ownerId, zona } = await requireUser()
   const now = new Date()
   const monday = normalizeWeekParam(texto('semana') || undefined, now, zona)
+  const hoy = dayKey(now, zona)
+  // El día de la vista «Día». Sin `fecha`, hoy si cae en la semana que se estaba mirando, y
+  // si no, el lunes de esa semana: cambiar de vista no te saca de donde estabas.
+  const fecha = normalizarFecha(
+    texto('fecha') || (weekDays(monday).includes(hoy) ? hoy : monday),
+    now,
+    zona,
+  )
 
   // En serie y no en paralelo: más consultas a la vez que conexiones en el pool se colgaron
   // una vez contra el pooler de Supabase (ver `docs/pendientes.md`), y estas son rápidas.
@@ -81,7 +101,7 @@ export default async function SchedulePage({
       return (
         <Composer
           // Otro borrador u otro día es otro formulario: se monta de cero.
-          key={borrador?.id ?? `nuevo-${texto('dia')}`}
+          key={borrador?.id ?? `nuevo-${texto('dia')}-${texto('cuenta')}`}
           carga={carga}
           cuentas={cuentas}
           borrador={borrador ? { id: borrador.id, campos: borrador.campos, media: borrador.media } : null}
@@ -94,6 +114,7 @@ export default async function SchedulePage({
                 : primero(borrador.campos, 'scheduledAt')
               : fechaParaDia(texto('dia'), now, zona)
           }
+          cuentaInicial={borrador ? '' : texto('cuenta')}
           listoHref={scheduleHref(params, { hecho: 'programado' })}
           cerrarHref={cerrarHref}
         />
@@ -159,8 +180,14 @@ export default async function SchedulePage({
         <div>
           <div className="mb-3 flex items-center gap-1.5">
             {[
-              { label: 'Calendario', href: scheduleHref(params, { vista: null }), active: !enLista },
-              { label: 'Lista', href: scheduleHref(params, { vista: 'lista', semana: null }), active: enLista },
+              {
+                label: 'Calendario',
+                // Desde un día, a la semana que lo contiene.
+                href: scheduleHref(params, { vista: null, fecha: null, semana: vista === 'dia' ? mondayOfKey(fecha) : texto('semana') || null }),
+                active: vista === 'semana',
+              },
+              { label: 'Día', href: scheduleHref(params, { vista: 'dia', fecha, semana: null }), active: vista === 'dia' },
+              { label: 'Lista', href: scheduleHref(params, { vista: 'lista', semana: null, fecha: null }), active: vista === 'lista' },
             ].map((tab) => (
               <Link
                 key={tab.label}
@@ -174,8 +201,38 @@ export default async function SchedulePage({
               </Link>
             ))}
           </div>
-          {enLista ? (
+          {vista === 'lista' ? (
             <Queue items={ordenarCola(cortes)} volver={volver} zone={zona} />
+          ) : vista === 'dia' ? (
+            <VistaDia
+              dia={fecha}
+              hoy={hoy}
+              columnas={columnasDelDia({
+                dia: fecha,
+                cuentas,
+                items: cortes,
+                borradores: borradores.flatMap((b) =>
+                  b.fecha
+                    ? [
+                        {
+                          id: b.id,
+                          href: scheduleHref(params, { borrador: b.id }),
+                          fecha: b.fecha,
+                          texto: textoDe(b.campos),
+                          cuentas: b.campos.cuentas ?? [],
+                        },
+                      ]
+                    : [],
+                ),
+                zone: zona,
+              })}
+              zone={zona}
+              volver={volver}
+              prevHref={scheduleHref(params, { fecha: addDays(fecha, -1) })}
+              nextHref={scheduleHref(params, { fecha: addDays(fecha, 1) })}
+              hoyHref={scheduleHref(params, { fecha: hoy })}
+              nuevoEnDia={(dia, cuenta) => scheduleHref(params, { componer: '1', dia, cuenta })}
+            />
           ) : (
             <WeekCalendar
               monday={monday}
@@ -188,6 +245,7 @@ export default async function SchedulePage({
               prevHref={scheduleHref(params, { semana: addDays(monday, -7) })}
               nextHref={scheduleHref(params, { semana: addDays(monday, 7) })}
               nuevoEnDia={(dia) => scheduleHref(params, { componer: '1', dia })}
+              verDia={(dia) => scheduleHref(params, { vista: 'dia', fecha: dia, semana: null })}
             />
           )}
         </div>

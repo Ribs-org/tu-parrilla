@@ -175,7 +175,10 @@ Fuera del panel, «el dueño» no siempre eres tú, así que conviene el detalle
 sin que la busques: lo que se quemó, con su motivo y el botón para darle hora nueva; sin
 ninguna red conectada, una tarjeta que te manda a Los Fierros. Debajo, el calendario de la
 semana —la lista queda a un clic—, con un «+» en cada día que abre el compositor con ese
-día puesto. Al pie, cuántos cortes salieron ayer; las miradas solo si la sincronización ya
+día puesto. El nombre de cada día abre la vista **Día** (`?vista=dia&fecha=…`): ese día con
+una columna por cuenta, cada una con su propio fuego y un «+» que abre el compositor con el
+día y la cuenta puestos; un post que sale a varias cuentas aparece en cada una, teñido por el
+estado de ese destino. Al pie, cuántos cortes salieron ayer; las miradas solo si la sincronización ya
 trajo sus métricas, porque un cero inventado diría «nadie miró» cuando lo cierto es
 «todavía no se sabe». Lo que no pide una acción está un clic más adentro: el tráfico, los
 links y qué contenido te trae gente viven en **Los Números**, y tus páginas públicas en
