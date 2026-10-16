@@ -6,17 +6,24 @@ import {
   MAX_BYTES,
   SIN_SENAL_SUBIDA,
   TIPO_NO_PUBLICABLE,
+  archivoDelBorrador,
+  archivoElegido,
   cuentasConTrial,
   describirArchivo,
+  estadoSubidas,
   etiquetaCuenta,
   etiquetaEnvio,
   fechaParaElDia,
+  hayPendientes,
+  notaDeArchivo,
   opcionesDelBorrador,
   proximaHoraEnPunto,
   puedeEnviar,
   reducirEnvio,
+  subidos,
   textoConfirmacion,
   vieneMarcada,
+  volverASubir,
   type Envio,
 } from './publicar'
 import type { CuentaApp } from './tipos'
@@ -70,62 +77,77 @@ describe('describirArchivo', () => {
 })
 
 describe('reducirEnvio', () => {
-  it('recorre el camino feliz', () => {
+  it('recorre el camino feliz: un solo pedido, porque los archivos ya subieron', () => {
     let e: Envio = ENVIO_INICIAL
-    e = reducirEnvio(e, { tipo: 'chequear' })
-    expect(e).toEqual({ paso: 'chequeando' })
-    e = reducirEnvio(e, { tipo: 'subir', indice: 0, total: 2 })
-    expect(e).toEqual({ paso: 'subiendo', indice: 0, total: 2, progreso: 0 })
-    e = reducirEnvio(e, { tipo: 'progreso', progreso: 0.5 })
-    expect(e).toEqual({ paso: 'subiendo', indice: 0, total: 2, progreso: 0.5 })
-    e = reducirEnvio(e, { tipo: 'subir', indice: 1, total: 2 })
-    e = reducirEnvio(e, { tipo: 'crear' })
-    expect(e).toEqual({ paso: 'creando' })
+    e = reducirEnvio(e, { tipo: 'crear', ahora: false })
+    expect(e).toEqual({ paso: 'creando', ahora: false })
     e = reducirEnvio(e, { tipo: 'hecho' })
     expect(e).toEqual({ paso: 'hecho' })
   })
 
-  it('el progreso se acota a [0, 1] y solo cuenta mientras sube', () => {
-    const subiendo: Envio = { paso: 'subiendo', indice: 0, total: 1, progreso: 0 }
-    expect(reducirEnvio(subiendo, { tipo: 'progreso', progreso: 1.7 })).toMatchObject({ progreso: 1 })
-    expect(reducirEnvio(subiendo, { tipo: 'progreso', progreso: -1 })).toMatchObject({ progreso: 0 })
-    expect(reducirEnvio({ paso: 'creando' }, { tipo: 'progreso', progreso: 0.5 })).toEqual({ paso: 'creando' })
-  })
-
-  it('un rechazo del servidor vuelve a listo con la frase: hay algo que cambiar', () => {
-    expect(reducirEnvio({ paso: 'chequeando' }, { tipo: 'rechazado', mensaje: 'X recibe hasta cuatro imágenes.' })).toEqual({
-      paso: 'listo',
-      error: 'X recibe hasta cuatro imágenes.',
-    })
-  })
-
-  it('un fallo de red guarda desde dónde retomar, y reintentar vuelve exactamente ahí', () => {
-    const retomar = { paso: 'subiendo', indice: 1, total: 3, progreso: 0 } as const
-    const caido = reducirEnvio(
-      { paso: 'subiendo', indice: 1, total: 3, progreso: 0.4 },
-      { tipo: 'fallo', mensaje: SIN_SENAL_SUBIDA, retomar },
-    )
-    expect(caido).toEqual({ paso: 'error', mensaje: SIN_SENAL_SUBIDA, retomar })
-    expect(reducirEnvio(caido, { tipo: 'reintentar' })).toEqual(retomar)
-  })
-
-  it('reintentar fuera de un error no hace nada', () => {
-    expect(reducirEnvio({ paso: 'creando' }, { tipo: 'reintentar' })).toEqual({ paso: 'creando' })
+  it('un rechazo, o la red caída, vuelve a listo con la frase: reintentar es tocar de nuevo', () => {
+    expect(
+      reducirEnvio({ paso: 'creando', ahora: false }, { tipo: 'rechazado', mensaje: 'X recibe hasta cuatro imágenes.' }),
+    ).toEqual({ paso: 'listo', error: 'X recibe hasta cuatro imágenes.' })
   })
 
   it('cancelar vuelve a listo sin error', () => {
-    expect(reducirEnvio({ paso: 'subiendo', indice: 0, total: 1, progreso: 0.3 }, { tipo: 'cancelar' })).toEqual(ENVIO_INICIAL)
+    expect(reducirEnvio({ paso: 'hecho' }, { tipo: 'cancelar' })).toEqual(ENVIO_INICIAL)
   })
 })
 
 describe('etiquetaEnvio', () => {
-  it('dice en qué va, en español, con el archivo y el porcentaje', () => {
+  it('dice en qué va, en español', () => {
     expect(etiquetaEnvio({ paso: 'listo', error: null })).toBeNull()
-    expect(etiquetaEnvio({ paso: 'chequeando' })).toBe('Comprobando…')
-    expect(etiquetaEnvio({ paso: 'subiendo', indice: 1, total: 3, progreso: 0.456 })).toBe('Subiendo 2 de 3 · 46 %')
-    expect(etiquetaEnvio({ paso: 'creando' })).toBe('Guardando…')
+    expect(etiquetaEnvio({ paso: 'creando', ahora: false })).toBe('Programando…')
+    expect(etiquetaEnvio({ paso: 'creando', ahora: true })).toBe('Publicando…')
     expect(etiquetaEnvio({ paso: 'hecho' })).toBe('Listo')
-    expect(etiquetaEnvio({ paso: 'error', mensaje: 'x', retomar: { paso: 'creando' } })).toBeNull()
+  })
+})
+
+describe('los archivos y sus subidas', () => {
+  const foto = { uri: 'file:///f.jpg', nombre: 'f.jpg', tipo: 'image/jpeg', bytes: 10, mediaType: 'image' as const }
+
+  it('uno elegido entra subiendo; uno de un borrador ya está listo', () => {
+    expect(archivoElegido(foto)).toMatchObject({ estado: 'subiendo', url: null, vista: 'file:///f.jpg', local: foto })
+    expect(archivoDelBorrador({ url: 'https://cdn/a.jpg', mediaType: 'image', nombre: 'a.jpg' })).toMatchObject({
+      estado: 'listo',
+      url: 'https://cdn/a.jpg',
+      vista: 'https://cdn/a.jpg',
+      local: null,
+    })
+  })
+
+  it('se suben de a uno: el primero que sube dice su porcentaje y los demás esperan', () => {
+    const lista = [
+      archivoDelBorrador({ url: 'https://cdn/a.jpg', mediaType: 'image', nombre: 'a.jpg' }),
+      { ...archivoElegido(foto), progreso: 0.456 },
+      archivoElegido(foto),
+      { ...archivoElegido(foto), estado: 'fallo' as const, error: SIN_SENAL_SUBIDA },
+    ]
+    expect(lista.map((_, i) => notaDeArchivo(lista, i))).toEqual([null, '46 %', 'En cola', 'Reintentar'])
+    expect(hayPendientes(lista)).toBe(true)
+    expect(hayPendientes([lista[0]!])).toBe(false)
+  })
+
+  it('una subida caída pesa más que las que siguen, y dice cómo reintentar', () => {
+    const caido = { ...archivoElegido(foto), estado: 'fallo' as const, error: SIN_SENAL_SUBIDA }
+    expect(estadoSubidas([archivoElegido(foto), caido])).toEqual({
+      texto: 'No se pudo subir el archivo. Revisa tu señal. Toca el archivo para reintentar.',
+      error: true,
+    })
+    expect(estadoSubidas([archivoElegido(foto), archivoElegido(foto)])).toEqual({ texto: 'Subiendo 2 archivos…', error: false })
+    expect(estadoSubidas([archivoElegido(foto)])).toEqual({ texto: 'Subiendo el archivo…', error: false })
+    expect(estadoSubidas([])).toBeNull()
+  })
+
+  it('volver a subir devuelve a la cola solo los del teléfono', () => {
+    const remoto = archivoDelBorrador({ url: 'https://cdn/a.jpg', mediaType: 'image', nombre: 'a.jpg' })
+    const local = { ...archivoElegido(foto), url: 'https://cdn/f.jpg', estado: 'listo' as const, progreso: 1 }
+    const [r, l] = volverASubir([remoto, local])
+    expect(r).toBe(remoto)
+    expect(l).toMatchObject({ estado: 'subiendo', url: null, progreso: 0 })
+    expect(subidos([remoto, l!])).toEqual([{ url: 'https://cdn/a.jpg', mediaType: 'image', nombre: 'a.jpg' }])
   })
 })
 

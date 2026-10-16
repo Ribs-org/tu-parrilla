@@ -118,6 +118,7 @@ const { verificarCuentas, cuentaUnicaPorRed } = await import('./social/cuentas')
 const { todosLosCortes, servidosAyer } = await import('./social/publish/cortes')
 const { quitarCuenta, CUENTA_CONECTADA } = await import('./social/quitar')
 const { listarBorradores, cargarBorrador, guardarBorrador, borrarBorrador } = await import('./borradores')
+const { cuentasParaElTelefono } = await import('./borradores-movil')
 const { leerAjuste } = await import('./ajustes')
 const { listarLlaves, crearLlave } = await import('./llaves')
 const { makeDefault, updateProfile, deleteScheduledPost, guardarCuenta, revocarLlaveApi } = await import(
@@ -125,7 +126,7 @@ const { makeDefault, updateProfile, deleteScheduledPost, guardarCuenta, revocarL
 )
 // `guardarCuenta` son dos funciones distintas con el mismo nombre: la de `admin/actions`
 // guarda la cuenta *del usuario* y la de `social/conectar`, una cuenta *de una red*.
-const { guardarCuenta: guardarCuentaDeRed } = await import('./social/conectar')
+const { guardarCuenta: guardarCuentaDeRed, tomadasPorOtro } = await import('./social/conectar')
 
 beforeEach(() => {
   capturas.length = 0
@@ -505,6 +506,34 @@ describe('aislamiento por dueño, escrituras (SQL generado, sin base)', () => {
     expect(escritura.sql).not.toContain(DUENO)
   })
 
+  it('social/conectar: guardarCuenta no pisa la cuenta de otro dueño, y la nombra', async () => {
+    colaRespuestas.push([['otro-dueno']])
+    await expect(
+      guardarCuentaDeRed(DUENO, 'instagram', {
+        externalId: '17841400000000000',
+        handle: '@ajena',
+        accessToken: 'token',
+        refreshToken: null,
+        expiresAt: null,
+      }),
+    ).rejects.toThrow('«@ajena» ya está conectada por otra persona en Tu Parrilla.')
+    // Solo la lectura del guardia: no llegó a escribir.
+    expect(capturas).toHaveLength(1)
+  })
+
+  /**
+   * La única lectura que cruza dueños a propósito: dice cuáles de las cuentas que trajo un
+   * login ya tiene otro usuario. Tiene que excluir al dueño de la sesión —si no, sus propias
+   * cuentas saldrían como «conectada por otra persona»— y preguntar solo por esos ids.
+   */
+  it('social/conectar: tomadasPorOtro excluye al dueño y pregunta solo por las cuentas del login', async () => {
+    const consultas = await consultasEncadenadas(() => tomadasPorOtro(DUENO, 'instagram', ['ig-a', 'ig-b']), [[]])
+    expect(consultas).toHaveLength(1)
+    const { sql, params } = consultas[0]!
+    expect(params).toEqual(expect.arrayContaining([DUENO, 'instagram', 'ig-a', 'ig-b']))
+    expect(sql.split(/\bwhere\b/i).pop()).toMatch(/"owner_id"\s*<>\s*\$/)
+  })
+
   /**
    * El id de la llave viaja desde el navegador: sin el dueño en el WHERE, cualquiera con
    * sesión revocaría la llave de otro sabiendo su id.
@@ -558,6 +587,16 @@ describe('aislamiento por dueño, escrituras (SQL generado, sin base)', () => {
     const consultas = await consultasEncadenadas(() => borrarBorrador(DUENO, 'borrador-x'), [[]])
     expect(consultas).toHaveLength(1)
     expect(consultas[0]!.sql).toMatch(/delete from "borradores"/i)
+    esperarFiltradoPorDueno(consultas[0]!)
+  })
+
+  /**
+   * Un borrador guardado desde el teléfono solo puede elegir cuentas que esta lectura
+   * devuelva: sin el dueño, cualquiera metería en su borrador la cuenta de otro.
+   */
+  it('borradores: cuentasParaElTelefono lee solo las cuentas del dueño', async () => {
+    const consultas = await todasLasConsultas(() => cuentasParaElTelefono(DUENO))
+    expect(consultas).toHaveLength(1)
     esperarFiltradoPorDueno(consultas[0]!)
   })
 

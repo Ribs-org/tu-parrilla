@@ -170,7 +170,8 @@ flujo (Facebook o Google), y complétalo hasta que la red devuelva la lista de p
 canales disponibles — ahí aparece esta pantalla con casillas para marcar cuáles conectar.
 Si no hay una conexión pendiente, esta ruta redirige de vuelta a Los Fierros con un aviso, así
 que hay que estar realmente a mitad del flujo para verla. Revisa que la lista de casillas
-se lea sobre su tarjeta y que el estado «ya conectada» de cada fila sea legible.
+se lea sobre su tarjeta y que el estado «ya conectada» de cada fila sea legible. Si alguna cuenta es de otro
+usuario, que «conectada por otra persona» y su casilla apagada también se lean.
 
 ## Qué NO debe haber cambiado
 

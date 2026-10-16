@@ -56,71 +56,138 @@ export function describirArchivo(asset: {
   return { uri: asset.uri, nombre, tipo, bytes, mediaType: tipo.startsWith('video/') ? 'video' : 'image' }
 }
 
-/** Desde dónde retoma un envío caído: el chequeo, un archivo en particular, o la creación. */
-export type Retomar =
-  | { paso: 'chequeando' }
-  | { paso: 'subiendo'; indice: number; total: number; progreso: number }
-  | { paso: 'creando' }
+/**
+ * Un archivo de Publicar. Se sube apenas se elige —como en el compositor del panel— para
+ * que el borrador lo pueda guardar. Uno que llega de un borrador ya está subido y no tiene
+ * `local`: no hay desde dónde volver a subirlo.
+ */
+export type Archivo = {
+  /** Única en la pantalla: la clave de React y la de la subida en curso. */
+  clave: string
+  nombre: string
+  mediaType: 'image' | 'video'
+  /** Lo que muestra la miniatura: el archivo del teléfono, o la URL si vino de un borrador. */
+  vista: string
+  local: Elegido | null
+  /** La URL en R2; null mientras no termina de subir. */
+  url: string | null
+  estado: 'subiendo' | 'listo' | 'fallo'
+  progreso: number
+  error: string | null
+}
 
-export type Envio =
-  | { paso: 'listo'; error: string | null }
-  | Retomar
-  | { paso: 'hecho' }
-  | { paso: 'error'; mensaje: string; retomar: Retomar }
+let claves = 0
+
+function nuevaClave(): string {
+  claves += 1
+  return `archivo-${claves}`
+}
+
+/** Un archivo recién elegido: entra a la cola de subida. */
+export function archivoElegido(elegido: Elegido): Archivo {
+  return {
+    clave: nuevaClave(),
+    nombre: elegido.nombre,
+    mediaType: elegido.mediaType,
+    vista: elegido.uri,
+    local: elegido,
+    url: null,
+    estado: 'subiendo',
+    progreso: 0,
+    error: null,
+  }
+}
+
+/** Un archivo de un borrador: ya está en R2. */
+export function archivoDelBorrador(media: { url: string; mediaType: 'image' | 'video'; nombre: string }): Archivo {
+  return {
+    clave: nuevaClave(),
+    nombre: media.nombre,
+    mediaType: media.mediaType,
+    vista: media.url,
+    local: null,
+    url: media.url,
+    estado: 'listo',
+    progreso: 1,
+    error: null,
+  }
+}
+
+export type MediaSubida = { url: string; mediaType: 'image' | 'video'; nombre: string }
+
+/** Los que ya están en R2, en el orden elegido: lo único que un borrador o un post pueden llevar. */
+export function subidos(archivos: Archivo[]): MediaSubida[] {
+  return archivos.flatMap((a) => (a.url ? [{ url: a.url, mediaType: a.mediaType, nombre: a.nombre }] : []))
+}
+
+/** Si algún archivo todavía no está listo para programar: subiendo o con la subida caída. */
+export function hayPendientes(archivos: Archivo[]): boolean {
+  return archivos.some((a) => a.estado !== 'listo')
+}
+
+/** Qué decir de las subidas bajo los botones, o null si no hay nada pendiente. */
+export function estadoSubidas(archivos: Archivo[]): { texto: string; error: boolean } | null {
+  const caido = archivos.find((a) => a.estado === 'fallo')
+  if (caido) return { texto: `${caido.error ?? SIN_SENAL_SUBIDA} Toca el archivo para reintentar.`, error: true }
+  const pendientes = archivos.filter((a) => a.estado === 'subiendo').length
+  if (pendientes === 0) return null
+  return { texto: pendientes === 1 ? 'Subiendo el archivo…' : `Subiendo ${pendientes} archivos…`, error: false }
+}
+
+/**
+ * Lo que dice la miniatura de un archivo que no está listo. Se suben de a uno y en orden,
+ * así que el primero que está subiendo es el que avanza; los demás esperan.
+ */
+export function notaDeArchivo(archivos: Archivo[], indice: number): string | null {
+  const archivo = archivos[indice]
+  if (!archivo || archivo.estado === 'listo') return null
+  if (archivo.estado === 'fallo') return 'Reintentar'
+  const enCurso = archivos.findIndex((a) => a.estado === 'subiendo')
+  return enCurso === indice ? `${Math.round(archivo.progreso * 100)} %` : 'En cola'
+}
+
+/**
+ * El servidor dijo que falta un archivo: el barrido de huérfanos borra a la hora lo que nada
+ * nombra, y un archivo que nunca alcanzó a entrar a un borrador pudo irse. Los del teléfono
+ * vuelven a la cola; los que vinieron de un borrador no tienen desde dónde subirse otra vez.
+ */
+export function volverASubir(archivos: Archivo[]): Archivo[] {
+  return archivos.map((a) => (a.local ? { ...a, url: null, estado: 'subiendo', progreso: 0, error: null } : a))
+}
+
+export type Envio = { paso: 'listo'; error: string | null } | { paso: 'creando'; ahora: boolean } | { paso: 'hecho' }
 
 export type Evento =
-  | { tipo: 'chequear' }
+  | { tipo: 'crear'; ahora: boolean }
   | { tipo: 'rechazado'; mensaje: string }
-  | { tipo: 'subir'; indice: number; total: number }
-  | { tipo: 'progreso'; progreso: number }
-  | { tipo: 'crear' }
   | { tipo: 'hecho' }
-  | { tipo: 'fallo'; mensaje: string; retomar: Retomar }
   | { tipo: 'cancelar' }
-  | { tipo: 'reintentar' }
 
 export const ENVIO_INICIAL: Envio = { paso: 'listo', error: null }
 
 /**
- * La máquina de pasos del envío. Dos salidas distintas a propósito: «rechazado» es el
- * servidor diciendo que algo del borrador está mal (vuelve a listo con la frase, el
- * dueño tiene que cambiar algo), y «fallo» es la red que se cayó (queda en error con
- * desde dónde retomar, porque el borrador está bien).
+ * El envío ya no sube nada —los archivos subieron al elegirlos—, así que es un solo pedido.
+ * Un rechazo del servidor y la red caída terminan igual: de vuelta en listo con la frase, y
+ * reintentar es volver a tocar el botón.
  */
-export function reducirEnvio(estado: Envio, evento: Evento): Envio {
+export function reducirEnvio(_estado: Envio, evento: Evento): Envio {
   switch (evento.tipo) {
-    case 'chequear':
-      return { paso: 'chequeando' }
+    case 'crear':
+      return { paso: 'creando', ahora: evento.ahora }
     case 'rechazado':
       return { paso: 'listo', error: evento.mensaje }
-    case 'subir':
-      return { paso: 'subiendo', indice: evento.indice, total: evento.total, progreso: 0 }
-    case 'progreso':
-      return estado.paso === 'subiendo'
-        ? { ...estado, progreso: Math.min(1, Math.max(0, evento.progreso)) }
-        : estado
-    case 'crear':
-      return { paso: 'creando' }
     case 'hecho':
       return { paso: 'hecho' }
-    case 'fallo':
-      return { paso: 'error', mensaje: evento.mensaje, retomar: evento.retomar }
     case 'cancelar':
       return ENVIO_INICIAL
-    case 'reintentar':
-      return estado.paso === 'error' ? estado.retomar : estado
   }
 }
 
 /** Qué mostrar bajo los botones mientras el envío corre; null cuando no hay nada que decir. */
 export function etiquetaEnvio(estado: Envio): string | null {
   switch (estado.paso) {
-    case 'chequeando':
-      return 'Comprobando…'
-    case 'subiendo':
-      return `Subiendo ${estado.indice + 1} de ${estado.total} · ${Math.round(estado.progreso * 100)} %`
     case 'creando':
-      return 'Guardando…'
+      return estado.ahora ? 'Publicando…' : 'Programando…'
     case 'hecho':
       return 'Listo'
     default:
@@ -196,6 +263,11 @@ export function puedeEnviar(texto: string, archivos: number, cuentas: number): b
 
 export type OpcionesApp = Record<string, { trialReel: true }>
 
+/** Un solo video, sin fotos: la única media con la que un trial reel es posible. */
+function esUnVideo(archivos: Pick<Elegido, 'mediaType'>[]): boolean {
+  return archivos.length === 1 && archivos[0]!.mediaType === 'video'
+}
+
 /**
  * Las cuentas a las que se les ofrece el trial reel: las de Instagram marcadas, y solo
  * cuando hay exactamente un video elegido — un trial reel es un solo video, sin fotos,
@@ -207,8 +279,7 @@ export function cuentasConTrial(
   marcadas: string[],
   archivos: Pick<Elegido, 'mediaType'>[],
 ): CuentaApp[] {
-  const unVideo = archivos.length === 1 && archivos[0]!.mediaType === 'video'
-  if (!unVideo) return []
+  if (!esUnVideo(archivos)) return []
   return disponibles.filter((c) => c.red === 'instagram' && marcadas.includes(c.id))
 }
 
@@ -223,5 +294,21 @@ export function opcionesDelBorrador(
   for (const c of cuentasConTrial(disponibles, marcadas, archivos)) {
     if (trial.includes(c.id)) salida[c.id] = { trialReel: true }
   }
+  return salida
+}
+
+/**
+ * Lo que el borrador guarda del trial reel. A diferencia del envío no mira `disponibles`: un
+ * guardado que corre antes de que carguen las cuentas no debe perder el trial. `trial` solo
+ * tiene cuentas de Instagram, porque solo esas tienen el botón.
+ */
+export function opcionesParaGuardar(
+  marcadas: string[],
+  trial: string[],
+  archivos: Pick<Elegido, 'mediaType'>[],
+): OpcionesApp {
+  if (!esUnVideo(archivos)) return {}
+  const salida: OpcionesApp = {}
+  for (const id of trial) if (marcadas.includes(id)) salida[id] = { trialReel: true }
   return salida
 }

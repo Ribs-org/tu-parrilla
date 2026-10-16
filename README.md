@@ -211,7 +211,9 @@ se guarda solo como **borrador** un segundo después de la última tecla, como u
 archivos se suben apenas los eliges para que el borrador los conserve. «Programar» lo
 convierte en publicación y lo saca de los borradores; «Descartar» lo borra. Los borradores
 con fecha aparecen en su día del calendario con borde punteado. Viven en sus propias tablas
-(`borradores` y `borrador_media`): el publicador y la API no los ven. El porqué de todo
+(`borradores` y `borrador_media`): el publicador y la API no los ven. La app del teléfono sí:
+Publicar guarda en los mismos borradores (`/api/mobile/borradores`), así que lo empezado en
+el teléfono se sigue en el panel y al revés (ver `mobile/README.md`, «Los borradores»). El porqué de todo
 esto está en `docs/superpowers/specs/2026-10-13-parrilla-entrada-y-borradores-design.md`.
 
 Solo entran los correos invitados; desde **Los Maestros** (Usuarios, dentro de Ajustes),
@@ -510,10 +512,10 @@ como trial reel—, y tanto el compositor del panel como Publicar en el teléfon
 un bloque (panel) o un chip (teléfono) por cuenta de Instagram marcada —«Publicar como
 trial reel» / «Trial reel · @handle»—, pero solo cuando hay exactamente un video elegido:
 con fotos, carrusel o sin archivo no aparece, y sin marcarlo no se manda nada. Un trial reel
-es exactamente un video, sin fotos: si eliges otra cosa con la opción marcada, el lote y el
-teléfono lo rechazan antes de subir nada; el compositor no, porque el navegador ya subió el
-archivo antes de que el formulario llegue al servidor —el bloque no se ofrece sin un video
-único, y la regla del servidor queda como reja de fondo, no como el primer filtro. La app
+es exactamente un video, sin fotos: si eliges otra cosa con la opción marcada, el lote lo
+rechaza antes de subir nada; el compositor y el teléfono no, porque los dos suben cada
+archivo apenas se elige —el bloque y el chip no se ofrecen sin un video único, y la regla
+del servidor queda como reja de fondo, no como el primer filtro. La app
 del teléfono todavía no ofrece TikTok como destino: el bloque de TikTok necesita consultar
 la cuenta del creador (`creator_info`) y sus interacciones, y eso el teléfono todavía no lo
 tiene.
@@ -1105,7 +1107,8 @@ src/
     llaves.ts              las llaves de API de cada usuario, y a nombre de quién entra cada petición
     llaves-api.ts          cómo se ve, se guarda y se lee una llave (sin base: lo prueban los tests)
     borradores.ts          los borradores del compositor: guardar, cargar, listar y borrar, siempre por dueño
-    borrador.ts            qué se guarda de un formulario y cómo se restaura (sin base)
+    borrador.ts            qué se guarda de un formulario y cómo se restaura, también desde el teléfono (sin base)
+    borradores-movil.ts    los mismos borradores en la forma de la app del teléfono
     empresa.ts             quién presta el servicio: lo leen la portada, privacidad y términos
     social/
       politica-youtube.ts  lo que las políticas de YouTube no dejan hacer con sus datos

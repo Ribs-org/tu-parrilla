@@ -6,7 +6,9 @@ import { Submit } from '@/components/ui'
 import { getDb, socialAccounts } from '@/db'
 import { requireUser } from '@/lib/auth'
 import { networkLabel } from '@/lib/networks'
+import { tomadasPorOtro } from '@/lib/social/conectar'
 import { COOKIE_PENDIENTE, LOGIN_VENCIDO, leerPendiente } from '@/lib/social/pendiente'
+import { cn } from '@/lib/utils'
 import { nombreDe } from '@/lib/vocabulario'
 
 export const dynamic = 'force-dynamic'
@@ -21,7 +23,8 @@ export default async function Elegir({
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
   const params = await searchParams
-  const mensaje = typeof params.mensaje === 'string' ? params.mensaje.slice(0, 200) : null
+  // Con lugar para nombrar varias cuentas en «… ya están conectadas por otra persona».
+  const mensaje = typeof params.mensaje === 'string' ? params.mensaje.slice(0, 300) : null
   const { id: ownerId } = await requireUser()
   const pendienteCrudo = leerPendiente((await cookies()).get(COOKIE_PENDIENTE)?.value)
   const pendiente = pendienteCrudo && pendienteCrudo.sub === ownerId ? pendienteCrudo : null
@@ -54,6 +57,13 @@ export default async function Elegir({
         )
     ).map((r) => r.externalId),
   )
+  // Las que ya son de otro usuario no se pueden conectar acá: se muestran, para que se
+  // entienda por qué el login las trajo, pero sin casilla que marcar.
+  const tomadas = await tomadasPorOtro(
+    ownerId,
+    pendiente.network,
+    pendiente.candidatas.map((c) => c.externalId),
+  )
 
   return (
     <section className="chapa rounded-xl p-6">
@@ -63,14 +73,30 @@ export default async function Elegir({
       <p className="mt-1 text-sm text-fg-muted">
         Marca las que quieres ver en el panel. Las ya conectadas solo renuevan su acceso.
       </p>
+      {tomadas.size > 0 ? (
+        <p className="mt-1 text-sm text-fg-muted">
+          Las que dicen «conectada por otra persona» ya están en otro usuario de Tu Parrilla y no se
+          pueden marcar.
+        </p>
+      ) : null}
       {mensaje ? <p className="mt-3 text-sm text-negative">{mensaje}</p> : null}
 
       <form action={conectarElegidas} className="mt-4 space-y-2">
         {pendiente.candidatas.map((c) => (
           <label key={c.externalId} className="flex items-center gap-3 rounded-xl bg-white/[0.04] px-3 py-2 text-sm">
-            <input type="checkbox" name="ids" value={c.externalId} defaultChecked={existentes.has(c.externalId)} />
-            <span className="flex-1 truncate">{c.handle ?? c.externalId}</span>
-            {existentes.has(c.externalId) ? (
+            <input
+              type="checkbox"
+              name="ids"
+              value={c.externalId}
+              disabled={tomadas.has(c.externalId)}
+              defaultChecked={existentes.has(c.externalId)}
+            />
+            <span className={cn('flex-1 truncate', tomadas.has(c.externalId) && 'text-fg-muted')}>
+              {c.handle ?? c.externalId}
+            </span>
+            {tomadas.has(c.externalId) ? (
+              <span className="font-mono text-[0.68rem] text-fg-faint">conectada por otra persona</span>
+            ) : existentes.has(c.externalId) ? (
               <span className="font-mono text-[0.68rem] text-fg-faint">ya conectada</span>
             ) : null}
           </label>
