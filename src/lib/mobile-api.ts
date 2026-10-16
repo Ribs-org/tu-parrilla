@@ -1,3 +1,4 @@
+import { avisoDeFierros, estadoDelFierro, fraseDelAviso, type Fierro } from './parrilla'
 import { PUBLISHABLE, typeFromContentType } from './social/publish/batch'
 import { CuentaInvalida, cuentaUnicaPorRed, verificarCuentas, type CuentaDestino } from './social/cuentas'
 
@@ -230,4 +231,38 @@ export function resolverCuando(ahora: boolean, cuando: string | null, now: Date)
   if (!cuando) return null
   const fecha = new Date(cuando)
   return Number.isNaN(fecha.getTime()) ? null : fecha
+}
+
+/**
+ * Lo que la pantalla Ajustes del teléfono muestra de tus cuentas: todas, de todas las redes
+ * —también TikTok, X y Threads, que el teléfono no publica—, con la temperatura de su fierro
+ * como en Los Fierros, y el aviso del engranaje como en el panel (`avisoDeFierros`). La
+ * respuesta de `GET /api/mobile/fierros`.
+ */
+export function fierrosParaElTelefono(
+  cuentas: ReadonlyArray<{
+    id: string
+    network: string
+    handle: string | null
+    connected: boolean
+    expiresAt: string | null
+    lastSyncError: string | null
+  }>,
+  ahora: Date,
+): {
+  cuentas: Array<{ id: string; red: string; handle: string | null; conectada: boolean; fierro: Fierro }>
+  /** Con la frase ya armada («1 se enfría»), para que el teléfono no repita la regla. */
+  aviso: (NonNullable<ReturnType<typeof avisoDeFierros>> & { frase: string }) | null
+} {
+  const aviso = avisoDeFierros(cuentas, ahora)
+  return {
+    cuentas: cuentas.map((c) => ({
+      id: c.id,
+      red: c.network,
+      handle: c.handle,
+      conectada: c.connected,
+      fierro: estadoDelFierro({ connected: c.connected, expiraEn: c.expiresAt, ultimoError: c.lastSyncError, red: c.network }, ahora),
+    })),
+    aviso: aviso ? { ...aviso, frase: fraseDelAviso(aviso) } : null,
+  }
 }

@@ -1,6 +1,6 @@
 # La app del teléfono
 
-Una app para Android que muestra de un vistazo lo programado y cómo van las redes de quien entra, y le deja publicar desde la galería del teléfono. Tiene las mismas tres pestañas que el panel web —La Parrilla, Publicar en el medio y Los Números—, pero hace mucho menos: mira lo programado y los números, y programa o publica fotos y videos en Instagram, Facebook y YouTube. También reprograma lo que se quemó, y guarda solo lo que se está escribiendo como borrador: los borradores son los mismos del panel web, así que lo empezado en un lado se sigue en el otro. Todo lo demás —conectar redes, corregir o borrar lo programado, TikTok, comentarios, la página pública— se hace en el panel web.
+Una app para Android que muestra de un vistazo lo programado y cómo van las redes de quien entra, y le deja publicar desde la galería del teléfono. Tiene las mismas tres pestañas que el panel web —La Parrilla, Publicar en el medio y Los Números— y, como el panel, un engranaje de Ajustes, pero hace mucho menos: mira lo programado y los números, y programa o publica fotos y videos en Instagram, Facebook y YouTube. También reprograma lo que se quemó, y guarda solo lo que se está escribiendo como borrador: los borradores son los mismos del panel web, así que lo empezado en un lado se sigue en el otro. Todo lo demás —conectar redes, corregir o borrar lo programado, TikTok, comentarios, la página pública— se hace en el panel web.
 
 ## Cómo se llega
 
@@ -9,6 +9,7 @@ Una app para Android que muestra de un vistazo lo programado y cómo van las red
 - La primera vez pide el correo y el código. Después la sesión queda abierta: no los vuelve a pedir.
 - Si el teléfono tiene PIN, patrón, huella o reconocimiento de cara, cada vez que se abre la app pide desbloquear con el aviso «Desbloquea para entrar a Tu Parrilla». Si se cancela, la app muestra la pantalla de entrada.
 - Si la sesión deja de valer (por ejemplo, porque quien administra el sitio revocó el acceso de los teléfonos), la app vuelve sola a la pantalla de entrada, sin ningún mensaje.
+- Para salir: el engranaje de arriba a la derecha → «Ajustes» → «Cerrar sesión» (ver «Ajustes», más abajo).
 - Al entrar se abre La Parrilla.
 
 ## Qué se ve
@@ -27,6 +28,8 @@ Si algo falla, el mensaje sale en rojo debajo del campo.
 ### La barra de pestañas
 
 Abajo, tres pestañas en este orden: «La Parrilla», «Publicar» y «Los Números». «Publicar» va al medio y se ve como un círculo naranjo con una cruz. La pestaña activa se ve en naranjo y su nombre sale también como título arriba de la pantalla.
+
+Arriba a la derecha de las tres, al lado del título, un botón redondo con un engranaje: abre «Ajustes». Si alguna cuenta conectada necesita que la reconecten, el engranaje lleva un punto: ámbar si su permiso vence esta semana, rojo si ya se apagó (venció o dejó de sincronizar). Sin nada que avisar, no hay punto. Un lector de pantalla lo lee «Ajustes» o, con aviso, «Ajustes: 1 se enfría» (o «2 se apagaron», etc.).
 
 En «La Parrilla», «Los Números» y «Tus publicaciones», la app muestra al instante lo último que descargó y lo actualiza por detrás; por eso funciona sin señal, con datos viejos. Arriba dice cuándo se actualizó: «Actualizado recién», «Actualizado hace 5 min», «Actualizado hace 2 h» o «Actualizado hace 1 d». Para actualizar a mano, se arrastra la pantalla hacia abajo.
 
@@ -74,6 +77,22 @@ Las dos mitades del tablero del panel ([Los Números](los-numeros.md)), más cor
 - **Tarjeta «En las redes»**, con la bajada «Lo que hicieron tus publicaciones donde las publicaste. Lo cuentan las redes.» Dos cifras: «Views ganadas» y «Seguidores ganados» (con «+» delante si es más que cero), las dos con «En el período · sin YouTube» debajo; una raya «—» es que no se sabe, no que sea cero. Después **«Lo que más creció»**: hasta cinco publicaciones, de más a menos views ganadas, cada una con una barra detrás que la compara con la primera, el texto (o su etiqueta), «Red · nombre_de_cuenta» y las views ganadas. Tocar una abre su detalle. Al final, el botón «Ver todas las publicaciones →».
 - **Tarjeta «En tu página»**, con la bajada «Quién entró a tu página de links y qué apretó. Lo cuenta Tu Parrilla, sin cookies.» Dos cifras: «Visitas» y «Clicks en tus links», cada una con la comparación con el período anterior debajo: «↑ +12% vs. período anterior» en verde, «↓ -8% …» en rojo, «→ 0% …» si casi no cambió, o «—» si no hay con qué comparar (el período anterior tuvo cero, o es «Todo»). Después **«Qué publicación te trajo gente»**: hasta cinco etiquetas, de más a menos visitas, con su barra, el texto del post y su cuenta (o «?s=etiqueta» si no es de una publicación) y las visitas. Estas filas no se pueden tocar.
 - El botón «⋯ Más: tus cuentas», que abre debajo **las tarjetas de cada red** del período elegido: el nombre, el número de seguidores y debajo «seguidores · +12 en el período», «seguidores · sin cambio» o «seguidores · — en el período»; «Visitas al perfil: N · Alcance: N», a veces con el día de la lectura entre paréntesis; y, con más de un día de datos, el gráfico de barras «Visitas al perfil por día». Abierto, el botón dice «Menos». Mientras carga: «Cargando tus cuentas…».
+
+### Ajustes
+
+Se abre con el engranaje de cualquier pestaña. Arriba, la flecha para volver y el título «Ajustes». Debajo:
+
+- **«Los Fierros»**, con «Actualizado …» debajo, y una tarjeta por cada cuenta conectada a Tu Parrilla, de todas las redes (también TikTok, X y Threads, aunque desde el teléfono no se publique en ellas). Cada tarjeta trae «Red · nombre_de_cuenta», el fierro —una barra delgada: naranja si la conexión está viva, ámbar si se enfría, gris si se apagó o está desconectada— y una frase:
+  - «Al rojo: conectada.»
+  - «Se está enfriando: su permiso vence esta semana. Reconéctala en el panel.» (en ámbar)
+  - «Se apagó: así no publica. Reconéctala en el panel.» (en rojo)
+  - «Desconectada.»
+  Sin cuentas, «Todavía no conectas ninguna cuenta.». Mientras carga, «Cargando tus cuentas…».
+- Debajo, «Tus redes conectadas. Se conectan y se reconectan en el panel web.» y el botón «Abrir Los Fierros en el panel», que abre [Los Fierros](los-fierros.md) en el navegador del teléfono (ahí puede pedir entrar con el correo, como el panel).
+- **«Tu sesión»**, con «Cerrar sesión» en rojo. Pregunta «¿Cerrar sesión en este teléfono?» / «Para volver a entrar te va a llegar un código a tu correo.», con «Cancelar» y «Cerrar sesión». Al confirmar, la app vuelve a la pantalla de entrada. Las cuentas conectadas y lo programado no se tocan.
+- Al pie, la versión de la app: «Versión 1.1.0» y, si llegó una actualización por aire, « · actualización » seguido de ocho letras y números que la identifican. Sirve para saber qué versión tiene alguien que pide ayuda.
+
+Aquí no se conecta ni se desconecta nada: eso es del panel web.
 
 ### Tus publicaciones
 
@@ -276,7 +295,9 @@ No se puede desde la app. Se hace en el panel web, en [La Parrilla](la-parrilla.
 - «Me dice que espere 24 horas» → se equivocó diez veces en un día con el código; ver [Entrar al panel](ingresar.md).
 - «¿Dónde quedó el Resumen?», «el Calendario», «Contenido» o «Cuentas» → desde el 2026-10-16 la app tiene las pestañas del panel. Lo programado y lo que salió está en «La Parrilla»; los números, en «Los Números»; la lista de publicaciones, en «Los Números» → «Ver todas las publicaciones →»; los seguidores de cada red, en «Los Números» → «⋯ Más: tus cuentas».
 - «Me pide desbloquear cada vez» → es el bloqueo del propio teléfono; se usa el PIN, patrón, huella o cara del teléfono.
-- «Quiero cerrar sesión» → la app no tiene botón para eso.
+- «Quiero cerrar sesión» → el engranaje de arriba a la derecha → «Cerrar sesión», y confirmar.
+- «El engranaje tiene un punto» → una cuenta se está enfriando (ámbar) o se apagó (rojo). En «Ajustes» se ve cuál; se reconecta en el panel web, con «Abrir Los Fierros en el panel».
+- «¿Qué versión tengo?» → «Ajustes», al pie.
 - «Perdí el teléfono» → quien administra el sitio puede revocar el acceso de todos los teléfonos a la vez; las conexiones con las redes no se tocan.
 - «No me aparece TikTok para publicar» → desde el teléfono no se publica en TikTok; se hace en el panel web, en [La Parrilla](la-parrilla.md).
 - «No aparece mi cuenta» o «dice reconéctala» → las cuentas se conectan y reconectan en el panel web, en [Los Fierros](los-fierros.md). La app no conecta nada.
@@ -319,7 +340,7 @@ Comparada con el panel web, la app no:
 Lo que describe sale de estos archivos:
 
 - `mobile/app.json` (el nombre del ícono)
-- `mobile/src/app/_layout.tsx` (el desbloqueo y las cabeceras de «Publicación» y «Tus publicaciones»)
+- `mobile/src/app/_layout.tsx` (el desbloqueo y las cabeceras de «Publicación», «Tus publicaciones» y «Ajustes»)
 - `mobile/src/app/login.tsx`
 - `mobile/src/app/(tabs)/_layout.tsx` (la barra de pestañas)
 - `mobile/src/app/(tabs)/index.tsx` (La Parrilla)
@@ -329,6 +350,8 @@ Lo que describe sale de estos archivos:
 - `mobile/src/app/post/[id].tsx`
 - `mobile/src/components/ui.tsx`
 - `mobile/src/components/corte-programado.tsx`
+- `mobile/src/app/ajustes.tsx` y `mobile/src/components/engranaje.tsx` (Ajustes y el engranaje de la cabecera)
+- `src/app/api/mobile/fierros/route.ts` (lo que muestran)
 - `mobile/src/components/pieza.tsx` (el corte dibujado)
 - `mobile/src/components/tus-cuentas.tsx`
 - `mobile/src/components/selector-fecha.tsx` (elegir día y hora: los dos diálogos de Android, o en iPhone —que todavía no se distribuye— la hoja «Cuándo sale» con «Cancelar» y «Listo»)

@@ -91,6 +91,18 @@ export default function RootLayout() {
               contentStyle: { backgroundColor: COLORES.fondo },
             }}
           />
+          {/* Ajustes se abre desde el engranaje de cualquier pestaña y vuelve ahí. */}
+          <Stack.Screen
+            name="ajustes"
+            options={{
+              headerShown: true,
+              title: 'Ajustes',
+              headerTitleStyle: { color: COLORES.texto, fontFamily: TIPO_TITULO },
+              headerTintColor: COLORES.brasa,
+              headerStyle: { backgroundColor: COLORES.tarjeta },
+              contentStyle: { backgroundColor: COLORES.fondo },
+            }}
+          />
           {/* «Tus publicaciones» se abre desde Los Números y vuelve ahí: la misma cabecera. */}
           <Stack.Screen
             name="publicaciones"

@@ -5,6 +5,7 @@ import {
   CUERPO_ILEGIBLE,
   MAX_BYTES_SUBIDA,
   TIPO_NO_PUBLICABLE,
+  fierrosParaElTelefono,
   parseBorradorMovil,
   parseConteos,
   parseMediaMovil,
@@ -346,5 +347,30 @@ describe('resolverDestinos', () => {
     await expect(resolverDestinos('owner-1', { cuentas: [], redes: ['tiktok'] }, d)).rejects.toThrow(
       'Red desconocida o sin publicación: tiktok.',
     )
+  })
+})
+
+describe('fierrosParaElTelefono', () => {
+  const ahora = new Date('2026-10-16T12:00:00Z')
+  const cuenta = { id: 'a', network: 'instagram', handle: '@a', connected: true, expiresAt: null, lastSyncError: null }
+
+  it('trae todas las cuentas con su fierro, y el aviso del engranaje', () => {
+    const respuesta = fierrosParaElTelefono(
+      [
+        cuenta,
+        { ...cuenta, id: 'b', network: 'tiktok', handle: '@b' },
+        { ...cuenta, id: 'c', handle: '@c', expiresAt: '2026-10-18T00:00:00Z' },
+        { ...cuenta, id: 'd', handle: '@d', connected: false },
+      ],
+      ahora,
+    )
+    expect(respuesta.cuentas).toEqual([
+      { id: 'a', red: 'instagram', handle: '@a', conectada: true, fierro: 'al-rojo' },
+      { id: 'b', red: 'tiktok', handle: '@b', conectada: true, fierro: 'al-rojo' },
+      { id: 'c', red: 'instagram', handle: '@c', conectada: true, fierro: 'enfriandose' },
+      { id: 'd', red: 'instagram', handle: '@d', conectada: false, fierro: 'frio' },
+    ])
+    // La desconectada no enciende el aviso; la que vence en dos días, sí.
+    expect(respuesta.aviso).toEqual({ nivel: 'enfriandose', cuantos: 1, frase: '1 se enfría' })
   })
 })

@@ -1,18 +1,22 @@
 import { Tabs } from 'expo-router'
 import { COLORES, TIPO_TITULO } from '../../components/ui'
 import { BotonPublicar, IconoNumeros, IconoParrilla } from '../../components/iconos'
+import { Engranaje } from '../../components/engranaje'
 
 /**
  * Las tres pestañas del panel web, en el mismo orden de importancia: La Parrilla es la
  * entrada, Publicar va al medio porque es la acción principal, y Los Números cierra. Hasta
  * el 2026-10-16 eran cinco con nombres propios (Resumen, Contenido, Publicar, Cuentas,
  * Calendario); lo que mostraban vive ahora en estas tres, con el vocabulario del panel.
+ *
+ * Arriba a la derecha de cada una, el engranaje de Ajustes, como en el panel.
  */
 export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
         headerStyle: { backgroundColor: COLORES.fondo },
+        headerRight: () => <Engranaje />,
         // El título de cada pestaña es el título de la pantalla: va en la voz de los títulos.
         headerTitleStyle: {
           color: COLORES.texto,
