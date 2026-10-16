@@ -18,7 +18,7 @@ panel de la plataforma correspondiente.
 | **Instagram** | `instagram_basic`, `instagram_manage_insights`, `pages_show_list`, `pages_read_engagement`, `instagram_content_publish`, `business_management`, `instagram_manage_comments` | App de Meta en **modo desarrollo** | El diálogo de Facebook le dice que la función no está disponible; no puede conectar (es lo que le pasó a una usuaria el 2026-09-29). Solo entran cuentas con un rol en la app. |
 | **Facebook** | `pages_show_list`, `pages_read_engagement`, `pages_read_user_content`, `pages_manage_posts`, `business_management`, `pages_manage_engagement` (+ `publish_video` al confirmar) | La misma app de Meta, mismo modo | Igual que Instagram. |
 | **TikTok** | `user.info.basic`, `video.list`, `video.upload`, `video.publish` | App **aprobada y en producción** desde el 2026-09-28 (Login Kit + Content Posting API); **auditoría de Direct Post aprobada** (aviso del 2026-10-06) | Puede conectar y publicar con la privacidad que elija, desde una cuenta pública o privada, sin cupo de usuarios por día. |
-| **YouTube** | `youtube.upload`, `youtube.force-ssl` (OAuth), más una API key para métricas | Proyecto de Google Cloud *In production* y **verificado** (2026-10-14) | Entra sin cartel ni tope de usuarios; falta la auditoría de cuota, y según la documentación los videos que suba un proyecto sin ella quedan **privados** aunque pida público. |
+| **YouTube** | `youtube.upload`, `youtube.force-ssl` (OAuth), más una API key para métricas | Proyecto de Google Cloud *In production* y **verificado** (2026-10-14) | Entra sin cartel ni tope de usuarios; falta la auditoría de cuota, que sube los cupos. Según la documentación, sin ella los videos quedan privados, pero a este proyecto no se le aplica: lo subido el 2026-10-09 y el 2026-10-16 salió público. |
 
 Lo que ya está resuelto del lado del producto y no hay que rehacer: usuarios invitados por
 correo con código, cada uno con su página y sus cuentas aisladas por dueño (`owner_id` en
@@ -178,12 +178,11 @@ verificación del OAuth. Lo que la app hace para cumplir está en
 
 ### 4.3 Videos privados hasta la auditoría
 
-Los videos subidos por un proyecto que no ha pasado esa auditoría quedan **privados**
-aunque se pidan públicos (política de YouTube desde 2020). O sea: sin §4.2, YouTube sirve
-para leer métricas y comentarios, pero **no para publicar**. Vale la pena decirlo en la
-tarjeta de YouTube mientras tanto, como se hizo con TikTok hasta su auditoría. Ojo: en la grabación del
-2026-10-09 el video que subió Tu Parrilla salió público; está por revisar en
-`docs/pendientes.md`.
+Según la política de YouTube desde 2020, los videos subidos por un proyecto que no ha
+pasado esa auditoría quedan **privados** aunque se pidan públicos. A este proyecto no se le
+aplica: lo que subió Tu Parrilla el 2026-10-09 y el 2026-10-16 salió público, así que la
+tarjeta de YouTube ya no lo advierte. Si un día un video sale «Privado» con candado, es esa
+regla, y el aviso vuelve hasta la auditoría.
 
 ### 4.4 Tiempo
 
@@ -251,7 +250,7 @@ ninguno depende de otro. Lo de código se intercala por lo que cada trámite pid
 - TikTok: pueden conectar y publicar con la privacidad que elijan (la auditoría de Direct
   Post ya pasó).
 - YouTube: conectan sin cartel ni tope (la verificación del OAuth se aprobó el
-  2026-10-14); lo que publiquen sale privado hasta la auditoría de cuota.
+  2026-10-14) y lo que publican sale público; la auditoría de cuota sube los cupos.
 
 Eso da una beta cerrada útil para Instagram y Facebook (el uso principal) en la semana 1,
 y la apertura de verdad al mes para Meta y TikTok, y al mes o dos para YouTube.

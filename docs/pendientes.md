@@ -118,11 +118,6 @@ Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataf
   como `revision@tu-parrilla.cl`) y que haya algún comentario pendiente en La Mesa (los de
   YouTube se borran a los 30 días). Contestar siempre en el mismo hilo del correo. Al
   aprobarse, ver «Después de aprobar» en el guion.
-- **Por revisar: el video de prueba salió público** (2026-10-10). En la grabación, YouTube
-  Studio muestra «Public» el video que subió Tu Parrilla, cuando según la documentación un
-  proyecto sin auditoría de cuota sube todo en privado, y el aviso de Los Fierros
-  (`AVISO_ANTES_DE_CONECTAR` en `src/lib/networks.ts`) dice eso mismo. Si Google ya no lo
-  aplica a este proyecto, el aviso sobra.
 - **Por revisar: qué se borra al desconectar YouTube** (2026-10-06). Desconectar borra las
   credenciales y el canal deja de leerse; lo guardado se borra solo a los 30 días
   (`retencion-youtube`). Si la auditoría de cuota pide borrarlo en el acto, hay que cambiar

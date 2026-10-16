@@ -30,9 +30,8 @@ En este orden: Instagram, TikTok, YouTube, Facebook, Threads, X / Twitter. Cada 
 - Debajo, en letra chica, los avisos de esa red:
   - Instagram: «Cuenta Business o Creator, enlazada a una página de Facebook. Una cuenta personal no puede conectar.»
   - Facebook: «Una página, no un perfil personal.»
-  - YouTube: «Hasta que Google apruebe la cuota de la app, lo que publiques sale privado.»
   - Instagram y Facebook, además, solo mientras la instalación tenga marcada la revisión de Meta: «Mientras Meta revisa la app, solo pueden conectar las cuentas que invitamos como testers. Si Facebook dice que la función no está disponible, escríbenos.»
-  - TikTok, Threads y X / Twitter no tienen aviso.
+  - TikTok, YouTube, Threads y X / Twitter no tienen aviso.
 - «Sin cuentas.» si la red no tiene ninguna; si tiene, una tarjeta por cuenta.
 
 ### La tarjeta de una cuenta

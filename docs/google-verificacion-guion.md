@@ -15,8 +15,11 @@ hacerlos en paralelo porque cada uno tarda semanas:
    día para todos los usuarios juntos, más un cupo aparte de 100 subidas al día (desde el
    1 de junio de 2026 `videos.insert` cuenta en su propio cupo; antes costaba 1.600
    unidades del general). Según la documentación, además, **los videos subidos quedan
-   privados** aunque el usuario pida público; en la grabación del 2026-10-09 el video
-   subido salió público, y eso está por revisar en `docs/pendientes.md`.
+   privados** aunque el usuario pida público. A este proyecto no se le aplica: lo que subió
+   Tu Parrilla el 2026-10-09 (en la grabación) y el 2026-10-16 (un Short, visto desde afuera
+   sin sesión: `isPrivate: false`) salió público, y por eso Los Fierros ya no lleva el aviso.
+   Si un día un video sale «Privado» con candado, es esa regla: vuelve el aviso
+   (`AVISO_ANTES_DE_CONECTAR` en `src/lib/networks.ts`).
 3. El proyecto ya usa `youtube.upload` y `youtube.force-ssl` (`SCOPES.youtube` en
    `src/app/api/social/[network]/connect/route.ts`); son *sensibles*, no *restringidos*: no
    hay auditoría de seguridad externa (CASA).
@@ -146,7 +149,7 @@ la app y del proyecto visibles**, cada permiso en uso, y cómo se revoca.
 |---|---|---|
 | 1 | `tu-parrilla.cl` con la barra de direcciones visible; bajar al párrafo que explica la app y su enlace a privacidad. | 1 |
 | 2 | `/ingresar`: correo, código, entrar. | 2 |
-| 3 | Engranaje → **Los Fierros**. Bajo YouTube, el aviso «Hasta que Google apruebe la cuota…». Pulsar **Conectar →**. | 3 |
+| 3 | Engranaje → **Los Fierros**. Pulsar **Conectar →** bajo YouTube. | 3 |
 | 4 | Pantalla de consentimiento de Google: **detenerse tres segundos** en el nombre «Tu Parrilla» y en los dos permisos con su descripción. Continuar. | 4 |
 | 5 | Volver a Los Fierros con la tarjeta del canal. Pulsar **Sincronizar**; **Los Números** → «Ver todas las publicaciones →» muestra los videos con sus números (hasta el 2026-10-13 era la pestaña Los Cortes). | 5 |
 | 6 | **El Fuego → «Poner al fuego»** (abre el compositor en La Parrilla): subir el video, marcar **YouTube**, título, «Ahora», **Programar**. De vuelta en El Fuego, verlo pasar a publicado. Abrir YouTube Studio y mostrar el video (privado, hasta la auditoría de cuota: decirlo en el subtítulo). | 6 |
@@ -263,5 +266,5 @@ la evidencia en `evidencia/` de la misma carpeta: son la base para una reauditor
 
 - Verificación aprobada (2026-10-14): desaparecen el cartel de app no verificada y el tope
   de 100 usuarios. No tocar la pantalla de consentimiento sin pedir otra verificación.
-- Con la cuota aprobada: quitar el aviso de YouTube en `AVISO_ANTES_DE_CONECTAR`
-  (`src/lib/networks.ts`) y su test, y la frase del README.
+- Con la cuota aprobada: suben los cupos (10.000 unidades y 100 subidas al día). El aviso
+  de «sale privado» ya se quitó el 2026-10-16, porque al proyecto no se le aplicaba.
