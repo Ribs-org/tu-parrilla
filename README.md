@@ -172,7 +172,8 @@ Fuera del panel, «el dueño» no siempre eres tú, así que conviene el detalle
 `SITE_TIMEZONE` solo queda como la zona con la que naces y la del sitio público.
 
 **La Parrilla es la entrada** (`/admin` lleva ahí). Arriba va lo único que pide una acción
-sin que la busques: lo que se quemó, con su motivo y el botón para darle hora nueva; sin
+sin que la busques: lo que se quemó, con su motivo, el arreglo cuando el motivo lo dice
+(«Reconectar», «Cambiar el archivo») y el botón para darle hora nueva; sin
 ninguna red conectada, una tarjeta que te manda a Los Fierros. Debajo, el calendario de la
 semana —la lista queda a un clic—, con un «+» en cada día que abre el compositor con ese
 día puesto. El nombre de cada día abre la vista **Día** (`?vista=dia&fecha=…`): ese día con
@@ -961,8 +962,9 @@ pasada siguiente sin borrar nada: un barrido que no termina no puede llevarse la
 
 Un destino que falla se reintenta en las corridas siguientes, hasta tres intentos, salvo
 los rechazos que la red ya decidió, que se queman al primero. Mientras espera el siguiente,
-el panel lo muestra como **Reintentando** con el motivo del intento anterior —en la tarjeta
-del calendario y en la cola—, y el correo de aviso llega solo cuando se quema: sin ese
+el panel lo muestra como **Reintentando** con el motivo del intento anterior —en el editor
+del post y en la cola; la tarjeta del calendario dice «Reintentando» con sus redes y deja el
+motivo al pasar el mouse—, y el correo de aviso llega solo cuando se quema: sin ese
 motivo a la vista, un reintento escondía el error real hasta agotar los intentos.
 
 ### Guía para el editor de contenido

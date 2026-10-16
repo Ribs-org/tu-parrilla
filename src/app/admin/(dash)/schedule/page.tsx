@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Plus } from 'lucide-react'
 import { ENLACE_BOTON, ENLACE_BOTON_SECUNDARIO } from '@/components/boton'
+import { Corte } from '@/components/corte'
 import { Encabezado } from '@/components/ui'
 import { requireUser } from '@/lib/auth'
 import { fechaParaDia, idDeBorrador, primero, textoDe } from '@/lib/borrador'
@@ -13,6 +14,7 @@ import {
   contarPorDia,
   dayKey,
   dayLabelConMes,
+  diaYHora,
   hourLabel,
   mondayOfKey,
   normalizeWeekParam,
@@ -25,6 +27,7 @@ import { BatchUpload } from './batch-upload'
 import { WeekCalendar } from './calendar'
 import { Composer } from './composer'
 import { columnasDelDia, normalizarFecha } from './dia'
+import { dibujoDe } from './dibujo'
 import { scheduleHref } from './enlace'
 import { ListaBorradores } from './lista-borradores'
 import { ordenarCola } from './orden'
@@ -205,7 +208,14 @@ export default async function SchedulePage({
             ))}
           </div>
           {vista === 'lista' ? (
-            <Queue items={ordenarCola(cortes)} volver={volver} zone={zona} />
+            <Queue
+              items={ordenarCola(cortes).map((c) => ({
+                ...c,
+                corte: <Corte {...dibujoDe(c.targets, c.media, frias)} chico className="w-full" />,
+                cuando: diaYHora(c.post.scheduledAt, zona),
+              }))}
+              volver={volver}
+            />
           ) : vista === 'dia' ? (
             <VistaDia
               dia={fecha}

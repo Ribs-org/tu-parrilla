@@ -3,8 +3,10 @@ import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
 import { Corte } from '@/components/corte'
 import type { ScheduledPost, ScheduledPostTarget } from '@/db/schema'
 import { dayLabel, dayKey, groupByDay, hourLabel, weekDays, weekLabel } from '@/lib/schedule-week'
+import { networkLabel } from '@/lib/networks'
 import { NOMBRE_COCCION, NOMBRE_FORMATO, calorDelDia, type Coccion } from '@/lib/parrilla'
 import { cn } from '@/lib/utils'
+import { DesplazarAHoy } from './desplazar-a-hoy'
 import { bordeDe, dibujoDe, estadoCorto, type Borde } from './dibujo'
 import { etiquetaDestino, motivoDestino, nombreDestino } from './etiqueta'
 import { Redes } from './redes'
@@ -116,9 +118,10 @@ export function WeekCalendar({
       {/*
         `relative` no es decorativo: los textos `sr-only` de adentro (el «+» de cada día) se
         posicionan en absoluto, y sin un ancestro posicionado dentro de esta caja se escapaban
-        de su scroll y estiraban la página entera al ancho de la semana en el teléfono.
+        de su scroll y estiraban la página entera al ancho de la semana en el teléfono. Es
+        también lo que deja a `DesplazarAHoy` medir dónde está hoy.
       */}
-      <div className="relative -mx-1 overflow-x-auto px-1">
+      <DesplazarAHoy className="relative -mx-1 overflow-x-auto px-1">
         <div className="grid min-w-[52rem] grid-cols-7 gap-2">
           {days.map((day, index) => {
             const cortes = grouped.get(day) ?? []
@@ -127,7 +130,7 @@ export function WeekCalendar({
             // En un día que ya pasó no se programa: ni el «+» ni la invitación a prenderlo.
             const abierto = day >= today
             return (
-              <div key={day} className="flex flex-col gap-2">
+              <div key={day} className="flex flex-col gap-2" data-hoy={day === today ? '' : undefined}>
                 <div className="flex items-baseline justify-between gap-2">
                   {/* El nombre del día abre ese día, cuenta por cuenta. */}
                   <Link
@@ -190,9 +193,14 @@ export function WeekCalendar({
                     cortes.map(({ post, targets, media }) => {
                       const dibujo = dibujoDe(targets, media, frias)
                       const estado = estadoCorto(dibujo.coccion, dibujo.sellos)
-                      // Los destinos que fallaron y esperan otro intento. Su marca va en ámbar;
-                      // el motivo, escrito, porque es lo único que dice qué está pasando.
-                      const reintentos = targets.filter((t) => t.status === 'scheduled' && motivoDestino(t))
+                      // Las redes que fallaron y esperan otro intento, una vez cada una. Su marca
+                      // ya va en ámbar; acá basta un renglón que las nombre, y el motivo de cada
+                      // una sale al pasar el mouse (el `title` de la tarjeta) y en el editor.
+                      // Antes iba el motivo entero por destino, y una tarjeta con un reintento
+                      // quedaba el doble de alta que las demás.
+                      const reintentos = [
+                        ...new Set(targets.filter((t) => t.status === 'scheduled' && motivoDestino(t)).map((t) => networkLabel(t.network))),
+                      ]
                       return (
                         <Link
                           key={post.id}
@@ -233,11 +241,11 @@ export function WeekCalendar({
                           <p className="mt-1 line-clamp-2 text-[0.75rem] leading-snug text-fg">
                             {post.caption || '(sin texto)'}
                           </p>
-                          {reintentos.map((t) => (
-                            <p key={t.id} className="mt-1 text-[0.68rem] leading-snug text-caution">
-                              Reintentando {nombreDestino(t)}: {motivoDestino(t)}
+                          {reintentos.length > 0 ? (
+                            <p className="mt-1 line-clamp-2 text-[0.68rem] leading-snug text-caution">
+                              Reintentando · {reintentos.join(', ')}
                             </p>
-                          ))}
+                          ) : null}
                           {/*
                             Lo que el dibujo dice, en palabras: el formato y la cocción. Los
                             destinos ya no van aquí: `Redes` trae su propio `sr-only`, y
@@ -276,7 +284,7 @@ export function WeekCalendar({
             )
           })}
         </div>
-      </div>
+      </DesplazarAHoy>
     </div>
   )
 }

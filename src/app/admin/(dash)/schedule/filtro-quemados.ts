@@ -29,3 +29,16 @@ export function quemadosVisibles<T extends { red: string }>(
   const visibles = encendidas.slice(0, mostradas)
   return { visibles, total: encendidas.length, quedan: encendidas.length - visibles.length }
 }
+
+/** Cuántos cortes quemados se ven en chico con la lista plegada. */
+export const CORTES_PLEGADA = 5
+
+/**
+ * Lo que se ve con la lista plegada: los primeros cortes quemados en chico —los más
+ * recientes, como abierta—, y cuántos más hay. Con cinco en fila ya se ve «son varios»; más
+ * se leerían como una franja y no como cortes.
+ */
+export function plegada<T>(filas: readonly T[]): { cortes: T[]; mas: number } {
+  const cortes = filas.slice(0, CORTES_PLEGADA)
+  return { cortes, mas: filas.length - cortes.length }
+}

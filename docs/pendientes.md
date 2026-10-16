@@ -29,7 +29,7 @@ Cómo se usa:
   `REVISION_CODIGO`. El arreglo es no borrar la fila fuera de producción.
 - **Por revisar: el resto de la auditoría de la wiki de la UI** (2026-10-13). Al escribir
   `public/docs/ui/` salieron unos cuarenta defectos más —textos que nombran pantallas
-  viejas, validaciones que dejan programar lo que va a fallar, borrar sin confirmar, números
+  viejas, validaciones que dejan programar lo que va a fallar, números
   que no cuadran—, ordenados por gravedad en `docs/auditoria-wiki-ui-2026-10-13.md`. Al
   arreglar cada uno, corregir también la página de la wiki que lo cuenta.
 - **Por revisar: seis consultas en paralelo contra la base no volvían nunca** (2026-10-05).
@@ -39,12 +39,11 @@ Cómo se usa:
   que eran más consultas a la vez que conexiones en el pool (`max: 5` en `src/db/index.ts`),
   contra el pooler de Supabase en modo transacción. La causa no está explicada: cualquier
   otro `Promise.all` con más de cinco consultas podría colgarse igual.
-- **Los defectos de la auditoría de UI del 2026-10-16.** Nueve por arreglar y uno por
-  revisar, en `docs/auditoria-ui-2026-10-16.md` («Defectos»). El más grave: el editor de un
-  post que falló no dice qué destino falló ni por qué. Los demás: cifras cortadas en el eje
-  de los gráficos de Los Números, series de escalas distintas en un mismo eje, «Todas las
-  etiquetas» sin la red, tres pantallas que se rompen a 390 px y tres formas de escribir una
-  fecha.
+- **Los defectos que quedan de la auditoría de UI del 2026-10-16**, en
+  `docs/auditoria-ui-2026-10-16.md` («Defectos»): cifras cortadas en el eje de los gráficos de
+  Los Números, series de escalas distintas en un mismo eje, «Todas las etiquetas» sin la red,
+  dos pantallas de Los Números que se rompen a 390 px, la fecha de la app escrita distinto
+  que la del panel, un «—» sin explicación y la barra de pestañas de la app por revisar.
 - **La Parrilla abierta pide decenas de páginas `/admin/schedule/<id>` cada pocos
   segundos** (2026-10-04). En los logs de Vercel, unas 60 peticiones por tanda, una por cada
   corte del calendario: parece el prefetch de los `Link` combinado con un refresco
