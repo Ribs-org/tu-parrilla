@@ -153,7 +153,7 @@ export function formatoDe(media: readonly { mediaType: string }[]): { formato: F
 export type Sello = 'pendiente' | 'saliendo' | 'servido' | 'bandeja' | 'reintento' | 'quemado' | 'frio'
 
 export function selloDe(
-  destino: { network: string; status: string; lastError?: string | null; opciones: unknown },
+  destino: { network: string; status: string; lastError?: string | null; opciones: unknown; externalId?: string | null },
   fierro: Fierro = 'al-rojo',
 ): Sello {
   if (destino.status === 'failed') return 'quemado'
@@ -162,7 +162,9 @@ export function selloDe(
       typeof destino.opciones === 'object' &&
       destino.opciones !== null &&
       (destino.opciones as { modo?: unknown }).modo === 'borrador'
-    return destino.network === 'tiktok' && borrador ? 'bandeja' : 'servido'
+    // Con su id, el borrador ya salió de la bandeja: el dueño lo publicó y la sincronización
+    // encontró su video (`vincularVideosTikTok`).
+    return destino.network === 'tiktok' && borrador && !destino.externalId ? 'bandeja' : 'servido'
   }
   if (destino.status === 'publishing') return 'saliendo'
   if (destino.lastError) return 'reintento'

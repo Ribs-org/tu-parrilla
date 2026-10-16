@@ -7,6 +7,7 @@ const destino = (accountId: string, status: 'scheduled' | 'publishing' | 'publis
   status,
   lastError: null,
   opciones: null,
+  externalId: null,
   ...extra,
 })
 

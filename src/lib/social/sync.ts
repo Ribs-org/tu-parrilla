@@ -12,6 +12,7 @@ import { campaignTagFor, type CuentaTag } from './campaign'
 import type { FetchedPost } from './connector'
 import { agruparPorRed, primariaDe } from './cuenta'
 import { connectorFor } from './index'
+import { vincularVideosTikTok } from './vincular-tiktok'
 
 export type SyncReport = Array<{ network: string; handle: string | null; ok: boolean; posts: number; error?: string }>
 
@@ -202,6 +203,18 @@ export async function syncAccount(account: SocialAccount, primaria: boolean): Pr
         .update(socialPosts)
         .set({ archivedAt: new Date() })
         .where(and(eq(socialPosts.accountId, account.id), inArray(socialPosts.externalId, gone)))
+    }
+
+    // TikTok no siempre devuelve el id del video al publicar: con los videos recién traídos
+    // se le pone a lo que salió por Tu Parrilla sin él, y así cruza con sus atributos. Un
+    // fallo acá no tumba la sincronización, que ya guardó lo suyo.
+    if (account.network === 'tiktok') {
+      try {
+        const vinculados = await vincularVideosTikTok(account)
+        if (vinculados > 0) console.log(`[sync] TikTok: ${vinculados} publicaciones recuperaron su id de video`)
+      } catch (error) {
+        console.error('[sync] vincular videos de TikTok:', String(error).slice(0, 300))
+      }
     }
 
     await db

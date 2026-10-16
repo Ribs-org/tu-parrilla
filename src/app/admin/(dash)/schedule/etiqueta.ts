@@ -28,7 +28,9 @@ export function nombreDestino(destino: { network: string; handle: string | null 
  * Cómo va ese destino: programado, publicando, en la bandeja de TikTok. «Publicado» en
  * TikTok tiene dos formas: el post en el perfil, o el borrador que llegó a la bandeja
  * del dueño para terminarlo desde el teléfono. El segundo no tiene id de video —no
- * existe hasta que el dueño lo publique— y el chip lo dice.
+ * existe hasta que el dueño lo publique— y el chip lo dice. Cuando el dueño lo publica, la
+ * sincronización siguiente le encuentra su video (`vincularVideosTikTok`) y pasa a decir
+ * «Publicado».
  *
  * Un destino que falló y todavía tiene intentos vuelve a `scheduled` con su `lastError`
  * puesto (`resolveOutcome`, en `social/publish/publisher.ts`); nada más deja un motivo en
@@ -42,7 +44,7 @@ export function etiquetaDestino(target: {
   opciones: unknown
   lastError?: string | null
 }): string {
-  if (target.network === 'tiktok' && target.status === 'published' && esBorrador(target.opciones)) {
+  if (target.network === 'tiktok' && target.status === 'published' && esBorrador(target.opciones) && !target.externalId) {
     return 'En tu bandeja de TikTok'
   }
   if (target.status === 'scheduled' && target.lastError) return 'Reintentando'

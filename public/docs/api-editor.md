@@ -449,7 +449,9 @@ así se atribuyen visitas y
 clicks. Si un post nunca tuvo su link pegado, `visitasAlSitio` viene `null`.
 
 **`atributos`** trae exactamente lo que enviaste al programar; es `null` para posts
-subidos a mano fuera del calendario (también aparecen: también enseñan).
+subidos a mano fuera del calendario (también aparecen: también enseñan). En TikTok, un post
+que salió del calendario puede venir con `null` hasta la sincronización siguiente a su
+publicación: es la que le encuentra su video (ver `externalId` en la sección 3).
 
 **`cuenta`** es la cuenta de la que salió el post: su `id` (el que va en `cuenta=` y en
 `cuentas` al programar), su `red` y su `nombre` en la red. Es `null` si esa cuenta ya no
@@ -609,7 +611,12 @@ Un rango pasado vale (lista lo ya publicado). Formato inválido o rango invertid
 - **`atributos`** trae exactamente lo que enviaste; `null` si no mandaste ninguno.
 - **`redes`**: un estado por destino. `scheduled` espera su hora; `publishing` está en
   vuelo (Meta procesando un video); `published` salió y `externalId` es su id en la
-  red, el mismo que usa `/api/metrics/posts`; `failed` agotó los tres intentos y
+  red, el mismo que usa `/api/metrics/posts`. **En TikTok puede venir `null` un tiempo**:
+  TikTok no siempre entrega el id al publicar (un post en «Solo yo», un borrador mandado a
+  la bandeja, o uno que todavía modera). La sincronización de la cuenta —la diaria, o
+  «Sincronizar ahora» en Los Fierros— lo completa cruzando el video por su texto y su hora,
+  y desde ahí cruza con sus métricas y sus `atributos`; un borrador, recién cuando el dueño
+  lo publica desde su app. `failed` agotó los tres intentos y
   `error` dice por qué con una frase fija. `intentos` cuenta los intentos hechos.
   **`cuentaId`** es el identificador de cuenta de ese destino — la fuente para el
   campo `cuentas` de la sección 1, cuando nombrar la red no alcanza — y **`handle`**

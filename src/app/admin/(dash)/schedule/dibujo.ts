@@ -20,6 +20,7 @@ type Destino = {
   status: TargetStatus
   lastError: string | null
   opciones: unknown
+  externalId: string | null
 }
 
 export type Dibujo = {

@@ -153,6 +153,8 @@ describe('selloDe', () => {
     const tiktok = { network: 'tiktok', status: 'published', lastError: null, opciones: { modo: 'borrador' } }
     expect(selloDe(tiktok)).toBe('bandeja')
     expect(selloDe({ ...tiktok, opciones: { modo: 'directo' } })).toBe('servido')
+    // Cuando el dueño lo publica desde su app, la sincronización le encuentra el video.
+    expect(selloDe({ ...tiktok, externalId: '7001' })).toBe('servido')
   })
 
   it('programado en un fierro frío no va a salir así como está', () => {

@@ -1047,7 +1047,9 @@ del rango** — no por métrica movida en él: un video de agosto que crece en s
 aparece en una consulta de agosto, no de septiembre. Cada fila trae red, `cuenta` (`id`,
 `red` y `nombre`), `externalId`,
 permalink, texto, `publicadoEl` (ISO con el offset de la zona del dueño), la etiqueta `?s=`, sus
-`atributos` (o `null` si el post no salió del calendario) y `metricas`: `views`
+`atributos` (o `null` si el post no salió del calendario; en TikTok, también hasta la
+sincronización siguiente a su publicación, que es la que le encuentra el id del video —ver
+`docs/deuda-tecnica.md`, «TikTok: el id del video se recupera por texto y hora»—) y `metricas`: `views`
 (acumulado), `viewsGanadas` (dentro del rango), `likes`, `comentarios`, `compartidos`,
 `alcance`, `visitasAlSitio`, `clicks`, `ctr` y `arrastre`. Un `null` significa que la
 red no reportó ese número — nunca cero. En YouTube, `viewsGanadas` y `arrastre` vienen

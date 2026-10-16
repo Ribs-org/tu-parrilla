@@ -522,3 +522,33 @@ Cerrarlo: sacar `SOCIAL_NETWORKS` y `SocialNetwork` a un módulo sin drizzle (el
 natural es `src/lib/networks.ts`, que ya es lo que el cliente importa) y que `db/schema`
 los reexporte, para no tocar los demás imports. Una tarde, con un `grep` de los sitios que
 los importan y el build para confirmar que el chunk se achica.
+
+## TikTok: el id del video se recupera por texto y hora (2026-10-16)
+
+TikTok no siempre devuelve el id del video al publicar: `status/fetch` lo trae en
+`publicaly_available_post_id` solo para posts públicos ya moderados, así que un post en «Solo
+yo», un borrador mandado a la bandeja o uno que todavía modera quedaban con `externalId`
+vacío para siempre, y sin el id no cruzaban con sus métricas ni con sus atributos (el
+torneo de ideas y versiones se medía solo en Instagram).
+
+Lo que se hizo: al final de cada sincronización de una cuenta de TikTok,
+`vincularVideosTikTok` (`src/lib/social/vincular-tiktok.ts`) cruza los destinos publicados
+sin id con los videos de esa cuenta que ningún destino tiene, por texto (el más corto es el
+comienzo del otro, con doce caracteres o más) y por hora (de una hora antes a dos días
+después de la programada; un mes para un borrador). Los pares se arman del más cercano en
+el tiempo al más lejano y cada lado entra en uno solo (`emparejarVideos`,
+`src/lib/social/tiktok-vinculo.ts`).
+
+Lo que queda a medias, a propósito:
+
+- **Es un cruce aproximado.** Dos posts con el mismo texto que salen dentro de la misma
+  ventana se reparten por cercanía en la hora; si TikTok tarda distinto en publicar cada
+  uno, pueden quedar cruzados. Un post sin texto solo cruza con un video sin texto a dos
+  horas o menos.
+- **Solo ve lo que la sincronización trae**: los videos públicos y dentro de su tope
+  (`MAX_POSTS_PER_SYNC`). Un post que se queda en «Solo yo» no aparece en la lista de videos
+  de TikTok y no se puede recuperar así.
+- **No vuelve a preguntarle a TikTok.** Lo exacto sería seguir consultando `status/fetch`
+  con el `publish_id` hasta que llegue el id, pero ese id no se guarda después de publicar y
+  TikTok no garantiza cuánto tarda la moderación. Costaría guardar el `publish_id` en el
+  destino publicado y un sondeo aparte en el cron.
