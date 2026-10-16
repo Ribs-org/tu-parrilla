@@ -25,6 +25,9 @@ export const COLORES = {
   ambar: '#e5a52a',
 }
 
+/** El borde de lo que se toca y no está elegido: un botón secundario, una ficha sin marcar. */
+const BORDE_TOCABLE = 'rgba(255,255,255,0.16)'
+
 /** Oswald para títulos y etiquetas, en mayúsculas. Las cifras se quedan en la del sistema. */
 export const TIPO_TITULO = 'Oswald_600SemiBold'
 
@@ -183,6 +186,9 @@ export function PuntoEstado({ estado }: { estado: string }) {
  * El control más usado de la app: filtros, rangos, el selector de archivos y el de
  * fecha. De ahí los 44 dp más el `hitSlop`: en reposo se ve casi igual que antes,
  * pero el dedo ya no falla.
+ *
+ * Sin marcar lleva un borde fino: antes era texto gris sobre nada, y en Publicar las cuentas
+ * no parecían algo que se toca hasta que una se marcaba.
  */
 export function Chip({
   texto,
@@ -209,6 +215,8 @@ export function Chip({
         borderRadius: 999,
         // Sin esto el ripple se dibuja rectangular, por fuera de las esquinas redondas.
         overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: activo ? COLORES.brasa : BORDE_TOCABLE,
         backgroundColor: activo ? COLORES.brasa : 'transparent',
         opacity: deshabilitado ? 0.5 : pressed ? 0.7 : 1,
       })}
@@ -324,6 +332,10 @@ export function Boton({
       style={({ pressed }) => ({
         flex: 1,
         backgroundColor: destacado ? COLORES.brasa : COLORES.tarjeta,
+        // El secundario es del color de la tarjeta: puesto sobre una, sin borde no se veía que
+        // era un botón («Reprogramar» en «Se quemó» se leía como texto suelto).
+        borderWidth: destacado ? 0 : 1,
+        borderColor: BORDE_TOCABLE,
         borderRadius: 12,
         // Sin esto el ripple se dibuja rectangular, por fuera de las esquinas redondas.
         overflow: 'hidden',

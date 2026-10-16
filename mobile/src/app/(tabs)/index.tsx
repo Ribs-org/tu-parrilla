@@ -4,13 +4,14 @@ import { useFocusEffect, useRouter } from 'expo-router'
 import { CorteProgramado } from '../../components/corte-programado'
 import { IconoPoner } from '../../components/iconos'
 import { Grilla, RotuloDia } from '../../components/parrilla'
+import { Pieza } from '../../components/pieza'
 import { useSelectorFecha } from '../../components/selector-fecha'
 import { Boton, COLORES, Cargando, ErrorConReintento, Pantalla, Sello, TIPO_TITULO, Tarjeta } from '../../components/ui'
 import { cuandoQuemado, diasDeLaAgenda, marcaDeToque, pieDeAyer, rotuloDelDia, seQuemo, servidosAyer } from '../../lib/agenda'
 import { RechazoApi, SesionCaducada, apiPost } from '../../lib/api'
 import { detalleDelBorrador, rotuloBorradores } from '../../lib/borradores'
 import { anotarCambio } from '../../lib/cambios'
-import { calorDelDia } from '../../lib/parrilla'
+import { calorDelDia, carneDe, coccionDe, selloPorEstado } from '../../lib/parrilla'
 import { SIN_SENAL, etiquetaCuenta, proximaHoraEnPunto } from '../../lib/publicar'
 import { clearToken } from '../../lib/session'
 import { type BorradorResumido, type Calendario } from '../../lib/tipos'
@@ -150,24 +151,51 @@ export default function LaParrilla() {
           >
             Se quemó
           </Text>
-          {quemados.map(({ post, destino }) => (
-            <Tarjeta key={destino.id}>
-              <Text style={{ color: COLORES.suave, fontSize: 12 }}>
-                {cuandoQuemado(post.cuando, hoy)} · {etiquetaCuenta(destino)}
-              </Text>
-              <Text style={{ color: COLORES.texto, fontSize: 14 }} numberOfLines={2}>
-                {post.texto || '(sin texto)'}
-              </Text>
-              {destino.error ? <Text style={{ color: COLORES.rojo, fontSize: 12 }}>{destino.error}</Text> : null}
-              <View style={{ flexDirection: 'row', marginTop: 4 }}>
-                <Boton
-                  texto={reprogramando === destino.id ? 'Reprogramando…' : 'Reprogramar'}
-                  onPress={() => reprogramar(destino.id)}
-                  deshabilitado={reprogramando !== null}
+          {quemados.map(({ post, destino }) => {
+            // El corte entero, con todas sus marcas, como en el panel: se ve cuál se quemó y si
+            // lo demás salió. Antes la tarjeta era solo texto, y el botón, del color de la
+            // tarjeta, se leía como una palabra más.
+            const estados = post.redes.map((r) => r.estado)
+            return (
+              <View
+                key={destino.id}
+                style={{
+                  flexDirection: 'row',
+                  gap: 12,
+                  backgroundColor: COLORES.tarjeta,
+                  borderRadius: 16,
+                  borderWidth: 1,
+                  borderColor: COLORES.rojo + '99',
+                  padding: 14,
+                }}
+              >
+                <Pieza
+                  formato={post.formato ?? 'bife'}
+                  huesos={post.huesos ?? 0}
+                  carne={carneDe(estados)}
+                  coccion={coccionDe(estados)}
+                  sellos={post.redes.map((r) => r.sello ?? selloPorEstado(r.estado, r.error))}
                 />
+                <View style={{ flex: 1, gap: 6 }}>
+                  <Text style={{ color: COLORES.suave, fontSize: 12 }}>
+                    {cuandoQuemado(post.cuando, hoy)} · {etiquetaCuenta(destino)}
+                  </Text>
+                  <Text style={{ color: COLORES.texto, fontSize: 14 }} numberOfLines={2}>
+                    {post.texto || '(sin texto)'}
+                  </Text>
+                  {destino.error ? <Text style={{ color: COLORES.rojo, fontSize: 12 }}>{destino.error}</Text> : null}
+                  <View style={{ flexDirection: 'row', marginTop: 2 }}>
+                    {/* Secundario, como en el panel: el naranjo queda para el arreglo exacto. */}
+                    <Boton
+                      texto={reprogramando === destino.id ? 'Reprogramando…' : 'Reprogramar'}
+                      onPress={() => reprogramar(destino.id)}
+                      deshabilitado={reprogramando !== null}
+                    />
+                  </View>
+                </View>
               </View>
-            </Tarjeta>
-          ))}
+            )
+          })}
         </View>
       ) : null}
 
