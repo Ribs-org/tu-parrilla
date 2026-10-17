@@ -59,7 +59,9 @@ export function PonerAlgo({ href, vacio }: { href: string; vacio: string }) {
       href={href}
       scroll={false}
       // La transición en la utilidad y no en `.poner-algo`: `transition-colors` la pisaría.
-      className="poner-algo inline-flex items-center gap-1 self-center rounded-md border border-dashed border-acero-600 px-2.5 py-1 text-[0.72rem] text-fg-muted transition-[opacity,color,border-color] duration-150 hover:border-brasa hover:text-fg"
+      // Sin corte de línea y con poco aire a los lados: en el teléfono la columna de un día mide
+      // menos de cien píxeles, y «Poner algo» se partía en dos renglones.
+      className="poner-algo inline-flex items-center gap-1 self-center whitespace-nowrap rounded-md border border-dashed border-acero-600 px-2 py-1 text-[0.72rem] text-fg-muted transition-[opacity,color,border-color] duration-150 hover:border-brasa hover:text-fg"
     >
       <span className="sr-only">{vacio} </span>
       <Plus className="h-3 w-3" aria-hidden />
