@@ -3,8 +3,10 @@ import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
 import { Corte } from '@/components/corte'
 import type { ScheduledPost, ScheduledPostTarget } from '@/db/schema'
 import { dayLabel, dayKey, groupByDay, hourLabel, weekDays, weekLabel } from '@/lib/schedule-week'
+import { networkLabel } from '@/lib/networks'
 import { NOMBRE_COCCION, NOMBRE_FORMATO, calorDelDia, type Coccion } from '@/lib/parrilla'
 import { cn } from '@/lib/utils'
+import { DesplazarAHoy } from './desplazar-a-hoy'
 import { bordeDe, dibujoDe, estadoCorto, type Borde } from './dibujo'
 import { etiquetaDestino, motivoDestino, nombreDestino } from './etiqueta'
 import { Redes } from './redes'
@@ -46,11 +48,35 @@ export const CLASE_ESTADO: Record<Coccion, string> = {
 }
 
 /**
+ * La invitación de una parrilla fría en la que todavía se puede programar: «+ Poner algo».
+ * Con mouse aparece al pasar por el día (`.poner-algo`, en globals.css). La frase de que no
+ * hay nada va adelante, solo para el lector de pantalla: la parrilla fría, que es lo que lo
+ * dice a la vista, no la ve. La comparten la semana y la vista «Día».
+ */
+export function PonerAlgo({ href, vacio }: { href: string; vacio: string }) {
+  return (
+    <Link
+      href={href}
+      scroll={false}
+      // La transición en la utilidad y no en `.poner-algo`: `transition-colors` la pisaría.
+      // Sin corte de línea y con poco aire a los lados: en el teléfono la columna de un día mide
+      // menos de cien píxeles, y «Poner algo» se partía en dos renglones.
+      className="poner-algo inline-flex items-center gap-1 self-center whitespace-nowrap rounded-md border border-dashed border-acero-600 px-2 py-1 text-[0.72rem] text-fg-muted transition-[opacity,color,border-color] duration-150 hover:border-brasa hover:text-fg"
+    >
+      <span className="sr-only">{vacio} </span>
+      <Plus className="h-3 w-3" aria-hidden />
+      Poner algo
+    </Link>
+  )
+}
+
+/**
  * La semana de lunes a domingo: la vista con que abre La Parrilla.
  *
  * Además de los cortes, cada día que no pasó trae un «+» que abre el compositor con ese día
  * puesto (`nuevoEnDia`), y los borradores con fecha aparecen en el suyo con borde punteado.
- * Los borradores no cuentan para el calor del día: todavía no van a salir.
+ * Los borradores no cuentan para el calor del día: todavía no van a salir. Un día sin nada es
+ * una parrilla fría, con «Poner algo» si todavía no pasó.
  */
 export function WeekCalendar({
   monday,
@@ -63,6 +89,7 @@ export function WeekCalendar({
   nuevoEnDia,
   verDia,
   frias,
+  recien = null,
 }: {
   monday: string
   items: Item[]
@@ -77,6 +104,8 @@ export function WeekCalendar({
   verDia: (dia: string) => string
   /** Las cuentas con el fierro frío: lo programado ahí lleva la marca fría. */
   frias: ReadonlySet<string>
+  /** El post recién programado: su tarjeta cae en su día, encendida una vez. */
+  recien?: string | null
 }) {
   const days = weekDays(monday)
   const today = dayKey(new Date(), zone)
@@ -116,9 +145,10 @@ export function WeekCalendar({
       {/*
         `relative` no es decorativo: los textos `sr-only` de adentro (el «+» de cada día) se
         posicionan en absoluto, y sin un ancestro posicionado dentro de esta caja se escapaban
-        de su scroll y estiraban la página entera al ancho de la semana en el teléfono.
+        de su scroll y estiraban la página entera al ancho de la semana en el teléfono. Es
+        también lo que deja a `DesplazarAHoy` medir dónde está hoy.
       */}
-      <div className="relative -mx-1 overflow-x-auto px-1">
+      <DesplazarAHoy className="relative -mx-1 overflow-x-auto px-1">
         <div className="grid min-w-[52rem] grid-cols-7 gap-2">
           {days.map((day, index) => {
             const cortes = grouped.get(day) ?? []
@@ -127,7 +157,7 @@ export function WeekCalendar({
             // En un día que ya pasó no se programa: ni el «+» ni la invitación a prenderlo.
             const abierto = day >= today
             return (
-              <div key={day} className="flex flex-col gap-2">
+              <div key={day} className="flex flex-col gap-2" data-hoy={day === today ? '' : undefined}>
                 <div className="flex items-baseline justify-between gap-2">
                   {/* El nombre del día abre ese día, cuenta por cuenta. */}
                   <Link
@@ -176,23 +206,22 @@ export function WeekCalendar({
                 >
                   {cortes.length === 0 && enBorrador.length === 0 ? (
                     abierto ? (
-                      <Link
-                        href={nuevoEnDia(day)}
-                        scroll={false}
-                        className="text-center text-[0.72rem] italic text-fg-muted underline-offset-2 hover:text-fg hover:underline"
-                      >
-                        No hay nada puesto. Préndela.
-                      </Link>
+                      <PonerAlgo href={nuevoEnDia(day)} vacio="No hay nada puesto." />
                     ) : (
-                      <p className="text-center text-[0.72rem] italic text-fg-muted">No hay nada puesto.</p>
+                      <p className="sr-only">No hay nada puesto.</p>
                     )
                   ) : (
                     cortes.map(({ post, targets, media }) => {
-                      const dibujo = dibujoDe(targets, media, frias)
+                      const dibujo = dibujoDe(targets, media, frias, post.videosLiberados)
                       const estado = estadoCorto(dibujo.coccion, dibujo.sellos)
-                      // Los destinos que fallaron y esperan otro intento. Su marca va en ámbar;
-                      // el motivo, escrito, porque es lo único que dice qué está pasando.
-                      const reintentos = targets.filter((t) => t.status === 'scheduled' && motivoDestino(t))
+                      // Las redes que fallaron y esperan otro intento, una vez cada una. Su marca
+                      // ya va en ámbar; acá basta un renglón que las nombre, y el motivo de cada
+                      // una sale al pasar el mouse (el `title` de la tarjeta) y en el editor.
+                      // Antes iba el motivo entero por destino, y una tarjeta con un reintento
+                      // quedaba el doble de alta que las demás.
+                      const reintentos = [
+                        ...new Set(targets.filter((t) => t.status === 'scheduled' && motivoDestino(t)).map((t) => networkLabel(t.network))),
+                      ]
                       return (
                         <Link
                           key={post.id}
@@ -207,9 +236,11 @@ export function WeekCalendar({
                               return `${nombreDestino(t)}: ${etiquetaDestino(t)}${motivo ? ` — ${motivo}` : ''}`
                             })
                             .join(' · ')}
+                          data-recien={post.id === recien ? '' : undefined}
                           className={cn(
                             'block rounded-md border bg-acero-900 p-1.5 transition-transform hover:-translate-y-0.5',
                             CLASE_BORDE[bordeDe(dibujo.coccion, dibujo.sellos)],
+                            post.id === recien && 'recien',
                           )}
                         >
                           {/*
@@ -233,11 +264,11 @@ export function WeekCalendar({
                           <p className="mt-1 line-clamp-2 text-[0.75rem] leading-snug text-fg">
                             {post.caption || '(sin texto)'}
                           </p>
-                          {reintentos.map((t) => (
-                            <p key={t.id} className="mt-1 text-[0.68rem] leading-snug text-caution">
-                              Reintentando {nombreDestino(t)}: {motivoDestino(t)}
+                          {reintentos.length > 0 ? (
+                            <p className="mt-1 line-clamp-2 text-[0.68rem] leading-snug text-caution">
+                              Reintentando · {reintentos.join(', ')}
                             </p>
-                          ))}
+                          ) : null}
                           {/*
                             Lo que el dibujo dice, en palabras: el formato y la cocción. Los
                             destinos ya no van aquí: `Redes` trae su propio `sr-only`, y
@@ -276,7 +307,7 @@ export function WeekCalendar({
             )
           })}
         </div>
-      </div>
+      </DesplazarAHoy>
     </div>
   )
 }

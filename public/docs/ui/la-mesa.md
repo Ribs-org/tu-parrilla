@@ -21,6 +21,8 @@ Los títulos se ven en mayúsculas; aquí van como están escritos.
 - El título «La Mesa» y debajo «lo que te responden y tus respuestas».
 - Una línea con cuántos esperan: «No hay nada esperando respuesta.», «Un comentario espera tu respuesta.» o «5 comentarios esperan tu respuesta.» (con el número que corresponda). Cuenta los pendientes de la red elegida en el filtro, sin importar qué estado esté elegido.
 
+Mientras carga se ve el título «La Mesa» y, en vez del resto, bloques sin texto con la forma de lo que viene —el renglón de cuántos esperan, las instrucciones, los filtros y dos publicaciones con sus comentarios—, como brasas: se encienden y se apagan de a poco, uno un poco después del otro (con «reducir movimiento» activado en el sistema, quietos a media luz).
+
 ### Instrucciones para el modelo
 
 Un recuadro con el título «Instrucciones para el modelo» y debajo «Se guardan en la base y rigen desde el siguiente borrador.». Adentro:
@@ -178,6 +180,7 @@ Lo que describe sale de:
 - `src/app/admin/(dash)/comments/page.tsx`
 - `src/app/admin/(dash)/comments/cola.tsx`
 - `src/app/admin/(dash)/comments/instrucciones.tsx`
+- `src/app/admin/(dash)/comments/loading.tsx` y `src/components/esqueleto.tsx` (la carga)
 - `src/app/admin/actions.ts` (`responderComentario`, `descartarComentario`, `reintentarBorrador`, `guardarInstruccionesComentarios`)
 - `src/lib/comentarios-cola.ts` (los filtros, el tope de 200)
 - `src/lib/social/comentarios/comentarista.ts` (las frases de fallo)

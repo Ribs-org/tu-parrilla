@@ -6,7 +6,7 @@ import { networkLabel } from '@/lib/networks'
 import { NOMBRE_COCCION, NOMBRE_FORMATO, calorDelDia } from '@/lib/parrilla'
 import { hourLabel } from '@/lib/schedule-week'
 import { cn } from '@/lib/utils'
-import { CLASE_BORDE, CLASE_ESTADO, ROTULO_CALOR } from './calendar'
+import { CLASE_BORDE, CLASE_ESTADO, PonerAlgo, ROTULO_CALOR } from './calendar'
 import { SIN_CUENTA, cortesDelDia, rotuloDelDia, type Columna, type CorteDelDia } from './dia'
 import { bordeDe, dibujoDe, estadoCorto } from './dibujo'
 import { etiquetaDestino, motivoDestino, nombreDestino } from './etiqueta'
@@ -32,6 +32,7 @@ export function VistaDia({
   hoyHref,
   nuevoEnDia,
   frias,
+  recien = null,
 }: {
   dia: string
   hoy: string
@@ -45,6 +46,8 @@ export function VistaDia({
   nuevoEnDia: (dia: string, cuenta: string | null) => string
   /** Las cuentas con el fierro frío: lo programado ahí lleva la marca fría. */
   frias: ReadonlySet<string>
+  /** El post recién programado: sus tarjetas caen en su columna, encendidas una vez. */
+  recien?: string | null
 }) {
   // En un día que ya pasó no se programa: ni el «+» ni la invitación a prenderlo.
   const abierto = dia >= hoy
@@ -95,6 +98,7 @@ export function VistaDia({
                 zone={zone}
                 volver={volver}
                 frias={frias}
+                recien={recien}
                 nuevo={columna.cuenta?.connected && abierto ? nuevoEnDia(dia, columna.cuenta.id) : null}
               />
             ))}
@@ -118,6 +122,7 @@ function ColumnaDeCuenta({
   zone,
   volver,
   frias,
+  recien,
   nuevo,
 }: {
   columna: Columna
@@ -125,6 +130,7 @@ function ColumnaDeCuenta({
   zone: string
   volver: string
   frias: ReadonlySet<string>
+  recien: string | null
   /** El compositor con esta cuenta marcada; null si no se puede programar en ella ese día. */
   nuevo: string | null
 }) {
@@ -176,23 +182,16 @@ function ColumnaDeCuenta({
           calor === 'llena' && 'grilla-llena',
         )}
       >
+        {/* Vacía es una parrilla fría, como en la semana: la frase, solo para el lector de pantalla. */}
         {vacia ? (
           nuevo ? (
-            <Link
-              href={nuevo}
-              scroll={false}
-              className="text-center text-[0.72rem] italic text-fg-muted underline-offset-2 hover:text-fg hover:underline"
-            >
-              Nada para esta cuenta. Préndela.
-            </Link>
+            <PonerAlgo href={nuevo} vacio="Nada para esta cuenta." />
           ) : (
-            <p className="text-center text-[0.72rem] italic text-fg-muted">
-              {abierto ? 'Nada para esta cuenta.' : 'No salió nada en esta cuenta.'}
-            </p>
+            <p className="sr-only">{abierto ? 'Nada para esta cuenta.' : 'No salió nada en esta cuenta.'}</p>
           )
         ) : null}
         {columna.cortes.map((corte) => (
-          <TarjetaDeDestino key={corte.destino.id} corte={corte} zone={zone} volver={volver} frias={frias} />
+          <TarjetaDeDestino key={corte.destino.id} corte={corte} zone={zone} volver={volver} frias={frias} recien={recien} />
         ))}
         {/* Los borradores, después de los cortes y con borde punteado, como en la semana. */}
         {columna.borradores.map((b) => (
@@ -221,14 +220,16 @@ function TarjetaDeDestino({
   zone,
   volver,
   frias,
+  recien,
 }: {
   corte: CorteDelDia
   zone: string
   volver: string
   frias: ReadonlySet<string>
+  recien: string | null
 }) {
   const { post, destino, otros, media } = corte
-  const dibujo = dibujoDe([destino], media, frias)
+  const dibujo = dibujoDe([destino], media, frias, post.videosLiberados)
   const deLosOtros = dibujoDe(otros, media, frias).sellos
   const estado = estadoCorto(dibujo.coccion, dibujo.sellos)
   const motivo = motivoDestino(destino)
@@ -237,9 +238,11 @@ function TarjetaDeDestino({
       href={`/admin/schedule/${post.id}?volver=${encodeURIComponent(volver)}`}
       // Sin prefetch, como en la semana: un día cargado son muchas tarjetas.
       prefetch={false}
+      data-recien={post.id === recien ? '' : undefined}
       className={cn(
         'flex gap-2 rounded-md border bg-acero-900 p-2 transition-transform hover:-translate-y-0.5',
         CLASE_BORDE[bordeDe(dibujo.coccion, dibujo.sellos)],
+        post.id === recien && 'recien',
       )}
     >
       {/* El humo y la banderita se asoman por arriba: el margen les deja lugar. */}

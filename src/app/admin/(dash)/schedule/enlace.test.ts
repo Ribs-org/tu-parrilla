@@ -29,7 +29,10 @@ describe('scheduleHref', () => {
 
   it('lo que abre el panel lateral y el aviso de «programado» tampoco viajan', () => {
     expect(
-      scheduleHref({ componer: '1', dia: '2026-10-16', borrador: 'b1', panel: 'csv', hecho: 'programado', semana: '2026-10-12' }, {}),
+      scheduleHref(
+        { componer: '1', dia: '2026-10-16', borrador: 'b1', panel: 'csv', hecho: 'programado', nuevo: 'p1', semana: '2026-10-12' },
+        {},
+      ),
     ).toBe('/admin/schedule?semana=2026-10-12')
   })
 

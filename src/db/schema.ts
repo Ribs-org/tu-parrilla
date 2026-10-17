@@ -339,6 +339,11 @@ export const scheduledPosts = pgTable(
     scheduledAt: timestamp('scheduled_at', { withTimezone: true }).notNull(),
     // Diseñada, no un fotograma: la aplican los publishers que pueden (IG/FB/YT).
     coverUrl: text('cover_url'),
+    // Los videos que el post llevaba y ya no están en el almacén: cuando sale en todas sus
+    // redes, el video se borra de R2 y su fila con él (`limpiarMedia`, en `publish/run.ts`).
+    // Con la fila se iba lo único que decía que el post era un video, y el corte de una
+    // entraña publicada se dibujaba como chori. La forma los cuenta (`formatoDe`).
+    videosLiberados: integer('videos_liberados').notNull().default(0),
     // La taxonomía libre del editor-LLM ({"hook": "...", "tema": "..."}); el
     // endpoint de métricas la devuelve junto a los números para cerrar su loop.
     atributos: jsonb('atributos'),

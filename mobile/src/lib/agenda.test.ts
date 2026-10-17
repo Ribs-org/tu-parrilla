@@ -94,6 +94,6 @@ describe('servidosAyer y pieDeAyer', () => {
 describe('cuandoQuemado', () => {
   it('solo la hora si es de hoy; si no, el día delante', () => {
     expect(cuandoQuemado('2026-10-15T19:00:00-03:00', HOY)).toBe('19:00')
-    expect(cuandoQuemado('2026-10-14T09:15:00-03:00', HOY)).toBe('14 oct · 09:15')
+    expect(cuandoQuemado('2026-10-14T09:15:00-03:00', HOY)).toBe('mié 14 de oct · 09:15')
   })
 })

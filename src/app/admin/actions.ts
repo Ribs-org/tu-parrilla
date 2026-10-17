@@ -65,7 +65,11 @@ import { cerrarSesiones, esChoqueDeUnicidad, invitar, pedir, quitar } from '@/li
 import { fromZonedInput, normalizeUrl, slugify } from '@/lib/utils'
 import { ZONA_INVALIDA, esZonaValida } from '@/lib/zona'
 
-export type FormState = { error?: string; ok?: boolean; aviso?: string }
+/**
+ * Lo que devuelve una acción de formulario. `id` es el del post recién programado: con él, el
+ * calendario lo enciende en su día al volver del compositor (`nuevo`, en `schedule/page.tsx`).
+ */
+export type FormState = { error?: string; ok?: boolean; aviso?: string; id?: string }
 
 export async function logout() {
   await destroySession()
@@ -792,7 +796,7 @@ export async function createScheduledPost(_prev: FormState, formData: FormData):
   const reglaCheck = validarRegla(reglaDesdeFormulario(formData))
   if ('error' in reglaCheck) return { error: reglaCheck.error }
 
-  await crearPostProgramado(ownerId, {
+  const id = await crearPostProgramado(ownerId, {
     caption,
     scheduledAt: scheduledAt!,
     media: uploaded,
@@ -807,7 +811,7 @@ export async function createScheduledPost(_prev: FormState, formData: FormData):
   if (borradorId) await borrarBorrador(ownerId, borradorId)
 
   revalidatePath('/admin/schedule')
-  return { ok: true }
+  return { ok: true, id }
 }
 
 /* -------------------------------------------------------------- borradores -- */
@@ -1087,8 +1091,10 @@ export async function updateScheduledPost(
 
   // El chequeo de video corre ANTES de descargar/subir la portada nueva — igual que en
   // el lote (batch.ts): si el resultado ya es una portada sin video, no vale la pena
-  // pagar esa descarga.
-  if ((portadaUrl || portadaKept) && !finalTypes.includes('video')) {
+  // pagar esa descarga. El video de un post que ya salió en todas sus redes cuenta aunque
+  // ya no esté en el almacén (`videosLiberados`): sin eso, el editor de cualquier post
+  // publicado con portada rechazaba guardar, con la portada que el mismo editor conservó.
+  if ((portadaUrl || portadaKept) && !finalTypes.includes('video') && post.videosLiberados === 0) {
     return { error: PORTADA_NEEDS_VIDEO }
   }
 

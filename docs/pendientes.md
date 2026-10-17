@@ -29,7 +29,7 @@ Cómo se usa:
   `REVISION_CODIGO`. El arreglo es no borrar la fila fuera de producción.
 - **Por revisar: el resto de la auditoría de la wiki de la UI** (2026-10-13). Al escribir
   `public/docs/ui/` salieron unos cuarenta defectos más —textos que nombran pantallas
-  viejas, validaciones que dejan programar lo que va a fallar, borrar sin confirmar, números
+  viejas, validaciones que dejan programar lo que va a fallar, números
   que no cuadran—, ordenados por gravedad en `docs/auditoria-wiki-ui-2026-10-13.md`. Al
   arreglar cada uno, corregir también la página de la wiki que lo cuenta.
 - **Por revisar: seis consultas en paralelo contra la base no volvían nunca** (2026-10-05).
@@ -39,12 +39,18 @@ Cómo se usa:
   que eran más consultas a la vez que conexiones en el pool (`max: 5` en `src/db/index.ts`),
   contra el pooler de Supabase en modo transacción. La causa no está explicada: cualquier
   otro `Promise.all` con más de cinco consultas podría colgarse igual.
-- **Los defectos de la auditoría de UI del 2026-10-16.** Nueve por arreglar y uno por
-  revisar, en `docs/auditoria-ui-2026-10-16.md` («Defectos»). El más grave: el editor de un
-  post que falló no dice qué destino falló ni por qué. Los demás: cifras cortadas en el eje
-  de los gráficos de Los Números, series de escalas distintas en un mismo eje, «Todas las
-  etiquetas» sin la red, tres pantallas que se rompen a 390 px y tres formas de escribir una
-  fecha.
+- **Por revisar en el teléfono: la barra de pestañas de la app** (2026-10-16). En la versión
+  web de la app, las etiquetas de las pestañas se ven cortadas por abajo; puede ser solo la
+  web. Mirarlo en el teléfono, y si pasa ahí también, darle alto a la barra en
+  `mobile/src/app/(tabs)/_layout.tsx`. Es el último defecto abierto de
+  `docs/auditoria-ui-2026-10-16.md`.
+- **Por revisar: miniaturas vencidas en La Mesa y en Tus publicaciones** (2026-10-16). Las
+  dos dibujan `socialPosts.thumbnailUrl` tal cual (`comments/cola.tsx`,
+  `analytics/publicaciones/post-table.tsx`), y esa URL se refresca solo con la
+  sincronización diaria. Las de Instagram vencen: si una vence entre dos sincronizaciones,
+  se ve el ícono de imagen rota. Se vio con datos de prueba, no en producción. Si pasa, la
+  salida es que la imagen caiga al cuadro vacío que ya existe para las publicaciones sin
+  miniatura.
 - **La Parrilla abierta pide decenas de páginas `/admin/schedule/<id>` cada pocos
   segundos** (2026-10-04). En los logs de Vercel, unas 60 peticiones por tanda, una por cada
   corte del calendario: parece el prefetch de los `Link` combinado con un refresco
@@ -180,11 +186,14 @@ Nada de esto bloquea un trámite hoy; conviene ordenarlo antes de abrir a tercer
 ## Features y trabajo de código
 
 - **Llevar el resto de la interfaz al nivel del corte** (2026-10-16). La auditoría de ese
-  día propone seis tandas que se publican solas: lo roto; el corte en los flujos (sobre todo
-  el compositor, con los archivos que llegan como carne cruda mientras suben y el corte que
-  cae en su día); la carne que se asa al ritmo de cada etapa de la publicación (toca el
-  publicador); Los Números con brasas donde se mide calor; la puerta de entrada; y lo
-  nativo de la app. Detalle y tiempos a ojo en `docs/auditoria-ui-2026-10-16.md`.
+  día propone seis tandas que se publican solas. La primera, lo roto, ya está. Quedan: el
+  corte en los flujos (el compositor, la parrilla fría y la carga tibia ya están; faltan La
+  Mesa como conversación y las cuentas del editor de un post como fichas, que siguen siendo
+  casillas); la carne que se asa al ritmo de cada etapa de
+  la publicación (toca el publicador); Los Números con brasas donde se mide calor; la puerta
+  de entrada (la portada ya está; faltan el código en casillas, y el error y el 404); y lo
+  nativo de la app. Detalle y tiempos a ojo en
+  `docs/auditoria-ui-2026-10-16.md`.
 - **El rediseño de la app del teléfono, partes 3 y 4** (2026-10-16). Las partes 1 y 2
   dejaron las tres pestañas del panel, «Reprogramar» en «Se quemó» y los borradores
   compartidos con el panel. Faltan: (3) La Mesa como cuarta pestaña, para leer y responder

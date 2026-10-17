@@ -3,16 +3,17 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { startTransition, useActionState, useEffect, useId, useMemo, useRef, useState } from 'react'
-import { X } from 'lucide-react'
 import {
   createScheduledPost,
   descartarBorrador,
   guardarBorradorAccion,
   type FormState,
 } from '@/app/admin/actions'
+import { Icon } from '@/components/icon'
 import { Button, Field, GroupLabel, Input, Textarea } from '@/components/ui'
 import {
   camposDesdeFormulario,
+  fechaParaDia,
   instagramTrialInicial,
   primero,
   reglaInicial,
@@ -22,14 +23,19 @@ import {
 } from '@/lib/borrador'
 import type { CuentaRow } from '@/lib/posts-kpis'
 import { networkLabel } from '@/lib/networks'
-import { calorDelDia, type Calor } from '@/lib/parrilla'
-import { subirArchivos, type MediaSubida } from '@/lib/subida-directa'
-import { cn } from '@/lib/utils'
+import { calorDelDia, estadoDelFierro, type Calor, type Fierro, type Sello } from '@/lib/parrilla'
+import { addDays, dayKey, dayLabelConMes, mondayOfKey } from '@/lib/schedule-week'
+import { subirUno, type MediaSubida } from '@/lib/subida-directa'
+import { cn, toZonedInput } from '@/lib/utils'
+import { TablaDeArchivos } from './archivos'
 import { InstagramOpciones } from './instagram-opciones'
 import { PanelLateral } from './panel-lateral'
 import { ReglaClave } from './regla-clave'
 import { RevisionMedia } from './revision-media'
+import { formatoConLoQueSube, fraseDeLlegada, llenadoDe, siguienteEnCola, tipoDe, type Subida } from './subidas'
 import { TikTokOpciones } from './tiktok-opciones'
+import { venceAntesDe } from './vence'
+import { VistaPrevia } from './vista-previa'
 
 // Twin of PUBLISHABLE (publish/batch.ts). NETWORKS in the editor
 // (schedule/[id]/editor.tsx) deliberately lacks tiktok: the editor cannot collect
@@ -99,6 +105,62 @@ const CLASE_CALOR: Record<Calor, string> = {
   llena: 'grilla-llena',
 }
 
+/** El fierro de cada ficha de cuenta: las mismas clases que en Los Fierros. */
+const CLASE_FIERRO: Record<Fierro, string> = {
+  'al-rojo': 'fierro-al-rojo',
+  enfriandose: 'fierro-enfriandose',
+  frio: 'fierro-frio',
+}
+
+const PALABRA_CALOR: Record<Calor, string> = {
+  apagada: 'apagada',
+  prendida: 'prendida',
+  llena: 'llena',
+}
+
+/** Los días que muestra la semana en chico, desde hoy. */
+const DIAS_A_LA_VISTA = 7
+
+/**
+ * Adónde vuelve el compositor al programar: la vista de la que vino, con el aviso de
+ * «programado» y el post recién puesto (`nuevo`) para que se encienda en su día. En la semana
+ * se pasa a la del día elegido, y en la vista «Día» a ese día: si no, el corte caería fuera de
+ * la vista y no se vería dónde.
+ */
+export function hrefDeVuelta(listoHref: string, id: string | undefined, dia: string | null): string {
+  if (!id) return listoHref
+  const url = new URL(listoHref, 'https://x')
+  url.searchParams.set('nuevo', id)
+  if (dia && /^\d{4}-\d{2}-\d{2}$/.test(dia)) {
+    const vista = url.searchParams.get('vista')
+    if (vista === 'dia') url.searchParams.set('fecha', dia)
+    else if (vista !== 'lista') url.searchParams.set('semana', mondayOfKey(dia))
+  }
+  return `${url.pathname}?${url.searchParams.toString()}`
+}
+
+/** El formato en palabras, para «Así va a quedar». */
+function formaEnPalabras(formato: string, huesos: number): string {
+  if (formato === 'entrana') return 'Un video'
+  if (formato === 'tira') return `Un carrusel de ${huesos}`
+  if (formato === 'bife') return 'Una foto'
+  return 'Solo texto'
+}
+
+/**
+ * A quién va, en palabras: «A Instagram y TikTok.». Con dos cuentas de la misma red, cada una
+ * con su nombre, para que se sepa cuál; sin ninguna, que falta elegir.
+ */
+export function destinosEnPalabras(cuentas: ReadonlyArray<{ network: string; handle: string | null }>): string {
+  if (cuentas.length === 0) return 'Todavía sin cuenta: elige al menos una.'
+  const repetidas = new Set(cuentas.map((c) => c.network).filter((red, i, todas) => todas.indexOf(red) !== i))
+  const nombres = cuentas.map((c) =>
+    repetidas.has(c.network) && c.handle ? `${networkLabel(c.network)} · ${c.handle}` : networkLabel(c.network),
+  )
+  const lista = nombres.length === 1 ? nombres[0] : `${nombres.slice(0, -1).join(', ')} y ${nombres[nombres.length - 1]}`
+  return `A ${lista}.`
+}
+
 type EstadoBorrador = 'nada' | 'guardando' | 'guardado' | 'error' | 'perdido'
 
 const FRASE_BORRADOR: Record<Exclude<EstadoBorrador, 'nada'>, string> = {
@@ -131,6 +193,7 @@ export function Composer({
   cuentaInicial = '',
   listoHref,
   cerrarHref,
+  zona,
 }: {
   carga: Record<string, number>
   cuentas: CuentaRow[]
@@ -147,6 +210,8 @@ export function Composer({
   listoHref: string
   /** Adónde ir al cerrar o descartar. */
   cerrarHref: string
+  /** La zona del dueño: la de la fecha del campo, de la semana en chico y de los vencimientos. */
+  zona: string
 }) {
   const router = useRouter()
   const captionId = useId()
@@ -178,16 +243,29 @@ export function Composer({
       ? publicables.filter((c) => c.network === 'instagram' && marcadaAlAbrir(c))
       : cuentasInicialesDe(publicables, 'instagram'),
   )
+  // Todas las marcadas, para la marca de cada una en «Así va a quedar».
+  const [marcadas, setMarcadas] = useState<ReadonlySet<string>>(
+    () => new Set(publicables.filter((c) => marcadaAlAbrir(c)).map((c) => c.id)),
+  )
 
   // La media ya subida, en el orden del carrusel. Los `File` de lo que se eligió en esta
   // sesión se guardan aparte solo para medirlos: lo que vino de un borrador no tiene `File`.
   const [media, setMedia] = useState<MediaSubida[]>(borrador?.media ?? [])
   const mediaRef = useRef(media)
   const [locales, setLocales] = useState<Record<string, File>>({})
-  const [subiendo, setSubiendo] = useState('')
-  // La acción de programar puede correr con un cierre viejo: lo que sube se lee de acá.
-  const subiendoRef = useRef(false)
-  const [errorSubida, setErrorSubida] = useState<string | null>(null)
+  // Lo elegido que todavía no es media: espera, sube o no llegó (`subidas.ts`). La acción de
+  // programar puede correr con un cierre viejo, así que la cola se lee también de un ref.
+  const [subidas, setSubidas] = useState<Subida[]>([])
+  const subidasRef = useRef<Subida[]>([])
+  const archivos = useRef(new Map<string, File>())
+  const [miniaturas, setMiniaturas] = useState<Record<string, string>>({})
+  const miniaturasRef = useRef<Record<string, string>>({})
+  const enSubida = useRef<{ clave: string; control: AbortController } | null>(null)
+  const procesando = useRef(false)
+  // La clave de cada archivo elegido: un contador y no `crypto.randomUUID`, que no existe fuera
+  // de un contexto seguro (el panel abierto por IP en la red local, por ejemplo).
+  const contador = useRef(0)
+  const idDeLlenado = useId()
   const soloFotos = media.length > 0 && media.every((m) => m.mediaType === 'image')
   // Exactamente un video: la única condición bajo la que se monta el bloque de Instagram,
   // porque un trial reel no admite fotos ni carrusel.
@@ -322,38 +400,120 @@ export function Composer({
 
   /* ---- los archivos ---- */
 
-  async function alElegir(input: HTMLInputElement) {
-    const files = Array.from(input.files ?? [])
-    if (files.length === 0) return
-    setErrorSubida(null)
-    subiendoRef.current = true
+  function ponerSubidas(cambio: (antes: Subida[]) => Subida[]) {
+    subidasRef.current = cambio(subidasRef.current)
+    setSubidas(subidasRef.current)
+  }
+
+  function ponerMiniatura(clave: string, url: string | null) {
+    const siguientes = { ...miniaturasRef.current }
+    if (url) siguientes[clave] = url
+    else delete siguientes[clave]
+    miniaturasRef.current = siguientes
+    setMiniaturas(siguientes)
+  }
+
+  // Las miniaturas son URLs `blob:` que el navegador guarda hasta que se sueltan.
+  useEffect(() => () => Object.values(miniaturasRef.current).forEach((url) => URL.revokeObjectURL(url)), [])
+
+  /** Los archivos elegidos o soltados: a la cola, con su miniatura, y a subir. */
+  function agregar(files: File[]) {
+    const nuevas = files.map((file) => {
+      contador.current += 1
+      const clave = `archivo-${contador.current}`
+      archivos.current.set(clave, file)
+      ponerMiniatura(clave, URL.createObjectURL(file))
+      return { clave, nombre: file.name, tipo: tipoDe(file), estado: 'cola', progreso: 0, error: null } satisfies Subida
+    })
+    ponerSubidas((antes) => [...antes, ...nuevas])
+    void procesar()
+  }
+
+  /**
+   * Sube lo que está en la cola, de a uno y en orden (`siguienteEnCola`). Cada uno que llega
+   * pasa a la media del post —con su miniatura— y se guarda el borrador; si uno no llega, la
+   * cola se detiene en él hasta que se reintente o se quite.
+   */
+  async function procesar() {
+    if (procesando.current) return
+    procesando.current = true
     try {
-      const subidos = await subirArchivos(files, (hechos, total) =>
-        setSubiendo(total > 1 ? `Subiendo ${hechos} de ${total}…` : 'Subiendo…'),
-      )
-      const nuevos: Record<string, File> = {}
-      subidos.forEach((m, i) => (nuevos[m.url] = files[i]!))
-      setLocales((prev) => ({ ...prev, ...nuevos }))
-      mediaRef.current = [...mediaRef.current, ...subidos]
-      setMedia(mediaRef.current)
-      alCambiar()
-    } catch (error) {
-      setErrorSubida(error instanceof Error ? error.message : 'No se pudo subir el archivo.')
+      for (let siguiente = siguienteEnCola(subidasRef.current); siguiente; siguiente = siguienteEnCola(subidasRef.current)) {
+        const { clave } = siguiente
+        const file = archivos.current.get(clave)
+        if (!file) {
+          ponerSubidas((antes) => antes.filter((s) => s.clave !== clave))
+          continue
+        }
+        const control = new AbortController()
+        enSubida.current = { clave, control }
+        ponerSubidas((antes) => antes.map((s) => (s.clave === clave ? { ...s, estado: 'subiendo', progreso: 0, error: null } : s)))
+        try {
+          const subida = await subirUno(
+            file,
+            (fraccion) => ponerSubidas((antes) => antes.map((s) => (s.clave === clave ? { ...s, progreso: fraccion } : s))),
+            control.signal,
+          )
+          ponerSubidas((antes) => antes.filter((s) => s.clave !== clave))
+          archivos.current.delete(clave)
+          // La miniatura sigue siendo la misma imagen: ahora la nombra su URL.
+          const miniatura = miniaturasRef.current[clave]
+          ponerMiniatura(clave, null)
+          if (miniatura) ponerMiniatura(subida.url, miniatura)
+          setLocales((antes) => ({ ...antes, [subida.url]: file }))
+          mediaRef.current = [...mediaRef.current, subida]
+          setMedia(mediaRef.current)
+          alCambiar()
+        } catch (error) {
+          // Quitado mientras subía: ya salió de la cola, no hay nada que marcar.
+          if (control.signal.aborted) continue
+          const frase = error instanceof Error ? error.message : 'No se pudo subir el archivo.'
+          ponerSubidas((antes) => antes.map((s) => (s.clave === clave ? { ...s, estado: 'fallo', error: frase } : s)))
+        } finally {
+          enSubida.current = null
+        }
+      }
     } finally {
-      subiendoRef.current = false
-      setSubiendo('')
-      // Vaciado para que elegir el mismo archivo otra vez vuelva a disparar `onChange`.
-      input.value = ''
+      procesando.current = false
     }
   }
 
   function quitar(url: string) {
     mediaRef.current = mediaRef.current.filter((m) => m.url !== url)
     setMedia(mediaRef.current)
+    const miniatura = miniaturasRef.current[url]
+    if (miniatura) {
+      URL.revokeObjectURL(miniatura)
+      ponerMiniatura(url, null)
+    }
     alCambiar()
   }
 
+  /** Lo que todavía no es media: si estaba subiendo, se corta su subida; la cola sigue. */
+  function quitarSubida(clave: string) {
+    if (enSubida.current?.clave === clave) enSubida.current.control.abort()
+    ponerSubidas((antes) => antes.filter((s) => s.clave !== clave))
+    archivos.current.delete(clave)
+    const miniatura = miniaturasRef.current[clave]
+    if (miniatura) {
+      URL.revokeObjectURL(miniatura)
+      ponerMiniatura(clave, null)
+    }
+    void procesar()
+  }
+
+  function reintentar(clave: string) {
+    ponerSubidas((antes) => antes.map((s) => (s.clave === clave ? { ...s, estado: 'cola', progreso: 0, error: null } : s)))
+    void procesar()
+  }
+
   function alternar(cuenta: CuentaRow, marcada: boolean) {
+    setMarcadas((antes) => {
+      const siguientes = new Set(antes)
+      if (marcada) siguientes.add(cuenta.id)
+      else siguientes.delete(cuenta.id)
+      return siguientes
+    })
     const setCuentas =
       cuenta.network === 'tiktok' ? setCuentasTikTok : cuenta.network === 'instagram' ? setCuentasInstagram : null
     if (!setCuentas) return
@@ -363,7 +523,10 @@ export function Composer({
   /* ---- programar ---- */
 
   const [state, programar, programando] = useActionState(async (prev: FormState, formData: FormData): Promise<FormState> => {
-    if (subiendoRef.current) return { error: 'Espera a que terminen de subir los archivos.' }
+    if (subidasRef.current.some((s) => s.estado === 'fallo')) {
+      return { error: 'Un archivo no llegó: reintenta o quítalo antes de programar.' }
+    }
+    if (subidasRef.current.length > 0) return { error: 'Espera a que terminen de subir los archivos.' }
     // Primero que termine lo que estaba guardando: así se sabe qué borrador sacar, y ningún
     // guardado atrasado vuelve a crear uno después de programar.
     terminado.current = true
@@ -376,7 +539,8 @@ export function Composer({
     if (borradorId.current) formData.set('borradorId', borradorId.current)
     const resultado = await createScheduledPost(prev, formData)
     if (resultado.ok) {
-      router.replace(listoHref, { scroll: false })
+      const diaProgramado = ahora ? dayKey(new Date(), zona) : String(formData.get('scheduledAt') ?? '').slice(0, 10)
+      router.replace(hrefDeVuelta(listoHref, resultado.id, diaProgramado), { scroll: false })
     } else if (estado !== 'perdido') {
       // No salió: se sigue escribiendo. El guardado que el clic dejó pendiente se canceló
       // arriba, así que se vuelve a pedir: lo del último segundo no se pierde.
@@ -392,6 +556,39 @@ export function Composer({
   }, [captionId])
 
   const reglaGuardada = campos ? reglaInicial(campos) : null
+
+  // «Así va a quedar»: la silueta con todo lo elegido, una marca por cuenta marcada (fría si su
+  // fierro se apagó), cuánta carne llegó y la parrilla del día elegido con este post encima.
+  const { formato, huesos } = formatoConLoQueSube(media, subidas)
+  const elegidas = publicables.filter((c) => marcadas.has(c.id))
+  const ahoraMismo = new Date()
+  const fierroDe = (c: CuentaRow): Fierro =>
+    estadoDelFierro({ connected: c.connected, expiraEn: c.expiresAt, ultimoError: c.lastSyncError, red: c.network }, ahoraMismo)
+  // Las marcadas cuyo permiso vence antes de la hora elegida: así como está, ahí no va a salir.
+  const vencenAntes = ahora
+    ? []
+    : elegidas.flatMap((c) => {
+        const vence = venceAntesDe(c, cuando, zona)
+        return vence ? [{ cuenta: c, vence }] : []
+      })
+  const sellosPrevia: Sello[] = elegidas.map((c) =>
+    fierroDe(c) === 'frio' || vencenAntes.some((v) => v.cuenta.id === c.id) ? 'frio' : 'pendiente',
+  )
+  // La semana en chico: hoy y los seis días que siguen, cada uno con su fuego.
+  const hoy = dayKey(ahoraMismo, zona)
+  const diasALaVista = Array.from({ length: DIAS_A_LA_VISTA }, (_, i) => addDays(hoy, i))
+
+  /** Un día de la semana en chico: ese día, con la hora que ya tenía si todavía no pasó. */
+  function elegirDia(dia: string) {
+    const hora = cuando.slice(11, 16)
+    const conSuHora = hora ? `${dia}T${hora}` : ''
+    const yaPaso = conSuHora !== '' && conSuHora <= toZonedInput(new Date(), zona).slice(0, 16)
+    setCuando(conSuHora && !yaPaso ? conSuHora : fechaParaDia(dia, new Date(), zona) || conSuHora || cuando)
+  }
+  const diaElegido = ahora ? null : cuando.slice(0, 10)
+  const calorPrevia = calorDelDia((diaElegido && diaElegido.length === 10 ? (carga[diaElegido] ?? 0) : 0) + 1)
+  const llegada = fraseDeLlegada(media.length, subidas)
+  const frasePrevia = [`${formaEnPalabras(formato, huesos)}.`, destinosEnPalabras(elegidas), llegada].filter(Boolean).join(' ')
 
   return (
     <PanelLateral titulo={borrador ? 'Borrador' : 'Nueva publicación'} onCerrar={() => void cerrar()}>
@@ -412,6 +609,17 @@ export function Composer({
         className="flex min-h-full flex-col"
       >
         <div className="flex-1 space-y-4 px-5 py-4">
+          <VistaPrevia
+            formato={formato}
+            huesos={huesos}
+            sellos={sellosPrevia}
+            llenado={llenadoDe(media.length, subidas)}
+            noLlego={subidas.some((sub) => sub.estado === 'fallo')}
+            calor={calorPrevia}
+            frase={frasePrevia}
+            idDeLlenado={`llenado-${idDeLlenado.replace(/[^a-zA-Z0-9_-]/g, '')}`}
+          />
+
           <Field label="Texto">
             <Textarea
               id={captionId}
@@ -423,38 +631,15 @@ export function Composer({
             />
           </Field>
 
-          <div>
-            <Field label="Archivos" hint="Imágenes o video, opcional. Se suben apenas los eliges.">
-              <Input
-                type="file"
-                multiple
-                accept="image/*,video/*"
-                disabled={Boolean(subiendo)}
-                onChange={(event) => void alElegir(event.currentTarget)}
-              />
-            </Field>
-            {media.length > 0 ? (
-              <ul className="mt-2 space-y-1">
-                {media.map((m, i) => (
-                  <li key={m.url} className="flex items-center gap-2 text-[0.8rem] text-fg-muted">
-                    <span className="font-mono text-[0.68rem] text-fg-faint">{i + 1}</span>
-                    <span className="min-w-0 flex-1 truncate">{m.nombre}</span>
-                    <span className="text-[0.68rem] text-fg-faint">{m.mediaType === 'video' ? 'video' : 'imagen'}</span>
-                    <button
-                      type="button"
-                      onClick={() => quitar(m.url)}
-                      className="rounded p-0.5 text-fg-faint transition-colors hover:text-fg"
-                    >
-                      <X className="h-3.5 w-3.5" aria-hidden />
-                      <span className="sr-only">Quitar {m.nombre}</span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            ) : null}
-            {subiendo ? <p className="mt-2 text-sm text-fg-muted">{subiendo}</p> : null}
-            {errorSubida ? <p className="mt-2 text-sm text-negative">{errorSubida}</p> : null}
-          </div>
+          <TablaDeArchivos
+            media={media}
+            subidas={subidas}
+            miniaturas={miniaturas}
+            onElegir={agregar}
+            onQuitarMedia={quitar}
+            onQuitarSubida={quitarSubida}
+            onReintentar={reintentar}
+          />
 
           <RevisionMedia files={archivosParaRevisar} activo={cuentasTikTok.length > 0} />
 
@@ -469,26 +654,59 @@ export function Composer({
                 para poder programar.
               </p>
             ) : (
-              <div className="flex flex-wrap gap-3">
-                {publicables.map((cuenta) => (
-                  <label
-                    key={cuenta.id}
-                    className={cn('flex items-center gap-2 text-sm', !cuenta.connected && 'opacity-40')}
-                  >
-                    <input
-                      type="checkbox"
-                      name="cuentas"
-                      value={cuenta.id}
-                      disabled={!cuenta.connected}
-                      defaultChecked={marcadaAlAbrir(cuenta)}
-                      onChange={(e) => alternar(cuenta, e.target.checked)}
-                    />
-                    {networkLabel(cuenta.network)} · {cuenta.handle ?? 'sin nombre'}
-                    {!cuenta.connected && <span className="text-xs text-fg-faint">reconéctala</span>}
-                  </label>
-                ))}
+              <div className="flex flex-wrap gap-2">
+                {/* Fichas y no casillas: la casilla sigue adentro, para el formulario y el teclado,
+                    pero lo que se ve es el fierro de la cuenta, su red y su nombre, y la ficha
+                    marcada se enciende. */}
+                {publicables.map((cuenta) => {
+                  const fierro = fierroDe(cuenta)
+                  return (
+                    <label
+                      key={cuenta.id}
+                      className={cn(
+                        'inline-flex items-center gap-2 rounded-full border border-acero-600 px-3 py-1.5 text-sm text-fg-muted transition-colors',
+                        'has-[:checked]:border-brasa has-[:checked]:bg-brasa/10 has-[:checked]:text-fg',
+                        'has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-brasa',
+                        cuenta.connected ? 'cursor-pointer hover:text-fg' : 'cursor-not-allowed opacity-50',
+                      )}
+                    >
+                      <input
+                        type="checkbox"
+                        name="cuentas"
+                        value={cuenta.id}
+                        disabled={!cuenta.connected}
+                        defaultChecked={marcadaAlAbrir(cuenta)}
+                        onChange={(e) => alternar(cuenta, e.target.checked)}
+                        className="sr-only"
+                      />
+                      <span className={cn('fierro w-3.5 shrink-0', CLASE_FIERRO[fierro])} aria-hidden />
+                      <Icon name={cuenta.network} className="h-3.5 w-3.5 shrink-0" />
+                      {networkLabel(cuenta.network)} · {cuenta.handle ?? 'sin nombre'}
+                      {!cuenta.connected ? (
+                        <span className="text-xs text-fg-faint">reconéctala</span>
+                      ) : fierro === 'enfriandose' ? (
+                        <span className="text-xs text-caution">se enfría</span>
+                      ) : null}
+                    </label>
+                  )
+                })}
               </div>
             )}
+            {vencenAntes.map(({ cuenta, vence }) => (
+              <p
+                key={cuenta.id}
+                role="status"
+                className="mt-2 rounded-lg border border-caution/40 bg-caution/10 px-3 py-2 text-[0.8rem] text-caution"
+              >
+                El permiso de {networkLabel(cuenta.network)} · {cuenta.handle ?? 'sin nombre'} vence el{' '}
+                {dayLabelConMes(vence.slice(0, 10))} a las {vence.slice(11, 16)}, antes de que salga esto: así no va a
+                salir ahí.{' '}
+                <Link className="underline" href="/admin/accounts">
+                  Reconéctala en Los Fierros
+                </Link>{' '}
+                antes, o elige un día anterior.
+              </p>
+            ))}
           </div>
 
           {cuentasTikTok.map((cuenta) => (
@@ -533,6 +751,39 @@ export function Composer({
               </Button>
               {ahora ? <input type="hidden" name="cuandoAhora" value="on" /> : null}
             </div>
+            {/* La semana en chico: hoy y los seis días que siguen, con el fuego de cada uno. Un
+                clic pone ese día en el campo, con la hora que ya tenía si todavía no pasó. Con
+                «Ahora» no hay día que elegir. */}
+            {ahora ? null : (
+              <div className="mt-2 grid max-w-md grid-cols-7 gap-1" role="group" aria-label="Elegir el día">
+                {diasALaVista.map((dia) => {
+                  const [dow, numero] = dayLabelConMes(dia).split(' ')
+                  const cortes = carga[dia] ?? 0
+                  const calor = calorDelDia(cortes)
+                  const elegido = cuando.slice(0, 10) === dia
+                  return (
+                    <button
+                      key={dia}
+                      type="button"
+                      aria-pressed={elegido}
+                      onClick={() => elegirDia(dia)}
+                      className={cn(
+                        'flex flex-col items-center gap-1 rounded-lg border px-1 pb-1 pt-1.5 transition-colors',
+                        elegido ? 'border-brasa text-fg' : 'border-acero-700 text-fg-muted hover:text-fg',
+                      )}
+                    >
+                      <span className="font-titulo text-[0.62rem] uppercase tracking-[0.08em]">{dia === hoy ? 'hoy' : dow}</span>
+                      <span className="font-mono text-[0.78rem] text-fg">{numero}</span>
+                      <span className={cn('grilla h-2.5 w-full', CLASE_CALOR[calor])} aria-hidden />
+                      <span className="sr-only">
+                        {dayLabelConMes(dia)}: {PALABRA_CALOR[calor]}
+                        {cortes > 0 ? `, ${cortes === 1 ? 'un corte' : `${cortes} cortes`}` : ''}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+            )}
             {/* Con «Ahora» no hay día que mirar: la hora la pone el servidor al enviar. */}
             {ahora ? null : <CargaDelDia carga={carga} cuando={cuando} />}
           </Field>
@@ -547,7 +798,7 @@ export function Composer({
           <div className="flex flex-wrap items-center gap-3">
             {/* Con el borrador perdido no se programa: si se programó en otro lado, saldría
                 dos veces. */}
-            <Button type="submit" variant="primary" disabled={programando || Boolean(subiendo) || estado === 'perdido'}>
+            <Button type="submit" variant="primary" disabled={programando || subidas.length > 0 || estado === 'perdido'}>
               {programando ? 'Programando…' : 'Programar'}
             </Button>
             <Button type="button" variant="ghost" onClick={() => void descartar()}>

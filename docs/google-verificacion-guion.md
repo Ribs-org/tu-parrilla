@@ -59,8 +59,11 @@ ahora es **Google Auth Platform**, con las secciones *Branding* (marca), *Audien
 Google mira `https://tu-parrilla.cl` y exige que diga **qué hace la app y para qué usa los
 datos de Google**, con enlace a la privacidad, sin pedir ingreso. Sin eso, Google rechaza
 por «Homepage requirements not met». Está cubierto: la landing (`src/components/landing.tsx`,
-servida en `DOMINIO_PRODUCTO`) nombra el canal de YouTube entre lo que se conecta y enlaza a
-Términos y Privacidad en el pie.
+servida en `DOMINIO_PRODUCTO`) nombra el canal de YouTube entre lo que se conecta, dice para qué
+lo usa en «Qué se conecta, y para qué» —sube los videos que programas y lee sus contadores y sus
+comentarios, tal como los entrega YouTube— y enlaza a Términos y Privacidad en el pie y junto a
+esa sección. Desde el rediseño del 2026-10-17 lo cuida una prueba (`src/components/landing.test.ts`):
+si una versión nueva de la portada se come una de estas cosas, el test falla antes del merge.
 
 ### La política de privacidad y los términos tienen que nombrar a Google y a YouTube
 

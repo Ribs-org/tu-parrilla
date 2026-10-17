@@ -132,10 +132,19 @@ export const NOMBRE_FORMATO: Record<Formato, string> = {
   chori: 'Texto',
 }
 
-export function formatoDe(media: readonly { mediaType: string }[]): { formato: Formato; huesos: number } {
-  if (media.length === 0) return { formato: 'chori', huesos: 0 }
-  if (media.length > 1) return { formato: 'tira', huesos: Math.min(media.length, MAX_HUESOS) }
-  return { formato: media[0]!.mediaType === 'video' ? 'entrana' : 'bife', huesos: 0 }
+/**
+ * `videosLiberados` son los videos que el post llevaba y ya no están en el almacén
+ * (`scheduled_posts.videos_liberados`): cuentan para la forma igual que los archivos que
+ * quedan. Sin ellos, una entraña que salió en todas sus redes se dibujaba como chori.
+ */
+export function formatoDe(
+  media: readonly { mediaType: string }[],
+  videosLiberados = 0,
+): { formato: Formato; huesos: number } {
+  const archivos = media.length + videosLiberados
+  if (archivos === 0) return { formato: 'chori', huesos: 0 }
+  if (archivos > 1) return { formato: 'tira', huesos: Math.min(archivos, MAX_HUESOS) }
+  return { formato: media.length === 0 || media[0]!.mediaType === 'video' ? 'entrana' : 'bife', huesos: 0 }
 }
 
 /**
@@ -234,6 +243,16 @@ export const DIAS_AVISO_FIERRO = 7
  * credencial puede estar viva y la conexión rota igual —permisos revocados desde la red,
  * por ejemplo— y para el caso da lo mismo, hay que reconectar.
  */
+/**
+ * Las redes cuya credencial se renueva sola antes de publicar, así que su `expiraEn` es el de
+ * un token corto y no dice cuándo se apaga la cuenta: TikTok, YouTube y X (el porqué de cada
+ * una, en `estadoDelFierro`). Para las demás, `expiraEn` es de verdad el día en que el permiso
+ * vence y lo programado después ya no sale.
+ */
+export function seRenuevaSola(red: string | undefined): boolean {
+  return red === 'tiktok' || red === 'youtube' || red === 'x'
+}
+
 export function estadoDelFierro(
   cuenta: { connected: boolean; expiraEn: string | null; ultimoError: string | null; red?: string },
   ahora: Date,
@@ -253,7 +272,7 @@ export function estadoDelFierro(
   // Y X, con dos horas: `social/publish/x.ts` lo renueva al publicar con el de refresco, que
   // rota en cada uso. Medido por ahí, X decía «vence hoy» al conectarla y quedaba fría a las
   // dos horas; con el punto del botón de Ajustes, eso habría sido una alarma encendida para siempre.
-  if (cuenta.red === 'tiktok' || cuenta.red === 'youtube' || cuenta.red === 'x') return 'al-rojo'
+  if (seRenuevaSola(cuenta.red)) return 'al-rojo'
   if (!cuenta.expiraEn) return 'al-rojo'
 
   const faltan = new Date(cuenta.expiraEn).getTime() - ahora.getTime()

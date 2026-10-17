@@ -66,6 +66,7 @@ function filaPost(overrides: Partial<ScheduledPost> = {}): ScheduledPost {
     caption: 'Hola',
     scheduledAt: new Date('2026-10-01T12:00:00Z'),
     coverUrl: null,
+    videosLiberados: 0,
     atributos: null,
     createdAt: new Date('2026-01-01'),
     updatedAt: new Date('2026-01-01'),
@@ -132,6 +133,17 @@ describe('agruparPostsMovil (GET /api/mobile/schedule)', () => {
     const [agrupado] = agruparPostsMovil(filas, media, 'America/Santiago', new Set(['fria']))
     expect(agrupado).toMatchObject({ formato: 'tira', huesos: 2, miniatura: 'https://cdn.ejemplo.cl/2.jpg' })
     expect(agrupado!.redes.map((r) => r.sello)).toEqual(['servido', 'frio'])
+  })
+
+  it('un video que ya salió en todas sus redes sigue siendo una entraña, aunque su archivo ya no esté', () => {
+    // `limpiarMedia` borra el video y su fila; el post se queda con la cuenta.
+    const post = filaPost({ id: 'post-4', videosLiberados: 1 })
+    const filas = [
+      { post, target: filaTarget({ id: 'dest-1', postId: 'post-4', status: 'published' }), handle: '@a' },
+      { post, target: filaTarget({ id: 'dest-2', postId: 'post-4', network: 'tiktok', status: 'published' }), handle: '@a' },
+    ]
+    const [agrupado] = agruparPostsMovil(filas, new Map(), 'America/Santiago')
+    expect(agrupado).toMatchObject({ formato: 'entrana', huesos: 0, miniatura: null })
   })
 
   it('agrupa por post, no por destino: dos filas del mismo post arman un post con dos redes', () => {

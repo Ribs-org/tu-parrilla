@@ -28,8 +28,11 @@ import { Button, Input } from '@/components/ui'
  * centra— lo pierde contra el `margin: 0` que Tailwind le pone a todo; de ahí el `m-auto`.
  * El `display` en cambio no se toca: el que lo esconde cerrado sale de esa misma hoja, y una
  * regla de autor lo ganaría siempre.
+ *
+ * `className` viste el botón que abre la ventana: subrayado al final de la píldora de la lista,
+ * y con pinta de botón junto al motivo en «Se quemó» y en el editor.
  */
-export function Reprogramar({ targetId, titulo }: { targetId: string; titulo?: string }) {
+export function Reprogramar({ targetId, titulo, className = 'ml-2 underline' }: { targetId: string; titulo?: string; className?: string }) {
   const panel = useRef<HTMLDialogElement>(null)
   const rotulo = useId()
   const [when, setWhen] = useState('')
@@ -62,7 +65,7 @@ export function Reprogramar({ targetId, titulo }: { targetId: string; titulo?: s
       <button
         type="button"
         disabled={pending}
-        className="ml-2 underline"
+        className={className}
         onClick={() => {
           limpiar()
           panel.current?.showModal()

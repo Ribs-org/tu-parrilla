@@ -35,3 +35,17 @@ export const ENLACE_BOTON = `${BOTON_FORMA} bg-brasa text-acero-950 transition-[
  * CSV» junto a «Nueva publicación»).
  */
 export const ENLACE_BOTON_SECUNDARIO = `${BOTON_FORMA} border border-acero-700 text-fg-muted transition-colors hover:bg-acero-800 hover:text-fg`
+
+/**
+ * La forma chica, para la acción que va pegada a una línea de texto: el arreglo de un destino
+ * quemado al lado de su motivo, en «Se quemó» y en el editor. Con la forma de siempre, el
+ * botón era más alto que la línea que lo explica y la fila saltaba de alto.
+ */
+export const BOTON_CHICO_FORMA =
+  'inline-flex items-center justify-center gap-1 rounded-md px-2.5 py-1 text-[0.75rem] font-medium'
+
+/** El arreglo exacto de lo quemado, en chico: «Reconectar», «Cambiar el archivo». */
+export const BOTON_CHICO = `${BOTON_CHICO_FORMA} bg-brasa text-acero-950 transition-[filter] hover:brightness-110 disabled:opacity-60`
+
+/** La acción que acompaña al arreglo, en chico: «Reprogramar». */
+export const BOTON_CHICO_SECUNDARIO = `${BOTON_CHICO_FORMA} border border-acero-700 text-fg-muted transition-colors hover:bg-acero-800 hover:text-fg disabled:opacity-60`

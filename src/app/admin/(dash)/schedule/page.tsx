@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Plus } from 'lucide-react'
 import { ENLACE_BOTON, ENLACE_BOTON_SECUNDARIO } from '@/components/boton'
+import { Corte } from '@/components/corte'
 import { Encabezado } from '@/components/ui'
 import { requireUser } from '@/lib/auth'
 import { fechaParaDia, idDeBorrador, primero, textoDe } from '@/lib/borrador'
@@ -13,6 +14,7 @@ import {
   contarPorDia,
   dayKey,
   dayLabelConMes,
+  diaYHora,
   hourLabel,
   mondayOfKey,
   normalizeWeekParam,
@@ -25,6 +27,7 @@ import { BatchUpload } from './batch-upload'
 import { WeekCalendar } from './calendar'
 import { Composer } from './composer'
 import { columnasDelDia, normalizarFecha } from './dia'
+import { dibujoDe } from './dibujo'
 import { scheduleHref } from './enlace'
 import { ListaBorradores } from './lista-borradores'
 import { ordenarCola } from './orden'
@@ -84,6 +87,8 @@ export default async function SchedulePage({
   // `volver` lleva al editor de vuelta a esta misma vista y semana; los parámetros de un solo
   // uso (el panel abierto, el aviso de «programado») no viajan.
   const volver = scheduleHref(params, {})
+  // El post que se acaba de programar desde el compositor: se enciende una vez en su día.
+  const recien = texto('nuevo') || null
 
   // Lo que el compositor usa para decir cómo está el día que elegiste. Sale de estas
   // mismas filas y no de otra consulta, así el aviso y el calendario nunca se
@@ -120,6 +125,7 @@ export default async function SchedulePage({
           cuentaInicial={borrador ? '' : texto('cuenta')}
           listoHref={scheduleHref(params, { hecho: 'programado' })}
           cerrarHref={cerrarHref}
+          zona={zona}
         />
       )
     }
@@ -205,7 +211,15 @@ export default async function SchedulePage({
             ))}
           </div>
           {vista === 'lista' ? (
-            <Queue items={ordenarCola(cortes)} volver={volver} zone={zona} />
+            <Queue
+              items={ordenarCola(cortes).map((c) => ({
+                ...c,
+                corte: <Corte {...dibujoDe(c.targets, c.media, frias, c.post.videosLiberados)} chico className="w-full" />,
+                cuando: diaYHora(c.post.scheduledAt, zona),
+              }))}
+              volver={volver}
+              recien={recien}
+            />
           ) : vista === 'dia' ? (
             <VistaDia
               dia={fecha}
@@ -236,6 +250,7 @@ export default async function SchedulePage({
               hoyHref={scheduleHref(params, { fecha: hoy })}
               nuevoEnDia={(dia, cuenta) => scheduleHref(params, { componer: '1', dia, cuenta })}
               frias={frias}
+              recien={recien}
             />
           ) : (
             <WeekCalendar
@@ -251,6 +266,7 @@ export default async function SchedulePage({
               nuevoEnDia={(dia) => scheduleHref(params, { componer: '1', dia })}
               verDia={(dia) => scheduleHref(params, { vista: 'dia', fecha: dia, semana: null })}
               frias={frias}
+              recien={recien}
             />
           )}
         </div>

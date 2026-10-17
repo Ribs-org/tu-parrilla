@@ -63,9 +63,10 @@ está mal y dónde está.
 13. **La Parrilla: un error manda a hacer algo imposible.** «TikTok ya no permite esa
     privacidad en tu cuenta; edita la publicación.», pero el editor no deja cambiar las
     opciones de TikTok. `src/lib/social/publish/tiktok.ts:10`.
-14. **La Parrilla: borrar no pide confirmación**, en la lista y en el editor, mientras «Subir
+14. ~~**La Parrilla: borrar no pide confirmación**, en la lista y en el editor, mientras «Subir
     ahora» sí pregunta. `src/app/admin/(dash)/schedule/queue.tsx:91-97`,
-    `schedule/[id]/editor.tsx:290`.
+    `schedule/[id]/editor.tsx:290`.~~ **Resuelto el 2026-10-16**: «Eliminar» pregunta antes, en
+    la lista y en el editor (`CONFIRMAR_ELIMINAR`, en `schedule/etiqueta.ts`).
 15. **La Parrilla: «Reprogramar» mueve el post entero**, no solo la red que falló: las redes
     que ya salieron no se republican, pero su hora en el calendario, en «Se quemó» y en el
     pie de «ayer» se corre a la nueva. Y con todo publicado, el editor deja cambiar la fecha.

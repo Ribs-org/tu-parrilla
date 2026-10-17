@@ -2,10 +2,13 @@ import { notFound } from 'next/navigation'
 import { and, asc, eq } from 'drizzle-orm'
 import { getDb, scheduledPosts, scheduledPostTargets, scheduledPostMedia, reglasClave } from '@/db'
 import { requireUser } from '@/lib/auth'
+import { cuentasFrias } from '@/lib/parrilla'
 import { getCuentas } from '@/lib/posts'
 import { toZonedInput } from '@/lib/utils'
 import { resumenOpciones } from '@/lib/social/publish/opciones'
+import { dibujoDe } from '../dibujo'
 import { volverDelEditor } from '../enlace'
+import { DestinosDelPost } from './destinos'
 import { Editor } from './editor'
 
 export const dynamic = 'force-dynamic'
@@ -43,10 +46,17 @@ export default async function EditScheduledPostPage({
     getCuentas(ownerId),
   ])
 
+  // El corte del post y el estado de cada destino, con el handle de su cuenta y la marca fría
+  // si su fierro se apagó: lo mismo que dibuja el calendario, para que digan lo mismo.
+  const handles = new Map(cuentas.map((c) => [c.id, c.handle]))
+  const destinos = targets.map((t) => ({ ...t, handle: handles.get(t.accountId) ?? null }))
+  const dibujo = dibujoDe(destinos, media, cuentasFrias(cuentas, new Date()), post.videosLiberados)
+
   return (
     <Editor
       postId={id}
       volver={volver}
+      cabecera={<DestinosDelPost dibujo={dibujo} destinos={destinos} />}
       caption={post.caption}
       scheduledAtLocal={toZonedInput(post.scheduledAt, zona)}
       cuentas={cuentas}
