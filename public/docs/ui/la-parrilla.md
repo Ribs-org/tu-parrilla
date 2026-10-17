@@ -350,8 +350,9 @@ formulario viene abierto, con el cursor en «Texto». En este orden:
 
    Al programar, el panel se cierra y el corte cae en su día: en el calendario, la semana se
    pasa a la de ese día y su tarjeta queda encendida un momento con un borde naranjo; en la
-   vista «Día», se va a ese día; en la lista, su fila se trae a la vista. En el teléfono, la
-   semana se corre hasta él.
+   vista «Día», se va a ese día; en la lista, su fila se trae a la vista y se enciende igual.
+   En el teléfono, la semana se corre hasta él. Con «reducir movimiento» activado en el
+   sistema, la tarjeta no cae: queda con el borde naranjo quieto hasta que se va a otra parte.
 10. **El pie del panel**, fijo abajo: los errores en rojo, encima de los botones; **«Programar»**,
    que dice «Programando…» mientras trabaja; **«Descartar»**; y a la derecha, en chico, cómo va
    el guardado del borrador (ver abajo).
