@@ -560,14 +560,17 @@
   }
 }
 
-/* Se enciende y se apaga de a poco: de ceniza tibia a brasa, y de vuelta. */
+/*
+ * Se enciende y se apaga de a poco: de brasa tibia a brasa, y de vuelta. El piso no baja más:
+ * casi toda carga dura menos de un segundo, y empezando más oscura se veía gris, no tibia.
+ */
 @keyframes tibio {
   0%,
   100% {
-    filter: brightness(0.55) saturate(0.6);
+    filter: brightness(0.7) saturate(0.7);
   }
   50% {
-    filter: brightness(0.9) saturate(1);
+    filter: brightness(1) saturate(1);
   }
 }
 
@@ -656,6 +659,6 @@
   /* La carga quieta, a media brasa: sigue diciendo que algo viene, sin latir. */
   .tibio {
     animation: none !important;
-    filter: brightness(0.75);
+    filter: brightness(0.8);
   }
 }

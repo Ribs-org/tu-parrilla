@@ -44,6 +44,13 @@ Cómo se usa:
   web. Mirarlo en el teléfono, y si pasa ahí también, darle alto a la barra en
   `mobile/src/app/(tabs)/_layout.tsx`. Es el último defecto abierto de
   `docs/auditoria-ui-2026-10-16.md`.
+- **Por revisar: miniaturas vencidas en La Mesa y en Tus publicaciones** (2026-10-16). Las
+  dos dibujan `socialPosts.thumbnailUrl` tal cual (`comments/cola.tsx`,
+  `analytics/publicaciones/post-table.tsx`), y esa URL se refresca solo con la
+  sincronización diaria. Las de Instagram vencen: si una vence entre dos sincronizaciones,
+  se ve el ícono de imagen rota. Se vio con datos de prueba, no en producción. Si pasa, la
+  salida es que la imagen caiga al cuadro vacío que ya existe para las publicaciones sin
+  miniatura.
 - **La Parrilla abierta pide decenas de páginas `/admin/schedule/<id>` cada pocos
   segundos** (2026-10-04). En los logs de Vercel, unas 60 peticiones por tanda, una por cada
   corte del calendario: parece el prefetch de los `Link` combinado con un refresco
