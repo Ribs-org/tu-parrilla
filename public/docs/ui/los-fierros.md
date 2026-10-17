@@ -22,6 +22,8 @@ Los títulos de la pantalla se ven en mayúsculas; aquí van como están escrito
 - El título «Los Fierros» y debajo «tus redes conectadas».
 - Solo al volver de conectar, o de un intento fallido: una franja con una frase, por ejemplo «Instagram conectado.». Todas las posibles están en «Mensajes que puede ver». La frase viaja en la dirección de la página: si se recarga, vuelve a aparecer, y eso no significa que se haya conectado otra vez.
 
+Mientras carga se ve el título «Los Fierros» y, en vez de las redes, bloques sin texto con su forma: cada red con sus cuentas, y cada cuenta con un fierro naranjo tenue que todavía no dice nada de la conexión. Todo se enciende y se apaga de a poco, como brasas, una pieza un poco después de la otra (con «reducir movimiento» activado en el sistema, quieto a media luz). La lista para elegir (`/admin/accounts/elegir`) carga con dos bloques sin texto.
+
 ### Las redes con cuentas
 
 Arriba, en un solo recuadro, un bloque por cada red que tiene al menos una cuenta, en este orden: Instagram, TikTok, YouTube, Facebook, Threads, X / Twitter. Cada bloque tiene:
@@ -300,6 +302,7 @@ Lo que describe sale de:
 - `src/app/admin/(dash)/accounts/page.tsx`
 - `src/app/admin/(dash)/accounts/cuentas.tsx`
 - `src/app/admin/(dash)/accounts/elegir/page.tsx`
+- `src/app/admin/(dash)/accounts/loading.tsx`, `src/app/admin/(dash)/carga-general.tsx` y `src/components/esqueleto.tsx` (la carga)
 - `src/app/admin/actions.ts` (`syncSocialNow`, `disconnectAccount`, `quitarCuentaAccion`, `fusionarCuenta`, `conectarElegidas`)
 - `src/app/api/social/[network]/connect/route.ts`
 - `src/app/api/social/[network]/callback/route.ts`

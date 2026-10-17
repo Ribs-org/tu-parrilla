@@ -6,7 +6,7 @@ import { networkLabel } from '@/lib/networks'
 import { NOMBRE_COCCION, NOMBRE_FORMATO, calorDelDia } from '@/lib/parrilla'
 import { hourLabel } from '@/lib/schedule-week'
 import { cn } from '@/lib/utils'
-import { CLASE_BORDE, CLASE_ESTADO, ROTULO_CALOR } from './calendar'
+import { CLASE_BORDE, CLASE_ESTADO, PonerAlgo, ROTULO_CALOR } from './calendar'
 import { SIN_CUENTA, cortesDelDia, rotuloDelDia, type Columna, type CorteDelDia } from './dia'
 import { bordeDe, dibujoDe, estadoCorto } from './dibujo'
 import { etiquetaDestino, motivoDestino, nombreDestino } from './etiqueta'
@@ -182,19 +182,12 @@ function ColumnaDeCuenta({
           calor === 'llena' && 'grilla-llena',
         )}
       >
+        {/* Vacía es una parrilla fría, como en la semana: la frase, solo para el lector de pantalla. */}
         {vacia ? (
           nuevo ? (
-            <Link
-              href={nuevo}
-              scroll={false}
-              className="text-center text-[0.72rem] italic text-fg-muted underline-offset-2 hover:text-fg hover:underline"
-            >
-              Nada para esta cuenta. Préndela.
-            </Link>
+            <PonerAlgo href={nuevo} vacio="Nada para esta cuenta." />
           ) : (
-            <p className="text-center text-[0.72rem] italic text-fg-muted">
-              {abierto ? 'Nada para esta cuenta.' : 'No salió nada en esta cuenta.'}
-            </p>
+            <p className="sr-only">{abierto ? 'Nada para esta cuenta.' : 'No salió nada en esta cuenta.'}</p>
           )
         ) : null}
         {columna.cortes.map((corte) => (

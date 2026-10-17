@@ -1,3 +1,4 @@
+import { retraso } from '@/components/esqueleto'
 import { cn } from '@/lib/utils'
 
 /**
@@ -40,19 +41,18 @@ export function Empty({ children }: { children: React.ReactNode }) {
 
 /**
  * El hueco que deja un `Panel` mientras sus consultas viajan. Misma `.chapa` y
- * mismas medidas que el de verdad, para que nada salte cuando llega el contenido.
- *
- * `animate-pulse` no necesita guardia propia: la regla de `prefers-reduced-motion`
- * en `globals.css` ya apaga toda animación del sitio.
+ * mismas medidas que el de verdad, para que nada salte cuando llega el contenido, con
+ * el pulso tibio de toda carga del panel (`src/components/esqueleto.tsx`): el lugar del
+ * gráfico, en brasa. `orden` corre el pulso respecto de los de al lado.
  */
-export function PanelSkeleton({ className }: { className?: string }) {
+export function PanelSkeleton({ className, orden = 0 }: { className?: string; orden?: number }) {
   return (
-    <div className={cn('chapa animate-pulse rounded-xl p-5', className)} aria-hidden>
+    <div className={cn('chapa tibio rounded-xl p-5', className)} style={retraso(orden)} aria-hidden>
       <div className="mb-4">
         <div className="h-[1.4rem] w-40 max-w-[60%] rounded bg-white/[0.06]" />
         <div className="mt-0.5 h-[1.15rem] w-72 max-w-full rounded bg-white/[0.035]" />
       </div>
-      <div className="h-40 rounded-xl bg-white/[0.035]" />
+      <div className="brasa-tibia h-40 rounded-xl" />
     </div>
   )
 }

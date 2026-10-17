@@ -69,4 +69,17 @@ describe('el vocabulario del panel', () => {
       expect(match?.[1], archivo).toBe(p.ruta)
     }
   })
+
+  it('la carga de una pantalla, si lleva su título, lleva el de su carpeta', () => {
+    // Las cargas con forma (`loading.tsx`) dibujan el título de verdad para que no salte al
+    // llegar. Copiado de otra pantalla, la carga diría un nombre y la pantalla otro.
+    const base = join(process.cwd(), 'src', 'app', 'admin', '(dash)')
+    for (const p of PANTALLAS) {
+      const archivo = join(base, p.ruta.replace('/admin/', ''), 'loading.tsx')
+      if (!existsSync(archivo)) continue
+      for (const [, ruta] of readFileSync(archivo, 'utf8').matchAll(/<Encabezado\s+ruta="([^"]+)"/g)) {
+        expect(ruta, archivo).toBe(p.ruta)
+      }
+    }
+  })
 })

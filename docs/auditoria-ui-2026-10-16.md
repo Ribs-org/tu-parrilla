@@ -111,7 +111,13 @@ quedar», el corte del post armándose sobre la parrilla de su día. También de
 cuentas como fichas con su fierro y el aviso de que el permiso vence antes de la hora elegida
 (`schedule/vence.ts`), la semana en chico con el fuego de cada día para elegirlo, y el corte
 que cae en su día al programar, encendido un momento. La hora caliente sigue esperando a la
-tanda 4.
+tanda 4. Y también: la parrilla fría —un día vacío con los fierros en ceniza, sin frase a la
+vista y con «Poner algo» al pasar el mouse—, y la carga con la forma de La Parrilla (semana,
+día, lista y editor), La Mesa, Los Números y Los Fierros, con el título de verdad y un pulso
+tibio (`src/components/esqueleto.tsx`). En la app, el día vacío sigue con su frase: sin mouse
+ni parrilla dibujada, es la frase lo que dice que está vacío. Quedan La Mesa como
+conversación y las cuentas del editor de un post, que siguen siendo casillas mientras el
+compositor ya tiene fichas.
 
 **Tanda 3, se asa mientras sale (2 a 3 días; toca el publicador).** Hoy la carne salta de
 cruda a sellada cuando empieza a salir. La propuesta es guardar la etapa de cada destino
