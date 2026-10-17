@@ -75,9 +75,12 @@ export function AccountSeriesChart({ series }: { series: AccountSeriesPoint[] })
     return entry
   })
 
+  // Separadas: el alcance va en miles y las visitas al perfil en decenas; en un mismo eje, las
+  // visitas quedaban planas en cero.
   return (
     <TrafficChart
       data={data}
+      separadas
       series={[
         { key: 'profileViews', name: 'Visitas al perfil' },
         { key: 'reach', name: 'Alcance' },

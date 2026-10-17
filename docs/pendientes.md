@@ -40,10 +40,8 @@ Cómo se usa:
   contra el pooler de Supabase en modo transacción. La causa no está explicada: cualquier
   otro `Promise.all` con más de cinco consultas podría colgarse igual.
 - **Los defectos que quedan de la auditoría de UI del 2026-10-16**, en
-  `docs/auditoria-ui-2026-10-16.md` («Defectos»): cifras cortadas en el eje de los gráficos de
-  Los Números, series de escalas distintas en un mismo eje, «Todas las etiquetas» sin la red,
-  dos pantallas de Los Números que se rompen a 390 px, la fecha de la app escrita distinto
-  que la del panel, un «—» sin explicación y la barra de pestañas de la app por revisar.
+  `docs/auditoria-ui-2026-10-16.md` («Defectos»): la fecha de la app escrita distinto que la
+  del panel, y la barra de pestañas de la app por revisar.
 - **La Parrilla abierta pide decenas de páginas `/admin/schedule/<id>` cada pocos
   segundos** (2026-10-04). En los logs de Vercel, unas 60 peticiones por tanda, una por cada
   corte del calendario: parece el prefetch de los `Link` combinado con un refresco
