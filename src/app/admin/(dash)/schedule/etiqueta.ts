@@ -2,6 +2,13 @@
 
 import { networkLabel } from '@/lib/networks'
 
+/**
+ * Lo que pregunta «Eliminar», en la lista y en el editor, antes de borrar un post: lo mismo
+ * que se pierde. Vive acá, en un módulo sin directiva, porque lo leen dos componentes de
+ * cliente y un `const` exportado desde uno de ellos llegaría al otro lado como referencia.
+ */
+export const CONFIRMAR_ELIMINAR = '¿Eliminar este post? Se borra de La Parrilla y ya no sale en ninguna red.'
+
 const ESTADO: Record<string, string> = {
   scheduled: 'Programado',
   publishing: 'Publicando…',

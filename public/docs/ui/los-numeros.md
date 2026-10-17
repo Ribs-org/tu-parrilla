@@ -69,7 +69,7 @@ cambio, la fila se ve más tenue.
 ### Mitad «En las redes»
 
 **La cabeza.** El título «En las redes» y debajo «Lo que hicieron tus publicaciones donde las
-publicaste. Lo cuentan las redes.» A la derecha:
+publicaste. Lo cuentan las redes.» A la derecha (en el teléfono, en la línea de abajo):
 
 - Un selector de cuenta, **solo si la persona tiene más de una cuenta en
   [Los Fierros](los-fierros.md)** (conectada o no): «Todas las cuentas», y una opción por cuenta
@@ -90,11 +90,12 @@ mostrar «—» (ver «Cómo leer cada número»).
 
 **Panel «Lo que más creció»**, explicación «Las publicaciones que más views ganaron en el
 período, de cualquier fecha.» A la derecha del título, tres enlaces: «Tu mejor 10 % →»,
-«Comparar por atributo →» y «Ver todas las publicaciones →» (uno encima del otro en el
-teléfono). Hasta cinco filas,
+«Comparar por atributo →» y «Ver todas las publicaciones →» (en el teléfono, debajo del
+título y uno encima del otro). Hasta cinco filas,
 de más a menos views ganadas, cada una con una barra detrás que compara con la primera: el
 texto del post (o su etiqueta, si no tiene texto), en chico la cuenta con el patrón «<red> ·
-<nombre de la cuenta>», y a la derecha las views ganadas. Cada fila abre la pieza de esa
+<nombre de la cuenta>» (en el teléfono, debajo del texto), y a la derecha las views
+ganadas. Cada fila abre la pieza de esa
 publicación, en la misma pestaña (el enlace a la red está ahí).
 
 **Con «⋯ Más» abierto**, debajo aparece:
@@ -123,19 +124,24 @@ publicación, en la misma pestaña (el enlace a la red está ahí).
     perfil: —» y «Alcance: —».
 
   Debajo de las tarjetas, **solo si alguna cuenta que no es de YouTube tiene lecturas en el
-  período**, un gráfico con dos series: «Visitas al perfil» y «Alcance», un punto por día leído.
+  período**, dos gráficos, uno debajo del otro y con las mismas fechas: «Visitas al perfil» y
+  «Alcance», un punto por día leído. Van separados porque se miden en escalas muy distintas:
+  en un mismo gráfico, las visitas al perfil quedaban planas en cero. En el eje de cada
+  gráfico, las cifras van abreviadas desde diez mil («34 mil»).
 
 - **Panel «Views ganadas y visitas, día a día»**, explicación: «Cuánto creció lo que se vio en
   las redes contra cuánta gente llegó a tu página. Las views no incluyen YouTube; las visitas,
   sí.» Con una cuenta elegida arriba, en medio de esas dos frases se suma «Esta serie es de
-  todas tus cuentas, no solo de la elegida.» Un gráfico de áreas con dos series, rotuladas
-  arriba: «Views ganadas» y «Visitas». Cada punto es un día (también con «Hoy»); con «Todo», una
-  semana. Al pasar el mouse aparece la fecha completa y los dos valores.
+  todas tus cuentas, no solo de la elegida.» Dos gráficos de áreas, uno debajo del otro y con
+  las mismas fechas, cada uno rotulado arriba: «Views ganadas» y «Visitas» (separados por lo
+  mismo: las views van en miles y las visitas en decenas). Cada punto es un día (también con
+  «Hoy»); con «Todo», una semana. Al pasar el mouse aparece la fecha completa y el valor.
 
 ### Mitad «En tu página»
 
 **La cabeza.** El título «En tu página» y debajo «Quién entró a tu página de links —tu
-Vitrina— y qué apretó. Lo cuenta Tu Parrilla, sin cookies ni terceros.» A la derecha:
+Vitrina— y qué apretó. Lo cuenta Tu Parrilla, sin cookies ni terceros.» A la derecha (en el
+teléfono, en la línea de abajo):
 
 - Un selector de página, **solo si la persona tiene más de una página pública**: «Todas tus
   páginas», y una opción por página con el patrón «<nombre> · /<dirección>».
@@ -146,7 +152,8 @@ Vitrina— y qué apretó. Lo cuenta Tu Parrilla, sin cookies ni terceros.» A l
 **Dos cifras**: «Visitas» y «Clicks en tus links». Debajo de cada número, la comparación con
 el período anterior: una flecha, un porcentaje («+12%», «-8%», o «0%» con flecha hacia el lado
 si casi no cambió) y el texto «vs. período anterior». La subida va en verde y la bajada en
-rojo. Si no hay con qué comparar, en vez de eso hay un «—».
+rojo. Si el período anterior no tuvo nada, en vez de eso dice «Nada en el período anterior
+para comparar».
 
 **Panel «Qué publicación te trajo gente»**, explicación «Visitas que llegaron por el link de
 una publicación (su etiqueta ?s=).» Hasta cinco filas: las etiquetas que más visitas trajeron
@@ -177,7 +184,9 @@ escrita a mano) no son enlaces.
   menor. En cada fila, detrás de la etiqueta, una barra cuyo largo compara sus visitas con las
   de la fila con más. En la columna «Etiqueta»: si la etiqueta es de una publicación
   sincronizada, su miniatura chica y el texto del post (o la etiqueta, si el post no tiene
-  texto), que es un enlace a la pieza de esa publicación, en la misma pestaña; si no, la
+  texto), que es un enlace a la pieza de esa publicación, en la misma pestaña, y debajo, en
+  chico, el ícono de su red y su cuenta con el patrón «<red> · <nombre de la cuenta>»: el
+  mismo post subido a tres redes son tres filas, y así se distinguen; si no, la
   etiqueta sola, en letra de máquina de escribir, sin enlace. Las visitas que llegaron sin
   etiqueta van juntas en la fila «(sin etiqueta)». Hasta 50 filas, las de más visitas.
 - **Paneles «Links más clickeados» y «De dónde vienen»**, lado a lado en pantalla ancha, uno
@@ -215,8 +224,11 @@ escrita a mano) no son enlaces.
     «bot» si es un bot (solo pueden aparecer con «Bots» activo), y a la derecha hace cuánto:
     «recién», «hace <N> minutos», «hace <N> horas», «ayer», «hace <N> días».
 
-Mientras una mitad carga se ve su esqueleto: rectángulos grises sin texto en el lugar de las
-cifras y del panel.
+Mientras una mitad carga se ve su esqueleto: bloques sin texto en el lugar del título, las
+cifras y el panel, como brasas: se encienden y se apagan de a poco, uno un poco después del otro (con «reducir movimiento» activado en el sistema, quietos a media luz). Al entrar a Los Números se ve lo mismo
+para el tablero entero, con el título, su bajada y el lugar del período; las páginas de
+adentro —«Tus publicaciones», «Comparar por atributo», «Tu mejor 10 %» y el detalle de un
+post— cargan con el lugar del título y filas.
 
 ### Tus publicaciones (`/admin/analytics/publicaciones`)
 
@@ -292,6 +304,12 @@ Cada fila, en la columna «Post»:
 - Debajo, la etiqueta como un botoncito que dice «?s=<etiqueta>» (al pasar el mouse: «Editar
   la etiqueta»), y a su lado un ícono de copiar (al pasar el mouse: «Copiar el link con la
   etiqueta»). Si algo falla, el error sale en rojo al lado.
+
+**En el teléfono**, con las dos columnas de entrada, la tabla deja solo «Post» y los rótulos
+de arriba se van: debajo del texto de cada fila van sus dos cifras, «<N> views (+<ganado>) ·
+<M> visitas a tu página», y arriba de la tabla, para ordenar, «Ordenar» con dos botones,
+«Views» y «Visitas», que funcionan como los títulos de las columnas. Con «⋯ Más» abierto, la
+tabla completa se desliza de lado.
 
 Detrás del número de «Views» hay una barra horizontal: su largo compara el acumulado de esa
 fila con el más grande de la lista, y su color dice cómo le fue en el período (ver «Cómo leer
@@ -610,9 +628,9 @@ hace varios clicks por visita. Sin visitas, «0.0%».
 
 **La comparación bajo cada cifra.** Cuánto cambió la cifra, en porcentaje, contra el período de
 igual largo justo antes (con «7 días», los siete días anteriores). En «CTR» es el cambio del CTR
-mismo, no en puntos: pasar de 2.0% a 3.0% se ve como «+50%». El «—» aparece cuando el período
-anterior tuvo cero y este no, porque no hay porcentaje de crecimiento desde cero; con «Todo»
-pasa casi siempre, porque antes de 2020 no hay nada.
+mismo, no en puntos: pasar de 2.0% a 3.0% se ve como «+50%». «Nada en el período anterior para
+comparar» aparece cuando el período anterior tuvo cero y este no, porque no hay porcentaje de
+crecimiento desde cero; con «Todo» pasa casi siempre, porque antes de 2020 no hay nada.
 
 **«Qué publicación te trajo gente» y «Todas las etiquetas».** Una fila por etiqueta. La
 etiqueta de una visita sale del `?s=` del link por el que llegó; si no trae `?s=`, de `src`,
@@ -1256,7 +1274,10 @@ Sale de:
 - `src/lib/social/comentarios/reglas.ts` (las etiquetas `dm-`)
 - `src/lib/social/sync.ts` y `src/lib/social/index.ts` (qué redes se sincronizan, borrados,
   lectura diaria), con `vercel.json` (la hora de la sincronización)
-- `src/app/admin/(dash)/error.tsx`, `src/app/admin/(dash)/loading.tsx`,
-  `src/app/admin/(dash)/nav.tsx`, `src/lib/vocabulario.ts`
+- `src/app/admin/(dash)/error.tsx`, `src/app/admin/(dash)/nav.tsx`, `src/lib/vocabulario.ts`
+- `src/app/admin/(dash)/analytics/loading.tsx`, `src/app/admin/(dash)/analytics/cargando.tsx`,
+  `src/app/admin/(dash)/analytics/cabeza.tsx` (la bajada, que comparten la pantalla y su carga),
+  `src/components/esqueleto.tsx` y los esqueletos de `src/components/charts/panel.tsx` y
+  `src/components/charts/stat-tile.tsx` (la carga)
 
 Si cambias lo que se ve en alguno de ellos, actualiza esta página en el mismo commit.

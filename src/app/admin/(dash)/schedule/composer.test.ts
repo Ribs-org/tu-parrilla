@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from 'vitest'
 // vacío para poder importar `vieneMarcada` bajo Vitest.
 vi.mock('server-only', () => ({}))
 
-const { vieneMarcada, cuentasInicialesDe } = await import('./composer')
+const { vieneMarcada, cuentasInicialesDe, hrefDeVuelta, destinosEnPalabras } = await import('./composer')
 
 describe('vieneMarcada', () => {
   it('con una sola cuenta conectada, viene marcada', () => {
@@ -55,5 +55,45 @@ describe('cuentasInicialesDe', () => {
     const tt = { id: 'tt-1', network: 'tiktok', connected: true }
     const ig = { id: 'ig-1', network: 'instagram', connected: true }
     expect(cuentasInicialesDe([tt, ig], 'tiktok')).toEqual([])
+  })
+})
+
+describe('hrefDeVuelta', () => {
+  it('vuelve a la semana del día programado, con el post recién puesto', () => {
+    expect(hrefDeVuelta('/admin/schedule?hecho=programado', 'p1', '2026-10-22')).toBe(
+      '/admin/schedule?hecho=programado&nuevo=p1&semana=2026-10-19',
+    )
+  })
+
+  it('en la vista «Día», a ese día; en la lista, a la lista', () => {
+    expect(hrefDeVuelta('/admin/schedule?vista=dia&fecha=2026-10-16&hecho=programado', 'p1', '2026-10-22')).toBe(
+      '/admin/schedule?vista=dia&fecha=2026-10-22&hecho=programado&nuevo=p1',
+    )
+    expect(hrefDeVuelta('/admin/schedule?vista=lista&hecho=programado', 'p1', '2026-10-22')).toBe(
+      '/admin/schedule?vista=lista&hecho=programado&nuevo=p1',
+    )
+  })
+
+  it('sin id, como antes', () => {
+    expect(hrefDeVuelta('/admin/schedule?hecho=programado', undefined, '2026-10-22')).toBe('/admin/schedule?hecho=programado')
+  })
+})
+
+describe('destinosEnPalabras', () => {
+  it('las redes en palabras, con el usuario solo cuando dos son de la misma red', () => {
+    expect(destinosEnPalabras([{ network: 'instagram', handle: '@a' }, { network: 'tiktok', handle: '@a' }])).toBe(
+      'A Instagram y TikTok.',
+    )
+    expect(
+      destinosEnPalabras([
+        { network: 'facebook', handle: 'Uno' },
+        { network: 'facebook', handle: 'Dos' },
+        { network: 'instagram', handle: '@a' },
+      ]),
+    ).toBe('A Facebook · Uno, Facebook · Dos y Instagram.')
+  })
+
+  it('sin cuentas, que falta elegir', () => {
+    expect(destinosEnPalabras([])).toBe('Todavía sin cuenta: elige al menos una.')
   })
 })

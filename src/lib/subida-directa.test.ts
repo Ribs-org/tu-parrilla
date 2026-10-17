@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { subirArchivos } from './subida-directa'
+import { subirArchivos, subirUno } from './subida-directa'
 
 /**
  * Lo que este archivo cuida es el contrato entre la ruta que firma y el PUT: R2 rechaza la
@@ -81,5 +81,51 @@ describe('subirArchivos', () => {
     const avances: Array<[number, number]> = []
     await subirArchivos([archivo('a.jpg', 'image/jpeg'), archivo('b.jpg', 'image/jpeg')], (h, t) => avances.push([h, t]))
     expect(avances).toEqual([[1, 2], [2, 2]])
+  })
+})
+
+describe('subirUno', () => {
+  it('con avance, sube por XMLHttpRequest y cuenta los bytes: con fetch no se puede', async () => {
+    responder({ subir: 'https://r2/f', publica: 'https://cdn/a.jpg', mediaType: 'image', tipo: 'image/jpeg' })
+    const enviados: Array<{ metodo: string; url: string; tipo: string | null }> = []
+    class XhrFalso {
+      upload: { onprogress: ((e: { lengthComputable: boolean; loaded: number; total: number }) => void) | null } = {
+        onprogress: null,
+      }
+      onload: (() => void) | null = null
+      onerror: (() => void) | null = null
+      onabort: (() => void) | null = null
+      status = 0
+      private metodo = ''
+      private url = ''
+      private tipo: string | null = null
+      open(metodo: string, url: string) {
+        this.metodo = metodo
+        this.url = url
+      }
+      setRequestHeader(_nombre: string, valor: string) {
+        this.tipo = valor
+      }
+      abort() {
+        this.onabort?.()
+      }
+      send() {
+        enviados.push({ metodo: this.metodo, url: this.url, tipo: this.tipo })
+        this.upload.onprogress?.({ lengthComputable: true, loaded: 1, total: 4 })
+        this.upload.onprogress?.({ lengthComputable: true, loaded: 4, total: 4 })
+        this.status = 200
+        this.onload?.()
+      }
+    }
+    vi.stubGlobal('XMLHttpRequest', XhrFalso)
+
+    const avances: number[] = []
+    const subido = await subirUno(archivo('a.jpg', 'image/jpeg'), (f) => avances.push(f))
+
+    expect(enviados).toEqual([{ metodo: 'PUT', url: 'https://r2/f', tipo: 'image/jpeg' }])
+    expect(avances).toEqual([0.25, 1])
+    expect(subido).toEqual({ url: 'https://cdn/a.jpg', mediaType: 'image', nombre: 'a.jpg' })
+    // La firma sigue por fetch; el PUT, no.
+    expect(llamadas.some((l) => l.url === 'https://r2/f')).toBe(false)
   })
 })

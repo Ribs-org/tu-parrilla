@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { PAGINA_QUEMADOS, quemadosVisibles, redesQuemadas } from './filtro-quemados'
+import { PAGINA_QUEMADOS, plegada, quemadosVisibles, redesQuemadas } from './filtro-quemados'
 
 const fila = (id: number, red: string) => ({ id: String(id), red })
 
@@ -37,5 +37,16 @@ describe('quemadosVisibles', () => {
 
   it('con todo apagado no se ve nada', () => {
     expect(quemadosVisibles(muchas, new Set(['tiktok', 'instagram']), PAGINA_QUEMADOS)).toEqual({ visibles: [], total: 0, quedan: 0 })
+  })
+})
+
+describe('plegada', () => {
+  it('muestra los primeros cinco y cuenta el resto', () => {
+    const filas = Array.from({ length: 8 }, (_, i) => i)
+    expect(plegada(filas)).toEqual({ cortes: [0, 1, 2, 3, 4], mas: 3 })
+  })
+
+  it('con menos de cinco, todos y ninguno más', () => {
+    expect(plegada(['a', 'b'])).toEqual({ cortes: ['a', 'b'], mas: 0 })
   })
 })

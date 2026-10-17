@@ -13,8 +13,10 @@ const UN_SOLO_USO = new Set([
   'cuenta',
   'borrador',
   'panel',
-  // El aviso de que algo se programó, que se lee una vez al volver del compositor.
+  // El aviso de que algo se programó, que se lee una vez al volver del compositor, y el post
+  // recién puesto, que se enciende una vez en su día para que se vea dónde cayó.
   'hecho',
+  'nuevo',
 ])
 
 /**

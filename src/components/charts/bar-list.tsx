@@ -17,6 +17,9 @@ export type BarItem = {
  * A ranked list where the bar is the row's own background. Values sit in a tabular
  * column so they align vertically; the bar carries magnitude, the text carries the
  * exact number.
+ *
+ * En el teléfono, la nota baja debajo del texto: al lado, «TikTok · @tomas.dev» se comía la
+ * fila y el texto quedaba en «Cuánto cobro…».
  */
 export function BarList({
   items,
@@ -42,9 +45,16 @@ export function BarList({
               className="absolute inset-y-0 left-0 rounded-md transition-[width] duration-500"
               style={{ width: `${pct}%`, background: color, opacity: 0.22 }}
             />
-            <span className="relative z-10 min-w-0 flex-1 truncate">{item.label}</span>
+            <span className="relative z-10 min-w-0 flex-1">
+              <span className="block truncate">{item.label}</span>
+              {item.note ? (
+                <span className="block truncate font-mono text-[0.68rem] tabular-nums text-fg-faint sm:hidden">
+                  {item.note}
+                </span>
+              ) : null}
+            </span>
             {item.note ? (
-              <span className="relative z-10 shrink-0 font-mono text-[0.72rem] tabular-nums text-fg-faint">
+              <span className="relative z-10 hidden shrink-0 font-mono text-[0.72rem] tabular-nums text-fg-faint sm:inline">
                 {item.note}
               </span>
             ) : null}
