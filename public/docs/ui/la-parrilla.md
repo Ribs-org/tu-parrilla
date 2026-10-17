@@ -51,6 +51,14 @@ programado debajo, y el pie de ayer. El formulario para programar, la lista de b
 CSV no están en la página: se abren en un panel que se desliza desde la derecha (ver «El panel
 lateral», más abajo).
 
+Mientras carga se ve la forma de lo que viene, sin texto salvo el título «La Parrilla»: el
+lugar de los botones, el de «Calendario», «Día» y «Lista», y siete parrillas tibias, sin
+cortes, que se encienden y se apagan de a poco como brasas, una un poco después de la otra
+(con «reducir movimiento» activado en el sistema, quietas a media luz). No son días vacíos:
+un día vacío es gris ceniza y no se mueve. En la vista «Día» son tres columnas, en «Lista»
+son filas, y al abrir un post se ve el editor: el título «Editar post» y el lugar de cada
+campo.
+
 ### Encabezado
 
 «La Parrilla», y debajo, en chico, «lo que viene y cómo salió lo que ya se fue». A la derecha
@@ -163,9 +171,12 @@ en la vista «Día», y un lector de pantalla lo lee «lun 12: ver por cuenta»�
 —«Apagada» (nada), «Prendida» (uno o dos cortes) o «Parrilla llena» (tres o más)— y, en los
 días de hoy en adelante, un «+» chico que abre el panel «Nueva publicación» con ese día puesto
 (un lector de pantalla lo lee «Programar el <día> <número>», por ejemplo «Programar el lun
-12»). El día de hoy tiene el nombre más claro y un borde fino. Un día vacío de hoy en
-adelante dice «No hay nada puesto. Préndela.», y esa frase es un enlace que hace lo mismo que
-el «+»; un día vacío que ya pasó dice «No hay nada puesto.», sin enlace y sin «+». En el
+12»). El día de hoy tiene el nombre más claro y un borde fino. Un día vacío es una parrilla
+fría: los fierros en gris ceniza, sin brasa debajo y sin ninguna frase a la vista. Si es de hoy
+en adelante, al pasar el mouse por encima aparece en el medio **«+ Poner algo»**, un botón con
+borde punteado que hace lo mismo que el «+» (en el teléfono, que no tiene mouse, está siempre a
+la vista; un lector de pantalla lo lee «No hay nada puesto. Poner algo»). Un día vacío que ya
+pasó no tiene ni ese botón ni el «+», y un lector de pantalla lee «No hay nada puesto.». En el
 teléfono la semana se desliza de lado, y abre corrida hasta hoy, con el día de antes asomado a
 la izquierda.
 
@@ -221,8 +232,11 @@ Los borradores con fecha de ese día van en la columna de cada cuenta que tienen
 borde punteado, como en la semana; los que no tienen ninguna cuenta marcada, en una columna
 «Sin cuenta elegida» al final. No cuentan para el fuego.
 
-Una columna vacía dice «Nada para esta cuenta. Préndela.» —un enlace que hace lo mismo que su
-«+»— si todavía se puede programar en ella; en un día que ya pasó, «No salió nada en esta
+Una columna vacía es una parrilla fría, como en la semana. Si todavía se puede programar en
+ella, al pasar el mouse aparece **«+ Poner algo»**, que hace lo mismo que su «+» (en el
+teléfono, siempre a la vista; un lector de pantalla lo lee «Nada para esta cuenta. Poner
+algo»). Si no se puede —el día ya pasó, o la cuenta está desconectada—, no lleva nada a la
+vista, y un lector de pantalla lee «No salió nada en esta cuenta.» o «Nada para esta
 cuenta.». Sin ninguna cuenta conectada y sin nada ese día: «No tienes cuentas conectadas, y
 ese día no hay nada puesto.».
 
@@ -272,7 +286,7 @@ borradores», más abajo).
 ### El compositor: «Nueva publicación» o «Borrador»
 
 El panel se llama «Nueva publicación» cuando se abre con ese botón, con el «+» de un día o con
-«No hay nada puesto. Préndela.», y «Borrador» cuando se abre un borrador guardado. El
+«+ Poner algo», y «Borrador» cuando se abre un borrador guardado. El
 formulario viene abierto, con el cursor en «Texto». En este orden:
 
 1. **«Así va a quedar»**: el corte del post mientras se arma (ver «El corte», más arriba),
@@ -604,8 +618,9 @@ Si hay que dejarlo a medias, basta con cerrar el panel: queda como borrador.
 ### Para programar en un día del calendario
 
 1. En «Calendario», ir a la semana con «Semana anterior» o «Semana siguiente».
-2. Apretar el «+» junto al nombre del día o, si el día está vacío, «No hay nada puesto.
-   Préndela.». Los días que ya pasaron no tienen ninguno de los dos.
+2. Apretar el «+» junto al nombre del día o, si el día está vacío, «+ Poner algo» en el medio
+   de su parrilla (con mouse, aparece al pasar por encima). Los días que ya pasaron no tienen
+   ninguno de los dos.
 3. Se abre «Nueva publicación» con la fecha puesta: ese día a las 09:00 (si es hoy, la hora
    en punto siguiente). Cambiar la hora si hace falta y seguir como en la tarea anterior.
 
@@ -766,8 +781,9 @@ alguna, hay que borrarlo en la red misma.
 |---|---|---|
 | «Programado.» | Lo que se programó desde el panel quedó guardado | Nada; está en el calendario |
 | «Conecta tu primera red» | No hay ninguna red conectada | «Ir a Los Fierros →» y conectar una |
-| «No hay nada puesto. Préndela.» | Ese día, de hoy en adelante, no tiene nada programado | Apretarlo para programar ahí |
-| «No hay nada puesto.» | Ese día ya pasó y no tuvo nada | Nada |
+| «+ Poner algo», en el medio de un día con los fierros en gris ceniza (con mouse, al pasar por encima) | Ese día, de hoy en adelante, no tiene nada programado | Apretarlo para programar ahí |
+| Un día con los fierros en gris ceniza y nada encima, sin «+» | Ese día ya pasó y no tuvo nada | Nada |
+| Bloques sin texto que se encienden y se apagan de a poco, en tonos de brasa | La pantalla está cargando | Esperar |
 | «Ayer no salió nada.» | Ningún corte de ayer salió en ninguna red | Si algo debía salir, mirar «Se quemó» |
 | El motivo en rojo bajo una fila de «Se quemó» | Por qué no salió en esa red (ver «Motivos de un destino que no salió») | El botón de abajo: «Reconectar» o «Cambiar el archivo» cuando el motivo lo pide; si no, «Reprogramar» |
 | «Algo se rompió», con «No fue nada que hicieras: una consulta no respondió. Vuelve a intentarlo; el detalle quedó en la consola del navegador.» y el botón «Reintentar» | Una consulta del servidor falló; no fue la persona. Si falló la pantalla principal de La Parrilla, no aparece «Ir a La Parrilla» | «Reintentar» |
@@ -1141,6 +1157,8 @@ Lo que describe esta página sale de:
   - `src/app/admin/(dash)/schedule/[id]/destinos.tsx` (cómo va el post en cada red, arriba del editor)
   - `src/app/admin/(dash)/schedule/arreglo.ts` (qué arreglo se ofrece junto a un destino quemado)
   - `src/app/admin/(dash)/schedule/desplazar-a-hoy.tsx` (la semana corrida hasta hoy en el teléfono)
+  - `src/app/admin/(dash)/schedule/loading.tsx` y `src/components/esqueleto.tsx` (la carga, con la forma de cada vista y del editor)
+  - `src/app/globals.css` (la parrilla fría de un día vacío, «Poner algo» al pasar el mouse, y el pulso de la carga)
 - Lo que hacen sus botones (programar, guardar y descartar un borrador, guardar en el editor, reprogramar, eliminar, «Subir ahora», la carga por CSV y la lectura de la cuenta de TikTok):
   - `src/app/admin/actions.ts`
 - Los borradores (qué se guarda, cuándo hay algo que guardar, la fecha que se propone para un día):

@@ -1106,6 +1106,7 @@ src/
       (dash)/              panel protegido
   components/
     corte.tsx              el corte dibujado de La Parrilla: silueta, carne, marcas, halo y humo
+    esqueleto.tsx          las piezas de la carga del panel: la forma de cada pantalla, con su pulso tibio
     profile-view.tsx       la página pública (también alimenta la vista previa del editor)
     click-tracker.tsx      escucha delegada de clicks
     charts/                gráficos y paleta validada

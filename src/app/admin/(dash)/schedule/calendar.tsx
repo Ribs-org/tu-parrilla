@@ -48,11 +48,35 @@ export const CLASE_ESTADO: Record<Coccion, string> = {
 }
 
 /**
+ * La invitación de una parrilla fría en la que todavía se puede programar: «+ Poner algo».
+ * Con mouse aparece al pasar por el día (`.poner-algo`, en globals.css). La frase de que no
+ * hay nada va adelante, solo para el lector de pantalla: la parrilla fría, que es lo que lo
+ * dice a la vista, no la ve. La comparten la semana y la vista «Día».
+ */
+export function PonerAlgo({ href, vacio }: { href: string; vacio: string }) {
+  return (
+    <Link
+      href={href}
+      scroll={false}
+      // La transición en la utilidad y no en `.poner-algo`: `transition-colors` la pisaría.
+      // Sin corte de línea y con poco aire a los lados: en el teléfono la columna de un día mide
+      // menos de cien píxeles, y «Poner algo» se partía en dos renglones.
+      className="poner-algo inline-flex items-center gap-1 self-center whitespace-nowrap rounded-md border border-dashed border-acero-600 px-2 py-1 text-[0.72rem] text-fg-muted transition-[opacity,color,border-color] duration-150 hover:border-brasa hover:text-fg"
+    >
+      <span className="sr-only">{vacio} </span>
+      <Plus className="h-3 w-3" aria-hidden />
+      Poner algo
+    </Link>
+  )
+}
+
+/**
  * La semana de lunes a domingo: la vista con que abre La Parrilla.
  *
  * Además de los cortes, cada día que no pasó trae un «+» que abre el compositor con ese día
  * puesto (`nuevoEnDia`), y los borradores con fecha aparecen en el suyo con borde punteado.
- * Los borradores no cuentan para el calor del día: todavía no van a salir.
+ * Los borradores no cuentan para el calor del día: todavía no van a salir. Un día sin nada es
+ * una parrilla fría, con «Poner algo» si todavía no pasó.
  */
 export function WeekCalendar({
   monday,
@@ -182,15 +206,9 @@ export function WeekCalendar({
                 >
                   {cortes.length === 0 && enBorrador.length === 0 ? (
                     abierto ? (
-                      <Link
-                        href={nuevoEnDia(day)}
-                        scroll={false}
-                        className="text-center text-[0.72rem] italic text-fg-muted underline-offset-2 hover:text-fg hover:underline"
-                      >
-                        No hay nada puesto. Préndela.
-                      </Link>
+                      <PonerAlgo href={nuevoEnDia(day)} vacio="No hay nada puesto." />
                     ) : (
-                      <p className="text-center text-[0.72rem] italic text-fg-muted">No hay nada puesto.</p>
+                      <p className="sr-only">No hay nada puesto.</p>
                     )
                   ) : (
                     cortes.map(({ post, targets, media }) => {

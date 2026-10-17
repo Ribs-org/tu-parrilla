@@ -44,6 +44,13 @@ Cómo se usa:
   web. Mirarlo en el teléfono, y si pasa ahí también, darle alto a la barra en
   `mobile/src/app/(tabs)/_layout.tsx`. Es el último defecto abierto de
   `docs/auditoria-ui-2026-10-16.md`.
+- **Por revisar: miniaturas vencidas en La Mesa y en Tus publicaciones** (2026-10-16). Las
+  dos dibujan `socialPosts.thumbnailUrl` tal cual (`comments/cola.tsx`,
+  `analytics/publicaciones/post-table.tsx`), y esa URL se refresca solo con la
+  sincronización diaria. Las de Instagram vencen: si una vence entre dos sincronizaciones,
+  se ve el ícono de imagen rota. Se vio con datos de prueba, no en producción. Si pasa, la
+  salida es que la imagen caiga al cuadro vacío que ya existe para las publicaciones sin
+  miniatura.
 - **La Parrilla abierta pide decenas de páginas `/admin/schedule/<id>` cada pocos
   segundos** (2026-10-04). En los logs de Vercel, unas 60 peticiones por tanda, una por cada
   corte del calendario: parece el prefetch de los `Link` combinado con un refresco
@@ -180,8 +187,9 @@ Nada de esto bloquea un trámite hoy; conviene ordenarlo antes de abrir a tercer
 
 - **Llevar el resto de la interfaz al nivel del corte** (2026-10-16). La auditoría de ese
   día propone seis tandas que se publican solas. La primera, lo roto, ya está. Quedan: el
-  corte en los flujos (el compositor ya está; faltan la parrilla fría, el esqueleto tibio y La
-  Mesa como conversación); la carne que se asa al ritmo de cada etapa de
+  corte en los flujos (el compositor, la parrilla fría y la carga tibia ya están; faltan La
+  Mesa como conversación y las cuentas del editor de un post como fichas, que siguen siendo
+  casillas); la carne que se asa al ritmo de cada etapa de
   la publicación (toca el publicador); Los Números con brasas donde se mide calor; la puerta
   de entrada; y lo nativo de la app. Detalle y tiempos a ojo en
   `docs/auditoria-ui-2026-10-16.md`.
