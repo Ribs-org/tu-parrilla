@@ -111,14 +111,18 @@ export function resolveOutcome(outcome: PublishOutcome, attemptCount: number): T
 /**
  * Qué media dejó de tener razón de existir en nuestro almacenamiento.
  *
- * La copia en el Blob existe para una sola cosa: entregarle el archivo a la red. Una
+ * La copia en el almacén existe para una sola cosa: entregarle el archivo a la red. Una
  * vez que TODOS los destinos publicaron, el video vive en Instagram, Facebook y
- * YouTube, y la nuestra solo ocupa espacio — el plan tiene 1 GB y un mes de parrilla
- * lo llena, que es exactamente cómo se cayó la carga masiva el 4 de septiembre.
+ * YouTube, y la nuestra solo ocupa espacio — con el 1 GB del Blob de antes, un mes de
+ * parrilla lo llenaba, y así se cayó la carga masiva el 4 de septiembre; R2 tiene diez
+ * veces eso, y a volumen se llenaría igual.
  *
  * Las fotos y la portada se conservan a propósito: pesan cientos de kilobytes contra
- * decenas de megabytes, y son la miniatura que el calendario muestra hacia atrás.
+ * decenas de megabytes, y son lo que el editor muestra de un post que ya salió.
  * Mientras un solo destino siga pendiente, no se toca nada: podría reintentarse.
+ *
+ * Lo que se borra no se olvida: el post cuenta sus videos liberados (`videosLiberados`),
+ * y su corte sigue siendo el de un video.
  */
 export function mediaParaBorrar<T extends { mediaType: string }>(
   targets: Array<{ status: string }>,

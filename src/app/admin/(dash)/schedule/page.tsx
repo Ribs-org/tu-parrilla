@@ -214,7 +214,7 @@ export default async function SchedulePage({
             <Queue
               items={ordenarCola(cortes).map((c) => ({
                 ...c,
-                corte: <Corte {...dibujoDe(c.targets, c.media, frias)} chico className="w-full" />,
+                corte: <Corte {...dibujoDe(c.targets, c.media, frias, c.post.videosLiberados)} chico className="w-full" />,
                 cuando: diaYHora(c.post.scheduledAt, zona),
               }))}
               volver={volver}

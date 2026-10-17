@@ -212,7 +212,7 @@ export function WeekCalendar({
                     )
                   ) : (
                     cortes.map(({ post, targets, media }) => {
-                      const dibujo = dibujoDe(targets, media, frias)
+                      const dibujo = dibujoDe(targets, media, frias, post.videosLiberados)
                       const estado = estadoCorto(dibujo.coccion, dibujo.sellos)
                       // Las redes que fallaron y esperan otro intento, una vez cada una. Su marca
                       // ya va en ámbar; acá basta un renglón que las nombre, y el motivo de cada
