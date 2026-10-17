@@ -1,4 +1,4 @@
-import { dayKey, dayLabelConMes, hourLabel } from '@/lib/schedule-week'
+import { dayKey, diaYHora, hourLabel } from '@/lib/schedule-week'
 import { formatNumber } from '@/lib/utils'
 
 // Lo que La Parrilla decide sin tocar la base para lo que pide una acción: qué se quemó, a
@@ -52,9 +52,7 @@ export function quemados<T extends Corte>(cortes: T[]): Array<{ corte: T; destin
  * acote cuánto puede alejarse.
  */
 export function horaConDia(scheduledAt: Date, now: Date, zone: string): string {
-  const dia = dayKey(scheduledAt, zone)
-  const hora = hourLabel(scheduledAt, zone)
-  return dia === dayKey(now, zone) ? hora : `${dayLabelConMes(dia)} · ${hora}`
+  return dayKey(scheduledAt, zone) === dayKey(now, zone) ? hourLabel(scheduledAt, zone) : diaYHora(scheduledAt, zone)
 }
 
 /**

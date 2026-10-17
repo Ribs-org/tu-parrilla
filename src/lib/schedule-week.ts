@@ -96,6 +96,15 @@ export function dayLabelConMes(key: string): string {
 }
 
 /**
+ * El día y la hora, siempre los dos: «jue 15 de oct · 13:00». Es la forma de una fecha en las
+ * listas de La Parrilla —«Se quemó» (`horaConDia`, que la usa salvo para lo de hoy) y la vista
+ * «Lista»—, para que el mismo instante no se escriba de dos maneras en dos lugares.
+ */
+export function diaYHora(date: Date, zone: string): string {
+  return `${dayLabelConMes(dayKey(date, zone))} · ${hourLabel(date, zone)}`
+}
+
+/**
  * Cuántos hay por día. El mismo reparto que `groupByDay`, solo que contando.
  *
  * Es una función y no dos líneas repetidas en cada pantalla porque la usan el aviso del

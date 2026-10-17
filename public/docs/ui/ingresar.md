@@ -11,9 +11,11 @@ después hay que pedir un código otra vez.
 ## Cómo se llega
 
 - Escribiendo `https://tu-parrilla.cl/ingresar`.
-- Desde la portada de tu-parrilla.cl: al pie, en la frase «Tu Parrilla es por invitación: no
-  hay registro abierto. Si ya te invitaron, entra con tu correo.», el enlace «entra con tu
-  correo».
+- Desde la portada de tu-parrilla.cl: el botón «Entrar», arriba a la derecha, o al pie, en la
+  frase «Tu Parrilla es por invitación: no hay registro abierto. Si ya te invitaron, entra con
+  tu correo.», el enlace «entra con tu correo». La portada no tiene registro: todo lo demás
+  que se ve ahí —la semana de ejemplo, el corte que se arma, las fotos que suben— es una
+  muestra del panel, y no guarda nada.
 - Abriendo cualquier dirección del panel (`/admin` o lo que cuelgue de ahí) sin sesión: lleva a
   `/ingresar`. Al entrar se llega siempre a La Parrilla, la entrada del panel
   ([la-parrilla.md](la-parrilla.md)), no a la dirección que se había abierto.
@@ -168,7 +170,7 @@ Sale de:
 - `src/app/admin/(dash)/page.tsx`: `/admin` lleva a La Parrilla.
 - `src/app/admin/actions.ts` (`logout`) y `src/app/admin/(dash)/layout.tsx`: «Salir».
 - `src/proxy.ts` y `src/lib/dominios.ts`: el panel solo en el dominio del producto.
-- `src/components/landing.tsx`: el enlace desde la portada.
+- `src/components/landing.tsx`: los dos enlaces desde la portada.
 - `src/app/api/mobile/session/codigo/route.ts` y `src/app/api/mobile/session/route.ts`: pedir
   y canjear el código desde el teléfono, con los mismos topes.
 

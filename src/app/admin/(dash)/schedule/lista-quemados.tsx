@@ -5,7 +5,7 @@ import { ChevronDown } from 'lucide-react'
 import { Icon } from '@/components/icon'
 import { networkLabel } from '@/lib/networks'
 import { cn } from '@/lib/utils'
-import { PAGINA_QUEMADOS, quemadosVisibles, redesQuemadas } from './filtro-quemados'
+import { PAGINA_QUEMADOS, plegada, quemadosVisibles, redesQuemadas } from './filtro-quemados'
 
 /** Dónde se recuerda si el dueño dejó «Se quemó» abierto. Solo en este navegador. */
 const CLAVE_ABIERTO = 'tp:se-quemo-abierto'
@@ -16,20 +16,26 @@ const CLAVE_ABIERTO = 'tp:se-quemo-abierto'
  * filas llegan ya dibujadas desde el servidor (`se-quemo.tsx`); acá solo se decide cuáles se
  * ven.
  *
- * Parte plegada, en una sola línea con cuántas hay: lo quemado sigue avisando arriba del
- * calendario, pero no lo empuja hacia abajo. Si el dueño la abre, queda abierta la próxima
+ * Parte plegada, en una sola línea con cuántas hay y los primeros cortes quemados en chico
+ * (`plegada`): lo quemado sigue avisando arriba del calendario, y se ve cuánto antes de leer
+ * el número, pero no lo empuja hacia abajo. Si el dueño la abre, queda abierta la próxima
  * vez (en `localStorage`, que puede no estar: entonces vuelve a partir plegada).
  *
  * El filtro no va a la URL a propósito: es una mirada de un momento, y un enlace a La
  * Parrilla con redes apagadas escondería lo quemado justo a quien lo abre.
  */
-export function ListaQuemados({ filas }: { filas: Array<{ id: string; red: string; fila: ReactNode }> }) {
+export function ListaQuemados({
+  filas,
+}: {
+  filas: Array<{ id: string; red: string; fila: ReactNode; corte: ReactNode }>
+}) {
   const [abierto, setAbierto] = useState(false)
   const [apagadas, setApagadas] = useState<ReadonlySet<string>>(new Set())
   const [mostradas, setMostradas] = useState(PAGINA_QUEMADOS)
   const region = useId()
   const redes = redesQuemadas(filas)
   const { visibles, total, quedan } = quemadosVisibles(filas, apagadas, mostradas)
+  const enChico = plegada(filas)
 
   useEffect(() => {
     // Después de montar y no en el estado inicial: el servidor no sabe lo que guardó este
@@ -78,6 +84,17 @@ export function ListaQuemados({ filas }: { filas: Array<{ id: string; red: strin
           <span className="rounded-full bg-negative/15 px-2 py-px font-mono text-[0.72rem] font-normal tracking-normal">
             {filas.length}
           </span>
+          {/* Plegada, los cortes quemados en chico: el número dice cuántos, esto los muestra. */}
+          {abierto ? null : (
+            <span className="mt-1 flex items-center gap-1" aria-hidden>
+              {enChico.cortes.map((f) => (
+                <Fragment key={f.id}>{f.corte}</Fragment>
+              ))}
+              {enChico.mas > 0 ? (
+                <span className="font-mono text-[0.68rem] font-normal tracking-normal text-fg-muted">+{enChico.mas}</span>
+              ) : null}
+            </span>
+          )}
           <span className="flex items-center gap-1 font-sans text-[0.75rem] font-normal normal-case tracking-normal text-fg-muted group-hover:text-fg">
             {abierto ? 'Ocultar' : 'Ver'}
             <ChevronDown className={cn('h-3.5 w-3.5 transition-transform', abierto && 'rotate-180')} aria-hidden />

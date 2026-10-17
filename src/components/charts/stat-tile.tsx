@@ -1,13 +1,20 @@
 import { ArrowDownRight, ArrowRight, ArrowUpRight } from 'lucide-react'
+import { retraso } from '@/components/esqueleto'
 import { NEGATIVE, POSITIVE } from './theme'
 
 type Props = {
   label: string
   value: string
-  /** Percentage change against the previous period of equal length. */
+  /**
+   * Percentage change against the previous period of equal length. `null` es «se quiso
+   * comparar y no se pudo»: el período anterior no tuvo nada (ver `delta`, abajo).
+   */
   delta?: number | null
   hint?: string
 }
+
+/** Lo que dice una cifra que se compara cuando el período anterior no tuvo nada. */
+export const SIN_ANTERIOR = 'Nada en el período anterior para comparar'
 
 export function StatTile({ label, value, delta, hint }: Props) {
   const hasDelta = typeof delta === 'number' && Number.isFinite(delta)
@@ -32,19 +39,24 @@ export function StatTile({ label, value, delta, hint }: Props) {
             <span className="text-fg-faint">vs. período anterior</span>
           </>
         ) : (
-          <span className="text-fg-faint">{hint ?? '—'}</span>
+          // Un «—» suelto debajo de la cifra no decía qué faltaba: cuando lo que falta es el
+          // período anterior, se dice.
+          <span className="text-fg-faint">{hint ?? (delta === null ? SIN_ANTERIOR : '—')}</span>
         )}
       </div>
     </div>
   )
 }
 
-/** El hueco de un `StatTile`: las tres líneas de la cifra, sin la cifra. */
-export function StatTileSkeleton() {
+/**
+ * El hueco de un `StatTile`: las tres líneas de la cifra, sin la cifra, con el pulso tibio
+ * de toda carga del panel (`src/components/esqueleto.tsx`). La cifra, en brasa.
+ */
+export function StatTileSkeleton({ orden = 0 }: { orden?: number }) {
   return (
-    <div className="chapa animate-pulse rounded-xl p-4" aria-hidden>
+    <div className="chapa tibio rounded-xl p-4" style={retraso(orden)} aria-hidden>
       <div className="h-4 w-20 rounded bg-white/[0.06]" />
-      <div className="mt-2 h-7 w-24 rounded bg-white/[0.07]" />
+      <div className="brasa-tibia mt-2 h-7 w-24 rounded" />
       <div className="mt-2 h-4 w-28 rounded bg-white/[0.035]" />
     </div>
   )

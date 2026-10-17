@@ -51,6 +51,14 @@ programado debajo, y el pie de ayer. El formulario para programar, la lista de b
 CSV no están en la página: se abren en un panel que se desliza desde la derecha (ver «El panel
 lateral», más abajo).
 
+Mientras carga se ve la forma de lo que viene, sin texto salvo el título «La Parrilla»: el
+lugar de los botones, el de «Calendario», «Día» y «Lista», y siete parrillas tibias, sin
+cortes, que se encienden y se apagan de a poco como brasas, una un poco después de la otra
+(con «reducir movimiento» activado en el sistema, quietas a media luz). No son días vacíos:
+un día vacío es gris ceniza y no se mueve. En la vista «Día» son tres columnas, en «Lista»
+son filas, y al abrir un post se ve el editor: el título «Editar post» y el lugar de cada
+campo.
+
 ### Encabezado
 
 «La Parrilla», y debajo, en chico, «lo que viene y cómo salió lo que ya se fue». A la derecha
@@ -65,7 +73,9 @@ lateral», más abajo).
 ### «Programado.»
 
 En verde, bajo el encabezado, justo después de programar algo desde el panel lateral. Se va
-al cambiar de semana o de vista, o al abrir otro panel.
+al cambiar de semana o de vista, o al abrir otro panel. A la vez, el corte recién programado
+cae en su día y queda encendido un momento con un borde naranjo que se apaga solo (ver «El
+compositor», al final de «Fecha y hora»).
 
 ### «Conecta tu primera red»
 
@@ -78,8 +88,9 @@ igual debajo de ella.
 ### «Se quemó»
 
 Aparece solo si hay algo que falló, de cualquier fecha; si no falló nada, la sección no existe.
-Parte plegada, en una sola línea: «Se quemó» en rojo, cuántas hay (por ejemplo «22») y «Ver»
-con una flecha. Un clic en esa línea la abre (y la flecha pasa a «Ocultar»); otro la vuelve a
+Parte plegada, en una sola línea: «Se quemó» en rojo, cuántas hay (por ejemplo «22»), los
+cortes quemados en chico —uno por cada uno, hasta cinco, y «+<N>» si hay más— y «Ver» con una
+flecha. Un clic en esa línea la abre (y la flecha pasa a «Ocultar»); otro la vuelve a
 plegar. Si se deja abierta, la próxima vez que se entre en ese navegador abre abierta.
 
 Abierta, cada fila es una red donde un corte falló: un corte que falló en dos redes da dos
@@ -104,8 +115,11 @@ líneas:
 - el texto del post, que es un enlace a su editor (o «(sin texto)»);
 - debajo, en rojo, el motivo, cuando lo hay: una frase fija en español que dice por qué no
   salió (ver «Motivos de un destino que no salió», más abajo);
-- al costado, el botón «Reprogramar», que abre la misma ventana que el de la lista (ver «La
-  ventana «Reprogramar»», más abajo).
+- debajo del motivo, los botones. Si el motivo dice cómo se arregla, primero el arreglo, en
+  naranjo: **«Reconectar»** cuando la cuenta perdió la conexión (lleva a [Los
+  Fierros](los-fierros.md)) o **«Cambiar el archivo»** cuando la red no acepta los archivos
+  (abre el editor del post, en sus archivos). Al lado, siempre, **«Reprogramar»**, que abre la
+  misma ventana que el de la lista (ver «La ventana «Reprogramar»», más abajo).
 
 ### El corte
 
@@ -157,17 +171,23 @@ en la vista «Día», y un lector de pantalla lo lee «lun 12: ver por cuenta»�
 —«Apagada» (nada), «Prendida» (uno o dos cortes) o «Parrilla llena» (tres o más)— y, en los
 días de hoy en adelante, un «+» chico que abre el panel «Nueva publicación» con ese día puesto
 (un lector de pantalla lo lee «Programar el <día> <número>», por ejemplo «Programar el lun
-12»). El día de hoy tiene el nombre más claro y un borde fino. Un día vacío de hoy en
-adelante dice «No hay nada puesto. Préndela.», y esa frase es un enlace que hace lo mismo que
-el «+»; un día vacío que ya pasó dice «No hay nada puesto.», sin enlace y sin «+». En el
-teléfono, la semana se desliza de lado.
+12»). El día de hoy tiene el nombre más claro y un borde fino. Un día vacío es una parrilla
+fría: los fierros en gris ceniza, sin brasa debajo y sin ninguna frase a la vista. Si es de hoy
+en adelante, al pasar el mouse por encima aparece en el medio **«+ Poner algo»**, un botón con
+borde punteado que hace lo mismo que el «+» (en el teléfono, que no tiene mouse, está siempre a
+la vista; un lector de pantalla lo lee «No hay nada puesto. Poner algo»). Un día vacío que ya
+pasó no tiene ni ese botón ni el «+», y un lector de pantalla lee «No hay nada puesto.». En el
+teléfono la semana se desliza de lado, y abre corrida hasta hoy, con el día de antes asomado a
+la izquierda.
 
 Cada publicación es una tarjeta con el corte arriba (ver «El corte»), la hora con su estado al
 lado cuando no es solo programado —«· saliendo», «· publicado» en verde, «· falló en <N> de
 <M>» o «· falló» en rojo—, los chips de sus destinos, el texto en dos líneas o «(sin texto)»,
-y una línea en ámbar «Reintentando <Red> · <usuario>: <motivo>» por cada destino que falló y
-espera otro intento. La tarjeta no lleva miniatura: la foto o el video se ven en el editor. Al
-dejar el mouse encima aparece el estado de cada red, con su motivo. Un clic abre el editor.
+y, si algún destino falló y espera otro intento, una línea en ámbar «Reintentando · <Red>»
+con las redes que reintentan (en dos renglones como mucho). El motivo no va en la tarjeta: al
+dejar el mouse encima aparece el estado de cada red, con su motivo, y está también en el
+editor. La tarjeta no lleva miniatura: la foto o el video se ven en el editor. Un clic abre el
+editor.
 
 Los borradores que tienen fecha aparecen en su día, debajo de los cortes, como tarjetas con
 borde punteado: arriba «Borrador · HH:MM» y debajo el texto en dos líneas (o «(sin texto)»).
@@ -177,7 +197,7 @@ fuego del día: un día que solo tiene borradores sigue diciendo «Apagada». Lo
 fecha no salen en el calendario; están en «Borradores (<N>)».
 
 El calendario no tiene botones de «Subir ahora», «Eliminar» ni «Reprogramar»: esos están en
-la lista (y «Reprogramar», también en «Se quemó»).
+la lista (y «Reprogramar», también en «Se quemó» y en el editor).
 
 ### El día
 
@@ -212,8 +232,11 @@ Los borradores con fecha de ese día van en la columna de cada cuenta que tienen
 borde punteado, como en la semana; los que no tienen ninguna cuenta marcada, en una columna
 «Sin cuenta elegida» al final. No cuentan para el fuego.
 
-Una columna vacía dice «Nada para esta cuenta. Préndela.» —un enlace que hace lo mismo que su
-«+»— si todavía se puede programar en ella; en un día que ya pasó, «No salió nada en esta
+Una columna vacía es una parrilla fría, como en la semana. Si todavía se puede programar en
+ella, al pasar el mouse aparece **«+ Poner algo»**, que hace lo mismo que su «+» (en el
+teléfono, siempre a la vista; un lector de pantalla lo lee «Nada para esta cuenta. Poner
+algo»). Si no se puede —el día ya pasó, o la cuenta está desconectada—, no lleva nada a la
+vista, y un lector de pantalla lee «No salió nada en esta cuenta.» o «Nada para esta
 cuenta.». Sin ninguna cuenta conectada y sin nada ese día: «No tienes cuentas conectadas, y
 ese día no hay nada puesto.».
 
@@ -226,9 +249,15 @@ menos». Sin nada: «Nada programado todavía.» Los borradores no aparecen en l
 
 Cada publicación es una tarjeta con:
 
-- El texto (dos líneas como mucho), o «(sin texto)», y debajo el día y la hora.
-- A la derecha: **«Editar»** (abre el editor), **«Subir ahora»** (solo si a alguna red le
-  falta salir: programada, publicándose o quemada) y **«Eliminar»**.
+- A la izquierda, el corte en chico, con todas sus marcas, como en «Se quemó» (ver «El
+  corte», más arriba).
+- El texto (dos líneas como mucho), o «(sin texto)», y debajo el día y la hora, en la misma
+  forma que «Se quemó» pero siempre con el día: «<día> <número> de <mes> · HH:MM», por
+  ejemplo «jue 15 de oct · 13:00».
+- A la derecha (en un teléfono, debajo del texto): **«Editar»** (abre el editor), **«Subir
+  ahora»** (solo si a alguna red le falta salir: programada, publicándose o quemada) y
+  **«Eliminar»**, que pregunta antes «¿Eliminar este post? Se borra de La Parrilla y ya no
+  sale en ninguna red.».
 - Abajo, una píldora por cada destino: el ícono de la red, el usuario, « · » y el estado
   (ver la tabla de estados, más abajo). Si hay un motivo de falla, sigue « — <motivo>». Si el
   destino se quemó, la píldora es roja y termina en el botón subrayado **«Reprogramar»**.
@@ -257,40 +286,65 @@ borradores», más abajo).
 ### El compositor: «Nueva publicación» o «Borrador»
 
 El panel se llama «Nueva publicación» cuando se abre con ese botón, con el «+» de un día o con
-«No hay nada puesto. Préndela.», y «Borrador» cuando se abre un borrador guardado. El
+«+ Poner algo», y «Borrador» cuando se abre un borrador guardado. El
 formulario viene abierto, con el cursor en «Texto». En este orden:
 
-1. **«Texto»**, con el placeholder «Texto del post…». No deja escribir más de 2200
+1. **«Así va a quedar»**: el corte del post mientras se arma (ver «El corte», más arriba),
+   sobre la parrilla del día elegido con este post encima. La silueta sale de los archivos
+   —también de los que todavía suben—: un chori sin archivos, un bife con una foto, una
+   entraña con un video, una tira con un hueso por archivo. Lleva una marca punteada por cada
+   cuenta marcada (fría, en gris acero, si el fierro de esa cuenta se apagó) y se llena de
+   carne cruda de izquierda a derecha a medida que llegan los archivos; lo que falta se ve
+   como la silueta punteada. Si un archivo no llegó, lleva el halo rojo y la banderita. Al
+   lado, en palabras: la forma («Solo texto.», «Una foto.», «Un video.» o «Un carrusel de
+   <N>.»), a quién va («A Instagram y TikTok.», con el usuario cuando hay dos cuentas de la
+   misma red, o «Todavía sin cuenta: elige al menos una.») y, mientras suben, «Llegando: <N>
+   de <M>.» o «Un archivo no llegó: reintenta o quítalo. Los que siguen esperan.».
+2. **«Texto»**, con el placeholder «Texto del post…». No deja escribir más de 2200
    caracteres.
-2. **«Archivos»**, el botón de archivos del navegador, que acepta varios a la vez; debajo
-   dice «Imágenes o video, opcional. Se suben apenas los eliges.» Solo deja elegir imágenes y
-   videos. Empiezan a subir en cuanto se eligen: mientras tanto dice «Subiendo…» o «Subiendo
-   <N> de <M>…», y el botón de archivos y «Programar» quedan apagados (con un video puede
-   tardar). Lo subido aparece debajo en una lista numerada, en el orden del carrusel: el
-   número, el nombre del archivo, «imagen» o «video», y una ✕ para quitarlo (un lector de
-   pantalla la lee «Quitar <nombre del archivo>»). Se pueden elegir más después: se agregan al
-   final. Para cambiar el orden hay que quitar y volver a elegir, o usar el editor después de
-   programar. Si una subida falla, el error sale en rojo debajo de la lista, y no queda
-   ninguno de los archivos de esa tanda.
-3. **La revisión para TikTok**, solo si hay una cuenta de TikTok marcada y archivos elegidos.
+3. **«Archivos»**: una zona con borde punteado que dice «Suelta fotos o un video acá, o
+   elígelos» y, debajo, «Opcional. Suben apenas los sueltas y se guardan con el borrador.»
+   Se puede soltar ahí archivos arrastrados desde la computadora (la zona se pinta de
+   naranjo mientras se arrastra encima) o apretarla para elegirlos; acepta varios a la vez,
+   solo imágenes y videos. Con algo elegido, la zona se achica y dice «Suelta más acá, o
+   elígelos». Debajo, una miniatura por archivo, en el orden del carrusel, con su número
+   arriba a la izquierda («· ▶» si es video) y una ✕ arriba a la derecha para quitarlo (un
+   lector de pantalla la lee «Quitar <nombre del archivo>»). Suben de a uno y en orden: el que
+   espera dice «En cola», el que sube dice cuánto lleva («45 %») con una barra del color de la
+   carne cruda, y los dos se ven apagados hasta que llegan. Uno que no llegó queda con borde
+   rojo, «No llegó» y el botón «Reintentar», y debajo de las miniaturas sale en rojo «<nombre
+   del archivo>: <error>»; los que venían atrás esperan hasta que se reintente o se quite. Lo
+   que ya llegó se queda. Quitar uno que está subiendo corta su subida. Se pueden agregar más
+   después: van al final. Para cambiar el orden hay que quitar y volver a elegir, o usar el
+   editor después de programar. Mientras algo sube o no llegó, «Programar» queda apagado.
+4. **La revisión para TikTok**, solo si hay una cuenta de TikTok marcada y archivos elegidos.
    Mide cada archivo en el navegador y dice, en verde, «El archivo cumple lo que pide
    TikTok.» o «Los archivos cumplen lo que pide TikTok.»; o, en un recuadro rojo, «TikTok va
    a rechazar esto:» con una línea por archivo, «<nombre del archivo>: <problema>.». Es un
    aviso: no impide programar. Solo mide lo elegido desde que se abrió el panel: los archivos
    que vienen de un borrador guardado no se vuelven a medir.
-4. **«Cuentas»**, una casilla por cuenta, rotulada «<Red> · <usuario>» (X aparece como «X /
-   Twitter»; una cuenta sin usuario dice «sin nombre»). Una cuenta desconectada sale
-   atenuada, no se puede marcar y lleva al lado «reconéctala». En un formulario nuevo, si hay
-   una sola cuenta conectada viene marcada; con dos o más no viene ninguna. En un borrador
-   vienen marcadas las que tenía marcadas, si siguen conectadas. Sin ninguna cuenta, el
-   bloque dice «Todavía no tienes cuentas conectadas. Conecta una para poder programar.», y
-   «Conecta una» lleva a [Los Fierros](los-fierros.md) (tus redes conectadas).
-5. **Un bloque «TikTok · <usuario>»** por cada cuenta de TikTok marcada (ver abajo).
-6. **Un bloque «Instagram · <usuario>»** por cada cuenta de Instagram marcada, solo cuando
+5. **«Cuentas»**, una ficha redonda por cuenta: el fierro de la cuenta —la rayita que dice la
+   temperatura de su conexión, como en [Los Fierros](los-fierros.md): naranja al rojo, ámbar
+   si se enfría, gris si se apagó—, el ícono de la red y «<Red> · <usuario>» (X aparece como
+   «X / Twitter»; una cuenta sin usuario dice «sin nombre»). Un clic la marca o la desmarca;
+   la marcada se enciende con borde naranjo. Una que se está enfriando lleva al lado «se
+   enfría», en ámbar. Una cuenta desconectada sale atenuada, no se puede marcar y lleva al
+   lado «reconéctala». En un formulario nuevo, si hay una sola cuenta conectada viene
+   marcada; con dos o más no viene ninguna. En un borrador vienen marcadas las que tenía
+   marcadas, si siguen conectadas. Si el permiso de una cuenta marcada vence antes de la hora
+   elegida, debajo de las fichas aparece en ámbar «El permiso de <Red> · <usuario> vence el
+   <día> <número> de <mes> a las HH:MM, antes de que salga esto: así no va a salir ahí.
+   Reconéctala en Los Fierros antes, o elige un día anterior.», con «Reconéctala en Los
+   Fierros» como enlace, y su marca en «Así va a quedar» sale fría. No avisa por TikTok,
+   YouTube ni X, que renuevan su permiso solas. Sin ninguna cuenta, el bloque dice «Todavía
+   no tienes cuentas conectadas. Conecta una para poder programar.», y «Conecta una» lleva a
+   Los Fierros (tus redes conectadas).
+6. **Un bloque «TikTok · <usuario>»** por cada cuenta de TikTok marcada (ver abajo).
+7. **Un bloque «Instagram · <usuario>»** por cada cuenta de Instagram marcada, solo cuando
    hay exactamente un archivo y es un video (ver abajo).
-7. **«Respuesta automática por palabra clave»**, plegado (ver abajo); viene abierto y lleno si
+8. **«Respuesta automática por palabra clave»**, plegado (ver abajo); viene abierto y lleno si
    el borrador tenía una palabra.
-8. **«Fecha y hora»**, un selector de día y hora con el botón «Ahora» al lado. Al abrir desde
+9. **«Fecha y hora»**, un selector de día y hora con el botón «Ahora» al lado. Al abrir desde
    un día del calendario, viene puesto ese día a las 09:00; si el día es hoy, la hora en punto
    siguiente (o las 09:00, si todavía no son las nueve), y vacío desde las 23:00. Al abrir un
    borrador, viene la fecha que tenía. Al elegir el día aparece debajo cómo está ese día según
@@ -299,7 +353,21 @@ formulario viene abierto, con el cursor en «Texto». En este orden:
    día ya va lleno, con <N>. Mira si te sirve uno más flojo.» (tres o más). Los borradores no
    cuentan. «Ahora» se enciende y se apaga con un clic; encendido, el selector queda vacío y
    bloqueado y el post queda para el minuto siguiente.
-9. **El pie del panel**, fijo abajo: los errores en rojo, encima de los botones; **«Programar»**,
+
+   Debajo del selector, la semana en chico: hoy y los seis días que siguen, cada uno con su
+   nombre («hoy», «sáb», «dom»…), su número y una rayita con su fuego (apagada, prendida o
+   llena, con lo que ya hay programado; un lector de pantalla lee, por ejemplo, «sáb 17 de
+   oct: prendida, 2 cortes»). Un clic pone ese día en el selector, con la hora que ya tenía si
+   todavía no pasó; si no tenía hora, o ya pasó, la de siempre: las 09:00, o la hora en punto
+   siguiente si es hoy. El día elegido lleva borde naranjo. Con «Ahora» encendido, la semana
+   en chico no aparece.
+
+   Al programar, el panel se cierra y el corte cae en su día: en el calendario, la semana se
+   pasa a la de ese día y su tarjeta queda encendida un momento con un borde naranjo; en la
+   vista «Día», se va a ese día; en la lista, su fila se trae a la vista y se enciende igual.
+   En el teléfono, la semana se corre hasta él. Con «reducir movimiento» activado en el
+   sistema, la tarjeta no cae: queda con el borde naranjo quieto hasta que se va a otra parte.
+10. **El pie del panel**, fijo abajo: los errores en rojo, encima de los botones; **«Programar»**,
    que dice «Programando…» mientras trabaja; **«Descartar»**; y a la derecha, en chico, cómo va
    el guardado del borrador (ver abajo).
 
@@ -438,7 +506,7 @@ Cada publicación tiene un destino por cuenta, y cada destino va por su lado.
 | Lo que dice | Cómo se ve | Qué está pasando |
 |---|---|---|
 | «Programado» | Píldora gris; en el corte, marca punteada y chip sin signo | Espera su hora |
-| «Reintentando» | Píldora gris con « — <motivo>»; en el corte, marca punteada en ámbar y chip «↻»; en el calendario, la línea «Reintentando <Red> · <usuario>: <motivo>» | Falló un intento y se volverá a probar solo. Son tres intentos en total; algunos rechazos se queman al primero |
+| «Reintentando» | Píldora gris con « — <motivo>»; en el corte, marca punteada en ámbar y chip «↻»; en el calendario, la línea «Reintentando · <Red>» | Falló un intento y se volverá a probar solo. Son tres intentos en total; algunos rechazos se queman al primero |
 | «Publicando…» | Píldora gris; humo sobre el corte, chip «…» y «· saliendo» al lado de la hora | La red recibió el archivo y lo está procesando. Si pasan 24 horas así, cuenta como un intento fallido |
 | «Publicado» | Píldora verde; marca llena en el corte y chip verde «✓» | Ya salió en esa red |
 | «En tu bandeja de TikTok» | Píldora verde; marca quemada hasta la mitad con un punto ámbar, chip «◐» y la tarjeta con borde ámbar | Se mandó como borrador de TikTok: hay que terminarlo en la app de TikTok. Cuando se publica desde allá, la sincronización siguiente (la diaria, o «Sincronizar ahora» en [Los Fierros](los-fierros.md)) encuentra el video y pasa a «Publicado» |
@@ -458,12 +526,21 @@ Además de desde el calendario y la lista, se llega desde la pieza de una public
 
 Arriba, el título «Editar post» y el enlace «Volver», que regresa a la vista desde la que se
 entró: la semana del calendario, la lista o, si se entró con «Editar atributos», esa pieza de
-Los Números. Debajo, según el caso:
+Los Números.
+
+Debajo, un recuadro con cómo va el post en cada red: a la izquierda, su corte con todas sus
+marcas (ver «El corte»); al lado, una línea por destino con su chip, «<Red> · <usuario>» y el
+estado en palabras («· Programado», «· Reintentando», «· Publicando…», «· Publicado», «· En tu
+bandeja de TikTok», «· Falló» o «· Su fierro está frío: reconéctala»). Si el destino reintenta
+o falló, debajo va el motivo, en ámbar o en rojo. Si falló, debajo del motivo van los mismos
+botones que en «Se quemó»: el arreglo cuando el motivo lo dice —**«Reconectar»**, que lleva a
+Los Fierros, o **«Cambiar el archivo»**, que baja a «Media» en este mismo editor— y
+**«Reprogramar»**. Si el fierro de su cuenta está frío, **«Reconectar»**. Al pie del
+recuadro, según el caso:
 
 - «Hay una publicación en curso. Vuelve en un minuto.», en amarillo, si algún destino está
   «Publicando…». Mientras tanto todo el formulario queda bloqueado, también «Eliminar».
-- «Ya publicado en <Red> · <usuario>, <…>. Los cambios no tocan lo publicado.», en verde, si
-  alguna red ya salió.
+- «Los cambios no tocan lo publicado.», si alguna red ya salió.
 
 El formulario, en orden:
 
@@ -499,15 +576,17 @@ El formulario, en orden:
    normal en la misma cuenta, que por fuerza son dos posts programados. Se puede agregar o
    cambiar también en un post que ya salió: no toca lo publicado.
 8. Los errores, en rojo, y los botones **«Guardar»** («Guardando…») y **«Eliminar»**
-   («Eliminando…»). Guardar bien devuelve a la vista de donde se vino —también a la pieza de
-   Los Números, si se entró desde ahí—; eliminar bien, también.
+   («Eliminando…»), que pregunta antes, como en la lista. Guardar bien devuelve a la vista de
+   donde se vino —también a la pieza de Los Números, si se entró desde ahí—; eliminar bien,
+   también.
 
 El editor no es un panel lateral: es una pantalla aparte, y no guarda borradores. Si el post
 no existe o ya se borró, el editor muestra la página «No encontramos esa página».
 
 ### La ventana «Reprogramar»
 
-Se abre al apretar «Reprogramar» en una píldora roja de la lista o en una fila de «Se quemó», y
+Se abre al apretar «Reprogramar» en una píldora roja de la lista, en una fila de «Se quemó» o
+en un destino quemado del editor, y
 queda al centro, encima de todo, con el fondo oscurecido. Arriba dice de qué destino se trata,
 «<Red> · <usuario>»; debajo, un selector de fecha y hora, **«Guardar»** (bloqueado hasta
 elegir una hora) y **«Cancelar»**. Se cierra también con Esc o con un clic fuera. Al guardar
@@ -525,20 +604,23 @@ se puede por API: ver [la guía de la API](../api-llm.md).
 2. Escribir en «Texto».
 3. Si lleva fotos o video, apretar el botón de «Archivos» y elegirlos. Esperar a que terminen
    de subir: aparecen en la lista numerada.
-4. En «Cuentas», marcar cada cuenta donde tiene que salir.
+4. En «Cuentas», marcar la ficha de cada cuenta donde tiene que salir.
 5. Si apareció un bloque de TikTok o de Instagram, llenarlo (ver las tareas de abajo).
-6. En «Fecha y hora», elegir día y hora. Mirar el aviso de debajo: si dice que el día va
-   lleno, conviene otro.
-7. Apretar «Programar». El panel se cierra, arriba dice «Programado.» y el post aparece en el
-   calendario.
+6. En «Fecha y hora», elegir día y hora: en el selector, o con un clic en un día de la semana
+   en chico. Mirar el aviso de debajo: si dice que el día va lleno, conviene otro. Si aparece
+   en ámbar que el permiso de una cuenta vence antes, reconectarla en Los Fierros o elegir un
+   día anterior.
+7. Apretar «Programar». El panel se cierra, arriba dice «Programado.» y el post cae en su día
+   del calendario, encendido un momento.
 
 Si hay que dejarlo a medias, basta con cerrar el panel: queda como borrador.
 
 ### Para programar en un día del calendario
 
 1. En «Calendario», ir a la semana con «Semana anterior» o «Semana siguiente».
-2. Apretar el «+» junto al nombre del día o, si el día está vacío, «No hay nada puesto.
-   Préndela.». Los días que ya pasaron no tienen ninguno de los dos.
+2. Apretar el «+» junto al nombre del día o, si el día está vacío, «+ Poner algo» en el medio
+   de su parrilla (con mouse, aparece al pasar por encima). Los días que ya pasaron no tienen
+   ninguno de los dos.
 3. Se abre «Nueva publicación» con la fecha puesta: ese día a las 09:00 (si es hoy, la hora
    en punto siguiente). Cambiar la hora si hace falta y seguir como en la tarea anterior.
 
@@ -655,9 +737,11 @@ el botón «Agregar archivos» del editor falla cuando lo elegido suma más de u
 
 ### Para arreglar un post quemado
 
-Primero leer el motivo, que está en «Se quemó», arriba de la pantalla, en la píldora roja de
-la lista y en el correo. Si dice que hay que reconectar, hacerlo antes en [Los
-Fierros](los-fierros.md). Después, una de tres:
+Primero leer el motivo, que está en «Se quemó», arriba de la pantalla, en el editor del post,
+en la píldora roja de la lista y en el correo. Si dice que hay que reconectar, hacerlo antes en
+[Los Fierros](los-fierros.md): el botón «Reconectar» de su fila en «Se quemó» lleva ahí. Si la
+red no acepta el archivo, «Cambiar el archivo» abre el editor en sus archivos. Después, una de
+tres:
 
 - **Darle otra hora:** apretar «Reprogramar» en su fila de «Se quemó» (o en la píldora roja de
   la lista), elegir una fecha y hora futuras, en la zona de Tu Cuenta, y «Guardar». La ventana
@@ -684,9 +768,10 @@ de un post que ya salió en otras redes.
 
 ### Para borrar un post
 
-Apretar «Eliminar» en su tarjeta de la lista, o «Eliminar» en el editor. **No pide
-confirmación** y no se puede deshacer. Solo funciona si no salió ni se está publicando en
-ninguna red; si ya salió en alguna, hay que borrarlo en la red misma.
+Apretar «Eliminar» en su tarjeta de la lista, o «Eliminar» en el editor, y aceptar la
+pregunta «¿Eliminar este post? Se borra de La Parrilla y ya no sale en ninguna red.». No se
+puede deshacer. Solo funciona si no salió ni se está publicando en ninguna red; si ya salió en
+alguna, hay que borrarlo en la red misma.
 
 ## Mensajes que puede ver
 
@@ -696,10 +781,11 @@ ninguna red; si ya salió en alguna, hay que borrarlo en la red misma.
 |---|---|---|
 | «Programado.» | Lo que se programó desde el panel quedó guardado | Nada; está en el calendario |
 | «Conecta tu primera red» | No hay ninguna red conectada | «Ir a Los Fierros →» y conectar una |
-| «No hay nada puesto. Préndela.» | Ese día, de hoy en adelante, no tiene nada programado | Apretarlo para programar ahí |
-| «No hay nada puesto.» | Ese día ya pasó y no tuvo nada | Nada |
+| «+ Poner algo», en el medio de un día con los fierros en gris ceniza (con mouse, al pasar por encima) | Ese día, de hoy en adelante, no tiene nada programado | Apretarlo para programar ahí |
+| Un día con los fierros en gris ceniza y nada encima, sin «+» | Ese día ya pasó y no tuvo nada | Nada |
+| Bloques sin texto que se encienden y se apagan de a poco, en tonos de brasa | La pantalla está cargando | Esperar |
 | «Ayer no salió nada.» | Ningún corte de ayer salió en ninguna red | Si algo debía salir, mirar «Se quemó» |
-| El motivo en rojo bajo una fila de «Se quemó» | Por qué no salió en esa red (ver «Motivos de un destino que no salió») | Si pide reconectar, ir a Los Fierros; después «Reprogramar» |
+| El motivo en rojo bajo una fila de «Se quemó» | Por qué no salió en esa red (ver «Motivos de un destino que no salió») | El botón de abajo: «Reconectar» o «Cambiar el archivo» cuando el motivo lo pide; si no, «Reprogramar» |
 | «Algo se rompió», con «No fue nada que hicieras: una consulta no respondió. Vuelve a intentarlo; el detalle quedó en la consola del navegador.» y el botón «Reintentar» | Una consulta del servidor falló; no fue la persona. Si falló la pantalla principal de La Parrilla, no aparece «Ir a La Parrilla» | «Reintentar» |
 
 ### Al programar
@@ -707,6 +793,7 @@ ninguna red; si ya salió en alguna, hay que borrarlo en la red misma.
 | Lo que dice la pantalla | Qué significa | Qué hacer |
 |---|---|---|
 | «Elige al menos una cuenta.» | No hay ninguna cuenta marcada | Marcar al menos una en «Cuentas» |
+| «El permiso de <Red> · <usuario> vence el <día> a las HH:MM, antes de que salga esto: así no va a salir ahí. Reconéctala en Los Fierros antes, o elige un día anterior.», en ámbar debajo de las fichas | El permiso de esa cuenta vence antes de la hora elegida: así como está, el post se quemaría en esa red | Reconectarla en Los Fierros, o elegir un día anterior; no impide programar |
 | «Escribe un texto o adjunta un archivo.» | No hay ni texto ni archivos | Agregar uno de los dos |
 | «La fecha no se entendió.» | La fecha está vacía o incompleta | Completar día y hora |
 | «La hora debe estar en el futuro.» | La hora elegida ya pasó (pasa con un borrador que tenía una fecha que ya llegó) | Elegir una futura, o «Ahora» |
@@ -714,6 +801,7 @@ ninguna red; si ya salió en alguna, hay que borrarlo en la red misma.
 | «Una de las cuentas elegidas no es tuya.» | Una cuenta dejó de existir mientras la pantalla estaba abierta | Cerrar el panel (queda el borrador) y volver a abrirlo desde «Borradores (<N>)» |
 | «La cuenta <usuario> no está conectada. Vuelve a conectarla en Los Fierros.» | Se desconectó | Reconectarla en Los Fierros y volver: lo escrito sigue en «Borradores» |
 | «Espera a que terminen de subir los archivos.» | Se intentó programar mientras subían archivos | Esperar a que aparezcan en la lista y volver a apretar «Programar» |
+| «Un archivo no llegó: reintenta o quítalo antes de programar.» | Se apretó «Programar» con un archivo que no llegó (con borde rojo y «No llegó») | «Reintentar» en su miniatura, o quitarlo con su ✕ |
 | «Un archivo no es del almacén.», «Falta subir un archivo.» o «El cuerpo no se entendió.» | Un archivo de la lista ya no está en el almacenamiento, o la subida quedó a medias | Quitar los archivos de la lista con su ✕, volver a elegirlos y programar |
 
 ### Al subir archivos
@@ -723,7 +811,8 @@ de esa tanda queda: hay que volver a elegirlos.
 
 | Lo que dice la pantalla | Qué significa | Qué hacer |
 |---|---|---|
-| «Subiendo…» o «Subiendo <N> de <M>…» | Están subiendo los archivos recién elegidos | Esperar: «Programar» se enciende al terminar |
+| «Llegando: <N> de <M>.», en «Así va a quedar», y «En cola» o «<N> %» en las miniaturas | Están subiendo los archivos recién elegidos, de a uno | Esperar: «Programar» se enciende cuando llegan todos |
+| «Un archivo no llegó: reintenta o quítalo. Los que siguen esperan.», y «No llegó» en una miniatura con borde rojo | Ese archivo no pudo subir; el error exacto sale en rojo debajo de las miniaturas | «Reintentar» en esa miniatura, o quitarlo con su ✕ |
 | «El archivo supera los 500 MB.» | Un archivo pasa del máximo | Achicarlo |
 | «Ese tipo de archivo no se puede publicar.» | No es imagen ni video | Elegir otro |
 | «No se pudo preparar la subida. (<código>)», «No se pudo subir el archivo. (<código>)» o «No se pudo subir el archivo.» | Falló la conexión al subir | Volver a elegirlos; si se repite, avisar a quien administra el sitio |
@@ -826,6 +915,7 @@ puede decir:
 |---|---|---|
 | «Nada programado todavía.» | No hay nada programado | Programar algo |
 | «¿Subirlo ahora, sin esperar la hora programada? Se publica en tus redes de inmediato.» | Pregunta de «Subir ahora» | Aceptar para publicar ya; cancelar para dejarlo como estaba |
+| «¿Eliminar este post? Se borra de La Parrilla y ya no sale en ninguna red.» | Pregunta de «Eliminar», en la lista y en el editor | Aceptar para borrarlo; cancelar para dejarlo como estaba |
 | Una lista con las partes que apliquen, separadas por comas y con punto final: «<N> publicado» (o «publicados»), «<N> en proceso», «<N> en espera de la red», «<N> para reintentar», «<N> con error» | Cómo le fue a «Subir ahora» | Lo que está en proceso o en espera de la red termina solo; para lo que quedó para reintentar o con error, leer el motivo en la píldora |
 | «Este post no tenía destinos pendientes.» | Ya había salido en todas sus redes | Nada |
 | «El post ya no existe.» | Se borró antes | Recargar |
@@ -838,7 +928,7 @@ puede decir:
 | Lo que dice la pantalla | Qué significa | Qué hacer |
 |---|---|---|
 | «Hay una publicación en curso. Vuelve en un minuto.» | Una red está procesando la publicación; el editor queda bloqueado | Esperar y recargar |
-| «Ya publicado en <…>. Los cambios no tocan lo publicado.» | Algo ya salió | Lo que se cambie solo vale para lo que falta salir |
+| «Los cambios no tocan lo publicado.» | Algo ya salió (el recuadro de arriba dice dónde) | Lo que se cambie solo vale para lo que falta salir |
 | «No se puede quitar una cuenta en la que ya se publicó.» | Se intentó desmarcar una red donde ya salió | Dejarla marcada |
 | «No se pudo leer una media por URL.» | Un enlace de «Agregar por URL» o de la portada no se pudo descargar | Usar un enlace de descarga directa |
 | «La portada requiere un video en media.» | Portada sin video | Quitar la portada o agregar el video |
@@ -850,8 +940,8 @@ puede decir:
 
 ### Motivos de un destino que no salió
 
-Aparecen en «Se quemó», en la píldora de la lista, en la línea «Reintentando <Red> ·
-<usuario>: <motivo>» del calendario y en el correo. Mientras el destino dice «Reintentando»,
+Aparecen en «Se quemó», en el editor del post, en la píldora de la lista, al dejar el mouse
+sobre su tarjeta del calendario y en el correo. Mientras el destino dice «Reintentando»,
 se reintenta solo; cuando dice «Falló», hay que actuar (ver la tarea de arreglar un post
 quemado, más arriba).
 
@@ -915,8 +1005,8 @@ quemado, más arriba).
   reconectarla en [Los Fierros](los-fierros.md).
 - **La fecha viene puesta a las 9.** Es lo que propone al abrir desde un día del calendario;
   se cambia en «Fecha y hora».
-- **Elegí un archivo y el botón Programar está gris.** Está subiendo («Subiendo…»): esperar
-  a que aparezca en la lista.
+- **Elegí un archivo y el botón Programar está gris.** Está subiendo («En cola» o «<N> %» en
+  su miniatura): esperar a que llegue. Si dice «No llegó», apretar «Reintentar» o quitarlo.
 - **Quiero cambiar el orden de los archivos.** En el compositor, quitarlos con su ✕ y volver a
   elegirlos en el orden que se quiere; o programar y reordenar en el editor con las flechas.
 - **¿Dónde subo un CSV? / No encuentro la carga masiva.** «Subir CSV», arriba a la derecha de
@@ -1044,6 +1134,9 @@ Lo que describe esta página sale de:
   - `src/app/admin/(dash)/schedule/page.tsx`
   - `src/app/admin/(dash)/schedule/panel-lateral.tsx`
   - `src/app/admin/(dash)/schedule/composer.tsx`
+  - `src/app/admin/(dash)/schedule/vista-previa.tsx`, `src/app/admin/(dash)/schedule/archivos.tsx` y `src/app/admin/(dash)/schedule/subidas.ts` («Así va a quedar», los archivos y su cola)
+  - `src/app/admin/(dash)/schedule/vence.ts` (el aviso de que el permiso de una cuenta vence antes de la hora elegida)
+  - `src/lib/subida-directa.ts` (la subida a R2, con su avance)
   - `src/app/admin/(dash)/schedule/lista-borradores.tsx`
   - `src/app/admin/(dash)/schedule/batch-upload.tsx`
   - `src/app/admin/(dash)/schedule/calendar.tsx`
@@ -1061,6 +1154,11 @@ Lo que describe esta página sale de:
   - `src/app/admin/(dash)/schedule/enlace.ts`
   - `src/app/admin/(dash)/schedule/[id]/page.tsx`
   - `src/app/admin/(dash)/schedule/[id]/editor.tsx`
+  - `src/app/admin/(dash)/schedule/[id]/destinos.tsx` (cómo va el post en cada red, arriba del editor)
+  - `src/app/admin/(dash)/schedule/arreglo.ts` (qué arreglo se ofrece junto a un destino quemado)
+  - `src/app/admin/(dash)/schedule/desplazar-a-hoy.tsx` (la semana corrida hasta hoy en el teléfono)
+  - `src/app/admin/(dash)/schedule/loading.tsx` y `src/components/esqueleto.tsx` (la carga, con la forma de cada vista y del editor)
+  - `src/app/globals.css` (la parrilla fría de un día vacío, «Poner algo» al pasar el mouse, y el pulso de la carga)
 - Lo que hacen sus botones (programar, guardar y descartar un borrador, guardar en el editor, reprogramar, eliminar, «Subir ahora», la carga por CSV y la lectura de la cuenta de TikTok):
   - `src/app/admin/actions.ts`
 - Los borradores (qué se guarda, cuándo hay algo que guardar, la fecha que se propone para un día):

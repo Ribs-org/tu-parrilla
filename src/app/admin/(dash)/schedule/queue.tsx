@@ -1,11 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { useState, useTransition } from 'react'
+import { useEffect, useState, useTransition, type ReactNode } from 'react'
 import { deleteScheduledPost, subirAhora } from '@/app/admin/actions'
 import type { ScheduledPost, ScheduledPostTarget } from '@/db/schema'
 import { cn } from '@/lib/utils'
-import { motivoDestino, nombreDestino } from './etiqueta'
+import { CONFIRMAR_ELIMINAR, motivoDestino, nombreDestino } from './etiqueta'
 import { cortarCola } from './orden'
 import { Redes } from './redes'
 import { Reprogramar } from './reprogramar'
@@ -14,20 +14,36 @@ import { Reprogramar } from './reprogramar'
 // casi siempre alcanzan para todo lo pendiente. El resto espera detrás del botón.
 const VISTA_PREVIA = 20
 
+/**
+ * La lista. Cada fila llega del servidor con su corte ya dibujado (el mismo corte chico de «Se
+ * quemó») y su fecha ya escrita en la zona del dueño (`diaYHora`): la página es la que sabe qué
+ * cuentas están frías y en qué zona vive el dueño, y esta lista solo maneja los botones.
+ */
 export function Queue({
   items,
   volver,
-  zone,
+  recien = null,
 }: {
-  items: Array<{ post: ScheduledPost; targets: Array<ScheduledPostTarget & { handle: string | null }> }>
+  items: Array<{
+    post: ScheduledPost
+    targets: Array<ScheduledPostTarget & { handle: string | null }>
+    corte: ReactNode
+    cuando: string
+  }>
   volver: string
-  zone: string
+  /** El post recién programado: su fila se enciende una vez, y la lista la trae a la vista. */
+  recien?: string | null
 }) {
   const [pending, start] = useTransition()
   const [error, setError] = useState<string | null>(null)
   // Lo que devolvió «Subir ahora»: cuántos destinos salieron y cuántos quedaron en proceso.
   const [aviso, setAviso] = useState<string | null>(null)
   const [expanded, setExpanded] = useState(false)
+
+  // El recién programado puede caer lejos en la lista: se la trae a la vista una vez.
+  useEffect(() => {
+    if (recien) document.querySelector('[data-recien]')?.scrollIntoView({ block: 'center' })
+  }, [recien])
 
   if (items.length === 0) {
     return <p className="py-8 text-center text-sm text-fg-faint">Nada programado todavía.</p>
@@ -41,23 +57,24 @@ export function Queue({
       {error && <p className="mb-3 text-sm text-negative">{error}</p>}
       {aviso && <p className="mb-3 text-sm text-positive">{aviso}</p>}
       <ul className="space-y-3">
-      {mostrados.map(({ post, targets }) => (
-        <li key={post.id} className="rounded-xl bg-white/[0.03] p-4">
-          <div className="flex items-start justify-between gap-3">
+      {mostrados.map(({ post, targets, corte, cuando }) => (
+        <li
+          key={post.id}
+          data-recien={post.id === recien ? '' : undefined}
+          className={cn('flex items-start gap-3 rounded-xl bg-white/[0.03] p-4', post.id === recien && 'recien')}
+        >
+          {/* El corte chico, como en «Se quemó»: la lista se lee igual que el calendario. El
+              margen deja asomar la banderita de lo quemado sin taparla. */}
+          <span className="mt-2 w-12 shrink-0">{corte}</span>
+          <div className="min-w-0 flex-1">
+          {/* En el teléfono los botones bajan debajo del texto: al lado, con el corte a la
+              izquierda, apretaban el título a dos palabras por renglón. */}
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
             <div className="min-w-0">
               <p className="line-clamp-2 text-sm">{post.caption || '(sin texto)'}</p>
-              <p className="mt-1 text-xs text-fg-faint">
-                {/* La zona llega por prop, como al calendario: es la del dueño de la
-                    sesión, que la página lee de `requireUser()` — un cliente no tiene
-                    forma de saberla. Sin ella, en Vercel (UTC) la cola decía una hora y El
-                    Fuego y el calendario otra para el mismo corte, y ahora las tres listan
-                    lo quemado. */}
-                {post.scheduledAt.toLocaleString('es-CL', {
-                  dateStyle: 'medium',
-                  timeStyle: 'short',
-                  timeZone: zone,
-                })}
-              </p>
+              {/* Escrita en el servidor, en la zona del dueño: un cliente no tiene forma de
+                  saberla, y en Vercel (UTC) la lista decía otra hora que el calendario. */}
+              <p className="mt-1 font-mono text-[0.72rem] text-fg-faint">{cuando}</p>
             </div>
             <div className="flex shrink-0 items-center gap-3">
               <Link
@@ -91,10 +108,20 @@ export function Queue({
                   {pending ? 'Subiendo…' : 'Subir ahora'}
                 </button>
               ) : null}
+              {/* Pregunta, como «Subir ahora»: borrar no se deshace. Lo ya publicado en una red
+                  no se puede eliminar (`borrarPostProgramado`), así que la pregunta no promete
+                  borrar nada de las redes. */}
               <button
                 type="button"
                 disabled={pending}
-                onClick={() => start(async () => { setError(null); const result = await deleteScheduledPost(post.id); if (result.error) setError(result.error) })}
+                onClick={() => {
+                  if (!confirm(CONFIRMAR_ELIMINAR)) return
+                  start(async () => {
+                    setError(null)
+                    const result = await deleteScheduledPost(post.id)
+                    if (result.error) setError(result.error)
+                  })
+                }}
                 className="text-xs text-fg-faint hover:text-fg"
               >
                 Eliminar
@@ -120,6 +147,7 @@ export function Queue({
                 {target.status === 'failed' && <Reprogramar targetId={target.id} titulo={nombreDestino(target)} />}
               </span>
             ))}
+          </div>
           </div>
         </li>
       ))}

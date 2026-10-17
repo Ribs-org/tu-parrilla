@@ -51,7 +51,7 @@ Debajo, cuatro bloques en este orden. En pantallas anchas hay además una column
   - «Ocultar de buscadores», con la ayuda «Recomendado para el perfil privado».
 - El botón «Guardar perfil» (mientras guarda, «Guardando…»; al terminar aparece al lado «Guardado», en verde). Si algo falla, el mensaje sale en rojo justo arriba del botón.
 
-**Bloque «Links»** (debajo del título: «Arrastra para reordenar. El orden se guarda solo.»). En pantallas angostas, donde no hay columna de vista previa, este bloque tiene a la derecha el botón «Ver», que abre la vista previa a pantalla completa; se cierra con la X de arriba a la derecha.
+**Bloque «Links»** (debajo del título: «Arrastra para reordenar. El orden se guarda solo.»). En pantallas angostas, donde no hay columna de vista previa, este bloque tiene el botón «Ver» —a la derecha del título, o debajo en un teléfono—, que abre la vista previa a pantalla completa; se cierra con la X de arriba a la derecha.
 
 - La lista de links. Cada fila, de izquierda a derecha:
   - un asa de seis puntitos para arrastrar;
