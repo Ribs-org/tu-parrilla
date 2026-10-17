@@ -137,6 +137,18 @@ Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataf
   `disconnectAccount` y `/privacidad`. Ver `docs/google-verificacion-guion.md`.
 - **[dueño] Vercel Pro antes de abrir a terceros.** El plan Hobby es de uso personal y no
   comercial (`docs/levantamiento-terceros.md` §5).
+- **[dueño] La app en la Play Store, pista de pruebas internas** (2026-10-16). La cuenta de
+  Play Console (personal) y la app existen: está como «Parrilla», `cl.tuparrilla.app`, en
+  borrador. El binario está listo, `tu-parrilla-1.1.0-2.aab` (versión 1.1.0, código 2,
+  salido de `a6bd08f`; nada nativo cambió después, y lo demás le llega por aire en el canal
+  `production`). Falta, en la consola: el nombre «Tu Parrilla» y la ficha, las tarjetas de
+  Contenido de la app, la lista de probadores, la versión interna con el `.aab`, e
+  instalarla. Para que lo siguiente salga sin entrar a la consola: la cuenta de servicio con
+  su clave JSON para EAS (nunca en un chat ni en el repo) y el secreto `EXPO_TOKEN` en
+  GitHub, que el flujo «App a la tienda» necesita y todavía no está. El paso a paso y los
+  textos, en la carpeta «Google Play» del escritorio de Vicente; el porqué, en
+  `docs/play-store.md`. La tienda pública es otro trámite: una cuenta personal nueva
+  necesita una prueba cerrada con doce probadores durante catorce días.
 - **[dueño] La app en iPhone** (2026-10-16). El código ya está listo para iOS; faltan la
   cuenta del Apple Developer Program, confirmar el identificador `cl.tuparrilla.app`
   (queda fijo al registrarlo), la ficha en App Store Connect y el primer build a
