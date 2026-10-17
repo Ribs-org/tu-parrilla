@@ -34,6 +34,11 @@
   --color-acero-900: #1d2124;
   --color-acero-800: #242a2f;
   --color-acero-700: #2a2e33;
+  /*
+   * Un paso más claro, para el borde de lo que se marca y se desmarca: apagado tiene que
+   * seguir viéndose tocable, y sin fondo el 700 de los botones secundarios no alcanza.
+   */
+  --color-acero-600: #3a4046;
 
   /* La brasa: solo lo caliente o lo accionable. Nunca decorativa. */
   --color-brasa: #e8621f;
