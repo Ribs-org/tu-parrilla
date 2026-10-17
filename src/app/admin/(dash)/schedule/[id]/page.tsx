@@ -50,7 +50,7 @@ export default async function EditScheduledPostPage({
   // si su fierro se apagó: lo mismo que dibuja el calendario, para que digan lo mismo.
   const handles = new Map(cuentas.map((c) => [c.id, c.handle]))
   const destinos = targets.map((t) => ({ ...t, handle: handles.get(t.accountId) ?? null }))
-  const dibujo = dibujoDe(destinos, media, cuentasFrias(cuentas, new Date()))
+  const dibujo = dibujoDe(destinos, media, cuentasFrias(cuentas, new Date()), post.videosLiberados)
 
   return (
     <Editor

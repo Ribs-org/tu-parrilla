@@ -123,6 +123,15 @@ describe('formatoDe', () => {
     expect(formatoDe(cinco)).toEqual({ formato: 'tira', huesos: 5 })
   })
 
+  // Al salir en todas sus redes, el video se borra del almacén con su fila (`limpiarMedia`) y
+  // el post se queda con la cuenta. Antes no la había, y toda entraña publicada era un chori.
+  it('los videos que ya se borraron del almacén cuentan: lo publicado no cambia de forma', () => {
+    expect(formatoDe([], 1)).toEqual({ formato: 'entrana', huesos: 0 })
+    expect(formatoDe([{ mediaType: 'image' }, { mediaType: 'image' }], 1)).toEqual({ formato: 'tira', huesos: 3 })
+    expect(formatoDe([{ mediaType: 'image' }], 1)).toEqual({ formato: 'tira', huesos: 2 })
+    expect(formatoDe([], 0)).toEqual({ formato: 'chori', huesos: 0 })
+  })
+
   // Un carrusel de TikTok lleva hasta 35 fotos; en 120 de ancho, once huesos ya no se cuentan.
   it('los huesos tienen tope', () => {
     const muchas = Array.from({ length: 35 }, () => ({ mediaType: 'image' }))

@@ -132,10 +132,19 @@ export const NOMBRE_FORMATO: Record<Formato, string> = {
   chori: 'Texto',
 }
 
-export function formatoDe(media: readonly { mediaType: string }[]): { formato: Formato; huesos: number } {
-  if (media.length === 0) return { formato: 'chori', huesos: 0 }
-  if (media.length > 1) return { formato: 'tira', huesos: Math.min(media.length, MAX_HUESOS) }
-  return { formato: media[0]!.mediaType === 'video' ? 'entrana' : 'bife', huesos: 0 }
+/**
+ * `videosLiberados` son los videos que el post llevaba y ya no están en el almacén
+ * (`scheduled_posts.videos_liberados`): cuentan para la forma igual que los archivos que
+ * quedan. Sin ellos, una entraña que salió en todas sus redes se dibujaba como chori.
+ */
+export function formatoDe(
+  media: readonly { mediaType: string }[],
+  videosLiberados = 0,
+): { formato: Formato; huesos: number } {
+  const archivos = media.length + videosLiberados
+  if (archivos === 0) return { formato: 'chori', huesos: 0 }
+  if (archivos > 1) return { formato: 'tira', huesos: Math.min(archivos, MAX_HUESOS) }
+  return { formato: media.length === 0 || media[0]!.mediaType === 'video' ? 'entrana' : 'bife', huesos: 0 }
 }
 
 /**

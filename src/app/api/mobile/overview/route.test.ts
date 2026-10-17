@@ -15,6 +15,7 @@ function filaPost(overrides: Partial<ScheduledPost> = {}): ScheduledPost {
     caption: 'Hola',
     scheduledAt: new Date('2026-10-01T12:00:00Z'),
     coverUrl: null,
+    videosLiberados: 0,
     atributos: null,
     createdAt: new Date('2026-01-01'),
     updatedAt: new Date('2026-01-01'),

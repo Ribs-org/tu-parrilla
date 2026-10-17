@@ -1,4 +1,4 @@
-import { and, asc, eq, inArray, lte, or } from 'drizzle-orm'
+import { and, asc, eq, inArray, lte, or, sql } from 'drizzle-orm'
 import {
   getDb,
   scheduledPostMedia,
@@ -133,6 +133,11 @@ async function correoDelDueno(ownerId: string): Promise<string | undefined> {
  * Falla en silencio a propósito: no poder borrar un archivo no es motivo para
  * arruinar una publicación que sí funcionó. Lo que quede se recupera la próxima vez
  * que el post pase por acá, o a mano.
+ *
+ * La fila se va con su video, y el post se queda con la cuenta (`videosLiberados`): es
+ * lo único que dice que llevaba un video, y el corte se dibuja con ella. Van en una
+ * transacción para que no quede una sin la otra, y la cuenta sube solo si la fila
+ * todavía estaba: si dos pasadas se cruzan, la segunda no borra nada y no cuenta dos veces.
  */
 async function limpiarMedia(postId: string): Promise<void> {
   try {
@@ -147,7 +152,17 @@ async function limpiarMedia(postId: string): Promise<void> {
 
     for (const item of mediaParaBorrar(targets, media)) {
       await borrar(item.blobUrl)
-      await db.delete(scheduledPostMedia).where(eq(scheduledPostMedia.id, item.id))
+      await db.transaction(async (tx) => {
+        const borradas = await tx
+          .delete(scheduledPostMedia)
+          .where(eq(scheduledPostMedia.id, item.id))
+          .returning({ id: scheduledPostMedia.id })
+        if (borradas.length === 0) return
+        await tx
+          .update(scheduledPosts)
+          .set({ videosLiberados: sql`${scheduledPosts.videosLiberados} + 1` })
+          .where(eq(scheduledPosts.id, postId))
+      })
     }
   } catch (error) {
     console.error('No se pudo liberar la media publicada:', String(error).slice(0, 300))
