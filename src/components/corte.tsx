@@ -28,8 +28,8 @@ import { cn } from '@/lib/utils'
  * Ver `docs/superpowers/specs/2026-10-16-el-corte-que-se-lee-design.md`.
  */
 
-/** Las siluetas, en un lienzo de 120 × 64. */
-const SILUETA: Record<Formato, string> = {
+/** Las siluetas, en un lienzo de 120 × 64. También las dibuja la imagen para compartir la portada. */
+export const SILUETA: Record<Formato, string> = {
   bife: 'M12 33C10 17 30 7 58 7C86 7 110 13 111 31C112 47 94 58 64 58C36 58 14 50 12 33Z',
   tira: 'M5 20C28 14 92 14 115 20C117 28 117 38 115 46C92 52 28 52 5 46C3 38 3 28 5 20Z',
   entrana:
