@@ -191,7 +191,8 @@ Nada de esto bloquea un trámite hoy; conviene ordenarlo antes de abrir a tercer
   Mesa como conversación y las cuentas del editor de un post como fichas, que siguen siendo
   casillas); la carne que se asa al ritmo de cada etapa de
   la publicación (toca el publicador); Los Números con brasas donde se mide calor; la puerta
-  de entrada; y lo nativo de la app. Detalle y tiempos a ojo en
+  de entrada (la portada ya está; faltan el código en casillas, y el error y el 404); y lo
+  nativo de la app. Detalle y tiempos a ojo en
   `docs/auditoria-ui-2026-10-16.md`.
 - **El rediseño de la app del teléfono, partes 3 y 4** (2026-10-16). Las partes 1 y 2
   dejaron las tres pestañas del panel, «Reprogramar» en «Se quemó» y los borradores
