@@ -580,4 +580,14 @@
   .late {
     animation: none !important;
   }
+
+  /*
+   * El corte recién programado, sin caer: la regla de arriba lo deja en su último cuadro, que
+   * es apagado, y sin animación no habría cómo ver dónde quedó. Queda con el borde de brasa,
+   * quieto, hasta que se navega a otra parte.
+   */
+  .recien {
+    animation: none !important;
+    box-shadow: 0 0 0 2px var(--color-brasa);
+  }
 }
