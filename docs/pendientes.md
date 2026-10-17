@@ -141,9 +141,12 @@ Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataf
   Play Console (personal) y la app existen: está como «Parrilla», `cl.tuparrilla.app`, en
   borrador. El binario está listo, `tu-parrilla-1.1.0-2.aab` (versión 1.1.0, código 2,
   salido de `a6bd08f`; nada nativo cambió después, y lo demás le llega por aire en el canal
-  `production`). Falta, en la consola: el nombre «Tu Parrilla» y la ficha, las tarjetas de
-  Contenido de la app, la lista de probadores, la versión interna con el `.aab`, e
-  instalarla. Para que lo siguiente salga sin entrar a la consola: la cuenta de servicio con
+  `production`). La versión interna con ese `.aab` se publicó el 2026-10-17, «Tu Parrilla
+  (Alfa)», sin revisar: hasta que Google revise la app, la tienda se la muestra a los
+  probadores como «cl.tuparrilla.app (unreviewed)». Falta, en la consola, lo que pide esa
+  revisión —el nombre «Tu Parrilla» y la ficha, y las tarjetas de Contenido de la app—, y en
+  el teléfono, unirse como probador e instalarla. Para que lo siguiente salga sin entrar a la
+  consola: la cuenta de servicio con
   su clave JSON para EAS (nunca en un chat ni en el repo) y el secreto `EXPO_TOKEN` en
   GitHub, que el flujo «App a la tienda» necesita y todavía no está. El paso a paso y los
   textos, en la carpeta «Google Play» del escritorio de Vicente; el porqué, en
