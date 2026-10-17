@@ -104,7 +104,10 @@ caliente marcada; la vista previa del corte armándose, y al programar, el corte
 su día del calendario que se ve detrás. Además: la parrilla fría para los días vacíos, el
 esqueleto de carga con la forma de cada pantalla y un pulso tibio, y La Mesa como
 conversación —lo que te dijeron a un lado, tu respuesta al otro— con el estado de cada
-respuesta en la gramática del corte y el número de pendientes en su pestaña.
+respuesta en la gramática del corte y el número de pendientes en su pestaña. Hecho el 2026-10-16:
+los archivos del compositor, que llegan como carne cruda con su porcentaje y se quedan con
+«Reintentar» si no llegan (la subida ya cuenta bytes, por `XMLHttpRequest`), y «Así va a
+quedar», el corte del post armándose sobre la parrilla de su día.
 
 **Tanda 3, se asa mientras sale (2 a 3 días; toca el publicador).** Hoy la carne salta de
 cruda a sellada cuando empieza a salir. La propuesta es guardar la etapa de cada destino
