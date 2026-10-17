@@ -312,16 +312,62 @@
     position: relative;
   }
 
-  /* `acero-900` y no un gris nuevo: es la superficie de panel que ya usa `.chapa`. */
+  /*
+   * La parrilla fría: un día sin nada. Los fierros están, pero en ceniza y sin brasa debajo,
+   * así que el día se ve vacío por la forma y no por una frase. El fondo baja del `acero-900`
+   * de la chapa al 950 y vuelve: el hueco donde iría el fuego. Sin borde punteado: el
+   * punteado es de lo que todavía no está en la parrilla (un borrador, la caja de archivos),
+   * y un día apagado no es eso.
+   */
   .grilla-apagada {
-    background: var(--color-acero-900);
-    border-style: dashed;
-    border-color: var(--color-acero-700);
+    background: linear-gradient(
+      to bottom,
+      var(--color-acero-900),
+      var(--color-acero-950) 60%,
+      var(--color-acero-900)
+    );
   }
 
-  /* Sin fierros: una parrilla apagada no tiene nada encima que mirar. */
   .grilla-apagada::before {
-    content: none;
+    background: repeating-linear-gradient(to bottom, rgb(150 160 170 / 0.13) 0 3px, transparent 3px 13px);
+  }
+
+  /*
+   * «Poner algo», en una parrilla fría en la que todavía se puede programar. Con mouse
+   * aparece al pasar por el día: la parrilla ya dice que está vacía, y una invitación en cada
+   * día vacío de la semana sería ruido. Sin mouse —un teléfono— no hay «pasar por encima», y
+   * está siempre. Con el teclado, al llegar a ella.
+   */
+  @media (hover: hover) {
+    .poner-algo {
+      opacity: 0;
+    }
+
+    .grilla:hover .poner-algo,
+    .poner-algo:focus-visible {
+      opacity: 1;
+    }
+  }
+
+  /*
+   * La carga (`src/components/esqueleto.tsx`): la forma de la pantalla que viene, con un
+   * pulso tibio —la parrilla calentándose— y no el gris que parpadea igual en todas partes.
+   * Cada pieza lleva su retraso en `--retraso`, para que el calor corra de una a la otra en
+   * vez de latir todo junto. `backwards`: mientras espera su turno, una pieza ya está en el
+   * primer cuadro, apagada; sin eso partía encendida y saltaba a apagada al empezar.
+   * `.brasa-tibia` es la superficie: la de una parrilla prendida.
+   */
+  .tibio {
+    animation: tibio 2.6s ease-in-out var(--retraso, 0s) infinite backwards;
+  }
+
+  .brasa-tibia {
+    background: linear-gradient(
+      to bottom,
+      rgb(196 52 26 / 0.04),
+      rgb(232 98 31 / 0.13) 62%,
+      rgb(255 138 61 / 0.22)
+    );
   }
 
   .grilla-prendida {
@@ -514,6 +560,17 @@
   }
 }
 
+/* Se enciende y se apaga de a poco: de ceniza tibia a brasa, y de vuelta. */
+@keyframes tibio {
+  0%,
+  100% {
+    filter: brightness(0.55) saturate(0.6);
+  }
+  50% {
+    filter: brightness(0.9) saturate(1);
+  }
+}
+
 /* Cae, queda encendido un momento —lo que tarde la página en terminar de cargar— y se apaga. */
 @keyframes recien {
   0% {
@@ -594,5 +651,11 @@
   .recien {
     animation: none !important;
     box-shadow: 0 0 0 2px var(--color-brasa);
+  }
+
+  /* La carga quieta, a media brasa: sigue diciendo que algo viene, sin latir. */
+  .tibio {
+    animation: none !important;
+    filter: brightness(0.75);
   }
 }

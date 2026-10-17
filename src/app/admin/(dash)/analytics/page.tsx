@@ -1,15 +1,18 @@
 import { Suspense } from 'react'
 import Link from 'next/link'
 import { AccountCards, AccountSeriesChart } from './accounts'
+import { BajadaDeLosNumeros } from './cabeza'
+import { SeccionCargando } from './cargando'
 import { BarList } from '@/components/charts/bar-list'
 import { CampaignTable } from '@/components/charts/campaign-table'
 import { Donut } from '@/components/charts/donut'
 import { Funnel } from '@/components/charts/funnel'
 import { Heatmap } from '@/components/charts/heatmap'
 import { Empty, Panel, PanelSkeleton } from '@/components/charts/panel'
-import { StatTile, StatTileSkeleton, delta } from '@/components/charts/stat-tile'
+import { StatTile, delta } from '@/components/charts/stat-tile'
 import { seriesColor } from '@/components/charts/theme'
 import { TrafficChart } from '@/components/charts/traffic-chart'
+import { Cargando } from '@/components/esqueleto'
 import { BotonBots, RangoBar, SelectorEnUrl } from '@/components/filter-bar'
 import { Encabezado } from '@/components/ui'
 import { buildAccountCards, buildAccountSeries } from '@/lib/account-stats'
@@ -116,10 +119,7 @@ export default async function NumerosPage({ searchParams }: { searchParams: Prom
     <>
       <header className="mb-4">
         <Encabezado ruta="/admin/analytics" />
-        <p className="mt-1 max-w-2xl text-sm text-fg-muted">
-          Dos cosas distintas: lo que hicieron tus publicaciones en las redes, y quién entró a tu
-          página de links. El período vale para las dos.
-        </p>
+        <BajadaDeLosNumeros />
       </header>
 
       <RangoBar />
@@ -128,7 +128,7 @@ export default async function NumerosPage({ searchParams }: { searchParams: Prom
         <Suspense fallback={<SeccionCargando />}>
           <EnLasRedes filters={filters} params={params} cuentas={cuentas} abierta={abiertas.has('redes')} />
         </Suspense>
-        <Suspense fallback={<SeccionCargando />}>
+        <Suspense fallback={<SeccionCargando orden={4} />}>
           <EnTuPagina
             filters={filters}
             params={params}
@@ -175,19 +175,6 @@ function CabezaDeSeccion({
       >
         {abierta ? 'Menos' : '⋯ Más'}
       </Link>
-    </div>
-  )
-}
-
-function SeccionCargando() {
-  return (
-    <div role="status" aria-label="Cargando" className="grid grid-cols-1 gap-3">
-      <div className="h-10 w-64 rounded bg-white/[0.04]" />
-      <div className="grid grid-cols-2 gap-3">
-        <StatTileSkeleton />
-        <StatTileSkeleton />
-      </div>
-      <PanelSkeleton />
     </div>
   )
 }
@@ -538,10 +525,10 @@ async function PaginaEnDetalle({
 
       <Suspense
         fallback={
-          <div role="status" aria-label="Cargando" className="grid grid-cols-1 gap-3">
+          <Cargando className="grid grid-cols-1 gap-3">
             <PanelSkeleton />
-            <PanelSkeleton />
-          </div>
+            <PanelSkeleton orden={2} />
+          </Cargando>
         }
       >
         <Audiencia filters={filters} kpis={kpis} />

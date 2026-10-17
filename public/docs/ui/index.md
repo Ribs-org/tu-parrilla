@@ -83,7 +83,8 @@ teléfono](app-movil.md).
 4. **Si ve «No encontramos esa página»** («La dirección no existe, o la página dejó de estar
    publicada.»), la dirección no existe. «Ir al inicio» lleva a la portada del sitio, no al
    panel: que entre de nuevo a `https://tu-parrilla.cl/admin`.
-5. **Si ve un esqueleto gris que pulsa, sin texto**, la pantalla está cargando.
+5. **Si ve la forma de la pantalla sin su contenido** —el título y bloques sin texto que se
+   encienden y se apagan de a poco, en tonos de brasa—, la pantalla está cargando.
 6. **Si ve «Entra con tu correo»**, su sesión terminó (o nunca entró): tiene que pedir un
    código de nuevo ([ingresar.md](ingresar.md)).
 7. **Si no ve «Los Maestros» en Ajustes**, no es el admin: es lo esperado.
@@ -132,7 +133,7 @@ esto es lo que quiere decir:
   Parrilla, en la sección «Se quemó», arriba del calendario, con su motivo y el botón
   «Reprogramar».
 - **El calor de un día:** apagado (nada programado), prendido (uno o dos cortes) o lleno (tres
-  o más).
+  o más). Apagado se ve como una parrilla fría: los fierros en gris ceniza y nada de brasa.
 - **Fierro:** una red conectada. Su fila en Los Fierros lleva una barra de color, el
   fierro, que dice cómo está la conexión: naranja encendido (al rojo: viva), ámbar
   (enfriándose: vence en siete días o menos) o gris apagado (frío: desconectada, rota o
@@ -179,7 +180,9 @@ Sale de:
 - `src/lib/parrilla.ts`: la cocción, el calor del día, la temperatura del fierro y el aviso del
   botón «Ajustes» (`avisoDeFierros`).
 - `src/app/admin/(dash)/error.tsx`, `src/app/admin/(dash)/loading.tsx` y
-  `src/app/not-found.tsx`: el error, la carga y el 404.
+  `src/app/not-found.tsx`: el error, la carga y el 404. La carga de cada pantalla sale de las
+  piezas de `src/components/esqueleto.tsx`; la de las que no tienen una propia, de
+  `src/app/admin/(dash)/carga-general.tsx`.
 - `src/proxy.ts`: que el panel solo se abre en tu-parrilla.cl.
 
 Si cambias lo que se ve en alguno de ellos, actualiza esta página en el mismo commit. Una

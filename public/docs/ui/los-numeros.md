@@ -224,8 +224,11 @@ escrita a mano) no son enlaces.
     «bot» si es un bot (solo pueden aparecer con «Bots» activo), y a la derecha hace cuánto:
     «recién», «hace <N> minutos», «hace <N> horas», «ayer», «hace <N> días».
 
-Mientras una mitad carga se ve su esqueleto: rectángulos grises sin texto en el lugar de las
-cifras y del panel.
+Mientras una mitad carga se ve su esqueleto: bloques sin texto en el lugar del título, las
+cifras y el panel, como brasas: se encienden y se apagan de a poco, uno un poco después del otro (con «reducir movimiento» activado en el sistema, quietos a media luz). Al entrar a Los Números se ve lo mismo
+para el tablero entero, con el título, su bajada y el lugar del período; las páginas de
+adentro —«Tus publicaciones», «Comparar por atributo», «Tu mejor 10 %» y el detalle de un
+post— cargan con el lugar del título y filas.
 
 ### Tus publicaciones (`/admin/analytics/publicaciones`)
 
@@ -1271,7 +1274,10 @@ Sale de:
 - `src/lib/social/comentarios/reglas.ts` (las etiquetas `dm-`)
 - `src/lib/social/sync.ts` y `src/lib/social/index.ts` (qué redes se sincronizan, borrados,
   lectura diaria), con `vercel.json` (la hora de la sincronización)
-- `src/app/admin/(dash)/error.tsx`, `src/app/admin/(dash)/loading.tsx`,
-  `src/app/admin/(dash)/nav.tsx`, `src/lib/vocabulario.ts`
+- `src/app/admin/(dash)/error.tsx`, `src/app/admin/(dash)/nav.tsx`, `src/lib/vocabulario.ts`
+- `src/app/admin/(dash)/analytics/loading.tsx`, `src/app/admin/(dash)/analytics/cargando.tsx`,
+  `src/app/admin/(dash)/analytics/cabeza.tsx` (la bajada, que comparten la pantalla y su carga),
+  `src/components/esqueleto.tsx` y los esqueletos de `src/components/charts/panel.tsx` y
+  `src/components/charts/stat-tile.tsx` (la carga)
 
 Si cambias lo que se ve en alguno de ellos, actualiza esta página en el mismo commit.
