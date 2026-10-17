@@ -1,0 +1,1 @@
+ALTER TABLE "scheduled_posts" ADD COLUMN "videos_liberados" integer DEFAULT 0 NOT NULL;

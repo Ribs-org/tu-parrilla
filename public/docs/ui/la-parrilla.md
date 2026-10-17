@@ -129,6 +129,8 @@ parrilla. El dibujo no lleva texto encima; lo dice todo en cuatro cosas que se l
 - **La forma es el formato.** Una entraña (larga y con la fibra en diagonal) es un video; una
   tira de asado, con un hueso por archivo, es un carrusel (cinco huesos, cinco fotos; se
   dibujan hasta diez); un bife (ovalado) es una foto; un chori, sin archivos, es solo texto.
+  Un video que ya salió en todas sus redes sigue siendo entraña, aunque su archivo ya no esté
+  en el sitio.
 - **La carne es cómo va.** De clara a oscura: cruda (rosada), programada; sellada (naranjo),
   saliendo ahora; a punto (dorada y café), publicada en todas; carbonizada y casi negra, falló
   en todas.
@@ -931,7 +933,7 @@ puede decir:
 | «Los cambios no tocan lo publicado.» | Algo ya salió (el recuadro de arriba dice dónde) | Lo que se cambie solo vale para lo que falta salir |
 | «No se puede quitar una cuenta en la que ya se publicó.» | Se intentó desmarcar una red donde ya salió | Dejarla marcada |
 | «No se pudo leer una media por URL.» | Un enlace de «Agregar por URL» o de la portada no se pudo descargar | Usar un enlace de descarga directa |
-| «La portada requiere un video en media.» | Portada sin video | Quitar la portada o agregar el video |
+| «La portada requiere un video en media.» | Portada sin video. El de un post que ya salió en todas sus redes cuenta aunque ya no esté en el sitio: guardar ese post con su portada no da este error | Quitar la portada o agregar el video |
 | «La portada debe ser una imagen.» / «La portada debe ser JPG o PNG.» | La portada no sirve | Usar una imagen JPG o PNG |
 | «Los atributos deben ser un objeto plano de valores simples.» | El JSON de «Atributos» está mal escrito o es demasiado grande | Corregirlo, o dejar el cuadro vacío |
 | «El post ya no existe.» | Se borró mientras estaba abierto | Volver a La Parrilla |
@@ -1078,7 +1080,12 @@ quemado, más arriba).
 - **En TikTok no aparece en mi perfil.** TikTok puede tardar unos minutos. Si se mandó como
   borrador de TikTok, dice «En tu bandeja de TikTok»: hay que terminarlo en la app.
 - **No veo el video en el editor de un post que ya salió.** Cuando un post sale en todas sus
-  redes, el video se borra del almacenamiento del sitio; las fotos y la portada se quedan.
+  redes, el video se borra del almacenamiento del sitio; las fotos y la portada se quedan. El
+  corte no cambia: sigue siendo una entraña, o la tira con todos sus huesos.
+- **Un video que ya salió se ve como chori, o como una tira con un hueso menos.** Solo puede
+  pasar con algunos posts antiguos, de cuando el sitio no guardaba que llevaban video, en los
+  que no quedó cómo saberlo: uno que fue solo a Threads o X, sin portada, o un carrusel con el
+  video al final. Es solo el dibujo: lo publicado está bien.
 - **La hora está corrida / el «hoy» no calza.** Las horas son las de la zona de [Tu
   Cuenta](tu-cuenta.md).
 - **No encuentro un post en el calendario.** Puede estar en otra semana: «Semana anterior» /

@@ -1091,8 +1091,10 @@ export async function updateScheduledPost(
 
   // El chequeo de video corre ANTES de descargar/subir la portada nueva — igual que en
   // el lote (batch.ts): si el resultado ya es una portada sin video, no vale la pena
-  // pagar esa descarga.
-  if ((portadaUrl || portadaKept) && !finalTypes.includes('video')) {
+  // pagar esa descarga. El video de un post que ya salió en todas sus redes cuenta aunque
+  // ya no esté en el almacén (`videosLiberados`): sin eso, el editor de cualquier post
+  // publicado con portada rechazaba guardar, con la portada que el mismo editor conservó.
+  if ((portadaUrl || portadaKept) && !finalTypes.includes('video') && post.videosLiberados === 0) {
     return { error: PORTADA_NEEDS_VIDEO }
   }
 
