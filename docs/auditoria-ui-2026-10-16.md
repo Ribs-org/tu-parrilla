@@ -135,7 +135,13 @@ encendidos—; las cifras grandes con su curva; «se pasó ×6» en vez de sí o
 encienden como brasas (con un solo campo de verdad y `autocomplete="one-time-code"`); el
 error y el 404 con la gramática del corte; la portada con cortes sobre su semana. La portada
 tiene que seguir diciendo qué hace la app y enlazando Privacidad y Términos: es lo que miró
-Google para verificar la marca.
+Google para verificar la marca. La portada quedó hecha el 2026-10-17: la semana del inicio con
+cortes de verdad sobre sus parrillas, un corte que se arma tocándolo, la subida que llega como
+carne cruda, los fierros, lo quemado, lo que trajo cada corte, La Mesa, tu página y qué se
+conecta y para qué, cada sección con la pieza del panel y no con un dibujo que se parece
+(`src/components/landing.tsx`); la imagen para compartirla dibuja la misma semana. Lo que lo
+exige Google lo cuida `src/components/landing.test.ts`. Quedan la entrada con el código en
+casillas, y el error y el 404.
 
 **Tanda 6, con el próximo build nativo.** `react-native-svg` para que los cortes de la app
 tengan las curvas del panel, y una vibración corta cuando algo sale o se quema (ya anotado en
