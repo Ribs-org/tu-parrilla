@@ -132,7 +132,7 @@ Entra en `/ingresar` con tu correo (el de `ADMIN_EMAIL`): te llega un código de
 dígitos que vale diez minutos.
 
 El panel tiene tres pestañas —La Parrilla (Calendario), La Mesa (Comentarios) y Los Números
-(Analítica)— y el botón de Ajustes (un cuchillo y un trinche cruzados),
+(Analítica)— y el botón de Ajustes (un trinche y un cuchillo, lado a lado),
 con Los Fierros (Cuentas), La Vitrina (Perfiles), Los Maestros (Usuarios, solo el admin) y
 Tu Cuenta. Las rutas no cambiaron. Cada pantalla lleva su subtítulo en llano por si el
 nombre no dice nada.

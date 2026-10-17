@@ -39,11 +39,12 @@ Cómo se usa:
   que eran más consultas a la vez que conexiones en el pool (`max: 5` en `src/db/index.ts`),
   contra el pooler de Supabase en modo transacción. La causa no está explicada: cualquier
   otro `Promise.all` con más de cinco consultas podría colgarse igual.
-- **En el teléfono, la pestaña activa queda cortada** (2026-10-13). La barra de pestañas del
-  panel (`src/app/admin/(dash)/nav.tsx`) se desliza de lado, y a 390 px «Los Números» queda
-  medio fuera de la pantalla aunque sea la pestaña en la que uno está. El arreglo es llevar
-  la activa a la vista al cargar (`scrollIntoView`), o achicar las pestañas en pantallas
-  angostas.
+- **Los defectos de la auditoría de UI del 2026-10-16.** Nueve por arreglar y uno por
+  revisar, en `docs/auditoria-ui-2026-10-16.md` («Defectos»). El más grave: el editor de un
+  post que falló no dice qué destino falló ni por qué. Los demás: cifras cortadas en el eje
+  de los gráficos de Los Números, series de escalas distintas en un mismo eje, «Todas las
+  etiquetas» sin la red, tres pantallas que se rompen a 390 px y tres formas de escribir una
+  fecha.
 - **La Parrilla abierta pide decenas de páginas `/admin/schedule/<id>` cada pocos
   segundos** (2026-10-04). En los logs de Vercel, unas 60 peticiones por tanda, una por cada
   corte del calendario: parece el prefetch de los `Link` combinado con un refresco
@@ -178,6 +179,12 @@ Nada de esto bloquea un trámite hoy; conviene ordenarlo antes de abrir a tercer
 
 ## Features y trabajo de código
 
+- **Llevar el resto de la interfaz al nivel del corte** (2026-10-16). La auditoría de ese
+  día propone seis tandas que se publican solas: lo roto; el corte en los flujos (sobre todo
+  el compositor, con los archivos que llegan como carne cruda mientras suben y el corte que
+  cae en su día); la carne que se asa al ritmo de cada etapa de la publicación (toca el
+  publicador); Los Números con brasas donde se mide calor; la puerta de entrada; y lo
+  nativo de la app. Detalle y tiempos a ojo en `docs/auditoria-ui-2026-10-16.md`.
 - **El rediseño de la app del teléfono, partes 3 y 4** (2026-10-16). Las partes 1 y 2
   dejaron las tres pestañas del panel, «Reprogramar» en «Se quemó» y los borradores
   compartidos con el panel. Faltan: (3) La Mesa como cuarta pestaña, para leer y responder

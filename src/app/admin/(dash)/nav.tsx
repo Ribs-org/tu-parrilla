@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { IconoAjustes } from '@/components/icono-ajustes'
@@ -11,13 +12,19 @@ import { cn } from '@/lib/utils'
 const RUTA_FIERROS = '/admin/accounts'
 
 /**
- * Tres pestañas y el botón de Ajustes —un cuchillo y un trinche cruzados—. Lo que no pide una acción todos los días —las cuentas, las
- * páginas públicas, quién entra— va dentro de Ajustes: sigue a un clic, pero ya no ocupa la
- * barra. Los nombres y las rutas salen del vocabulario; acá no se escribe ninguno.
+ * Tres pestañas y el botón de Ajustes —un trinche y un cuchillo, lado a lado—. Lo que no pide
+ * una acción todos los días —las cuentas, las páginas públicas, quién entra— va dentro de
+ * Ajustes: sigue a un clic, pero ya no ocupa la barra. Los nombres y las rutas salen del
+ * vocabulario; acá no se escribe ninguno.
  *
  * El botón de Ajustes lleva un punto cuando algo adentro necesita al dueño: ámbar si un fierro se
  * enfría, rojo si se apagó (`avisoDeFierros`). Adentro, la entrada de Los Fierros lo dice en
  * palabras. Sin nada que avisar, no hay punto.
+ *
+ * En un teléfono las tres pestañas no caben: la fila se desliza de lado, con el borde derecho
+ * desvanecido para que se note que sigue, y al llegar a una pestaña la fila se corre hasta
+ * dejarla entera a la vista. Antes, en Los Números, la pestaña activa quedaba debajo del botón
+ * de Ajustes y se leía «L».
  */
 export function AdminNav({
   esAdmin,
@@ -32,9 +39,22 @@ export function AdminNav({
   const frase = aviso ? fraseDelAviso(aviso) : null
   const colorAviso = aviso?.nivel === 'apagado' ? 'bg-negative' : 'bg-caution'
 
+  // La pestaña activa, entera a la vista: si queda cortada a la derecha, la fila se corre.
+  const tira = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const fila = tira.current
+    const activa = fila?.querySelector<HTMLElement>('[aria-current="page"]')
+    if (!fila || !activa) return
+    const sobra = activa.offsetLeft + activa.offsetWidth - (fila.scrollLeft + fila.clientWidth)
+    if (sobra > 0) fila.scrollLeft += sobra + 16
+  }, [pathname])
+
   return (
     <nav className="flex min-w-0 flex-1 items-center gap-1" aria-label="Secciones del panel">
-      <div className="flex items-center gap-1 overflow-x-auto">
+      <div
+        ref={tira}
+        className="flex items-center gap-1 overflow-x-auto pr-4 [mask-image:linear-gradient(to_right,black_calc(100%-1.25rem),transparent)] sm:pr-0 sm:[mask-image:none]"
+      >
         {pestanas(Boolean(esAdmin)).map((p) => {
           const active = actual?.ruta === p.ruta
           return (

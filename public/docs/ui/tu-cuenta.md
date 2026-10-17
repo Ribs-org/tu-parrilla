@@ -13,7 +13,7 @@ la API ([../api-llm.md](../api-llm.md); la versión para personas,
 ## Cómo se llega
 
 1. En la barra de arriba, apretar el botón «Ajustes» (en una pantalla angosta, como la del
-   teléfono, se ve solo el ícono, un cuchillo y un trinche cruzados, sin la palabra).
+   teléfono, se ve solo el ícono, un trinche y un cuchillo, lado a lado, sin la palabra).
 2. En el menú que se abre, apretar «Tu Cuenta», la que tiene debajo «tu nombre, tu hora y tus
    llaves».
 
