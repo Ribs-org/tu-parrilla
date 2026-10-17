@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useState, useTransition, type ReactNode } from 'react'
+import { useEffect, useState, useTransition, type ReactNode } from 'react'
 import { deleteScheduledPost, subirAhora } from '@/app/admin/actions'
 import type { ScheduledPost, ScheduledPostTarget } from '@/db/schema'
 import { cn } from '@/lib/utils'
@@ -22,6 +22,7 @@ const VISTA_PREVIA = 20
 export function Queue({
   items,
   volver,
+  recien = null,
 }: {
   items: Array<{
     post: ScheduledPost
@@ -30,12 +31,19 @@ export function Queue({
     cuando: string
   }>
   volver: string
+  /** El post recién programado: su fila se enciende una vez, y la lista la trae a la vista. */
+  recien?: string | null
 }) {
   const [pending, start] = useTransition()
   const [error, setError] = useState<string | null>(null)
   // Lo que devolvió «Subir ahora»: cuántos destinos salieron y cuántos quedaron en proceso.
   const [aviso, setAviso] = useState<string | null>(null)
   const [expanded, setExpanded] = useState(false)
+
+  // El recién programado puede caer lejos en la lista: se la trae a la vista una vez.
+  useEffect(() => {
+    if (recien) document.querySelector('[data-recien]')?.scrollIntoView({ block: 'center' })
+  }, [recien])
 
   if (items.length === 0) {
     return <p className="py-8 text-center text-sm text-fg-faint">Nada programado todavía.</p>
@@ -50,7 +58,11 @@ export function Queue({
       {aviso && <p className="mb-3 text-sm text-positive">{aviso}</p>}
       <ul className="space-y-3">
       {mostrados.map(({ post, targets, corte, cuando }) => (
-        <li key={post.id} className="flex items-start gap-3 rounded-xl bg-white/[0.03] p-4">
+        <li
+          key={post.id}
+          data-recien={post.id === recien ? '' : undefined}
+          className={cn('flex items-start gap-3 rounded-xl bg-white/[0.03] p-4', post.id === recien && 'recien')}
+        >
           {/* El corte chico, como en «Se quemó»: la lista se lee igual que el calendario. El
               margen deja asomar la banderita de lo quemado sin taparla. */}
           <span className="mt-2 w-12 shrink-0">{corte}</span>

@@ -375,6 +375,16 @@
   }
 
   /*
+   * El corte recién programado: cae en su día y se enciende una vez, al volver del compositor,
+   * para que se vea dónde quedó (`nuevo`, en `schedule/page.tsx`). Una vez y no en bucle: el
+   * fuego, solo cuando algo pasa. `backwards` y no `both`: al terminar no se queda con nada, y
+   * la tarjeta vuelve a levantarse al pasar el mouse como las demás.
+   */
+  .recien {
+    animation: recien 3.2s ease-out 1 backwards;
+  }
+
+  /*
    * El fierro de una cuenta: una barra corta que dice la temperatura de la conexión.
    *
    * El resplandor es `box-shadow` y no un degradado porque tiene que leerse a 4 px de
@@ -504,6 +514,27 @@
   }
 }
 
+/* Cae, queda encendido un momento —lo que tarde la página en terminar de cargar— y se apaga. */
+@keyframes recien {
+  0% {
+    transform: translateY(-12px);
+    box-shadow:
+      0 0 0 2px var(--color-brasa),
+      0 0 28px 6px rgb(232 98 31 / 0.65);
+  }
+  12% {
+    transform: translateY(0);
+  }
+  55% {
+    box-shadow:
+      0 0 0 2px var(--color-brasa),
+      0 0 22px 4px rgb(232 98 31 / 0.5);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgb(232 98 31 / 0);
+  }
+}
+
 @keyframes late {
   0%,
   100% {
@@ -553,5 +584,15 @@
 
   .late {
     animation: none !important;
+  }
+
+  /*
+   * El corte recién programado, sin caer: la regla de arriba lo deja en su último cuadro, que
+   * es apagado, y sin animación no habría cómo ver dónde quedó. Queda con el borde de brasa,
+   * quieto, hasta que se navega a otra parte.
+   */
+  .recien {
+    animation: none !important;
+    box-shadow: 0 0 0 2px var(--color-brasa);
   }
 }

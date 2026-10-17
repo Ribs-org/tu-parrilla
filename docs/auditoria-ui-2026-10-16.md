@@ -107,7 +107,11 @@ conversación —lo que te dijeron a un lado, tu respuesta al otro— con el est
 respuesta en la gramática del corte y el número de pendientes en su pestaña. Hecho el 2026-10-16:
 los archivos del compositor, que llegan como carne cruda con su porcentaje y se quedan con
 «Reintentar» si no llegan (la subida ya cuenta bytes, por `XMLHttpRequest`), y «Así va a
-quedar», el corte del post armándose sobre la parrilla de su día.
+quedar», el corte del post armándose sobre la parrilla de su día. También del mismo día: las
+cuentas como fichas con su fierro y el aviso de que el permiso vence antes de la hora elegida
+(`schedule/vence.ts`), la semana en chico con el fuego de cada día para elegirlo, y el corte
+que cae en su día al programar, encendido un momento. La hora caliente sigue esperando a la
+tanda 4.
 
 **Tanda 3, se asa mientras sale (2 a 3 días; toca el publicador).** Hoy la carne salta de
 cruda a sellada cuando empieza a salir. La propuesta es guardar la etapa de cada destino

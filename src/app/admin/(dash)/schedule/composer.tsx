@@ -9,9 +9,11 @@ import {
   guardarBorradorAccion,
   type FormState,
 } from '@/app/admin/actions'
+import { Icon } from '@/components/icon'
 import { Button, Field, GroupLabel, Input, Textarea } from '@/components/ui'
 import {
   camposDesdeFormulario,
+  fechaParaDia,
   instagramTrialInicial,
   primero,
   reglaInicial,
@@ -21,9 +23,10 @@ import {
 } from '@/lib/borrador'
 import type { CuentaRow } from '@/lib/posts-kpis'
 import { networkLabel } from '@/lib/networks'
-import { calorDelDia, estadoDelFierro, type Calor, type Sello } from '@/lib/parrilla'
+import { calorDelDia, estadoDelFierro, type Calor, type Fierro, type Sello } from '@/lib/parrilla'
+import { addDays, dayKey, dayLabelConMes, mondayOfKey } from '@/lib/schedule-week'
 import { subirUno, type MediaSubida } from '@/lib/subida-directa'
-import { cn } from '@/lib/utils'
+import { cn, toZonedInput } from '@/lib/utils'
 import { TablaDeArchivos } from './archivos'
 import { InstagramOpciones } from './instagram-opciones'
 import { PanelLateral } from './panel-lateral'
@@ -31,6 +34,7 @@ import { ReglaClave } from './regla-clave'
 import { RevisionMedia } from './revision-media'
 import { formatoConLoQueSube, fraseDeLlegada, llenadoDe, siguienteEnCola, tipoDe, type Subida } from './subidas'
 import { TikTokOpciones } from './tiktok-opciones'
+import { venceAntesDe } from './vence'
 import { VistaPrevia } from './vista-previa'
 
 // Twin of PUBLISHABLE (publish/batch.ts). NETWORKS in the editor
@@ -101,6 +105,40 @@ const CLASE_CALOR: Record<Calor, string> = {
   llena: 'grilla-llena',
 }
 
+/** El fierro de cada ficha de cuenta: las mismas clases que en Los Fierros. */
+const CLASE_FIERRO: Record<Fierro, string> = {
+  'al-rojo': 'fierro-al-rojo',
+  enfriandose: 'fierro-enfriandose',
+  frio: 'fierro-frio',
+}
+
+const PALABRA_CALOR: Record<Calor, string> = {
+  apagada: 'apagada',
+  prendida: 'prendida',
+  llena: 'llena',
+}
+
+/** Los días que muestra la semana en chico, desde hoy. */
+const DIAS_A_LA_VISTA = 7
+
+/**
+ * Adónde vuelve el compositor al programar: la vista de la que vino, con el aviso de
+ * «programado» y el post recién puesto (`nuevo`) para que se encienda en su día. En la semana
+ * se pasa a la del día elegido, y en la vista «Día» a ese día: si no, el corte caería fuera de
+ * la vista y no se vería dónde.
+ */
+export function hrefDeVuelta(listoHref: string, id: string | undefined, dia: string | null): string {
+  if (!id) return listoHref
+  const url = new URL(listoHref, 'https://x')
+  url.searchParams.set('nuevo', id)
+  if (dia && /^\d{4}-\d{2}-\d{2}$/.test(dia)) {
+    const vista = url.searchParams.get('vista')
+    if (vista === 'dia') url.searchParams.set('fecha', dia)
+    else if (vista !== 'lista') url.searchParams.set('semana', mondayOfKey(dia))
+  }
+  return `${url.pathname}?${url.searchParams.toString()}`
+}
+
 /** El formato en palabras, para «Así va a quedar». */
 function formaEnPalabras(formato: string, huesos: number): string {
   if (formato === 'entrana') return 'Un video'
@@ -155,6 +193,7 @@ export function Composer({
   cuentaInicial = '',
   listoHref,
   cerrarHref,
+  zona,
 }: {
   carga: Record<string, number>
   cuentas: CuentaRow[]
@@ -171,6 +210,8 @@ export function Composer({
   listoHref: string
   /** Adónde ir al cerrar o descartar. */
   cerrarHref: string
+  /** La zona del dueño: la de la fecha del campo, de la semana en chico y de los vencimientos. */
+  zona: string
 }) {
   const router = useRouter()
   const captionId = useId()
@@ -498,7 +539,8 @@ export function Composer({
     if (borradorId.current) formData.set('borradorId', borradorId.current)
     const resultado = await createScheduledPost(prev, formData)
     if (resultado.ok) {
-      router.replace(listoHref, { scroll: false })
+      const diaProgramado = ahora ? dayKey(new Date(), zona) : String(formData.get('scheduledAt') ?? '').slice(0, 10)
+      router.replace(hrefDeVuelta(listoHref, resultado.id, diaProgramado), { scroll: false })
     } else if (estado !== 'perdido') {
       // No salió: se sigue escribiendo. El guardado que el clic dejó pendiente se canceló
       // arriba, así que se vuelve a pedir: lo del último segundo no se pierde.
@@ -520,12 +562,29 @@ export function Composer({
   const { formato, huesos } = formatoConLoQueSube(media, subidas)
   const elegidas = publicables.filter((c) => marcadas.has(c.id))
   const ahoraMismo = new Date()
+  const fierroDe = (c: CuentaRow): Fierro =>
+    estadoDelFierro({ connected: c.connected, expiraEn: c.expiresAt, ultimoError: c.lastSyncError, red: c.network }, ahoraMismo)
+  // Las marcadas cuyo permiso vence antes de la hora elegida: así como está, ahí no va a salir.
+  const vencenAntes = ahora
+    ? []
+    : elegidas.flatMap((c) => {
+        const vence = venceAntesDe(c, cuando, zona)
+        return vence ? [{ cuenta: c, vence }] : []
+      })
   const sellosPrevia: Sello[] = elegidas.map((c) =>
-    estadoDelFierro({ connected: c.connected, expiraEn: c.expiresAt, ultimoError: c.lastSyncError, red: c.network }, ahoraMismo) ===
-    'frio'
-      ? 'frio'
-      : 'pendiente',
+    fierroDe(c) === 'frio' || vencenAntes.some((v) => v.cuenta.id === c.id) ? 'frio' : 'pendiente',
   )
+  // La semana en chico: hoy y los seis días que siguen, cada uno con su fuego.
+  const hoy = dayKey(ahoraMismo, zona)
+  const diasALaVista = Array.from({ length: DIAS_A_LA_VISTA }, (_, i) => addDays(hoy, i))
+
+  /** Un día de la semana en chico: ese día, con la hora que ya tenía si todavía no pasó. */
+  function elegirDia(dia: string) {
+    const hora = cuando.slice(11, 16)
+    const conSuHora = hora ? `${dia}T${hora}` : ''
+    const yaPaso = conSuHora !== '' && conSuHora <= toZonedInput(new Date(), zona).slice(0, 16)
+    setCuando(conSuHora && !yaPaso ? conSuHora : fechaParaDia(dia, new Date(), zona) || conSuHora || cuando)
+  }
   const diaElegido = ahora ? null : cuando.slice(0, 10)
   const calorPrevia = calorDelDia((diaElegido && diaElegido.length === 10 ? (carga[diaElegido] ?? 0) : 0) + 1)
   const llegada = fraseDeLlegada(media.length, subidas)
@@ -595,26 +654,59 @@ export function Composer({
                 para poder programar.
               </p>
             ) : (
-              <div className="flex flex-wrap gap-3">
-                {publicables.map((cuenta) => (
-                  <label
-                    key={cuenta.id}
-                    className={cn('flex items-center gap-2 text-sm', !cuenta.connected && 'opacity-40')}
-                  >
-                    <input
-                      type="checkbox"
-                      name="cuentas"
-                      value={cuenta.id}
-                      disabled={!cuenta.connected}
-                      defaultChecked={marcadaAlAbrir(cuenta)}
-                      onChange={(e) => alternar(cuenta, e.target.checked)}
-                    />
-                    {networkLabel(cuenta.network)} · {cuenta.handle ?? 'sin nombre'}
-                    {!cuenta.connected && <span className="text-xs text-fg-faint">reconéctala</span>}
-                  </label>
-                ))}
+              <div className="flex flex-wrap gap-2">
+                {/* Fichas y no casillas: la casilla sigue adentro, para el formulario y el teclado,
+                    pero lo que se ve es el fierro de la cuenta, su red y su nombre, y la ficha
+                    marcada se enciende. */}
+                {publicables.map((cuenta) => {
+                  const fierro = fierroDe(cuenta)
+                  return (
+                    <label
+                      key={cuenta.id}
+                      className={cn(
+                        'inline-flex items-center gap-2 rounded-full border border-acero-600 px-3 py-1.5 text-sm text-fg-muted transition-colors',
+                        'has-[:checked]:border-brasa has-[:checked]:bg-brasa/10 has-[:checked]:text-fg',
+                        'has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-brasa',
+                        cuenta.connected ? 'cursor-pointer hover:text-fg' : 'cursor-not-allowed opacity-50',
+                      )}
+                    >
+                      <input
+                        type="checkbox"
+                        name="cuentas"
+                        value={cuenta.id}
+                        disabled={!cuenta.connected}
+                        defaultChecked={marcadaAlAbrir(cuenta)}
+                        onChange={(e) => alternar(cuenta, e.target.checked)}
+                        className="sr-only"
+                      />
+                      <span className={cn('fierro w-3.5 shrink-0', CLASE_FIERRO[fierro])} aria-hidden />
+                      <Icon name={cuenta.network} className="h-3.5 w-3.5 shrink-0" />
+                      {networkLabel(cuenta.network)} · {cuenta.handle ?? 'sin nombre'}
+                      {!cuenta.connected ? (
+                        <span className="text-xs text-fg-faint">reconéctala</span>
+                      ) : fierro === 'enfriandose' ? (
+                        <span className="text-xs text-caution">se enfría</span>
+                      ) : null}
+                    </label>
+                  )
+                })}
               </div>
             )}
+            {vencenAntes.map(({ cuenta, vence }) => (
+              <p
+                key={cuenta.id}
+                role="status"
+                className="mt-2 rounded-lg border border-caution/40 bg-caution/10 px-3 py-2 text-[0.8rem] text-caution"
+              >
+                El permiso de {networkLabel(cuenta.network)} · {cuenta.handle ?? 'sin nombre'} vence el{' '}
+                {dayLabelConMes(vence.slice(0, 10))} a las {vence.slice(11, 16)}, antes de que salga esto: así no va a
+                salir ahí.{' '}
+                <Link className="underline" href="/admin/accounts">
+                  Reconéctala en Los Fierros
+                </Link>{' '}
+                antes, o elige un día anterior.
+              </p>
+            ))}
           </div>
 
           {cuentasTikTok.map((cuenta) => (
@@ -659,6 +751,39 @@ export function Composer({
               </Button>
               {ahora ? <input type="hidden" name="cuandoAhora" value="on" /> : null}
             </div>
+            {/* La semana en chico: hoy y los seis días que siguen, con el fuego de cada uno. Un
+                clic pone ese día en el campo, con la hora que ya tenía si todavía no pasó. Con
+                «Ahora» no hay día que elegir. */}
+            {ahora ? null : (
+              <div className="mt-2 grid max-w-md grid-cols-7 gap-1" role="group" aria-label="Elegir el día">
+                {diasALaVista.map((dia) => {
+                  const [dow, numero] = dayLabelConMes(dia).split(' ')
+                  const cortes = carga[dia] ?? 0
+                  const calor = calorDelDia(cortes)
+                  const elegido = cuando.slice(0, 10) === dia
+                  return (
+                    <button
+                      key={dia}
+                      type="button"
+                      aria-pressed={elegido}
+                      onClick={() => elegirDia(dia)}
+                      className={cn(
+                        'flex flex-col items-center gap-1 rounded-lg border px-1 pb-1 pt-1.5 transition-colors',
+                        elegido ? 'border-brasa text-fg' : 'border-acero-700 text-fg-muted hover:text-fg',
+                      )}
+                    >
+                      <span className="font-titulo text-[0.62rem] uppercase tracking-[0.08em]">{dia === hoy ? 'hoy' : dow}</span>
+                      <span className="font-mono text-[0.78rem] text-fg">{numero}</span>
+                      <span className={cn('grilla h-2.5 w-full', CLASE_CALOR[calor])} aria-hidden />
+                      <span className="sr-only">
+                        {dayLabelConMes(dia)}: {PALABRA_CALOR[calor]}
+                        {cortes > 0 ? `, ${cortes === 1 ? 'un corte' : `${cortes} cortes`}` : ''}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+            )}
             {/* Con «Ahora» no hay día que mirar: la hora la pone el servidor al enviar. */}
             {ahora ? null : <CargaDelDia carga={carga} cuando={cuando} />}
           </Field>

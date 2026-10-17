@@ -234,6 +234,16 @@ export const DIAS_AVISO_FIERRO = 7
  * credencial puede estar viva y la conexión rota igual —permisos revocados desde la red,
  * por ejemplo— y para el caso da lo mismo, hay que reconectar.
  */
+/**
+ * Las redes cuya credencial se renueva sola antes de publicar, así que su `expiraEn` es el de
+ * un token corto y no dice cuándo se apaga la cuenta: TikTok, YouTube y X (el porqué de cada
+ * una, en `estadoDelFierro`). Para las demás, `expiraEn` es de verdad el día en que el permiso
+ * vence y lo programado después ya no sale.
+ */
+export function seRenuevaSola(red: string | undefined): boolean {
+  return red === 'tiktok' || red === 'youtube' || red === 'x'
+}
+
 export function estadoDelFierro(
   cuenta: { connected: boolean; expiraEn: string | null; ultimoError: string | null; red?: string },
   ahora: Date,
@@ -253,7 +263,7 @@ export function estadoDelFierro(
   // Y X, con dos horas: `social/publish/x.ts` lo renueva al publicar con el de refresco, que
   // rota en cada uso. Medido por ahí, X decía «vence hoy» al conectarla y quedaba fría a las
   // dos horas; con el punto del botón de Ajustes, eso habría sido una alarma encendida para siempre.
-  if (cuenta.red === 'tiktok' || cuenta.red === 'youtube' || cuenta.red === 'x') return 'al-rojo'
+  if (seRenuevaSola(cuenta.red)) return 'al-rojo'
   if (!cuenta.expiraEn) return 'al-rojo'
 
   const faltan = new Date(cuenta.expiraEn).getTime() - ahora.getTime()
