@@ -1,0 +1,1 @@
+ALTER TABLE "scheduled_posts" ADD CONSTRAINT "scheduled_posts_owner_ref_key" UNIQUE("owner_id","ref");

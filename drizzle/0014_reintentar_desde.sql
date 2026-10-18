@@ -1,0 +1,1 @@
+ALTER TABLE "scheduled_post_targets" ADD COLUMN "reintentar_desde" timestamp with time zone;

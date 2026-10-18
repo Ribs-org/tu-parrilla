@@ -59,7 +59,8 @@ Content-Type: application/json
       "media": ["https://drive.usercontent.google.com/download?id=ABC&export=download"],
       "portada": "https://ejemplo.com/portada.jpg",
       "atributos": { "hook": "pregunta-polemica", "tema": "negocios-chile", "formato": "listado" },
-      "opciones": { "tiktok": { "modo": "directo", "privacidad": "SELF_ONLY", "comentarios": true, "comercial": "no" } }
+      "opciones": { "tiktok": { "modo": "directo", "privacidad": "SELF_ONLY", "comentarios": true, "comercial": "no" } },
+      "ref": "septiembre-fila-12"
     }
   ]
 }
@@ -297,6 +298,28 @@ al final de `mensaje`, separado por una línea en blanco, así que hoy sale dent
 misma respuesta pública que el resto de `mensaje` — la nota del párrafo de arriba sobre el
 privado aplica igual al documento.
 
+### `ref` (opcional, recomendado) — para reenviar un lote sin duplicar
+
+```json
+"ref": "septiembre-fila-12"
+```
+
+Un texto tuyo, de 1 a 100 caracteres, que identifica la fila: el id de la fila en tu
+planilla, por ejemplo. Es único por dueño de la llave: si mandas una fila con una `ref` que
+ya entró, no se programa de nuevo y vuelve el post que ya existía, con `"repetido": true`
+(ver «Respuesta»). Se recortan los espacios de los bordes.
+
+Sirve para el caso del lote cortado: si la respuesta no llega (se acabó el tiempo con muchas
+descargas, se cortó la conexión), reenvía **el lote entero, con las mismas `ref`**. Las filas
+que ya habían entrado vuelven como repetidas, sin descargar su media otra vez ni volver a
+validarse —aunque su hora haya pasado desde el primer envío—, y se programan solo las que
+faltaban.
+
+La `ref` **no compara contenidos**: si cambiaste el texto de una fila y la reenvías con la
+misma `ref`, vuelve el post de antes, sin el cambio. Para cambiar un post, bórralo
+(`DELETE /api/schedule/posts/{id}`) y mándalo de nuevo; una vez borrado, su `ref` queda
+libre. Sin `ref`, reenviar una fila la programa otra vez.
+
 ## Reglas por red (las que rechazan una fila)
 
 | Regla | Cuándo se rompe | Frase exacta |
@@ -347,6 +370,7 @@ Instagram acepta: 1 foto, 1 video, o 2–10 fotos (carrusel).
 | `El mensaje del privado va de 1 a 1000 caracteres.` | `regla.mensaje` ausente, vacío o largo |
 | `La respuesta pública va de 1 a 300 caracteres.` | `regla.respuestaPublica` larga |
 | `El documento tiene que ser una URL absoluta a un PDF de hasta 25 MB.` | `regla.documentoUrl` no es una URL absoluta http/https, o sí lo es pero al descargarla no resultó un PDF de hasta 25 MB (u otro fallo de descarga) |
+| `«ref» tiene que ser un texto de 1 a 100 caracteres.` | `ref` vacía, de puros espacios, de más de 100 caracteres, o que no es texto (un número, por ejemplo) |
 | `No se pudo guardar la fila. Inténtalo de nuevo.` | fallo transitorio de base de datos |
 
 ## Respuesta
@@ -358,19 +382,24 @@ por fila es dato, no error del endpoint.
 {
   "resultados": [
     { "index": 0, "ok": true,  "postId": "3f2a…" },
-    { "index": 1, "ok": false, "error": "El texto excede los 280 caracteres de X." }
+    { "index": 1, "ok": false, "error": "El texto excede los 280 caracteres de X." },
+    { "index": 2, "ok": true,  "postId": "9c41…", "repetido": true }
   ]
 }
 ```
 
-`index` es la posición en tu array `posts` (base 0).
+`index` es la posición en tu array `posts` (base 0). `repetido: true` dice que esa fila
+traía una `ref` que ya había entrado: el `postId` es el del post que ya existía, y no se
+programó nada nuevo.
 
 **Éxito parcial:** las filas buenas quedan programadas aunque otras fallen. Corrige
-las malas y **reenvía solo esas** — no hay deduplicación: reenviar una fila ya
-programada la programa **otra vez**.
+las malas y reenvíalas. Con `ref` puedes reenviar el lote entero: lo que ya entró vuelve
+como repetido. Sin `ref` no hay deduplicación: reenviar una fila ya programada la programa
+**otra vez**, así que reenvía solo las malas.
 
-**Si no recibes respuesta** (timeout con muchas descargas): las filas ya procesadas
-quedaron programadas. Verifica antes de reintentar, o duplicarás posts.
+**Si no recibes respuesta** (timeout con muchas descargas, conexión cortada): las filas ya
+procesadas quedaron programadas. Con `ref` en cada fila, reenvía el lote igual y listo. Sin
+ella, verifica con `GET /api/schedule/posts` antes de reintentar, o duplicarás posts.
 
 ---
 
@@ -593,10 +622,11 @@ Un rango pasado vale (lista lo ya publicado). Formato inválido o rango invertid
       "portada": "https://media.vicente-pareja.cl/scheduled/…jpg",
       "media": [{ "url": "https://media.vicente-pareja.cl/scheduled/…mp4", "tipo": "video" }],
       "atributos": { "hook": "pregunta-polemica", "tema": "retail" },
+      "ref": "septiembre-fila-12",
       "redes": [
-        { "red": "instagram", "estado": "published", "error": null, "externalId": "18114074218999893", "intentos": 1, "cuentaId": "8f0a…", "handle": "@vicente" },
-        { "red": "youtube", "estado": "scheduled", "error": null, "externalId": null, "intentos": 0, "cuentaId": "b21c…", "handle": null },
-        { "red": "x", "estado": "failed", "error": "X aún no recibe video desde el calendario.", "externalId": null, "intentos": 3, "cuentaId": "9d4e…", "handle": "@vicentepareja" }
+        { "red": "instagram", "estado": "published", "error": null, "externalId": "18114074218999893", "intentos": 1, "proximoIntento": null, "cuentaId": "8f0a…", "handle": "@vicente" },
+        { "red": "youtube", "estado": "scheduled", "error": "No se pudo hablar con la red. Se reintentará.", "externalId": null, "intentos": 1, "proximoIntento": "2026-09-10T09:15:00-03:00", "cuentaId": "b21c…", "handle": null },
+        { "red": "x", "estado": "failed", "error": "X aún no recibe video desde el calendario.", "externalId": null, "intentos": 3, "proximoIntento": null, "cuentaId": "9d4e…", "handle": "@vicentepareja" }
       ]
     }
   ]
@@ -609,6 +639,8 @@ Un rango pasado vale (lista lo ya publicado). Formato inválido o rango invertid
 - **`media`** viene en el orden del carrusel, ya en el almacén propio (la URL de
   origen que mandaste no se conserva).
 - **`atributos`** trae exactamente lo que enviaste; `null` si no mandaste ninguno.
+- **`ref`** es la que mandaste en la fila (sección 1), o `null`: con ella cruzas un lote
+  que reenviaste contra lo que ya entró.
 - **`redes`**: un estado por destino. `scheduled` espera su hora; `publishing` está en
   vuelo (Meta procesando un video); `published` salió y `externalId` es su id en la
   red, el mismo que usa `/api/metrics/posts`. **En TikTok puede venir `null` un tiempo**:
@@ -618,6 +650,12 @@ Un rango pasado vale (lista lo ya publicado). Formato inválido o rango invertid
   y desde ahí cruza con sus métricas y sus `atributos`; un borrador, recién cuando el dueño
   lo publica desde su app. `failed` agotó los tres intentos y
   `error` dice por qué con una frase fija. `intentos` cuenta los intentos hechos.
+  Un `scheduled` con `error` es uno que falló y espera el siguiente intento:
+  **`proximoIntento`** dice cuándo (quince minutos después del primer fallo, dos horas
+  después del segundo), y es `null` en todo destino que no espera nada más que su hora. Un
+  destino de Instagram que chocó con el tope diario de publicaciones también espera así, sin
+  gastar intentos, con `error` `Instagram llegó a su tope de publicaciones por día: sale apenas se libere un cupo.`
+  y una hora de espera cada vez.
   **`cuentaId`** es el identificador de cuenta de ese destino — la fuente para el
   campo `cuentas` de la sección 1, cuando nombrar la red no alcanza — y **`handle`**
   es el de esa cuenta, o `null` si la cuenta ya no existe (el destino se conserva
@@ -629,13 +667,73 @@ lo que decidiste y lo que rindió.
 
 ---
 
+# 3b. Lo que pide atención — `GET /api/schedule/resumen`
+
+```http
+GET /api/schedule/resumen?dias=3&horas=24
+Authorization: Bearer <tu llave>
+```
+
+Lo mismo que el resumen del día que le llega al dueño por correo, calculado en el momento:
+lo que se quemó, las cuentas que hay que reconectar y las que se están quedando sin
+parrilla. Pídelo antes de armar una tanda, o una vez al día: es la forma de enterarte sin
+leer el correo del dueño.
+
+Parámetros, ambos opcionales:
+- `dias`: entero de 1 a 30, por defecto 3. Una cuenta entra en `pista` si tiene menos de
+  esos días programados. Fuera de rango: `400` con `«dias» tiene que ser un entero de 1 a 30.`
+- `horas`: entero de 1 a 168, por defecto 24. Cuántas horas hacia atrás mira `fallidos`.
+  Fuera de rango: `400` con `«horas» tiene que ser un entero de 1 a 168.`
+
+```json
+{
+  "generado": "2026-10-17T09:00:00-03:00",
+  "horas": 24,
+  "dias": 3,
+  "fallidos": [
+    { "postId": "3f2a…", "fecha": "2026-10-16T19:00:00-03:00", "texto": "¿El negocio con más margen?", "red": "instagram", "cuentaId": "8f0a…", "handle": "@vicente", "error": "Instagram rechazó la publicación.", "intentos": 3 }
+  ],
+  "cuentas": [
+    { "cuentaId": "c71d…", "red": "tiktok", "handle": "@vicente", "fierro": "frio", "vence": null, "motivo": "La conexión falló; reconecta la cuenta." },
+    { "cuentaId": "8f0a…", "red": "instagram", "handle": "@vicente", "fierro": "enfriandose", "vence": "2026-10-20T10:00:00-03:00", "motivo": "La conexión está por vencer; reconéctala antes." }
+  ],
+  "pista": [
+    { "cuentaId": "b21c…", "red": "youtube", "handle": null, "ultima": "2026-10-18T19:00:00-03:00", "dias": 1 },
+    { "cuentaId": "9d4e…", "red": "x", "handle": "@vicentepareja", "ultima": null, "dias": 0 }
+  ]
+}
+```
+
+- **`fallidos`**: los destinos que se quemaron en las últimas `horas`, el más reciente
+  primero. `fecha` es la hora de salida del post; `error`, la misma frase fija de
+  `/api/schedule/posts`. Para reprogramarlo, el dueño tiene «Reprogramar» en su panel; por
+  API, se borra y se programa de nuevo.
+- **`cuentas`**: las que hay que reconectar. `fierro` `frio` ya no publica (la conexión
+  falló, venció, o el dueño quitó la app desde Facebook); `enfriandose` vence en menos de
+  siete días, y `vence` dice cuándo (`null` en TikTok, YouTube y X, que se renuevan solas y
+  no tienen una fecha que diga algo). Lo programado en una cuenta fría no sale hasta que el
+  dueño la reconecte en Los Fierros: avísale. Una cuenta que el dueño desconectó a propósito
+  no aparece.
+- **`pista`**: las cuentas en uso —con algo programado en los últimos 30 días— que tienen
+  menos de `dias` días programados hacia adelante. `ultima` es la hora de lo último que
+  tienen por salir (`null` si nada), y `dias` los días completos de aquí a esa hora. Las más
+  cortas primero: es la lista de lo que conviene programar primero.
+
+Las tres listas vacías significan que no hay nada que mirar. El correo del dueño sale ese
+día solo si alguna tiene algo, después de la sincronización de la mañana.
+
+---
+
 # 4. El ciclo completo
 
-1. **Mira** `/api/schedule/posts` para saber qué ya está puesto en la ventana.
-2. **Programa** con `atributos` describiendo tus decisiones creativas.
+1. **Mira** `/api/schedule/posts` para saber qué ya está puesto en la ventana, y
+   `/api/schedule/resumen` para saber qué se quemó y qué cuenta se está quedando sin parrilla.
+2. **Programa** con `atributos` describiendo tus decisiones creativas, y una `ref` en cada fila.
 3. El sistema **publica** a la hora indicada, en cada red. Si un destino falla, se
-   reintenta hasta 3 veces; al tercer fallo el dueño recibe un correo y el post queda
-   marcado en rojo en su calendario, y en `failed` en `/api/schedule/posts`.
+   reintenta hasta tres intentos —quince minutos después del primero, dos horas después
+   del segundo—; al tercer fallo el dueño recibe un correo y el post queda marcado en rojo
+   en su calendario, y en `failed` en `/api/schedule/posts`. Si lo que falló es la conexión
+   de la cuenta, el correo es uno solo por cuenta, no uno por post.
 4. La sincronización diaria trae **métricas reales**.
 5. **Lee** `/api/metrics/posts` sobre un rango con suficiente historia, o pide directo
    `/api/metrics/mejores` para ver lo mejor de cada cuenta y qué lo distingue.
@@ -652,7 +750,8 @@ patrones. Con menos de ~10 posts por valor de atributo, desconfía de la diferen
 
 # 5. Lo que el sistema NO hace
 
-- **No deduplica**: reenviar el mismo lote programa todo de nuevo.
+- **No deduplica sin `ref`**: reenviar el mismo lote sin `ref` programa todo de nuevo. Con
+  `ref`, lo que ya entró vuelve como repetido (sección 1).
 - **No programa en el pasado** ni acepta media que no esté en una URL pública.
 - **No edita por API**: para corregir un post ya programado, o lo borras con
   `DELETE /api/schedule/posts/{id}` y lo programas de nuevo, o el dueño lo cambia en su
@@ -693,17 +792,30 @@ curl -X POST https://tu-parrilla.cl/api/schedule/batch \
         "redes": ["instagram", "youtube", "facebook"],
         "media": ["https://drive.usercontent.google.com/download?id=ABC&export=download"],
         "portada": "https://ejemplo.com/portada-01.jpg",
-        "atributos": { "hook": "pregunta-polemica", "tema": "retail", "formato": "explicacion" }
+        "atributos": { "hook": "pregunta-polemica", "tema": "retail", "formato": "explicacion" },
+        "ref": "septiembre-01"
       },
       {
         "fecha": "2026-09-10 19:00",
         "texto": "Tres cosas que aprendí vendiendo software en Chile.",
         "redes": ["threads", "x"],
         "media": [],
-        "atributos": { "hook": "listado", "tema": "software", "formato": "texto" }
+        "atributos": { "hook": "listado", "tema": "software", "formato": "texto" },
+        "ref": "septiembre-02"
       }
     ]
   }'
+```
+
+Si ese envío no respondió, se manda igual otra vez: las filas que ya habían entrado vuelven
+con `"repetido": true`.
+
+Lo que pide atención hoy (lo quemado, las cuentas por reconectar, las que se quedan sin
+parrilla):
+
+```bash
+curl -s "https://tu-parrilla.cl/api/schedule/resumen" \
+  -H "Authorization: Bearer $LLAVE_PARRILLA"
 ```
 
 Leer el mes:

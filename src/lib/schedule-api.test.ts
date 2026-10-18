@@ -51,21 +51,22 @@ describe('armarProgramados', () => {
     scheduledAt: new Date('2026-06-21T22:00:00Z'),
     coverUrl: 'https://m.x/portada.jpg',
     atributos: { hook: 'pregunta' },
+    ref: 'lote-7',
   }
   const filas = [
     {
       post,
-      target: { network: 'instagram', status: 'published', lastError: null, externalId: '18', attemptCount: 1, accountId: 'acc-ig' },
+      target: { network: 'instagram', status: 'published', lastError: null, externalId: '18', attemptCount: 1, accountId: 'acc-ig', reintentarDesde: null },
       handle: '@vicente',
     },
     {
       post,
-      target: { network: 'x', status: 'failed', lastError: 'X aún no recibe video desde el calendario.', externalId: null, attemptCount: 3, accountId: 'acc-x' },
+      target: { network: 'x', status: 'failed', lastError: 'X aún no recibe video desde el calendario.', externalId: null, attemptCount: 3, accountId: 'acc-x', reintentarDesde: new Date('2026-06-21T23:00:00Z') },
       handle: null,
     },
     {
-      post: { id: 'p2', caption: '', scheduledAt: new Date('2026-06-22T12:00:00Z'), coverUrl: null, atributos: null },
-      target: { network: 'threads', status: 'scheduled', lastError: null, externalId: null, attemptCount: 0, accountId: 'acc-th' },
+      post: { id: 'p2', caption: '', scheduledAt: new Date('2026-06-22T12:00:00Z'), coverUrl: null, atributos: null, ref: null },
+      target: { network: 'threads', status: 'scheduled', lastError: null, externalId: null, attemptCount: 0, accountId: 'acc-th', reintentarDesde: null },
       handle: '@vicentethreads',
     },
   ]
@@ -87,11 +88,32 @@ describe('armarProgramados', () => {
         { url: 'https://m.x/b.mp4', tipo: 'video' },
       ],
       atributos: { hook: 'pregunta' },
+      ref: 'lote-7',
       redes: [
-        { red: 'instagram', estado: 'published', error: null, externalId: '18', intentos: 1, cuentaId: 'acc-ig', handle: '@vicente' },
-        { red: 'x', estado: 'failed', error: 'X aún no recibe video desde el calendario.', externalId: null, intentos: 3, cuentaId: 'acc-x', handle: null },
+        { red: 'instagram', estado: 'published', error: null, externalId: '18', intentos: 1, proximoIntento: null, cuentaId: 'acc-ig', handle: '@vicente' },
+        // Quemado: la hora de su último reintento ya no dice nada, aunque la fila la traiga.
+        { red: 'x', estado: 'failed', error: 'X aún no recibe video desde el calendario.', externalId: null, intentos: 3, proximoIntento: null, cuentaId: 'acc-x', handle: null },
       ],
     })
+  })
+
+  it('un destino que espera su próximo intento dice cuándo, en hora de Chile', () => {
+    const fila = {
+      post: { id: 'p3', caption: 'Reintento', scheduledAt: new Date('2026-06-21T22:00:00Z'), coverUrl: null, atributos: null, ref: null },
+      target: {
+        network: 'instagram',
+        status: 'scheduled',
+        lastError: 'No se pudo hablar con la red. Se reintentará.',
+        externalId: null,
+        attemptCount: 1,
+        reintentarDesde: new Date('2026-06-21T22:15:00Z'),
+        accountId: 'acc-ig',
+      },
+      handle: '@vicente',
+    }
+    const [post] = armarProgramados([fila], [], ZONE)
+    expect(post!.ref).toBeNull()
+    expect(post!.redes[0]!.proximoIntento).toBe('2026-06-21T18:15:00-04:00')
   })
 
   it('un post sin media ni atributos viaja con lista vacía y null, nunca 0', () => {
