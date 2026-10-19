@@ -1,6 +1,6 @@
 import 'server-only'
 import { createHash } from 'node:crypto'
-import { and, asc, eq, inArray, isNull } from 'drizzle-orm'
+import { and, asc, eq, inArray, isNull, sql } from 'drizzle-orm'
 import { accountMetrics, getDb, postMetrics, socialAccounts, socialPosts } from '@/db'
 import type { SocialAccount } from '@/db'
 import { localDay } from '../analytics'
@@ -9,9 +9,10 @@ import { adminId, buscarPorId } from '../usuarios'
 import { ZONA_POR_DEFECTO } from '../zona'
 import { postsToArchive } from './archive'
 import { campaignTagFor, type CuentaTag } from './campaign'
-import type { FetchedPost } from './connector'
+import type { Connector, FetchedPost, PostMetricValues } from './connector'
 import { agruparPorRed, primariaDe } from './cuenta'
 import { connectorFor } from './index'
+import { DIAS_DE_LECTURA_DIARIA, porLeerHoy } from './lectura'
 import { vincularVideosTikTok } from './vincular-tiktok'
 
 export type SyncReport = Array<{ network: string; handle: string | null; ok: boolean; posts: number; error?: string }>
@@ -130,17 +131,108 @@ async function upsertPost(post: FetchedPost, account: SocialAccount, cuenta: Cue
   }
 }
 
-async function writeSnapshot(postId: string, post: FetchedPost, day: string): Promise<void> {
-  await getDb()
-    .insert(postMetrics)
-    .values({ postId, day, ...post.metrics })
-    .onConflictDoUpdate({
-      target: [postMetrics.postId, postMetrics.day],
-      set: { ...post.metrics, capturedAt: new Date() },
-    })
+export type Lectura = { postId: string; metrics: PostMetricValues }
+
+/** Cuántas lecturas van en un mismo insert. */
+const LECTURAS_POR_INSERT = 500
+
+/**
+ * Las lecturas del día, de a muchas por consulta: con cientos de publicaciones por cuenta,
+ * una consulta por lectura son cientos de idas y vueltas a la base. Una misma
+ * publicación dos veces en el lote —una red que repite un post entre dos páginas— hace
+ * fallar el insert entero («ON CONFLICT DO UPDATE command cannot affect row a second
+ * time»), así que se queda la última.
+ */
+export function lecturasSinRepetir(lecturas: readonly Lectura[]): Lectura[] {
+  return [...new Map(lecturas.map((l) => [l.postId, l])).values()]
 }
 
-export async function syncAccount(account: SocialAccount, primaria: boolean): Promise<number> {
+async function writeSnapshots(lecturas: readonly Lectura[], day: string): Promise<void> {
+  const unicas = lecturasSinRepetir(lecturas)
+  for (let i = 0; i < unicas.length; i += LECTURAS_POR_INSERT) {
+    await getDb()
+      .insert(postMetrics)
+      .values(unicas.slice(i, i + LECTURAS_POR_INSERT).map((l) => ({ postId: l.postId, day, ...l.metrics })))
+      .onConflictDoUpdate({
+        target: [postMetrics.postId, postMetrics.day],
+        set: {
+          views: sql`excluded.views`,
+          likes: sql`excluded.likes`,
+          comments: sql`excluded.comments`,
+          shares: sql`excluded.shares`,
+          saves: sql`excluded.saves`,
+          reach: sql`excluded.reach`,
+          capturedAt: new Date(),
+        },
+      })
+  }
+}
+
+/** Cuántos ids se le piden por vez a `fetchMetricsById`; entre una vez y la otra se mira el plazo. */
+const IDS_POR_VUELTA = 50
+
+/**
+ * Lo viejo que el listado no trajo y que hoy toca (`lectura.ts`), leído por su id hasta
+ * que se acaba el plazo de la corrida. Lo que no alcanzó sigue en la fila mañana. Devuelve
+ * cuántas se leyeron.
+ */
+async function leerLasViejas(
+  account: SocialAccount,
+  connector: Connector,
+  token: string,
+  listadas: ReadonlySet<string>,
+  day: string,
+  zona: string,
+  plazo: number,
+): Promise<number> {
+  if (!connector.fetchMetricsById) return 0
+  const filas = await getDb()
+    .select({
+      id: socialPosts.id,
+      externalId: socialPosts.externalId,
+      publishedAt: socialPosts.publishedAt,
+      // Como texto: el día es una llave «YYYY-MM-DD», igual que `day`.
+      ultimaLectura: sql<string | null>`max(${postMetrics.day})::text`,
+    })
+    .from(socialPosts)
+    .leftJoin(postMetrics, eq(postMetrics.postId, socialPosts.id))
+    .where(and(eq(socialPosts.accountId, account.id), isNull(socialPosts.archivedAt)))
+    .groupBy(socialPosts.id)
+
+  const conocidas = filas.map((f) => ({
+    externalId: f.externalId,
+    publicadaDia: localDay(f.publishedAt, zona),
+    ultimaLectura: f.ultimaLectura,
+  }))
+  const ids = porLeerHoy(conocidas, listadas, day)
+  const postIdDe = new Map(filas.map((f) => [f.externalId, f.id]))
+
+  let leidas = 0
+  for (let i = 0; i < ids.length; i += IDS_POR_VUELTA) {
+    if (Date.now() >= plazo) {
+      console.log(`[sync] ${account.network} ${account.handle ?? ''}: ${ids.length - i} publicaciones viejas quedan para mañana`)
+      break
+    }
+    const metricas = await connector.fetchMetricsById(account, token, ids.slice(i, i + IDS_POR_VUELTA))
+    const lecturas: Lectura[] = []
+    for (const [externalId, metrics] of metricas) {
+      const postId = postIdDe.get(externalId)
+      if (postId) lecturas.push({ postId, metrics })
+    }
+    await writeSnapshots(lecturas, day)
+    leidas += lecturas.length
+  }
+  return leidas
+}
+
+/**
+ * Hasta cuándo se leen publicaciones viejas, contado desde que empieza `syncAll`. Lo nuevo
+ * se lee siempre entero; lo viejo es lo que cede si no hay tiempo. Deja margen dentro de
+ * los 300 s del cron para la retención de YouTube y lo que corre después.
+ */
+export const PLAZO_DE_LO_VIEJO_MS = 180_000
+
+export async function syncAccount(account: SocialAccount, primaria: boolean, plazo = Infinity): Promise<number> {
   const db = getDb()
   const connector = connectorFor(account.network)
   if (!connector) throw new Error(`Unknown network ${account.network}`)
@@ -155,7 +247,9 @@ export async function syncAccount(account: SocialAccount, primaria: boolean): Pr
     // "Sincronizado recién" under a Conectar button.
     if (token === null) return 0
 
-    const { posts: fetched, windowWasCapped } = await connector.fetchPosts(account, token)
+    // Lo de los últimos días se lista entero, aunque sean cientos (`lectura.ts`).
+    const desde = new Date(Date.now() - DIAS_DE_LECTURA_DIARIA * 864e5)
+    const { posts: fetched, windowWasCapped } = await connector.fetchPosts(account, token, { desde })
 
     // El día del dueño, no el del servidor: `getPostRows` compara estas llaves contra
     // `localDay(…, f.zone)`, así que una captura escrita en otra zona se leería un día
@@ -165,10 +259,11 @@ export async function syncAccount(account: SocialAccount, primaria: boolean): Pr
     const dueno = account.ownerId ? await buscarPorId(account.ownerId) : null
     const zona = dueno?.zona ?? ZONA_POR_DEFECTO
     const day = localDay(new Date(), zona)
+    const lecturas: Lectura[] = []
     for (const post of fetched) {
-      const id = await upsertPost(post, account, cuenta)
-      await writeSnapshot(id, post, day)
+      lecturas.push({ postId: await upsertPost(post, account, cuenta), metrics: post.metrics })
     }
+    await writeSnapshots(lecturas, day)
 
     // Extra deliberado: las métricas de cuenta nunca deben tumbar la sincronización
     // de publicaciones que sí funcionó, así que su fallo muere acá mismo.
@@ -217,12 +312,22 @@ export async function syncAccount(account: SocialAccount, primaria: boolean): Pr
       }
     }
 
+    // Lo viejo, al final y por su cuenta: lo nuevo ya quedó guardado, y un tropiezo acá
+    // —un límite de la red a mitad de camino— no debe pintar de rojo una cuenta que sí se
+    // leyó. Lo que no se alcanzó a leer le sigue tocando mañana.
+    let viejas = 0
+    try {
+      viejas = await leerLasViejas(account, connector, token, new Set(fetched.map((p) => p.externalId)), day, zona, plazo)
+    } catch (error) {
+      console.error(`[sync] lo viejo de ${account.network}:`, String(error).slice(0, 300))
+    }
+
     await db
       .update(socialAccounts)
       .set({ lastSyncedAt: new Date(), lastSyncError: null })
       .where(eq(socialAccounts.id, account.id))
 
-    return fetched.length
+    return fetched.length + viejas
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
     // `lastSyncedAt` deliberately untouched: this run fetched nothing, and stamping it
@@ -245,6 +350,7 @@ export async function syncAccount(account: SocialAccount, primaria: boolean): Pr
  * cuentas, que es lo que pide el botón del panel: nadie gasta la cuota de API de otro.
  */
 export async function syncAll(ownerId?: string): Promise<SyncReport> {
+  const plazo = Date.now() + PLAZO_DE_LO_VIEJO_MS
   // Antes del resto y por su cuenta: una base inalcanzable acá no debe costarle el
   // snapshot del día a las demás, así que su fallo se registra y se sigue.
   try {
@@ -276,7 +382,7 @@ export async function syncAll(ownerId?: string): Promise<SyncReport> {
       const filas: SyncReport = []
       for (const cuenta of cuentas) {
         try {
-          filas.push({ network: cuenta.network, handle: cuenta.handle, ok: true, posts: await syncAccount(cuenta, primaria === cuenta.id) })
+          filas.push({ network: cuenta.network, handle: cuenta.handle, ok: true, posts: await syncAccount(cuenta, primaria === cuenta.id, plazo) })
         } catch (error) {
           filas.push({ network: cuenta.network, handle: cuenta.handle, ok: false, posts: 0, error: error instanceof Error ? error.message : String(error) })
         }

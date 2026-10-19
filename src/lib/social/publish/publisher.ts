@@ -21,9 +21,12 @@ export type PublishOutcome =
   // borrador a la bandeja de TikTok publica "en la bandeja", no en el perfil.
   | { kind: 'published'; externalId: string | null }
   | { kind: 'processing'; containerId: string }
-  // La red pidió esperar (cupo por minuto): se vuelve a intentar en la próxima corrida
-  // sin gastar intento ni dejar motivo, porque nada salió mal con el post.
-  | { kind: 'deferred' }
+  // La red pidió esperar: se vuelve a intentar sin gastar intento, porque nada salió mal
+  // con el post. Sin más datos, en la próxima corrida y sin motivo (el cupo por minuto de
+  // TikTok). Con `esperaMs`, no antes de ese plazo; con `motivo`, el panel dice por qué
+  // espera; con `containerId`, el contenedor ya hecho se guarda para no rehacerlo (el tope
+  // diario de Instagram, que se cobra al publicar el contenedor, no al crearlo).
+  | { kind: 'deferred'; esperaMs?: number; motivo?: string; containerId?: string }
   // `definitivo` lo ponen dos sitios, y solo ante un rechazo que reintentar no cambia:
   // `createContainer` (instagram.ts) cuando `motivoDeRechazo` lo reconoció, y el init de
   // TikTok cuando la app sin auditar choca con una cuenta pública (tiktok.ts). Un `failed`
@@ -44,6 +47,7 @@ export type TargetPatch = {
   externalId: string | null
   attemptCount: number
   lastError: string | null
+  reintentarDesde: Date | null
 }
 
 // Every sentence the owner can see. Upstream detail goes to the server log only.
@@ -52,9 +56,19 @@ export const TRIAL_REEL_NO_DISPONIBLE = 'Instagram no permite trial reels en est
 export const PUBLISH_NETWORK_ERROR = 'No se pudo hablar con la red. Se reintentará.'
 export const NO_PUBLISH_TOKEN = 'La cuenta no está conectada. Reconéctala y reprograma.'
 export const STALE_PROCESSING = 'La red no terminó de procesar el video.'
+export const TOPE_INSTAGRAM = 'Instagram llegó a su tope de publicaciones por día: sale apenas se libere un cupo.'
 
 export const MAX_PUBLISH_ATTEMPTS = 3
 export const STALE_PROCESSING_HOURS = 24
+
+/**
+ * Cuánto se espera después de cada intento fallido antes del siguiente: quince minutos
+ * después del primero y dos horas después del segundo. Antes los tres intentos iban en
+ * corridas seguidas y se gastaban en diez minutos, así que una red caída una hora quemaba
+ * el post igual. Con estas esperas, un destino se quema recién unas dos horas y cuarto
+ * después de su hora, y una caída de la red de hasta dos horas ya no lo pierde.
+ */
+export const ESPERAS_TRAS_FALLO_MS = [15 * 60_000, 2 * 60 * 60_000] as const
 
 /**
  * The whole state machine in one pure spot. Waiting on Meta ('processing') spends no
@@ -69,8 +83,13 @@ export const STALE_PROCESSING_HOURS = 24
  * how many are left. It still goes through the same 'failed' branch as the third
  * ordinary failure, so the email-fires-once property above holds unchanged — it is
  * still the transition into 'failed', and only into it, that sends the alert.
+ *
+ * `reintentarDesde` es el otro lado de la misma decisión: un fallo que todavía tiene
+ * intentos espera `ESPERAS_TRAS_FALLO_MS` antes del siguiente, y una red que pidió esperar
+ * con plazo (`deferred` con `esperaMs`) no se vuelve a probar antes. Todo lo demás la deja
+ * nula, para que nada arrastre la espera de un intento viejo.
  */
-export function resolveOutcome(outcome: PublishOutcome, attemptCount: number): TargetPatch {
+export function resolveOutcome(outcome: PublishOutcome, attemptCount: number, now: Date): TargetPatch {
   if (outcome.kind === 'published') {
     return {
       status: 'published',
@@ -78,6 +97,7 @@ export function resolveOutcome(outcome: PublishOutcome, attemptCount: number): T
       externalId: outcome.externalId,
       attemptCount,
       lastError: null,
+      reintentarDesde: null,
     }
   }
   if (outcome.kind === 'processing') {
@@ -87,24 +107,29 @@ export function resolveOutcome(outcome: PublishOutcome, attemptCount: number): T
       externalId: null,
       attemptCount,
       lastError: null,
+      reintentarDesde: null,
     }
   }
   if (outcome.kind === 'deferred') {
     return {
       status: 'scheduled',
-      containerId: null,
+      containerId: outcome.containerId ?? null,
       externalId: null,
       attemptCount,
-      lastError: null,
+      lastError: outcome.motivo ?? null,
+      reintentarDesde: outcome.esperaMs ? new Date(now.getTime() + outcome.esperaMs) : null,
     }
   }
   const attempts = attemptCount + 1
+  const quemado = Boolean(outcome.definitivo) || attempts >= MAX_PUBLISH_ATTEMPTS
+  const espera = ESPERAS_TRAS_FALLO_MS[Math.min(attempts, ESPERAS_TRAS_FALLO_MS.length) - 1]!
   return {
-    status: outcome.definitivo || attempts >= MAX_PUBLISH_ATTEMPTS ? 'failed' : 'scheduled',
+    status: quemado ? 'failed' : 'scheduled',
     containerId: null,
     externalId: null,
     attemptCount: attempts,
     lastError: outcome.reason,
+    reintentarDesde: quemado ? null : new Date(now.getTime() + espera),
   }
 }
 

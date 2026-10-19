@@ -2,15 +2,16 @@ import type { SocialAccount } from '@/db'
 import {
   NO_ACCOUNT_METRICS,
   NO_METRICS,
-  MAX_POSTS_PER_SYNC,
   type AccountMetricValues,
   type Connector,
   type FetchedBatch,
   type FetchedPost,
+  type OpcionesDeListado,
   type PostMetricValues,
 } from './connector'
 import { normalizeFacebookAccount } from './account-metrics'
 import { decryptToken } from './crypto'
+import { laMasVieja, sigueListando } from './lectura'
 
 /** El `me/accounts?fields=id,name,access_token` payload. */
 export type FacebookPageEntry = { id?: string; name?: string; access_token?: string }
@@ -23,6 +24,9 @@ export class FacebookHttpError extends Error {
   constructor(
     public status: number,
     message: string,
+    /** Graph's `code` and `error_subcode`, when the body carried them. */
+    public code?: number,
+    public subcode?: number,
   ) {
     super(message)
   }
@@ -38,16 +42,40 @@ export function isPostWithoutInsights(error: unknown): boolean {
   return error instanceof FacebookHttpError && error.status === 404
 }
 
+/**
+ * Whether Graph says this id no longer answers: a 404, or code 100 with subcode 33
+ * («Object with ID … does not exist, cannot be loaded due to missing permissions…»). Only
+ * asked of posts read one by one (`fetchMetricsById`), where it almost always means the
+ * post was deleted. The post is skipped, never archived, because the same answer also
+ * covers missing permissions.
+ */
+export function isPostGone(error: unknown): boolean {
+  return error instanceof FacebookHttpError && (error.status === 404 || (error.code === 100 && error.subcode === 33))
+}
+
 async function getJson(url: string): Promise<Record<string, unknown>> {
   const response = await fetch(url)
   if (!response.ok) {
     const body = await response.text()
-    throw new FacebookHttpError(
-      response.status,
-      `Facebook ${response.status}: ${body.slice(0, 200)}`,
-    )
+    const { code, subcode } = codesOf(body)
+    throw new FacebookHttpError(response.status, `Facebook ${response.status}: ${body.slice(0, 200)}`, code, subcode)
   }
   return response.json()
+}
+
+/** Best effort: an unparseable body is still a failure, just one we cannot classify. */
+function codesOf(body: string): { code?: number; subcode?: number } {
+  try {
+    const parsed = JSON.parse(body) as { error?: { code?: unknown; error_subcode?: unknown } }
+    const code = parsed.error?.code
+    const subcode = parsed.error?.error_subcode
+    return {
+      code: typeof code === 'number' ? code : undefined,
+      subcode: typeof subcode === 'number' ? subcode : undefined,
+    }
+  } catch {
+    return {}
+  }
 }
 
 export const NO_FACEBOOK_PAGE = 'Esta cuenta no administra ninguna página de Facebook.'
@@ -171,12 +199,14 @@ export function halveLimit(url: string): string | null {
 export async function collectPublishedPosts(
   firstUrl: string,
   fetchJson: (url: string) => Promise<Record<string, unknown>>,
+  desde?: Date,
 ): Promise<{ posts: FacebookPost[]; windowWasCapped: boolean }> {
   const posts: FacebookPost[] = []
   let next = firstUrl
   let pagesFetched = 0
+  let masVieja: Date | null = null
 
-  while (next && posts.length < MAX_POSTS_PER_SYNC && pagesFetched < MAX_POST_PAGES) {
+  while (next && pagesFetched < MAX_POST_PAGES && sigueListando(posts.length, masVieja, desde)) {
     let page: { data?: FacebookPost[]; paging?: { next?: string } }
     try {
       page = await fetchJson(next)
@@ -191,16 +221,16 @@ export async function collectPublishedPosts(
     pagesFetched++
 
     for (const item of page.data ?? []) {
-      if (posts.length >= MAX_POSTS_PER_SYNC) break
       posts.push(item)
+      masVieja = laMasVieja(masVieja, new Date(item.created_time ?? 0))
     }
     next = page.paging?.next ?? ''
   }
 
-  // A cursor still in hand means the loop stopped at a ceiling, not at the end of the
-  // page's posts. Hitting exactly MAX_POSTS_PER_SYNC counts too: items from the last
-  // page get dropped once the array is full, whatever the cursor says.
-  return { posts, windowWasCapped: posts.length >= MAX_POSTS_PER_SYNC || next !== '' }
+  // A cursor still in hand means the loop stopped at its window or its page ceiling, not
+  // at the end of the page's posts. Nothing listed is ever dropped, so without a cursor
+  // the listing really was everything.
+  return { posts, windowWasCapped: next !== '' }
 }
 
 const GRAPH = 'https://graph.facebook.com/v23.0'
@@ -209,6 +239,24 @@ const GRAPH = 'https://graph.facebook.com/v23.0'
 // 25 stops being enough.
 const PAGE_SIZE = 25
 const INSIGHTS_CHUNK_SIZE = 5
+
+// likes.summary/comments.summary answer (#10) unless the token carries
+// pages_read_user_content — granted since the Meta app gained the «Administrar
+// páginas» use case. A token from before that consent needs reconnecting.
+const POST_FIELDS =
+  'id,message,permalink_url,full_picture,attachments{media_type},created_time,shares,likes.summary(true),comments.summary(true)'
+
+const INSIGHT_METRICS = `post_media_view,post_total_media_view_unique,${REACTIONS_METRIC}`
+
+/** Las estadísticas de un post; un 404 es un post sin ellas, y cualquier otro error sube. */
+async function insightsOf(id: string, token: string): Promise<FacebookInsights> {
+  try {
+    return (await getJson(`${GRAPH}/${id}/insights?metric=${INSIGHT_METRICS}&access_token=${token}`)) as FacebookInsights
+  } catch (error) {
+    if (isPostWithoutInsights(error)) return {}
+    throw error
+  }
+}
 
 export const facebookConnector: Connector = {
   network: 'facebook',
@@ -224,47 +272,49 @@ export const facebookConnector: Connector = {
     return decryptToken(account.accessToken)
   },
 
-  async fetchPosts(account: SocialAccount, token: string | null): Promise<FetchedBatch> {
+  async fetchPosts(account: SocialAccount, token: string | null, opciones?: OpcionesDeListado): Promise<FetchedBatch> {
     const pageId = account.externalId
     if (!token || !pageId) return { posts: [], windowWasCapped: false }
 
-    // likes.summary/comments.summary answer (#10) unless the token carries
-    // pages_read_user_content — granted since the Meta app gained the «Administrar
-    // páginas» use case. A token from before that consent needs reconnecting.
-    const fields =
-      'id,message,permalink_url,full_picture,attachments{media_type},created_time,shares,likes.summary(true),comments.summary(true)'
-    const first = `${GRAPH}/${pageId}/published_posts?fields=${fields}&limit=${PAGE_SIZE}&access_token=${token}`
-    const { posts: fetched, windowWasCapped } = await collectPublishedPosts(first, getJson)
+    const first = `${GRAPH}/${pageId}/published_posts?fields=${POST_FIELDS}&limit=${PAGE_SIZE}&access_token=${token}`
+    const { posts: fetched, windowWasCapped } = await collectPublishedPosts(first, getJson, opciones?.desde)
 
-    const metrics = `post_media_view,post_total_media_view_unique,${REACTIONS_METRIC}`
     const posts: FetchedPost[] = []
-    // Sequential chunks rather than one Promise.all over every post: up to 200
-    // concurrent requests risks a 429, and a systemic insights failure aborts the whole
-    // sync, so keeping concurrency low keeps that risk low. Wall-clock doesn't matter —
-    // this runs once a day from a cron.
+    // Sequential chunks rather than one Promise.all over every post: hundreds of
+    // concurrent requests risk a 429, and a systemic insights failure aborts the whole
+    // sync, so keeping concurrency low keeps that risk low. Wall-clock doesn't matter
+    // much — this runs once a day from a cron.
     for (let i = 0; i < fetched.length; i += INSIGHTS_CHUNK_SIZE) {
       const chunk = fetched.slice(i, i + INSIGHTS_CHUNK_SIZE)
       const chunkPosts = await Promise.all(
-        chunk.map(async (item) => {
-          let insights: FacebookInsights = {}
-          try {
-            insights = (await getJson(
-              `${GRAPH}/${item.id}/insights?metric=${metrics}&access_token=${token}`,
-            )) as FacebookInsights
-          } catch (error) {
-            if (isPostWithoutInsights(error)) {
-              insights = {}
-            } else {
-              throw error
-            }
-          }
-          return normalizeFacebookPost(item, insights)
-        }),
+        chunk.map(async (item) => normalizeFacebookPost(item, await insightsOf(item.id, token))),
       )
       posts.push(...chunkPosts)
     }
 
     return { posts, windowWasCapped }
+  },
+
+  /**
+   * Dos lecturas por post, como en el listado: los likes, comentarios y compartidos
+   * exactos vienen en el post mismo, y las views en sus insights.
+   */
+  async fetchMetricsById(_account: SocialAccount, token: string | null, externalIds: string[]) {
+    const metricas = new Map<string, PostMetricValues>()
+    if (!token) return metricas
+    for (let i = 0; i < externalIds.length; i += INSIGHTS_CHUNK_SIZE) {
+      await Promise.all(
+        externalIds.slice(i, i + INSIGHTS_CHUNK_SIZE).map(async (id) => {
+          try {
+            const post = (await getJson(`${GRAPH}/${id}?fields=${POST_FIELDS}&access_token=${token}`)) as FacebookPost
+            metricas.set(id, normalizeFacebookPost({ ...post, id }, await insightsOf(id, token)).metrics)
+          } catch (error) {
+            if (!isPostGone(error)) throw error
+          }
+        }),
+      )
+    }
+    return metricas
   },
 
   /** Solo el nodo de la página: sus insights están deprecadas y responden vacío. */

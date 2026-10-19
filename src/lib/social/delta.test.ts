@@ -1,5 +1,37 @@
 import { describe, expect, it } from 'vitest'
-import { periodChange, type Snapshot } from './delta'
+import { periodChange, publicationPeriodChange, type Snapshot } from './delta'
+
+describe('publicationPeriodChange', () => {
+  const lecturas: Snapshot[] = [
+    { day: '2026-08-01', value: 100 },
+    { day: '2026-08-20', value: 900 },
+    { day: '2026-08-21', value: null },
+  ]
+
+  it('con lectura adentro, lo mismo que periodChange', () => {
+    expect(publicationPeriodChange(lecturas, '2026-08-05', '2026-08-25')).toEqual(
+      periodChange(lecturas, '2026-08-05', '2026-08-25'),
+    )
+  })
+
+  it('sin lectura adentro, el contador de la última de antes, y lo ganado no se sabe', () => {
+    // Lo viejo se lee cada una a cuatro semanas: una semana sin lectura no es una
+    // publicación sin números.
+    expect(publicationPeriodChange(lecturas, '2026-09-01', '2026-09-07', '2026-07-30')).toEqual({
+      current: 900,
+      change: null,
+      isNew: false,
+    })
+  })
+
+  it('una lectura de después del período no cuenta, y sin ninguna de antes no hay dato', () => {
+    expect(publicationPeriodChange(lecturas, '2026-07-01', '2026-07-31')).toEqual({
+      current: null,
+      change: null,
+      isNew: false,
+    })
+  })
+})
 
 const snapshots: Snapshot[] = [
   { day: '2026-08-01', value: 100 },

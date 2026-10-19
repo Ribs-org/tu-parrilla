@@ -10,8 +10,9 @@ import {
   REGLA_PALABRA,
   REGLA_RESPUESTA,
 } from './social/comentarios/reglas'
-import { MAX_BATCH_ITEMS } from './social/publish/batch'
-import { TRIAL_REEL_NO_DISPONIBLE } from './social/publish/publisher'
+import { MAX_BATCH_ITEMS, MAX_REF, REF_ERROR } from './social/publish/batch'
+import { TOPE_INSTAGRAM, TRIAL_REEL_NO_DISPONIBLE } from './social/publish/publisher'
+import { DIAS_ERROR, HORAS_ERROR } from './avisos/reglas'
 import { BORRADO_YA_PUBLICADO } from './schedule-api'
 import { TRIAL_REEL_MEDIA } from './social/publish/opciones'
 import { METRICA_ERROR, PERCENTIL_ERROR } from './mejores'
@@ -39,6 +40,15 @@ describe('la documentación para LLM no le miente al código', () => {
       BORRADO_YA_PUBLICADO,
     ]) {
       expect(guia).toContain(frase)
+    }
+  })
+
+  it('las frases de la ref, del resumen y del tope de Instagram son las del código, en las dos guías', () => {
+    for (const archivo of ['public/docs/api-llm.md', 'public/docs/api-editor.md']) {
+      const guia = readFileSync(archivo, 'utf8')
+      for (const frase of [REF_ERROR, DIAS_ERROR, HORAS_ERROR, TOPE_INSTAGRAM]) {
+        expect(guia, `${archivo}: ${frase}`).toContain(frase)
+      }
     }
   })
 
@@ -71,6 +81,7 @@ describe('la documentación para LLM no le miente al código', () => {
     // forma de expresar eso. Los validadores la ignoran; el LLM la lee. Que quede dicho en
     // el propio esquema con una `description`, para que nadie la confunda con estándar.
     expect(regla.documentoUrl.maxBytes).toBe(MAX_DOCUMENTO_BYTES)
+    expect(esquema.properties.posts.items.properties.ref.maxLength).toBe(MAX_REF)
   })
 
   it('el esquema declara exactamente los campos que el validador lee', () => {
@@ -80,7 +91,7 @@ describe('la documentación para LLM no le miente al código', () => {
     const esquema = JSON.parse(readFileSync('public/docs/api.json', 'utf8'))
     const declarados = Object.keys(esquema.properties.posts.items.properties).sort()
     expect(declarados).toEqual(
-      ['atributos', 'cuentas', 'fecha', 'media', 'opciones', 'portada', 'redes', 'regla', 'texto'].sort(),
+      ['atributos', 'cuentas', 'fecha', 'media', 'opciones', 'portada', 'redes', 'ref', 'regla', 'texto'].sort(),
     )
   })
 })

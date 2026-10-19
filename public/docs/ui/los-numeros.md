@@ -277,13 +277,15 @@ enlaces que se prenden y apagan, cada uno cambia de texto al apretarlo:
 
 Cerrar con «Menos» apaga los dos.
 
-**Los avisos.** Debajo, un recuadro con una o dos frases, **solo cuando corresponde**:
+**Los avisos.** Debajo, un recuadro con una, dos o tres frases, **solo cuando corresponde**:
 
+- Si la lista llegó a su tope de 1000 filas, primero: «Se ven las 1000 más recientes. Para ver
+  el resto, elige una cuenta o un período más corto.»
 - Si hay publicaciones cuyo link nunca se pegó: «Ninguna etiqueta está pegada todavía. Copia
   el link de una fila y pégalo en ese post de la red.» (cuando no hay ninguna pegada), o «1
   publicación aún no tiene su link pegado.», o «<N> publicaciones aún no tienen su link
   pegado.».
-- Si hay publicaciones de las que la red no entregó ningún número en el período: «1 publicación
+- Si hay publicaciones de las que la red no entregó ningún número hasta el fin del período: «1 publicación
   no tiene métricas de la red en este período (Instagram no las entrega para lo publicado antes
   de tu cuenta profesional).», o la misma frase con «<N> publicaciones no tienen…».
 
@@ -473,8 +475,8 @@ como vara. Las filas con menos de 10 publicaciones se ven tenues.
 
 Debajo de la tabla: «<N> publicaciones en el período, <M> con atributos. Las filas tenues
 tienen menos de 10 publicaciones: con tan pocas, la diferencia puede ser suerte.» Si el período
-tiene 2000 publicaciones o más, se suma «Se leyeron las 2000 más recientes: acorta el período
-para verlas todas.»
+tiene 10.000 publicaciones o más, se suma «Se leyeron las 10 mil más recientes: acorta el
+período para verlas todas.»
 
 ### Tu mejor 10 % (`/admin/analytics/mejores`)
 
@@ -537,7 +539,7 @@ ganadas», «Visitas a tu página», «Interacciones» y «Arrastre».
 <métrica>: sus reglas no permiten calcular métricas con sus datos. Sí compite en visitas y
 clicks, que mide Tu Parrilla.»; con el arrastre, además, «En el arrastre solo compiten las que
 ganaron al menos la mediana de views del período: con pocas views, una visita ya es un
-porcentaje alto.»; y si el período tiene 2000 publicaciones o más, «Se leyeron las 2000 más
+porcentaje alto.»; y si el período tiene 10.000 publicaciones o más, «Se leyeron las 10 mil más
 recientes: acorta el período para verlas todas.»
 
 ## Cómo leer cada número
@@ -556,10 +558,18 @@ fechas se puede compartir; unas fechas que no se entienden se ignoran y queda el
 
 **De dónde salen los números de la red.** La red no se consulta en vivo. Una sincronización
 lee todas las cuentas una vez al día (a las 9:00 UTC, las 5 o 6 de la mañana en Chile según la
-época) y guarda una lectura por publicación, por cuenta y por día; también corre al apretar
+época) y guarda una lectura de cada publicación que le toca; también corre al apretar
 «Sincronizar ahora» en [Los Fierros](los-fierros.md). Por eso una publicación nueva no aparece
 hasta la siguiente sincronización, y los números pueden ir hasta un día atrás de lo que muestra
 la app de la red. Threads y X no se sincronizan: no tienen números aquí.
+
+**Qué publicación se lee cada día.** Depende de su edad. Lo publicado en los últimos 10 días se
+lee todos los días (y, aunque la cuenta publique poco, siempre sus 200 publicaciones más
+nuevas). Lo más viejo, cada vez más espaciado, porque casi no se mueve: una vez por semana hasta
+el mes, cada dos semanas hasta los tres meses y cada cuatro semanas después. Así, los números de
+una publicación de hace dos meses pueden ir hasta dos semanas atrás de lo que muestra la red, y
+lo que creció entre dos lecturas aparece entero el día de la segunda. Si una corrida no alcanza
+a leer todo lo viejo que le tocaba, lo que falta se lee al día siguiente.
 
 **Lo ganado.** Para una publicación, cuánto creció su contador dentro del período: la última
 lectura del período menos la última de antes de que empezara. Si la publicación salió dentro
@@ -577,8 +587,9 @@ línea «Visitas» del gráfico) se cuentan siempre en todas las páginas y sin 
 
 **«Views ganadas».** La suma de lo ganado por las publicaciones de la cuenta elegida (o de
 todas), **de cualquier fecha de publicación**: un reel de agosto que sigue creciendo en octubre
-cuenta en octubre. Sin YouTube ni publicaciones borradas. Mira las 500 publicaciones más
-recientes de la cuenta elegida (o de todas). «—» cuando ninguna publicación tiene lo ganado
+cuenta en octubre. Sin YouTube ni publicaciones borradas. Mira las publicaciones de la cuenta
+elegida (o de todas) que tuvieron alguna lectura de la red o alguna visita en el período, que
+son las únicas que pueden sumar, hasta 10.000. «—» cuando ninguna publicación tiene lo ganado
 conocido (por ejemplo, si todo es de YouTube o si la cuenta se acaba de conectar); «0», cuando
 se sabe y no ganaron nada.
 
@@ -621,8 +632,10 @@ página ni «Bots»; sí el período y la cuenta.
 **«Views ganadas y visitas, día a día».** Cuánto crecieron las views de todo el catálogo cada
 día, de una lectura a la siguiente, contra las visitas que llegaron ese día con la etiqueta de
 cualquier publicación. Las views no incluyen YouTube ni lo borrado, y el primer día medido de
-cada publicación no suma (no hay lectura anterior con qué restar). Por eso no tiene por qué
-sumar lo mismo que la cifra «Views ganadas».
+cada publicación no suma (no hay lectura anterior con qué restar). Una publicación de más de
+10 días se lee cada una, dos o cuatro semanas (ver «Qué publicación se lee cada día»), así que
+lo que creció en ese tiempo cae entero en el día en que se leyó: los saltos de un día puntual
+pueden ser eso. Por eso no tiene por qué sumar lo mismo que la cifra «Views ganadas».
 
 ### En tu página
 
@@ -698,25 +711,29 @@ de página, no una persona.
 
 **Qué publicaciones salen.** Con «Publicadas en el período», las **publicadas** dentro del
 período, no las que tuvieron actividad en él (es la misma regla que la API de métricas). Con
-«Todas las recientes», las 200 publicaciones más recientes, de cualquier fecha, con sus números
-medidos dentro del período. En los dos casos, como mucho 200, todas de la cuenta elegida (o de
-todas las cuentas).
+«Todas las recientes», las 1000 publicaciones más recientes, de cualquier fecha, con sus números
+medidos dentro del período. En los dos casos, como mucho 1000, todas de la cuenta elegida (o de
+todas las cuentas); si el tope corta la lista, lo dice el aviso de arriba.
 
 **Qué filtros le aplican.** El período, la cuenta, los dos botones de qué publicaciones y lo del
 «⋯ Más». La página y «Bots» del tablero no: las visitas, clicks, CTR y arrastre de cada
 publicación se cuentan siempre en todas las páginas y sin bots.
 
-**«Views» (columna).** El contador acumulado de por vida, según la última lectura dentro del
-período. El «+<N>» al lado es lo ganado en el período. Ese «+<N>» no aparece cuando:
+**«Views» (columna).** El contador acumulado de por vida, según la última lectura hasta el fin
+del período: casi siempre una de adentro, pero una publicación de más de 10 días se lee cada
+una, dos o cuatro semanas, y en un período corto puede tener solo una de antes. El «+<N>» al
+lado es lo ganado en el período. Ese «+<N>» no aparece cuando:
 
 - la publicación salió dentro del período (lleva « · nuevo»): todo su contador es lo ganado, y
   repetirlo no agrega nada. Con «Publicadas en el período» casi todas las filas son así; el
   «+<N>» se ve sobre todo con «Todas las recientes»;
 - no hay lectura de antes del período (la publicación existía, pero nadie la había medido
   todavía): el crecimiento no se puede saber;
+- no hay lectura dentro del período (una publicación vieja, que no tocaba leer): el contador es
+  el de antes y lo ganado adentro no se sabe;
 - no creció, o es de YouTube.
 
-El «—» en «Views» aparece solo cuando la red no dio ninguna lectura en el período. Ordenar por
+El «—» en «Views» aparece solo cuando la red no dio ninguna lectura hasta el fin del período. Ordenar por
 «Views» ordena por el acumulado, no por lo ganado; para lo ganado está «Lo que más creció», en
 el tablero.
 
@@ -782,7 +799,7 @@ de una a otra —o que alguna no tiene— van en columnas, porque eso es lo que 
 **Qué publicaciones cuenta.** Las publicadas dentro del período (no las que solo tuvieron
 actividad en él), de la cuenta elegida o de todas, sin las borradas. La página y «Bots» no le
 aplican. Cada publicación sincronizada cuenta una vez: un post programado que salió a tres
-cuentas son tres publicaciones, cada una con los atributos del post. Lee como mucho las 2000
+cuentas son tres publicaciones, cada una con los atributos del post. Lee como mucho las 10.000
 más recientes.
 
 **Los valores.** Los espacios al principio y al final no cuentan, pero el resto sí: un valor se
@@ -966,7 +983,7 @@ El orden se pierde al recargar. «Post» no ordena.
 ### Para ver lo publicado antes del período
 
 En «Tus publicaciones», apretar «Todas las recientes». La lista deja de filtrar por fecha de
-publicación y trae las 200 publicaciones más recientes (de la cuenta elegida, si hay una), con
+publicación y trae las 1000 publicaciones más recientes (de la cuenta elegida, si hay una), con
 sus números medidos dentro del período. «Publicadas en el período» vuelve atrás.
 
 ### Para esconder las filas sin números de la red
@@ -1090,7 +1107,8 @@ API: ver `GET /api/metrics/posts` en [la guía de la API](../api-editor.md).
 | «No publicaste nada en este período. Amplía el período.» (en «Comparar por atributo») | No hay publicaciones publicadas en el período (de la cuenta elegida, si hay una). | Elegir un período más largo, o «Todas las cuentas». |
 | «Ninguna publicación del período tiene atributos. Se anotan en el editor de un post de La Parrilla (el campo «Atributos»), desde «Editar atributos» en una pieza, o por la API.» | Hay publicaciones en el período, pero ninguna tiene atributos. | Anotarlos (ver «Para juntar dos versiones…» y «Para ver qué hook funciona»), o ampliar el período. |
 | «Nada de lo publicado en este período lleva «<atributo>». Amplía el período, o mira otro atributo.» | Se pidió un atributo (por ejemplo, desde una cápsula de una pieza) que nada de lo publicado en el período lleva; la tabla muestra otro. | Elegir un período más largo, u otro atributo en el selector. |
-| «Se leyeron las 2000 más recientes: acorta el período para verlas todas.» | El período tiene 2000 publicaciones o más y la comparación usó solo las más recientes. | Elegir un período más corto. |
+| «Se leyeron las 10 mil más recientes: acorta el período para verlas todas.» | El período tiene 10.000 publicaciones o más y la comparación usó solo las más recientes. | Elegir un período más corto. |
+| «Se ven las 1000 más recientes. Para ver el resto, elige una cuenta o un período más corto.» (en «Tus publicaciones») | La lista llegó a su tope de 1000 filas y deja fuera las más viejas. | Elegir una cuenta, o un período más corto. |
 | «No publicaste nada en este período. Amplía el período.» (en «Tu mejor 10 %») | No hay publicaciones publicadas en el período (de la cuenta elegida, si hay una). | Elegir un período más largo, o «Todas las cuentas». |
 | «Ninguna publicación del período tiene <métrica>. YouTube no entra en esta métrica.» | Hay publicaciones, pero ninguna tiene la métrica elegida: por ejemplo, todo es de YouTube y la métrica es views ganadas. | Elegir «Por visitas a tu página» o «Por clicks en tus links», donde YouTube sí compite. |
 | «Ninguna publicación del período tiene <métrica>. Las visitas y los clicks se cuentan cuando alguien entra por el link con la etiqueta de la publicación.» | Ninguna publicación del período tiene su link pegado con su etiqueta. | Pegar los links (ver «Para copiar el link…»), o elegir otra métrica. |
@@ -1259,9 +1277,10 @@ API: ver `GET /api/metrics/posts` en [la guía de la API](../api-editor.md).
 - No ordena la lista por views ganadas (la columna «Views» ordena por el acumulado; las que más
   ganaron están en «Lo que más creció»).
 - No exporta a planilla.
-- Tiene topes y no avisa cuando se pasan: «En las redes» suma las 500 publicaciones más
-  recientes de la cuenta elegida (o de todas); «Tus publicaciones» muestra como mucho 200; la
-  pieza, 100 versiones; «Comparar por atributo» y «Tu mejor 10 %» leen 2000 publicaciones (esas sí avisan); 50
+- Tiene topes, y no todos avisan cuando se pasan: «En las redes» suma como mucho 10.000
+  publicaciones con actividad en el período; «Tus publicaciones» muestra como mucho 1000 (avisa);
+  la pieza, 100 versiones; «Comparar por atributo» y «Tu mejor 10 %» leen 10.000 publicaciones
+  (avisan); 50
   etiquetas, 25 links, 12 orígenes,
   países o ciudades, 8 dispositivos, sistemas, navegadores o idiomas, 40 últimas visitas.
 - No se lee con las llaves de la API: la API de métricas es por publicación, más el mejor X %
@@ -1319,7 +1338,8 @@ Sale de:
 - `src/lib/social/politica-youtube.ts` y `src/lib/social/retencion-youtube.ts` (YouTube)
 - `src/lib/social/comentarios/reglas.ts` (las etiquetas `dm-`)
 - `src/lib/social/sync.ts` y `src/lib/social/index.ts` (qué redes se sincronizan, borrados,
-  lectura diaria), con `vercel.json` (la hora de la sincronización)
+  lectura diaria), con `vercel.json` (la hora de la sincronización), y
+  `src/lib/social/lectura.ts` (qué publicación se lee cada día, según su edad)
 - `src/app/admin/(dash)/error.tsx`, `src/app/admin/(dash)/nav.tsx`, `src/lib/vocabulario.ts`
 - `src/app/admin/(dash)/analytics/loading.tsx`, `src/app/admin/(dash)/analytics/cargando.tsx`,
   `src/app/admin/(dash)/analytics/cabeza.tsx` (la bajada, que comparten la pantalla y su carga),

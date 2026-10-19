@@ -8,14 +8,11 @@ import { buildMetricPost } from '@/lib/metrics-api'
 import { RANGO_DEL_PANEL, leerRango } from '@/lib/mobile-api'
 import { requireMobileUser } from '@/lib/mobile-guardia'
 import { attributesFor } from '@/lib/post-attributes'
-import { getCampaignPosts, getCuentas, getPostRows, postKpisFrom } from '@/lib/posts'
+import { MAX_PUBLICACIONES_LEIDAS, getCampaignPosts, getCuentas, getPostRows, postKpisFrom } from '@/lib/posts'
 import { topPostsByGain, type CuentaRow } from '@/lib/posts-kpis'
 import { seguidoresGanados } from '@/lib/tablero'
 
 export const dynamic = 'force-dynamic'
-
-// Lo mismo que lee el tablero del panel para «En las redes».
-const PUBLICACIONES_LEIDAS = 500
 
 /** La cuenta como la nombra la app: su id, su red y su nombre en la red. */
 function cuentaMovil(c: Pick<CuentaRow, 'id' | 'network' | 'handle'>) {
@@ -45,8 +42,11 @@ export async function GET(request: Request) {
   const cuentas = await getCuentas(ownerId)
   const cuenta = cuentas.find((c) => c.id === url.searchParams.get('cuenta')) ?? null
 
+  // Lo mismo que lee el tablero del panel para «En las redes»: lo que tuvo una lectura o
+  // una visita en el período.
   const filas = await getPostRows(filters, false, {
-    limit: PUBLICACIONES_LEIDAS,
+    conActividad: true,
+    limit: MAX_PUBLICACIONES_LEIDAS,
     ...(cuenta ? { accountId: cuenta.id } : {}),
   })
   const lecturas = (await lecturasDeCuentas(ownerId)).filter((l) => cuenta === null || l.accountId === cuenta.id)

@@ -1,5 +1,5 @@
 import 'server-only'
-import { and, asc, desc, eq, gte, inArray, isNull, lte, sql, type SQL } from 'drizzle-orm'
+import { and, asc, desc, eq, gte, inArray, isNull, lt, lte, or, sql, type SQL } from 'drizzle-orm'
 import {
   clicks,
   getDb,
@@ -17,7 +17,7 @@ import {
   type PostKpis,
   type PostRow,
 } from './posts-kpis'
-import { periodChange, type Snapshot } from './social/delta'
+import { publicationPeriodChange, type Snapshot } from './social/delta'
 import { REDES_SIN_DERIVADAS, sinMetricasDerivadas } from './social/politica-youtube'
 
 // Re-exported so server call sites only need one import line; the types and the pure
@@ -61,15 +61,35 @@ function publishedLabel(date: Date, zone: string): string {
 }
 
 /**
+ * Lo más que lee de una vez una pantalla que suma o compara publicaciones (el tablero,
+ * «Comparar por atributo», «Tu mejor 10 %»). Con 1.000 publicaciones por semana, un mes
+ * son unas 4.300; el tope de 2000 que hubo hasta octubre de 2026 cortaba un mes por la
+ * mitad. Cabe porque de cada publicación se traen solo dos lecturas (ver abajo).
+ */
+export const MAX_PUBLICACIONES_LEIDAS = 10_000
+
+/**
  * `opts` exists for the metrics API: the panel wants the latest 200 posts whatever
  * their date, but an API caller asking for a month needs the window pushed into the
  * query — otherwise the newest 200 rows are all it can ever see, and a request for
  * an older month comes back empty with no way to tell that from "nothing happened".
+ *
+ * `conActividad` is what the dashboard sums over: the posts with a reading or a visit
+ * inside the period, whatever their date. Those are the only ones that can add views
+ * gained or visits to the period, and asking for them by name replaced «the 500 most
+ * recent», which at 1,000 posts a week covered three days of a thirty-day window.
  */
 export async function getPostRows(
   f: Filters,
   includeArchived = false,
-  opts: { publishedFrom?: Date; publishedTo?: Date; limit?: number; accountId?: string; ids?: string[] } = {},
+  opts: {
+    publishedFrom?: Date
+    publishedTo?: Date
+    limit?: number
+    accountId?: string
+    ids?: string[]
+    conActividad?: boolean
+  } = {},
 ): Promise<PostRow[]> {
   if (opts.ids?.length === 0) return []
   const db = getDb()
@@ -85,6 +105,27 @@ export async function getPostRows(
   if (opts.accountId) postConds.push(eq(socialPosts.accountId, opts.accountId))
   // Las versiones de una pieza: unas pocas publicaciones con nombre y apellido.
   if (opts.ids) postConds.push(inArray(socialPosts.id, opts.ids))
+  if (opts.conActividad) {
+    // Dos subconsultas y no un EXISTS por fila: cada una recorre una sola vez lo del
+    // período (por el índice de día o de fecha) y Postgres las cruza con un hash.
+    const leidasEnElPeriodo = db
+      .selectDistinct({ id: postMetrics.postId })
+      .from(postMetrics)
+      .where(and(gte(postMetrics.day, from), lte(postMetrics.day, to)))
+    const visitadasEnElPeriodo = db
+      .selectDistinct({ campaign: visits.campaign })
+      .from(visits)
+      .where(
+        and(
+          gte(visits.createdAt, f.from),
+          lte(visits.createdAt, f.to),
+          inArray(visits.profileId, db.select({ id: profiles.id }).from(profiles).where(eq(profiles.ownerId, f.ownerId))),
+        ),
+      )
+    postConds.push(
+      or(inArray(socialPosts.id, leidasEnElPeriodo), inArray(socialPosts.campaign, visitadasEnElPeriodo))!,
+    )
+  }
 
   const posts = await db
     .select()
@@ -98,12 +139,34 @@ export async function getPostRows(
   const ids = posts.map((p) => p.id)
   const campaigns = posts.map((p) => p.campaign)
 
-  // Every snapshot from before the window too: the baseline for a period's growth is
-  // the last reading *before* it, which by definition falls outside the range.
-  const snapshots = await db
-    .select()
+  // Dos lecturas por publicación, no todas: la última del período (el contador) y la
+  // última de antes (la vara contra la que se mide lo ganado), que son las únicas que mira
+  // `periodChange`. Traer todas eran decenas por publicación, y con miles de publicaciones
+  // eso era lo que pesaba. La diferencia con antes, a propósito: si la última lectura trae
+  // una métrica en null, ya no se mira una anterior que sí la tenía. No pasa en la práctica
+  // —una red que no entrega una métrica no la entrega nunca—, y no vale una consulta por
+  // métrica.
+  const columnas = {
+    postId: postMetrics.postId,
+    day: postMetrics.day,
+    views: postMetrics.views,
+    likes: postMetrics.likes,
+    comments: postMetrics.comments,
+    shares: postMetrics.shares,
+    saves: postMetrics.saves,
+    reach: postMetrics.reach,
+  }
+  const adentro = await db
+    .selectDistinctOn([postMetrics.postId], columnas)
     .from(postMetrics)
-    .where(and(inArray(postMetrics.postId, ids), lte(postMetrics.day, to)))
+    .where(and(inArray(postMetrics.postId, ids), gte(postMetrics.day, from), lte(postMetrics.day, to)))
+    .orderBy(postMetrics.postId, desc(postMetrics.day))
+  const antes = await db
+    .selectDistinctOn([postMetrics.postId], columnas)
+    .from(postMetrics)
+    .where(and(inArray(postMetrics.postId, ids), lt(postMetrics.day, from)))
+    .orderBy(postMetrics.postId, desc(postMetrics.day))
+  const snapshots = [...antes, ...adentro]
 
   const byPost = new Map<string, typeof snapshots>()
   for (const snapshot of snapshots) {
@@ -172,10 +235,12 @@ export async function getPostRows(
     // historia como crecimiento de la ventana que la contiene.
     const publishedDay = localDay(post.publishedAt, f.zone)
 
-    const views = periodChange(snapshotsOf('views'), from, to, publishedDay)
-    const likes = periodChange(snapshotsOf('likes'), from, to, publishedDay)
-    const comments = periodChange(snapshotsOf('comments'), from, to, publishedDay)
-    const shares = periodChange(snapshotsOf('shares'), from, to, publishedDay)
+    // Con la variante de publicaciones: lo viejo se lee espaciado, y una semana sin lectura
+    // no es una publicación sin números (`publicationPeriodChange`).
+    const views = publicationPeriodChange(snapshotsOf('views'), from, to, publishedDay)
+    const likes = publicationPeriodChange(snapshotsOf('likes'), from, to, publishedDay)
+    const comments = publicationPeriodChange(snapshotsOf('comments'), from, to, publishedDay)
+    const shares = publicationPeriodChange(snapshotsOf('shares'), from, to, publishedDay)
     // De YouTube solo salen los contadores tal como los da la API: lo ganado y el
     // arrastre son métricas derivadas, que sus políticas no permiten (`politica-youtube`).
     // Anularlos aquí los saca de todo lo que se construye encima —la tabla, los totales,
@@ -208,8 +273,8 @@ export async function getPostRows(
       likes: likes.current,
       comments: comments.current,
       shares: shares.current,
-      saves: periodChange(snapshotsOf('saves'), from, to).current,
-      reach: periodChange(snapshotsOf('reach'), from, to).current,
+      saves: publicationPeriodChange(snapshotsOf('saves'), from, to).current,
+      reach: publicationPeriodChange(snapshotsOf('reach'), from, to).current,
       visits: visitCount,
       uniques: pasted ? (traffic?.uniques ?? 0) : null,
       clicks: clickCount,

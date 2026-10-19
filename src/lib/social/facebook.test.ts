@@ -1,7 +1,9 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import fixture from './fixtures/facebook-posts.json'
 import {
   FacebookHttpError,
+  facebookConnector,
+  isPostGone,
   isPostWithoutInsights,
   listFacebookPages,
   normalizeFacebookPost,
@@ -134,6 +136,55 @@ describe('isPostWithoutInsights', () => {
   })
 })
 
+describe('isPostGone', () => {
+  it('reconoce el post que ya no existe: un 404, o el code 100 con subcode 33', () => {
+    expect(isPostGone(new FacebookHttpError(404, 'Facebook 404'))).toBe(true)
+    expect(isPostGone(new FacebookHttpError(400, 'Facebook 400', 100, 33))).toBe(true)
+  })
+
+  it('no confunde otro 400, un token vencido ni un límite con un post borrado', () => {
+    expect(isPostGone(new FacebookHttpError(400, 'Facebook 400', 100))).toBe(false)
+    expect(isPostGone(new FacebookHttpError(400, 'Facebook 400', 190))).toBe(false)
+    expect(isPostGone(new FacebookHttpError(403, 'Facebook 403', 4))).toBe(false)
+    expect(isPostGone(new Error('fetch failed'))).toBe(false)
+  })
+})
+
+describe('facebookConnector.fetchMetricsById', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  const cuenta = { id: 'acc-1', externalId: 'page-1' } as never
+
+  it('lee el post y sus insights, y salta el que ya no existe sin tumbar el resto', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => {
+        const id = /v23\.0\/([^/?]+)/.exec(url)![1]
+        if (id === 'borrado') {
+          return new Response(JSON.stringify({ error: { code: 100, error_subcode: 33 } }), { status: 400 })
+        }
+        if (url.includes('/insights')) {
+          return Response.json({ data: [{ name: 'post_media_view', values: [{ value: 900 }] }] })
+        }
+        return Response.json({ id, likes: { summary: { total_count: 12 } }, comments: { summary: { total_count: 3 } } })
+      }),
+    )
+    const metricas = await facebookConnector.fetchMetricsById!(cuenta, 'token', ['vivo', 'borrado'])
+    expect([...metricas.keys()]).toEqual(['vivo'])
+    expect(metricas.get('vivo')).toMatchObject({ views: 900, likes: 12, comments: 3 })
+  })
+
+  it('un error que no es de un post borrado sube', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => new Response(JSON.stringify({ error: { code: 190 } }), { status: 400 })),
+    )
+    await expect(facebookConnector.fetchMetricsById!(cuenta, 'token', ['vivo'])).rejects.toThrow('Facebook 400')
+  })
+})
+
 describe('collectPublishedPosts', () => {
   /** Sirve páginas de `count` posts; `next` dice si la página entrega cursor. */
   function serving(pages: Array<{ count: number; next: boolean }>) {
@@ -159,7 +210,7 @@ describe('collectPublishedPosts', () => {
     expect(callCount()).toBe(2)
   })
 
-  it('corta en MAX_POSTS_PER_SYNC y lo declara como ventana', async () => {
+  it('sin ventana, corta al juntar el mínimo y lo declara como ventana', async () => {
     const { fetchJson, callCount } = serving(
       Array.from({ length: 10 }, () => ({ count: 50, next: true })),
     )
@@ -180,15 +231,34 @@ describe('collectPublishedPosts', () => {
     expect(windowWasCapped).toBe(true)
   })
 
-  it('exactamente 200 sin cursor pendiente también es ventana', async () => {
-    // Los items de la última página se descartan cuando el array se llena, diga lo
-    // que diga el cursor — mismo razonamiento que el conector de Instagram.
+  it('sin cursor pendiente no es ventana, aunque pase del mínimo: no se descarta nada', async () => {
     const { fetchJson } = serving([
-      { count: 100, next: true },
-      { count: 100, next: false },
+      { count: 150, next: true },
+      { count: 150, next: false },
     ])
     const { posts, windowWasCapped } = await collectPublishedPosts('https://graph.test/p0', fetchJson)
-    expect(posts).toHaveLength(200)
+    expect(posts).toHaveLength(300)
+    expect(windowWasCapped).toBe(false)
+  })
+
+  it('con ventana, pasa del mínimo mientras lo listado siga siendo de la ventana', async () => {
+    // Cien posts por página, cada página un día más atrás (del 20 de octubre hacia
+    // atrás) y la ventana desde el 17: se piden páginas hasta la primera que ya trae algo
+    // de antes, la quinta (del 16), que es la que dice que se pasó.
+    let calls = 0
+    const fetchJson = async () => {
+      const dia = calls
+      calls++
+      const data = Array.from({ length: 100 }, (_, i) => ({
+        id: `${dia}-${i}`,
+        created_time: new Date(Date.UTC(2026, 9, 20 - dia)).toISOString(),
+      }))
+      return { data, paging: { next: `https://graph.test/p${calls}` } }
+    }
+    const desde = new Date(Date.UTC(2026, 9, 17))
+    const { posts, windowWasCapped } = await collectPublishedPosts('https://graph.test/p0', fetchJson, desde)
+    expect(calls).toBe(5)
+    expect(posts).toHaveLength(500)
     expect(windowWasCapped).toBe(true)
   })
 })

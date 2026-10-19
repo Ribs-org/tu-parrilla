@@ -7,16 +7,12 @@ import { parseFilters } from '@/lib/filters'
 import { networkLabel } from '@/lib/networks'
 import { POCAS_PUBLICACIONES, claveElegida, clavesDeAtributos, compararPorAtributo } from '@/lib/pieza'
 import { attributesFor } from '@/lib/post-attributes'
-import { getCuentas, getPostRows } from '@/lib/posts'
+import { MAX_PUBLICACIONES_LEIDAS, getCuentas, getPostRows } from '@/lib/posts'
 import { cuentaElegida, numerosHref, type Params } from '@/lib/tablero'
 import { cn, formatNumber } from '@/lib/utils'
 import { nombreDe } from '@/lib/vocabulario'
 
 export const dynamic = 'force-dynamic'
-
-// El mismo tope que `GET /api/metrics/posts`: un mes de parrilla cargada cabe holgado, y
-// el aviso de abajo dice cuándo mordió.
-const MAX_PUBLICACIONES = 2000
 
 function num(value: number | null): string {
   return value === null ? '—' : formatNumber(Math.round(value))
@@ -44,7 +40,7 @@ export default async function CompararPage({ searchParams }: { searchParams: Pro
   const filas = await getPostRows({ ...filters, profileId: null, includeBots: false }, false, {
     publishedFrom: filters.from,
     publishedTo: filters.to,
-    limit: MAX_PUBLICACIONES,
+    limit: MAX_PUBLICACIONES_LEIDAS,
     ...(cuenta ? { accountId: cuenta.id } : {}),
   })
   const atributosDe = await attributesFor(ownerId, filas)
@@ -170,8 +166,8 @@ export default async function CompararPage({ searchParams }: { searchParams: Pro
               {formatNumber(filas.length)} {filas.length === 1 ? 'publicación' : 'publicaciones'} en el período,{' '}
               {formatNumber(conAtributos)} con atributos. Las filas tenues tienen menos de{' '}
               {POCAS_PUBLICACIONES} publicaciones: con tan pocas, la diferencia puede ser suerte.
-              {filas.length >= MAX_PUBLICACIONES
-                ? ` Se leyeron las ${formatNumber(MAX_PUBLICACIONES)} más recientes: acorta el período para verlas todas.`
+              {filas.length >= MAX_PUBLICACIONES_LEIDAS
+                ? ` Se leyeron las ${formatNumber(MAX_PUBLICACIONES_LEIDAS)} más recientes: acorta el período para verlas todas.`
                 : ''}
             </p>
           </>

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { vigilarConexiones } from '@/lib/avisos/run'
 import { sondearComentarios } from '@/lib/social/comentarios/run'
 import { publishDue } from '@/lib/social/publish/run'
 import { barrerHuerfanos } from '@/lib/storage-gc'
@@ -29,6 +30,17 @@ export async function GET(request: Request) {
     // calendar shows it. A non-2xx here means the orchestrator itself broke.
     const report = await publishDue()
     marca('publicar')
+    // Justo después de publicar: un destino que la red rechazó por la conexión acaba de
+    // anotarlo en su cuenta (`marcarCaida`), y el correo de la caída sale en esta misma
+    // pasada. Su fallo no tumba la corrida, que ya publicó.
+    let conexiones: Awaited<ReturnType<typeof vigilarConexiones>> | { error: string }
+    try {
+      conexiones = await vigilarConexiones()
+    } catch (error) {
+      console.error('Falló la vigilancia de conexiones:', String(error).slice(0, 300))
+      conexiones = { error: 'La vigilancia de conexiones falló; ver el log.' }
+    }
+    marca('conexiones')
     // Después de publicar y antes de barrer: publicar a tiempo manda sobre responder a
     // tiempo, y el sondeo no debe quitarle segundos a la publicación de esta pasada.
     // Su fallo no puede tumbar la corrida, que ya publicó.
@@ -48,7 +60,7 @@ export async function GET(request: Request) {
     // falta envolverlo: `barrerHuerfanos` no lanza nunca.
     const barrido = await barrerHuerfanos()
     marca('barrido')
-    return NextResponse.json({ report, comentarios, barrido })
+    return NextResponse.json({ report, conexiones, comentarios, barrido })
   } catch (error) {
     console.error('Falló la corrida de publicación:', error)
     return NextResponse.json({ error: 'La publicación falló por completo.' }, { status: 500 })

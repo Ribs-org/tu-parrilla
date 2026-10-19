@@ -29,6 +29,8 @@ estilo; aquí van escritos como están en el código.
 - Quien no es admin y abre la dirección de [Los Maestros](los-maestros.md) vuelve acá.
 - El correo que avisa que algo no salió termina con «Revisa el calendario en /admin/schedule
   para reprogramarla.»
+- El resumen del día que llega por correo, cuando algo se quemó: «Revísalos en «Se quemó», en
+  La Parrilla: …/admin/schedule».
 - Por dirección: `https://tu-parrilla.cl/admin/schedule` abre el calendario en la semana de
   hoy. Se le puede agregar:
   - `?vista=lista`: la lista en vez del calendario (los enlaces viejos con
@@ -508,11 +510,11 @@ Cada publicación tiene un destino por cuenta, y cada destino va por su lado.
 | Lo que dice | Cómo se ve | Qué está pasando |
 |---|---|---|
 | «Programado» | Píldora gris; en el corte, marca punteada y chip sin signo | Espera su hora |
-| «Reintentando» | Píldora gris con « — <motivo>»; en el corte, marca punteada en ámbar y chip «↻»; en el calendario, la línea «Reintentando · <Red>» | Falló un intento y se volverá a probar solo. Son tres intentos en total; algunos rechazos se queman al primero |
+| «Reintentando» | Píldora gris con « — <motivo>»; en el corte, marca punteada en ámbar y chip «↻»; en el calendario, la línea «Reintentando · <Red>» | Falló un intento y se volverá a probar solo: quince minutos después del primer fallo y dos horas después del segundo. Son tres intentos en total; algunos rechazos se queman al primero. También dice «Reintentando», sin gastar intentos, un destino de Instagram que espera a que la cuenta recupere cupo (ver «Motivos de un destino que no salió») |
 | «Publicando…» | Píldora gris; humo sobre el corte, chip «…» y «· saliendo» al lado de la hora | La red recibió el archivo y lo está procesando. Si pasan 24 horas así, cuenta como un intento fallido |
 | «Publicado» | Píldora verde; marca llena en el corte y chip verde «✓» | Ya salió en esa red |
 | «En tu bandeja de TikTok» | Píldora verde; marca quemada hasta la mitad con un punto ámbar, chip «◐» y la tarjeta con borde ámbar | Se mandó como borrador de TikTok: hay que terminarlo en la app de TikTok. Cuando se publica desde allá, la sincronización siguiente (la diaria, o «Sincronizar ahora» en [Los Fierros](los-fierros.md)) encuentra el video y pasa a «Publicado» |
-| «Falló» | Píldora roja con « — <motivo>» y «Reprogramar»; marca carbonizada, chip rojo «✕», el corte con halo rojo y banderita, y la tarjeta con borde rojo | Se quemó: no se volverá a intentar sola. Aparece también en «Se quemó», arriba del calendario, y puede llegar un correo con el asunto «No se pudo publicar en <Red>» |
+| «Falló» | Píldora roja con « — <motivo>» y «Reprogramar»; marca carbonizada, chip rojo «✕», el corte con halo rojo y banderita, y la tarjeta con borde rojo | Se quemó: no se volverá a intentar sola. Aparece también en «Se quemó», arriba del calendario, y puede llegar un correo con el asunto «No se pudo publicar en <Red>» (no llega si el motivo es la conexión de la cuenta: de eso avisa un solo correo por cuenta, ver [Los Fierros](los-fierros.md)). También sale en el resumen del día, el correo de la mañana |
 
 Un destino programado en una cuenta con el fierro frío (desconectada, vencida o que no
 sincroniza; ver [Los Fierros](los-fierros.md)) lleva en el corte la marca punteada en gris
@@ -950,6 +952,7 @@ quemado, más arriba).
 | Lo que dice la pantalla | Qué significa | Qué hacer |
 |---|---|---|
 | «No se pudo hablar con la red. Se reintentará.» | Falla de conexión | Esperar; si se quema, «Subir ahora» |
+| «Instagram llegó a su tope de publicaciones por día: sale apenas se libere un cupo.» | La cuenta ya publicó por la API lo máximo que Instagram deja en 24 horas. No es un fallo: no gasta intentos ni se quema; se vuelve a probar cada hora y sale cuando se libera un cupo, 24 horas después de una publicación anterior | Esperar: sale solo |
 | «La cuenta no está conectada. Reconéctala y reprograma.» | La cuenta perdió la conexión | Reconectar en Los Fierros y «Reprogramar» |
 | «La red no terminó de procesar el video.» | Pasó 24 horas en «Publicando…» | «Subir ahora» o «Reprogramar» |
 | «Instagram rechazó la publicación.» | Instagram dijo que no | «Subir ahora» o «Reprogramar»; si vuelve a fallar, revisar el archivo y el texto |
@@ -1025,8 +1028,9 @@ quemado, más arriba).
   está encendido «Enviar como borrador a mi bandeja de TikTok».
 - **Programé con Ahora y todavía no sale.** Sale en la pasada siguiente del publicador,
   en unos minutos. Para que sea ya: «Subir ahora» en la lista.
-- **Dice Reintentando.** Falló un intento y se va a volver a probar solo; el motivo va al
-  lado. Si el motivo pide reconectar, conviene hacerlo ya.
+- **Dice Reintentando.** Falló un intento y se va a volver a probar solo: a los quince minutos
+  la primera vez y a las dos horas la segunda. El motivo va al lado. Si el motivo pide
+  reconectar, conviene hacerlo ya: si se reconecta antes del intento siguiente, el post sale.
 - **Se me quemó un post.** Leer el motivo en «Se quemó», arriba de la pantalla, y seguir la
   tarea de arreglar un post quemado.
 - **No veo la sección Se quemó.** No hay nada que haya fallado: la sección solo aparece cuando
@@ -1199,9 +1203,10 @@ Lo que describe esta página sale de:
   - `src/lib/social/publish/borrar.ts`
   - `src/lib/social/publish/reprogramar.ts` (la regla de «Reprogramar», compartida con la app del teléfono)
   - `src/lib/social/publish/tiktok-creador.ts`
-  - `src/lib/social/publish/publisher.ts`
+  - `src/lib/social/publish/publisher.ts` (las esperas entre intentos, `ESPERAS_TRAS_FALLO_MS`)
   - `src/lib/social/publish/run.ts`
   - `src/lib/social/publish/alert.ts`
+  - `src/lib/avisos/reglas.ts` (el resumen del día)
   - `src/lib/social/publish/instagram.ts`
   - `src/lib/social/publish/facebook.ts`
   - `src/lib/social/publish/threads.ts`

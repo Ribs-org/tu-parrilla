@@ -5,7 +5,7 @@ import { CLASE_BORDE, CLASE_ESTADO, ROTULO_CALOR } from '@/app/admin/(dash)/sche
 import { bordeDe, estadoCorto } from '@/app/admin/(dash)/schedule/dibujo'
 import { DesplazarAHoy } from '@/app/admin/(dash)/schedule/desplazar-a-hoy'
 import { Redes } from '@/app/admin/(dash)/schedule/redes'
-import { BOTON_CHICO, BOTON_CHICO_SECUNDARIO, ENLACE_BOTON_SECUNDARIO } from '@/components/boton'
+import { BOTON_CHICO, BOTON_CHICO_SECUNDARIO, ENLACE_BOTON, ENLACE_BOTON_SECUNDARIO } from '@/components/boton'
 import { Corte, CorteDefs } from '@/components/corte'
 import { Icon } from '@/components/icon'
 import { ArmaUnCorte, SeArmaMientrasSube } from '@/components/landing-demos'
@@ -141,23 +141,44 @@ function Semana() {
   )
 }
 
-/** Una sección: el texto manda, y la pieza del panel de al lado lo muestra. */
+/**
+ * El título de una sección, con la pantalla del panel donde vive eso encima: quien entra
+ * después ya conoce los nombres.
+ */
+function Encabezado({ donde, titulo }: { donde: string; titulo: string }) {
+  return (
+    <>
+      <p className="font-titulo text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-fg-faint">{donde}</p>
+      <h2 className="mt-2 text-balance font-titulo text-2xl font-semibold uppercase leading-tight tracking-[0.04em] sm:text-[1.75rem]">
+        {titulo}
+      </h2>
+    </>
+  )
+}
+
+/**
+ * Una sección: el texto manda, y la pieza del panel de al lado lo muestra. Sin raya entre
+ * una y otra: el aire y el título ya las separan, y ocho rayas seguidas hacían de la página
+ * una ficha técnica.
+ */
 function Rasgo({
+  donde,
   titulo,
   children,
   muestra,
 }: {
+  donde: string
   titulo: string
   children: React.ReactNode
   muestra: React.ReactNode
 }) {
   return (
-    <section className="grid gap-6 border-t border-acero-700 py-12 sm:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] sm:gap-12 sm:py-16">
+    <section className="grid gap-8 py-12 sm:py-16 lg:grid-cols-[minmax(0,22rem)_minmax(0,1fr)] lg:gap-16">
       <div>
-        <h2 className="font-titulo text-xl font-semibold uppercase tracking-[0.06em]">{titulo}</h2>
-        <div className="mt-3 max-w-[40ch] space-y-3 text-sm leading-relaxed text-fg-muted">{children}</div>
+        <Encabezado donde={donde} titulo={titulo} />
+        <div className="mt-4 max-w-[44ch] space-y-3 text-[0.95rem] leading-relaxed text-fg-muted">{children}</div>
       </div>
-      <div className="flex min-w-0 items-center">{muestra}</div>
+      <div className="flex min-w-0 items-center lg:justify-center">{muestra}</div>
     </section>
   )
 }
@@ -316,17 +337,47 @@ function TuPagina() {
   )
 }
 
-/** Las redes que se conectan, cada una con su nombre. */
+/** Las redes que se conectan, cada una con su nombre, en su chapa. */
 function LasRedes() {
   return (
-    <ul className="grid w-full max-w-md grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-3">
+    <ul className="grid w-full max-w-lg grid-cols-2 gap-2 sm:grid-cols-3">
       {['instagram', 'facebook', 'tiktok', 'youtube', 'threads', 'x'].map((red) => (
-        <li key={red} className="flex items-center gap-2 text-sm text-fg">
+        <li key={red} className="chapa flex items-center gap-2.5 rounded-lg px-3.5 py-3 text-sm text-fg">
           <Icon name={red} className="h-4 w-4 shrink-0" />
           {networkLabel(red)}
         </li>
       ))}
     </ul>
+  )
+}
+
+/** El cierre: una parrilla llena, con tres cortes a punto. Es un dibujo y nada más. */
+function ParrillaLlena() {
+  return (
+    <div className="grilla grilla-llena relative aspect-[16/10] w-full" aria-hidden>
+      <Corte
+        formato="entrana"
+        carne="punto"
+        coccion="punto"
+        sellos={['servido', 'servido', 'servido']}
+        className="absolute left-[6%] top-[12%] w-[46%]"
+      />
+      <Corte
+        formato="tira"
+        huesos={4}
+        carne="punto"
+        coccion="punto"
+        sellos={['servido', 'servido']}
+        className="absolute right-[6%] top-[36%] w-[38%]"
+      />
+      <Corte
+        formato="bife"
+        carne="punto"
+        coccion="punto"
+        sellos={['servido', 'servido']}
+        className="absolute bottom-[9%] left-[18%] w-[32%]"
+      />
+    </div>
   )
 }
 
@@ -336,20 +387,25 @@ export function Landing() {
       <CorteDefs />
       <div className="mx-auto w-full max-w-6xl">
         <header className="flex items-center justify-between gap-4">
-          <p className="font-titulo text-[0.7rem] uppercase tracking-[0.3em] text-fg-faint">Tu Parrilla</p>
+          {/* La marca: el bife a punto, el mismo del ícono de la app. */}
+          <p className="flex items-center gap-3">
+            <Corte formato="bife" carne="punto" coccion="punto" sellos={['servido', 'servido']} chico className="w-10" />
+            <span className="font-titulo text-[0.8rem] font-semibold uppercase tracking-[0.28em] text-fg">Tu Parrilla</span>
+          </p>
           <Link href="/ingresar" className={ENLACE_BOTON_SECUNDARIO}>
             Entrar
           </Link>
         </header>
 
-        <div className="mt-14 sm:mt-20">
-          <h1 className="max-w-[15ch] text-balance font-titulo text-[2rem] font-semibold uppercase leading-[1.05] tracking-[0.02em] sm:max-w-[30ch] sm:text-6xl">
-            {/* Dos frases, dos líneas en pantalla ancha; en angosto fluyen y rompen solas. */}
-            <span className="sm:block">Programa la semana.</span>{' '}
-            <span className="sm:block">Mira qué trajo cada corte.</span>
+        <div className="mt-16 sm:mt-24">
+          <h1 className="text-balance font-titulo text-[2.6rem] font-semibold uppercase leading-[1.02] tracking-[0.015em] sm:text-6xl lg:text-7xl">
+            {/* Una frase por renglón, también en el teléfono: fluyendo, «Mira» quedaba colgando
+                al final del primero. */}
+            <span className="block">Programa la semana.</span>{' '}
+            <span className="block">Mira qué trajo cada corte.</span>
           </h1>
 
-          <p className="mt-6 max-w-[58ch] text-base leading-relaxed text-fg-muted">
+          <p className="mt-6 max-w-[60ch] text-base leading-relaxed text-fg-muted sm:mt-8 sm:text-lg">
             Tu Parrilla publica en Instagram, Facebook, TikTok, YouTube, Threads y X a la hora que
             elegiste, te avisa antes de que algo falle y te dice cuánta gente llegó a tu página por
             cada publicación. No solo cuántos la vieron.
@@ -365,27 +421,27 @@ export function Landing() {
         </div>
 
         {/* La leyenda del corte, para tocarla: la sección más ancha, porque es la que enseña. */}
-        <section className="mt-20 border-t border-acero-700 py-12 sm:py-16">
-          <h2 className="font-titulo text-xl font-semibold uppercase tracking-[0.06em]">Cada publicación es un corte</h2>
-          <p className="mt-3 max-w-[62ch] text-sm leading-relaxed text-fg-muted">
+        <section className="mt-8 py-12 sm:mt-12 sm:py-16">
+          <Encabezado donde={nombreDe('/admin/schedule')} titulo="Cada publicación es un corte" />
+          <p className="mt-4 max-w-[62ch] text-[0.95rem] leading-relaxed text-fg-muted">
             La forma dice qué es: entraña el video, tira de asado el carrusel —un hueso por foto—,
             bife la foto y chori el texto. La carne dice cómo va, de cruda a punto. Y lleva una marca
             por cada red, que se quema cuando esa red lo publica. Se lee de un vistazo, sin abrir
             nada. Pruébalo:
           </p>
-          <div className="mt-8">
+          <div className="mt-10">
             <ArmaUnCorte />
           </div>
         </section>
 
-        <Rasgo titulo="Se arma mientras sube" muestra={<SeArmaMientrasSube />}>
+        <Rasgo donde="Nueva publicación" titulo="Se arma mientras sube" muestra={<SeArmaMientrasSube />}>
           <p>
             Los archivos llegan como carne cruda, y el corte se completa a medida que suben. Si uno
             no llega, se quema y espera su «Reintentar»: nada se programa a medias.
           </p>
         </Rasgo>
 
-        <Rasgo titulo="Los fierros avisan" muestra={<Fierros />}>
+        <Rasgo donde={nombreDe('/admin/accounts')} titulo="Avisan antes, no después" muestra={<Fierros />}>
           <p>
             Conectas cada cuenta una vez, y su fierro dice cómo está la conexión: al rojo, viva; en
             ámbar, se está enfriando; gris, se apagó.
@@ -396,7 +452,7 @@ export function Landing() {
           </p>
         </Rasgo>
 
-        <Rasgo titulo="Lo que se quema, se ve" muestra={<SeQuemo />}>
+        <Rasgo donde="Se quemó" titulo="Lo que se quema, se ve" muestra={<SeQuemo />}>
           <p>
             Si una red no lo publica, el corte se quema —halo rojo y banderita— y te dice en una
             frase qué pasó, con el arreglo al lado: reconectar la cuenta, cambiar el archivo o darle
@@ -404,7 +460,7 @@ export function Landing() {
           </p>
         </Rasgo>
 
-        <Rasgo titulo="Qué trajo cada corte" muestra={<QueTrajo />}>
+        <Rasgo donde={nombreDe('/admin/analytics')} titulo="Qué trajo cada corte" muestra={<QueTrajo />}>
           <p>
             Un programador de posts te dice cuántos lo vieron. Tu Parrilla pone al lado cuánta gente
             llegó a tu página por cada publicación, y ahí se ve cuál de tus cortes trabajó: no
@@ -412,21 +468,21 @@ export function Landing() {
           </p>
         </Rasgo>
 
-        <Rasgo titulo="Lo que te responden, en una mesa" muestra={<LaMesa />}>
+        <Rasgo donde={nombreDe('/admin/comments')} titulo="Cada comentario, con su respuesta ya escrita" muestra={<LaMesa />}>
           <p>
             Los comentarios de Instagram, Facebook y YouTube llegan a un solo lugar, con una
             respuesta ya escrita en tu tono. La lees, la cambias si quieres, y sale desde tu cuenta.
           </p>
         </Rasgo>
 
-        <Rasgo titulo="Tu página" muestra={<TuPagina />}>
+        <Rasgo donde={nombreDe('/admin/profiles')} titulo="Tu página" muestra={<TuPagina />}>
           <p>
             Todos tus enlaces en una dirección, con tu cara y tus colores. Es la página que mides, y
             la que pones en cada perfil. Si tienes dominio propio, va ahí.
           </p>
         </Rasgo>
 
-        <Rasgo titulo="Qué se conecta, y para qué" muestra={<LasRedes />}>
+        <Rasgo donde="Tus cuentas" titulo="Qué se conecta, y para qué" muestra={<LasRedes />}>
           <p>
             Cada cuenta se conecta con el permiso de su red, y solo se toca lo tuyo: Tu Parrilla
             publica lo que programas, lee los números de tus publicaciones y sus comentarios para
@@ -443,21 +499,30 @@ export function Landing() {
           </p>
         </Rasgo>
 
-        <footer className="border-t border-acero-700 pt-8 pb-4 text-sm text-fg-muted">
-          <p>
-            Tu Parrilla es por invitación: no hay registro abierto. Si ya te invitaron,{' '}
-            <Link href="/ingresar" className="text-brasa underline-offset-4 hover:underline">
-              entra con tu correo
+        {/* El cierre: la semana servida, y la única puerta que hay. */}
+        <section className="grid items-center gap-10 py-12 sm:py-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] lg:gap-16">
+          <div>
+            <h2 className="font-titulo text-[2rem] font-semibold uppercase leading-[1.05] tracking-[0.02em] sm:text-5xl">
+              <span className="block">Tu Parrilla</span> <span className="block">es por invitación.</span>
+            </h2>
+            <p className="mt-4 max-w-[48ch] text-base leading-relaxed text-fg-muted sm:text-lg">
+              No hay registro abierto. Si ya te invitaron, entra con tu correo.
+            </p>
+            <Link href="/ingresar" className={cn(ENLACE_BOTON, 'mt-8')}>
+              Entrar con tu correo
             </Link>
-            .
-          </p>
-          <p className="mt-6 text-fg-faint">
+          </div>
+          <ParrillaLlena />
+        </section>
+
+        <footer className="flex flex-col gap-3 border-t border-acero-700 pt-8 pb-4 text-sm text-fg-faint sm:flex-row sm:items-center sm:justify-between">
+          <p>
             Un servicio de {RESPONSABLE} (RUT {RUT}), Chile ·{' '}
             <a href={`mailto:${CONTACTO}`} className="hover:text-fg">
               {CONTACTO}
             </a>
           </p>
-          <p className="mt-3 flex gap-5 text-fg-faint">
+          <p className="flex gap-5">
             <Link href="/terminos" className="hover:text-fg">Términos</Link>
             <Link href="/privacidad" className="hover:text-fg">Privacidad</Link>
           </p>

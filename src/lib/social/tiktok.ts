@@ -1,13 +1,15 @@
 import type { SocialAccount } from '@/db'
 import { env } from '../env'
 import {
-  MAX_POSTS_PER_SYNC,
   NO_METRICS,
   type Connector,
   type FetchedBatch,
   type FetchedPost,
+  type OpcionesDeListado,
+  type PostMetricValues,
 } from './connector'
 import { decryptToken } from './crypto'
+import { laMasVieja, sigueListando } from './lectura'
 
 const API = 'https://open.tiktokapis.com/v2'
 const PAGE_SIZE = 20
@@ -16,6 +18,21 @@ const PAGE_SIZE = 20
 // videos.length check below and loop forever.
 const MAX_VIDEO_PAGES = 50
 const REFRESH_WINDOW_MS = 60 * 60 * 1000
+/** Lo más que acepta `video/query` por llamada. */
+const QUERY_SIZE = 20
+
+const VIDEO_FIELDS = [
+  'id',
+  'title',
+  'cover_image_url',
+  'share_url',
+  'create_time',
+  'duration',
+  'view_count',
+  'like_count',
+  'comment_count',
+  'share_count',
+].join(',')
 
 export type TikTokVideo = {
   id: string
@@ -105,29 +122,17 @@ export const tiktokConnector: Connector = {
     return data.access_token
   },
 
-  async fetchPosts(_account: SocialAccount, token: string | null): Promise<FetchedBatch> {
+  async fetchPosts(_account: SocialAccount, token: string | null, opciones?: OpcionesDeListado): Promise<FetchedBatch> {
     if (!token) return { posts: [], windowWasCapped: false }
-
-    const fields = [
-      'id',
-      'title',
-      'cover_image_url',
-      'share_url',
-      'create_time',
-      'duration',
-      'view_count',
-      'like_count',
-      'comment_count',
-      'share_count',
-    ].join(',')
 
     const videos: TikTokVideo[] = []
     let cursor: number | undefined
     let pagesFetched = 0
     let moreToPage = false
+    let masVieja: Date | null = null
 
-    while (videos.length < MAX_POSTS_PER_SYNC && pagesFetched < MAX_VIDEO_PAGES) {
-      const response = await fetch(`${API}/video/list/?fields=${fields}`, {
+    while (pagesFetched < MAX_VIDEO_PAGES && sigueListando(videos.length, masVieja, opciones?.desde)) {
+      const response = await fetch(`${API}/video/list/?fields=${VIDEO_FIELDS}`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -145,8 +150,8 @@ export const tiktokConnector: Connector = {
       pagesFetched++
 
       for (const item of payload.data?.videos ?? []) {
-        if (videos.length >= MAX_POSTS_PER_SYNC) break
         videos.push(item)
+        masVieja = laMasVieja(masVieja, new Date((item.create_time ?? 0) * 1000))
       }
 
       moreToPage = Boolean(payload.data?.has_more) && payload.data?.cursor !== undefined
@@ -154,12 +159,30 @@ export const tiktokConnector: Connector = {
       cursor = payload.data!.cursor
     }
 
-    // Videos still waiting behind the cursor mean the loop stopped at a ceiling rather
-    // than at the end of the account. Hitting exactly MAX_POSTS_PER_SYNC counts too:
-    // items from the last page get dropped once the array is full, `has_more` or not.
-    return {
-      posts: videos.slice(0, MAX_POSTS_PER_SYNC).map(normalizeTikTokVideo),
-      windowWasCapped: videos.length >= MAX_POSTS_PER_SYNC || moreToPage,
+    // Videos still waiting behind the cursor mean the loop stopped at its window or its
+    // page ceiling rather than at the end of the account. Nothing listed is dropped.
+    return { posts: videos.map(normalizeTikTokVideo), windowWasCapped: moreToPage }
+  },
+
+  /**
+   * `video/query` recibe hasta 20 ids por llamada y devuelve solo los que siguen
+   * existiendo: un video borrado simplemente no vuelve.
+   */
+  async fetchMetricsById(_account: SocialAccount, token: string | null, externalIds: string[]) {
+    const metricas = new Map<string, PostMetricValues>()
+    if (!token) return metricas
+    for (let i = 0; i < externalIds.length; i += QUERY_SIZE) {
+      const response = await fetch(`${API}/video/query/?fields=${VIDEO_FIELDS}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filters: { video_ids: externalIds.slice(i, i + QUERY_SIZE) } }),
+      })
+      if (!response.ok) {
+        throw new Error(`TikTok ${response.status}: ${(await response.text()).slice(0, 200)}`)
+      }
+      const payload = (await response.json()) as { data?: { videos?: TikTokVideo[] } }
+      for (const video of payload.data?.videos ?? []) metricas.set(video.id, normalizeTikTokVideo(video).metrics)
     }
+    return metricas
   },
 }
