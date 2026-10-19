@@ -67,7 +67,7 @@ Debajo, en otro recuadro, «Sin conectar» y una línea por cada red que no tien
 
 - Instagram: «Cuenta Business o Creator, enlazada a una página de Facebook. Una cuenta personal no puede conectar.»
 - Facebook: «Una página, no un perfil personal.»
-- Instagram y Facebook, además, solo mientras la instalación tenga marcada la revisión de Meta: «Mientras Meta revisa la app, solo pueden conectar las cuentas que invitamos como testers. Si Facebook dice que la función no está disponible, escríbenos.»
+- Instagram y Facebook, además, solo mientras la instalación tenga marcada la revisión de Meta: «Mientras Meta revisa la app, solo pueden conectar las cuentas que invitamos como testers. Si Facebook dice que la función no está disponible, escríbenos.» En `tu-parrilla.cl` ya no aparece: la app de Meta está en Live desde el 2026-10-19.
 - TikTok, YouTube, Threads y X / Twitter no tienen aviso.
 
 Cuando una red ya tiene cuentas, esos mismos avisos se ven en su bloque, con «Requisitos para agregar otra».
@@ -265,7 +265,7 @@ Trae los posts y los números de las cuentas de Instagram, TikTok, YouTube y Fac
 - **«En La Parrilla me sale "reconéctala" al lado de una cuenta»** o **«una publicación falló con "La cuenta no está conectada. Reconéctala y reprograma."»** → Esa cuenta perdió la conexión: «Reconectar» o «Conectar →» en su fila, y después volver a programar.
 - **«Al programar me sale en ámbar que el permiso de una cuenta vence antes de que salga»** → El compositor de [La Parrilla](la-parrilla.md) lo avisa cuando la hora elegida cae después de que venza el permiso de esa cuenta: «Reconectar» en su fila de acá, con la misma cuenta, y el aviso se va. Sin reconectar, esa red se quemaría a la hora del post.
 - **«El compositor me pide "Reconecta TikTok para autorizar la publicación."»** → «Reconectar» en la fila de TikTok.
-- **«Facebook dice que la función no está disponible»** → Mientras Meta revisa la app, solo pueden conectar las cuentas invitadas como testers, y ese error no vuelve al panel. Hay que pedirle a quien administra Tu Parrilla que la invite.
+- **«Facebook dice que la función no está disponible»** → Pasaba mientras Meta revisaba la app, cuando solo conectaban las cuentas invitadas como testers. Desde el 2026-10-19 la app está en Live y conecta cualquier cuenta Business o Creator con su página: si pasa igual, el error no vuelve al panel y hay que avisarle a quien administra Tu Parrilla.
 - **«Facebook dice "Invalid Scopes"»** → Es un problema de configuración de la app de Meta de Tu Parrilla, no de la cuenta: avisar a quien administra Tu Parrilla.
 - **«Google dice que la app no está verificada»** → Mientras Google no termine de verificar la app de Tu Parrilla, muestra ese cartel; hay que pasarlo para seguir.
 - **«Conecté Instagram y no aparece mi página de Facebook»** → Son conexiones separadas: hay que apretar también «Conectar →» en el bloque «Facebook».

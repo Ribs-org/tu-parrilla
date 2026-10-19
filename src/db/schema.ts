@@ -27,6 +27,12 @@ export const users = pgTable('users', {
   nombre: text('nombre'),
   rol: text('rol').$type<Rol>().notNull().default('usuario'),
   zona: text('zona').notNull().default('America/Santiago'),
+  /**
+   * El modo del panel y de la app del teléfono: la noche de siempre o el día con sushi. Es de
+   * la cuenta y no del equipo, para que el teléfono y el panel vayan juntos. Ver
+   * `src/lib/tema.ts`.
+   */
+  tema: text('tema').$type<'noche' | 'dia'>().notNull().default('noche'),
   sesionVersion: integer('sesion_version').notNull().default(1),
   invitadoEn: timestamp('invitado_en', { withTimezone: true }).notNull().defaultNow(),
   primerIngresoEn: timestamp('primer_ingreso_en', { withTimezone: true }),

@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react'
 import { Linking, Pressable, ScrollView, Text, View } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import { Boton, COLORES, Cargando, Etiqueta, Tarjeta } from '../../components/ui'
+import { Boton, Cargando, Etiqueta, Tarjeta } from '../../components/ui'
+import { useColores } from '../../components/tema'
 import { POST_ABIERTO, readCache } from '../../lib/cache'
 import { capitalizar, num, pct, shortDate } from '../../lib/format'
 import { NOMBRE_RED, RANGOS, type PostMetrica, type Posts } from '../../lib/tipos'
 
 export default function DetallePost() {
+  const colores = useColores()
   const { id, red } = useLocalSearchParams<{ id: string; red: string }>()
   const router = useRouter()
   const [post, setPost] = useState<PostMetrica | null>(null)
@@ -44,9 +46,9 @@ export default function DetallePost() {
   if (!buscado) return <Cargando />
   if (!post) {
     return (
-      <View style={{ flex: 1, backgroundColor: COLORES.fondo, padding: 16 }}>
+      <View style={{ flex: 1, backgroundColor: colores.fondo, padding: 16 }}>
         <Tarjeta>
-          <Text style={{ color: COLORES.suave }}>
+          <Text style={{ color: colores.suave }}>
             Vuelve a la lista y ábrelo de nuevo: este post no está en lo descargado.
           </Text>
           {/* «Volver» y no «Reintentar»: la caché no va a cambiar por mirarla de nuevo.
@@ -74,13 +76,13 @@ export default function DetallePost() {
 
   return (
     <ScrollView
-      style={{ flex: 1, backgroundColor: COLORES.fondo }}
+      style={{ flex: 1, backgroundColor: colores.fondo }}
       contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 48 }}
     >
-      <Text style={{ color: COLORES.tenue, fontSize: 11 }}>
+      <Text style={{ color: colores.tenue, fontSize: 11 }}>
         {NOMBRE_RED[post.red] ?? post.red} · {shortDate(post.publicadoEl)}
       </Text>
-      <Text style={{ color: COLORES.texto, fontSize: 16, lineHeight: 22 }}>
+      <Text style={{ color: colores.texto, fontSize: 16, lineHeight: 22 }}>
         {post.texto || '(sin texto)'}
       </Text>
 
@@ -91,10 +93,10 @@ export default function DetallePost() {
             style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}
           >
             {/* La cifra manda: la etiqueta cede el ancho y se corta antes que el valor. */}
-            <Text style={{ color: COLORES.suave, fontSize: 13, flex: 1 }} numberOfLines={1}>
+            <Text style={{ color: colores.suave, fontSize: 13, flex: 1 }} numberOfLines={1}>
               {etiqueta}
             </Text>
-            <Text style={{ color: COLORES.texto, fontSize: 13, flexShrink: 0 }}>{valor}</Text>
+            <Text style={{ color: colores.texto, fontSize: 13, flexShrink: 0 }}>{valor}</Text>
           </View>
         ))}
       </Tarjeta>
@@ -104,8 +106,8 @@ export default function DetallePost() {
           <Etiqueta>Atributos</Etiqueta>
           {Object.entries(post.atributos).map(([clave, valor]) => (
             <View key={clave} style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-              <Text style={{ color: COLORES.suave, fontSize: 13 }}>{capitalizar(clave)}</Text>
-              <Text style={{ color: COLORES.texto, fontSize: 13 }}>{String(valor)}</Text>
+              <Text style={{ color: colores.suave, fontSize: 13 }}>{capitalizar(clave)}</Text>
+              <Text style={{ color: colores.texto, fontSize: 13 }}>{String(valor)}</Text>
             </View>
           ))}
         </Tarjeta>
@@ -116,7 +118,7 @@ export default function DetallePost() {
           <Tarjeta>
             {/* En brasa como el resto de las acciones: el verde de esta app dice
                 «publicado», y acá no informa un estado, invita a tocar. */}
-            <Text style={{ color: COLORES.brasa }}>Abrir en {NOMBRE_RED[post.red] ?? post.red} ↗</Text>
+            <Text style={{ color: colores.brasa }}>Abrir en {NOMBRE_RED[post.red] ?? post.red} ↗</Text>
           </Tarjeta>
         </Pressable>
       ) : null}

@@ -5,6 +5,7 @@ import { ChevronDown } from 'lucide-react'
 import { Icon } from '@/components/icon'
 import { networkLabel } from '@/lib/networks'
 import { cn } from '@/lib/utils'
+import { SE_QUEMO } from '@/lib/vocabulario'
 import { PAGINA_QUEMADOS, plegada, quemadosVisibles, redesQuemadas } from './filtro-quemados'
 
 /** Dónde se recuerda si el dueño dejó «Se quemó» abierto. Solo en este navegador. */
@@ -80,7 +81,9 @@ export function ListaQuemados({
           aria-controls={region}
           className="group flex items-center gap-2 rounded font-titulo text-sm font-semibold uppercase tracking-[0.03em] text-negative"
         >
-          Se quemó
+          {/* Las dos palabras, y el modo esconde una: así cambia con el botón, sin recargar. */}
+          <span className="solo-noche">{SE_QUEMO.noche}</span>
+          <span className="solo-dia">{SE_QUEMO.dia}</span>
           <span className="rounded-full bg-negative/15 px-2 py-px font-mono text-[0.72rem] font-normal tracking-normal">
             {filas.length}
           </span>

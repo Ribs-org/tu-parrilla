@@ -1,5 +1,7 @@
+import { useEffect } from 'react'
 import { Tabs } from 'expo-router'
-import { COLORES, TIPO_TITULO } from '../../components/ui'
+import { TIPO_TITULO } from '../../components/ui'
+import { useColores, useTema } from '../../components/tema'
 import { BotonPublicar, IconoNumeros, IconoParrilla } from '../../components/iconos'
 import { BotonAjustes } from '../../components/boton-ajustes'
 
@@ -12,22 +14,28 @@ import { BotonAjustes } from '../../components/boton-ajustes'
  * Arriba a la derecha de cada una, el botón de Ajustes, como en el panel.
  */
 export default function TabsLayout() {
+  const colores = useColores()
+  const { sincronizar } = useTema()
+  // Recién entrado, el modo de la cuenta: al abrir la app todavía no había sesión que preguntar.
+  useEffect(() => {
+    sincronizar()
+  }, [sincronizar])
   return (
     <Tabs
       screenOptions={{
-        headerStyle: { backgroundColor: COLORES.fondo },
+        headerStyle: { backgroundColor: colores.fondo },
         headerRight: () => <BotonAjustes />,
         // El título de cada pestaña es el título de la pantalla: va en la voz de los títulos.
         headerTitleStyle: {
-          color: COLORES.texto,
+          color: colores.texto,
           fontFamily: TIPO_TITULO,
           letterSpacing: 1,
           textTransform: 'uppercase',
         },
-        tabBarStyle: { backgroundColor: COLORES.tarjeta, borderTopColor: '#00000000' },
+        tabBarStyle: { backgroundColor: colores.tarjeta, borderTopColor: '#00000000' },
         // La pestaña activa en brasa: antes se distinguía solo por blanco contra gris.
-        tabBarActiveTintColor: COLORES.brasa,
-        tabBarInactiveTintColor: COLORES.tenue,
+        tabBarActiveTintColor: colores.brasa,
+        tabBarInactiveTintColor: colores.tenue,
         // El rótulo también en la voz de los títulos, pero chico: el icono manda y el
         // texto confirma. Sin `textTransform` acá — a 10 puntos las mayúsculas de una
         // condensada como Oswald se empastan.
@@ -44,7 +52,7 @@ export default function TabsLayout() {
         options={{
           title: 'Publicar',
           tabBarIcon: ({ focused }) => (
-            <BotonPublicar fondo={COLORES.tarjeta} brasa={COLORES.brasa} activo={focused} />
+            <BotonPublicar fondo={colores.tarjeta} brasa={colores.brasa} activo={focused} />
           ),
         }}
       />

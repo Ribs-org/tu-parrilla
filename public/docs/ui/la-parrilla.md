@@ -20,8 +20,8 @@ reemplaza por el real. Los títulos y los rótulos de los campos se ven en mayú
 estilo; aquí van escritos como están en el código.
 
 Esta página describe los dibujos de noche, el modo de entrada. En el modo día los cortes son
-piezas de sushi y los días, tablas de servir, con las mismas palabras: la equivalencia está en
-«El modo día», en [index.md](index.md).
+piezas de sushi y los días, tablas de servir, con las mismas palabras salvo una: «Se quemó» se
+llama «Se echó a perder». La equivalencia está en «El modo día», en [index.md](index.md).
 
 ## Cómo se llega
 
@@ -34,7 +34,8 @@ piezas de sushi y los días, tablas de servir, con las mismas palabras: la equiv
 - El correo que avisa que algo no salió termina con «Revisa el calendario en /admin/schedule
   para reprogramarla.»
 - El resumen del día que llega por correo, cuando algo se quemó: «Revísalos en «Se quemó», en
-  La Parrilla: …/admin/schedule».
+  La Parrilla: …/admin/schedule». Con la cuenta en el modo día: «Revísalos en «Se echó a
+  perder», en La Parrilla: …».
 - Por dirección: `https://tu-parrilla.cl/admin/schedule` abre el calendario en la semana de
   hoy. Se le puede agregar:
   - `?vista=lista`: la lista en vez del calendario (los enlaces viejos con
@@ -92,6 +93,8 @@ conectadas). Con una sola red conectada, la tarjeta se va. El resto de la pantal
 igual debajo de ella.
 
 ### «Se quemó»
+
+En el modo día se llama «Se echó a perder»; lo demás es igual.
 
 Aparece solo si hay algo que falló, de cualquier fecha; si no falló nada, la sección no existe.
 Parte plegada, en una sola línea: «Se quemó» en rojo, cuántas hay (por ejemplo «22»), los

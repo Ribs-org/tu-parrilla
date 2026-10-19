@@ -1,5 +1,7 @@
 import { Text, View } from 'react-native'
-import { COLORES, TIPO_TITULO } from './ui'
+import { TIPO_TITULO } from './ui'
+import type { Colores } from './colores'
+import { useColores } from './tema'
 import { Pieza } from './pieza'
 import {
   bordeDe,
@@ -7,7 +9,6 @@ import {
   coccionDe,
   NOMBRE_COCCION,
   NOMBRE_FORMATO,
-  QUEMO,
   selloPorEstado,
   type Borde,
   type Sello,
@@ -16,21 +17,31 @@ import { etiquetaCuenta } from '../lib/publicar'
 import type { PostProgramado } from '../lib/tipos'
 
 /** La tarjeta es chapa, no carne: solo cambia de borde cuando necesita algo del dueño. */
-const BORDE: Record<Borde, string> = {
-  cuenta: 'rgba(255,255,255,0.07)',
-  atencion: 'rgba(229,165,42,0.75)',
-  mano: 'rgba(242,85,122,0.8)',
+function colorDelBorde(borde: Borde, colores: Colores): string {
+  if (borde === 'atencion') return 'rgba(229,165,42,0.75)'
+  if (borde === 'mano') return 'rgba(242,85,122,0.8)'
+  return `${colores.velo}12`
 }
 
 /** Cada destino, en palabras y con el mismo signo que su chip en el panel. */
-const LINEA: Record<Sello, { color: string; signo: string; sufijo: string }> = {
-  pendiente: { color: COLORES.texto, signo: '', sufijo: '' },
-  saliendo: { color: COLORES.brasa, signo: '…', sufijo: ' · saliendo' },
-  servido: { color: COLORES.verde, signo: '✓', sufijo: '' },
-  bandeja: { color: COLORES.ambar, signo: '◐', sufijo: ' · en tu bandeja de TikTok' },
-  reintento: { color: COLORES.ambar, signo: '↻', sufijo: ' · reintentando' },
-  frio: { color: COLORES.ambar, signo: '!', sufijo: ' · reconéctala en el panel' },
-  quemado: { color: QUEMO, signo: '✕', sufijo: '' },
+function lineaDe(sello: Sello, colores: Colores): { color: string; signo: string; sufijo: string } {
+  switch (sello) {
+    case 'saliendo':
+      return { color: colores.brasa, signo: '…', sufijo: ' · saliendo' }
+    case 'servido':
+      return { color: colores.verde, signo: '✓', sufijo: '' }
+    case 'bandeja':
+      return { color: colores.ambar, signo: '◐', sufijo: ' · en tu bandeja de TikTok' }
+    case 'reintento':
+      return { color: colores.ambar, signo: '↻', sufijo: ' · reintentando' }
+    case 'frio':
+      return { color: colores.ambar, signo: '!', sufijo: ' · reconéctala en el panel' }
+    case 'quemado':
+      // El rojo del texto del modo: de noche es el del halo; de día, uno más hondo que pasa 4,5:1.
+      return { color: colores.rojo, signo: '✕', sufijo: '' }
+    default:
+      return { color: colores.texto, signo: '', sufijo: '' }
+  }
 }
 
 /**
@@ -43,6 +54,7 @@ const LINEA: Record<Sello, { color: string; signo: string; sufijo: string }> = {
  * estado (`selloPorEstado`).
  */
 export function CorteProgramado({ post }: { post: PostProgramado }) {
+  const colores = useColores()
   const estados = post.redes.map((r) => r.estado)
   const coccion = coccionDe(estados)
   const sellos = post.redes.map((r) => r.sello ?? selloPorEstado(r.estado, r.error))
@@ -52,27 +64,27 @@ export function CorteProgramado({ post }: { post: PostProgramado }) {
       style={{
         flexDirection: 'row',
         gap: 12,
-        backgroundColor: COLORES.tarjeta,
+        backgroundColor: colores.tarjeta,
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: BORDE[bordeDe(coccion, sellos)],
+        borderColor: colorDelBorde(bordeDe(coccion, sellos), colores),
         padding: 12,
       }}
     >
       <Pieza formato={formato} huesos={post.huesos ?? 0} carne={carneDe(estados)} coccion={coccion} sellos={sellos} />
 
       <View style={{ flex: 1, gap: 4 }}>
-        <Text style={{ color: COLORES.texto, fontSize: 10, fontFamily: TIPO_TITULO, letterSpacing: 1 }}>
+        <Text style={{ color: colores.texto, fontSize: 10, fontFamily: TIPO_TITULO, letterSpacing: 1 }}>
           {post.cuando.slice(11, 16)}
         </Text>
 
-        <Text style={{ color: COLORES.texto, fontSize: 14 }} numberOfLines={2}>
+        <Text style={{ color: colores.texto, fontSize: 14 }} numberOfLines={2}>
           {post.texto || '(sin texto)'}
         </Text>
 
         <View style={{ gap: 2, marginTop: 2 }}>
           {post.redes.map((r, i) => {
-            const linea = LINEA[sellos[i]!]
+            const linea = lineaDe(sellos[i]!, colores)
             return (
               <Text
                 // `r.id` es el destino, no la red: con dos cuentas de la misma red, `r.red` se
@@ -93,7 +105,7 @@ export function CorteProgramado({ post }: { post: PostProgramado }) {
         {/* Lo que el dibujo dice, en palabras: el color nunca es la única señal. */}
         <Text
           style={{
-            color: COLORES.suave,
+            color: colores.suave,
             fontSize: 10,
             fontFamily: TIPO_TITULO,
             textTransform: 'uppercase',

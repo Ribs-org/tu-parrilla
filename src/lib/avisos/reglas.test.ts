@@ -4,6 +4,7 @@ import {
   CONEXION_POR_VENCER,
   CONEXION_VENCIDA,
   DIAS_ERROR,
+  HORAS_DE_FALLIDOS,
   HORAS_ERROR,
   MAX_FALLIDOS_EN_CORREO,
   correoDeCaida,
@@ -207,5 +208,19 @@ describe('correoDeResumen', () => {
     const correo = correoDeResumen({ ...vacio, fallidos: muchos }, ZONA, '', AHORA)!
     expect(correo.text).toContain('y 4 más.')
     expect(correo.text.match(/^- /gm)).toHaveLength(MAX_FALLIDOS_EN_CORREO)
+  })
+
+  it('de día, lo que falló se echó a perder: nombra la sección como la ve la persona', () => {
+    const correo = correoDeResumen({ ...vacio, fallidos: [fallido] }, ZONA, 'https://tu-parrilla.cl', AHORA, 'dia')!
+    expect(correo.subject).toBe('Tu parrilla hoy: 1 destino echado a perder')
+    expect(correo.text).toContain(`Se echaron a perder en las últimas ${HORAS_DE_FALLIDOS} horas (1):`)
+    expect(correo.text).toContain('Revísalos en «Se echó a perder», en La Parrilla: https://tu-parrilla.cl/admin/schedule')
+    expect(correo.text).not.toMatch(/quem/i)
+  })
+
+  it('sin modo, la noche: el correo de siempre', () => {
+    const correo = correoDeResumen({ ...vacio, fallidos: [fallido] }, ZONA, '', AHORA)!
+    expect(correo.subject).toBe('Tu parrilla hoy: 1 destino quemado')
+    expect(correo.text).toContain('Revísalos en «Se quemó», en La Parrilla')
   })
 })

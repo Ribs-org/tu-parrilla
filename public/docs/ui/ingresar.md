@@ -8,8 +8,10 @@ correo de la invitación: se escribe el correo, llega un código de seis dígito
 se abre el panel. La sesión dura treinta días en ese navegador, contados desde que se entró;
 después hay que pedir un código otra vez.
 
-Las dos pantallas siguen el modo del panel que se eligió en ese equipo: oscuras de noche, claras
-de día (ver «El modo día», en [index.md](index.md)). La de error sigue siempre de noche.
+Las dos pantallas siguen el modo con que se usó el panel la última vez en ese equipo: oscuras de
+noche, claras de día (ver «El modo día», en [index.md](index.md)). Adentro manda el de la
+cuenta, así que si la persona lo cambió en otro lado, el panel entra en ese y la puerta lo sigue
+desde la próxima vez. La de error sigue siempre de noche.
 
 ## Cómo se llega
 

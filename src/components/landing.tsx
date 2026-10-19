@@ -6,7 +6,8 @@ import { bordeDe, estadoCorto } from '@/app/admin/(dash)/schedule/dibujo'
 import { DesplazarAHoy } from '@/app/admin/(dash)/schedule/desplazar-a-hoy'
 import { Redes } from '@/app/admin/(dash)/schedule/redes'
 import { BOTON_CHICO, BOTON_CHICO_SECUNDARIO, ENLACE_BOTON, ENLACE_BOTON_SECUNDARIO } from '@/components/boton'
-import { Corte, CorteDefs } from '@/components/corte'
+import { BotonTema } from '@/components/boton-tema'
+import { Corte, CorteDefs, MarcaDeTuParrilla } from '@/components/corte'
 import { Icon } from '@/components/icon'
 import { ArmaUnCorte, SeArmaMientrasSube } from '@/components/landing-demos'
 import { CONTACTO, RESPONSABLE, RUT } from '@/lib/empresa'
@@ -14,8 +15,10 @@ import { networkLabel } from '@/lib/networks'
 import { calorDelDia, carneDe, coccionDe, formatoDe, selloDe, type Calor, type Fierro } from '@/lib/parrilla'
 import { NO_PUBLISH_TOKEN } from '@/lib/social/publish/publisher'
 import { FOTO, SEMANA, VIDEO, fotos, type CorteDeMuestra, type DiaDeMuestra, type Estado } from '@/components/landing-semana'
+import { PiezaDefs } from '@/components/pieza-sushi'
+import type { Tema } from '@/lib/tema'
 import { cn } from '@/lib/utils'
-import { nombreDe } from '@/lib/vocabulario'
+import { SE_QUEMO, nombreDe } from '@/lib/vocabulario'
 
 /**
  * La cara pública del producto, en el dominio del producto.
@@ -31,7 +34,27 @@ import { nombreDe } from '@/lib/vocabulario'
  * tiene que seguir diciendo qué hace la app y para qué usa los datos de cada red, con la
  * privacidad a la vista: es lo que Google miró para verificar la marca
  * (`docs/google-verificacion-guion.md`).
+ *
+ * Tiene los dos modos del panel: la noche de entrada y el día con sushi, con el mismo botón. De
+ * día la marca es el nigiri a punto (`MarcaDeTuParrilla`), y lo que cuenta el dibujo se dice con sushi
+ * (`DeNocheYDeDia`). Ver `docs/superpowers/specs/2026-10-19-modo-dia-sushi-design.md`, tanda 4.
  */
+
+/**
+ * Lo que la portada dice distinto de día, donde el dibujo es sushi: van las dos versiones y el
+ * modo esconde una (`.solo-noche`, `.solo-dia`), como los dos dibujos del corte, así cambia con
+ * el botón sin recargar. Adentro del panel las palabras no cambian de día, salvo «Se quemó»; la
+ * portada sí tiene voz de día, porque no es una pantalla que guíe la wiki. Lo que dice qué hace
+ * la app no va acá: es igual en los dos modos.
+ */
+function DeNocheYDeDia({ noche, dia }: { noche: React.ReactNode; dia: React.ReactNode }) {
+  return (
+    <>
+      <span className="solo-noche">{noche}</span>
+      <span className="solo-dia">{dia}</span>
+    </>
+  )
+}
 
 const CLASE_CALOR: Record<Calor, string> = {
   apagada: 'grilla-apagada',
@@ -102,7 +125,7 @@ function Dia({ dia }: { dia: DiaDeMuestra }) {
           'grilla flex min-h-0 flex-1 flex-col gap-2 p-2',
           CLASE_CALOR[calor],
           calor === 'apagada' && 'justify-center',
-          dia.hoy && 'ring-1 ring-inset ring-white/25',
+          dia.hoy && 'ring-1 ring-inset ring-velo/25',
         )}
       >
         {/* Una parrilla fría que todavía sirve invita, como en el panel: con mouse, al pasar. */}
@@ -145,7 +168,7 @@ function Semana() {
  * El título de una sección, con la pantalla del panel donde vive eso encima: quien entra
  * después ya conoce los nombres.
  */
-function Encabezado({ donde, titulo }: { donde: string; titulo: string }) {
+function Encabezado({ donde, titulo }: { donde: React.ReactNode; titulo: React.ReactNode }) {
   return (
     <>
       <p className="font-titulo text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-fg-faint">{donde}</p>
@@ -167,8 +190,8 @@ function Rasgo({
   children,
   muestra,
 }: {
-  donde: string
-  titulo: string
+  donde: React.ReactNode
+  titulo: React.ReactNode
   children: React.ReactNode
   muestra: React.ReactNode
 }) {
@@ -381,20 +404,28 @@ function ParrillaLlena() {
   )
 }
 
-export function Landing() {
+/**
+ * `tema` es el modo con que se abre: el de la dirección (`?modo=dia`) o el del equipo
+ * (`temaDeLaPortada`). `delEnlace`, si vino de la dirección: el botón lo anota en el equipo.
+ */
+export function Landing({ tema = 'noche', delEnlace = false }: { tema?: Tema; delEnlace?: boolean }) {
   return (
-    <main className="acerado min-h-dvh bg-acero-950 px-6 py-8 sm:py-10">
+    <main className="acerado min-h-dvh bg-acero-950 px-6 py-8 sm:py-10" data-tema={tema}>
       <CorteDefs />
+      <PiezaDefs />
       <div className="mx-auto w-full max-w-6xl">
         <header className="flex items-center justify-between gap-4">
-          {/* La marca: el bife a punto, el mismo del ícono de la app. */}
+          {/* La marca: el bife a punto de noche, el mismo del ícono de la app; de día, el nigiri. */}
           <p className="flex items-center gap-3">
-            <Corte formato="bife" carne="punto" coccion="punto" sellos={['servido', 'servido']} chico className="w-10" />
+            <MarcaDeTuParrilla className="w-10" />
             <span className="font-titulo text-[0.8rem] font-semibold uppercase tracking-[0.28em] text-fg">Tu Parrilla</span>
           </p>
-          <Link href="/ingresar" className={ENLACE_BOTON_SECUNDARIO}>
-            Entrar
-          </Link>
+          <div className="flex items-center gap-1 sm:gap-2">
+            <BotonTema inicial={tema} anotar={delEnlace} />
+            <Link href="/ingresar" className={ENLACE_BOTON_SECUNDARIO}>
+              Entrar
+            </Link>
+          </div>
         </header>
 
         <div className="mt-16 sm:mt-24">
@@ -402,7 +433,9 @@ export function Landing() {
             {/* Una frase por renglón, también en el teléfono: fluyendo, «Mira» quedaba colgando
                 al final del primero. */}
             <span className="block">Programa la semana.</span>{' '}
-            <span className="block">Mira qué trajo cada corte.</span>
+            <span className="block">
+              Mira qué trajo cada <DeNocheYDeDia noche="corte" dia="pieza" />.
+            </span>
           </h1>
 
           <p className="mt-6 max-w-[60ch] text-base leading-relaxed text-fg-muted sm:mt-8 sm:text-lg">
@@ -415,19 +448,25 @@ export function Landing() {
         <div className="mt-12 sm:mt-14">
           <Semana />
           <p className="mt-3 text-[0.75rem] text-fg-faint">
-            Cada publicación es un corte, sobre el día en que sale. El fuego del día dice cuánto
-            tiene encima.
+            <DeNocheYDeDia
+              noche="Cada publicación es un corte, sobre el día en que sale. El fuego del día dice cuánto tiene encima."
+              dia="Cada publicación es una pieza, sobre el día en que sale. El color del día dice cuánto tiene encima."
+            />
           </p>
         </div>
 
         {/* La leyenda del corte, para tocarla: la sección más ancha, porque es la que enseña. */}
         <section className="mt-8 py-12 sm:mt-12 sm:py-16">
-          <Encabezado donde={nombreDe('/admin/schedule')} titulo="Cada publicación es un corte" />
+          <Encabezado
+            donde={nombreDe('/admin/schedule')}
+            titulo={<DeNocheYDeDia noche="Cada publicación es un corte" dia="Cada publicación es una pieza" />}
+          />
           <p className="mt-4 max-w-[62ch] text-[0.95rem] leading-relaxed text-fg-muted">
-            La forma dice qué es: entraña el video, tira de asado el carrusel —un hueso por foto—,
-            bife la foto y chori el texto. La carne dice cómo va, de cruda a punto. Y lleva una marca
-            por cada red, que se quema cuando esa red lo publica. Se lee de un vistazo, sin abrir
-            nada. Pruébalo:
+            <DeNocheYDeDia
+              noche="La forma dice qué es: entraña el video, tira de asado el carrusel —un hueso por foto—, bife la foto y chori el texto. La carne dice cómo va, de cruda a punto. Y lleva una marca por cada red, que se quema cuando esa red lo publica."
+              dia="La forma dice qué es: nigiri el video, un roll el carrusel —entero hasta que sale, y después en rodajas, una por foto—, sashimi la foto y temaki el texto. El pescado dice cómo va, de crudo a punto bajo el soplete. Y lleva una banda de nori por cada red, que se completa cuando esa red lo publica."
+            />{' '}
+            Se lee de un vistazo, sin abrir nada. Pruébalo:
           </p>
           <div className="mt-10">
             <ArmaUnCorte />
@@ -436,8 +475,11 @@ export function Landing() {
 
         <Rasgo donde="Nueva publicación" titulo="Se arma mientras sube" muestra={<SeArmaMientrasSube />}>
           <p>
-            Los archivos llegan como carne cruda, y el corte se completa a medida que suben. Si uno
-            no llega, se quema y espera su «Reintentar»: nada se programa a medias.
+            <DeNocheYDeDia
+              noche="Los archivos llegan como carne cruda, y el corte se completa a medida que suben. Si uno no llega, se quema y espera su «Reintentar»:"
+              dia="Los archivos llegan como pescado crudo, y la pieza se completa a medida que suben. Si uno no llega, se echa a perder y espera su «Reintentar»:"
+            />{' '}
+            nada se programa a medias.
           </p>
         </Rasgo>
 
@@ -452,19 +494,28 @@ export function Landing() {
           </p>
         </Rasgo>
 
-        <Rasgo donde="Se quemó" titulo="Lo que se quema, se ve" muestra={<SeQuemo />}>
+        <Rasgo
+          donde={<DeNocheYDeDia noche={SE_QUEMO.noche} dia={SE_QUEMO.dia} />}
+          titulo={<DeNocheYDeDia noche="Lo que se quema, se ve" dia="Lo que se echa a perder, se ve" />}
+          muestra={<SeQuemo />}
+        >
           <p>
-            Si una red no lo publica, el corte se quema —halo rojo y banderita— y te dice en una
-            frase qué pasó, con el arreglo al lado: reconectar la cuenta, cambiar el archivo o darle
-            otra hora.
+            Si una red no lo publica,{' '}
+            <DeNocheYDeDia noche="el corte se quema" dia="la pieza se echa a perder" /> —halo rojo y
+            banderita— y te dice en una frase qué pasó, con el arreglo al lado: reconectar la
+            cuenta, cambiar el archivo o darle otra hora.
           </p>
         </Rasgo>
 
-        <Rasgo donde={nombreDe('/admin/analytics')} titulo="Qué trajo cada corte" muestra={<QueTrajo />}>
+        <Rasgo
+          donde={nombreDe('/admin/analytics')}
+          titulo={<DeNocheYDeDia noche="Qué trajo cada corte" dia="Qué trajo cada pieza" />}
+          muestra={<QueTrajo />}
+        >
           <p>
             Un programador de posts te dice cuántos lo vieron. Tu Parrilla pone al lado cuánta gente
-            llegó a tu página por cada publicación, y ahí se ve cuál de tus cortes trabajó: no
-            siempre es el más visto.
+            llegó a tu página por cada publicación, y ahí se ve cuál de tus{' '}
+            <DeNocheYDeDia noche="cortes" dia="piezas" /> trabajó: no siempre es el más visto.
           </p>
         </Rasgo>
 
@@ -492,7 +543,7 @@ export function Landing() {
             Con tu canal de YouTube, sube los videos que programas y lee sus contadores y sus
             comentarios, tal como los entrega YouTube. Desconectas cuando quieras desde{' '}
             {nombreDe('/admin/accounts')}. El detalle está en la{' '}
-            <Link href="/privacidad" className="text-fg underline decoration-white/20 underline-offset-4 transition-colors hover:decoration-white/50">
+            <Link href="/privacidad" className="text-fg underline decoration-velo/20 underline-offset-4 transition-colors hover:decoration-velo/50">
               política de privacidad
             </Link>
             .
@@ -537,7 +588,9 @@ const DESCRIPCION =
   'Programa la semana en tus redes y mira cuánta gente llegó a tu página por cada publicación.'
 
 /**
- * La metadata de la landing, compartida por sus dos direcciones.
+ * La metadata de la landing, compartida por sus dos direcciones. `tema` elige la imagen para
+ * compartir: con `?modo=dia` en la dirección, la de día (`/api/og/dia`). Las dos direcciones,
+ * con o sin modo, son la misma página: la canónica es la raíz.
  *
  * La misma página se sirve en la raíz del dominio del producto y en `/landing`, y las dos
  * tienen que compartirse igual. Vive acá, al lado de la página, para que no se
@@ -547,11 +600,12 @@ const DESCRIPCION =
  * relativas —quien las lee es un servidor ajeno, que no sabe de qué sitio vinieron—, y el
  * host sale de la petición para que funcione igual en producción y en un preview.
  */
-export function metadataLanding(host: string | null): Metadata {
-  const imagen = host ? `https://${host}/api/og` : undefined
+export function metadataLanding(host: string | null, tema: Tema = 'noche'): Metadata {
+  const imagen = host ? `https://${host}/api/og${tema === 'dia' ? '/dia' : ''}` : undefined
   return {
     title: TITULO,
     description: DESCRIPCION,
+    alternates: host ? { canonical: `https://${host}/` } : undefined,
     openGraph: { title: TITULO, description: DESCRIPCION, images: imagen, type: 'website' },
     twitter: { card: 'summary_large_image', title: TITULO, description: DESCRIPCION, images: imagen },
   }

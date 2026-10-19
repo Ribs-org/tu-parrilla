@@ -197,11 +197,20 @@ al lado, en la chapa, nunca sobre la carne. La app del teléfono dibuja el mismo
 vistas (`mobile/src/components/pieza.tsx`), con el formato y el sello de cada destino que le
 manda `GET /api/mobile/schedule`. El porqué, en
 `docs/superpowers/specs/2026-10-16-el-corte-que-se-lee-design.md`. El panel tiene además un
-**modo día**, que se elige con el botón de la barra y se recuerda en el equipo con una cookie
-(`src/lib/tema.ts`): el fondo claro y, en vez de cortes, piezas de sushi
-(`src/components/pieza-sushi.tsx`) que dicen lo mismo con la misma gramática —nigiri, maki,
-sashimi y temaki; el pescado bajo el soplete; una banda de nori por destino—. Las palabras no
-cambian, la noche sigue por defecto, y la página pública de cada creador no cambia nunca. El
+**modo día**, que se elige con el botón de la barra y se recuerda en la cuenta (`users.tema`,
+`src/lib/tema.ts`), así que vale en cualquier equipo donde entres y en la app del teléfono, que lo lee y lo cambia
+en Ajustes con `GET`/`PUT /api/mobile/tema` y lo dibuja con sus colores de día
+(`mobile/src/components/colores.ts`) y sus piezas de sushi hechas con vistas
+(`mobile/src/components/pieza-sushi.tsx`). Una cookie lo copia en cada equipo para la
+puerta, que se dibuja antes de saber de quién es. El modo día es el fondo claro y, en vez de cortes, piezas de sushi
+(`src/components/pieza-sushi.tsx`) que dicen lo mismo con la misma gramática —nigiri, un roll
+que se corta al servirse, sashimi y temaki; el pescado bajo el soplete; una banda de nori por
+destino—. Lo que falló no
+se quema: es pescado pasado, y la sección «Se quemó» se llama «Se echó a perder» (`SE_QUEMO`,
+en `src/lib/vocabulario.ts`). Las demás palabras no cambian, la noche sigue por defecto, y la
+página pública de cada creador no cambia nunca. La portada tiene los dos modos, con el mismo
+botón: de día su marca es el nigiri, y `?modo=dia` la abre de día, con su imagen para compartir
+(`/api/og/dia`). El
 diseño, en `docs/superpowers/specs/2026-10-19-modo-dia-sushi-design.md`. Al pie, cuántos cortes salieron ayer; las miradas solo si la sincronización ya
 trajo sus métricas, porque un cero inventado diría «nadie miró» cuando lo cierto es
 «todavía no se sabe». Lo que no pide una acción está un clic más adentro: el tráfico, los
@@ -270,7 +279,9 @@ de cero.
 Cada fila de cada tabla (perfiles, cuentas, posts, borradores, comentarios, ajustes, llaves
 de API) tiene dueño: el panel solo te muestra lo tuyo, nunca lo de otro usuario invitado. Lo mismo
 la API: lo que entra con una llave es del dueño de la llave, y un agente con la tuya no ve
-ni toca lo de nadie más. Los crons (sync,
+ni toca lo de nadie más. Tu fila de usuario —el nombre, la zona y el modo del panel— la
+cambias solo tú: Tu Cuenta, el botón del modo y la app del teléfono escriben la fila de la
+sesión o del token, nunca una que llegue en la petición. Los crons (sync,
 publicación, comentarios) siguen recorriendo *todo* el despliegue sin filtrar por
 dueño — un cron por inquilino es otro subproyecto, no esta entrega. La llave del despliegue
 (`SCHEDULE_API_KEY`) y la raíz pública (`/`) siguen siendo del admin. Y hasta la entrega
@@ -417,7 +428,8 @@ Mientras la app siga en modo desarrollo, solo conectan las cuentas que tienen un
 ella (testers): a cualquier otra, Facebook le dice que la función no está disponible, y
 ese error no vuelve a nuestro callback, así que no hay forma de interceptarlo. Pon
 `META_EN_REVISION=1` para que Los Fierros lo avisen junto al botón de Instagram y de
-Facebook, y quítala al pasar la app a Live.
+Facebook, y quítala al pasar la app a Live. La de Tu Parrilla está en Live desde el 2026-10-19,
+con los permisos aprobados: en producción la variable ya no está.
 
 Al conectar se guarda tu **id de usuario de Meta**, que es lo que Meta manda cuando quitas
 la app desde tu cuenta de Facebook: sin él no hay forma de saber a qué cuentas se refiere.
@@ -1038,7 +1050,8 @@ Tres correos, todos con el remitente `PUBLISH_ALERT_FROM` y al correo del dueño
   post: `social_accounts.caida_avisada_en` lo marca y se borra cuando el fierro vuelve a
   calentarse. Una cuenta que el dueño desconectó a propósito no avisa. El día que esto se
   despliega, cada cuenta que ya estaba caída manda el suyo una vez.
-- **El resumen del día**: lo que se quemó en las últimas 24 horas, las cuentas por reconectar
+- **El resumen del día**: lo que se quemó en las últimas 24 horas (con la cuenta en el modo
+  día, lo que «se echó a perder», como se llama ahí la sección), las cuentas por reconectar
   (frías o a menos de siete días de vencer) y las cuentas en uso —con algo programado en los
   últimos 30 días— que tienen menos de tres días programados hacia adelante. Sale después de
   la sincronización diaria (9:00 UTC), y solo los días en que hay algo que contar. Lo mismo
@@ -1217,17 +1230,17 @@ src/
       (dash)/              panel protegido
   components/
     corte.tsx              el corte dibujado de La Parrilla: silueta, carne, marcas, halo y humo
-    pieza-sushi.tsx        el mismo corte en el modo día: nigiri, maki, sashimi y temaki
+    pieza-sushi.tsx        el mismo corte en el modo día: nigiri, roll, sashimi y temaki
     boton-tema.tsx         el botón de la barra que cambia entre la noche y el día
     icono-maestro.tsx      el dibujo de la pestaña Tu IA: el parrillero de noche, el maestro de sushi de día
-    landing.tsx            la portada del producto, armada con las piezas del panel; landing-demos.tsx, lo que se toca
-    landing-semana.ts      la semana de ejemplo, que comparten la portada y su imagen para compartir (/api/og)
+    landing.tsx            la portada del producto, armada con las piezas del panel y con los dos modos; landing-demos.tsx, lo que se toca
+    landing-semana.ts      la semana de ejemplo, que comparten la portada y sus imágenes para compartir (/api/og, /api/og/dia)
     esqueleto.tsx          las piezas de la carga del panel: la forma de cada pantalla, con su pulso tibio
     profile-view.tsx       la página pública (también alimenta la vista previa del editor)
     click-tracker.tsx      escucha delegada de clicks
     charts/                gráficos y paleta validada
   lib/
-    tema.ts                el modo del panel (noche o día) y su cookie; tema-servidor.ts lo lee en el servidor
+    tema.ts                el modo de la cuenta (noche o día) y su copia en una cookie; tema-servidor.ts lee la cookie
     slugs.ts               qué direcciones están reservadas y cuál le toca a cada correo
     dominios.ts            si un host es el del producto, y adónde va el panel si no lo es
     tracking.ts            contexto de la visita desde headers

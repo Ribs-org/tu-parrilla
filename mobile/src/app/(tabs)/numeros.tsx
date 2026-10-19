@@ -2,7 +2,8 @@ import { useCallback, useState } from 'react'
 import { Pressable, ScrollView, Text, View } from 'react-native'
 import { useRouter } from 'expo-router'
 import { TusCuentas } from '../../components/tus-cuentas'
-import { Boton, COLORES, Cargando, Chip, ErrorConReintento, Etiqueta, Pantalla, Sello, TIPO_TITULO, Tarjeta } from '../../components/ui'
+import { Boton, Cargando, Chip, ErrorConReintento, Etiqueta, Pantalla, Sello, TIPO_TITULO, Tarjeta } from '../../components/ui'
+import { useColores } from '../../components/tema'
 import { POST_ABIERTO, writeCache } from '../../lib/cache'
 import { cambio, num } from '../../lib/format'
 import { clearToken } from '../../lib/session'
@@ -18,24 +19,26 @@ function nombreDeCuenta(cuenta: CuentaNombrada | null, red: string | null): stri
 
 /** Una cifra con su aclaración debajo, como las del tablero del panel. */
 function CifraConNota({ etiqueta, valor, nota }: { etiqueta: string; valor: string; nota: React.ReactNode }) {
+  const colores = useColores()
   return (
     <View style={{ flex: 1, gap: 2 }}>
       <Etiqueta>{etiqueta}</Etiqueta>
       {/* La cifra en la fuente del sistema: Oswald es condensada y los números salen apretados. */}
-      <Text style={{ color: COLORES.texto, fontSize: 24, fontWeight: '600' }}>{valor}</Text>
+      <Text style={{ color: colores.texto, fontSize: 24, fontWeight: '600' }}>{valor}</Text>
       {nota}
     </View>
   )
 }
 
 function NotaCambio({ valor }: { valor: number | null }) {
+  const colores = useColores()
   const c = cambio(valor)
-  if (!c) return <Text style={{ color: COLORES.suave, fontSize: 12 }}>—</Text>
-  const color = c.sube === null ? COLORES.suave : c.sube ? COLORES.verde : COLORES.rojo
+  if (!c) return <Text style={{ color: colores.suave, fontSize: 12 }}>—</Text>
+  const color = c.sube === null ? colores.suave : c.sube ? colores.verde : colores.rojo
   const flecha = c.sube === null ? '→' : c.sube ? '↑' : '↓'
   return (
     <Text style={{ color, fontSize: 12 }}>
-      {flecha} {c.texto} <Text style={{ color: COLORES.suave }}>vs. período anterior</Text>
+      {flecha} {c.texto} <Text style={{ color: colores.suave }}>vs. período anterior</Text>
     </Text>
   )
 }
@@ -48,23 +51,24 @@ function FilaConBarra({ texto, nota, valor, proporcion, onPress }: {
   proporcion: number
   onPress?: () => void
 }) {
+  const colores = useColores()
   const cuerpo = (
-    <View style={{ borderRadius: 8, overflow: 'hidden', backgroundColor: '#ffffff08' }}>
+    <View style={{ borderRadius: 8, overflow: 'hidden', backgroundColor: colores.velo + '08' }}>
       <View
-        style={{ position: 'absolute', top: 0, bottom: 0, left: 0, width: `${Math.max(4, proporcion * 100)}%`, backgroundColor: '#e8621f33' }}
+        style={{ position: 'absolute', top: 0, bottom: 0, left: 0, width: `${Math.max(4, proporcion * 100)}%`, backgroundColor: colores.brasa + '33' }}
       />
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, padding: 10 }}>
         <View style={{ flex: 1 }}>
-          <Text style={{ color: COLORES.texto, fontSize: 14 }} numberOfLines={1}>
+          <Text style={{ color: colores.texto, fontSize: 14 }} numberOfLines={1}>
             {texto}
           </Text>
           {nota ? (
-            <Text style={{ color: COLORES.suave, fontSize: 11 }} numberOfLines={1}>
+            <Text style={{ color: colores.suave, fontSize: 11 }} numberOfLines={1}>
               {nota}
             </Text>
           ) : null}
         </View>
-        <Text style={{ color: COLORES.texto, fontSize: 14, fontWeight: '600' }}>{valor}</Text>
+        <Text style={{ color: colores.texto, fontSize: 14, fontWeight: '600' }}>{valor}</Text>
       </View>
     </View>
   )
@@ -78,12 +82,13 @@ function FilaConBarra({ texto, nota, valor, proporcion, onPress }: {
 }
 
 function TituloDeMitad({ titulo, bajada }: { titulo: string; bajada: string }) {
+  const colores = useColores()
   return (
     <View style={{ gap: 2 }}>
-      <Text style={{ color: COLORES.texto, fontFamily: TIPO_TITULO, fontSize: 16, letterSpacing: 1, textTransform: 'uppercase' }}>
+      <Text style={{ color: colores.texto, fontFamily: TIPO_TITULO, fontSize: 16, letterSpacing: 1, textTransform: 'uppercase' }}>
         {titulo}
       </Text>
-      <Text style={{ color: COLORES.suave, fontSize: 12 }}>{bajada}</Text>
+      <Text style={{ color: colores.suave, fontSize: 12 }}>{bajada}</Text>
     </View>
   )
 }
@@ -96,6 +101,7 @@ function TituloDeMitad({ titulo, bajada }: { titulo: string; bajada: string }) {
  * publicaciones queda un toque adentro, y las cuentas detrás de «⋯ Más».
  */
 export default function LosNumeros() {
+  const colores = useColores()
   const [rango, setRango] = useState<Rango>('30d')
   const [cuenta, setCuenta] = useState<string | null>(null)
   const [mas, setMas] = useState(false)
@@ -133,7 +139,7 @@ export default function LosNumeros() {
 
   return (
     <Pantalla refrescando={cargando} onRefrescar={refrescar}>
-      <Text style={{ color: COLORES.suave, fontSize: 13 }}>cómo te fue en las redes y en tu página</Text>
+      <Text style={{ color: colores.suave, fontSize: 13 }}>cómo te fue en las redes y en tu página</Text>
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6 }}>
         {RANGOS.map((r) => (
@@ -156,17 +162,17 @@ export default function LosNumeros() {
           <CifraConNota
             etiqueta="Views ganadas"
             valor={num(redes.viewsGanadas)}
-            nota={<Text style={{ color: COLORES.suave, fontSize: 12 }}>En el período · sin YouTube</Text>}
+            nota={<Text style={{ color: colores.suave, fontSize: 12 }}>En el período · sin YouTube</Text>}
           />
           <CifraConNota
             etiqueta="Seguidores ganados"
             valor={redes.seguidoresGanados === null ? '—' : `${redes.seguidoresGanados > 0 ? '+' : ''}${num(redes.seguidoresGanados)}`}
-            nota={<Text style={{ color: COLORES.suave, fontSize: 12 }}>En el período · sin YouTube</Text>}
+            nota={<Text style={{ color: colores.suave, fontSize: 12 }}>En el período · sin YouTube</Text>}
           />
         </View>
         <Etiqueta margenArriba>Lo que más creció</Etiqueta>
         {redes.loQueMasCrecio.length === 0 ? (
-          <Text style={{ color: COLORES.suave, fontSize: 13 }}>
+          <Text style={{ color: colores.suave, fontSize: 13 }}>
             Ninguna publicación ganó views en este período. Las métricas llegan con la sincronización diaria, así que lo
             publicado hoy aparece mañana.
           </Text>
@@ -197,7 +203,7 @@ export default function LosNumeros() {
         </View>
         <Etiqueta margenArriba>Qué publicación te trajo gente</Etiqueta>
         {pagina.queTeTrajoGente.length === 0 ? (
-          <Text style={{ color: COLORES.suave, fontSize: 13 }}>Ninguna visita llegó todavía por el link de una publicación.</Text>
+          <Text style={{ color: colores.suave, fontSize: 13 }}>Ninguna visita llegó todavía por el link de una publicación.</Text>
         ) : (
           <View style={{ gap: 6 }}>
             {pagina.queTeTrajoGente.map((e) => (

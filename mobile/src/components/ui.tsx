@@ -1,39 +1,22 @@
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native'
 import type { ReactNode } from 'react'
 import { Image } from 'expo-image'
-
-/**
- * «Fierro y humo», los mismos valores que el panel web (ver
- * `docs/superpowers/specs/2026-09-18-parrilla-direccion-visual-design.md`).
- *
- * `brasa` es el acento y no existía: antes el verde hacía dos trabajos, el estado
- * «publicado» y el fondo del botón destacado, así que el mismo color informaba y pedía
- * que lo tocaras. Ahora el verde es solo estado y la brasa solo acción.
- */
-export const COLORES = {
-  fondo: '#16181a',
-  tarjeta: '#1d2124',
-  texto: '#f2ebe2',
-  // El secundario y el tenue del panel, a 5,85:1 y 5,03:1 sobre la tarjeta. Antes el tenue
-  // daba 3,25:1, y se repetía con otro nombre (`gris`). `src/lib/paleta.test.ts` compara.
-  suave: '#a39a8f',
-  tenue: '#8a9096',
-  brasa: '#e8621f',
-  verde: '#74bf6a',
-  // El de «se quemó», como en el panel: el de antes (#f0614f) era casi el naranjo de la brasa.
-  rojo: '#f2557a',
-  ambar: '#e5a52a',
-}
+import type { Colores } from './colores'
+import { useColores } from './tema'
 
 /** El borde de lo que se toca y no está elegido: un botón secundario, una ficha sin marcar. */
-const BORDE_TOCABLE = 'rgba(255,255,255,0.16)'
+function bordeTocable(c: Colores): string {
+  return `${c.velo}29`
+}
 
 /** Oswald para títulos y etiquetas, en mayúsculas. Las cifras se quedan en la del sistema. */
 export const TIPO_TITULO = 'Oswald_600SemiBold'
 
-// El destello de Android al tocar: el mismo blanco del texto, casi transparente.
-const RIPPLE = { color: COLORES.texto + '22' }
-// Sobre la brasa el blanco casi no se nota: mismo nivel de opacidad, pero negro.
+// El destello de Android al tocar: el mismo color del texto, casi transparente.
+function ripple(c: Colores) {
+  return { color: c.texto + '22' }
+}
+// Sobre la brasa el destello claro casi no se nota: mismo nivel de opacidad, pero negro.
 const RIPPLE_DESTACADO = { color: '#00000022' }
 
 export function Pantalla({
@@ -45,12 +28,13 @@ export function Pantalla({
   refrescando: boolean
   onRefrescar: () => void
 }) {
+  const colores = useColores()
   return (
     <ScrollView
-      style={{ flex: 1, backgroundColor: COLORES.fondo }}
+      style={{ flex: 1, backgroundColor: colores.fondo }}
       contentContainerStyle={{ padding: 16, paddingBottom: 48, gap: 12 }}
       refreshControl={
-        <RefreshControl refreshing={refrescando} onRefresh={onRefrescar} tintColor={COLORES.suave} />
+        <RefreshControl refreshing={refrescando} onRefresh={onRefrescar} tintColor={colores.suave} />
       }
     >
       {children}
@@ -59,8 +43,9 @@ export function Pantalla({
 }
 
 export function Tarjeta({ children }: { children: ReactNode }) {
+  const colores = useColores()
   return (
-    <View style={{ backgroundColor: COLORES.tarjeta, borderRadius: 16, padding: 14, gap: 6 }}>
+    <View style={{ backgroundColor: colores.tarjeta, borderRadius: 16, padding: 14, gap: 6 }}>
       {children}
     </View>
   )
@@ -76,10 +61,11 @@ export function Tarjeta({ children }: { children: ReactNode }) {
  * que van pegados al techo de una tarjeta no lo llevan.
  */
 export function Etiqueta({ children, margenArriba }: { children: string; margenArriba?: boolean }) {
+  const colores = useColores()
   return (
     <Text
       style={{
-        color: COLORES.tenue,
+        color: colores.tenue,
         fontSize: 11,
         textTransform: 'uppercase',
         fontFamily: TIPO_TITULO,
@@ -94,10 +80,11 @@ export function Etiqueta({ children, margenArriba }: { children: string; margenA
 
 /** Un título de pantalla, en la voz de los títulos. */
 export function Titulo({ children }: { children: string }) {
+  const colores = useColores()
   return (
     <Text
       style={{
-        color: COLORES.texto,
+        color: colores.texto,
         fontSize: 22,
         fontFamily: TIPO_TITULO,
         textTransform: 'uppercase',
@@ -110,12 +97,13 @@ export function Titulo({ children }: { children: string }) {
 }
 
 export function Cifra({ etiqueta, valor }: { etiqueta: string; valor: string }) {
+  const colores = useColores()
   return (
-    <View style={{ flex: 1, backgroundColor: COLORES.tarjeta, borderRadius: 16, padding: 14 }}>
+    <View style={{ flex: 1, backgroundColor: colores.tarjeta, borderRadius: 16, padding: 14 }}>
       <Etiqueta>{etiqueta}</Etiqueta>
       {/* La cifra en sí se queda en la fuente del sistema: Oswald es condensada y los
           números salen apretados justo donde hay que leerlos de una pasada. */}
-      <Text style={{ color: COLORES.texto, fontSize: 24, fontWeight: '600', marginTop: 4 }}>
+      <Text style={{ color: colores.texto, fontSize: 24, fontWeight: '600', marginTop: 4 }}>
         {valor}
       </Text>
     </View>
@@ -123,29 +111,32 @@ export function Cifra({ etiqueta, valor }: { etiqueta: string; valor: string }) 
 }
 
 export function Sello({ texto }: { texto: string | null }) {
+  const colores = useColores()
   if (!texto) return null
-  return <Text style={{ color: COLORES.tenue, fontSize: 11 }}>Actualizado {texto}</Text>
+  return <Text style={{ color: colores.tenue, fontSize: 11 }}>Actualizado {texto}</Text>
 }
 
 export function Cargando() {
+  const colores = useColores()
   return (
     <View
       style={{
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: COLORES.fondo,
+        backgroundColor: colores.fondo,
       }}
     >
-      <ActivityIndicator color={COLORES.suave} />
+      <ActivityIndicator color={colores.suave} />
     </View>
   )
 }
 
 export function ErrorConReintento({ mensaje, onReintentar }: { mensaje: string; onReintentar: () => void }) {
+  const colores = useColores()
   return (
     <Tarjeta>
-      <Text style={{ color: COLORES.texto }}>{mensaje}</Text>
+      <Text style={{ color: colores.texto }}>{mensaje}</Text>
       <View style={{ flexDirection: 'row', marginTop: 4 }}>
         <Boton texto="Reintentar" onPress={onReintentar} destacado />
       </View>
@@ -154,29 +145,32 @@ export function ErrorConReintento({ mensaje, onReintentar }: { mensaje: string; 
 }
 
 export function Vacio({ texto }: { texto: string }) {
+  const colores = useColores()
   return (
-    <Text style={{ color: COLORES.tenue, textAlign: 'center', marginTop: 24, lineHeight: 20 }}>
+    <Text style={{ color: colores.tenue, textAlign: 'center', marginTop: 24, lineHeight: 20 }}>
       {texto}
     </Text>
   )
 }
 
-const COLOR_ESTADO: Record<string, string> = {
-  published: COLORES.verde,
-  scheduled: COLORES.tenue,
-  failed: COLORES.rojo,
-  publishing: COLORES.ambar,
+/** El color del estado de un destino: verde publicado, gris programado, rojo falló, ámbar saliendo. */
+function colorDeEstado(c: Colores, estado: string): string {
+  if (estado === 'published') return c.verde
+  if (estado === 'failed') return c.rojo
+  if (estado === 'publishing') return c.ambar
+  return c.tenue
 }
 
 /** El mismo semáforo del panel: verde publicado, gris programado, rojo falló. */
 export function PuntoEstado({ estado }: { estado: string }) {
+  const colores = useColores()
   return (
     <View
       style={{
         width: 8,
         height: 8,
         borderRadius: 4,
-        backgroundColor: COLOR_ESTADO[estado] ?? COLORES.tenue,
+        backgroundColor: colorDeEstado(colores, estado),
       }}
     />
   )
@@ -201,12 +195,13 @@ export function Chip({
   onPress: () => void
   deshabilitado?: boolean
 }) {
+  const colores = useColores()
   return (
     <Pressable
       onPress={onPress}
       disabled={deshabilitado}
       hitSlop={4}
-      android_ripple={deshabilitado ? undefined : activo ? RIPPLE_DESTACADO : RIPPLE}
+      android_ripple={deshabilitado ? undefined : activo ? RIPPLE_DESTACADO : ripple(colores)}
       style={({ pressed }) => ({
         paddingHorizontal: 12,
         paddingVertical: 10,
@@ -216,12 +211,12 @@ export function Chip({
         // Sin esto el ripple se dibuja rectangular, por fuera de las esquinas redondas.
         overflow: 'hidden',
         borderWidth: 1,
-        borderColor: activo ? COLORES.brasa : BORDE_TOCABLE,
-        backgroundColor: activo ? COLORES.brasa : 'transparent',
+        borderColor: activo ? colores.brasa : bordeTocable(colores),
+        backgroundColor: activo ? colores.brasa : 'transparent',
         opacity: deshabilitado ? 0.5 : pressed ? 0.7 : 1,
       })}
     >
-      <Text style={{ color: activo ? COLORES.fondo : COLORES.tenue, fontSize: 12, fontWeight: activo ? '600' : '400' }}>{texto}</Text>
+      <Text style={{ color: activo ? colores.fondo : colores.tenue, fontSize: 12, fontWeight: activo ? '600' : '400' }}>{texto}</Text>
     </Pressable>
   )
 }
@@ -247,6 +242,7 @@ export function Miniatura({
   nota?: string | null
   onTocar?: () => void
 }) {
+  const colores = useColores()
   return (
     <View style={{ width: 72, height: 72 }}>
       <Pressable
@@ -261,12 +257,12 @@ export function Miniatura({
             style={{
               width: 72,
               height: 72,
-              backgroundColor: '#ffffff10',
+              backgroundColor: colores.velo + '10',
               alignItems: 'center',
               justifyContent: 'center',
             }}
           >
-            <Text style={{ color: COLORES.suave, fontSize: 11 }}>Video</Text>
+            <Text style={{ color: colores.suave, fontSize: 11 }}>Video</Text>
           </View>
         ) : (
           <Image source={{ uri }} style={{ width: 72, height: 72 }} />
@@ -284,7 +280,7 @@ export function Miniatura({
               alignItems: 'center',
             }}
           >
-            <Text style={{ color: nota === 'Reintentar' ? COLORES.rojo : COLORES.texto, fontSize: 10 }}>{nota}</Text>
+            <Text style={{ color: nota === 'Reintentar' ? colores.rojo : colores.texto, fontSize: 10 }}>{nota}</Text>
           </View>
         ) : null}
       </Pressable>
@@ -301,12 +297,12 @@ export function Miniatura({
             width: 22,
             height: 22,
             borderRadius: 11,
-            backgroundColor: COLORES.fondo,
+            backgroundColor: colores.fondo,
             alignItems: 'center',
             justifyContent: 'center',
           }}
         >
-          <Text style={{ color: COLORES.texto, fontSize: 12 }}>✕</Text>
+          <Text style={{ color: colores.texto, fontSize: 12 }}>✕</Text>
         </Pressable>
       ) : null}
     </View>
@@ -324,18 +320,19 @@ export function Boton({
   deshabilitado?: boolean
   destacado?: boolean
 }) {
+  const colores = useColores()
   return (
     <Pressable
       onPress={onPress}
       disabled={deshabilitado}
-      android_ripple={deshabilitado ? undefined : destacado ? RIPPLE_DESTACADO : RIPPLE}
+      android_ripple={deshabilitado ? undefined : destacado ? RIPPLE_DESTACADO : ripple(colores)}
       style={({ pressed }) => ({
         flex: 1,
-        backgroundColor: destacado ? COLORES.brasa : COLORES.tarjeta,
+        backgroundColor: destacado ? colores.brasa : colores.tarjeta,
         // El secundario es del color de la tarjeta: puesto sobre una, sin borde no se veía que
         // era un botón («Reprogramar» en «Se quemó» se leía como texto suelto).
         borderWidth: destacado ? 0 : 1,
-        borderColor: BORDE_TOCABLE,
+        borderColor: bordeTocable(colores),
         borderRadius: 12,
         // Sin esto el ripple se dibuja rectangular, por fuera de las esquinas redondas.
         overflow: 'hidden',
@@ -346,7 +343,7 @@ export function Boton({
         opacity: deshabilitado ? 0.5 : pressed ? 0.7 : 1,
       })}
     >
-      <Text style={{ color: destacado ? COLORES.fondo : COLORES.texto, fontWeight: '600' }}>{texto}</Text>
+      <Text style={{ color: destacado ? colores.fondo : colores.texto, fontWeight: '600' }}>{texto}</Text>
     </Pressable>
   )
 }
@@ -366,6 +363,7 @@ export function BotonTexto({
   deshabilitado?: boolean
   peligro?: boolean
 }) {
+  const colores = useColores()
   return (
     <Pressable
       onPress={onPress}
@@ -379,7 +377,7 @@ export function BotonTexto({
         opacity: deshabilitado ? 0.5 : pressed ? 0.7 : 1,
       })}
     >
-      <Text style={{ color: peligro ? COLORES.rojo : COLORES.suave, fontSize: 13, fontWeight: '600' }}>{texto}</Text>
+      <Text style={{ color: peligro ? colores.rojo : colores.suave, fontSize: 13, fontWeight: '600' }}>{texto}</Text>
     </Pressable>
   )
 }

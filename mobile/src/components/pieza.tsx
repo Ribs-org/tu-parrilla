@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
-import { AccessibilityInfo, Animated, View, type ViewStyle } from 'react-native'
+import { Animated, View, type ViewStyle } from 'react-native'
 import { CARNE, GRASA, QUEMO, type Carne, type Coccion, type Formato, type Sello } from '../lib/parrilla'
-import { COLORES } from './ui'
+import { ANCHO, ESCALA, Lienzo, Punteada, useQuieto } from './lienzo'
+import { PiezaDeSushi } from './pieza-sushi'
+import { useColores, useTema } from './tema'
 
 /**
  * El corte del panel (`src/components/corte.tsx`), dibujado con vistas.
@@ -13,13 +15,11 @@ import { COLORES } from './ui'
  * por destino que se quema cuando ese destino confirma, el halo rojo y la banderita si algo
  * se quemó, y el humo mientras algo sale.
  *
+ * De día, la pieza de sushi (`pieza-sushi.tsx`), con la misma gramática: `Pieza` elige según
+ * el modo de la cuenta.
+ *
  * Es solo el dibujo: quien lo pone escribe al lado, en palabras, lo que dice.
  */
-
-/** El lienzo: 120 × 64 del panel, a poco más de la mitad. Se dibuja ahí y se agranda entero. */
-const ANCHO = 64
-const ALTO = 34
-const AUMENTO = 1.3
 
 /** Dónde va la carne de cada formato dentro del lienzo, y con qué esquinas. */
 const SILUETA: Record<Formato, ViewStyle> = {
@@ -43,34 +43,9 @@ function posiciones(n: number): number[] {
   return Array.from({ length: n }, (_, i) => 34 + (i * 58) / (n - 1))
 }
 
-/** «Quitar animaciones» del teléfono: con eso prendido, el humo y el latido quedan quietos. */
-function useQuieto(): boolean {
-  const [quieto, setQuieto] = useState(false)
-  useEffect(() => {
-    let vivo = true
-    AccessibilityInfo.isReduceMotionEnabled().then((v) => vivo && setQuieto(v))
-    const sub = AccessibilityInfo.addEventListener('reduceMotionChanged', setQuieto)
-    return () => {
-      vivo = false
-      sub.remove()
-    }
-  }, [])
-  return quieto
-}
-
-/** Una línea punteada de segmentos: RN no dibuja bien un borde punteado de un solo lado. */
-function Punteada({ color, ancho, opacidad = 1 }: { color: string; ancho: number; opacidad?: number }) {
-  return (
-    <View style={{ flex: 1, alignItems: 'center', gap: 3, opacity: opacidad }}>
-      {Array.from({ length: 7 }, (_, i) => (
-        <View key={i} style={{ width: ancho, height: 4, borderRadius: ancho / 2, backgroundColor: color }} />
-      ))}
-    </View>
-  )
-}
-
 /** La marca de un destino: una diagonal del fierro, inclinada como en el panel. */
 function Marca({ x, sello }: { x: number; sello: Sello }) {
+  const colores = useColores()
   const base: ViewStyle = { position: 'absolute', left: x - 3, top: -8, width: 6, height: 50, transform: [{ rotate: '18deg' }] }
   if (sello === 'servido') {
     return (
@@ -95,11 +70,11 @@ function Marca({ x, sello }: { x: number; sello: Sello }) {
         <View style={{ flex: 1, width: 6 }}>
           <Punteada color="#1e0a06" ancho={2} opacidad={0.42} />
         </View>
-        <View style={{ position: 'absolute', top: 22, width: 5, height: 5, borderRadius: 3, backgroundColor: COLORES.ambar, borderWidth: 0.5, borderColor: '#24100a' }} />
+        <View style={{ position: 'absolute', top: 22, width: 5, height: 5, borderRadius: 3, backgroundColor: colores.ambar, borderWidth: 0.5, borderColor: '#24100a' }} />
       </View>
     )
   }
-  if (sello === 'reintento') return <View style={base}><Punteada color={COLORES.ambar} ancho={2} /></View>
+  if (sello === 'reintento') return <View style={base}><Punteada color={colores.ambar} ancho={2} /></View>
   if (sello === 'frio') return <View style={base}><Punteada color="#9aa7b4" ancho={2} opacidad={0.8} /></View>
   return <View style={base}><Punteada color="#1e0a06" ancho={2} opacidad={0.42} /></View>
 }
@@ -238,35 +213,31 @@ function Halo({ silueta, quieto, giro }: { silueta: ViewStyle; quieto: boolean; 
   )
 }
 
-export function Pieza({
-  formato,
-  huesos = 0,
-  carne,
-  coccion,
-  sellos,
-}: {
+export type PropsDePieza = {
   formato: Formato
   huesos?: number
   carne: Carne
   coccion: Coccion
   sellos: readonly Sello[]
-}) {
+}
+
+/** La pieza de cada post: el corte de carne de noche, la de sushi de día. */
+export function Pieza(props: PropsDePieza) {
+  const { tema } = useTema()
+  return tema === 'dia' ? <PiezaDeSushi {...props} /> : <PiezaDeCarne {...props} />
+}
+
+function PiezaDeCarne({ formato, huesos = 0, carne, coccion, sellos }: PropsDePieza) {
   const quieto = useQuieto()
   const silueta = SILUETA[formato]
   const izquierda = silueta.left as number
   const ancho = silueta.width as number
   const v = VETAS[carne]
-  const escala = ANCHO / 120
-  const xs = posiciones(sellos.length).map((x) => x * escala - izquierda)
+  const xs = posiciones(sellos.length).map((x) => x * ESCALA - izquierda)
   // La entraña va apenas torcida: así una tira larga se lee como entraña y no como un palo.
   const giro: ViewStyle['transform'] = formato === 'entrana' ? [{ rotate: '-3deg' }] : []
   return (
-    <View
-      accessibilityElementsHidden
-      importantForAccessibility="no-hide-descendants"
-      style={{ width: ANCHO * AUMENTO, height: ALTO * AUMENTO, marginTop: 10 }}
-    >
-      <View style={{ width: ANCHO, height: ALTO, transform: [{ scale: AUMENTO }], transformOrigin: 'top left' }}>
+    <Lienzo>
       {sellos.includes('saliendo') ? <Humo quieto={quieto} /> : null}
       {/* La sombra sobre la parrilla. */}
       <View style={{ position: 'absolute', left: 10, right: 10, bottom: 0, height: 4, borderRadius: 4, backgroundColor: 'rgba(0,0,0,0.45)' }} />
@@ -298,7 +269,6 @@ export function Pieza({
         ))}
       </View>
       {coccion === 'parcial' || coccion === 'quemada' ? <Halo silueta={silueta} quieto={quieto} giro={giro} /> : null}
-      </View>
-    </View>
+    </Lienzo>
   )
 }

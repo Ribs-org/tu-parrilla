@@ -123,7 +123,7 @@ const { cuentasParaElTelefono } = await import('./borradores-movil')
 const { leerAjuste } = await import('./ajustes')
 const { listarLlaves, crearLlave } = await import('./llaves')
 const { leerResumen } = await import('./avisos/run')
-const { makeDefault, updateProfile, deleteScheduledPost, guardarCuenta, revocarLlaveApi } = await import(
+const { makeDefault, updateProfile, deleteScheduledPost, guardarCuenta, guardarTema, revocarLlaveApi } = await import(
   '@/app/admin/actions'
 )
 // `guardarCuenta` son dos funciones distintas con el mismo nombre: la de `admin/actions`
@@ -143,6 +143,7 @@ const USUARIO = {
   nombre: null,
   rol: 'usuario' as const,
   zona: 'America/Santiago',
+  tema: 'noche' as const,
   sesionVersion: 1,
   invitadoEn: new Date('2026-01-01'),
   primerIngresoEn: new Date('2026-01-01'),
@@ -519,6 +520,36 @@ describe('aislamiento por dueño, escrituras (SQL generado, sin base)', () => {
     expect(sql.split(/\bwhere\b/i).pop()).toMatch(/"id"\s*=\s*\$/)
     expect(params).toContain(DUENO)
     // Y el dueño va como parámetro ligado, nunca escrito en el texto de la consulta.
+    expect(sql).not.toContain(DUENO)
+  })
+
+  /**
+   * El modo es de la cuenta, y lo cambian dos puertas: el botón del panel y Ajustes en el
+   * teléfono. Las dos escriben la fila del usuario de la sesión o del token, como «Tu Cuenta».
+   */
+  it('admin/actions: guardarTema ata su UPDATE a la fila del usuario de la sesión', async () => {
+    const consultas = await consultasEncadenadas(() => guardarTema('dia'))
+    expect(consultas).toHaveLength(1)
+    const { sql, params } = consultas[0]!
+    expect(sql).toMatch(/update "users"/i)
+    expect(sql.split(/\bwhere\b/i).pop()).toMatch(/"id"\s*=\s*\$/)
+    expect(params).toContain(DUENO)
+    expect(params).toContain('dia')
+    expect(sql).not.toContain(DUENO)
+  })
+
+  it('api/mobile/tema: PUT ata su UPDATE a la fila del dueño del token', async () => {
+    const { PUT } = await import('../app/api/mobile/tema/route')
+    const peticion = new Request('https://ejemplo.cl/api/mobile/tema', {
+      method: 'PUT',
+      body: JSON.stringify({ tema: 'dia' }),
+    })
+    const consultas = await consultasEncadenadas(() => PUT(peticion))
+    expect(consultas).toHaveLength(1)
+    const { sql, params } = consultas[0]!
+    expect(sql).toMatch(/update "users"/i)
+    expect(sql.split(/\bwhere\b/i).pop()).toMatch(/"id"\s*=\s*\$/)
+    expect(params).toContain(DUENO)
     expect(sql).not.toContain(DUENO)
   })
 
