@@ -1,12 +1,11 @@
 // Qué arreglo se ofrece al lado de un destino quemado. Puro: «Se quemó» y el editor lo
 // preguntan igual, y acá se lo puede pinchar con un test sin pintar nada.
 
+import { MOTIVOS_DE_CONEXION } from '@/lib/social/publish/conexion'
 import { FACEBOOK_MIXED_MEDIA } from '@/lib/social/publish/facebook'
 import { TRIAL_REEL_MEDIA } from '@/lib/social/publish/opciones'
-import { NO_PUBLISH_TOKEN } from '@/lib/social/publish/publisher'
 import { THREADS_SINGLE_FILE } from '@/lib/social/publish/threads'
 import { TIKTOK_ARCHIVO } from '@/lib/social/publish/tiktok'
-import { TIKTOK_RECONECTAR, TIKTOK_SIN_CUENTA } from '@/lib/social/publish/tiktok-creador'
 import { TIKTOK_MEDIA } from '@/lib/social/publish/validate'
 import { X_NO_VIDEO, X_TOO_MANY_IMAGES } from '@/lib/social/publish/x'
 import { YOUTUBE_ONLY_VIDEO } from '@/lib/social/publish/youtube'
@@ -15,9 +14,6 @@ import { YOUTUBE_ONLY_VIDEO } from '@/lib/social/publish/youtube'
 export const RECONECTAR_EN = '/admin/accounts'
 
 export type Arreglo = { texto: string; href: string }
-
-/** Lo que se arregla en Los Fierros: la cuenta perdió la conexión o el permiso. */
-const DE_CONEXION: ReadonlySet<string> = new Set([NO_PUBLISH_TOKEN, TIKTOK_RECONECTAR, TIKTOK_SIN_CUENTA])
 
 /** Lo que se arregla cambiando los archivos del post: la red no los acepta como vienen. */
 const DE_ARCHIVO: ReadonlySet<string> = new Set([
@@ -48,7 +44,8 @@ const DE_ARCHIVO: ReadonlySet<string> = new Set([
  */
 export function arregloDe(motivo: string | null, archivoHref: string): Arreglo | null {
   if (!motivo) return null
-  if (DE_CONEXION.has(motivo)) return { texto: 'Reconectar', href: RECONECTAR_EN }
+  // Lo que se arregla en Los Fierros: la cuenta perdió la conexión o el permiso.
+  if (MOTIVOS_DE_CONEXION.has(motivo)) return { texto: 'Reconectar', href: RECONECTAR_EN }
   if (DE_ARCHIVO.has(motivo)) return { texto: 'Cambiar el archivo', href: archivoHref }
   return null
 }

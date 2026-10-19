@@ -209,6 +209,10 @@ export const socialAccounts = pgTable(
     expiresAt: timestamp('expires_at', { withTimezone: true }),
     lastSyncedAt: timestamp('last_synced_at', { withTimezone: true }),
     lastSyncError: text('last_sync_error'),
+    // Cuándo salió el correo de que esta conexión se cayó; nula mientras esté bien. La
+    // escribe `vigilarConexiones` (`lib/avisos/run.ts`) al avisar y la borra cuando el fierro
+    // vuelve a calentarse: así llega un correo por caída, no uno por cada post que no sale.
+    caidaAvisadaEn: timestamp('caida_avisada_en', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
@@ -347,10 +351,19 @@ export const scheduledPosts = pgTable(
     // La taxonomía libre del editor-LLM ({"hook": "...", "tema": "..."}); el
     // endpoint de métricas la devuelve junto a los números para cerrar su loop.
     atributos: jsonb('atributos'),
+    // La referencia que el que llama a `POST /api/schedule/batch` le pone a la fila. Es
+    // única por dueño: reenviar un lote que se cortó a medias devuelve el post que ya
+    // entró en vez de programarlo dos veces (`scheduleBatch`). Nula en lo que no vino por
+    // la API o vino sin ella.
+    ref: text('ref'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [index('scheduled_posts_owner_idx').on(t.ownerId)],
+  (t) => [
+    index('scheduled_posts_owner_idx').on(t.ownerId),
+    // Los nulos no chocan entre sí: un post sin `ref` nunca se topa con otro.
+    unique('scheduled_posts_owner_ref_key').on(t.ownerId, t.ref),
+  ],
 ).enableRLS()
 
 /**
@@ -378,6 +391,10 @@ export const scheduledPostTargets = pgTable(
     externalId: text('external_id'),
     attemptCount: integer('attempt_count').notNull().default(0),
     lastError: text('last_error'),
+    // No se intenta antes de esta hora. La pone `resolveOutcome`: la espera entre un intento
+    // fallido y el siguiente (`ESPERAS_TRAS_FALLO_MS`), o la que pide una red sin cupo (el
+    // tope diario de Instagram). Nula = sale en la primera corrida después de su hora.
+    reintentarDesde: timestamp('reintentar_desde', { withTimezone: true }),
     // Lo que la red exige elegir por destino antes de publicar (TikTok: modo, privacidad,
     // interacciones, comercial). Null en las redes que no piden nada. La forma la valida
     // `lib/social/publish/opciones`; el editor la muestra pero no la cambia.

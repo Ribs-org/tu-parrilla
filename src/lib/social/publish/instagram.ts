@@ -1,6 +1,14 @@
 import type { PublishMedia, PublishInput, PublishOutcome, Publisher } from './publisher'
-import { PUBLISH_NETWORK_ERROR, PUBLISH_REJECTED, TRIAL_REEL_NO_DISPONIBLE } from './publisher'
+import { PUBLISH_NETWORK_ERROR, PUBLISH_REJECTED, TOPE_INSTAGRAM, TRIAL_REEL_NO_DISPONIBLE } from './publisher'
 import type { OpcionesDestino } from './opciones'
+
+/**
+ * Cada cuánto se vuelve a probar un destino que chocó con el tope diario. El tope es una
+ * ventana móvil de 24 horas —cada cupo se libera un día después de la publicación que lo
+ * gastó—, así que probar cada cinco minutos solo gasta llamadas, y una hora es lo más que
+ * un post se atrasa por esperar de más.
+ */
+export const ESPERA_TOPE_INSTAGRAM_MS = 60 * 60_000
 
 export function photoContainerParams(caption: string, media: PublishMedia): Record<string, string> {
   return { image_url: media.url, caption }
@@ -32,15 +40,34 @@ export function reelContainerParams(
  * the message text — and only when a trial reel was asked for, so an unrelated error
  * that happens to say "trial" on a normal reel keeps its usual treatment. The cost
  * when the wording does not match (Meta changes it, or rejects for a reason it phrases
- * without the word — a private account, the daily quota): the rejection is treated as
+ * without the word — a private account, say): the rejection is treated as
  * a network failure and retried up to MAX_PUBLISH_ATTEMPTS times before the target
  * fails, with a sentence that promises a retry Meta already refused. That is the same
  * treatment every non-ok gets on a normal reel today; this function only narrows it
- * for the one case Meta lets us recognise. Tracked in docs/deuda-tecnica.md.
+ * for the one case Meta lets us recognise. The daily quota is the other one, and it is
+ * not a rejection: `esTopeDiario`. Tracked in docs/deuda-tecnica.md.
  */
 export function motivoDeRechazo(cuerpo: string, opciones: OpcionesDestino | null): string | null {
   if (!opciones || !('trialReel' in opciones)) return null
   return /trial/i.test(cuerpo) ? TRIAL_REEL_NO_DISPONIBLE : null
+}
+
+/**
+ * Si Meta dijo que la cuenta llegó a su tope de publicaciones por API en 24 horas: el
+ * subcódigo 2207042 (código 9) de la tabla de errores de la plataforma de Instagram. Meta
+ * lo cobra al publicar el contenedor, pero se mira también al crearlo por si lo adelanta.
+ *
+ * No es un fallo del post: el cupo vuelve solo. Por eso no gasta intento ni lo quema
+ * (`diferidoPorTope`). Se lee el subcódigo y no el mensaje, que Meta traduce; con una
+ * expresión y no con `JSON.parse`, porque el cuerpo puede venir cortado.
+ */
+export function esTopeDiario(cuerpo: string): boolean {
+  return /"error_subcode"\s*:\s*2207042\b/.test(cuerpo)
+}
+
+/** La espera del tope diario, con el contenedor ya hecho si lo hay: el reintento solo lo publica. */
+function diferidoPorTope(containerId?: string): PublishOutcome {
+  return { kind: 'deferred', esperaMs: ESPERA_TOPE_INSTAGRAM_MS, motivo: TOPE_INSTAGRAM, ...(containerId ? { containerId } : {}) }
 }
 
 export function carouselChildParams(media: PublishMedia): Record<string, string> {
@@ -75,14 +102,16 @@ const GRAPH = 'https://graph.facebook.com/v23.0'
 // (as `rechazo`, the raw text) so a trial-reel rejection can be told apart from a
 // plain network failure. `postForm` itself does not know what a trial reel is — that
 // judgement is `motivoDeRechazo`'s, in the one caller that has `opciones` to ask it.
+// The log keeps 300 characters; the caller gets more, so the subcode that comes after a
+// long message (`esTopeDiario`) is still there to read.
 async function postForm(
   url: string,
   params: Record<string, string>,
 ): Promise<{ data: Record<string, unknown> } | { rechazo: string }> {
   const response = await fetch(url, { method: 'POST', body: new URLSearchParams(params) })
   if (!response.ok) {
-    const rechazo = (await response.text()).slice(0, 300)
-    console.error('Instagram publish:', response.status, rechazo)
+    const rechazo = (await response.text()).slice(0, 2000)
+    console.error('Instagram publish:', response.status, rechazo.slice(0, 300))
     return { rechazo }
   }
   return { data: await response.json() }
@@ -93,16 +122,18 @@ async function postForm(
  * decidió que no, y `resolveOutcome` lo hace fallar en este mismo intento en vez de
  * reintentarlo. Cualquier otro `failed` —incluido el de `publishContainer`, que no pasa
  * por acá— sigue sin la propiedad, y `resolveOutcome` lo trata exactamente como hoy.
+ * `tope` es el tope diario, que no es un rechazo (`esTopeDiario`).
  */
 async function createContainer(
   input: PublishInput,
   params: Record<string, string>,
-): Promise<{ id: string } | { failed: string; definitivo?: true }> {
+): Promise<{ id: string } | { failed: string; definitivo?: true } | { tope: true }> {
   const r = await postForm(`${GRAPH}/${input.accountExternalId}/media`, {
     ...params,
     access_token: input.token,
   })
   if ('rechazo' in r) {
+    if (esTopeDiario(r.rechazo)) return { tope: true }
     const motivo = motivoDeRechazo(r.rechazo, input.opciones)
     return motivo ? { failed: motivo, definitivo: true } : { failed: PUBLISH_NETWORK_ERROR }
   }
@@ -110,9 +141,10 @@ async function createContainer(
   return typeof id === 'string' ? { id } : { failed: PUBLISH_NETWORK_ERROR }
 }
 
-/** El `failed` de `PublishOutcome` que corresponde a lo que devolvió `createContainer`,
- * llevando `definitivo` solo si venía puesto. */
-function fromCreate(r: { failed: string; definitivo?: true }): PublishOutcome {
+/** El `PublishOutcome` que corresponde a lo que devolvió `createContainer` sin un id:
+ * la espera del tope, o el `failed` llevando `definitivo` solo si venía puesto. */
+function fromCreate(r: { failed: string; definitivo?: true } | { tope: true }): PublishOutcome {
+  if ('tope' in r) return diferidoPorTope()
   return r.definitivo ? { kind: 'failed', reason: r.failed, definitivo: true } : { kind: 'failed', reason: r.failed }
 }
 
@@ -121,6 +153,7 @@ async function publishContainer(input: PublishInput, containerId: string): Promi
     creation_id: containerId,
     access_token: input.token,
   })
+  if ('rechazo' in r && esTopeDiario(r.rechazo)) return diferidoPorTope(containerId)
   const id = 'data' in r ? r.data.id : undefined
   if (typeof id !== 'string') return { kind: 'failed', reason: PUBLISH_REJECTED }
   return { kind: 'published', externalId: id }
@@ -151,7 +184,7 @@ export const instagramPublisher: Publisher = {
     // once, so create-and-publish in the same run.
     if (media.length === 1 && media[0]!.mediaType === 'image') {
       const r = await createContainer(input, photoContainerParams(input.caption, media[0]!))
-      if ('failed' in r) return fromCreate(r)
+      if (!('id' in r)) return fromCreate(r)
       return publishContainer(input, r.id)
     }
 
@@ -162,7 +195,7 @@ export const instagramPublisher: Publisher = {
         input,
         reelContainerParams(input.caption, media[0]!, input.coverUrl, input.opciones),
       )
-      if ('failed' in r) return fromCreate(r)
+      if (!('id' in r)) return fromCreate(r)
       return { kind: 'processing', containerId: r.id }
     }
 
@@ -171,11 +204,11 @@ export const instagramPublisher: Publisher = {
     const childIds: string[] = []
     for (const item of media) {
       const r = await createContainer(input, carouselChildParams(item))
-      if ('failed' in r) return fromCreate(r)
+      if (!('id' in r)) return fromCreate(r)
       childIds.push(r.id)
     }
     const parent = await createContainer(input, carouselParentParams(input.caption, childIds))
-    if ('failed' in parent) return fromCreate(parent)
+    if (!('id' in parent)) return fromCreate(parent)
     return { kind: 'processing', containerId: parent.id }
   },
 }

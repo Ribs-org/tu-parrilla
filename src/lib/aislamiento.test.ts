@@ -122,6 +122,7 @@ const { listarBorradores, cargarBorrador, guardarBorrador, borrarBorrador } = aw
 const { cuentasParaElTelefono } = await import('./borradores-movil')
 const { leerAjuste } = await import('./ajustes')
 const { listarLlaves, crearLlave } = await import('./llaves')
+const { leerResumen } = await import('./avisos/run')
 const { makeDefault, updateProfile, deleteScheduledPost, guardarCuenta, revocarLlaveApi } = await import(
   '@/app/admin/actions'
 )
@@ -346,6 +347,12 @@ describe('aislamiento por dueño (SQL generado, sin base)', () => {
     esperarFiltradoPorDueno(destinos)
     esperarFiltradoPorDueno(posts)
     expect(metricas.params).toContain('social-post-1') // post_metrics: por el id que ya filtró `posts`.
+  })
+
+  it('avisos/run: leerResumen ata sus cuatro consultas al dueño: quemados, cuentas, cuentas en uso y lo último por salir', async () => {
+    const consultas = await consultasEncadenadas(() => leerResumen(DUENO, new Date('2026-10-17T12:00:00Z')), [[], [], [], []])
+    expect(consultas).toHaveLength(4)
+    for (const c of consultas) esperarFiltradoPorDueno(c)
   })
 
   it('ajustes: leerAjuste filtra por dueño', async () => {

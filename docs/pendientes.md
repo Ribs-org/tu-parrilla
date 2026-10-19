@@ -275,3 +275,10 @@ Nada de esto bloquea un trámite hoy; conviene ordenarlo antes de abrir a tercer
   credenciales aparte, y cortarlas en silencio rompería su agente). Si una se filtra y el
   usuario no responde, el admin no tiene cómo cortarla sin tocar la base. Opciones: que
   «Cerrar sesiones» también las borre, o una lista de llaves por usuario en Los Maestros.
+- **Por decidir: que los avisos lleguen a quien lleva el calendario** (2026-10-17). El correo
+  de una cuenta caída, el de un post quemado y el resumen del día van al correo del dueño de
+  las cuentas. Si el calendario lo lleva otra persona con la llave del dueño —un agente que
+  programa por la API—, por correo no le llega nada; lo lee en `GET /api/schedule/resumen`.
+  Si hace falta que le llegue por correo, la salida es un campo «Avisos a» en Tu Cuenta, un
+  correo por usuario, que lean `destinatario` (`src/lib/social/publish/alert.ts`) y
+  `enviarResumenes` (`src/lib/avisos/run.ts`) en vez del correo del dueño.

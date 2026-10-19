@@ -4,6 +4,7 @@ import { validateAtributos } from './atributos'
 import { validarOpcionesPorCuenta, errorDeMediaPorOpciones, OPCIONES_ERROR, type OpcionesDestino } from './opciones'
 import { guardar } from '@/lib/storage'
 import { getDb, scheduledPosts, scheduledPostMedia, scheduledPostTargets, reglasClave } from '@/db'
+import { and, eq } from 'drizzle-orm'
 import { randomUUID } from 'node:crypto'
 import { CuentaInvalida, cuentaUnicaPorRed, verificarCuentas, type CuentaDestino } from '../cuentas'
 import { validarRegla, REGLA_DOCUMENTO } from '../comentarios/reglas'
@@ -44,13 +45,56 @@ export type BatchItem = {
   opciones?: unknown
   /** { palabra, mensaje, respuestaPublica? }; se valida con validarRegla. */
   regla?: unknown
+  /** La referencia del que llama, única por dueño, para reconocer la fila si reenvía el lote; se valida con refDeFila. */
+  ref?: unknown
 }
 
 export type BatchResult =
-  | { index: number; ok: true; postId: string }
+  // `repetido`: ya había un post con esa `ref`, y es el que vuelve; la fila no se programó otra vez.
+  | { index: number; ok: true; postId: string; repetido?: true }
   | { index: number; ok: false; error: string }
 
 export const MAX_BATCH_ITEMS = 50
+
+export const MAX_REF = 100
+export const REF_ERROR = `«ref» tiene que ser un texto de 1 a ${MAX_REF} caracteres.`
+
+/** El nombre de la unicidad (dueño, ref) en `scheduled_posts`: el choque que delata un lote reenviado a la vez. */
+const REF_UNICA = 'scheduled_posts_owner_ref_key'
+
+/**
+ * La `ref` de una fila, limpia: nula si no vino, la frase si vino mal. Se recorta, así que
+ * « a1 » y «a1» son la misma fila.
+ */
+export function refDeFila(raw: unknown): { ref: string | null } | { error: string } {
+  if (raw === undefined || raw === null) return { ref: null }
+  if (typeof raw !== 'string') return { error: REF_ERROR }
+  const ref = raw.trim()
+  return ref.length >= 1 && ref.length <= MAX_REF ? { ref } : { error: REF_ERROR }
+}
+
+/**
+ * Si el insert chocó con la unicidad de la `ref`. postgres-js llama al campo
+ * `constraint_name` y Drizzle lo envuelve en `cause`; el mismo molde que
+ * `isCampaignUniqueViolation` (`social/sync.ts`), que también acepta `constraint`.
+ */
+function esRefRepetida(error: unknown): boolean {
+  const choca = (e: unknown) => {
+    const { code, constraint_name, constraint } = (e as { code?: string; constraint_name?: string; constraint?: string }) ?? {}
+    return code === '23505' && (constraint_name ?? constraint) === REF_UNICA
+  }
+  return choca(error) || choca((error as { cause?: unknown })?.cause)
+}
+
+/** El post de este dueño que ya lleva esa `ref`, o null. */
+async function postConRef(ownerId: string, ref: string): Promise<string | null> {
+  const [fila] = await getDb()
+    .select({ id: scheduledPosts.id })
+    .from(scheduledPosts)
+    .where(and(eq(scheduledPosts.ownerId, ownerId), eq(scheduledPosts.ref, ref)))
+    .limit(1)
+  return fila?.id ?? null
+}
 
 export const PORTADA_NEEDS_VIDEO = 'La portada requiere un video en media.'
 export const PORTADA_NOT_IMAGE = 'La portada debe ser una imagen.'
@@ -376,6 +420,12 @@ export async function mediaToBlob(
  * One batch, sequential on purpose: fifty concurrent downloads against third-party
  * hosting is how you meet rate limits. A failed row records its fixed sentence and
  * the loop keeps going — partial success is the contract, Buffer-style.
+ *
+ * Una fila con `ref` es reconocible: si el lote se corta a mitad (la función se queda sin
+ * tiempo, se cae la conexión), reenviarlo entero devuelve los posts que ya habían entrado,
+ * con `repetido`, en vez de programarlos de nuevo. Para que eso valga, cada post se guarda
+ * con sus destinos, su media y su regla en una sola transacción: un corte a mitad de una
+ * fila no deja un post a medias que la `ref` daría por hecho.
  */
 export async function scheduleBatch(ownerId: string, items: BatchItem[]): Promise<BatchResult[]> {
   const db = getDb()
@@ -388,6 +438,22 @@ export async function scheduleBatch(ownerId: string, items: BatchItem[]): Promis
   const zone = (await buscarPorId(ownerId))?.zona ?? ZONA_POR_DEFECTO
 
   for (const [index, item] of items.entries()) {
+    // La `ref` va antes que todo lo demás: una fila reenviada no se vuelve a validar, porque
+    // ya entró y su hora pudo pasar desde el primer envío. Se compara sin mirar el contenido.
+    const refCheck = refDeFila(item.ref)
+    if ('error' in refCheck) {
+      results.push({ index, ok: false, error: refCheck.error })
+      continue
+    }
+    const ref = refCheck.ref
+    if (ref) {
+      const existente = await postConRef(ownerId, ref)
+      if (existente) {
+        results.push({ index, ok: true, postId: existente, repetido: true })
+        continue
+      }
+    }
+
     const invalid = validateBatchItem(item, now, zone)
     if (invalid) {
       results.push({ index, ok: false, error: invalid })
@@ -547,45 +613,58 @@ export async function scheduleBatch(ownerId: string, items: BatchItem[]): Promis
       const atributosCheck = validateAtributos(item.atributos)
       const atributos = 'error' in atributosCheck ? null : atributosCheck.atributos
 
-      const [post] = await db
-        .insert(scheduledPosts)
-        .values({ ownerId, caption: item.texto, scheduledAt, coverUrl, atributos })
-        .returning()
-      if (uploaded.length > 0) {
-        await db.insert(scheduledPostMedia).values(
-          uploaded.map((m, position) => ({
+      const postId = await db.transaction(async (tx) => {
+        const [post] = await tx
+          .insert(scheduledPosts)
+          .values({ ownerId, caption: item.texto, scheduledAt, coverUrl, atributos, ref })
+          .returning()
+        if (uploaded.length > 0) {
+          await tx.insert(scheduledPostMedia).values(
+            uploaded.map((m, position) => ({
+              postId: post!.id,
+              blobUrl: m.url,
+              mediaType: m.mediaType,
+              position,
+            })),
+          )
+        }
+        // Dos caminos crean posts programados y no comparten código: este, y
+        // `crearPostProgramado` (`./crear.ts`), que usan el compositor y la ruta móvil.
+        // Ese no sirve acá porque no sabe de `coverUrl` ni de `atributos` — el lote es
+        // hoy el único llamador que los necesita al crear. Un cambio en cómo se escribe
+        // un target (esta forma de `scheduledPostTargets.values`) hay que replicarlo ahí.
+        await tx.insert(scheduledPostTargets).values(
+          destinos.map((cuenta) => ({
             postId: post!.id,
-            blobUrl: m.url,
-            mediaType: m.mediaType,
-            position,
+            network: cuenta.network,
+            accountId: cuenta.id,
+            opciones: opciones[cuenta.id] ?? null,
           })),
         )
-      }
-      // Dos caminos crean posts programados y no comparten código: este, y
-      // `crearPostProgramado` (`./crear.ts`), que usan el compositor y la ruta móvil.
-      // Ese no sirve acá porque no sabe de `coverUrl` ni de `atributos` — el lote es
-      // hoy el único llamador que los necesita al crear. Un cambio en cómo se escribe
-      // un target (esta forma de `scheduledPostTargets.values`) hay que replicarlo ahí.
-      await db.insert(scheduledPostTargets).values(
-        destinos.map((cuenta) => ({
-          postId: post!.id,
-          network: cuenta.network,
-          accountId: cuenta.id,
-          opciones: opciones[cuenta.id] ?? null,
-        })),
-      )
 
-      if (!('error' in reglaCheck) && reglaCheck.regla) {
-        // La URL de R2 (`documentoUrl`, del paso de arriba) manda sobre la del que llamó:
-        // `...reglaCheck.regla` la trae también, pero ya copiada, no la ajena.
-        await db.insert(reglasClave).values({ postId: post!.id, ...reglaCheck.regla, documentoUrl })
-      }
+        if (!('error' in reglaCheck) && reglaCheck.regla) {
+          // La URL de R2 (`documentoUrl`, del paso de arriba) manda sobre la del que llamó:
+          // `...reglaCheck.regla` la trae también, pero ya copiada, no la ajena.
+          await tx.insert(reglasClave).values({ postId: post!.id, ...reglaCheck.regla, documentoUrl })
+        }
+        return post!.id
+      })
 
-      results.push({ index, ok: true, postId: post!.id })
+      results.push({ index, ok: true, postId })
     } catch (error) {
       if (error instanceof CuentaInvalida) {
         results.push({ index, ok: false, error: error.message })
         continue
+      }
+      // Otro envío del mismo lote guardó esta `ref` mientras esta fila descargaba su media:
+      // el post ya está, y es ese el que vuelve. Lo que esta fila subió a R2 queda sin
+      // referencia y se lo lleva el barrido de huérfanos.
+      if (ref && esRefRepetida(error)) {
+        const existente = await postConRef(ownerId, ref)
+        if (existente) {
+          results.push({ index, ok: true, postId: existente, repetido: true })
+          continue
+        }
       }
       console.error(`Falló el item ${index} del lote:`, error)
       results.push({ index, ok: false, error: 'No se pudo guardar la fila. Inténtalo de nuevo.' })

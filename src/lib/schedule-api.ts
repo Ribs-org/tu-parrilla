@@ -51,6 +51,7 @@ export type FilaProgramada = {
     scheduledAt: Date
     coverUrl: string | null
     atributos: unknown
+    ref: string | null
   }
   target: {
     network: string
@@ -58,6 +59,7 @@ export type FilaProgramada = {
     lastError: string | null
     externalId: string | null
     attemptCount: number
+    reintentarDesde: Date | null
     accountId: string
   }
   // De un `leftJoin` con `socialAccounts`: null si la cuenta ya no existe. El
@@ -81,12 +83,18 @@ export type PostProgramadoApi = {
   portada: string | null
   media: Array<{ url: string; tipo: 'image' | 'video' }>
   atributos: Atributos | null
+  // La `ref` con que llegó por `POST /api/schedule/batch`, o null: con ella se cruza un lote
+  // reenviado contra lo que ya entró.
+  ref: string | null
   redes: Array<{
     red: string
     estado: string
     error: string | null
     externalId: string | null
     intentos: number
+    // Cuándo es el próximo intento de un destino que espera (tras un fallo, o por el tope
+    // de Instagram); null si no espera nada más que su hora.
+    proximoIntento: string | null
     // La superficie para descubrir identificadores de cuenta: `POST /api/schedule/batch`
     // los pide en `cuentas`, y este es el único lugar público donde se pueden leer.
     cuentaId: string
@@ -122,6 +130,7 @@ export function armarProgramados(
         .sort((a, b) => a.position - b.position)
         .map((m) => ({ url: m.blobUrl, tipo: m.mediaType })),
       atributos: (post.atributos as Atributos | null) ?? null,
+      ref: post.ref,
       redes: [],
     }
     entrada.redes.push({
@@ -130,6 +139,8 @@ export function armarProgramados(
       error: target.lastError,
       externalId: target.externalId,
       intentos: target.attemptCount,
+      proximoIntento:
+        target.status === 'scheduled' && target.reintentarDesde ? isoInZone(target.reintentarDesde, zone) : null,
       cuentaId: target.accountId,
       handle,
     })
