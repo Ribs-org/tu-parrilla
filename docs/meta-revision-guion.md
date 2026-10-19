@@ -190,6 +190,9 @@ reel publicado por la app, y la corrida de comentarios tarda hasta cinco minutos
 
 ## Después de aprobar
 
+Hecho el 2026-10-19: Meta aprobó los 11 permisos, la app pasó a Live y `META_EN_REVISION` salió
+de Vercel. Lo que sigue valiendo, para la próxima vuelta:
+
 - Pasar la app a **Live** (interruptor arriba del panel).
 - Quitar `META_EN_REVISION` de Vercel y redesplegar. `REVISION_CORREO`/`REVISION_CODIGO`
   se quedan, con las cuentas del revisor conectadas: Meta vuelve a revisar la app y pide
