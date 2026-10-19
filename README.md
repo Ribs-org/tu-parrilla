@@ -411,7 +411,8 @@ Mientras la app siga en modo desarrollo, solo conectan las cuentas que tienen un
 ella (testers): a cualquier otra, Facebook le dice que la función no está disponible, y
 ese error no vuelve a nuestro callback, así que no hay forma de interceptarlo. Pon
 `META_EN_REVISION=1` para que Los Fierros lo avisen junto al botón de Instagram y de
-Facebook, y quítala al pasar la app a Live.
+Facebook, y quítala al pasar la app a Live. La de Tu Parrilla está en Live desde el 2026-10-19,
+con los permisos aprobados: en producción la variable ya no está.
 
 Al conectar se guarda tu **id de usuario de Meta**, que es lo que Meta manda cuando quitas
 la app desde tu cuenta de Facebook: sin él no hay forma de saber a qué cuentas se refiere.
