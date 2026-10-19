@@ -617,6 +617,18 @@ describe('aislamiento por dueño, escrituras (SQL generado, sin base)', () => {
     expect(capturas).toHaveLength(1)
   })
 
+  // «Agregar cuenta →» necesita saber si la red trajo una cuenta nueva o la de antes: es la
+  // diferencia entre «conectado» y «se renovó y no se agregó otra».
+  it('social/conectar: guardarCuenta dice si la cuenta era nueva para este dueño o solo se renovó', async () => {
+    const cuenta = { externalId: '17841400000000000', handle: '@mia', accessToken: 'token', refreshToken: null, expiresAt: null }
+    colaRespuestas.push([], []) // nadie la tenía; el insert.
+    expect(await guardarCuentaDeRed(DUENO, 'instagram', cuenta)).toBe('nueva')
+    colaRespuestas.push([[DUENO]], []) // ya era de este dueño; el upsert.
+    expect(await guardarCuentaDeRed(DUENO, 'instagram', cuenta)).toBe('renovada')
+    colaRespuestas.push([[null]], []) // una fila de antes de los dueños: en su panel no estaba.
+    expect(await guardarCuentaDeRed(DUENO, 'instagram', cuenta)).toBe('nueva')
+  })
+
   /**
    * La única lectura que cruza dueños a propósito: dice cuáles de las cuentas que trajo un
    * login ya tiene otro usuario. Tiene que excluir al dueño de la sesión —si no, sus propias

@@ -529,6 +529,17 @@ sale cada publicación. **El compositor del panel, y Publicar en la app del tel�
 listan tus cuentas, no las redes**, con su handle a la vista, y marcas las que quieras: el
 mismo corte puede salir a las dos.
 
+**Agregar la segunda** es «Agregar cuenta →» en el bloque de la red, y las redes tienden a
+entrar solas con la cuenta que ya conectaste: TikTok autoriza la sesión abierta en el
+navegador sin mostrar nada, Google entra con la única cuenta abierta y Meta repite lo que se
+compartió con la app la vez anterior. Por eso TikTok se abre con `disable_auto_auth=1`
+(muestra siempre su pantalla, con la cuenta que va a autorizar) y Google con
+`prompt=select_account consent`. Y «Agregar cuenta →» marca su vuelta (`?agregar=1`, que deja
+una cookie de diez minutos en la ruta de esa red): si la red trae la cuenta de antes, Los
+Fierros no dice «conectado», dice que se renovó y no se agregó otra, y abre los pasos para
+conseguirla (`src/lib/social/vuelta.ts` y `ayuda-conexion.ts`). En Meta no hay parámetro que
+fuerce la elección de páginas: los pasos dicen cómo editar el acceso en la ventana de Facebook.
+
 Nada viene marcado por omisión, salvo que tengas exactamente una cuenta conectada — contada
 sobre las cuentas que cada pantalla puede ofrecer, que no es el mismo universo en las dos:
 el panel cuenta sobre todas las tuyas, TikTok incluido; el teléfono, solo sobre las que
