@@ -83,3 +83,22 @@ describe('GET de una red en «Próximamente»', () => {
     expect(pedidas).toEqual([])
   })
 })
+
+describe('GET sin código', () => {
+  it('deja en el registro lo que dijo la red, sin el estado, y borra la marca de «Agregar cuenta →»', async () => {
+    const aviso = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const res = await GET(
+      new Request(
+        'https://tu-parrilla.cl/api/social/instagram/callback?error=access_denied&error_reason=user_denied&state=SECRETO',
+        { headers: { cookie: 'agregar_cuenta=instagram' } },
+      ),
+      { params: Promise.resolve({ network: 'instagram' }) },
+    )
+    const destino = new URL(res.headers.get('location') ?? '')
+    expect(destino.searchParams.get('mensaje')).toBe('La red no devolvió el código de autorización.')
+    const registrado = String(aviso.mock.calls[0]?.[0])
+    expect(registrado).toContain('access_denied · user_denied')
+    expect(registrado).not.toContain('SECRETO')
+    expect(res.headers.get('set-cookie')).toMatch(/agregar_cuenta=;.*Path=\/api\/social\/instagram/i)
+  })
+})

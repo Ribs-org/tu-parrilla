@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
 import { usuarioActual } from '@/lib/auth'
 import { env } from '@/lib/env'
-import { REDES_PROXIMAMENTE, fraseProximamente, networkLabel } from '@/lib/networks'
+import { REDES_PROXIMAMENTE, fraseProximamente } from '@/lib/networks'
 import { CuentaDeOtro, guardarCuenta, siQueriasOtra } from '@/lib/social/conectar'
+import { COOKIE_AGREGAR, fraseDeVuelta, pidioAgregar } from '@/lib/social/vuelta'
 import {
   NO_FACEBOOK_PAGE,
   SIN_TOKEN_DE_PAGINA,
@@ -409,23 +410,41 @@ export async function GET(
   const code = url.searchParams.get('code')
   const state = url.searchParams.get('state')
 
-  const back = (message: string) => {
+  // La marca de «Agregar cuenta →» (`connect/route.ts`) sirve una sola vuelta: toda salida la
+  // borra.
+  const agregar = pidioAgregar(request.headers.get('cookie'), network)
+  const sinMarca = (response: NextResponse) => {
+    response.cookies.delete({ name: COOKIE_AGREGAR, path: `/api/social/${network}` })
+    return response
+  }
+
+  /** `detalle` va solo al registro: lo que la red dijo, que la persona no necesita leer. */
+  const back = (message: string, detalle?: string) => {
     // La frase queda también en el registro: la dirección de vuelta no se registra, y sin esto
     // ayudar a alguien que no pudo conectar empieza por preguntarle qué vio. Son frases nuestras,
     // sin tokens.
-    console.warn(`Conexión de ${network} sin terminar: ${message}`)
+    console.warn(`Conexión de ${network} sin terminar: ${message}${detalle ? ` (${detalle})` : ''}`)
     const fallo = NextResponse.redirect(`${url.origin}/admin/accounts?mensaje=${encodeURIComponent(message)}`)
     // Un login que falló tampoco puede dejar una elección anterior viva: esa cookie
     // mantendría alcanzable un selector abandonado durante sus diez minutos.
     fallo.cookies.delete({ name: COOKIE_PENDIENTE, path: '/admin/accounts' })
-    return fallo
+    return sinMarca(fallo)
   }
 
   // Una red en «Próximamente» tampoco termina una conexión empezada antes de quedar así: no
   // se guarda nada.
   if (REDES_PROXIMAMENTE.has(network)) return back(fraseProximamente(network))
 
-  if (!code || !state) return back('La red no devolvió el código de autorización.')
+  // Sin código, la red suele decir por qué (`error=access_denied` al cancelar en su ventana):
+  // al registro, para distinguir un «cancelé» de un rechazo de la red.
+  if (!code || !state) {
+    const dijo = ['error', 'error_reason', 'error_description', 'error_code']
+      .map((clave) => url.searchParams.get(clave))
+      .filter((valor): valor is string => Boolean(valor))
+      .map((valor) => valor.slice(0, 200))
+      .join(' · ')
+    return back('La red no devolvió el código de autorización.', dijo || undefined)
+  }
 
   try {
     // Verifies, but as something other than a state we minted for this network — a
@@ -447,7 +466,7 @@ export async function GET(
 
     if (credential.candidatas.length === 1) {
       const [unica] = credential.candidatas
-      await guardarCuenta(usuario.id, network, {
+      const resultado = await guardarCuenta(usuario.id, network, {
         externalId: unica.externalId,
         handle: unica.handle,
         // Facebook publica y lee con el token de la página, no con el del usuario; las
@@ -458,12 +477,14 @@ export async function GET(
         metaUserId: credential.metaUserId,
       })
       // Una conexión que terminó no puede dejar otra a medias detrás: la cookie de una
-      // elección anterior abandonada seguiría viva diez minutos y confundiría al panel.
+      // elección anterior abandonada seguiría viva diez minutos y confundiría al panel. Si se
+      // apretó «Agregar cuenta →» y la red entró con la de antes, la frase lo dice y Los
+      // Fierros abre la ayuda (`soloSeRenovo`).
       const hecho = NextResponse.redirect(
-        `${url.origin}/admin/accounts?mensaje=${encodeURIComponent(`${networkLabel(network)} conectado.`)}`,
+        `${url.origin}/admin/accounts?mensaje=${encodeURIComponent(fraseDeVuelta(network, resultado, agregar))}`,
       )
       hecho.cookies.delete({ name: COOKIE_PENDIENTE, path: '/admin/accounts' })
-      return hecho
+      return sinMarca(hecho)
     }
 
     // Varias candidatas: el dueño elige en el panel. El token de usuario y la lista
@@ -483,7 +504,7 @@ export async function GET(
       }),
       { httpOnly: true, secure: true, sameSite: 'lax', maxAge: PENDIENTE_MAX_AGE, path: '/admin/accounts' },
     )
-    return response
+    return sinMarca(response)
   } catch (error) {
     // Only our own OAuthError (and CuentaDeOtro, same idea) carries a message we wrote
     // ourselves. Everything else — a non-JSON upstream body breaking `.json()`, a DB

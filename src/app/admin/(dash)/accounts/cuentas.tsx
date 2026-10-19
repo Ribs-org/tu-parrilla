@@ -109,8 +109,10 @@ export function Cuentas({ rows, metaEnRevision }: { rows: CuentaRow[]; metaEnRev
                   {REDES_PROXIMAMENTE.has(network) ? (
                     <Proximamente />
                   ) : (
+                    // `agregar=1`: si la red vuelve con la cuenta de antes, Los Fierros lo dice en vez
+                    // de «conectado» (`connect/route.ts`).
                     <a
-                      href={`/api/social/${network}/connect`}
+                      href={`/api/social/${network}/connect?agregar=1`}
                       aria-describedby={idsDeAvisos.length > 0 ? idsDeAvisos.join(' ') : undefined}
                       className="ml-auto text-[0.75rem] text-fg-muted transition-colors hover:text-fg"
                     >

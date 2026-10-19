@@ -70,8 +70,17 @@ export async function tomadasPorOtro(ownerId: string, network: string, externalI
   return new Set(filas.flatMap((f) => (f.externalId ? [f.externalId] : [])))
 }
 
-/** Upsert por (red, id externo): la misma cuenta renueva su token; un id nuevo es una fila nueva. */
-export async function guardarCuenta(ownerId: string, network: string, cuenta: CuentaAConectar): Promise<void> {
+/**
+ * Upsert por (red, id externo): la misma cuenta renueva su token; un id nuevo es una fila nueva.
+ * Dice cuál de las dos pasó, para que «Agregar cuenta →» no vuelva diciendo «conectado» cuando
+ * solo se renovó la de antes. Una fila sin dueño (de antes de que existieran los dueños) cuenta
+ * como nueva: en el panel de esta persona no estaba.
+ */
+export async function guardarCuenta(
+  ownerId: string,
+  network: string,
+  cuenta: CuentaAConectar,
+): Promise<'nueva' | 'renovada'> {
   // Hasta que la entrega 3 cambie la única a (owner_id, network, external_id), dos dueños
   // caen en la misma fila: avisar es la única salida honesta. Pisar el token dejaría al
   // primero publicando con la credencial del segundo.
@@ -104,6 +113,7 @@ export async function guardarCuenta(ownerId: string, network: string, cuenta: Cu
       target: [socialAccounts.network, socialAccounts.externalId],
       set: metaUserId ? { ...valores, metaUserId } : valores,
     })
+  return existente?.ownerId === ownerId ? 'renovada' : 'nueva'
 }
 
 const GRAPH = 'https://graph.facebook.com/v23.0'

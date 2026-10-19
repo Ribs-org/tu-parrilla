@@ -24,6 +24,7 @@ Los títulos de la pantalla se ven en mayúsculas; aquí van como están escrito
 - El título «Los Fierros» y debajo «tus redes conectadas».
 - Solo al volver de conectar, o de un intento fallido: una franja con una frase, por ejemplo «Instagram conectado.». Todas las posibles están en «Mensajes que puede ver». La frase viaja en la dirección de la página: si se recarga, vuelve a aparecer, y eso no significa que se haya conectado otra vez.
 - Si la frase es «Ninguna página de Facebook tiene una cuenta de Instagram asociada.» o «Esta cuenta no administra ninguna página de Facebook.», la franja termina con «Cómo arreglarlo» y además se abre sola una ventana: «Instagram no se conectó» (o «Facebook no se conectó»), con el porqué, los pasos numerados y los botones «Volver a conectar Instagram» (o «Volver a conectar Facebook») y «Cerrar». Esc o un clic fuera también la cierran, y «Cómo arreglarlo» la vuelve a abrir. Como la frase, la ventana vuelve a aparecer si se recarga la página.
+- Lo mismo cuando «Agregar cuenta →» vuelve con la cuenta de antes: la frase es «<Red> entró con la cuenta que ya estaba conectada: se renovó y no se agregó otra.» (por ejemplo, «TikTok entró con la cuenta que ya estaba conectada: se renovó y no se agregó otra.»), y la ventana se llama «No se agregó otra cuenta de TikTok» (o «… de Instagram», «No se agregó otra página de Facebook», «No se agregó otro canal de YouTube»), con su botón «Agregar otra cuenta de TikTok» (o el de su red). Ver «Para agregar otra cuenta de la misma red».
 
 Mientras carga se ve el título «Los Fierros» y, en vez de las redes, bloques sin texto con su forma: cada red con sus cuentas, y cada cuenta con un fierro naranjo tenue que todavía no dice nada de la conexión. Todo se enciende y se apaga de a poco, como brasas, una pieza un poco después de la otra (con «reducir movimiento» activado en el sistema, quieto a media luz). La lista para elegir (`/admin/accounts/elegir`) carga con dos bloques sin texto.
 
@@ -31,7 +32,7 @@ Mientras carga se ve el título «Los Fierros» y, en vez de las redes, bloques 
 
 Arriba, en un solo recuadro, un bloque por cada red que tiene al menos una cuenta, en este orden: Instagram, TikTok, YouTube, Facebook, Threads, X / Twitter. Cada bloque tiene:
 
-- El ícono y el nombre de la red y, a la derecha, «Agregar cuenta →», que abre la ventana de la red para conectar otra. En Threads y X / Twitter dice «Próximamente», sin enlace: esas redes solo tienen bloque si una cuenta se conectó antes de que quedaran así.
+- El ícono y el nombre de la red y, a la derecha, «Agregar cuenta →», que abre la ventana de la red para conectar otra (ver «Para agregar otra cuenta de la misma red»). En Threads y X / Twitter dice «Próximamente», sin enlace: esas redes solo tienen bloque si una cuenta se conectó antes de que quedaran así.
 - Solo en las redes que tienen avisos, debajo, «Requisitos para agregar otra»: un clic los muestra (ver «Las redes sin conectar», abajo, para el texto de cada uno).
 - Una fila por cuenta (ver «La fila de una cuenta»).
 
@@ -116,14 +117,14 @@ Se conecta una página de Facebook, no un perfil personal.
 ### Para conectar YouTube
 
 1. En el bloque «YouTube», aprieta «Conectar →».
-2. Se abre la ventana de Google. Elige la cuenta de Google del canal y acepta los permisos. Google pide aceptar cada vez, también al reconectar.
+2. Se abre la ventana de Google. Pregunta siempre con qué cuenta entrar: elige la cuenta de Google del canal y acepta los permisos. Google pide aceptar cada vez, también al reconectar.
 3. Con un canal vuelve con «YouTube conectado.». Si Google devuelve varios aparece «¿Qué cuentas de YouTube conectar?»: marca los canales y aprieta «Conectar».
 4. «Esta cuenta de Google no tiene canal de YouTube.» quiere decir que se eligió una cuenta de Google sin canal: hay que repetir eligiendo la del canal.
 
 ### Para conectar TikTok
 
 1. En el bloque «TikTok», aprieta «Conectar →».
-2. En la ventana de TikTok, entra con la cuenta y autoriza.
+2. TikTok muestra siempre su pantalla de autorización, con la cuenta que va a autorizar: la que tiene la sesión abierta en ese navegador. Si es la que corresponde, autoriza; si no, cambia de cuenta en TikTok antes de seguir.
 3. Vuelve con «TikTok conectado.». TikTok conecta siempre una cuenta por vez.
 
 El aviso del bloque habla de publicar, no de conectar: una cuenta pública se conecta igual. Si la fila muestra un número largo en vez del nombre, TikTok no entregó el nombre; «Reconectar» lo vuelve a pedir.
@@ -137,8 +138,12 @@ Una cuenta de Threads o de X conectada antes sigue en su bloque, sin «Reconecta
 ### Para agregar otra cuenta de la misma red
 
 1. Aprieta «Agregar cuenta →» al lado del nombre de la red.
-2. En la ventana de la red, entra con la otra cuenta. Si la red entra sola con la cuenta que ya estaba conectada, solo se renueva esa y no aparece una fila nueva: hay que cambiar de cuenta en la ventana de la red (o cerrar la sesión de la red en ese navegador) y repetir.
+2. En la ventana de la red, entra con la otra cuenta:
+   - **TikTok** entra con la sesión abierta en ese navegador, y su pantalla dice cuál. Si es la que ya está conectada, antes hay que cerrar la sesión de TikTok (o cambiar a la otra cuenta) en tiktok.com, en ese mismo navegador.
+   - **YouTube**: Google pregunta con qué cuenta entrar; elige la del otro canal.
+   - **Instagram y Facebook**: la otra cuenta tiene que estar en una página de Facebook que administre la misma cuenta de Facebook (para Instagram, una cuenta profesional enlazada a esa página). Si la ventana de Facebook ofrece seguir como la vez anterior, no sigas así: elige editar el acceso y marca también esa página (y su Instagram).
 3. En Instagram, Facebook y YouTube, si el login ve varias cuentas aparece la lista: marca la nueva. Las ya conectadas vienen marcadas, y dejarlas así solo renueva su acceso.
+4. Si la red entró con la cuenta que ya estaba conectada, solo se renueva esa y no aparece una fila nueva: vuelve con «<Red> entró con la cuenta que ya estaba conectada: se renovó y no se agregó otra.» (por ejemplo, «TikTok entró con la cuenta que ya estaba conectada: se renovó y no se agregó otra.»), y se abre la ventana «No se agregó otra cuenta de <Red>» con los pasos de su red y el botón para volver a intentarlo.
 
 Cada cuenta queda como una fila aparte. Con dos cuentas de una red, el compositor de [La Parrilla](la-parrilla.md) las lista por separado, y la carga masiva o la API piden el id de la cuenta (ver «Para copiar el id de una cuenta»).
 
@@ -201,6 +206,7 @@ Trae los posts y los números de las cuentas de Instagram, TikTok, YouTube y Fac
 |---|---|---|
 | «Instagram conectado.» (o «Facebook conectado.», «YouTube conectado.», «TikTok conectado.») | Se conectó una cuenta, o se renovó una que ya estaba. | Nada. Si no apareció una fila nueva, se renovó la que ya estaba. |
 | «2 cuentas conectadas.» (con el número que corresponda) | Se conectaron o renovaron varias desde la lista. | Nada. |
+| «<Red> entró con la cuenta que ya estaba conectada: se renovó y no se agregó otra.» (por ejemplo, «TikTok entró con la cuenta que ya estaba conectada: se renovó y no se agregó otra.»), con la ventana «No se agregó otra cuenta de <Red>» | Se apretó «Agregar cuenta →» y la red entró con la cuenta que ya estaba conectada: solo se renovó. | Los pasos de la ventana: en TikTok, cerrar la sesión o cambiar de cuenta en tiktok.com; en YouTube, elegir en Google la cuenta del otro canal; en Instagram y Facebook, editar el acceso en la ventana de Facebook y marcar la otra página. Después, el botón de la ventana. |
 | «La red no devolvió el código de autorización.» | La ventana de la red devolvió al panel sin la autorización; pasa, por ejemplo, al cancelar en ella. | Volver a apretar «Conectar →» y aceptar en la ventana de la red. |
 | «El estado no corresponde a esa red.» | La vuelta no calza con la conexión que se empezó: pasaron más de diez minutos, o en medio se empezó a conectar otra red o se cambió de sesión. | Volver a apretar «Conectar →» y terminar de corrido, en el mismo navegador. |
 | «El enlace de conexión expiró. Inténtalo de nuevo.» | Igual que el anterior. | Volver a apretar «Conectar →». |
@@ -260,7 +266,7 @@ Trae los posts y los números de las cuentas de Instagram, TikTok, YouTube y Fac
 - **«Acepté todo lo de Meta y no se conectó Instagram»** → Casi siempre falta la página de Facebook: Tu Parrilla encuentra el Instagram a través de ella, y aceptar los permisos no basta. Los pasos son los de la ventana «Instagram no se conectó», que se abre sola al volver (o con «Cómo arreglarlo» en la franja): (1) que el Instagram sea una cuenta profesional, de creador o de empresa; (2) que esté enlazado a una página de Facebook, desde Instagram, en Editar perfil → «Página» (enlazar las cuentas en el Centro de cuentas de Meta no sirve para esto), y (3) al volver a conectar, entrar con el Facebook que administra esa página y marcar esa página y ese Instagram cuando Meta pregunte qué compartir con Tu Parrilla, o corregirlo en la configuración de Facebook, en «Integraciones comerciales».
 - **«Conecté Instagram y no aparece mi página de Facebook»** → Son conexiones separadas: hay que apretar también «Conectar →» en el bloque «Facebook».
 - **«Me dice que la cuenta ya está conectada por otra persona»** → Mirar qué cuenta nombra: suele ser otra cuenta que la red trajo junto con la que se quería (en Meta, la de otra página que administra la misma persona en Facebook). En la lista para elegir, marcar solo la propia; si el error salió sin lista, volver a conectar y, en la ventana de Facebook, elegir la página de la cuenta que se quiere. Si nombra la cuenta propia, la tiene otro usuario de Tu Parrilla: avisar a quien administra Tu Parrilla.
-- **«Apreté "Agregar cuenta" y no apareció otra cuenta»** → La red entró con la cuenta que ya estaba conectada y solo la renovó. Ver «Para agregar otra cuenta de la misma red».
+- **«Apreté "Agregar cuenta" y no apareció otra cuenta»**, **«Agregar cuenta no me lleva a nada»** o **«parece que no se puede tener más de una cuenta por red»** → Sí se puede: la red entró con la cuenta que ya estaba conectada y solo la renovó. Los Fierros lo dice con «<Red> entró con la cuenta que ya estaba conectada: se renovó y no se agregó otra.» (por ejemplo, «TikTok entró con la cuenta que ya estaba conectada: se renovó y no se agregó otra.») y la ventana con los pasos; ver «Para agregar otra cuenta de la misma red». En TikTok, casi siempre es la sesión abierta en el navegador: hay que cerrarla en tiktok.com.
 - **«Reconecté y apareció una cuenta nueva»** → En la ventana de la red se entró con otra cuenta, o la red le dio un identificador nuevo a la misma. Si es la misma cuenta, desconectar la vieja y fusionarla (ver «Para fusionar una cuenta repetida»).
 - **«Tengo dos filas de la misma cuenta»** → «Para fusionar una cuenta repetida».
 - **«Mi TikTok aparece con un número largo en vez del nombre»** → TikTok no entregó el nombre al conectar; «Reconectar» lo vuelve a pedir.
@@ -311,6 +317,7 @@ Lo que describe sale de:
 - `src/lib/social/oauth-state.ts` (los diez minutos)
 - `src/lib/social/facebook.ts` y `src/lib/social/instagram.ts` (frases de la conexión de Meta)
 - `src/app/admin/(dash)/accounts/aviso-de-conexion.tsx` y `src/lib/social/ayuda-conexion.ts` (la franja de la vuelta y la ventana con los pasos)
+- `src/lib/social/vuelta.ts` (la frase de «Agregar cuenta →» cuando solo se renovó la de antes)
 - `src/lib/social/meta-bajas.ts` (la frase de la baja desde Facebook)
 - `src/lib/social/quitar.ts` (las reglas y las frases de «Quitar»)
 - `src/lib/social/sync.ts` y `src/lib/social/index.ts` (qué redes traen números)

@@ -3,6 +3,7 @@ import { createHash, randomBytes } from 'node:crypto'
 import { usuarioActual } from '@/lib/auth'
 import { env } from '@/lib/env'
 import { REDES_PROXIMAMENTE, fraseProximamente } from '@/lib/networks'
+import { COOKIE_AGREGAR } from '@/lib/social/vuelta'
 import { signOAuthState } from '@/lib/social/oauth-state'
 
 export const dynamic = 'force-dynamic'
@@ -71,6 +72,21 @@ export async function GET(
   // their tokens into this dashboard.
   const state = await signOAuthState(network, usuario.id)
 
+  // «Agregar cuenta →» llega con `?agregar=1`: la vuelta tiene que saber que se quería una
+  // cuenta más, para no decir «conectado» si la red solo renovó la de antes. Va en una cookie
+  // corta en la ruta de esta red; sin la marca, se borra la de un intento anterior.
+  const agregar = new URL(request.url).searchParams.get('agregar') === '1'
+  const ir = (destino: URL) => {
+    const response = NextResponse.redirect(destino)
+    const ruta = `/api/social/${network}`
+    if (agregar) {
+      response.cookies.set(COOKIE_AGREGAR, network, { httpOnly: true, secure: true, sameSite: 'lax', maxAge: 600, path: ruta })
+    } else {
+      response.cookies.delete({ name: COOKIE_AGREGAR, path: ruta })
+    }
+    return response
+  }
+
   if (network === 'instagram' || network === 'facebook') {
     const appId = env('INSTAGRAM_APP_ID')
     if (!appId) return new NextResponse('Falta INSTAGRAM_APP_ID', { status: 400 })
@@ -81,7 +97,7 @@ export async function GET(
     url.searchParams.set('scope', scope)
     url.searchParams.set('response_type', 'code')
     url.searchParams.set('state', state)
-    return NextResponse.redirect(url)
+    return ir(url)
   }
 
   if (network === 'youtube') {
@@ -90,16 +106,18 @@ export async function GET(
 
     // access_type=offline + prompt=consent is the pair that makes Google hand over a
     // refresh token even on re-consent; without it the second connect gets none and
-    // the hourly access token dies with no way back.
+    // the hourly access token dies with no way back. select_account, además, hace que
+    // Google pregunte siempre con qué cuenta entrar: sin eso, con una sola sesión abierta,
+    // «Agregar cuenta →» volvía con el mismo canal.
     const url = new URL('https://accounts.google.com/o/oauth2/v2/auth')
     url.searchParams.set('client_id', clientId)
     url.searchParams.set('redirect_uri', redirectUri)
     url.searchParams.set('scope', scope)
     url.searchParams.set('response_type', 'code')
     url.searchParams.set('access_type', 'offline')
-    url.searchParams.set('prompt', 'consent')
+    url.searchParams.set('prompt', 'select_account consent')
     url.searchParams.set('state', state)
-    return NextResponse.redirect(url)
+    return ir(url)
   }
 
   if (network === 'threads') {
@@ -112,7 +130,7 @@ export async function GET(
     url.searchParams.set('scope', scope)
     url.searchParams.set('response_type', 'code')
     url.searchParams.set('state', state)
-    return NextResponse.redirect(url)
+    return ir(url)
   }
 
   if (network === 'x') {
@@ -133,7 +151,7 @@ export async function GET(
     url.searchParams.set('code_challenge', challenge)
     url.searchParams.set('code_challenge_method', 'S256')
 
-    const response = NextResponse.redirect(url)
+    const response = ir(url)
     response.cookies.set('x_pkce_verifier', verifier, {
       httpOnly: true,
       secure: true,
@@ -153,5 +171,9 @@ export async function GET(
   url.searchParams.set('scope', scope)
   url.searchParams.set('response_type', 'code')
   url.searchParams.set('state', state)
-  return NextResponse.redirect(url)
+  // Con una sesión de TikTok abierta en el navegador, TikTok autoriza solo y vuelve en
+  // segundos, sin mostrar nada: «Agregar cuenta →» parecía no hacer nada y renovaba la de
+  // antes. Con esto muestra siempre su pantalla, con la cuenta que va a autorizar.
+  url.searchParams.set('disable_auto_auth', '1')
+  return ir(url)
 }
