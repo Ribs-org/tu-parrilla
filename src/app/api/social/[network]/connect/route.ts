@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createHash, randomBytes } from 'node:crypto'
 import { usuarioActual } from '@/lib/auth'
 import { env } from '@/lib/env'
+import { REDES_PROXIMAMENTE, fraseProximamente } from '@/lib/networks'
 import { signOAuthState } from '@/lib/social/oauth-state'
 
 export const dynamic = 'force-dynamic'
@@ -58,6 +59,12 @@ export async function GET(
   if (!scope) return new NextResponse('Esa red no usa OAuth', { status: 400 })
 
   const origin = new URL(request.url).origin
+
+  // Una red en «Próximamente» no abre la ventana de la red aunque alguien escriba esta
+  // dirección a mano: vuelve a Los Fierros con la frase, como cualquier otra vuelta.
+  if (REDES_PROXIMAMENTE.has(network)) {
+    return NextResponse.redirect(`${origin}/admin/accounts?mensaje=${encodeURIComponent(fraseProximamente(network))}`)
+  }
   const redirectUri = `${origin}/api/social/${network}/callback`
 
   // A signed, short-lived state is what stops a stranger's callback from writing

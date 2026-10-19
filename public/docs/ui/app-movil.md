@@ -107,7 +107,7 @@ Aquí no se conecta ni se desconecta nada: eso es del panel web.
 Se abre con «Ver todas las publicaciones →» en Los Números. Arriba, la barra con el título «Tus publicaciones» y la flecha para volver.
 
 - Los cinco botones de período, deslizables: «Hoy», «7 días», «30 días» (el que viene marcado), «90 días» y «Todo».
-- Botones de red: «Todas», «Instagram», «TikTok», «YouTube» y «Facebook». Se pueden marcar varios; «Todas» quita el filtro. Threads y X no tienen botón: publican, pero Tu Parrilla no trae sus publicaciones.
+- Botones de red: «Todas», «Instagram», «TikTok», «YouTube» y «Facebook». Se pueden marcar varios; «Todas» quita el filtro. Threads y X no tienen botón: Tu Parrilla no trae sus publicaciones, y hoy están en «Próximamente».
 - La lista de lo publicado en el período, ordenada de más a menos views ganadas. Cada fila: la miniatura, el texto, «Red · fecha», la marca «Se pasó» cuando el post sacó al menos el doble de views ganadas que la mediana (el valor del medio) de los posts que se están mirando, y abajo «N views» y «P% arrastre».
 - Si no hay nada: «No publicaste nada en este período.»
 - Tocar una fila abre su detalle.

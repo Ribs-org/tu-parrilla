@@ -8,8 +8,10 @@ import { cn } from '@/lib/utils'
 import { nombreDe } from '@/lib/vocabulario'
 import { PanelLateral } from './panel-lateral'
 
+// La primera fila es solo texto: va a Facebook, la única de las que publican hoy que lo recibe
+// (Threads y X también, pero están en «Próximamente», `REDES_PROXIMAMENTE`).
 const PLANTILLA = `fecha,texto,redes,media,portada
-2026-09-03 10:00,"Mi primer post en lote",threads|x,,
+2026-09-03 10:00,"Mi primer post en lote",facebook,,
 2026-09-03 18:30,"Con foto, y con coma",instagram|facebook,https://ejemplo.com/foto.jpg,
 2026-09-08 19:00,"Mi corto",instagram|youtube,https://ejemplo.com/corto.mp4,https://ejemplo.com/portada.jpg`
 

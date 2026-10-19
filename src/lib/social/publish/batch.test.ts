@@ -99,7 +99,7 @@ vi.mock('../cuentas', async (importOriginal) => {
     ...real,
     verificarCuentas: vi.fn(async () => []),
     cuentaUnicaPorRed: vi.fn(
-      async () => new Map([['threads', { id: 'threads-1', network: 'threads', handle: 'demo' }]]),
+      async () => new Map([['facebook', { id: 'facebook-1', network: 'facebook', handle: 'demo' }]]),
     ),
   }
 })
@@ -132,7 +132,7 @@ const base: BatchItem = {
   fecha: '2026-09-03 10:00',
   texto: 'Hola lote',
   cuentas: [],
-  redes: ['threads', 'x'],
+  redes: ['facebook'],
   media: [],
 }
 
@@ -254,16 +254,13 @@ describe('validateBatchItem', () => {
   it('la media de tipo diferido igual cuenta como archivo en las reglas por cantidad', () => {
     const url = 'https://ej.com/sin-extension'
     expect(validateBatchItem({ ...base, redes: ['instagram'], media: [url] }, now, ZONA)).toBeNull()
-    expect(validateBatchItem({ ...base, redes: ['threads'], media: [url, url] }, now, ZONA)).toMatch(
-      /un solo archivo/,
-    )
-    expect(validateBatchItem({ ...base, redes: ['x'], media: Array(5).fill(url) }, now, ZONA)).toMatch(
-      /cuatro/,
+    expect(validateBatchItem({ ...base, redes: ['instagram'], media: Array(11).fill(url) }, now, ZONA)).toMatch(
+      /diez/,
     )
   })
 
   it('delega en las reglas del compositor: límites y formas por red', () => {
-    expect(validateBatchItem({ ...base, texto: 'x'.repeat(281) }, now, ZONA)).toMatch(/280/)
+    expect(validateBatchItem({ ...base, texto: 'x'.repeat(2201) }, now, ZONA)).toMatch(/largo/)
     expect(
       validateBatchItem(
         { ...base, redes: ['instagram'], media: [] },
@@ -273,15 +270,24 @@ describe('validateBatchItem', () => {
     ).toMatch(/archivo/)
     expect(
       validateBatchItem(
-        { ...base, redes: ['x'], media: ['https://ej.com/v.mp4'] },
+        { ...base, media: Array(11).fill('https://ej.com/a.jpg') },
         now,
         ZONA,
       ),
-    ).toMatch(/video/)
+    ).toMatch(/diez/)
+  })
+
+  it('rechaza Threads y X, que están en «Próximamente», con su frase', () => {
+    expect(validateBatchItem({ ...base, redes: ['threads'] }, now, ZONA)).toBe(
+      'Threads todavía no está disponible en Tu Parrilla: próximamente.',
+    )
+    expect(validateBatchItem({ ...base, redes: ['facebook', 'x'] }, now, ZONA)).toBe(
+      'X / Twitter todavía no está disponible en Tu Parrilla: próximamente.',
+    )
   })
 
   it('rechaza redes repetidas: el destino es único por post', () => {
-    expect(validateBatchItem({ ...base, redes: ['x', 'x'] }, now, ZONA)).toMatch(/repetidas/)
+    expect(validateBatchItem({ ...base, redes: ['facebook', 'facebook'] }, now, ZONA)).toMatch(/repetidas/)
   })
 
   it('rechaza fechas ISO con zona o segundos: solo YYYY-MM-DD HH:MM', () => {
@@ -461,7 +467,7 @@ describe('opciones por red en el lote', () => {
   })
 
   it('una red que no pide opciones no las acepta', () => {
-    expect(validateBatchItem({ ...base, opciones: { threads: { modo: 'directo' } } }, now, ZONA)).toBe(OPCIONES_ERROR)
+    expect(validateBatchItem({ ...base, opciones: { facebook: { modo: 'directo' } } }, now, ZONA)).toBe(OPCIONES_ERROR)
   })
 
   it('la media de tiktok se valida por extensión antes de descargar', () => {
@@ -532,7 +538,7 @@ describe('scheduleBatch — el documento antes de escribir la regla, y antes de 
     fecha: '2030-01-01 10:00',
     texto: 'Hola',
     cuentas: [],
-    redes: ['threads'],
+    redes: ['facebook'],
     media: ['https://ej.com/a.mp4'],
     regla: { palabra: 'GUIA', mensaje: 'Toma', documentoUrl: 'https://origen.ej.com/g.pdf' },
   }
@@ -665,7 +671,7 @@ describe('scheduleBatch — «19:00» son las 19:00 del dueño', () => {
     fecha: '2030-10-05 19:00',
     texto: 'Hola',
     cuentas: [],
-    redes: ['threads'],
+    redes: ['facebook'],
     media: [],
   }
 
@@ -722,7 +728,7 @@ describe('scheduleBatch — la ref reconoce una fila reenviada', () => {
     fecha: '2030-10-05 19:00',
     texto: 'Hola',
     cuentas: [],
-    redes: ['threads'],
+    redes: ['facebook'],
     media: [],
     ref: 'lote-1',
   }

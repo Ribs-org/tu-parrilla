@@ -96,6 +96,14 @@ Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataf
   Review de Meta, Pyxis declaró revisar la legalidad de cada solicitud, poder impugnarla,
   entregar lo mínimo y documentarla. Que el abogado la deje por escrito, junto con la
   revisión de `/privacidad` y `/terminos`.
+- **Threads y X en «Próximamente»** (2026-10-19). Se apagaron para que un usuario nuevo no
+  se tope con algo que no funciona: Los Fierros dice «Próximamente» y nada deja programar ahí
+  (README, «Conectar y sincronizar»). Para abrir **Threads**: la segunda vuelta del App Review
+  (la entrada de abajo) y su baja y su borrado (`docs/deuda-tecnica.md`). Para abrir **X**:
+  ver por qué no publica; lo primero a mirar es el saldo, porque su API ya no tiene capa
+  gratuita, y pagarla es decisión del **[dueño]**. Abrir cualquiera de las dos es sacarla de
+  `REDES_PROXIMAMENTE` (`src/lib/networks.ts`), y volver a contar su conexión en
+  `public/docs/ui/los-fierros.md`.
 - **Meta, segunda vuelta: mensajes privados** (el privado con el enlace de la regla de
   palabra clave, `instagram_manage_messages` y `pages_messaging`) y, aparte, **Threads**
   (`threads_basic`, `threads_content_publish`). Se sacaron de la primera solicitud porque
@@ -206,8 +214,9 @@ Nada de esto bloquea un trámite hoy; conviene ordenarlo antes de abrir a tercer
 - **El rediseño de la app del teléfono, partes 3 y 4** (2026-10-16). Las partes 1 y 2
   dejaron las tres pestañas del panel, «Reprogramar» en «Se quemó» y los borradores
   compartidos con el panel. Faltan: (3) La Mesa como cuarta pestaña, para leer y responder
-  comentarios; (4) TikTok, Threads y X desde Publicar —TikTok exige mostrar los datos de la
-  cuenta (`creator_info`) antes de publicar—, y con eso la palabra clave: hoy un borrador
+  comentarios; (4) TikTok desde Publicar —exige mostrar los datos de la cuenta
+  (`creator_info`) antes de publicar—, y Threads y X cuando salgan de «Próximamente»; y con eso
+  la palabra clave: hoy un borrador
   con TikTok o con palabra clave se edita en el teléfono pero se programa en el panel
   (`soloEnElPanel` en `src/lib/borrador.ts`). El nombre y el ícono «Tu Parrilla» ya están en
   `mobile/app.json`, con el identificador `cl.tuparrilla.app`: llegan con el primer build de

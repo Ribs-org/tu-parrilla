@@ -130,14 +130,14 @@ no por subcadena parcial ni regex:
 | `Elige al menos una cuenta o una red.` | `redes` y `cuentas` ambas vacías o ausentes |
 | `Escribe un texto o adjunta un archivo.` | `texto` vacío y `media` vacía |
 | `Red desconocida o sin publicación: <red>.` | `redes` con un nombre que no existe |
+| `Threads todavía no está disponible en Tu Parrilla: próximamente.` | `threads` en `redes`, o una cuenta de Threads en `cuentas`: está en «Próximamente» |
+| `X / Twitter todavía no está disponible en Tu Parrilla: próximamente.` | `x` en `redes`, o una cuenta de X en `cuentas`: está en «Próximamente» |
 | `Hay redes repetidas en la fila.` | `redes` con la misma red dos veces |
 | `No se pudo leer una media de la fila.` | `media` o `portada`: descarga fallida, timeout, o tipo ajeno |
 | `La portada requiere un video en media.` | `portada` sin video en `media` |
 | `La portada debe ser una imagen.` | `portada` resultó ser video u otra cosa |
 | `La portada debe ser JPG o PNG.` | `portada` en gif/webp u otro formato |
 | `Los atributos deben ser un objeto plano de valores simples.` | `atributos` con array, anidado, o más de 20 claves / 2000 caracteres |
-| `El texto excede los 280 caracteres de X.` | `texto` largo con `x` en `redes` |
-| `El texto excede los 500 caracteres de Threads.` | `texto` largo con `threads` en `redes` |
 | `El texto es demasiado largo para Instagram.` | `texto` sobre 2200 caracteres |
 | `TikTok necesita que elijas la privacidad.` | un destino TikTok sin `opciones`, o `directo` sin `privacidad` válida |
 | `Un contenido patrocinado no puede ser privado.` | `opciones` con `comercial: patrocinado` y `privacidad: SELF_ONLY` |
@@ -215,7 +215,7 @@ fallido: sale solo cuando la cuenta recupere cupo, sin gastar intentos.
 - **No manda nada de inmediato.** Todo lo que entra por `POST /api/schedule/batch` espera a su
   `fecha`; no existe una forma de publicar ahora mismo por esta vía.
 - **Solo tres redes leen comentarios: Instagram, Facebook y YouTube.** Una `regla` en un post que
-  va únicamente a TikTok, Threads o X **no hace nada** —no falla, no avisa: nunca se dispara,
+  va únicamente a TikTok **no hace nada** —no falla, no avisa: nunca se dispara,
   porque nadie lee esos comentarios—. La regla vale la pena solo si el post sale a alguna de esas
   tres.
 - **No devuelve las opciones de un post ya programado.** `GET /api/schedule/posts` no trae

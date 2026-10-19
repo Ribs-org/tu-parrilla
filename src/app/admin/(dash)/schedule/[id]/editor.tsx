@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 import { ArrowDown, ArrowLeft, ArrowUp, Check, Copy, ExternalLink } from 'lucide-react'
 import { deleteScheduledPost, updateScheduledPost, type FormState } from '@/app/admin/actions'
 import { Button, Field, GroupLabel, Input, Textarea } from '@/components/ui'
-import { networkLabel } from '@/lib/networks'
+import { REDES_PROXIMAMENTE, networkLabel } from '@/lib/networks'
 import type { CuentaRow } from '@/lib/posts-kpis'
 import { cn } from '@/lib/utils'
 import { CONFIRMAR_ELIMINAR } from '../etiqueta'
@@ -56,9 +56,11 @@ export function Editor({
   // seguir nombrando su red sin la cuenta.
   const networkPorAccountId = new Map(targets.map((t) => [t.accountId, t.network]))
   // Las cuentas que se pueden agregar desde el editor: `tiktok` no se ofrece porque no
-  // puede pedir sus opciones acá, igual que antes con la red. Un destino que ya existe
-  // se dibuja aunque su cuenta no se pueda agregar (una de tiktok, o desconectada).
-  const ofertables = cuentas.filter((c) => ENABLED_NETWORKS.has(c.network))
+  // puede pedir sus opciones acá, igual que antes con la red, ni una red en «Próximamente»
+  // (`REDES_PROXIMAMENTE`). Un destino que ya existe se dibuja aunque su cuenta no se pueda
+  // agregar (una de tiktok, una de X, o desconectada); uno de X o de Threads que siga por
+  // salir hay que desmarcarlo para guardar, porque la regla común lo rechaza.
+  const ofertables = cuentas.filter((c) => ENABLED_NETWORKS.has(c.network) && !REDES_PROXIMAMENTE.has(c.network))
   const drawnIds = [...new Set([...ofertables.map((c) => c.id), ...targets.map((t) => t.accountId)])]
   const resumen = new Map(targets.map((t) => [t.accountId, t.opciones]))
 

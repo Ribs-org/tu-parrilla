@@ -9,7 +9,7 @@ import { PINTURA } from '@/components/charts/theme'
 import { SOCIAL_NETWORKS } from '@/db/schema'
 import type { CuentaRow } from '@/lib/posts-kpis'
 import { CONEXION_FALLO } from '@/lib/avisos/reglas'
-import { avisosDe, networkLabel } from '@/lib/networks'
+import { PROXIMAMENTE, REDES_PROXIMAMENTE, avisosDe, networkLabel } from '@/lib/networks'
 import { estadoDelFierro, type Fierro } from '@/lib/parrilla'
 import { cn } from '@/lib/utils'
 
@@ -49,6 +49,14 @@ function syncedAgo(iso: string | null): string {
 
 function nombreDe(row: CuentaRow): string {
   return row.handle ?? row.externalId ?? 'Sin nombre'
+}
+
+/**
+ * Donde iría «Conectar →» o «Agregar cuenta →» en una red de `REDES_PROXIMAMENTE`: un texto y
+ * no un enlace, porque no hay adónde ir. La conexión tampoco arranca si alguien la pide a mano.
+ */
+function Proximamente() {
+  return <span className="ml-auto text-[0.75rem] text-fg-faint">{PROXIMAMENTE}</span>
 }
 
 /**
@@ -98,13 +106,17 @@ export function Cuentas({ rows, metaEnRevision }: { rows: CuentaRow[]; metaEnRev
                 <div className="flex items-center gap-2">
                   <Icon name={network} className="h-4 w-4 shrink-0" />
                   <h2 className="font-titulo text-sm font-semibold uppercase tracking-[0.03em]">{networkLabel(network)}</h2>
-                  <a
-                    href={`/api/social/${network}/connect`}
-                    aria-describedby={idsDeAvisos.length > 0 ? idsDeAvisos.join(' ') : undefined}
-                    className="ml-auto text-[0.75rem] text-fg-muted transition-colors hover:text-fg"
-                  >
-                    Agregar cuenta →
-                  </a>
+                  {REDES_PROXIMAMENTE.has(network) ? (
+                    <Proximamente />
+                  ) : (
+                    <a
+                      href={`/api/social/${network}/connect`}
+                      aria-describedby={idsDeAvisos.length > 0 ? idsDeAvisos.join(' ') : undefined}
+                      className="ml-auto text-[0.75rem] text-fg-muted transition-colors hover:text-fg"
+                    >
+                      Agregar cuenta →
+                    </a>
+                  )}
                 </div>
                 {/* Los avisos sirven antes de conectar: con la red ya conectada, a un clic. */}
                 {avisos.length > 0 ? (
@@ -141,14 +153,23 @@ export function Cuentas({ rows, metaEnRevision }: { rows: CuentaRow[]; metaEnRev
                 <li key={network}>
                   <div className="flex items-center gap-2">
                     <Icon name={network} className="h-4 w-4 shrink-0 text-fg-muted" />
-                    <span className="text-sm">{networkLabel(network)}</span>
-                    <a
-                      href={`/api/social/${network}/connect`}
-                      aria-describedby={idsDeAvisos.length > 0 ? idsDeAvisos.join(' ') : undefined}
-                      className="ml-auto text-[0.75rem] text-fg-muted transition-colors hover:text-fg"
-                    >
-                      Conectar →
-                    </a>
+                    {REDES_PROXIMAMENTE.has(network) ? (
+                      <>
+                        <span className="text-sm text-fg-muted">{networkLabel(network)}</span>
+                        <Proximamente />
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-sm">{networkLabel(network)}</span>
+                        <a
+                          href={`/api/social/${network}/connect`}
+                          aria-describedby={idsDeAvisos.length > 0 ? idsDeAvisos.join(' ') : undefined}
+                          className="ml-auto text-[0.75rem] text-fg-muted transition-colors hover:text-fg"
+                        >
+                          Conectar →
+                        </a>
+                      </>
+                    )}
                   </div>
                   {avisos.map((aviso, i) => (
                     <p key={aviso} id={idsDeAvisos[i]} className="mt-0.5 pl-6 text-[0.72rem] text-fg-faint">
@@ -299,12 +320,16 @@ function Fila({ row, network, vivas }: { row: CuentaRow; network: string; vivas:
           </p>
           <p className="text-[0.72rem] leading-snug">{estado}</p>
         </div>
-        <a
-          href={`/api/social/${network}/connect`}
-          className="shrink-0 text-[0.75rem] text-fg-muted transition-colors hover:text-fg"
-        >
-          {row.connected ? 'Reconectar' : 'Conectar →'}
-        </a>
+        {/* En una red en «Próximamente» el bloque ya lo dice arriba; la fila se queda con su
+            detalle, para poder desconectarla o quitarla. */}
+        {REDES_PROXIMAMENTE.has(network) ? null : (
+          <a
+            href={`/api/social/${network}/connect`}
+            className="shrink-0 text-[0.75rem] text-fg-muted transition-colors hover:text-fg"
+          >
+            {row.connected ? 'Reconectar' : 'Conectar →'}
+          </a>
+        )}
         <button
           type="button"
           onClick={() => setAbierta(!abierta)}

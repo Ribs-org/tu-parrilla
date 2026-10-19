@@ -13,7 +13,11 @@ guarda el resultado. Otro proceso sincroniza a diario las métricas de lo public
 Cierras el ciclo leyendo esas métricas junto a las etiquetas que tú mismo pusiste al
 programar.
 
-**Redes que publican hoy:** `instagram`, `facebook`, `youtube`, `threads`, `x`, `tiktok`.
+**Redes que publican hoy:** `instagram`, `facebook`, `youtube`, `tiktok`. `threads` y `x` están
+en «Próximamente»: el dueño no puede conectarlas, y una fila que las nombre se rechaza con su
+frase (`Threads todavía no está disponible en Tu Parrilla: próximamente.` o
+`X / Twitter todavía no está disponible en Tu Parrilla: próximamente.`). Lo que esta guía dice
+de ellas vale para el día en que se abran.
 
 **Zona horaria:** todo lo que escribes y lees en horas está en la zona horaria del
 dueño de la llave — la que tiene puesta en Tu Cuenta (`/admin/cuenta`).
@@ -123,7 +127,8 @@ con los identificadores separados por `|` igual que `redes` y `media`.
 
 ### `redes` (obligatorio si la fila no trae `cuentas`)
 
-Array con una o más de: `instagram`, `facebook`, `youtube`, `threads`, `x`, `tiktok`.
+Array con una o más de: `instagram`, `facebook`, `youtube`, `tiktok` (`threads` y `x`, en
+«Próximamente», se rechazan).
 Sin repetir. Un mismo post sale a todas las que pongas.
 
 Cada nombre se resuelve a una cuenta **solo si tienes exactamente una** conectada de
@@ -362,6 +367,7 @@ libre. Sin `ref`, reenviar una fila la programa otra vez.
 
 | Regla | Cuándo se rompe | Frase exacta |
 |---|---|---|
+| Red en «Próximamente» | `threads` o `x` en `redes`, o una cuenta suya en `cuentas` | `Threads todavía no está disponible en Tu Parrilla: próximamente.` (o `X / Twitter todavía no está disponible en Tu Parrilla: próximamente.`) |
 | Instagram, YouTube y TikTok exigen archivo | los pones sin `media` | `Instagram, YouTube y TikTok necesitan al menos un archivo.` |
 | Un post necesita algo | sin texto y sin media | `Escribe un texto o adjunta un archivo.` |
 | X no recibe video | `x` + un video | `X aún no recibe video desde el calendario.` |
@@ -370,6 +376,9 @@ libre. Sin `ref`, reenviar una fila la programa otra vez.
 | Tope general | 11 o más archivos, con alguna red además de `tiktok` (una fila solo con `tiktok` admite hasta 35 fotos) | `Máximo diez archivos por publicación.` |
 | Al menos un destino | sin `cuentas` y sin `redes` (o ambas vacías) | `Elige al menos una cuenta o una red.` |
 | Fecha futura | hora ya pasada | `La hora debe estar en el futuro.` |
+
+Las reglas de `x` y de `threads` quedan para cuando salgan de «Próximamente»: hoy esas filas
+se rechazan antes, con la frase de la primera.
 
 Facebook además no admite **mezclar** video y fotos en un mismo post; eso se detecta
 al publicar y el destino falla con `Facebook no admite mezclar video y fotos en un post.`
@@ -420,7 +429,7 @@ por fila es dato, no error del endpoint.
 {
   "resultados": [
     { "index": 0, "ok": true,  "postId": "3f2a…" },
-    { "index": 1, "ok": false, "error": "El texto excede los 280 caracteres de X." },
+    { "index": 1, "ok": false, "error": "El texto es demasiado largo para Instagram." },
     { "index": 2, "ok": true,  "postId": "9c41…", "repetido": true }
   ]
 }
@@ -708,7 +717,7 @@ Un rango pasado vale (lista lo ya publicado). Formato inválido o rango invertid
       "redes": [
         { "red": "instagram", "estado": "published", "error": null, "externalId": "18114074218999893", "intentos": 1, "proximoIntento": null, "cuentaId": "8f0a…", "handle": "@vicente" },
         { "red": "youtube", "estado": "scheduled", "error": "No se pudo hablar con la red. Se reintentará.", "externalId": null, "intentos": 1, "proximoIntento": "2026-09-10T09:15:00-03:00", "cuentaId": "b21c…", "handle": null },
-        { "red": "x", "estado": "failed", "error": "X aún no recibe video desde el calendario.", "externalId": null, "intentos": 3, "proximoIntento": null, "cuentaId": "9d4e…", "handle": "@vicentepareja" }
+        { "red": "tiktok", "estado": "failed", "error": "TikTok no acepta el archivo: revisa formato, tamaño o duración.", "externalId": null, "intentos": 3, "proximoIntento": null, "cuentaId": "9d4e…", "handle": "@vicente" }
       ]
     }
   ]
@@ -781,7 +790,7 @@ Parámetros, ambos opcionales:
   ],
   "pista": [
     { "cuentaId": "b21c…", "red": "youtube", "handle": null, "ultima": "2026-10-18T19:00:00-03:00", "dias": 1 },
-    { "cuentaId": "9d4e…", "red": "x", "handle": "@vicentepareja", "ultima": null, "dias": 0 }
+    { "cuentaId": "9d4e…", "red": "facebook", "handle": "Vicente Pareja", "ultima": null, "dias": 0 }
   ]
 }
 ```
@@ -880,7 +889,7 @@ curl -X POST https://tu-parrilla.cl/api/schedule/batch \
       {
         "fecha": "2026-09-10 19:00",
         "texto": "Tres cosas que aprendí vendiendo software en Chile.",
-        "redes": ["threads", "x"],
+        "redes": ["facebook"],
         "media": [],
         "atributos": { "hook": "lista", "tema": "software", "estilo": "texto" },
         "ref": "septiembre-02"

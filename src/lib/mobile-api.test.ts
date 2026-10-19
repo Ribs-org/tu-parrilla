@@ -4,6 +4,7 @@ import {
   ARCHIVO_MUY_GRANDE,
   CUERPO_ILEGIBLE,
   MAX_BYTES_SUBIDA,
+  REDES_MOVIL,
   TIPO_NO_PUBLICABLE,
   fierrosParaElTelefono,
   parseBorradorMovil,
@@ -121,9 +122,9 @@ describe('parseBorradorMovil', () => {
   })
 
   it('texto ausente es texto vacío, y cuando ausente es null', () => {
-    expect(parseBorradorMovil({ redes: ['x'], ahora: true })).toEqual({
+    expect(parseBorradorMovil({ redes: ['facebook'], ahora: true })).toEqual({
       texto: '',
-      redes: ['x'],
+      redes: ['facebook'],
       cuentas: [],
       cuando: null,
       ahora: true,
@@ -132,8 +133,8 @@ describe('parseBorradorMovil', () => {
   })
 
   it('quita redes repetidas sin quejarse: el índice único las rechazaría después', () => {
-    expect(parseBorradorMovil({ ...bueno, redes: ['x', 'x', 'threads'] })).toMatchObject({
-      redes: ['x', 'threads'],
+    expect(parseBorradorMovil({ ...bueno, redes: ['facebook', 'facebook', 'instagram'] })).toMatchObject({
+      redes: ['facebook', 'instagram'],
     })
   })
 
@@ -147,8 +148,19 @@ describe('parseBorradorMovil', () => {
     expect(parseBorradorMovil({ ...bueno, redes: ['tiktok'] })).toEqual({
       error: 'Red desconocida o sin publicación: tiktok.',
     })
-    expect(parseBorradorMovil({ ...bueno, redes: ['threads'] })).toMatchObject({
-      redes: ['threads'],
+    expect(parseBorradorMovil({ ...bueno, redes: ['facebook'] })).toMatchObject({
+      redes: ['facebook'],
+    })
+  })
+
+  it('Threads y X están en «Próximamente»: el teléfono tampoco, y con la frase de la reja', () => {
+    expect(REDES_MOVIL.has('threads')).toBe(false)
+    expect(REDES_MOVIL.has('x')).toBe(false)
+    expect(parseBorradorMovil({ ...bueno, redes: ['threads'] })).toEqual({
+      error: 'Threads todavía no está disponible en Tu Parrilla: próximamente.',
+    })
+    expect(parseBorradorMovil({ ...bueno, redes: ['instagram', 'x'] })).toEqual({
+      error: 'X / Twitter todavía no está disponible en Tu Parrilla: próximamente.',
     })
   })
 

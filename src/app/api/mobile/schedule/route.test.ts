@@ -204,17 +204,10 @@ describe('POST /api/mobile/schedule', () => {
   })
 
   it('valida con las redes que resolverDestinos entregó, no con lo que el cuerpo declaró', async () => {
-    resolverDestinos.mockResolvedValueOnce({ cuentas: [], networks: ['x'] })
-    const res = await POST(
-      peticion({
-        texto: 'Hola',
-        cuentas: ['c1'],
-        ahora: true,
-        media: [{ url: 'https://cdn.ejemplo.cl/scheduled/a.mp4', mediaType: 'video' }],
-      }),
-    )
+    resolverDestinos.mockResolvedValueOnce({ cuentas: [], networks: ['instagram'] })
+    const res = await POST(peticion({ texto: 'Hola', cuentas: ['c1'], ahora: true, media: [] }))
     expect(res.status).toBe(400)
-    expect(await res.json()).toEqual({ error: 'X aún no recibe video desde el calendario.' })
+    expect(await res.json()).toEqual({ error: 'Instagram, YouTube y TikTok necesitan al menos un archivo.' })
     expect(crearPostProgramado).not.toHaveBeenCalled()
   })
 

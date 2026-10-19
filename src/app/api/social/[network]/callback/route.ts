@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { usuarioActual } from '@/lib/auth'
 import { env } from '@/lib/env'
-import { networkLabel } from '@/lib/networks'
+import { REDES_PROXIMAMENTE, fraseProximamente, networkLabel } from '@/lib/networks'
 import { CuentaDeOtro, guardarCuenta, siQueriasOtra } from '@/lib/social/conectar'
 import {
   NO_FACEBOOK_PAGE,
@@ -416,6 +416,10 @@ export async function GET(
     fallo.cookies.delete({ name: COOKIE_PENDIENTE, path: '/admin/accounts' })
     return fallo
   }
+
+  // Una red en «Próximamente» tampoco termina una conexión empezada antes de quedar así: no
+  // se guarda nada.
+  if (REDES_PROXIMAMENTE.has(network)) return back(fraseProximamente(network))
 
   if (!code || !state) return back('La red no devolvió el código de autorización.')
 

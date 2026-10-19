@@ -1,3 +1,4 @@
+import { REDES_PROXIMAMENTE, fraseProximamente } from './networks'
 import { avisoDeFierros, estadoDelFierro, fraseDelAviso, type Fierro } from './parrilla'
 import { PUBLISHABLE, typeFromContentType } from './social/publish/batch'
 import { CuentaInvalida, cuentaUnicaPorRed, verificarCuentas, type CuentaDestino } from './social/cuentas'
@@ -6,14 +7,18 @@ import { CuentaInvalida, cuentaUnicaPorRed, verificarCuentas, type CuentaDestino
 // consultar `creator_info` por creador antes de ofrecer privacidad, comentarios, dúo
 // y demás — el teléfono no hace esa consulta ni resuelve esas interacciones, así que
 // esa red se rechaza aquí aunque el lote y el compositor ya la publiquen. Quitar esta
-// exclusión cuando la app móvil traiga ese bloque.
+// exclusión cuando la app móvil traiga ese bloque. Las redes en «Próximamente»
+// (`REDES_PROXIMAMENTE`) tampoco: no se ofrecen en ninguna parte.
 //
 // Exportada: `resolverDestinos` (más abajo) también la usa para filtrar destinos
 // elegidos por cuenta, y `GET /api/mobile/schedule/accounts` para no ofrecer un chip
 // de una cuenta que después el servidor va a rechazar.
-export const REDES_MOVIL = new Set([...PUBLISHABLE].filter((red) => red !== 'tiktok'))
+export const REDES_MOVIL = new Set(
+  [...PUBLISHABLE].filter((red) => red !== 'tiktok' && !REDES_PROXIMAMENTE.has(red)),
+)
 
 function fraseRedNoPublicable(red: string): string {
+  if (REDES_PROXIMAMENTE.has(red)) return fraseProximamente(red)
   return `Red desconocida o sin publicación: ${red}.`
 }
 

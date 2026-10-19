@@ -1,3 +1,5 @@
+import { REDES_PROXIMAMENTE, fraseProximamente } from '@/lib/networks'
+
 export type ScheduleDraft = {
   caption: string
   imageCount: number
@@ -47,8 +49,26 @@ function tiktokMediaError(draft: ScheduleDraft): string | null {
 /**
  * The composer's whole rulebook, pure so it is testable and shared: the server action
  * runs it as the real gate. Returns a fixed sentence or null.
+ *
+ * Antes que cualquier regla de forma va la reja de «Próximamente» (`REDES_PROXIMAMENTE`): a
+ * esas redes no se programa nada, por ningún camino, y sus reglas de forma no vienen al caso.
  */
 export function validateScheduleDraft(
+  draft: ScheduleDraft,
+  now: Date,
+  opts?: { allowPast?: boolean },
+): string | null {
+  const proxima = draft.networks.find((n) => REDES_PROXIMAMENTE.has(n))
+  if (proxima) return fraseProximamente(proxima)
+  return reglasDeForma(draft, now, opts)
+}
+
+/**
+ * Todo `validateScheduleDraft` menos la reja de «Próximamente»: los archivos, los límites de
+ * cada red y la hora. Exportada para probar las reglas de X y de Threads, que siguen escritas
+ * para el día en que esas redes se abran; para validar lo que se programa, `validateScheduleDraft`.
+ */
+export function reglasDeForma(
   draft: ScheduleDraft,
   now: Date,
   opts?: { allowPast?: boolean },

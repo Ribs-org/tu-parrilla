@@ -22,7 +22,7 @@ import {
   type Campos,
 } from '@/lib/borrador'
 import type { CuentaRow } from '@/lib/posts-kpis'
-import { networkLabel } from '@/lib/networks'
+import { REDES_PROXIMAMENTE, networkLabel } from '@/lib/networks'
 import { calorDelDia, estadoDelFierro, type Calor, type Fierro, type Sello } from '@/lib/parrilla'
 import { addDays, dayKey, dayLabelConMes, mondayOfKey } from '@/lib/schedule-week'
 import { subirUno, type MediaSubida } from '@/lib/subida-directa'
@@ -218,8 +218,9 @@ export function Composer({
   const campos = borrador?.campos ?? null
 
   // Cuentas cuya red todavía publica desde aquí. Una cuenta de una red que no está en
-  // `ENABLED` no se ofrece, esté o no conectada.
-  const publicables = cuentas.filter((c) => ENABLED.has(c.network))
+  // `ENABLED`, o que está en «Próximamente» (`REDES_PROXIMAMENTE`), no se ofrece, esté o no
+  // conectada.
+  const publicables = cuentas.filter((c) => ENABLED.has(c.network) && !REDES_PROXIMAMENTE.has(c.network))
   // Las marcadas al abrir: las del borrador; si no, la que pidió la vista «Día»; si no, la
   // única conectada.
   const pedida = publicables.find((c) => c.id === cuentaInicial && c.connected)

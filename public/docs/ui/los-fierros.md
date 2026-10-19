@@ -2,7 +2,7 @@
 
 `/admin/accounts`, dentro del botón «Ajustes» de la barra del panel (no es una pestaña). La lista para elegir cuentas, que aparece sola cuando una red devuelve varias, vive en `/admin/accounts/elegir`.
 
-Los Fierros (en llano: las cuentas conectadas) es donde se conectan a Tu Parrilla las cuentas de Instagram, TikTok, YouTube, Facebook, Threads y X / Twitter, donde se renuevan cuando su permiso vence y donde se desconectan. Cada cuenta es una fila con su «fierro», una barra corta de color que dice si la conexión está viva; lo que se usa poco se abre con la flecha de la fila. Sin una cuenta conectada aquí, el panel no puede publicar en esa red. Las seis redes sirven para publicar; los números de los posts se traen de Instagram, TikTok, YouTube y Facebook; los comentarios (en [La Mesa](la-mesa.md)) llegan de Instagram, Facebook y YouTube.
+Los Fierros (en llano: las cuentas conectadas) es donde se conectan a Tu Parrilla las cuentas de Instagram, TikTok, YouTube y Facebook, donde se renuevan cuando su permiso vence y donde se desconectan. Threads y X / Twitter también están en la lista, pero dicen «Próximamente»: todavía no se pueden conectar. Cada cuenta es una fila con su «fierro», una barra corta de color que dice si la conexión está viva; lo que se usa poco se abre con la flecha de la fila. Sin una cuenta conectada aquí, el panel no puede publicar en esa red. Las cuatro redes que se conectan sirven para publicar y traen los números de sus posts; los comentarios (en [La Mesa](la-mesa.md)) llegan de Instagram, Facebook y YouTube.
 
 En el modo día el fierro es la misma barra, con el salmón tostado del día en vez del naranjo: ver «El modo día», en [index.md](index.md).
 
@@ -30,7 +30,7 @@ Mientras carga se ve el título «Los Fierros» y, en vez de las redes, bloques 
 
 Arriba, en un solo recuadro, un bloque por cada red que tiene al menos una cuenta, en este orden: Instagram, TikTok, YouTube, Facebook, Threads, X / Twitter. Cada bloque tiene:
 
-- El ícono y el nombre de la red y, a la derecha, «Agregar cuenta →», que abre la ventana de la red para conectar otra.
+- El ícono y el nombre de la red y, a la derecha, «Agregar cuenta →», que abre la ventana de la red para conectar otra. En Threads y X / Twitter dice «Próximamente», sin enlace: esas redes solo tienen bloque si una cuenta se conectó antes de que quedaran así.
 - Solo en las redes que tienen avisos, debajo, «Requisitos para agregar otra»: un clic los muestra (ver «Las redes sin conectar», abajo, para el texto de cada uno).
 - Una fila por cuenta (ver «La fila de una cuenta»).
 
@@ -49,7 +49,7 @@ Cada cuenta es una fila de una o dos líneas. De izquierda a derecha:
    - en rojo, si la última sincronización falló o si la red rechazó la conexión al publicar: «La conexión falló; reconecta la cuenta.» Al pasar el mouse aparece el error original de la red, a veces en inglés;
    - en ámbar, si se está enfriando: «Este fierro se está enfriando: la conexión vence hoy. Reconéctala antes de que se apague.» En lugar de «hoy» puede decir «mañana», «pasado mañana» o «dentro de 5 días»;
    - si no: cuándo se trajeron sus números por última vez —«Sincronizado recién», «Sincronizado hace 3 horas», «Sincronizado ayer», «Sincronizado hace 4 días»…— o «Sin sincronizar» si nunca se trajeron, con «Sin credencial · » delante si la cuenta no está conectada. Threads y X / Twitter dicen siempre «Sin sincronizar», porque de ellas no se traen números.
-4. A la derecha, «Reconectar» si la cuenta está conectada, o «Conectar →» si no.
+4. A la derecha, «Reconectar» si la cuenta está conectada, o «Conectar →» si no. En Threads y X / Twitter no aparece ninguno de los dos.
 5. Una **flecha** hacia abajo, que abre el detalle de la cuenta (un lector de pantalla la lee «Más de <nombre>»). Abierta, la flecha mira hacia arriba y otro clic lo cierra.
 
 Avisos de un momento, debajo de la fila: «Desconectada.» después de desconectar (se va sola), y el resultado de fusionar.
@@ -63,12 +63,12 @@ Avisos de un momento, debajo de la fila: «Desconectada.» después de desconect
 
 ### Las redes sin conectar
 
-Debajo, en otro recuadro, «Sin conectar» y una línea por cada red que no tiene ninguna cuenta: su ícono, su nombre y «Conectar →» a la derecha. Debajo del nombre, en letra chica, los avisos de esa red, si tiene:
+Debajo, en otro recuadro, «Sin conectar» y una línea por cada red que no tiene ninguna cuenta: su ícono, su nombre y «Conectar →» a la derecha. Threads y X / Twitter van al final, con el nombre más tenue y «Próximamente» en vez de «Conectar →», sin enlace. Debajo del nombre, en letra chica, los avisos de esa red, si tiene:
 
 - Instagram: «Cuenta Business o Creator, enlazada a una página de Facebook. Una cuenta personal no puede conectar.»
 - Facebook: «Una página, no un perfil personal.»
 - Instagram y Facebook, además, solo mientras la instalación tenga marcada la revisión de Meta: «Mientras Meta revisa la app, solo pueden conectar las cuentas que invitamos como testers. Si Facebook dice que la función no está disponible, escríbenos.» En `tu-parrilla.cl` ya no aparece: la app de Meta está en Live desde el 2026-10-19.
-- TikTok, YouTube, Threads y X / Twitter no tienen aviso.
+- TikTok y YouTube no tienen aviso.
 
 Cuando una red ya tiene cuentas, esos mismos avisos se ven en su bloque, con «Requisitos para agregar otra».
 
@@ -127,21 +127,11 @@ Se conecta una página de Facebook, no un perfil personal.
 
 El aviso del bloque habla de publicar, no de conectar: una cuenta pública se conecta igual. Si la fila muestra un número largo en vez del nombre, TikTok no entregó el nombre; «Reconectar» lo vuelve a pedir.
 
-### Para conectar Threads
+### Threads y X / Twitter: «Próximamente»
 
-1. En el bloque «Threads», aprieta «Conectar →».
-2. En la ventana de Threads, entra y autoriza.
-3. Vuelve con «Threads conectado.».
+Todavía no se pueden conectar, y no hay nada que hacer de este lado: en vez de «Conectar →» dicen «Próximamente». Si alguien abre a mano la dirección de conexión de una de ellas, vuelve a Los Fierros con «Threads todavía no está disponible en Tu Parrilla: próximamente.» (o «X / Twitter todavía no está disponible en Tu Parrilla: próximamente.»), sin que se abra la ventana de la red. Tampoco se puede programar nada hacia ellas (ver [La Parrilla](la-parrilla.md)).
 
-La conexión de Threads dura unos 60 días. En la última semana se renueva sola si se publica en Threads; si no, su fierro se pone en ámbar y hay que apretar «Reconectar».
-
-### Para conectar X / Twitter
-
-1. En el bloque «X / Twitter», aprieta «Conectar →».
-2. En la ventana de X, entra y autoriza, en menos de diez minutos.
-3. Vuelve con «X / Twitter conectado.».
-
-El acceso que entrega X dura dos horas y Tu Parrilla lo renueva solo cada vez que publica en X, así que el fierro de X no se mide por esa hora: queda al rojo mientras tenga su conexión y la última sincronización no haya fallado. Hay que reconectar si una publicación a X falla con «La cuenta no está conectada. Reconéctala y reprograma.».
+Una cuenta de Threads o de X conectada antes sigue en su bloque, sin «Reconectar»: se puede desconectar y quitar como cualquier otra (ver «Para quitar una cuenta»).
 
 ### Para agregar otra cuenta de la misma red
 
@@ -208,12 +198,11 @@ Trae los posts y los números de las cuentas de Instagram, TikTok, YouTube y Fac
 
 | Lo que dice la pantalla | Qué significa | Qué hacer |
 |---|---|---|
-| «Instagram conectado.» (o «Facebook conectado.», «YouTube conectado.», «TikTok conectado.», «Threads conectado.», «X / Twitter conectado.») | Se conectó una cuenta, o se renovó una que ya estaba. | Nada. Si no apareció una fila nueva, se renovó la que ya estaba. |
+| «Instagram conectado.» (o «Facebook conectado.», «YouTube conectado.», «TikTok conectado.») | Se conectó una cuenta, o se renovó una que ya estaba. | Nada. Si no apareció una fila nueva, se renovó la que ya estaba. |
 | «2 cuentas conectadas.» (con el número que corresponda) | Se conectaron o renovaron varias desde la lista. | Nada. |
 | «La red no devolvió el código de autorización.» | La ventana de la red devolvió al panel sin la autorización; pasa, por ejemplo, al cancelar en ella. | Volver a apretar «Conectar →» y aceptar en la ventana de la red. |
 | «El estado no corresponde a esa red.» | La vuelta no calza con la conexión que se empezó: pasaron más de diez minutos, o en medio se empezó a conectar otra red o se cambió de sesión. | Volver a apretar «Conectar →» y terminar de corrido, en el mismo navegador. |
 | «El enlace de conexión expiró. Inténtalo de nuevo.» | Igual que el anterior. | Volver a apretar «Conectar →». |
-| «La conexión con X expiró. Inténtalo de nuevo.» | Pasaron más de diez minutos en la ventana de X, o se terminó en otro navegador. | Volver a apretar «Conectar →» en el bloque de X / Twitter. |
 | «El login venció. Vuelve a conectar.» | Pasaron más de diez minutos entre el login y apretar «Conectar» en la lista. | Volver a apretar «Conectar →» en esa red. |
 | «Elige al menos una cuenta.» | Se apretó «Conectar» en la lista sin marcar ninguna casilla. | Marcar al menos una, o «Cancelar». |
 | ««@cuenta» ya está conectada por otra persona en Tu Parrilla.» (con el nombre de la cuenta), a veces seguido de «Si querías conectar otra, vuelve a conectar y, en la ventana de Facebook, elige la página de esa cuenta.» o «Si querías conectar otra, vuelve a conectar entrando con esa cuenta.» | Otro usuario de Tu Parrilla ya tiene esa cuenta conectada; una cuenta solo puede estar en un usuario. Con la segunda frase, era la única cuenta que entregó la red: casi siempre se quería otra. No se guardó nada. | Si se quería otra cuenta, hacer lo que dice la segunda frase. Si es esa misma, no se arregla desde esta pantalla: avisar a quien administra Tu Parrilla. |
@@ -227,10 +216,9 @@ Trae los posts y los números de las cuentas de Instagram, TikTok, YouTube y Fac
 | «Google no entregó el token de refresco. Reintenta la conexión.» | Google no dio el permiso para renovar la conexión sola. | Volver a conectar. |
 | «Google rechazó el código. Inténtalo de nuevo.», «Google no devolvió token.», «No se pudo leer el canal de YouTube.» | Google no terminó de entregar el permiso o no dejó leer el canal. | Volver a conectar. |
 | «TikTok rechazó el código: <número>», «TikTok no devolvió token», «TikTok no devolvió el id de la cuenta. Vuelve a conectar.» | TikTok no terminó de entregar el permiso. | Volver a conectar. |
-| «Threads rechazó el código. Inténtalo de nuevo.», «Threads no devolvió token.», «Threads no canjeó el token largo. Inténtalo de nuevo.», «Threads no devolvió el token largo.», «No se pudo leer el perfil de Threads.», «Threads no devolvió el perfil.» | Threads no terminó de entregar el permiso o no dejó leer el perfil. | Volver a conectar. |
-| «X rechazó el código. Inténtalo de nuevo.», «X no devolvió token.», «X no entregó el token de refresco. Inténtalo de nuevo.», «No se pudo leer la cuenta de X.», «X no devolvió la cuenta.» | X no terminó de entregar el permiso o no dejó leer la cuenta. | Volver a conectar. |
-| «Faltan las credenciales de la app de Meta (INSTAGRAM_APP_ID / INSTAGRAM_APP_SECRET).», «Faltan las credenciales de Google (GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET).», «Faltan las credenciales de TikTok», «Faltan las credenciales de Threads (THREADS_APP_ID / THREADS_APP_SECRET).», «Faltan las credenciales de X (X_CLIENT_ID / X_CLIENT_SECRET).» | La instalación de Tu Parrilla no tiene configurada esa red. | Avisar a quien administra Tu Parrilla. |
-| Una página en blanco que dice «Falta INSTAGRAM_APP_ID» (o «Falta GOOGLE_CLIENT_ID», «Falta THREADS_APP_ID», «Falta X_CLIENT_ID», «Falta TIKTOK_CLIENT_KEY») | Lo mismo, detectado antes de abrir la ventana de la red. | Avisar a quien administra Tu Parrilla. |
+| «Threads todavía no está disponible en Tu Parrilla: próximamente.» (o «X / Twitter todavía no está disponible en Tu Parrilla: próximamente.») | Se abrió a mano la dirección de conexión de Threads o de X, que están en «Próximamente». No se conectó nada. | Nada: esas redes todavía no se pueden conectar. |
+| «Faltan las credenciales de la app de Meta (INSTAGRAM_APP_ID / INSTAGRAM_APP_SECRET).», «Faltan las credenciales de Google (GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET).», «Faltan las credenciales de TikTok» | La instalación de Tu Parrilla no tiene configurada esa red. | Avisar a quien administra Tu Parrilla. |
+| Una página en blanco que dice «Falta INSTAGRAM_APP_ID» (o «Falta GOOGLE_CLIENT_ID», «Falta TIKTOK_CLIENT_KEY») | Lo mismo, detectado antes de abrir la ventana de la red. | Avisar a quien administra Tu Parrilla. |
 | Una página en blanco que dice «No autorizado» | La sesión del panel se cerró. | Entrar de nuevo ([Ingresar](ingresar.md)) y repetir. |
 | «Esa red no usa OAuth» o «Esa red no usa OAuth.» | Se abrió una dirección de conexión de una red que no existe. | Volver a Los Fierros y usar los enlaces de cada bloque. |
 | «No se pudo conectar. Inténtalo de nuevo.» | Falló algo inesperado al guardar la conexión. | Volver a conectar; si se repite, avisar a quien administra Tu Parrilla. |
@@ -267,7 +255,7 @@ Trae los posts y los números de las cuentas de Instagram, TikTok, YouTube y Fac
 - **«El compositor me pide "Reconecta TikTok para autorizar la publicación."»** → «Reconectar» en la fila de TikTok.
 - **«Facebook dice que la función no está disponible»** → Pasaba mientras Meta revisaba la app, cuando solo conectaban las cuentas invitadas como testers. Desde el 2026-10-19 la app está en Live y conecta cualquier cuenta Business o Creator con su página: si pasa igual, el error no vuelve al panel y hay que avisarle a quien administra Tu Parrilla.
 - **«Facebook dice "Invalid Scopes"»** → Es un problema de configuración de la app de Meta de Tu Parrilla, no de la cuenta: avisar a quien administra Tu Parrilla.
-- **«Google dice que la app no está verificada»** → Mientras Google no termine de verificar la app de Tu Parrilla, muestra ese cartel; hay que pasarlo para seguir.
+- **«Google dice que la app no está verificada»** → No debería pasar: Google verificó la app de Tu Parrilla el 2026-10-14. Si el cartel aparece igual, avisar a quien administra Tu Parrilla.
 - **«Conecté Instagram y no aparece mi página de Facebook»** → Son conexiones separadas: hay que apretar también «Conectar →» en el bloque «Facebook».
 - **«Me dice que la cuenta ya está conectada por otra persona»** → Mirar qué cuenta nombra: suele ser otra cuenta que la red trajo junto con la que se quería (en Meta, la de otra página que administra la misma persona en Facebook). En la lista para elegir, marcar solo la propia; si el error salió sin lista, volver a conectar y, en la ventana de Facebook, elegir la página de la cuenta que se quiere. Si nombra la cuenta propia, la tiene otro usuario de Tu Parrilla: avisar a quien administra Tu Parrilla.
 - **«Apreté "Agregar cuenta" y no apareció otra cuenta»** → La red entró con la cuenta que ya estaba conectada y solo la renovó. Ver «Para agregar otra cuenta de la misma red».
@@ -276,7 +264,8 @@ Trae los posts y los números de las cuentas de Instagram, TikTok, YouTube y Fac
 - **«Mi TikTok aparece con un número largo en vez del nombre»** → TikTok no entregó el nombre al conectar; «Reconectar» lo vuelve a pedir.
 - **«¿Tengo que poner mi TikTok en privada?»** → No, ni para conectar ni para publicar: la publicación directa está aprobada y sale con la privacidad que se elija en el compositor de [La Parrilla](la-parrilla.md).
 - **«El botón "Ajustes" (o "el engranaje") tiene un punto ámbar (o rojo)»** → Una cuenta se está enfriando (o se apagó). Abrir el botón: la entrada «Los Fierros» dice cuántas, por ejemplo «1 se enfría». Aquí, la fila con el fierro ámbar o gris → «Reconectar». Una cuenta desconectada a propósito no enciende el punto.
-- **«Threads o X dicen "Sin sincronizar"»** → Es lo normal: de esas redes no se traen números, solo se publica.
+- **«¿Cómo conecto Threads?»** o **«no puedo conectar X»** → Todavía no se puede: las dos dicen «Próximamente». Hoy se conectan Instagram, Facebook, TikTok y YouTube.
+- **«Threads o X dicen "Sin sincronizar"»** → Es lo normal, en una cuenta conectada antes de que esas redes quedaran en «Próximamente»: de ellas no se traen números.
 - **«Sincronizar ahora no hace nada» o «me dice que espere»** → Se puede apretar una vez cada cinco minutos. Los números de Threads y X no se traen nunca.
 - **«¿Dónde saco el id de la cuenta para la API o la carga masiva?»** → En el detalle de la cuenta (la flecha de su fila): el de «En Tu Parrilla: », con el ícono de copiar.
 - **«No me llegan los comentarios de Instagram, Facebook o YouTube»** → Si la cuenta se conectó antes de que existieran los comentarios, hay que apretar «Reconectar» una vez para dar ese permiso. Más en [La Mesa](la-mesa.md).
@@ -292,7 +281,7 @@ Trae los posts y los números de las cuentas de Instagram, TikTok, YouTube y Fac
 - No elige a qué cuenta sale cada publicación: eso se marca en el compositor de [La Parrilla](la-parrilla.md).
 - No muestra los números de las cuentas ni de sus publicaciones: están en [Los Números](los-numeros.md).
 - No muestra ni responde comentarios: eso es [La Mesa](la-mesa.md).
-- No conecta otras redes que las seis de la lista (ni LinkedIn, ni WhatsApp, ni otras).
+- No conecta Threads ni X / Twitter, que dicen «Próximamente», ni otras redes que las de la lista (ni LinkedIn, ni WhatsApp, ni otras).
 - No trae números de Threads ni de X / Twitter, ni comentarios de TikTok, Threads o X.
 - No elige con qué cuenta se entra en la ventana de la red: eso lo decide la red, y «Reconectar» no está atado a la fila.
 - Desmarcar una cuenta ya conectada en la lista no la desconecta: solo no la renueva.
@@ -310,7 +299,7 @@ Lo que describe sale de:
 - `src/app/admin/actions.ts` (`syncSocialNow`, `disconnectAccount`, `quitarCuentaAccion`, `fusionarCuenta`, `conectarElegidas`)
 - `src/app/api/social/[network]/connect/route.ts`
 - `src/app/api/social/[network]/callback/route.ts`
-- `src/lib/networks.ts` (nombres de las redes, avisos, `META_EN_REVISION`)
+- `src/lib/networks.ts` (nombres de las redes, avisos, `META_EN_REVISION` y las redes en «Próximamente»)
 - `src/lib/parrilla.ts` (`estadoDelFierro`, los siete días del aviso)
 - `src/lib/avisos/reglas.ts` (la frase «La conexión falló; reconecta la cuenta.», qué es una caída y los correos de la caída y del resumen) y `src/lib/avisos/run.ts` (cuándo salen)
 - `src/app/globals.css` (los colores del fierro)

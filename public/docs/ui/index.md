@@ -102,7 +102,7 @@ teléfono](app-movil.md).
 | Entrar; no le llega el código | [Entrar al panel](ingresar.md) |
 | Ver qué sale hoy, qué falló, cómo viene la semana | La Parrilla: el calendario de la semana y, arriba, «Se quemó» ([la-parrilla.md](la-parrilla.md)) |
 | Ver un día cuenta por cuenta; cuántas veces sale cada cuenta | La Parrilla, botón «Día», o un clic en el nombre del día en el calendario ([la-parrilla.md](la-parrilla.md)) |
-| Conectar Instagram, Facebook, YouTube, TikTok, Threads o X; reconectar una que venció | Los Fierros ([los-fierros.md](los-fierros.md)) |
+| Conectar Instagram, Facebook, YouTube o TikTok; reconectar una que venció (Threads y X dicen «Próximamente») | Los Fierros ([los-fierros.md](los-fierros.md)) |
 | Programar un post o un video; subir varios por CSV | La Parrilla, botones «Nueva publicación» y «Subir CSV», o el «+» de un día del calendario ([la-parrilla.md](la-parrilla.md)) |
 | Retomar algo que dejó a medias; ver lo que escribió y no programó | La Parrilla, botón «Borradores (N)» ([la-parrilla.md](la-parrilla.md)); en el teléfono, La Parrilla → «Borradores (N)» ([app-movil.md](app-movil.md)) |
 | Cambiar o borrar algo programado; reprogramar lo que falló | La Parrilla, abriendo el post ([la-parrilla.md](la-parrilla.md)); lo que falló, también desde «Se quemó», arriba del calendario |
@@ -200,6 +200,8 @@ que dicen las páginas:
 ## Lo que no existe (no la mandes a buscarlo)
 
 - **Registro abierto.** Solo entra quien invitó el admin, desde Los Maestros.
+- **Publicar en Threads o en X / Twitter.** Las dos dicen «Próximamente» en Los Fierros: todavía
+  no se conectan ni se programan.
 - **Cambiar el correo con el que se entra.** No se cambia desde el panel.
 - **Elegir los creadores del «modo Tinder».** La traída de ideas existe por dentro, pero no
   tiene pantalla todavía.

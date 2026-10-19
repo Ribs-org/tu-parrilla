@@ -10,7 +10,8 @@ import {
   REGLA_PALABRA,
   REGLA_RESPUESTA,
 } from './social/comentarios/reglas'
-import { MAX_BATCH_ITEMS, MAX_REF, REF_ERROR } from './social/publish/batch'
+import { MAX_BATCH_ITEMS, MAX_REF, PUBLISHABLE, REF_ERROR } from './social/publish/batch'
+import { REDES_PROXIMAMENTE, fraseProximamente } from './networks'
 import { TOPE_INSTAGRAM, TRIAL_REEL_NO_DISPONIBLE } from './social/publish/publisher'
 import { DIAS_ERROR, HORAS_ERROR } from './avisos/reglas'
 import { BORRADO_YA_PUBLICADO } from './schedule-api'
@@ -94,6 +95,18 @@ describe('la documentación para LLM no le miente al código', () => {
     // el propio esquema con una `description`, para que nadie la confunda con estándar.
     expect(regla.documentoUrl.maxBytes).toBe(MAX_DOCUMENTO_BYTES)
     expect(esquema.properties.posts.items.properties.ref.maxLength).toBe(MAX_REF)
+  })
+
+  it('las redes del esquema son las que publican hoy, y las dos guías dicen la frase de «Próximamente»', () => {
+    // Si una red sale de «Próximamente» y el esquema no la suma, el LLM nunca la usa; si entra
+    // y el esquema la sigue ofreciendo, el LLM manda filas que se rechazan.
+    const esquema = JSON.parse(readFileSync('public/docs/api.json', 'utf8'))
+    const redes: string[] = esquema.properties.posts.items.properties.redes.items.enum
+    expect([...redes].sort()).toEqual([...PUBLISHABLE].filter((red) => !REDES_PROXIMAMENTE.has(red)).sort())
+    for (const archivo of ['public/docs/api-llm.md', 'public/docs/api-editor.md']) {
+      const guia = readFileSync(archivo, 'utf8')
+      for (const red of REDES_PROXIMAMENTE) expect(guia, `${archivo}: ${red}`).toContain(fraseProximamente(red))
+    }
   })
 
   it('el esquema declara exactamente los campos que el validador lee', () => {

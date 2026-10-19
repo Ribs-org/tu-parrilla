@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { validateScheduleDraft, type ScheduleDraft, TIKTOK_MEDIA, extensionDe } from './validate'
+import { reglasDeForma, validateScheduleDraft, type ScheduleDraft, TIKTOK_MEDIA, extensionDe } from './validate'
 
 const now = new Date('2026-08-31T12:00:00Z')
 const base: ScheduleDraft = {
@@ -65,10 +65,36 @@ describe('validateScheduleDraft', () => {
   })
 })
 
-describe('validación por destino (Threads y X)', () => {
+describe('las redes en «Próximamente»', () => {
+  it('Threads y X se rechazan con su frase, aunque el post sirva para ellas', () => {
+    const texto = { ...base, imageCount: 0 }
+    expect(validateScheduleDraft({ ...texto, networks: ['threads'] }, now)).toBe(
+      'Threads todavía no está disponible en Tu Parrilla: próximamente.',
+    )
+    expect(validateScheduleDraft({ ...texto, networks: ['x'] }, now)).toBe(
+      'X / Twitter todavía no está disponible en Tu Parrilla: próximamente.',
+    )
+  })
+
+  it('basta con una entre varias, y la reja va antes que cualquier regla de forma', () => {
+    expect(validateScheduleDraft({ ...base, networks: ['instagram', 'x'] }, now)).toMatch(/^X \/ Twitter todavía/)
+    // Vacío y en el pasado: igual la frase es la de «Próximamente».
+    expect(
+      validateScheduleDraft({ ...base, imageCount: 0, caption: '', networks: ['threads'], scheduledAt: null }, now),
+    ).toMatch(/^Threads todavía/)
+  })
+
+  it('las demás redes no la ven', () => {
+    expect(validateScheduleDraft({ ...base, imageCount: 0, networks: ['facebook'] }, now)).toBeNull()
+  })
+})
+
+// Las reglas de X y de Threads siguen escritas para el día en que salgan de «Próximamente»:
+// se prueban sobre `reglasDeForma`, que es todo lo de `validateScheduleDraft` menos esa reja.
+describe('validación por destino (Threads y X), sin la reja de «Próximamente»', () => {
   it('acepta texto puro cuando ningún destino exige archivo', () => {
     expect(
-      validateScheduleDraft(
+      reglasDeForma(
         { ...base, imageCount: 0, networks: ['x', 'threads', 'facebook'] },
         now,
       ),
@@ -77,7 +103,7 @@ describe('validación por destino (Threads y X)', () => {
 
   it('rechaza texto puro si Instagram o YouTube están marcados', () => {
     expect(
-      validateScheduleDraft({ ...base, imageCount: 0, networks: ['x', 'instagram'] }, now),
+      reglasDeForma({ ...base, imageCount: 0, networks: ['x', 'instagram'] }, now),
     ).toMatch(/archivo/)
     expect(
       validateScheduleDraft({ ...base, imageCount: 0, networks: ['youtube'] }, now),
@@ -86,14 +112,14 @@ describe('validación por destino (Threads y X)', () => {
 
   it('280 exactos pasan por X; 281 no', () => {
     const conX = { ...base, networks: ['x'], imageCount: 0 }
-    expect(validateScheduleDraft({ ...conX, caption: 'x'.repeat(280) }, now)).toBeNull()
-    expect(validateScheduleDraft({ ...conX, caption: 'x'.repeat(281) }, now)).toMatch(/280/)
+    expect(reglasDeForma({ ...conX, caption: 'x'.repeat(280) }, now)).toBeNull()
+    expect(reglasDeForma({ ...conX, caption: 'x'.repeat(281) }, now)).toMatch(/280/)
   })
 
   it('500 exactos pasan por Threads; 501 no', () => {
     const conTh = { ...base, networks: ['threads'], imageCount: 0 }
-    expect(validateScheduleDraft({ ...conTh, caption: 'x'.repeat(500) }, now)).toBeNull()
-    expect(validateScheduleDraft({ ...conTh, caption: 'x'.repeat(501) }, now)).toMatch(/500/)
+    expect(reglasDeForma({ ...conTh, caption: 'x'.repeat(500) }, now)).toBeNull()
+    expect(reglasDeForma({ ...conTh, caption: 'x'.repeat(501) }, now)).toMatch(/500/)
   })
 
   it('un texto largo sin X ni Threads marcados sigue valiendo hasta 2200', () => {
@@ -102,19 +128,22 @@ describe('validación por destino (Threads y X)', () => {
 
   it('rechaza el post totalmente vacío', () => {
     expect(
-      validateScheduleDraft({ ...base, imageCount: 0, caption: '', networks: ['x'] }, now),
+      reglasDeForma({ ...base, imageCount: 0, caption: '', networks: ['x'] }, now),
+    ).toMatch(/texto|archivo/)
+    expect(
+      validateScheduleDraft({ ...base, imageCount: 0, caption: '', networks: ['facebook'] }, now),
     ).toMatch(/texto|archivo/)
   })
 
   it('rechaza las formas que X y Threads no aceptan, al programar', () => {
     expect(
-      validateScheduleDraft({ ...base, imageCount: 0, videoCount: 1, networks: ['x'] }, now),
+      reglasDeForma({ ...base, imageCount: 0, videoCount: 1, networks: ['x'] }, now),
     ).toMatch(/video/)
     expect(
-      validateScheduleDraft({ ...base, imageCount: 5, networks: ['x'] }, now),
+      reglasDeForma({ ...base, imageCount: 5, networks: ['x'] }, now),
     ).toMatch(/cuatro/)
     expect(
-      validateScheduleDraft({ ...base, imageCount: 2, networks: ['threads'] }, now),
+      reglasDeForma({ ...base, imageCount: 2, networks: ['threads'] }, now),
     ).toMatch(/un solo archivo/)
   })
 })
