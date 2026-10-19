@@ -58,7 +58,7 @@ Content-Type: application/json
       "redes": ["instagram", "facebook", "youtube"],
       "media": ["https://drive.usercontent.google.com/download?id=ABC&export=download"],
       "portada": "https://ejemplo.com/portada.jpg",
-      "atributos": { "hook": "pregunta-polemica", "tema": "negocios-chile", "formato": "listado" },
+      "atributos": { "hook": "pregunta-polemica", "tema": "negocios", "estilo": "a-camara" },
       "opciones": { "tiktok": { "modo": "directo", "privacidad": "SELF_ONLY", "comentarios": true, "comercial": "no" } },
       "ref": "septiembre-fila-12"
     }
@@ -165,17 +165,55 @@ Un objeto plano, de valores simples (texto, número o booleano), máximo 20 clav
 2000 caracteres serializado:
 
 ```json
-"atributos": { "hook": "pregunta-polemica", "tema": "negocios", "serie": "mut", "duracion_seg": 42 }
+"atributos": { "hook": "pregunta-polemica", "tema": "negocios", "serie": "mut", "duracion": "30-60" }
 ```
 
-**Las claves y los valores los inventas tú.** El sistema los guarda tal cual y te los
+**Las claves y los valores los eliges tú.** El sistema los guarda tal cual y te los
 devuelve junto a las métricas. Ese es el mecanismo con el que puedes descubrir qué
-funciona: etiqueta de forma consistente lo que decides (hook, tema, formato, estructura,
-duración, serie…) y después correlaciona. El dueño ve lo mismo en su panel: Los Números
-tiene «Comparar por atributo», con las medianas de cada valor.
+funciona: etiqueta de forma consistente lo que decides y después correlaciona. El dueño ve
+lo mismo en su panel: Los Números tiene «Comparar por atributo», con las medianas de cada
+valor —entre ellas «contra su cuenta», que compara a la misma edad y dentro de cada
+cuenta—, y «Tu mejor 10 %», que dice qué se repite entre lo mejor y entre lo peor.
 
-Recomendación práctica: mantén un vocabulario estable entre posts. `"hook": "pregunta"`
-en unos y `"gancho": "pregunta-directa"` en otros hace imposible comparar.
+#### El vocabulario recomendado
+
+Es opcional, y el sistema no lo valida: si no te sirve, usa el tuyo. Pero si etiquetas para
+que el dueño compare, estas claves cubren lo que más se pregunta —qué tema pica, qué hook
+engancha, y si algo de la edición hizo la diferencia—, y usarlas igual en todos los posts es
+lo que permite comparar.
+
+| Clave | Qué anota | Valores de ejemplo |
+|---|---|---|
+| `tema` | De qué trata: el tema principal, uno solo | `negocios`, `edicion`, `finanzas`, `recetas` |
+| `hook` | Cómo abre: lo que pasa en los primeros 3 segundos | `pregunta`, `pregunta-polemica`, `dato`, `promesa`, `historia`, `lista`, `antes-despues`, `error-comun` |
+| `estilo` | Cómo está hecho | `a-camara`, `voz-en-off`, `tutorial`, `entrevista`, `b-roll`, `meme`, `texto` |
+| `serie` | La serie, si es parte de una | su nombre corto: `mut`, `lunes-de-numeros` |
+| `color` | El tratamiento de color dominante | `calido`, `frio`, `saturado`, `desaturado`, `blanco-y-negro`, `de-marca` |
+| `fuente` | La tipografía del texto en pantalla | su nombre (`montserrat`, `bebas-neue`), o `sin-texto` |
+| `ritmo` | Cada cuánto hay un corte de edición | `rapido` (cada 1 a 2 segundos), `medio` (cada 3 a 5), `lento` (más de 5), `plano-secuencia` |
+| `musica` | Qué suena | `tendencia`, `biblioteca`, `original`, `voz-sola`, `sin-musica` |
+| `duracion` | El largo del video, en tramos de segundos | `0-15`, `15-30`, `30-60`, `60-90`, `90+` |
+
+Cuatro reglas para que se puedan comparar:
+
+- **Un valor por clave.** Los atributos no aceptan listas: si un post toca dos temas, elige
+  el principal.
+- **Minúsculas, sin tildes, con guiones en vez de espacios** (`voz-en-off`, no `Voz en off`).
+  El panel compara los valores tal como están escritos, salvo los espacios de los bordes:
+  «Pregunta» y «pregunta» son dos filas.
+- **Tramos y categorías, no números exactos.** `"duracion": 42` deja cada largo en su propia
+  fila; con `"duracion": "30-60"` se juntan y se comparan.
+- **Siempre lo mismo.** `"hook": "pregunta"` en unos y `"gancho": "pregunta-directa"` en otros
+  hace imposible comparar. Si cambias el vocabulario, que sea para los posts nuevos.
+
+Y no anotes lo que no decidiste: si no sabes el color de un video, no mandes `color`. Una
+clave que falta cae en «sin color», que es la vara contra la que se compara; un valor puesto
+por poner la ensucia.
+
+Dos nombres que conviene no usar: `formato`, porque el panel ya llama así al tipo de post
+(«Reel», «Carrusel»…) en «Tu mejor 10 %» y quedarían dos «formato» distintos; y `corte`,
+porque en el panel un corte es el post mismo (la entraña, la tira, el bife, el chori). Para
+eso están `estilo` y `ritmo`.
 
 **Una sola clave tiene significado: `pieza`.** Los posts con el mismo valor de `pieza` son
 versiones de una misma pieza, y el panel los muestra juntos, lado a lado. Úsala cuando
@@ -185,7 +223,7 @@ cuenta, y sus atributos son uno solo—, así que sin `pieza` nada las une:
 
 ```json
 { "atributos": { "pieza": "chimichurri-30s", "hook": "pregunta" } }
-{ "atributos": { "pieza": "chimichurri-30s", "hook": "listado" } }
+{ "atributos": { "pieza": "chimichurri-30s", "hook": "lista" } }
 ```
 
 No la uses como `serie`: es para variantes del mismo contenido, no para un tema que se repite.
@@ -440,6 +478,8 @@ Parámetros, todos opcionales:
       "metricas": {
         "views": 5210,
         "viewsGanadas": 1200,
+        "viewsA7Dias": 4800,
+        "contraSuCuenta": 1.6,
         "likes": 310,
         "comentarios": 12,
         "compartidos": 8,
@@ -457,9 +497,21 @@ Parámetros, todos opcionales:
 ## Cómo leer cada número
 
 - **`views`** — el contador acumulado de por vida, al cierre del rango.
-- **`viewsGanadas`** — cuánto creció ese contador **dentro** del rango. Para comparar
-  posts entre sí, esta es casi siempre la métrica correcta: `views` favorece a lo
-  viejo solo por llevar más tiempo publicado.
+- **`viewsGanadas`** — cuánto creció ese contador **dentro** del rango. Compara mejor que
+  `views`, que favorece a lo viejo solo por llevar más tiempo publicado; pero dentro del
+  rango también le gana lo que salió al principio a lo que salió ayer.
+- **`viewsA7Dias`** — el contador una semana después de publicar: la primera lectura
+  después de cumplir 7 días desde la hora de publicación, si llegó antes de los 9. Mide a
+  todas a la misma edad. `null` si todavía no cumple 7 días o si esos días no se leyó.
+- **`contraSuCuenta`** — `viewsA7Dias` dividido por la mediana de las de su cuenta en el
+  rango: `2` es el doble de lo normal de esa cuenta, `0.5` la mitad. Compara publicaciones
+  de cuentas distintas sin que gane la que tiene más seguidores ni la de la red más grande:
+  **para saber qué funciona, esta es casi siempre la métrica correcta**. `null` si la
+  publicación no tiene `viewsA7Dias`, o si su cuenta tiene menos de 5 publicaciones del
+  rango con `viewsA7Dias`. Depende del rango, porque «lo normal» es lo de ese rango; no de
+  `red` ni de `cuenta`, que no cambian qué publicaciones tiene cada cuenta.
+- En YouTube, `viewsGanadas`, `viewsA7Dias`, `contraSuCuenta` y `arrastre` vienen siempre
+  `null`: sus políticas no permiten calcular métricas con sus datos.
 - **`likes`, `comentarios`, `compartidos`, `alcance`** — lo que reporta la red.
 - **`visitasAlSitio`, `clicks`, `ctr`** — tráfico real que ese post llevó a la
   página pública del dueño, atribuido por la etiqueta `?s=` (ver abajo). Ninguna red te da
@@ -503,7 +555,7 @@ parte el rango en trozos más chicos.
 
 ---
 
-# 2b. Tu mejor X % — `GET /api/metrics/mejores`
+# 2b. Tu mejor X % (o el peor) — `GET /api/metrics/mejores`
 
 ```http
 GET /api/metrics/mejores?desde=2026-09-01&hasta=2026-09-30&cuenta=@vicente&metrica=viewsGanadas&percentil=10
@@ -511,27 +563,39 @@ Authorization: Bearer <tu llave>
 ```
 
 La pregunta que más se hace con las métricas, ya respondida: de lo publicado en el rango,
-¿qué fue lo mejor, cuánto había que sacar para estar ahí, cuánto más rindió que el resto, y
-qué tiene en común? Es la misma cuenta que la pantalla «Tu mejor 10 %» del panel.
+¿qué fue lo mejor (o lo peor), cuánto había que sacar para estar ahí, cuánto rindió contra el
+resto, y qué tiene en común? Es la misma cuenta que la pantalla «Tu mejor 10 %» del panel.
 
 Parámetros, todos opcionales:
 - `desde`, `hasta`, `red`, `cuenta`: igual que en `/api/metrics/posts`, con las mismas
   frases de error. El rango filtra por **fecha de publicación**.
-- `metrica`: por cuál se ordena. `viewsGanadas` (por defecto), `visitas` (visitas a la
-  página del dueño), `clicks`, `interacciones` (likes, comentarios y compartidos ganados en
-  el rango) o `arrastre`. Otra cosa: `400` con `La métrica no se entendió (usa viewsGanadas, visitas, clicks, interacciones o arrastre).`
-- `percentil`: qué tajada de arriba, un entero de 1 a 50; por defecto `10`. Otra cosa:
-  `400` con `El percentil tiene que ser un entero entre 1 y 50.`
+- `metrica`: por cuál se ordena. `viewsGanadas` (por defecto), `contraSuCuenta`,
+  `viewsA7Dias` (las dos de la sección 2), `visitas` (visitas a la página del dueño),
+  `clicks`, `interacciones` (likes, comentarios y compartidos ganados en el rango) o
+  `arrastre`. La pantalla entra con `contraSuCuenta`; la API se queda en `viewsGanadas`
+  para no cambiarle la respuesta a quien ya la usa. Otra cosa: `400` con `La métrica no se entendió (usa contraSuCuenta, viewsA7Dias, viewsGanadas, visitas, clicks, interacciones o arrastre).`
+- `percentil`: qué tajada, un entero de 1 a 50; por defecto `10`. Otra cosa: `400` con
+  `El percentil tiene que ser un entero entre 1 y 50.`
+- `lado`: `mejor` (por defecto), la tajada de arriba, o `peor`, la de abajo. Otra cosa:
+  `400` con `El lado no se entendió (usa mejor o peor).`
+- `recientes`: `si` (por defecto) o `no`. Con `no`, en las métricas que no son a igual
+  edad (todas menos `contraSuCuenta` y `viewsA7Dias`) no compite lo que tenía menos de 7
+  días al cierre del rango: casi no tuvo tiempo de sumar, y en el peor X % llenaría la
+  tajada. La pantalla entra con `no`; la API, con `si`, como respondió siempre. Otra cosa:
+  `400` con `recientes va con si o no.`
 
 ## Respuesta
 
 ```json
 {
   "metrica": "viewsGanadas",
+  "lado": "mejor",
   "percentil": 10,
+  "recientes": "si",
   "cuenta": { "id": "3f1c…", "red": "instagram", "nombre": "@vicente" },
   "publicaciones": 64,
   "compiten": 58,
+  "fueraPorRecientes": 0,
   "pocas": false,
   "corte": 4200,
   "rinden": 4.6,
@@ -545,12 +609,12 @@ Parámetros, todos opcionales:
       "externalId": "18114074218999893",
       "texto": "Tres errores al editar reels",
       "atributos": { "hook": "pregunta", "tema": "edicion" },
-      "metricas": { "viewsGanadas": 21000, "visitasAlSitio": 214, "arrastre": 1.02, "…": "…" }
+      "metricas": { "viewsGanadas": 21000, "viewsA7Dias": 18500, "contraSuCuenta": 3.4, "visitasAlSitio": 214, "…": "…" }
     }
   ],
   "medianas": {
-    "mejores": { "viewsGanadas": 9800, "visitas": 120, "interacciones": 640, "arrastre": 1.1 },
-    "resto": { "viewsGanadas": 2100, "visitas": 18, "interacciones": 95, "arrastre": 0.8 }
+    "mejores": { "contraSuCuenta": 2.6, "viewsA7Dias": 8900, "viewsGanadas": 9800, "visitas": 120, "interacciones": 640, "arrastre": 1.1 },
+    "resto": { "contraSuCuenta": 0.9, "viewsA7Dias": 2300, "viewsGanadas": 2100, "visitas": 18, "interacciones": 95, "arrastre": 0.8 }
   },
   "enComun": [
     { "rasgo": "hook", "valor": "pregunta", "enMejores": 4, "mejores": 6, "enTodas": 9, "todas": 58, "veces": 4.3 },
@@ -562,24 +626,36 @@ Parámetros, todos opcionales:
 Cada elemento de `mejores` es una fila con la misma forma que las de `/api/metrics/posts`,
 más `puesto` y `valor` (el número de la métrica elegida).
 
+**Con `lado=peor`, las claves del grupo dicen «peores»**: la lista es `peores` (de la peor a
+la menos mala), las medianas son `medianas.peores` contra `medianas.resto`, y cada rasgo de
+`enComun` trae `enPeores` y `peores` en vez de `enMejores` y `mejores`. Así nadie lee lo de
+abajo como lo de arriba.
+
 ## Cómo leerla
 
 - **`compiten`** son las publicaciones del rango que tienen la métrica; `publicaciones`,
   todas. Las que no la tienen no compiten (un `null` es «no se sabe», nunca cero):
-  - En `viewsGanadas`, `interacciones` y `arrastre`, **YouTube no compite**: sus políticas
-    no permiten calcular métricas con sus datos. En `visitas` y `clicks` sí, porque esas las
-    mide Tu Parrilla.
+  - En `viewsGanadas`, `contraSuCuenta`, `viewsA7Dias`, `interacciones` y `arrastre`,
+    **YouTube no compite**: sus políticas no permiten calcular métricas con sus datos. En
+    `visitas` y `clicks` sí, porque esas las mide Tu Parrilla.
+  - En `viewsA7Dias` y `contraSuCuenta` no compite lo publicado hace menos de 7 días, que
+    todavía no tiene su lectura; en `contraSuCuenta`, tampoco una cuenta con menos de 5
+    publicaciones del rango con `viewsA7Dias`.
+  - Con `recientes=no`, en las demás tampoco compite lo que tenía menos de 7 días al cierre
+    del rango. **`fueraPorRecientes`** dice cuántas habrían competido y quedaron fuera.
   - En `visitas` y `clicks` no compite un post cuyo link con `?s=` nunca se usó.
   - En `arrastre` solo compiten las que ganaron al menos la mediana de views del rango:
     con 30 views, una visita ya es un 3 %, y el ranking se llenaría de casualidades.
 - **Quién entra:** las primeras `ceil(compiten × percentil / 100)` —al menos una— y todas
-  las empatadas con la última. Nunca una con valor cero. **`corte`** es el valor de la
-  última que entra (`null` si ninguna).
-- **`rinden`**: la mediana de la métrica entre las de arriba dividida por la del resto.
-  `4.6` es «rinden 4,6 veces más que una publicación típica».
-- **`medianas`**: la publicación del medio de cada grupo, en cuatro métricas. Mediana y no
+  las empatadas con la última. Arriba, nunca una con valor cero; abajo sí, que es lo que se
+  busca. **`corte`** es el valor de la última que entra (`null` si ninguna): lo mínimo para
+  entrar arriba, lo máximo para entrar abajo.
+- **`rinden`**: la mediana de la métrica en el grupo dividida por la del resto. `4.6` es
+  «rinden 4,6 veces más que una publicación típica»; abajo sale menos de uno: `0.2` es «un
+  quinto de lo típico».
+- **`medianas`**: la publicación del medio de cada grupo, en seis métricas. Mediana y no
   promedio: un viral no arrastra al grupo entero.
-- **`enComun`**: lo que se repite más entre las de arriba que entre todas las que compiten.
+- **`enComun`**: lo que se repite más en el grupo que entre todas las que compiten.
   `rasgo` es una clave de tus `atributos` (sin `pieza`) o uno de `red`, `formato`, `día`,
   `hora` (franja: madrugada, mañana, tarde o noche, en la zona del dueño). Entra si está en
   al menos dos de arriba y es al menos 1,5 veces más frecuente ahí (`veces`). Viene vacío
@@ -587,10 +663,12 @@ más `puesto` y `valor` (el número de la métrica elegida).
   próxima prueba.
 - **`pocas: true`** cuando compiten menos de 20: el mejor 10 % son una o dos publicaciones,
   que sirven para mirarlas, no para concluir. Amplía el rango o sube `percentil`.
-- **`truncado`**, como en `/api/metrics/posts`.
+- **`truncado`**, como en `/api/metrics/posts`, con otro tope: acá se leen hasta 10.000
+  publicaciones, porque la respuesta trae solo el grupo.
 
 Para mirar una cuenta sola, pasa `cuenta`: con «todas», una cuenta grande llena la tajada
-de arriba y las chicas no aparecen nunca.
+de arriba y las chicas no aparecen nunca. Con `metrica=contraSuCuenta` no hace falta: cada
+publicación compite contra lo normal de su propia cuenta.
 
 ---
 
@@ -769,8 +847,8 @@ patrones. Con menos de ~10 posts por valor de atributo, desconfía de la diferen
   `{ "ok": true, "id" }`.
 - **No republica lo ya publicado**: corregir un post afecta solo a los destinos que
   aún no salieron.
-- **Entrega un solo agregado**: `/api/metrics/mejores`, el mejor X % con sus medianas y lo
-  que se repite. Todo lo demás —promedios por red, tendencias, cruces de atributos— sale de
+- **Entrega un solo agregado**: `/api/metrics/mejores`, el mejor (o el peor) X % con sus
+  medianas y lo que se repite. Todo lo demás —promedios por red, tendencias, cruces de atributos— sale de
   las filas crudas de `/api/metrics/posts`, y el análisis es tuyo, a propósito.
 
 # 6. Ejemplos ejecutables
@@ -796,7 +874,7 @@ curl -X POST https://tu-parrilla.cl/api/schedule/batch \
         "redes": ["instagram", "youtube", "facebook"],
         "media": ["https://drive.usercontent.google.com/download?id=ABC&export=download"],
         "portada": "https://ejemplo.com/portada-01.jpg",
-        "atributos": { "hook": "pregunta-polemica", "tema": "retail", "formato": "explicacion" },
+        "atributos": { "hook": "pregunta-polemica", "tema": "retail", "estilo": "tutorial" },
         "ref": "septiembre-01"
       },
       {
@@ -804,7 +882,7 @@ curl -X POST https://tu-parrilla.cl/api/schedule/batch \
         "texto": "Tres cosas que aprendí vendiendo software en Chile.",
         "redes": ["threads", "x"],
         "media": [],
-        "atributos": { "hook": "listado", "tema": "software", "formato": "texto" },
+        "atributos": { "hook": "lista", "tema": "software", "estilo": "texto" },
         "ref": "septiembre-02"
       }
     ]

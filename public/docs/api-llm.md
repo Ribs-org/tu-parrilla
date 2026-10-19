@@ -82,6 +82,43 @@ no tres días después dentro de un cron. `mensaje` es obligatorio junto con `pa
 como **respuesta pública** al comentario, no por mensaje privado. Ver la sección 6, «Lo que
 Meta no permite», para el porqué y para lo que cambia cuando el privado se encienda.
 
+## 2b. Los atributos: anótalos siempre igual
+
+Cada fila acepta `atributos`, un objeto plano de valores simples (texto, número o booleano;
+hasta 20 claves y 2000 caracteres). El sistema no los interpreta —salvo `pieza`, abajo—: los
+guarda y los devuelve junto a las métricas, y el panel del dueño compara lo publicado por
+cada valor («Comparar por atributo») y dice qué se repite entre lo mejor y entre lo peor
+(«Tu mejor 10 %»). Son opcionales y no se validan, pero si los mandas, usa este vocabulario,
+con los mismos valores en todos los posts, o no se van a poder comparar:
+
+| Clave | Qué anota | Valores de ejemplo |
+|---|---|---|
+| `tema` | De qué trata: el tema principal, uno solo | `negocios`, `edicion`, `finanzas`, `recetas` |
+| `hook` | Cómo abre: lo que pasa en los primeros 3 segundos | `pregunta`, `pregunta-polemica`, `dato`, `promesa`, `historia`, `lista`, `antes-despues`, `error-comun` |
+| `estilo` | Cómo está hecho | `a-camara`, `voz-en-off`, `tutorial`, `entrevista`, `b-roll`, `meme`, `texto` |
+| `serie` | La serie, si es parte de una | su nombre corto: `mut`, `lunes-de-numeros` |
+| `color` | El tratamiento de color dominante | `calido`, `frio`, `saturado`, `desaturado`, `blanco-y-negro`, `de-marca` |
+| `fuente` | La tipografía del texto en pantalla | su nombre (`montserrat`, `bebas-neue`), o `sin-texto` |
+| `ritmo` | Cada cuánto hay un corte de edición | `rapido` (cada 1 a 2 segundos), `medio` (cada 3 a 5), `lento` (más de 5), `plano-secuencia` |
+| `musica` | Qué suena | `tendencia`, `biblioteca`, `original`, `voz-sola`, `sin-musica` |
+| `duracion` | El largo del video, en tramos de segundos | `0-15`, `15-30`, `30-60`, `60-90`, `90+` |
+
+- **Un valor por clave**: no hay listas. Si toca dos temas, el principal.
+- **Minúsculas, sin tildes, guiones en vez de espacios.** Se compara el texto exacto:
+  `Pregunta` y `pregunta` son dos valores.
+- **Tramos y categorías, no números exactos**: `"duracion": 42` no se agrupa con nada.
+- **No anotes lo que no decidiste.** Una clave que falta cae en «sin <clave>», la vara contra
+  la que se compara; un valor inventado la ensucia.
+- **No uses `formato` ni `corte`**: el panel ya llama «formato» al tipo de post (Reel,
+  Carrusel…), y «corte» al post mismo. Para eso están `estilo` y `ritmo`.
+- **`pieza` sí significa algo**: los posts con el mismo valor son versiones de una misma
+  pieza —dos hooks del mismo video, o el trial reel y el reel normal— y el panel los muestra
+  lado a lado. No la uses como `serie`.
+
+```json
+"atributos": { "tema": "edicion", "hook": "error-comun", "estilo": "a-camara", "ritmo": "rapido", "musica": "tendencia", "duracion": "30-60", "fuente": "montserrat", "color": "calido" }
+```
+
 ## 3. Frases de error literales
 
 Toda fila rechazada trae la frase exacta, en `resultados[i].error` — comparar por igualdad,
@@ -264,17 +301,30 @@ Dos endpoints de lectura, con la misma llave. El detalle de cada número está e
   Los números de una publicación de los últimos 10 días son de hoy o ayer; los de una más
   vieja se leen cada vez más espaciado (una vez por semana hasta el mes, cada dos semanas
   hasta los tres meses, cada cuatro después), así que pueden ir hasta esas semanas atrás.
+  Dos métricas comparan a la misma edad: `viewsA7Dias`, el contador una semana después de
+  publicar, y `contraSuCuenta`, eso dividido por la mediana de su cuenta en el rango (`2` es
+  el doble de lo normal de esa cuenta). Lo de los últimos 7 días todavía no las tiene.
 - `GET /api/metrics/mejores?desde=…&hasta=…&metrica=viewsGanadas&percentil=10` — el mejor X %
   de lo publicado en el rango: `corte` (lo que había que sacar para entrar), `compiten`,
   `mejores` (filas como las de arriba, con `puesto` y `valor`), `medianas` de arriba contra
   el resto, `rinden` (cuántas veces más rinde la mediana de arriba) y `enComun` (lo que se
   repite más entre las de arriba: un atributo, la red, el formato, el día o la franja
-  horaria, con `veces`).
+  horaria, con `veces`). Con `lado=peor`, el peor X %: las mismas claves con «peores» en vez
+  de «mejores» (`peores`, `medianas.peores`, y `enPeores` y `peores` en `enComun`), de la
+  peor a la menos mala, y `corte` es lo más que sacó una de las que entraron.
 
 Filtros que valen en los dos: `red`, y `cuenta` —su `id` o su nombre en la red, con o sin
 «@»—. Para «el mejor 10 % de esta cuenta», pasa `cuenta`: sin ella, la cuenta más grande
-llena la tajada de arriba. `metrica` es `viewsGanadas` (por defecto), `visitas`, `clicks`,
-`interacciones` o `arrastre`; `percentil`, un entero de 1 a 50 (por defecto 10).
+llena la tajada de arriba, salvo con `metrica=contraSuCuenta`, que mide a cada una contra lo
+suyo. Solo de `mejores`:
+
+- `metrica`: `viewsGanadas` (por defecto), `contraSuCuenta`, `viewsA7Dias`, `visitas`,
+  `clicks`, `interacciones` o `arrastre`.
+- `percentil`: un entero de 1 a 50 (por defecto 10).
+- `lado`: `mejor` (por defecto) o `peor`.
+- `recientes`: `si` (por defecto) o `no`. Con `no`, en las métricas que no son a igual edad
+  no compite lo que tenía menos de 7 días al cierre del rango: casi no tuvo tiempo de sumar,
+  y en el peor X % llenaría la tajada. `fueraPorRecientes` dice cuántas quedaron fuera.
 
 Frases de error (`400`):
 
@@ -284,14 +334,21 @@ Frases de error (`400`):
 | `Red desconocida: <valor>.` | `red` que no es una de las seis |
 | `Cuenta desconocida: <valor>.` | ninguna cuenta del dueño tiene ese id ni ese nombre |
 | `Hay más de una cuenta llamada <valor>: usa su id, o agrega red=.` | el nombre se repite en dos redes |
-| `La métrica no se entendió (usa viewsGanadas, visitas, clicks, interacciones o arrastre).` | `metrica` desconocida |
+| `La métrica no se entendió (usa contraSuCuenta, viewsA7Dias, viewsGanadas, visitas, clicks, interacciones o arrastre).` | `metrica` desconocida |
 | `El percentil tiene que ser un entero entre 1 y 50.` | `percentil` fuera de rango o con decimales |
+| `El lado no se entendió (usa mejor o peor).` | `lado` desconocido |
+| `recientes va con si o no.` | `recientes` con otro valor |
 
-Tres reglas que cambian la lectura:
+Cuatro reglas que cambian la lectura:
 
 - **Un `null` es «no se sabe», nunca cero**, y no compite en el mejor X %.
-- **YouTube no entra en `viewsGanadas`, `interacciones` ni `arrastre`**: sus políticas no
-  permiten calcular métricas con sus datos. Sí entra en `visitas` y `clicks`, que mide Tu
-  Parrilla.
+- **Para comparar publicaciones entre sí, `contraSuCuenta`.** `viewsGanadas` le da ventaja a
+  lo que salió al principio del rango, y entre cuentas, a la más grande; `contraSuCuenta`
+  mide a todas a los 7 días y contra lo normal de su propia cuenta. Una cuenta con menos de 5
+  publicaciones del rango con `viewsA7Dias` no la tiene. Para «qué hook funciona», agrupa
+  por atributo las filas de `/api/metrics/posts` y compara las medianas de `contraSuCuenta`.
+- **YouTube no entra en `viewsGanadas`, `viewsA7Dias`, `contraSuCuenta`, `interacciones` ni
+  `arrastre`**: sus políticas no permiten calcular métricas con sus datos. Sí entra en
+  `visitas` y `clicks`, que mide Tu Parrilla.
 - **`pocas: true`** (compiten menos de 20) quiere decir que el mejor 10 % son una o dos
   publicaciones: no concluyas nada; amplía el rango o sube `percentil`.

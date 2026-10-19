@@ -234,8 +234,8 @@ En pantallas angostas, solo el ícono: la barra ya lleva las pestañas y Ajustes
   - **la pantalla de error de la puerta:** se dibuja en el navegador, sin la cookie a mano.
 
 **Por equipo y no por cuenta**, en esta primera vuelta: no pide migración ni API, y el panel no
-sabe del teléfono. Si la app del teléfono se suma (tanda 3), ahí se decide si el modo pasa a
-la cuenta.
+sabe del teléfono. El dueño decidió el 2026-10-19 que el modo pase a la cuenta, para que el
+teléfono y el panel vayan juntos (ver «Decisiones»).
 
 **Cómo cambia el dibujo.** Cada corte dibuja las dos versiones y el CSS esconde la que no va
 (`[data-tema='dia'] .solo-noche`). La otra opción era un contexto de React con el modo.
@@ -305,7 +305,7 @@ panel de día con sus piezas de sushi.
   - **La salida:** un gancho de un renglón que lea `data-tema` y le pase los hexes.
   - **Lo que hay que evitar:** que el servidor dibuje con los colores de un modo y el cliente
     con los del otro.
-- **Los velos fueron un barrido mecánico** (90 en 43 archivos, `bg-white/` y parecidos a
+- **Los velos fueron un barrido mecánico** (97 en 45 archivos, `bg-white/` y parecidos a
   `bg-velo/`). El texto blanco sobre un color (`text-white`) quedó como estaba: de día sigue
   siendo blanco.
 - **La página pública de cada creador hereda reglas globales** (`:focus-visible`, `::selection`,
@@ -329,15 +329,17 @@ panel de día con sus piezas de sushi.
 
 ## Decisiones para el dueño
 
+Las dos primeras las tomó el dueño el 2026-10-19.
+
 1. **La marca, de día.** El panel no la lleva (dice «Panel»); la portada y el ícono de la app
    llevan el bife a punto.
-   - **Recomendación:** el nigiri a punto en la portada de día (tanda 4).
+   - **Decidido:** el nigiri a punto en la portada de día (tanda 4).
    - **Lo que no cambia:** el ícono de la app y el favicon. Son la marca, y cambiarlos pide
      pasar otra vez por las tiendas.
 2. **El modo, por equipo o por cuenta.**
-   - **Recomendación:** por equipo ahora, con la cookie.
-   - **Por cuenta:** si se quiere que el teléfono y el panel vayan juntos, cuando llegue la
-     tanda 3.
+   - **Decidido:** por cuenta, para que el teléfono y el panel vayan juntos. Va antes de la
+     tanda 3, que lo necesita.
+   - **La primera vuelta** lo guardó por equipo, con la cookie: no pedía migración ni API.
 3. **Seguir el modo del sistema si nunca se eligió.**
    - **Recomendación:** no. Pediste la noche por defecto, y el que llega de día con el
      teléfono en modo claro vería otro producto sin haberlo elegido.

@@ -576,7 +576,10 @@ El formulario, en orden:
 7. **«Atributos (JSON del editor de contenido)»**, un cuadro de texto con el placeholder
    `{"hook": "pregunta-polemica", "tema": "negocios"}`. Son anotaciones libres sobre el post
    —el hook, el tema, la serie—, hasta 20 claves con valores simples (texto, número, o `true` /
-   `false`). Los lee el agente que analiza las publicaciones por la API, y el panel los muestra
+   `false`). Las claves que recomienda la guía de la API, para que todo se pueda comparar,
+   son `tema`, `hook`, `estilo`, `serie`, `color`, `fuente`, `ritmo`, `musica` y
+   `duracion`, con valores en minúsculas y sin tildes (`"ritmo": "rapido"`); la tabla con
+   ejemplos está en [la guía para LLM](../api-llm.md), sección 2b. Los lee el agente que analiza las publicaciones por la API, y el panel los muestra
    en [Los Números](los-numeros.md): en la pieza de cada publicación y en «Comparar por
    atributo». Una sola clave cambia algo en el panel, **`pieza`**: los posts programados con el
    mismo valor (por ejemplo `{"pieza": "chimichurri-30s"}`) se muestran juntos, como versiones

@@ -1,5 +1,5 @@
 import 'server-only'
-import { and, asc, desc, eq, gte, inArray, isNull, lt, lte, or, sql, type SQL } from 'drizzle-orm'
+import { and, asc, desc, eq, gte, inArray, isNotNull, isNull, lt, lte, or, sql, type SQL } from 'drizzle-orm'
 import {
   clicks,
   getDb,
@@ -11,6 +11,7 @@ import {
 } from '@/db'
 import type { Filters, Granularity } from './analytics'
 import { describe, granularityFor, localDay } from './analytics'
+import { DIAS_A_IGUAL_EDAD, DIAS_HASTA_LA_LECTURA } from './igual-edad'
 import {
   postKpisFrom,
   type CuentaRow,
@@ -78,6 +79,10 @@ export const MAX_PUBLICACIONES_LEIDAS = 10_000
  * inside the period, whatever their date. Those are the only ones that can add views
  * gained or visits to the period, and asking for them by name replaced «the 500 most
  * recent», which at 1,000 posts a week covered three days of a thirty-day window.
+ *
+ * `aLos7Dias` agrega las views de cada publicación a la semana de publicada, para comparar a
+ * igual edad (`igual-edad.ts`). Es una consulta más, así que solo la piden las pantallas y
+ * las rutas que la usan.
  */
 export async function getPostRows(
   f: Filters,
@@ -89,6 +94,7 @@ export async function getPostRows(
     accountId?: string
     ids?: string[]
     conActividad?: boolean
+    aLos7Dias?: boolean
   } = {},
 ): Promise<PostRow[]> {
   if (opts.ids?.length === 0) return []
@@ -167,6 +173,28 @@ export async function getPostRows(
     .where(and(inArray(postMetrics.postId, ids), lt(postMetrics.day, from)))
     .orderBy(postMetrics.postId, desc(postMetrics.day))
   const snapshots = [...antes, ...adentro]
+
+  // La primera lectura después de cumplir 7 días, si llegó antes de los 9. Por la hora en que
+  // se tomó (`captured_at`) y no por el día: el día de una lectura es el del dueño, y un post
+  // de las 23:00 y otro de las 01:00 del mismo día no tienen la misma edad en la lectura de la
+  // mañana siguiente.
+  const aLos7Dias = new Map<string, number>()
+  if (opts.aLos7Dias) {
+    const lecturas = await db
+      .selectDistinctOn([postMetrics.postId], { postId: postMetrics.postId, views: postMetrics.views })
+      .from(postMetrics)
+      .innerJoin(socialPosts, eq(socialPosts.id, postMetrics.postId))
+      .where(
+        and(
+          inArray(postMetrics.postId, ids),
+          isNotNull(postMetrics.views),
+          sql`${postMetrics.capturedAt} >= ${socialPosts.publishedAt} + make_interval(days => ${DIAS_A_IGUAL_EDAD})`,
+          sql`${postMetrics.capturedAt} < ${socialPosts.publishedAt} + make_interval(days => ${DIAS_HASTA_LA_LECTURA})`,
+        ),
+      )
+      .orderBy(postMetrics.postId, asc(postMetrics.capturedAt))
+    for (const lectura of lecturas) if (lectura.views !== null) aLos7Dias.set(lectura.postId, lectura.views)
+  }
 
   const byPost = new Map<string, typeof snapshots>()
   for (const snapshot of snapshots) {
@@ -266,6 +294,9 @@ export async function getPostRows(
       archived: post.archivedAt !== null,
       views: views.current,
       viewsChange: derivadas ? views.change : null,
+      // El contador de YouTube a los 7 días no es derivado, pero compararlo sí (de ahí sale
+      // «contra su cuenta»): fuera, como lo ganado.
+      viewsA7Dias: derivadas ? (aLos7Dias.get(post.id) ?? null) : null,
       likesChange: derivadas ? likes.change : null,
       commentsChange: derivadas ? comments.change : null,
       sharesChange: derivadas ? shares.change : null,
@@ -390,6 +421,24 @@ export async function getPostSeries(f: Filters): Promise<PostSeriesPoint[]> {
     views: Number(row.views),
     visits: Number(row.visits),
   }))
+}
+
+/**
+ * Todas las lecturas de unas pocas publicaciones, de la más vieja a la más nueva, para dibujar
+ * cómo crecieron («Lado a lado»). Con la hora de cada una (`captured_at`), que es lo que mide
+ * la edad. El dueño va en la consulta, por el post: los ids vienen de la URL.
+ */
+export async function getLecturasDe(
+  ownerId: string,
+  postIds: string[],
+): Promise<Array<{ postId: string; capturedAt: Date; views: number | null }>> {
+  if (postIds.length === 0) return []
+  return getDb()
+    .select({ postId: postMetrics.postId, capturedAt: postMetrics.capturedAt, views: postMetrics.views })
+    .from(postMetrics)
+    .innerJoin(socialPosts, eq(socialPosts.id, postMetrics.postId))
+    .where(and(eq(socialPosts.ownerId, ownerId), inArray(postMetrics.postId, postIds)))
+    .orderBy(asc(postMetrics.capturedAt))
 }
 
 /** Todas las cuentas, en el orden en que se conectaron; Los Fierros (en Ajustes) las agrupa por red. */

@@ -200,29 +200,17 @@ Nada de esto bloquea un trámite hoy; conviene ordenarlo antes de abrir a tercer
 
 ## Features y trabajo de código
 
-- **Los Números para 1.000 publicaciones por semana** (2026-10-18). Pedido del dueño. La
-  lectura diaria por edad ya está (`src/lib/social/lectura.ts`), y los topes de las pantallas
-  y el rango de fechas a mano van cada uno en su PR; lo demás va en este orden, cada cosa en
-  su PR:
-  1. Comparar a la misma edad («views a los 7 días») y dentro de la misma cuenta («×N sobre
-     lo normal de su cuenta»), con un interruptor para incluir lo que aún no cumple esa
-     edad; «Tu peor 10 %» y el contraste de los de arriba contra los de abajo.
-  2. En las guías de la API, un vocabulario de atributos recomendado y opcional: `tema`,
-     `hook` y `formato`, y los de edición (`color`, `fuente`, `corte`, `musica`,
-     `duracion`). Sin etiquetado automático: decisión del dueño, por el costo.
-  3. Ver lado a lado los de arriba y los de abajo, o dos publicaciones elegidas: portada,
-     atributos, la curva día a día y el link a la red. Sin guardar el video después de
-     publicado: decisión del dueño, para que R2 no crezca.
 - **El modo día con sushi** (2026-10-18). Pedido del dueño, para el público que la estética de
   asado deja fuera. Están hechas las tandas 1 y 2: el botón, la paleta del día y las piezas de
   sushi en el panel. El diseño, con lo que queda, está en
   `docs/superpowers/specs/2026-10-19-modo-dia-sushi-design.md`. Falta:
   - mirar de día los gráficos en Safari y en Firefox: en Chrome, recharts toma las variables
     del modo; si otro navegador no, saldrían con el color por defecto de cada atributo;
+  - que el modo sea de la cuenta y no del equipo, para que el teléfono y el panel vayan
+    juntos: lo decidió el dueño el 2026-10-19;
   - la app del teléfono, que sigue solo de noche (tanda 3, por aire);
-  - la portada y lo que se comparte, cuando marketing lo pida (tanda 4);
-  - **[dueño]** decidir la marca de día (el nigiri en vez del bife, en la portada) y si el
-    modo pasa a ser de la cuenta en vez del equipo.
+  - la portada de día, con el nigiri a punto como marca, y lo que se comparte (tanda 4): la
+    marca la decidió el dueño el 2026-10-19.
 - **Llevar el resto de la interfaz al nivel del corte** (2026-10-16). La auditoría de ese
   día propone seis tandas que se publican solas. La primera, lo roto, ya está. Quedan: el
   corte en los flujos (el compositor, la parrilla fría y la carga tibia ya están; faltan La
