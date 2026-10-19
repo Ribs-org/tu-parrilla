@@ -75,28 +75,23 @@ Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataf
   de «solo en privado» ya se quitaron del panel. Opcional, en el portal de TikTok: dejar en
   *Redirect URI* solo `https://tu-parrilla.cl/api/social/tiktok/callback` (las de
   `www.vicente-pareja.cl` y `portafolio-page-inky.vercel.app` ya no se usan para conectar).
-- **[dueño] Meta (Instagram y Facebook) — pasar la app a Live.** El 2026-10-19 Meta aprobó
-  el App Review que se envió el 2026-10-06: los 11 permisos, con acceso avanzado. Falta, en
-  este orden:
-  1. **Pasar la app (1433211842004004) a Live**, con el interruptor de arriba de
-     developers.facebook.com. Hasta entonces solo conectan su Instagram o su Facebook las
-     cuentas con un rol en la app; con la app en Live, a un creador le basta la invitación
-     en Los Maestros.
-  2. **Quitar `META_EN_REVISION` de Vercel y redesplegar**, y corregir el párrafo del README
-     que la explica («Mientras la app siga en modo desarrollo…»). Ver «Después de aprobar»
-     en `docs/meta-revision-guion.md`.
+- **[dueño] Meta (Instagram y Facebook): falta la verificación de acceso.** La app
+  (1433211842004004) está en Live desde el 2026-10-19, con los 11 permisos del App Review
+  aprobados con acceso avanzado, y `META_EN_REVISION` salió de Vercel ese mismo día: a un
+  creador le basta la invitación en Los Maestros. Queda la **verificación de acceso** (Pyxis
+  como proveedor de tecnología, enviada el 2026-10-06), «En revisión» al 2026-10-19. Meta pide
+  tenerla antes del 18/12/2026 para no restringir la app; no hay nada que mandar, y si piden
+  más información llega a la campana de developers.facebook.com y a pyxis.latam@gmail.com.
 
-  Lo que se queda también con la app en Live: el revisor (`revision@tu-parrilla.cl`) con sus
+  Lo que se queda aunque la app esté en Live: el revisor (`revision@tu-parrilla.cl`) con sus
   cuentas conectadas, @vicente_edits2 y la página Tu-Parrilla, y `REVISION_CORREO` y
   `REVISION_CODIGO` en Vercel. Meta vuelve a revisar las apps aprobadas y pide que las
   credenciales de prueba sigan activas un año (README, «Dejar entrar al revisor de Meta»).
   Una cuenta de Instagram la conecta una sola persona en Tu Parrilla: para usar
   @vicente_edits2 en otra cuenta, primero hay que conectarle al revisor otro Instagram de
-  prueba. La **verificación de acceso** (Pyxis como proveedor de tecnología, enviada el
-  2026-10-06) sigue «En revisión» al 2026-10-19. El video y los textos de esta vuelta
-  (`meta-app-review-demo.mp4`, `TEXTOS-FORMULARIO.txt`) están en la carpeta
-  «Meta - Verification» del escritorio de Vicente, y sirven de molde para la segunda. Las
-  alertas llegan a la campana de developers.facebook.com y a pyxis.latam@gmail.com.
+  prueba. El video y los textos de esta vuelta (`meta-app-review-demo.mp4`,
+  `TEXTOS-FORMULARIO.txt`) están en la carpeta «Meta - Verification» del escritorio de
+  Vicente, y sirven de molde para la segunda.
 - **[dueño] Política interna ante solicitudes de autoridades** (2026-10-06). En el App
   Review de Meta, Pyxis declaró revisar la legalidad de cada solicitud, poder impugnarla,
   entregar lo mínimo y documentarla. Que el abogado la deje por escrito, junto con la
