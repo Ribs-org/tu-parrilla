@@ -28,6 +28,16 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ['postgres'],
 
   /**
+   * El manual del parrillero (`/admin/ia/manual`) lee la wiki de la UI del disco, y lo de
+   * `public/` lo sirve la CDN: sin esto, la función se despliega sin los archivos y el manual
+   * no encuentra ninguna página.
+   */
+  outputFileTracingIncludes: {
+    // La clave es un glob de picomatch: los corchetes y los puntos de `[[...pagina]]` van escapados.
+    '/admin/ia/manual/\\[\\[\\.\\.\\.pagina\\]\\]': ['./public/docs/ui/*.md'],
+  },
+
+  /**
    * El compositor manda los archivos dentro del formulario, así que el video cruza la
    * función y queda bajo el tope de cuerpo de las acciones de servidor, que por defecto
    * es de 1 MB. Con ese default, programar una publicación con un video real devuelve

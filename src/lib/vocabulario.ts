@@ -19,15 +19,18 @@ export type Pantalla = {
 // la entrada era El Fuego, con su propia pestaña; se fundió en La Parrilla (ver
 // `docs/superpowers/specs/2026-10-13-parrilla-entrada-y-borradores-design.md`). Ese mismo
 // día Los Cortes dejó de ser pestaña: sus publicaciones viven dentro de Los Números
-// (`docs/superpowers/specs/2026-10-13-numeros-tablero-design.md`).
+// (`docs/superpowers/specs/2026-10-13-numeros-tablero-design.md`). Tu IA es pestaña desde el
+// 2026-10-19, a pedido del dueño: conectar la IA propia tiene que estar a la vista, no dentro de
+// Ajustes. Se llevó las llaves, que antes vivían en Tu Cuenta.
 export const PANTALLAS: readonly Pantalla[] = [
   { ruta: '/admin/schedule', nombre: 'La Parrilla', subtitulo: 'lo que viene y cómo salió lo que ya se fue', grupo: 'pestana' },
   { ruta: '/admin/comments', nombre: 'La Mesa', subtitulo: 'lo que te responden y tus respuestas', grupo: 'pestana' },
   { ruta: '/admin/analytics', nombre: 'Los Números', subtitulo: 'cómo te fue en las redes y en tu página', grupo: 'pestana' },
+  { ruta: '/admin/ia', nombre: 'Tu IA', subtitulo: 'tu propio chef: la llave y la guía para conectarla', grupo: 'pestana' },
   { ruta: '/admin/accounts', nombre: 'Los Fierros', subtitulo: 'tus redes conectadas', grupo: 'ajustes' },
   { ruta: '/admin/profiles', nombre: 'La Vitrina', subtitulo: 'tus páginas públicas', grupo: 'ajustes' },
   { ruta: '/admin/usuarios', nombre: 'Los Maestros', subtitulo: 'quién puede entrar', grupo: 'ajustes', soloAdmin: true },
-  { ruta: '/admin/cuenta', nombre: 'Tu Cuenta', subtitulo: 'tu nombre, tu hora y tus llaves', grupo: 'ajustes' },
+  { ruta: '/admin/cuenta', nombre: 'Tu Cuenta', subtitulo: 'tu nombre y tu hora', grupo: 'ajustes' },
 ]
 
 function visibles(esAdmin: boolean): Pantalla[] {

@@ -296,7 +296,7 @@ Trae los posts y los números de las cuentas de Instagram, TikTok, YouTube y Fac
 - No trae números de Threads ni de X / Twitter, ni comentarios de TikTok, Threads o X.
 - No elige con qué cuenta se entra en la ventana de la red: eso lo decide la red, y «Reconectar» no está atado a la fila.
 - Desmarcar una cuenta ya conectada en la lista no la desconecta: solo no la renueva.
-- No genera llaves de API: eso es [Tu Cuenta](tu-cuenta.md).
+- No genera llaves de API: eso es [Tu IA](tu-ia.md).
 - No existe en la app del teléfono: las redes se conectan solo desde el panel web (ver [la app del teléfono](app-movil.md)).
 
 ## Para quien mantiene esta página

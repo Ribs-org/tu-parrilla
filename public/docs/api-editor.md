@@ -26,7 +26,7 @@ Una sola llave para todos los endpoints, en cada petición:
 Authorization: Bearer <tu llave>
 ```
 
-La llave te la da el dueño: la genera en Tu Cuenta (`/admin/cuenta`), y las que salen de
+La llave te la da el dueño: la genera en Tu IA (`/admin/ia`), y las que salen de
 ahí empiezan con `tp_`.
 Todo lo que hagas con ella lo haces a su nombre —sus cuentas, sus posts, su zona horaria—,
 y no ves nada de nadie más. Sin ella, con una incorrecta o con una que el dueño revocó:

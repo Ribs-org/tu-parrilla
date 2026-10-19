@@ -89,7 +89,7 @@ Solo para quien ya entró (etiqueta «entró <fecha>»).
 No aparece confirmación: la fila queda igual. Desde su siguiente paso, esa persona sale del
 panel en todos sus navegadores y de la app del teléfono, y tiene que pedir un código nuevo.
 **No le quita el acceso**: su correo sigue invitado y puede volver a entrar cuando quiera. Y no
-toca sus llaves de API, que siguen funcionando hasta que ella las revoque en Tu Cuenta.
+toca sus llaves de API, que siguen funcionando hasta que ella las revoque en Tu IA.
 
 ## Mensajes que puede ver
 

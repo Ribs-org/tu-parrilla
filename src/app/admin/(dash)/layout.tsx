@@ -34,7 +34,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <PiezaDefs />
       <header className="sticky top-0 z-30 border-b border-acero-700 bg-acero-950/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-6xl items-center gap-2 px-4 py-3 sm:gap-4 sm:px-6">
-          {/* En un teléfono el rótulo no cabe junto a las tres pestañas: cede su lugar. */}
+          {/* En un teléfono el rótulo no cabe junto a las cuatro pestañas: cede su lugar. */}
           <span className="hidden font-titulo text-sm font-semibold uppercase tracking-[0.1em] sm:inline">Panel</span>
           <AdminNav esAdmin={usuario.rol === 'admin'} aviso={aviso} />
           <BotonTema key={tema} inicial={tema} guardar={guardarTema} />

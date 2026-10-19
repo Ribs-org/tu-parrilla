@@ -31,11 +31,12 @@ describe('el vocabulario del panel', () => {
     expect(new Set(nombres).size).toBe(nombres.length)
   })
 
-  it('tres pestañas con La Parrilla primera, y Ajustes con tres entradas para un usuario y cuatro para el admin', () => {
+  it('cuatro pestañas con La Parrilla primera y Tu IA al final, y Ajustes con tres entradas para un usuario y cuatro para el admin', () => {
     expect(pestanas(false).map((p) => p.ruta)).toEqual([
       '/admin/schedule',
       '/admin/comments',
       '/admin/analytics',
+      '/admin/ia',
     ])
     expect(pestanas(true)).toEqual(pestanas(false))
     expect(ajustes(false).map((p) => p.ruta)).toEqual(['/admin/accounts', '/admin/profiles', '/admin/cuenta'])
@@ -55,6 +56,8 @@ describe('el vocabulario del panel', () => {
     expect(pantallaDe('/admin/profiles/xyz')?.ruta).toBe('/admin/profiles')
     // Las publicaciones viven dentro de Los Números: la pestaña queda marcada.
     expect(pantallaDe('/admin/analytics/publicaciones')?.ruta).toBe('/admin/analytics')
+    // El manual vive dentro de Tu IA: la pestaña queda marcada mientras se lee.
+    expect(pantallaDe('/admin/ia/manual/la-parrilla')?.ruta).toBe('/admin/ia')
     // Un prefijo de texto que no es un segmento no cuenta: /admin/scheduleX no es la parrilla.
     expect(pantallaDe('/admin/scheduleX')).toBeNull()
     expect(pantallaDe('/ingresar')).toBeNull()

@@ -338,7 +338,7 @@ Comparada con el panel web, la app no:
 - muestra ni responde comentarios ([La Mesa](la-mesa.md));
 - muestra la pieza de una publicación con sus versiones, «Comparar por atributo», el «⋯ Más» de «En tu página» (orígenes, links, países, equipos) ni el filtro de página o de bots ([Los Números](los-numeros.md));
 - edita la página pública ([La Vitrina](la-vitrina.md));
-- cambia la zona horaria ni genera llaves ([Tu Cuenta](tu-cuenta.md));
+- cambia la zona horaria ([Tu Cuenta](tu-cuenta.md)) ni genera llaves ([Tu IA](tu-ia.md));
 - invita usuarios ([Los Maestros](los-maestros.md));
 - cierra sesión desde la propia app;
 - manda notificaciones;
