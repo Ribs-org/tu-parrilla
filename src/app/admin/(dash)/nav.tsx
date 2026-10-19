@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { IconoAjustes } from '@/components/icono-ajustes'
+import { IconoMaestro } from '@/components/icono-maestro'
 import { fraseDelAviso, type avisoDeFierros } from '@/lib/parrilla'
 import { ajustes, pantallaDe, pestanas } from '@/lib/vocabulario'
 import { cn } from '@/lib/utils'
@@ -11,8 +12,12 @@ import { cn } from '@/lib/utils'
 /** Dónde vive el aviso de los fierros dentro del menú: la entrada de Los Fierros. */
 const RUTA_FIERROS = '/admin/accounts'
 
+/** La única pestaña con dibujo: Tu IA lleva a su maestro, parrillero de noche y de sushi de día. */
+const RUTA_IA = '/admin/ia'
+
 /**
- * Tres pestañas y el botón de Ajustes —un trinche y un cuchillo, lado a lado—. Lo que no pide
+ * Cuatro pestañas —la última, Tu IA, con su maestro dibujado— y el botón de Ajustes —un trinche
+ * y un cuchillo, lado a lado—. Lo que no pide
  * una acción todos los días —las cuentas, las páginas públicas, quién entra— va dentro de
  * Ajustes: sigue a un clic, pero ya no ocupa la barra. Los nombres y las rutas salen del
  * vocabulario; acá no se escribe ninguno.
@@ -21,7 +26,7 @@ const RUTA_FIERROS = '/admin/accounts'
  * enfría, rojo si se apagó (`avisoDeFierros`). Adentro, la entrada de Los Fierros lo dice en
  * palabras. Sin nada que avisar, no hay punto.
  *
- * En un teléfono las tres pestañas no caben: la fila se desliza de lado, con el borde derecho
+ * En un teléfono las cuatro pestañas no caben: la fila se desliza de lado, con el borde derecho
  * desvanecido para que se note que sigue, y al llegar a una pestaña la fila se corre hasta
  * dejarla entera a la vista. Antes, en Los Números, la pestaña activa quedaba debajo del botón
  * de Ajustes y se leía «L».
@@ -63,10 +68,11 @@ export function AdminNav({
               href={p.ruta}
               aria-current={active ? 'page' : undefined}
               className={cn(
-                'rounded-lg px-3 py-1.5 text-sm whitespace-nowrap transition-colors',
+                'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm whitespace-nowrap transition-colors',
                 active ? 'bg-brasa text-acero-950' : 'text-fg-muted hover:text-fg',
               )}
             >
+              {p.ruta === RUTA_IA ? <IconoMaestro className="h-4 w-4" /> : null}
               {p.nombre}
             </Link>
           )

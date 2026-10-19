@@ -240,6 +240,122 @@
     border: 1px solid var(--color-acero-700);
   }
 
+  /*
+   * El manual del parrillero (`/admin/ia/manual`): la wiki de la UI pasada a HTML por `marked`
+   * (`src/lib/manual.ts`). Son los elementos que escribe `marked`, con la voz del panel: los
+   * títulos en Oswald, el texto en el secundario, los enlaces en brasa. Todo con las variables
+   * del acero, así sirve de noche y de día.
+   */
+  .manual {
+    max-width: 46rem;
+    color: var(--color-fg-muted);
+    font-size: 0.9rem;
+    line-height: 1.65;
+  }
+
+  .manual > * + * {
+    margin-top: 0.9em;
+  }
+
+  .manual h2 {
+    margin-top: 2.2em;
+    color: var(--color-fg);
+    font-family: var(--font-titulo);
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .manual h3,
+  .manual h4 {
+    margin-top: 1.8em;
+    color: var(--color-fg);
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+
+  .manual strong {
+    color: var(--color-fg);
+    font-weight: 600;
+  }
+
+  .manual a {
+    color: var(--color-brasa);
+    text-underline-offset: 2px;
+  }
+
+  .manual a:hover {
+    text-decoration: underline;
+  }
+
+  .manual ul {
+    padding-left: 1.25rem;
+    list-style: disc;
+  }
+
+  .manual ol {
+    padding-left: 1.4rem;
+    list-style: decimal;
+  }
+
+  .manual li + li,
+  .manual li > ul,
+  .manual li > ol {
+    margin-top: 0.35em;
+  }
+
+  .manual code {
+    padding: 0.1em 0.35em;
+    border-radius: 4px;
+    background: var(--color-acero-800);
+    color: var(--color-fg);
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+  }
+
+  .manual pre {
+    overflow-x: auto;
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--color-acero-700);
+    border-radius: 8px;
+    background: var(--color-acero-950);
+  }
+
+  .manual pre code {
+    padding: 0;
+    background: none;
+  }
+
+  .manual blockquote {
+    padding-left: 0.9rem;
+    border-left: 2px solid var(--color-acero-600);
+  }
+
+  /* En un teléfono las tablas de la wiki no caben: la caja se desliza de lado. */
+  .manual-tabla {
+    overflow-x: auto;
+  }
+
+  .manual table {
+    min-width: 32rem;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+
+  .manual th,
+  .manual td {
+    padding: 0.45rem 0.7rem;
+    border-bottom: 1px solid var(--color-acero-700);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .manual th {
+    color: var(--color-fg);
+    font-weight: 600;
+  }
+
   .chapa-hover {
     transition:
       border-color 180ms ease,

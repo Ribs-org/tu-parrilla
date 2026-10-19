@@ -33,15 +33,17 @@ registro abierto.
 Está siempre, fija arriba, en todas las pantallas del panel. De izquierda a derecha:
 
 1. **«Panel»**, en mayúsculas. Es un rótulo, no un botón. En un teléfono no aparece: le deja el lugar a las pestañas.
-2. **Tres pestañas**, iguales para todos: «La Parrilla», «La Mesa» y «Los Números». La activa
+2. **Cuatro pestañas**, iguales para todos: «La Parrilla», «La Mesa», «Los Números» y «Tu IA».
+   «Tu IA» lleva al lado el dibujo de un maestro cocinero: de noche, un parrillero de sombrero
+   de ala ancha y delantal; de día, un maestro de sushi con su gorrito alto. La activa
    se pinta con fondo naranjo. En una pantalla angosta (un
-   teléfono) no caben las tres: la fila se desplaza de lado y la última se desvanece en el
+   teléfono) no caben las cuatro: la fila se desplaza de lado y la última se desvanece en el
    borde. La pestaña en la que está se ve siempre entera; si no ve otra, que deslice la barra.
 3. **El botón «Ajustes»**, a la derecha, con el ícono de un trinche y un cuchillo, lado a lado (antes era un engranaje:
    si alguien dice «el engranaje», es este). En pantallas angostas se ve solo el ícono, sin la
    palabra. Abre un menú con cuatro entradas, cada una con su subtítulo debajo: «Los Fierros»
    (tus redes conectadas), «La Vitrina» (tus páginas públicas), «Los Maestros» (quién puede
-   entrar; **solo lo ve el admin**) y «Tu Cuenta» (tu nombre, tu hora y tus llaves). Cuando la
+   entrar; **solo lo ve el admin**) y «Tu Cuenta» (tu nombre y tu hora). Cuando la
    persona está en una de esas pantallas, el botón queda pintado de naranjo. Si el permiso
    de alguna cuenta conectada vence en la semana, el botón lleva un punto ámbar; si alguna
    ya se apagó (venció o dejó de sincronizar), un punto rojo. Adentro, la entrada «Los Fierros»
@@ -65,10 +67,11 @@ se ve arriba, grande y en mayúsculas.
 | La Parrilla | lo que viene y cómo salió lo que ya se fue | `/admin/schedule` | Primera pestaña. Es la entrada: se llega acá al entrar, y `/admin` lleva acá. El calendario: programar, borradores, lo que se quemó, editar, reprogramar | [la-parrilla.md](la-parrilla.md) |
 | La Mesa | lo que te responden y tus respuestas | `/admin/comments` | Pestaña. Los comentarios y sus respuestas | [la-mesa.md](la-mesa.md) |
 | Los Números | cómo te fue en las redes y en tu página | `/admin/analytics` | Pestaña. Un tablero con dos mitades: «En las redes» (views y seguidores ganados) y «En tu página» (visitas y clicks en su página de links). Un clic adentro, «Tus publicaciones» (`/admin/analytics/publicaciones`): cada publicación con sus números y su etiqueta `?s=`; la pieza de cada una, con sus versiones (`/admin/analytics/publicaciones/<id>`); «Comparar por atributo» (`/admin/analytics/comparar`); «Tu mejor 10 %» (`/admin/analytics/mejores`), lo que más rindió —o lo que menos, con «Lo peor»— y qué tiene en común; y «Lado a lado» (`/admin/analytics/lado-a-lado`), dos publicaciones con su portada, el link a la red y cómo crecieron | [los-numeros.md](los-numeros.md) |
+| Tu IA | tu propio chef: la llave y la guía para conectarla | `/admin/ia` | Cuarta pestaña, la última. Conectar la IA propia: generar y revocar llaves de API, y las guías que tiene que leer. Al final, el manual del parrillero (`/admin/ia/manual`): esta misma wiki, para que la lea la persona | [tu-ia.md](tu-ia.md) |
 | Los Fierros | tus redes conectadas | `/admin/accounts` | Botón «Ajustes». Conectar y desconectar redes | [los-fierros.md](los-fierros.md) |
 | La Vitrina | tus páginas públicas | `/admin/profiles` | Botón «Ajustes». Su página de links | [la-vitrina.md](la-vitrina.md) |
 | Los Maestros | quién puede entrar | `/admin/usuarios` | Botón «Ajustes», solo el admin. Invitar gente | [los-maestros.md](los-maestros.md) |
-| Tu Cuenta | tu nombre, tu hora y tus llaves | `/admin/cuenta` | Botón «Ajustes». Nombre, zona horaria y llaves de API | [tu-cuenta.md](tu-cuenta.md) |
+| Tu Cuenta | tu nombre y tu hora | `/admin/cuenta` | Botón «Ajustes». Nombre y zona horaria | [tu-cuenta.md](tu-cuenta.md) |
 
 Y dos páginas que no son una pantalla del panel: [Entrar al panel](ingresar.md) y [La app del
 teléfono](app-movil.md).
@@ -114,7 +117,8 @@ teléfono](app-movil.md).
 | Responder comentarios; darle instrucciones a la IA que redacta los borradores | La Mesa ([la-mesa.md](la-mesa.md)) |
 | Editar su página de links: foto, bio, colores, links, dirección | La Vitrina ([la-vitrina.md](la-vitrina.md)) |
 | Cambiar su nombre o su zona horaria | Tu Cuenta ([tu-cuenta.md](tu-cuenta.md)) |
-| Generar o revocar la llave que te dio a ti, o a otro agente | Tu Cuenta, panel «Llaves para tus agentes» ([tu-cuenta.md](tu-cuenta.md)) |
+| Generar o revocar la llave que te dio a ti, o a otro agente | Tu IA, bloque «1. Su llave» ([tu-ia.md](tu-ia.md)). Hasta el 2026-10-19 estaba en Tu Cuenta |
+| Leer cómo funciona el panel, pantalla por pantalla | Tu IA → «El manual del parrillero →»: esta misma wiki, en el panel ([tu-ia.md](tu-ia.md)) |
 | Invitar a alguien; cerrar las sesiones de alguien | Los Maestros, solo el admin ([los-maestros.md](los-maestros.md)) |
 | Publicar desde el teléfono | [La app del teléfono](app-movil.md) |
 
@@ -190,7 +194,7 @@ la persona describe lo que ve de día, esta es la equivalencia con lo que dicen 
 - **Elegir los creadores del «modo Tinder».** La traída de ideas existe por dentro, pero no
   tiene pantalla todavía.
 - **Ver una llave de API ya generada.** Se ve una sola vez al crearla; después solo se revoca
-  y se genera otra (Tu Cuenta).
+  y se genera otra (Tu IA).
 - **El Fuego** (la pantalla de entrada de antes, con el botón «Poner al fuego»). Ya no está:
   lo que mostraba —lo que se quemó, la tarjeta para conectar la primera red y lo que salió
   ayer— está en La Parrilla, que es ahora la entrada.

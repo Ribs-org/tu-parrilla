@@ -10,7 +10,7 @@ quede con tus números.
 | --- | --- |
 | `/` | La página principal del dueño del dominio. Cada usuario tiene una principal, pero solo la del admin se sirve en la raíz |
 | `/<slug>` | La página de un usuario. Cada dominio sirve solo las de su dueño; el del producto las sirve todas |
-| `/admin` | Tu panel: entra a La Parrilla, el calendario con lo que se quemó arriba; adentro, los números, los comentarios y el editor. Se abre en el dominio del producto: en cualquier otro, `/admin` e `/ingresar` redirigen ahí con la misma ruta |
+| `/admin` | Tu panel: entra a La Parrilla, el calendario con lo que se quemó arriba; adentro, los números, los comentarios, el editor y Tu IA (`/admin/ia`), con las llaves para tu agente y el manual del parrillero (`/admin/ia/manual`). Se abre en el dominio del producto: en cualquier otro, `/admin` e `/ingresar` redirigen ahí con la misma ruta |
 | `/borrado/<código>` | El estado de un borrado que pidió Meta: cuándo fue y cuántas cuentas. Pública, sin sesión; el código es la llave |
 | `/docs/…` | Las guías para LLMs, públicas y sin sesión: la de la API (`api-llm.md`, `api-editor.md`, `api.json`) y la wiki de la interfaz (`ui/index.md`), para guiar a quien se pierde en el panel |
 | `/api/social/meta/baja` | `POST` de Meta cuando alguien quita la app desde Facebook: deja sin credencial sus cuentas de Instagram y Facebook |
@@ -131,8 +131,9 @@ Abre el sitio: ahora se ve un perfil de ejemplo.
 Entra en `/ingresar` con tu correo (el de `ADMIN_EMAIL`): te llega un código de seis
 dígitos que vale diez minutos.
 
-El panel tiene tres pestañas —La Parrilla (Calendario), La Mesa (Comentarios) y Los Números
-(Analítica)— y el botón de Ajustes (un trinche y un cuchillo, lado a lado),
+El panel tiene cuatro pestañas —La Parrilla (Calendario), La Mesa (Comentarios), Los Números
+(Analítica) y Tu IA (las llaves y el manual)— y el botón de Ajustes (un trinche y un
+cuchillo, lado a lado),
 con Los Fierros (Cuentas), La Vitrina (Perfiles), Los Maestros (Usuarios, solo el admin) y
 Tu Cuenta. Las rutas no cambiaron. Cada pantalla lleva su subtítulo en llano por si el
 nombre no dice nada.
@@ -146,9 +147,12 @@ ventanas de los links— y en lo que guardas desde ahí: si escribes «19:00», 
 19:00 tuyas. También manda por dentro: Los Números y su lista de publicaciones agrupan los días en tu
 zona.
 
-En Tu Cuenta también generas las **llaves para tus agentes**: una llave deja que un
-programa —el agente que te edita los videos, un script— use la API a tu nombre sin entrar al
-panel. Le pones un nombre (el del agente), aprietas «Generar llave» y la ves **una sola
+En **Tu IA** (`/admin/ia`), la cuarta pestaña, generas las **llaves para tu IA**: una llave
+deja que un programa —el agente que te edita los videos, un asistente, un script— use la API
+a tu nombre sin entrar al panel. La pestaña lleva un maestro cocinero dibujado
+(`src/components/icono-maestro.tsx`): un parrillero de noche y un maestro de sushi de día.
+Hasta el 2026-10-19 las llaves vivían en Tu Cuenta; ahora están junto a las guías que tu IA
+tiene que leer y lo que puede hacer con ellas. Le pones un nombre (el del agente), aprietas «Generar llave» y la ves **una sola
 vez**, con un botón que la copia junto con las instrucciones para el agente (la base de la
 API, el header, dónde está la guía y dónde la wiki del panel). En la base se guarda solo su hash, así que no hay forma
 de volver a leerla: si se pierde, se revoca y se genera otra. La lista muestra cada llave
@@ -156,6 +160,12 @@ por su nombre y sus últimos cuatro caracteres, cuándo se creó y cuándo se us
 vez; revocar la borra y lo que la use deja de entrar en su próxima petición. Hasta diez por
 usuario. Cerrar las sesiones de alguien desde Los Maestros no toca sus llaves: son
 credenciales aparte, y las maneja cada uno.
+
+Al final de Tu IA está **el manual del parrillero** (`/admin/ia/manual`): la wiki de la UI
+(`public/docs/ui/`) pasada a HTML para que la lea la persona, una página por dirección, sin el
+pie con los archivos de cada una y con los enlaces llevados al manual (`src/lib/manual.ts`, con
+`marked`). La función lee la wiki del disco: `next.config.ts` la incluye en ella
+(`outputFileTracingIncludes`), porque lo de `public/` lo sirve la CDN.
 
 Fuera del panel, «el dueño» no siempre eres tú, así que conviene el detalle:
 
@@ -956,7 +966,7 @@ Vercel y bajan con `vercel env pull .env.local`.
 | `X_CLIENT_SECRET` | El secreto de esa app | Junto con el anterior |
 | `CRON_SECRET` | Autoriza las corridas programadas (sync diario y publicación cada 5 minutos) | No — la pone Vercel solo, al declarar el cron |
 | `MIGRAR_PREVIEWS` | Que los previews migren la base | Solo cuando el preview tenga una base propia; contra la de producción, no |
-| `SCHEDULE_API_KEY` | La llave del despliegue: abre `POST /api/schedule/batch` (carga masiva), `DELETE /api/schedule/posts/{id}` (sacar lo programado), `GET /api/schedule/posts` (calendario), `GET /api/schedule/resumen` (el resumen del día), `GET /api/metrics/posts` (métricas) y `GET /api/metrics/mejores` (el mejor X %) a nombre del admin. Es anterior a las llaves por usuario y sigue para el agente que ya la usa | No — sin ella los seis endpoints aceptan solo las llaves que cada usuario genera en Tu Cuenta; si la pones, genérala igual que `CRON_SECRET` |
+| `SCHEDULE_API_KEY` | La llave del despliegue: abre `POST /api/schedule/batch` (carga masiva), `DELETE /api/schedule/posts/{id}` (sacar lo programado), `GET /api/schedule/posts` (calendario), `GET /api/schedule/resumen` (el resumen del día), `GET /api/metrics/posts` (métricas) y `GET /api/metrics/mejores` (el mejor X %) a nombre del admin. Es anterior a las llaves por usuario y sigue para el agente que ya la usa | No — sin ella los seis endpoints aceptan solo las llaves que cada usuario genera en Tu IA; si la pones, genérala igual que `CRON_SECRET` |
 | `RESEND_API_KEY` | Manda los códigos de ingreso y los avisos: la publicación que se quemó, la cuenta que se cayó y el resumen del día (ver «Avisos por correo») | Sí — sin ella nadie puede entrar al panel |
 | `PUBLISH_ALERT_TO` | Adónde va un aviso sin dueño con correo: un post o una cuenta de antes de los usuarios. Lo demás va al correo de su dueño | No — sin ella, lo que no tiene dueño no avisa; el calendario y Los Fierros lo siguen mostrando |
 | `PUBLISH_ALERT_FROM` | Remitente de los avisos | Opcional; default `onboarding@resend.dev`, que solo entrega al correo de la cuenta de Resend |
@@ -1041,7 +1051,7 @@ Tres correos, todos con el remitente `PUBLISH_ALERT_FROM` y al correo del dueño
 LLM que crea contenido lo lea entero y no necesite explicaciones: contratos, reglas
 por red, todas las frases de error y qué significa cada métrica. Se sirve tal cual en
 <https://tu-parrilla.cl/docs/api-editor.md>. No contiene secretos — la llave
-viaja aparte: cada usuario la genera en Tu Cuenta, y el botón que la copia pega al lado
+viaja aparte: cada usuario la genera en Tu IA, y el botón que la copia pega al lado
 la dirección de la guía compacta — pero es público: si prefieres que no lo sea, muévelo
 fuera de `public/`.
 
@@ -1067,7 +1077,7 @@ Los seis endpoints de abajo piden el header `Authorization: Bearer <llave>`, y l
 hacen lo hacen a nombre del dueño de la llave: sus cuentas, sus posts, su zona. Valen dos
 clases de llave:
 
-- **Las de cada usuario** (`tp_…`), que se generan y se revocan en Tu Cuenta. Viven en
+- **Las de cada usuario** (`tp_…`), que se generan y se revocan en Tu IA. Viven en
   `llaves_api`, de la que solo se guarda el hash; cada uso anota la fecha en la fila.
 - **La del despliegue**, `SCHEDULE_API_KEY`, que actúa como el admin. Es la que existía
   antes de las llaves por usuario y sigue andando para no romper al agente que ya la usa.
@@ -1209,6 +1219,7 @@ src/
     corte.tsx              el corte dibujado de La Parrilla: silueta, carne, marcas, halo y humo
     pieza-sushi.tsx        el mismo corte en el modo día: nigiri, maki, sashimi y temaki
     boton-tema.tsx         el botón de la barra que cambia entre la noche y el día
+    icono-maestro.tsx      el dibujo de la pestaña Tu IA: el parrillero de noche, el maestro de sushi de día
     landing.tsx            la portada del producto, armada con las piezas del panel; landing-demos.tsx, lo que se toca
     landing-semana.ts      la semana de ejemplo, que comparten la portada y su imagen para compartir (/api/og)
     esqueleto.tsx          las piezas de la carga del panel: la forma de cada pantalla, con su pulso tibio
@@ -1231,6 +1242,7 @@ src/
     auth.ts                sesión del panel
     llaves.ts              las llaves de API de cada usuario, y a nombre de quién entra cada petición
     llaves-api.ts          cómo se ve, se guarda y se lee una llave (sin base: lo prueban los tests)
+    manual.ts              el manual del parrillero: cada página de la wiki de la UI pasada a HTML (sin base)
     borradores.ts          los borradores del compositor: guardar, cargar, listar y borrar, siempre por dueño
     borrador.ts            qué se guarda de un formulario y cómo se restaura, también desde el teléfono (sin base)
     borradores-movil.ts    los mismos borradores en la forma de la app del teléfono

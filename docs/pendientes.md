@@ -277,8 +277,8 @@ Nada de esto bloquea un trámite hoy; conviene ordenarlo antes de abrir a tercer
   `retencion-youtube.ts`. Ver `docs/google-verificacion-guion.md`, «Lo que la auditoría
   mira de los datos guardados».
 - **[dueño] Pasar el agente del admin a una llave propia y retirar `SCHEDULE_API_KEY`**
-  (2026-10-13). Desde que cada usuario genera sus llaves en Tu Cuenta, la del despliegue
-  solo sigue para no romper al agente que ya la usa. Pasos: generar una llave en Tu Cuenta,
+  (2026-10-13). Desde que cada usuario genera sus llaves en el panel (hoy en Tu IA), la del
+  despliegue solo sigue para no romper al agente que ya la usa. Pasos: generar una llave en Tu IA,
   ponerla en ese agente y, cuando ande, borrar la variable en Vercel. En código no hay nada
   que hacer: sin la variable, la API ya acepta solo las llaves de usuario.
 - **Por decidir: que el admin pueda cortar las llaves de otro usuario** (2026-10-13). Hoy

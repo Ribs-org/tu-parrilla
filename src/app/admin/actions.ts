@@ -1441,13 +1441,13 @@ export async function generarLlaveApi(_prev: LlaveState, formData: FormData): Pr
   const nombre = String(formData.get('nombre') ?? '')
   const resultado = await crearLlave(ownerId, nombre)
   if ('error' in resultado) return { error: resultado.error }
-  revalidatePath('/admin/cuenta')
+  revalidatePath('/admin/ia')
   return { llave: resultado.llave, nombre: nombre.trim() }
 }
 
 export async function revocarLlaveApi(id: string): Promise<{ error?: string }> {
   const { id: ownerId } = await requireUser()
   await revocarLlave(ownerId, id)
-  revalidatePath('/admin/cuenta')
+  revalidatePath('/admin/ia')
   return {}
 }
