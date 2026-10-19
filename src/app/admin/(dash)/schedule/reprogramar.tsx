@@ -83,7 +83,7 @@ export function Reprogramar({ targetId, titulo, className = 'ml-2 underline' }: 
         onClick={(event) => {
           if (event.target === event.currentTarget) panel.current?.close()
         }}
-        className="m-auto w-[20rem] max-w-[calc(100vw-2rem)] rounded-xl border border-white/10 bg-acero-900/95 text-fg shadow-xl backdrop-blur backdrop:bg-acero-950/80"
+        className="m-auto w-[20rem] max-w-[calc(100vw-2rem)] rounded-xl border border-velo/10 bg-acero-900/95 text-fg shadow-xl backdrop-blur backdrop:bg-acero-950/80"
       >
         <div className="p-3">
           {titulo ? <p id={rotulo} className="mb-2 text-xs text-fg-faint">{titulo}</p> : null}

@@ -151,7 +151,7 @@ export default async function CompararPage({ searchParams }: { searchParams: Pro
                     <tr
                       key={fila.valor ?? ''}
                       className={cn(
-                        'border-t border-white/[0.06]',
+                        'border-t border-velo/[0.06]',
                         fila.publicaciones < POCAS_PUBLICACIONES && 'opacity-60',
                       )}
                     >

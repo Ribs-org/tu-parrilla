@@ -4,6 +4,8 @@
 
 Los Fierros (en llano: las cuentas conectadas) es donde se conectan a Tu Parrilla las cuentas de Instagram, TikTok, YouTube, Facebook, Threads y X / Twitter, donde se renuevan cuando su permiso vence y donde se desconectan. Cada cuenta es una fila con su «fierro», una barra corta de color que dice si la conexión está viva; lo que se usa poco se abre con la flecha de la fila. Sin una cuenta conectada aquí, el panel no puede publicar en esa red. Las seis redes sirven para publicar; los números de los posts se traen de Instagram, TikTok, YouTube y Facebook; los comentarios (en [La Mesa](la-mesa.md)) llegan de Instagram, Facebook y YouTube.
 
+En el modo día el fierro es la misma barra, con el salmón tostado del día en vez del naranjo: ver «El modo día», en [index.md](index.md).
+
 ## Cómo se llega
 
 1. En la barra de arriba del panel, abre el botón «Ajustes», a la derecha. En un teléfono se ve solo el ícono, un trinche y un cuchillo, lado a lado, sin la palabra.

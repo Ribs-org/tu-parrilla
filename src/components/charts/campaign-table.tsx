@@ -98,7 +98,7 @@ export function CampaignTable({
         </thead>
         <tbody>
           {sorted.map((row) => (
-            <tr key={row.campaign} className="border-t border-white/[0.06]">
+            <tr key={row.campaign} className="border-t border-velo/[0.06]">
               <td className="relative max-w-[14rem] truncate py-2 pr-3">
                 <span
                   aria-hidden

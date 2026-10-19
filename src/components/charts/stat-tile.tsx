@@ -1,6 +1,6 @@
 import { ArrowDownRight, ArrowRight, ArrowUpRight } from 'lucide-react'
 import { retraso } from '@/components/esqueleto'
-import { NEGATIVE, POSITIVE } from './theme'
+import { PINTURA } from './theme'
 
 type Props = {
   label: string
@@ -21,7 +21,7 @@ export function StatTile({ label, value, delta, hint }: Props) {
   const flat = hasDelta && Math.abs(delta) < 0.5
   const up = hasDelta && delta > 0
   const Arrow = flat ? ArrowRight : up ? ArrowUpRight : ArrowDownRight
-  const color = flat ? undefined : up ? POSITIVE : NEGATIVE
+  const color = flat ? undefined : up ? PINTURA.sube : PINTURA.baja
 
   return (
     <div className="chapa rounded-xl p-4">
@@ -55,9 +55,9 @@ export function StatTile({ label, value, delta, hint }: Props) {
 export function StatTileSkeleton({ orden = 0 }: { orden?: number }) {
   return (
     <div className="chapa tibio rounded-xl p-4" style={retraso(orden)} aria-hidden>
-      <div className="h-4 w-20 rounded bg-white/[0.06]" />
+      <div className="h-4 w-20 rounded bg-velo/[0.06]" />
       <div className="brasa-tibia mt-2 h-7 w-24 rounded" />
-      <div className="mt-2 h-4 w-28 rounded bg-white/[0.035]" />
+      <div className="mt-2 h-4 w-28 rounded bg-velo/[0.035]" />
     </div>
   )
 }

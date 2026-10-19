@@ -8,6 +8,9 @@ correo de la invitación: se escribe el correo, llega un código de seis dígito
 se abre el panel. La sesión dura treinta días en ese navegador, contados desde que se entró;
 después hay que pedir un código otra vez.
 
+Las dos pantallas siguen el modo del panel que se eligió en ese equipo: oscuras de noche, claras
+de día (ver «El modo día», en [index.md](index.md)). La de error sigue siempre de noche.
+
 ## Cómo se llega
 
 - Escribiendo `https://tu-parrilla.cl/ingresar`.
@@ -167,6 +170,7 @@ Sale de:
 - `src/lib/usuarios.ts`: pedir y canjear el código, y el texto del correo.
 - `src/lib/limite-ip.ts`: el freno por conexión.
 - `src/lib/sesion-token.ts` y `src/lib/auth.ts`: los treinta días y adónde manda sin sesión.
+- `src/lib/tema-servidor.ts`: el modo, de noche o de día, con que se pintan las dos pantallas.
 - `src/app/admin/(dash)/page.tsx`: `/admin` lleva a La Parrilla.
 - `src/app/admin/actions.ts` (`logout`) y `src/app/admin/(dash)/layout.tsx`: «Salir».
 - `src/proxy.ts` y `src/lib/dominios.ts`: el panel solo en el dominio del producto.

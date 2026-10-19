@@ -81,7 +81,7 @@ export default async function EditProfilePage({ params }: { params: Promise<{ id
           href={hrefVerPagina}
           target="_blank"
           rel="noopener noreferrer"
-          className="ml-auto inline-flex items-center gap-1.5 rounded-xl border border-white/10 px-3 py-1.5 text-xs text-fg-muted transition-colors hover:text-fg"
+          className="ml-auto inline-flex items-center gap-1.5 rounded-xl border border-velo/10 px-3 py-1.5 text-xs text-fg-muted transition-colors hover:text-fg"
         >
           Ver página <ExternalLink className="h-3 w-3" aria-hidden />
         </a>

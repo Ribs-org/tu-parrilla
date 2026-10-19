@@ -43,6 +43,13 @@
   /* La brasa: solo lo caliente o lo accionable. Nunca decorativa. */
   --color-brasa: #e8621f;
 
+  /*
+   * El velo: lo que aclara una superficie (`bg-velo/[0.06]`, `border-velo/10`). Blanco, como
+   * los `white/` que reemplazó, así que afuera del panel nada cambia; de día es la tinta, y
+   * sombrea en vez de aclarar (`.acerado[data-tema='dia']`, más abajo).
+   */
+  --color-velo: #ffffff;
+
   --font-titulo: var(--font-oswald), 'Arial Narrow', sans-serif;
 }
 
@@ -54,6 +61,17 @@
   }
 
   * {
+    border-color: rgb(255 255 255 / 0.07);
+  }
+
+  /* De día el borde por defecto sombrea: blanco sobre la chapa clara no se ve. */
+  [data-tema='dia'] * {
+    border-color: rgb(34 31 28 / 0.1);
+  }
+
+  /* Salvo en la vista previa de La Vitrina, que es la página pública y no cambia de modo. */
+  [data-tema='dia'] .vista-publica,
+  [data-tema='dia'] .vista-publica * {
     border-color: rgb(255 255 255 / 0.07);
   }
 
@@ -270,6 +288,30 @@
      * el blanco viejo sobre acero, y los dos blancos se distinguen a simple vista.
      */
     color: var(--color-fg);
+
+    /*
+     * Lo que pintan los gráficos (`PINTURA` en `src/components/charts/theme.ts`): los mismos
+     * hexes de `CHART`, `SEQUENTIAL` y `ORDINAL`, como variables para que el día los cambie.
+     * `paleta.test.ts` compara las dos copias.
+     */
+    --chart-surface: #1d2124;
+    --chart-grid: #242a2f;
+    --chart-axis: #2a2e33;
+    --chart-muted: #8a9096;
+    --chart-text: #f2ebe2;
+    --chart-secondary: #a39a8f;
+    --chart-sube: #0ca30c;
+    --chart-baja: #d03b3b;
+    --chart-secuencia-0: #1b2338;
+    --chart-secuencia-1: #184f95;
+    --chart-secuencia-2: #256abf;
+    --chart-secuencia-3: #3987e5;
+    --chart-secuencia-4: #5598e7;
+    --chart-secuencia-5: #86b6ef;
+    --chart-secuencia-6: #cde2fb;
+    --chart-escalon-0: #86b6ef;
+    --chart-escalon-1: #3987e5;
+    --chart-escalon-2: #184f95;
   }
 
   .acerado :focus-visible {
@@ -279,6 +321,71 @@
   /* La brasa en vez del violeta de `--accent`, solo dentro del acero. */
   .acerado ::selection {
     background: rgb(232 98 31 / 0.32);
+  }
+
+  /*
+   * ================= El modo día =================
+   * La barra de sushi: las mismas variables con los valores del día, sobre el mismo `.acerado`.
+   * La escala del acero se da vuelta, y ninguna pantalla tiene que saber que el día existe. El
+   * modo lo pone el servidor (`data-tema`, de la cookie de `src/lib/tema.ts`). Cada contraste
+   * está medido en docs/superpowers/specs/2026-10-19-modo-dia-sushi-design.md, y
+   * `src/lib/paleta.test.ts` los guarda.
+   */
+  .acerado[data-tema='dia'] {
+    --color-acero-950: #f6f1e9;
+    --color-acero-900: #fffdf9;
+    --color-acero-800: #f2ece2;
+    --color-acero-700: #e2d8c9;
+    --color-acero-600: #c9bca8;
+    --color-fg: #221f1c;
+    --color-fg-muted: #5c564e;
+    --color-fg-faint: #6b655d;
+    --color-brasa: #b83d0b;
+    --color-positive: #2f7a3b;
+    --color-negative: #c0244c;
+    --color-caution: #946000;
+    --color-velo: #221f1c;
+
+    --chart-surface: #fffdf9;
+    --chart-grid: #efe8dd;
+    --chart-axis: #e2d8c9;
+    --chart-muted: #6b655d;
+    --chart-text: #221f1c;
+    --chart-secondary: #5c564e;
+    --chart-sube: #2f7a3b;
+    --chart-baja: #c0244c;
+    /* De claro a hondo: de día, lo que casi no tiene también se pierde en la chapa. */
+    --chart-secuencia-0: #f1ebe2;
+    --chart-secuencia-1: #dbe6f6;
+    --chart-secuencia-2: #b3cdef;
+    --chart-secuencia-3: #86b0e6;
+    --chart-secuencia-4: #5591db;
+    --chart-secuencia-5: #2f6fc0;
+    --chart-secuencia-6: #184f95;
+    /* El escalón más grande, el más hondo: de día es el que más se ve. */
+    --chart-escalon-0: #184f95;
+    --chart-escalon-1: #3987e5;
+    --chart-escalon-2: #7aa8e6;
+
+    color: var(--color-fg);
+  }
+
+  .acerado[data-tema='dia'] ::selection {
+    background: rgb(184 61 11 / 0.22);
+  }
+
+  /*
+   * La vista previa de La Vitrina, dentro del panel, es la página pública del creador: tiene su
+   * propia identidad y no cambia con el modo. De día vuelve a los colores de afuera del panel
+   * (los de `@theme`), que son los que ve quien abre la página.
+   */
+  .acerado[data-tema='dia'] .vista-publica {
+    --color-fg: #edeaf2;
+    --color-fg-muted: #9c96ad;
+    --color-fg-faint: #6b6580;
+    --color-negative: #f0614f;
+    --color-velo: #ffffff;
+    color: var(--color-fg);
   }
 
   /*
@@ -421,6 +528,20 @@
   }
 
   /*
+   * La llama del soplete (`pieza-sushi.tsx`): de día, lo que se mueve mientras algo está
+   * saliendo, en vez del humo. Titila desde la boquilla. Su versión quieta, al final del archivo.
+   */
+  .llama {
+    transform-box: fill-box;
+    transform-origin: 50% 0%;
+    animation: llama 0.9s ease-in-out infinite alternate;
+  }
+
+  .llama-2 {
+    animation-duration: 0.7s;
+  }
+
+  /*
    * El corte recién programado: cae en su día y se enciende una vez, al volver del compositor,
    * para que se vea dónde quedó (`nuevo`, en `schedule/page.tsx`). Una vez y no en bucle: el
    * fuego, solo cuando algo pasa. `backwards` y no `both`: al terminar no se queda con nada, y
@@ -506,6 +627,78 @@
   .corrio-normal {
     background: rgb(255 255 255 / 0.09);
   }
+
+  /*
+   * Los motivos de la parrilla, de día. En vez de los fierros, la tabla de servir: líneas de
+   * bambú en el color del borde, sin negro. El fuego del día, un lavado de salmón que sube, con
+   * el mismo umbral (`calorDelDia`); la carga, crema; el fierro de una cuenta irradia salmón; la
+   * miniatura lleva una banda de nori en vez del rayado. La forma de cada uno no cambia.
+   */
+  .acerado[data-tema='dia'] .grilla::before {
+    background: repeating-linear-gradient(to bottom, rgb(120 100 70 / 0.1) 0 2px, transparent 2px 12px);
+  }
+
+  .acerado[data-tema='dia'] .grilla-apagada {
+    background: var(--color-acero-950);
+  }
+
+  .acerado[data-tema='dia'] .grilla-apagada::before {
+    background: repeating-linear-gradient(to bottom, rgb(120 100 70 / 0.05) 0 2px, transparent 2px 12px);
+  }
+
+  .acerado[data-tema='dia'] .grilla-prendida,
+  .acerado[data-tema='dia'] .brasa-tibia {
+    background: linear-gradient(
+      to bottom,
+      rgb(242 140 104 / 0.04),
+      rgb(242 140 104 / 0.14) 62%,
+      rgb(242 140 104 / 0.22)
+    );
+  }
+
+  .acerado[data-tema='dia'] .grilla-llena {
+    background: linear-gradient(
+      to bottom,
+      rgb(242 140 104 / 0.1),
+      rgb(242 140 104 / 0.26) 58%,
+      rgb(242 140 104 / 0.4)
+    );
+    border-color: rgb(184 61 11 / 0.35);
+  }
+
+  .acerado[data-tema='dia'] .fierro-al-rojo {
+    box-shadow: 0 0 10px 1px rgb(184 61 11 / 0.35);
+  }
+
+  .acerado[data-tema='dia'] .fierro-enfriandose {
+    box-shadow: 0 0 8px 1px rgb(148 96 0 / 0.25);
+  }
+
+  .acerado[data-tema='dia'] .corte-mini::after {
+    background: linear-gradient(to right, rgb(31 44 38 / 0.85) 0 3px, transparent 3px);
+    mix-blend-mode: normal;
+  }
+
+  .acerado[data-tema='dia'] .corrio-normal {
+    background: rgb(34 31 28 / 0.07);
+  }
+}
+
+/*
+ * Los dos dibujos del corte (`corte.tsx`): la carne de noche y la pieza de sushi de día. Van los
+ * dos en la página y el modo esconde uno. Fuera de toda capa a propósito: tienen que ganarle a
+ * las utilidades de tamaño y de `display` que trae el `className` de cada corte.
+ */
+.solo-dia {
+  display: none;
+}
+
+[data-tema='dia'] .solo-dia {
+  display: block;
+}
+
+[data-tema='dia'] .solo-noche {
+  display: none;
 }
 
 @keyframes drift-a {
@@ -595,6 +788,18 @@
   }
 }
 
+/* Desde la boquilla: se estira y se angosta, como una llama que respira. */
+@keyframes llama {
+  from {
+    transform: scaleY(0.9) scaleX(1.05);
+    opacity: 0.85;
+  }
+  to {
+    transform: scaleY(1.08) scaleX(0.95);
+    opacity: 1;
+  }
+}
+
 @keyframes late {
   0%,
   100% {
@@ -643,6 +848,11 @@
   }
 
   .late {
+    animation: none !important;
+  }
+
+  /* La llama quieta: sigue diciendo, entera, que algo está saliendo. */
+  .llama {
     animation: none !important;
   }
 

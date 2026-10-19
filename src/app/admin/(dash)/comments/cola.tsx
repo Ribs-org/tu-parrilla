@@ -166,7 +166,7 @@ function Tarjeta({ fila, mostrarPrivado }: { fila: ComentarioFila; mostrarPrivad
             <p className="text-fg-muted">
               <span className="text-positive">Respondido:</span> {fila.draft}
               {fila.automatico ? (
-                <span className="ml-2 rounded-full bg-white/[0.08] px-2 py-0.5 text-[0.68rem] text-fg-faint">
+                <span className="ml-2 rounded-full bg-velo/[0.08] px-2 py-0.5 text-[0.68rem] text-fg-faint">
                   Automática
                 </span>
               ) : null}

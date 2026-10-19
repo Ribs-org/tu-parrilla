@@ -83,7 +83,7 @@ export default async function Elegir({
 
       <form action={conectarElegidas} className="mt-4 space-y-2">
         {pendiente.candidatas.map((c) => (
-          <label key={c.externalId} className="flex items-center gap-3 rounded-xl bg-white/[0.04] px-3 py-2 text-sm">
+          <label key={c.externalId} className="flex items-center gap-3 rounded-xl bg-velo/[0.04] px-3 py-2 text-sm">
             <input
               type="checkbox"
               name="ids"

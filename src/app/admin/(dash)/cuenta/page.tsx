@@ -61,7 +61,7 @@ export default async function CuentaPage() {
         </p>
         <FormularioLlave base={base} maxNombre={MAX_NOMBRE} />
         {llaves.length > 0 ? (
-          <ul className="mt-6 divide-y divide-white/[0.06] border-t border-white/[0.06]">
+          <ul className="mt-6 divide-y divide-velo/[0.06] border-t border-velo/[0.06]">
             {llaves.map((llave) => (
               <li key={llave.id} className="flex flex-wrap items-center gap-3 py-3 text-sm">
                 <span className="min-w-0 flex-1 truncate">{llave.nombre}</span>

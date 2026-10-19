@@ -19,6 +19,10 @@ En esta página, lo que va entre ángulos (`<usuario>`, `<N>`) es un dato que la
 reemplaza por el real. Los títulos y los rótulos de los campos se ven en mayúsculas por
 estilo; aquí van escritos como están en el código.
 
+Esta página describe los dibujos de noche, el modo de entrada. En el modo día los cortes son
+piezas de sushi y los días, tablas de servir, con las mismas palabras: la equivalencia está en
+«El modo día», en [index.md](index.md).
+
 ## Cómo se llega
 
 - Al entrar al panel con el código ([ingresar.md](ingresar.md)) se llega siempre acá, y

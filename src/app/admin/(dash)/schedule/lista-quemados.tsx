@@ -135,13 +135,13 @@ export function ListaQuemados({
             <button
               type="button"
               onClick={() => setApagadas(new Set())}
-              className="text-fg underline decoration-white/20 underline-offset-4 hover:decoration-white/50"
+              className="text-fg underline decoration-velo/20 underline-offset-4 hover:decoration-velo/50"
             >
               Encender todas
             </button>
           </p>
         ) : (
-          <ul className="divide-y divide-white/[0.06]">
+          <ul className="divide-y divide-velo/[0.06]">
             {visibles.map((f) => (
               <Fragment key={f.id}>{f.fila}</Fragment>
             ))}
@@ -149,7 +149,7 @@ export function ListaQuemados({
         )}
 
         {quedan > 0 ? (
-          <div className="mt-1 border-t border-white/[0.06] pt-2 text-center">
+          <div className="mt-1 border-t border-velo/[0.06] pt-2 text-center">
             <button
               type="button"
               onClick={() => setMostradas(mostradas + PAGINA_QUEMADOS)}

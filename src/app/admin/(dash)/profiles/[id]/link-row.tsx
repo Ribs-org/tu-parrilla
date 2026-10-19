@@ -119,7 +119,7 @@ export function LinkRow({
       </div>
 
       {open ? (
-        <form action={formAction} className="space-y-3 border-t border-white/[0.06] p-4">
+        <form action={formAction} className="space-y-3 border-t border-velo/[0.06] p-4">
           <div className="grid gap-3 sm:grid-cols-2">
             <Field label="Tipo">
               <Select
@@ -189,7 +189,7 @@ export function LinkRow({
             </>
           ) : null}
 
-          <details className="rounded-xl border border-white/[0.06] px-3 py-2">
+          <details className="rounded-xl border border-velo/[0.06] px-3 py-2">
             <summary className="cursor-pointer text-[0.8rem] text-fg-muted">
               Programar visibilidad
             </summary>

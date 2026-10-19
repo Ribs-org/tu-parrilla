@@ -1,6 +1,6 @@
 import type { Funnel as FunnelData } from '@/lib/analytics'
 import { formatNumber } from '@/lib/utils'
-import { ORDINAL } from './theme'
+import { ESCALONES } from './theme'
 import { Empty } from './panel'
 
 /**
@@ -11,9 +11,9 @@ export function Funnel({ data }: { data: FunnelData }) {
   if (data.visits === 0) return <Empty>Sin visitas en este período.</Empty>
 
   const stages = [
-    { label: 'Llegaron a la página', value: data.visits, color: ORDINAL[0] },
-    { label: 'Hicieron al menos un click', value: data.engaged, color: ORDINAL[1] },
-    { label: 'Clicks totales', value: data.clicks, color: ORDINAL[2] },
+    { label: 'Llegaron a la página', value: data.visits, color: ESCALONES[0]! },
+    { label: 'Hicieron al menos un click', value: data.engaged, color: ESCALONES[1]! },
+    { label: 'Clicks totales', value: data.clicks, color: ESCALONES[2]! },
   ]
 
   const scale = Math.max(data.visits, data.clicks, 1)
@@ -35,7 +35,7 @@ export function Funnel({ data }: { data: FunnelData }) {
                 </span>
               ) : null}
             </div>
-            <div className="h-2.5 overflow-hidden rounded-full bg-white/[0.05]">
+            <div className="h-2.5 overflow-hidden rounded-full bg-velo/[0.05]">
               <div
                 className="h-full rounded-full transition-[width] duration-700"
                 style={{ width: `${Math.max(share, 1.5)}%`, background: stage.color }}

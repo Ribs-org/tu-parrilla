@@ -92,7 +92,7 @@ function Lista() {
   return (
     <div className="space-y-3">
       {Array.from({ length: 5 }, (_, i) => (
-        <div key={i} className="flex items-start gap-3 rounded-xl bg-white/[0.03] p-4">
+        <div key={i} className="flex items-start gap-3 rounded-xl bg-velo/[0.03] p-4">
           <Brasa orden={i} className="mt-2 h-7 w-12 shrink-0 rounded-md" />
           <div className="min-w-0 flex-1 space-y-2">
             <Renglon orden={i} className="h-3.5 w-full max-w-md" />

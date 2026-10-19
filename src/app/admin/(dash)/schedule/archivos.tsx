@@ -58,7 +58,7 @@ export function TablaDeArchivos({
         className={cn(
           'flex cursor-pointer flex-col items-center justify-center gap-0.5 rounded-xl border border-dashed text-center transition-colors has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-brasa',
           hayAlgo ? 'px-3 py-2.5' : 'px-4 py-5',
-          encima ? 'border-brasa bg-brasa/10' : 'border-acero-600 hover:border-fg-faint hover:bg-white/[0.02]',
+          encima ? 'border-brasa bg-brasa/10' : 'border-acero-600 hover:border-fg-faint hover:bg-velo/[0.02]',
         )}
       >
         <input
@@ -184,7 +184,7 @@ function Miniatura({
           <span className="block font-mono text-[0.6rem] text-white">
             {estado === 'cola' ? 'En cola' : `${Math.round(progreso * 100)} %`}
           </span>
-          <span className="mt-0.5 block h-1 overflow-hidden rounded bg-white/15">
+          <span className="mt-0.5 block h-1 overflow-hidden rounded bg-velo/15">
             {/* La barra es carne cruda: es lo que se va sumando al corte del post. */}
             <span className="block h-full rounded" style={{ width: `${Math.round(progreso * 100)}%`, background: CARNE.cruda.medio }} />
           </span>

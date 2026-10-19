@@ -23,7 +23,7 @@ export default async function AccountsPage({
         <Encabezado ruta="/admin/accounts" />
       </header>
       {mensaje ? (
-        <p role="status" className="mb-4 rounded-xl bg-white/[0.04] px-4 py-2 text-sm text-fg-muted">
+        <p role="status" className="mb-4 rounded-xl bg-velo/[0.04] px-4 py-2 text-sm text-fg-muted">
           {mensaje}
         </p>
       ) : null}

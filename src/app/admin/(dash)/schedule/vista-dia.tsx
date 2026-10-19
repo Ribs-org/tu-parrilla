@@ -165,7 +165,7 @@ function ColumnaDeCuenta({
             <Link
               href={nuevo}
               scroll={false}
-              className="rounded p-0.5 text-fg-faint transition-colors hover:bg-white/[0.08] hover:text-fg"
+              className="rounded p-0.5 text-fg-faint transition-colors hover:bg-velo/[0.08] hover:text-fg"
             >
               <Plus className="h-3.5 w-3.5" aria-hidden />
               <span className="sr-only">Programar en {nombreDeColumna(columna)}</span>
@@ -200,7 +200,7 @@ function ColumnaDeCuenta({
             href={b.href}
             scroll={false}
             prefetch={false}
-            className="block rounded-md border border-dashed border-white/30 p-2 transition-colors hover:border-white/60"
+            className="block rounded-md border border-dashed border-velo/30 p-2 transition-colors hover:border-velo/60"
           >
             <p className="font-titulo text-[0.6rem] tracking-[0.12em] text-fg-muted">Borrador · {hourLabel(b.fecha, zone)}</p>
             <p className="mt-1 line-clamp-2 text-[0.75rem] leading-snug text-fg-muted">{b.texto || '(sin texto)'}</p>

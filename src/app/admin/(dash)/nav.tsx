@@ -121,7 +121,7 @@ export function AdminNav({
                   aria-current={active ? 'page' : undefined}
                   className={cn(
                     'block rounded-lg px-3 py-2 transition-colors',
-                    active ? 'bg-brasa text-acero-950' : 'hover:bg-white/[0.06]',
+                    active ? 'bg-brasa text-acero-950' : 'hover:bg-velo/[0.06]',
                   )}
                 >
                   <span className="flex items-center justify-between gap-2">

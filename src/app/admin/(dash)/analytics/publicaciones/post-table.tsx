@@ -163,12 +163,12 @@ export function PostTable({
           <tr className={cn(compacta && 'hidden sm:table-row')}>
             <td aria-hidden />
             <th scope="colgroup" colSpan={deLaRed} className="pb-1 text-right font-normal">
-              <span className="border-b border-white/[0.08] pb-0.5 font-mono text-[0.6rem] uppercase tracking-[0.14em] text-fg-faint">
+              <span className="border-b border-velo/[0.08] pb-0.5 font-mono text-[0.6rem] uppercase tracking-[0.14em] text-fg-faint">
                 En la red
               </span>
             </th>
             <th scope="colgroup" colSpan={nuestras} className="pb-1 text-right font-normal">
-              <span className="border-b border-white/[0.08] pb-0.5 font-mono text-[0.6rem] uppercase tracking-[0.14em] text-fg-faint">
+              <span className="border-b border-velo/[0.08] pb-0.5 font-mono text-[0.6rem] uppercase tracking-[0.14em] text-fg-faint">
                 En tu página · lo mide Tu Parrilla
               </span>
             </th>
@@ -214,7 +214,7 @@ export function PostTable({
             <tr
               key={row.id}
               className={cn(
-                'border-t border-white/[0.06]',
+                'border-t border-velo/[0.06]',
                 // A row the network reported nothing about steps back the same way a
                 // deleted one does: it is still true, just not comparable. The page
                 // explains why above the table, so the dimming is not a dead end.
@@ -238,7 +238,7 @@ export function PostTable({
                       />
                     </span>
                   ) : (
-                    <span className="corte-mini h-9 w-9 shrink-0 bg-white/[0.06]" aria-hidden />
+                    <span className="corte-mini h-9 w-9 shrink-0 bg-velo/[0.06]" aria-hidden />
                   )}
                   <div className="min-w-0">
                     {/* Sin prefetch: son hasta doscientas filas (ver `docs/pendientes.md`). */}
@@ -336,7 +336,7 @@ export function PostTable({
         </tbody>
       </table>
       {hidden > 0 || expanded ? (
-        <div className="border-t border-white/[0.06] pt-2 text-center">
+        <div className="border-t border-velo/[0.06] pt-2 text-center">
           <button
             type="button"
             onClick={() => setExpanded(!expanded)}
@@ -457,7 +457,7 @@ function CampaignCell({ postId, campaign, baseEnlace }: { postId: string; campai
             if (event.key === 'Enter') save()
             if (event.key === 'Escape') cancel()
           }}
-          className="w-36 rounded bg-white/[0.08] px-1 py-0.5 font-mono text-[0.65rem] text-fg outline-none"
+          className="w-36 rounded bg-velo/[0.08] px-1 py-0.5 font-mono text-[0.65rem] text-fg outline-none"
         />
       ) : (
         <button
@@ -465,7 +465,7 @@ function CampaignCell({ postId, campaign, baseEnlace }: { postId: string; campai
           onClick={startEditing}
           disabled={pending}
           title="Editar la etiqueta"
-          className="rounded bg-white/[0.06] px-1.5 py-0.5 font-mono text-[0.65rem] text-fg-muted transition-colors hover:text-fg"
+          className="rounded bg-velo/[0.06] px-1.5 py-0.5 font-mono text-[0.65rem] text-fg-muted transition-colors hover:text-fg"
         >
           ?s={value}
         </button>

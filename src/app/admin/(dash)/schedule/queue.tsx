@@ -61,7 +61,7 @@ export function Queue({
         <li
           key={post.id}
           data-recien={post.id === recien ? '' : undefined}
-          className={cn('flex items-start gap-3 rounded-xl bg-white/[0.03] p-4', post.id === recien && 'recien')}
+          className={cn('flex items-start gap-3 rounded-xl bg-velo/[0.03] p-4', post.id === recien && 'recien')}
         >
           {/* El corte chico, como en «Se quemó»: la lista se lee igual que el calendario. El
               margen deja asomar la banderita de lo quemado sin taparla. */}
@@ -137,7 +137,7 @@ export function Queue({
                   target.status === 'published' && 'bg-positive/15 text-positive',
                   target.status === 'failed' && 'bg-negative/15 text-negative',
                   (target.status === 'scheduled' || target.status === 'publishing') &&
-                    'bg-white/[0.08] text-fg-muted',
+                    'bg-velo/[0.08] text-fg-muted',
                 )}
               >
                 <Redes targets={[target]} detalle />
@@ -153,7 +153,7 @@ export function Queue({
       ))}
       </ul>
       {ocultos > 0 ? (
-        <div className="mt-3 border-t border-white/[0.06] pt-2 text-center">
+        <div className="mt-3 border-t border-velo/[0.06] pt-2 text-center">
           <button
             type="button"
             onClick={() => setExpanded(!expanded)}

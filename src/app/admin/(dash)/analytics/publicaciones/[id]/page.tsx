@@ -156,8 +156,8 @@ export default async function PiezaPage({
                 <tr
                   key={v.clave}
                   className={cn(
-                    'border-t border-white/[0.06] align-top',
-                    v.socialPostId === pieza.abierta.id && 'bg-white/[0.03]',
+                    'border-t border-velo/[0.06] align-top',
+                    v.socialPostId === pieza.abierta.id && 'bg-velo/[0.03]',
                     v.fila?.archived && 'opacity-50',
                   )}
                 >

@@ -267,7 +267,7 @@ export default async function MejoresPage({ searchParams }: { searchParams: Prom
                       <Image src={m.fila.thumbnailUrl} alt="" width={40} height={40} unoptimized className="h-10 w-10 object-cover" />
                     </span>
                   ) : (
-                    <span className="corte-mini h-10 w-10 shrink-0 bg-white/[0.06]" aria-hidden />
+                    <span className="corte-mini h-10 w-10 shrink-0 bg-velo/[0.06]" aria-hidden />
                   )}
                   <div className="min-w-0 flex-1">
                     {/* Sin prefetch, como en Tus publicaciones (ver `docs/pendientes.md`). */}
@@ -351,7 +351,7 @@ export default async function MejoresPage({ searchParams }: { searchParams: Prom
               </thead>
               <tbody>
                 {medianas.map((fila) => (
-                  <tr key={fila.campo} className="border-t border-white/[0.06]">
+                  <tr key={fila.campo} className="border-t border-velo/[0.06]">
                     <td className="py-2 pr-3 text-fg-muted">{fila.nombre}</td>
                     <td className="py-2 pl-3 text-right font-mono tabular-nums">{fila.formato(r.medianas.grupo[fila.campo])}</td>
                     <td className="py-2 pl-3 text-right font-mono tabular-nums">{fila.formato(r.medianas.resto[fila.campo])}</td>

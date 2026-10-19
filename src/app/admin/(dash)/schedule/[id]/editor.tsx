@@ -172,7 +172,7 @@ export function Editor({
             {kept.length > 0 ? (
               <ul className="mb-2 space-y-2">
                 {kept.map((m, index) => (
-                  <li key={m.id} className="flex items-center gap-3 rounded-xl bg-white/[0.04] p-2">
+                  <li key={m.id} className="flex items-center gap-3 rounded-xl bg-velo/[0.04] p-2">
                     <input type="hidden" name="keptMedia" value={m.id} />
                     {m.mediaType === 'image' ? (
                       <Image src={m.blobUrl} alt="" width={48} height={48} unoptimized className="h-12 w-12 shrink-0 rounded object-cover" />
@@ -230,7 +230,7 @@ export function Editor({
           <div>
             <GroupLabel>Portada (solo para video)</GroupLabel>
             {keptCover ? (
-              <div className="mb-2 flex items-center gap-3 rounded-xl bg-white/[0.04] p-2">
+              <div className="mb-2 flex items-center gap-3 rounded-xl bg-velo/[0.04] p-2">
                 <input type="hidden" name="keepPortada" value={keptCover} />
                 <Image src={keptCover} alt="" width={48} height={48} unoptimized className="h-12 w-12 shrink-0 rounded object-cover" />
                 <span className="min-w-0 flex-1 truncate text-xs text-fg-faint">{keptCover}</span>

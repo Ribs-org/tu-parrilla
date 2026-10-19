@@ -51,6 +51,30 @@ export const ORDINAL = ['#86b6ef', '#3987e5', '#184f95'] as const
 export const POSITIVE = '#0ca30c'
 export const NEGATIVE = '#d03b3b'
 
+/**
+ * Lo que pintan los componentes: variables que `.acerado` resuelve según el modo
+ * (`globals.css`), así un gráfico se ve bien de noche y de día sin saber cuál es. Los hexes de
+ * arriba son los de la noche, los que miden los tests (`color.test.ts`, `paleta.test.ts`). Las
+ * ocho series no tienen variable: pasan 3:1 sobre la chapa de los dos modos, y `color.test.ts`
+ * lo comprueba.
+ */
+export const PINTURA = {
+  surface: 'var(--chart-surface)',
+  grid: 'var(--chart-grid)',
+  axis: 'var(--chart-axis)',
+  muted: 'var(--chart-muted)',
+  text: 'var(--chart-text)',
+  secondary: 'var(--chart-secondary)',
+  sube: 'var(--chart-sube)',
+  baja: 'var(--chart-baja)',
+} as const
+
+/** `SEQUENTIAL` como variables: de día va de la chapa al azul hondo, y lo que casi no tiene se pierde igual. */
+export const SECUENCIA: readonly string[] = SEQUENTIAL.map((_, i) => `var(--chart-secuencia-${i})`)
+
+/** `ORDINAL` como variables: de día, el escalón más grande es el más hondo, que es el que más se ve. */
+export const ESCALONES: readonly string[] = ORDINAL.map((_, i) => `var(--chart-escalon-${i})`)
+
 export function seriesColor(index: number): string {
   return SERIES[index % SERIES.length]!
 }

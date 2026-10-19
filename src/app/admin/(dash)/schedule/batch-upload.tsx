@@ -34,7 +34,7 @@ export function BatchUpload({ cerrarHref }: { cerrarHref: string }) {
             </Link>{' '}
             trae el suyo, con botón para copiarlo. Máximo 50 filas.
           </p>
-          <pre className="overflow-x-auto rounded-lg bg-white/[0.06] p-3 text-xs text-fg-muted">{PLANTILLA}</pre>
+          <pre className="overflow-x-auto rounded-lg bg-velo/[0.06] p-3 text-xs text-fg-muted">{PLANTILLA}</pre>
 
           <input type="file" name="archivo" accept=".csv,text/csv" className="block text-sm text-fg-muted" />
 
@@ -43,7 +43,7 @@ export function BatchUpload({ cerrarHref }: { cerrarHref: string }) {
           <button
             type="submit"
             disabled={pending}
-            className="rounded-lg bg-white/[0.1] px-4 py-2 text-sm hover:bg-white/[0.15] disabled:opacity-50"
+            className="rounded-lg bg-velo/[0.1] px-4 py-2 text-sm hover:bg-velo/[0.15] disabled:opacity-50"
           >
             {pending ? 'Cargando…' : 'Cargar lote'}
           </button>

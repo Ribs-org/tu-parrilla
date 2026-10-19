@@ -56,12 +56,12 @@ export default async function ProfilesPage() {
                     {profile.displayName}
                   </h2>
                   {profile.isDefault ? (
-                    <span className="rounded-md bg-white/[0.1] px-1.5 py-0.5 font-mono text-[0.6rem] uppercase tracking-wider text-fg-muted">
+                    <span className="rounded-md bg-velo/[0.1] px-1.5 py-0.5 font-mono text-[0.6rem] uppercase tracking-wider text-fg-muted">
                       principal
                     </span>
                   ) : null}
                   {!profile.isPublished ? (
-                    <span className="rounded-md bg-white/[0.06] px-1.5 py-0.5 font-mono text-[0.6rem] uppercase tracking-wider text-fg-faint">
+                    <span className="rounded-md bg-velo/[0.06] px-1.5 py-0.5 font-mono text-[0.6rem] uppercase tracking-wider text-fg-faint">
                       borrador
                     </span>
                   ) : null}
@@ -79,7 +79,7 @@ export default async function ProfilesPage() {
             <div className="mt-4 flex items-center gap-2">
               <Link
                 href={`/admin/profiles/${profile.id}`}
-                className="rounded-xl bg-white/[0.1] px-3 py-1.5 text-xs font-medium transition-colors hover:bg-white/[0.16]"
+                className="rounded-xl bg-velo/[0.1] px-3 py-1.5 text-xs font-medium transition-colors hover:bg-velo/[0.16]"
               >
                 Editar
               </Link>
@@ -87,7 +87,7 @@ export default async function ProfilesPage() {
                 href={enlacePublicoDe(profile, admin, dominio)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 rounded-xl border border-white/10 px-3 py-1.5 text-xs text-fg-muted transition-colors hover:text-fg"
+                className="inline-flex items-center gap-1 rounded-xl border border-velo/10 px-3 py-1.5 text-xs text-fg-muted transition-colors hover:text-fg"
               >
                 Abrir <ExternalLink className="h-3 w-3" aria-hidden />
               </a>

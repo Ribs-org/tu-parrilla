@@ -34,7 +34,7 @@ export function AccountCards({ cards, nombres = {} }: { cards: AccountCard[]; no
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
       {cards.map((card) => (
-        <div key={card.accountId ?? card.network} className="rounded-2xl bg-white/[0.04] p-4">
+        <div key={card.accountId ?? card.network} className="rounded-2xl bg-velo/[0.04] p-4">
           <p className="font-mono text-[0.65rem] uppercase tracking-[0.14em] text-fg-faint">
             {(card.accountId && nombres[card.accountId]) || networkLabel(card.network)}
           </p>

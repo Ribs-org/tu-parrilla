@@ -4,7 +4,7 @@ import { useActionState, useEffect, useState, useTransition } from 'react'
 import { Check, Copy } from 'lucide-react'
 import { generarLlaveApi, revocarLlaveApi, type LlaveState } from '@/app/admin/actions'
 import { Button, Field, Input, Submit } from '@/components/ui'
-import { POSITIVE } from '@/components/charts/theme'
+import { PINTURA } from '@/components/charts/theme'
 
 /** Lo que dura un acuse de recibo antes de irse solo, como los «Copiado» del panel. */
 const AVISO_MS = 2000
@@ -48,7 +48,7 @@ function BotonCopiar({ texto, children }: { texto: string; children: React.React
       }}
     >
       {copiado ? (
-        <Check className="h-3.5 w-3.5" style={{ color: POSITIVE }} aria-hidden />
+        <Check className="h-3.5 w-3.5" style={{ color: PINTURA.sube }} aria-hidden />
       ) : (
         <Copy className="h-3.5 w-3.5" aria-hidden />
       )}

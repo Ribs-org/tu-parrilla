@@ -2,7 +2,7 @@
 
 import { CartesianGrid, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { formatNumber } from '@/lib/utils'
-import { CHART, SERIES } from './theme'
+import { PINTURA, SERIES } from './theme'
 
 type Punto = { dia: number; a: number | null; b: number | null }
 
@@ -20,7 +20,7 @@ function Tarjeta({
   if (!active || !payload?.length) return null
   const punto = payload[0]?.payload
   return (
-    <div className="rounded-xl border border-white/10 bg-acero-900/95 px-3 py-2 shadow-xl backdrop-blur">
+    <div className="rounded-xl border border-velo/10 bg-acero-900/95 px-3 py-2 shadow-xl backdrop-blur">
       <p className="font-mono text-[0.65rem] uppercase tracking-wider text-fg-faint">
         {punto?.dia === 1 ? '1 día después de publicar' : `${punto?.dia} días después de publicar`}
       </p>
@@ -67,15 +67,15 @@ export function CurvaChart({ puntos, nombres, marca }: { puntos: Punto[]; nombre
       </ul>
       <ResponsiveContainer width="100%" height={240}>
         <LineChart data={puntos} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
-          <CartesianGrid stroke={CHART.grid} vertical={false} />
+          <CartesianGrid stroke={PINTURA.grid} vertical={false} />
           <XAxis
             dataKey="dia"
             type="number"
             domain={[0, 'dataMax']}
             allowDecimals={false}
             tickLine={false}
-            axisLine={{ stroke: CHART.axis }}
-            tick={{ fill: CHART.muted, fontSize: 11 }}
+            axisLine={{ stroke: PINTURA.axis }}
+            tick={{ fill: PINTURA.muted, fontSize: 11 }}
             tickFormatter={(dia: number) => `día ${dia}`}
             minTickGap={24}
           />
@@ -85,15 +85,15 @@ export function CurvaChart({ puntos, nombres, marca }: { puntos: Punto[]; nombre
             width={ejeY}
             allowDecimals={false}
             tickFormatter={(valor: number) => formatNumber(valor)}
-            tick={{ fill: CHART.muted, fontSize: 11 }}
+            tick={{ fill: PINTURA.muted, fontSize: 11 }}
           />
           <ReferenceLine
             x={marca}
-            stroke={CHART.muted}
+            stroke={PINTURA.muted}
             strokeDasharray="3 3"
-            label={{ value: `${marca} días`, fill: CHART.muted, fontSize: 11, position: 'insideTopRight' }}
+            label={{ value: `${marca} días`, fill: PINTURA.muted, fontSize: 11, position: 'insideTopRight' }}
           />
-          <Tooltip cursor={{ stroke: CHART.axis, strokeWidth: 1 }} content={<Tarjeta series={series} />} />
+          <Tooltip cursor={{ stroke: PINTURA.axis, strokeWidth: 1 }} content={<Tarjeta series={series} />} />
           {series.map((s) => (
             <Line
               key={s.key}
@@ -103,7 +103,7 @@ export function CurvaChart({ puntos, nombres, marca }: { puntos: Punto[]; nombre
               stroke={s.color}
               strokeWidth={2}
               dot={{ r: 2, fill: s.color, strokeWidth: 0 }}
-              activeDot={{ r: 4, strokeWidth: 2, stroke: CHART.surface }}
+              activeDot={{ r: 4, strokeWidth: 2, stroke: PINTURA.surface }}
               connectNulls
             />
           ))}

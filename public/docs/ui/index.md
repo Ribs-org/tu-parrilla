@@ -49,7 +49,10 @@ Está siempre, fija arriba, en todas las pantallas del panel. De izquierda a der
    (un lector de pantalla lee el botón «Ajustes: en Los Fierros, 1 se enfría»). Sin nada
    que avisar no hay punto. El menú se cierra con Escape, al elegir una entrada o volviendo a
    apretar el botón; un clic afuera no lo cierra.
-4. **«Salir»**, al final, en mayúsculas. Cierra la sesión y deja en la pantalla para entrar con
+4. **El botón del modo**, a la derecha de Ajustes. De noche lleva un sol y dice «Modo día»; de
+   día, una luna y «Modo noche»: muestra el modo al que lleva, no el que está puesto. En
+   pantallas angostas se ve solo el ícono. Ver «El modo día», abajo.
+5. **«Salir»**, al final, en mayúsculas. Cierra la sesión y deja en la pantalla para entrar con
    el correo ([ingresar.md](ingresar.md)).
 
 ## Las pantallas
@@ -151,6 +154,35 @@ Y tres palabras de Los Números que no son del asado pero se confunden:
   en Los Números. Dos posts programados distintos se juntan en una pieza si comparten el
   atributo `pieza`.
 
+## El modo día
+
+El panel tiene dos modos. La noche es la de entrada: el acero oscuro, los cortes de carne y el
+fuego, como los describen todas las páginas de esta wiki. El día es lo mismo con otro plato: el
+fondo claro, color papel de arroz, y piezas de sushi en vez de cortes de carne. Se cambia con el
+botón del modo de la barra de arriba, y el panel lo recuerda en ese equipo: la próxima vez entra
+en el mismo modo. La pantalla para entrar con el correo también lo sigue. No cambian las páginas
+legales, el 404, la portada ni la página pública de cada creador; tampoco la vista previa de La
+Vitrina, que es esa página. La app del teléfono, por ahora, solo tiene la noche.
+
+**Las palabras no cambian.** De día, los botones, los títulos, los estados y los mensajes dicen
+lo mismo que de noche («La Parrilla», «Programada», «Se quemó»). Lo que cambia son los dibujos. Si
+la persona describe lo que ve de día, esta es la equivalencia con lo que dicen las páginas:
+
+| Lo que dicen las páginas (de noche) | Lo que se ve de día | Qué quiere decir |
+|---|---|---|
+| Una entraña | Un nigiri de salmón | Un video |
+| Una tira de asado, un hueso por archivo | Un maki, una rodaja por archivo | Un carrusel |
+| Un bife | Un sashimi: tres láminas sobre una hoja verde, con wasabi | Una foto |
+| Un chori | Un temaki: un cono rosado | Un texto, sin archivos |
+| La carne cruda, sellada, a punto, quemada | El pescado crudo, dorado, tostado, carbón | Programada, saliendo ahora, publicada, falló |
+| Una marca del fierro por destino | Una banda de alga oscura (nori) por destino | Cómo le fue a cada red |
+| El humo | Una llama azul de soplete, encima de la pieza | Está saliendo ahora |
+| El halo rojo y la banderita | Iguales | Se quemó |
+| La parrilla fría | La tabla vacía, sin color | Un día sin nada |
+| El fuego del día | Un tono salmón que sube desde abajo | Un día con uno o dos cortes, o lleno |
+| El naranjo de lo activo (la pestaña, los botones llenos) | Un salmón tostado, más oscuro | Lo mismo |
+| El fierro encendido, en naranjo | La misma barra, en salmón tostado | La conexión está viva |
+
 ## Lo que no existe (no la mandes a buscarlo)
 
 - **Registro abierto.** Solo entra quien invitó el admin, desde Los Maestros.
@@ -173,6 +205,10 @@ Sale de:
 
 - `src/app/admin/(dash)/layout.tsx` y `src/app/admin/(dash)/nav.tsx`: la barra, las pestañas,
   el botón «Ajustes» y «Salir». El ícono de Ajustes, en `src/components/icono-ajustes.tsx`.
+- El modo día: el botón, en `src/components/boton-tema.tsx`; el modo y su cookie, en
+  `src/lib/tema.ts` y `src/lib/tema-servidor.ts`; las piezas de sushi, en
+  `src/components/pieza-sushi.tsx`; los colores, en `src/app/globals.css`
+  (`.acerado[data-tema='dia']`).
 - `src/app/admin/(dash)/page.tsx`: `/admin` lleva a La Parrilla.
 - `src/app/admin/(dash)/content/page.tsx`: la dirección de la antigua pestaña Los Cortes lleva a
   «Tus publicaciones», dentro de Los Números.

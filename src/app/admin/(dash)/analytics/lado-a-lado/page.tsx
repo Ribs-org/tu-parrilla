@@ -104,10 +104,10 @@ function Ficha({
               width={128}
               height={228}
               unoptimized
-              className="aspect-[9/16] w-full rounded-lg bg-white/[0.06] object-cover"
+              className="aspect-[9/16] w-full rounded-lg bg-velo/[0.06] object-cover"
             />
           ) : (
-            <div className="flex aspect-[9/16] w-full items-center justify-center rounded-lg bg-white/[0.06] px-2 text-center text-[0.7rem] text-fg-faint">
+            <div className="flex aspect-[9/16] w-full items-center justify-center rounded-lg bg-velo/[0.06] px-2 text-center text-[0.7rem] text-fg-faint">
               Sin portada
             </div>
           )}
@@ -389,7 +389,7 @@ export default async function LadoALadoPage({ searchParams }: { searchParams: Pr
                   </thead>
                   <tbody>
                     {atributos.map((fila) => (
-                      <tr key={fila.clave} className="border-t border-white/[0.06]">
+                      <tr key={fila.clave} className="border-t border-velo/[0.06]">
                         <td className="py-2 pr-3 text-fg-muted">{fila.clave}</td>
                         <td className={cn('py-2 pl-3 font-mono text-[0.8rem]', fila.igual ? 'text-fg' : 'text-brasa')}>{fila.a}</td>
                         <td className={cn('py-2 pl-3 font-mono text-[0.8rem]', fila.igual ? 'text-fg' : 'text-brasa')}>{fila.b}</td>
@@ -424,7 +424,7 @@ export default async function LadoALadoPage({ searchParams }: { searchParams: Pr
                           title={m.fila.caption || `?s=${m.fila.campaign}`}
                           className={cn(
                             'block overflow-hidden rounded-lg border-2 transition-colors',
-                            m.fila.id === lado.elegida ? 'border-brasa' : 'border-transparent hover:border-white/20',
+                            m.fila.id === lado.elegida ? 'border-brasa' : 'border-transparent hover:border-velo/20',
                           )}
                         >
                           {m.fila.thumbnailUrl ? (
@@ -434,10 +434,10 @@ export default async function LadoALadoPage({ searchParams }: { searchParams: Pr
                               width={120}
                               height={150}
                               unoptimized
-                              className="aspect-[4/5] w-full bg-white/[0.06] object-cover"
+                              className="aspect-[4/5] w-full bg-velo/[0.06] object-cover"
                             />
                           ) : (
-                            <span className="block aspect-[4/5] w-full bg-white/[0.06]" aria-hidden />
+                            <span className="block aspect-[4/5] w-full bg-velo/[0.06]" aria-hidden />
                           )}
                         </Link>
                         <p className="mt-1 text-center font-mono text-[0.7rem] tabular-nums text-fg-muted">

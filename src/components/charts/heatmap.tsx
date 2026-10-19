@@ -1,15 +1,15 @@
 import type { HeatCell } from '@/lib/analytics'
-import { SEQUENTIAL } from './theme'
+import { SECUENCIA } from './theme'
 import { Empty } from './panel'
 
 const DAYS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
 
 /** Bucket a value onto the sequential ramp; zero always reads as the plane. */
 function step(value: number, max: number): string {
-  if (value === 0) return SEQUENTIAL[0]!
+  if (value === 0) return SECUENCIA[0]!
   const ratio = value / max
-  const index = Math.min(SEQUENTIAL.length - 1, 1 + Math.floor(ratio * (SEQUENTIAL.length - 1)))
-  return SEQUENTIAL[index]!
+  const index = Math.min(SECUENCIA.length - 1, 1 + Math.floor(ratio * (SECUENCIA.length - 1)))
+  return SECUENCIA[index]!
 }
 
 export function Heatmap({ cells }: { cells: HeatCell[] }) {
@@ -52,7 +52,7 @@ export function Heatmap({ cells }: { cells: HeatCell[] }) {
 
         <div className="mt-3 flex items-center gap-2 pl-9">
           <span className="font-mono text-[0.6rem] text-fg-faint">0</span>
-          {SEQUENTIAL.map((color) => (
+          {SECUENCIA.map((color) => (
             <span key={color} className="h-2.5 w-5 rounded-[2px]" style={{ background: color }} />
           ))}
           <span className="font-mono text-[0.6rem] text-fg-faint">{max}</span>
