@@ -221,21 +221,23 @@ una luna de día (`src/components/boton-tema.tsx`). Muestra el modo al que lleva
 a otro lugar, y no el que está puesto. Se nombra «Modo día» o «Modo noche», según adonde lleve.
 En pantallas angostas, solo el ícono: la barra ya lleva las pestañas y Ajustes.
 
-**Cómo se recuerda.** Con una cookie, `tp-tema`, que vale `dia` o `noche` y dura un año.
-- **Sin parpadeo.** El layout del panel la lee en el servidor y escribe `data-tema` en el
-  contenedor `.acerado`, así el primer cuadro ya sale en el modo elegido, sin un destello de
-  noche al cargar.
-- **Sin recargar.** Al apretar el botón, cambia el atributo en el momento.
-- **También en la puerta.** `ingresar` lee la misma cookie: quien eligió el día no vuelve a la
-  noche al entrar.
+**Cómo se recuerda.** En la cuenta, `users.tema` (`noche` por defecto), para que el teléfono y
+el panel vayan juntos: lo decidió el dueño el 2026-10-19 (ver «Decisiones»). La primera vuelta
+lo guardó solo en el equipo, con una cookie.
+- **Sin parpadeo.** El layout del panel lo lee de la cuenta en el servidor y escribe `data-tema`
+  en el contenedor `.acerado`, así el primer cuadro ya sale en el modo elegido, sin un destello
+  de noche al cargar.
+- **Sin recargar.** Al apretar el botón, cambia el atributo en el momento, y después lo guarda
+  en la cuenta (`guardarTema`, una acción del servidor que no vuelve a dibujar la página).
+- **El teléfono** lo lee y lo cambia con `GET`/`PUT /api/mobile/tema`.
+- **La puerta, con una cookie.** `ingresar` se dibuja antes de saber de quién es, así que lee
+  `tp-tema`, la copia del modo en ese equipo, que dura un año. La escribe el botón al cambiar, y
+  al cargar el panel la pone al día si la cuenta cambió en otro lado. Lo mismo el color de la
+  barra del navegador: sale de la cookie, para no leer la base dos veces por página.
 - **Lo que sigue de noche:**
   - **las páginas legales y el 404:** son públicas, sirven igual en el dominio de un creador y no
     vale la pena que dejen de ser estáticas;
   - **la pantalla de error de la puerta:** se dibuja en el navegador, sin la cookie a mano.
-
-**Por equipo y no por cuenta**, en esta primera vuelta: no pide migración ni API, y el panel no
-sabe del teléfono. El dueño decidió el 2026-10-19 que el modo pase a la cuenta, para que el
-teléfono y el panel vayan juntos (ver «Decisiones»).
 
 **Cómo cambia el dibujo.** Cada corte dibuja las dos versiones y el CSS esconde la que no va
 (`[data-tema='dia'] .solo-noche`). La otra opción era un contexto de React con el modo.
@@ -283,7 +285,9 @@ panel de día con sus piezas de sushi.
 - los fierros, la miniatura y las barras de views en salmón.
 
 **Tanda 3, la app del teléfono (2 a 3 días, por aire).**
-- **El modo:** un modo guardado en el teléfono, con el mismo botón en Ajustes.
+- **El modo:** el de la cuenta, que la app lee y cambia con `/api/mobile/tema` (hecho el
+  2026-10-19), con el mismo botón en Ajustes. Guardado también en el teléfono, para abrir en el
+  modo de la última vez sin esperar a la red.
 - **Las piezas:** dibujadas con vistas, como hoy los cortes (`mobile/src/components/pieza.tsx`).
   Las curvas finas esperan a `react-native-svg`, que pide un build nativo (tanda 6 de la
   auditoría).
@@ -337,8 +341,8 @@ Las dos primeras las tomó el dueño el 2026-10-19.
    - **Lo que no cambia:** el ícono de la app y el favicon. Son la marca, y cambiarlos pide
      pasar otra vez por las tiendas.
 2. **El modo, por equipo o por cuenta.**
-   - **Decidido:** por cuenta, para que el teléfono y el panel vayan juntos. Va antes de la
-     tanda 3, que lo necesita.
+   - **Decidido:** por cuenta, para que el teléfono y el panel vayan juntos. Hecho el
+     2026-10-19, antes de la tanda 3, que lo necesita (ver «El interruptor»).
    - **La primera vuelta** lo guardó por equipo, con la cookie: no pedía migración ni API.
 3. **Seguir el modo del sistema si nunca se eligió.**
    - **Recomendación:** no. Pediste la noche por defecto, y el que llega de día con el

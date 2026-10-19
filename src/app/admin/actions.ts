@@ -64,6 +64,7 @@ import { esReservado } from '@/lib/slugs'
 import { cerrarSesiones, esChoqueDeUnicidad, invitar, pedir, quitar } from '@/lib/usuarios'
 import { fromZonedInput, normalizeUrl, slugify } from '@/lib/utils'
 import { ZONA_INVALIDA, esZonaValida } from '@/lib/zona'
+import { temaDe, type Tema } from '@/lib/tema'
 
 /**
  * Lo que devuelve una acción de formulario. `id` es el del post recién programado: con él, el
@@ -1425,6 +1426,23 @@ export async function guardarCuenta(_prev: FormState, formData: FormData): Promi
   revalidatePath('/admin')
   revalidatePath('/admin/cuenta')
   return { ok: true }
+}
+
+/**
+ * El modo del panel, en la cuenta: lo llama el botón del modo (`boton-tema.tsx`) después de
+ * cambiar el dibujo en el momento, y vale también en la app del teléfono. Escribe su propia
+ * fila de `users`, como `guardarCuenta`, con el id de la sesión. Lo que llega se valida: una
+ * acción del servidor se puede llamar con cualquier cosa, y lo que no es el día es la noche.
+ *
+ * No toca la cookie del equipo ni revalida nada: el botón ya escribió la cookie y el dibujo, y
+ * una cookie escrita acá haría que Next volviera a dibujar la página entera.
+ */
+export async function guardarTema(tema: Tema): Promise<void> {
+  const usuario = await requireUser()
+  await getDb()
+    .update(users)
+    .set({ tema: temaDe(typeof tema === 'string' ? tema : null) })
+    .where(eq(users.id, usuario.id))
 }
 
 /* ------------------------------------------------------------ llaves de API -- */
