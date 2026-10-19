@@ -61,12 +61,15 @@ export default async function PiezaPage({
   const programados = new Set(versiones.map((v) => v.scheduledPostId).filter(Boolean)).size
 
   // Vuelve a donde se entró: el tablero marca sus enlaces con `de=numeros`, y «Tu mejor
-  // 10 %» con `de=mejores`; sin marca, a Tus publicaciones.
+  // 10 %» con `de=mejores` (y su lado, si era «Lo peor»); sin marca, a Tus publicaciones.
   const vuelta =
     query.de === 'numeros'
       ? { ruta: '/admin/analytics', texto: nombreDe('/admin/analytics') }
       : query.de === 'mejores'
-        ? { ruta: '/admin/analytics/mejores', texto: `Tu mejor ${leerPercentil(typeof query.percentil === 'string' ? query.percentil : null) ?? PERCENTIL_POR_DEFECTO} %` }
+        ? {
+            ruta: '/admin/analytics/mejores',
+            texto: `Tu ${query.lado === 'peor' ? 'peor' : 'mejor'} ${leerPercentil(typeof query.percentil === 'string' ? query.percentil : null) ?? PERCENTIL_POR_DEFECTO} %`,
+          }
         : { ruta: '/admin/analytics/publicaciones', texto: 'Tus publicaciones' }
   const aqui = numerosHref(`/admin/analytics/publicaciones/${pieza.abierta.id}`, query, {})
   const fecha = new Intl.DateTimeFormat('es', {

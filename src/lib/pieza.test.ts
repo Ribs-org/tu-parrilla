@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { contraSuCuenta } from './igual-edad'
 import {
   claveElegida,
   clavePieza,
@@ -11,6 +12,9 @@ import {
 } from './pieza'
 import type { PostRow } from './posts-kpis'
 import type { Atributos } from './social/publish/atributos'
+
+/** Sin lecturas de los 7 días, las dos columnas a igual edad no se saben. */
+const sinIgualEdad = { contraSuCuenta: null, viewsA7Dias: null }
 
 function fila(overrides: Partial<PostRow>): PostRow {
   return {
@@ -28,6 +32,7 @@ function fila(overrides: Partial<PostRow>): PostRow {
     archived: false,
     views: null,
     viewsChange: null,
+    viewsA7Dias: null,
     likesChange: null,
     commentsChange: null,
     sharesChange: null,
@@ -145,9 +150,9 @@ describe('compararPorAtributo', () => {
       'hook',
     )
     expect(filas).toEqual([
-      { valor: 'pregunta', publicaciones: 3, viewsGanadas: 300, visitas: 6, arrastre: 2 },
-      { valor: 'listado', publicaciones: 1, viewsGanadas: 80, visitas: null, arrastre: null },
-      { valor: null, publicaciones: 1, viewsGanadas: 10, visitas: 1, arrastre: 10 },
+      { valor: 'pregunta', publicaciones: 3, ...sinIgualEdad, viewsGanadas: 300, visitas: 6, arrastre: 2 },
+      { valor: 'listado', publicaciones: 1, ...sinIgualEdad, viewsGanadas: 80, visitas: null, arrastre: null },
+      { valor: null, publicaciones: 1, ...sinIgualEdad, viewsGanadas: 10, visitas: 1, arrastre: 10 },
     ])
   })
 
@@ -159,6 +164,37 @@ describe('compararPorAtributo', () => {
       ],
       'tema',
     )
-    expect(unica).toEqual({ valor: 'asado', publicaciones: 2, viewsGanadas: 500, visitas: 11, arrastre: 0.4 })
+    expect(unica).toEqual({ valor: 'asado', publicaciones: 2, ...sinIgualEdad, viewsGanadas: 500, visitas: 11, arrastre: 0.4 })
+  })
+
+  it('a igual edad y contra su cuenta: la vara de cada cuenta es todo lo suyo del período', () => {
+    // Una cuenta chica (normal: 100 a los 7 días) y una grande (normal: 10.000). El hook
+    // «pregunta» duplica lo normal en las dos; en views a secas, la grande lo tapa todo.
+    const chica = (id: string, views: number, hook?: string) => ({
+      atributos: hook ? { hook } : null,
+      fila: fila({ id, accountId: 'chica', viewsA7Dias: views }),
+    })
+    const grande = (id: string, views: number, hook?: string) => ({
+      atributos: hook ? { hook } : null,
+      fila: fila({ id, accountId: 'grande', viewsA7Dias: views }),
+    })
+    const entradas = [
+      chica('c1', 200, 'pregunta'),
+      chica('c2', 100),
+      chica('c3', 100),
+      chica('c4', 100),
+      chica('c5', 50, 'listado'),
+      grande('g1', 20_000, 'pregunta'),
+      grande('g2', 10_000),
+      grande('g3', 10_000),
+      grande('g4', 10_000),
+      grande('g5', 5_000, 'listado'),
+    ]
+    const filas = compararPorAtributo(entradas, 'hook', contraSuCuenta(entradas.map((e) => e.fila)))
+    const de = (valor: string | null) => filas.find((f) => f.valor === valor)!
+    expect(de('pregunta').contraSuCuenta).toBe(2)
+    expect(de('listado').contraSuCuenta).toBe(0.5)
+    expect(de(null).contraSuCuenta).toBe(1)
+    expect(de('pregunta').viewsA7Dias).toBe(10_100)
   })
 })

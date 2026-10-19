@@ -28,6 +28,7 @@ function row(overrides: Partial<PostRow>): PostRow {
     archived: false,
     views: null,
     viewsChange: null,
+    viewsA7Dias: null,
     likesChange: null,
     commentsChange: null,
     sharesChange: null,

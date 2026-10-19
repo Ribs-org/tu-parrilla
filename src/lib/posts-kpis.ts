@@ -48,6 +48,13 @@ export type PostRow = {
   views: number | null
   /** How much each cumulative counter grew inside the period. */
   viewsChange: number | null
+  /**
+   * El contador de views una semana después de publicar: la primera lectura después de
+   * cumplir 7 días, si llegó antes de los 9 (`igual-edad.ts`). Así se comparan publicaciones a
+   * la misma edad. Null si todavía no los cumple, si esos días no se leyó, en YouTube
+   * (`politica-youtube`) y si quien llamó a `getPostRows` no la pidió (`aLos7Dias`).
+   */
+  viewsA7Dias: number | null
   likesChange: number | null
   commentsChange: number | null
   sharesChange: number | null

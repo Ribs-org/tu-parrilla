@@ -208,12 +208,16 @@ programado del que salió y, si sus atributos traen `pieza`, los de todos los po
 programados con el mismo valor: dos hooks del mismo video, o el trial reel y el reel normal
 en una cuenta, son por fuerza dos posts. **Comparar por atributo** (`/admin/analytics/comparar`)
 muestra, para cada valor de un atributo —el hook, el tema, la serie—, cuántas publicaciones
-lo llevan y sus medianas de views ganadas, visitas y arrastre. **Tu mejor 10 %**
-(`/admin/analytics/mejores`) ordena lo publicado en el período por una métrica —views
-ganadas, visitas, clicks, interacciones o arrastre—, muestra el 5, 10, 20 o 25 % de arriba
-con el corte para entrar, sus medianas contra las del resto y lo que se repite más entre
-ellas (un atributo, la red, el formato, el día o la franja horaria); la misma cuenta la hace
-`GET /api/metrics/mejores` para un agente. El porqué del tablero, en
+lo llevan y sus medianas: «contra su cuenta», views a los 7 días, views ganadas, visitas y
+arrastre. **Tu mejor 10 %** (`/admin/analytics/mejores`) ordena lo publicado en el período
+por una métrica, muestra el 5, 10, 20 o 25 % de arriba —o de abajo, con «Lo peor»— con el
+corte para entrar, sus medianas contra las del resto y lo que se repite más entre ellas (un
+atributo, la red, el formato, el día o la franja horaria); la misma cuenta la hace
+`GET /api/metrics/mejores` para un agente. Entra con «contra su cuenta»: las views de cada
+publicación a los 7 días de publicada, divididas por la mediana de su cuenta en el período,
+para comparar mil publicaciones por semana en varias cuentas sin que gane la más vieja ni la
+cuenta más grande (`src/lib/igual-edad.ts`). En las otras métricas, lo publicado hace menos
+de 7 días no compite salvo que se prenda «Con las de menos de 7 días». El porqué del tablero, en
 `docs/superpowers/specs/2026-10-13-numeros-tablero-design.md`.
 
 **Componer** pasa en un panel que se abre desde la derecha con «+ Nueva publicación», sin
@@ -1117,22 +1121,27 @@ permalink, texto, `publicadoEl` (ISO con el offset de la zona del dueño), la et
 `atributos` (o `null` si el post no salió del calendario; en TikTok, también hasta la
 sincronización siguiente a su publicación, que es la que le encuentra el id del video —ver
 `docs/deuda-tecnica.md`, «TikTok: el id del video se recupera por texto y hora»—) y `metricas`: `views`
-(acumulado), `viewsGanadas` (dentro del rango), `likes`, `comentarios`, `compartidos`,
-`alcance`, `visitasAlSitio`, `clicks`, `ctr` y `arrastre`. Un `null` significa que la
-red no reportó ese número — nunca cero. En YouTube, `viewsGanadas` y `arrastre` vienen
-siempre en `null`: sus políticas no permiten calcular métricas nuevas con sus datos (ver
-«Analítica de posts»). `truncado: true` avisa que el tope de filas mordió y la respuesta
+(acumulado), `viewsGanadas` (dentro del rango), `viewsA7Dias` (el contador a la semana de
+publicada), `contraSuCuenta` (eso sobre la mediana de su cuenta en el rango), `likes`,
+`comentarios`, `compartidos`, `alcance`, `visitasAlSitio`, `clicks`, `ctr` y `arrastre`. Un
+`null` significa que la red no reportó ese número — nunca cero. En YouTube, `viewsGanadas`,
+`viewsA7Dias`, `contraSuCuenta` y `arrastre` vienen siempre en `null`: sus políticas no
+permiten calcular métricas nuevas con sus datos (ver «Analítica de posts»). `truncado: true` avisa que el tope de filas mordió y la respuesta
 es parcial.
 
 Las métricas las trae la sincronización diaria, así que lo publicado hoy aparece con
 números recién al día siguiente.
 
 `GET /api/metrics/mejores`, con los mismos parámetros más `metrica` (`viewsGanadas` por
-defecto, `visitas`, `clicks`, `interacciones` o `arrastre`) y `percentil` (entero de 1 a 50,
-10 por defecto), devuelve el mejor X % de lo publicado en el rango: el corte para entrar,
-cuántas compiten, las de arriba con sus métricas, las medianas de arriba contra las del
-resto y lo que se repite más entre las de arriba. Las mismas reglas que la pantalla «Tu
-mejor 10 %»; la lógica, sin base, está en `src/lib/mejores.ts`.
+defecto, `contraSuCuenta`, `viewsA7Dias`, `visitas`, `clicks`, `interacciones` o
+`arrastre`), `percentil` (entero de 1 a 50, 10 por defecto), `lado` (`mejor` por defecto, o
+`peor`) y `recientes` (`si` por defecto, o `no` para dejar fuera lo de menos de 7 días),
+devuelve el mejor (o el peor) X % de lo publicado en el rango: el corte para entrar, cuántas
+compiten, las del grupo con sus métricas, las medianas del grupo contra las del resto y lo
+que se repite más en el grupo. Lee hasta 10.000 publicaciones, como la pantalla, porque
+responde solo el grupo. Las mismas reglas que la pantalla «Tu mejor 10 %», salvo lo que esta
+cambió por defecto (la métrica y las recientes), que en la API sigue como antes para no
+moverle la respuesta a quien ya la usa; la lógica, sin base, está en `src/lib/mejores.ts`.
 
 ### Calendario por API
 
@@ -1198,7 +1207,8 @@ src/
     analytics.ts           consultas del dashboard
     tablero.ts             las reglas de Los Números sin base: cuenta elegida, «⋯ Más» abiertos, la URL
     pieza.ts               qué junta las versiones de una pieza y las medianas por atributo (sin base)
-    mejores.ts             el mejor X % de lo publicado: el corte, las medianas y lo que se repite (sin base)
+    mejores.ts             el mejor (o el peor) X % de lo publicado: el corte, las medianas y lo que se repite (sin base)
+    igual-edad.ts          comparar a la misma edad y contra la propia cuenta: los 7 días y «contra su cuenta» (sin base)
     metrics-consulta.ts    lo que comparten las rutas de /api/metrics: la llave, el rango, la red y la cuenta
     piezas.ts              la pieza de una publicación: sus destinos programados unidos a lo publicado
     auth.ts                sesión del panel
