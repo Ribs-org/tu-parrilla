@@ -1,7 +1,9 @@
 import { requireUser } from '@/lib/auth'
 import { getCuentas } from '@/lib/posts'
 import { env } from '@/lib/env'
+import { ayudaDeConexion } from '@/lib/social/ayuda-conexion'
 import { Encabezado } from '@/components/ui'
+import { AvisoDeConexion } from './aviso-de-conexion'
 import { Cuentas } from './cuentas'
 
 export const dynamic = 'force-dynamic'
@@ -22,11 +24,9 @@ export default async function AccountsPage({
       <header className="mb-6">
         <Encabezado ruta="/admin/accounts" />
       </header>
-      {mensaje ? (
-        <p role="status" className="mb-4 rounded-xl bg-velo/[0.04] px-4 py-2 text-sm text-fg-muted">
-          {mensaje}
-        </p>
-      ) : null}
+      {/* La ayuda se arma acá, en el servidor: sus frases vienen de los conectores de Meta, que
+          no viajan al navegador. */}
+      {mensaje ? <AvisoDeConexion mensaje={mensaje} ayuda={ayudaDeConexion(mensaje)} /> : null}
       <Cuentas rows={cuentas} metaEnRevision={metaEnRevision} />
     </>
   )

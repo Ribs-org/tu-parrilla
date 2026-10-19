@@ -410,6 +410,10 @@ export async function GET(
   const state = url.searchParams.get('state')
 
   const back = (message: string) => {
+    // La frase queda también en el registro: la dirección de vuelta no se registra, y sin esto
+    // ayudar a alguien que no pudo conectar empieza por preguntarle qué vio. Son frases nuestras,
+    // sin tokens.
+    console.warn(`Conexión de ${network} sin terminar: ${message}`)
     const fallo = NextResponse.redirect(`${url.origin}/admin/accounts?mensaje=${encodeURIComponent(message)}`)
     // Un login que falló tampoco puede dejar una elección anterior viva: esa cookie
     // mantendría alcanzable un selector abandonado durante sus diez minutos.
