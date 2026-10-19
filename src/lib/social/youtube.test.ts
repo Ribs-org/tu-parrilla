@@ -55,3 +55,58 @@ describe('youtubeConnector.ensureCredential', () => {
     expect(await youtubeConnector.ensureCredential(cuenta(null))).toBeNull()
   })
 })
+
+describe('youtubeConnector, por ventana y por id', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  const canal = { externalId: 'UC-1' } as SocialAccount
+
+  it('lista mientras la fecha de publicación de la playlist siga en la ventana', async () => {
+    let paginas = 0
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => {
+        if (url.includes('/channels')) {
+          return Response.json({ items: [{ contentDetails: { relatedPlaylists: { uploads: 'UU-1' } } }] })
+        }
+        if (url.includes('/videos')) {
+          const ids = new URL(url).searchParams.get('id')!.split(',')
+          return Response.json({ items: ids.map((id) => ({ id, statistics: { viewCount: '5' } })) })
+        }
+        const dia = paginas++
+        const items = Array.from({ length: 50 }, (_, i) => ({
+          contentDetails: { videoId: `${dia}-${i}`, videoPublishedAt: new Date(Date.UTC(2026, 9, 20 - dia)).toISOString() },
+        }))
+        return Response.json({ items, nextPageToken: `t${paginas}` })
+      }),
+    )
+    const { posts, windowWasCapped } = await youtubeConnector.fetchPosts(canal, 'AIza', {
+      desde: new Date(Date.UTC(2026, 9, 15)),
+    })
+    // Del 20 al 15 son seis páginas; la séptima (del 14) dice que se pasó.
+    expect(paginas).toBe(7)
+    expect(posts).toHaveLength(350)
+    expect(windowWasCapped).toBe(true)
+  })
+
+  it('por id: de a 50 en videos.list, y lo privado o borrado simplemente no vuelve', async () => {
+    const pedidos: number[] = []
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => {
+        const ids = new URL(url).searchParams.get('id')!.split(',')
+        pedidos.push(ids.length)
+        return Response.json({
+          items: ids.filter((id) => id !== 'v7').map((id) => ({ id, statistics: { viewCount: '12' } })),
+        })
+      }),
+    )
+    const ids = Array.from({ length: 60 }, (_, i) => `v${i}`)
+    const metricas = await youtubeConnector.fetchMetricsById!(canal, 'AIza', ids)
+    expect(pedidos).toEqual([50, 10])
+    expect(metricas.size).toBe(59)
+    expect(metricas.get('v0')!.views).toBe(12)
+  })
+})

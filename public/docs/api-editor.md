@@ -495,7 +495,11 @@ parte el rango en trozos más chicos.
    el 30 de agosto que explota el 5 de septiembre aparece en una consulta de *agosto*
    (con sus views ganadas dentro del rango que pidas), no en una de septiembre.
 2. **Las métricas llegan con la sincronización diaria.** Lo publicado hoy tendrá
-   números recién mañana. No concluyas nada de un post de hace dos horas.
+   números recién mañana. No concluyas nada de un post de hace dos horas. Y lo viejo se
+   lee menos seguido: una publicación de los últimos 10 días se lee todos los días; una
+   más vieja, una vez por semana hasta el mes, cada dos semanas hasta los tres meses y
+   cada cuatro después. Sus números pueden ir hasta esas semanas atrás de lo que muestra
+   la red.
 
 ---
 

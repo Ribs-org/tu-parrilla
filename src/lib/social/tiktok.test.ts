@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import fixture from './fixtures/tiktok-videos.json'
-import { normalizeTikTokVideo, type TikTokVideo } from './tiktok'
+import { normalizeTikTokVideo, tiktokConnector, type TikTokVideo } from './tiktok'
 
 const [video, fresh] = fixture.data.videos as TikTokVideo[]
 
@@ -42,5 +42,36 @@ describe('normalizeTikTokVideo', () => {
 
   it('trata el título vacío como sin caption', () => {
     expect(normalizeTikTokVideo(fresh!).caption).toBeNull()
+  })
+})
+
+describe('tiktokConnector.fetchMetricsById', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('pide de a 20 ids a video/query, y lo que no vuelve (borrado) no está en el mapa', async () => {
+    const pedidos: string[][] = []
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string, init: RequestInit) => {
+        expect(url).toContain('/video/query/')
+        const ids = (JSON.parse(String(init.body)) as { filters: { video_ids: string[] } }).filters.video_ids
+        pedidos.push(ids)
+        const videos = ids.filter((id) => id !== 'v3').map((id) => ({ id, view_count: 10 }))
+        return Response.json({ data: { videos } })
+      }),
+    )
+    const ids = Array.from({ length: 25 }, (_, i) => `v${i}`)
+    const metricas = await tiktokConnector.fetchMetricsById!({} as never, 'token', ids)
+    expect(pedidos.map((p) => p.length)).toEqual([20, 5])
+    expect(metricas.size).toBe(24)
+    expect(metricas.has('v3')).toBe(false)
+    expect(metricas.get('v0')!.views).toBe(10)
+  })
+
+  it('una respuesta que no es 2xx sube', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => new Response('limit', { status: 429 })))
+    await expect(tiktokConnector.fetchMetricsById!({} as never, 'token', ['v0'])).rejects.toThrow('TikTok 429')
   })
 })

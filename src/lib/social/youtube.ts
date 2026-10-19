@@ -1,15 +1,17 @@
 import type { SocialAccount } from '@/db'
 import { env } from '../env'
 import {
-  MAX_POSTS_PER_SYNC,
   NO_ACCOUNT_METRICS,
   NO_METRICS,
   type AccountMetricValues,
   type Connector,
   type FetchedBatch,
   type FetchedPost,
+  type OpcionesDeListado,
+  type PostMetricValues,
 } from './connector'
 import { normalizeYoutubeAccount } from './account-metrics'
+import { laMasVieja, sigueListando } from './lectura'
 
 export type YouTubeVideo = {
   id: string
@@ -98,7 +100,7 @@ export const youtubeConnector: Connector = {
     return env('YOUTUBE_API_KEY') ?? null
   },
 
-  async fetchPosts(account: SocialAccount, token: string | null): Promise<FetchedBatch> {
+  async fetchPosts(account: SocialAccount, token: string | null, opciones?: OpcionesDeListado): Promise<FetchedBatch> {
     const apiKey = token
     const channelId = account.externalId ?? env('YOUTUBE_CHANNEL_ID')
     if (!apiKey || !channelId) return { posts: [], windowWasCapped: false }
@@ -108,21 +110,26 @@ export const youtubeConnector: Connector = {
     let pageToken = ''
     let pagesFetched = 0
     let moreToPage = false
+    let masVieja: Date | null = null
 
-    while (ids.length < MAX_POSTS_PER_SYNC && pagesFetched < MAX_PLAYLIST_PAGES) {
+    while (pagesFetched < MAX_PLAYLIST_PAGES && sigueListando(ids.length, masVieja, opciones?.desde)) {
       const page = (await getJson(
         `https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails` +
           `&playlistId=${playlist}&maxResults=${PAGE_SIZE}&key=${apiKey}` +
           (pageToken ? `&pageToken=${pageToken}` : ''),
       )) as {
-        items?: Array<{ contentDetails?: { videoId?: string } }>
+        items?: Array<{ contentDetails?: { videoId?: string; videoPublishedAt?: string } }>
         nextPageToken?: string
       }
       pagesFetched++
 
       for (const item of page.items ?? []) {
-        if (ids.length >= MAX_POSTS_PER_SYNC) break
-        if (item.contentDetails?.videoId) ids.push(item.contentDetails.videoId)
+        if (!item.contentDetails?.videoId) continue
+        ids.push(item.contentDetails.videoId)
+        // Un video privado o borrado puede venir sin fecha: no mueve la ventana.
+        if (item.contentDetails.videoPublishedAt) {
+          masVieja = laMasVieja(masVieja, new Date(item.contentDetails.videoPublishedAt))
+        }
       }
       moreToPage = Boolean(page.nextPageToken)
       if (!moreToPage) break
@@ -141,14 +148,25 @@ export const youtubeConnector: Connector = {
       posts.push(...(data.items ?? []).map(normalizeYouTubeVideo))
     }
 
-    // Judged on the ids the playlist handed over, never on `posts.length`. `videos.list`
+    // Judged on the cursor the playlist left, never on `posts.length`. `videos.list`
     // silently omits private and deleted videos, so one unavailable video among the
-    // newest 200 turns a capped window into 199 posts — and a caller counting posts
-    // would read that as an exhaustive fetch and archive the whole back catalogue.
-    return {
-      posts,
-      windowWasCapped: ids.length >= MAX_POSTS_PER_SYNC || moreToPage,
+    // newest 200 turns 200 ids into 199 posts — and a caller counting posts would read
+    // that as an exhaustive fetch and archive the whole back catalogue.
+    return { posts, windowWasCapped: moreToPage }
+  },
+
+  /** `videos.list` con hasta 50 ids por llamada, una unidad de cuota cada una. */
+  async fetchMetricsById(_account: SocialAccount, token: string | null, externalIds: string[]) {
+    const metricas = new Map<string, PostMetricValues>()
+    if (!token) return metricas
+    for (let i = 0; i < externalIds.length; i += PAGE_SIZE) {
+      const batch = externalIds.slice(i, i + PAGE_SIZE).join(',')
+      const data = (await getJson(
+        `https://www.googleapis.com/youtube/v3/videos?part=statistics&id=${batch}&key=${token}`,
+      )) as { items?: YouTubeVideo[] }
+      for (const video of data.items ?? []) metricas.set(video.id, normalizeYouTubeVideo(video).metrics)
     }
+    return metricas
   },
 
   // `ensureCredential` above never hands back the OAuth token — only the read-side API

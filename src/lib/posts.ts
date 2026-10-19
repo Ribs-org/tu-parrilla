@@ -17,7 +17,7 @@ import {
   type PostKpis,
   type PostRow,
 } from './posts-kpis'
-import { periodChange, type Snapshot } from './social/delta'
+import { publicationPeriodChange, type Snapshot } from './social/delta'
 import { REDES_SIN_DERIVADAS, sinMetricasDerivadas } from './social/politica-youtube'
 
 // Re-exported so server call sites only need one import line; the types and the pure
@@ -172,10 +172,12 @@ export async function getPostRows(
     // historia como crecimiento de la ventana que la contiene.
     const publishedDay = localDay(post.publishedAt, f.zone)
 
-    const views = periodChange(snapshotsOf('views'), from, to, publishedDay)
-    const likes = periodChange(snapshotsOf('likes'), from, to, publishedDay)
-    const comments = periodChange(snapshotsOf('comments'), from, to, publishedDay)
-    const shares = periodChange(snapshotsOf('shares'), from, to, publishedDay)
+    // Con la variante de publicaciones: lo viejo se lee espaciado, y una semana sin lectura
+    // no es una publicación sin números (`publicationPeriodChange`).
+    const views = publicationPeriodChange(snapshotsOf('views'), from, to, publishedDay)
+    const likes = publicationPeriodChange(snapshotsOf('likes'), from, to, publishedDay)
+    const comments = publicationPeriodChange(snapshotsOf('comments'), from, to, publishedDay)
+    const shares = publicationPeriodChange(snapshotsOf('shares'), from, to, publishedDay)
     // De YouTube solo salen los contadores tal como los da la API: lo ganado y el
     // arrastre son métricas derivadas, que sus políticas no permiten (`politica-youtube`).
     // Anularlos aquí los saca de todo lo que se construye encima —la tabla, los totales,
@@ -208,8 +210,8 @@ export async function getPostRows(
       likes: likes.current,
       comments: comments.current,
       shares: shares.current,
-      saves: periodChange(snapshotsOf('saves'), from, to).current,
-      reach: periodChange(snapshotsOf('reach'), from, to).current,
+      saves: publicationPeriodChange(snapshotsOf('saves'), from, to).current,
+      reach: publicationPeriodChange(snapshotsOf('reach'), from, to).current,
       visits: visitCount,
       uniques: pasted ? (traffic?.uniques ?? 0) : null,
       clicks: clickCount,

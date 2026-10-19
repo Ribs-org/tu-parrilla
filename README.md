@@ -705,6 +705,24 @@ páginas o cuentas, elige cuáles. El `vercel.json` del repo declara una corrida
 9:00 UTC; Vercel inyecta `CRON_SECRET` solo. También puedes apretar *Sincronizar ahora*
 cuando quieras.
 
+**Qué se lee cada día.** La lectura va por edad, no por cantidad (`src/lib/social/lectura.ts`).
+Lo publicado en los últimos 10 días —y, como mínimo, las 200 publicaciones más nuevas de la
+cuenta— se lista y se lee entero, todos los días. Lo más viejo se pide por su id, cada vez
+más espaciado: una vez por semana hasta los 30 días, cada 14 hasta los 90 y cada 28 después
+(28 y no más, porque la retención de YouTube borra sus lecturas de más de 30 días). Hasta
+octubre de 2026 se leían solo las 200 más recientes de cada cuenta, y con unas 50
+publicaciones diarias lo de la semana anterior quedaba congelado con los números del día en
+que salió de esa ventana. Lo viejo se lee al final y con plazo: 180 segundos desde que
+empieza la corrida, contados para todas las cuentas; lo que no alcanza sigue en la fila al
+día siguiente, de lo más nuevo a lo más viejo, y un error leyéndolo no pinta la cuenta de
+rojo. Lo nuevo no tiene plazo. A unas 50 publicaciones diarias por cuenta, cada red alcanza
+para cinco o seis cuentas así en serie dentro de los 300 segundos del cron; más que eso pide
+partir la corrida.
+
+Una publicación que ya no responde cuando se la pide por id (borrada, casi siempre) se salta
+y nada más: no se archiva, porque la misma respuesta de Meta cubre «sin permiso». Solo se
+archiva lo que falta dentro de lo que el listado alcanzó a ver, como siempre.
+
 **Si una cuenta aparece dos veces —una «Sin credencial» y otra viva—, no es un error tuyo.**
 TikTok, Instagram y Facebook le dan a la misma persona un identificador distinto por cada
 app: al pasar del sandbox a la app real (o al crear una app nueva) la misma cuenta vuelve
@@ -1192,6 +1210,7 @@ src/
     empresa.ts             quién presta el servicio: lo leen la portada, privacidad y términos
     avisos/                la caída de una cuenta y el resumen del día: las reglas sin base y lo que lee y manda
     social/
+      lectura.ts           qué publicaciones se leen cada día: lo nuevo a diario, lo viejo cada vez más espaciado
       politica-youtube.ts  lo que las políticas de YouTube no dejan hacer con sus datos
       retencion-youtube.ts borra lo de YouTube que lleva 30 días sin refrescarse
 public/docs/
