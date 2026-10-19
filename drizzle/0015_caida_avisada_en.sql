@@ -1,0 +1,1 @@
+ALTER TABLE "social_accounts" ADD COLUMN "caida_avisada_en" timestamp with time zone;

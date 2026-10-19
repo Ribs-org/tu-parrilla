@@ -340,11 +340,13 @@ comprobar:
    ocurra de verdad, sin haber apostado antes a una forma adivinada.
 
    Lo que cuesta mientras tanto, dicho sin suavizar: un rechazo definitivo que Meta redacte
-   sin la palabra —una cuenta privada, la cuota diaria— cae en «No se pudo hablar con la
+   sin la palabra —una cuenta privada, por ejemplo— cae en «No se pudo hablar con la
    red. Se reintentará.» y se reintenta hasta tres veces antes de fallar, prometiendo un
    reintento que Meta ya negó. Es el mismo trato que hoy recibe cualquier no-ok en un reel
    normal; el mapeo solo lo estrecha para el único caso que Meta deja reconocer. Cerrarlo
    pide ver el error real una vez, y entonces reconocerlo por su código y no por su texto.
+   La cuota diaria ya no está en este caso: Meta sí documenta su código (9, subcódigo
+   2207042), y `esTopeDiario` la reconoce y la hace esperar sin gastar intentos (2026-10-17).
 
    El rechazo que sí reconoce por texto ya no se reintenta: `createContainer` marca ese
    `failed` con `definitivo: true`, y `resolveOutcome` (`publisher.ts`) lo hace fallar en
@@ -545,8 +547,9 @@ Lo que queda a medias, a propósito:
   ventana se reparten por cercanía en la hora; si TikTok tarda distinto en publicar cada
   uno, pueden quedar cruzados. Un post sin texto solo cruza con un video sin texto a dos
   horas o menos.
-- **Solo ve lo que la sincronización trae**: los videos públicos y dentro de su tope
-  (`MAX_POSTS_PER_SYNC`). Un post que se queda en «Solo yo» no aparece en la lista de videos
+- **Solo ve lo que la sincronización lista**: los videos públicos de los últimos 10 días, o
+  los 200 más nuevos si son más (`src/lib/social/lectura.ts`); lo más viejo se lee por id y
+  no pasa por este cruce. Un post que se queda en «Solo yo» no aparece en la lista de videos
   de TikTok y no se puede recuperar así.
 - **No vuelve a preguntarle a TikTok.** Lo exacto sería seguir consultando `status/fetch`
   con el `publish_id` hasta que llegue el id, pero ese id no se guarda después de publicar y

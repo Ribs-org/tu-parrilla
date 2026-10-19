@@ -137,6 +137,21 @@ Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataf
   `disconnectAccount` y `/privacidad`. Ver `docs/google-verificacion-guion.md`.
 - **[dueño] Vercel Pro antes de abrir a terceros.** El plan Hobby es de uso personal y no
   comercial (`docs/levantamiento-terceros.md` §5).
+- **[dueño] La app en la Play Store, pista de pruebas internas** (2026-10-16). La cuenta de
+  Play Console (personal) y la app existen: está como «Parrilla», `cl.tuparrilla.app`, en
+  borrador. El binario está listo, `tu-parrilla-1.1.0-2.aab` (versión 1.1.0, código 2,
+  salido de `a6bd08f`; nada nativo cambió después, y lo demás le llega por aire en el canal
+  `production`). La versión interna con ese `.aab` se publicó el 2026-10-17, «Tu Parrilla
+  (Alfa)», sin revisar: hasta que Google revise la app, la tienda se la muestra a los
+  probadores como «cl.tuparrilla.app (unreviewed)». Falta, en la consola, lo que pide esa
+  revisión —el nombre «Tu Parrilla» y la ficha, y las tarjetas de Contenido de la app—, y en
+  el teléfono, unirse como probador e instalarla. Para que lo siguiente salga sin entrar a la
+  consola: la cuenta de servicio con
+  su clave JSON para EAS (nunca en un chat ni en el repo) y el secreto `EXPO_TOKEN` en
+  GitHub, que el flujo «App a la tienda» necesita y todavía no está. El paso a paso y los
+  textos, en la carpeta «Google Play» del escritorio de Vicente; el porqué, en
+  `docs/play-store.md`. La tienda pública es otro trámite: una cuenta personal nueva
+  necesita una prueba cerrada con doce probadores durante catorce días.
 - **[dueño] La app en iPhone** (2026-10-16). El código ya está listo para iOS; faltan la
   cuenta del Apple Developer Program, confirmar el identificador `cl.tuparrilla.app`
   (queda fijo al registrarlo), la ficha en App Store Connect y el primer build a
@@ -185,6 +200,24 @@ Nada de esto bloquea un trámite hoy; conviene ordenarlo antes de abrir a tercer
 
 ## Features y trabajo de código
 
+- **Los Números para 1.000 publicaciones por semana** (2026-10-18). Pedido del dueño. La
+  lectura diaria por edad ya está (`src/lib/social/lectura.ts`), y los topes de las pantallas
+  y el rango de fechas a mano van cada uno en su PR; lo demás va en este orden, cada cosa en
+  su PR:
+  1. Comparar a la misma edad («views a los 7 días») y dentro de la misma cuenta («×N sobre
+     lo normal de su cuenta»), con un interruptor para incluir lo que aún no cumple esa
+     edad; «Tu peor 10 %» y el contraste de los de arriba contra los de abajo.
+  2. En las guías de la API, un vocabulario de atributos recomendado y opcional: `tema`,
+     `hook` y `formato`, y los de edición (`color`, `fuente`, `corte`, `musica`,
+     `duracion`). Sin etiquetado automático: decisión del dueño, por el costo.
+  3. Ver lado a lado los de arriba y los de abajo, o dos publicaciones elegidas: portada,
+     atributos, la curva día a día y el link a la red. Sin guardar el video después de
+     publicado: decisión del dueño, para que R2 no crezca.
+- **Un modo día con sushi** (2026-10-18). Pedido del dueño, para después de lo anterior:
+  un modo día donde la parrilla se vuelve sushi —las mismas piezas, con sashimi y compañía
+  en vez de cortes—, para el público que la estética de asado deja fuera. El modo noche, el
+  de hoy, sigue por defecto. Solo interfaz. Antes del código va un diseño extenso, al nivel
+  de `docs/auditoria-ui-2026-10-16.md`.
 - **Llevar el resto de la interfaz al nivel del corte** (2026-10-16). La auditoría de ese
   día propone seis tandas que se publican solas. La primera, lo roto, ya está. Quedan: el
   corte en los flujos (el compositor, la parrilla fría y la carga tibia ya están; faltan La
@@ -260,3 +293,10 @@ Nada de esto bloquea un trámite hoy; conviene ordenarlo antes de abrir a tercer
   credenciales aparte, y cortarlas en silencio rompería su agente). Si una se filtra y el
   usuario no responde, el admin no tiene cómo cortarla sin tocar la base. Opciones: que
   «Cerrar sesiones» también las borre, o una lista de llaves por usuario en Los Maestros.
+- **Por decidir: que los avisos lleguen a quien lleva el calendario** (2026-10-17). El correo
+  de una cuenta caída, el de un post quemado y el resumen del día van al correo del dueño de
+  las cuentas. Si el calendario lo lleva otra persona con la llave del dueño —un agente que
+  programa por la API—, por correo no le llega nada; lo lee en `GET /api/schedule/resumen`.
+  Si hace falta que le llegue por correo, la salida es un campo «Avisos a» en Tu Cuenta, un
+  correo por usuario, que lean `destinatario` (`src/lib/social/publish/alert.ts`) y
+  `enviarResumenes` (`src/lib/avisos/run.ts`) en vez del correo del dueño.

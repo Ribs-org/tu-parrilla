@@ -11,6 +11,9 @@ import {
   opcionesDeFila,
   mediaToBlob,
   scheduleBatch,
+  refDeFila,
+  MAX_REF,
+  REF_ERROR,
   PORTADA_NEEDS_VIDEO,
   PORTADA_NOT_IMAGE,
   PORTADA_FORMAT,
@@ -36,17 +39,52 @@ vi.mock('@/lib/storage', () => ({
 // conservar las tablas reales) anotando cada `insert` — tabla y valores — en `inserts`,
 // para poder afirmar tanto que una fila rechazada no escribe nada como qué URL llegó al
 // insert de `reglasClave`.
-const { inserts } = vi.hoisted(() => ({ inserts: [] as Array<{ tabla: unknown; valores: unknown }> }))
+//
+// Lo único que el lote lee es si una `ref` ya existe (`postConRef`): `refsGuardadas` hace
+// de esa columna. El `where` se renderiza con el dialecto real para sacar la `ref` de sus
+// parámetros, y un post insertado con `ref` la anota, como lo haría la base. `choqueDeRef`
+// simula la carrera: el próximo insert de un post choca con la unicidad, porque otro envío
+// guardó esa `ref` primero.
+const { inserts, refsGuardadas, choqueDeRef } = vi.hoisted(() => ({
+  inserts: [] as Array<{ tabla: unknown; valores: unknown }>,
+  refsGuardadas: new Map<string, string>(),
+  choqueDeRef: { activo: false },
+}))
 vi.mock('@/db', async (importOriginal) => {
   const real = await importOriginal<typeof import('@/db')>()
+  const { PgDialect } = await import('drizzle-orm/pg-core')
+  const dialecto = new PgDialect()
+  const insert = (tabla: unknown) => ({
+    values: (valores: unknown) => {
+      const ref = (valores as { ref?: string | null }).ref
+      if (tabla === real.scheduledPosts && choqueDeRef.activo) {
+        choqueDeRef.activo = false
+        if (ref) refsGuardadas.set(ref, 'post-ganador')
+        const choque = Object.assign(new Error('duplicate key'), {
+          cause: { code: '23505', constraint_name: 'scheduled_posts_owner_ref_key' },
+        })
+        return { returning: async () => Promise.reject(choque) }
+      }
+      inserts.push({ tabla, valores })
+      if (tabla === real.scheduledPosts && ref) refsGuardadas.set(ref, 'post-1')
+      return { returning: async () => [{ id: 'post-1' }] }
+    },
+  })
   return {
     ...real,
     getDb: () => ({
-      insert: (tabla: unknown) => ({
-        values: (valores: unknown) => {
-          inserts.push({ tabla, valores })
-          return { returning: async () => [{ id: 'post-1' }] }
-        },
+      insert,
+      // La transacción del lote: los mismos inserts anotados, sin base.
+      transaction: async (fn: (tx: unknown) => Promise<unknown>) => fn({ insert }),
+      select: () => ({
+        from: () => ({
+          where: (condicion: Parameters<typeof dialecto.sqlToQuery>[0]) => ({
+            limit: async () => {
+              const ref = dialecto.sqlToQuery(condicion).params.find((p) => typeof p === 'string' && refsGuardadas.has(p))
+              return typeof ref === 'string' ? [{ id: refsGuardadas.get(ref)! }] : []
+            },
+          }),
+        }),
       }),
     }),
   }
@@ -654,5 +692,91 @@ describe('scheduleBatch — «19:00» son las 19:00 del dueño', () => {
     const resultados = await scheduleBatch('owner-1', [item])
     expect(resultados).toEqual([{ index: 0, ok: true, postId: 'post-1' }])
     expect(instanteGuardado().toISOString()).toBe('2030-10-05T22:00:00.000Z')
+  })
+})
+
+describe('refDeFila', () => {
+  it('sin ref, la fila no la lleva', () => {
+    expect(refDeFila(undefined)).toEqual({ ref: null })
+    expect(refDeFila(null)).toEqual({ ref: null })
+  })
+
+  it('se recorta: « a1 » y «a1» son la misma fila', () => {
+    expect(refDeFila('  a1  ')).toEqual({ ref: 'a1' })
+  })
+
+  it('vacía, de puros espacios, demasiado larga o que no es texto: la frase fija', () => {
+    for (const mala of ['', '   ', 'x'.repeat(MAX_REF + 1), 7, ['a1'], { ref: 'a1' }]) {
+      expect(refDeFila(mala)).toEqual({ error: REF_ERROR })
+    }
+    expect(refDeFila('x'.repeat(MAX_REF))).toEqual({ ref: 'x'.repeat(MAX_REF) })
+  })
+})
+
+/**
+ * Un lote que se corta a mitad se reenvía entero: las filas con una `ref` que ya entró
+ * devuelven su post con `repetido` y no escriben nada; las demás se programan como siempre.
+ */
+describe('scheduleBatch — la ref reconoce una fila reenviada', () => {
+  const fila: BatchItem = {
+    fecha: '2030-10-05 19:00',
+    texto: 'Hola',
+    cuentas: [],
+    redes: ['threads'],
+    media: [],
+    ref: 'lote-1',
+  }
+
+  afterEach(() => {
+    inserts.length = 0
+    refsGuardadas.clear()
+    choqueDeRef.activo = false
+    vi.unstubAllGlobals()
+  })
+
+  it('una ref nueva se guarda con el post', async () => {
+    expect(await scheduleBatch('owner-1', [fila])).toEqual([{ index: 0, ok: true, postId: 'post-1' }])
+    const post = inserts.find((i) => i.tabla === scheduledPosts)
+    expect((post!.valores as { ref: string | null }).ref).toBe('lote-1')
+  })
+
+  it('una ref que ya entró devuelve ese post, sin escribir, sin descargar y sin volver a validar', async () => {
+    refsGuardadas.set('lote-1', 'post-viejo')
+    const fetchMock = vi.fn()
+    vi.stubGlobal('fetch', fetchMock)
+    // La hora ya pasó desde el primer envío: igual es la misma fila, y no un error.
+    const reenviada = { ...fila, fecha: '2020-01-01 10:00', media: ['https://ej.com/a.mp4'] }
+
+    expect(await scheduleBatch('owner-1', [reenviada])).toEqual([
+      { index: 0, ok: true, postId: 'post-viejo', repetido: true },
+    ])
+    expect(inserts).toEqual([])
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  it('la misma ref dos veces en un lote: la segunda vuelve como repetida', async () => {
+    expect(await scheduleBatch('owner-1', [fila, { ...fila, texto: 'Otra' }])).toEqual([
+      { index: 0, ok: true, postId: 'post-1' },
+      { index: 1, ok: true, postId: 'post-1', repetido: true },
+    ])
+    expect(inserts.filter((i) => i.tabla === scheduledPosts)).toHaveLength(1)
+  })
+
+  it('si otro envío guardó la ref mientras esta fila se armaba, vuelve el post de ese envío', async () => {
+    choqueDeRef.activo = true
+    expect(await scheduleBatch('owner-1', [fila])).toEqual([
+      { index: 0, ok: true, postId: 'post-ganador', repetido: true },
+    ])
+  })
+
+  it('una ref mal formada rechaza la fila con su frase', async () => {
+    expect(await scheduleBatch('owner-1', [{ ...fila, ref: 7 }])).toEqual([{ index: 0, ok: false, error: REF_ERROR }])
+    expect(inserts).toEqual([])
+  })
+
+  it('sin ref, la fila se programa como siempre y el post va sin ref', async () => {
+    expect(await scheduleBatch('owner-1', [{ ...fila, ref: undefined }])).toEqual([{ index: 0, ok: true, postId: 'post-1' }])
+    const post = inserts.find((i) => i.tabla === scheduledPosts)
+    expect((post!.valores as { ref: string | null }).ref).toBeNull()
   })
 })

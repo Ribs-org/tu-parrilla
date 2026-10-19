@@ -50,3 +50,26 @@ export function periodChange(
   // Instagram revises views downward sometimes. Negative growth is noise, not a story.
   return { current, change: Math.max(0, current - before.value), isNew: false }
 }
+
+/**
+ * Lo mismo para el contador de una publicación, que se lee cada vez más espaciado
+ * (`lectura.ts`): en un período corto, una publicación vieja puede no tener ninguna lectura
+ * adentro y aun así tener contador. Sin lectura adentro, el contador es el de la última de
+ * antes y lo que creció adentro no se sabe. Las cuentas se leen a diario y siguen con
+ * `periodChange`: en una cuenta, no tener lectura en el período sí quiere decir algo
+ * (desconectada, o sin sincronizar), y mostrar sus seguidores viejos lo escondería.
+ */
+export function publicationPeriodChange(
+  snapshots: Snapshot[],
+  from: string,
+  to: string,
+  publishedDay?: string,
+): PeriodChange {
+  const change = periodChange(snapshots, from, to, publishedDay)
+  if (change.current !== null) return change
+  const last = snapshots
+    .filter((s): s is { day: string; value: number } => s.value !== null && s.day <= to)
+    .sort((a, b) => a.day.localeCompare(b.day))
+    .at(-1)
+  return { current: last?.value ?? null, change: null, isNew: false }
+}

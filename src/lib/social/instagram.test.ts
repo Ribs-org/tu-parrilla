@@ -1,8 +1,10 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import fixture from './fixtures/instagram-media.json'
 import {
   InstagramHttpError,
+  instagramConnector,
   instagramTokenExpiry,
+  isMediaGone,
   isMediaWithoutInsights,
   listInstagramAccounts,
   normalizeInstagramMedia,
@@ -132,5 +134,89 @@ describe('isMediaWithoutInsights', () => {
   it('no tolera un error que no venga de una respuesta HTTP', () => {
     // Un fallo de red o un JSON.parse roto no dicen nada sobre esta publicación.
     expect(isMediaWithoutInsights(new Error('fetch failed'))).toBe(false)
+  })
+})
+
+describe('isMediaGone', () => {
+  it('reconoce el id que ya no existe: code 100 con subcode 33', () => {
+    expect(isMediaGone(new InstagramHttpError(400, 'Instagram 400', 33, 100))).toBe(true)
+  })
+
+  it('no confunde otro 100, un token vencido ni un límite con un borrado', () => {
+    expect(isMediaGone(new InstagramHttpError(400, 'Instagram 400', undefined, 100))).toBe(false)
+    expect(isMediaGone(new InstagramHttpError(400, 'Instagram 400', 463, 190))).toBe(false)
+    expect(isMediaGone(new InstagramHttpError(400, 'Instagram 400', undefined, 4))).toBe(false)
+    expect(isMediaGone(new Error('fetch failed'))).toBe(false)
+  })
+})
+
+describe('instagramConnector, por ventana y por id', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  const cuenta = { id: 'acc-1', externalId: 'ig-1' } as never
+  const insights = { data: [{ name: 'views', values: [{ value: 70 }] }] }
+
+  it('lista más allá de las 200 mientras lo listado siga siendo de la ventana', async () => {
+    // Páginas de 50, un día más atrás cada una, del 20 de octubre hacia atrás.
+    let paginas = 0
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => {
+        if (url.includes('/insights')) return Response.json(insights)
+        const dia = paginas++
+        const data = Array.from({ length: 50 }, (_, i) => ({
+          id: `${dia}-${i}`,
+          timestamp: new Date(Date.UTC(2026, 9, 20 - dia, 12)).toISOString(),
+        }))
+        return Response.json({ data, paging: { next: `https://graph.test/media?p=${paginas}` } })
+      }),
+    )
+    const desde = new Date(Date.UTC(2026, 9, 14))
+    const { posts, windowWasCapped } = await instagramConnector.fetchPosts(cuenta, 'token', { desde })
+    // Del 20 al 14 son siete páginas; la octava (del 13) es la que dice que se pasó.
+    expect(paginas).toBe(8)
+    expect(posts).toHaveLength(400)
+    expect(posts[0]!.metrics.views).toBe(70)
+    expect(windowWasCapped).toBe(true)
+  })
+
+  it('sin cursor al final, no es ventana', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => {
+        if (url.includes('/insights')) return Response.json(insights)
+        return Response.json({ data: [{ id: 'a', timestamp: '2026-10-20T12:00:00Z' }] })
+      }),
+    )
+    const { posts, windowWasCapped } = await instagramConnector.fetchPosts(cuenta, 'token')
+    expect(posts).toHaveLength(1)
+    expect(windowWasCapped).toBe(false)
+  })
+
+  it('por id: lo borrado se salta, lo que no tiene estadísticas vuelve en null, y un error de la corrida sube', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => {
+        if (url.includes('/borrado/')) {
+          return new Response(JSON.stringify({ error: { code: 100, error_subcode: 33 } }), { status: 400 })
+        }
+        if (url.includes('/antigua/')) {
+          return new Response(JSON.stringify({ error: { code: 100, error_subcode: 2108006 } }), { status: 400 })
+        }
+        return Response.json(insights)
+      }),
+    )
+    const metricas = await instagramConnector.fetchMetricsById!(cuenta, 'token', ['viva', 'borrado', 'antigua'])
+    expect([...metricas.keys()].sort()).toEqual(['antigua', 'viva'])
+    expect(metricas.get('viva')!.views).toBe(70)
+    expect(metricas.get('antigua')!.views).toBeNull()
+
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => new Response(JSON.stringify({ error: { code: 190, error_subcode: 463 } }), { status: 400 })),
+    )
+    await expect(instagramConnector.fetchMetricsById!(cuenta, 'token', ['viva'])).rejects.toThrow('Instagram 400')
   })
 })

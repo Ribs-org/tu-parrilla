@@ -46,12 +46,13 @@ export type FetchedBatch = {
    * catalogue, so what it returned is a window, not everything. `postsToArchive` needs
    * this to tell "deleted" from "beyond the edge of what we asked for".
    *
-   * Only the connector can answer it. The orchestrator used to infer it from
-   * `posts.length >= MAX_POSTS_PER_SYNC`, which YouTube quietly broke: it collects up to
-   * 200 *ids* from `playlistItems` and then builds posts from `videos.list`, which omits
-   * private and deleted videos. One unavailable video in the newest 200 returned 199,
-   * read as an exhaustive fetch, and archived every older post — permanently, since
-   * those posts sit beyond the cap and never come back to clear `archivedAt`.
+   * Only the connector can answer it. The orchestrator used to infer it from how many
+   * posts came back, which YouTube quietly broke: it collects *ids* from `playlistItems`
+   * and then builds posts from `videos.list`, which omits private and deleted videos. One
+   * unavailable video in the newest 200 returned 199, read as an exhaustive fetch, and
+   * archived every older post — permanently, since those posts sat beyond the cap and
+   * never came back to clear `archivedAt`. Today every connector answers it the same way:
+   * a cursor was left in hand.
    */
   windowWasCapped: boolean
 }
@@ -64,7 +65,20 @@ export type Connector = {
   network: string
   /** Returns the usable credential, refreshing it first when it is close to expiring. */
   ensureCredential(account: SocialAccount): Promise<string | null>
-  fetchPosts(account: SocialAccount, token: string | null): Promise<FetchedBatch>
+  /**
+   * Lo más nuevo de la cuenta, de adelante hacia atrás, con sus números: al menos
+   * `MIN_LISTADAS` y, si viene `desde`, todo lo publicado desde ahí (`sigueListando`).
+   */
+  fetchPosts(account: SocialAccount, token: string | null, opciones?: OpcionesDeListado): Promise<FetchedBatch>
+  /**
+   * Los números de hoy de publicaciones ya guardadas que el listado no trajo, por su id
+   * (`lectura.ts`). Lo que la red no devuelve —borrado, o un id que ya no responde— falta
+   * en el mapa y nada más: no se archiva por eso, porque un id que no contesta no
+   * distingue «borrado» de «sin permiso», y archivar no tiene vuelta. Una publicación sin
+   * estadísticas vuelve con todo en null, como en el listado. Opcional: sin él, lo que
+   * cae fuera del listado deja de leerse.
+   */
+  fetchMetricsById?(account: SocialAccount, token: string | null, externalIds: string[]): Promise<Map<string, PostMetricValues>>
   /**
    * Cómo va la cuenta hoy. Opcional: una red que no lo implemente simplemente no
    * aporta fila, y ninguna implementación debe lanzar por una métrica ausente.
@@ -72,8 +86,8 @@ export type Connector = {
   fetchAccountMetrics?(account: SocialAccount, token: string): Promise<AccountMetricValues>
 }
 
-/** The shared ceiling every connector pages up to. */
-export const MAX_POSTS_PER_SYNC = 200
+/** Hasta dónde listar: además del mínimo, todo lo publicado desde `desde` (`lectura.ts`). */
+export type OpcionesDeListado = { desde?: Date }
 
 /** Every metric absent — the starting point a connector fills in with what it has. */
 export const NO_METRICS: PostMetricValues = {

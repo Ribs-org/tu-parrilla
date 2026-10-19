@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { enviarResumenes } from '@/lib/avisos/run'
 import { purgarYoutubeViejo } from '@/lib/social/retencion-youtube'
 import { syncAll } from '@/lib/social/sync'
 import { env } from '@/lib/env'
@@ -30,7 +31,16 @@ export async function GET(request: Request) {
       console.error('Falló la retención de datos de YouTube:', error)
       retencion = { error: 'La retención de YouTube falló; ver el log.' }
     }
-    return NextResponse.json({ report, retencion })
+    // El resumen del día, al final: así lee el estado de las cuentas que esta misma
+    // sincronización acaba de dejar. Mismo trato que la retención: si falla, el sync ya quedó.
+    let resumenes: Awaited<ReturnType<typeof enviarResumenes>> | { error: string }
+    try {
+      resumenes = await enviarResumenes()
+    } catch (error) {
+      console.error('Falló el resumen del día:', error)
+      resumenes = { error: 'El resumen del día falló; ver el log.' }
+    }
+    return NextResponse.json({ report, retencion, resumenes })
   } catch (error) {
     // Reaching here is the other case entirely: syncAll settles every network on its own,
     // so a throw is the orchestrator itself breaking, before any per-network catch could

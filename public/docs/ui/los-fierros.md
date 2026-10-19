@@ -44,7 +44,7 @@ Cada cuenta es una fila de una o dos líneas. De izquierda a derecha:
    TikTok, YouTube y X / Twitter nunca se ponen en ámbar, porque se renuevan solos; Facebook tampoco, porque el permiso de una página no vence.
 2. **El nombre de la cuenta**: el @usuario en Instagram, el nombre de la página en Facebook, el título del canal en YouTube, el nombre visible en TikTok, el usuario en Threads y en X. Si la red no dio nombre, se ve el número que la red le da a la cuenta, o «Sin nombre». Al lado, un triángulo rojo si la última sincronización falló, un visto verde si está conectada y sin error, y nada si no tiene credencial.
 3. **Debajo del nombre, una línea que dice cómo está**, una sola de estas, en este orden:
-   - en rojo, si la última sincronización falló: «La conexión falló; reconecta la cuenta.» Al pasar el mouse aparece el error original de la red, a veces en inglés;
+   - en rojo, si la última sincronización falló o si la red rechazó la conexión al publicar: «La conexión falló; reconecta la cuenta.» Al pasar el mouse aparece el error original de la red, a veces en inglés;
    - en ámbar, si se está enfriando: «Este fierro se está enfriando: la conexión vence hoy. Reconéctala antes de que se apague.» En lugar de «hoy» puede decir «mañana», «pasado mañana» o «dentro de 5 días»;
    - si no: cuándo se trajeron sus números por última vez —«Sincronizado recién», «Sincronizado hace 3 horas», «Sincronizado ayer», «Sincronizado hace 4 días»…— o «Sin sincronizar» si nunca se trajeron, con «Sin credencial · » delante si la cuenta no está conectada. Threads y X / Twitter dicen siempre «Sin sincronizar», porque de ellas no se traen números.
 4. A la derecha, «Reconectar» si la cuenta está conectada, o «Conectar →» si no.
@@ -151,7 +151,7 @@ Cada cuenta queda como una fila aparte. Con dos cuentas de una red, el composito
 
 ### Para renovar una conexión
 
-Cuándo: el fierro está en ámbar, dice «La conexión falló; reconecta la cuenta.», dice «Sin credencial», o otra pantalla pide reconectar.
+Cuándo: el fierro está en ámbar, dice «La conexión falló; reconecta la cuenta.», dice «Sin credencial», otra pantalla pide reconectar, o llegó el correo «Se cayó la conexión con <Red> · <cuenta>».
 
 1. En la fila de la cuenta, aprieta «Reconectar» (o «Conectar →» si dice «Sin credencial»).
 2. En la ventana de la red, entra con **la misma cuenta** de esa fila. El botón no está atado a la fila: la red decide qué cuenta vuelve, y si vuelve otra, aparece una fila nueva en vez de renovarse esta.
@@ -234,7 +234,7 @@ Trae los posts y los números de las cuentas de Instagram, TikTok, YouTube y Fac
 | «No se pudo conectar. Inténtalo de nuevo.» | Falló algo inesperado al guardar la conexión. | Volver a conectar; si se repite, avisar a quien administra Tu Parrilla. |
 | «No se pudo guardar la cuenta. Inténtalo de nuevo.» | Falló guardar las cuentas elegidas en la lista. | Volver a conectar. |
 | «Este fierro se está enfriando: la conexión vence <hoy / mañana / pasado mañana / dentro de N días>. Reconéctala antes de que se apague.» | El permiso de esa cuenta vence pronto. Mientras tanto, el botón «Ajustes» lleva un punto ámbar. | «Reconectar» en esa fila, con la misma cuenta. |
-| «La conexión falló; reconecta la cuenta.» | La última vez que se trajeron sus números, la red rechazó la conexión (permiso vencido o quitado desde la red). Si al pasar el mouse dice «Quitaste la app desde Facebook: vuelve a conectar.», alguien quitó Tu Parrilla desde la configuración de Facebook. | «Reconectar» (o «Conectar →») en esa fila. |
+| «La conexión falló; reconecta la cuenta.» | La última vez que se trajeron sus números, o al publicar, la red rechazó la conexión (permiso vencido o quitado desde la red). Si fue al publicar, al pasar el mouse aparece el motivo de esa publicación, por ejemplo «Reconecta TikTok para autorizar la publicación.»; vuelve a la normalidad con la próxima sincronización que funcione, o al reconectar. Si al pasar el mouse dice «Quitaste la app desde Facebook: vuelve a conectar.», alguien quitó Tu Parrilla desde la configuración de Facebook. | «Reconectar» (o «Conectar →») en esa fila. |
 | «Sin credencial» | La cuenta no está conectada; su historial se conserva. | «Conectar →» en la fila, o fusionarla si es una repetida (en su detalle). |
 | «Se desconecta «<nombre>» de <red>. Sus posts y métricas ya bajados se quedan, pero no se sincroniza nada más hasta que la vuelvas a conectar. ¿Seguir?» | Confirmación antes de desconectar. | Aceptar para desconectar, cancelar para dejarla. |
 | «Desconectada.» | Se desconectó. | Nada. |
@@ -257,6 +257,8 @@ Trae los posts y los números de las cuentas de Instagram, TikTok, YouTube y Fac
 
 - **«¿Cómo conecto mi Instagram?»** → Botón «Ajustes» → «Los Fierros» → bloque «Instagram» → «Conectar →». Ver «Para conectar Instagram».
 - **«No encuentro Los Fierros» o «no encuentro Cuentas»** → No es una pestaña: está dentro del botón «Ajustes», a la derecha de la barra. En el teléfono el botón no tiene texto, solo el ícono.
+- **«Me llegó un correo "Se cayó la conexión con …"»** → Esa cuenta dejó de publicar: su fierro está gris acá. «Reconectar» en su fila, entrando con la misma cuenta en la ventana de la red. El correo dice cuántas publicaciones tiene por salir; si se reconecta antes de que se quemen, salen solas. Llega uno por caída, no uno por publicación, y una cuenta desconectada a propósito no lo manda.
+- **«Me llega un resumen por correo en la mañana»** → Es el resumen del día: lo que se quemó, las cuentas por reconectar y las que tienen menos de tres días programados. Llega solo los días en que hay algo de eso. Las cuentas por reconectar se arreglan acá, con «Reconectar».
 - **«Me dice que el token venció»**, **«el fierro está gris»** o **«dice que se está enfriando»** → «Reconectar» en esa fila, entrando con la misma cuenta en la ventana de la red.
 - **«En La Parrilla me sale "reconéctala" al lado de una cuenta»** o **«una publicación falló con "La cuenta no está conectada. Reconéctala y reprograma."»** → Esa cuenta perdió la conexión: «Reconectar» o «Conectar →» en su fila, y después volver a programar.
 - **«Al programar me sale en ámbar que el permiso de una cuenta vence antes de que salga»** → El compositor de [La Parrilla](la-parrilla.md) lo avisa cuando la hora elegida cae después de que venza el permiso de esa cuenta: «Reconectar» en su fila de acá, con la misma cuenta, y el aviso se va. Sin reconectar, esa red se quemaría a la hora del post.
@@ -308,6 +310,7 @@ Lo que describe sale de:
 - `src/app/api/social/[network]/callback/route.ts`
 - `src/lib/networks.ts` (nombres de las redes, avisos, `META_EN_REVISION`)
 - `src/lib/parrilla.ts` (`estadoDelFierro`, los siete días del aviso)
+- `src/lib/avisos/reglas.ts` (la frase «La conexión falló; reconecta la cuenta.», qué es una caída y los correos de la caída y del resumen) y `src/lib/avisos/run.ts` (cuándo salen)
 - `src/app/globals.css` (los colores del fierro)
 - `src/lib/social/pendiente.ts`
 - `src/lib/social/conectar.ts`

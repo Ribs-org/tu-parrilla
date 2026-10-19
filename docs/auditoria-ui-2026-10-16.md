@@ -139,7 +139,9 @@ Google para verificar la marca. La portada quedó hecha el 2026-10-17: la semana
 cortes de verdad sobre sus parrillas, un corte que se arma tocándolo, la subida que llega como
 carne cruda, los fierros, lo quemado, lo que trajo cada corte, La Mesa, tu página y qué se
 conecta y para qué, cada sección con la pieza del panel y no con un dibujo que se parece
-(`src/components/landing.tsx`); la imagen para compartirla dibuja la misma semana. Lo que lo
+(`src/components/landing.tsx`); la imagen para compartirla dibuja la misma semana. Arriba
+lleva la marca —el bife a punto del ícono de la app—, cada sección dice sobre su título la
+pantalla del panel donde vive, y cierra con la invitación junto a una parrilla llena. Lo que lo
 exige Google lo cuida `src/components/landing.test.ts`. Quedan la entrada con el código en
 casillas, y el error y el 404.
 

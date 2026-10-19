@@ -41,6 +41,13 @@ menos un elemento. `redes` solo resuelve la cuenta a nombrar la red si hay exact
 conectada de esa red; con dos, hay que usar `cuentas` con el identificador exacto (se leen en
 `/admin/accounts` o en `GET /api/schedule/posts`, campo `cuentaId`).
 
+**Ponle una `ref` a cada fila** (`"ref": "octubre-fila-3"`: un texto tuyo de 1 a 100
+caracteres, único por dueño). Si el envío se corta y no llega la respuesta, reenvía el lote
+entero con las mismas `ref`: las filas que ya habían entrado vuelven con su `postId` y
+`"repetido": true`, sin programarse otra vez ni volver a validarse, y se programan solo las
+que faltaban. La `ref` no compara contenidos: una fila cambiada con la misma `ref` devuelve el
+post de antes. Sin `ref`, reenviar duplica.
+
 ## 2. Una sola petición: video, regla y documento
 
 ```bash
@@ -109,13 +116,15 @@ no por subcadena parcial ni regex:
 | `El mensaje del privado va de 1 a 1000 caracteres.` | `regla.mensaje` ausente, vacío o largo |
 | `La respuesta pública va de 1 a 300 caracteres.` | `regla.respuestaPublica` larga |
 | `El documento tiene que ser una URL absoluta a un PDF de hasta 25 MB.` | `regla.documentoUrl` no es una URL http/https absoluta, o al descargarla no resultó un PDF que quepa |
+| `«ref» tiene que ser un texto de 1 a 100 caracteres.` | `ref` vacía, de puros espacios, de más de 100 caracteres, o que no es texto |
 | `Máximo 50 posts por lote.` | `posts` con más de 50 elementos |
 | `El cuerpo debe ser JSON con { posts: [...] }.` | el cuerpo entero no tiene la forma `{ posts: [...] }` |
 | `No se pudo guardar la fila. Inténtalo de nuevo.` | fallo transitorio de base de datos; reintentar esa fila sola |
 
 `200` es la respuesta normal aunque haya filas rechazadas — el rechazo por fila es dato, no
-fallo del endpoint. Corrige y reenvía solo las filas malas: no hay deduplicación, reenviar una
-fila ya programada la programa otra vez.
+fallo del endpoint. Corrige y reenvía las filas malas. Con `ref` en cada fila puedes reenviar
+el lote entero (lo que ya entró vuelve con `"repetido": true`); sin `ref` no hay
+deduplicación, y reenviar una fila ya programada la programa otra vez.
 
 ## 3b. Sacar un post programado
 
@@ -138,13 +147,34 @@ Un post en `failed` (algún destino falló y agotó sus intentos) **sí** se pue
 salió. Un post con un destino publicado y otro programado **no**: el publicado manda. Los
 archivos que subió quedan en el almacén hasta el barrido del día siguiente; no hay que
 hacer nada con ellos.
+
+## 3c. Lo que pide atención
+
+```bash
+curl -s "https://tu-parrilla.cl/api/schedule/resumen" -H "Authorization: Bearer $LLAVE_PARRILLA"
+```
+
+Devuelve `{ generado, horas, dias, fallidos, cuentas, pista }`: los destinos que se quemaron en
+las últimas `horas` (con su `postId`, red, `cuentaId` y `error`), las cuentas que hay que
+reconectar (`fierro` `frio` ya no publica; `enfriandose` vence en menos de siete días, con
+`vence`) y las cuentas en uso con menos de `dias` días programados hacia adelante (`ultima`,
+la hora de lo último que tienen por salir o `null`, y `dias`). Es lo mismo que el resumen que
+le llega al dueño por correo cada mañana. Parámetros opcionales: `dias` de 1 a 30 (3 por
+defecto) y `horas` de 1 a 168 (24 por defecto); fuera de rango, `400` con
+`«dias» tiene que ser un entero de 1 a 30.` o `«horas» tiene que ser un entero de 1 a 168.`
+
+Una cuenta fría no publica hasta que el dueño la reconecte en Los Fierros: si aparece, díselo
+antes de programarle nada. Un destino de Instagram que espera con el `error`
+`Instagram llegó a su tope de publicaciones por día: sale apenas se libere un cupo.` no está
+fallido: sale solo cuando la cuenta recupere cupo, sin gastar intentos.
+
 ## 4. Lo que esta API no hace
 
 - **No edita un post programado.** Para cambiar texto, hora, destinos o media hay que
   borrarlo (sección 3b) y programarlo de nuevo, o corregirlo a mano en `/admin/schedule`.
 - **No lista cuentas.** Para eso está `GET /api/schedule/posts`: cada destino de un post ya
   programado trae `cuentaId` y `handle`. No hay un endpoint que liste cuentas sueltas sin
-  pasar por un post.
+  pasar por un post; el resumen (sección 3c) nombra solo las que piden atención.
 - **No manda nada de inmediato.** Todo lo que entra por `POST /api/schedule/batch` espera a su
   `fecha`; no existe una forma de publicar ahora mismo por esta vía.
 - **Solo tres redes leen comentarios: Instagram, Facebook y YouTube.** Una `regla` en un post que
@@ -231,6 +261,9 @@ Dos endpoints de lectura, con la misma llave. El detalle de cada número está e
   llegan desde la sincronización siguiente a su publicación (la diaria, o «Sincronizar
   ahora»): TikTok no siempre da el id del video al publicar y es la sincronización la que lo
   cruza por texto y hora. Antes de eso, el post sale con `atributos: null`.
+  Los números de una publicación de los últimos 10 días son de hoy o ayer; los de una más
+  vieja se leen cada vez más espaciado (una vez por semana hasta el mes, cada dos semanas
+  hasta los tres meses, cada cuatro después), así que pueden ir hasta esas semanas atrás.
 - `GET /api/metrics/mejores?desde=…&hasta=…&metrica=viewsGanadas&percentil=10` — el mejor X %
   de lo publicado en el rango: `corte` (lo que había que sacar para entrar), `compiten`,
   `mejores` (filas como las de arriba, con `puesto` y `valor`), `medianas` de arriba contra

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui'
 import { NEGATIVE, POSITIVE } from '@/components/charts/theme'
 import { SOCIAL_NETWORKS } from '@/db/schema'
 import type { CuentaRow } from '@/lib/posts-kpis'
+import { CONEXION_FALLO } from '@/lib/avisos/reglas'
 import { avisosDe, networkLabel } from '@/lib/networks'
 import { estadoDelFierro, type Fierro } from '@/lib/parrilla'
 import { cn } from '@/lib/utils'
@@ -20,9 +21,10 @@ const AVISO_MS = 2000
 /**
  * Lo que devuelve Meta cuando un token murió es una frase en inglés con códigos adentro,
  * y aparece justo cuando algo se rompió. La pantalla dice qué hacer; el texto original
- * queda en el `title` para quien lo necesite.
+ * queda en el `title` para quien lo necesite. Es la misma frase del resumen del día y de
+ * `GET /api/schedule/resumen`, para que la tarjeta y el aviso digan lo mismo.
  */
-const FALLO_DE_SYNC = 'La conexión falló; reconecta la cuenta.'
+const FALLO_DE_SYNC = CONEXION_FALLO
 
 const CLASE_FIERRO: Record<Fierro, string> = {
   'al-rojo': 'fierro-al-rojo',

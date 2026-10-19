@@ -91,6 +91,12 @@
                 "maxBytes": 26214400
               }
             }
+          },
+          "ref": {
+            "type": "string",
+            "description": "Opcional y recomendada: una referencia tuya para la fila (el id de la fila en tu planilla, por ejemplo), única por dueño de la llave. Si una fila trae una 'ref' que ya entró, no se programa de nuevo: vuelve con el 'postId' de antes y 'repetido': true, sin descargar ni validar nada. Sirve para reenviar entero un lote cuya respuesta no llegó. No compara contenidos. Se recortan los espacios de los bordes.",
+            "minLength": 1,
+            "maxLength": 100
           }
         }
       }
