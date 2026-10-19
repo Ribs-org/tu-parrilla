@@ -213,6 +213,7 @@ describe('syncAccount: lo viejo se lee por id', () => {
     expiresAt: null,
     lastSyncedAt: null,
     lastSyncError: null,
+    caidaAvisadaEn: null,
     createdAt: new Date('2026-01-01'),
   } satisfies SocialAccount
   const vista = { views: 50, likes: 2, comments: 0, shares: 0, saves: 0, reach: 40 }
