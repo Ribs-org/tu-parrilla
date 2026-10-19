@@ -264,7 +264,7 @@ Cerrar con «Menos» apaga los dos.
   el link de una fila y pégalo en ese post de la red.» (cuando no hay ninguna pegada), o «1
   publicación aún no tiene su link pegado.», o «<N> publicaciones aún no tienen su link
   pegado.».
-- Si hay publicaciones de las que la red no entregó ningún número en el período: «1 publicación
+- Si hay publicaciones de las que la red no entregó ningún número hasta el fin del período: «1 publicación
   no tiene métricas de la red en este período (Instagram no las entrega para lo publicado antes
   de tu cuenta profesional).», o la misma frase con «<N> publicaciones no tienen…».
 
@@ -691,17 +691,21 @@ todas las cuentas).
 «⋯ Más». La página y «Bots» del tablero no: las visitas, clicks, CTR y arrastre de cada
 publicación se cuentan siempre en todas las páginas y sin bots.
 
-**«Views» (columna).** El contador acumulado de por vida, según la última lectura dentro del
-período. El «+<N>» al lado es lo ganado en el período. Ese «+<N>» no aparece cuando:
+**«Views» (columna).** El contador acumulado de por vida, según la última lectura hasta el fin
+del período: casi siempre una de adentro, pero una publicación de más de 10 días se lee cada
+una, dos o cuatro semanas, y en un período corto puede tener solo una de antes. El «+<N>» al
+lado es lo ganado en el período. Ese «+<N>» no aparece cuando:
 
 - la publicación salió dentro del período (lleva « · nuevo»): todo su contador es lo ganado, y
   repetirlo no agrega nada. Con «Publicadas en el período» casi todas las filas son así; el
   «+<N>» se ve sobre todo con «Todas las recientes»;
 - no hay lectura de antes del período (la publicación existía, pero nadie la había medido
   todavía): el crecimiento no se puede saber;
+- no hay lectura dentro del período (una publicación vieja, que no tocaba leer): el contador es
+  el de antes y lo ganado adentro no se sabe;
 - no creció, o es de YouTube.
 
-El «—» en «Views» aparece solo cuando la red no dio ninguna lectura en el período. Ordenar por
+El «—» en «Views» aparece solo cuando la red no dio ninguna lectura hasta el fin del período. Ordenar por
 «Views» ordena por el acumulado, no por lo ganado; para lo ganado está «Lo que más creció», en
 el tablero.
 
