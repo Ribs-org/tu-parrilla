@@ -28,15 +28,20 @@ varias.
 
    | Lo que se ve | Lo que dice | De noche | De día |
    |---|---|---|---|
-   | La silueta | El formato | entraña, tira, bife, chori | nigiri, maki, sashimi, temaki |
+   | La silueta | El formato | entraña, tira, bife, chori | nigiri, roll, sashimi, temaki |
    | El relleno | La cocción | la carne | el pescado, bajo el soplete |
    | Las marcas | Cómo le fue a cada destino, una por destino | la del fierro | una banda de nori |
-   | El halo rojo y la banderita | Que algo se quemó | igual | igual |
+   | El halo rojo y la banderita | Que algo falló | igual | igual |
    | Lo que se mueve | Que algo está saliendo ahora | el humo | la llama del soplete |
 
-2. **Las palabras no cambian.** Siguen iguales:
+   La única propiedad que de día dice algo más es la silueta del roll: entero mientras no se
+   sirvió, en rodajas cuando salió. Lo pidió el dueño el 2026-10-19, y no le quita nada a la
+   regla: dice lo mismo que su pescado, a punto o no, con otra señal, que además se lee sin
+   color.
+
+2. **Las palabras no cambian, salvo una.** Siguen iguales:
    - los nombres de las pantallas, los botones, los estados («Programada», «Saliendo ahora»,
-     «Se quemó») y la marca, «Tu Parrilla»;
+     «Falló») y la marca, «Tu Parrilla»;
    - las frases de error.
 
    Tres razones:
@@ -45,8 +50,17 @@ varias.
    - **Las guías de la API nombran las pantallas.**
    - **«Tu Parrilla» es el nombre del producto y del dominio,** el que verificó Google.
 
-   Lo que cambia es el dibujo, y por eso el soplete: un nigiri se sella, queda a punto y se
-   quema con el soplete del aburi. Así «Se quemó» sigue siendo verdad también de día.
+   **La excepción es «Se quemó»**, la sección de La Parrilla con lo que falló: de día dice «Se
+   echó a perder» (`SE_QUEMO`, en `src/lib/vocabulario.ts`). La primera vuelta la dejó igual y
+   le dio el soplete para que fuera verdad: un nigiri se sella, queda a punto y se quema con el
+   soplete del aburi. El dueño la vio el 2026-10-19 y pidió otra cosa, porque quemar pescado no
+   tiene mucho sentido: lo que no se sirvió se echa a perder. Ahora el soplete solo cocina —sella
+   y deja a punto— y lo que falló es pescado pasado (ver «La cocción»).
+   - **La wiki** lo cuenta en «El modo día», para que un agente que oye una palabra sepa que es
+     la otra.
+   - **El correo del resumen** nombra la sección como la ve la cuenta.
+   - **Lo demás de lo que falló sigue neutro:** el estado dice «Falló» o «Falló en parte» en los
+     dos modos.
 
 3. **La noche por defecto, y el modo se elige.** No se adivina por el modo del sistema
    (`prefers-color-scheme`), porque el dueño pidió que la noche fuera la de entrada. Quien
@@ -57,20 +71,20 @@ varias.
    como la carne: es lo que la deja leer con daltonismo. Cada cifra de abajo está medida, y los
    tests de paleta las van a guardar (ver «Tanda 1»).
 
-5. **Lo quemado se ve igual en los dos modos.** El halo, la banderita y el rojo `QUEMO`
-   (#f2557a) son los mismos, porque lo quemado es lo único que pide la mano del dueño. De
+5. **Lo que falló se ve igual en los dos modos.** El halo, la banderita y el rojo `QUEMO`
+   (#f2557a) son los mismos, porque lo que falló es lo único que pide la mano del dueño. De
    noche y de día, el ojo tiene que encontrarlo igual de rápido.
 
 6. **Lo de afuera no cambia.** La página pública de cada creador es su identidad y no lleva
-   asado: tampoco lleva sushi. Los correos, la API y el ícono de la app siguen como están. La
-   portada sigue de noche hasta la tanda 4.
+   asado: tampoco lleva sushi. La API y el ícono de la app siguen como están, y los correos
+   solo cambian donde nombran «Se quemó» (regla 2). La portada sigue de noche hasta la tanda 4.
 
 ## Las piezas
 
 Las cuatro van en el mismo lienzo de 120 × 64 que los cortes y reciben las mismas props que
 `Corte`, para que el modo día cambie el dibujo y nada más:
 
-- `formato`, `huesos` (las rodajas del maki), `carne`, `coccion` y `sellos`;
+- `formato`, `huesos` (las rodajas del roll), `carne`, `coccion` y `sellos`;
 - `chico` (el de «Se quemó», a 48 px) y `llenado` (el compositor, que se llena a medida que
   llegan los archivos).
 
@@ -80,7 +94,7 @@ Las reglas que deciden qué es cada post no se tocan: `formatoDe`, `coccionDe`, 
 | Formato | De noche | De día | Por qué esa pieza |
 |---|---|---|---|
 | Video | Entraña | **Nigiri de salmón** | Es lo que más se publica y la pieza más reconocible. Las vetas blancas del salmón van en diagonal, como la fibra de la entraña, y son lo que hace leer «salmón» y no «tomate». |
-| Carrusel | Tira de asado, un hueso por archivo | **Maki, una rodaja por archivo** | Las rodajas se cuentan como los huesos, hasta diez. Van juntas, apenas montadas: separadas, el pescado del centro quedaba chico para decir la cocción. |
+| Carrusel | Tira de asado, un hueso por archivo | **Un roll envuelto en salmón**: entero mientras no se sirvió, en rodajas cuando salió, una por archivo | El roll se corta al servirse: lo pidió el dueño el 2026-10-19 (la primera vuelta lo dibujaba siempre en rodajas). Entero, cuenta los archivos con sus líneas de corte; cortado, con sus rodajas, como los huesos, hasta diez. Las rodajas van juntas, apenas montadas: separadas, quedaban chicas para decir la cocción. El salmón va afuera, como el roll que más se come en Chile, para que la cocción tenga la misma superficie antes y después de cortar y las bandas de nori se vean encima. |
 | Foto | Bife | **Sashimi**, tres láminas sobre una hoja de shiso, con wasabi | Una sola pieza de pescado, sin arroz: la silueta compacta del bife, sin confundirse con el nigiri. |
 | Texto | Chori | **Temaki**, en papel de soya rosado | Una silueta que no se parece a ninguna otra, el cono. El papel de soya y no el nori, porque sobre el nori negro las bandas no se verían. Rosado, porque es lo más «bonito» del muestrario sin agregar un color con significado. |
 
@@ -89,24 +103,29 @@ soya. La cocción vive solo en el pescado, para que el estado tenga una sola sup
 carne del corte. El arroz lleva un borde (#d9ccb6): blanco sobre la chapa clara, sin borde,
 desaparecía.
 
-### La cocción: el soplete
+### La cocción: el soplete, y lo que se echó a perder
 
-El soplete del aburi hace de parrilla. El pescado va de crudo a carbón, de claro a oscuro. Los
-tonos medios:
+El soplete del aburi hace de parrilla: sella y deja a punto. Lo que falló no se quema, se echa
+a perder. El pescado va de crudo a pasado, de claro a oscuro. Los tonos medios:
 
 | Cocción | En palabras | El pescado | Contraste con la vecina |
 |---|---|---|---|
 | `cruda` | Programada | salmón fresco, #ffb39a | — |
 | `sellada` | Saliendo ahora | bordes dorados, #e5864a | 1,55:1 |
 | `punto` | Publicada | aburi tostado, #b46a33 | 1,55:1 |
-| `quemada` | Falló | carbón, #33292a | 3,39:1 |
+| `quemada` | Falló | pasado: un verde gris hondo, #282d20 | 3,40:1 |
 
-- **Entre los extremos, 8,16:1.** La carne de la noche daba 6,75:1.
+- **Entre los extremos, 8,19:1.** La carne de la noche daba 6,75:1.
 - **Entre vecinas, al menos 1,55.** La carne daba al menos 1,59, casi lo mismo.
-- **La quemada contra la chapa del día da 13,86:1.** De noche, lo quemado tenía el halo para
+- **El pasado contra la chapa del día da 13,91:1.** De noche, lo quemado tenía el halo para
   no camuflarse en la parrilla oscura. De día lo tiene igual, por la regla 5.
-- **La parcial** («Falló en parte»): como de noche, se pinta con el pescado de lo que no se
-  quemó, y lleva el halo.
+- **Lo que lo aparta del carbón**, siendo igual de oscuro:
+  - el verde gris, más verde que rojo en sus tres tonos (lo guarda `pieza-sushi.test.ts`);
+  - el moho, en manchas pálidas y difusas;
+  - el olor: tres ondas quietas sobre la pieza, a la izquierda de la banderita. Quietas,
+    porque lo único que se mueve es lo que está saliendo (regla 1).
+- **La parcial** («Falló en parte»): como de noche, se pinta con el pescado de lo que no
+  falló, y lleva el halo.
 
 ### Las marcas: una banda de nori por destino
 
@@ -117,14 +136,16 @@ las de la marca del corte (`Sello`):
 |---|---|---|
 | `pendiente`, `saliendo` | marca punteada | banda punteada, solo el contorno |
 | `servido` | marca quemada, oscura | banda de nori entera, con un brillo |
-| `quemado` | carbonizada, con una brasa adentro | carbonizada, con la misma brasa |
+| `quemado` | carbonizada, con una brasa adentro | pasada, cruzada por el rojo del halo: sin brasa, porque de día nada se quema |
 | `bandeja` (TikTok espera la mano del dueño) | quemada hasta la mitad, punto ámbar | nori hasta la mitad, el mismo punto ámbar |
 | `reintento` | punteada en ámbar | punteada en ámbar |
 | `frio` (el fierro frío) | punteada en acero | punteada en acero |
 
-En el maki, cada banda cruza el centro de una rodaja y nunca la juntura de dos: ahí el nori de
-las dos rodajas la tapaba, y con cuatro rodajas y tres destinos caían justo encima. Si hay más
-destinos que rodajas, van de a varias por rodaja.
+En el roll, cada banda cruza el centro de una rodaja y nunca la juntura de dos, donde se perdía
+entre las orillas de las dos: con cuatro rodajas y tres destinos caían justo encima. Con el
+roll entero, caen donde van a quedar sus rodajas, y las líneas del corte van enteras y finas,
+para no confundirse con la banda punteada de un destino que no salió. Si hay más destinos que
+rodajas, van de a varias por rodaja.
 
 ### El halo, la banderita y la llama
 
@@ -207,7 +228,7 @@ dónde vive.
 | El fuego del día | `.grilla-prendida`, `.grilla-llena` | un degradado de brasa que sube | un lavado de salmón que sube, más fuerte con la tabla llena. Mismo umbral (`calorDelDia`) |
 | La carga | `.tibio`, `.brasa-tibia`, `esqueleto.tsx` | un pulso tibio, la parrilla calentándose | el mismo pulso, crema y salmón: el arroz recién hecho |
 | Saliendo | `.voluta` | el humo, tres volutas | la llama del soplete (`.llama`) |
-| Lo quemado | `.late` | el halo late tres veces | igual |
+| Lo que falló | `.late` | el halo late tres veces | igual, y la banda que falló late con él |
 | Recién programado | `.recien` | el corte cae y se enciende una vez | igual, con el acento del día |
 | El fierro de una cuenta | `.fierro-al-rojo`, `-enfriandose`, `-frio` | una barra que irradia brasa, ámbar o nada | la misma barra: irradia salmón tostado, ámbar o nada. El nombre «Los Fierros» no cambia (regla 2) |
 | La miniatura con forma de corte | `.corte-mini` | las esquinas dispares y el rayado del fierro | las mismas esquinas, sin el rayado: una banda de nori en el borde izquierdo |
@@ -254,8 +275,8 @@ lo guardó solo en el equipo, con una cookie.
   - la tabla de equivalencias de arriba: la entraña es el nigiri, el humo es la llama, la
     banda de nori es la marca.
 
-  Así, un agente que oye «mi sushi tiene una banderita roja» sabe que es «Se quemó» y manda a la
-  misma pantalla. Las páginas que nombran un dibujo enlazan a esa sección. El test de la wiki
+  Así, un agente que oye «mi sushi tiene una banderita roja» sabe que se echó a perder —«Se
+  quemó», de noche— y manda a la misma sección. Las páginas que nombran un dibujo enlazan a esa sección. El test de la wiki
   (`docs-ui.test.ts`) puede exigir que exista.
 - **README:** una línea en lo del panel. En el árbol, `pieza-sushi.tsx` y el módulo del modo.
 - **`docs/pendientes.md`:** cada tanda saca lo suyo.
@@ -316,8 +337,8 @@ panel de día con sus piezas de sushi.
   el borde de `*`). El día se acota a `.acerado`, igual que el acero, y no toca esas reglas
   afuera.
 - **El dibujo doble y los ids de los SVG.** Las piezas definen sus degradados y sus recortes en
-  `PiezaDefs`, una vez por página, en el layout del panel, con un recorte de maki por cantidad
-  de rodajas. Ninguna pieza repite un id.
+  `PiezaDefs`, una vez por página, en el layout del panel, con dos recortes de roll por
+  cantidad de rodajas, entero y cortado. Ninguna pieza repite un id.
 - **La vista previa de La Vitrina** es la página pública dentro del panel. De día vuelve a los
   colores de afuera (`.vista-publica`, en `globals.css`), y lo que pinta esa página
   (`profile-view.tsx`) quedó fuera del barrido de los velos.
@@ -325,7 +346,7 @@ panel de día con sus piezas de sushi.
 ## Lo que queda como está
 
 - **La noche entera,** que es la de entrada.
-- **Las palabras, la marca y el ícono de la app.**
+- **Las palabras, salvo «Se quemó» (regla 2); la marca y el ícono de la app.**
 - **Lo de afuera del panel:** la página pública de cada creador, los correos, la API y la
   portada hasta la tanda 4.
 - **Las reglas del producto** de `src/lib/parrilla.ts`: qué es cada post, su cocción y el sello
@@ -333,7 +354,7 @@ panel de día con sus piezas de sushi.
 
 ## Decisiones para el dueño
 
-Las dos primeras las tomó el dueño el 2026-10-19.
+La primera, la segunda y la cuarta las tomó el dueño el 2026-10-19.
 
 1. **La marca, de día.** El panel no la lleva (dice «Panel»); la portada y el ícono de la app
    llevan el bife a punto.
@@ -348,6 +369,8 @@ Las dos primeras las tomó el dueño el 2026-10-19.
    - **Recomendación:** no. Pediste la noche por defecto, y el que llega de día con el
      teléfono en modo claro vería otro producto sin haberlo elegido.
 4. **Las palabras.**
-   - **Recomendación:** no cambiarlas (regla 2).
+   - **Decidido:** no cambian, salvo «Se quemó», que de día dice «Se echó a perder»: quemar
+     pescado no tiene mucho sentido (regla 2). La primera vuelta recomendaba no cambiar
+     ninguna.
    - **Si marketing quiere una voz de día:** que sea en la portada y en lo que se comparte, que
      no son pantallas que guíe la wiki.

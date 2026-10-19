@@ -191,9 +191,12 @@ manda `GET /api/mobile/schedule`. El porqué, en
 `src/lib/tema.ts`), así que vale en cualquier equipo donde entres. `GET`/`PUT /api/mobile/tema` lo dan a la app
 del teléfono, que todavía no tiene el modo día, y una cookie lo copia en cada equipo para la
 puerta, que se dibuja antes de saber de quién es. El modo día es el fondo claro y, en vez de cortes, piezas de sushi
-(`src/components/pieza-sushi.tsx`) que dicen lo mismo con la misma gramática —nigiri, maki,
-sashimi y temaki; el pescado bajo el soplete; una banda de nori por destino—. Las palabras no
-cambian, la noche sigue por defecto, y la página pública de cada creador no cambia nunca. El
+(`src/components/pieza-sushi.tsx`) que dicen lo mismo con la misma gramática —nigiri, un roll
+que se corta al servirse, sashimi y temaki; el pescado bajo el soplete; una banda de nori por
+destino—. Lo que falló no
+se quema: es pescado pasado, y la sección «Se quemó» se llama «Se echó a perder» (`SE_QUEMO`,
+en `src/lib/vocabulario.ts`). Las demás palabras no cambian, la noche sigue por defecto, y la
+página pública de cada creador no cambia nunca. El
 diseño, en `docs/superpowers/specs/2026-10-19-modo-dia-sushi-design.md`. Al pie, cuántos cortes salieron ayer; las miradas solo si la sincronización ya
 trajo sus métricas, porque un cero inventado diría «nadie miró» cuando lo cierto es
 «todavía no se sabe». Lo que no pide una acción está un clic más adentro: el tráfico, los
@@ -1033,7 +1036,8 @@ Tres correos, todos con el remitente `PUBLISH_ALERT_FROM` y al correo del dueño
   post: `social_accounts.caida_avisada_en` lo marca y se borra cuando el fierro vuelve a
   calentarse. Una cuenta que el dueño desconectó a propósito no avisa. El día que esto se
   despliega, cada cuenta que ya estaba caída manda el suyo una vez.
-- **El resumen del día**: lo que se quemó en las últimas 24 horas, las cuentas por reconectar
+- **El resumen del día**: lo que se quemó en las últimas 24 horas (con la cuenta en el modo
+  día, lo que «se echó a perder», como se llama ahí la sección), las cuentas por reconectar
   (frías o a menos de siete días de vencer) y las cuentas en uso —con algo programado en los
   últimos 30 días— que tienen menos de tres días programados hacia adelante. Sale después de
   la sincronización diaria (9:00 UTC), y solo los días en que hay algo que contar. Lo mismo
@@ -1212,7 +1216,7 @@ src/
       (dash)/              panel protegido
   components/
     corte.tsx              el corte dibujado de La Parrilla: silueta, carne, marcas, halo y humo
-    pieza-sushi.tsx        el mismo corte en el modo día: nigiri, maki, sashimi y temaki
+    pieza-sushi.tsx        el mismo corte en el modo día: nigiri, roll, sashimi y temaki
     boton-tema.tsx         el botón de la barra que cambia entre la noche y el día
     landing.tsx            la portada del producto, armada con las piezas del panel; landing-demos.tsx, lo que se toca
     landing-semana.ts      la semana de ejemplo, que comparten la portada y su imagen para compartir (/api/og)

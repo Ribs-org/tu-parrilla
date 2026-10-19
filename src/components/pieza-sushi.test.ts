@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { MAX_HUESOS, ORDEN_CARNE } from '@/lib/parrilla'
 import { contraste, simular } from './charts/color'
-import { PESCADO, posicionesMaki, rodajas, siluetaDe } from './pieza-sushi'
+import { PESCADO, posicionesMaki, rodajas, rollCortado, rollEntero, siluetaDe } from './pieza-sushi'
 
 /*
  * La pieza de sushi dice la cocción como la dice la carne del corte: por luminosidad, de clara a
@@ -43,13 +43,57 @@ describe('el pescado de la pieza', () => {
     }
     expect(contraste(simular(PESCADO.cruda.medio, tipo), simular(PESCADO.quemada.medio, tipo))).toBeGreaterThanOrEqual(5)
   })
+
+  // De día lo que falló no se quema, se echa a perder (2026-10-19): el pescado del extremo es
+  // verde gris, no carbón. Más verde que rojo en sus tres tonos, que es lo que lo aparta del
+  // salmón y del aburi aunque sea igual de oscuro que el carbón.
+  it('lo que falló es pescado pasado: verde gris, no carbón', () => {
+    const canales = (hex: string) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16))
+    for (const tono of Object.values(PESCADO.quemada)) {
+      const [r, g] = canales(tono)
+      expect(g, tono).toBeGreaterThan(r!)
+    }
+  })
 })
 
 describe('las siluetas', () => {
-  it('cada formato tiene la suya, y el maki una por cantidad de rodajas', () => {
+  it('cada formato tiene la suya, y el roll una por cantidad de rodajas, entero y cortado', () => {
     for (const formato of ['entrana', 'bife', 'chori'] as const) expect(siluetaDe(formato, 0)).toMatch(/^M/)
-    const largos = new Set(Array.from({ length: MAX_HUESOS - 1 }, (_, i) => siluetaDe('tira', i + 2)))
-    expect(largos.size).toBe(MAX_HUESOS - 1)
+    const ns = Array.from({ length: MAX_HUESOS - 1 }, (_, i) => i + 2)
+    const todas = new Set(ns.flatMap((n) => [siluetaDe('tira', n), siluetaDe('tira', n, false)]))
+    expect(todas.size).toBe(2 * ns.length)
+  })
+})
+
+// El roll va entero mientras no se sirvió y en rodajas cuando salió (lo pidió el dueño el
+// 2026-10-19). Entero también cuenta los archivos: una línea de corte menos que rodajas.
+describe('el roll, entero o en rodajas', () => {
+  it('se corta solo cuando se sirvió: a punto, o a punto en lo que no falló', () => {
+    expect(ORDEN_CARNE.filter(rollCortado)).toEqual(['punto'])
+  })
+
+  it('entero, ocupa lo mismo que sus rodajas, y lleva una línea de corte entre cada dos', () => {
+    for (let n = 2; n <= MAX_HUESOS; n++) {
+      const discos = rodajas(n)
+      const { x0, x1, cortes } = rollEntero(n)
+      expect(x0).toBeCloseTo(discos[0]!.cx - discos[0]!.r)
+      expect(x1).toBeCloseTo(discos[n - 1]!.cx + discos[n - 1]!.r)
+      expect(cortes).toHaveLength(n - 1)
+      cortes.forEach((x, i) => {
+        expect(x).toBeGreaterThan(discos[i]!.cx)
+        expect(x).toBeLessThan(discos[i + 1]!.cx)
+      })
+    }
+  })
+
+  it('sus bandas caen sobre el roll entero, donde van a quedar las rodajas', () => {
+    for (let n = 2; n <= MAX_HUESOS; n++) {
+      const { x0, x1 } = rollEntero(n)
+      for (const x of posicionesMaki(3, n)) {
+        expect(x).toBeGreaterThan(x0)
+        expect(x).toBeLessThan(x1)
+      }
+    }
   })
 })
 
