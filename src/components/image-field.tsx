@@ -42,7 +42,7 @@ export function ImageField({ label, value, onChange, hint, shape = 'wide' }: Pro
           onClick={() => input.current?.click()}
           disabled={pending}
           className={cn(
-            'relative grid shrink-0 place-items-center overflow-hidden border border-dashed border-white/15 bg-white/[0.03] transition-colors hover:border-white/30',
+            'relative grid shrink-0 place-items-center overflow-hidden border border-dashed border-velo/15 bg-velo/[0.03] transition-colors hover:border-velo/30',
             shape === 'circle' ? 'h-16 w-16 rounded-full' : 'h-16 w-28 rounded-xl',
           )}
         >
@@ -66,7 +66,7 @@ export function ImageField({ label, value, onChange, hint, shape = 'wide' }: Pro
               type="button"
               onClick={() => input.current?.click()}
               disabled={pending}
-              className="rounded-lg border border-white/10 px-2.5 py-1.5 text-xs text-fg-muted transition-colors hover:text-fg disabled:opacity-50"
+              className="rounded-lg border border-velo/10 px-2.5 py-1.5 text-xs text-fg-muted transition-colors hover:text-fg disabled:opacity-50"
             >
               {value ? 'Cambiar' : 'Subir imagen'}
             </button>

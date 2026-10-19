@@ -137,8 +137,9 @@ export function ProfileEditor({ profile, initialLinks, origin, publicUrl, soloPe
     })
   }
 
+  // `vista-publica`: es la página pública del creador, que de día no cambia (`globals.css`).
   const preview = (
-    <div className="mx-auto w-full max-w-[22rem] overflow-hidden rounded-[2rem] border border-white/10 bg-ink-950 shadow-2xl">
+    <div className="vista-publica mx-auto w-full max-w-[22rem] overflow-hidden rounded-[2rem] border border-white/10 bg-ink-950 shadow-2xl">
       <div className="h-[38rem] overflow-y-auto">
         <ProfileView
           profile={{
@@ -230,7 +231,7 @@ export function ProfileEditor({ profile, initialLinks, origin, publicUrl, soloPe
                     onClick={() => setDraft((d) => ({ ...d, accentColor: color }))}
                     className={cn(
                       'h-7 w-7 rounded-full ring-offset-2 ring-offset-acero-900 transition-all',
-                      draft.accentColor.toLowerCase() === color && 'ring-2 ring-white/60',
+                      draft.accentColor.toLowerCase() === color && 'ring-2 ring-velo/60',
                     )}
                     style={{ background: color }}
                   />
@@ -240,13 +241,13 @@ export function ProfileEditor({ profile, initialLinks, origin, publicUrl, soloPe
                   name="accentColor"
                   value={draft.accentColor}
                   onChange={(event) => setDraft((d) => ({ ...d, accentColor: event.target.value }))}
-                  className="h-7 w-10 cursor-pointer rounded border border-white/10 bg-transparent"
+                  className="h-7 w-10 cursor-pointer rounded border border-velo/10 bg-transparent"
                   aria-label="Color personalizado"
                 />
               </div>
             </div>
 
-            <div className="space-y-3 rounded-xl border border-white/[0.06] p-3">
+            <div className="space-y-3 rounded-xl border border-velo/[0.06] p-3">
               <Toggle
                 label="Publicado"
                 hint="Si lo apagas, la URL responde 404"
@@ -291,7 +292,7 @@ export function ProfileEditor({ profile, initialLinks, origin, publicUrl, soloPe
             <button
               type="button"
               onClick={() => setShowPreview(true)}
-              className="flex items-center gap-1 rounded-lg border border-white/10 px-2.5 py-1.5 text-xs text-fg-muted transition-colors hover:text-fg lg:hidden"
+              className="flex items-center gap-1 rounded-lg border border-velo/10 px-2.5 py-1.5 text-xs text-fg-muted transition-colors hover:text-fg lg:hidden"
             >
               <Eye className="h-3.5 w-3.5" aria-hidden /> Ver
             </button>
@@ -325,7 +326,7 @@ export function ProfileEditor({ profile, initialLinks, origin, publicUrl, soloPe
             </p>
           ) : null}
 
-          <form action={addLink} className="mt-4 space-y-3 rounded-xl border border-white/[0.06] p-3">
+          <form action={addLink} className="mt-4 space-y-3 rounded-xl border border-velo/[0.06] p-3">
             <div className="grid gap-3 sm:grid-cols-[10rem_minmax(0,1fr)]">
               <Field label="Tipo">
                 <Select name="kind" defaultValue="standard">
@@ -358,7 +359,7 @@ export function ProfileEditor({ profile, initialLinks, origin, publicUrl, soloPe
 
         <Panel title="Compartir">
           <div className="flex flex-wrap items-center gap-2">
-            <code className="min-w-0 flex-1 truncate rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 font-mono text-sm">
+            <code className="min-w-0 flex-1 truncate rounded-xl border border-velo/10 bg-velo/[0.04] px-3 py-2 font-mono text-sm">
               {publicUrl}
             </code>
             <Button
@@ -443,7 +444,7 @@ export function ProfileEditor({ profile, initialLinks, origin, publicUrl, soloPe
           <button
             type="button"
             onClick={() => setShowPreview(false)}
-            className="absolute right-4 top-4 rounded-full border border-white/10 bg-acero-900 p-2"
+            className="absolute right-4 top-4 rounded-full border border-velo/10 bg-acero-900 p-2"
             aria-label="Cerrar vista previa"
           >
             <X className="h-4 w-4" aria-hidden />

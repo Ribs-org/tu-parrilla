@@ -125,7 +125,7 @@ export default async function PublicacionesPage({ searchParams }: { searchParams
               aria-current={opcion.activa ? 'true' : undefined}
               className={cn(
                 'rounded-lg px-2.5 py-1.5 text-xs whitespace-nowrap transition-colors',
-                opcion.activa ? 'bg-white/[0.14] text-fg' : 'text-fg-muted hover:text-fg',
+                opcion.activa ? 'bg-velo/[0.14] text-fg' : 'text-fg-muted hover:text-fg',
               )}
             >
               {opcion.texto}

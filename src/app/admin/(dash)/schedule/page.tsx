@@ -203,7 +203,7 @@ export default async function SchedulePage({
                 href={tab.href}
                 className={cn(
                   'rounded-full px-2.5 py-1 font-mono text-[0.68rem] transition-colors',
-                  tab.active ? 'bg-white/[0.14] text-fg' : 'bg-white/[0.05] text-fg-faint hover:text-fg',
+                  tab.active ? 'bg-velo/[0.14] text-fg' : 'bg-velo/[0.05] text-fg-faint hover:text-fg',
                 )}
               >
                 {tab.label}

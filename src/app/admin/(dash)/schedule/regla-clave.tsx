@@ -15,7 +15,7 @@ export function ReglaClave({
   inicial?: { palabra: string; mensaje: string; respuestaPublica: string } | null
 }) {
   return (
-    <details open={Boolean(inicial)} className="rounded-xl bg-white/[0.04] p-4">
+    <details open={Boolean(inicial)} className="rounded-xl bg-velo/[0.04] p-4">
       <summary className="cursor-pointer text-sm font-medium">Respuesta automática por palabra clave</summary>
       <div className="mt-4 space-y-4">
         <Field label="Palabra clave" hint="Una sola palabra. Quien la comente recibe la respuesta sin que hagas nada.">

@@ -49,8 +49,8 @@ export function PanelSkeleton({ className, orden = 0 }: { className?: string; or
   return (
     <div className={cn('chapa tibio rounded-xl p-5', className)} style={retraso(orden)} aria-hidden>
       <div className="mb-4">
-        <div className="h-[1.4rem] w-40 max-w-[60%] rounded bg-white/[0.06]" />
-        <div className="mt-0.5 h-[1.15rem] w-72 max-w-full rounded bg-white/[0.035]" />
+        <div className="h-[1.4rem] w-40 max-w-[60%] rounded bg-velo/[0.06]" />
+        <div className="mt-0.5 h-[1.15rem] w-72 max-w-full rounded bg-velo/[0.035]" />
       </div>
       <div className="brasa-tibia h-40 rounded-xl" />
     </div>

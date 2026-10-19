@@ -213,11 +213,16 @@ Nada de esto bloquea un trámite hoy; conviene ordenarlo antes de abrir a tercer
   3. Ver lado a lado los de arriba y los de abajo, o dos publicaciones elegidas: portada,
      atributos, la curva día a día y el link a la red. Sin guardar el video después de
      publicado: decisión del dueño, para que R2 no crezca.
-- **Un modo día con sushi** (2026-10-18). Pedido del dueño, para después de lo anterior:
-  un modo día donde la parrilla se vuelve sushi —las mismas piezas, con sashimi y compañía
-  en vez de cortes—, para el público que la estética de asado deja fuera. El modo noche, el
-  de hoy, sigue por defecto. Solo interfaz. Antes del código va un diseño extenso, al nivel
-  de `docs/auditoria-ui-2026-10-16.md`.
+- **El modo día con sushi** (2026-10-18). Pedido del dueño, para el público que la estética de
+  asado deja fuera. Están hechas las tandas 1 y 2: el botón, la paleta del día y las piezas de
+  sushi en el panel. El diseño, con lo que queda, está en
+  `docs/superpowers/specs/2026-10-19-modo-dia-sushi-design.md`. Falta:
+  - mirar de día los gráficos en Safari y en Firefox: en Chrome, recharts toma las variables
+    del modo; si otro navegador no, saldrían con el color por defecto de cada atributo;
+  - la app del teléfono, que sigue solo de noche (tanda 3, por aire);
+  - la portada y lo que se comparte, cuando marketing lo pida (tanda 4);
+  - **[dueño]** decidir la marca de día (el nigiri en vez del bife, en la portada) y si el
+    modo pasa a ser de la cuenta en vez del equipo.
 - **Llevar el resto de la interfaz al nivel del corte** (2026-10-16). La auditoría de ese
   día propone seis tandas que se publican solas. La primera, lo roto, ya está. Quedan: el
   corte en los flujos (el compositor, la parrilla fría y la carga tibia ya están; faltan La

@@ -185,7 +185,7 @@ export function WeekCalendar({
                     <Link
                       href={nuevoEnDia(day)}
                       scroll={false}
-                      className="-my-1 rounded p-0.5 text-fg-faint transition-colors hover:bg-white/[0.08] hover:text-fg"
+                      className="-my-1 rounded p-0.5 text-fg-faint transition-colors hover:bg-velo/[0.08] hover:text-fg"
                     >
                       <Plus className="h-3.5 w-3.5" aria-hidden />
                       <span className="sr-only">Programar el {dayLabel(day, index)}</span>
@@ -201,7 +201,7 @@ export function WeekCalendar({
                     calor === 'llena' && 'grilla-llena',
                     // El día de hoy se marca con el borde y no con el fondo: el fondo ya
                     // lo está usando el fuego para contar el volumen.
-                    day === today && 'ring-1 ring-inset ring-white/25',
+                    day === today && 'ring-1 ring-inset ring-velo/25',
                   )}
                 >
                   {cortes.length === 0 && enBorrador.length === 0 ? (
@@ -292,7 +292,7 @@ export function WeekCalendar({
                       href={b.href}
                       scroll={false}
                       prefetch={false}
-                      className="block rounded-md border border-dashed border-white/30 p-2 transition-colors hover:border-white/60"
+                      className="block rounded-md border border-dashed border-velo/30 p-2 transition-colors hover:border-velo/60"
                     >
                       <p className="font-titulo text-[0.6rem] tracking-[0.12em] text-fg-muted">
                         Borrador · {hourLabel(b.fecha, zone)}

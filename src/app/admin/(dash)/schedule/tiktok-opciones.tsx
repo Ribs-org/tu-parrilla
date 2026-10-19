@@ -86,7 +86,7 @@ export function TikTokOpciones({
   const patrocinadoPrivado = patrocinado && privacidad === 'SELF_ONLY'
 
   return (
-    <div className="space-y-4 rounded-xl bg-white/[0.04] p-4">
+    <div className="space-y-4 rounded-xl bg-velo/[0.04] p-4">
       <div className="flex items-center gap-3">
         {creador?.avatarUrl ? (
           <Image src={creador.avatarUrl} alt="" width={32} height={32} unoptimized className="h-8 w-8 rounded-full" />

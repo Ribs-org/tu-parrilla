@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { contraste, distancia, simular } from './color'
 import { CHART, SERIES } from './theme'
@@ -23,6 +24,16 @@ describe('la paleta de series sobre la superficie del panel', () => {
   it('las ocho se leen sobre la chapa', () => {
     for (const color of SERIES) {
       expect(contraste(color, CHART.surface), `${color} sobre ${CHART.surface}`).toBeGreaterThanOrEqual(3)
+    }
+  })
+
+  it('las ocho se leen también sobre la chapa del día: no cambian con el modo', () => {
+    const css = readFileSync(new URL('../../app/globals.css', import.meta.url), 'utf8')
+    const dia = css.match(/\.acerado\[data-tema='dia'\]\s*\{([^}]*)\}/)?.[1] ?? ''
+    const chapaDelDia = dia.match(/--chart-surface:\s*(#[0-9a-f]{6});/)?.[1]
+    expect(chapaDelDia).toBeDefined()
+    for (const color of SERIES) {
+      expect(contraste(color, chapaDelDia!), `${color} sobre ${chapaDelDia}`).toBeGreaterThanOrEqual(3)
     }
   })
 

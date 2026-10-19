@@ -48,7 +48,7 @@ export function DestinosDelPost({ dibujo, destinos }: { dibujo: Dibujo; destinos
       <div className="flex items-start gap-4">
         {/* El margen deja asomar el humo o la banderita sin taparlos. */}
         <Corte {...dibujo} className="mt-3 w-24 shrink-0 sm:w-32" />
-        <ul className="min-w-0 flex-1 divide-y divide-white/[0.06]">
+        <ul className="min-w-0 flex-1 divide-y divide-velo/[0.06]">
           {destinos.map((d, i) => {
             const sello = dibujo.sellos[i]!
             const motivo = motivoDestino(d)

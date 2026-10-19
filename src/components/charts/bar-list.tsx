@@ -69,7 +69,7 @@ export function BarList({
             {item.href?.startsWith('/') ? (
               <Link
                 href={item.href}
-                className="relative flex items-center gap-3 overflow-hidden rounded-md px-2.5 py-1.5 text-[0.85rem] transition-colors hover:bg-white/[0.04]"
+                className="relative flex items-center gap-3 overflow-hidden rounded-md px-2.5 py-1.5 text-[0.85rem] transition-colors hover:bg-velo/[0.04]"
               >
                 {row}
               </Link>
@@ -78,7 +78,7 @@ export function BarList({
                 href={item.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="relative flex items-center gap-3 overflow-hidden rounded-md px-2.5 py-1.5 text-[0.85rem] transition-colors hover:bg-white/[0.04]"
+                className="relative flex items-center gap-3 overflow-hidden rounded-md px-2.5 py-1.5 text-[0.85rem] transition-colors hover:bg-velo/[0.04]"
               >
                 {row}
               </a>

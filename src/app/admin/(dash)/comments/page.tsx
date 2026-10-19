@@ -55,7 +55,7 @@ export default async function CommentsPage({
   const chip = (activo: boolean) =>
     cn(
       'rounded-full px-3 py-1 text-[0.72rem] transition-colors',
-      activo ? 'bg-white/[0.12] text-fg' : 'bg-white/[0.04] text-fg-muted hover:text-fg',
+      activo ? 'bg-velo/[0.12] text-fg' : 'bg-velo/[0.04] text-fg-muted hover:text-fg',
     )
 
   return (

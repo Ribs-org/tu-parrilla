@@ -43,7 +43,7 @@ export function Brasa({ orden = 0, className }: { orden?: number; className?: st
 
 /** Un renglón que todavía no llegó: un nombre, una fecha, un enlace. */
 export function Renglon({ orden = 0, className }: { orden?: number; className?: string }) {
-  return <div aria-hidden className={cn('tibio h-3 rounded bg-white/[0.07]', className)} style={retraso(orden)} />
+  return <div aria-hidden className={cn('tibio h-3 rounded bg-velo/[0.07]', className)} style={retraso(orden)} />
 }
 
 /**

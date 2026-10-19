@@ -14,7 +14,7 @@ import type { CuentaDestino } from '@/lib/social/cuentas'
 export function InstagramOpciones({ cuenta, inicial = false }: { cuenta: CuentaDestino; inicial?: boolean }) {
   const [trial, setTrial] = useState(inicial)
   return (
-    <div className="space-y-3 rounded-xl bg-white/[0.04] p-4">
+    <div className="space-y-3 rounded-xl bg-velo/[0.04] p-4">
       <GroupLabel>Instagram · {cuenta.handle ?? 'sin nombre'}</GroupLabel>
       <Toggle
         name={`instagramTrial:${cuenta.id}`}

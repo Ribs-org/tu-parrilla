@@ -5,7 +5,7 @@ import { AlertTriangle, Check, ChevronDown, Copy, RefreshCw } from 'lucide-react
 import { disconnectAccount, fusionarCuenta, quitarCuentaAccion, syncSocialNow } from '@/app/admin/actions'
 import { Icon } from '@/components/icon'
 import { Button } from '@/components/ui'
-import { NEGATIVE, POSITIVE } from '@/components/charts/theme'
+import { PINTURA } from '@/components/charts/theme'
 import { SOCIAL_NETWORKS } from '@/db/schema'
 import type { CuentaRow } from '@/lib/posts-kpis'
 import { CONEXION_FALLO } from '@/lib/avisos/reglas'
@@ -280,7 +280,7 @@ function Fila({ row, network, vivas }: { row: CuentaRow; network: string; vivas:
   )
 
   return (
-    <li className="rounded-lg transition-colors hover:bg-white/[0.03]">
+    <li className="rounded-lg transition-colors hover:bg-velo/[0.03]">
       <div className="flex items-center gap-3 px-1 py-1.5">
         {/*
           El fierro, en chico y a la izquierda de todo. Dice la temperatura de la conexión
@@ -292,9 +292,9 @@ function Fila({ row, network, vivas }: { row: CuentaRow; network: string; vivas:
           <p className="flex items-center gap-1.5 text-sm">
             <span className="truncate">{nombre}</span>
             {row.lastSyncError ? (
-              <AlertTriangle className="h-3.5 w-3.5 shrink-0" style={{ color: NEGATIVE }} aria-hidden />
+              <AlertTriangle className="h-3.5 w-3.5 shrink-0" style={{ color: PINTURA.baja }} aria-hidden />
             ) : row.connected ? (
-              <Check className="h-3.5 w-3.5 shrink-0" style={{ color: POSITIVE }} aria-hidden />
+              <Check className="h-3.5 w-3.5 shrink-0" style={{ color: PINTURA.sube }} aria-hidden />
             ) : null}
           </p>
           <p className="text-[0.72rem] leading-snug">{estado}</p>
@@ -310,7 +310,7 @@ function Fila({ row, network, vivas }: { row: CuentaRow; network: string; vivas:
           onClick={() => setAbierta(!abierta)}
           aria-expanded={abierta}
           aria-controls={detalle}
-          className="shrink-0 rounded p-1 text-fg-faint transition-colors hover:bg-white/[0.06] hover:text-fg"
+          className="shrink-0 rounded p-1 text-fg-faint transition-colors hover:bg-velo/[0.06] hover:text-fg"
         >
           <ChevronDown className={cn('h-4 w-4 transition-transform', abierta && 'rotate-180')} aria-hidden />
           <span className="sr-only">Más de {nombre}</span>
@@ -345,7 +345,7 @@ function Fila({ row, network, vivas }: { row: CuentaRow; network: string; vivas:
           <span className="shrink-0 whitespace-nowrap text-fg-muted">En Tu Parrilla: </span>
           <span className="truncate">{row.id}</span>
           {idCopiado ? (
-            <Check className="h-3 w-3 shrink-0" style={{ color: POSITIVE }} aria-hidden />
+            <Check className="h-3 w-3 shrink-0" style={{ color: PINTURA.sube }} aria-hidden />
           ) : (
             <Copy className="h-3 w-3 shrink-0" aria-hidden />
           )}
@@ -446,7 +446,7 @@ function Quitar({ id, nombre, red }: { id: string; nombre: string; red: string }
         onClick={(event) => {
           if (event.target === event.currentTarget && !quitando) ventana.current?.close()
         }}
-        className="m-auto w-[24rem] max-w-[calc(100vw-2rem)] rounded-xl border border-white/10 bg-acero-900/95 text-fg shadow-xl backdrop-blur backdrop:bg-acero-950/80"
+        className="m-auto w-[24rem] max-w-[calc(100vw-2rem)] rounded-xl border border-velo/10 bg-acero-900/95 text-fg shadow-xl backdrop-blur backdrop:bg-acero-950/80"
       >
         <div className="space-y-3 p-4">
           <p id={titulo} className="font-titulo text-sm font-semibold uppercase tracking-[0.03em]">

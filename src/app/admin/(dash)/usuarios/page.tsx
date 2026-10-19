@@ -21,7 +21,7 @@ export default async function UsuariosPage() {
         <FormularioInvitar />
       </Panel>
       <Panel title="Invitados">
-        <ul className="divide-y divide-white/[0.06]">
+        <ul className="divide-y divide-velo/[0.06]">
           {usuarios.map((u) => (
             <li key={u.id} className="flex flex-wrap items-center gap-3 py-3 text-sm">
               <span className="min-w-0 flex-1 truncate">{u.nombre ? `${u.nombre} · ` : ''}{u.correo}</span>

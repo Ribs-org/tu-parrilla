@@ -24,7 +24,7 @@ export function ListaBorradores({ filas, cerrarHref }: { filas: FilaBorrador[]; 
       {filas.length === 0 ? (
         <p className="px-5 py-8 text-center text-sm text-fg-faint">No tienes borradores.</p>
       ) : (
-        <ul className="divide-y divide-white/[0.06]">
+        <ul className="divide-y divide-velo/[0.06]">
           {filas.map((fila) => (
             <li key={fila.id}>
               <Link

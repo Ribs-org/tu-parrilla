@@ -186,7 +186,13 @@ destino sale, y un halo rojo con banderita si algo se quemó; humo mientras sale
 al lado, en la chapa, nunca sobre la carne. La app del teléfono dibuja el mismo corte con
 vistas (`mobile/src/components/pieza.tsx`), con el formato y el sello de cada destino que le
 manda `GET /api/mobile/schedule`. El porqué, en
-`docs/superpowers/specs/2026-10-16-el-corte-que-se-lee-design.md`. Al pie, cuántos cortes salieron ayer; las miradas solo si la sincronización ya
+`docs/superpowers/specs/2026-10-16-el-corte-que-se-lee-design.md`. El panel tiene además un
+**modo día**, que se elige con el botón de la barra y se recuerda en el equipo con una cookie
+(`src/lib/tema.ts`): el fondo claro y, en vez de cortes, piezas de sushi
+(`src/components/pieza-sushi.tsx`) que dicen lo mismo con la misma gramática —nigiri, maki,
+sashimi y temaki; el pescado bajo el soplete; una banda de nori por destino—. Las palabras no
+cambian, la noche sigue por defecto, y la página pública de cada creador no cambia nunca. El
+diseño, en `docs/superpowers/specs/2026-10-19-modo-dia-sushi-design.md`. Al pie, cuántos cortes salieron ayer; las miradas solo si la sincronización ya
 trajo sus métricas, porque un cero inventado diría «nadie miró» cuando lo cierto es
 «todavía no se sabe». Lo que no pide una acción está un clic más adentro: el tráfico, los
 links y qué contenido te trae gente viven en **Los Números**, y tus páginas públicas en
@@ -1185,6 +1191,8 @@ src/
       (dash)/              panel protegido
   components/
     corte.tsx              el corte dibujado de La Parrilla: silueta, carne, marcas, halo y humo
+    pieza-sushi.tsx        el mismo corte en el modo día: nigiri, maki, sashimi y temaki
+    boton-tema.tsx         el botón de la barra que cambia entre la noche y el día
     landing.tsx            la portada del producto, armada con las piezas del panel; landing-demos.tsx, lo que se toca
     landing-semana.ts      la semana de ejemplo, que comparten la portada y su imagen para compartir (/api/og)
     esqueleto.tsx          las piezas de la carga del panel: la forma de cada pantalla, con su pulso tibio
@@ -1192,6 +1200,7 @@ src/
     click-tracker.tsx      escucha delegada de clicks
     charts/                gráficos y paleta validada
   lib/
+    tema.ts                el modo del panel (noche o día) y su cookie; tema-servidor.ts lo lee en el servidor
     slugs.ts               qué direcciones están reservadas y cuál le toca a cada correo
     dominios.ts            si un host es el del producto, y adónde va el panel si no lo es
     tracking.ts            contexto de la visita desde headers

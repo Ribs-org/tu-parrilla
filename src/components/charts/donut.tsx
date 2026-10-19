@@ -2,7 +2,7 @@
 
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
 import { formatNumber } from '@/lib/utils'
-import { CHART, seriesColor } from './theme'
+import { PINTURA, seriesColor } from './theme'
 
 export type Slice = { key: string; label: string; value: number }
 
@@ -35,7 +35,7 @@ export function Donut({ slices }: { slices: Slice[] }) {
               innerRadius={52}
               outerRadius={80}
               paddingAngle={2}
-              stroke={CHART.surface}
+              stroke={PINTURA.surface}
               strokeWidth={2}
             >
               {data.map((slice, i) => (
@@ -48,7 +48,7 @@ export function Donut({ slices }: { slices: Slice[] }) {
                 const item = payload[0]!
                 const value = Number(item.value ?? 0)
                 return (
-                  <div className="rounded-xl border border-white/10 bg-acero-900/95 px-3 py-2 text-[0.8rem] shadow-xl backdrop-blur">
+                  <div className="rounded-xl border border-velo/10 bg-acero-900/95 px-3 py-2 text-[0.8rem] shadow-xl backdrop-blur">
                     <span className="text-fg-muted">{item.name}</span>
                     <span className="ml-3 font-mono tabular-nums text-fg">
                       {formatNumber(value)} · {((value / total) * 100).toFixed(1)}%

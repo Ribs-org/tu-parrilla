@@ -9,6 +9,7 @@ import {
   type Sello,
 } from '@/lib/parrilla'
 import { cn } from '@/lib/utils'
+import { PiezaSushi } from './pieza-sushi'
 
 /*
  * El corte, dibujado. Reemplaza a la tarjeta teñida de antes (`.corte-*`), donde el color
@@ -25,7 +26,8 @@ import { cn } from '@/lib/utils'
  * Es un dibujo y nada más: no lleva texto encima. La hora, el texto del post y el estado en
  * palabras van debajo, en la chapa, donde se leen.
  *
- * Ver `docs/superpowers/specs/2026-10-16-el-corte-que-se-lee-design.md`.
+ * Ver `docs/superpowers/specs/2026-10-16-el-corte-que-se-lee-design.md`. De día, el mismo
+ * corte se dibuja como una pieza de sushi (`pieza-sushi.tsx`), con la misma gramática.
  */
 
 /** Las siluetas, en un lienzo de 120 × 64. También las dibuja la imagen para compartir la portada. */
@@ -203,25 +205,7 @@ function Marca({ x, sello, chico }: { x: number; sello: Sello; chico: boolean })
   return <path d={d} fill="none" strokeLinecap="round" stroke="#24100a" strokeOpacity=".82" strokeWidth={5 * g} />
 }
 
-/**
- * Un corte. `sellos` son los de sus destinos, en el orden de sus destinos: una marca por
- * cada uno. `carne` es con qué se pinta y `coccion` si lleva el halo de quemado
- * (`carneDe` y `coccionDe`, en `src/lib/parrilla.ts`).
- *
- * Es solo el dibujo y va `aria-hidden`: quien lo pone escribe al lado, en palabras, lo que
- * el dibujo dice —el formato, la cocción y cómo le fue a cada destino—.
- */
-export function Corte({
-  formato,
-  huesos = 0,
-  carne,
-  coccion,
-  sellos,
-  chico = false,
-  llenado = 1,
-  idDeLlenado = 'tp-llenado',
-  className,
-}: {
+type PropsDeCorte = {
   formato: Formato
   huesos?: number
   carne: Carne
@@ -238,7 +222,42 @@ export function Corte({
   /** El id del recorte del llenado: único por página si hay más de un corte a medio llenar. */
   idDeLlenado?: string
   className?: string
-}) {
+}
+
+/**
+ * Un corte. `sellos` son los de sus destinos, en el orden de sus destinos: una marca por
+ * cada uno. `carne` es con qué se pinta y `coccion` si lleva el halo de quemado
+ * (`carneDe` y `coccionDe`, en `src/lib/parrilla.ts`).
+ *
+ * Van los dos dibujos, la carne de la noche y la pieza del día, y el CSS esconde el que no va
+ * (`.solo-noche` y `.solo-dia`, en `globals.css`). Así el corte sirve igual en un componente del
+ * servidor que en uno del cliente, sin saber el modo. Afuera del panel —la portada— no hay
+ * `data-tema` y queda la carne.
+ *
+ * Es solo el dibujo y va `aria-hidden`: quien lo pone escribe al lado, en palabras, lo que
+ * el dibujo dice —el formato, la cocción y cómo le fue a cada destino—.
+ */
+export function Corte({ className, idDeLlenado = 'tp-llenado', ...props }: PropsDeCorte) {
+  return (
+    <span className={cn('relative block', className)} aria-hidden>
+      <CorteDeCarne {...props} idDeLlenado={idDeLlenado} className="solo-noche" />
+      <PiezaSushi {...props} idDeLlenado={`${idDeLlenado}-sushi`} className="solo-dia" />
+    </span>
+  )
+}
+
+/** La carne: el corte de la noche. */
+function CorteDeCarne({
+  formato,
+  huesos = 0,
+  carne,
+  coccion,
+  sellos,
+  chico = false,
+  llenado = 1,
+  idDeLlenado = 'tp-llenado',
+  className,
+}: PropsDeCorte) {
   const quemado = coccion === 'parcial' || coccion === 'quemada'
   const saliendo = sellos.includes('saliendo')
   const v = VETAS[carne]

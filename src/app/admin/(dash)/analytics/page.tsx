@@ -608,7 +608,7 @@ async function Audiencia({ filters, kpis }: { filters: Filters; kpis: Kpis }) {
         {recent.length === 0 ? (
           <Empty>Nada todavía.</Empty>
         ) : (
-          <ul className="divide-y divide-white/[0.06]">
+          <ul className="divide-y divide-velo/[0.06]">
             {recent.map((visit) => (
               <li key={visit.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 py-2 text-[0.82rem]">
                 <span aria-hidden>{flagEmoji(visit.country)}</span>
@@ -623,7 +623,7 @@ async function Audiencia({ filters, kpis }: { filters: Filters; kpis: Kpis }) {
                   {visit.os ? ` · ${visit.os}` : ''}
                   {visit.browser ? ` · ${visit.browser}` : ''}
                 </span>
-                <span className="rounded-md bg-white/[0.06] px-1.5 py-0.5 font-mono text-[0.68rem] text-fg-muted">
+                <span className="rounded-md bg-velo/[0.06] px-1.5 py-0.5 font-mono text-[0.68rem] text-fg-muted">
                   {networkLabel(visit.referrerNetwork)}
                 </span>
                 {visit.campaign ? (
@@ -635,7 +635,7 @@ async function Audiencia({ filters, kpis }: { filters: Filters; kpis: Kpis }) {
                   </span>
                 ) : null}
                 {visit.isBot ? (
-                  <span className="rounded-md bg-white/[0.06] px-1.5 py-0.5 font-mono text-[0.68rem] text-fg-faint">
+                  <span className="rounded-md bg-velo/[0.06] px-1.5 py-0.5 font-mono text-[0.68rem] text-fg-faint">
                     bot
                   </span>
                 ) : null}

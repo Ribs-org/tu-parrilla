@@ -11,7 +11,7 @@ import {
   YAxis,
 } from 'recharts'
 import { formatNumber } from '@/lib/utils'
-import { CHART, SERIES } from './theme'
+import { PINTURA, SERIES } from './theme'
 
 type Series = { key: string; name: string }
 
@@ -50,7 +50,7 @@ function TooltipCard({
   const point = payload[0]?.payload
 
   return (
-    <div className="rounded-xl border border-white/10 bg-acero-900/95 px-3 py-2 shadow-xl backdrop-blur">
+    <div className="rounded-xl border border-velo/10 bg-acero-900/95 px-3 py-2 shadow-xl backdrop-blur">
       <p className="font-mono text-[0.65rem] uppercase tracking-wider text-fg-faint">
         {point?.fullLabel}
       </p>
@@ -95,12 +95,12 @@ function Grafico({ data, series, alto, ejeY }: { data: ChartPoint[]; series: Ser
           ))}
         </defs>
 
-        <CartesianGrid stroke={CHART.grid} vertical={false} />
+        <CartesianGrid stroke={PINTURA.grid} vertical={false} />
         <XAxis
           dataKey="label"
           tickLine={false}
-          axisLine={{ stroke: CHART.axis }}
-          tick={{ fill: CHART.muted, fontSize: 11 }}
+          axisLine={{ stroke: PINTURA.axis }}
+          tick={{ fill: PINTURA.muted, fontSize: 11 }}
           minTickGap={28}
         />
         <YAxis
@@ -109,9 +109,9 @@ function Grafico({ data, series, alto, ejeY }: { data: ChartPoint[]; series: Ser
           width={ejeY}
           allowDecimals={false}
           tickFormatter={(value: number) => formatNumber(value)}
-          tick={{ fill: CHART.muted, fontSize: 11 }}
+          tick={{ fill: PINTURA.muted, fontSize: 11 }}
         />
-        <Tooltip cursor={{ stroke: CHART.axis, strokeWidth: 1 }} content={<TooltipCard colores={colores} />} />
+        <Tooltip cursor={{ stroke: PINTURA.axis, strokeWidth: 1 }} content={<TooltipCard colores={colores} />} />
         {series.map((s) => (
           <Area
             key={s.key}
@@ -122,7 +122,7 @@ function Grafico({ data, series, alto, ejeY }: { data: ChartPoint[]; series: Ser
             strokeWidth={2}
             fill={`url(#${id}-${s.key})`}
             dot={false}
-            activeDot={{ r: 4, strokeWidth: 2, stroke: CHART.surface }}
+            activeDot={{ r: 4, strokeWidth: 2, stroke: PINTURA.surface }}
           />
         ))}
       </AreaChart>
