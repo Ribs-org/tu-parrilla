@@ -809,8 +809,8 @@ patrones. Con menos de ~10 posts por valor de atributo, desconfía de la diferen
   `{ "ok": true, "id" }`.
 - **No republica lo ya publicado**: corregir un post afecta solo a los destinos que
   aún no salieron.
-- **Entrega un solo agregado**: `/api/metrics/mejores`, el mejor X % con sus medianas y lo
-  que se repite. Todo lo demás —promedios por red, tendencias, cruces de atributos— sale de
+- **Entrega un solo agregado**: `/api/metrics/mejores`, el mejor (o el peor) X % con sus
+  medianas y lo que se repite. Todo lo demás —promedios por red, tendencias, cruces de atributos— sale de
   las filas crudas de `/api/metrics/posts`, y el análisis es tuyo, a propósito.
 
 # 6. Ejemplos ejecutables
