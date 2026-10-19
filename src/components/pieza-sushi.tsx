@@ -7,9 +7,12 @@ import { cn } from '@/lib/utils'
  * - la silueta, el formato: nigiri el video, maki el carrusel (una rodaja por archivo, como
  *   el hueso de la tira), sashimi la foto, temaki el texto;
  * - el pescado, la cocción: el soplete del aburi hace de parrilla, así que crudo es
- *   programado, sellado es saliendo, a punto es publicado y quemado es quemado;
+ *   programado, sellado es saliendo y a punto es publicado. Lo que falló no se quema: el
+ *   pescado que no se sirvió se echó a perder, y se ve pasado —verde gris, con moho y con su
+ *   olor encima—. Lo pidió el dueño el 2026-10-19, junto con la palabra: de día, «Se quemó»
+ *   dice «Se echó a perder» (`SE_QUEMO`, en `src/lib/vocabulario.ts`);
  * - las bandas de nori, una por destino, cómo le fue a cada uno (`Sello`);
- * - el halo rojo y la banderita, que algo se quemó, idénticos a los del corte;
+ * - el halo rojo y la banderita, que algo falló, idénticos a los del corte;
  * - la llama del soplete, que algo está saliendo ahora (en el corte, el humo).
  *
  * El arroz, el nori, el shiso y el papel de soya no cambian con la cocción: solo el pescado,
@@ -22,14 +25,31 @@ import { cn } from '@/lib/utils'
 /**
  * El pescado según la cocción, de claro a oscuro, como la carne del corte: el orden por
  * luminosidad es lo que sobrevive a un daltonismo. Crudo es salmón fresco; sellado, con los
- * bordes ya dorados; a punto, el aburi tostado; quemado, carbón.
+ * bordes ya dorados; a punto, el aburi tostado. Lo que falló (`quemada`, como la carne) no es
+ * carbón: es pescado pasado, un verde gris hondo y sin brillo. Igual de oscuro que el carbón,
+ * para que siga siendo el extremo de la escala.
  */
 export const PESCADO: Record<Carne, { claro: string; medio: string; hondo: string }> = {
   cruda: { claro: '#ffd2c2', medio: '#ffb39a', hondo: '#f48d6f' },
   sellada: { claro: '#f4ad7e', medio: '#e5864a', hondo: '#c66737' },
   punto: { claro: '#d58e4f', medio: '#b46a33', hondo: '#86491f' },
-  quemada: { claro: '#4b3b37', medio: '#33292a', hondo: '#1b1517' },
+  quemada: { claro: '#5d6a43', medio: '#282d20', hondo: '#161a10' },
 }
+
+/** El moho del pescado pasado y el olor que sube de él: un verde que no es el del shiso. */
+const PASADO = { moho: '#cfd8b4', olor: '#7d8f52' }
+
+/** Dónde cae el moho: unas manchas repartidas por todo el lienzo, que la silueta recorta. */
+const MOHO: ReadonlyArray<readonly [number, number, number]> = [
+  [30, 22, 4.6],
+  [56, 16, 3.4],
+  [82, 25, 4.2],
+  [44, 40, 3.2],
+  [94, 42, 3.8],
+  [102, 16, 3.2],
+  [22, 46, 3.4],
+  [68, 47, 4],
+]
 
 /** Lo que no se cocina: el arroz, el nori, el shiso, el wasabi y el papel de soya del temaki. */
 const ARROZ = { claro: '#ffffff', sombra: '#efe5d4', borde: '#d9ccb6', grano: '#e4d8c4' }
@@ -38,16 +58,16 @@ const SHISO = { claro: '#7fbf5f', hondo: '#4f8f3a' }
 const WASABI = '#a9c864'
 const SOYA = { claro: '#fbd3df', hondo: '#efa9bf' }
 
-/** Las vetas blancas del salmón; en el quemado, apagadas. */
+/** Las vetas blancas del salmón; en el pescado pasado, apagadas y verdosas. */
 function vetas(carne: Carne): { color: string; opacidad: number } {
-  if (carne === 'quemada') return { color: '#6a5550', opacidad: 0.35 }
+  if (carne === 'quemada') return { color: '#7a8566', opacidad: 0.35 }
   if (carne === 'punto') return { color: '#f3c99a', opacidad: 0.45 }
   return { color: '#ffffff', opacidad: carne === 'cruda' ? 0.75 : 0.55 }
 }
 
 /*
  * Las siluetas, en el mismo lienzo de 120 × 64 que el corte. Cada una es la forma entera de
- * la pieza: recorta las bandas, lleva el contorno y, si se quemó, el halo.
+ * la pieza: recorta las bandas, lleva el contorno y, si algo falló, el halo.
  */
 const NIGIRI = {
   silueta: 'M8 29C9 17 30 10 60 10C90 10 111 16 112 27C113 33 108 36 103 37C103 49 89 55 60 55C31 55 17 49 17 37C11 36 7 34 8 29Z',
@@ -288,9 +308,9 @@ export function posicionesMaki(bandas: number, huesos: number): number[] {
 
 /**
  * La banda de nori de un destino, de arriba abajo, apenas inclinada. Las mismas siete formas
- * que la marca del corte: punteada mientras no salió, entera cuando salió, carbonizada con
- * una brasa cuando se quemó, a medias con un punto ámbar en la bandeja de TikTok, punteada
- * en ámbar el reintento, en acero el fierro frío.
+ * que la marca del corte: punteada mientras no salió, entera cuando salió, pasada y cruzada
+ * por el rojo del halo cuando falló, a medias con un punto ámbar en la bandeja de TikTok,
+ * punteada en ámbar el reintento, en acero el fierro frío.
  */
 function Banda({ x, sello, chico }: { x: number; sello: Sello; chico: boolean }) {
   const ancho = (chico ? 8 : 6.5) / 2
@@ -311,10 +331,11 @@ function Banda({ x, sello, chico }: { x: number; sello: Sello; chico: boolean })
   if (sello === 'reintento') return <path d={d} {...punteada} style={{ stroke: 'var(--color-caution)' }} />
   if (sello === 'frio') return <path d={d} {...punteada} stroke="#8d9aa6" />
   if (sello === 'quemado') {
+    // Sin brasa: de día nada se quema. El rojo es el del halo, el de lo que falló.
     return (
       <>
-        <path d={d} fill="#0d0605" />
-        <path d={eje} className="late" fill="none" strokeLinecap="round" stroke="#ff5a2e" strokeWidth="1.6" filter="url(#tp-sushi-brillo)" />
+        <path d={d} fill={PESCADO.quemada.medio} />
+        <path d={eje} className="late" fill="none" strokeLinecap="round" stroke={QUEMO} strokeWidth="1.6" />
       </>
     )
   }
@@ -388,17 +409,12 @@ export function PiezaSushi({
             <ellipse cx="46" cy="17" rx="24" ry="4" fill="#ffffff" opacity={carne === 'cruda' ? 0.4 : 0.22} filter="url(#tp-sushi-difuso)" clipPath={`url(#${recorte})`} />
           ) : null}
           {coccion === 'quemada' ? (
-            <path
-              className="late"
-              d="M18 30l9-5 6 6 10-4 7 5M60 20l7 6 8-3 6 7M66 40l8-5 9 4 8-6"
-              fill="none"
-              stroke="#ff6b3d"
-              strokeWidth="1.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              filter="url(#tp-sushi-brillo)"
-              clipPath={`url(#${recorte})`}
-            />
+            // El moho: manchas difusas, quietas. Lo único que se mueve es la llama del soplete.
+            <g clipPath={`url(#${recorte})`} fill={PASADO.moho} opacity=".75">
+              {MOHO.map(([cx, cy, r]) => (
+                <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r={r} filter="url(#tp-sushi-difuso)" />
+              ))}
+            </g>
           ) : null}
           <g clipPath={`url(#${recorte})`}>
             {sellos.map((sello, i) => (
@@ -407,9 +423,20 @@ export function PiezaSushi({
           </g>
           <path d={silueta} fill="none" stroke="rgba(60,40,30,.28)" strokeWidth=".9" />
         </g>
+        {coccion === 'quemada' ? (
+          // El olor que sube del pescado pasado: tres ondas quietas, a la izquierda de la banderita.
+          <path
+            d="M36 4c-3-3 3-5 0-8s3-5 0-8M52 2c-3-3 3-5 0-8s3-5 0-8M68 4c-3-3 3-5 0-8s3-5 0-8"
+            fill="none"
+            stroke={PASADO.olor}
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            opacity=".85"
+          />
+        ) : null}
         {quemado ? (
           <>
-            {/* El halo y la banderita, idénticos a los del corte: lo quemado se ve igual en todas partes. */}
+            {/* El halo y la banderita, idénticos a los del corte: lo que falló se ve igual en todas partes. */}
             <path d={silueta} className="late" fill="none" stroke={QUEMO} strokeWidth="2.4" filter="url(#tp-sushi-brillo)" />
             <path d="M107 20V-9" stroke="#8f8170" strokeWidth="1.5" strokeLinecap="round" />
             <path d="M107 -9L122 -4L107 1Z" fill={QUEMO} />

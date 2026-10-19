@@ -685,16 +685,22 @@
 }
 
 /*
- * Los dos dibujos del corte (`corte.tsx`): la carne de noche y la pieza de sushi de día. Van los
- * dos en la página y el modo esconde uno. Fuera de toda capa a propósito: tienen que ganarle a
- * las utilidades de tamaño y de `display` que trae el `className` de cada corte.
+ * Lo que cambia con el modo y va dos veces en la página, para que el modo esconda uno: los dos
+ * dibujos del corte (`corte.tsx`), la carne de noche y la pieza de sushi de día, y la única
+ * palabra que cambia, «Se quemó» (`SE_QUEMO`, en `src/lib/vocabulario.ts`). Fuera de toda capa
+ * a propósito: tienen que ganarle a las utilidades de tamaño y de `display` que trae el
+ * `className` de cada uno.
+ *
+ * De día, lo de día vuelve al `display` que le dan sus utilidades (`revert-layer` deshace solo
+ * esta regla, que no está en ninguna capa): el corte, `block`; una palabra en una frase, en
+ * línea, como cualquier `span`.
  */
 .solo-dia {
   display: none;
 }
 
 [data-tema='dia'] .solo-dia {
-  display: block;
+  display: revert-layer;
 }
 
 [data-tema='dia'] .solo-noche {

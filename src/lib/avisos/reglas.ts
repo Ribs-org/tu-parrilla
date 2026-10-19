@@ -4,6 +4,8 @@
 import { isoInZone } from '@/lib/metrics-api'
 import { networkLabel } from '@/lib/networks'
 import { estadoDelFierro, seRenuevaSola } from '@/lib/parrilla'
+import type { Tema } from '@/lib/tema'
+import { SE_QUEMO } from '@/lib/vocabulario'
 
 /** Debajo de cuántos días programados una cuenta entra en el resumen por quedarse sin parrilla. */
 export const DIAS_DE_PISTA = 3
@@ -257,14 +259,25 @@ export function correoDeCaida(
 }
 
 /**
+ * Cómo cuenta el correo lo que falló, en el modo de la cuenta: tiene que nombrar la sección que
+ * la persona ve en La Parrilla, y de día esa sección no dice «Se quemó» (`SE_QUEMO`).
+ */
+const LO_QUE_FALLO: Record<Tema, { uno: string; varios: string; cuando: string }> = {
+  noche: { uno: 'destino quemado', varios: 'destinos quemados', cuando: 'Se quemaron' },
+  dia: { uno: 'destino echado a perder', varios: 'destinos echados a perder', cuando: 'Se echaron a perder' },
+}
+
+/**
  * El resumen del día, o `null` si no hay nada que contar: un correo que llega todos los días
- * diciendo «todo bien» enseña a no abrirlo.
+ * diciendo «todo bien» enseña a no abrirlo. Habla en el modo de la cuenta (`tema`), el mismo
+ * del panel.
  */
 export function correoDeResumen(
   r: Resumen,
   zona: string,
   sitio: string,
   ahora: Date,
+  tema: Tema = 'noche',
 ): { subject: string; text: string } | null {
   if (resumenVacio(r)) return null
 
@@ -272,13 +285,14 @@ export function correoDeResumen(
   const lineas: string[] = []
 
   if (r.fallidos.length > 0) {
-    partes.push(plural(r.fallidos.length, 'destino quemado', 'destinos quemados'))
-    lineas.push(`Se quemaron en las últimas ${HORAS_DE_FALLIDOS} horas (${r.fallidos.length}):`)
+    const fallo = LO_QUE_FALLO[tema]
+    partes.push(plural(r.fallidos.length, fallo.uno, fallo.varios))
+    lineas.push(`${fallo.cuando} en las últimas ${HORAS_DE_FALLIDOS} horas (${r.fallidos.length}):`)
     for (const f of r.fallidos.slice(0, MAX_FALLIDOS_EN_CORREO)) {
       lineas.push(`- ${fechaLegible(f.fecha, zona)} · ${cuentaLegible(f.red, f.handle)} · «${extracto(f.texto)}» — ${f.error ?? 'sin motivo'}`)
     }
     if (r.fallidos.length > MAX_FALLIDOS_EN_CORREO) lineas.push(`y ${r.fallidos.length - MAX_FALLIDOS_EN_CORREO} más.`)
-    lineas.push(`Revísalos en «Se quemó», en La Parrilla: ${sitio}/admin/schedule`, '')
+    lineas.push(`Revísalos en «${SE_QUEMO[tema]}», en La Parrilla: ${sitio}/admin/schedule`, '')
   }
 
   if (r.cuentas.length > 0) {

@@ -43,6 +43,17 @@ describe('el pescado de la pieza', () => {
     }
     expect(contraste(simular(PESCADO.cruda.medio, tipo), simular(PESCADO.quemada.medio, tipo))).toBeGreaterThanOrEqual(5)
   })
+
+  // De día lo que falló no se quema, se echa a perder (2026-10-19): el pescado del extremo es
+  // verde gris, no carbón. Más verde que rojo en sus tres tonos, que es lo que lo aparta del
+  // salmón y del aburi aunque sea igual de oscuro que el carbón.
+  it('lo que falló es pescado pasado: verde gris, no carbón', () => {
+    const canales = (hex: string) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16))
+    for (const tono of Object.values(PESCADO.quemada)) {
+      const [r, g] = canales(tono)
+      expect(g, tono).toBeGreaterThan(r!)
+    }
+  })
 })
 
 describe('las siluetas', () => {

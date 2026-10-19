@@ -210,12 +210,20 @@ export async function leerResumen(
  * esa mañana. Un dueño que falla no detiene a los demás.
  */
 export async function enviarResumenes(ahora: Date = new Date()): Promise<{ enviados: number; fallidos: number }> {
-  const duenos = await getDb().select({ id: users.id, correo: users.correo, zona: users.zona }).from(users)
+  const duenos = await getDb()
+    .select({ id: users.id, correo: users.correo, zona: users.zona, tema: users.tema })
+    .from(users)
   let enviados = 0
   let fallidos = 0
   for (const dueno of duenos) {
     try {
-      const correo = correoDeResumen(await leerResumen(dueno.id, ahora), dueno.zona ?? ZONA_POR_DEFECTO, sitio(), ahora)
+      const correo = correoDeResumen(
+        await leerResumen(dueno.id, ahora),
+        dueno.zona ?? ZONA_POR_DEFECTO,
+        sitio(),
+        ahora,
+        dueno.tema,
+      )
       if (!correo) continue
       if (await enviarAviso(dueno.correo, correo)) enviados++
       else fallidos++

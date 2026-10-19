@@ -4,6 +4,8 @@
 // encontrando todo. Las rutas no cambian nunca: son las de siempre, y esta tabla solo les
 // pone nombre. Nadie fuera de este archivo escribe «Los Fierros».
 
+import type { Tema } from './tema'
+
 export type Pantalla = {
   ruta: string
   nombre: string
@@ -59,3 +61,11 @@ export function nombreDe(ruta: string): string {
   if (!pantalla) throw new Error(`nombreDe: ${ruta} no está en el vocabulario`)
   return pantalla.nombre
 }
+
+/**
+ * «Se quemó», la sección de La Parrilla con lo que falló, en cada modo. Es la única palabra del
+ * panel que cambia con el modo: de día nada se quema, y el pescado que no se sirvió se echó a
+ * perder. Lo pidió el dueño el 2026-10-19. La wiki lo cuenta en «El modo día»
+ * (`public/docs/ui/index.md`), para que un agente que oye una sepa que es la otra.
+ */
+export const SE_QUEMO: Record<Tema, string> = { noche: 'Se quemó', dia: 'Se echó a perder' }
