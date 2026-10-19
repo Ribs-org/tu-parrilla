@@ -111,7 +111,7 @@ process.env.AUTH_SECRET = 'secreto-de-prueba-para-el-arnes'
 // terminar antes de `testTimeout`. Mismo motivo que en `usuarios.test.ts` (ver el
 // comentario de sus líneas 50-54).
 const { getRecentVisits } = await import('./analytics')
-const { getCuentas, getPostRows } = await import('./posts')
+const { getCuentas, getLecturasDe, getPostRows } = await import('./posts')
 const { getAllProfiles, getProfileBySlug } = await import('./profiles')
 const { getCola } = await import('./comentarios-cola')
 const { verificarCuentas, cuentaUnicaPorRed } = await import('./social/cuentas')
@@ -448,6 +448,12 @@ describe('aislamiento por dueño (SQL generado, sin base)', () => {
     // post_metrics cruzada con social_posts solo por la fecha de publicación: el filtro es el id.
     expect(aLos7Dias.sql).toMatch(/captured_at/)
     expect(aLos7Dias.params).toContain('post-1')
+  })
+
+  it('posts: getLecturasDe ata sus lecturas al dueño por el post, aunque los ids vengan de la URL', async () => {
+    const consultas = await todasLasConsultas(() => getLecturasDe(DUENO, ['post-1', 'post-ajeno']))
+    expect(consultas).toHaveLength(1)
+    esperarFiltradoPorDueno(consultas[0]!)
   })
 
   it('posts: con actividad (el tablero), la subconsulta de visitas también va por las páginas del dueño', async () => {

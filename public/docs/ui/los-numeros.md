@@ -1,6 +1,6 @@
 # Los Números — cómo te fue en las redes y en tu página
 
-`/admin/analytics` — pestaña «Los Números» de la barra de arriba del panel, la tercera y última (en el README y en documentos viejos se llama «Analítica»). Un clic adentro están `/admin/analytics/publicaciones`, «Tus publicaciones»: la lista de cada publicación, que hasta el 2026-10-13 era la pestaña «Los Cortes» (`/admin/content`, que ahora lleva ahí); `/admin/analytics/publicaciones/<id>`, la pieza de una publicación con sus versiones; `/admin/analytics/comparar`, «Comparar por atributo»; y `/admin/analytics/mejores`, «Tu mejor 10 %» (o «Tu peor 10 %»).
+`/admin/analytics` — pestaña «Los Números» de la barra de arriba del panel, la tercera y última (en el README y en documentos viejos se llama «Analítica»). Un clic adentro están `/admin/analytics/publicaciones`, «Tus publicaciones»: la lista de cada publicación, que hasta el 2026-10-13 era la pestaña «Los Cortes» (`/admin/content`, que ahora lleva ahí); `/admin/analytics/publicaciones/<id>`, la pieza de una publicación con sus versiones; `/admin/analytics/comparar`, «Comparar por atributo»; `/admin/analytics/mejores`, «Tu mejor 10 %» (o «Tu peor 10 %»); y `/admin/analytics/lado-a-lado`, «Lado a lado».
 
 Un tablero con dos mitades que miden cosas distintas y lo dicen. «En las redes» es lo que
 hicieron las publicaciones de la persona donde se publicaron —views ganadas, seguidores,
@@ -17,7 +17,8 @@ lo publicado por hook, tema o serie para ver qué funciona. Y «Tu mejor 10 %» 
 rindió en el período —o lo que menos—, cuánto había que sacar para estar ahí y qué tienen en
 común esas publicaciones. Las dos pueden comparar a igual edad: las views a los 7 días de
 publicada, y «Contra su cuenta», que mide a cada publicación contra lo normal de su propia
-cuenta.
+cuenta. «Lado a lado» pone dos publicaciones una al lado de la otra —por ejemplo, la mejor y la
+peor—, con su portada, el link para ver el video en la red y cómo crecieron.
 
 Dos palabras que no hay que mezclar: la **etiqueta** es el `?s=` del link de cada publicación,
 que dice por cuál llegó la gente a la página; los **atributos** son lo que se le anota a un post
@@ -50,6 +51,9 @@ API.
   del título «Lo que más creció»; o, en una pieza, uno de los atributos de arriba.
 - A «Tu mejor 10 %»: en el tablero, el enlace «Tu mejor 10 % →», el primero de los tres a la
   derecha del título «Lo que más creció». Llega con el mismo período y la misma cuenta.
+- A «Lado a lado»: en «Tu mejor 10 %», el enlace «Lado a lado →», a la derecha del título «Las
+  publicaciones»; o, en una pieza, «Comparar lado a lado →», debajo del título. Llega con lo
+  mismo que estaba elegido.
 
 ## Qué se ve
 
@@ -365,8 +369,8 @@ Números».
 si se llegó desde el tablero («Lo que más creció», «Qué publicación te trajo gente» o «Todas
 las etiquetas»), que vuelve al tablero como estaba, con los mismos «⋯ Más» abiertos; «Tu mejor
 <N> %» (con el porcentaje que estaba elegido, y «Tu peor <N> %» si estaba en «Lo peor») si
-se llegó desde esa pantalla; o «Tus
-publicaciones» si se llegó desde la lista. Debajo, en chico, «Pieza»; el título es el texto de la
+se llegó desde esa pantalla; «Lado a lado» si se llegó desde ahí; o «Tus publicaciones» si se
+llegó desde la lista. Debajo, en chico, «Pieza»; el título es el texto de la
 publicación que se abrió (cortado a dos líneas), o «?s=<etiqueta>» si no tiene texto. Debajo,
 «Cada lugar donde salió, con sus números lado a lado. Las views las cuenta cada red; las
 visitas, Tu Parrilla, cuando alguien entra por el link de esa versión.»
@@ -380,6 +384,9 @@ visitas, Tu Parrilla, cuando alguien entra por el link de esa versión.»
   ese atributo elegido.
 
 Un valor `true` o `false` se lee «sí» o «no».
+
+**«Comparar lado a lado →».** Debajo del título y de los atributos, un enlace que abre «Lado a
+lado» con esta publicación de A y la peor del período de B.
 
 **El período.** Los botones de siempre: «Hoy», «7 días», «30 días», «90 días», «Todo» y «Fechas».
 
@@ -542,7 +549,8 @@ publicaciones: con tan pocas, el mejor <P> % sirve para mirarlas, no para sacar 
 Amplía el período o sube el porcentaje.» («el peor <P> %» con «Lo peor»).
 
 **Panel «Las publicaciones»**, explicación «De la más alta a la más baja en «<Métrica>». Cada
-una abre su pieza.» (con «Lo peor», «De la más baja a la más alta en «<Métrica>»…»). Una fila
+una abre su pieza.» (con «Lo peor», «De la más baja a la más alta en «<Métrica>»…»). A la
+derecha del título, si alguna compite, el enlace «Lado a lado →». Una fila
 por publicación que entró: su puesto, su miniatura, el texto (o «?s=<etiqueta>» si no tiene),
 debajo en chico «<red> · <nombre de la cuenta> · <fecha>», y a la derecha su número en la
 métrica elegida: en porcentaje con dos decimales si es el arrastre, y como «×3,0» en «Contra su
@@ -579,6 +587,78 @@ las filas «Contra su cuenta», «Views a los 7 días», «Views ganadas», «Vi
   views del período: con pocas views, una visita ya es un porcentaje alto.»;
 - y si el período tiene 10.000 publicaciones o más, «Se leyeron las 10 mil más recientes: acorta
   el período para verlas todas.»
+
+### Lado a lado (`/admin/analytics/lado-a-lado`)
+
+Dos publicaciones, A y B, una al lado de la otra: su portada, el link para ver el video en la
+red, sus números, sus atributos y cómo crecieron sus views a la misma edad. Debajo, las
+portadas de las de arriba y las de abajo. Responde «¿por qué esta anduvo mejor que esta
+otra?» y «¿qué tienen las mejores que no tengan las peores?», y sirve para mirar con los ojos
+si fue el color, la letra o el corte. El video no se guarda en Tu Parrilla: se ve en la red,
+con «Ver en <red>».
+
+Las dos tajadas salen de lo mismo que «Tu mejor 10 %»: el período, la cuenta, la métrica, el
+porcentaje y «Con las de menos de 7 días» llegan de ahí y se pueden cambiar acá. Al entrar, A
+es la mejor de la tajada de arriba y B, la peor de la de abajo.
+
+Se llega desde «Tu mejor 10 %», con el enlace «Lado a lado →» a la derecha del título «Las
+publicaciones», o desde una pieza, con «Comparar lado a lado →» debajo del título: ahí A es
+esa publicación. No tiene pestaña propia: la barra sigue marcando «Los Números».
+
+**Encabezado.** Arriba a la izquierda, una flecha y «Tu mejor <N> %» («Tu peor <N> %» si se
+llegó desde «Lo peor»), que vuelve a esa pantalla. El título «Lado a lado» y debajo: «Dos
+publicaciones con su portada, sus números, sus atributos y cómo crecieron a la misma edad.
+Para ver el video, «Ver en» su red: acá no se guarda.»
+
+**La fila de controles.** Los botones del período y «Fechas»; el selector de cuenta, **solo
+con más de una cuenta**; el de métrica, con las mismas opciones que «Tu mejor 10 %»; el de
+porcentaje, con «El 5 % de arriba y de abajo», «El 10 %…» (el de entrada), «El 20 %…» y «El
+25 %…»; y el botón «Con las de menos de 7 días», solo con las métricas que no son a igual edad.
+
+**Los selectores de A y de B.** Debajo, una «A» en cian con su selector y una «B» en azul con
+el suyo. Cada uno lista las publicaciones en dos grupos, «Arriba · el mejor <N> %» y «Abajo ·
+el peor <N> %», con su puesto y el comienzo del texto («1. Tres errores al editar…»); una
+publicación que está en las dos tajadas aparece una vez, arriba. Si A o B no está en ninguna
+(llegó desde una pieza), va primero, sola.
+
+**El aviso de la misma.** Si A y B son la misma publicación (compite una sola): «A y B son la
+misma publicación: compite una sola. Elige otra en el selector, o amplía el período.»
+
+**Las dos fichas**, lado a lado (una debajo de la otra en un teléfono). Cada una:
+
+- Arriba, un círculo con su letra («A» en cian, «B» en azul) y dónde quedó: «Puesto <n> del
+  mejor <N> %», «Puesto <n> del peor <N> %», «Ni arriba ni abajo», o «No compite en
+  «<métrica>»» si no tiene ese número.
+- La portada, alta como la de un video vertical, o «Sin portada».
+- El texto (cortado a tres líneas), en chico «<red> · <nombre de la cuenta> · <fecha>», el
+  enlace en naranjo «Ver en <red>» con una flechita en diagonal, que abre el post en la red en
+  otra pestaña, y «Abrir su pieza».
+- Seis números: «Contra su cuenta» («×3,4»), «Views a los 7 días», «Views ganadas» (en el
+  período), «Views en total», «Visitas a tu página» y «Arrastre». Cualquiera puede ser «—».
+
+**Panel «Cómo crecieron»**, explicación «Las views de cada una por días cumplidos desde que se
+publicó, hasta los 30: así se comparan a la misma edad aunque hayan salido en semanas
+distintas. La raya marca los 7 días. Después de los 10 días se lee cada vez más espaciado, y la
+línea une lecturas sueltas.» Arriba, la leyenda: «A» y «B» con el comienzo de su texto. El
+gráfico tiene una línea por publicación (A en cian, B en azul), los días abajo («día 0», «día
+1»…) y las views a la izquierda, y una raya punteada en el día 7 con el rótulo «7 días». Al
+pasar el mouse, un recuadro con «<n> días después de publicar» y las views de A y de B ese día
+(«—» si no hubo lectura). Si una de las dos es de YouTube, debajo: «YouTube no entra en la
+curva: sus reglas no permiten comparar sus números.»
+
+**Panel «Sus atributos»**, explicación «Lo que se le anotó a cada una al programarla. Los que
+cambian de una a otra van en naranjo: ahí puede estar la diferencia.» Una tabla con las
+columnas «Atributo», «A» y «B», una fila por atributo que tenga alguna de las dos (menos
+`pieza`), en orden alfabético; uno que una no tiene se ve «—» y cuenta como distinto.
+
+**Panel «Las portadas»**, explicación «Las de arriba y las de abajo en «<métrica>», para ver de
+un vistazo si algo se repite: un color, una letra, una cara. Apretar una de arriba la pone de
+A; una de abajo, de B.» Dos grupos, «Arriba · el mejor <N> %» y «Abajo · el peor <N> %», con
+hasta 12 portadas cada uno y su número debajo («×2,9»). La que es A o B lleva un borde
+naranjo. Si el grupo tiene más de 12: «Y <N> más: se ven en «Tu mejor <P> %».»
+
+**Al pie**, si el período tiene 10.000 publicaciones o más: «Se leyeron las 10 mil más recientes:
+acorta el período para verlas todas.»
 
 ## Cómo leer cada número
 
@@ -930,6 +1010,22 @@ dejar de hacer, o probar de otra forma.
 llena la tajada de arriba y las chicas no aparecen nunca: para ver lo mejor de cada una,
 elegirla en el selector, o usar «Contra su cuenta», que mide a cada una contra lo suyo.
 
+### En «Lado a lado»
+
+**Las dos tajadas** son las de «Tu mejor 10 %» con la misma métrica, el mismo porcentaje y las
+mismas recientes: «Puesto 1 del mejor 10 %» en A es la misma que encabeza «Tu mejor 10 %».
+
+**Los números de cada ficha** se leen como en las otras pantallas: «Contra su cuenta» y «Views
+a los 7 días» como en «Tu mejor 10 %»; «Views ganadas» es lo ganado en el período elegido, y
+«Views en total», el contador de por vida. Una publicación que llegó desde una pieza y se
+publicó fuera del período tiene «Contra su cuenta» en «—»: lo normal de su cuenta se mide con lo
+del período.
+
+**La curva** no es lo ganado en un período: es el contador de cada una a cada edad. El día 0 es
+su primer día (las primeras 24 horas), el día 7 su octavo; si dos lecturas caen el mismo día
+cumplido, vale la más alta. Que una línea arranque más arriba es que llegó a más gente en las
+primeras horas; que se aplane antes, que se apagó antes. YouTube no se dibuja, por sus reglas.
+
 ## Qué se puede hacer
 
 ### Para saber cómo le fue en el período
@@ -1128,6 +1224,16 @@ de cada post en [La Parrilla](la-parrilla.md), en «Editar atributos» de una pi
    %» y la lista va de la peor a la menos mala.
 2. Mirar «Qué tienen en común»: lo que se repite entre las que peor anduvieron.
 
+### Para ver dos publicaciones lado a lado
+
+1. En «Tu mejor 10 %», apretar «Lado a lado →», a la derecha de «Las publicaciones». Entra con
+   la mejor de A y la peor de B.
+2. Para cambiar una, elegirla en el selector de A o de B, o apretar su portada en «Las
+   portadas» (las de arriba van a A, las de abajo a B).
+3. Para ver el video, «Ver en <red>» en su ficha: abre la red en otra pestaña.
+
+Para comparar una publicación cualquiera: abrir su pieza y apretar «Comparar lado a lado →».
+
 ### Para que compita lo publicado hace menos de 7 días
 
 1. En «Tu mejor 10 %», elegir una métrica que no sea a igual edad (por ejemplo «Por views
@@ -1210,6 +1316,13 @@ API: ver `GET /api/metrics/posts` en [la guía de la API](../api-editor.md).
 | «Compiten solo <N> publicaciones: con tan pocas, el mejor <P> % sirve para mirarlas, no para sacar conclusiones. Amplía el período o sube el porcentaje.» («el peor <P> %» con «Lo peor») | Compiten menos de 20. | Elegir un período más largo o un porcentaje mayor. |
 | «Con menos de 3 publicaciones arriba no hay con qué comparar. Amplía el período o sube el porcentaje.» (en «Qué tienen en común»; «abajo» con «Lo peor») | Entraron una o dos. | Igual que arriba. |
 | «Nada se repite más entre las de arriba que en el resto.» («abajo» con «Lo peor») | Ningún rasgo está en al menos dos del grupo y es 1,5 veces más frecuente ahí. | Nada: las del grupo no comparten nada que las distinga. Anotar atributos ayuda a que aparezca algo. |
+| «No publicaste nada en este período. Amplía el período.» (en «Lado a lado») | No hay publicaciones publicadas en el período (de la cuenta elegida, si hay una). | Elegir un período más largo, o «Todas las cuentas». |
+| «Ninguna publicación del período compite en «<métrica>», así que no hay una de arriba ni una de abajo. Amplía el período o elige otra métrica.» | Hay publicaciones, pero ninguna tiene esa métrica (por ejemplo, con «Contra su cuenta» y un período de la última semana). | Elegir un período más largo, u otra métrica. |
+| «A y B son la misma publicación: compite una sola. Elige otra en el selector, o amplía el período.» | Compite una sola publicación, que es a la vez la mejor y la peor. | Ampliar el período, o elegir otra en el selector. |
+| «Todavía no hay lecturas de estas dos: llegan con la sincronización diaria.» (en «Cómo crecieron») | Ninguna de las dos tiene lecturas en sus primeros 30 días (se publicaron hoy, o antes de conectar la cuenta). | Esperar a la sincronización del día siguiente, o elegir otras. |
+| «YouTube no entra en la curva: sus reglas no permiten comparar sus números.» | Una de las dos (o las dos) es de YouTube. | Nada: sus números siguen en la ficha. |
+| «Ninguna de las dos tiene atributos. Se anotan en el editor de un post de La Parrilla, o por la API.» (en «Sus atributos») | Ninguna salió de La Parrilla con atributos. | Anotarlos en los posts que vienen (ver la guía de la API, sección 2b). |
+| «Y <N> más: se ven en «Tu mejor <P> %».» (en «Las portadas») | La tajada tiene más de 12 publicaciones. | Abrir «Tu mejor 10 %» para verlas todas. |
 | «Sin publicaciones que comparar.» (en «Arriba y el resto» o «Abajo y el resto») | No compite ninguna publicación. | Ampliar el período, u otra métrica. |
 | «Algo se rompió» y «No fue nada que hicieras: una consulta no respondió. Vuelve a intentarlo; el detalle quedó en la consola del navegador.» | Una consulta de la pantalla falló. | Apretar «Reintentar»; si sigue, «Ir a La Parrilla». |
 
@@ -1231,6 +1344,13 @@ API: ver `GET /api/metrics/posts` en [la guía de la API](../api-editor.md).
 - **«No aparece lo que publiqué ayer» (en «Tu mejor 10 %»)**: con «Contra su cuenta» y «Por
   views a los 7 días», lo de la última semana todavía no tiene su lectura de los 7 días. En las
   demás métricas, prender «Con las de menos de 7 días».
+- **«Quiero ver los videos que mejor y peor anduvieron» / «¿por qué este anduvo mejor que
+  este otro?»**: «Tu mejor 10 %» → «Lado a lado →». Ahí están la mejor y la peor con sus
+  portadas, sus atributos y cómo crecieron; «Ver en <red>» abre cada video en la red. Para dos
+  cualquiera, elegirlas en los selectores de A y B, o desde la pieza de una, «Comparar lado a
+  lado →».
+- **«¿Dónde veo el video?»**: en la red, con «Ver en <red>» (en «Lado a lado», en «Tus
+  publicaciones» o en la pieza). Tu Parrilla no guarda el video después de publicarlo.
 - **«Mi video de YouTube no aparece en mi mejor 10 %»**: en «Contra su cuenta», en las views
   (a los 7 días o ganadas), en las interacciones y en el arrastre YouTube no compite, porque
   sus reglas no permiten calcular métricas con sus datos. Con «Por visitas a tu página» o «Por
@@ -1367,6 +1487,8 @@ API: ver `GET /api/metrics/posts` en [la guía de la API](../api-editor.md).
 - «Tu mejor 10 %» no acepta un porcentaje distinto de 5, 10, 20 o 25 (la API, cualquiera de 1 a
   50), no ordena por views acumuladas, no mide a otra edad que los 7 días, y «Qué tienen en
   común» no dice qué causó el resultado: dice qué se repite.
+- No guarda ni reproduce los videos: se ven en la red, con «Ver en <red>». «Lado a lado» no
+  dibuja la curva de YouTube ni compara más de dos publicaciones a la vez.
 - No muestra publicaciones de Threads ni de X: esas redes publican, pero no se sincronizan.
 - No muestra lo programado que todavía no sale: eso está en [La Parrilla](la-parrilla.md).
 - No consulta la red en vivo ni tiene botón para sincronizar: eso está en
@@ -1409,6 +1531,10 @@ Sale de:
   (quién compite, quién entra, el corte, las medianas, «Rinden» y «Qué tienen en común»)
 - `src/lib/igual-edad.ts` (los 7 días, «Contra su cuenta», su mínimo de 5 y qué es reciente);
   la lectura de los 7 días sale de `getPostRows`, en `src/lib/posts.ts`
+- `src/app/admin/(dash)/analytics/lado-a-lado/page.tsx` («Lado a lado»), `src/lib/lado-a-lado.ts`
+  (la curva por edad, los atributos de A y B, las 12 portadas) y
+  `src/components/charts/curva-chart.tsx` (el gráfico); las lecturas salen de `getLecturasDe`,
+  en `src/lib/posts.ts`
 - `src/lib/pieza.ts` (qué atributos son comunes y cuáles cambian, el orden de las versiones,
   el trial reel, las medianas, el atributo elegido al entrar, las filas tenues) y
   `src/lib/piezas.ts` (qué versiones junta una pieza, la clave `pieza`, el tope de 100)

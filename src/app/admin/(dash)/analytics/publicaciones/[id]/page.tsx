@@ -60,8 +60,9 @@ export default async function PiezaPage({
   const organica = versiones.length === 1 && versiones[0]!.scheduledPostId === null
   const programados = new Set(versiones.map((v) => v.scheduledPostId).filter(Boolean)).size
 
-  // Vuelve a donde se entró: el tablero marca sus enlaces con `de=numeros`, y «Tu mejor
-  // 10 %» con `de=mejores` (y su lado, si era «Lo peor»); sin marca, a Tus publicaciones.
+  // Vuelve a donde se entró: el tablero marca sus enlaces con `de=numeros`, «Tu mejor 10 %»
+  // con `de=mejores` (y su lado, si era «Lo peor») y «Lado a lado» con `de=lado`; sin marca, a
+  // Tus publicaciones.
   const vuelta =
     query.de === 'numeros'
       ? { ruta: '/admin/analytics', texto: nombreDe('/admin/analytics') }
@@ -70,7 +71,9 @@ export default async function PiezaPage({
             ruta: '/admin/analytics/mejores',
             texto: `Tu ${query.lado === 'peor' ? 'peor' : 'mejor'} ${leerPercentil(typeof query.percentil === 'string' ? query.percentil : null) ?? PERCENTIL_POR_DEFECTO} %`,
           }
-        : { ruta: '/admin/analytics/publicaciones', texto: 'Tus publicaciones' }
+        : query.de === 'lado'
+          ? { ruta: '/admin/analytics/lado-a-lado', texto: 'Lado a lado' }
+          : { ruta: '/admin/analytics/publicaciones', texto: 'Tus publicaciones' }
   const aqui = numerosHref(`/admin/analytics/publicaciones/${pieza.abierta.id}`, query, {})
   const fecha = new Intl.DateTimeFormat('es', {
     day: 'numeric',
@@ -111,6 +114,12 @@ export default async function PiezaPage({
             ))}
           </ul>
         ) : null}
+        <Link
+          href={numerosHref('/admin/analytics/lado-a-lado', query, { a: pieza.abierta.id, b: null, de: null })}
+          className="mt-3 inline-block text-[0.75rem] text-fg-muted transition-colors hover:text-fg"
+        >
+          Comparar lado a lado →
+        </Link>
       </header>
 
       <RangoBar periodo={filters.periodo} />
