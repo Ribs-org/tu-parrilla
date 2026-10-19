@@ -77,7 +77,8 @@ varias.
 
 6. **Lo de afuera no cambia.** La página pública de cada creador es su identidad y no lleva
    asado: tampoco lleva sushi. La API y el ícono de la app siguen como están, y los correos
-   solo cambian donde nombran «Se quemó» (regla 2). La portada sigue de noche hasta la tanda 4.
+   solo cambian donde nombran «Se quemó» (regla 2). La portada tiene los dos modos desde la
+   tanda 4: es la cara del producto, no la de un creador.
 
 ## Las piezas
 
@@ -233,7 +234,7 @@ dónde vive.
 | El fierro de una cuenta | `.fierro-al-rojo`, `-enfriandose`, `-frio` | una barra que irradia brasa, ámbar o nada | la misma barra: irradia salmón tostado, ámbar o nada. El nombre «Los Fierros» no cambia (regla 2) |
 | La miniatura con forma de corte | `.corte-mini` | las esquinas dispares y el rayado del fierro | las mismas esquinas, sin el rayado: una banda de nori en el borde izquierdo |
 | El calor de las barras de views | `.corrio-se-paso`, `-bien`, `-normal` | la brasa a 38 % y a 18 % | el salmón tostado, con las mismas proporciones |
-| La marca | la portada (`landing.tsx`) y el ícono de la app | el bife a punto | **por decidir** (ver «Decisiones») |
+| La marca | la portada (`landing.tsx`, `MarcaDeTuParrilla` en `corte.tsx`) y el ícono de la app | el bife a punto | el nigiri a punto, en la portada (ver «Decisiones»). El ícono de la app no cambia |
 
 ## El interruptor
 
@@ -315,12 +316,18 @@ panel de día con sus piezas de sushi.
 - **Los colores:** `mobile/src/components/ui.tsx` (`COLORES`) gana el juego de día. Los tests
   que comparan los colores del teléfono con los del panel cubren los dos modos.
 
-**Tanda 4, la portada y lo de marketing (1 a 2 días, cuando marketing lo pida).**
-- **La portada (`landing.tsx`):** puede mostrar el día, o elegirlo con el mismo botón. Su
-  semana dibujada usa las piezas.
-- **La imagen para compartir:** también.
-- **Lo que exige Google:** la portada tiene que seguir diciendo qué hace la app y enlazando
-  Privacidad y Términos. Lo cuida `landing.test.ts`.
+**Tanda 4, la portada y lo de marketing.** Hecha el 2026-10-19.
+- **La portada (`landing.tsx`):** el mismo botón del modo, junto a «Entrar», y la cookie del
+  equipo, como la puerta. De día, la marca es el nigiri a punto, y la semana, la leyenda y el
+  cierre, las piezas.
+- **Su voz de día:** lo que cuenta el dibujo se dice con sushi —«cada pieza», «el pescado
+  crudo», «se echa a perder»— con las dos versiones en la página (`DeNocheYDeDia`). Lo que dice
+  qué hace la app es igual en los dos modos.
+- **Lo que se comparte:** `?modo=dia` abre la portada de día, aunque el equipo nunca lo haya
+  elegido, y la tarjeta sale con la imagen de día (`/api/og/dia`): es el enlace para mostrarla
+  de día. Las dos direcciones son la misma página: la canónica es la raíz.
+- **Lo que exige Google:** la portada sigue diciendo qué hace la app y enlazando Privacidad y
+  Términos. Lo cuida `landing.test.ts`.
 
 ## Riesgos
 
@@ -347,8 +354,8 @@ panel de día con sus piezas de sushi.
 
 - **La noche entera,** que es la de entrada.
 - **Las palabras, salvo «Se quemó» (regla 2); la marca y el ícono de la app.**
-- **Lo de afuera del panel:** la página pública de cada creador, los correos, la API y la
-  portada hasta la tanda 4.
+- **Lo de afuera del panel:** la página pública de cada creador, la API y los correos, salvo
+  donde nombran «Se quemó».
 - **Las reglas del producto** de `src/lib/parrilla.ts`: qué es cada post, su cocción y el sello
   de cada destino.
 
@@ -358,7 +365,7 @@ La primera, la segunda y la cuarta las tomó el dueño el 2026-10-19.
 
 1. **La marca, de día.** El panel no la lleva (dice «Panel»); la portada y el ícono de la app
    llevan el bife a punto.
-   - **Decidido:** el nigiri a punto en la portada de día (tanda 4).
+   - **Decidido:** el nigiri a punto en la portada de día. Hecho en la tanda 4.
    - **Lo que no cambia:** el ícono de la app y el favicon. Son la marca, y cambiarlos pide
      pasar otra vez por las tiendas.
 2. **El modo, por equipo o por cuenta.**

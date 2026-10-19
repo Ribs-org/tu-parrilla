@@ -193,9 +193,7 @@ Nada de esto bloquea un trámite hoy; conviene ordenarlo antes de abrir a tercer
   - mirar de día los gráficos en Safari y en Firefox: en Chrome, recharts toma las variables
     del modo; si otro navegador no, saldrían con el color por defecto de cada atributo;
   - la app del teléfono, que sigue solo de noche (tanda 3, por aire). El modo ya es de la
-    cuenta, y `/api/mobile/tema` se lo da a la app;
-  - la portada de día, con el nigiri a punto como marca, y lo que se comparte (tanda 4): la
-    marca la decidió el dueño el 2026-10-19.
+    cuenta, y `/api/mobile/tema` se lo da a la app.
 - **Llevar el resto de la interfaz al nivel del corte** (2026-10-16). La auditoría de ese
   día propone seis tandas que se publican solas. La primera, lo roto, ya está. Quedan: el
   corte en los flujos (el compositor, la parrilla fría y la carga tibia ya están; faltan La

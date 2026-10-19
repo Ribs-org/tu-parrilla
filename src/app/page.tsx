@@ -1,7 +1,9 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { headers } from 'next/headers'
 import { Landing, metadataLanding } from '@/components/landing'
 import { esDominioDelProducto } from '@/lib/dominios'
+import { COLOR_DE_BARRA, temaDelEnlace } from '@/lib/tema'
+import { temaDeLaPortada } from '@/lib/tema-servidor'
 import { getDefaultProfile } from '@/lib/profiles'
 import { FirstRun, profileMetadata, renderProfile, type SearchParams } from '@/lib/serve-profile'
 import { adminId } from '@/lib/usuarios'
@@ -28,12 +30,21 @@ async function load() {
   }
 }
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ searchParams }: { searchParams: Promise<SearchParams> }): Promise<Metadata> {
   const host = (await headers()).get('host')
-  if (esDominioDelProducto(host)) return metadataLanding(host)
+  // La imagen para compartir sale de la dirección y no del equipo: quien lee la tarjeta es un
+  // servidor ajeno, sin la cookie de nadie.
+  if (esDominioDelProducto(host)) return metadataLanding(host, temaDelEnlace((await searchParams).modo) ?? 'noche')
 
   const { profile } = await load()
   return profile ? profileMetadata(profile) : { title: 'Portafolio' }
+}
+
+/** La barra del navegador del teléfono, del fondo de la portada en su modo. La página de un creador se queda con la del layout. */
+export async function generateViewport({ searchParams }: { searchParams: Promise<SearchParams> }): Promise<Viewport> {
+  if (!(await enElProducto())) return {}
+  const { tema } = await temaDeLaPortada((await searchParams).modo)
+  return { themeColor: COLOR_DE_BARRA[tema] }
 }
 
 export default async function HomePage({
@@ -41,7 +52,10 @@ export default async function HomePage({
 }: {
   searchParams: Promise<SearchParams>
 }) {
-  if (await enElProducto()) return <Landing />
+  if (await enElProducto()) {
+    const { tema, delEnlace } = await temaDeLaPortada((await searchParams).modo)
+    return <Landing tema={tema} delEnlace={delEnlace} />
+  }
 
   const { profile, failed } = await load()
   if (!profile) return <FirstRun reason={failed ? 'error' : 'empty'} />

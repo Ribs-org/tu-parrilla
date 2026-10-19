@@ -47,3 +47,13 @@ export function temaDelCuerpo(cuerpo: unknown): Tema | null {
   const tema = (cuerpo as { tema?: unknown }).tema
   return tema === 'dia' || tema === 'noche' ? tema : null
 }
+
+/**
+ * El modo que pide la dirección de la portada (`?modo=dia`), o null si no pide ninguno. Es para
+ * compartirla de día: la tarjeta sale con la imagen de día (`/api/og/dia`) y quien la abre la ve
+ * de día, aunque su equipo nunca lo haya elegido.
+ */
+export function temaDelEnlace(modo: string | string[] | undefined): Tema | null {
+  const valor = Array.isArray(modo) ? modo[0] : modo
+  return valor === 'dia' || valor === 'noche' ? valor : null
+}

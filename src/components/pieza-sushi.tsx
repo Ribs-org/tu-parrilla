@@ -89,6 +89,7 @@ const SASHIMI = {
   ],
   silueta: 'M14 46C11 34 15 21 26 17L52 12L75 12L98 13C104 12 108 16 107 22L103 47C102 53 97 56 91 56L24 56C19 56 15 52 14 46Z',
   shiso: 'M6 30C14 12 40 4 62 6C50 12 30 18 18 34C14 40 8 40 6 30Z',
+  wasabi: 'M100 52C104 47 112 47 114 52C115 56 110 58 106 57C102 57 99 55 100 52Z',
 }
 
 const TEMAKI = {
@@ -345,7 +346,7 @@ function Sashimi({ carne }: { carne: Carne }) {
           return <path key={i} d={`M${x} 12C${x + 6} 24 ${x + 5} 38 ${x - 2} 56`} stroke={v.color} strokeOpacity={v.opacidad} strokeWidth="1.8" fill="none" strokeLinecap="round" />
         })}
       </g>
-      <path d="M100 52C104 47 112 47 114 52C115 56 110 58 106 57C102 57 99 55 100 52Z" fill={WASABI} stroke="rgba(60,90,20,.25)" strokeWidth=".8" />
+      <path d={SASHIMI.wasabi} fill={WASABI} stroke="rgba(60,90,20,.25)" strokeWidth=".8" />
     </>
   )
 }
@@ -366,6 +367,53 @@ function Temaki({ carne }: { carne: Carne }) {
       ))}
     </>
   )
+}
+
+/** Una elipse como trazo, para el motor de la imagen para compartir, que se queda con trazos. */
+function elipse(cx: number, cy: number, rx: number, ry: number): string {
+  return `M${cx - rx} ${cy}a${rx} ${ry} 0 1 0 ${2 * rx} 0a${rx} ${ry} 0 1 0 ${-2 * rx} 0Z`
+}
+
+/** Una capa de una pieza en plano: un trazo y su color, o el degradado del pescado. */
+export type CapaDeMuestra = { d: string; relleno: string }
+
+/** El corte de un roll en capas, de afuera adentro: el salmón, el arroz, el nori y la palta. */
+function capasDelCorte(cx: number, cy: number, rx: number, ry: number): CapaDeMuestra[] {
+  return [
+    { d: elipse(cx, cy, rx, ry), relleno: 'pescado' },
+    { d: elipse(cx, cy, rx * 0.66, ry * 0.66), relleno: ARROZ.claro },
+    { d: elipse(cx, cy, rx * 0.42, ry * 0.42), relleno: NORI.cuerpo },
+    { d: elipse(cx, cy, rx * 0.34, ry * 0.34), relleno: RELLENO.palta },
+  ]
+}
+
+/**
+ * Una pieza en capas planas, para la imagen con que se comparte la portada de día
+ * (`/api/og/dia`). A ese tamaño no se leen las bandas ni las vetas, y su motor no dibuja
+ * recortes: cada capa es un trazo con un color, y la del pescado, `relleno: 'pescado'`, va con
+ * el degradado de su cocción. Son las mismas formas que `PiezaSushi`, el roll entero o cortado
+ * igual que en el panel.
+ */
+export function capasDeMuestra(formato: Formato, huesos: number, carne: Carne): CapaDeMuestra[] {
+  if (formato === 'entrana') return [{ d: NIGIRI.arroz, relleno: ARROZ.claro }, { d: NIGIRI.pescado, relleno: 'pescado' }]
+  if (formato === 'bife') {
+    return [
+      { d: SASHIMI.shiso, relleno: SHISO.hondo },
+      ...SASHIMI.laminas.map((d) => ({ d, relleno: 'pescado' })),
+      { d: SASHIMI.wasabi, relleno: WASABI },
+    ]
+  }
+  if (formato === 'chori') {
+    return [
+      { d: TEMAKI.cono, relleno: SOYA.claro },
+      { d: TEMAKI.arroz, relleno: ARROZ.claro },
+      { d: TEMAKI.pescado, relleno: 'pescado' },
+    ]
+  }
+  if (rollCortado(carne)) return rodajas(huesos).flatMap(({ cx, r }) => capasDelCorte(cx, 34, r, r))
+  const { x1 } = rollEntero(huesos)
+  const { arriba, abajo, cara } = ROLL
+  return [{ d: siluetaRoll(huesos), relleno: 'pescado' }, ...capasDelCorte(x1 - cara, (arriba + abajo) / 2, cara, (abajo - arriba) / 2)]
 }
 
 /** Dónde cae la banda de cada destino: repartidas entre 30 y 90, o al centro si es una. */
