@@ -78,7 +78,7 @@ export default async function CompararPage({ searchParams }: { searchParams: Pro
       </header>
 
       <div className="flex flex-wrap items-center gap-2">
-        <RangoBar />
+        <RangoBar periodo={filters.periodo} />
         {cuentas.length > 1 ? (
           <SelectorEnUrl
             clave="cuenta"

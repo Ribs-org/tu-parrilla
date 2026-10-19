@@ -122,7 +122,7 @@ export default async function NumerosPage({ searchParams }: { searchParams: Prom
         <BajadaDeLosNumeros />
       </header>
 
-      <RangoBar />
+      <RangoBar periodo={filters.periodo} />
 
       <div className="mt-6 space-y-10">
         <Suspense fallback={<SeccionCargando />}>
