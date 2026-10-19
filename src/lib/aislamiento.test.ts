@@ -382,26 +382,27 @@ describe('aislamiento por dueño (SQL generado, sin base)', () => {
    * segunda seguiría atada a *algún* post, pero uno arbitrario en vez de 'post-1', así
    * que ese id ya no aparecería entre sus parámetros y la aserción fallaría.
    */
+  // select() de social_posts trae todas sus columnas, en el orden declarado en el
+  // esquema: id, owner_id, network, account_id, external_id, permalink, caption,
+  // thumbnail_url, media_type, published_at, campaign, archived_at, created_at, updated_at.
+  const filaPost = [
+    'post-1',
+    DUENO,
+    'instagram',
+    'acc-1',
+    'ext-1',
+    null,
+    null,
+    null,
+    null,
+    new Date('2026-01-10T00:00:00Z'),
+    'tag-1',
+    null,
+    new Date('2026-01-10T00:00:00Z'),
+    new Date('2026-01-10T00:00:00Z'),
+  ]
+
   it('posts: getPostRows filtra sus seis consultas por dueño, directo o por el id que ya filtró la primera', async () => {
-    // select() de social_posts trae todas sus columnas, en el orden declarado en el
-    // esquema: id, owner_id, network, account_id, external_id, permalink, caption,
-    // thumbnail_url, media_type, published_at, campaign, archived_at, created_at, updated_at.
-    const filaPost = [
-      'post-1',
-      DUENO,
-      'instagram',
-      'acc-1',
-      'ext-1',
-      null,
-      null,
-      null,
-      null,
-      new Date('2026-01-10T00:00:00Z'),
-      'tag-1',
-      null,
-      new Date('2026-01-10T00:00:00Z'),
-      new Date('2026-01-10T00:00:00Z'),
-    ]
     const consultas = await consultasEncadenadas(
       () =>
         getPostRows({
@@ -423,6 +424,30 @@ describe('aislamiento por dueño (SQL generado, sin base)', () => {
     esperarFiltradoPorDueno(visitas) // visits: por el profileId de una subconsulta a profiles filtrada por dueño.
     esperarFiltradoPorDueno(clics) // clicks: mismo molde.
     esperarFiltradoPorDueno(vistos) // "alguna vez visto": mismo molde.
+  })
+
+  it('posts: con las views a los 7 días, la consulta de más va por el id que ya filtró la primera', async () => {
+    const consultas = await consultasEncadenadas(
+      () =>
+        getPostRows(
+          {
+            ownerId: DUENO,
+            zone: 'America/Santiago',
+            profileId: null,
+            from: new Date('2026-01-01'),
+            to: new Date('2026-01-31'),
+            includeBots: true,
+          },
+          false,
+          { aLos7Dias: true },
+        ),
+      [[filaPost], [], [], [], [], [], []],
+    )
+    expect(consultas).toHaveLength(7)
+    const aLos7Dias = consultas[3]!
+    // post_metrics cruzada con social_posts solo por la fecha de publicación: el filtro es el id.
+    expect(aLos7Dias.sql).toMatch(/captured_at/)
+    expect(aLos7Dias.params).toContain('post-1')
   })
 
   it('posts: con actividad (el tablero), la subconsulta de visitas también va por las páginas del dueño', async () => {

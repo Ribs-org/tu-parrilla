@@ -200,17 +200,14 @@ Nada de esto bloquea un trámite hoy; conviene ordenarlo antes de abrir a tercer
 
 ## Features y trabajo de código
 
-- **Los Números para 1.000 publicaciones por semana** (2026-10-18). Pedido del dueño. La
-  lectura diaria por edad ya está (`src/lib/social/lectura.ts`), y los topes de las pantallas
-  y el rango de fechas a mano van cada uno en su PR; lo demás va en este orden, cada cosa en
-  su PR:
-  1. Comparar a la misma edad («views a los 7 días») y dentro de la misma cuenta («×N sobre
-     lo normal de su cuenta»), con un interruptor para incluir lo que aún no cumple esa
-     edad; «Tu peor 10 %» y el contraste de los de arriba contra los de abajo.
-  2. En las guías de la API, un vocabulario de atributos recomendado y opcional: `tema`,
+- **Los Números para 1.000 publicaciones por semana** (2026-10-18). Pedido del dueño. Ya
+  están la lectura diaria por edad (`src/lib/social/lectura.ts`), los topes de las
+  pantallas, el rango de fechas a mano y la comparación a igual edad, con «Tu peor 10 %»
+  (`src/lib/igual-edad.ts`). Queda, en este orden, cada cosa en su PR:
+  1. En las guías de la API, un vocabulario de atributos recomendado y opcional: `tema`,
      `hook` y `formato`, y los de edición (`color`, `fuente`, `corte`, `musica`,
      `duracion`). Sin etiquetado automático: decisión del dueño, por el costo.
-  3. Ver lado a lado los de arriba y los de abajo, o dos publicaciones elegidas: portada,
+  2. Ver lado a lado los de arriba y los de abajo, o dos publicaciones elegidas: portada,
      atributos, la curva día a día y el link a la red. Sin guardar el video después de
      publicado: decisión del dueño, para que R2 no crezca.
 - **Un modo día con sushi** (2026-10-18). Pedido del dueño, para después de lo anterior:

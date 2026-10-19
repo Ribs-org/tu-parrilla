@@ -61,7 +61,7 @@ se ve arriba, grande y en mayúsculas.
 |---|---|---|---|---|
 | La Parrilla | lo que viene y cómo salió lo que ya se fue | `/admin/schedule` | Primera pestaña. Es la entrada: se llega acá al entrar, y `/admin` lleva acá. El calendario: programar, borradores, lo que se quemó, editar, reprogramar | [la-parrilla.md](la-parrilla.md) |
 | La Mesa | lo que te responden y tus respuestas | `/admin/comments` | Pestaña. Los comentarios y sus respuestas | [la-mesa.md](la-mesa.md) |
-| Los Números | cómo te fue en las redes y en tu página | `/admin/analytics` | Pestaña. Un tablero con dos mitades: «En las redes» (views y seguidores ganados) y «En tu página» (visitas y clicks en su página de links). Un clic adentro, «Tus publicaciones» (`/admin/analytics/publicaciones`): cada publicación con sus números y su etiqueta `?s=`; la pieza de cada una, con sus versiones (`/admin/analytics/publicaciones/<id>`); «Comparar por atributo» (`/admin/analytics/comparar`); y «Tu mejor 10 %» (`/admin/analytics/mejores`), lo que más rindió y qué tiene en común | [los-numeros.md](los-numeros.md) |
+| Los Números | cómo te fue en las redes y en tu página | `/admin/analytics` | Pestaña. Un tablero con dos mitades: «En las redes» (views y seguidores ganados) y «En tu página» (visitas y clicks en su página de links). Un clic adentro, «Tus publicaciones» (`/admin/analytics/publicaciones`): cada publicación con sus números y su etiqueta `?s=`; la pieza de cada una, con sus versiones (`/admin/analytics/publicaciones/<id>`); «Comparar por atributo» (`/admin/analytics/comparar`); y «Tu mejor 10 %» (`/admin/analytics/mejores`), lo que más rindió —o lo que menos, con «Lo peor»— y qué tiene en común | [los-numeros.md](los-numeros.md) |
 | Los Fierros | tus redes conectadas | `/admin/accounts` | Botón «Ajustes». Conectar y desconectar redes | [los-fierros.md](los-fierros.md) |
 | La Vitrina | tus páginas públicas | `/admin/profiles` | Botón «Ajustes». Su página de links | [la-vitrina.md](la-vitrina.md) |
 | Los Maestros | quién puede entrar | `/admin/usuarios` | Botón «Ajustes», solo el admin. Invitar gente | [los-maestros.md](los-maestros.md) |
@@ -74,7 +74,7 @@ teléfono](app-movil.md).
 
 1. **Pregúntale qué título grande ve arriba.** Es el nombre de la pantalla (en mayúsculas) y
    debajo va el subtítulo. Con eso sabes en qué página de esta wiki está. Si dice «Tus
-   publicaciones», «Comparar por atributo» o «Tu mejor 10 %» (o 5, 20, 25), o si arriba del título dice «Pieza» en chico y el
+   publicaciones», «Comparar por atributo», «Tu mejor 10 %» o «Tu peor 10 %» (o 5, 20, 25), o si arriba del título dice «Pieza» en chico y el
    título es el texto de un post, está dentro de Los Números ([los-numeros.md](los-numeros.md)).
 2. **Si no sabe el nombre, tradúcelo desde lo que quiere hacer** (la tabla de abajo).
 3. **Si ve «Algo se rompió»**, es la pantalla de error del panel: una consulta falló, no fue

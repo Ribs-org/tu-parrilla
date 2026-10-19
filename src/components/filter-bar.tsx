@@ -228,6 +228,30 @@ export function SelectorEnUrl({
   )
 }
 
+/**
+ * Un interruptor atado a una clave de la URL: prendido pone `clave=1`, apagado la borra. Al
+ * entrar está apagado.
+ */
+export function InterruptorEnUrl({ clave, texto, titulo }: { clave: string; texto: string; titulo: string }) {
+  const { params, pending, cambiar } = useFiltro()
+  const prendido = params.get(clave) === '1'
+  return (
+    <button
+      type="button"
+      aria-pressed={prendido}
+      onClick={() => cambiar(clave, prendido ? null : '1')}
+      title={titulo}
+      className={cn(
+        'chapa rounded-xl px-3 py-2 text-xs transition-colors',
+        prendido ? 'border-brasa text-brasa' : 'text-fg-muted hover:text-fg',
+        pending && 'opacity-60',
+      )}
+    >
+      {texto}
+    </button>
+  )
+}
+
 /** Incluir o no a los bots en las visitas. Apagado, se excluyen. */
 export function BotonBots() {
   const { params, pending, cambiar } = useFiltro()

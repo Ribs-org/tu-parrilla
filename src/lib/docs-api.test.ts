@@ -15,7 +15,7 @@ import { TOPE_INSTAGRAM, TRIAL_REEL_NO_DISPONIBLE } from './social/publish/publi
 import { DIAS_ERROR, HORAS_ERROR } from './avisos/reglas'
 import { BORRADO_YA_PUBLICADO } from './schedule-api'
 import { TRIAL_REEL_MEDIA } from './social/publish/opciones'
-import { METRICA_ERROR, PERCENTIL_ERROR } from './mejores'
+import { LADO_ERROR, METRICA_ERROR, PERCENTIL_ERROR, RECIENTES_ERROR } from './mejores'
 import { RANGO_ERROR, cuentaAmbigua, cuentaDesconocida } from './metrics-api'
 
 // `batch.ts` importa `@/lib/usuarios` (la zona del dueño del lote), que trae
@@ -59,6 +59,8 @@ describe('la documentación para LLM no le miente al código', () => {
         RANGO_ERROR,
         METRICA_ERROR,
         PERCENTIL_ERROR,
+        LADO_ERROR,
+        RECIENTES_ERROR,
         cuentaDesconocida('<valor>'),
         cuentaAmbigua('<valor>'),
       ]) {

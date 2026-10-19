@@ -91,6 +91,9 @@ export type FilaComparada = {
   /** El valor del atributo, o null para «sin este atributo». */
   valor: string | null
   publicaciones: number
+  /** A igual edad y contra su propia cuenta (`igual-edad.ts`): ×1 es lo normal de cada cuenta. */
+  contraSuCuenta: number | null
+  viewsA7Dias: number | null
   viewsGanadas: number | null
   visitas: number | null
   arrastre: number | null
@@ -124,11 +127,14 @@ export function claveElegida(pedida: string | undefined, claves: string[]): stri
  * Cada valor del atributo con sus medianas, del que tiene más publicaciones al que tiene
  * menos; «sin este atributo» al final, como vara. Una mediana solo cuenta a quien tiene
  * ese número: un null es «no se sabe», no un cero —por eso YouTube, que no tiene views
- * ganadas ni arrastre (`politica-youtube`), no entra en esas dos y sí en las visitas—.
+ * ganadas, views a los 7 días ni arrastre (`politica-youtube`), no entra en esas y sí en las
+ * visitas—. `relativos` es `contraSuCuenta` de todo lo del período, por id de publicación: la
+ * vara de cada cuenta son todas sus publicaciones, no solo las de un valor.
  */
 export function compararPorAtributo(
   entradas: Array<{ atributos: Atributos | null; fila: PostRow }>,
   clave: string,
+  relativos: ReadonlyMap<string, number> = new Map(),
 ): FilaComparada[] {
   const grupos = new Map<string | null, PostRow[]>()
   for (const { atributos, fila } of entradas) {
@@ -146,6 +152,8 @@ export function compararPorAtributo(
     .map(([valor, filas]) => ({
       valor,
       publicaciones: filas.length,
+      contraSuCuenta: medianaDeCampo(filas, (f) => relativos.get(f.id) ?? null),
+      viewsA7Dias: medianaDeCampo(filas, (f) => f.viewsA7Dias),
       viewsGanadas: medianaDeCampo(filas, (f) => f.viewsChange),
       visitas: medianaDeCampo(filas, (f) => f.visits),
       arrastre: medianaDeCampo(filas, (f) => f.pull),

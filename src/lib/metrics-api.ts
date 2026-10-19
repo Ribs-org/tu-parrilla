@@ -101,6 +101,10 @@ export type MetricPost = {
   metricas: {
     views: number | null
     viewsGanadas: number | null
+    /** El contador a la semana de publicada (`igual-edad.ts`). */
+    viewsA7Dias: number | null
+    /** Las views a los 7 días sobre la mediana de su cuenta en el rango: 2 es el doble de lo normal. */
+    contraSuCuenta: number | null
     likes: number | null
     comentarios: number | null
     compartidos: number | null
@@ -112,12 +116,17 @@ export type MetricPost = {
   }
 }
 
-/** Nombres en español para el consumidor; los nulls viajan intactos (nunca 0). */
+/**
+ * Nombres en español para el consumidor; los nulls viajan intactos (nunca 0). `contraSuCuenta`
+ * depende de las demás publicaciones de la cuenta en el rango, así que la calcula quien tiene
+ * la lista entera (`contraSuCuenta` de `igual-edad.ts`).
+ */
 export function buildMetricPost(
   row: PostRow,
   atributos: Atributos | null,
   zone: string,
   cuenta: CuentaApi | null = null,
+  contraSuCuenta: number | null = null,
 ): MetricPost {
   return {
     red: row.network,
@@ -132,6 +141,8 @@ export function buildMetricPost(
     metricas: {
       views: row.views,
       viewsGanadas: row.viewsChange,
+      viewsA7Dias: row.viewsA7Dias,
+      contraSuCuenta,
       likes: row.likes,
       comentarios: row.comments,
       compartidos: row.shares,

@@ -4,6 +4,7 @@ import { Empty, Panel } from '@/components/charts/panel'
 import { RangoBar, SelectorEnUrl } from '@/components/filter-bar'
 import { requireUser } from '@/lib/auth'
 import { parseFilters } from '@/lib/filters'
+import { DIAS_A_IGUAL_EDAD, contraSuCuenta } from '@/lib/igual-edad'
 import { networkLabel } from '@/lib/networks'
 import { POCAS_PUBLICACIONES, claveElegida, clavesDeAtributos, compararPorAtributo } from '@/lib/pieza'
 import { attributesFor } from '@/lib/post-attributes'
@@ -22,12 +23,17 @@ function pct(value: number | null): string {
   return value === null ? '—' : `${value.toFixed(2)}%`
 }
 
+function veces(value: number | null): string {
+  return value === null ? '—' : `×${value.toFixed(value < 1 ? 2 : 1).replace('.', ',')}`
+}
+
 /**
  * Comparar por atributo: para cada valor de un atributo (el hook, el tema, la serie), cuántas
- * publicaciones lo llevan y sus medianas de views ganadas, visitas y arrastre. Cuenta lo
- * publicado en el período, como la API de métricas: comparar el reel de ayer con uno de
- * hace seis meses por lo ganado este mes no compara hooks. «Atributo» y no «etiqueta»: en
- * el panel, la etiqueta es el `?s=` del link de cada publicación.
+ * publicaciones lo llevan y sus medianas: contra su cuenta y views a los 7 días (a igual
+ * edad), views ganadas, visitas y arrastre. Cuenta lo publicado en el período, como la API de
+ * métricas: comparar el reel de ayer con uno de hace seis meses por lo ganado este mes no
+ * compara hooks. «Atributo» y no «etiqueta»: en el panel, la etiqueta es el `?s=` del link
+ * de cada publicación.
  */
 export default async function CompararPage({ searchParams }: { searchParams: Promise<Params> }) {
   const params = await searchParams
@@ -41,6 +47,7 @@ export default async function CompararPage({ searchParams }: { searchParams: Pro
     publishedFrom: filters.from,
     publishedTo: filters.to,
     limit: MAX_PUBLICACIONES_LEIDAS,
+    aLos7Dias: true,
     ...(cuenta ? { accountId: cuenta.id } : {}),
   })
   const atributosDe = await attributesFor(ownerId, filas)
@@ -49,7 +56,7 @@ export default async function CompararPage({ searchParams }: { searchParams: Pro
 
   const claves = clavesDeAtributos(entradas.map((e) => e.atributos))
   const clave = claveElegida(typeof params.atributo === 'string' ? params.atributo : undefined, claves)
-  const comparadas = clave ? compararPorAtributo(entradas, clave) : []
+  const comparadas = clave ? compararPorAtributo(entradas, clave, contraSuCuenta(filas)) : []
   // Un atributo pedido que no aparece en lo publicado del período (un enlace desde una
   // pieza vieja): se muestra otro, pero se dice.
   const pedido = typeof params.atributo === 'string' ? params.atributo : null
@@ -106,7 +113,7 @@ export default async function CompararPage({ searchParams }: { searchParams: Pro
       <Panel
         className="mt-4"
         title={clave ? `Por ${clave}` : 'Por atributo'}
-        hint="Medianas de lo publicado en el período: la publicación del medio, para que un reel que se pasó no arrastre a todo su valor. Cada mediana cuenta solo a quien tiene ese número; YouTube no entra en views ni en arrastre."
+        hint={`Medianas de lo publicado en el período: la publicación del medio, para que un reel que se pasó no arrastre a todo su valor. «Contra su cuenta» compara cada publicación con lo normal de su cuenta a los ${DIAS_A_IGUAL_EDAD} días: ×1,5 es una vez y media lo normal. Cada mediana cuenta solo a quien tiene ese número; YouTube no entra en views, en «Contra su cuenta» ni en arrastre.`}
       >
         {filas.length === 0 ? (
           <Empty>No publicaste nada en este período. Amplía el período.</Empty>
@@ -118,18 +125,22 @@ export default async function CompararPage({ searchParams }: { searchParams: Pro
         ) : (
           <>
             <div className="-mx-1 overflow-x-auto px-1">
-              <table className="w-full min-w-[30rem] border-collapse text-[0.85rem]">
+              <table className="w-full min-w-[42rem] border-collapse text-[0.85rem]">
                 <thead>
                   <tr className="font-mono text-[0.6rem] uppercase tracking-[0.16em] text-fg-faint">
                     <th colSpan={2} />
-                    <th className="whitespace-nowrap pb-1 text-right font-normal">En la red</th>
-                    <th colSpan={2} className="whitespace-nowrap pb-1 pl-4 text-right font-normal">
+                    <th colSpan={3} className="whitespace-nowrap pb-1 pl-4 text-center font-normal">
+                      En la red
+                    </th>
+                    <th colSpan={2} className="whitespace-nowrap pb-1 pl-4 text-center font-normal">
                       En tu página · lo mide Tu Parrilla
                     </th>
                   </tr>
                   <tr className="font-mono text-[0.65rem] uppercase tracking-[0.14em] text-fg-faint">
                     <th className="py-2 pr-3 text-left font-normal normal-case tracking-normal">{clave}</th>
                     <th className="py-2 text-right font-normal">Publicaciones</th>
+                    <th className="py-2 pl-4 text-right font-normal">Contra su cuenta</th>
+                    <th className="py-2 pl-4 text-right font-normal">Views a los {DIAS_A_IGUAL_EDAD} días</th>
                     <th className="py-2 pl-4 text-right font-normal">Views ganadas</th>
                     <th className="py-2 pl-4 text-right font-normal">Visitas</th>
                     <th className="py-2 pl-4 text-right font-normal">Arrastre</th>
@@ -154,6 +165,8 @@ export default async function CompararPage({ searchParams }: { searchParams: Pro
                       <td className="py-2 text-right font-mono tabular-nums text-fg-muted">
                         {formatNumber(fila.publicaciones)}
                       </td>
+                      <td className="py-2 pl-4 text-right font-mono tabular-nums">{veces(fila.contraSuCuenta)}</td>
+                      <td className="py-2 pl-4 text-right font-mono tabular-nums">{num(fila.viewsA7Dias)}</td>
                       <td className="py-2 pl-4 text-right font-mono tabular-nums">{num(fila.viewsGanadas)}</td>
                       <td className="py-2 pl-4 text-right font-mono tabular-nums">{num(fila.visitas)}</td>
                       <td className="py-2 pl-4 text-right font-mono tabular-nums">{pct(fila.arrastre)}</td>
