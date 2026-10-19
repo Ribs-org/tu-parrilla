@@ -1,4 +1,4 @@
-import { and, asc, eq, inArray, lte, or, sql } from 'drizzle-orm'
+import { and, asc, eq, inArray, isNull, lte, or, sql } from 'drizzle-orm'
 import {
   getDb,
   scheduledPostMedia,
@@ -20,7 +20,9 @@ import {
   type PublishOutcome,
 } from './publisher'
 import { sendFailureAlert } from './alert'
+import { MOTIVOS_DE_CONEXION } from './conexion'
 import type { OpcionesDestino } from './opciones'
+import { marcarCaida } from '@/lib/avisos/run'
 
 export type Report = { published: number; processing: number; retried: number; deferred: number; failed: number }
 
@@ -32,7 +34,8 @@ export type Report = { published: number; processing: number; retried: number; d
  * `soloPost` es el botón «Subir ahora» del calendario: restringe la corrida a los destinos
  * de ese post y no mira la hora, para publicar antes de lo programado. Pasa por aquí y no
  * por un camino propio a propósito — así hereda el reclamo de fila, los reintentos, el
- * aviso al dueño y, sobre todo, las opciones guardadas de cada destino.
+ * aviso al dueño y, sobre todo, las opciones guardadas de cada destino. Tampoco mira la
+ * espera entre intentos (`reintentarDesde`): quien aprieta el botón quiere el intento ahora.
  */
 export async function publishDue(now: Date = new Date(), soloPost?: string): Promise<Report> {
   const db = getDb()
@@ -50,7 +53,11 @@ export async function publishDue(now: Date = new Date(), soloPost?: string): Pro
             inArray(scheduledPostTargets.status, ['scheduled', 'publishing']),
           )
         : or(
-            and(eq(scheduledPostTargets.status, 'scheduled'), lte(scheduledPosts.scheduledAt, now)),
+            and(
+              eq(scheduledPostTargets.status, 'scheduled'),
+              lte(scheduledPosts.scheduledAt, now),
+              or(isNull(scheduledPostTargets.reintentarDesde), lte(scheduledPostTargets.reintentarDesde, now)),
+            ),
             eq(scheduledPostTargets.status, 'publishing'),
           ),
     )
@@ -88,11 +95,17 @@ export async function publishDue(now: Date = new Date(), soloPost?: string): Pro
       })
     }
 
-    const patch = resolveOutcome(outcome, target.attemptCount)
+    const patch = resolveOutcome(outcome, target.attemptCount, now)
     await db
       .update(scheduledPostTargets)
       .set({ ...patch, updatedAt: now })
       .where(eq(scheduledPostTargets.id, target.id))
+
+    // La cuenta perdió la conexión o el permiso: eso es de la cuenta, no de este post. Se
+    // anota en la cuenta desde el primer intento, para que el correo de la caída salga ya
+    // (`vigilarConexiones`, después de esta corrida) y no recién cuando el post se queme.
+    const deConexion = outcome.kind === 'failed' && MOTIVOS_DE_CONEXION.has(outcome.reason) ? outcome.reason : null
+    if (deConexion) await marcarCaida(target.accountId, deConexion)
 
     if (patch.status === 'published') {
       report.published++
@@ -104,6 +117,10 @@ export async function publishDue(now: Date = new Date(), soloPost?: string): Pro
       else report.retried++
     } else {
       report.failed++
+      // Una cuenta caída avisa una vez por cuenta, no una por post: trece posts de una
+      // cuenta de TikTok desconectada eran trece correos con la misma frase. El que sí
+      // llega es el de la caída; estos posts quedan en el resumen del día.
+      if (deConexion) continue
       // Al dueño del post, no al del despliegue: el fallo es de su publicación.
       let correoDueno: string | undefined
       if (post.ownerId) {
@@ -188,16 +205,20 @@ async function attempt(
 
   // Por la cuenta del destino: con dos páginas de Facebook, la red no dice cuál.
   const [account] = await db.select().from(socialAccounts).where(eq(socialAccounts.id, target.accountId))
-  const token = account ? await ensure(account) : null
-  if (!token || !account?.externalId) return { kind: 'failed', reason: NO_PUBLISH_TOKEN }
-
-  const media = await db
-    .select()
-    .from(scheduledPostMedia)
-    .where(eq(scheduledPostMedia.postId, postId))
-    .orderBy(asc(scheduledPostMedia.position))
 
   try {
+    // Dentro del try: renovar el token es una llamada a la red (el refresco de TikTok lanza
+    // con un 5xx), y una que lanzaba acá tumbaba la corrida entera, con todo lo que venía
+    // detrás en la fila sin publicar.
+    const token = account ? await ensure(account) : null
+    if (!token || !account?.externalId) return { kind: 'failed', reason: NO_PUBLISH_TOKEN }
+
+    const media = await db
+      .select()
+      .from(scheduledPostMedia)
+      .where(eq(scheduledPostMedia.postId, postId))
+      .orderBy(asc(scheduledPostMedia.position))
+
     return await publisher.publish({
       caption: content.caption,
       media: media.map((m) => ({ url: m.blobUrl, mediaType: m.mediaType, position: m.position })),

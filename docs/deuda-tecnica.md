@@ -340,11 +340,13 @@ comprobar:
    ocurra de verdad, sin haber apostado antes a una forma adivinada.
 
    Lo que cuesta mientras tanto, dicho sin suavizar: un rechazo definitivo que Meta redacte
-   sin la palabra —una cuenta privada, la cuota diaria— cae en «No se pudo hablar con la
+   sin la palabra —una cuenta privada, por ejemplo— cae en «No se pudo hablar con la
    red. Se reintentará.» y se reintenta hasta tres veces antes de fallar, prometiendo un
    reintento que Meta ya negó. Es el mismo trato que hoy recibe cualquier no-ok en un reel
    normal; el mapeo solo lo estrecha para el único caso que Meta deja reconocer. Cerrarlo
    pide ver el error real una vez, y entonces reconocerlo por su código y no por su texto.
+   La cuota diaria ya no está en este caso: Meta sí documenta su código (9, subcódigo
+   2207042), y `esTopeDiario` la reconoce y la hace esperar sin gastar intentos (2026-10-17).
 
    El rechazo que sí reconoce por texto ya no se reintenta: `createContainer` marca ese
    `failed` con `definitivo: true`, y `resolveOutcome` (`publisher.ts`) lo hace fallar en

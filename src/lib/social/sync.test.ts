@@ -124,6 +124,7 @@ describe('syncAccount: el día del snapshot es el del dueño', () => {
     expiresAt: null,
     lastSyncedAt: null,
     lastSyncError: null,
+    caidaAvisadaEn: null,
     createdAt: new Date('2026-01-01'),
   } satisfies SocialAccount
 

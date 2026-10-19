@@ -159,7 +159,7 @@ credenciales aparte, y las maneja cada uno.
 
 Fuera del panel, «el dueño» no siempre eres tú, así que conviene el detalle:
 
-- La **API con llave** (`/api/schedule/posts`, `/api/metrics/posts`, `/api/metrics/mejores`) habla en la zona del
+- La **API con llave** (`/api/schedule/posts`, `/api/schedule/resumen`, `/api/metrics/posts`, `/api/metrics/mejores`) habla en la zona del
   dueño de la llave: la tuya si el agente usa una llave que generaste tú, la del admin si
   usa `SCHEDULE_API_KEY`, la llave del despliegue. Lo que el agente escribe como «19:00»
   son las 19:00 del dueño, y los días de `desde`/`hasta` son sus días.
@@ -943,10 +943,10 @@ Vercel y bajan con `vercel env pull .env.local`.
 | `X_CLIENT_SECRET` | El secreto de esa app | Junto con el anterior |
 | `CRON_SECRET` | Autoriza las corridas programadas (sync diario y publicación cada 5 minutos) | No — la pone Vercel solo, al declarar el cron |
 | `MIGRAR_PREVIEWS` | Que los previews migren la base | Solo cuando el preview tenga una base propia; contra la de producción, no |
-| `SCHEDULE_API_KEY` | La llave del despliegue: abre `POST /api/schedule/batch` (carga masiva), `DELETE /api/schedule/posts/{id}` (sacar lo programado), `GET /api/schedule/posts` (calendario), `GET /api/metrics/posts` (métricas) y `GET /api/metrics/mejores` (el mejor X %) a nombre del admin. Es anterior a las llaves por usuario y sigue para el agente que ya la usa | No — sin ella los cinco endpoints aceptan solo las llaves que cada usuario genera en Tu Cuenta; si la pones, genérala igual que `CRON_SECRET` |
-| `RESEND_API_KEY` | Manda los códigos de ingreso y el aviso de publicación fallida | Sí — sin ella nadie puede entrar al panel |
-| `PUBLISH_ALERT_TO` | A qué correo llega el aviso de fallo | Sin ella no se envía ningún email; el calendario sigue mostrando el fallo |
-| `PUBLISH_ALERT_FROM` | Remitente del aviso | Opcional; default `onboarding@resend.dev` |
+| `SCHEDULE_API_KEY` | La llave del despliegue: abre `POST /api/schedule/batch` (carga masiva), `DELETE /api/schedule/posts/{id}` (sacar lo programado), `GET /api/schedule/posts` (calendario), `GET /api/schedule/resumen` (el resumen del día), `GET /api/metrics/posts` (métricas) y `GET /api/metrics/mejores` (el mejor X %) a nombre del admin. Es anterior a las llaves por usuario y sigue para el agente que ya la usa | No — sin ella los seis endpoints aceptan solo las llaves que cada usuario genera en Tu Cuenta; si la pones, genérala igual que `CRON_SECRET` |
+| `RESEND_API_KEY` | Manda los códigos de ingreso y los avisos: la publicación que se quemó, la cuenta que se cayó y el resumen del día (ver «Avisos por correo») | Sí — sin ella nadie puede entrar al panel |
+| `PUBLISH_ALERT_TO` | Adónde va un aviso sin dueño con correo: un post o una cuenta de antes de los usuarios. Lo demás va al correo de su dueño | No — sin ella, lo que no tiene dueño no avisa; el calendario y Los Fierros lo siguen mostrando |
+| `PUBLISH_ALERT_FROM` | Remitente de los avisos | Opcional; default `onboarding@resend.dev`, que solo entrega al correo de la cuenta de Resend |
 
 Para cambiar una variable en producción:
 
@@ -970,24 +970,61 @@ diarios, así que `vercel.json` declara apenas una corrida diaria de respaldo. E
 Pro puedes cambiar ese schedule a `*/5 * * * *` y prescindir del pinger: el endpoint
 es el mismo en los dos casos, cambia solo quién lo dispara.
 
-Cada corrida hace tres cosas, en orden: publica lo vencido, sondea comentarios (con la
-mitad del presupuesto como mucho) y barre los archivos huérfanos de R2. Al terminar cada
+Cada corrida hace cuatro cosas, en orden: publica lo vencido, vigila las conexiones de las
+cuentas (manda el correo de las que se cayeron; ver «Avisos por correo»), sondea comentarios
+(con la mitad del presupuesto como mucho) y barre los archivos huérfanos de R2. Al terminar cada
 fase escribe `[cron] <fase> listo a los N ms` en el log, y el barrido dice cuántos objetos
 leyó: si una corrida muere por `maxDuration` (240 s), la fase colgada es la primera que no
 dejó su línea. El barrido tiene un plazo de un minuto por lectura —el listado de R2 y la
 consulta a la base, cada una con su línea `[barrido]`— y, si no le alcanza, se rinde hasta la
 pasada siguiente sin borrar nada: un barrido que no termina no puede llevarse la corrida.
 
-Un destino que falla se reintenta en las corridas siguientes, hasta tres intentos, salvo
-los rechazos que la red ya decidió, que se queman al primero. Mientras espera el siguiente,
-el panel lo muestra como **Reintentando** con el motivo del intento anterior —en el editor
-del post y en la cola; la tarjeta del calendario dice «Reintentando» con sus redes y deja el
-motivo al pasar el mouse—, y el correo de aviso llega solo cuando se quema: sin ese
-motivo a la vista, un reintento escondía el error real hasta agotar los intentos.
+Un destino que falla se reintenta, hasta tres intentos, salvo los rechazos que la red ya
+decidió, que se queman al primero. Entre un intento y el siguiente hay una espera
+(`reintentarDesde`): quince minutos después del primero y dos horas después del segundo,
+así que un destino se quema recién unas dos horas y cuarto después de su hora, y una red
+caída hasta dos horas ya no lo pierde. Antes los tres intentos iban en corridas seguidas y
+se gastaban en diez minutos. «Subir ahora» no espera: es el dueño pidiendo el intento ya.
+Mientras espera el siguiente, el panel lo muestra como **Reintentando** con el motivo del
+intento anterior —en el editor del post y en la cola; la tarjeta del calendario dice
+«Reintentando» con sus redes y deja el motivo al pasar el mouse—, y el correo de aviso llega
+solo cuando se quema: sin ese motivo a la vista, un reintento escondía el error real hasta
+agotar los intentos.
+
+El tope diario de Instagram (las publicaciones por API que una cuenta puede hacer en 24
+horas) no es un fallo: el cupo vuelve solo, una publicación a la vez, 24 horas después de la
+que lo gastó. Un destino que choca con él no gasta intento ni se quema; espera una hora y
+prueba de nuevo, con el contenedor ya hecho para no volver a subir el video, y el panel lo
+muestra como «Reintentando» con la frase «Instagram llegó a su tope de publicaciones por
+día: sale apenas se libere un cupo.» (`esTopeDiario`, en `social/publish/instagram.ts`).
+
+### Avisos por correo
+
+Tres correos, todos con el remitente `PUBLISH_ALERT_FROM` y al correo del dueño (o a
+`PUBLISH_ALERT_TO` si lo que avisa no tiene dueño con correo). Las reglas viven en
+`src/lib/avisos/reglas.ts`, sin base; lo que lee y manda, en `src/lib/avisos/run.ts`.
+
+- **Una publicación que se quemó**: «No se pudo publicar en <Red>», con el motivo. Sale al
+  quemarse, una vez por destino. No sale cuando el motivo es la conexión de la cuenta: de eso
+  avisa el correo siguiente, una sola vez.
+- **Una cuenta cuya conexión se cayó**: «Se cayó la conexión con <Red> · <cuenta>», con
+  cuántas publicaciones tiene por salir ahí. Sale cuando su fierro queda frío —vencida, con la
+  sincronización rota, con una baja desde Facebook, o porque la red rechazó la conexión al
+  publicar (`marcarCaida` lo anota en la cuenta desde el primer intento)—, a los cinco
+  minutos, en la pasada siguiente del cron de publicación. Llega uno por caída, no uno por
+  post: `social_accounts.caida_avisada_en` lo marca y se borra cuando el fierro vuelve a
+  calentarse. Una cuenta que el dueño desconectó a propósito no avisa. El día que esto se
+  despliega, cada cuenta que ya estaba caída manda el suyo una vez.
+- **El resumen del día**: lo que se quemó en las últimas 24 horas, las cuentas por reconectar
+  (frías o a menos de siete días de vencer) y las cuentas en uso —con algo programado en los
+  últimos 30 días— que tienen menos de tres días programados hacia adelante. Sale después de
+  la sincronización diaria (9:00 UTC), y solo los días en que hay algo que contar. Lo mismo
+  se lee por API en `GET /api/schedule/resumen` (ver «Resumen por API»), para que quien
+  programa con un agente se entere aunque los correos le lleguen al dueño.
 
 ### Guía para el editor de contenido
 
-`public/docs/api-editor.md` documenta los cinco endpoints en detalle, escrito para que un
+`public/docs/api-editor.md` documenta los seis endpoints en detalle, escrito para que un
 LLM que crea contenido lo lea entero y no necesite explicaciones: contratos, reglas
 por red, todas las frases de error y qué significa cada métrica. Se sirve tal cual en
 <https://tu-parrilla.cl/docs/api-editor.md>. No contiene secretos — la llave
@@ -1013,7 +1050,7 @@ página cita archivos que ya no existen.
 
 ### La llave de la API
 
-Los cinco endpoints de abajo piden el header `Authorization: Bearer <llave>`, y lo que
+Los seis endpoints de abajo piden el header `Authorization: Bearer <llave>`, y lo que
 hacen lo hacen a nombre del dueño de la llave: sus cuentas, sus posts, su zona. Valen dos
 clases de llave:
 
@@ -1035,7 +1072,17 @@ ignora. Nombrar solo `redes` sigue funcionando, pero cada nombre se resuelve a u
 cuenta solo cuando el dueño tiene **exactamente una** conectada de esa red — con dos, la
 fila se rechaza nombrando las candidatas y sus handles; no hay adivinanza posible.
 Responde el resultado por item; las filas rechazadas traen su motivo.
-Si la función alcanza su tiempo máximo a mitad de un lote, la respuesta se pierde pero las filas ya procesadas quedan programadas — re-enviar el lote vuelve a programar las que habían entrado (no hay deduplicación), así que conviene reintentar solo las filas pendientes.
+
+Cada fila puede traer una `ref`: un texto de hasta 100 caracteres, único por dueño, que el
+que llama elige (el id de la fila en su planilla, por ejemplo). Sirve para el caso que antes
+duplicaba: si la función alcanza su tiempo máximo a mitad de un lote, o se corta la conexión,
+la respuesta se pierde pero las filas ya procesadas quedan programadas. Reenviar el lote
+entero devuelve esas filas con su `postId` y `repetido: true`, sin programarlas de nuevo —ni
+descargar su media, ni volver a validarlas: su hora pudo pasar desde el primer envío—, y
+programa solo las que faltaban. La `ref` no compara contenidos: si la fila cambió, el post
+que vuelve es el de antes. Para que eso valga, cada post entra con sus destinos, su media y su
+regla en una sola transacción, y la unicidad `(owner_id, ref)` de `scheduled_posts` resuelve
+dos envíos simultáneos. Sin `ref`, reenviar sigue duplicando.
 
 Cada item acepta además `atributos`: un objeto plano de valores simples
 (`{"hook": "pregunta-polemica", "tema": "negocios", "serie": "mut"}`, máximo 20
@@ -1093,9 +1140,10 @@ mejor 10 %»; la lógica, sin base, está en `src/lib/mejores.ts`.
 y `hasta` (`YYYY-MM-DD` en la zona horaria del dueño, la de Tu Cuenta; ambos inclusive; por defecto de hoy a 30
 días). Devuelve `{ desde, hasta, posts }` con lo programado cuya **hora de salida** cae
 en la ventana, salido o no: texto, `fecha` (ISO con offset), portada, media en orden,
-`atributos`, y por cada destino su estado (`scheduled`, `publishing`, `published`,
-`failed`), el `externalId` si ya salió, los intentos, la frase de error del último intento fallido (también en un `scheduled`
-que espera reintentarse), y
+`atributos`, la `ref` con que llegó por el lote (o `null`), y por cada destino su estado
+(`scheduled`, `publishing`, `published`, `failed`), el `externalId` si ya salió, los
+intentos, la frase de error del último intento fallido (también en un `scheduled` que espera
+reintentarse), `proximoIntento` (cuándo vuelve a probar uno que espera, o `null`), y
 `cuentaId`/`handle` de la cuenta — útil para recuperar el id de una cuenta que ya tiene
 algún destino programado. Para una cuenta recién conectada, que todavía no tiene
 ninguno, el id está en el detalle de su fila en **Los Fierros** (Cuentas, en Ajustes) del panel —la flecha de la fila—, con un botón para
@@ -1107,6 +1155,19 @@ entero —destinos, media y regla— con la regla del panel, que comparten en
 con `Ya se publicó (o está publicando): elimínalo en la red.`, porque borrar la fila no
 despublica nada; si el id no existe (o no es del dueño), `404`; borrado, `200`. No hay
 edición por API: para cambiar algo se borra y se programa de nuevo.
+
+### Resumen por API
+
+`GET /api/schedule/resumen` con el mismo `Authorization` devuelve lo mismo que el resumen
+del día que llega por correo (ver «Avisos por correo»), calculado en el momento: `fallidos`
+(los destinos que se quemaron en las últimas `horas`, con su post, red, cuenta, motivo e
+intentos), `cuentas` (las que hay que reconectar: `fierro` `frio` o `enfriandose`, cuándo
+vence y el motivo) y `pista` (las cuentas en uso con menos de `dias` días programados: la
+hora de lo último que tienen por salir, o `null`, y los días completos que quedan).
+Parámetros opcionales: `dias`, entero de 1 a 30 (3 por defecto), y `horas`, entero de 1 a
+168 (24 por defecto); fuera de rango, `400` con la frase fija. Las horas van en ISO con el
+offset de la zona del dueño. Es para que un agente que programa por la API se entere de lo
+que se quemó o se está por acabar aunque los correos le lleguen al dueño de la llave.
 
 ## Estructura
 
@@ -1147,6 +1208,7 @@ src/
     borrador.ts            qué se guarda de un formulario y cómo se restaura, también desde el teléfono (sin base)
     borradores-movil.ts    los mismos borradores en la forma de la app del teléfono
     empresa.ts             quién presta el servicio: lo leen la portada, privacidad y términos
+    avisos/                la caída de una cuenta y el resumen del día: las reglas sin base y lo que lee y manda
     social/
       lectura.ts           qué publicaciones se leen cada día: lo nuevo a diario, lo viejo cada vez más espaciado
       politica-youtube.ts  lo que las políticas de YouTube no dejan hacer con sus datos

@@ -37,6 +37,8 @@ export async function POST(request: Request) {
         atributos: p.atributos,
         opciones: p.opciones,
         regla: p.regla,
+        // Cruda también: un número donde va un texto lo rechaza `refDeFila` con su frase.
+        ref: p.ref,
       }
     })
   } catch {
