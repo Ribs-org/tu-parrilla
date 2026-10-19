@@ -58,7 +58,7 @@ Content-Type: application/json
       "redes": ["instagram", "facebook", "youtube"],
       "media": ["https://drive.usercontent.google.com/download?id=ABC&export=download"],
       "portada": "https://ejemplo.com/portada.jpg",
-      "atributos": { "hook": "pregunta-polemica", "tema": "negocios-chile", "formato": "listado" },
+      "atributos": { "hook": "pregunta-polemica", "tema": "negocios", "estilo": "a-camara" },
       "opciones": { "tiktok": { "modo": "directo", "privacidad": "SELF_ONLY", "comentarios": true, "comercial": "no" } },
       "ref": "septiembre-fila-12"
     }
@@ -165,17 +165,55 @@ Un objeto plano, de valores simples (texto, número o booleano), máximo 20 clav
 2000 caracteres serializado:
 
 ```json
-"atributos": { "hook": "pregunta-polemica", "tema": "negocios", "serie": "mut", "duracion_seg": 42 }
+"atributos": { "hook": "pregunta-polemica", "tema": "negocios", "serie": "mut", "duracion": "30-60" }
 ```
 
-**Las claves y los valores los inventas tú.** El sistema los guarda tal cual y te los
+**Las claves y los valores los eliges tú.** El sistema los guarda tal cual y te los
 devuelve junto a las métricas. Ese es el mecanismo con el que puedes descubrir qué
-funciona: etiqueta de forma consistente lo que decides (hook, tema, formato, estructura,
-duración, serie…) y después correlaciona. El dueño ve lo mismo en su panel: Los Números
-tiene «Comparar por atributo», con las medianas de cada valor.
+funciona: etiqueta de forma consistente lo que decides y después correlaciona. El dueño ve
+lo mismo en su panel: Los Números tiene «Comparar por atributo», con las medianas de cada
+valor —entre ellas «contra su cuenta», que compara a la misma edad y dentro de cada
+cuenta—, y «Tu mejor 10 %», que dice qué se repite entre lo mejor y entre lo peor.
 
-Recomendación práctica: mantén un vocabulario estable entre posts. `"hook": "pregunta"`
-en unos y `"gancho": "pregunta-directa"` en otros hace imposible comparar.
+#### El vocabulario recomendado
+
+Es opcional, y el sistema no lo valida: si no te sirve, usa el tuyo. Pero si etiquetas para
+que el dueño compare, estas claves cubren lo que más se pregunta —qué tema pica, qué hook
+engancha, y si algo de la edición hizo la diferencia—, y usarlas igual en todos los posts es
+lo que permite comparar.
+
+| Clave | Qué anota | Valores de ejemplo |
+|---|---|---|
+| `tema` | De qué trata: el tema principal, uno solo | `negocios`, `edicion`, `finanzas`, `recetas` |
+| `hook` | Cómo abre: lo que pasa en los primeros 3 segundos | `pregunta`, `pregunta-polemica`, `dato`, `promesa`, `historia`, `lista`, `antes-despues`, `error-comun` |
+| `estilo` | Cómo está hecho | `a-camara`, `voz-en-off`, `tutorial`, `entrevista`, `b-roll`, `meme`, `texto` |
+| `serie` | La serie, si es parte de una | su nombre corto: `mut`, `lunes-de-numeros` |
+| `color` | El tratamiento de color dominante | `calido`, `frio`, `saturado`, `desaturado`, `blanco-y-negro`, `de-marca` |
+| `fuente` | La tipografía del texto en pantalla | su nombre (`montserrat`, `bebas-neue`), o `sin-texto` |
+| `ritmo` | Cada cuánto hay un corte de edición | `rapido` (cada 1 a 2 segundos), `medio` (cada 3 a 5), `lento` (más de 5), `plano-secuencia` |
+| `musica` | Qué suena | `tendencia`, `biblioteca`, `original`, `voz-sola`, `sin-musica` |
+| `duracion` | El largo del video, en tramos de segundos | `0-15`, `15-30`, `30-60`, `60-90`, `90+` |
+
+Cuatro reglas para que se puedan comparar:
+
+- **Un valor por clave.** Los atributos no aceptan listas: si un post toca dos temas, elige
+  el principal.
+- **Minúsculas, sin tildes, con guiones en vez de espacios** (`voz-en-off`, no `Voz en off`).
+  El panel compara los valores tal como están escritos, salvo los espacios de los bordes:
+  «Pregunta» y «pregunta» son dos filas.
+- **Tramos y categorías, no números exactos.** `"duracion": 42` deja cada largo en su propia
+  fila; con `"duracion": "30-60"` se juntan y se comparan.
+- **Siempre lo mismo.** `"hook": "pregunta"` en unos y `"gancho": "pregunta-directa"` en otros
+  hace imposible comparar. Si cambias el vocabulario, que sea para los posts nuevos.
+
+Y no anotes lo que no decidiste: si no sabes el color de un video, no mandes `color`. Una
+clave que falta cae en «sin color», que es la vara contra la que se compara; un valor puesto
+por poner la ensucia.
+
+Dos nombres que conviene no usar: `formato`, porque el panel ya llama así al tipo de post
+(«Reel», «Carrusel»…) en «Tu mejor 10 %» y quedarían dos «formato» distintos; y `corte`,
+porque en el panel un corte es el post mismo (la entraña, la tira, el bife, el chori). Para
+eso están `estilo` y `ritmo`.
 
 **Una sola clave tiene significado: `pieza`.** Los posts con el mismo valor de `pieza` son
 versiones de una misma pieza, y el panel los muestra juntos, lado a lado. Úsala cuando
@@ -185,7 +223,7 @@ cuenta, y sus atributos son uno solo—, así que sin `pieza` nada las une:
 
 ```json
 { "atributos": { "pieza": "chimichurri-30s", "hook": "pregunta" } }
-{ "atributos": { "pieza": "chimichurri-30s", "hook": "listado" } }
+{ "atributos": { "pieza": "chimichurri-30s", "hook": "lista" } }
 ```
 
 No la uses como `serie`: es para variantes del mismo contenido, no para un tema que se repite.
@@ -836,7 +874,7 @@ curl -X POST https://tu-parrilla.cl/api/schedule/batch \
         "redes": ["instagram", "youtube", "facebook"],
         "media": ["https://drive.usercontent.google.com/download?id=ABC&export=download"],
         "portada": "https://ejemplo.com/portada-01.jpg",
-        "atributos": { "hook": "pregunta-polemica", "tema": "retail", "formato": "explicacion" },
+        "atributos": { "hook": "pregunta-polemica", "tema": "retail", "estilo": "tutorial" },
         "ref": "septiembre-01"
       },
       {
@@ -844,7 +882,7 @@ curl -X POST https://tu-parrilla.cl/api/schedule/batch \
         "texto": "Tres cosas que aprendí vendiendo software en Chile.",
         "redes": ["threads", "x"],
         "media": [],
-        "atributos": { "hook": "listado", "tema": "software", "formato": "texto" },
+        "atributos": { "hook": "lista", "tema": "software", "estilo": "texto" },
         "ref": "septiembre-02"
       }
     ]

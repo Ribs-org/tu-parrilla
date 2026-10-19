@@ -82,6 +82,43 @@ no tres días después dentro de un cron. `mensaje` es obligatorio junto con `pa
 como **respuesta pública** al comentario, no por mensaje privado. Ver la sección 6, «Lo que
 Meta no permite», para el porqué y para lo que cambia cuando el privado se encienda.
 
+## 2b. Los atributos: anótalos siempre igual
+
+Cada fila acepta `atributos`, un objeto plano de valores simples (texto, número o booleano;
+hasta 20 claves y 2000 caracteres). El sistema no los interpreta —salvo `pieza`, abajo—: los
+guarda y los devuelve junto a las métricas, y el panel del dueño compara lo publicado por
+cada valor («Comparar por atributo») y dice qué se repite entre lo mejor y entre lo peor
+(«Tu mejor 10 %»). Son opcionales y no se validan, pero si los mandas, usa este vocabulario,
+con los mismos valores en todos los posts, o no se van a poder comparar:
+
+| Clave | Qué anota | Valores de ejemplo |
+|---|---|---|
+| `tema` | De qué trata: el tema principal, uno solo | `negocios`, `edicion`, `finanzas`, `recetas` |
+| `hook` | Cómo abre: lo que pasa en los primeros 3 segundos | `pregunta`, `pregunta-polemica`, `dato`, `promesa`, `historia`, `lista`, `antes-despues`, `error-comun` |
+| `estilo` | Cómo está hecho | `a-camara`, `voz-en-off`, `tutorial`, `entrevista`, `b-roll`, `meme`, `texto` |
+| `serie` | La serie, si es parte de una | su nombre corto: `mut`, `lunes-de-numeros` |
+| `color` | El tratamiento de color dominante | `calido`, `frio`, `saturado`, `desaturado`, `blanco-y-negro`, `de-marca` |
+| `fuente` | La tipografía del texto en pantalla | su nombre (`montserrat`, `bebas-neue`), o `sin-texto` |
+| `ritmo` | Cada cuánto hay un corte de edición | `rapido` (cada 1 a 2 segundos), `medio` (cada 3 a 5), `lento` (más de 5), `plano-secuencia` |
+| `musica` | Qué suena | `tendencia`, `biblioteca`, `original`, `voz-sola`, `sin-musica` |
+| `duracion` | El largo del video, en tramos de segundos | `0-15`, `15-30`, `30-60`, `60-90`, `90+` |
+
+- **Un valor por clave**: no hay listas. Si toca dos temas, el principal.
+- **Minúsculas, sin tildes, guiones en vez de espacios.** Se compara el texto exacto:
+  `Pregunta` y `pregunta` son dos valores.
+- **Tramos y categorías, no números exactos**: `"duracion": 42` no se agrupa con nada.
+- **No anotes lo que no decidiste.** Una clave que falta cae en «sin <clave>», la vara contra
+  la que se compara; un valor inventado la ensucia.
+- **No uses `formato` ni `corte`**: el panel ya llama «formato» al tipo de post (Reel,
+  Carrusel…), y «corte» al post mismo. Para eso están `estilo` y `ritmo`.
+- **`pieza` sí significa algo**: los posts con el mismo valor son versiones de una misma
+  pieza —dos hooks del mismo video, o el trial reel y el reel normal— y el panel los muestra
+  lado a lado. No la uses como `serie`.
+
+```json
+"atributos": { "tema": "edicion", "hook": "error-comun", "estilo": "a-camara", "ritmo": "rapido", "musica": "tendencia", "duracion": "30-60", "fuente": "montserrat", "color": "calido" }
+```
+
 ## 3. Frases de error literales
 
 Toda fila rechazada trae la frase exacta, en `resultados[i].error` — comparar por igualdad,

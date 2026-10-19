@@ -51,7 +51,7 @@
           },
           "atributos": {
             "type": "object",
-            "description": "Objeto plano de valores simples (texto, número o booleano) — las claves y valores los elige quien llama; el sistema los guarda y los devuelve junto a las métricas de GET /api/metrics/posts. Una sola clave tiene significado: 'pieza', que junta como versiones de una misma pieza (en el panel, lado a lado) a los posts con el mismo valor — para variantes del mismo video, como dos hooks o un trial reel y su reel normal. Máximo 20 claves y 2000 caracteres al serializar.",
+            "description": "Objeto plano de valores simples (texto, número o booleano) — las claves y valores los elige quien llama; el sistema los guarda y los devuelve junto a las métricas de GET /api/metrics/posts. Una sola clave tiene significado: 'pieza', que junta como versiones de una misma pieza (en el panel, lado a lado) a los posts con el mismo valor — para variantes del mismo video, como dos hooks o un trial reel y su reel normal. Máximo 20 claves y 2000 caracteres al serializar. Vocabulario recomendado, opcional y sin validar (tabla en api-llm.md, sección 2b): tema, hook, estilo, serie, color, fuente, ritmo, musica y duracion, un valor por clave, en minúsculas, sin tildes y siempre igual; no usar formato ni corte, que el panel ya usa para otra cosa.",
             "maxProperties": 20,
             "additionalProperties": { "type": ["string", "number", "boolean"] }
           },
