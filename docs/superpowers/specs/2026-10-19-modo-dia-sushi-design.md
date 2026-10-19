@@ -306,7 +306,7 @@ panel de día con sus piezas de sushi.
 - la carga crema;
 - los fierros, la miniatura y las barras de views en salmón.
 
-**Tanda 3, la app del teléfono.** Hecha el 2026-10-19; llega por aire.
+**Tanda 3, la app del teléfono.** Hecha y publicada por aire el 2026-10-19.
 - **El modo:** el de la cuenta, que la app lee y cambia con `/api/mobile/tema`, con «Modo día» o
   «Modo noche» en Ajustes. El teléfono guarda una copia para abrir en el modo de la última vez
   sin esperar a la red, vuelve a preguntarle a la cuenta al pasar al frente, y un cambio sin señal
