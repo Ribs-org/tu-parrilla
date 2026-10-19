@@ -62,9 +62,28 @@ página de links. El período vale para las dos.»
 
 ### El período
 
-Cinco botones: «Hoy», «7 días», «30 días», «90 días», «Todo». El elegido queda resaltado en
-naranjo; al entrar es «30 días». Vale para todo el tablero, las dos mitades. Mientras carga el
-cambio, la fila se ve más tenue.
+Seis botones en una fila: «Hoy», «7 días», «30 días», «90 días», «Todo» y, con un ícono de
+calendario, «Fechas». El elegido queda resaltado en naranjo; al entrar es «30 días». Vale para
+todo el tablero, las dos mitades. Mientras carga el cambio, la fila se ve más tenue. En un
+teléfono angosto, «Fechas» baja a una segunda línea dentro de la misma fila.
+
+«Fechas» abre, debajo de la fila (y en su propia línea, después de los demás controles de la
+fila si los hay), el **selector de fechas**:
+
+- Dos campos de fecha, «Desde» y «Hasta», que abren el calendario del navegador. Vienen con el
+  período que está puesto: con «30 días», de hace treinta días a hoy. No dejan elegir antes del
+  1 de enero de 2020 ni después de hoy.
+- Cuatro accesos rápidos: «Esta semana», «La semana pasada», «Este mes» y «El mes pasado». Cada
+  uno se ve al tiro, sin apretar nada más. La semana empieza el lunes; «Esta semana» y «Este
+  mes» terminan hoy.
+- Si las fechas no se pueden ver, una frase en rojo (ver «Mensajes que puede ver»).
+- «Ver estas fechas», que muestra los días de los dos campos (apagado mientras haya una frase
+  en rojo), y «Cancelar», que cierra sin cambiar nada. Escape también cierra.
+
+Con unas fechas puestas, el botón «Fechas» queda resaltado y en vez de «Fechas» dice los días:
+«22 ago – 7 sept», o «7 sept» si es uno solo, y con el año en las dos puntas si alguna no es de
+este año («22 dic 2025 – 7 ene 2026»). Apretarlo abre el selector con esas fechas, para cambiar
+solo una punta. Apretar un atajo («30 días», por ejemplo) borra las fechas elegidas.
 
 ### Mitad «En las redes»
 
@@ -243,7 +262,7 @@ alguien entra por el link de esa publicación.»
 
 **La fila de controles**, de izquierda a derecha:
 
-- Los cinco botones del período, los mismos del tablero.
+- Los botones del período y «Fechas», los mismos del tablero.
 - El selector de cuenta, **solo con más de una cuenta**: «Todas las cuentas» y una opción por
   cuenta con el patrón «<red> · <nombre de la cuenta>».
 - Dos botones juntos: «Publicadas en el período» (el de al entrar) y «Todas las recientes». El
@@ -359,7 +378,7 @@ visitas, Tu Parrilla, cuando alguien entra por el link de esa versión.»
 
 Un valor `true` o `false` se lee «sí» o «no».
 
-**El período.** Los cinco botones de siempre: «Hoy», «7 días», «30 días», «90 días», «Todo».
+**El período.** Los botones de siempre: «Hoy», «7 días», «30 días», «90 días», «Todo» y «Fechas».
 
 **Panel «Una versión»** (o «<N> versiones»), explicación: «Los números del período elegido; con
 «Todo», los de toda la vida. Views: el total en la red, con lo ganado en el período al lado. En
@@ -429,7 +448,7 @@ cómo le fue a lo que publicaste en el período.»
 
 **La fila de controles:**
 
-- Los cinco botones del período.
+- Los botones del período y «Fechas», los mismos del tablero.
 - El selector de cuenta, **solo con más de una cuenta**: «Todas las cuentas» y una opción por
   cuenta con el patrón «<red> · <nombre de la cuenta>».
 - El selector de atributo, **solo si alguna publicación del período tiene atributos**: una
@@ -476,7 +495,7 @@ común esas publicaciones frente al resto.»
 
 **La fila de controles:**
 
-- Los cinco botones del período.
+- Los botones del período y «Fechas», los mismos del tablero.
 - El selector de cuenta, **solo con más de una cuenta**: «Todas las cuentas» y una opción por
   cuenta con el patrón «<red> · <nombre de la cuenta>».
 - El selector de métrica: «Por views ganadas» (el de entrada), «Por visitas a tu página», «Por
@@ -530,7 +549,12 @@ queda siempre al fondo, en las dos direcciones. Los números desde 10.000 se abr
 «1,5 M»). Los porcentajes llevan punto decimal («3.3%», «7.10%»).
 
 **El período.** «Hoy» son las últimas 24 horas, no desde la medianoche; «Todo» es desde 2020.
-Los días y las horas se cortan en la zona horaria de la persona, la de [Tu Cuenta](tu-cuenta.md).
+Con «Fechas», los días elegidos enteros, los dos incluidos: del 22 de agosto al 7 de septiembre
+es desde la medianoche del 22 hasta la del 8. Los días y las horas se cortan en la zona horaria
+de la persona, la de [Tu Cuenta](tu-cuenta.md). Las fechas viajan en la dirección
+(`?desde=2026-08-22&hasta=2026-09-07`, igual que en la API de métricas), así que un enlace con
+fechas se puede compartir; unas fechas que no se entienden se ignoran y queda el atajo, o los
+30 días.
 
 **De dónde salen los números de la red.** La red no se consulta en vivo. Una sincronización
 lee todas las cuentas una vez al día (a las 9:00 UTC, las 5 o 6 de la mañana en Chile según la
@@ -640,7 +664,8 @@ la misma conexión y el mismo navegador pueden contar como una.
 hace varios clicks por visita. Sin visitas, «0.0%».
 
 **La comparación bajo cada cifra.** Cuánto cambió la cifra, en porcentaje, contra el período de
-igual largo justo antes (con «7 días», los siete días anteriores). En «CTR» es el cambio del CTR
+igual largo justo antes (con «7 días», los siete días anteriores; con unas fechas, los mismos
+días justo antes: del 1 al 7 de septiembre se compara con el 25 al 31 de agosto). En «CTR» es el cambio del CTR
 mismo, no en puntos: pasar de 2.0% a 3.0% se ve como «+50%». «Nada en el período anterior para
 comparar» aparece cuando el período anterior tuvo cero y este no, porque no hay porcentaje de
 crecimiento desde cero; con «Todo» pasa casi siempre, porque antes de 2020 no hay nada.
@@ -836,10 +861,23 @@ aparecen nunca: para ver lo mejor de cada una, elegirla en el selector.
 
 ### Para saber cómo le fue en el período
 
-1. Elegir el período arriba («Hoy», «7 días», «30 días», «90 días» o «Todo»).
+1. Elegir el período arriba («Hoy», «7 días», «30 días», «90 días» o «Todo»), o unas fechas con
+   «Fechas» (ver «Para ver unas fechas exactas»).
 2. En «En las redes», leer «Views ganadas» y «Seguidores ganados»; debajo, «Lo que más creció».
 3. En «En tu página», leer «Visitas» y «Clicks en tus links», con su comparación contra el
    período anterior; debajo, «Qué publicación te trajo gente».
+
+### Para ver unas fechas exactas
+
+1. Arriba, apretar «Fechas» (el último botón del período, con un calendario).
+2. Para una semana o un mes, apretar «Esta semana», «La semana pasada», «Este mes» o «El mes
+   pasado»: se ve al tiro.
+3. Para otros días, elegir «Desde» y «Hasta» en sus calendarios y apretar «Ver estas fechas».
+   Para mover solo una punta (del 1 de septiembre al 22 de agosto, por ejemplo), basta con
+   cambiar ese campo: el otro ya trae la fecha puesta.
+4. Para volver a un período de los de siempre, apretar «30 días» o cualquier otro atajo.
+
+Las fechas valen en todas las pantallas de Los Números y viajan al pasar de una a otra.
 
 ### Para ver el detalle de una mitad
 
@@ -1029,6 +1067,10 @@ API: ver `GET /api/metrics/posts` en [la guía de la API](../api-editor.md).
 
 | Lo que dice la pantalla | Qué significa | Qué hacer |
 |---|---|---|
+| «La primera fecha tiene que ir antes que la segunda.» (en el selector de fechas) | «Desde» es posterior a «Hasta». | Cambiar una de las dos. |
+| «La primera fecha no puede ser anterior a 2020.» (en el selector de fechas) | «Desde» es de antes del 1 de enero de 2020, donde empieza «Todo». | Elegir una fecha desde 2020, o «Todo». |
+| «La segunda fecha no puede pasar de hoy: lo que viene todavía no tiene números.» (en el selector de fechas) | «Hasta» es de un día que todavía no llega. | Elegir hoy o un día anterior. |
+| «Elige las dos fechas.» (en el selector de fechas) | Uno de los dos campos está vacío o a medio escribir. | Completar el campo. |
 | «—» en «Views ganadas» | Ninguna publicación tiene lo ganado conocido: todo es de YouTube, no hay lectura de antes del período, o no hay publicaciones sincronizadas. | Esperar la próxima sincronización, o elegir un período más corto que el tiempo que lleva conectada la cuenta. |
 | «—» en «Seguidores ganados» | Ninguna cuenta tiene una lectura de antes del período para comparar, o solo hay YouTube, TikTok, Threads o X. | Igual que arriba. |
 | «Ninguna publicación ganó views en este período. Las métricas llegan con la sincronización diaria, así que lo publicado hoy aparece mañana.» (en «Lo que más creció») | Ninguna publicación ganó más de cero views conocidas en el período. | Ampliar el período, o esperar la próxima sincronización. |
@@ -1079,6 +1121,9 @@ API: ver `GET /api/metrics/posts` en [la guía de la API](../api-editor.md).
 
 ## Si el humano dice…
 
+- **«Quiero ver del 1 al 7 de septiembre» / «quiero ver una semana en particular»**: en Los
+  Números, «Fechas» (el último botón del período): elegir «Desde» y «Hasta» y apretar «Ver
+  estas fechas», o un acceso rápido como «La semana pasada». Vale en todas sus pantallas.
 - **«¿Cuáles fueron mis mejores posts?» / «quiero ver mi top 10 %»**: en Los Números, «Tu mejor
   10 % →» (a la derecha de «Lo que más creció»). Ahí se elige la métrica, el porcentaje y, con
   más de una cuenta, la cuenta.
@@ -1207,7 +1252,6 @@ API: ver `GET /api/metrics/posts` en [la guía de la API](../api-editor.md).
 
 ## Lo que esta pantalla no hace
 
-- No acepta fechas exactas: solo los cinco períodos.
 - No filtra por red: filtra por cuenta.
 - No adivina versiones: dos posts programados se ven juntos solo si comparten el atributo
   `pieza`. Una publicación subida a mano en la red no se junta con nada.
@@ -1267,7 +1311,9 @@ Sale de:
 - `src/lib/social/publish/atributos.ts` y `src/lib/social/publish/opciones.ts` (qué atributos
   valen; qué es un trial reel)
 - `src/app/admin/(dash)/content/page.tsx` (la redirección desde la dirección de Los Cortes)
-- `src/components/filter-bar.tsx` y `src/lib/filters.ts` (período, selectores, bots)
+- `src/components/filter-bar.tsx` y `src/lib/filters.ts` (período, selectores, bots) y
+  `src/lib/rango.ts` (las fechas a mano: los accesos rápidos, cómo se leen en el botón y sus
+  frases)
 - `src/lib/tablero.ts` (cuenta elegida, qué «⋯ Más» están abiertos, seguidores ganados, qué
   filtros viajan entre las dos pantallas)
 - `src/lib/analytics.ts` (cada consulta de la página, topes, granularidad, período anterior)

@@ -110,7 +110,7 @@ export default async function PiezaPage({
         ) : null}
       </header>
 
-      <RangoBar />
+      <RangoBar periodo={filters.periodo} />
 
       <Panel
         className="mt-4"

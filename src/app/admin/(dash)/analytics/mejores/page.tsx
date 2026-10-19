@@ -107,7 +107,7 @@ export default async function MejoresPage({ searchParams }: { searchParams: Prom
       </header>
 
       <div className="flex flex-wrap items-center gap-2">
-        <RangoBar />
+        <RangoBar periodo={filters.periodo} />
         {cuentas.length > 1 ? (
           <SelectorEnUrl
             clave="cuenta"
