@@ -203,13 +203,11 @@ Nada de esto bloquea un trámite hoy; conviene ordenarlo antes de abrir a tercer
 - **Los Números para 1.000 publicaciones por semana** (2026-10-18). Pedido del dueño. Ya
   están la lectura diaria por edad (`src/lib/social/lectura.ts`), los topes de las
   pantallas, el rango de fechas a mano y la comparación a igual edad, con «Tu peor 10 %»
-  (`src/lib/igual-edad.ts`). Queda, en este orden, cada cosa en su PR:
-  1. En las guías de la API, un vocabulario de atributos recomendado y opcional: `tema`,
-     `hook` y `formato`, y los de edición (`color`, `fuente`, `corte`, `musica`,
-     `duracion`). Sin etiquetado automático: decisión del dueño, por el costo.
-  2. Ver lado a lado los de arriba y los de abajo, o dos publicaciones elegidas: portada,
-     atributos, la curva día a día y el link a la red. Sin guardar el video después de
-     publicado: decisión del dueño, para que R2 no crezca.
+  (`src/lib/igual-edad.ts`), y el vocabulario de atributos recomendado en las guías de la
+  API. Queda:
+  - Ver lado a lado los de arriba y los de abajo, o dos publicaciones elegidas: portada,
+    atributos, la curva día a día y el link a la red. Sin guardar el video después de
+    publicado: decisión del dueño, para que R2 no crezca.
 - **Un modo día con sushi** (2026-10-18). Pedido del dueño, para después de lo anterior:
   un modo día donde la parrilla se vuelve sushi —las mismas piezas, con sashimi y compañía
   en vez de cortes—, para el público que la estética de asado deja fuera. El modo noche, el

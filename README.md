@@ -1092,9 +1092,13 @@ Cada item acepta además `atributos`: un objeto plano de valores simples
 (`{"hook": "pregunta-polemica", "tema": "negocios", "serie": "mut"}`, máximo 20
 claves) que el sistema guarda sin interpretar y devuelve junto a las métricas. Es la
 taxonomía de quien crea el contenido: sirve para correlacionar decisiones creativas
-con resultados, y el panel la usa en «Comparar por atributo». Una sola clave tiene
-significado para el panel: `pieza`, que junta como versiones de una misma pieza a los
-posts que comparten su valor. El CSV no lo lleva; el editor de un post programado lo muestra y
+con resultados, y el panel la usa en «Comparar por atributo». Las guías de la API recomiendan
+un vocabulario —`tema`, `hook`, `estilo`, `serie` y, para la edición, `color`, `fuente`,
+`ritmo`, `musica` y `duracion`—, opcional y sin validar: sirve si el agente que edita los
+videos lo usa siempre igual (`public/docs/api-llm.md`, sección 2b). No hay etiquetado
+automático, a propósito: costaría tokens por cada post. Una sola clave tiene significado
+para el panel: `pieza`, que junta como versiones de una misma pieza a los posts que
+comparten su valor. El CSV no lo lleva; el editor de un post programado lo muestra y
 permite corregirlo.
 
 Y `opciones`, obligatorio cuando algún destino de la fila es una cuenta de TikTok (el

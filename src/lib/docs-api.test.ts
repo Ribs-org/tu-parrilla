@@ -69,6 +69,16 @@ describe('la documentación para LLM no le miente al código', () => {
     }
   })
 
+  it('las dos guías recomiendan el mismo vocabulario de atributos', () => {
+    // El vocabulario no se valida en el código —es una recomendación—, así que lo único que
+    // impide que las dos guías se separen es esto.
+    const vocabulario = ['tema', 'hook', 'estilo', 'serie', 'color', 'fuente', 'ritmo', 'musica', 'duracion']
+    for (const archivo of ['public/docs/api-llm.md', 'public/docs/api-editor.md']) {
+      const guia = readFileSync(archivo, 'utf8')
+      for (const clave of vocabulario) expect(guia, `${archivo}: ${clave}`).toContain(`| \`${clave}\` |`)
+    }
+  })
+
   it('cada límite del esquema es el que el validador aplica', () => {
     const esquema = JSON.parse(readFileSync('public/docs/api.json', 'utf8'))
     // El tope de filas por lote también: la guía lo dice en su tabla de errores («Máximo 50
