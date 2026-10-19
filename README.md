@@ -217,7 +217,10 @@ atributo, la red, el formato, el día o la franja horaria); la misma cuenta la h
 publicación a los 7 días de publicada, divididas por la mediana de su cuenta en el período,
 para comparar mil publicaciones por semana en varias cuentas sin que gane la más vieja ni la
 cuenta más grande (`src/lib/igual-edad.ts`). En las otras métricas, lo publicado hace menos
-de 7 días no compite salvo que se prenda «Con las de menos de 7 días». El porqué del tablero, en
+de 7 días no compite salvo que se prenda «Con las de menos de 7 días». **Lado a lado**
+(`/admin/analytics/lado-a-lado`) pone dos publicaciones —al entrar, la mejor y la peor— con
+su portada, el link para ver el video en la red, sus atributos y cómo crecieron sus views por
+días desde que salieron; el video no se guarda (`src/lib/lado-a-lado.ts`). El porqué del tablero, en
 `docs/superpowers/specs/2026-10-13-numeros-tablero-design.md`.
 
 **Componer** pasa en un panel que se abre desde la derecha con «+ Nueva publicación», sin
@@ -1213,6 +1216,7 @@ src/
     pieza.ts               qué junta las versiones de una pieza y las medianas por atributo (sin base)
     mejores.ts             el mejor (o el peor) X % de lo publicado: el corte, las medianas y lo que se repite (sin base)
     igual-edad.ts          comparar a la misma edad y contra la propia cuenta: los 7 días y «contra su cuenta» (sin base)
+    lado-a-lado.ts         dos publicaciones lado a lado: la curva por edad y sus atributos (sin base)
     metrics-consulta.ts    lo que comparten las rutas de /api/metrics: la llave, el rango, la red y la cuenta
     piezas.ts              la pieza de una publicación: sus destinos programados unidos a lo publicado
     auth.ts                sesión del panel

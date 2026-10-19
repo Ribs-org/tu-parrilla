@@ -423,6 +423,24 @@ export async function getPostSeries(f: Filters): Promise<PostSeriesPoint[]> {
   }))
 }
 
+/**
+ * Todas las lecturas de unas pocas publicaciones, de la más vieja a la más nueva, para dibujar
+ * cómo crecieron («Lado a lado»). Con la hora de cada una (`captured_at`), que es lo que mide
+ * la edad. El dueño va en la consulta, por el post: los ids vienen de la URL.
+ */
+export async function getLecturasDe(
+  ownerId: string,
+  postIds: string[],
+): Promise<Array<{ postId: string; capturedAt: Date; views: number | null }>> {
+  if (postIds.length === 0) return []
+  return getDb()
+    .select({ postId: postMetrics.postId, capturedAt: postMetrics.capturedAt, views: postMetrics.views })
+    .from(postMetrics)
+    .innerJoin(socialPosts, eq(socialPosts.id, postMetrics.postId))
+    .where(and(eq(socialPosts.ownerId, ownerId), inArray(postMetrics.postId, postIds)))
+    .orderBy(asc(postMetrics.capturedAt))
+}
+
 /** Todas las cuentas, en el orden en que se conectaron; Los Fierros (en Ajustes) las agrupa por red. */
 export async function getCuentas(ownerId: string): Promise<CuentaRow[]> {
   const cuentas = await getDb()

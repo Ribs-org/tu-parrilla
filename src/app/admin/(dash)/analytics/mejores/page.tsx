@@ -236,6 +236,16 @@ export default async function MejoresPage({ searchParams }: { searchParams: Prom
         className="mt-4"
         title="Las publicaciones"
         hint={`De la más ${peor ? 'baja a la más alta' : 'alta a la más baja'} en «${def.nombre}». Cada una abre su pieza.`}
+        action={
+          r.compiten > 0 ? (
+            <Link
+              href={numerosHref('/admin/analytics/lado-a-lado', params, { a: null, b: null })}
+              className="text-[0.75rem] text-fg-muted transition-colors hover:text-fg"
+            >
+              Lado a lado →
+            </Link>
+          ) : null
+        }
       >
         {filas.length === 0 ? (
           <Empty>No publicaste nada en este período. Amplía el período.</Empty>

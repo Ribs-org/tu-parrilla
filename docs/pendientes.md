@@ -200,19 +200,11 @@ Nada de esto bloquea un trámite hoy; conviene ordenarlo antes de abrir a tercer
 
 ## Features y trabajo de código
 
-- **Los Números para 1.000 publicaciones por semana** (2026-10-18). Pedido del dueño. Ya
-  están la lectura diaria por edad (`src/lib/social/lectura.ts`), los topes de las
-  pantallas, el rango de fechas a mano y la comparación a igual edad, con «Tu peor 10 %»
-  (`src/lib/igual-edad.ts`), y el vocabulario de atributos recomendado en las guías de la
-  API. Queda:
-  - Ver lado a lado los de arriba y los de abajo, o dos publicaciones elegidas: portada,
-    atributos, la curva día a día y el link a la red. Sin guardar el video después de
-    publicado: decisión del dueño, para que R2 no crezca.
-- **Un modo día con sushi** (2026-10-18). Pedido del dueño, para después de lo anterior:
-  un modo día donde la parrilla se vuelve sushi —las mismas piezas, con sashimi y compañía
-  en vez de cortes—, para el público que la estética de asado deja fuera. El modo noche, el
-  de hoy, sigue por defecto. Solo interfaz. Antes del código va un diseño extenso, al nivel
-  de `docs/auditoria-ui-2026-10-16.md`.
+- **Un modo día con sushi** (2026-10-18). Pedido del dueño: un modo día donde la parrilla se
+  vuelve sushi —las mismas piezas, con sashimi y compañía en vez de cortes—, para el público
+  que la estética de asado deja fuera. El modo noche, el de hoy, sigue por defecto. Solo
+  interfaz. Antes del código va un diseño extenso, al nivel de
+  `docs/auditoria-ui-2026-10-16.md`.
 - **Llevar el resto de la interfaz al nivel del corte** (2026-10-16). La auditoría de ese
   día propone seis tandas que se publican solas. La primera, lo roto, ya está. Quedan: el
   corte en los flujos (el compositor, la parrilla fría y la carga tibia ya están; faltan La
