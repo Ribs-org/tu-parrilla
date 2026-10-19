@@ -21,15 +21,12 @@ import {
 } from '@/lib/mejores'
 import { networkLabel } from '@/lib/networks'
 import { attributesFor } from '@/lib/post-attributes'
-import { getCuentas, getPostRows, type CuentaRow } from '@/lib/posts'
+import { MAX_PUBLICACIONES_LEIDAS, getCuentas, getPostRows, type CuentaRow } from '@/lib/posts'
 import { cuentaElegida, numerosHref, type Params } from '@/lib/tablero'
 import { formatNumber } from '@/lib/utils'
 import { nombreDe } from '@/lib/vocabulario'
 
 export const dynamic = 'force-dynamic'
-
-// El mismo tope que Comparar por atributo y que la API de métricas.
-const MAX_PUBLICACIONES = 2000
 
 function nombreDeCuenta(cuenta: Pick<CuentaRow, 'network' | 'handle'>): string {
   return cuenta.handle ? `${networkLabel(cuenta.network)} · ${cuenta.handle}` : networkLabel(cuenta.network)
@@ -69,7 +66,7 @@ export default async function MejoresPage({ searchParams }: { searchParams: Prom
   const filas = await getPostRows({ ...filters, profileId: null, includeBots: false }, false, {
     publishedFrom: filters.from,
     publishedTo: filters.to,
-    limit: MAX_PUBLICACIONES,
+    limit: MAX_PUBLICACIONES_LEIDAS,
     ...(cuenta ? { accountId: cuenta.id } : {}),
   })
   const atributosDe = await attributesFor(ownerId, filas)
@@ -279,8 +276,8 @@ export default async function MejoresPage({ searchParams }: { searchParams: Prom
         {metrica === 'arrastre'
           ? 'En el arrastre solo compiten las que ganaron al menos la mediana de views del período: con pocas views, una visita ya es un porcentaje alto. '
           : ''}
-        {filas.length >= MAX_PUBLICACIONES
-          ? `Se leyeron las ${formatNumber(MAX_PUBLICACIONES)} más recientes: acorta el período para verlas todas.`
+        {filas.length >= MAX_PUBLICACIONES_LEIDAS
+          ? `Se leyeron las ${formatNumber(MAX_PUBLICACIONES_LEIDAS)} más recientes: acorta el período para verlas todas.`
           : ''}
       </p>
     </>

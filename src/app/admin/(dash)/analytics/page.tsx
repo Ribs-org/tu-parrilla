@@ -39,7 +39,14 @@ import {
 } from '@/lib/analytics'
 import { parseFilters } from '@/lib/filters'
 import { networkLabel } from '@/lib/networks'
-import { getCampaignPosts, getCuentas, getPostRows, getPostSeries, postKpisFrom } from '@/lib/posts'
+import {
+  MAX_PUBLICACIONES_LEIDAS,
+  getCampaignPosts,
+  getCuentas,
+  getPostRows,
+  getPostSeries,
+  postKpisFrom,
+} from '@/lib/posts'
 import { topPostsByGain, type CuentaRow } from '@/lib/posts-kpis'
 import { lecturasDeCuentas } from '@/lib/lecturas-cuentas'
 import { getAllProfiles } from '@/lib/profiles'
@@ -57,13 +64,6 @@ import { countryName, flagEmoji, formatNumber, formatPercent } from '@/lib/utils
 export const dynamic = 'force-dynamic'
 
 const RUTA = '/admin/analytics'
-
-/**
- * Cuántas publicaciones se leen para sumar lo ganado en el período. Sin ventana de
- * publicación —un reel de agosto que crece en octubre cuenta en octubre—, así que el tope
- * va por las más recientes; lo viejo que ya no crece no mueve la suma.
- */
-const PUBLICACIONES_LEIDAS = 500
 
 const RELATIVE = new Intl.RelativeTimeFormat('es', { numeric: 'auto' })
 
@@ -196,8 +196,11 @@ async function EnLasRedes({
   // La página y los bots son filtros de «En tu página»: las visitas de cada publicación se
   // cuentan en todas tus páginas y sin bots, digan lo que digan esos dos filtros.
   const deLasRedes = sinFiltrosDePagina(filters)
+  // Sin ventana de publicación —un reel de agosto que crece en octubre cuenta en octubre—:
+  // las que tuvieron una lectura o una visita en el período, que son las únicas que suman.
   const filas = await getPostRows(deLasRedes, false, {
-    limit: PUBLICACIONES_LEIDAS,
+    conActividad: true,
+    limit: MAX_PUBLICACIONES_LEIDAS,
     ...(cuenta ? { accountId: cuenta.id } : {}),
   })
   const lecturas = (await lecturasDeCuentas(filters.ownerId)).filter((l) => cuenta === null || l.accountId === cuenta.id)
