@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
 import { Pressable, View, type ColorValue } from 'react-native'
 import { useRouter } from 'expo-router'
-import { COLORES } from './ui'
+import { useColores } from './tema'
 import { clearToken } from '../lib/session'
 import type { Fierros } from '../lib/tipos'
 import { useScreenData } from '../lib/useScreenData'
@@ -70,6 +70,7 @@ export function useFierros() {
  * botón queda sin punto y Ajustes lo dice.
  */
 export function BotonAjustes() {
+  const colores = useColores()
   const router = useRouter()
   const { data } = useFierros()
   const aviso = data?.aviso ?? null
@@ -85,14 +86,14 @@ export function BotonAjustes() {
         height: 36,
         borderRadius: 18,
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.12)',
-        backgroundColor: COLORES.tarjeta,
+        borderColor: colores.velo + '1f',
+        backgroundColor: colores.tarjeta,
         alignItems: 'center',
         justifyContent: 'center',
         opacity: pressed ? 0.7 : 1,
       })}
     >
-      <IconoAjustes color={COLORES.texto} fondo={COLORES.tarjeta} />
+      <IconoAjustes color={colores.texto} fondo={colores.tarjeta} />
       {aviso ? (
         <View
           style={{
@@ -103,8 +104,8 @@ export function BotonAjustes() {
             height: 10,
             borderRadius: 5,
             borderWidth: 2,
-            borderColor: COLORES.fondo,
-            backgroundColor: aviso.nivel === 'apagado' ? COLORES.rojo : COLORES.ambar,
+            borderColor: colores.fondo,
+            backgroundColor: aviso.nivel === 'apagado' ? colores.rojo : colores.ambar,
           }}
         />
       ) : null}

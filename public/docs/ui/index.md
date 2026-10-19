@@ -165,7 +165,8 @@ con que se usó el panel la última vez en ese equipo, porque se ve antes de sab
 portada, `https://tu-parrilla.cl`, también tiene los dos modos, con el mismo botón al lado de
 «Entrar»; de día su marca es un nigiri. No cambian las páginas legales, el 404 ni la página
 pública de cada creador; tampoco la vista previa de La Vitrina, que es esa página. La app del
-teléfono, por ahora, solo tiene la noche.
+teléfono tiene los dos modos y va con la cuenta: se cambia también en su Ajustes, con «Modo día»
+o «Modo noche» ([app-movil.md](app-movil.md)).
 
 **Las palabras no cambian, salvo una.** De día, los botones, los títulos, los estados y los
 mensajes dicen lo mismo que de noche («La Parrilla», «Programada», «Falló»). La excepción es la

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { MAX_HUESOS, ORDEN_CARNE } from '@/lib/parrilla'
 import { contraste, simular } from './charts/color'
+import * as movil from '../../mobile/src/lib/pieza-sushi'
 import { PESCADO, posicionesMaki, rodajas, rollCortado, rollEntero, siluetaDe } from './pieza-sushi'
 
 /*
@@ -84,6 +85,18 @@ describe('el roll, entero o en rodajas', () => {
         expect(x).toBeLessThan(discos[i + 1]!.cx)
       })
     }
+  })
+
+  // La app del teléfono copia estas medidas (`mobile/src/lib/pieza-sushi.ts`): Metro no sale de
+  // `mobile/`. Una copia sin guardia se separa sola, y la misma publicación saldría en rodajas
+  // en el panel y entera en el teléfono.
+  it('la app del teléfono mide el roll igual que el panel', () => {
+    for (let n = 2; n <= MAX_HUESOS; n++) {
+      expect(movil.rodajas(n)).toEqual(rodajas(n))
+      expect(movil.rollEntero(n)).toEqual(rollEntero(n))
+      for (let bandas = 1; bandas <= 6; bandas++) expect(movil.posicionesMaki(bandas, n)).toEqual(posicionesMaki(bandas, n))
+    }
+    for (const carne of ORDEN_CARNE) expect(movil.rollCortado(carne)).toBe(rollCortado(carne))
   })
 
   it('sus bandas caen sobre el roll entero, donde van a quedar las rodajas', () => {

@@ -11,7 +11,7 @@ programas, o lo mandas a salir ahora) y **Los Números** (las dos mitades del ta
 publicaciones» un toque adentro y los seguidores de cada red detrás de «⋯ Más»). Arriba a
 la derecha de las tres, el botón de **Ajustes** (un trinche y un cuchillo, lado a lado): tus cuentas con la temperatura de su
 fierro (`/api/mobile/fierros`), con un punto en el botón si alguna se enfría o se apagó,
-y «Cerrar sesión». Antes eran cinco con nombres propios: Resumen, Contenido, Publicar, Cuentas y
+el modo —la noche o el día con sushi, el mismo de la cuenta— y «Cerrar sesión». Antes eran cinco con nombres propios: Resumen, Contenido, Publicar, Cuentas y
 Calendario. Los datos son los mismos que ve el panel web, leídos desde
 `https://tu-parrilla.cl/api/mobile/*`; `/api/mobile/overview` y
 `/api/mobile/schedule/check` ya no los usa la app nueva y siguen solo para las
@@ -195,6 +195,24 @@ con el orden de siempre (web primero), como se explica en
 Lo que no se puede hacer desde el teléfono, y sigue siendo del panel web: poner una
 portada, etiquetar con atributos, programar en TikTok o con una palabra clave, y editar o
 borrar lo ya programado.
+
+## El modo día
+
+La app tiene los dos modos del panel: la noche de entrada y el día con sushi. Es el modo de la
+cuenta (`/api/mobile/tema`): se cambia en Ajustes, con «Modo día» o «Modo noche», o en la barra
+del panel web, y vale en los dos. El teléfono guarda una copia para abrir en el modo de la última
+vez sin esperar a la red, vuelve a preguntarle a la cuenta cada vez que la app pasa al frente, y
+un cambio hecho sin señal se manda cuando vuelve la conexión (`src/components/tema.tsx`).
+
+Para quien agregue una pantalla: los colores salen de `useColores()` (`src/components/tema.tsx`),
+nunca escritos a mano, y lo que sombrea con transparencia usa el velo del modo
+(`colores.velo + '10'`), blanco de noche y tinta de día. Las dos paletas viven en
+`src/components/colores.ts`, y un test del panel las compara con las suyas. Los dibujos de cada
+post también son dos, el corte de carne (`src/components/pieza.tsx`) y la pieza de sushi
+(`src/components/pieza-sushi.tsx`), y `Pieza` elige según el modo.
+
+Lo que dibuja el teléfono mismo —la pantalla de arranque, el selector de fecha, las alertas—
+sigue oscuro en los dos modos: cambiarlo pide un build nativo (ver `docs/deuda-tecnica.md`).
 
 ## iPhone (iOS)
 

@@ -2,17 +2,8 @@ import { useCallback, useState } from 'react'
 import { Pressable, ScrollView, Text, View } from 'react-native'
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
-import {
-  Chip,
-  COLORES,
-  Cargando,
-  ErrorConReintento,
-  Pantalla,
-  Sello,
-  TIPO_TITULO,
-  Tarjeta,
-  Vacio,
-} from '../components/ui'
+import { Chip, Cargando, ErrorConReintento, Pantalla, Sello, TIPO_TITULO, Tarjeta, Vacio } from '../components/ui'
+import { useColores } from '../components/tema'
 import { MiniCorte } from '../components/parrilla'
 import { num, pct, shortDate } from '../lib/format'
 import { comoSalio, medianaDe } from '../lib/parrilla'
@@ -31,6 +22,7 @@ const REDES = ['instagram', 'tiktok', 'youtube', 'facebook']
  * Los Números, como en el panel.
  */
 export default function TusPublicaciones() {
+  const colores = useColores()
   const [rango, setRango] = useState<Rango>('30d')
   const [redes, setRedes] = useState<string[]>([])
   const token = useToken()
@@ -127,15 +119,15 @@ export default function TusPublicaciones() {
                   {post.miniatura ? (
                     <Image source={{ uri: post.miniatura }} style={{ width: 48, height: 48 }} />
                   ) : (
-                    <View style={{ width: 48, height: 48, backgroundColor: '#ffffff10' }} />
+                    <View style={{ width: 48, height: 48, backgroundColor: colores.velo + '10' }} />
                   )}
                 </MiniCorte>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ color: COLORES.texto, fontSize: 14 }} numberOfLines={2}>
+                  <Text style={{ color: colores.texto, fontSize: 14 }} numberOfLines={2}>
                     {post.texto || '(sin texto)'}
                   </Text>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2 }}>
-                    <Text style={{ color: COLORES.tenue, fontSize: 11 }}>
+                    <Text style={{ color: colores.tenue, fontSize: 11 }}>
                       {NOMBRE_RED[post.red] ?? post.red} · {shortDate(post.publicadoEl)}
                     </Text>
                     {/*
@@ -146,7 +138,7 @@ export default function TusPublicaciones() {
                     {comoSalio(post.metricas.viewsGanadas, mediana) === 'se-paso' ? (
                       <Text
                         style={{
-                          color: COLORES.brasa,
+                          color: colores.brasa,
                           fontSize: 10,
                           fontFamily: TIPO_TITULO,
                           textTransform: 'uppercase',
@@ -160,10 +152,10 @@ export default function TusPublicaciones() {
                 </View>
               </View>
               <View style={{ flexDirection: 'row', gap: 16, marginTop: 6 }}>
-                <Text style={{ color: COLORES.suave, fontSize: 12 }}>
+                <Text style={{ color: colores.suave, fontSize: 12 }}>
                   {num(post.metricas.viewsGanadas)} views
                 </Text>
-                <Text style={{ color: COLORES.suave, fontSize: 12 }}>
+                <Text style={{ color: colores.suave, fontSize: 12 }}>
                   {pct(post.metricas.arrastre)} arrastre
                 </Text>
               </View>

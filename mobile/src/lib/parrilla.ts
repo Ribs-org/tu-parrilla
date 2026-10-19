@@ -38,6 +38,19 @@ export const CARNE: Record<Carne, { claro: string; medio: string; hondo: string 
   quemada: { claro: '#3a2722', medio: '#2b1d1a', hondo: '#150e0c' },
 }
 
+/**
+ * El pescado de la pieza de sushi, la carne del modo día: los mismos topes del panel
+ * (`PESCADO` en `src/components/pieza-sushi.tsx`), de claro a oscuro. Crudo es salmón fresco;
+ * sellado, con los bordes dorados por el soplete; a punto, el aburi tostado. Lo que falló no es
+ * carbón: es pescado pasado, un verde gris igual de hondo.
+ */
+export const PESCADO: Record<Carne, { claro: string; medio: string; hondo: string }> = {
+  cruda: { claro: '#ffd2c2', medio: '#ffb39a', hondo: '#f48d6f' },
+  sellada: { claro: '#f4ad7e', medio: '#e5864a', hondo: '#c66737' },
+  punto: { claro: '#d58e4f', medio: '#b46a33', hondo: '#86491f' },
+  quemada: { claro: '#5d6a43', medio: '#282d20', hondo: '#161a10' },
+}
+
 /** El veteado de la grasa y los huesos de la tira. */
 export const GRASA = '#e8d7b8'
 

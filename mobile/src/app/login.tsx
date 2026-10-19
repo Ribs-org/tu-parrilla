@@ -2,20 +2,15 @@ import { useState } from 'react'
 import { KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from 'react-native'
 import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { Boton, COLORES, Titulo } from '../components/ui'
+import { Boton, Titulo } from '../components/ui'
+import { useColores } from '../components/tema'
 import { CODIGO_ENVIADO, CORREO_INVALIDO, limpiarCodigo, normalizarCorreo } from '../lib/ingreso'
 import { entrar, pedirCodigo } from '../lib/session'
 
-const CAMPO = {
-  backgroundColor: COLORES.tarjeta,
-  color: COLORES.texto,
-  borderRadius: 12,
-  padding: 14,
-  marginTop: 8,
-} as const
-
 /** Los dos pasos del panel web (/ingresar) en una sola pantalla: el correo y el código. */
 export default function Login() {
+  const colores = useColores()
+  const campo = { backgroundColor: colores.tarjeta, color: colores.texto, borderRadius: 12, padding: 14, marginTop: 8 } as const
   const [paso, setPaso] = useState<'correo' | 'codigo'>('correo')
   const [correo, setCorreo] = useState('')
   const [codigo, setCodigo] = useState('')
@@ -69,7 +64,7 @@ export default function Login() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={{
         flex: 1,
-        backgroundColor: COLORES.fondo,
+        backgroundColor: colores.fondo,
         paddingTop: insets.top,
         paddingBottom: insets.bottom,
       }}
@@ -78,7 +73,7 @@ export default function Login() {
         {paso === 'correo' ? (
           <>
             <Titulo>Tu Parrilla</Titulo>
-            <Text style={{ color: COLORES.suave }}>Entra con tu correo: te mandamos un código.</Text>
+            <Text style={{ color: colores.suave }}>Entra con tu correo: te mandamos un código.</Text>
             <TextInput
               key="correo"
               value={correo}
@@ -90,14 +85,14 @@ export default function Login() {
               keyboardType="email-address"
               onSubmitEditing={mandar}
               placeholder="tu@correo.cl"
-              placeholderTextColor={COLORES.tenue}
-              style={CAMPO}
+              placeholderTextColor={colores.tenue}
+              style={campo}
             />
           </>
         ) : (
           <>
             <Titulo>Tu código</Titulo>
-            <Text style={{ color: COLORES.suave }}>{CODIGO_ENVIADO}</Text>
+            <Text style={{ color: colores.suave }}>{CODIGO_ENVIADO}</Text>
             <TextInput
               key="codigo"
               value={codigo}
@@ -107,12 +102,12 @@ export default function Login() {
               keyboardType="number-pad"
               onSubmitEditing={canjear}
               placeholder="000000"
-              placeholderTextColor={COLORES.tenue}
-              style={{ ...CAMPO, letterSpacing: 6 }}
+              placeholderTextColor={colores.tenue}
+              style={{ ...campo, letterSpacing: 6 }}
             />
           </>
         )}
-        {error ? <Text style={{ color: COLORES.rojo }}>{error}</Text> : null}
+        {error ? <Text style={{ color: colores.rojo }}>{error}</Text> : null}
         {/* En fila porque `Boton` crece a lo ancho con `flex: 1`, y esta pantalla apila. */}
         <View style={{ flexDirection: 'row' }}>
           {paso === 'correo' ? (
@@ -133,7 +128,7 @@ export default function Login() {
         </View>
         {paso === 'codigo' ? (
           <Pressable onPress={otroCorreo} disabled={ocupado} hitSlop={8} style={{ alignSelf: 'center', padding: 8 }}>
-            <Text style={{ color: COLORES.tenue }}>Usar otro correo</Text>
+            <Text style={{ color: colores.tenue }}>Usar otro correo</Text>
           </Pressable>
         ) : null}
       </View>

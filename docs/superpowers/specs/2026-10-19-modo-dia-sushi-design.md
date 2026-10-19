@@ -306,15 +306,22 @@ panel de día con sus piezas de sushi.
 - la carga crema;
 - los fierros, la miniatura y las barras de views en salmón.
 
-**Tanda 3, la app del teléfono (2 a 3 días, por aire).**
-- **El modo:** el de la cuenta, que la app lee y cambia con `/api/mobile/tema` (hecho el
-  2026-10-19), con el mismo botón en Ajustes. Guardado también en el teléfono, para abrir en el
-  modo de la última vez sin esperar a la red.
-- **Las piezas:** dibujadas con vistas, como hoy los cortes (`mobile/src/components/pieza.tsx`).
-  Las curvas finas esperan a `react-native-svg`, que pide un build nativo (tanda 6 de la
-  auditoría).
-- **Los colores:** `mobile/src/components/ui.tsx` (`COLORES`) gana el juego de día. Los tests
-  que comparan los colores del teléfono con los del panel cubren los dos modos.
+**Tanda 3, la app del teléfono.** Hecha el 2026-10-19; llega por aire.
+- **El modo:** el de la cuenta, que la app lee y cambia con `/api/mobile/tema`, con «Modo día» o
+  «Modo noche» en Ajustes. El teléfono guarda una copia para abrir en el modo de la última vez
+  sin esperar a la red, vuelve a preguntarle a la cuenta al pasar al frente, y un cambio sin señal
+  se manda cuando vuelve la conexión (`components/tema.tsx`).
+- **Las piezas:** dibujadas con vistas, como los cortes (`pieza-sushi.tsx` junto a `pieza.tsx`),
+  con las mismas medidas del panel (`lib/pieza-sushi.ts`, que un test compara): el nigiri, el
+  roll entero o en rodajas, el sashimi y el temaki, el pescado pasado con moho y olor, las bandas
+  de nori y la llama del soplete. Las curvas finas esperan a `react-native-svg`, que pide un
+  build nativo (tanda 6 de la auditoría).
+- **Los colores:** `COLORES_NOCHE` y `COLORES_DIA` (`mobile/src/components/colores.ts`), que
+  cada pantalla pide con `useColores()`. `paleta.test.ts` compara los del día con el panel, uno
+  por uno. La parrilla de cada día se lava de salmón y la miniatura lleva su banda de nori.
+- **Lo que sigue de noche:** lo que dibuja el teléfono mismo —la pantalla de arranque, el
+  selector de fecha, las alertas—, porque `userInterfaceStyle` de `app.json` pide un build
+  nativo. Anotado en `docs/deuda-tecnica.md`.
 
 **Tanda 4, la portada y lo de marketing.** Hecha el 2026-10-19.
 - **La portada (`landing.tsx`):** el mismo botón del modo, junto a «Entrar», y la cookie del

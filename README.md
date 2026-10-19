@@ -188,8 +188,10 @@ vistas (`mobile/src/components/pieza.tsx`), con el formato y el sello de cada de
 manda `GET /api/mobile/schedule`. El porqué, en
 `docs/superpowers/specs/2026-10-16-el-corte-que-se-lee-design.md`. El panel tiene además un
 **modo día**, que se elige con el botón de la barra y se recuerda en la cuenta (`users.tema`,
-`src/lib/tema.ts`), así que vale en cualquier equipo donde entres. `GET`/`PUT /api/mobile/tema` lo dan a la app
-del teléfono, que todavía no tiene el modo día, y una cookie lo copia en cada equipo para la
+`src/lib/tema.ts`), así que vale en cualquier equipo donde entres y en la app del teléfono, que lo lee y lo cambia
+en Ajustes con `GET`/`PUT /api/mobile/tema` y lo dibuja con sus colores de día
+(`mobile/src/components/colores.ts`) y sus piezas de sushi hechas con vistas
+(`mobile/src/components/pieza-sushi.tsx`). Una cookie lo copia en cada equipo para la
 puerta, que se dibuja antes de saber de quién es. El modo día es el fondo claro y, en vez de cortes, piezas de sushi
 (`src/components/pieza-sushi.tsx`) que dicen lo mismo con la misma gramática —nigiri, un roll
 que se corta al servirse, sashimi y temaki; el pescado bajo el soplete; una banda de nori por

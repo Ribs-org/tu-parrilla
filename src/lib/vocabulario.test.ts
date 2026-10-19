@@ -1,7 +1,15 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { PANTALLAS, ajustes, pantallaDe, pestanas } from './vocabulario'
+import { SE_QUEMO as SE_QUEMO_DE_LA_APP } from '../../mobile/src/lib/tema'
+import { PANTALLAS, SE_QUEMO, ajustes, pantallaDe, pestanas } from './vocabulario'
+
+describe('«Se quemó» en cada modo', () => {
+  it('de día se echó a perder, y la app del teléfono dice lo mismo que el panel', () => {
+    expect(SE_QUEMO).toEqual({ noche: 'Se quemó', dia: 'Se echó a perder' })
+    expect(SE_QUEMO_DE_LA_APP).toEqual(SE_QUEMO)
+  })
+})
 
 describe('el vocabulario del panel', () => {
   it('cada pantalla apunta a una ruta que existe de verdad bajo (dash)', () => {
