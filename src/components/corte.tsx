@@ -231,8 +231,8 @@ type PropsDeCorte = {
  *
  * Van los dos dibujos, la carne de la noche y la pieza del día, y el CSS esconde el que no va
  * (`.solo-noche` y `.solo-dia`, en `globals.css`). Así el corte sirve igual en un componente del
- * servidor que en uno del cliente, sin saber el modo. Afuera del panel —la portada— no hay
- * `data-tema` y queda la carne.
+ * servidor que en uno del cliente, sin saber el modo. Donde no hay `data-tema` —afuera del
+ * panel y de la portada— queda la carne.
  *
  * Es solo el dibujo y va `aria-hidden`: quien lo pone escribe al lado, en palabras, lo que
  * el dibujo dice —el formato, la cocción y cómo le fue a cada destino—.
@@ -242,6 +242,21 @@ export function Corte({ className, idDeLlenado = 'tp-llenado', ...props }: Props
     <span className={cn('relative block', className)} aria-hidden>
       <CorteDeCarne {...props} idDeLlenado={idDeLlenado} className="solo-noche" />
       <PiezaSushi {...props} idDeLlenado={`${idDeLlenado}-sushi`} className="solo-dia" />
+    </span>
+  )
+}
+
+/**
+ * La marca de la portada, el corte que hace de logo: de noche el bife a punto, el mismo del
+ * ícono de la app; de día el nigiri a punto, que decidió el dueño el 2026-10-19. El ícono de la
+ * app y el favicon no cambian: cambiarlos pide pasar otra vez por las tiendas.
+ */
+export function MarcaDeTuParrilla({ className }: { className?: string }) {
+  const aPunto = { carne: 'punto', coccion: 'punto', sellos: ['servido', 'servido'], chico: true } as const
+  return (
+    <span className={cn('relative block', className)} aria-hidden>
+      <CorteDeCarne formato="bife" {...aPunto} idDeLlenado="tp-llenado-marca" className="solo-noche" />
+      <PiezaSushi formato="entrana" {...aPunto} idDeLlenado="tp-llenado-marca-sushi" className="solo-dia" />
     </span>
   )
 }

@@ -21,6 +21,7 @@ import {
 } from '@/lib/parrilla'
 import { NO_PUBLISH_TOKEN } from '@/lib/social/publish/publisher'
 import { cn } from '@/lib/utils'
+import { SE_QUEMO } from '@/lib/vocabulario'
 
 /*
  * Las dos piezas de la portada que se tocan. No son maquetas: dibujan con las mismas funciones
@@ -52,11 +53,20 @@ const LLEVA: ReadonlyArray<{ clave: Lleva; nombre: string; media: ReadonlyArray<
   { clave: 'texto', nombre: 'Solo texto', media: [] },
 ]
 
-const VA: ReadonlyArray<{ clave: Va; nombre: string }> = [
+const VA: ReadonlyArray<{ clave: Va; nombre: ReactNode }> = [
   { clave: 'programada', nombre: 'Programada' },
   { clave: 'saliendo', nombre: 'Saliendo' },
   { clave: 'publicada', nombre: 'Publicada' },
-  { clave: 'quemada', nombre: 'Se quemó en una' },
+  {
+    clave: 'quemada',
+    // De día no se quema: se echa a perder. Las dos, y el modo esconde una (`globals.css`).
+    nombre: (
+      <>
+        <span className="solo-noche">{SE_QUEMO.noche} en una</span>
+        <span className="solo-dia">{SE_QUEMO.dia} en una</span>
+      </>
+    ),
+  },
 ]
 
 const REDES: readonly Red[] = ['instagram', 'facebook', 'tiktok', 'youtube']
@@ -88,7 +98,7 @@ const POR_QUE_NO: Partial<Record<Lleva, string>> = {
   foto: 'YouTube solo recibe video.',
 }
 
-/** Cómo va cada destino. «Se quemó en una»: la primera red falló, y las demás salieron. */
+/** Cómo va cada destino. «Se quemó en una» (de día, «Se echó a perder en una»): la primera red falló, y las demás salieron. */
 function estadoDe(va: Va, i: number): 'scheduled' | 'publishing' | 'published' | 'failed' {
   if (va === 'programada') return 'scheduled'
   if (va === 'saliendo') return 'publishing'

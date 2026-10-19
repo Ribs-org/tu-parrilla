@@ -196,7 +196,9 @@ que se corta al servirse, sashimi y temaki; el pescado bajo el soplete; una band
 destino—. Lo que falló no
 se quema: es pescado pasado, y la sección «Se quemó» se llama «Se echó a perder» (`SE_QUEMO`,
 en `src/lib/vocabulario.ts`). Las demás palabras no cambian, la noche sigue por defecto, y la
-página pública de cada creador no cambia nunca. El
+página pública de cada creador no cambia nunca. La portada tiene los dos modos, con el mismo
+botón: de día su marca es el nigiri, y `?modo=dia` la abre de día, con su imagen para compartir
+(`/api/og/dia`). El
 diseño, en `docs/superpowers/specs/2026-10-19-modo-dia-sushi-design.md`. Al pie, cuántos cortes salieron ayer; las miradas solo si la sincronización ya
 trajo sus métricas, porque un cero inventado diría «nadie miró» cuando lo cierto es
 «todavía no se sabe». Lo que no pide una acción está un clic más adentro: el tráfico, los
@@ -1217,8 +1219,8 @@ src/
     corte.tsx              el corte dibujado de La Parrilla: silueta, carne, marcas, halo y humo
     pieza-sushi.tsx        el mismo corte en el modo día: nigiri, roll, sashimi y temaki
     boton-tema.tsx         el botón de la barra que cambia entre la noche y el día
-    landing.tsx            la portada del producto, armada con las piezas del panel; landing-demos.tsx, lo que se toca
-    landing-semana.ts      la semana de ejemplo, que comparten la portada y su imagen para compartir (/api/og)
+    landing.tsx            la portada del producto, armada con las piezas del panel y con los dos modos; landing-demos.tsx, lo que se toca
+    landing-semana.ts      la semana de ejemplo, que comparten la portada y sus imágenes para compartir (/api/og, /api/og/dia)
     esqueleto.tsx          las piezas de la carga del panel: la forma de cada pantalla, con su pulso tibio
     profile-view.tsx       la página pública (también alimenta la vista previa del editor)
     click-tracker.tsx      escucha delegada de clicks

@@ -161,9 +161,11 @@ fuego, como los describen todas las páginas de esta wiki. El día es lo mismo c
 fondo claro, color papel de arroz, y piezas de sushi en vez de cortes de carne. Se cambia con el
 botón del modo de la barra de arriba, y queda guardado en la cuenta: el panel entra en ese modo
 en cualquier equipo donde la persona entre. La pantalla para entrar con el correo sigue el modo
-con que se usó el panel la última vez en ese equipo, porque se ve antes de saber de quién es. No cambian las páginas
-legales, el 404, la portada ni la página pública de cada creador; tampoco la vista previa de La
-Vitrina, que es esa página. La app del teléfono, por ahora, solo tiene la noche.
+con que se usó el panel la última vez en ese equipo, porque se ve antes de saber de quién es. La
+portada, `https://tu-parrilla.cl`, también tiene los dos modos, con el mismo botón al lado de
+«Entrar»; de día su marca es un nigiri. No cambian las páginas legales, el 404 ni la página
+pública de cada creador; tampoco la vista previa de La Vitrina, que es esa página. La app del
+teléfono, por ahora, solo tiene la noche.
 
 **Las palabras no cambian, salvo una.** De día, los botones, los títulos, los estados y los
 mensajes dicen lo mismo que de noche («La Parrilla», «Programada», «Falló»). La excepción es la

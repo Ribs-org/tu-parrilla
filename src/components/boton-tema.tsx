@@ -20,18 +20,27 @@ function anotarEnElEquipo(tema: Tema) {
  *   vayan con este. Sin `guardar`, el modo queda solo en el equipo.
  *
  * Con `guardar`, al cargar pone la cookie al día con la cuenta: si el modo se cambió en otro
- * lado, la puerta de este equipo lo sigue desde la próxima vez.
+ * lado, la puerta de este equipo lo sigue desde la próxima vez. `anotar` hace lo mismo con un
+ * modo que vino en la dirección: la portada abierta con `?modo=dia` deja el día en el equipo.
  */
-export function BotonTema({ inicial, guardar }: { inicial: Tema; guardar?: (tema: Tema) => Promise<void> }) {
+export function BotonTema({
+  inicial,
+  guardar,
+  anotar = false,
+}: {
+  inicial: Tema
+  guardar?: (tema: Tema) => Promise<void>
+  anotar?: boolean
+}) {
   const [tema, setTema] = useState(inicial)
   const destino = otroTema(tema)
   const nombre = destino === 'dia' ? 'Modo día' : 'Modo noche'
-  const deLaCuenta = guardar !== undefined
+  const ponerAlDia = guardar !== undefined || anotar
 
   useEffect(() => {
-    if (!deLaCuenta) return
+    if (!ponerAlDia) return
     if (!document.cookie.split('; ').includes(`${TEMA_COOKIE}=${inicial}`)) anotarEnElEquipo(inicial)
-  }, [deLaCuenta, inicial])
+  }, [ponerAlDia, inicial])
 
   function cambiar() {
     for (const contenedor of document.querySelectorAll('.acerado')) contenedor.setAttribute('data-tema', destino)

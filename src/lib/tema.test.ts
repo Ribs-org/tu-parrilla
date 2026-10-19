@@ -1,6 +1,17 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
-import { COLOR_DE_BARRA, otroTema, temaDe, temaDelCuerpo } from './tema'
+import { COLOR_DE_BARRA, otroTema, temaDe, temaDelCuerpo, temaDelEnlace } from './tema'
+
+describe('temaDelEnlace (la portada con ?modo=)', () => {
+  it('la dirección pide uno de los dos modos, o ninguno', () => {
+    expect(temaDelEnlace('dia')).toBe('dia')
+    expect(temaDelEnlace('noche')).toBe('noche')
+    expect(temaDelEnlace(['dia', 'noche'])).toBe('dia')
+    expect(temaDelEnlace(undefined)).toBeNull()
+    expect(temaDelEnlace('DIA')).toBeNull()
+    expect(temaDelEnlace('')).toBeNull()
+  })
+})
 
 describe('temaDe', () => {
   it('sin cookie, o con cualquier otra cosa, la noche', () => {
