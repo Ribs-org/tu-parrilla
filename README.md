@@ -468,7 +468,8 @@ está vacío: el callback responde igual, pero con cero cuentas afectadas.
 de uso «API de Threads» de la misma app, que tiene su propio par de campos —firmados con
 `THREADS_APP_SECRET`, no con el de arriba— y **todavía no está implementado**: quien quite
 la app o pida el borrado desde Threads no llega a ninguna parte. Está anotado en
-`docs/deuda-tecnica.md`.
+`docs/deuda-tecnica.md`. Mientras Threads esté en «Próximamente» (ver «Conectar y
+sincronizar») nadie nuevo lo conecta.
 
 #### Dejar entrar al revisor de Meta
 
@@ -705,7 +706,7 @@ entregas siguientes— proponerte una reescritura con tu voz que apruebas de un 
 sale publicado sin que lo veas.
 
 Para que funcione necesitas `X_BEARER_TOKEN` en el entorno, que sacas del portal de
-desarrolladores de X, en la misma app que ya usas para publicar. X ya no tiene capa
+desarrolladores de X, en la misma app de la publicación en X (hoy en «Próximamente»). X ya no tiene capa
 gratuita: hay que **activar facturación por uso en la app**. Cobra unos 0,005 dólares por
 publicación leída, así que veinte creadores publicando tres veces al día salen por unos
 nueve dólares al mes.
@@ -739,6 +740,15 @@ Con eso hecho, las variables puestas y un redeploy encima, entra a `/admin/accou
 páginas o cuentas, elige cuáles. El `vercel.json` del repo declara una corrida diaria a las
 9:00 UTC; Vercel inyecta `CRON_SECRET` solo. También puedes apretar *Sincronizar ahora*
 cuando quieras.
+
+**Threads y X, en «Próximamente».** Su código está entero, pero no se ofrecen: en Los Fierros
+dicen «Próximamente» en vez de *Conectar*, la conexión no arranca ni termina, el compositor, el
+editor y el teléfono no las ofrecen como destino, y lo que llegue por la API o por el lote se
+rechaza con una frase fija (`REDES_PROXIMAMENTE` y `fraseProximamente`, en
+`src/lib/networks.ts`; la reja vive en `validateScheduleDraft`). Así un usuario nuevo no se
+topa con una red que no funciona: Threads espera la segunda vuelta del App Review de Meta, y X
+no publica hoy (el detalle, en `docs/pendientes.md`). Lo programado antes a esas redes se
+sigue intentando. Abrir una es sacarla de esa lista.
 
 **Qué se lee cada día.** La lectura va por edad, no por cantidad (`src/lib/social/lectura.ts`).
 Lo publicado en los últimos 10 días —y, como mínimo, las 200 publicaciones más nuevas de la
@@ -972,9 +982,9 @@ Vercel y bajan con `vercel env pull .env.local`.
 | `META_EN_REVISION` | Enciende en Los Fierros el aviso de que, mientras la app de Meta esté en revisión, solo conectan las cuentas invitadas como testers | No — solo mientras la app de Meta esté en modo desarrollo |
 | `REVISION_CORREO` | El único correo (ya invitado en Los Maestros) que recibe un código de ingreso fijo en vez de uno mandado por correo, para que el revisor de Meta entre | No — solo con la app de Meta en revisión o publicada (Meta vuelve a revisarla) |
 | `REVISION_CODIGO` | El código fijo de seis dígitos que vale para ese correo; el mismo que dicen las instrucciones para revisores en Meta | No — va junto a `REVISION_CORREO` |
-| `THREADS_APP_ID` | Conectar Threads para publicar | El Threads App ID del caso de uso «API de Threads» de la app de Meta |
+| `THREADS_APP_ID` | Conectar Threads para publicar; hoy en «Próximamente» (ver «Conectar y sincronizar») | El Threads App ID del caso de uso «API de Threads» de la app de Meta |
 | `THREADS_APP_SECRET` | El secreto de ese caso de uso | Junto con el anterior |
-| `X_CLIENT_ID` | Conectar X para publicar (OAuth 2.0 + PKCE) | El Client ID de la app en developer.x.com |
+| `X_CLIENT_ID` | Conectar X para publicar (OAuth 2.0 + PKCE); hoy en «Próximamente» | El Client ID de la app en developer.x.com |
 | `X_CLIENT_SECRET` | El secreto de esa app | Junto con el anterior |
 | `CRON_SECRET` | Autoriza las corridas programadas (sync diario y publicación cada 5 minutos) | No — la pone Vercel solo, al declarar el cron |
 | `MIGRAR_PREVIEWS` | Que los previews migren la base | Solo cuando el preview tenga una base propia; contra la de producción, no |

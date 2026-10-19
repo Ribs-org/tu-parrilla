@@ -5,8 +5,8 @@ entrada del panel: `/admin` lleva acá. El editor de cada publicación vive en
 `/admin/schedule/<id>`.
 
 La Parrilla es el calendario de publicación y la pantalla con que abre el panel. Aquí se
-programa un post para una o varias cuentas (Instagram, Facebook, YouTube, Threads, X y
-TikTok), se retoma lo que quedó a medio escribir (los borradores, que se guardan solos), se
+programa un post para una o varias cuentas (Instagram, Facebook, YouTube y TikTok; Threads
+y X dicen «Próximamente»), se retoma lo que quedó a medio escribir (los borradores, que se guardan solos), se
 programan muchos de una vez con un CSV, y se ve cómo va cada uno —programado, saliendo,
 publicado o quemado— en una semana o en una lista. Arriba aparece lo que falló, para
 reprogramarlo, y al pie cuánto salió ayer. También es donde se corrige, se reintenta o se
@@ -336,8 +336,9 @@ formulario viene abierto, con el cursor en «Texto». En este orden:
    que vienen de un borrador guardado no se vuelven a medir.
 5. **«Cuentas»**, una ficha redonda por cuenta: el fierro de la cuenta —la rayita que dice la
    temperatura de su conexión, como en [Los Fierros](los-fierros.md): naranja al rojo, ámbar
-   si se enfría, gris si se apagó—, el ícono de la red y «<Red> · <usuario>» (X aparece como
-   «X / Twitter»; una cuenta sin usuario dice «sin nombre»). Un clic la marca o la desmarca;
+   si se enfría, gris si se apagó—, el ícono de la red y «<Red> · <usuario>» (una cuenta sin
+   usuario dice «sin nombre»). Las de Threads y X / Twitter no aparecen: esas redes están en
+   «Próximamente». Un clic la marca o la desmarca;
    la marcada se enciende con borde naranjo. Una que se está enfriando lleva al lado «se
    enfría», en ámbar. Una cuenta desconectada sale atenuada, no se puede marcar y lleva al
    lado «reconéctala». En un formulario nuevo, si hay una sola cuenta conectada viene
@@ -346,8 +347,8 @@ formulario viene abierto, con el cursor en «Texto». En este orden:
    elegida, debajo de las fichas aparece en ámbar «El permiso de <Red> · <usuario> vence el
    <día> <número> de <mes> a las HH:MM, antes de que salga esto: así no va a salir ahí.
    Reconéctala en Los Fierros antes, o elige un día anterior.», con «Reconéctala en Los
-   Fierros» como enlace, y su marca en «Así va a quedar» sale fría. No avisa por TikTok,
-   YouTube ni X, que renuevan su permiso solas. Sin ninguna cuenta, el bloque dice «Todavía
+   Fierros» como enlace, y su marca en «Así va a quedar» sale fría. No avisa por TikTok ni
+   YouTube, que renuevan su permiso solas. Sin ninguna cuenta, el bloque dice «Todavía
    no tienes cuentas conectadas. Conecta una para poder programar.», y «Conecta una» lleva a
    Los Fierros (tus redes conectadas).
 6. **Un bloque «TikTok · <usuario>»** por cada cuenta de TikTok marcada (ver abajo).
@@ -500,7 +501,7 @@ anteriores, aunque vayan vacías.
 |---|---|
 | `fecha` | `AAAA-MM-DD HH:MM`, en la zona horaria de Tu Cuenta, en el futuro |
 | `texto` | El texto del post; entre comillas si lleva comas |
-| `redes` | `instagram`, `facebook`, `youtube`, `threads`, `x` o `tiktok`, separadas por `\|` |
+| `redes` | `instagram`, `facebook`, `youtube` o `tiktok`, separadas por `\|` (`threads` y `x` se rechazan: están en «Próximamente») |
 | `media` | Direcciones de descarga directa de los archivos, separadas por `\|`; puede ir vacía si hay texto y ninguna red exige archivo |
 | `portada` | Dirección de una imagen JPG o PNG; solo vale si hay un video en `media` |
 | `opciones` | JSON con lo que piden TikTok (privacidad, borrador) o Instagram (trial reel) |
@@ -560,7 +561,9 @@ El formulario, en orden:
 3. **«Cuentas»**: las mismas casillas que al programar, marcadas las que son destino. Una red
    donde ya se publicó lleva « ✓» y no se puede desmarcar. Una desconectada lleva
    «reconéctala»: si ya era destino se puede desmarcar, pero no se puede agregar. Las cuentas
-   de TikTok solo aparecen si ya eran destino: desde aquí no se agregan. Junto a un destino
+   de TikTok solo aparecen si ya eran destino: desde aquí no se agregan. Las de Threads y X /
+   Twitter tampoco se agregan («Próximamente»); si una ya era destino de algo que no salió, hay
+   que desmarcarla para poder guardar. Junto a un destino
    con opciones va, tras un punto medio, un resumen: «Borrador a tu bandeja de TikTok»;
    «Directo» seguido de la privacidad y de lo permitido, por ejemplo «Directo · Solo yo · sin
    comentarios · sin dúo · sin pegar · sin comercial»; o «Trial reel — lo compartes tú desde
@@ -765,8 +768,8 @@ tres:
   su propio «Reprogramar».
 - **Reintentar ya:** «Subir ahora» en la tarjeta de la lista. Devuelve los destinos quemados a
   la cola y publica en el acto.
-- **Corregirlo y reintentar:** «Editar», arreglar lo que dice el motivo (por ejemplo, acortar
-  el texto para X) y «Guardar» sin tocar la fecha. Los destinos quemados que sigan marcados
+- **Corregirlo y reintentar:** «Editar», arreglar lo que dice el motivo (por ejemplo, dejar
+  un solo video para YouTube) y «Guardar» sin tocar la fecha. Los destinos quemados que sigan marcados
   vuelven a «Programado» y salen en la pasada siguiente (o a su hora, si todavía no llega).
   Si se cambia la fecha, tiene que ser futura.
 
@@ -848,11 +851,7 @@ de esa tanda queda: hay que volver a elegirlos.
 | Lo que dice la pantalla | Qué significa | Qué hacer |
 |---|---|---|
 | «Instagram, YouTube y TikTok necesitan al menos un archivo.» | Hay una de esas redes marcada y ningún archivo | Agregar archivo o desmarcar esa red |
-| «X aún no recibe video desde el calendario.» | Hay video y X marcado | Sacar X o el video; programar X aparte con fotos o solo texto |
-| «X recibe hasta cuatro imágenes.» | Más de cuatro fotos con X marcado | Dejar cuatro, o programar X aparte |
-| «El texto excede los 280 caracteres de X.» | El texto es largo para X | Acortarlo o programar X aparte |
-| «Threads recibe un solo archivo por post.» | Más de un archivo con Threads marcado | Dejar uno, o programar Threads aparte |
-| «El texto excede los 500 caracteres de Threads.» | El texto es largo para Threads | Acortarlo o programar Threads aparte |
+| «Threads todavía no está disponible en Tu Parrilla: próximamente.» (o «X / Twitter todavía no está disponible en Tu Parrilla: próximamente.») | Una cuenta de Threads o de X quedó entre los destinos de un post programado antes de que esas redes quedaran en «Próximamente» | Desmarcarla en el editor |
 | «El texto es demasiado largo para Instagram.» | Más de 2200 caracteres, vaya a la red que vaya (pasa en el editor o el CSV) | Acortarlo |
 | «TikTok recibe un video, o hasta 35 fotos JPG o WebP.» | Con TikTok marcado: dos videos, video con fotos, más de 35 fotos, o un formato que no acepta (por ejemplo PNG) | Dejar un video MP4, MOV o WebM, o fotos JPG o WebP |
 | «Un trial reel es un solo video, sin fotos.» | En el editor se cambiaron los archivos de un trial reel | Dejar exactamente un video |
@@ -909,7 +908,8 @@ puede decir:
 | «Fila <N>: Programado» | Esa fila quedó | Nada |
 | «La fecha no se entendió (usa YYYY-MM-DD HH:MM).» | Fecha en otro formato | Escribirla como `2026-10-20 19:00` |
 | «Elige al menos una cuenta o una red.» | `redes` y `cuentas` vacías | Llenar una |
-| «Red desconocida o sin publicación: <red>.» | Nombre de red mal escrito | Usar `instagram`, `facebook`, `youtube`, `threads`, `x` o `tiktok` |
+| «Red desconocida o sin publicación: <red>.» | Nombre de red mal escrito | Usar `instagram`, `facebook`, `youtube` o `tiktok` |
+| «Threads todavía no está disponible en Tu Parrilla: próximamente.» (o «X / Twitter todavía no está disponible en Tu Parrilla: próximamente.») | La fila nombra `threads` o `x`, que están en «Próximamente» | Sacar esa red de la fila |
 | «Hay redes repetidas en la fila.» | La misma red dos veces | Dejarla una vez |
 | «No hay una cuenta de <red> conectada.» | No hay cuenta conectada de esa red | Conectarla en Los Fierros, o sacar esa red |
 | «Tienes <N> cuentas de <red> (<usuarios>). Elige cuál con «cuentas».» | Dos cuentas de la misma red | Usar la columna `cuentas` |
@@ -958,6 +958,10 @@ Aparecen en «Se quemó», en el editor del post, en la píldora de la lista, al
 sobre su tarjeta del calendario y en el correo. Mientras el destino dice «Reintentando»,
 se reintenta solo; cuando dice «Falló», hay que actuar (ver la tarea de arreglar un post
 quemado, más arriba).
+
+Los de Threads y de X solo aparecen en un post programado antes de que esas redes quedaran en
+«Próximamente»: «Subir ahora» y «Reprogramar» los vuelven a intentar, pero no se puede
+programar nada nuevo ahí. Para dejar de intentarlo, desmarcar esa red en el editor.
 
 | Lo que dice la pantalla | Qué significa | Qué hacer |
 |---|---|---|
@@ -1140,7 +1144,7 @@ quemado, más arriba).
 - La vista «Día» no tiene «Subir ahora», «Eliminar» ni «Reprogramar» (están en la lista), no
   alinea las horas entre columnas —cada columna va en su orden, de la más temprana a la más
   tarde— y no muestra varios días a la vez: para eso está la semana.
-- No publica video en X.
+- No publica en Threads ni en X / Twitter, que dicen «Próximamente» (ver [Los Fierros](los-fierros.md)).
 - No conecta cuentas: eso es [Los Fierros](los-fierros.md). No muestra cómo le fue a lo
   publicado: eso es [Los Números](los-numeros.md) (cómo te fue en las redes y en tu página; cada
   publicación, en «Tus publicaciones», un clic adentro). No responde

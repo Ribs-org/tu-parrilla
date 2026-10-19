@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest'
-import { AVISO_META_EN_REVISION, avisosDe } from './networks'
+import { AVISO_META_EN_REVISION, PROXIMAMENTE, REDES_PROXIMAMENTE, avisosDe, fraseProximamente } from './networks'
+
+describe('las redes en «Próximamente»', () => {
+  it('son Threads y X, y lo dicen letra por letra', () => {
+    expect([...REDES_PROXIMAMENTE].sort()).toEqual(['threads', 'x'])
+    expect(PROXIMAMENTE).toBe('Próximamente')
+    expect(fraseProximamente('threads')).toBe('Threads todavía no está disponible en Tu Parrilla: próximamente.')
+    expect(fraseProximamente('x')).toBe('X / Twitter todavía no está disponible en Tu Parrilla: próximamente.')
+  })
+})
 
 describe('avisosDe', () => {
   it('cada red dice lo que exige, letra por letra', () => {

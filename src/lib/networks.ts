@@ -121,3 +121,30 @@ export function avisosDe(network: SocialNetwork, metaEnRevision: boolean): strin
   if (metaEnRevision && (network === 'instagram' || network === 'facebook')) avisos.push(AVISO_META_EN_REVISION)
   return avisos
 }
+
+/**
+ * Las redes que todavía no se ofrecen, aunque su código esté entero. En Los Fierros dicen
+ * «Próximamente» en vez de «Conectar →», la conexión no arranca ni vuelve, el compositor, el
+ * editor y el teléfono no las ofrecen como destino, y la regla común de lo que se programa
+ * (`validateScheduleDraft`) rechaza con `fraseProximamente` lo que llegue por la API o por el
+ * lote. Abrir una es sacarla de acá.
+ *
+ * - **Threads** espera la segunda vuelta del App Review de Meta (`threads_basic` y
+ *   `threads_content_publish`, `docs/pendientes.md`): con la app en Live, sin esa aprobación
+ *   solo autoriza quien tiene un rol en ella. Antes de abrirla falta además su baja y su
+ *   borrado (`docs/deuda-tecnica.md`).
+ * - **X** no publica hoy (2026-10-19). Antes de abrirla hay que ver por qué, empezando por el
+ *   saldo: la API de X ya no tiene capa gratuita (README, «Modo Tinder»).
+ *
+ * Lo ya programado a una de estas redes no se toca: el publicador lo sigue intentando, y para
+ * editarlo hay que sacarle ese destino.
+ */
+export const REDES_PROXIMAMENTE: ReadonlySet<string> = new Set<SocialNetwork>(['threads', 'x'])
+
+/** Lo que dice Los Fierros en lugar de «Conectar →» para una red de `REDES_PROXIMAMENTE`. */
+export const PROXIMAMENTE = 'Próximamente'
+
+/** La frase con que se rechaza lo que llegue a una red de `REDES_PROXIMAMENTE`. */
+export function fraseProximamente(network: string): string {
+  return `${networkLabel(network)} todavía no está disponible en Tu Parrilla: próximamente.`
+}

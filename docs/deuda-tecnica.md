@@ -455,6 +455,10 @@ llega a ninguna parte, y sus datos se quedan.
 La entrega A acotó su alcance a Instagram y Facebook a propósito, y para el App Review de
 esos permisos alcanza. Lo que no alcanza es el día que Threads entre a revisión.
 
+Desde el 2026-10-19 Threads está en «Próximamente» (`REDES_PROXIMAMENTE`,
+`src/lib/networks.ts`): nadie nuevo lo conecta, así que el hueco se reduce a las cuentas que
+ya estaban conectadas, y cerrarlo pasa a ser parte de abrirlo.
+
 Cerrarlo son las dos rutas otra vez —`/api/social/meta/threads-baja` y `-borrado`, o un
 segmento por caso de uso— leyendo `THREADS_APP_SECRET`, y una decisión antes: si el id de
 usuario de Threads vive en la misma columna `meta_user_id` (son espacios de ids distintos,

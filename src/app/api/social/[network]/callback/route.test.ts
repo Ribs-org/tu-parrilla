@@ -3,8 +3,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 // `route.ts` llega a `@/lib/auth` y de ahí a módulos con `server-only`, que no resuelve
 // bajo Vitest. Mismo motivo y mismo arreglo que `mobile/overview/route.test.ts`.
 vi.mock('server-only', () => ({}))
+// La vuelta de una conexión (`GET`) pide un dueño con sesión; `fetchCredential` no la usa.
+vi.mock('@/lib/auth', () => ({ usuarioActual: async () => ({ id: 'owner-1' }) }))
 
-const { fetchCredential } = await import('./route')
+const { GET, fetchCredential } = await import('./route')
 
 /**
  * Las respuestas del Graph que un login de Instagram recorre, en orden: token corto,
@@ -66,5 +68,18 @@ describe('fetchCredential (Meta)', () => {
     expect(credential.metaUserId).toBeUndefined()
     expect(credential.accessToken).toBe('LARGO')
     expect(credential.candidatas).toHaveLength(1)
+  })
+})
+
+describe('GET de una red en «Próximamente»', () => {
+  it('no canjea el código ni guarda nada: vuelve a Los Fierros con la frase', async () => {
+    const pedidas = doblarFetch([])
+    const res = await GET(new Request('https://tu-parrilla.cl/api/social/x/callback?code=CODE&state=STATE'), {
+      params: Promise.resolve({ network: 'x' }),
+    })
+    const destino = new URL(res.headers.get('location') ?? '')
+    expect(destino.pathname).toBe('/admin/accounts')
+    expect(destino.searchParams.get('mensaje')).toBe('X / Twitter todavía no está disponible en Tu Parrilla: próximamente.')
+    expect(pedidas).toEqual([])
   })
 })

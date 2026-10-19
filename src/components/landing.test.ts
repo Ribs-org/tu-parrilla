@@ -14,7 +14,13 @@ const texto = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ')
 
 describe('la portada', () => {
   it('dice qué hace la app, con su nombre', () => {
-    expect(texto).toContain('Tu Parrilla publica en Instagram, Facebook, TikTok, YouTube, Threads y X')
+    expect(texto).toContain('Tu Parrilla publica en Instagram, Facebook, TikTok y YouTube a la hora que elegiste')
+  })
+
+  it('no promete las redes en «Próximamente»: las nombra apagadas, con la palabra', () => {
+    expect(texto).toContain('Threads Próximamente')
+    expect(texto).toContain('X / Twitter Próximamente')
+    expect(texto).not.toMatch(/publica en [^.]*Threads/)
   })
 
   it('dice para qué usa tu canal de YouTube', () => {
@@ -36,7 +42,7 @@ describe('la portada', () => {
     const dia = renderToStaticMarkup(createElement(Landing, { tema: 'dia' }))
     const textoDia = dia.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ')
     expect(dia).toContain('data-tema="dia"')
-    expect(textoDia).toContain('Tu Parrilla publica en Instagram, Facebook, TikTok, YouTube, Threads y X')
+    expect(textoDia).toContain('Tu Parrilla publica en Instagram, Facebook, TikTok y YouTube a la hora que elegiste')
     expect(textoDia).toContain('Con tu canal de YouTube, sube los videos que programas')
     expect(dia).toContain('href="/privacidad"')
     expect(dia).toContain('href="/terminos"')

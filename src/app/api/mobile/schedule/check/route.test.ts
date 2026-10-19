@@ -78,12 +78,12 @@ describe('POST /api/mobile/schedule/check', () => {
 
   it('valida con las redes que resolverDestinos entregó, no con lo que el cuerpo declaró', async () => {
     // El cuerpo no manda `redes`, solo `cuentas` — si el chequeo validara con
-    // `borrador.redes` (vacío) en vez de con lo que resolvió el destino, esto pasaría
-    // sin marcar el video de X como un problema.
-    resolverDestinos.mockResolvedValueOnce({ cuentas: [], networks: ['x'] })
-    const res = await POST(peticion({ texto: 'Hola', cuentas: ['c1'], ahora: true, fotos: 0, videos: 1 }))
+    // `borrador.redes` (vacío) en vez de con lo que resolvió el destino, esto diría «elige
+    // una plataforma» sin marcar que Instagram necesita un archivo.
+    resolverDestinos.mockResolvedValueOnce({ cuentas: [], networks: ['instagram'] })
+    const res = await POST(peticion({ texto: 'Hola', cuentas: ['c1'], ahora: true, fotos: 0, videos: 0 }))
     expect(res.status).toBe(400)
-    expect(await res.json()).toEqual({ error: 'X aún no recibe video desde el calendario.' })
+    expect(await res.json()).toEqual({ error: 'Instagram, YouTube y TikTok necesitan al menos un archivo.' })
   })
 
   it('sin ningún destino resuelto, la frase la da validateScheduleDraft, no un 200 a ciegas', async () => {

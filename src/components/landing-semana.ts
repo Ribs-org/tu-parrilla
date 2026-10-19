@@ -70,10 +70,9 @@ export const SEMANA: readonly DiaDeMuestra[] = [
         hora: '19:30',
         texto: 'Por qué publico todos los días',
         media: [],
-        destinos: [
-          { network: 'threads', status: 'published' },
-          { network: 'x', status: 'published' },
-        ],
+        // Solo texto: de las redes que publican hoy, la única que lo recibe es Facebook. Threads
+        // y X también, pero están en «Próximamente» (`REDES_PROXIMAMENTE`).
+        destinos: [{ network: 'facebook', status: 'published' }],
       },
     ],
   },

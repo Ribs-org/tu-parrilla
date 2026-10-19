@@ -27,10 +27,10 @@
           },
           "redes": {
             "type": "array",
-            "description": "Nombra la red, no la cuenta. Cada nombre se resuelve a una cuenta solo si hay exactamente una conectada de esa red; con dos, la fila se rechaza nombrando las candidatas y hay que usar 'cuentas'. Sin repetidos.",
+            "description": "Nombra la red, no la cuenta. Cada nombre se resuelve a una cuenta solo si hay exactamente una conectada de esa red; con dos, la fila se rechaza nombrando las candidatas y hay que usar 'cuentas'. Sin repetidos. 'threads' y 'x' están en «Próximamente»: una fila que las nombre se rechaza con 'Threads todavía no está disponible en Tu Parrilla: próximamente.' o 'X / Twitter todavía no está disponible en Tu Parrilla: próximamente.'.",
             "items": {
               "type": "string",
-              "enum": ["instagram", "facebook", "youtube", "threads", "x", "tiktok"]
+              "enum": ["instagram", "facebook", "youtube", "tiktok"]
             },
             "uniqueItems": true
           },

@@ -11,7 +11,7 @@ import { Corte, CorteDefs, MarcaDeTuParrilla } from '@/components/corte'
 import { Icon } from '@/components/icon'
 import { ArmaUnCorte, SeArmaMientrasSube } from '@/components/landing-demos'
 import { CONTACTO, RESPONSABLE, RUT } from '@/lib/empresa'
-import { networkLabel } from '@/lib/networks'
+import { PROXIMAMENTE, REDES_PROXIMAMENTE, networkLabel } from '@/lib/networks'
 import { calorDelDia, carneDe, coccionDe, formatoDe, selloDe, type Calor, type Fierro } from '@/lib/parrilla'
 import { NO_PUBLISH_TOKEN } from '@/lib/social/publish/publisher'
 import { FOTO, SEMANA, VIDEO, fotos, type CorteDeMuestra, type DiaDeMuestra, type Estado } from '@/components/landing-semana'
@@ -360,16 +360,39 @@ function TuPagina() {
   )
 }
 
-/** Las redes que se conectan, cada una con su nombre, en su chapa. */
+/** Las redes de la portada, en el orden en que se nombran. */
+const REDES_DE_LA_PORTADA = ['instagram', 'facebook', 'tiktok', 'youtube', 'threads', 'x']
+
+/**
+ * «Instagram, Facebook, TikTok y YouTube»: las que publican hoy. Sale de `REDES_PROXIMAMENTE`
+ * para que la frase de arriba no prometa una red que Los Fierros todavía no deja conectar.
+ */
+const QUE_PUBLICAN = new Intl.ListFormat('es', { type: 'conjunction' }).format(
+  REDES_DE_LA_PORTADA.filter((red) => !REDES_PROXIMAMENTE.has(red)).map(networkLabel),
+)
+
+/**
+ * Las redes que se conectan, cada una con su nombre, en su chapa. Las de «Próximamente» van
+ * apagadas y lo dicen debajo del nombre: es la misma palabra que ven en Los Fierros.
+ */
 function LasRedes() {
   return (
     <ul className="grid w-full max-w-lg grid-cols-2 gap-2 sm:grid-cols-3">
-      {['instagram', 'facebook', 'tiktok', 'youtube', 'threads', 'x'].map((red) => (
-        <li key={red} className="chapa flex items-center gap-2.5 rounded-lg px-3.5 py-3 text-sm text-fg">
-          <Icon name={red} className="h-4 w-4 shrink-0" />
-          {networkLabel(red)}
-        </li>
-      ))}
+      {REDES_DE_LA_PORTADA.map((red) => {
+        const proxima = REDES_PROXIMAMENTE.has(red)
+        return (
+          <li
+            key={red}
+            className={cn('chapa flex items-center gap-2.5 rounded-lg px-3.5 py-3 text-sm', proxima ? 'text-fg-muted' : 'text-fg')}
+          >
+            <Icon name={red} className="h-4 w-4 shrink-0" />
+            <span className="min-w-0">
+              <span className="block">{networkLabel(red)}</span>
+              {proxima ? <span className="block text-[0.7rem] text-fg-faint">{PROXIMAMENTE}</span> : null}
+            </span>
+          </li>
+        )
+      })}
     </ul>
   )
 }
@@ -439,9 +462,9 @@ export function Landing({ tema = 'noche', delEnlace = false }: { tema?: Tema; de
           </h1>
 
           <p className="mt-6 max-w-[60ch] text-base leading-relaxed text-fg-muted sm:mt-8 sm:text-lg">
-            Tu Parrilla publica en Instagram, Facebook, TikTok, YouTube, Threads y X a la hora que
-            elegiste, te avisa antes de que algo falle y te dice cuánta gente llegó a tu página por
-            cada publicación. No solo cuántos la vieron.
+            Tu Parrilla publica en {QUE_PUBLICAN} a la hora que elegiste, te avisa antes de que algo
+            falle y te dice cuánta gente llegó a tu página por cada publicación. No solo cuántos la
+            vieron.
           </p>
         </div>
 
