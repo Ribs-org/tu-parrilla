@@ -191,8 +191,9 @@ manda `GET /api/mobile/schedule`. El porqué, en
 `src/lib/tema.ts`), así que vale en cualquier equipo donde entres. `GET`/`PUT /api/mobile/tema` lo dan a la app
 del teléfono, que todavía no tiene el modo día, y una cookie lo copia en cada equipo para la
 puerta, que se dibuja antes de saber de quién es. El modo día es el fondo claro y, en vez de cortes, piezas de sushi
-(`src/components/pieza-sushi.tsx`) que dicen lo mismo con la misma gramática —nigiri, maki,
-sashimi y temaki; el pescado bajo el soplete; una banda de nori por destino—. Lo que falló no
+(`src/components/pieza-sushi.tsx`) que dicen lo mismo con la misma gramática —nigiri, un roll
+que se corta al servirse, sashimi y temaki; el pescado bajo el soplete; una banda de nori por
+destino—. Lo que falló no
 se quema: es pescado pasado, y la sección «Se quemó» se llama «Se echó a perder» (`SE_QUEMO`,
 en `src/lib/vocabulario.ts`). Las demás palabras no cambian, la noche sigue por defecto, y la
 página pública de cada creador no cambia nunca. El
@@ -1214,7 +1215,7 @@ src/
       (dash)/              panel protegido
   components/
     corte.tsx              el corte dibujado de La Parrilla: silueta, carne, marcas, halo y humo
-    pieza-sushi.tsx        el mismo corte en el modo día: nigiri, maki, sashimi y temaki
+    pieza-sushi.tsx        el mismo corte en el modo día: nigiri, roll, sashimi y temaki
     boton-tema.tsx         el botón de la barra que cambia entre la noche y el día
     landing.tsx            la portada del producto, armada con las piezas del panel; landing-demos.tsx, lo que se toca
     landing-semana.ts      la semana de ejemplo, que comparten la portada y su imagen para compartir (/api/og)

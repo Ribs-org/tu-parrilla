@@ -4,8 +4,9 @@ import { cn } from '@/lib/utils'
 /*
  * La pieza de sushi: el corte del modo día. Dice lo mismo que `Corte` (`corte.tsx`), con la
  * misma gramática, y por eso recibe las mismas props:
- * - la silueta, el formato: nigiri el video, maki el carrusel (una rodaja por archivo, como
- *   el hueso de la tira), sashimi la foto, temaki el texto;
+ * - la silueta, el formato: nigiri el video, un roll envuelto en salmón el carrusel, sashimi la
+ *   foto, temaki el texto. El roll va entero mientras no se sirvió y en rodajas cuando salió,
+ *   una por archivo, como el hueso de la tira: lo pidió el dueño el 2026-10-19;
  * - el pescado, la cocción: el soplete del aburi hace de parrilla, así que crudo es
  *   programado, sellado es saliendo y a punto es publicado. Lo que falló no se quema: el
  *   pescado que no se sirvió se echó a perder, y se ve pasado —verde gris, con moho y con su
@@ -51,12 +52,16 @@ const MOHO: ReadonlyArray<readonly [number, number, number]> = [
   [68, 47, 4],
 ]
 
-/** Lo que no se cocina: el arroz, el nori, el shiso, el wasabi y el papel de soya del temaki. */
+/**
+ * Lo que no se cocina: el arroz, el nori, el shiso, el wasabi, el papel de soya del temaki y el
+ * relleno del roll, palta y queso crema.
+ */
 const ARROZ = { claro: '#ffffff', sombra: '#efe5d4', borde: '#d9ccb6', grano: '#e4d8c4' }
 const NORI = { cuerpo: '#1f2c26', brillo: '#3d5649' }
 const SHISO = { claro: '#7fbf5f', hondo: '#4f8f3a' }
 const WASABI = '#a9c864'
 const SOYA = { claro: '#fbd3df', hondo: '#efa9bf' }
+const RELLENO = { palta: '#a7cc6c', queso: '#fffaf0' }
 
 /** Las vetas blancas del salmón; en el pescado pasado, apagadas y verdosas. */
 function vetas(carne: Carne): { color: string; opacidad: number } {
@@ -107,29 +112,65 @@ export function rodajas(n: number): Array<{ cx: number; r: number }> {
   return Array.from({ length: cuantas }, (_, i) => ({ cx: inicio + i * paso, r }))
 }
 
-/** La silueta del maki: sus rodajas, para recortar y para el contorno. */
+/** La silueta del maki en rodajas: sus discos, para recortar y para el contorno. */
 function siluetaMaki(n: number): string {
   return rodajas(n)
     .map(({ cx, r }) => `M${cx - r} 34a${r} ${r} 0 1 0 ${2 * r} 0a${r} ${r} 0 1 0 ${-2 * r} 0Z`)
     .join('')
 }
 
-export function siluetaDe(formato: Formato, huesos: number): string {
+/**
+ * El roll entero, visto de lado: un tronco de alto fijo que va de punta a punta de donde caerían
+ * sus rodajas, con la punta izquierda redonda y, a la derecha, la cara del corte de la orilla.
+ * `cortes` son las líneas por donde se va a cortar: una menos que rodajas, así el roll entero
+ * también cuenta los archivos.
+ */
+const ROLL = { arriba: 20, abajo: 48, punta: 8, cara: 7 }
+
+export function rollEntero(n: number): { x0: number; x1: number; cortes: number[] } {
+  const discos = rodajas(n)
+  const primero = discos[0]!
+  const ultimo = discos[discos.length - 1]!
+  return {
+    x0: primero.cx - primero.r,
+    x1: ultimo.cx + ultimo.r,
+    cortes: discos.slice(1).map((d, i) => (discos[i]!.cx + d.cx) / 2),
+  }
+}
+
+function siluetaRoll(n: number): string {
+  const { x0, x1 } = rollEntero(n)
+  const { arriba, abajo, punta, cara } = ROLL
+  const ry = (abajo - arriba) / 2
+  return `M${x0 + punta} ${arriba}H${x1 - cara}A${cara} ${ry} 0 0 1 ${x1 - cara} ${abajo}H${x0 + punta}A${punta} ${ry} 0 0 1 ${x0 + punta} ${arriba}Z`
+}
+
+/**
+ * Si el roll va en rodajas: cuando se sirvió, o sea cuando su pescado está a punto —publicado,
+ * o publicado en todo lo que no falló—. Mientras está programado o saliendo, y si falló en
+ * todas partes, va entero: no se llegó a servir.
+ */
+export function rollCortado(carne: Carne): boolean {
+  return carne === 'punto'
+}
+
+export function siluetaDe(formato: Formato, huesos: number, cortado = true): string {
   if (formato === 'entrana') return NIGIRI.silueta
-  if (formato === 'tira') return siluetaMaki(huesos)
+  if (formato === 'tira') return cortado ? siluetaMaki(huesos) : siluetaRoll(huesos)
   if (formato === 'bife') return SASHIMI.silueta
   return TEMAKI.silueta
 }
 
-/** El id del recorte de una silueta: el maki tiene uno por cantidad de rodajas. */
-function idDeSilueta(formato: Formato, huesos: number): string {
-  return `tp-sushi-silueta-${formato}${formato === 'tira' ? `-${Math.min(Math.max(huesos, 2), MAX_HUESOS)}` : ''}`
+/** El id del recorte de una silueta: el roll tiene uno por cantidad de rodajas, entero y cortado. */
+function idDeSilueta(formato: Formato, huesos: number, cortado = true): string {
+  if (formato !== 'tira') return `tp-sushi-silueta-${formato}`
+  return `tp-sushi-silueta-tira-${cortado ? '' : 'entero-'}${Math.min(Math.max(huesos, 2), MAX_HUESOS)}`
 }
 
 /**
  * Lo que comparten todas las piezas de la página, una sola vez, como `CorteDefs`: los
- * degradados, los difuminados y los recortes de cada silueta —el del maki, uno por cantidad de
- * rodajas, de dos a diez—. Va en el layout del panel. `width`/`height` en cero y no
+ * degradados, los difuminados y los recortes de cada silueta —los del roll, uno por cantidad de
+ * rodajas, de dos a diez, entero y cortado—. Va en el layout del panel. `width`/`height` en cero y no
  * `display: none`, por lo mismo que `CorteDefs`: Safari no pinta un degradado definido en un SVG
  * oculto.
  */
@@ -142,11 +183,14 @@ export function PiezaDefs() {
             <path d={siluetaDe(formato, 0)} />
           </clipPath>
         ))}
-        {Array.from({ length: MAX_HUESOS - 1 }, (_, i) => i + 2).map((n) => (
+        {Array.from({ length: MAX_HUESOS - 1 }, (_, i) => i + 2).flatMap((n) => [
           <clipPath key={n} id={idDeSilueta('tira', n)}>
             <path d={siluetaMaki(n)} />
-          </clipPath>
-        ))}
+          </clipPath>,
+          <clipPath key={`entero-${n}`} id={idDeSilueta('tira', n, false)}>
+            <path d={siluetaRoll(n)} />
+          </clipPath>,
+        ])}
         <clipPath id="tp-sushi-nigiri-pescado">
           <path d={NIGIRI.pescado} />
         </clipPath>
@@ -221,19 +265,65 @@ function Nigiri({ carne }: { carne: Carne }) {
   )
 }
 
-function Maki({ carne, n }: { carne: Carne; n: number }) {
+/** El corte de un roll envuelto en salmón: el pescado afuera, el arroz, el nori y el relleno. */
+function CaraDelRoll({ cx, cy, rx, ry, carne }: { cx: number; cy: number; rx: number; ry: number; carne: Carne }) {
+  return (
+    <>
+      <ellipse cx={cx} cy={cy} rx={rx} ry={ry} fill={`url(#tp-pescado-${carne})`} stroke="rgba(120,40,20,.25)" strokeWidth=".8" />
+      <ellipse cx={cx} cy={cy} rx={rx * 0.66} ry={ry * 0.66} fill="url(#tp-arroz)" />
+      <ellipse cx={cx} cy={cy} rx={rx * 0.42} ry={ry * 0.42} fill={NORI.cuerpo} />
+      <ellipse cx={cx} cy={cy} rx={rx * 0.34} ry={ry * 0.34} fill={RELLENO.palta} />
+      <ellipse cx={cx + rx * 0.1} cy={cy - ry * 0.08} rx={rx * 0.15} ry={ry * 0.15} fill={RELLENO.queso} />
+    </>
+  )
+}
+
+/**
+ * El roll en rodajas, ya servido: una por archivo, cada una con su vuelta de salmón, que es lo
+ * que dice la cocción. El salmón va afuera, como en el roll entero, para que la cocción tenga
+ * la misma superficie antes y después de cortar.
+ */
+function MakiEnRodajas({ carne, n }: { carne: Carne; n: number }) {
+  const v = vetas(carne)
   return (
     <>
       {rodajas(n).map(({ cx, r }, i) => (
         <g key={i}>
-          <circle cx={cx} cy="34" r={r} fill={NORI.cuerpo} />
-          <circle cx={cx} cy="34" r={r * 0.88} fill="url(#tp-arroz)" />
-          <circle cx={cx} cy="34" r={r * 0.54} fill={`url(#tp-pescado-${carne})`} />
-          {/* Un pepino al lado del pescado: lo justo para que la rodaja se lea maki. */}
-          <circle cx={cx + r * 0.46} cy={34 - r * 0.36} r={r * 0.15} fill={WASABI} />
-          <path d={`M${cx - r * 0.7} ${34 - r * 0.5}A${r * 0.86} ${r * 0.86} 0 0 1 ${cx + r * 0.2} ${34 - r * 0.84}`} stroke={NORI.brillo} strokeWidth="1.2" fill="none" strokeLinecap="round" />
+          <CaraDelRoll cx={cx} cy={34} rx={r} ry={r} carne={carne} />
+          {/* Una veta en la vuelta del salmón: lo justo para que se lea pescado y no tomate. */}
+          <path d={`M${cx - r * 0.62} ${34 - r * 0.62}A${r * 0.86} ${r * 0.86} 0 0 1 ${cx + r * 0.3} ${34 - r * 0.81}`} stroke={v.color} strokeOpacity={v.opacidad} strokeWidth="1.3" fill="none" strokeLinecap="round" />
         </g>
       ))}
+    </>
+  )
+}
+
+/**
+ * El roll entero, sin servir: el tronco envuelto en salmón, con sus vetas, las líneas por donde
+ * se va a cortar —una rodaja por archivo— y, a la derecha, la cara del corte de la orilla.
+ */
+function MakiEntero({ carne, n }: { carne: Carne; n: number }) {
+  const v = vetas(carne)
+  const { x0, x1, cortes } = rollEntero(n)
+  const { arriba, abajo, cara } = ROLL
+  const medio = (arriba + abajo) / 2
+  // Las líneas del corte van enteras y finas: punteada es la banda del destino que no salió.
+  // Sobre el pescado pasado, que es oscuro, van claras.
+  const linea = carne === 'quemada' ? 'rgba(255,255,255,.4)' : 'rgba(90,30,15,.55)'
+  return (
+    <>
+      <path d={siluetaRoll(n)} fill={`url(#tp-pescado-${carne})`} stroke="rgba(120,40,20,.25)" strokeWidth=".8" />
+      <g clipPath={`url(#${idDeSilueta('tira', n, false)})`}>
+        {/* Las vetas, más ralas que en el nigiri: las líneas que cuentan son las del corte. */}
+        {Array.from({ length: Math.ceil((x1 - x0) / 14) }, (_, i) => {
+          const x = x0 + 6 + i * 14
+          return <path key={i} d={`M${x} ${arriba - 1}C${x + 6} ${arriba + 7} ${x + 5} ${abajo - 11} ${x - 1} ${abajo + 1}`} stroke={v.color} strokeOpacity={v.opacidad * 0.7} strokeWidth="1.5" fill="none" strokeLinecap="round" />
+        })}
+      </g>
+      {cortes.map((x) => (
+        <path key={x} d={`M${x} ${arriba + 1.5}C${x + 2} ${arriba + 10} ${x + 2} ${abajo - 10} ${x} ${abajo - 1.5}`} stroke={linea} strokeWidth="1.1" fill="none" />
+      ))}
+      <CaraDelRoll cx={x1 - cara} cy={medio} rx={cara} ry={(abajo - arriba) / 2} carne={carne} />
     </>
   )
 }
@@ -285,9 +375,9 @@ function posiciones(n: number): number[] {
 }
 
 /**
- * En el maki, cada banda cruza el centro de una rodaja y nunca la juntura de dos, donde el
- * nori de las dos rodajas la tapaba. Con más destinos que rodajas, van de a varias por
- * rodaja, repartidas dentro de ella.
+ * En el roll, cada banda cruza el centro de una rodaja y nunca la juntura de dos, donde se
+ * perdía entre las orillas de las dos. Con el roll entero, caen donde van a quedar sus
+ * rodajas. Con más destinos que rodajas, van de a varias por rodaja, repartidas dentro de ella.
  */
 export function posicionesMaki(bandas: number, huesos: number): number[] {
   const discos = rodajas(huesos)
@@ -349,7 +439,7 @@ function Banda({ x, sello, chico }: { x: number; sello: Sello; chico: boolean })
 
 /**
  * Una pieza. Las mismas props que `Corte`, para que el modo día cambie el dibujo y nada más.
- * `huesos` es cuántas rodajas lleva el maki.
+ * `huesos` es cuántas rodajas lleva el roll, cortado o por cortar.
  */
 export function PiezaSushi({
   formato,
@@ -375,10 +465,13 @@ export function PiezaSushi({
   const quemado = coccion === 'parcial' || coccion === 'quemada'
   const saliendo = sellos.includes('saliendo')
   const xs = formato === 'tira' ? posicionesMaki(sellos.length, huesos) : posiciones(sellos.length)
-  const silueta = siluetaDe(formato, huesos)
+  const cortado = rollCortado(carne)
+  const silueta = siluetaDe(formato, huesos, cortado)
   const lleno = Math.max(0, Math.min(1, llenado))
   const aMedias = lleno < 1
-  const recorte = idDeSilueta(formato, huesos)
+  const recorte = idDeSilueta(formato, huesos, cortado)
+  // El brillo de arriba cae sobre el lomo de la pieza: el roll entero empieza más abajo.
+  const brilloY = formato === 'tira' && !cortado ? ROLL.arriba + 5 : 17
   return (
     <span className={cn('relative block', className)} aria-hidden>
       {/* La llama del soplete: lo único que se repite, y solo mientras algo está saliendo. */}
@@ -402,11 +495,11 @@ export function PiezaSushi({
         {aMedias ? <path d={silueta} fill="rgba(34,31,28,.03)" stroke="rgba(34,31,28,.32)" strokeWidth="1.1" strokeDasharray="3 3" /> : null}
         <g clipPath={aMedias ? `url(#${idDeLlenado})` : undefined}>
           {formato === 'entrana' ? <Nigiri carne={carne} /> : null}
-          {formato === 'tira' ? <Maki carne={carne} n={huesos} /> : null}
+          {formato === 'tira' ? (cortado ? <MakiEnRodajas carne={carne} n={huesos} /> : <MakiEntero carne={carne} n={huesos} />) : null}
           {formato === 'bife' ? <Sashimi carne={carne} /> : null}
           {formato === 'chori' ? <Temaki carne={carne} /> : null}
           {carne !== 'quemada' ? (
-            <ellipse cx="46" cy="17" rx="24" ry="4" fill="#ffffff" opacity={carne === 'cruda' ? 0.4 : 0.22} filter="url(#tp-sushi-difuso)" clipPath={`url(#${recorte})`} />
+            <ellipse cx="46" cy={brilloY} rx="24" ry="4" fill="#ffffff" opacity={carne === 'cruda' ? 0.4 : 0.22} filter="url(#tp-sushi-difuso)" clipPath={`url(#${recorte})`} />
           ) : null}
           {coccion === 'quemada' ? (
             // El moho: manchas difusas, quietas. Lo único que se mueve es la llama del soplete.

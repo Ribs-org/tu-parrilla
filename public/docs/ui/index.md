@@ -176,7 +176,7 @@ que dicen las páginas:
 | Lo que dicen las páginas (de noche) | Lo que se ve de día | Qué quiere decir |
 |---|---|---|
 | Una entraña | Un nigiri de salmón | Un video |
-| Una tira de asado, un hueso por archivo | Un maki, una rodaja por archivo | Un carrusel |
+| Una tira de asado, un hueso por archivo | Un roll envuelto en salmón: entero, con una línea por donde se va a cortar, mientras no sale; en rodajas —una por archivo— cuando ya salió | Un carrusel |
 | Un bife | Un sashimi: tres láminas sobre una hoja verde, con wasabi | Una foto |
 | Un chori | Un temaki: un cono rosado | Un texto, sin archivos |
 | La carne cruda, sellada, a punto, quemada | El pescado crudo, dorado, tostado y, si falló, pasado: verde gris, con manchas de moho y tres ondas de olor encima | Programada, saliendo ahora, publicada, falló |

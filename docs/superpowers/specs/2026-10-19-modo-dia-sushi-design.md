@@ -28,11 +28,16 @@ varias.
 
    | Lo que se ve | Lo que dice | De noche | De día |
    |---|---|---|---|
-   | La silueta | El formato | entraña, tira, bife, chori | nigiri, maki, sashimi, temaki |
+   | La silueta | El formato | entraña, tira, bife, chori | nigiri, roll, sashimi, temaki |
    | El relleno | La cocción | la carne | el pescado, bajo el soplete |
    | Las marcas | Cómo le fue a cada destino, una por destino | la del fierro | una banda de nori |
    | El halo rojo y la banderita | Que algo falló | igual | igual |
    | Lo que se mueve | Que algo está saliendo ahora | el humo | la llama del soplete |
+
+   La única propiedad que de día dice algo más es la silueta del roll: entero mientras no se
+   sirvió, en rodajas cuando salió. Lo pidió el dueño el 2026-10-19, y no le quita nada a la
+   regla: dice lo mismo que su pescado, a punto o no, con otra señal, que además se lee sin
+   color.
 
 2. **Las palabras no cambian, salvo una.** Siguen iguales:
    - los nombres de las pantallas, los botones, los estados («Programada», «Saliendo ahora»,
@@ -79,7 +84,7 @@ varias.
 Las cuatro van en el mismo lienzo de 120 × 64 que los cortes y reciben las mismas props que
 `Corte`, para que el modo día cambie el dibujo y nada más:
 
-- `formato`, `huesos` (las rodajas del maki), `carne`, `coccion` y `sellos`;
+- `formato`, `huesos` (las rodajas del roll), `carne`, `coccion` y `sellos`;
 - `chico` (el de «Se quemó», a 48 px) y `llenado` (el compositor, que se llena a medida que
   llegan los archivos).
 
@@ -89,7 +94,7 @@ Las reglas que deciden qué es cada post no se tocan: `formatoDe`, `coccionDe`, 
 | Formato | De noche | De día | Por qué esa pieza |
 |---|---|---|---|
 | Video | Entraña | **Nigiri de salmón** | Es lo que más se publica y la pieza más reconocible. Las vetas blancas del salmón van en diagonal, como la fibra de la entraña, y son lo que hace leer «salmón» y no «tomate». |
-| Carrusel | Tira de asado, un hueso por archivo | **Maki, una rodaja por archivo** | Las rodajas se cuentan como los huesos, hasta diez. Van juntas, apenas montadas: separadas, el pescado del centro quedaba chico para decir la cocción. |
+| Carrusel | Tira de asado, un hueso por archivo | **Un roll envuelto en salmón**: entero mientras no se sirvió, en rodajas cuando salió, una por archivo | El roll se corta al servirse: lo pidió el dueño el 2026-10-19 (la primera vuelta lo dibujaba siempre en rodajas). Entero, cuenta los archivos con sus líneas de corte; cortado, con sus rodajas, como los huesos, hasta diez. Las rodajas van juntas, apenas montadas: separadas, quedaban chicas para decir la cocción. El salmón va afuera, como el roll que más se come en Chile, para que la cocción tenga la misma superficie antes y después de cortar y las bandas de nori se vean encima. |
 | Foto | Bife | **Sashimi**, tres láminas sobre una hoja de shiso, con wasabi | Una sola pieza de pescado, sin arroz: la silueta compacta del bife, sin confundirse con el nigiri. |
 | Texto | Chori | **Temaki**, en papel de soya rosado | Una silueta que no se parece a ninguna otra, el cono. El papel de soya y no el nori, porque sobre el nori negro las bandas no se verían. Rosado, porque es lo más «bonito» del muestrario sin agregar un color con significado. |
 
@@ -136,9 +141,11 @@ las de la marca del corte (`Sello`):
 | `reintento` | punteada en ámbar | punteada en ámbar |
 | `frio` (el fierro frío) | punteada en acero | punteada en acero |
 
-En el maki, cada banda cruza el centro de una rodaja y nunca la juntura de dos: ahí el nori de
-las dos rodajas la tapaba, y con cuatro rodajas y tres destinos caían justo encima. Si hay más
-destinos que rodajas, van de a varias por rodaja.
+En el roll, cada banda cruza el centro de una rodaja y nunca la juntura de dos, donde se perdía
+entre las orillas de las dos: con cuatro rodajas y tres destinos caían justo encima. Con el
+roll entero, caen donde van a quedar sus rodajas, y las líneas del corte van enteras y finas,
+para no confundirse con la banda punteada de un destino que no salió. Si hay más destinos que
+rodajas, van de a varias por rodaja.
 
 ### El halo, la banderita y la llama
 
@@ -330,8 +337,8 @@ panel de día con sus piezas de sushi.
   el borde de `*`). El día se acota a `.acerado`, igual que el acero, y no toca esas reglas
   afuera.
 - **El dibujo doble y los ids de los SVG.** Las piezas definen sus degradados y sus recortes en
-  `PiezaDefs`, una vez por página, en el layout del panel, con un recorte de maki por cantidad
-  de rodajas. Ninguna pieza repite un id.
+  `PiezaDefs`, una vez por página, en el layout del panel, con dos recortes de roll por
+  cantidad de rodajas, entero y cortado. Ninguna pieza repite un id.
 - **La vista previa de La Vitrina** es la página pública dentro del panel. De día vuelve a los
   colores de afuera (`.vista-publica`, en `globals.css`), y lo que pinta esa página
   (`profile-view.tsx`) quedó fuera del barrido de los velos.
