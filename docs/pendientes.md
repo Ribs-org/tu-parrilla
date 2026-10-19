@@ -206,9 +206,8 @@ Nada de esto bloquea un trámite hoy; conviene ordenarlo antes de abrir a tercer
   `docs/superpowers/specs/2026-10-19-modo-dia-sushi-design.md`. Falta:
   - mirar de día los gráficos en Safari y en Firefox: en Chrome, recharts toma las variables
     del modo; si otro navegador no, saldrían con el color por defecto de cada atributo;
-  - que el modo sea de la cuenta y no del equipo, para que el teléfono y el panel vayan
-    juntos: lo decidió el dueño el 2026-10-19;
-  - la app del teléfono, que sigue solo de noche (tanda 3, por aire);
+  - la app del teléfono, que sigue solo de noche (tanda 3, por aire). El modo ya es de la
+    cuenta, y `/api/mobile/tema` se lo da a la app;
   - la portada de día, con el nigiri a punto como marca, y lo que se comparte (tanda 4): la
     marca la decidió el dueño el 2026-10-19.
 - **Llevar el resto de la interfaz al nivel del corte** (2026-10-16). La auditoría de ese

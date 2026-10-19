@@ -159,8 +159,9 @@ Y tres palabras de Los Números que no son del asado pero se confunden:
 El panel tiene dos modos. La noche es la de entrada: el acero oscuro, los cortes de carne y el
 fuego, como los describen todas las páginas de esta wiki. El día es lo mismo con otro plato: el
 fondo claro, color papel de arroz, y piezas de sushi en vez de cortes de carne. Se cambia con el
-botón del modo de la barra de arriba, y el panel lo recuerda en ese equipo: la próxima vez entra
-en el mismo modo. La pantalla para entrar con el correo también lo sigue. No cambian las páginas
+botón del modo de la barra de arriba, y queda guardado en la cuenta: el panel entra en ese modo
+en cualquier equipo donde la persona entre. La pantalla para entrar con el correo sigue el modo
+con que se usó el panel la última vez en ese equipo, porque se ve antes de saber de quién es. No cambian las páginas
 legales, el 404, la portada ni la página pública de cada creador; tampoco la vista previa de La
 Vitrina, que es esa página. La app del teléfono, por ahora, solo tiene la noche.
 
@@ -205,8 +206,9 @@ Sale de:
 
 - `src/app/admin/(dash)/layout.tsx` y `src/app/admin/(dash)/nav.tsx`: la barra, las pestañas,
   el botón «Ajustes» y «Salir». El ícono de Ajustes, en `src/components/icono-ajustes.tsx`.
-- El modo día: el botón, en `src/components/boton-tema.tsx`; el modo y su cookie, en
-  `src/lib/tema.ts` y `src/lib/tema-servidor.ts`; las piezas de sushi, en
+- El modo día: el botón, en `src/components/boton-tema.tsx`; el modo, en la cuenta
+  (`users.tema`, que guarda `guardarTema` en `src/app/admin/actions.ts`), con su copia en una
+  cookie para la puerta, en `src/lib/tema.ts` y `src/lib/tema-servidor.ts`; las piezas de sushi, en
   `src/components/pieza-sushi.tsx`; los colores, en `src/app/globals.css`
   (`.acerado[data-tema='dia']`).
 - `src/app/admin/(dash)/page.tsx`: `/admin` lleva a La Parrilla.

@@ -187,8 +187,10 @@ al lado, en la chapa, nunca sobre la carne. La app del teléfono dibuja el mismo
 vistas (`mobile/src/components/pieza.tsx`), con el formato y el sello de cada destino que le
 manda `GET /api/mobile/schedule`. El porqué, en
 `docs/superpowers/specs/2026-10-16-el-corte-que-se-lee-design.md`. El panel tiene además un
-**modo día**, que se elige con el botón de la barra y se recuerda en el equipo con una cookie
-(`src/lib/tema.ts`): el fondo claro y, en vez de cortes, piezas de sushi
+**modo día**, que se elige con el botón de la barra y se recuerda en la cuenta (`users.tema`,
+`src/lib/tema.ts`), así que vale en cualquier equipo donde entres. `GET`/`PUT /api/mobile/tema` lo dan a la app
+del teléfono, que todavía no tiene el modo día, y una cookie lo copia en cada equipo para la
+puerta, que se dibuja antes de saber de quién es. El modo día es el fondo claro y, en vez de cortes, piezas de sushi
 (`src/components/pieza-sushi.tsx`) que dicen lo mismo con la misma gramática —nigiri, maki,
 sashimi y temaki; el pescado bajo el soplete; una banda de nori por destino—. Las palabras no
 cambian, la noche sigue por defecto, y la página pública de cada creador no cambia nunca. El
@@ -260,7 +262,9 @@ de cero.
 Cada fila de cada tabla (perfiles, cuentas, posts, borradores, comentarios, ajustes, llaves
 de API) tiene dueño: el panel solo te muestra lo tuyo, nunca lo de otro usuario invitado. Lo mismo
 la API: lo que entra con una llave es del dueño de la llave, y un agente con la tuya no ve
-ni toca lo de nadie más. Los crons (sync,
+ni toca lo de nadie más. Tu fila de usuario —el nombre, la zona y el modo del panel— la
+cambias solo tú: Tu Cuenta, el botón del modo y la app del teléfono escriben la fila de la
+sesión o del token, nunca una que llegue en la petición. Los crons (sync,
 publicación, comentarios) siguen recorriendo *todo* el despliegue sin filtrar por
 dueño — un cron por inquilino es otro subproyecto, no esta entrega. La llave del despliegue
 (`SCHEDULE_API_KEY`) y la raíz pública (`/`) siguen siendo del admin. Y hasta la entrega
@@ -1216,7 +1220,7 @@ src/
     click-tracker.tsx      escucha delegada de clicks
     charts/                gráficos y paleta validada
   lib/
-    tema.ts                el modo del panel (noche o día) y su cookie; tema-servidor.ts lo lee en el servidor
+    tema.ts                el modo de la cuenta (noche o día) y su copia en una cookie; tema-servidor.ts lee la cookie
     slugs.ts               qué direcciones están reservadas y cuál le toca a cada correo
     dominios.ts            si un host es el del producto, y adónde va el panel si no lo es
     tracking.ts            contexto de la visita desde headers

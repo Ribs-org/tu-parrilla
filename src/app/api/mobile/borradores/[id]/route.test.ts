@@ -10,6 +10,7 @@ const USUARIO: Usuario = {
   nombre: null,
   rol: 'usuario',
   zona: 'America/Santiago',
+  tema: 'noche',
   sesionVersion: 1,
   invitadoEn: new Date('2026-01-01'),
   primerIngresoEn: new Date('2026-01-01'),

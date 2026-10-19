@@ -6,12 +6,14 @@ import { avisoDeFierros } from '@/lib/parrilla'
 import { getCuentas } from '@/lib/posts'
 import { COLOR_DE_BARRA } from '@/lib/tema'
 import { temaPedido } from '@/lib/tema-servidor'
-import { logout } from '../actions'
+import { guardarTema, logout } from '../actions'
 import { AdminNav } from './nav'
 
 export const metadata = { title: 'Panel', robots: { index: false, follow: false } }
 // Calza la barra del navegador del teléfono con el fondo del panel, de noche o de día — el
-// layout raíz se queda en el fondo viejo porque ese es el de la página pública.
+// layout raíz se queda en el fondo viejo porque ese es el de la página pública. Sale de la
+// cookie del equipo y no de la cuenta, para no leer la base dos veces: si la cuenta cambió en
+// otro lado, el botón del modo la corrige al cargar.
 export async function generateViewport() {
   return { themeColor: COLOR_DE_BARRA[await temaPedido()] }
 }
@@ -22,7 +24,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
   // El botón de Ajustes avisa si un fierro se enfría o se apagó: Los Fierros vive adentro de
   // Ajustes, y un aviso que solo se ve ahí no lo ve nadie.
   const aviso = avisoDeFierros(await getCuentas(usuario.id), new Date())
-  const tema = await temaPedido()
+  // El modo es de la cuenta: el mismo en el teléfono y en cualquier equipo donde se entre.
+  const tema = usuario.tema
 
   return (
     <div className="acerado min-h-dvh bg-acero-950" data-tema={tema}>
@@ -34,7 +37,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           {/* En un teléfono el rótulo no cabe junto a las tres pestañas: cede su lugar. */}
           <span className="hidden font-titulo text-sm font-semibold uppercase tracking-[0.1em] sm:inline">Panel</span>
           <AdminNav esAdmin={usuario.rol === 'admin'} aviso={aviso} />
-          <BotonTema inicial={tema} />
+          <BotonTema key={tema} inicial={tema} guardar={guardarTema} />
           <form action={logout}>
             <button
               type="submit"

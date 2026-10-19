@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
-import { COLOR_DE_BARRA, otroTema, temaDe } from './tema'
+import { COLOR_DE_BARRA, otroTema, temaDe, temaDelCuerpo } from './tema'
 
 describe('temaDe', () => {
   it('sin cookie, o con cualquier otra cosa, la noche', () => {
@@ -18,6 +18,19 @@ describe('temaDe', () => {
   it('el botón lleva al otro', () => {
     expect(otroTema('noche')).toBe('dia')
     expect(otroTema('dia')).toBe('noche')
+  })
+})
+
+describe('temaDelCuerpo (PUT /api/mobile/tema)', () => {
+  it('lee los dos modos', () => {
+    expect(temaDelCuerpo({ tema: 'dia' })).toBe('dia')
+    expect(temaDelCuerpo({ tema: 'noche' })).toBe('noche')
+  })
+
+  it('lo que no es un modo no cambia nada: no hay noche por descarte', () => {
+    for (const cuerpo of [null, undefined, 'dia', {}, { tema: 'DIA' }, { tema: '' }, { tema: 1 }, { modo: 'dia' }]) {
+      expect(temaDelCuerpo(cuerpo), JSON.stringify(cuerpo)).toBeNull()
+    }
   })
 })
 
