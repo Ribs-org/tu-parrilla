@@ -231,6 +231,9 @@ Dos endpoints de lectura, con la misma llave. El detalle de cada número está e
   llegan desde la sincronización siguiente a su publicación (la diaria, o «Sincronizar
   ahora»): TikTok no siempre da el id del video al publicar y es la sincronización la que lo
   cruza por texto y hora. Antes de eso, el post sale con `atributos: null`.
+  Los números de una publicación de los últimos 10 días son de hoy o ayer; los de una más
+  vieja se leen cada vez más espaciado (una vez por semana hasta el mes, cada dos semanas
+  hasta los tres meses, cada cuatro después), así que pueden ir hasta esas semanas atrás.
 - `GET /api/metrics/mejores?desde=…&hasta=…&metrica=viewsGanadas&percentil=10` — el mejor X %
   de lo publicado en el rango: `corte` (lo que había que sacar para entrar), `compiten`,
   `mejores` (filas como las de arriba, con `puesto` y `valor`), `medianas` de arriba contra

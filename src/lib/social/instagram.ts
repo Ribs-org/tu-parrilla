@@ -1,17 +1,18 @@
 import type { SocialAccount } from '@/db'
 import { env } from '../env'
 import {
-  MAX_POSTS_PER_SYNC,
   NO_ACCOUNT_METRICS,
   NO_METRICS,
   type AccountMetricValues,
   type Connector,
   type FetchedBatch,
   type FetchedPost,
+  type OpcionesDeListado,
   type PostMetricValues,
 } from './connector'
 import { normalizeInstagramAccount } from './account-metrics'
 import { decryptToken } from './crypto'
+import { laMasVieja, sigueListando } from './lectura'
 
 // Instagram API with Facebook Login, not Instagram Login: the owner's app lives in a
 // Meta business portfolio, and instagram.com/oauth/authorize only ever answered
@@ -129,6 +130,8 @@ export class InstagramHttpError extends Error {
     message: string,
     /** Graph's `error_subcode`, which says *why* far more precisely than the status does. */
     public subcode?: number,
+    /** Graph's `code`: 100 is «parámetro inválido», también el de un id que ya no existe. */
+    public code?: number,
   ) {
     super(message)
   }
@@ -152,27 +155,64 @@ export function isMediaWithoutInsights(error: unknown): boolean {
   return error.status === 404 || error.subcode === MEDIA_PREDATES_CONVERSION
 }
 
+/** Graph: «Object with ID … does not exist, cannot be loaded due to missing permissions…». */
+const OBJECT_DOES_NOT_EXIST = 33
+
+/**
+ * Whether Graph says this id no longer answers: code 100 with subcode 33. Only asked of
+ * ids read one by one (`fetchMetricsById`), where it almost always means the media was
+ * deleted. Almost: the same answer covers «missing permissions», which is why it skips
+ * the media instead of archiving it — a token that lost its permissions also fails the
+ * listing, which runs first, so by then it would have already stopped the account.
+ */
+export function isMediaGone(error: unknown): boolean {
+  return error instanceof InstagramHttpError && error.code === 100 && error.subcode === OBJECT_DOES_NOT_EXIST
+}
+
 async function getJson(url: string): Promise<Record<string, unknown>> {
   const response = await fetch(url)
   if (!response.ok) {
     const body = await response.text()
-    throw new InstagramHttpError(
-      response.status,
-      `Instagram ${response.status}: ${body.slice(0, 200)}`,
-      subcodeOf(body),
-    )
+    const { code, subcode } = codesOf(body)
+    throw new InstagramHttpError(response.status, `Instagram ${response.status}: ${body.slice(0, 200)}`, subcode, code)
   }
   return response.json()
 }
 
 /** Best effort: an unparseable body is still a failure, just one we cannot classify. */
-function subcodeOf(body: string): number | undefined {
+function codesOf(body: string): { code?: number; subcode?: number } {
   try {
-    const parsed = JSON.parse(body) as { error?: { error_subcode?: unknown } }
+    const parsed = JSON.parse(body) as { error?: { code?: unknown; error_subcode?: unknown } }
+    const code = parsed.error?.code
     const subcode = parsed.error?.error_subcode
-    return typeof subcode === 'number' ? subcode : undefined
+    return {
+      code: typeof code === 'number' ? code : undefined,
+      subcode: typeof subcode === 'number' ? subcode : undefined,
+    }
   } catch {
-    return undefined
+    return {}
+  }
+}
+
+const INSIGHT_METRICS = 'views,reach,likes,comments,saved,shares'
+
+/**
+ * Las estadísticas de una publicación. Sin estadísticas para siempre (`isMediaWithoutInsights`)
+ * vuelve vacío y la publicación queda con todo en null, como siempre; cualquier otro error
+ * sube.
+ */
+async function insightsOf(id: string, token: string): Promise<InstagramInsights> {
+  try {
+    return (await getJson(`${GRAPH}/${id}/insights?metric=${INSIGHT_METRICS}&access_token=${token}`)) as InstagramInsights
+  } catch (error) {
+    // Two answers mean "this one post has no insights, permanently": a 404, and a
+    // 400 whose subcode says the post predates the account's conversion to a
+    // professional account. Both are facts about the media, not about the run.
+    // Anything else (expired token, rate limit, 5xx) is systemic: swallowing it
+    // too would silently write NO_METRICS as if it were real data for every
+    // remaining post, since fetchPosts reuses the same token throughout.
+    if (isMediaWithoutInsights(error)) return {}
+    throw error
   }
 }
 
@@ -248,7 +288,7 @@ export const instagramConnector: Connector = {
     return refreshed.access_token
   },
 
-  async fetchPosts(account: SocialAccount, token: string | null): Promise<FetchedBatch> {
+  async fetchPosts(account: SocialAccount, token: string | null, opciones?: OpcionesDeListado): Promise<FetchedBatch> {
     // Under Facebook Login the token belongs to the person, not to one Instagram
     // account, so there is no `me/media` to fall back on: without the id the callback
     // stored there is nothing to ask about.
@@ -259,8 +299,9 @@ export const instagramConnector: Connector = {
     const media: InstagramMedia[] = []
     let next = `${GRAPH}/${igUserId}/media?fields=${fields}&limit=${PAGE_SIZE}&access_token=${token}`
     let pagesFetched = 0
+    let masVieja: Date | null = null
 
-    while (next && media.length < MAX_POSTS_PER_SYNC && pagesFetched < MAX_MEDIA_PAGES) {
+    while (next && pagesFetched < MAX_MEDIA_PAGES && sigueListando(media.length, masVieja, opciones?.desde)) {
       const page = (await getJson(next)) as {
         data?: InstagramMedia[]
         paging?: { next?: string }
@@ -268,53 +309,46 @@ export const instagramConnector: Connector = {
       pagesFetched++
 
       for (const item of page.data ?? []) {
-        if (media.length >= MAX_POSTS_PER_SYNC) break
         media.push(item)
+        masVieja = laMasVieja(masVieja, new Date(item.timestamp ?? 0))
       }
       next = page.paging?.next ?? ''
     }
 
-    const metrics = 'views,reach,likes,comments,saved,shares'
     const posts: FetchedPost[] = []
-    // Sequential chunks rather than one Promise.all over every post: up to MAX_POSTS_PER_SYNC
-    // concurrent requests risks a 429 from the Graph API, and since a non-404 insights
-    // failure now aborts the whole sync (see below), keeping concurrency low keeps that
-    // risk low. Wall-clock doesn't matter — this runs once a day from a cron.
+    // Sequential chunks rather than one Promise.all over every post: hundreds of
+    // concurrent requests risk a 429 from the Graph API, and since a systemic insights
+    // failure aborts the whole sync (see `insightsOf`), keeping concurrency low keeps that
+    // risk low. Wall-clock doesn't matter much — this runs once a day from a cron.
     for (let i = 0; i < media.length; i += INSIGHTS_CHUNK_SIZE) {
       const chunk = media.slice(i, i + INSIGHTS_CHUNK_SIZE)
       const chunkPosts = await Promise.all(
-        chunk.map(async (item) => {
-          let insights: InstagramInsights = {}
-          try {
-            insights = (await getJson(
-              `${GRAPH}/${item.id}/insights?metric=${metrics}&access_token=${token}`,
-            )) as InstagramInsights
-          } catch (error) {
-            // Two answers mean "this one post has no insights, permanently": a 404, and a
-            // 400 whose subcode says the post predates the account's conversion to a
-            // professional account. Both are facts about the media, not about the run.
-            // Anything else (expired token, rate limit, 5xx) is systemic: swallowing it
-            // too would silently write NO_METRICS as if it were real data for every
-            // remaining post, since fetchPosts reuses the same token throughout.
-            if (isMediaWithoutInsights(error)) {
-              insights = {}
-            } else {
-              throw error
-            }
-          }
-          return normalizeInstagramMedia(item, insights)
-        }),
+        chunk.map(async (item) => normalizeInstagramMedia(item, await insightsOf(item.id, token))),
       )
       posts.push(...chunkPosts)
     }
 
-    // A cursor still in hand means the paging loop stopped at a ceiling, not at the end
-    // of the account's media. Hitting exactly MAX_POSTS_PER_SYNC counts too: items from
-    // the last page get dropped once the array is full, whatever the cursor says.
-    return {
-      posts,
-      windowWasCapped: media.length >= MAX_POSTS_PER_SYNC || next !== '',
+    // A cursor still in hand means the paging loop stopped at its window or its page
+    // ceiling, not at the end of the account's media. Nothing listed is ever dropped, so
+    // without a cursor the listing really was the whole catalogue.
+    return { posts, windowWasCapped: next !== '' }
+  },
+
+  async fetchMetricsById(_account: SocialAccount, token: string | null, externalIds: string[]) {
+    const metricas = new Map<string, PostMetricValues>()
+    if (!token) return metricas
+    for (let i = 0; i < externalIds.length; i += INSIGHTS_CHUNK_SIZE) {
+      await Promise.all(
+        externalIds.slice(i, i + INSIGHTS_CHUNK_SIZE).map(async (id) => {
+          try {
+            metricas.set(id, normalizeInstagramMedia({ id }, await insightsOf(id, token)).metrics)
+          } catch (error) {
+            if (!isMediaGone(error)) throw error
+          }
+        }),
+      )
     }
+    return metricas
   },
 
   /**

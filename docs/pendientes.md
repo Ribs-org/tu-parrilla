@@ -185,6 +185,27 @@ Nada de esto bloquea un trámite hoy; conviene ordenarlo antes de abrir a tercer
 
 ## Features y trabajo de código
 
+- **Los Números para 1.000 publicaciones por semana** (2026-10-18). Pedido del dueño. La
+  lectura diaria por edad ya está (`src/lib/social/lectura.ts`); lo demás va en este orden,
+  cada cosa en su PR:
+  1. Los topes de las pantallas. El tablero suma lo ganado solo de las 500 más recientes
+     (`PUBLICACIONES_LEIDAS` en `src/app/admin/(dash)/analytics/page.tsx`), «Comparar por
+     atributo» y «Tu mejor 10 %» cortan en 2000, y «Tus publicaciones» en 200.
+  2. Un rango de fechas libre, desde y hasta, con los atajos de hoy como accesos rápidos.
+  3. Comparar a la misma edad («views a los 7 días») y dentro de la misma cuenta («×N sobre
+     lo normal de su cuenta»), con un interruptor para incluir lo que aún no cumple esa
+     edad; «Tu peor 10 %» y el contraste de los de arriba contra los de abajo.
+  4. En las guías de la API, un vocabulario de atributos recomendado y opcional: `tema`,
+     `hook` y `formato`, y los de edición (`color`, `fuente`, `corte`, `musica`,
+     `duracion`). Sin etiquetado automático: decisión del dueño, por el costo.
+  5. Ver lado a lado los de arriba y los de abajo, o dos publicaciones elegidas: portada,
+     atributos, la curva día a día y el link a la red. Sin guardar el video después de
+     publicado: decisión del dueño, para que R2 no crezca.
+- **Un modo día con sushi** (2026-10-18). Pedido del dueño, para después de lo anterior:
+  un modo día donde la parrilla se vuelve sushi —las mismas piezas, con sashimi y compañía
+  en vez de cortes—, para el público que la estética de asado deja fuera. El modo noche, el
+  de hoy, sigue por defecto. Solo interfaz. Antes del código va un diseño extenso, al nivel
+  de `docs/auditoria-ui-2026-10-16.md`.
 - **Llevar el resto de la interfaz al nivel del corte** (2026-10-16). La auditoría de ese
   día propone seis tandas que se publican solas. La primera, lo roto, ya está. Quedan: el
   corte en los flujos (el compositor, la parrilla fría y la carga tibia ya están; faltan La

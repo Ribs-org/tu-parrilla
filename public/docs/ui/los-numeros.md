@@ -532,10 +532,18 @@ Los días y las horas se cortan en la zona horaria de la persona, la de [Tu Cuen
 
 **De dónde salen los números de la red.** La red no se consulta en vivo. Una sincronización
 lee todas las cuentas una vez al día (a las 9:00 UTC, las 5 o 6 de la mañana en Chile según la
-época) y guarda una lectura por publicación, por cuenta y por día; también corre al apretar
+época) y guarda una lectura de cada publicación que le toca; también corre al apretar
 «Sincronizar ahora» en [Los Fierros](los-fierros.md). Por eso una publicación nueva no aparece
 hasta la siguiente sincronización, y los números pueden ir hasta un día atrás de lo que muestra
 la app de la red. Threads y X no se sincronizan: no tienen números aquí.
+
+**Qué publicación se lee cada día.** Depende de su edad. Lo publicado en los últimos 10 días se
+lee todos los días (y, aunque la cuenta publique poco, siempre sus 200 publicaciones más
+nuevas). Lo más viejo, cada vez más espaciado, porque casi no se mueve: una vez por semana hasta
+el mes, cada dos semanas hasta los tres meses y cada cuatro semanas después. Así, los números de
+una publicación de hace dos meses pueden ir hasta dos semanas atrás de lo que muestra la red, y
+lo que creció entre dos lecturas aparece entero el día de la segunda. Si una corrida no alcanza
+a leer todo lo viejo que le tocaba, lo que falta se lee al día siguiente.
 
 **Lo ganado.** Para una publicación, cuánto creció su contador dentro del período: la última
 lectura del período menos la última de antes de que empezara. Si la publicación salió dentro
@@ -597,8 +605,10 @@ página ni «Bots»; sí el período y la cuenta.
 **«Views ganadas y visitas, día a día».** Cuánto crecieron las views de todo el catálogo cada
 día, de una lectura a la siguiente, contra las visitas que llegaron ese día con la etiqueta de
 cualquier publicación. Las views no incluyen YouTube ni lo borrado, y el primer día medido de
-cada publicación no suma (no hay lectura anterior con qué restar). Por eso no tiene por qué
-sumar lo mismo que la cifra «Views ganadas».
+cada publicación no suma (no hay lectura anterior con qué restar). Una publicación de más de
+10 días se lee cada una, dos o cuatro semanas (ver «Qué publicación se lee cada día»), así que
+lo que creció en ese tiempo cae entero en el día en que se leyó: los saltos de un día puntual
+pueden ser eso. Por eso no tiene por qué sumar lo mismo que la cifra «Views ganadas».
 
 ### En tu página
 
@@ -1273,7 +1283,8 @@ Sale de:
 - `src/lib/social/politica-youtube.ts` y `src/lib/social/retencion-youtube.ts` (YouTube)
 - `src/lib/social/comentarios/reglas.ts` (las etiquetas `dm-`)
 - `src/lib/social/sync.ts` y `src/lib/social/index.ts` (qué redes se sincronizan, borrados,
-  lectura diaria), con `vercel.json` (la hora de la sincronización)
+  lectura diaria), con `vercel.json` (la hora de la sincronización), y
+  `src/lib/social/lectura.ts` (qué publicación se lee cada día, según su edad)
 - `src/app/admin/(dash)/error.tsx`, `src/app/admin/(dash)/nav.tsx`, `src/lib/vocabulario.ts`
 - `src/app/admin/(dash)/analytics/loading.tsx`, `src/app/admin/(dash)/analytics/cargando.tsx`,
   `src/app/admin/(dash)/analytics/cabeza.tsx` (la bajada, que comparten la pantalla y su carga),

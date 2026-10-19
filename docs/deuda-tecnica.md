@@ -545,8 +545,9 @@ Lo que queda a medias, a propósito:
   ventana se reparten por cercanía en la hora; si TikTok tarda distinto en publicar cada
   uno, pueden quedar cruzados. Un post sin texto solo cruza con un video sin texto a dos
   horas o menos.
-- **Solo ve lo que la sincronización trae**: los videos públicos y dentro de su tope
-  (`MAX_POSTS_PER_SYNC`). Un post que se queda en «Solo yo» no aparece en la lista de videos
+- **Solo ve lo que la sincronización lista**: los videos públicos de los últimos 10 días, o
+  los 200 más nuevos si son más (`src/lib/social/lectura.ts`); lo más viejo se lee por id y
+  no pasa por este cruce. Un post que se queda en «Solo yo» no aparece en la lista de videos
   de TikTok y no se puede recuperar así.
 - **No vuelve a preguntarle a TikTok.** Lo exacto sería seguir consultando `status/fetch`
   con el `publish_id` hasta que llegue el id, pero ese id no se guarda después de publicar y
