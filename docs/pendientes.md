@@ -109,6 +109,18 @@ Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataf
   (`threads_basic`, `threads_content_publish`). Se sacaron de la primera solicitud porque
   no salen en su video; cada una necesita su guion y su grabación. Ver
   `docs/levantamiento-terceros.md` §2.2 y §7.
+
+  En la misma vuelta, **Instagram sin página de Facebook** (2026-10-19). La conexión de hoy es
+  Instagram con login de Facebook, que encuentra el Instagram solo a través de una página que la
+  persona administre: sin página enlazada, Meta no entrega ninguno, aunque se acepten todos los
+  permisos. Probablemente es lo que trabó a la primera usuaria invitada, que conectó TikTok y no
+  Instagram. Meta tiene otra vía, Instagram con login de Instagram (*Business Login for
+  Instagram*: `instagram_business_basic`, `instagram_business_content_publish` y compañía, en
+  `graph.instagram.com`), que no pide página; la cuenta profesional, sí. Cuesta un video más en
+  esta vuelta y una conexión nueva en el código: otro token, que según Meta se renueva desde el
+  servidor, y adaptar a él la publicación, la sincronización y los comentarios de Instagram. Los
+  trial reels por esa vía, por confirmar. La idea: «Conectar con Instagram» como camino
+  principal en Los Fierros, y el login de Facebook para quien además maneja páginas.
 - **[dueño] Google — auditoría de cuota de YouTube (trámite B): enviada el 2026-10-10,
   esperando respuesta.** YouTube acusó recibo por correo a pyxis.latam@gmail.com, sin número
   de caso; suele tardar semanas. Se pidieron 100.000 unidades al día del cupo general (el
@@ -166,6 +178,11 @@ Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataf
   en R2, `R2_PUBLIC_BASE` en Vercel, verificarlo como *URL property* en las dos apps de
   TikTok (si no, `PULL_FROM_URL` falla), y decidir qué pasa con las URLs ya guardadas en la
   base, que apuntan al dominio viejo.
+- **El AM de Vicente** (el repositorio privado `marca-personal`) programa y lee números en
+  `https://www.vicente-pareja.cl/api/…`: sus tres constantes `API`
+  (`pipeline/cortos/programar.py`, `pipeline/cortos/metricas.py` y
+  `pipeline/evento/programar.py`). Se cambian a `tu-parrilla.cl` junto con su llave propia
+  (ver «Pasar el agente del admin a una llave propia», en «Features y trabajo de código»).
 
 ## Que todo quede a nombre de Pyxis
 
@@ -278,7 +295,11 @@ Nada de esto bloquea un trámite hoy; conviene ordenarlo antes de abrir a tercer
   (2026-10-13). Desde que cada usuario genera sus llaves en el panel (hoy en Tu IA), la del
   despliegue solo sigue para no romper al agente que ya la usa. Pasos: generar una llave en Tu IA,
   ponerla en ese agente y, cuando ande, borrar la variable en Vercel. En código no hay nada
-  que hacer: sin la variable, la API ya acepta solo las llaves de usuario.
+  que hacer: sin la variable, la API ya acepta solo las llaves de usuario. Ese agente es el AM
+  de `marca-personal`, y en el mismo cambio conviene ponerle al día su `docs/parrilla.md`, que
+  describe la API de antes: dice que TikTok va por Buffer (hoy publica directo), que la API no
+  evita duplicados (hoy está `ref`), nombra Threads y X entre las redes que publican (hoy en
+  «Próximamente») y no conoce `/api/schedule/resumen` ni `/api/metrics/mejores`.
 - **Por decidir: que el admin pueda cortar las llaves de otro usuario** (2026-10-13). Hoy
   solo el dueño de una llave la revoca, y «Cerrar sesiones» en Los Maestros no las toca (son
   credenciales aparte, y cortarlas en silencio rompería su agente). Si una se filtra y el
