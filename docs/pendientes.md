@@ -194,6 +194,12 @@ Nada de esto bloquea un trámite hoy; conviene ordenarlo antes de abrir a tercer
 
 ## Features y trabajo de código
 
+- **El chef de la casa** (2026-10-19). Un agente nuestro, levemente personalizado por cliente,
+  que recibe el material crudo —la res entera de noche, el atún entero de día—, lo despieza en
+  clips y los deja en la parrilla de cada cliente para que los apruebe. Es un servicio pagado, y
+  convive con el chef propio de cada uno en Tu IA. Nada está implementado: espera el servidor,
+  que el **[dueño]** está configurando; la lista de lo que necesita está en el diseño, junto con
+  las fases y las preguntas abiertas: `docs/superpowers/specs/2026-10-19-chef-de-la-casa-design.md`.
 - **El modo día con sushi** (2026-10-18). Pedido del dueño, para el público que la estética de
   asado deja fuera. Están hechas las cuatro tandas: el panel, sus motivos, la app del teléfono y
   la portada. El diseño está en `docs/superpowers/specs/2026-10-19-modo-dia-sushi-design.md`.
