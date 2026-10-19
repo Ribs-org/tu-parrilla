@@ -7,7 +7,7 @@ import { QUEMO } from './parrilla'
 /*
  * El texto del panel, y sus copias. `.acerado` (globals.css) define el texto, el secundario,
  * el tenue y el rojo de «se quemó» del panel; los gráficos (`charts/theme.ts`) y la app del
- * teléfono (`COLORES` en `mobile/src/components/ui.tsx`) los repiten escritos a mano, porque
+ * teléfono (`COLORES_NOCHE` y `COLORES_DIA` en `mobile/src/components/colores.ts`) los repiten escritos a mano, porque
  * Recharts pide un hex y Metro no sale de `mobile/`. Una copia sin guardia se separa sola:
  * así fue como el tenue de la app quedó con dos nombres.
  */
@@ -20,8 +20,10 @@ const delPanel = (variable: string) => acerado.match(new RegExp(`--${variable}:\
 const dia = css.match(/\.acerado\[data-tema='dia'\]\s*\{([^}]*)\}/)?.[1] ?? ''
 const delDia = (variable: string) => dia.match(new RegExp(`--${variable}:\\s*(#[0-9a-f]{6});`))?.[1]
 
-const movil = sinComentarios(readFileSync(new URL('../../mobile/src/components/ui.tsx', import.meta.url), 'utf8'))
-const deLaApp = (nombre: string) => movil.match(new RegExp(`\\b${nombre}: '(#[0-9a-f]{6})'`))?.[1]
+const movil = sinComentarios(readFileSync(new URL('../../mobile/src/components/colores.ts', import.meta.url), 'utf8'))
+const paletaDeLaApp = (modo: 'COLORES_NOCHE' | 'COLORES_DIA') => movil.match(new RegExp(`export const ${modo}: Colores = \\{([^}]*)\\}`))?.[1] ?? ''
+const deLaApp = (nombre: string, modo: 'COLORES_NOCHE' | 'COLORES_DIA' = 'COLORES_NOCHE') =>
+  paletaDeLaApp(modo).match(new RegExp(`\\b${nombre}: '(#[0-9a-f]{6})'`))?.[1]
 
 const TEXTO = delPanel('color-fg')
 const SECUNDARIO = delPanel('color-fg-muted')
@@ -123,5 +125,27 @@ describe('las copias no se separaron del panel', () => {
     expect(deLaApp('suave')).toBe(SECUNDARIO)
     expect(deLaApp('tenue')).toBe(TENUE)
     expect(deLaApp('rojo')).toBe(QUEMO)
+    expect(deLaApp('fondo')).toBe(FONDO)
+    expect(deLaApp('tarjeta')).toBe(CHAPA)
+  })
+
+  // De día, la app tiene que ser el mismo papel de arroz que el panel: cada color de su paleta
+  // del día es una variable del bloque `.acerado[data-tema='dia']`.
+  it.each([
+    ['fondo', 'color-acero-950'],
+    ['tarjeta', 'color-acero-900'],
+    ['texto', 'color-fg'],
+    ['suave', 'color-fg-muted'],
+    ['tenue', 'color-fg-faint'],
+    ['brasa', 'color-brasa'],
+    ['verde', 'color-positive'],
+    ['rojo', 'color-negative'],
+    ['ambar', 'color-caution'],
+    ['velo', 'color-velo'],
+    ['acero', 'color-acero-700'],
+  ])('la app de día: %s es --%s del panel de día', (nombre, variable) => {
+    const delPanelDeDia = delDia(variable)
+    expect(delPanelDeDia, variable).toBeDefined()
+    expect(deLaApp(nombre, 'COLORES_DIA')).toBe(delPanelDeDia)
   })
 })

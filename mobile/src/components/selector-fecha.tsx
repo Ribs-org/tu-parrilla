@@ -2,7 +2,8 @@ import { useState, type ReactNode } from 'react'
 import { Modal, Platform, Pressable, Text, View } from 'react-native'
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { Boton, COLORES, TIPO_TITULO } from './ui'
+import { Boton, TIPO_TITULO } from './ui'
+import { useColores } from './tema'
 
 /**
  * El día y la hora en el iPhone. Android trae dos diálogos del sistema, uno detrás del otro
@@ -24,6 +25,7 @@ export function SelectorFechaIOS({
   onListo: (fecha: Date) => void
   onCancelar: () => void
 }) {
+  const colores = useColores()
   const [borrador, setBorrador] = useState(valor)
   const insets = useSafeAreaInsets()
 
@@ -37,7 +39,7 @@ export function SelectorFechaIOS({
       />
       <View
         style={{
-          backgroundColor: COLORES.tarjeta,
+          backgroundColor: colores.tarjeta,
           borderTopLeftRadius: 16,
           borderTopRightRadius: 16,
           padding: 16,
@@ -47,7 +49,7 @@ export function SelectorFechaIOS({
       >
         <Text
           style={{
-            color: COLORES.texto,
+            color: colores.texto,
             fontFamily: TIPO_TITULO,
             fontSize: 16,
             letterSpacing: 1,
@@ -63,7 +65,7 @@ export function SelectorFechaIOS({
           minimumDate={minimo}
           locale="es-CL"
           themeVariant="dark"
-          accentColor={COLORES.brasa}
+          accentColor={colores.brasa}
           onValueChange={(_evento, fecha) => setBorrador(fecha)}
         />
         <View style={{ flexDirection: 'row', gap: 10 }}>

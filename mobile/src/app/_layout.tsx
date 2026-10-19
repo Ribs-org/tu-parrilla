@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from 'react'
-import { DarkTheme, Stack, ThemeProvider, useRouter, type Theme } from 'expo-router'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { DarkTheme, DefaultTheme, Stack, ThemeProvider, useRouter, type Theme } from 'expo-router'
 // Del subcamino y no del paquete: el índice reexporta los seis grosores de Oswald y
 // Metro se lleva los seis al paquete — 528 KB de tipografía para usar 88. `useFonts`
 // sale de `expo-font`, que ya es dependencia directa.
@@ -7,17 +7,31 @@ import { Oswald_600SemiBold } from '@expo-google-fonts/oswald/600SemiBold'
 import { useFonts } from 'expo-font'
 import * as LocalAuthentication from 'expo-local-authentication'
 import { StatusBar } from 'expo-status-bar'
-import { COLORES, Cargando, TIPO_TITULO } from '../components/ui'
+import { Cargando, TIPO_TITULO } from '../components/ui'
+import { ProveedorDeTema, useColores, useTema } from '../components/tema'
 import { readToken } from '../lib/session'
 
-// Sin esto el navegador pinta su tema claro debajo de todo: el fondo de escena y
-// las cabeceras nativas salían blancos aunque cada pantalla se dibuje oscura.
-const TEMA: Theme = {
-  ...DarkTheme,
-  colors: { ...DarkTheme.colors, background: COLORES.fondo, card: COLORES.tarjeta },
+/** El modo de la cuenta, para toda la app: cada pantalla pide sus colores con `useColores()`. */
+export default function RootLayout() {
+  return (
+    <ProveedorDeTema>
+      <Raiz />
+    </ProveedorDeTema>
+  )
 }
 
-export default function RootLayout() {
+function Raiz() {
+  const colores = useColores()
+  const { tema } = useTema()
+  // Sin esto el navegador pinta su tema por defecto debajo de todo: el fondo de escena y las
+  // cabeceras nativas salían blancos aunque cada pantalla se dibujara oscura. De día, el claro.
+  const navegacion: Theme = useMemo(() => {
+    const base = tema === 'dia' ? DefaultTheme : DarkTheme
+    return {
+      ...base,
+      colors: { ...base.colors, background: colores.fondo, card: colores.tarjeta, text: colores.texto, border: colores.acero, primary: colores.brasa },
+    }
+  }, [tema, colores])
   const [listo, setListo] = useState(false)
   const router = useRouter()
   /*
@@ -68,11 +82,12 @@ export default function RootLayout() {
   }, [arrancar])
 
   return (
-    <ThemeProvider value={TEMA}>
-      <StatusBar style="light" />
+    <ThemeProvider value={navegacion}>
+      {/* La hora y la batería, claras sobre la noche y oscuras sobre el papel de arroz. */}
+      <StatusBar style={tema === 'dia' ? 'dark' : 'light'} />
       {listo && (fuentesListas || errorFuentes) ? (
         <Stack
-          screenOptions={{ headerShown: false, contentStyle: { backgroundColor: COLORES.fondo } }}
+          screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colores.fondo } }}
         >
           {/* La única pantalla con cabecera: el detalle se empuja sobre esta pila y sin
               ella no hay cómo volver ni queda libre la franja de la hora. Declararla
@@ -85,10 +100,10 @@ export default function RootLayout() {
             options={{
               headerShown: true,
               title: 'Publicación',
-              headerTitleStyle: { color: COLORES.texto, fontFamily: TIPO_TITULO },
-              headerTintColor: COLORES.brasa,
-              headerStyle: { backgroundColor: COLORES.tarjeta },
-              contentStyle: { backgroundColor: COLORES.fondo },
+              headerTitleStyle: { color: colores.texto, fontFamily: TIPO_TITULO },
+              headerTintColor: colores.brasa,
+              headerStyle: { backgroundColor: colores.tarjeta },
+              contentStyle: { backgroundColor: colores.fondo },
             }}
           />
           {/* Ajustes se abre desde el botón de Ajustes de cualquier pestaña y vuelve ahí. */}
@@ -97,10 +112,10 @@ export default function RootLayout() {
             options={{
               headerShown: true,
               title: 'Ajustes',
-              headerTitleStyle: { color: COLORES.texto, fontFamily: TIPO_TITULO },
-              headerTintColor: COLORES.brasa,
-              headerStyle: { backgroundColor: COLORES.tarjeta },
-              contentStyle: { backgroundColor: COLORES.fondo },
+              headerTitleStyle: { color: colores.texto, fontFamily: TIPO_TITULO },
+              headerTintColor: colores.brasa,
+              headerStyle: { backgroundColor: colores.tarjeta },
+              contentStyle: { backgroundColor: colores.fondo },
             }}
           />
           {/* «Tus publicaciones» se abre desde Los Números y vuelve ahí: la misma cabecera. */}
@@ -109,10 +124,10 @@ export default function RootLayout() {
             options={{
               headerShown: true,
               title: 'Tus publicaciones',
-              headerTitleStyle: { color: COLORES.texto, fontFamily: TIPO_TITULO },
-              headerTintColor: COLORES.brasa,
-              headerStyle: { backgroundColor: COLORES.tarjeta },
-              contentStyle: { backgroundColor: COLORES.fondo },
+              headerTitleStyle: { color: colores.texto, fontFamily: TIPO_TITULO },
+              headerTintColor: colores.brasa,
+              headerStyle: { backgroundColor: colores.tarjeta },
+              contentStyle: { backgroundColor: colores.fondo },
             }}
           />
         </Stack>

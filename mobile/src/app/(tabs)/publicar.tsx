@@ -5,7 +5,8 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useSelectorFecha } from '../../components/selector-fecha'
-import { Boton, BotonTexto, COLORES, Chip, ErrorConReintento, Miniatura } from '../../components/ui'
+import { Boton, BotonTexto, Chip, ErrorConReintento, Miniatura } from '../../components/ui'
+import { useColores } from '../../components/tema'
 import { RechazoApi, SesionCaducada, apiDelete, apiGet, apiPost } from '../../lib/api'
 import {
   BORRADOR_NO_EXISTE,
@@ -83,6 +84,7 @@ function fechaLegible(fecha: Date): string {
  * el borrador en post y el servidor lo borra; «Descartar» lo borra sin programar.
  */
 export default function Publicar() {
+  const colores = useColores()
   const token = useToken()
   const router = useRouter()
   const insets = useSafeAreaInsets()
@@ -620,15 +622,15 @@ export default function Publicar() {
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={insets.top + ALTO_CABECERA}
-      style={{ flex: 1, backgroundColor: COLORES.fondo }}
+      style={{ flex: 1, backgroundColor: colores.fondo }}
     >
       <ScrollView
-        style={{ flex: 1, backgroundColor: COLORES.fondo }}
+        style={{ flex: 1, backgroundColor: colores.fondo }}
         contentContainerStyle={{ padding: 16, paddingBottom: 48, gap: 14 }}
         keyboardShouldPersistTaps="handled"
       >
-        {abriendo ? <Text style={{ color: COLORES.suave, fontSize: 12 }}>Abriendo borrador…</Text> : null}
-        {soloEnElPanel ? <Text style={{ color: COLORES.ambar, fontSize: 13 }}>{soloEnElPanel}</Text> : null}
+        {abriendo ? <Text style={{ color: colores.suave, fontSize: 12 }}>Abriendo borrador…</Text> : null}
+        {soloEnElPanel ? <Text style={{ color: colores.ambar, fontSize: 13 }}>{soloEnElPanel}</Text> : null}
 
         <TextInput
           value={texto}
@@ -637,10 +639,10 @@ export default function Publicar() {
           maxLength={MAX_TEXTO}
           editable={!ocupado}
           placeholder="Texto del post…"
-          placeholderTextColor={COLORES.tenue}
+          placeholderTextColor={colores.tenue}
           style={{
-            backgroundColor: COLORES.tarjeta,
-            color: COLORES.texto,
+            backgroundColor: colores.tarjeta,
+            color: colores.texto,
             borderRadius: 12,
             padding: 14,
             minHeight: 120,
@@ -648,8 +650,8 @@ export default function Publicar() {
           }}
         />
         <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-          <Text style={{ color: COLORES.tenue, fontSize: 11 }}>En YouTube el primer renglón es el título</Text>
-          <Text style={{ color: COLORES.tenue, fontSize: 11 }}>
+          <Text style={{ color: colores.tenue, fontSize: 11 }}>En YouTube el primer renglón es el título</Text>
+          <Text style={{ color: colores.tenue, fontSize: 11 }}>
             {texto.length} / {MAX_TEXTO}
           </Text>
         </View>
@@ -671,14 +673,14 @@ export default function Publicar() {
         </View>
 
         {cuentasEstado.paso === 'cargando' ? (
-          <Text style={{ color: COLORES.tenue, fontSize: 12 }}>Cargando cuentas…</Text>
+          <Text style={{ color: colores.tenue, fontSize: 12 }}>Cargando cuentas…</Text>
         ) : cuentasEstado.paso === 'error' ? (
           <ErrorConReintento mensaje="No se pudieron cargar las cuentas." onReintentar={() => void cargarCuentas()} />
         ) : disponibles.length === 0 ? (
           // Cierto tanto si no hay ninguna cuenta como si la única que hay es de una
           // red que el teléfono no ofrece (hoy, TikTok): el endpoint ya las filtró, y
           // desde acá no se puede distinguir un caso del otro.
-          <Text style={{ color: COLORES.tenue, fontSize: 12 }}>
+          <Text style={{ color: colores.tenue, fontSize: 12 }}>
             No hay ninguna cuenta lista para publicar desde el teléfono. Conéctala en el panel
             web, en Los Fierros.
           </Text>
@@ -704,15 +706,15 @@ export default function Publicar() {
                     key={c.id}
                     style={{ paddingHorizontal: 12, paddingVertical: 10, minHeight: 44, justifyContent: 'center' }}
                   >
-                    <Text style={{ color: COLORES.texto, fontSize: 12 }}>
-                      {etiquetaCuenta(c)} · <Text style={{ color: COLORES.rojo }}>reconéctala</Text>
+                    <Text style={{ color: colores.texto, fontSize: 12 }}>
+                      {etiquetaCuenta(c)} · <Text style={{ color: colores.rojo }}>reconéctala</Text>
                     </Text>
                   </View>
                 ),
               )}
             </View>
             {cuentas.length === 0 ? (
-              <Text style={{ color: COLORES.tenue, fontSize: 11 }}>Elige al menos una cuenta.</Text>
+              <Text style={{ color: colores.tenue, fontSize: 11 }}>Elige al menos una cuenta.</Text>
             ) : null}
             {cuentasConTrial(disponibles, cuentas, archivos).length > 0 ? (
               <>
@@ -727,7 +729,7 @@ export default function Publicar() {
                     />
                   ))}
                 </View>
-                <Text style={{ color: COLORES.tenue, fontSize: 11 }}>
+                <Text style={{ color: colores.tenue, fontSize: 11 }}>
                   Un trial reel solo lo ven quienes no te siguen. Tú decides desde Instagram cuándo
                   compartirlo con todos.
                 </Text>
@@ -738,10 +740,10 @@ export default function Publicar() {
 
         <Chip texto={`Cuándo: ${fechaLegible(fecha)}`} activo onPress={elegirFecha} deshabilitado={ocupado} />
 
-        {aviso ? <Text style={{ color: COLORES.rojo }}>{aviso}</Text> : null}
-        {error ? <Text style={{ color: COLORES.rojo }}>{error}</Text> : null}
-        {subidas ? <Text style={{ color: subidas.error ? COLORES.rojo : COLORES.suave }}>{subidas.texto}</Text> : null}
-        {etiqueta ? <Text style={{ color: COLORES.suave }}>{etiqueta}</Text> : null}
+        {aviso ? <Text style={{ color: colores.rojo }}>{aviso}</Text> : null}
+        {error ? <Text style={{ color: colores.rojo }}>{error}</Text> : null}
+        {subidas ? <Text style={{ color: subidas.error ? colores.rojo : colores.suave }}>{subidas.texto}</Text> : null}
+        {etiqueta ? <Text style={{ color: colores.suave }}>{etiqueta}</Text> : null}
 
         <View style={{ flexDirection: 'row', gap: 10 }}>
           <Boton
@@ -759,7 +761,7 @@ export default function Publicar() {
 
         <Text
           style={{
-            color: estadoBorrador === 'error' || estadoBorrador === 'perdido' ? COLORES.rojo : COLORES.tenue,
+            color: estadoBorrador === 'error' || estadoBorrador === 'perdido' ? colores.rojo : colores.tenue,
             fontSize: 11,
           }}
         >

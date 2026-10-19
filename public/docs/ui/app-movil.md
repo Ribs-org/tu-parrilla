@@ -16,6 +16,13 @@ Una app para Android que muestra de un vistazo lo programado y cómo van las red
 
 Los títulos y rótulos se ven en mayúsculas por diseño; aquí van escritos como están en el código.
 
+La app tiene los dos modos del panel, y es el mismo de la cuenta: lo que se elige en Ajustes vale
+también en el panel web, y al revés. Esta página describe la noche, la de entrada. De día el
+fondo es claro, los cortes son piezas de sushi y la sección «Se quemó» se llama «Se echó a
+perder»; la equivalencia de cada dibujo está en «El modo día», en [index.md](index.md). Lo que
+dibuja el teléfono mismo —la pantalla de arranque, el selector de fecha y las preguntas de
+«Cerrar sesión» o de borrar— sigue oscuro en los dos modos.
+
 ### La pantalla de entrada
 
 Tiene dos pasos, uno detrás del otro en la misma pantalla:
@@ -89,6 +96,7 @@ Se abre con el botón de Ajustes de cualquier pestaña. Arriba, la flecha para v
   - «Desconectada.»
   Sin cuentas, «Todavía no conectas ninguna cuenta.». Mientras carga, «Cargando tus cuentas…».
 - Debajo, «Tus redes conectadas. Se conectan y se reconectan en el panel web.» y el botón «Abrir Los Fierros en el panel», que abre [Los Fierros](los-fierros.md) en el navegador del teléfono (ahí puede pedir entrar con el correo, como el panel).
+- **«El modo»**, con la frase «De noche: el acero y los cortes de la parrilla. Se guarda en tu cuenta: vale también en el panel web.» (de día, «De día: el fondo claro y piezas de sushi. Se guarda…») y un botón que dice adónde lleva: «Modo día» de noche, «Modo noche» de día. Cambia en el momento y lo guarda en la cuenta; sin señal, el teléfono lo recuerda y lo manda cuando vuelve la conexión.
 - **«Tu sesión»**, con «Cerrar sesión» en rojo. Pregunta «¿Cerrar sesión en este teléfono?» / «Para volver a entrar te va a llegar un código a tu correo.», con «Cancelar» y «Cerrar sesión». Al confirmar, la app vuelve a la pantalla de entrada. Las cuentas conectadas y lo programado no se tocan.
 - Al pie, la versión de la app: «Versión 1.1.0» y, si llegó una actualización por aire, « · actualización » seguido de ocho letras y números que la identifican. Sirve para saber qué versión tiene alguien que pide ayuda.
 
@@ -353,7 +361,9 @@ Lo que describe sale de estos archivos:
 - `mobile/src/components/corte-programado.tsx`
 - `mobile/src/app/ajustes.tsx` y `mobile/src/components/boton-ajustes.tsx` (Ajustes y su botón en la cabecera)
 - `src/app/api/mobile/fierros/route.ts` (lo que muestran)
-- `mobile/src/components/pieza.tsx` (el corte dibujado)
+- `mobile/src/components/pieza.tsx`, `mobile/src/components/pieza-sushi.tsx` y `mobile/src/components/lienzo.tsx` (el corte dibujado, de noche y de día)
+- `mobile/src/components/tema.tsx`, `mobile/src/components/colores.ts` y `mobile/src/lib/tema.ts` (el modo de la cuenta y los colores de cada modo; «Se echó a perder»)
+- `src/app/api/mobile/tema/route.ts` (leer y cambiar el modo de la cuenta)
 - `mobile/src/components/tus-cuentas.tsx`
 - `mobile/src/components/selector-fecha.tsx` (elegir día y hora: los dos diálogos de Android, o en iPhone —que todavía no se distribuye— la hoja «Cuándo sale» con «Cancelar» y «Listo»)
 - `mobile/src/components/parrilla.tsx`

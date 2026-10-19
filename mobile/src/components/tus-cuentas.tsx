@@ -1,7 +1,8 @@
 import { useCallback } from 'react'
 import { Text, View } from 'react-native'
 import { useRouter } from 'expo-router'
-import { COLORES, Etiqueta, Tarjeta, Vacio } from './ui'
+import { Etiqueta, Tarjeta, Vacio } from './ui'
+import { useColores } from './tema'
 import { num } from '../lib/format'
 import { clearToken } from '../lib/session'
 import { NOMBRE_RED, type Cuentas, type Rango } from '../lib/tipos'
@@ -15,6 +16,7 @@ import { useToken } from '../lib/useToken'
  * «⋯ Más», así que no se pide lo que no se va a ver.
  */
 export function TusCuentas({ rango }: { rango: Rango }) {
+  const colores = useColores()
   const token = useToken()
   const router = useRouter()
   const salir = useCallback(async () => {
@@ -30,7 +32,7 @@ export function TusCuentas({ rango }: { rango: Rango }) {
   )
 
   if (!data) {
-    return <Text style={{ color: COLORES.suave, fontSize: 12 }}>{cargando ? 'Cargando tus cuentas…' : (error ?? 'No se pudo cargar.')}</Text>
+    return <Text style={{ color: colores.suave, fontSize: 12 }}>{cargando ? 'Cargando tus cuentas…' : (error ?? 'No se pudo cargar.')}</Text>
   }
 
   const maximo = Math.max(1, ...data.serie.map((p) => p.visitasAlPerfil ?? 0))
@@ -43,8 +45,8 @@ export function TusCuentas({ rango }: { rango: Rango }) {
         data.cuentas.map((cuenta) => (
           <Tarjeta key={cuenta.red}>
             <Etiqueta>{NOMBRE_RED[cuenta.red] ?? cuenta.red}</Etiqueta>
-            <Text style={{ color: COLORES.texto, fontSize: 24, fontWeight: '600' }}>{num(cuenta.seguidores)}</Text>
-            <Text style={{ color: COLORES.suave, fontSize: 12 }}>
+            <Text style={{ color: colores.texto, fontSize: 24, fontWeight: '600' }}>{num(cuenta.seguidores)}</Text>
+            <Text style={{ color: colores.suave, fontSize: 12 }}>
               seguidores
               {cuenta.seguidoresGanados === null
                 ? ' · — en el período'
@@ -56,7 +58,7 @@ export function TusCuentas({ rango }: { rango: Rango }) {
                     ? ` · ${num(cuenta.seguidoresGanados)} en el período`
                     : ` · +${num(cuenta.seguidoresGanados)} en el período`}
             </Text>
-            <Text style={{ color: COLORES.tenue, fontSize: 12, marginTop: 4 }}>
+            <Text style={{ color: colores.tenue, fontSize: 12, marginTop: 4 }}>
               Visitas al perfil{cuenta.dia ? ` (${cuenta.dia})` : ''}: {num(cuenta.visitasAlPerfil)} · Alcance:{' '}
               {num(cuenta.alcance)}
             </Text>
@@ -76,7 +78,7 @@ export function TusCuentas({ rango }: { rango: Rango }) {
                 style={{
                   flex: 1,
                   height: Math.max(2, ((punto.visitasAlPerfil ?? 0) / maximo) * 76),
-                  backgroundColor: punto.visitasAlPerfil === null ? '#ffffff14' : COLORES.verde,
+                  backgroundColor: punto.visitasAlPerfil === null ? colores.velo + '14' : colores.verde,
                   borderRadius: 2,
                 }}
               />

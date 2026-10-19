@@ -6,7 +6,8 @@ import { IconoPoner } from '../../components/iconos'
 import { Grilla, RotuloDia } from '../../components/parrilla'
 import { Pieza } from '../../components/pieza'
 import { useSelectorFecha } from '../../components/selector-fecha'
-import { Boton, COLORES, Cargando, ErrorConReintento, Pantalla, Sello, TIPO_TITULO, Tarjeta } from '../../components/ui'
+import { Boton, Cargando, ErrorConReintento, Pantalla, Sello, TIPO_TITULO, Tarjeta } from '../../components/ui'
+import { useColores, useTema } from '../../components/tema'
 import { cuandoQuemado, diasDeLaAgenda, marcaDeToque, pieDeAyer, rotuloDelDia, seQuemo, servidosAyer } from '../../lib/agenda'
 import { RechazoApi, SesionCaducada, apiPost } from '../../lib/api'
 import { detalleDelBorrador, rotuloBorradores } from '../../lib/borradores'
@@ -14,6 +15,7 @@ import { anotarCambio } from '../../lib/cambios'
 import { calorDelDia, carneDe, coccionDe, selloPorEstado } from '../../lib/parrilla'
 import { SIN_SENAL, etiquetaCuenta, proximaHoraEnPunto } from '../../lib/publicar'
 import { clearToken } from '../../lib/session'
+import { SE_QUEMO } from '../../lib/tema'
 import { type BorradorResumido, type Calendario } from '../../lib/tipos'
 import { useScreenData } from '../../lib/useScreenData'
 import { useToken } from '../../lib/useToken'
@@ -31,6 +33,7 @@ function hoyEnElTelefono(): string {
  * no está en la parrilla, solo apartado para ese día. Como en el calendario del panel.
  */
 function BorradorEnElDia({ borrador, onAbrir }: { borrador: BorradorResumido; onAbrir: () => void }) {
+  const colores = useColores()
   return (
     <Pressable
       onPress={onAbrir}
@@ -38,17 +41,17 @@ function BorradorEnElDia({ borrador, onAbrir }: { borrador: BorradorResumido; on
       style={({ pressed }) => ({
         borderWidth: 1,
         borderStyle: 'dashed',
-        borderColor: '#ffffff4d',
+        borderColor: colores.velo + '4d',
         borderRadius: 6,
         padding: 10,
         gap: 4,
         opacity: pressed ? 0.7 : 1,
       })}
     >
-      <Text style={{ color: COLORES.suave, fontSize: 10, fontFamily: TIPO_TITULO, letterSpacing: 1 }}>
+      <Text style={{ color: colores.suave, fontSize: 10, fontFamily: TIPO_TITULO, letterSpacing: 1 }}>
         BORRADOR · {borrador.cuando?.slice(11, 16)}
       </Text>
-      <Text style={{ color: COLORES.suave, fontSize: 13 }} numberOfLines={2}>
+      <Text style={{ color: colores.suave, fontSize: 13 }} numberOfLines={2}>
         {borrador.texto || '(sin texto)'}
       </Text>
     </Pressable>
@@ -62,6 +65,8 @@ function BorradorEnElDia({ borrador, onAbrir }: { borrador: BorradorResumido; on
  * «Qué viene») y el Calendario.
  */
 export default function LaParrilla() {
+  const colores = useColores()
+  const { tema } = useTema()
   const token = useToken()
   const router = useRouter()
   const salir = useCallback(async () => {
@@ -135,21 +140,22 @@ export default function LaParrilla() {
 
   return (
     <Pantalla refrescando={cargando} onRefrescar={refrescar}>
-      <Text style={{ color: COLORES.suave, fontSize: 13 }}>lo que viene y cómo salió lo que ya se fue</Text>
+      <Text style={{ color: colores.suave, fontSize: 13 }}>lo que viene y cómo salió lo que ya se fue</Text>
       <Sello texto={sello} />
 
       {quemados.length > 0 ? (
         <View style={{ gap: 8 }}>
           <Text
             style={{
-              color: COLORES.rojo,
+              color: colores.rojo,
               fontFamily: TIPO_TITULO,
               fontSize: 13,
               letterSpacing: 1.2,
               textTransform: 'uppercase',
             }}
           >
-            Se quemó
+            {/* De día no se quema: se echa a perder, como en el panel. */}
+            {SE_QUEMO[tema]}
           </Text>
           {quemados.map(({ post, destino }) => {
             // El corte entero, con todas sus marcas, como en el panel: se ve cuál se quemó y si
@@ -162,10 +168,10 @@ export default function LaParrilla() {
                 style={{
                   flexDirection: 'row',
                   gap: 12,
-                  backgroundColor: COLORES.tarjeta,
+                  backgroundColor: colores.tarjeta,
                   borderRadius: 16,
                   borderWidth: 1,
-                  borderColor: COLORES.rojo + '99',
+                  borderColor: colores.rojo + '99',
                   padding: 14,
                 }}
               >
@@ -177,13 +183,13 @@ export default function LaParrilla() {
                   sellos={post.redes.map((r) => r.sello ?? selloPorEstado(r.estado, r.error))}
                 />
                 <View style={{ flex: 1, gap: 6 }}>
-                  <Text style={{ color: COLORES.suave, fontSize: 12 }}>
+                  <Text style={{ color: colores.suave, fontSize: 12 }}>
                     {cuandoQuemado(post.cuando, hoy)} · {etiquetaCuenta(destino)}
                   </Text>
-                  <Text style={{ color: COLORES.texto, fontSize: 14 }} numberOfLines={2}>
+                  <Text style={{ color: colores.texto, fontSize: 14 }} numberOfLines={2}>
                     {post.texto || '(sin texto)'}
                   </Text>
-                  {destino.error ? <Text style={{ color: COLORES.rojo, fontSize: 12 }}>{destino.error}</Text> : null}
+                  {destino.error ? <Text style={{ color: colores.rojo, fontSize: 12 }}>{destino.error}</Text> : null}
                   <View style={{ flexDirection: 'row', marginTop: 2 }}>
                     {/* Secundario, como en el panel: el naranjo queda para el arreglo exacto. */}
                     <Boton
@@ -208,7 +214,7 @@ export default function LaParrilla() {
             hitSlop={4}
             style={({ pressed }) => ({ minHeight: 44, justifyContent: 'center', opacity: pressed ? 0.7 : 1 })}
           >
-            <Text style={{ color: COLORES.texto, fontSize: 14, fontWeight: '600' }}>
+            <Text style={{ color: colores.texto, fontSize: 14, fontWeight: '600' }}>
               {verBorradores ? '▾' : '▸'} {rotuloBorradores(borradores.length)}
             </Text>
           </Pressable>
@@ -221,10 +227,10 @@ export default function LaParrilla() {
                   style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
                 >
                   <Tarjeta>
-                    <Text style={{ color: COLORES.texto, fontSize: 14 }} numberOfLines={2}>
+                    <Text style={{ color: colores.texto, fontSize: 14 }} numberOfLines={2}>
                       {b.texto || '(sin texto)'}
                     </Text>
-                    <Text style={{ color: COLORES.suave, fontSize: 12 }}>{detalleDelBorrador(b)}</Text>
+                    <Text style={{ color: colores.suave, fontSize: 12 }}>{detalleDelBorrador(b)}</Text>
                   </Tarjeta>
                 </Pressable>
               ))
@@ -249,18 +255,18 @@ export default function LaParrilla() {
                   width: 36,
                   height: 36,
                   borderRadius: 18,
-                  backgroundColor: COLORES.tarjeta,
+                  backgroundColor: colores.tarjeta,
                   alignItems: 'center',
                   justifyContent: 'center',
                   opacity: pressed ? 0.7 : 1,
                 })}
               >
-                <IconoPoner color={COLORES.texto} />
+                <IconoPoner color={colores.texto} />
               </Pressable>
             </View>
             {posts.length === 0 && delDia.length === 0 ? (
               <Pressable onPress={() => prender(dia)} hitSlop={4} style={{ paddingVertical: 6 }}>
-                <Text style={{ color: COLORES.brasa, fontSize: 14 }}>No hay nada puesto. Préndela.</Text>
+                <Text style={{ color: colores.brasa, fontSize: 14 }}>No hay nada puesto. Préndela.</Text>
               </Pressable>
             ) : (
               // Los borradores no cuentan para el calor: todavía no van a salir.
@@ -277,7 +283,7 @@ export default function LaParrilla() {
         )
       })}
 
-      <Text style={{ color: COLORES.suave, fontSize: 12, textAlign: 'center', marginTop: 8 }}>
+      <Text style={{ color: colores.suave, fontSize: 12, textAlign: 'center', marginTop: 8 }}>
         {pieDeAyer(servidosAyer(data.posts, hoy))}
       </Text>
       {selector}

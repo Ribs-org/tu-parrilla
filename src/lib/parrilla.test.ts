@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { contraste, simular } from '../components/charts/color'
+import { PESCADO } from '../components/pieza-sushi'
 import {
   CARNE,
   GRASA,
@@ -452,6 +453,11 @@ describe('el teléfono no se separó del panel', () => {
 
   it.each(ORDEN_CARNE)('%s tiene los mismos tres topes en el teléfono', (nombre) => {
     const { claro, medio, hondo } = CARNE[nombre]
+    expect(sinComentarios).toContain(`${nombre}: { claro: '${claro}', medio: '${medio}', hondo: '${hondo}' }`)
+  })
+
+  it.each(ORDEN_CARNE)('el pescado %s del modo día tiene los mismos tres topes en el teléfono', (nombre) => {
+    const { claro, medio, hondo } = PESCADO[nombre]
     expect(sinComentarios).toContain(`${nombre}: { claro: '${claro}', medio: '${medio}', hondo: '${hondo}' }`)
   })
 

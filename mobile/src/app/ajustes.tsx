@@ -3,22 +3,25 @@ import { Alert, Linking, Text, View } from 'react-native'
 import Constants from 'expo-constants'
 import * as Updates from 'expo-updates'
 import { useFocusEffect, useRouter } from 'expo-router'
-import { Boton, BotonTexto, COLORES, Etiqueta, Pantalla, Sello, Tarjeta } from '../components/ui'
+import { Boton, BotonTexto, Etiqueta, Pantalla, Sello, Tarjeta } from '../components/ui'
+import type { Colores } from '../components/colores'
+import { useColores, useTema } from '../components/tema'
 import { useFierros } from '../components/boton-ajustes'
 import { API_BASE } from '../lib/config'
 import { clearToken } from '../lib/session'
+import { otroTema } from '../lib/tema'
 import { NOMBRE_RED, type Fierros } from '../lib/tipos'
 
 /** El fierro en palabras y en color, como la barra de cada tarjeta de Los Fierros. */
-function fierroDe(cuenta: Fierros['cuentas'][number]): { color: string; barra: string; texto: string } {
-  if (!cuenta.conectada) return { color: COLORES.tenue, barra: '#2a2e33', texto: 'Desconectada.' }
+function fierroDe(cuenta: Fierros['cuentas'][number], colores: Colores): { color: string; barra: string; texto: string } {
+  if (!cuenta.conectada) return { color: colores.tenue, barra: colores.acero, texto: 'Desconectada.' }
   if (cuenta.fierro === 'frio') {
-    return { color: COLORES.rojo, barra: '#2a2e33', texto: 'Se apagó: así no publica. Reconéctala en el panel.' }
+    return { color: colores.rojo, barra: colores.acero, texto: 'Se apagó: así no publica. Reconéctala en el panel.' }
   }
   if (cuenta.fierro === 'enfriandose') {
-    return { color: COLORES.ambar, barra: COLORES.ambar, texto: 'Se está enfriando: su permiso vence esta semana. Reconéctala en el panel.' }
+    return { color: colores.ambar, barra: colores.ambar, texto: 'Se está enfriando: su permiso vence esta semana. Reconéctala en el panel.' }
   }
-  return { color: COLORES.suave, barra: COLORES.brasa, texto: 'Al rojo: conectada.' }
+  return { color: colores.suave, barra: colores.brasa, texto: 'Al rojo: conectada.' }
 }
 
 /**
@@ -28,6 +31,8 @@ function fierroDe(cuenta: Fierros['cuentas'][number]): { color: string; barra: s
  * de salir era borrar la app.
  */
 export default function Ajustes() {
+  const colores = useColores()
+  const { tema, cambiarTema } = useTema()
   const router = useRouter()
   const { data, cargando, error, sello, refrescar, refrescarSiVieja } = useFierros()
 
@@ -64,17 +69,17 @@ export default function Ajustes() {
       <Etiqueta>Los Fierros</Etiqueta>
       <Sello texto={sello} />
       {!data ? (
-        <Text style={{ color: COLORES.suave, fontSize: 13 }}>
+        <Text style={{ color: colores.suave, fontSize: 13 }}>
           {cargando ? 'Cargando tus cuentas…' : (error ?? 'No se pudo cargar.')}
         </Text>
       ) : data.cuentas.length === 0 ? (
-        <Text style={{ color: COLORES.suave, fontSize: 13 }}>Todavía no conectas ninguna cuenta.</Text>
+        <Text style={{ color: colores.suave, fontSize: 13 }}>Todavía no conectas ninguna cuenta.</Text>
       ) : (
         data.cuentas.map((cuenta) => {
-          const f = fierroDe(cuenta)
+          const f = fierroDe(cuenta, colores)
           return (
             <Tarjeta key={cuenta.id}>
-              <Text style={{ color: COLORES.texto, fontSize: 14, fontWeight: '600' }}>
+              <Text style={{ color: colores.texto, fontSize: 14, fontWeight: '600' }}>
                 {NOMBRE_RED[cuenta.red] ?? cuenta.red} · {cuenta.handle ?? 'sin nombre'}
               </Text>
               {/* El fierro: una barra que dice si la conexión está viva, como en el panel. */}
@@ -84,11 +89,22 @@ export default function Ajustes() {
           )
         })
       )}
-      <Text style={{ color: COLORES.suave, fontSize: 12 }}>
+      <Text style={{ color: colores.suave, fontSize: 12 }}>
         Tus redes conectadas. Se conectan y se reconectan en el panel web.
       </Text>
       <View style={{ flexDirection: 'row' }}>
         <Boton texto="Abrir Los Fierros en el panel" onPress={() => void Linking.openURL(`${API_BASE}/admin/accounts`)} />
+      </View>
+
+      {/* El modo, como el botón de la barra del panel: dice adónde lleva, no el que está puesto.
+          Es de la cuenta, así que vale también en el panel web. */}
+      <Etiqueta margenArriba>El modo</Etiqueta>
+      <Text style={{ color: colores.suave, fontSize: 12 }}>
+        {tema === 'dia' ? 'De día: el fondo claro y piezas de sushi.' : 'De noche: el acero y los cortes de la parrilla.'} Se
+        guarda en tu cuenta: vale también en el panel web.
+      </Text>
+      <View style={{ flexDirection: 'row' }}>
+        <Boton texto={tema === 'dia' ? 'Modo noche' : 'Modo día'} onPress={() => cambiarTema(otroTema(tema))} />
       </View>
 
       <Etiqueta margenArriba>Tu sesión</Etiqueta>
@@ -96,7 +112,7 @@ export default function Ajustes() {
         <BotonTexto texto="Cerrar sesión" onPress={cerrarSesion} peligro />
       </View>
 
-      <Text style={{ color: COLORES.tenue, fontSize: 11, marginTop: 16 }}>
+      <Text style={{ color: colores.tenue, fontSize: 11, marginTop: 16 }}>
         Versión {version}
         {actualizacion}
       </Text>

@@ -1,7 +1,17 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { PANTALLAS, ajustes, pantallaDe, pestanas } from './vocabulario'
+import { PANTALLAS, SE_QUEMO, ajustes, pantallaDe, pestanas } from './vocabulario'
+
+describe('«Se quemó» en cada modo', () => {
+  // La app la copia en `mobile/src/lib/tema.ts`: se compara por texto, porque `mobile/` no se
+  // importa desde acá (tiene su propio tsconfig, el de Expo).
+  it('de día se echó a perder, y la app del teléfono dice lo mismo que el panel', () => {
+    expect(SE_QUEMO).toEqual({ noche: 'Se quemó', dia: 'Se echó a perder' })
+    const app = readFileSync(join(process.cwd(), 'mobile', 'src', 'lib', 'tema.ts'), 'utf8')
+    expect(app).toContain(`SE_QUEMO: Record<Tema, string> = { noche: '${SE_QUEMO.noche}', dia: '${SE_QUEMO.dia}' }`)
+  })
+})
 
 describe('el vocabulario del panel', () => {
   it('cada pantalla apunta a una ruta que existe de verdad bajo (dash)', () => {

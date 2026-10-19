@@ -1,7 +1,30 @@
+import { readFileSync } from 'node:fs'
+import { runInNewContext } from 'node:vm'
+import ts from 'typescript'
 import { describe, expect, it } from 'vitest'
 import { MAX_HUESOS, ORDEN_CARNE } from '@/lib/parrilla'
 import { contraste, simular } from './charts/color'
 import { PESCADO, posicionesMaki, rodajas, rollCortado, rollEntero, siluetaDe } from './pieza-sushi'
+
+/**
+ * La copia de la app (`mobile/src/lib/pieza-sushi.ts`), compilada acá y corrida aparte. No se
+ * importa: `mobile/` tiene su propio tsconfig, que extiende el de Expo, y en el CI del sitio la
+ * app no está instalada. La copia no importa nada más que tipos, así que se corre sola.
+ */
+const movil = (() => {
+  const fuente = readFileSync(new URL('../../mobile/src/lib/pieza-sushi.ts', import.meta.url), 'utf8')
+  const { outputText } = ts.transpileModule(fuente, {
+    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+  })
+  const exports: Record<string, unknown> = {}
+  runInNewContext(outputText, { exports })
+  return exports as {
+    rodajas: typeof rodajas
+    rollEntero: typeof rollEntero
+    posicionesMaki: typeof posicionesMaki
+    rollCortado: typeof rollCortado
+  }
+})()
 
 /*
  * La pieza de sushi dice la cocción como la dice la carne del corte: por luminosidad, de clara a
@@ -84,6 +107,20 @@ describe('el roll, entero o en rodajas', () => {
         expect(x).toBeLessThan(discos[i + 1]!.cx)
       })
     }
+  })
+
+  // La app del teléfono copia estas medidas (`mobile/src/lib/pieza-sushi.ts`): Metro no sale de
+  // `mobile/`. Una copia sin guardia se separa sola, y la misma publicación saldría en rodajas
+  // en el panel y entera en el teléfono.
+  it('la app del teléfono mide el roll igual que el panel', () => {
+    // Por JSON: lo que corre en otro contexto trae sus propios `Array` y `Object`.
+    const igual = (a: unknown, b: unknown) => expect(JSON.parse(JSON.stringify(a))).toEqual(b)
+    for (let n = 2; n <= MAX_HUESOS; n++) {
+      igual(movil.rodajas(n), rodajas(n))
+      igual(movil.rollEntero(n), rollEntero(n))
+      for (let bandas = 1; bandas <= 6; bandas++) igual(movil.posicionesMaki(bandas, n), posicionesMaki(bandas, n))
+    }
+    for (const carne of ORDEN_CARNE) expect(movil.rollCortado(carne)).toBe(rollCortado(carne))
   })
 
   it('sus bandas caen sobre el roll entero, donde van a quedar las rodajas', () => {
