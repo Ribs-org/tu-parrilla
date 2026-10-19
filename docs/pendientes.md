@@ -192,8 +192,6 @@ Nada de esto bloquea un trámite hoy; conviene ordenarlo antes de abrir a tercer
   Falta:
   - mirar de día los gráficos en Safari y en Firefox: en Chrome, recharts toma las variables
     del modo; si otro navegador no, saldrían con el color por defecto de cada atributo;
-  - **[dueño]** publicar por aire la actualización de la app del teléfono (`mobile/README.md`):
-    hasta entonces, el teléfono sigue solo de noche;
   - lo nativo de la app, que sigue de noche en los dos modos (ver `docs/deuda-tecnica.md`, «Lo
     nativo de la app no cambia de modo»).
 - **Llevar el resto de la interfaz al nivel del corte** (2026-10-16). La auditoría de ese
