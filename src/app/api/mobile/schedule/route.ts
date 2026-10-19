@@ -87,7 +87,7 @@ export function agruparPostsMovil(
       cuando: isoInZone(post.scheduledAt, zone),
       portada: post.coverUrl,
       miniatura: media.find((m) => m.mediaType === 'image')?.blobUrl ?? null,
-      ...formatoDe(media),
+      ...formatoDe(media, post.videosLiberados),
       redes: [],
     }
     entrada.redes.push({

@@ -464,10 +464,16 @@ function MiniaturaDeMuestra({
       )}
     >
       <span
-        className={cn('block h-full w-full', llegando && 'opacity-50')}
+        className={cn('relative block h-full w-full', llegando && 'opacity-50')}
         style={{ background: `linear-gradient(160deg, ${tonos[0]}, ${tonos[1]})` }}
         aria-hidden
-      />
+      >
+        {/* Un sol y dos cerros: sin ellos, cinco degradados se leían como cajas vacías. */}
+        <svg viewBox="0 0 40 50" preserveAspectRatio="xMidYMax slice" className="absolute inset-0 h-full w-full">
+          <circle cx="28" cy="15" r="4.5" fill="#ffffff" fillOpacity=".2" />
+          <path d="M0 39L12 27L21 35L28 29L40 39V50H0Z" fill="#000000" fillOpacity=".3" />
+        </svg>
+      </span>
       <span className="absolute left-1 top-1 rounded bg-black/60 px-1 font-mono text-[0.6rem] text-white">{numero}</span>
       {llegando ? (
         <div className="absolute inset-x-0 bottom-0 bg-black/55 px-1.5 pb-1 pt-0.5">

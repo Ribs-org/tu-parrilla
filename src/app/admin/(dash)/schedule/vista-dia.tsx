@@ -229,7 +229,7 @@ function TarjetaDeDestino({
   recien: string | null
 }) {
   const { post, destino, otros, media } = corte
-  const dibujo = dibujoDe([destino], media, frias)
+  const dibujo = dibujoDe([destino], media, frias, post.videosLiberados)
   const deLosOtros = dibujoDe(otros, media, frias).sellos
   const estado = estadoCorto(dibujo.coccion, dibujo.sellos)
   const motivo = motivoDestino(destino)

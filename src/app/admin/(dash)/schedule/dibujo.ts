@@ -32,14 +32,16 @@ export type Dibujo = {
   sellos: Sello[]
 }
 
+/** `videosLiberados`, los del post que ya no están en el almacén (ver `formatoDe`). */
 export function dibujoDe(
   destinos: readonly Destino[],
   media: ReadonlyArray<{ mediaType: string }>,
   frias: ReadonlySet<string>,
+  videosLiberados = 0,
 ): Dibujo {
   const estados = destinos.map((d) => d.status)
   return {
-    ...formatoDe(media),
+    ...formatoDe(media, videosLiberados),
     coccion: coccionDe(estados),
     carne: carneDe(estados),
     sellos: destinos.map((d) => selloDe(d, frias.has(d.accountId) ? 'frio' : 'al-rojo')),
