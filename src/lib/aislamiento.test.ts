@@ -362,11 +362,12 @@ describe('aislamiento por dueño (SQL generado, sin base)', () => {
   })
 
   /**
-   * `getPostRows` hace cinco consultas encadenadas: posts, sus snapshots de métricas,
-   * las visitas, los clics y el "alguna vez visto". Solo la primera (`social_posts`) y
+   * `getPostRows` hace seis consultas encadenadas: posts, sus snapshots de métricas (dos:
+   * la última del período y la última de antes), las visitas, los clics y el "alguna vez
+   * visto". Solo la primera (`social_posts`) y
    * las de visitas/clics tienen columna de dueño propia y llevan el filtro directo
-   * (mismo criterio que `esperarFiltradoPorDueno` de arriba). La de métricas
-   * (`post_metrics`) no tiene columna de dueño: va por los ids de los posts que la
+   * (mismo criterio que `esperarFiltradoPorDueno` de arriba). Las de métricas
+   * (`post_metrics`) no tienen columna de dueño: va por los ids de los posts que la
    * primera consulta ya filtró por dueño — exigirle un `owner_id` directo sería ruidoso
    * (esa tabla no lo tiene). Para esa se comprueba en cambio que va ligada a un id de la
    * fila ya filtrada (el id del post que la primera consulta devolvió), no a la tabla
@@ -374,7 +375,7 @@ describe('aislamiento por dueño (SQL generado, sin base)', () => {
    * segunda seguiría atada a *algún* post, pero uno arbitrario en vez de 'post-1', así
    * que ese id ya no aparecería entre sus parámetros y la aserción fallaría.
    */
-  it('posts: getPostRows filtra sus cinco consultas por dueño, directo o por el id que ya filtró la primera', async () => {
+  it('posts: getPostRows filtra sus seis consultas por dueño, directo o por el id que ya filtró la primera', async () => {
     // select() de social_posts trae todas sus columnas, en el orden declarado en el
     // esquema: id, owner_id, network, account_id, external_id, permalink, caption,
     // thumbnail_url, media_type, published_at, campaign, archived_at, created_at, updated_at.
@@ -404,16 +405,41 @@ describe('aislamiento por dueño (SQL generado, sin base)', () => {
           to: new Date('2026-01-31'),
           includeBots: true,
         }),
-      [[filaPost], [], [], [], []],
+      [[filaPost], [], [], [], [], []],
     )
-    expect(consultas).toHaveLength(5)
-    const [posts, metricas, visitas, clics, vistos] = consultas as [Captura, Captura, Captura, Captura, Captura]
+    expect(consultas).toHaveLength(6)
+    const [posts, adentro, antes, visitas, clics, vistos] = consultas as [Captura, Captura, Captura, Captura, Captura, Captura]
 
     esperarFiltradoPorDueno(posts) // social_posts: filtro directo.
-    expect(metricas.params).toContain('post-1') // post_metrics: por el id que ya filtró `posts`.
+    expect(adentro.params).toContain('post-1') // post_metrics: por el id que ya filtró `posts`.
+    expect(antes.params).toContain('post-1') // la última de antes del período, igual.
     esperarFiltradoPorDueno(visitas) // visits: por el profileId de una subconsulta a profiles filtrada por dueño.
     esperarFiltradoPorDueno(clics) // clicks: mismo molde.
     esperarFiltradoPorDueno(vistos) // "alguna vez visto": mismo molde.
+  })
+
+  it('posts: con actividad (el tablero), la subconsulta de visitas también va por las páginas del dueño', async () => {
+    const consultas = await consultasEncadenadas(
+      () =>
+        getPostRows(
+          {
+            ownerId: DUENO,
+            zone: 'America/Santiago',
+            profileId: null,
+            from: new Date('2026-01-01'),
+            to: new Date('2026-01-31'),
+            includeBots: false,
+          },
+          false,
+          { conActividad: true },
+        ),
+      [[]],
+    )
+    expect(consultas).toHaveLength(1)
+    esperarFiltradoPorDueno(consultas[0]!)
+    // Dos veces el dueño: el de `social_posts` y el de las páginas en la subconsulta de visitas,
+    // que sin él juntaría las etiquetas visitadas de todos los dueños.
+    expect(consultas[0]!.params.filter((p) => p === DUENO)).toHaveLength(2)
   })
 })
 

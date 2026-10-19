@@ -21,6 +21,14 @@ export const dynamic = 'force-dynamic'
 const RUTA = '/admin/analytics/publicaciones'
 
 /**
+ * Cuántas filas trae la lista, las más recientes. Eran 200: con 1.000 publicaciones por
+ * semana, eso es día y medio. Mil caben en la página porque la tabla muestra veinte y el
+ * resto espera detrás de «Ver las N restantes»; para más, se elige una cuenta o un período
+ * más corto, y el aviso de arriba lo dice.
+ */
+const MAX_EN_LA_LISTA = 1000
+
+/**
  * Todas las publicaciones, una por fila: lo que fue la pantalla Los Cortes, ahora un clic
  * adentro de Los Números («Ver todas las publicaciones →»). Cada fila abre su pieza
  * (`[id]/page.tsx`). Muestra poco al entrar —views y
@@ -50,8 +58,10 @@ export default async function PublicacionesPage({ searchParams }: { searchParams
     {
       ...(todas ? {} : { publishedFrom: filters.from, publishedTo: filters.to }),
       ...(cuenta ? { accountId: cuenta.id } : {}),
+      limit: MAX_EN_LA_LISTA,
     },
   )
+  const cortada = filas.length >= MAX_EN_LA_LISTA
   const baseEnlace = await enlaceDeLaPaginaPrincipal(ownerId)
 
   const visibles = onlyWithMetrics ? withPlatformMetrics(filas) : filas
@@ -152,8 +162,14 @@ export default async function PublicacionesPage({ searchParams }: { searchParams
         </div>
       ) : null}
 
-      {sinPegar > 0 || sinMetricas > 0 ? (
+      {sinPegar > 0 || sinMetricas > 0 || cortada ? (
         <div className="chapa mt-4 space-y-1 rounded-xl px-4 py-3 text-[0.82rem] leading-relaxed text-fg-muted">
+          {cortada ? (
+            <p>
+              Se ven las {formatNumber(MAX_EN_LA_LISTA)} más recientes. Para ver el resto, elige una cuenta o un
+              período más corto.
+            </p>
+          ) : null}
           {sinPegar > 0 ? <p>{avisoSinPegar}</p> : null}
           {sinMetricas > 0 ? <p>{avisoSinMetricas}</p> : null}
         </div>
