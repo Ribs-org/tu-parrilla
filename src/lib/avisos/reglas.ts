@@ -3,7 +3,7 @@
 // para que la API (`GET /api/schedule/resumen`), el correo y los tests lean lo mismo.
 import { isoInZone } from '@/lib/metrics-api'
 import { networkLabel } from '@/lib/networks'
-import { estadoDelFierro, seRenuevaSola } from '@/lib/parrilla'
+import { estadoDelFierro, seRenuevaSola, type Fierro } from '@/lib/parrilla'
 import type { Tema } from '@/lib/tema'
 import { SE_QUEMO } from '@/lib/vocabulario'
 
@@ -29,6 +29,9 @@ export const HORAS_ERROR = `«horas» tiene que ser un entero de 1 a ${MAX_HORAS
 export const CONEXION_FALLO = 'La conexión falló; reconecta la cuenta.'
 export const CONEXION_VENCIDA = 'La conexión venció; reconecta la cuenta.'
 export const CONEXION_POR_VENCER = 'La conexión está por vencer; reconéctala antes.'
+// Esta no entra al resumen —desconectar es una decisión del dueño, y no avisa nada—, pero la
+// lista de cuentas de la API (`GET /api/schedule/cuentas`) nombra todas, también esas.
+export const CONEXION_DESCONECTADA = 'La cuenta está desconectada; reconéctala para programarle.'
 
 const DIA_MS = 86_400_000
 
@@ -56,7 +59,7 @@ function fierroDe(c: CuentaVigilada, ahora: Date) {
  * avisa nada. Sin credencial pero con el error escrito —una baja desde Facebook— sí es una
  * caída: la cuenta no se fue porque él quisiera.
  */
-function desconectadaAProposito(c: CuentaVigilada): boolean {
+function desconectadaAProposito(c: Pick<CuentaVigilada, 'conCredencial' | 'lastSyncError'>): boolean {
   return !c.conCredencial && !c.lastSyncError
 }
 
@@ -79,18 +82,27 @@ export type CuentaEnRiesgo = {
   motivo: string
 }
 
+/**
+ * Por qué hay que reconectar una cuenta, según su fierro; nulo si está al rojo. La misma frase
+ * en el resumen y en la lista de cuentas de la API, para que las dos no se contradigan.
+ */
+export function motivoDelFierro(
+  c: Pick<CuentaVigilada, 'conCredencial' | 'lastSyncError'>,
+  fierro: Fierro,
+): string | null {
+  if (fierro === 'al-rojo') return null
+  if (fierro === 'enfriandose') return CONEXION_POR_VENCER
+  if (desconectadaAProposito(c)) return CONEXION_DESCONECTADA
+  return c.lastSyncError || !c.conCredencial ? CONEXION_FALLO : CONEXION_VENCIDA
+}
+
 /** Las cuentas que hay que reconectar ya (frías) o pronto (enfriándose), sin las desconectadas a propósito. */
 export function cuentasEnRiesgo(cuentas: readonly CuentaVigilada[], ahora: Date): CuentaEnRiesgo[] {
   return cuentas.flatMap((c) => {
     if (desconectadaAProposito(c)) return []
     const fierro = fierroDe(c, ahora)
-    if (fierro === 'al-rojo') return []
-    const motivo =
-      fierro === 'enfriandose'
-        ? CONEXION_POR_VENCER
-        : c.lastSyncError || !c.conCredencial
-          ? CONEXION_FALLO
-          : CONEXION_VENCIDA
+    const motivo = motivoDelFierro(c, fierro)
+    if (fierro === 'al-rojo' || motivo === null) return []
     const vence = seRenuevaSola(c.network) ? null : c.expiresAt
     return [{ cuentaId: c.id, red: c.network, handle: c.handle, fierro, vence, motivo }]
   })

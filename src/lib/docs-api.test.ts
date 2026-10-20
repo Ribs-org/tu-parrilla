@@ -13,7 +13,14 @@ import {
 import { MAX_BATCH_ITEMS, MAX_REF, PUBLISHABLE, REF_ERROR } from './social/publish/batch'
 import { REDES_PROXIMAMENTE, fraseProximamente } from './networks'
 import { TOPE_INSTAGRAM, TRIAL_REEL_NO_DISPONIBLE } from './social/publish/publisher'
-import { DIAS_ERROR, HORAS_ERROR } from './avisos/reglas'
+import {
+  CONEXION_DESCONECTADA,
+  CONEXION_FALLO,
+  CONEXION_POR_VENCER,
+  CONEXION_VENCIDA,
+  DIAS_ERROR,
+  HORAS_ERROR,
+} from './avisos/reglas'
 import { BORRADO_YA_PUBLICADO } from './schedule-api'
 import { TRIAL_REEL_MEDIA } from './social/publish/opciones'
 import { LADO_ERROR, METRICA_ERROR, PERCENTIL_ERROR, RECIENTES_ERROR } from './mejores'
@@ -48,6 +55,15 @@ describe('la documentación para LLM no le miente al código', () => {
     for (const archivo of ['public/docs/api-llm.md', 'public/docs/api-editor.md']) {
       const guia = readFileSync(archivo, 'utf8')
       for (const frase of [REF_ERROR, DIAS_ERROR, HORAS_ERROR, TOPE_INSTAGRAM]) {
+        expect(guia, `${archivo}: ${frase}`).toContain(frase)
+      }
+    }
+  })
+
+  it('las frases de la conexión de cada cuenta (el resumen y la lista de cuentas) son las del código, en las dos guías', () => {
+    for (const archivo of ['public/docs/api-llm.md', 'public/docs/api-editor.md']) {
+      const guia = readFileSync(archivo, 'utf8')
+      for (const frase of [CONEXION_FALLO, CONEXION_VENCIDA, CONEXION_POR_VENCER, CONEXION_DESCONECTADA]) {
         expect(guia, `${archivo}: ${frase}`).toContain(frase)
       }
     }

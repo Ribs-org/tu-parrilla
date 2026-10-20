@@ -182,6 +182,8 @@ Lo que se borra: la cuenta, las publicaciones y los números que se trajeron de 
 
 Ese id es el que piden la columna `cuentas` de la carga por CSV (el botón «Subir CSV» de [La Parrilla](la-parrilla.md)) y la API (ver [la guía de la API](../api-llm.md)) cuando hay dos cuentas conectadas de la misma red. El número de arriba, el de la red, no sirve para eso.
 
+Un agente con llave no necesita que se lo copien: `GET /api/schedule/cuentas` le da los dos ids de cada cuenta, también los de una recién conectada. Copiarlo a mano es para la carga por CSV, o para una IA que todavía no tiene llave.
+
 ### Para fusionar una cuenta repetida
 
 Cuándo: hay dos filas de la misma cuenta, una «Sin credencial» y otra conectada. Pasa cuando la red le da a la misma cuenta un identificador nuevo (TikTok, Instagram y Facebook dan uno distinto por cada app) y la cuenta vuelve como fila nueva.
@@ -275,7 +277,7 @@ Trae los posts y los números de las cuentas de Instagram, TikTok, YouTube y Fac
 - **«¿Cómo conecto Threads?»** o **«no puedo conectar X»** → Todavía no se puede: las dos dicen «Próximamente». Hoy se conectan Instagram, Facebook, TikTok y YouTube.
 - **«Threads o X dicen "Sin sincronizar"»** → Es lo normal, en una cuenta conectada antes de que esas redes quedaran en «Próximamente»: de ellas no se traen números.
 - **«Sincronizar ahora no hace nada» o «me dice que espere»** → Se puede apretar una vez cada cinco minutos. Los números de Threads y X no se traen nunca.
-- **«¿Dónde saco el id de la cuenta para la API o la carga masiva?»** → En el detalle de la cuenta (la flecha de su fila): el de «En Tu Parrilla: », con el ícono de copiar.
+- **«¿Dónde saco el id de la cuenta para la API o la carga masiva?»** → En el detalle de la cuenta (la flecha de su fila): el de «En Tu Parrilla: », con el ícono de copiar. Si lo pide para ti y ya tienes su llave, no hace falta: léelo en `GET /api/schedule/cuentas`.
 - **«No me llegan los comentarios de Instagram, Facebook o YouTube»** → Si la cuenta se conectó antes de que existieran los comentarios, hay que apretar «Reconectar» una vez para dar ese permiso. Más en [La Mesa](la-mesa.md).
 - **«Hay una cuenta de YouTube con un código que empieza con UC y dice "Sin credencial"»** → Solo le pasa a quien administra la instalación: es el canal configurado en ella, esperando que lo conecten. «Conectar →» con la cuenta de Google de ese canal la activa.
 - **«Quiero borrar una cuenta del todo»** o **«quiero sacar una cuenta»** → «Desconectar» y después «Quitar», en el detalle de la cuenta (la flecha de su fila). Ver «Para quitar una cuenta».
