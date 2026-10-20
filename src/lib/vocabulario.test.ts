@@ -1,7 +1,18 @@
-import { existsSync, readFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { existsSync, readFileSync, readdirSync } from 'node:fs'
+import { join, relative } from 'node:path'
+import ts from 'typescript'
 import { describe, expect, it } from 'vitest'
-import { PANTALLAS, SE_QUEMO, ajustes, pantallaDe, pestanas } from './vocabulario'
+import {
+  PALABRAS_DE_DIA,
+  PANTALLAS,
+  ROTULO_CALOR,
+  SE_QUEMO,
+  ajustes,
+  nombreDe,
+  nombreEn,
+  pantallaDe,
+  pestanas,
+} from './vocabulario'
 
 describe('«Se quemó» en cada modo', () => {
   // La app la copia en `mobile/src/lib/tema.ts`: se compara por texto, porque `mobile/` no se
@@ -10,6 +21,87 @@ describe('«Se quemó» en cada modo', () => {
     expect(SE_QUEMO).toEqual({ noche: 'Se quemó', dia: 'Se echó a perder' })
     const app = readFileSync(join(process.cwd(), 'mobile', 'src', 'lib', 'tema.ts'), 'utf8')
     expect(app).toContain(`SE_QUEMO: Record<Tema, string> = { noche: '${SE_QUEMO.noche}', dia: '${SE_QUEMO.dia}' }`)
+  })
+
+  it('la app del teléfono llama igual que el panel a las pantallas que cambian de día y al calor de cada día', () => {
+    const app = readFileSync(join(process.cwd(), 'mobile', 'src', 'lib', 'tema.ts'), 'utf8')
+    for (const [constante, ruta] of [
+      ['LA_PARRILLA', '/admin/schedule'],
+      ['LOS_FIERROS', '/admin/accounts'],
+    ] as const) {
+      expect(app).toContain(`${constante}: Record<Tema, string> = { noche: '${nombreDe(ruta)}', dia: '${nombreDe(ruta, 'dia')}' }`)
+    }
+    for (const tema of ['noche', 'dia'] as const) {
+      const { apagada, prendida, llena } = ROTULO_CALOR[tema]
+      expect(app).toContain(`${tema}: { apagada: '${apagada}', prendida: '${prendida}', llena: '${llena}' }`)
+    }
+  })
+})
+
+/** Los archivos de una carpeta, recursivos, sin los tests. */
+function fuentes(dir: string): string[] {
+  return readdirSync(dir, { withFileTypes: true }).flatMap((e) => {
+    const ruta = join(dir, e.name)
+    if (e.isDirectory()) return fuentes(ruta)
+    return /\.tsx?$/.test(e.name) && !/\.test\./.test(e.name) ? [ruta] : []
+  })
+}
+
+/** El texto de cada cadena, plantilla y texto JSX de un archivo, con su renglón: lo que se ve, sin los comentarios. */
+function textosDe(archivo: string): Array<{ renglon: number; texto: string }> {
+  const fuente = readFileSync(archivo, 'utf8')
+  const sf = ts.createSourceFile(archivo, fuente, ts.ScriptTarget.Latest, true, archivo.endsWith('x') ? ts.ScriptKind.TSX : ts.ScriptKind.TS)
+  const textos: Array<{ renglon: number; texto: string }> = []
+  const visitar = (nodo: ts.Node) => {
+    if (ts.isStringLiteral(nodo) || ts.isNoSubstitutionTemplateLiteral(nodo) || ts.isJsxText(nodo)) {
+      textos.push({ renglon: sf.getLineAndCharacterOfPosition(nodo.getStart()).line + 1, texto: nodo.text })
+    } else if (ts.isTemplateExpression(nodo)) {
+      textos.push({ renglon: sf.getLineAndCharacterOfPosition(nodo.getStart()).line + 1, texto: nodo.getText() })
+    }
+    ts.forEachChild(nodo, visitar)
+  }
+  visitar(sf)
+  return textos
+}
+
+describe('el modo día', () => {
+  it('La Parrilla es La Barra y Los Fierros son Los Cuchillos; las demás pantallas se llaman igual', () => {
+    expect(nombreDe('/admin/schedule', 'dia')).toBe('La Barra')
+    expect(nombreDe('/admin/accounts', 'dia')).toBe('Los Cuchillos')
+    // Sin modo, la noche: lo que no sabe en qué modo se lee nombra la pantalla como siempre.
+    expect(nombreDe('/admin/schedule')).toBe('La Parrilla')
+    expect(nombreDe('/admin/accounts')).toBe('Los Fierros')
+    for (const p of PANTALLAS.filter((p) => p.ruta !== '/admin/schedule' && p.ruta !== '/admin/accounts')) {
+      expect(nombreEn(p, 'dia'), p.ruta).toBe(p.nombre)
+    }
+  })
+
+  it('no hay dos pantallas con el mismo nombre de día, ni uno de día que sea el de noche de otra', () => {
+    const deDia = PANTALLAS.map((p) => nombreEn(p, 'dia'))
+    expect(new Set(deDia).size).toBe(deDia.length)
+    for (const p of PANTALLAS) {
+      if (p.nombreDeDia) expect(PANTALLAS.map((q) => q.nombre)).not.toContain(p.nombreDeDia)
+    }
+  })
+
+  it('cada palabra de día dice otra cosa que la de noche', () => {
+    for (const palabra of PALABRAS_DE_DIA) expect(palabra.dia, palabra.noche).not.toBe(palabra.noche)
+  })
+
+  it('ningún texto del panel ni de la portada escribe a mano el nombre de una pantalla que cambia de día', () => {
+    // Escrito a mano, el nombre no cambia con el modo: de día la persona leería «Los Fierros»
+    // al lado de una barra que dice «Los Cuchillos». Va con `NombreDe` o con `nombreDe(ruta, tema)`.
+    // Las frases de error no viven acá (`src/lib`): son de la API y se guardan, y no cambian.
+    const nombres = PANTALLAS.filter((p) => p.nombreDeDia).map((p) => p.nombre)
+    const raiz = process.cwd()
+    const hallazgos = [join(raiz, 'src', 'app', 'admin'), join(raiz, 'src', 'components')]
+      .flatMap(fuentes)
+      .flatMap((archivo) =>
+        textosDe(archivo)
+          .filter(({ texto }) => nombres.some((nombre) => texto.includes(nombre)))
+          .map(({ renglon, texto }) => `${relative(raiz, archivo)}:${renglon}: ${texto.trim().slice(0, 80)}`),
+      )
+    expect(hallazgos).toEqual([])
   })
 })
 

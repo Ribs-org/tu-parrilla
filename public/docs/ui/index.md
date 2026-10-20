@@ -34,22 +34,24 @@ Está siempre, fija arriba, en todas las pantallas del panel. De izquierda a der
 
 1. **«Panel»**, en mayúsculas. Es un rótulo, no un botón. En un teléfono no aparece: le deja el lugar a las pestañas.
 2. **Cuatro pestañas**, iguales para todos: «La Parrilla», «La Mesa», «Los Números» y «Tu IA».
+   De día, la primera se llama «La Barra» (ver «El modo día», abajo).
    «Tu IA» lleva al lado el dibujo de un maestro cocinero: de noche, un parrillero de sombrero
    de ala ancha y delantal; de día, un maestro de sushi con su gorrito alto. La activa
    se pinta con fondo naranjo. En una pantalla angosta (un
    teléfono) no caben las cuatro: la fila se desplaza de lado y la última se desvanece en el
    borde. La pestaña en la que está se ve siempre entera; si no ve otra, que deslice la barra.
 3. **El botón «Ajustes»**, a la derecha, con el ícono de un trinche y un cuchillo, lado a lado (antes era un engranaje:
-   si alguien dice «el engranaje», es este). En pantallas angostas se ve solo el ícono, sin la
+   si alguien dice «el engranaje», es este); de día, dos palillos en diagonal. En pantallas angostas se ve solo el ícono, sin la
    palabra. Abre un menú con cuatro entradas, cada una con su subtítulo debajo: «Los Fierros»
-   (tus redes conectadas), «La Vitrina» (tus páginas públicas), «Los Maestros» (quién puede
+   (tus redes conectadas; de día, «Los Cuchillos»), «La Vitrina» (tus páginas públicas), «Los Maestros» (quién puede
    entrar; **solo lo ve el admin**) y «Tu Cuenta» (tu nombre y tu hora). Cuando la
    persona está en una de esas pantallas, el botón queda pintado de naranjo. Si el permiso
    de alguna cuenta conectada vence en la semana, el botón lleva un punto ámbar; si alguna
    ya se apagó (venció o dejó de sincronizar), un punto rojo. Adentro, la entrada «Los Fierros»
-   lo dice al lado del nombre: «1 se enfría», «2 se enfrían», «1 se apagó» o «2 se apagaron»
-   (un lector de pantalla lee el botón «Ajustes: en Los Fierros, 1 se enfría»). Sin nada
-   que avisar no hay punto. El menú se cierra con Escape, al elegir una entrada o volviendo a
+   lo dice al lado del nombre: «1 se enfría», «2 se enfrían», «1 se apagó» o «2 se apagaron»;
+   de día, «1 se desafila», «2 se desafilan», «1 sin filo» o «2 sin filo»
+   (un lector de pantalla lee el botón «Ajustes: en Los Fierros, 1 se enfría», o de día «Ajustes: en Los Cuchillos, 1 se
+   desafila»). Sin nada que avisar no hay punto. El menú se cierra con Escape, al elegir una entrada o volviendo a
    apretar el botón; un clic afuera no lo cierra.
 4. **El botón del modo**, a la derecha de Ajustes. De noche lleva un sol y dice «Modo día»; de
    día, una luna y «Modo noche»: muestra el modo al que lleva, no el que está puesto. En
@@ -73,13 +75,18 @@ se ve arriba, grande y en mayúsculas.
 | Los Maestros | quién puede entrar | `/admin/usuarios` | Botón «Ajustes», solo el admin. Invitar gente | [los-maestros.md](los-maestros.md) |
 | Tu Cuenta | tu nombre y tu hora | `/admin/cuenta` | Botón «Ajustes». Nombre y zona horaria | [tu-cuenta.md](tu-cuenta.md) |
 
+De día, dos se llaman distinto, en la barra, en Ajustes y en su título: La Parrilla es **«La
+Barra»** y Los Fierros son **«Los Cuchillos»**. La dirección y lo que se hace en cada una no
+cambian (ver «El modo día»).
+
 Y dos páginas que no son una pantalla del panel: [Entrar al panel](ingresar.md) y [La app del
 teléfono](app-movil.md).
 
 ## Cómo ubicar a una persona perdida
 
 1. **Pregúntale qué título grande ve arriba.** Es el nombre de la pantalla (en mayúsculas) y
-   debajo va el subtítulo. Con eso sabes en qué página de esta wiki está. Si dice «Tus
+   debajo va el subtítulo. Con eso sabes en qué página de esta wiki está; si dice «La Barra» o
+   «Los Cuchillos», está de día, en La Parrilla o en Los Fierros. Si dice «Tus
    publicaciones», «Comparar por atributo», «Tu mejor 10 %» o «Tu peor 10 %» (o 5, 20, 25) o «Lado a lado», o si arriba del título dice «Pieza» en chico y el
    título es el texto de un post, está dentro de Los Números ([los-numeros.md](los-numeros.md)).
 2. **Si no sabe el nombre, tradúcelo desde lo que quiere hacer** (la tabla de abajo).
@@ -144,7 +151,8 @@ esto es lo que quiere decir:
 - **Fierro:** una red conectada. Su fila en Los Fierros lleva una barra de color, el
   fierro, que dice cómo está la conexión: naranja encendido (al rojo: viva), ámbar
   (enfriándose: vence en siete días o menos) o gris apagado (frío: desconectada, rota o
-  vencida, hay que reconectar).
+  vencida, hay que reconectar). De día es un cuchillo chico, con la hoja en salmón tostado
+  (con filo), ámbar (se desafila) o gris (sin filo), y la pantalla se llama Los Cuchillos.
 - **Servido:** un corte que salió. El pie de La Parrilla cuenta los de ayer.
 
 Y tres palabras de Los Números que no son del asado pero se confunden:
@@ -172,13 +180,41 @@ pública de cada creador; tampoco la vista previa de La Vitrina, que es esa pág
 teléfono tiene los dos modos y va con la cuenta: se cambia también en su Ajustes, con «Modo día»
 o «Modo noche» ([app-movil.md](app-movil.md)).
 
-**Las palabras no cambian, salvo una.** De día, los botones, los títulos, los estados y los
-mensajes dicen lo mismo que de noche («La Parrilla», «Programada», «Falló»). La excepción es la
-sección «Se quemó» de La Parrilla, que de día se llama **«Se echó a perder»**: de día nada se
-quema, y el pescado que no se sirvió se echa a perder. Todo lo que esta wiki dice de «Se quemó»
-vale para ella, y el resumen que llega por correo la nombra como la ve la cuenta. Lo demás que
-cambia son los dibujos. Si la persona describe lo que ve de día, esta es la equivalencia con lo
-que dicen las páginas:
+**Algunas palabras cambian.** Con sushi no tenía sentido hablar de fierros ni de fuego, así que
+de día dos pantallas se llaman distinto, en la barra, en Ajustes y en su título: La Parrilla es
+**«La Barra»** y Los Fierros son **«Los Cuchillos»**. También lo que el panel dice del asado:
+el fierro de cada cuenta es un cuchillo, que se desafila en vez de enfriarse; un corte es una
+pieza, y lo que falló no se quema, se echa a perder. No cambian las direcciones, los botones,
+los estados («Programada», «Falló») ni lo que hace cada pantalla. Tampoco las frases de error,
+que son las mismas de la API: si una dice «Los Fierros», de día es Los Cuchillos. Los correos
+nombran las pantallas como las ve la cuenta. Todo lo que esta wiki dice con la palabra de noche
+vale para la de día:
+
+| De noche (como lo dicen las páginas) | De día | Dónde |
+|---|---|---|
+| «La Parrilla» | «La Barra» | La pestaña, su título y cada frase que nombra la pantalla |
+| «Los Fierros» | «Los Cuchillos» | La entrada de Ajustes, su título y cada frase que la nombra |
+| «Se quemó» | «Se echó a perder» | La sección de La Parrilla con lo que falló, y el correo |
+| «El manual del parrillero» | «El manual del maestro de sushi» | Al final de Tu IA, y el título del manual |
+| «Su fierro está frío: reconéctala» | «Su cuchillo está sin filo: reconéctala» | Un destino hacia una cuenta que hay que reconectar |
+| «se enfría» | «se desafila» | Al lado de una cuenta cuyo permiso vence en la semana, en el compositor |
+| «1 se enfría» | «1 se desafila» | El aviso de Ajustes; con más, «2 se desafilan» |
+| «1 se apagó» | «1 sin filo» | El aviso de Ajustes; con más, «2 sin filo» |
+| «un corte» | «una pieza» | El compositor: «Ese día ya tiene una pieza.» o «… 2 piezas.» |
+| «1 corte servido» | «1 pieza servida» | El pie de La Parrilla: «Ayer: 3 piezas servidas» |
+| «Apagada» | «Vacía» | El calor de un día del calendario |
+| «Prendida» | «Con piezas» | El calor de un día |
+| «Parrilla llena» | «Tabla llena» | El calor de un día |
+
+Y unas frases enteras: en Los Fierros, «Este fierro se está enfriando: la conexión vence <fecha>.
+Reconéctala antes de que se apague.» es «Este cuchillo se está desafilando: la conexión vence
+<fecha>. Reconéctala antes de que pierda el filo.»; en el compositor, «Ese día está apagado.
+Buen lugar para este.» es «Ese día está vacío. Buen lugar para este.»; y en La Parrilla sin
+redes, «Sin una red conectada no hay nada que poner al fuego.» es «Sin una red conectada no hay
+nada que servir.».
+
+Lo demás que cambia son los dibujos. Si la persona describe lo que ve de día, esta es la
+equivalencia con lo que dicen las páginas:
 
 | Lo que dicen las páginas (de noche) | Lo que se ve de día | Qué quiere decir |
 |---|---|---|
@@ -195,7 +231,8 @@ que dicen las páginas:
 | La parrilla fría | La tabla vacía, sin color | Un día sin nada |
 | El fuego del día | Un tono salmón que sube desde abajo | Un día con uno o dos cortes, o lleno |
 | El naranjo de lo activo (la pestaña, los botones llenos) | Un salmón tostado, más oscuro | Lo mismo |
-| El fierro encendido, en naranjo | La misma barra, en salmón tostado | La conexión está viva |
+| El fierro, la barrita de color de cada cuenta | Un cuchillo chico: el mango oscuro a la izquierda y la hoja a la derecha, en salmón tostado; ámbar si se desafila, gris si perdió el filo | Cómo está la conexión |
+| El trinche y el cuchillo del botón «Ajustes» | Dos palillos en diagonal | El mismo botón |
 
 ## Lo que no existe (no la mandes a buscarlo)
 
@@ -220,12 +257,15 @@ que dicen las páginas:
 Sale de:
 
 - `src/app/admin/(dash)/layout.tsx` y `src/app/admin/(dash)/nav.tsx`: la barra, las pestañas,
-  el botón «Ajustes» y «Salir». El ícono de Ajustes, en `src/components/icono-ajustes.tsx`.
+  el botón «Ajustes» y «Salir». El ícono de Ajustes, con los palillos de día, en
+  `src/components/icono-ajustes.tsx`.
 - El modo día: el botón, en `src/components/boton-tema.tsx`; el modo, en la cuenta
   (`users.tema`, que guarda `guardarTema` en `src/app/admin/actions.ts`), con su copia en una
   cookie para la puerta, en `src/lib/tema.ts` y `src/lib/tema-servidor.ts`; las piezas de sushi, en
-  `src/components/pieza-sushi.tsx`; los colores, en `src/app/globals.css`
-  (`.acerado[data-tema='dia']`).
+  `src/components/pieza-sushi.tsx`; los colores y el cuchillo de cada cuenta, en
+  `src/app/globals.css` (`.acerado[data-tema='dia']`); las palabras de día, en
+  `src/lib/vocabulario.ts` (`PALABRAS_DE_DIA`), puestas en la página en los dos modos con
+  `src/components/de-noche-y-de-dia.tsx`.
 - `src/app/admin/(dash)/page.tsx`: `/admin` lleva a La Parrilla.
 - `src/app/admin/(dash)/content/page.tsx`: la dirección de la antigua pestaña Los Cortes lleva a
   «Tus publicaciones», dentro de Los Números.

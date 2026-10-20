@@ -12,7 +12,7 @@ que nunca se usó y corta las sesiones abiertas de una persona.
 ## Cómo se llega
 
 1. En la barra de arriba, apretar el botón «Ajustes» (en una pantalla angosta se ve solo el
-   ícono, un trinche y un cuchillo, lado a lado, sin la palabra).
+   ícono, un trinche y un cuchillo, lado a lado —de día, dos palillos—, sin la palabra).
 2. En el menú, apretar «Los Maestros», la que tiene debajo «quién puede entrar». Está entre La
    Vitrina y Tu Cuenta.
 

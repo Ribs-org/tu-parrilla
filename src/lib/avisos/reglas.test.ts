@@ -171,6 +171,12 @@ describe('correoDeCaida', () => {
   it('una sola publicación va en singular', () => {
     expect(correoDeCaida({ red: 'x', handle: '@v', vencida: false }, 1, '').text).toContain('Tiene 1 publicación por salir')
   })
+
+  it('de día manda a Los Cuchillos, como se llama la pantalla en ese modo', () => {
+    const correo = correoDeCaida({ red: 'instagram', handle: null, vencida: true }, 0, '', 'dia')
+    expect(correo.text).toContain('Reconéctala en Los Cuchillos: /admin/accounts')
+    expect(correo.text).not.toContain('Los Fierros')
+  })
 })
 
 describe('correoDeResumen', () => {
@@ -210,12 +216,23 @@ describe('correoDeResumen', () => {
     expect(correo.text.match(/^- /gm)).toHaveLength(MAX_FALLIDOS_EN_CORREO)
   })
 
-  it('de día, lo que falló se echó a perder: nombra la sección como la ve la persona', () => {
-    const correo = correoDeResumen({ ...vacio, fallidos: [fallido] }, ZONA, 'https://tu-parrilla.cl', AHORA, 'dia')!
-    expect(correo.subject).toBe('Tu parrilla hoy: 1 destino echado a perder')
+  it('de día, lo que falló se echó a perder: nombra la sección y las pantallas como las ve la persona', () => {
+    const correo = correoDeResumen(
+      {
+        fallidos: [fallido],
+        cuentas: [{ cuentaId: 'tt-1', red: 'tiktok', handle: '@tt', fierro: 'frio', vence: null, motivo: CONEXION_FALLO }],
+        pista: [{ cuentaId: 'fb-1', red: 'facebook', handle: 'Página', ultima: null, dias: 0 }],
+      },
+      ZONA,
+      'https://tu-parrilla.cl',
+      AHORA,
+      'dia',
+    )!
+    expect(correo.subject).toBe('Tu barra hoy: 1 destino echado a perder, 1 cuenta por reconectar, 1 cuenta con poco en la barra')
     expect(correo.text).toContain(`Se echaron a perder en las últimas ${HORAS_DE_FALLIDOS} horas (1):`)
-    expect(correo.text).toContain('Revísalos en «Se echó a perder», en La Parrilla: https://tu-parrilla.cl/admin/schedule')
-    expect(correo.text).not.toMatch(/quem/i)
+    expect(correo.text).toContain('Revísalos en «Se echó a perder», en La Barra: https://tu-parrilla.cl/admin/schedule')
+    expect(correo.text).toContain('Reconéctalas en Los Cuchillos: https://tu-parrilla.cl/admin/accounts')
+    expect(correo.text).not.toMatch(/quem|La Parrilla|Los Fierros/i)
   })
 
   it('sin modo, la noche: el correo de siempre', () => {

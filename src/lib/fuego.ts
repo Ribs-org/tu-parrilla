@@ -1,5 +1,7 @@
 import { dayKey, diaYHora, hourLabel } from '@/lib/schedule-week'
+import type { Tema } from '@/lib/tema'
 import { formatNumber } from '@/lib/utils'
+import { servidos as servidosEnPalabras } from '@/lib/vocabulario'
 
 // Lo que La Parrilla decide sin tocar la base para lo que pide una acción: qué se quemó, a
 // qué hora y día, y qué dice el pie de ayer (cuántos cortes y cuántas miradas). La página
@@ -57,11 +59,11 @@ export function horaConDia(scheduledAt: Date, now: Date, zone: string): string {
 
 /**
  * El pie de la pantalla. Las miradas solo cuando el sync ya las trajo: un cero inventado
- * diría «nadie miró» cuando lo cierto es «todavía no se sabe».
+ * diría «nadie miró» cuando lo cierto es «todavía no se sabe». De día, piezas servidas.
  */
-export function pieDeAyer(servidos: number, miradas: number | null): string {
+export function pieDeAyer(servidos: number, miradas: number | null, tema: Tema = 'noche'): string {
   if (servidos === 0) return 'Ayer no salió nada.'
-  const cortes = servidos === 1 ? '1 corte servido' : `${servidos} cortes servidos`
+  const cortes = servidosEnPalabras(servidos, tema)
   return miradas === null ? `Ayer: ${cortes}` : `Ayer: ${cortes} · ${formatNumber(miradas)} miradas`
 }
 

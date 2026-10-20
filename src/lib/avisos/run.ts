@@ -5,6 +5,7 @@ import { and, count, desc, eq, gt, gte, inArray, isNotNull, isNull, max, sql } f
 import { getDb, scheduledPosts, scheduledPostTargets, socialAccounts, users } from '@/db'
 import { dominioProducto } from '@/lib/dominios'
 import { destinatario, enviarAviso } from '@/lib/social/publish/alert'
+import { temaDe } from '@/lib/tema'
 import { ZONA_POR_DEFECTO } from '@/lib/zona'
 import {
   DIAS_DE_PISTA,
@@ -76,7 +77,7 @@ export async function marcarCaida(accountId: string, motivo: string): Promise<vo
 export async function vigilarConexiones(ahora: Date = new Date()): Promise<{ avisadas: number; recuperadas: number }> {
   const db = getDb()
   const cuentas = await db
-    .select({ ...columnasVigiladas, correo: users.correo })
+    .select({ ...columnasVigiladas, correo: users.correo, tema: users.tema })
     .from(socialAccounts)
     .leftJoin(users, eq(users.id, socialAccounts.ownerId))
 
@@ -109,7 +110,7 @@ export async function vigilarConexiones(ahora: Date = new Date()): Promise<{ avi
     const vencida = cuenta.conCredencial && !cuenta.lastSyncError
     const enviado = await enviarAviso(
       para,
-      correoDeCaida({ red: cuenta.network, handle: cuenta.handle, vencida }, pendientes, sitio()),
+      correoDeCaida({ red: cuenta.network, handle: cuenta.handle, vencida }, pendientes, sitio(), temaDe(cuenta.tema)),
     )
     if (enviado) {
       avisadas++

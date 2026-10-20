@@ -3,7 +3,8 @@
 import { useId } from 'react'
 import { useFormStatus } from 'react-dom'
 import { BOTON_FORMA } from '@/components/boton'
-import { pantallaDe } from '@/lib/vocabulario'
+import { DeNocheYDeDia } from '@/components/de-noche-y-de-dia'
+import { nombreEn, pantallaDe } from '@/lib/vocabulario'
 import { cn } from '@/lib/utils'
 
 // `color-scheme: dark` es para lo que dibuja el sistema y no el CSS: la lista desplegable de
@@ -15,8 +16,9 @@ const CONTROL =
 /**
  * El título de una pantalla del panel, con su subtítulo en llano debajo: la red de
  * seguridad de los nombres del asado (dirección visual, §2). Sale del vocabulario, así que
- * una pantalla no puede llamarse distinto en la barra y en su título. `children` es lo que
- * la pantalla quiera a la derecha —un selector, un botón— y se alinea con el título.
+ * una pantalla no puede llamarse distinto en la barra y en su título, ni de noche ni de día.
+ * `children` es lo que la pantalla quiera a la derecha —un selector, un botón— y se alinea con
+ * el título.
  */
 export function Encabezado({ ruta, children }: { ruta: string; children?: React.ReactNode }) {
   const pantalla = pantallaDe(ruta)
@@ -24,7 +26,9 @@ export function Encabezado({ ruta, children }: { ruta: string; children?: React.
   return (
     <div className="flex flex-wrap items-end justify-between gap-3">
       <div>
-        <h1 className="font-titulo text-2xl font-semibold uppercase tracking-[0.03em]">{pantalla.nombre}</h1>
+        <h1 className="font-titulo text-2xl font-semibold uppercase tracking-[0.03em]">
+          <DeNocheYDeDia noche={pantalla.nombre} dia={nombreEn(pantalla, 'dia')} />
+        </h1>
         <p className="mt-0.5 text-[0.78rem] text-fg-faint">{pantalla.subtitulo}</p>
       </div>
       {children}

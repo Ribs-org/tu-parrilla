@@ -204,6 +204,11 @@ del panel web, y vale en los dos. El teléfono guarda una copia para abrir en el
 vez sin esperar a la red, vuelve a preguntarle a la cuenta cada vez que la app pasa al frente, y
 un cambio hecho sin señal se manda cuando vuelve la conexión (`src/components/tema.tsx`).
 
+De día también cambian unas palabras, como en el panel: La Parrilla es La Barra, Los Fierros son
+Los Cuchillos —el fierro de una cuenta se desafila en vez de enfriarse—, los cortes son piezas y
+el botón de Ajustes lleva dos palillos. Salen de `src/lib/tema.ts`, que copia las del panel
+(`src/lib/vocabulario.ts` en la raíz) y que un test del panel compara.
+
 Para quien agregue una pantalla: los colores salen de `useColores()` (`src/components/tema.tsx`),
 nunca escritos a mano, y lo que sombrea con transparencia usa el velo del modo
 (`colores.velo + '10'`), blanco de noche y tinta de día. Las dos paletas viven en

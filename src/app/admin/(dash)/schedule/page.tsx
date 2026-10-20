@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Plus } from 'lucide-react'
 import { ENLACE_BOTON, ENLACE_BOTON_SECUNDARIO } from '@/components/boton'
 import { Corte } from '@/components/corte'
+import { DeNocheYDeDia, NombreDe } from '@/components/de-noche-y-de-dia'
 import { Encabezado } from '@/components/ui'
 import { requireUser } from '@/lib/auth'
 import { fechaParaDia, idDeBorrador, primero, textoDe } from '@/lib/borrador'
@@ -22,7 +23,6 @@ import {
 } from '@/lib/schedule-week'
 import { servidosAyer, todosLosCortes } from '@/lib/social/publish/cortes'
 import { cn, toZonedInput } from '@/lib/utils'
-import { nombreDe } from '@/lib/vocabulario'
 import { BatchUpload } from './batch-upload'
 import { WeekCalendar } from './calendar'
 import { Composer } from './composer'
@@ -274,7 +274,12 @@ export default async function SchedulePage({
         {/* Ayer, en mono y al pie: las miradas solo si el sync ya las trajo; un cero
             inventado diría «nadie miró» cuando lo cierto es «todavía no se sabe». */}
         {hayConectada ? (
-          <p className="font-mono text-[0.72rem] text-fg-faint">{pieDeAyer(ayer.servidos, ayer.miradas)}</p>
+          <p className="font-mono text-[0.72rem] text-fg-faint">
+            <DeNocheYDeDia
+              noche={pieDeAyer(ayer.servidos, ayer.miradas, 'noche')}
+              dia={pieDeAyer(ayer.servidos, ayer.miradas, 'dia')}
+            />
+          </p>
         ) : null}
       </div>
 
@@ -291,9 +296,14 @@ function PrimerDia() {
   return (
     <section className="chapa rounded-2xl p-6">
       <h2 className="font-titulo text-lg font-semibold uppercase tracking-[0.03em]">Conecta tu primera red</h2>
-      <p className="mt-2 text-sm text-fg-muted">Sin una red conectada no hay nada que poner al fuego.</p>
+      <p className="mt-2 text-sm text-fg-muted">
+        <DeNocheYDeDia
+          noche="Sin una red conectada no hay nada que poner al fuego."
+          dia="Sin una red conectada no hay nada que servir."
+        />
+      </p>
       <Link href="/admin/accounts" className={`mt-5 ${ENLACE_BOTON}`}>
-        Ir a {nombreDe('/admin/accounts')} →
+        Ir a <NombreDe ruta="/admin/accounts" /> →
       </Link>
     </section>
   )

@@ -4,6 +4,14 @@
 entrada del panel: `/admin` lleva acá. El editor de cada publicación vive en
 `/admin/schedule/<id>`.
 
+**De día** esta pantalla se llama «La Barra», en la pestaña y en su título, y unas palabras
+cambian: «Se quemó» es «Se echó a perder»; el calor de cada día dice «Vacía», «Con piezas» o
+«Tabla llena» en vez de «Apagada», «Prendida» o «Parrilla llena»; los cortes son piezas («Ayer:
+3 piezas servidas», «Ese día ya tiene una pieza.»); «Su fierro está frío: reconéctala» es «Su
+cuchillo está sin filo: reconéctala», y «se enfría», «se desafila». Cada frase que aquí dice «La
+Parrilla» o «Los Fierros» dice de día «La Barra» o «Los Cuchillos». La lista entera, en «El modo
+día», en [index.md](index.md).
+
 La Parrilla es el calendario de publicación y la pantalla con que abre el panel. Aquí se
 programa un post para una o varias cuentas (Instagram, Facebook, YouTube y TikTok; Threads
 y X dicen «Próximamente»), se retoma lo que quedó a medio escribir (los borradores, que se guardan solos), se

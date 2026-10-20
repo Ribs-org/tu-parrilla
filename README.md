@@ -206,9 +206,15 @@ puerta, que se dibuja antes de saber de quién es. El modo día es el fondo clar
 (`src/components/pieza-sushi.tsx`) que dicen lo mismo con la misma gramática —nigiri, un roll
 que se corta al servirse, sashimi y temaki; el pescado bajo el soplete; una banda de nori por
 destino—. Lo que falló no
-se quema: es pescado pasado, y la sección «Se quemó» se llama «Se echó a perder» (`SE_QUEMO`,
-en `src/lib/vocabulario.ts`). Las demás palabras no cambian, la noche sigue por defecto, y la
-página pública de cada creador no cambia nunca. La portada tiene los dos modos, con el mismo
+se quema: es pescado pasado, y la sección «Se quemó» se llama «Se echó a perder». Cambian
+también las palabras que con sushi no tenían sentido: de día La Parrilla es **La Barra**, Los
+Fierros son **Los Cuchillos** —el fierro de cada cuenta es un cuchillo, que se desafila en vez
+de enfriarse—, un corte es una pieza y el botón de Ajustes lleva dos palillos en vez del trinche
+y el cuchillo. Todas salen de `src/lib/vocabulario.ts` (`PALABRAS_DE_DIA`, que la wiki tiene
+que nombrar entera) y van en la página en los dos modos (`src/components/de-noche-y-de-dia.tsx`),
+para que el botón las cambie sin recargar; las direcciones, los estados, las frases de error y
+la API no cambian. La noche sigue por defecto, y la página pública de cada creador no cambia
+nunca. La portada tiene los dos modos, con el mismo
 botón: de día su marca es el nigiri, y `?modo=dia` la abre de día, con su imagen para compartir
 (`/api/og/dia`). El
 diseño, en `docs/superpowers/specs/2026-10-19-modo-dia-sushi-design.md`. Al pie, cuántos cortes salieron ayer; las miradas solo si la sincronización ya
@@ -1265,7 +1271,10 @@ src/
     corte.tsx              el corte dibujado de La Parrilla: silueta, carne, marcas, halo y humo
     pieza-sushi.tsx        el mismo corte en el modo día: nigiri, roll, sashimi y temaki
     boton-tema.tsx         el botón de la barra que cambia entre la noche y el día
+    de-noche-y-de-dia.tsx  lo que se dice distinto de día, en sus dos versiones (el modo esconde una), y el nombre de cada pantalla
+    tema-vivo.ts           el modo que se ve ahora, para lo que el CSS no alcanza: un aria-label, un title, un confirm
     icono-maestro.tsx      el dibujo de la pestaña Tu IA: el parrillero de noche, el maestro de sushi de día
+    icono-ajustes.tsx      el botón de Ajustes: el trinche y el cuchillo de noche, los palillos de día
     landing.tsx            la portada del producto, armada con las piezas del panel y con los dos modos; landing-demos.tsx, lo que se toca
     landing-semana.ts      la semana de ejemplo, que comparten la portada y sus imágenes para compartir (/api/og, /api/og/dia)
     esqueleto.tsx          las piezas de la carga del panel: la forma de cada pantalla, con su pulso tibio

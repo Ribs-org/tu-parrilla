@@ -5,7 +5,7 @@ import { isoInZone } from '@/lib/metrics-api'
 import { networkLabel } from '@/lib/networks'
 import { estadoDelFierro, seRenuevaSola, type Fierro } from '@/lib/parrilla'
 import type { Tema } from '@/lib/tema'
-import { SE_QUEMO } from '@/lib/vocabulario'
+import { SE_QUEMO, nombreDe } from '@/lib/vocabulario'
 
 /** Debajo de cuántos días programados una cuenta entra en el resumen por quedarse sin parrilla. */
 export const DIAS_DE_PISTA = 3
@@ -243,11 +243,13 @@ function extracto(texto: string): string {
  * El correo de una cuenta caída. `pendientes` son sus destinos que todavía esperan salir:
  * es lo que se pierde si nadie la reconecta, y lo que el correo tiene que decir primero.
  * `sitio` es el origen del panel (`https://tu-parrilla.cl`), o vacío para dejar la ruta sola.
+ * Nombra la pantalla como la ve la cuenta (`tema`): de día, Los Cuchillos.
  */
 export function correoDeCaida(
   cuenta: { red: string; handle: string | null; vencida: boolean },
   pendientes: number,
   sitio: string,
+  tema: Tema = 'noche',
 ): { subject: string; text: string } {
   const nombre = cuentaLegible(cuenta.red, cuenta.handle)
   const que = cuenta.vencida
@@ -263,7 +265,7 @@ export function correoDeCaida(
       que,
       loQueSePierde,
       '',
-      `Reconéctala en Los Fierros: ${sitio}/admin/accounts`,
+      `Reconéctala en ${nombreDe('/admin/accounts', tema)}: ${sitio}/admin/accounts`,
       '',
       'Este aviso llega una vez por caída: si la reconectas y se vuelve a caer, llega otro.',
     ].join('\n'),
@@ -277,6 +279,12 @@ export function correoDeCaida(
 const LO_QUE_FALLO: Record<Tema, { uno: string; varios: string; cuando: string }> = {
   noche: { uno: 'destino quemado', varios: 'destinos quemados', cuando: 'Se quemaron' },
   dia: { uno: 'destino echado a perder', varios: 'destinos echados a perder', cuando: 'Se echaron a perder' },
+}
+
+/** El asunto y la cuenta que se queda sin nada programado, también en el modo de la cuenta. */
+const DEL_RESUMEN: Record<Tema, { asunto: string; poca: { uno: string; varios: string } }> = {
+  noche: { asunto: 'Tu parrilla hoy', poca: { uno: 'cuenta con poca parrilla', varios: 'cuentas con poca parrilla' } },
+  dia: { asunto: 'Tu barra hoy', poca: { uno: 'cuenta con poco en la barra', varios: 'cuentas con poco en la barra' } },
 }
 
 /**
@@ -304,7 +312,7 @@ export function correoDeResumen(
       lineas.push(`- ${fechaLegible(f.fecha, zona)} · ${cuentaLegible(f.red, f.handle)} · «${extracto(f.texto)}» — ${f.error ?? 'sin motivo'}`)
     }
     if (r.fallidos.length > MAX_FALLIDOS_EN_CORREO) lineas.push(`y ${r.fallidos.length - MAX_FALLIDOS_EN_CORREO} más.`)
-    lineas.push(`Revísalos en «${SE_QUEMO[tema]}», en La Parrilla: ${sitio}/admin/schedule`, '')
+    lineas.push(`Revísalos en «${SE_QUEMO[tema]}», en ${nombreDe('/admin/schedule', tema)}: ${sitio}/admin/schedule`, '')
   }
 
   if (r.cuentas.length > 0) {
@@ -314,11 +322,11 @@ export function correoDeResumen(
       const cuando = c.fierro === 'enfriandose' && c.vence ? ` Vence el ${fechaLegible(c.vence, zona)}.` : ''
       lineas.push(`- ${cuentaLegible(c.red, c.handle)} — ${c.motivo}${cuando}`)
     }
-    lineas.push(`Reconéctalas en Los Fierros: ${sitio}/admin/accounts`, '')
+    lineas.push(`Reconéctalas en ${nombreDe('/admin/accounts', tema)}: ${sitio}/admin/accounts`, '')
   }
 
   if (r.pista.length > 0) {
-    partes.push(plural(r.pista.length, 'cuenta con poca parrilla', 'cuentas con poca parrilla'))
+    partes.push(plural(r.pista.length, DEL_RESUMEN[tema].poca.uno, DEL_RESUMEN[tema].poca.varios))
     lineas.push(`Cuentas con menos de ${DIAS_DE_PISTA} días programados (${r.pista.length}):`)
     for (const p of r.pista) {
       const cuanto = p.ultima ? `lo último sale el ${fechaLegible(p.ultima, zona)}` : 'no tiene nada programado'
@@ -328,7 +336,7 @@ export function correoDeResumen(
   }
 
   return {
-    subject: `Tu parrilla hoy: ${partes.join(', ')}`,
+    subject: `${DEL_RESUMEN[tema].asunto}: ${partes.join(', ')}`,
     text: [
       `Resumen de Tu Parrilla, ${fechaLegible(ahora, zona)}.`,
       '',

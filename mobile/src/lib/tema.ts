@@ -37,3 +37,39 @@ export function temaDeLaRespuesta(cuerpo: unknown): Tema | null {
  * que no se sirvió se echó a perder.
  */
 export const SE_QUEMO: Record<Tema, string> = { noche: 'Se quemó', dia: 'Se echó a perder' }
+
+/*
+ * Las otras palabras que cambian de día, como en el panel (`src/lib/vocabulario.ts`, que un test
+ * compara con estas). Con sushi no tenían sentido los fierros ni el fuego: La Parrilla es La
+ * Barra, Los Fierros son Los Cuchillos —el fierro de una cuenta se desafila en vez de enfriarse—,
+ * y un corte es una pieza. Lo pidió el dueño el 2026-10-20.
+ */
+export const LA_PARRILLA: Record<Tema, string> = { noche: 'La Parrilla', dia: 'La Barra' }
+export const LOS_FIERROS: Record<Tema, string> = { noche: 'Los Fierros', dia: 'Los Cuchillos' }
+
+/** El calor de un día de la agenda, como la grilla del panel (`ROTULO_CALOR`). */
+export const ROTULO_CALOR: Record<Tema, Record<'apagada' | 'prendida' | 'llena', string>> = {
+  noche: { apagada: 'Apagada', prendida: 'Prendida', llena: 'Parrilla llena' },
+  dia: { apagada: 'Vacía', prendida: 'Con piezas', llena: 'Tabla llena' },
+}
+
+/**
+ * El aviso del botón de Ajustes en palabras, como el del panel (`fraseDelAviso`, en
+ * `src/lib/parrilla.ts`). El servidor manda la de noche ya armada (`aviso.frase`); esta la arma
+ * en el modo que se ve, con lo mismo que trae el aviso.
+ */
+export function fraseDelAviso(aviso: { nivel: 'apagado' | 'enfriandose'; cuantos: number }, tema: Tema): string {
+  const { nivel, cuantos } = aviso
+  if (tema === 'dia') {
+    if (nivel === 'apagado') return `${cuantos} sin filo`
+    return cuantos === 1 ? '1 se desafila' : `${cuantos} se desafilan`
+  }
+  if (nivel === 'apagado') return cuantos === 1 ? '1 se apagó' : `${cuantos} se apagaron`
+  return cuantos === 1 ? '1 se enfría' : `${cuantos} se enfrían`
+}
+
+/** Lo que salió, como el pie del panel (`servidos`): cortes de noche, piezas de día. */
+export function servidos(n: number, tema: Tema): string {
+  if (tema === 'dia') return n === 1 ? '1 pieza servida' : `${n} piezas servidas`
+  return n === 1 ? '1 corte servido' : `${n} cortes servidos`
+}

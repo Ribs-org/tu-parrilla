@@ -2,13 +2,23 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { DeNocheYDeDia } from '@/components/de-noche-y-de-dia'
 import { requireUser } from '@/lib/auth'
 import { PAGINAS, cuerpoDe, esPaginaDelManual, htmlDe, nombreEnLaLista, rutaDe, tituloDe, type PaginaDelManual } from '@/lib/manual'
+import { temaPedido } from '@/lib/tema-servidor'
 import { cn } from '@/lib/utils'
-import { nombreDe } from '@/lib/vocabulario'
+import { MANUAL, nombreDe } from '@/lib/vocabulario'
 
 export const dynamic = 'force-dynamic'
-export const metadata = { title: 'El manual del parrillero' }
+
+/**
+ * El título de la pestaña del navegador, en el modo de este equipo: el CSS que cambia el de la
+ * página no llega hasta acá. Sale de la cookie y no de la cuenta, como el color de la barra del
+ * navegador (`(dash)/layout.tsx`), para no leer la base dos veces.
+ */
+export async function generateMetadata() {
+  return { title: MANUAL[await temaPedido()] }
+}
 
 /**
  * La carpeta de la wiki. Se lee del disco y no por la red: `next.config.ts` la incluye en la
@@ -22,7 +32,7 @@ function leer(pagina: PaginaDelManual): Promise<string> {
 }
 
 /**
- * El manual del parrillero: una página de la wiki de la UI por dirección
+ * El manual del parrillero —de día, el del maestro de sushi—: una página de la wiki de la UI por dirección
  * (`/admin/ia/manual/la-parrilla`), con la lista de todas al lado. Vive dentro de Tu IA, que
  * queda marcada en la barra mientras se lee.
  */
@@ -43,7 +53,9 @@ export default async function ManualPage({ params }: { params: Promise<{ pagina?
         <Link href="/admin/ia" className="text-sm text-fg-muted hover:text-fg">
           ← {nombreDe('/admin/ia')}
         </Link>
-        <h1 className="mt-3 font-titulo text-2xl font-semibold uppercase tracking-[0.03em]">El manual del parrillero</h1>
+        <h1 className="mt-3 font-titulo text-2xl font-semibold uppercase tracking-[0.03em]">
+          <DeNocheYDeDia noche={MANUAL.noche} dia={MANUAL.dia} />
+        </h1>
         <p className="mt-1 max-w-2xl text-sm text-fg-muted">
           Cada pantalla del panel, botón por botón, con el texto literal de cada uno, lo que dice cada mensaje y
           qué hacer con él. Lo escribimos para que tu IA te guíe sin ver tu pantalla —por eso a ratos le habla

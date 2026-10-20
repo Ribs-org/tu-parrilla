@@ -10,7 +10,7 @@ estaban acá hasta el 2026-10-19, se mudaron a Tu IA, la cuarta pestaña de la b
 ## Cómo se llega
 
 1. En la barra de arriba, apretar el botón «Ajustes» (en una pantalla angosta, como la del
-   teléfono, se ve solo el ícono, un trinche y un cuchillo, lado a lado, sin la palabra).
+   teléfono, se ve solo el ícono, un trinche y un cuchillo, lado a lado —de día, dos palillos—, sin la palabra).
 2. En el menú que se abre, apretar «Tu Cuenta», la que tiene debajo «tu nombre y tu hora».
 
 O directo: `https://tu-parrilla.cl/admin/cuenta`.

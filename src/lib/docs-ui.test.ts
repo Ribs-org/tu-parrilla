@@ -1,7 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { PANTALLAS } from './vocabulario'
+import { PALABRAS_DE_DIA, PANTALLAS } from './vocabulario'
 
 // La reja de la wiki de la UI (`public/docs/ui/`), la que un LLM lee para guiar a una
 // persona que se perdió en el panel. No puede comprobar que cada página diga la verdad
@@ -22,6 +22,17 @@ describe('la wiki de la UI no le miente al panel', () => {
       const pagina = paginas.find((f) => leer(f).split(/\r?\n/)[0] === titulo)
       expect(pagina, `ninguna página de ${DIR} empieza con «${titulo}»`).toBeDefined()
       expect(leer(pagina!)).toContain(`\`${pantalla.ruta}\``)
+    }
+  })
+
+  it('«El modo día» del índice nombra cada palabra que cambia de día, junto a la de noche', () => {
+    // La wiki describe la noche. Un agente que oye «Los Cuchillos» tiene que saber que es Los
+    // Fierros, y la única forma es que esta sección lo diga, palabra por palabra.
+    const seccion = leer('index.md').split('## El modo día')[1]?.split(/\r?\n## /)[0]
+    expect(seccion, 'index.md no tiene la sección «El modo día»').toBeDefined()
+    for (const { noche, dia } of PALABRAS_DE_DIA) {
+      expect(seccion, `«El modo día» no nombra «${noche}»`).toContain(`«${noche}»`)
+      expect(seccion, `«El modo día» no nombra «${dia}»`).toContain(`«${dia}»`)
     }
   })
 

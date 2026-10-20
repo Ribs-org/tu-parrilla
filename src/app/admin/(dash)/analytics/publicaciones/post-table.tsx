@@ -9,8 +9,8 @@ import { comoSalio, medianaDe, type Marca } from '@/lib/parrilla'
 import { useSortedRows } from '@/components/charts/use-sorted-rows'
 import { networkLabel } from '@/lib/networks'
 import { hasNoPlatformMetrics, type PostRow } from '@/lib/posts-kpis'
+import { NombreDe } from '@/components/de-noche-y-de-dia'
 import { cn, formatNumber } from '@/lib/utils'
-import { nombreDe } from '@/lib/vocabulario'
 
 type Column = 'views' | 'likes' | 'comments' | 'shares' | 'visits' | 'clicks' | 'ctr' | 'pull'
 
@@ -101,7 +101,7 @@ export function PostTable({
         <p className="mx-auto mt-2 max-w-sm text-[0.8rem] leading-relaxed text-fg-faint">
           Conecta una red en{' '}
           <span className="text-fg-muted">
-            {nombreDe('/admin/accounts')} (Ajustes)
+            <NombreDe ruta="/admin/accounts" /> (Ajustes)
           </span>{' '}
           y aprieta <span className="text-fg-muted">Sincronizar ahora</span> ahí mismo.
         </p>

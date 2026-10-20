@@ -11,6 +11,8 @@ Base: `https://tu-parrilla.cl`. Las otras dos guías están al lado:
 persona con la que trabajas se pierde en su panel —dónde se conecta una red, dónde se genera
 la llave, qué significa un error que le salió—, la wiki de la interfaz está en
 `https://tu-parrilla.cl/docs/ui/index.md`: cada pantalla, con el texto literal de cada botón.
+Esta guía nombra las pantallas como se ven de noche; en el modo día, La Parrilla es «La Barra»
+y Los Fierros, «Los Cuchillos» (la wiki las da todas, en «El modo día»).
 
 Dos endpoints de escritura: `POST /api/schedule/batch` programa, y `DELETE /api/schedule/posts/{id}` saca lo programado (sección 3b). Autenticación en todos los
 endpoints:

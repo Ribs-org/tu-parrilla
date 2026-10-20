@@ -354,6 +354,13 @@ describe('avisoDeFierros', () => {
     expect(fraseDelAviso({ nivel: 'apagado', cuantos: 1 })).toBe('1 se apagó')
     expect(fraseDelAviso({ nivel: 'apagado', cuantos: 2 })).toBe('2 se apagaron')
   })
+
+  it('de día el fierro es un cuchillo: se desafila, o se quedó sin filo', () => {
+    expect(fraseDelAviso({ nivel: 'enfriandose', cuantos: 1 }, 'dia')).toBe('1 se desafila')
+    expect(fraseDelAviso({ nivel: 'enfriandose', cuantos: 3 }, 'dia')).toBe('3 se desafilan')
+    expect(fraseDelAviso({ nivel: 'apagado', cuantos: 1 }, 'dia')).toBe('1 sin filo')
+    expect(fraseDelAviso({ nivel: 'apagado', cuantos: 2 }, 'dia')).toBe('2 sin filo')
+  })
 })
 
 // La chapa del panel: `--color-acero-900`, el fondo de las tarjetas.

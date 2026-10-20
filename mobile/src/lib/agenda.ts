@@ -1,4 +1,5 @@
 import { agruparPorDia } from './agrupar'
+import { servidos, type Tema } from './tema'
 import type { BorradorResumido, PostProgramado } from './tipos'
 
 // Las reglas de La Parrilla en el teléfono, sin pantalla: qué días se muestran, qué se quemó
@@ -71,10 +72,13 @@ export function servidosAyer(posts: PostProgramado[], hoy: string): number {
   return posts.filter((p) => p.cuando.slice(0, 10) === ayer && p.redes.some((r) => r.estado === 'published')).length
 }
 
-/** «Ayer no salió nada.», «Ayer: 1 corte servido» o «Ayer: N cortes servidos», como el pie del panel. */
-export function pieDeAyer(servidos: number): string {
-  if (servidos === 0) return 'Ayer no salió nada.'
-  return servidos === 1 ? 'Ayer: 1 corte servido' : `Ayer: ${servidos} cortes servidos`
+/**
+ * «Ayer no salió nada.», «Ayer: 1 corte servido» o «Ayer: N cortes servidos», como el pie del
+ * panel; de día, piezas servidas.
+ */
+export function pieDeAyer(cuantos: number, tema: Tema = 'noche'): string {
+  if (cuantos === 0) return 'Ayer no salió nada.'
+  return `Ayer: ${servidos(cuantos, tema)}`
 }
 
 /**

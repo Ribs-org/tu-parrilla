@@ -53,11 +53,12 @@ Las palabras, en primera pasada:
 De día no se usa «soplete» para nada de esto: la llama del soplete ya quiere decir «está
 saliendo ahora».
 
-Un cuidado con las palabras: el modo día tiene la regla «las palabras no cambian, salvo una»
-(«Se quemó» / «Se echó a perder», `SE_QUEMO` en `src/lib/vocabulario.ts`). Esta tabla sumaría
-excepciones. Se decide al diseñar la pantalla, con dos salidas: aceptarlas, cada una con su par
-en `vocabulario.ts` igual que `SE_QUEMO`, o usar palabras que sirven de noche y de día («la pieza
-entera», «el despiece») y que cambie solo el dibujo.
+Un cuidado con las palabras: desde el 2026-10-20 el modo día cambia las que con sushi no tienen
+sentido (La Barra, Los Cuchillos, «se desafila»…), y cada una tiene su par en
+`src/lib/vocabulario.ts`, en `PALABRAS_DE_DIA`, que la wiki tiene que nombrar entera. Esta tabla
+sumaría más. Se decide al diseñar la pantalla, con dos salidas: aceptarlas, cada una con su par
+en `PALABRAS_DE_DIA`, o usar palabras que sirven de noche y de día («la pieza entera», «el
+despiece») y que cambie solo el dibujo.
 
 ## Lo que ya existe y sirve
 

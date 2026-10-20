@@ -4,8 +4,8 @@ import { useActionState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { uploadBatch } from '@/app/admin/actions'
+import { NombreDe } from '@/components/de-noche-y-de-dia'
 import { cn } from '@/lib/utils'
-import { nombreDe } from '@/lib/vocabulario'
 import { PanelLateral } from './panel-lateral'
 
 // La primera fila es solo texto: va a Facebook, la única de las que publican hoy que lo recibe
@@ -32,7 +32,7 @@ export function BatchUpload({ cerrarHref }: { cerrarHref: string }) {
             octava columna <code>cuentas</code> con sus identificadores (también
             separados por <code>|</code>) — cada tarjeta en{' '}
             <Link className="underline" href="/admin/accounts">
-              {nombreDe('/admin/accounts')}
+              <NombreDe ruta="/admin/accounts" />
             </Link>{' '}
             trae el suyo, con botón para copiarlo. Máximo 50 filas.
           </p>

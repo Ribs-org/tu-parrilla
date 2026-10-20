@@ -1,6 +1,8 @@
 import 'server-only'
 import { and, eq, inArray, sql, type SQL } from 'drizzle-orm'
 import { getDb, scheduledPostTargets, socialAccounts } from '@/db'
+import type { Tema } from '@/lib/tema'
+import { nombreDe } from '@/lib/vocabulario'
 import { pasoDeHuerfanos } from './meta-bajas'
 
 // «Quitar» en Los Fierros: saca una cuenta de Tu Parrilla con todo su historial, y la deja
@@ -13,12 +15,14 @@ export const CUENTA_CONECTADA = 'Desconecta la cuenta antes de quitarla.'
 
 /**
  * Lo que se dice cuando la cuenta todavía tiene publicaciones por salir: quitarla las dejaría
- * sin ese destino sin que nadie lo viera.
+ * sin ese destino sin que nadie lo viera. Nombra La Parrilla como la ve la cuenta: de día, La
+ * Barra.
  */
-export function fraseConPendientes(cuantas: number): string {
+export function fraseConPendientes(cuantas: number, tema: Tema = 'noche'): string {
+  const donde = nombreDe('/admin/schedule', tema)
   return cuantas === 1
-    ? 'Tiene una publicación programada hacia esta cuenta: bórrala en La Parrilla, o espera a que salga, antes de quitarla.'
-    : `Tiene ${cuantas} publicaciones programadas hacia esta cuenta: bórralas en La Parrilla, o espera a que salgan, antes de quitarla.`
+    ? `Tiene una publicación programada hacia esta cuenta: bórrala en ${donde}, o espera a que salga, antes de quitarla.`
+    : `Tiene ${cuantas} publicaciones programadas hacia esta cuenta: bórralas en ${donde}, o espera a que salgan, antes de quitarla.`
 }
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -51,6 +55,7 @@ export function pasosParaQuitar(ownerId: string, accountId: string): SQL[] {
 export async function quitarCuenta(
   ownerId: string,
   accountId: string,
+  tema: Tema = 'noche',
 ): Promise<{ nombre: string } | { error: string }> {
   if (!UUID.test(accountId)) return { error: CUENTA_NO_ESTA }
   return getDb().transaction(async (tx) => {
@@ -76,7 +81,7 @@ export async function quitarCuenta(
           inArray(scheduledPostTargets.status, ['scheduled', 'publishing']),
         ),
       )
-    if (pendientes > 0) return { error: fraseConPendientes(pendientes) }
+    if (pendientes > 0) return { error: fraseConPendientes(pendientes, tema) }
 
     const cortes = await tx
       .selectDistinct({ postId: scheduledPostTargets.postId })

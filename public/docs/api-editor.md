@@ -41,7 +41,9 @@ Base: `https://tu-parrilla.cl`
 
 **Si el dueño se pierde en su panel** (dónde se conecta una red, dónde se genera la llave, qué
 significa un error que le salió), la wiki de la interfaz lo cuenta pantalla por pantalla,
-con el texto literal de cada botón: `https://tu-parrilla.cl/docs/ui/index.md`.
+con el texto literal de cada botón: `https://tu-parrilla.cl/docs/ui/index.md`. Esta guía nombra
+las pantallas como se ven de noche; si el dueño usa el modo día, La Parrilla se llama «La
+Barra» y Los Fierros, «Los Cuchillos» (la wiki tiene la lista entera, en «El modo día»).
 
 ---
 

@@ -1,7 +1,10 @@
+import { DeNocheYDeDia } from '@/components/de-noche-y-de-dia'
 import { Icon } from '@/components/icon'
 import { networkLabel } from '@/lib/networks'
 import { selloDe, type Sello } from '@/lib/parrilla'
+import type { Tema } from '@/lib/tema'
 import { cn } from '@/lib/utils'
+import { FIERRO_FRIO } from '@/lib/vocabulario'
 import { colorDeDestino, etiquetaDestino, nombreDestino } from './etiqueta'
 
 type Destino = {
@@ -79,33 +82,38 @@ export function Redes({
       </span>
     )
   }
+  const enPalabras = (tema: Tema) => targets.map((t, i) => textoDe(t, sellos?.[i] ?? selloDe(t), tema)).join(', ')
   return (
     <span className="inline-flex flex-wrap items-center gap-1">
       {targets.map((t, i) => {
         const sello = sellos?.[i] ?? selloDe(t)
-        const texto = `${nombreDestino(t)}: ${sello === 'frio' ? 'Su fierro está frío: reconéctala' : etiquetaDestino(t)}`
-        return (
+        const chip = (titulo: string, modo?: 'solo-noche' | 'solo-dia') => (
           <span
-            key={`${t.network}-${t.handle ?? ''}-${i}`}
-            title={texto}
+            key={`${t.network}-${t.handle ?? ''}-${i}${modo ? `-${modo}` : ''}`}
+            title={titulo}
             className={cn(
               'inline-flex h-[1.15rem] items-center gap-0.5 rounded-[3px] border px-1 font-mono text-[0.62rem] leading-none',
               CHIP[sello].clase,
+              modo,
             )}
           >
             <Icon name={t.network} className="h-3 w-3 shrink-0" />
             {CHIP[sello].signo ? <span aria-hidden>{CHIP[sello].signo}</span> : null}
           </span>
         )
+        // El chip de una cuenta fría nombra su fierro en el `title`, que el CSS no alcanza: de día
+        // va otro chip con el del cuchillo, y el modo esconde uno, como los dos dibujos del corte.
+        if (sello === 'frio') return [chip(textoDe(t, sello, 'noche'), 'solo-noche'), chip(textoDe(t, sello, 'dia'), 'solo-dia')]
+        return chip(textoDe(t, sello, 'noche'))
       })}
       <span className="sr-only">
-        {targets
-          .map((t, i) => {
-            const sello = sellos?.[i] ?? selloDe(t)
-            return `${nombreDestino(t)}: ${sello === 'frio' ? 'Su fierro está frío: reconéctala' : etiquetaDestino(t)}`
-          })
-          .join(', ')}
+        <DeNocheYDeDia noche={enPalabras('noche')} dia={enPalabras('dia')} />
       </span>
     </span>
   )
+}
+
+/** Lo que dice un chip en palabras: la cuenta y cómo le fue, o que su fierro está frío. */
+function textoDe(t: Destino, sello: Sello, tema: Tema): string {
+  return `${nombreDestino(t)}: ${sello === 'frio' ? FIERRO_FRIO[tema] : etiquetaDestino(t)}`
 }

@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { ArrowLeft, ArrowUpRight } from 'lucide-react'
 import { etiquetaDestino, motivoDestino, nombreDestino } from '@/app/admin/(dash)/schedule/etiqueta'
 import { Panel } from '@/components/charts/panel'
+import { NombreDe } from '@/components/de-noche-y-de-dia'
 import { RangoBar } from '@/components/filter-bar'
 import { requireUser } from '@/lib/auth'
 import { parseFilters } from '@/lib/filters'
@@ -229,8 +230,8 @@ export default async function PiezaPage({
         <p className="mt-4 max-w-2xl text-[0.78rem] leading-relaxed text-fg-faint">
           {organica ? (
             <>
-              Esta publicación no salió de La Parrilla: no tiene versiones ni atributos. Lo que
-              programas desde La Parrilla sí los tiene.
+              Esta publicación no salió de <NombreDe ruta="/admin/schedule" />: no tiene versiones ni
+              atributos. Lo que programas desde <NombreDe ruta="/admin/schedule" /> sí los tiene.
             </>
           ) : pieza.clave ? (
             <>
@@ -253,9 +254,15 @@ export default async function PiezaPage({
 }
 
 /** Cómo va esa versión: el estado del destino, o lo que se sabe de una orgánica. */
-function estadoDe(v: VersionDePieza, fila: PostRow | null): string {
+function estadoDe(v: VersionDePieza, fila: PostRow | null): React.ReactNode {
   if (fila?.archived) return 'Borrada en la red'
-  if (v.scheduledPostId === null) return 'Fuera de La Parrilla'
+  if (v.scheduledPostId === null) {
+    return (
+      <>
+        Fuera de <NombreDe ruta="/admin/schedule" />
+      </>
+    )
+  }
   return etiquetaDestino({
     network: v.network,
     status: v.status ?? '',

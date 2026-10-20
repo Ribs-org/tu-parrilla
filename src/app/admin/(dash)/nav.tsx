@@ -3,10 +3,12 @@
 import { useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { DeNocheYDeDia } from '@/components/de-noche-y-de-dia'
 import { IconoAjustes } from '@/components/icono-ajustes'
 import { IconoMaestro } from '@/components/icono-maestro'
+import { useTema } from '@/components/tema-vivo'
 import { fraseDelAviso, type avisoDeFierros } from '@/lib/parrilla'
-import { ajustes, pantallaDe, pestanas } from '@/lib/vocabulario'
+import { ajustes, nombreDe, nombreEn, pantallaDe, pestanas } from '@/lib/vocabulario'
 import { cn } from '@/lib/utils'
 
 /** Dónde vive el aviso de los fierros dentro del menú: la entrada de Los Fierros. */
@@ -17,10 +19,10 @@ const RUTA_IA = '/admin/ia'
 
 /**
  * Cuatro pestañas —la última, Tu IA, con su maestro dibujado— y el botón de Ajustes —un trinche
- * y un cuchillo, lado a lado—. Lo que no pide
+ * y un cuchillo, lado a lado; de día, dos palillos—. Lo que no pide
  * una acción todos los días —las cuentas, las páginas públicas, quién entra— va dentro de
  * Ajustes: sigue a un clic, pero ya no ocupa la barra. Los nombres y las rutas salen del
- * vocabulario; acá no se escribe ninguno.
+ * vocabulario, con el de día donde lo hay (La Barra, Los Cuchillos); acá no se escribe ninguno.
  *
  * El botón de Ajustes lleva un punto cuando algo adentro necesita al dueño: ámbar si un fierro se
  * enfría, rojo si se apagó (`avisoDeFierros`). Adentro, la entrada de Los Fierros lo dice en
@@ -41,7 +43,8 @@ export function AdminNav({
   const pathname = usePathname()
   const actual = pantallaDe(pathname)
   const enAjustes = actual?.grupo === 'ajustes'
-  const frase = aviso ? fraseDelAviso(aviso) : null
+  // La frase del aviso va a la vista en los dos modos; la del lector de pantalla, en el que se ve.
+  const tema = useTema()
   const colorAviso = aviso?.nivel === 'apagado' ? 'bg-negative' : 'bg-caution'
 
   // La pestaña activa, entera a la vista: si queda cortada a la derecha, la fila se corre.
@@ -73,7 +76,7 @@ export function AdminNav({
               )}
             >
               {p.ruta === RUTA_IA ? <IconoMaestro className="h-4 w-4" /> : null}
-              {p.nombre}
+              <DeNocheYDeDia noche={p.nombre} dia={nombreEn(p, 'dia')} />
             </Link>
           )
         })}
@@ -106,7 +109,7 @@ export function AdminNav({
             'relative flex cursor-pointer list-none items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm transition-colors [&::-webkit-details-marker]:hidden',
             enAjustes ? 'bg-brasa text-acero-950' : 'text-fg-muted hover:text-fg',
           )}
-          aria-label={frase ? `Ajustes: en Los Fierros, ${frase}` : 'Ajustes'}
+          aria-label={aviso ? `Ajustes: en ${nombreDe(RUTA_FIERROS, tema)}, ${fraseDelAviso(aviso, tema)}` : 'Ajustes'}
         >
           <IconoAjustes className="h-4 w-4" />
           <span className="hidden sm:inline">Ajustes</span>
@@ -131,8 +134,10 @@ export function AdminNav({
                   )}
                 >
                   <span className="flex items-center justify-between gap-2">
-                    <span className="block text-sm">{p.nombre}</span>
-                    {frase && p.ruta === RUTA_FIERROS ? (
+                    <span className="block text-sm">
+                      <DeNocheYDeDia noche={p.nombre} dia={nombreEn(p, 'dia')} />
+                    </span>
+                    {aviso && p.ruta === RUTA_FIERROS ? (
                       <span
                         className={cn(
                           'shrink-0 rounded-full border px-1.5 py-px font-mono text-[0.62rem]',
@@ -143,7 +148,7 @@ export function AdminNav({
                               : 'border-caution/60 text-caution',
                         )}
                       >
-                        {frase}
+                        <DeNocheYDeDia noche={fraseDelAviso(aviso)} dia={fraseDelAviso(aviso, 'dia')} />
                       </span>
                     ) : null}
                   </span>

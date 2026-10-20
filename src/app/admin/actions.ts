@@ -486,7 +486,7 @@ export async function syncSocialNow(): Promise<{ ok?: boolean; error?: string }>
  */
 export async function quitarCuentaAccion(accountId: string): Promise<{ error: string }> {
   const usuario = await requireUser()
-  const resultado = await quitarCuenta(usuario.id, accountId)
+  const resultado = await quitarCuenta(usuario.id, accountId, usuario.tema)
   if ('error' in resultado) return resultado
   // Lo que se borró se veía también en La Parrilla y en Los Números.
   revalidatePath('/admin', 'layout')

@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { cookies } from 'next/headers'
 import { and, eq, isNotNull } from 'drizzle-orm'
 import { conectarElegidas } from '@/app/admin/actions'
+import { NombreDe } from '@/components/de-noche-y-de-dia'
 import { Submit } from '@/components/ui'
 import { getDb, socialAccounts } from '@/db'
 import { requireUser } from '@/lib/auth'
@@ -9,7 +10,6 @@ import { networkLabel } from '@/lib/networks'
 import { tomadasPorOtro } from '@/lib/social/conectar'
 import { COOKIE_PENDIENTE, LOGIN_VENCIDO, leerPendiente } from '@/lib/social/pendiente'
 import { cn } from '@/lib/utils'
-import { nombreDe } from '@/lib/vocabulario'
 
 export const dynamic = 'force-dynamic'
 
@@ -34,7 +34,7 @@ export default async function Elegir({
       <section className="chapa rounded-xl p-6">
         <p className="text-sm">{LOGIN_VENCIDO}</p>
         <Link href="/admin/accounts" className="mt-3 inline-block text-sm text-fg-muted hover:text-fg">
-          ← Volver a {nombreDe('/admin/accounts')}
+          ← Volver a <NombreDe ruta="/admin/accounts" />
         </Link>
       </section>
     )

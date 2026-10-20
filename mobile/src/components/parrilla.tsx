@@ -1,7 +1,7 @@
 import { View, Text } from 'react-native'
 import type { ReactNode } from 'react'
 import { calorDelDia, type Calor } from '../lib/parrilla'
-import type { Tema } from '../lib/tema'
+import { ROTULO_CALOR, type Tema } from '../lib/tema'
 import { TIPO_TITULO } from './ui'
 import { useColores, useTema } from './tema'
 
@@ -89,6 +89,7 @@ export function Grilla({ calor, children }: { calor: Calor; children: ReactNode 
 /** El rótulo de un día: qué día es y cómo está la parrilla. */
 export function RotuloDia({ dia, cortes }: { dia: string; cortes: number }) {
   const colores = useColores()
+  const { tema } = useTema()
   const calor = calorDelDia(cortes)
   return (
     <View
@@ -121,7 +122,7 @@ export function RotuloDia({ dia, cortes }: { dia: string; cortes: number }) {
           letterSpacing: 1,
         }}
       >
-        {calor === 'llena' ? 'Parrilla llena' : calor === 'prendida' ? 'Prendida' : 'Apagada'}
+        {ROTULO_CALOR[tema][calor]}
       </Text>
     </View>
   )
