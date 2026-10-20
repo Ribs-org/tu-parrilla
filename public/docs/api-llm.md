@@ -39,7 +39,7 @@ Cuenta—, futura). Cada
 fila necesita además: `texto` o al menos un elemento en `media`, y `redes` o `cuentas` con al
 menos un elemento. `redes` solo resuelve la cuenta a nombrar la red si hay exactamente una
 conectada de esa red; con dos, hay que usar `cuentas` con el identificador exacto (se leen en
-`/admin/accounts` o en `GET /api/schedule/posts`, campo `cuentaId`).
+`GET /api/schedule/cuentas`, campo `id`: sección 3d).
 
 **Ponle una `ref` a cada fila** (`"ref": "octubre-fila-3"`: un texto tuyo de 1 a 100
 caracteres, único por dueño). Si el envío se corta y no llega la respuesta, reenvía el lote
@@ -205,13 +205,38 @@ antes de programarle nada. Un destino de Instagram que espera con el `error`
 `Instagram llegó a su tope de publicaciones por día: sale apenas se libere un cupo.` no está
 fallido: sale solo cuando la cuenta recupere cupo, sin gastar intentos.
 
+## 3d. Las cuentas y sus identificadores
+
+```bash
+curl -s "https://tu-parrilla.cl/api/schedule/cuentas" -H "Authorization: Bearer $LLAVE_PARRILLA"
+```
+
+Devuelve `{ cuentas }`: todas las del dueño, también las desconectadas, por red y de la más
+antigua a la más nueva. Cada una trae:
+
+- `id`: el identificador de Tu Parrilla, el que va en `cuentas`, como clave de `opciones` y en
+  `cuenta=` de las métricas (el mismo `cuentaId` de `/api/schedule/posts` y del resumen);
+- `red` y `handle` (`null` si la red no dio uno);
+- `externalId`: el identificador que le da la red —la cuenta de Instagram, la página de
+  Facebook, el canal de YouTube, el `open_id` de TikTok—, que ningún campo de esta API recibe;
+- `conectada`, si tiene credencial, y `proximamente`, `true` en Threads y X;
+- `fierro` (`al-rojo`, `enfriandose` o `frio`) y `vence` (ISO en la zona del dueño, o `null` en
+  TikTok, YouTube y X, que lo renuevan solas, y en una cuenta sin credencial);
+- `motivo`: `null` al rojo; si no, una de cuatro frases:
+  `La conexión está por vencer; reconéctala antes.`, `La conexión falló; reconecta la cuenta.`,
+  `La conexión venció; reconecta la cuenta.` o
+  `La cuenta está desconectada; reconéctala para programarle.`
+
+Programa solo hacia una con `conectada: true` y `proximamente: false`: las demás rechazan la
+fila. Una con `fierro` `frio` y `conectada: true` acepta la fila, pero no publica hasta que el
+dueño la reconecte en Los Fierros: díselo antes.
+
 ## 4. Lo que esta API no hace
 
 - **No edita un post programado.** Para cambiar texto, hora, destinos o media hay que
   borrarlo (sección 3b) y programarlo de nuevo, o corregirlo a mano en `/admin/schedule`.
-- **No lista cuentas.** Para eso está `GET /api/schedule/posts`: cada destino de un post ya
-  programado trae `cuentaId` y `handle`. No hay un endpoint que liste cuentas sueltas sin
-  pasar por un post; el resumen (sección 3c) nombra solo las que piden atención.
+- **No conecta cuentas.** Conectar, reconectar o quitar una cuenta lo hace el dueño en Los
+  Fierros (`/admin/accounts`); la API solo las lee (sección 3d).
 - **No manda nada de inmediato.** Todo lo que entra por `POST /api/schedule/batch` espera a su
   `fecha`; no existe una forma de publicar ahora mismo por esta vía.
 - **Solo tres redes leen comentarios: Instagram, Facebook y YouTube.** Una `regla` en un post que
@@ -313,8 +338,8 @@ Dos endpoints de lectura, con la misma llave. El detalle de cada número está e
   de «mejores» (`peores`, `medianas.peores`, y `enPeores` y `peores` en `enComun`), de la
   peor a la menos mala, y `corte` es lo más que sacó una de las que entraron.
 
-Filtros que valen en los dos: `red`, y `cuenta` —su `id` o su nombre en la red, con o sin
-«@»—. Para «el mejor 10 % de esta cuenta», pasa `cuenta`: sin ella, la cuenta más grande
+Filtros que valen en los dos: `red`, y `cuenta` —su `id` (el de la sección 3d) o su nombre en
+la red, con o sin «@»—. Para «el mejor 10 % de esta cuenta», pasa `cuenta`: sin ella, la cuenta más grande
 llena la tajada de arriba, salvo con `metrica=contraSuCuenta`, que mide a cada una contra lo
 suyo. Solo de `mejores`:
 

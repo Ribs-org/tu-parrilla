@@ -169,7 +169,7 @@ pie con los archivos de cada una y con los enlaces llevados al manual (`src/lib/
 
 Fuera del panel, «el dueño» no siempre eres tú, así que conviene el detalle:
 
-- La **API con llave** (`/api/schedule/posts`, `/api/schedule/resumen`, `/api/metrics/posts`, `/api/metrics/mejores`) habla en la zona del
+- La **API con llave** (`/api/schedule/posts`, `/api/schedule/resumen`, `/api/schedule/cuentas`, `/api/metrics/posts`, `/api/metrics/mejores`) habla en la zona del
   dueño de la llave: la tuya si el agente usa una llave que generaste tú, la del admin si
   usa `SCHEDULE_API_KEY`, la llave del despliegue. Lo que el agente escribe como «19:00»
   son las 19:00 del dueño, y los días de `desde`/`hasta` son sus días.
@@ -999,7 +999,7 @@ Vercel y bajan con `vercel env pull .env.local`.
 | `X_CLIENT_SECRET` | El secreto de esa app | Junto con el anterior |
 | `CRON_SECRET` | Autoriza las corridas programadas (sync diario y publicación cada 5 minutos) | No — la pone Vercel solo, al declarar el cron |
 | `MIGRAR_PREVIEWS` | Que los previews migren la base | Solo cuando el preview tenga una base propia; contra la de producción, no |
-| `SCHEDULE_API_KEY` | La llave del despliegue: abre `POST /api/schedule/batch` (carga masiva), `DELETE /api/schedule/posts/{id}` (sacar lo programado), `GET /api/schedule/posts` (calendario), `GET /api/schedule/resumen` (el resumen del día), `GET /api/metrics/posts` (métricas) y `GET /api/metrics/mejores` (el mejor X %) a nombre del admin. Es anterior a las llaves por usuario y sigue para el agente que ya la usa | No — sin ella los seis endpoints aceptan solo las llaves que cada usuario genera en Tu IA; si la pones, genérala igual que `CRON_SECRET` |
+| `SCHEDULE_API_KEY` | La llave del despliegue: abre `POST /api/schedule/batch` (carga masiva), `DELETE /api/schedule/posts/{id}` (sacar lo programado), `GET /api/schedule/posts` (calendario), `GET /api/schedule/resumen` (el resumen del día), `GET /api/schedule/cuentas` (las cuentas), `GET /api/metrics/posts` (métricas) y `GET /api/metrics/mejores` (el mejor X %) a nombre del admin. Es anterior a las llaves por usuario y sigue para el agente que ya la usa | No — sin ella los siete endpoints aceptan solo las llaves que cada usuario genera en Tu IA; si la pones, genérala igual que `CRON_SECRET` |
 | `RESEND_API_KEY` | Manda los códigos de ingreso y los avisos: la publicación que se quemó, la cuenta que se cayó y el resumen del día (ver «Avisos por correo») | Sí — sin ella nadie puede entrar al panel |
 | `PUBLISH_ALERT_TO` | Adónde va un aviso sin dueño con correo: un post o una cuenta de antes de los usuarios. Lo demás va al correo de su dueño | No — sin ella, lo que no tiene dueño no avisa; el calendario y Los Fierros lo siguen mostrando |
 | `PUBLISH_ALERT_FROM` | Remitente de los avisos | Opcional; default `onboarding@resend.dev`, que solo entrega al correo de la cuenta de Resend |
@@ -1081,7 +1081,7 @@ Tres correos, todos con el remitente `PUBLISH_ALERT_FROM` y al correo del dueño
 
 ### Guía para el editor de contenido
 
-`public/docs/api-editor.md` documenta los seis endpoints en detalle, escrito para que un
+`public/docs/api-editor.md` documenta los siete endpoints en detalle, escrito para que un
 LLM que crea contenido lo lea entero y no necesite explicaciones: contratos, reglas
 por red, todas las frases de error y qué significa cada métrica. Se sirve tal cual en
 <https://tu-parrilla.cl/docs/api-editor.md>. No contiene secretos — la llave
@@ -1107,7 +1107,7 @@ página cita archivos que ya no existen.
 
 ### La llave de la API
 
-Los seis endpoints de abajo piden el header `Authorization: Bearer <llave>`, y lo que
+Los siete endpoints de abajo piden el header `Authorization: Bearer <llave>`, y lo que
 hacen lo hacen a nombre del dueño de la llave: sus cuentas, sus posts, su zona. Valen dos
 clases de llave:
 
@@ -1210,10 +1210,10 @@ en la ventana, salido o no: texto, `fecha` (ISO con offset), portada, media en o
 (`scheduled`, `publishing`, `published`, `failed`), el `externalId` si ya salió, los
 intentos, la frase de error del último intento fallido (también en un `scheduled` que espera
 reintentarse), `proximoIntento` (cuándo vuelve a probar uno que espera, o `null`), y
-`cuentaId`/`handle` de la cuenta — útil para recuperar el id de una cuenta que ya tiene
-algún destino programado. Para una cuenta recién conectada, que todavía no tiene
-ninguno, el id está en el detalle de su fila en **Los Fierros** (Cuentas, en Ajustes) del panel —la flecha de la fila—, con un botón para
-copiarlo: ahí no hace falta llave de API, solo la sesión de quien entra al panel.
+`cuentaId`/`handle` de la cuenta. Los ids de todas las cuentas, también los de una recién
+conectada que todavía no tiene nada programado, los lista `GET /api/schedule/cuentas` (ver
+«Cuentas por API»); en el panel están en el detalle de cada fila de **Los Fierros** (en
+Ajustes) —la flecha de la fila—, con un botón para copiarlo.
 
 `DELETE /api/schedule/posts/{id}` con el mismo `Authorization` saca un post programado
 entero —destinos, media y regla— con la regla del panel, que comparten en
@@ -1234,6 +1234,18 @@ Parámetros opcionales: `dias`, entero de 1 a 30 (3 por defecto), y `horas`, ent
 168 (24 por defecto); fuera de rango, `400` con la frase fija. Las horas van en ISO con el
 offset de la zona del dueño. Es para que un agente que programa por la API se entere de lo
 que se quemó o se está por acabar aunque los correos le lleguen al dueño de la llave.
+
+### Cuentas por API
+
+`GET /api/schedule/cuentas` con el mismo `Authorization` devuelve `{ cuentas }`: todas las
+cuentas del dueño de la llave, también las desconectadas, cada una con su `id` de Tu Parrilla
+(el de `cuentas` en el lote, `cuenta=` en las métricas y las claves de `opciones`), su red,
+su `handle`, su `externalId` (el id que le da la red), si tiene credencial (`conectada`), si es
+de una red en «Próximamente» y cómo está su conexión: el `fierro`, cuándo `vence` y el
+`motivo` para reconectarla, con las frases del resumen más una para la desconectada a
+propósito. Sin parámetros. Antes, un agente solo veía el id de una cuenta pasando por un post
+ya programado, y para una recién conectada había que pedirle al dueño que lo copiara de Los
+Fierros. Lo puro está en `src/lib/cuentas-api.ts`.
 
 ## Estructura
 
@@ -1272,6 +1284,7 @@ src/
     igual-edad.ts          comparar a la misma edad y contra la propia cuenta: los 7 días y «contra su cuenta» (sin base)
     lado-a-lado.ts         dos publicaciones lado a lado: la curva por edad y sus atributos (sin base)
     metrics-consulta.ts    lo que comparten las rutas de /api/metrics: la llave, el rango, la red y la cuenta
+    cuentas-api.ts         las cuentas de GET /api/schedule/cuentas: los dos ids y cómo está la conexión (sin base)
     piezas.ts              la pieza de una publicación: sus destinos programados unidos a lo publicado
     auth.ts                sesión del panel
     llaves.ts              las llaves de API de cada usuario, y a nombre de quién entra cada petición

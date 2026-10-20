@@ -36,7 +36,7 @@
           },
           "cuentas": {
             "type": "array",
-            "description": "Identificadores de cuenta exactos. Si trae al menos un elemento, manda sobre 'redes' para elegir destino: es la única forma de elegir a cuál de dos cuentas de la misma red sale el post. Los identificadores se leen en /admin/accounts o en la respuesta de GET /api/schedule/posts (campo cuentaId de cada destino); no se inventan.",
+            "description": "Identificadores de cuenta exactos. Si trae al menos un elemento, manda sobre 'redes' para elegir destino: es la única forma de elegir a cuál de dos cuentas de la misma red sale el post. Los identificadores se leen en GET /api/schedule/cuentas (campo id de cada cuenta), en /admin/accounts o en la respuesta de GET /api/schedule/posts (campo cuentaId de cada destino); no se inventan.",
             "items": { "type": "string" }
           },
           "media": {

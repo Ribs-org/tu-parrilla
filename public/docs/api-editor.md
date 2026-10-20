@@ -106,13 +106,12 @@ el post. Para elegir destino, `redes` se ignora cuando `cuentas` no está vacío
 la mandes igual, sigue debiendo tener nombres válidos y sin repetir (ver abajo), así que
 lo más simple es no mandarla en ese caso.
 
-**De dónde salen los identificadores:** no los inventas ni los adivinas. Cada cuenta
-conectada muestra el suyo en Los Fierros (`/admin/accounts`), en el detalle que abre la
-flecha de su fila, con un botón para copiarlo — es la forma de conseguir el de una cuenta recién conectada, incluso antes
-de que tenga algo programado, y no pide llave de API, solo la sesión del panel. Si ya
-tienes acceso por API y la cuenta tiene al menos un destino programado, `GET
-/api/schedule/posts` (sección 3, más abajo) también lo trae: cada destino de `redes[]`
-trae `cuentaId` y `handle`.
+**De dónde salen los identificadores:** no los inventas ni los adivinas. `GET
+/api/schedule/cuentas` (sección 3c, más abajo) los lista todos, cada uno con su red y su
+handle, también el de una cuenta recién conectada que todavía no tiene nada programado. El
+dueño ve el mismo id en Los Fierros (`/admin/accounts`), en el detalle que abre la flecha de
+cada fila, con un botón para copiarlo; y cada destino de `GET /api/schedule/posts` (sección
+3) trae el suyo en `cuentaId`.
 
 Lo que **no** resuelve la ambigüedad: programar primero con `redes` para leer el id
 después en el post recién creado. Esa entrada solo se acepta cuando la red no es
@@ -462,8 +461,9 @@ Parámetros, todos opcionales:
   los últimos 30 días. Formato inválido o rango invertido: `400` con
   `El rango de fechas no se entendió (usa YYYY-MM-DD).`
 - `red`: una de las conocidas. Otra cosa: `400` con `Red desconocida: <valor>.`
-- `cuenta`: solo las publicaciones de una cuenta. Va su `id` (el `cuenta.id` de cualquier
-  fila de esta misma respuesta, o el `cuentaId` de `/api/schedule/posts`) o su nombre en la
+- `cuenta`: solo las publicaciones de una cuenta. Va su `id` (el de `/api/schedule/cuentas`,
+  el `cuenta.id` de cualquier fila de esta misma respuesta, o el `cuentaId` de
+  `/api/schedule/posts`) o su nombre en la
   red, con o sin «@» y sin importar mayúsculas (`cuenta=@vicente`). Si ninguna calza: `400`
   con `Cuenta desconocida: <valor>.` Si el nombre lo tienen dos cuentas de redes distintas:
   `400` con `Hay más de una cuenta llamada <valor>: usa su id, o agrega red=.`
@@ -815,9 +815,66 @@ día solo si alguna tiene algo, después de la sincronización de la mañana.
 
 ---
 
+# 3c. Las cuentas — `GET /api/schedule/cuentas`
+
+```http
+GET /api/schedule/cuentas
+Authorization: Bearer <tu llave>
+```
+
+Todas las cuentas del dueño de la llave, con los dos identificadores de cada una: el de Tu
+Parrilla, que es el que usas en esta API, y el que le da la red. No lleva parámetros.
+Pídela antes de la primera tanda, y cada vez que el dueño te cuente que conectó una cuenta.
+
+```json
+{
+  "cuentas": [
+    { "id": "8f0a…", "red": "instagram", "handle": "@vicente", "externalId": "17841400000000000", "conectada": true, "proximamente": false, "fierro": "al-rojo", "vence": "2026-12-01T10:00:00-03:00", "motivo": null },
+    { "id": "9d4e…", "red": "tiktok", "handle": "@vicente", "externalId": "-000Ab1Cd2…", "conectada": true, "proximamente": false, "fierro": "al-rojo", "vence": null, "motivo": null },
+    { "id": "c71d…", "red": "facebook", "handle": "Vicente Pareja", "externalId": "1029384756", "conectada": false, "proximamente": false, "fierro": "frio", "vence": null, "motivo": "La cuenta está desconectada; reconéctala para programarle." }
+  ]
+}
+```
+
+- **`id`** es el identificador de la cuenta en Tu Parrilla: el que va en `cuentas` al
+  programar (sección 1), como clave de `opciones` y en `cuenta=` de las métricas (sección 2).
+  Es el mismo `cuentaId` de `/api/schedule/posts` y de `/api/schedule/resumen`, y el
+  `cuenta.id` de `/api/metrics/posts`.
+- **`externalId`** es el identificador que la red le da a la cuenta: el de la cuenta de
+  Instagram, el de la página de Facebook, el del canal de YouTube o el `open_id` de TikTok.
+  Sirve para cruzar con lo que leas en la red; ningún campo de esta API lo recibe. `null` si
+  la red no lo dio.
+- **`handle`** es el nombre de la cuenta en la red (en Facebook y YouTube, el de la página o
+  el canal), o `null`.
+- **`conectada`** dice si tiene credencial. Una cuenta con `false` sigue en la lista porque el
+  dueño la ve en Los Fierros, pero una fila con su id en `cuentas` se rechaza con
+  `La cuenta <handle> no está conectada. Vuelve a conectarla en Los Fierros.`
+- **`proximamente`** es `true` en las cuentas de Threads y X, que están en «Próximamente»:
+  una fila hacia ellas se rechaza aunque estén conectadas.
+- **`fierro`** es cómo está la conexión, con la misma lectura de Los Fierros y del resumen:
+  `al-rojo` (viva), `enfriandose` (el permiso vence en siete días o menos) o `frio` (ya no
+  publica: desconectada, vencida o con la sincronización rota). Una cuenta fría con
+  `conectada: true` acepta la fila, pero lo programado no sale hasta que el dueño la
+  reconecte: avísale antes de programarle.
+- **`vence`** es cuándo vence el permiso, en ISO con el offset de la zona del dueño. Viene
+  `null` en TikTok, YouTube y X, que lo renuevan solas; en una red que no da la fecha; y en una
+  cuenta sin credencial.
+- **`motivo`** es `null` al rojo. Si no, dice por qué hay que reconectarla, con una de
+  cuatro frases: `La conexión está por vencer; reconéctala antes.`,
+  `La conexión falló; reconecta la cuenta.`, `La conexión venció; reconecta la cuenta.` o
+  `La cuenta está desconectada; reconéctala para programarle.` Las tres primeras son las del
+  resumen (sección 3b), que no nombra las desconectadas a propósito; esta lista sí.
+
+Vienen ordenadas por red, en orden alfabético, y dentro de una red de la más antigua a la más
+nueva. Conectar, reconectar o quitar una cuenta no se hace por API: lo hace el dueño en Los
+Fierros.
+
+---
+
 # 4. El ciclo completo
 
-1. **Mira** `/api/schedule/posts` para saber qué ya está puesto en la ventana, y
+1. **Mira** `/api/schedule/cuentas` para saber a qué cuentas puedes programar,
+   `/api/schedule/posts` para saber qué ya está puesto en la ventana, y
    `/api/schedule/resumen` para saber qué se quemó y qué cuenta se está quedando sin parrilla.
 2. **Programa** con `atributos` describiendo tus decisiones creativas, y una `ref` en cada fila.
 3. El sistema **publica** a la hora indicada, en cada red. Si un destino falla, se
@@ -861,6 +918,13 @@ patrones. Con menos de ~10 posts por valor de atributo, desconfía de la diferen
   las filas crudas de `/api/metrics/posts`, y el análisis es tuyo, a propósito.
 
 # 6. Ejemplos ejecutables
+
+Las cuentas del dueño, con el id que va en `cuentas`:
+
+```bash
+curl -s "https://tu-parrilla.cl/api/schedule/cuentas" \
+  -H "Authorization: Bearer $LLAVE_PARRILLA"
+```
 
 Ver qué hay en el calendario las próximas dos semanas:
 

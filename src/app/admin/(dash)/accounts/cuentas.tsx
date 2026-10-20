@@ -242,10 +242,9 @@ function Fila({ row, network, vivas }: { row: CuentaRow; network: string; vivas:
   }, [idCopiado])
 
   // El id de esta cuenta: lo que `cuentas` de la carga masiva y de la API espera
-  // cuando nombrar la red ya no alcanza porque hay dos conectadas de la misma. Con dos
-  // cuentas de una red, es la única forma pública de conseguirlo para una recién
-  // conectada — `GET /api/schedule/posts` solo trae ids de cuentas que ya tienen un
-  // destino programado.
+  // cuando nombrar la red ya no alcanza porque hay dos conectadas de la misma. Un agente con
+  // llave lo lee solo en `GET /api/schedule/cuentas`; copiarlo es para el CSV, o para una IA
+  // que todavía no tiene llave.
   function copiarId() {
     const clipboard = navigator.clipboard
     if (!clipboard) return
