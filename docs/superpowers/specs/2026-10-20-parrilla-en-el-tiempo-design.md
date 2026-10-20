@@ -89,9 +89,18 @@ Cada parte se publica sola y no cambia la API ni los datos: es cómo se dibuja.
   sola cada vez que la línea pasa una fila costaría consultas a la base y pelearía con lo que
   el dueño tenga abierto. La semana pide 60rem de ancho mínimo, para que una fila de una red
   quepa entera al lado de la hora; en el teléfono se desliza de lado, como antes.
-- **C. Por hora: el día y la semana.** El día, con una columna por cuenta y las horas hacia
-  abajo, lo pasado rayado y la línea de «ahora» atravesando todas. La semana por hora, como
-  tercera vista, con bloques chicos en carriles cuando se juntan.
+- **C. Por hora: el día y la semana.** Hecha (2026-10-20): `reja-de-horas.tsx` y `horas.ts`,
+  que comparten `vista-dia.tsx` y `semana-por-hora.tsx` (`?vista=hora`, la pestaña «Por
+  hora»). El día, con una columna por cuenta y las horas hacia abajo; la semana, con siete. Las
+  horas van de 07:00 a 23:00 —las del agente—, o más si algo cae afuera. Lo pasado va rayado y
+  la línea de «ahora» cruza la columna de hoy, con la hora escrita en el canal de las horas, que
+  esconde la hora entera que taparía. Los bloques que se pisan van lado a lado, como en Google
+  Calendar (`carriles`). Un bloque del día lleva el corte en chico, la hora, el texto en un
+  renglón y el signo de su red; uno de la semana, solo la franja de sus redes, la hora y el signo
+  de la que más pide (`selloQueManda`): con 44 al día no cabe más, y el resto va en el `title`.
+  En el teléfono la reja se desliza de lado con el canal de las horas pegado a la izquierda
+  (`overflow-clip`, no `overflow-hidden`, para que el canal se quede pegado). No se programa con un
+  clic en una hora vacía: el compositor recibe el día, no la hora, y sumarla es otro cambio.
 - **D. El teléfono.** Lo mismo en La Parrilla de la app: el filtro, los colores y lo que ya
   salió.
 

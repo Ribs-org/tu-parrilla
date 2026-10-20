@@ -36,6 +36,7 @@ import { ListaBorradores } from './lista-borradores'
 import { ordenarCola } from './orden'
 import { Queue } from './queue'
 import { SeQuemo } from './se-quemo'
+import { SemanaPorHora } from './semana-por-hora'
 import { VistaDia } from './vista-dia'
 
 export const dynamic = 'force-dynamic'
@@ -44,7 +45,8 @@ export const dynamic = 'force-dynamic'
  * La Parrilla, que es también la entrada del panel (`/admin` lleva acá).
  *
  * De arriba abajo: lo que se quemó —lo único que pide una acción sin que nadie la busque—,
- * el calendario de la semana (o un día por cuenta, o la lista, a un clic) y, al pie, cuánto
+ * el calendario de la semana (o la misma semana por hora, un día por cuenta o la lista, a un
+ * clic) y, al pie, cuánto
  * salió ayer. Componer,
  * abrir un borrador y subir un CSV pasan en un panel lateral que la URL abre
  * (`?componer=1`, `?borrador=…`, `?panel=…`), para que el calendario siga a la vista detrás.
@@ -56,9 +58,10 @@ export default async function SchedulePage({
 }) {
   const params = await searchParams
   const texto = (clave: string) => (typeof params[clave] === 'string' ? (params[clave] as string) : '')
-  // El calendario es la vista con que abre; el día y la lista, a un clic. `vista=calendario`,
-  // de los enlaces de antes, sigue cayendo en el calendario.
-  const vista = texto('vista') === 'lista' ? 'lista' : texto('vista') === 'dia' ? 'dia' : 'semana'
+  // El calendario es la vista con que abre; la semana por hora, el día y la lista, a un clic.
+  // `vista=calendario`, de los enlaces de antes, sigue cayendo en el calendario.
+  const pedida = texto('vista')
+  const vista = pedida === 'lista' ? 'lista' : pedida === 'dia' ? 'dia' : pedida === 'hora' ? 'hora' : 'semana'
 
   // La parrilla entera —qué semana es «esta», en qué casilla cae cada corte, qué hora dice
   // la lista— se dibuja en la zona del dueño.
@@ -92,7 +95,8 @@ export default async function SchedulePage({
   const nombreDelFiltro = filtro
     ? (cuentas.find((c) => c.id === filtro.cuenta)?.handle ?? networkLabel(filtro.red))
     : null
-  // Los botones del filtro cuentan lo que se mira: la semana, el día o la lista entera.
+  // Los botones del filtro cuentan lo que se mira: la semana (en filas o por hora), el día o la
+  // lista entera.
   const semanaALaVista = new Set(weekDays(monday))
   const enVista = cortes.filter(({ post }) => {
     if (vista === 'lista') return true
@@ -233,6 +237,11 @@ export default async function SchedulePage({
                   href: scheduleHref(params, { vista: null, fecha: null, semana: vista === 'dia' ? mondayOfKey(fecha) : texto('semana') || null }),
                   active: vista === 'semana',
                 },
+                {
+                  label: 'Por hora',
+                  href: scheduleHref(params, { vista: 'hora', fecha: null, semana: vista === 'dia' ? mondayOfKey(fecha) : texto('semana') || null }),
+                  active: vista === 'hora',
+                },
                 { label: 'Día', href: scheduleHref(params, { vista: 'dia', fecha, semana: null }), active: vista === 'dia' },
                 { label: 'Lista', href: scheduleHref(params, { vista: 'lista', semana: null, fecha: null }), active: vista === 'lista' },
               ].map((tab) => (
@@ -297,6 +306,22 @@ export default async function SchedulePage({
               nuevoEnDia={(dia, cuenta) => scheduleHref(params, { componer: '1', dia, cuenta })}
               frias={frias}
               recien={recien}
+              ahora={now}
+            />
+          ) : vista === 'hora' ? (
+            <SemanaPorHora
+              monday={monday}
+              items={recortar(cortes, filtro)}
+              borradores={borradoresConFecha}
+              zone={zona}
+              volver={volver}
+              prevHref={scheduleHref(params, { semana: addDays(monday, -7) })}
+              nextHref={scheduleHref(params, { semana: addDays(monday, 7) })}
+              nuevoEnDia={(dia) => scheduleHref(params, { componer: '1', dia })}
+              verDia={(dia) => scheduleHref(params, { vista: 'dia', fecha: dia, semana: null })}
+              frias={frias}
+              recien={recien}
+              ahora={now}
             />
           ) : (
             <WeekCalendar

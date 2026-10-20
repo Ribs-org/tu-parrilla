@@ -1,5 +1,19 @@
 import { describe, expect, it } from 'vitest'
-import { dondeVaAhora, estadoDeFila, mezclaDeRedes, resumenDelDia } from './semana'
+import { dondeVaAhora, estadoDeFila, mezclaDeRedes, resumenDelDia, selloQueManda } from './semana'
+
+describe('selloQueManda', () => {
+  it('lo quemado manda; después lo que pide atención, y después lo que está saliendo', () => {
+    expect(selloQueManda(['servido', 'quemado', 'saliendo'])).toBe('quemado')
+    expect(selloQueManda(['servido', 'bandeja'])).toBe('bandeja')
+    expect(selloQueManda(['pendiente', 'saliendo'])).toBe('saliendo')
+  })
+
+  it('salido en todas, servido; lo que solo espera su hora, nada', () => {
+    expect(selloQueManda(['servido', 'servido'])).toBe('servido')
+    expect(selloQueManda(['servido', 'pendiente'])).toBeNull()
+    expect(selloQueManda([])).toBeNull()
+  })
+})
 
 describe('estadoDeFila', () => {
   it('lo que salió en todas se aplana; lo que viene y lo que está saliendo conservan la chapa', () => {

@@ -37,6 +37,20 @@ const CHIP: Record<Sello, { clase: string; signo: string }> = {
 }
 
 /**
+ * El signo de cada estado suelto, con su color, para lo que no tiene lugar para un chip: un
+ * bloque de la reja de horas. Es el mismo signo del chip; lo programado no lleva ninguno.
+ */
+export const SIGNO: Record<Sello, { signo: string; color: string }> = {
+  pendiente: { signo: '', color: '' },
+  saliendo: { signo: '…', color: 'text-brasa' },
+  servido: { signo: '✓', color: 'text-positive' },
+  bandeja: { signo: '◐', color: 'text-caution' },
+  reintento: { signo: '↻', color: 'text-caution' },
+  frio: { signo: '!', color: 'text-caution' },
+  quemado: { signo: '✕', color: 'text-negative' },
+}
+
+/**
  * Los destinos de un corte. Sin `detalle`, un chip por destino con el icono de la red y un
  * signo de cómo le fue (el calendario, la vista «Día» y «Se quemó»); el `sellos` que trae la
  * página manda, porque solo ella sabe qué cuentas se enfriaron. Con `detalle`, cada icono

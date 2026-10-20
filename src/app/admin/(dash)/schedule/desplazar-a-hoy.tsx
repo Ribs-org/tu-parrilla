@@ -14,7 +14,16 @@ import { useEffect, useRef, type ReactNode } from 'react'
  *
  * Solo al montar: después, el dueño desliza a donde quiera y la caja no se lo discute.
  */
-export function DesplazarAHoy({ children, className }: { children: ReactNode; className?: string }) {
+export function DesplazarAHoy({
+  children,
+  className,
+  margen = 32,
+}: {
+  children: ReactNode
+  className?: string
+  /** Cuánto queda a la vista a la izquierda de hoy: en la reja de horas, también el canal de las horas, que va pegado encima. */
+  margen?: number
+}) {
   const caja = useRef<HTMLDivElement>(null)
   useEffect(() => {
     const el = caja.current
@@ -23,8 +32,8 @@ export function DesplazarAHoy({ children, className }: { children: ReactNode; cl
     // Por la diferencia de las cajas y no por `offsetLeft`: la tarjeta recién puesta vive dentro
     // de la parrilla de su día, que es `relative`, y su `offsetLeft` contaría desde ahí.
     const desde = objetivo.getBoundingClientRect().left - el.getBoundingClientRect().left + el.scrollLeft
-    el.scrollLeft = Math.max(0, desde - 32)
-  }, [])
+    el.scrollLeft = Math.max(0, desde - margen)
+  }, [margen])
   return (
     <div ref={caja} className={className}>
       {children}

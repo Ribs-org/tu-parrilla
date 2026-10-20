@@ -48,8 +48,10 @@ llama «Se echó a perder». La equivalencia está en «El modo día», en [inde
   hoy. Se le puede agregar:
   - `?vista=lista`: la lista en vez del calendario (los enlaces viejos con
     `?vista=calendario` abren el calendario igual);
-  - `?vista=dia`: un solo día, por cuenta (ver «El día»); con `&fecha=AAAA-MM-DD`, ese día, y
-    sin ella, hoy;
+  - `?vista=hora`: la misma semana por hora, como Google Calendar (ver «Por hora»); con
+    `&semana=AAAA-MM-DD`, la semana que contiene ese día;
+  - `?vista=dia`: un solo día, por cuenta y por hora (ver «El día»); con `&fecha=AAAA-MM-DD`,
+    ese día, y sin ella, hoy;
   - `?semana=AAAA-MM-DD`: el calendario en la semana que contiene ese día;
   - `?red=<red>` (`instagram`, `tiktok`, `youtube` o `facebook`): solo lo que sale a esa red,
     en el calendario, el día y la lista (ver «El filtro por red»); con el id de una cuenta en
@@ -65,17 +67,17 @@ llama «Se echó a perder». La equivalencia está en «El modo día», en [inde
 
 De arriba abajo: el encabezado con sus botones, el aviso «Programado.» (solo cuando se acaba
 de programar), la tarjeta «Conecta tu primera red» (solo sin ninguna red conectada), la
-sección «Se quemó» (solo si algo falló), los botones «Calendario», «Día» y «Lista» —con el
-filtro por red al lado— y lo programado debajo, y el pie de ayer. El formulario para programar, la lista de borradores y la carga por
+sección «Se quemó» (solo si algo falló), los botones «Calendario», «Por hora», «Día» y «Lista»
+—con el filtro por red al lado— y lo programado debajo, y el pie de ayer. El formulario para programar, la lista de borradores y la carga por
 CSV no están en la página: se abren en un panel que se desliza desde la derecha (ver «El panel
 lateral», más abajo).
 
 Mientras carga se ve la forma de lo que viene, sin texto salvo el título «La Parrilla»: el
-lugar de los botones, el de «Calendario», «Día» y «Lista», y siete parrillas tibias, sin
+lugar de los botones, el de «Calendario», «Por hora», «Día» y «Lista», y siete parrillas tibias, sin
 cortes, que se encienden y se apagan de a poco como brasas, una un poco después de la otra
 (con «reducir movimiento» activado en el sistema, quietas a media luz). No son días vacíos:
-un día vacío es gris ceniza y no se mueve. En la vista «Día» son tres columnas, en «Lista»
-son filas, y al abrir un post se ve el editor: el título «Editar post» y el lugar de cada
+un día vacío es gris ceniza y no se mueve. En «Día» son tres columnas y en «Por hora» siete, con
+el lugar del canal de las horas a la izquierda; en «Lista» son filas, y al abrir un post se ve el editor: el título «Editar post» y el lugar de cada
 campo.
 
 ### Encabezado
@@ -180,25 +182,27 @@ el chip teñido de rojo. El rojo de YouTube no es un fallo. En el calendario, lo
 todas sus redes lleva solo los íconos, sin chip, y un «✓» para todas. Un lector de pantalla lee el formato y la cocción («Video · Programada»,
 «Carrusel · Falló en parte») y cada destino con su estado.
 
-La tarjeta en que va el corte (en el calendario, su fila) es de acero, no del color de la carne,
+La tarjeta en que va el corte (en el calendario, su fila; en «Día», su bloque) es de acero, no del color de la carne,
 y cambia de borde solo cuando pide algo: ámbar si algo espera en la bandeja de TikTok, reintenta
 o tiene el fierro frío; rojo si se quemó. En el calendario, además, lo que ya salió en todas sus
 redes deja la chapa (ver «El calendario»).
 
-### «Calendario», «Día» y «Lista»
+### «Calendario», «Por hora», «Día» y «Lista»
 
-Tres botoncitos sobre lo programado. «Calendario» es la vista con que abre la pantalla: la
-semana. «Día» muestra un solo día, separado por cuenta; abre en el día que se estaba mirando
-(hoy, si la semana a la vista es la de hoy, y si no, el lunes de esa semana). «Lista» cambia a
-la lista. Desde «Día», «Calendario» vuelve a la semana que contiene ese día.
+Cuatro botoncitos sobre lo programado. «Calendario» es la vista con que abre la pantalla: la
+semana, en filas. «Por hora» muestra la misma semana con las horas hacia abajo, como Google
+Calendar (ver «Por hora»). «Día» muestra un solo día, separado por cuenta y por hora; abre en el
+día que se estaba mirando (hoy, si la semana a la vista es la de hoy, y si no, el lunes de esa
+semana). «Lista» cambia a la lista. Desde «Día», «Calendario» y «Por hora» vuelven a la semana que
+contiene ese día.
 
 ### El filtro por red
 
-A la derecha de «Calendario», «Día» y «Lista» (en el teléfono, debajo, en un solo renglón que
+A la derecha de «Calendario», «Por hora», «Día» y «Lista» (en el teléfono, debajo, en un solo renglón que
 se desliza de lado), un botón por red: «Todas» y, en este orden, las redes en las que tienes
 cuentas —Instagram, TikTok, YouTube, Facebook—, cada una con su ícono en el color de la red y
-cuántas publicaciones tiene en lo que estás mirando: la semana en el calendario, el día en
-«Día», todo en «Lista». Una publicación que sale a dos redes cuenta en las dos, y una vez en
+cuántas publicaciones tiene en lo que estás mirando: la semana en el calendario y en «Por hora»,
+el día en «Día», todo en «Lista». Una publicación que sale a dos redes cuenta en las dos, y una vez en
 «Todas»: cada número es lo que queda a la vista al apretar ese botón. Con una sola cuenta, el
 filtro no aparece.
 
@@ -207,7 +211,7 @@ clic en la misma, o «Todas», vuelve a mostrar todo. El filtro sigue puesto al 
 semana, de día o de vista, porque va en la dirección (`?red=`); entrar a La Parrilla desde la
 barra lo saca.
 
-- **En el calendario y en «Día»**, una publicación que sale a varias redes se ve solo con lo
+- **En el calendario, en «Por hora» y en «Día»**, una publicación que sale a varias redes se ve solo con lo
   de la red elegida: su corte, cocido según esa red, con una sola marca y un solo chip. En
   «Día» quedan solo las columnas de las cuentas de esa red.
 - **En la lista** se ve entera, con todas sus píldoras: ahí se sube, se reprograma y se borra
@@ -292,10 +296,37 @@ fecha no salen en el calendario; están en «Borradores (<N>)».
 El calendario no tiene botones de «Subir ahora», «Eliminar» ni «Reprogramar»: esos están en
 la lista (y «Reprogramar», también en «Se quemó» y en el editor).
 
+### Por hora
+
+La misma semana que el calendario, con las horas hacia abajo, como Google Calendar: siete
+columnas, de lunes a domingo, y cada publicación a la altura de su hora. Todo calza: lo que sale
+a la misma hora queda a la misma altura en todos los días, y se ven los huecos y los choques.
+Arriba, «Semana anterior», el rango de la semana y «Semana siguiente», y cada día lleva arriba lo
+mismo que en el calendario: su nombre (que abre ese día en «Día»), su fuego, el «+», la mezcla de
+redes y el renglón «42 ✓ · 2 ✕». A la izquierda, el canal de las horas: de 07:00 a 23:00, o más
+si algo cae antes o después.
+
+Cada publicación es un bloque chico: a la izquierda una franja con el color de cada red a la que
+sale (Instagram rosado, TikTok gris, YouTube rojo, Facebook azul; partida si sale a varias), la
+hora y el signo de la red que más pide: «✕» si se quemó en alguna; «!», «↻» o «◐» si pide
+atención; «…» si está saliendo; «✓» si salió en todas; sin signo, programada. El corte y el texto
+no caben: al dejar el mouse encima aparecen la hora, el texto y cada red con su estado, y un clic
+abre el editor. Las que caen a menos de veinte minutos van lado a lado. Se ven como las filas del
+calendario: lo que ya salió, hundido; lo quemado, teñido de rojo; lo que está saliendo, con borde
+naranjo; lo que pide atención, con borde ámbar.
+
+Los días que ya pasaron van rayados en diagonal, y hoy, hasta la hora de ahora, donde cruza la
+línea naranja con la hora escrita en el canal («14:20»); la línea se corre sola. Los borradores
+con fecha van a su hora, con borde punteado y sin franja. Un día sin nada no tiene bloques; si es
+de hoy en adelante, al pasar el mouse aparece arriba **«+ Poner algo»**, como en el calendario.
+En el teléfono la reja se desliza de lado, con el canal de las horas fijo a la izquierda, y abre
+corrida hasta hoy.
+
 ### El día
 
-Un solo día, con una columna por cuenta. Sirve para ver qué sale en cada cuenta ese día y
-dónde hay huecos: cuántas veces sale una misma cuenta en un día no se ve en la semana.
+Un solo día, con una columna por cuenta y las horas hacia abajo, como Google Calendar: lo que
+sale a la misma hora queda a la misma altura en todas las columnas. Sirve para ver qué sale en
+cada cuenta ese día, qué sale a la vez y dónde hay huecos.
 
 Arriba, «Día anterior», el día —«Hoy · vie 16 de oct», «Mañana · sáb 17 de oct», «Ayer · jue
 15 de oct» o solo «mar 20 de oct»— con el fuego del día entero al lado («Apagada»,
@@ -303,30 +334,39 @@ Arriba, «Día anterior», el día —«Hoy · vie 16 de oct», «Mañana · sá
 «Ir a hoy» si el día no es hoy, y «Día siguiente». En el teléfono las flechas dicen
 «Anterior» y «Siguiente».
 
-Debajo, una columna por cuenta, en el orden de [Los Fierros](los-fierros.md). Cada cuenta
-conectada tiene la suya aunque ese día no tenga nada; una desconectada aparece solo si ese
-día tiene algo, con «reconéctala» al lado del nombre. En el teléfono las columnas van una
-debajo de otra. Cada columna lleva arriba el ícono de la red, en su color, y el @usuario (o el
-nombre de la página), el fuego de esa cuenta ese día —con las mismas reglas que el día: uno o dos,
-«Prendida»; tres o más, «Parrilla llena»— y, si el día no pasó y la cuenta está conectada, un
-«+» que abre «Nueva publicación» con ese día puesto y esa cuenta ya marcada (un lector de
-pantalla lo lee «Programar en <Red> · <usuario>»).
+Debajo, a la izquierda, el canal de las horas («07:00», «08:00»…: de 07:00 a 23:00, o más si
+algo cae antes o después) y una columna por cuenta, en el orden de [Los Fierros](los-fierros.md).
+Cada cuenta conectada tiene la suya aunque ese día no tenga nada; una desconectada aparece solo
+si ese día tiene algo, con «reconéctala» debajo del nombre. En el teléfono la reja se desliza de
+lado, con el canal de las horas fijo a la izquierda. Cada columna lleva arriba el ícono de la red,
+en su color, y el @usuario (o el nombre de la página); si el día no pasó y la cuenta está
+conectada, un «+» que abre «Nueva publicación» con ese día puesto y esa cuenta ya marcada (un
+lector de pantalla lo lee «Programar en <Red> · <usuario>»); y debajo, cuántas publicaciones
+tiene ese día y su fuego, con las mismas reglas que el día: uno o dos, «Prendida»; tres o más,
+«Parrilla llena».
 
-En cada columna, por hora, una tarjeta por cada publicación que sale a esa cuenta: una que
-sale a tres cuentas aparece en las tres. La tarjeta trae a la izquierda el corte, cocido según
-ese destino solo y con una sola marca, la suya; y al lado la hora (con «· saliendo»,
-«· publicado» o «· falló» si corresponde), el texto en tres líneas o «(sin texto)», el estado
-de ese destino en palabras («Programado», «Reintentando», «Publicando…», «Publicado», «En tu
-bandeja de TikTok», «Falló» o «Su fierro está frío: reconéctala», con el motivo después de
-dos puntos si lo hay) y, si sale también a otras cuentas, «También en» con sus chips. La misma
-publicación puede verse publicada en una columna y quemada en otra. Un clic abre el editor.
+Lo que ya pasó va rayado en diagonal: el día entero si ya pasó, y hoy hasta la hora de ahora,
+donde una línea naranja cruza todas las columnas, con la hora escrita en el canal («14:20»). La
+línea se corre sola.
 
-Los borradores con fecha de ese día van en la columna de cada cuenta que tienen marcada, con
-borde punteado, como en la semana; los que no tienen ninguna cuenta marcada, en una columna
-«Sin cuenta elegida» al final. No cuentan para el fuego.
+Cada publicación que sale a esa cuenta es un bloque a la altura de su hora: el corte en chico,
+cocido según ese destino solo y con una sola marca, la suya; la hora; el texto en un renglón (o
+«(sin texto)»); y el signo de cómo le fue en esa red: «✓» salió, «…» saliendo, «✕» se quemó,
+«◐» en la bandeja de TikTok, «↻» reintentando, «!» fierro frío; sin signo, programada. Si sale
+también a otras cuentas, sus íconos van al final del bloque. Al dejar el mouse encima aparecen el
+texto entero, el estado de esa red con su motivo y «También en: …» con el estado de las otras.
+Una que sale a tres cuentas aparece en las tres columnas, cada una cocida según su destino: la
+misma publicación puede verse publicada en una columna y quemada en otra. El bloque se ve como una
+fila del calendario: lo que ya salió, hundido; lo quemado, teñido de rojo; lo que está saliendo,
+con borde naranjo; lo que pide atención, con borde ámbar. Dos de la misma cuenta a menos de media
+hora van lado a lado. Un clic abre el editor.
 
-Una columna vacía es una parrilla fría, como en la semana. Si todavía se puede programar en
-ella, al pasar el mouse aparece **«+ Poner algo»**, que hace lo mismo que su «+» (en el
+Los borradores con fecha de ese día van en la columna de cada cuenta que tienen marcada, a su
+hora y con borde punteado: «Borrador», la hora y el texto. Los que no tienen ninguna cuenta
+marcada van en una columna «Sin cuenta elegida», al final. No cuentan para el fuego.
+
+Una columna vacía no tiene bloques. Si todavía se puede programar en ella, al pasar el mouse
+aparece arriba **«+ Poner algo»**, que hace lo mismo que su «+» (en el
 teléfono, siempre a la vista; un lector de pantalla lo lee «Nada para esta cuenta. Poner
 algo»). Si no se puede —el día ya pasó, o la cuenta está desconectada—, no lleva nada a la
 vista, y un lector de pantalla lee «No salió nada en esta cuenta.» o «Nada para esta
@@ -601,11 +641,11 @@ Cada publicación tiene un destino por cuenta, y cada destino va por su lado.
 | Lo que dice | Cómo se ve | Qué está pasando |
 |---|---|---|
 | «Programado» | Píldora gris; en el corte, marca punteada y chip sin signo | Espera su hora |
-| «Reintentando» | Píldora gris con « — <motivo>»; en el corte, marca punteada en ámbar y chip «↻»; en el calendario, la fila con borde ámbar | Falló un intento y se volverá a probar solo: quince minutos después del primer fallo y dos horas después del segundo. Son tres intentos en total; algunos rechazos se queman al primero. También dice «Reintentando», sin gastar intentos, un destino de Instagram que espera a que la cuenta recupere cupo (ver «Motivos de un destino que no salió») |
-| «Publicando…» | Píldora gris; humo sobre el corte y chip «…»; en «Día», «· saliendo» al lado de la hora, y en el calendario, la fila con borde naranjo | La red recibió el archivo y lo está procesando. Si pasan 24 horas así, cuenta como un intento fallido |
-| «Publicado» | Píldora verde; marca llena en el corte y chip verde «✓»; en el calendario, cuando salió en todas sus redes, la fila hundida y sin chapa, con un solo «✓» | Ya salió en esa red |
+| «Reintentando» | Píldora gris con « — <motivo>»; en el corte, marca punteada en ámbar y chip «↻»; en el calendario, en «Por hora» y en «Día», el borde ámbar y «↻» | Falló un intento y se volverá a probar solo: quince minutos después del primer fallo y dos horas después del segundo. Son tres intentos en total; algunos rechazos se queman al primero. También dice «Reintentando», sin gastar intentos, un destino de Instagram que espera a que la cuenta recupere cupo (ver «Motivos de un destino que no salió») |
+| «Publicando…» | Píldora gris; humo sobre el corte y chip «…»; en el calendario, en «Por hora» y en «Día», el borde naranjo y «…» | La red recibió el archivo y lo está procesando. Si pasan 24 horas así, cuenta como un intento fallido |
+| «Publicado» | Píldora verde; marca llena en el corte y chip verde «✓»; en el calendario, en «Por hora» y en «Día», cuando salió en todas sus redes, hundida y sin chapa, con un solo «✓» | Ya salió en esa red |
 | «En tu bandeja de TikTok» | Píldora verde; marca quemada hasta la mitad con un punto ámbar, chip «◐» y la tarjeta (o la fila) con borde ámbar | Se mandó como borrador de TikTok: hay que terminarlo en la app de TikTok. Cuando se publica desde allá, la sincronización siguiente (la diaria, o «Sincronizar ahora» en [Los Fierros](los-fierros.md)) encuentra el video y pasa a «Publicado» |
-| «Falló» | Píldora roja con « — <motivo>» y «Reprogramar»; marca carbonizada, chip rojo «✕», el corte con halo rojo y banderita, y la tarjeta con borde rojo (en el calendario, la fila con borde rojo y teñida de rojo) | Se quemó: no se volverá a intentar sola. Aparece también en «Se quemó», arriba del calendario, y puede llegar un correo con el asunto «No se pudo publicar en <Red>» (no llega si el motivo es la conexión de la cuenta: de eso avisa un solo correo por cuenta, ver [Los Fierros](los-fierros.md)). También sale en el resumen del día, el correo de la mañana |
+| «Falló» | Píldora roja con « — <motivo>» y «Reprogramar»; marca carbonizada, chip rojo «✕», el corte con halo rojo y banderita, y la tarjeta con borde rojo (en el calendario, en «Por hora» y en «Día», con borde rojo y teñida de rojo) | Se quemó: no se volverá a intentar sola. Aparece también en «Se quemó», arriba del calendario, y puede llegar un correo con el asunto «No se pudo publicar en <Red>» (no llega si el motivo es la conexión de la cuenta: de eso avisa un solo correo por cuenta, ver [Los Fierros](los-fierros.md)). También sale en el resumen del día, el correo de la mañana |
 
 Un destino programado en una cuenta con el fierro frío (desconectada, vencida o que no
 sincroniza; ver [Los Fierros](los-fierros.md)) lleva en el corte la marca punteada en gris
@@ -819,12 +859,19 @@ suben archivos sueltos.
    renglón que aparece debajo.
 3. Para volver a ver todo: «Todas».
 
+### Para ver la semana por hora, como Google Calendar
+
+1. Apretar «Por hora», al lado de «Calendario».
+2. Moverse con «Semana anterior» y «Semana siguiente».
+3. Dejar el mouse encima de un bloque para ver su texto y cómo le fue en cada red; un clic abre
+   su editor.
+
 ### Para ver qué sale en cada cuenta un día
 
 1. Un clic en el nombre del día en el calendario (por ejemplo `sáb 17`), o el botoncito «Día»
    arriba de lo programado.
-2. Cada columna es una cuenta. Moverse con «Día anterior» y «Día siguiente»; «Ir a hoy»
-   vuelve a hoy.
+2. Cada columna es una cuenta, con las horas hacia abajo. Moverse con «Día anterior» y «Día
+   siguiente»; «Ir a hoy» vuelve a hoy.
 3. Para programar algo en una cuenta ese día, el «+» de su columna: abre «Nueva publicación»
    con el día y la cuenta ya puestos.
 
@@ -1112,8 +1159,15 @@ programar nada nuevo ahí. Para dejar de intentarlo, desmarcar esa red en el edi
 - **No veo el + en un día.** Solo lo tienen hoy y los días que vienen.
 - **Quiero ver un día cuenta por cuenta** o **¿cuántas veces sale cada cuenta mañana?** El
   nombre del día en el calendario, o «Día»: una columna por cuenta, con su propio fuego.
-- **En la vista Día un post aparece dos veces.** Sale a dos cuentas: es una tarjeta por
-  cuenta, y «También en» dice cuáles son las otras.
+- **En la vista Día un post aparece dos veces.** Sale a dos cuentas: es un bloque por cuenta,
+  y al final de cada bloque van los íconos de las otras (al dejar el mouse encima, «También
+  en: …»).
+- **¿Hay una vista como Google Calendar, por hora?** Sí: «Por hora», al lado de «Calendario»,
+  muestra la semana con las horas hacia abajo. «Día» muestra un día, por cuenta y por hora.
+- **En «Por hora» no se lee el texto.** No cabe: aparece al dejar el mouse encima del bloque, y
+  está en «Día», en la lista y en el editor.
+- **¿Qué es la franja de color de cada bloque en «Por hora»?** La red a la que sale, en su
+  color (Instagram rosado, TikTok gris, YouTube rojo, Facebook azul); partida si sale a varias.
 - **Quiero ver solo Facebook (o solo una red).** El filtro por red, arriba de lo programado a
   la derecha: el botón de esa red. «Todas» vuelve a mostrar todo.
 - **Quiero ver solo una de mis cuentas de TikTok.** Pasar el mouse por «TikTok» en el filtro y
@@ -1264,9 +1318,10 @@ programar nada nuevo ahí. Para dejar de intentarlo, desmarcar esa red en el edi
 - El calendario no muestra el texto en la fila (va al dejar el mouse encima y en el editor), ni
   cambia una fila sin recargar: la línea de «ahora» se corre sola, pero lo que salió mientras la
   página estaba abierta se ve al volver a cargarla.
-- La vista «Día» no tiene «Subir ahora», «Eliminar» ni «Reprogramar» (están en la lista), no
-  alinea las horas entre columnas —cada columna va en su orden, de la más temprana a la más
-  tarde— y no muestra varios días a la vez: para eso está la semana.
+- «Día» y «Por hora» no tienen «Subir ahora», «Eliminar» ni «Reprogramar» (están en la
+  lista), y no se programa con un clic en una hora vacía: para eso está el «+» de cada columna o
+  «Nueva publicación». «Día» no muestra varios días a la vez, y «Por hora» no muestra el corte
+  ni el texto de cada publicación: van al dejar el mouse encima y en el editor.
 - El filtro por red no esconde «Se quemó» ni cambia el pie de ayer, y no se recuerda entre
   visitas: vive en la dirección (`?red=`), y entrar a La Parrilla desde la barra lo saca.
 - No publica en Threads ni en X / Twitter, que dicen «Próximamente» (ver [Los Fierros](los-fierros.md)).
@@ -1289,8 +1344,10 @@ Lo que describe esta página sale de:
   - `src/lib/subida-directa.ts` (la subida a R2, con su avance)
   - `src/app/admin/(dash)/schedule/lista-borradores.tsx`
   - `src/app/admin/(dash)/schedule/batch-upload.tsx`
-  - `src/app/admin/(dash)/schedule/calendar.tsx`, `src/app/admin/(dash)/schedule/semana.ts` y `src/app/admin/(dash)/schedule/linea-de-ahora.tsx` (la semana en filas: cómo va cada fila, el renglón y la mezcla de cada día, y la línea de «ahora»)
+  - `src/app/admin/(dash)/schedule/calendar.tsx`, `src/app/admin/(dash)/schedule/semana.ts` y `src/app/admin/(dash)/schedule/linea-de-ahora.tsx` (la semana en filas: cómo va cada fila, el renglón y la mezcla de cada día, y la línea de «ahora», también la de las rejas de horas)
   - `src/app/admin/(dash)/schedule/vista-dia.tsx` y `src/app/admin/(dash)/schedule/dia.ts` (la vista «Día»)
+  - `src/app/admin/(dash)/schedule/semana-por-hora.tsx` («Por hora»)
+  - `src/app/admin/(dash)/schedule/reja-de-horas.tsx` y `src/app/admin/(dash)/schedule/horas.ts` (la reja de horas de «Día» y «Por hora»: el canal de las horas, los carriles y lo rayado)
   - `src/app/admin/(dash)/schedule/filtro-redes.tsx` y `src/app/admin/(dash)/schedule/filtro-red.ts` (el filtro por red)
   - `src/app/admin/(dash)/schedule/se-quemo.tsx`, `src/app/admin/(dash)/schedule/lista-quemados.tsx` y `src/app/admin/(dash)/schedule/filtro-quemados.ts` («Se quemó»)
   - `src/app/admin/(dash)/schedule/queue.tsx`
@@ -1309,7 +1366,7 @@ Lo que describe esta página sale de:
   - `src/app/admin/(dash)/schedule/arreglo.ts` (qué arreglo se ofrece junto a un destino quemado)
   - `src/app/admin/(dash)/schedule/desplazar-a-hoy.tsx` (la semana corrida hasta hoy en el teléfono)
   - `src/app/admin/(dash)/schedule/loading.tsx` y `src/components/esqueleto.tsx` (la carga, con la forma de cada vista y del editor)
-  - `src/app/globals.css` (la parrilla fría de un día vacío, «Poner algo» al pasar el mouse, el menú «Por cuenta» del filtro, el color de cada red, el fondo de las filas servidas y quemadas de la semana, y el pulso de la carga)
+  - `src/app/globals.css` (la parrilla fría de un día vacío, «Poner algo» al pasar el mouse, el menú «Por cuenta» del filtro, el color de cada red, el fondo de las filas servidas y quemadas de la semana, las rayas de la reja de horas y lo rayado de lo que ya pasó, y el pulso de la carga)
 - Lo que hacen sus botones (programar, guardar y descartar un borrador, guardar en el editor, reprogramar, eliminar, «Subir ahora», la carga por CSV y la lectura de la cuenta de TikTok):
   - `src/app/admin/actions.ts`
 - Los borradores (qué se guarda, cuándo hay algo que guardar, la fecha que se propone para un día):

@@ -188,9 +188,12 @@ ninguna red conectada, una tarjeta que te manda a Los Fierros. Debajo, el calend
 semana —la lista queda a un clic—, con cada corte en una fila de una línea (lo que ya salió,
 hundido y sin chapa), la mezcla de redes y cuánto salió de cada día, una línea de «ahora» que se
 corre sola en el de hoy, y un «+» en cada día que abre el compositor con ese día puesto. El nombre de cada día abre la vista **Día** (`?vista=dia&fecha=…`): ese día con
-una columna por cuenta, cada una con su propio fuego y un «+» que abre el compositor con el
-día y la cuenta puestos; un post que sale a varias cuentas aparece en cada una, cocido según
-el estado de ese destino. Arriba de lo programado, un **filtro por red** (`?red=`, con la red
+una columna por cuenta y las horas hacia abajo, como Google Calendar —lo que ya pasó rayado y
+la línea de «ahora» cruzando todas—, cada una con su propio fuego y un «+» que abre el
+compositor con el día y la cuenta puestos; un post que sale a varias cuentas aparece en cada
+una, cocido según el estado de ese destino. **Por hora** (`?vista=hora`) es la misma semana del
+calendario con las horas hacia abajo, con bloques chicos que van lado a lado cuando se juntan;
+las dos rejas salen de `schedule/reja-de-horas.tsx`. Arriba de lo programado, un **filtro por red** (`?red=`, con la red
 o con el id de una cuenta) dice cuántos cortes tiene cada una en lo que se mira y deja ver solo
 esa; «Se quemó» no lo obedece. El ícono de cada red va en su color de marca
 (`--color-marca-*`, `src/lib/color-de-red.ts`), nunca de fondo: el fondo rojo es lo quemado.

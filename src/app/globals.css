@@ -585,6 +585,7 @@
     }
 
     .grilla:hover .poner-algo,
+    .columna-por-hora:hover .poner-algo,
     .poner-algo:focus-visible {
       opacity: 1;
     }
@@ -607,6 +608,28 @@
 
   .fila-quemada {
     background: color-mix(in srgb, var(--color-negative) 12%, var(--color-acero-900));
+  }
+
+  /*
+   * La reja de horas de «Día» y «Por hora» (`schedule/reja-de-horas.tsx`). La raya de cada hora
+   * es el fondo de la columna, repetido cada `--hora` (los píxeles de una hora), y no un elemento
+   * por hora. Lo que ya pasó va rayado en diagonal, apenas, debajo de los bloques: se ve que pasó
+   * sin tapar cómo salió.
+   */
+  .reja-horas {
+    background-image: repeating-linear-gradient(
+      to bottom,
+      var(--color-acero-700) 0 1px,
+      transparent 1px var(--hora)
+    );
+  }
+
+  .pasado-rayado {
+    background: repeating-linear-gradient(
+      -45deg,
+      color-mix(in srgb, var(--color-fg) 6%, transparent) 0 6px,
+      transparent 6px 12px
+    );
   }
 
   /*

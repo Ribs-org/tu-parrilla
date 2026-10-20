@@ -62,7 +62,7 @@ export const CLASE_ESTADO: Record<Coccion, string> = {
  * lo que pide atención, el borde ámbar de siempre. Los dos fondos van en globals.css porque
  * cambian distinto de noche y de día, y una utilidad de fondo los pisaría.
  */
-const CLASE_FILA: Record<EstadoDeFila, string> = {
+export const CLASE_FILA: Record<EstadoDeFila, string> = {
   servida: 'fila-servida border-transparent hover:border-acero-700',
   'por-salir': 'border-acero-700 bg-acero-900 hover:border-acero-600',
   saliendo: 'border-brasa/60 bg-acero-900',
@@ -158,23 +158,7 @@ export function WeekCalendar({
 
   return (
     <div>
-      <div className="mb-3 flex items-center justify-between text-sm">
-        <Link
-          href={prevHref}
-          className="inline-flex items-center gap-1 text-fg-faint transition-colors hover:text-fg"
-        >
-          <ChevronLeft className="h-4 w-4" aria-hidden />
-          Semana anterior
-        </Link>
-        <span className="font-mono text-[0.8rem] text-fg-muted">{weekLabel(monday)}</span>
-        <Link
-          href={nextHref}
-          className="inline-flex items-center gap-1 text-fg-faint transition-colors hover:text-fg"
-        >
-          Semana siguiente
-          <ChevronRight className="h-4 w-4" aria-hidden />
-        </Link>
-      </div>
+      <CambiarSemana monday={monday} prevHref={prevHref} nextHref={nextHref} />
       {/*
         `relative` no es decorativo: los textos `sr-only` de adentro (el «+» de cada día) se
         posicionan en absoluto, y sin un ancestro posicionado dentro de esta caja se escapaban
@@ -199,43 +183,14 @@ export function WeekCalendar({
             ))
             return (
               <div key={day} className="flex flex-col gap-1.5" data-hoy={day === today ? '' : undefined}>
-                <div className="flex items-baseline justify-between gap-2">
-                  {/* El nombre del día abre ese día, cuenta por cuenta. */}
-                  <Link
-                    href={verDia(day)}
-                    className={cn(
-                      'font-titulo text-[0.65rem] uppercase tracking-[0.14em] underline-offset-2 transition-colors hover:text-fg hover:underline',
-                      day === today ? 'text-fg' : 'text-fg-faint',
-                    )}
-                  >
-                    {dayLabel(day, index)}
-                    <span className="sr-only">: ver por cuenta</span>
-                  </Link>
-                  <span
-                    // En el secundario y no en el tenue: a 0.55rem es el texto más chico
-                    // de la pantalla, y el secundario es el que más le sobra sobre el
-                    // mínimo de 4.5:1 (5,85 contra 5,03 sobre la chapa).
-                    className={cn(
-                      'font-titulo text-[0.55rem] uppercase tracking-[0.12em]',
-                      calor === 'llena' ? 'text-brasa' : 'text-fg-muted',
-                    )}
-                  >
-                    <RotuloCalor calor={calor} />
-                  </span>
-                  {abierto ? (
-                    <Link
-                      href={nuevoEnDia(day)}
-                      scroll={false}
-                      className="-my-1 rounded p-0.5 text-fg-faint transition-colors hover:bg-velo/[0.08] hover:text-fg"
-                    >
-                      <Plus className="h-3.5 w-3.5" aria-hidden />
-                      <span className="sr-only">Programar el {dayLabel(day, index)}</span>
-                    </Link>
-                  ) : null}
-                </div>
-
-                <MezclaDelDia items={cortes} />
-                <ResumenDelDia cocciones={cortes.map((c) => c.dibujo.coccion)} />
+                <CabezaDeDia
+                  dia={day}
+                  indice={index}
+                  hoy={today}
+                  cortes={cortes}
+                  verDia={verDia(day)}
+                  nuevo={abierto ? nuevoEnDia(day) : null}
+                />
 
                 <div
                   className={cn(
@@ -286,6 +241,84 @@ export function WeekCalendar({
           })}
         </div>
       </DesplazarAHoy>
+    </div>
+  )
+}
+
+/** «Semana anterior», el rango de la semana y «Semana siguiente»: la semana en filas y «Por hora». */
+export function CambiarSemana({ monday, prevHref, nextHref }: { monday: string; prevHref: string; nextHref: string }) {
+  return (
+    <div className="mb-3 flex items-center justify-between text-sm">
+      <Link href={prevHref} className="inline-flex items-center gap-1 text-fg-faint transition-colors hover:text-fg">
+        <ChevronLeft className="h-4 w-4" aria-hidden />
+        Semana anterior
+      </Link>
+      <span className="font-mono text-[0.8rem] text-fg-muted">{weekLabel(monday)}</span>
+      <Link href={nextHref} className="inline-flex items-center gap-1 text-fg-faint transition-colors hover:text-fg">
+        Semana siguiente
+        <ChevronRight className="h-4 w-4" aria-hidden />
+      </Link>
+    </div>
+  )
+}
+
+/**
+ * Lo de arriba de cada día, en la semana en filas y en «Por hora»: su nombre —que abre ese día,
+ * cuenta por cuenta—, su calor, el «+» si todavía no pasó, la mezcla de redes y el renglón de
+ * cuánto salió y cuánto viene.
+ */
+export function CabezaDeDia({
+  dia,
+  indice,
+  hoy,
+  cortes,
+  verDia,
+  nuevo,
+}: {
+  dia: string
+  /** La posición en la semana (0 = lunes): `dayLabel` la pide. */
+  indice: number
+  hoy: string
+  cortes: ReadonlyArray<{ targets: ReadonlyArray<{ network: string }>; dibujo: Dibujo }>
+  verDia: string
+  /** El compositor en ese día; null si el día ya pasó. */
+  nuevo: string | null
+}) {
+  const calor = calorDelDia(cortes.length)
+  return (
+    <div className="flex flex-col gap-1.5">
+      <div className="flex items-baseline justify-between gap-2">
+        <Link
+          href={verDia}
+          className={cn(
+            'font-titulo text-[0.65rem] uppercase tracking-[0.14em] underline-offset-2 transition-colors hover:text-fg hover:underline',
+            dia === hoy ? 'text-fg' : 'text-fg-faint',
+          )}
+        >
+          {dayLabel(dia, indice)}
+          <span className="sr-only">: ver por cuenta</span>
+        </Link>
+        <span
+          // En el secundario y no en el tenue: a 0.55rem es el texto más chico de la pantalla, y
+          // el secundario es el que más le sobra sobre el mínimo de 4.5:1 (5,85 contra 5,03 sobre
+          // la chapa).
+          className={cn('font-titulo text-[0.55rem] uppercase tracking-[0.12em]', calor === 'llena' ? 'text-brasa' : 'text-fg-muted')}
+        >
+          <RotuloCalor calor={calor} />
+        </span>
+        {nuevo ? (
+          <Link
+            href={nuevo}
+            scroll={false}
+            className="-my-1 rounded p-0.5 text-fg-faint transition-colors hover:bg-velo/[0.08] hover:text-fg"
+          >
+            <Plus className="h-3.5 w-3.5" aria-hidden />
+            <span className="sr-only">Programar el {dayLabel(dia, indice)}</span>
+          </Link>
+        ) : null}
+      </div>
+      <MezclaDelDia items={cortes} />
+      <ResumenDelDia cocciones={cortes.map((c) => c.dibujo.coccion)} />
     </div>
   )
 }
@@ -364,7 +397,7 @@ function FilaDeCorte({
  * A qué red va lo del día: una barra fina con un tramo por red, del largo de sus destinos, en
  * su color (`fondoDeRed`). Sin nada, la barra vacía, para que los días sigan alineados.
  */
-function MezclaDelDia({ items }: { items: ReadonlyArray<{ targets: ReadonlyArray<{ network: string }> }> }) {
+export function MezclaDelDia({ items }: { items: ReadonlyArray<{ targets: ReadonlyArray<{ network: string }> }> }) {
   const mezcla = mezclaDeRedes(items)
   const total = mezcla.reduce((suma, m) => suma + m.destinos, 0)
   const enPalabras = mezcla.map((m) => `${networkLabel(m.red)} ${m.destinos}`)
@@ -386,7 +419,7 @@ function MezclaDelDia({ items }: { items: ReadonlyArray<{ targets: ReadonlyArray
  * chips: «42 ✓ · 2 ✕», «30 ✓ · 14 por salir», «44 por salir». Un renglón siempre, aunque esté
  * vacío: si no, la grilla de ese día bajaría y dejaría de alinearse con la del lado.
  */
-function ResumenDelDia({ cocciones }: { cocciones: readonly Coccion[] }) {
+export function ResumenDelDia({ cocciones }: { cocciones: readonly Coccion[] }) {
   const { servidos: salieron, fallaron, porSalir } = resumenDelDia(cocciones)
   const enPalabras = (tema: Tema) =>
     [
