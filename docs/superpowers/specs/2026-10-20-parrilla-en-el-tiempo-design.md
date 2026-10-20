@@ -70,9 +70,25 @@ Cada parte se publica sola y no cambia la API ni los datos: es cómo se dibuja.
   `src/lib/color-de-red.ts`. El color va también en los chips de cada corte, en las píldoras de
   la lista, en las columnas de «Día», en el filtro de «Se quemó» y en las cuentas del
   compositor.
-- **B. La semana en filas.** Cada publicación, una fila de una línea: el corte en chico, la
-  hora, sus redes y un signo. Lo que ya salió deja la chapa; una línea de «ahora» corta el día
-  de hoy; cada día dice cuánto salió, cuánto falló y cuánto viene, y lleva la mezcla de redes.
+- **B. La semana en filas.** Hecha (2026-10-20): `calendar.tsx`, con `semana.ts` y
+  `linea-de-ahora.tsx`. Cada publicación, una fila de una línea: el corte en chico, la hora y
+  sus redes con su signo; el texto, que en un séptimo de pantalla no cabe, va en el `title` y en
+  el editor. Cada día lleva la mezcla de redes y un renglón con los signos de los chips («42 ✓ ·
+  2 ✕», «44 por salir»). La semana entera, con 44 al día, mide unos 1.400 px en vez de 7.700.
+
+  Lo que ya salió, a criterio, como lo dejó el dueño: deja la chapa y se hunde —sin borde, más
+  oscuro que la chapa de noche y tostado de día, porque el fondo del día es casi tan claro como
+  la chapa—, con el dibujo apagado y un solo «✓» para todas sus redes. Un chip con su «✓» por
+  red hacía que lo servido se viera más cargado que lo que viene, que es lo que hay que mirar.
+  Lo que se quemó o pide atención no se hunde aunque haya pasado su hora (`estadoDeFila`): le
+  falta algo del dueño. Va por el estado y no por la hora: lo que pasó su hora sin salir sigue
+  en la chapa.
+
+  La línea de «ahora» se corre sola, con un reloj al minuto (`useAhora`) que al hidratar parte
+  de la hora del servidor. Las filas no cambian de estado sin recargar: que la página se pida
+  sola cada vez que la línea pasa una fila costaría consultas a la base y pelearía con lo que
+  el dueño tenga abierto. La semana pide 60rem de ancho mínimo, para que una fila de una red
+  quepa entera al lado de la hora; en el teléfono se desliza de lado, como antes.
 - **C. Por hora: el día y la semana.** El día, con una columna por cuenta y las horas hacia
   abajo, lo pasado rayado y la línea de «ahora» atravesando todas. La semana por hora, como
   tercera vista, con bloques chicos en carriles cuando se juntan.

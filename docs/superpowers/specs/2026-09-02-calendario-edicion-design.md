@@ -40,7 +40,7 @@ con las reglas del compositor y re-arma los destinos fallidos.
 
 | Decisión | Alternativa descartada | Razón |
 |---|---|---|
-| Vista semanal, 7 columnas | Mes tipo Google Calendar; mes + lista | Elegida por el dueño: más detalle por post (miniatura, texto) donde se programa denso |
+| Vista semanal, 7 columnas | Mes tipo Google Calendar; mes + lista | Elegida por el dueño: más detalle por post (miniatura, texto) donde se programa denso. Desde el 2026-10-20, con unas 44 publicaciones al día, cada post es una fila de una línea y el texto va al pasar el mouse (`2026-10-20-parrilla-en-el-tiempo-design.md`) |
 | Alternador «Lista \| Calendario» por URL | Reemplazar la lista; secciones duplicadas | Elegido por el dueño: misma data, dos lentes; la URL (`?vista=`) sigue el molde de los filtros de Contenido |
 | Editable con destinos intactos **y fallidos**; publicados bloqueados | Solo intactos; editar incluso con publicados | Corregir-lo-que-falló-y-reintentar es el caso de uso real; versiones distintas por red no |
 | Guardar re-arma los fallidos (`scheduled`, intentos 0, sin error) | Botón de reintento aparte | Editar-y-guardar ES el reintento; un paso extra no compra nada |
