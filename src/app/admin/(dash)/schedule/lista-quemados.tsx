@@ -3,6 +3,7 @@
 import { Fragment, useEffect, useId, useState, type ReactNode } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { Icon } from '@/components/icon'
+import { colorDeRed } from '@/lib/color-de-red'
 import { networkLabel } from '@/lib/networks'
 import { cn } from '@/lib/utils'
 import { SE_QUEMO } from '@/lib/vocabulario'
@@ -121,7 +122,7 @@ export function ListaQuemados({
                       : 'border-dashed border-acero-700 text-fg-faint hover:text-fg-muted',
                   )}
                 >
-                  <Icon name={red} className="h-3.5 w-3.5 shrink-0" />
+                  <Icon name={red} className={cn('h-3.5 w-3.5 shrink-0', colorDeRed(red))} />
                   {networkLabel(red)}
                   <span className="font-mono text-[0.68rem]">{cuantas}</span>
                 </button>

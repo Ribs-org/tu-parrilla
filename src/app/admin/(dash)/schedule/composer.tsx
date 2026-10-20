@@ -22,6 +22,7 @@ import {
   tiktokInicial,
   type Campos,
 } from '@/lib/borrador'
+import { colorDeRed } from '@/lib/color-de-red'
 import type { CuentaRow } from '@/lib/posts-kpis'
 import { REDES_PROXIMAMENTE, networkLabel } from '@/lib/networks'
 import { calorDelDia, estadoDelFierro, type Calor, type Fierro, type Sello } from '@/lib/parrilla'
@@ -688,7 +689,7 @@ export function Composer({
                         className="sr-only"
                       />
                       <span className={cn('fierro w-3.5 shrink-0', CLASE_FIERRO[fierro])} aria-hidden />
-                      <Icon name={cuenta.network} className="h-3.5 w-3.5 shrink-0" />
+                      <Icon name={cuenta.network} className={cn('h-3.5 w-3.5 shrink-0', colorDeRed(cuenta.network))} />
                       {networkLabel(cuenta.network)} · {cuenta.handle ?? 'sin nombre'}
                       {!cuenta.connected ? (
                         <span className="text-xs text-fg-faint">reconéctala</span>

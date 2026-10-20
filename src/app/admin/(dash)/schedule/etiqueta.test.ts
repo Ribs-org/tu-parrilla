@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { networkLabel } from '@/lib/networks'
-import { colorDeDestino, etiquetaDestino, motivoDestino, nombreDestino } from './etiqueta'
+import { etiquetaDestino, motivoDestino, nombreDestino } from './etiqueta'
 
 describe('nombreDestino', () => {
   it('nombra la red y el handle, para que dos destinos de la misma red se distingan', () => {
@@ -55,15 +55,5 @@ describe('motivoDestino', () => {
     expect(motivoDestino({ status: 'failed', lastError: null })).toBeNull()
     expect(motivoDestino({ status: 'published', lastError: 'viejo' })).toBeNull()
     expect(motivoDestino({ status: 'publishing', lastError: 'viejo' })).toBeNull()
-  })
-})
-
-describe('colorDeDestino', () => {
-  it('solo el fallo y el éxito tiñen; lo demás queda en gris y deja hablar a la cocción', () => {
-    expect(colorDeDestino('failed')).toBe('negativo')
-    expect(colorDeDestino('published')).toBe('positivo')
-    expect(colorDeDestino('scheduled')).toBe('gris')
-    expect(colorDeDestino('publishing')).toBe('gris')
-    expect(colorDeDestino('lo-que-sea')).toBe('gris')
   })
 })

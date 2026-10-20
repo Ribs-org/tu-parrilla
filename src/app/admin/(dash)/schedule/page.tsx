@@ -8,6 +8,7 @@ import { requireUser } from '@/lib/auth'
 import { fechaParaDia, idDeBorrador, primero, textoDe } from '@/lib/borrador'
 import { cargarBorrador, listarBorradores } from '@/lib/borradores'
 import { pieDeAyer, quemados } from '@/lib/fuego'
+import { networkLabel } from '@/lib/networks'
 import { cuentasFrias } from '@/lib/parrilla'
 import { getCuentas } from '@/lib/posts'
 import {
@@ -29,6 +30,8 @@ import { Composer } from './composer'
 import { columnasDelDia, normalizarFecha } from './dia'
 import { dibujoDe } from './dibujo'
 import { scheduleHref } from './enlace'
+import { borradoresDelFiltro, conAlguno, filtroDeLaUrl, hayQueFiltrar, opcionesDelFiltro, recortar } from './filtro-red'
+import { FiltroDeRedes } from './filtro-redes'
 import { ListaBorradores } from './lista-borradores'
 import { ordenarCola } from './orden'
 import { Queue } from './queue'
@@ -82,6 +85,40 @@ export default async function SchedulePage({
   const borradores = await listarBorradores(ownerId)
 
   const hayConectada = cuentas.some((c) => c.connected)
+  // El filtro por red (`?red=`): una red, o una sola cuenta de una red. Lo obedecen la semana,
+  // el día y la lista; «Se quemó», el pie de ayer y el aviso del compositor —que cuenta todo lo
+  // que ya hay ese día— miran todo igual.
+  const filtro = filtroDeLaUrl(texto('red'), cuentas)
+  const nombreDelFiltro = filtro
+    ? (cuentas.find((c) => c.id === filtro.cuenta)?.handle ?? networkLabel(filtro.red))
+    : null
+  // Los botones del filtro cuentan lo que se mira: la semana, el día o la lista entera.
+  const semanaALaVista = new Set(weekDays(monday))
+  const enVista = cortes.filter(({ post }) => {
+    if (vista === 'lista') return true
+    const dia = dayKey(post.scheduledAt, zona)
+    return vista === 'dia' ? dia === fecha : semanaALaVista.has(dia)
+  })
+  const opciones = opcionesDelFiltro(enVista, cuentas)
+  // Los borradores con fecha, en su día: con un filtro, solo los que tienen marcada una cuenta
+  // de esa red (o esa cuenta).
+  const borradoresConFecha = borradoresDelFiltro(
+    borradores.flatMap((b) =>
+      b.fecha
+        ? [
+            {
+              id: b.id,
+              href: scheduleHref(params, { borrador: b.id }),
+              fecha: b.fecha,
+              texto: textoDe(b.campos),
+              cuentas: b.campos.cuentas ?? [],
+            },
+          ]
+        : [],
+    ),
+    filtro,
+    cuentas,
+  )
   // Las cuentas con el fierro frío: lo que se programó ahí lleva la marca fría en su corte.
   const frias = cuentasFrias(cuentas, now)
   // `volver` lleva al editor de vuelta a esta misma vista y semana; los parámetros de un solo
@@ -187,38 +224,49 @@ export default async function SchedulePage({
         <SeQuemo filas={quemados(cortes)} now={now} zone={zona} volver={volver} frias={frias} />
 
         <div>
-          <div className="mb-3 flex items-center gap-1.5">
-            {[
-              {
-                label: 'Calendario',
-                // Desde un día, a la semana que lo contiene.
-                href: scheduleHref(params, { vista: null, fecha: null, semana: vista === 'dia' ? mondayOfKey(fecha) : texto('semana') || null }),
-                active: vista === 'semana',
-              },
-              { label: 'Día', href: scheduleHref(params, { vista: 'dia', fecha, semana: null }), active: vista === 'dia' },
-              { label: 'Lista', href: scheduleHref(params, { vista: 'lista', semana: null, fecha: null }), active: vista === 'lista' },
-            ].map((tab) => (
-              <Link
-                key={tab.label}
-                href={tab.href}
-                className={cn(
-                  'rounded-full px-2.5 py-1 font-mono text-[0.68rem] transition-colors',
-                  tab.active ? 'bg-velo/[0.14] text-fg' : 'bg-velo/[0.05] text-fg-faint hover:text-fg',
-                )}
-              >
-                {tab.label}
-              </Link>
-            ))}
+          <div className="mb-3 flex flex-wrap items-start justify-between gap-x-4 gap-y-2">
+            <div className="flex items-center gap-1.5">
+              {[
+                {
+                  label: 'Calendario',
+                  // Desde un día, a la semana que lo contiene.
+                  href: scheduleHref(params, { vista: null, fecha: null, semana: vista === 'dia' ? mondayOfKey(fecha) : texto('semana') || null }),
+                  active: vista === 'semana',
+                },
+                { label: 'Día', href: scheduleHref(params, { vista: 'dia', fecha, semana: null }), active: vista === 'dia' },
+                { label: 'Lista', href: scheduleHref(params, { vista: 'lista', semana: null, fecha: null }), active: vista === 'lista' },
+              ].map((tab) => (
+                <Link
+                  key={tab.label}
+                  href={tab.href}
+                  className={cn(
+                    'rounded-full px-2.5 py-1 font-mono text-[0.68rem] transition-colors',
+                    tab.active ? 'bg-velo/[0.14] text-fg' : 'bg-velo/[0.05] text-fg-faint hover:text-fg',
+                  )}
+                >
+                  {tab.label}
+                </Link>
+              ))}
+            </div>
+            {hayQueFiltrar(opciones.redes) ? (
+              <FiltroDeRedes
+                todas={opciones.todas}
+                redes={opciones.redes}
+                filtro={filtro}
+                hrefDe={(valor) => scheduleHref(params, { red: valor })}
+              />
+            ) : null}
           </div>
           {vista === 'lista' ? (
             <Queue
-              items={ordenarCola(cortes).map((c) => ({
+              items={conAlguno(ordenarCola(cortes), filtro).map((c) => ({
                 ...c,
                 corte: <Corte {...dibujoDe(c.targets, c.media, frias, c.post.videosLiberados)} chico className="w-full" />,
                 cuando: diaYHora(c.post.scheduledAt, zona),
               }))}
               volver={volver}
               recien={recien}
+              vacio={nombreDelFiltro ? `Nada programado en ${nombreDelFiltro}.` : undefined}
             />
           ) : vista === 'dia' ? (
             <VistaDia
@@ -226,23 +274,21 @@ export default async function SchedulePage({
               hoy={hoy}
               columnas={columnasDelDia({
                 dia: fecha,
-                cuentas,
-                items: cortes,
-                borradores: borradores.flatMap((b) =>
-                  b.fecha
-                    ? [
-                        {
-                          id: b.id,
-                          href: scheduleHref(params, { borrador: b.id }),
-                          fecha: b.fecha,
-                          texto: textoDe(b.campos),
-                          cuentas: b.campos.cuentas ?? [],
-                        },
-                      ]
-                    : [],
-                ),
+                // Con un filtro, solo las columnas de esa red (o de esa cuenta).
+                cuentas: filtro
+                  ? cuentas.filter((c) => (filtro.cuenta ? c.id === filtro.cuenta : c.network === filtro.red))
+                  : cuentas,
+                items: recortar(cortes, filtro),
+                borradores: borradoresConFecha,
                 zone: zona,
               })}
+              sinColumnas={
+                filtro?.cuenta
+                  ? `${nombreDelFiltro} no está conectada, y ese día no tiene nada.`
+                  : nombreDelFiltro
+                    ? `No tienes ninguna cuenta de ${nombreDelFiltro} conectada, y ese día no hay nada ahí.`
+                    : undefined
+              }
               zone={zona}
               volver={volver}
               prevHref={scheduleHref(params, { fecha: addDays(fecha, -1) })}
@@ -255,10 +301,8 @@ export default async function SchedulePage({
           ) : (
             <WeekCalendar
               monday={monday}
-              items={cortes}
-              borradores={borradores.flatMap((b) =>
-                b.fecha ? [{ id: b.id, href: scheduleHref(params, { borrador: b.id }), fecha: b.fecha, texto: textoDe(b.campos) }] : [],
-              )}
+              items={recortar(cortes, filtro)}
+              borradores={borradoresConFecha}
               zone={zona}
               volver={volver}
               prevHref={scheduleHref(params, { semana: addDays(monday, -7) })}

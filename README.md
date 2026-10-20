@@ -189,7 +189,11 @@ semana —la lista queda a un clic—, con un «+» en cada día que abre el com
 día puesto. El nombre de cada día abre la vista **Día** (`?vista=dia&fecha=…`): ese día con
 una columna por cuenta, cada una con su propio fuego y un «+» que abre el compositor con el
 día y la cuenta puestos; un post que sale a varias cuentas aparece en cada una, cocido según
-el estado de ese destino. Cada post se dibuja como un **corte** (`src/components/corte.tsx`):
+el estado de ese destino. Arriba de lo programado, un **filtro por red** (`?red=`, con la red
+o con el id de una cuenta) dice cuántos cortes tiene cada una en lo que se mira y deja ver solo
+esa; «Se quemó» no lo obedece. El ícono de cada red va en su color de marca
+(`--color-marca-*`, `src/lib/color-de-red.ts`), nunca de fondo: el fondo rojo es lo quemado.
+El porqué, en `docs/superpowers/specs/2026-10-20-parrilla-en-el-tiempo-design.md`. Cada post se dibuja como un **corte** (`src/components/corte.tsx`):
 la silueta dice el formato —entraña video, tira de asado carrusel con un hueso por archivo,
 bife foto, chori texto—, la carne cómo va, una marca por destino que se quema cuando ese
 destino sale, y un halo rojo con banderita si algo se quemó; humo mientras sale. El texto va
@@ -1294,6 +1298,7 @@ src/
     lado-a-lado.ts         dos publicaciones lado a lado: la curva por edad y sus atributos (sin base)
     metrics-consulta.ts    lo que comparten las rutas de /api/metrics: la llave, el rango, la red y la cuenta
     cuentas-api.ts         las cuentas de GET /api/schedule/cuentas: los dos ids y cómo está la conexión (sin base)
+    color-de-red.ts        el color de marca de cada red en La Parrilla, como clases de Tailwind escritas enteras
     piezas.ts              la pieza de una publicación: sus destinos programados unidos a lo publicado
     auth.ts                sesión del panel
     llaves.ts              las llaves de API de cada usuario, y a nombre de quién entra cada petición
