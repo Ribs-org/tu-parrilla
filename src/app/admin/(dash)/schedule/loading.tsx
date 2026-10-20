@@ -5,8 +5,8 @@ import { Brasa, Cargando, Renglon } from '@/components/esqueleto'
 import { Encabezado } from '@/components/ui'
 
 /**
- * La carga de La Parrilla, con la forma de lo que viene: la semana, el día por cuenta, la lista
- * o, adentro, el editor de un post. Es de cliente por eso: la vista va en la dirección
+ * La carga de La Parrilla, con la forma de lo que viene: la semana, la semana por hora, el día
+ * por cuenta, la lista o, adentro, el editor de un post. Es de cliente por eso: la vista va en la dirección
  * (`?vista=`), y una carga no recibe `searchParams`. Ver `src/components/esqueleto.tsx`.
  */
 export default function Loading() {
@@ -25,13 +25,22 @@ export default function Loading() {
         </Encabezado>
       </header>
       <Cargando>
-        {/* «Calendario», «Día», «Lista». */}
+        {/* «Calendario», «Por hora», «Día», «Lista». */}
         <div className="mb-3 flex items-center gap-1.5">
           <Renglon className="h-6 w-[5.5rem] rounded-full" />
-          <Renglon orden={1} className="h-6 w-11 rounded-full" />
-          <Renglon orden={2} className="h-6 w-[3.25rem] rounded-full" />
+          <Renglon orden={1} className="h-6 w-[4.5rem] rounded-full" />
+          <Renglon orden={2} className="h-6 w-11 rounded-full" />
+          <Renglon orden={3} className="h-6 w-[3.25rem] rounded-full" />
         </div>
-        {vista === 'lista' ? <Lista /> : vista === 'dia' ? <Dia /> : <Semana />}
+        {vista === 'lista' ? (
+          <Lista />
+        ) : vista === 'dia' ? (
+          <Reja columnas={3} anchoMinimo="9.5rem" />
+        ) : vista === 'hora' ? (
+          <Reja columnas={7} anchoMinimo="7.5rem" />
+        ) : (
+          <Semana />
+        )}
       </Cargando>
     </>
   )
@@ -63,8 +72,12 @@ function Semana() {
   )
 }
 
-/** Una columna por cuenta, como la vista «Día»: en el teléfono, una debajo de otra. */
-function Dia() {
+/**
+ * La reja de horas de «Día» (tres columnas) y de «Por hora» (siete): las cabezas, el canal de las
+ * horas a la izquierda y cada columna calentándose, del alto de la reja de verdad.
+ */
+function Reja({ columnas, anchoMinimo }: { columnas: number; anchoMinimo: string }) {
+  const plantilla = { gridTemplateColumns: `3.25rem repeat(${columnas}, minmax(${anchoMinimo}, 1fr))` }
   return (
     <>
       <div className="mb-3 flex items-center justify-between gap-2">
@@ -72,16 +85,19 @@ function Dia() {
         <Renglon orden={1} className="h-4 w-36" />
         <Renglon orden={2} className="h-4 w-24" />
       </div>
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-        {Array.from({ length: 3 }, (_, i) => (
-          <div key={i} className="flex flex-col gap-2 sm:w-64 sm:shrink-0">
-            <div className="flex items-center justify-between gap-2">
-              <Renglon orden={i} className="h-3.5 w-28" />
-              <Renglon orden={i} className="h-2 w-12" />
-            </div>
-            <Brasa orden={i} className="grilla h-48 rounded-[3px]" />
-          </div>
-        ))}
+      <div className="-mx-1 overflow-hidden px-1">
+        <div className="mb-2 grid gap-x-1.5" style={plantilla}>
+          <span />
+          {Array.from({ length: columnas }, (_, i) => (
+            <Renglon key={i} orden={i} className="h-3.5 w-24 max-w-full" />
+          ))}
+        </div>
+        <div className="grid gap-x-1.5" style={plantilla}>
+          <span />
+          {Array.from({ length: columnas }, (_, i) => (
+            <Brasa key={i} orden={i} className="h-[36rem] rounded-[3px]" />
+          ))}
+        </div>
       </div>
     </>
   )

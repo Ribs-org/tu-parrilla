@@ -59,6 +59,18 @@ export function mezclaDeRedes(items: ReadonlyArray<{ targets: ReadonlyArray<{ ne
 }
 
 /**
+ * El estado que dice un bloque de la reja por hora, que no tiene lugar para un chip por red: el
+ * del destino que más pide. Lo quemado manda, después lo que pide atención y después lo que está
+ * saliendo; si salió en todas, que salió. Lo que solo espera su hora no dice nada.
+ */
+export function selloQueManda(sellos: readonly Sello[]): Sello | null {
+  for (const sello of ['quemado', 'frio', 'reintento', 'bandeja', 'saliendo'] as const) {
+    if (sellos.includes(sello)) return sello
+  }
+  return sellos.length > 0 && sellos.every((s) => s === 'servido') ? 'servido' : null
+}
+
+/**
  * Dónde va la línea de «ahora» entre las filas de hoy, que vienen por hora: después de las que
  * ya tienen su hora encima. Una publicación de las 14:20, a las 14:20, ya quedó arriba.
  */

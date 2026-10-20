@@ -63,6 +63,10 @@ describe('hrefDeVuelta', () => {
     expect(hrefDeVuelta('/admin/schedule?hecho=programado', 'p1', '2026-10-22')).toBe(
       '/admin/schedule?hecho=programado&nuevo=p1&semana=2026-10-19',
     )
+    // «Por hora» es la misma semana: también pasa a la del día programado, sin dejar la vista.
+    expect(hrefDeVuelta('/admin/schedule?vista=hora&hecho=programado', 'p1', '2026-10-22')).toBe(
+      '/admin/schedule?vista=hora&hecho=programado&nuevo=p1&semana=2026-10-19',
+    )
   })
 
   it('en la vista «Día», a ese día; en la lista, a la lista', () => {
