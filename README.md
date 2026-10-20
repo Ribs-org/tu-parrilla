@@ -185,8 +185,9 @@ Fuera del panel, «el dueño» no siempre eres tú, así que conviene el detalle
 sin que la busques: lo que se quemó, con su motivo, el arreglo cuando el motivo lo dice
 («Reconectar», «Cambiar el archivo») y el botón para darle hora nueva; sin
 ninguna red conectada, una tarjeta que te manda a Los Fierros. Debajo, el calendario de la
-semana —la lista queda a un clic—, con un «+» en cada día que abre el compositor con ese
-día puesto. El nombre de cada día abre la vista **Día** (`?vista=dia&fecha=…`): ese día con
+semana —la lista queda a un clic—, con cada corte en una fila de una línea (lo que ya salió,
+hundido y sin chapa), la mezcla de redes y cuánto salió de cada día, una línea de «ahora» que se
+corre sola en el de hoy, y un «+» en cada día que abre el compositor con ese día puesto. El nombre de cada día abre la vista **Día** (`?vista=dia&fecha=…`): ese día con
 una columna por cuenta, cada una con su propio fuego y un «+» que abre el compositor con el
 día y la cuenta puestos; un post que sale a varias cuentas aparece en cada una, cocido según
 el estado de ese destino. Arriba de lo programado, un **filtro por red** (`?red=`, con la red

@@ -171,17 +171,19 @@ el tiempo. El halo de lo quemado late tres veces al cargar la página y después
 encendido. Con «reducir movimiento» activado en el sistema, el humo queda en dos volutas
 quietas y el halo encendido sin latir.
 
-Debajo del corte, un chip por destino con el ícono de su red, en el color de la red —Instagram
+Junto al corte, un chip por destino con el ícono de su red, en el color de la red —Instagram
 rosado, TikTok gris (su marca es blanco y negro), YouTube rojo, Facebook azul; de día, los
 mismos más hondos—, y un signo: «✓» salió, «…» saliendo, «✕» se quemó, «◐» en la bandeja de
 TikTok, «↻» reintentando, «!» fierro frío; sin signo, programado. El color del ícono dice la
 red, nunca el estado: el estado lo dicen el signo y el borde del chip, y lo quemado, además,
-el chip teñido de rojo. El rojo de YouTube no es un fallo. Un lector de pantalla lee el formato y la cocción («Video · Programada»,
+el chip teñido de rojo. El rojo de YouTube no es un fallo. En el calendario, lo que ya salió en
+todas sus redes lleva solo los íconos, sin chip, y un «✓» para todas. Un lector de pantalla lee el formato y la cocción («Video · Programada»,
 «Carrusel · Falló en parte») y cada destino con su estado.
 
-La tarjeta en que va el corte es de acero, no del color de la carne, y cambia de borde solo
-cuando pide algo: ámbar si algo espera en la bandeja de TikTok, reintenta o tiene el fierro
-frío; rojo si se quemó.
+La tarjeta en que va el corte (en el calendario, su fila) es de acero, no del color de la carne,
+y cambia de borde solo cuando pide algo: ámbar si algo espera en la bandeja de TikTok, reintenta
+o tiene el fierro frío; rojo si se quemó. En el calendario, además, lo que ya salió en todas sus
+redes deja la chapa (ver «El calendario»).
 
 ### «Calendario», «Día» y «Lista»
 
@@ -238,7 +240,13 @@ en la vista «Día», y un lector de pantalla lo lee «lun 12: ver por cuenta»�
 —«Apagada» (nada), «Prendida» (uno o dos cortes) o «Parrilla llena» (tres o más)— y, en los
 días de hoy en adelante, un «+» chico que abre el panel «Nueva publicación» con ese día puesto
 (un lector de pantalla lo lee «Programar el <día> <número>», por ejemplo «Programar el lun
-12»). El día de hoy tiene el nombre más claro y un borde fino. Un día vacío es una parrilla
+12»). Debajo del nombre, una barra fina con la mezcla de redes del día —un tramo por red, del
+largo de lo que sale a ella, en su color; al dejar el mouse encima, «Instagram 10 · TikTok 18 ·
+…»— y un renglón con cuánto salió, cuánto se quemó y cuánto viene, con los signos de los
+chips: «42 ✓ · 2 ✕» (42 salieron en todas sus redes y 2 fallaron en alguna), «21 ✓ · 23 por
+salir» o «44 por salir». Un lector de pantalla lo lee en palabras: «42 cortes servidos, 2
+fallaron» (de día, «piezas servidas»). Un día sin nada tiene la barra vacía y el renglón en
+blanco. El día de hoy tiene el nombre más claro y un borde fino. Un día vacío es una parrilla
 fría: los fierros en gris ceniza, sin brasa debajo y sin ninguna frase a la vista. Si es de hoy
 en adelante, al pasar el mouse por encima aparece en el medio **«+ Poner algo»**, un botón con
 borde punteado que hace lo mismo que el «+» (en el teléfono, que no tiene mouse, está siempre a
@@ -247,17 +255,35 @@ pasó no tiene ni ese botón ni el «+», y un lector de pantalla lee «No hay n
 teléfono la semana se desliza de lado, y abre corrida hasta hoy, con el día de antes asomado a
 la izquierda.
 
-Cada publicación es una tarjeta con el corte arriba (ver «El corte»), la hora con su estado al
-lado cuando no es solo programado —«· saliendo», «· publicado» en verde, «· falló en <N> de
-<M>» o «· falló» en rojo—, los chips de sus destinos, el texto en dos líneas o «(sin texto)»,
-y, si algún destino falló y espera otro intento, una línea en ámbar «Reintentando · <Red>»
-con las redes que reintentan (en dos renglones como mucho). El motivo no va en la tarjeta: al
-dejar el mouse encima aparece el estado de cada red, con su motivo, y está también en el
-editor. La tarjeta no lleva miniatura: la foto o el video se ven en el editor. Un clic abre el
-editor.
+Cada publicación es una fila de una línea, por hora: a la izquierda el corte en chico (ver «El
+corte»), la hora, y a la derecha sus redes. El texto no va en la fila: al dejar el mouse encima
+aparecen la hora y el texto, y debajo cada red con su estado y su motivo, si lo hay. La fila no
+lleva miniatura: la foto, el video y el texto están en el editor, que se abre con un clic, y el
+texto se ve también en «Día» y en la lista. En una columna angosta (en el teléfono), las redes
+de una publicación que sale a dos bajan a un segundo renglón.
 
-Los borradores que tienen fecha aparecen en su día, debajo de los cortes, como tarjetas con
-borde punteado: arriba «Borrador · HH:MM» y debajo el texto en dos líneas (o «(sin texto)»).
+Cómo se ve la fila dice cómo va:
+
+- **Lo que ya salió en todas sus redes** deja la chapa: la fila no tiene borde y va hundida —más
+  oscura que la chapa de noche, tostada de día—, con el corte apagado, la hora en gris, los
+  íconos de sus redes sin chip y un solo «✓» verde.
+- **Lo que viene** va en la chapa, con borde, y un chip por red, sin signo mientras está
+  programado.
+- **Lo que está saliendo** tiene el borde naranjo, humo sobre el corte y «…» en su chip.
+- **Lo que se quemó**, en todas sus redes o en parte, tiene el borde rojo y la fila teñida de
+  rojo, con «✕» en el chip de la red que falló.
+- **Lo que pide atención** —llegó a la bandeja de TikTok y falta terminarlo, reintenta, o su
+  cuenta tiene el fierro frío— tiene el borde ámbar y su chip con «◐», «↻» o «!».
+
+Una publicación cuya hora ya pasó pero que todavía no salió sigue en la chapa: no está servida.
+
+En el día de hoy, una línea naranja con «ahora · HH:MM» separa lo que ya tuvo su hora de lo que
+viene. Se corre sola a medida que pasa el tiempo, sin recargar la página; la fila que deja atrás
+no cambia de aspecto hasta que la página se vuelve a cargar. Un lector de pantalla la lee
+«Ahora, HH:MM».
+
+Los borradores que tienen fecha aparecen en su día, debajo de los cortes, como filas con
+borde punteado: «Borrador» y la hora; el texto (o «(sin texto)»), al dejar el mouse encima.
 Un clic abre ese borrador en el compositor, no en el editor. Un borrador no está programado:
 no sale a ninguna red hasta que se abre y se aprieta «Programar». Por eso no cuenta para el
 fuego del día: un día que solo tiene borradores sigue diciendo «Apagada». Los borradores sin
@@ -431,10 +457,11 @@ formulario viene abierto, con el cursor en «Texto». En este orden:
    en chico no aparece.
 
    Al programar, el panel se cierra y el corte cae en su día: en el calendario, la semana se
-   pasa a la de ese día y su tarjeta queda encendida un momento con un borde naranjo; en la
-   vista «Día», se va a ese día; en la lista, su fila se trae a la vista y se enciende igual.
-   En el teléfono, la semana se corre hasta él. Con «reducir movimiento» activado en el
-   sistema, la tarjeta no cae: queda con el borde naranjo quieto hasta que se va a otra parte.
+   pasa a la de ese día y su fila queda encendida un momento con un borde naranjo; en la
+   vista «Día», se va a ese día y su tarjeta se enciende igual; en la lista, su fila se trae a
+   la vista y se enciende. En el teléfono, la semana se corre hasta él. Con «reducir
+   movimiento» activado en el sistema, no cae: queda con el borde naranjo quieto hasta que se
+   va a otra parte.
 10. **El pie del panel**, fijo abajo: los errores en rojo, encima de los botones; **«Programar»**,
    que dice «Programando…» mientras trabaja; **«Descartar»**; y a la derecha, en chico, cómo va
    el guardado del borrador (ver abajo).
@@ -574,15 +601,16 @@ Cada publicación tiene un destino por cuenta, y cada destino va por su lado.
 | Lo que dice | Cómo se ve | Qué está pasando |
 |---|---|---|
 | «Programado» | Píldora gris; en el corte, marca punteada y chip sin signo | Espera su hora |
-| «Reintentando» | Píldora gris con « — <motivo>»; en el corte, marca punteada en ámbar y chip «↻»; en el calendario, la línea «Reintentando · <Red>» | Falló un intento y se volverá a probar solo: quince minutos después del primer fallo y dos horas después del segundo. Son tres intentos en total; algunos rechazos se queman al primero. También dice «Reintentando», sin gastar intentos, un destino de Instagram que espera a que la cuenta recupere cupo (ver «Motivos de un destino que no salió») |
-| «Publicando…» | Píldora gris; humo sobre el corte, chip «…» y «· saliendo» al lado de la hora | La red recibió el archivo y lo está procesando. Si pasan 24 horas así, cuenta como un intento fallido |
-| «Publicado» | Píldora verde; marca llena en el corte y chip verde «✓» | Ya salió en esa red |
-| «En tu bandeja de TikTok» | Píldora verde; marca quemada hasta la mitad con un punto ámbar, chip «◐» y la tarjeta con borde ámbar | Se mandó como borrador de TikTok: hay que terminarlo en la app de TikTok. Cuando se publica desde allá, la sincronización siguiente (la diaria, o «Sincronizar ahora» en [Los Fierros](los-fierros.md)) encuentra el video y pasa a «Publicado» |
-| «Falló» | Píldora roja con « — <motivo>» y «Reprogramar»; marca carbonizada, chip rojo «✕», el corte con halo rojo y banderita, y la tarjeta con borde rojo | Se quemó: no se volverá a intentar sola. Aparece también en «Se quemó», arriba del calendario, y puede llegar un correo con el asunto «No se pudo publicar en <Red>» (no llega si el motivo es la conexión de la cuenta: de eso avisa un solo correo por cuenta, ver [Los Fierros](los-fierros.md)). También sale en el resumen del día, el correo de la mañana |
+| «Reintentando» | Píldora gris con « — <motivo>»; en el corte, marca punteada en ámbar y chip «↻»; en el calendario, la fila con borde ámbar | Falló un intento y se volverá a probar solo: quince minutos después del primer fallo y dos horas después del segundo. Son tres intentos en total; algunos rechazos se queman al primero. También dice «Reintentando», sin gastar intentos, un destino de Instagram que espera a que la cuenta recupere cupo (ver «Motivos de un destino que no salió») |
+| «Publicando…» | Píldora gris; humo sobre el corte y chip «…»; en «Día», «· saliendo» al lado de la hora, y en el calendario, la fila con borde naranjo | La red recibió el archivo y lo está procesando. Si pasan 24 horas así, cuenta como un intento fallido |
+| «Publicado» | Píldora verde; marca llena en el corte y chip verde «✓»; en el calendario, cuando salió en todas sus redes, la fila hundida y sin chapa, con un solo «✓» | Ya salió en esa red |
+| «En tu bandeja de TikTok» | Píldora verde; marca quemada hasta la mitad con un punto ámbar, chip «◐» y la tarjeta (o la fila) con borde ámbar | Se mandó como borrador de TikTok: hay que terminarlo en la app de TikTok. Cuando se publica desde allá, la sincronización siguiente (la diaria, o «Sincronizar ahora» en [Los Fierros](los-fierros.md)) encuentra el video y pasa a «Publicado» |
+| «Falló» | Píldora roja con « — <motivo>» y «Reprogramar»; marca carbonizada, chip rojo «✕», el corte con halo rojo y banderita, y la tarjeta con borde rojo (en el calendario, la fila con borde rojo y teñida de rojo) | Se quemó: no se volverá a intentar sola. Aparece también en «Se quemó», arriba del calendario, y puede llegar un correo con el asunto «No se pudo publicar en <Red>» (no llega si el motivo es la conexión de la cuenta: de eso avisa un solo correo por cuenta, ver [Los Fierros](los-fierros.md)). También sale en el resumen del día, el correo de la mañana |
 
 Un destino programado en una cuenta con el fierro frío (desconectada, vencida o que no
 sincroniza; ver [Los Fierros](los-fierros.md)) lleva en el corte la marca punteada en gris
-acero, el chip «!» en ámbar y la tarjeta con borde ámbar: así como está, no va a salir.
+acero, el chip «!» en ámbar y la tarjeta (o la fila) con borde ámbar: así como está, no va a
+salir.
 
 Lo programado sale en la pasada siguiente del publicador, que corre cada pocos minutos: no
 en el segundo exacto de la hora elegida.
@@ -700,7 +728,7 @@ Si hay que dejarlo a medias, basta con cerrar el panel: queda como borrador.
 ### Para retomar un borrador
 
 1. Apretar «Borradores (<N>)», arriba a la derecha. Si el borrador tiene fecha, también se
-   puede apretar su tarjeta punteada en el calendario.
+   puede apretar su fila punteada en el calendario.
 2. Apretar el borrador. Se abre el panel «Borrador» con todo lo que tenía.
 3. Seguir escribiendo (se sigue guardando solo) y, cuando esté listo, «Programar». Si se
    había usado «Ahora», volver a encenderlo.
@@ -779,7 +807,8 @@ suben archivos sueltos.
 
 1. Mirar el «Calendario», que es la vista con que abre la pantalla.
 2. Moverse con «Semana anterior» y «Semana siguiente».
-3. Un clic en una tarjeta abre su editor (o, si es punteada, el borrador).
+3. Un clic en una fila abre su editor (o, si es punteada, el borrador). Al dejar el mouse
+   encima de una fila se ven su hora, su texto y cómo le fue en cada red.
 
 ### Para ver solo una red (o una cuenta)
 
@@ -801,7 +830,7 @@ suben archivos sueltos.
 
 ### Para cambiar algo de un post programado
 
-1. Abrirlo: «Editar» en la lista, un clic en su tarjeta del calendario o en su texto en «Se
+1. Abrirlo: «Editar» en la lista, un clic en su fila del calendario o en su texto en «Se
    quemó».
 2. Cambiar lo que haga falta: texto, fecha y hora, cuentas, orden de los archivos (flechas),
    quitar («Quitar») o agregar archivos, portada, respuesta automática.
@@ -1020,7 +1049,7 @@ puede decir:
 ### Motivos de un destino que no salió
 
 Aparecen en «Se quemó», en el editor del post, en la píldora de la lista, al dejar el mouse
-sobre su tarjeta del calendario y en el correo. Mientras el destino dice «Reintentando»,
+sobre su fila del calendario y en el correo. Mientras el destino dice «Reintentando»,
 se reintenta solo; cuando dice «Falló», hay que actuar (ver la tarea de arreglar un post
 quemado, más arriba).
 
@@ -1066,7 +1095,7 @@ programar nada nuevo ahí. Para dejar de intentarlo, desmarcar esa red en el edi
   tenía texto, archivo ni palabra clave, el guardado falló («No se pudo guardar el
   borrador.»), o se descartó.
 - **No veo el botón Borradores.** Solo aparece cuando hay al menos un borrador.
-- **Hay una tarjeta punteada en el calendario.** Es un borrador con fecha: todavía no está
+- **Hay una fila punteada en el calendario.** Es un borrador con fecha: todavía no está
   programado y no va a salir hasta abrirlo y apretar «Programar».
 - **El día dice Apagada pero tiene algo.** Lo que tiene son borradores, que no cuentan para
   el fuego del día porque no van a salir solos.
@@ -1187,16 +1216,29 @@ programar nada nuevo ahí. Para dejar de intentarlo, desmarcar esa red en el edi
 - **No encuentro un post en el calendario.** Puede estar en otra semana: «Semana anterior» /
   «Semana siguiente», o mirar la «Lista», que tiene todo.
 - **En el calendario no está el botón para borrar o subir.** Esos botones están en la
-  «Lista»; en el calendario, un clic en la tarjeta abre el editor, que tiene «Eliminar».
-- **¿Qué significa el dibujo de la tarjeta?** La forma es el formato (entraña video, tira
+  «Lista»; en el calendario, un clic en la fila abre el editor, que tiene «Eliminar».
+- **¿Qué significa el dibujo de cada publicación?** La forma es el formato (entraña video, tira
   carrusel, bife foto, chori texto); el color de la carne, cómo va (rosada programada, naranja
   saliendo, dorada publicada, negra falló); cada diagonal, un destino (llena salió, punteada
   todavía no). El halo rojo y la banderita, que algo se quemó. Con borde punteado y sin
   dibujo, es un borrador. Detalle en «El corte».
-- **¿Por qué una tarjeta tiene el borde ámbar?** Algo espera en la bandeja de TikTok, un
+- **¿Por qué una publicación tiene el borde ámbar?** Algo espera en la bandeja de TikTok, un
   destino está reintentando o una de sus cuentas tiene el fierro frío. Rojo: se quemó.
-- **¿Dónde quedó la miniatura de la foto en el calendario?** Ya no va en la tarjeta: el corte
-  dice el formato y el estado. La foto o el video están en el editor (un clic en la tarjeta).
+- **¿Dónde quedó la miniatura de la foto, o el texto, en el calendario?** No van en la fila:
+  el corte dice el formato y el estado, y el texto aparece al dejar el mouse encima. La foto, el
+  video y el texto están en el editor (un clic en la fila); el texto se ve también en «Día» y en
+  la lista.
+- **¿Qué es la raya naranja que dice «ahora»?** La hora de ahora, en el día de hoy del
+  calendario: arriba, lo que ya tuvo su hora; abajo, lo que viene. Se corre sola.
+- **¿Cómo sé qué ya salió?** En el calendario, lo que salió en todas sus redes va hundido, sin
+  borde y con un «✓»; lo que viene, en la chapa con borde. Bajo el nombre de cada día, cuántos:
+  «42 ✓ · 2 ✕» o «44 por salir».
+- **¿Qué es la barra de colores bajo cada día?** A qué red va lo de ese día: un tramo por red,
+  en su color (Instagram rosado, TikTok gris, YouTube rojo, Facebook azul), del largo de lo que
+  sale a ella. Al dejar el mouse encima dice cuántos de cada una.
+- **Una publicación ya pasó la raya de «ahora» y no dice que salió.** La línea se corre sola,
+  pero las filas no cambian hasta recargar la página. Si al recargar sigue en la chapa, todavía
+  no salió: puede estar esperando la pasada siguiente del publicador, o tener el fierro frío.
 - **Cambié la fecha de un post ya publicado.** No lo vuelve a publicar: solo cambia el día
   en que aparece en el calendario.
 
@@ -1218,7 +1260,10 @@ programar nada nuevo ahí. Para dejar de intentarlo, desmarcar esa red en el edi
 - No muestra los borradores en la lista, en la app del teléfono ni en la API.
 - No sube la portada como archivo, ni adjunta el PDF de la respuesta automática.
 - No sube archivos sueltos en la carga por CSV: solo por dirección.
-- No duplica un post ni arrastra tarjetas en el calendario, ni programa en un día que ya pasó.
+- No duplica un post ni arrastra filas en el calendario, ni programa en un día que ya pasó.
+- El calendario no muestra el texto en la fila (va al dejar el mouse encima y en el editor), ni
+  cambia una fila sin recargar: la línea de «ahora» se corre sola, pero lo que salió mientras la
+  página estaba abierta se ve al volver a cargarla.
 - La vista «Día» no tiene «Subir ahora», «Eliminar» ni «Reprogramar» (están en la lista), no
   alinea las horas entre columnas —cada columna va en su orden, de la más temprana a la más
   tarde— y no muestra varios días a la vez: para eso está la semana.
@@ -1244,7 +1289,7 @@ Lo que describe esta página sale de:
   - `src/lib/subida-directa.ts` (la subida a R2, con su avance)
   - `src/app/admin/(dash)/schedule/lista-borradores.tsx`
   - `src/app/admin/(dash)/schedule/batch-upload.tsx`
-  - `src/app/admin/(dash)/schedule/calendar.tsx`
+  - `src/app/admin/(dash)/schedule/calendar.tsx`, `src/app/admin/(dash)/schedule/semana.ts` y `src/app/admin/(dash)/schedule/linea-de-ahora.tsx` (la semana en filas: cómo va cada fila, el renglón y la mezcla de cada día, y la línea de «ahora»)
   - `src/app/admin/(dash)/schedule/vista-dia.tsx` y `src/app/admin/(dash)/schedule/dia.ts` (la vista «Día»)
   - `src/app/admin/(dash)/schedule/filtro-redes.tsx` y `src/app/admin/(dash)/schedule/filtro-red.ts` (el filtro por red)
   - `src/app/admin/(dash)/schedule/se-quemo.tsx`, `src/app/admin/(dash)/schedule/lista-quemados.tsx` y `src/app/admin/(dash)/schedule/filtro-quemados.ts` («Se quemó»)
@@ -1264,7 +1309,7 @@ Lo que describe esta página sale de:
   - `src/app/admin/(dash)/schedule/arreglo.ts` (qué arreglo se ofrece junto a un destino quemado)
   - `src/app/admin/(dash)/schedule/desplazar-a-hoy.tsx` (la semana corrida hasta hoy en el teléfono)
   - `src/app/admin/(dash)/schedule/loading.tsx` y `src/components/esqueleto.tsx` (la carga, con la forma de cada vista y del editor)
-  - `src/app/globals.css` (la parrilla fría de un día vacío, «Poner algo» al pasar el mouse, el menú «Por cuenta» del filtro, el color de cada red y el pulso de la carga)
+  - `src/app/globals.css` (la parrilla fría de un día vacío, «Poner algo» al pasar el mouse, el menú «Por cuenta» del filtro, el color de cada red, el fondo de las filas servidas y quemadas de la semana, y el pulso de la carga)
 - Lo que hacen sus botones (programar, guardar y descartar un borrador, guardar en el editor, reprogramar, eliminar, «Subir ahora», la carga por CSV y la lectura de la cuenta de TikTok):
   - `src/app/admin/actions.ts`
 - Los borradores (qué se guarda, cuándo hay algo que guardar, la fecha que se propone para un día):

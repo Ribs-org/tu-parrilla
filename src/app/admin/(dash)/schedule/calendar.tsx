@@ -2,16 +2,21 @@ import Link from 'next/link'
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
 import { Corte } from '@/components/corte'
 import { DeNocheYDeDia } from '@/components/de-noche-y-de-dia'
+import { Icon } from '@/components/icon'
 import type { ScheduledPost, ScheduledPostTarget } from '@/db/schema'
+import { colorDeRed, fondoDeRed } from '@/lib/color-de-red'
 import { dayLabel, dayKey, groupByDay, hourLabel, weekDays, weekLabel } from '@/lib/schedule-week'
 import { networkLabel } from '@/lib/networks'
 import { NOMBRE_COCCION, NOMBRE_FORMATO, calorDelDia, type Calor, type Coccion } from '@/lib/parrilla'
+import type { Tema } from '@/lib/tema'
 import { cn } from '@/lib/utils'
-import { ROTULO_CALOR } from '@/lib/vocabulario'
+import { ROTULO_CALOR, servidos } from '@/lib/vocabulario'
 import { DesplazarAHoy } from './desplazar-a-hoy'
-import { bordeDe, dibujoDe, estadoCorto, type Borde } from './dibujo'
+import { dibujoDe, type Borde, type Dibujo } from './dibujo'
 import { etiquetaDestino, motivoDestino, nombreDestino } from './etiqueta'
+import { FilasConAhora } from './linea-de-ahora'
 import { Redes } from './redes'
+import { estadoDeFila, mezclaDeRedes, resumenDelDia, type EstadoDeFila } from './semana'
 
 /** Un borrador con fecha, ya con su enlace: el calendario solo lo pone en su día. */
 export type BorradorEnCalendario = { id: string; href: string; fecha: Date; texto: string }
@@ -33,7 +38,7 @@ export function RotuloCalor({ calor }: { calor: Calor }) {
 /**
  * La tarjeta de un corte: chapa, y no carne. La carne es el dibujo de arriba; la tarjeta solo
  * cambia de borde cuando necesita algo del dueño (`bordeDe`, en `dibujo.ts`). La comparten la
- * semana y la vista «Día».
+ * vista «Día» y la portada.
  */
 export const CLASE_BORDE: Record<Borde, string> = {
   cuenta: 'border-acero-700',
@@ -48,6 +53,21 @@ export const CLASE_ESTADO: Record<Coccion, string> = {
   punto: 'text-positive',
   parcial: 'text-negative',
   quemada: 'text-negative',
+}
+
+/**
+ * La fila de un corte en la semana, según cómo va (`estadoDeFila`). Lo que ya salió deja la
+ * chapa: sin borde y hundida (`.fila-servida`), con el dibujo apagado, porque ya no está en la
+ * parrilla. Lo que viene sigue en la chapa. Lo quemado lleva el tinte rojo (`.fila-quemada`), y
+ * lo que pide atención, el borde ámbar de siempre. Los dos fondos van en globals.css porque
+ * cambian distinto de noche y de día, y una utilidad de fondo los pisaría.
+ */
+const CLASE_FILA: Record<EstadoDeFila, string> = {
+  servida: 'fila-servida border-transparent hover:border-acero-700',
+  'por-salir': 'border-acero-700 bg-acero-900 hover:border-acero-600',
+  saliendo: 'border-brasa/60 bg-acero-900',
+  atencion: 'border-caution/75 bg-acero-900',
+  quemada: 'fila-quemada border-negative/80',
 }
 
 /**
@@ -76,6 +96,13 @@ export function PonerAlgo({ href, vacio }: { href: string; vacio: string }) {
 /**
  * La semana de lunes a domingo: la vista con que abre La Parrilla.
  *
+ * Cada corte es una fila de una línea —el dibujo en chico, la hora, sus redes con su signo— y
+ * no una tarjeta: con decenas al día, la tarjeta hacía de cada día una columna de miles de
+ * píxeles (ver `docs/superpowers/specs/2026-10-20-parrilla-en-el-tiempo-design.md`). El texto
+ * va al pasar el mouse y en el editor. Bajo el nombre de cada día, la mezcla de redes y cuánto
+ * salió, cuánto se quemó y cuánto viene; en el de hoy, la línea de «ahora» entre lo que ya tuvo
+ * su hora y lo que viene, y se corre sola.
+ *
  * Además de los cortes, cada día que no pasó trae un «+» que abre el compositor con ese día
  * puesto (`nuevoEnDia`), y los borradores con fecha aparecen en el suyo con borde punteado.
  * Los borradores no cuentan para el calor del día: todavía no van a salir. Un día sin nada es
@@ -93,6 +120,7 @@ export function WeekCalendar({
   verDia,
   frias,
   recien = null,
+  ahora = new Date(),
 }: {
   monday: string
   items: Item[]
@@ -107,11 +135,13 @@ export function WeekCalendar({
   verDia: (dia: string) => string
   /** Las cuentas con el fierro frío: lo programado ahí lleva la marca fría. */
   frias: ReadonlySet<string>
-  /** El post recién programado: su tarjeta cae en su día, encendida una vez. */
+  /** El post recién programado: su fila cae en su día, encendida una vez. */
   recien?: string | null
+  /** La hora con que se arma la página: la de la línea de «ahora» hasta que el navegador la corre. */
+  ahora?: Date
 }) {
   const days = weekDays(monday)
-  const today = dayKey(new Date(), zone)
+  const today = dayKey(ahora, zone)
   const week = new Set(days)
   const grouped = groupByDay(
     items
@@ -152,15 +182,23 @@ export function WeekCalendar({
         también lo que deja a `DesplazarAHoy` medir dónde está hoy.
       */}
       <DesplazarAHoy className="relative -mx-1 overflow-x-auto px-1">
-        <div className="grid min-w-[52rem] grid-cols-7 gap-2">
+        {/* 60rem: una fila de una red cabe entera al lado de la hora; en el teléfono la semana se
+            desliza de lado, como siempre. */}
+        <div className="grid min-w-[60rem] grid-cols-7 gap-2">
           {days.map((day, index) => {
-            const cortes = grouped.get(day) ?? []
+            const cortes = (grouped.get(day) ?? []).map((item) => {
+              const dibujo = dibujoDe(item.targets, item.media, frias, item.post.videosLiberados)
+              return { ...item, dibujo, estado: estadoDeFila(dibujo.coccion, dibujo.sellos) }
+            })
             const enBorrador = borradoresPorDia.get(day) ?? []
             const calor = calorDelDia(cortes.length)
             // En un día que ya pasó no se programa: ni el «+» ni la invitación a prenderlo.
             const abierto = day >= today
+            const filas = cortes.map((corte) => (
+              <FilaDeCorte key={corte.post.id} corte={corte} zone={zone} volver={volver} recien={recien} />
+            ))
             return (
-              <div key={day} className="flex flex-col gap-2" data-hoy={day === today ? '' : undefined}>
+              <div key={day} className="flex flex-col gap-1.5" data-hoy={day === today ? '' : undefined}>
                 <div className="flex items-baseline justify-between gap-2">
                   {/* El nombre del día abre ese día, cuenta por cuenta. */}
                   <Link
@@ -196,9 +234,12 @@ export function WeekCalendar({
                   ) : null}
                 </div>
 
+                <MezclaDelDia items={cortes} />
+                <ResumenDelDia cocciones={cortes.map((c) => c.dibujo.coccion)} />
+
                 <div
                   className={cn(
-                    'grilla flex min-h-[4.5rem] flex-col gap-2 p-2',
+                    'grilla flex min-h-[4.5rem] flex-col gap-1 p-1.5',
                     calor === 'apagada' && 'grilla-apagada justify-center',
                     calor === 'prendida' && 'grilla-prendida',
                     calor === 'llena' && 'grilla-llena',
@@ -213,76 +254,12 @@ export function WeekCalendar({
                     ) : (
                       <p className="sr-only">No hay nada puesto.</p>
                     )
+                  ) : day === today && cortes.length > 0 ? (
+                    <FilasConAhora horas={cortes.map((c) => c.post.scheduledAt.getTime())} desde={ahora.getTime()} zona={zone}>
+                      {filas}
+                    </FilasConAhora>
                   ) : (
-                    cortes.map(({ post, targets, media }) => {
-                      const dibujo = dibujoDe(targets, media, frias, post.videosLiberados)
-                      const estado = estadoCorto(dibujo.coccion, dibujo.sellos)
-                      // Las redes que fallaron y esperan otro intento, una vez cada una. Su marca
-                      // ya va en ámbar; acá basta un renglón que las nombre, y el motivo de cada
-                      // una sale al pasar el mouse (el `title` de la tarjeta) y en el editor.
-                      // Antes iba el motivo entero por destino, y una tarjeta con un reintento
-                      // quedaba el doble de alta que las demás.
-                      const reintentos = [
-                        ...new Set(targets.filter((t) => t.status === 'scheduled' && motivoDestino(t)).map((t) => networkLabel(t.network))),
-                      ]
-                      return (
-                        <Link
-                          key={post.id}
-                          href={`/admin/schedule/${post.id}?volver=${encodeURIComponent(volver)}`}
-                          // Sin prefetch: una semana cargada son decenas de tarjetas, y cada
-                          // una pedía su editor por adelantado (ver `docs/pendientes.md`).
-                          prefetch={false}
-                          // El detalle por red, con el motivo si lo hay, sin entrar al editor.
-                          title={targets
-                            .map((t) => {
-                              const motivo = motivoDestino(t)
-                              return `${nombreDestino(t)}: ${etiquetaDestino(t)}${motivo ? ` — ${motivo}` : ''}`
-                            })
-                            .join(' · ')}
-                          data-recien={post.id === recien ? '' : undefined}
-                          className={cn(
-                            'block rounded-md border bg-acero-900 p-1.5 transition-transform hover:-translate-y-0.5',
-                            CLASE_BORDE[bordeDe(dibujo.coccion, dibujo.sellos)],
-                            post.id === recien && 'recien',
-                          )}
-                        >
-                          {/*
-                            El humo y la banderita se asoman por arriba del dibujo: el margen
-                            les deja lugar sin tapar la tarjeta de encima.
-                          */}
-                          <Corte
-                            {...dibujo}
-                            className={cn(
-                              (dibujo.sellos.includes('saliendo') || dibujo.coccion === 'parcial' || dibujo.coccion === 'quemada') &&
-                                'mt-2.5',
-                            )}
-                          />
-                          <p className="mt-1.5 font-titulo text-[0.6rem] tracking-[0.12em] text-fg">
-                            {hourLabel(post.scheduledAt, zone)}
-                            {estado ? <span className={CLASE_ESTADO[dibujo.coccion]}> · {estado}</span> : null}
-                          </p>
-                          <span className="mt-1 block">
-                            <Redes targets={targets} sellos={dibujo.sellos} />
-                          </span>
-                          <p className="mt-1 line-clamp-2 text-[0.75rem] leading-snug text-fg">
-                            {post.caption || '(sin texto)'}
-                          </p>
-                          {reintentos.length > 0 ? (
-                            <p className="mt-1 line-clamp-2 text-[0.68rem] leading-snug text-caution">
-                              Reintentando · {reintentos.join(', ')}
-                            </p>
-                          ) : null}
-                          {/*
-                            Lo que el dibujo dice, en palabras: el formato y la cocción. Los
-                            destinos ya no van aquí: `Redes` trae su propio `sr-only`, y
-                            decirlos dos veces sería un lector de pantalla repitiéndose.
-                          */}
-                          <span className="sr-only">
-                            {NOMBRE_FORMATO[dibujo.formato]} · {NOMBRE_COCCION[dibujo.coccion]}
-                          </span>
-                        </Link>
-                      )
-                    })
+                    filas
                   )}
                   {/*
                     Los borradores, después de los cortes y con borde punteado: no están en la
@@ -295,14 +272,12 @@ export function WeekCalendar({
                       href={b.href}
                       scroll={false}
                       prefetch={false}
-                      className="block rounded-md border border-dashed border-velo/30 p-2 transition-colors hover:border-velo/60"
+                      title={b.texto || '(sin texto)'}
+                      className="flex items-center gap-1.5 rounded-[4px] border border-dashed border-velo/30 px-1.5 py-1 transition-colors hover:border-velo/60"
                     >
-                      <p className="font-titulo text-[0.6rem] tracking-[0.12em] text-fg-muted">
-                        Borrador · {hourLabel(b.fecha, zone)}
-                      </p>
-                      <p className="mt-1 line-clamp-2 text-[0.75rem] leading-snug text-fg-muted">
-                        {b.texto || '(sin texto)'}
-                      </p>
+                      <span className="font-titulo text-[0.58rem] uppercase tracking-[0.12em] text-fg-muted">Borrador</span>
+                      <span className="font-mono text-[0.66rem] text-fg-muted">{hourLabel(b.fecha, zone)}</span>
+                      <span className="sr-only">: {b.texto || '(sin texto)'}</span>
                     </Link>
                   ))}
                 </div>
@@ -312,5 +287,137 @@ export function WeekCalendar({
         </div>
       </DesplazarAHoy>
     </div>
+  )
+}
+
+/**
+ * Un corte en la semana: una fila de una línea. El texto no cabe en una columna de un séptimo
+ * de pantalla; va en el `title`, con cómo le fue a cada red y su motivo, y en el editor, que
+ * abre la fila.
+ */
+function FilaDeCorte({
+  corte,
+  zone,
+  volver,
+  recien,
+}: {
+  corte: Item & { dibujo: Dibujo; estado: EstadoDeFila }
+  zone: string
+  volver: string
+  recien: string | null
+}) {
+  const { post, targets, dibujo, estado } = corte
+  const hora = hourLabel(post.scheduledAt, zone)
+  const texto = post.caption || '(sin texto)'
+  return (
+    <Link
+      href={`/admin/schedule/${post.id}?volver=${encodeURIComponent(volver)}`}
+      // Sin prefetch: una semana cargada son cientos de filas, y cada una pedía su editor por
+      // adelantado (ver `docs/pendientes.md`).
+      prefetch={false}
+      title={[
+        `${hora} · ${texto}`,
+        ...targets.map((t) => {
+          const motivo = motivoDestino(t)
+          return `${nombreDestino(t)}: ${etiquetaDestino(t)}${motivo ? ` — ${motivo}` : ''}`
+        }),
+      ].join('\n')}
+      data-recien={post.id === recien ? '' : undefined}
+      // `flex-wrap`: en el teléfono la columna de un día mide poco más de cien píxeles, y las redes
+      // de un corte que sale a dos, o la de uno quemado, no caben al lado de la hora. Bajan a un
+      // segundo renglón en vez de taparla.
+      className={cn(
+        'flex flex-wrap items-center gap-x-1.5 gap-y-0.5 rounded-[4px] border py-0.5 pl-0.5 pr-1 transition-colors',
+        CLASE_FILA[estado],
+        post.id === recien && 'recien',
+      )}
+    >
+      <Corte {...dibujo} chico className={cn('w-[1.85rem] shrink-0', estado === 'servida' && 'opacity-55')} />
+      <span className={cn('font-mono text-[0.66rem] tabular-nums', estado === 'servida' ? 'text-fg-muted' : 'text-fg')}>{hora}</span>
+      {estado === 'servida' ? (
+        // Salió en todas: los íconos solos y un ✓ para todos. Un chip con su ✓ por red hacía que
+        // lo ya servido se viera más cargado que lo que viene, y es lo que menos hay que mirar.
+        <span className="ml-auto flex shrink-0 items-center gap-1">
+          {targets.map((t) => (
+            <Icon key={t.id} name={t.network} className={cn('h-3 w-3 shrink-0', colorDeRed(t.network))} />
+          ))}
+          <span aria-hidden className="text-[0.66rem] text-positive">
+            ✓
+          </span>
+          <span className="sr-only">{targets.map((t) => `${nombreDestino(t)}: ${etiquetaDestino(t)}`).join(', ')}</span>
+        </span>
+      ) : (
+        <span className="ml-auto flex shrink-0 justify-end">
+          <Redes targets={targets} sellos={dibujo.sellos} />
+        </span>
+      )}
+      {/* Lo que el dibujo dice, en palabras, y el texto, que a la vista no cabe. Los destinos ya
+          los dice `Redes` en su propio `sr-only`. */}
+      <span className="sr-only">
+        {NOMBRE_FORMATO[dibujo.formato]} · {NOMBRE_COCCION[dibujo.coccion]} · {texto}
+      </span>
+    </Link>
+  )
+}
+
+/**
+ * A qué red va lo del día: una barra fina con un tramo por red, del largo de sus destinos, en
+ * su color (`fondoDeRed`). Sin nada, la barra vacía, para que los días sigan alineados.
+ */
+function MezclaDelDia({ items }: { items: ReadonlyArray<{ targets: ReadonlyArray<{ network: string }> }> }) {
+  const mezcla = mezclaDeRedes(items)
+  const total = mezcla.reduce((suma, m) => suma + m.destinos, 0)
+  const enPalabras = mezcla.map((m) => `${networkLabel(m.red)} ${m.destinos}`)
+  return (
+    <span
+      className="relative flex h-1 overflow-hidden rounded-full bg-acero-700"
+      title={total > 0 ? enPalabras.join(' · ') : undefined}
+    >
+      {mezcla.map((m) => (
+        <span key={m.red} className={fondoDeRed(m.red)} style={{ width: `${(m.destinos / total) * 100}%` }} />
+      ))}
+      {total > 0 ? <span className="sr-only">A qué red va: {enPalabras.join(', ')}.</span> : null}
+    </span>
+  )
+}
+
+/**
+ * Cuánto salió, cuánto se quemó y cuánto viene, bajo el nombre del día, con los signos de los
+ * chips: «42 ✓ · 2 ✕», «30 ✓ · 14 por salir», «44 por salir». Un renglón siempre, aunque esté
+ * vacío: si no, la grilla de ese día bajaría y dejaría de alinearse con la del lado.
+ */
+function ResumenDelDia({ cocciones }: { cocciones: readonly Coccion[] }) {
+  const { servidos: salieron, fallaron, porSalir } = resumenDelDia(cocciones)
+  const enPalabras = (tema: Tema) =>
+    [
+      salieron > 0 ? servidos(salieron, tema) : null,
+      fallaron > 0 ? (fallaron === 1 ? '1 falló' : `${fallaron} fallaron`) : null,
+      porSalir > 0 ? `${porSalir} por salir` : null,
+    ]
+      .filter(Boolean)
+      .join(', ')
+  const partes = [
+    salieron > 0 ? <span key="s" className="text-positive">{salieron} ✓</span> : null,
+    fallaron > 0 ? <span key="f" className="text-negative">{fallaron} ✕</span> : null,
+    porSalir > 0 ? <span key="p">{porSalir} por salir</span> : null,
+  ].filter(Boolean)
+  return (
+    <p className="h-3.5 truncate text-[0.66rem] leading-[0.875rem] tabular-nums text-fg-muted">
+      {partes.length > 0 ? (
+        <>
+          <span aria-hidden>
+            {partes.map((parte, i) => (
+              <span key={i}>
+                {i > 0 ? ' · ' : null}
+                {parte}
+              </span>
+            ))}
+          </span>
+          <span className="sr-only">
+            <DeNocheYDeDia noche={enPalabras('noche')} dia={enPalabras('dia')} />
+          </span>
+        </>
+      ) : null}
+    </p>
   )
 }

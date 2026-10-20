@@ -591,6 +591,25 @@
   }
 
   /*
+   * Las filas de la semana (`schedule/calendar.tsx`). La que ya salió deja la chapa y se hunde:
+   * de noche, en el fondo, más oscuro que la chapa; de día, en un tostado, porque el fondo del día
+   * es casi tan claro como la chapa y la fila servida se confundía con la que viene. La que se
+   * quemó lleva el tinte rojo encima de la chapa, opaco, para que los fierros de la grilla no se
+   * vean a través y el tinte diga lo mismo sobre cualquier fuego.
+   */
+  .fila-servida {
+    background: color-mix(in srgb, var(--color-acero-950) 75%, transparent);
+  }
+
+  .acerado[data-tema='dia'] .fila-servida {
+    background: color-mix(in srgb, var(--color-acero-700) 70%, transparent);
+  }
+
+  .fila-quemada {
+    background: color-mix(in srgb, var(--color-negative) 12%, var(--color-acero-900));
+  }
+
+  /*
    * Las cuentas de una red en el filtro de La Parrilla (`schedule/filtro-redes.tsx`). El dueño
    * pidió no mostrar tanto: con mouse aparecen al pasar por la red, y con el teclado al llegar
    * a ella. Sin mouse no hay «pasar por encima», y un toque en la red ya la elige: entonces sus

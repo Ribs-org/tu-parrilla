@@ -47,7 +47,7 @@ function Semana() {
         <Renglon orden={2} className="h-4 w-32" />
       </div>
       <div className="-mx-1 overflow-hidden px-1">
-        <div className="grid min-w-[52rem] grid-cols-7 gap-2">
+        <div className="grid min-w-[60rem] grid-cols-7 gap-2">
           {Array.from({ length: 7 }, (_, i) => (
             <div key={i} className="flex flex-col gap-2">
               <div className="flex items-center justify-between gap-2">

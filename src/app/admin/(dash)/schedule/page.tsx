@@ -311,6 +311,7 @@ export default async function SchedulePage({
               verDia={(dia) => scheduleHref(params, { vista: 'dia', fecha: dia, semana: null })}
               frias={frias}
               recien={recien}
+              ahora={now}
             />
           )}
         </div>
