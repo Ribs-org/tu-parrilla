@@ -1,7 +1,10 @@
 import { View, Text } from 'react-native'
 import type { ReactNode } from 'react'
+import type { Resumen } from '../lib/agenda'
 import { calorDelDia, type Calor } from '../lib/parrilla'
-import { ROTULO_CALOR, type Tema } from '../lib/tema'
+import { ROTULO_CALOR, servidos, type Tema } from '../lib/tema'
+import { NOMBRE_RED } from '../lib/tipos'
+import { colorDeRed } from './colores'
 import { TIPO_TITULO } from './ui'
 import { useColores, useTema } from './tema'
 
@@ -173,6 +176,70 @@ export function MiniCorte({ children }: { children: ReactNode }) {
           ))
         )}
       </View>
+    </View>
+  )
+}
+
+/**
+ * A qué red va lo del día: una barra fina con un tramo por red, del largo de sus destinos y en su
+ * color, como en el panel (`MezclaDelDia`, en `schedule/calendar.tsx`).
+ */
+export function MezclaDelDia({ mezcla }: { mezcla: readonly { red: string; destinos: number }[] }) {
+  const colores = useColores()
+  if (mezcla.length === 0) return null
+  return (
+    <View
+      accessible
+      accessibilityLabel={`A qué red va: ${mezcla.map((m) => `${NOMBRE_RED[m.red] ?? m.red} ${m.destinos}`).join(', ')}`}
+      style={{ flexDirection: 'row', height: 4, borderRadius: 2, overflow: 'hidden', backgroundColor: colores.acero, marginBottom: 5 }}
+    >
+      {mezcla.map((m) => (
+        <View key={m.red} style={{ flex: m.destinos, backgroundColor: colorDeRed(colores, m.red) }} />
+      ))}
+    </View>
+  )
+}
+
+/**
+ * Cuánto salió, cuánto se quemó y cuánto falta del día, con los signos de los chips del panel:
+ * «21 ✓ · 23 por salir». El lector de pantalla lo oye en palabras.
+ */
+export function ResumenDelDia({ resumen }: { resumen: Resumen }) {
+  const colores = useColores()
+  const { tema } = useTema()
+  const { servidos: salieron, fallaron, porSalir } = resumen
+  const enPalabras = [
+    salieron > 0 ? servidos(salieron, tema) : null,
+    fallaron > 0 ? (fallaron === 1 ? '1 falló' : `${fallaron} fallaron`) : null,
+    porSalir > 0 ? `${porSalir} por salir` : null,
+  ].filter(Boolean)
+  if (enPalabras.length === 0) return null
+  const partes = [
+    salieron > 0 ? { clave: 's', texto: `${salieron} ✓`, color: colores.verde } : null,
+    fallaron > 0 ? { clave: 'f', texto: `${fallaron} ✕`, color: colores.rojo } : null,
+    porSalir > 0 ? { clave: 'p', texto: `${porSalir} por salir`, color: colores.suave } : null,
+  ].filter((p) => p !== null)
+  return (
+    <Text accessibilityLabel={enPalabras.join(', ')} style={{ color: colores.suave, fontSize: 11, marginBottom: 6 }}>
+      {partes.map((p, i) => (
+        <Text key={p.clave}>
+          {i > 0 ? ' · ' : ''}
+          <Text style={{ color: p.color }}>{p.texto}</Text>
+        </Text>
+      ))}
+    </Text>
+  )
+}
+
+/** La raya de «ahora» en el día de hoy, con la hora escrita: la brasa, porque es lo que está pasando. */
+export function LineaDeAhora({ hora }: { hora: string }) {
+  const colores = useColores()
+  return (
+    <View accessible accessibilityLabel={`Ahora, ${hora}`} style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 2 }}>
+      <View style={{ backgroundColor: colores.brasa, borderRadius: 3, paddingHorizontal: 5, paddingVertical: 1 }}>
+        <Text style={{ color: colores.fondo, fontSize: 10, fontWeight: '600', fontVariant: ['tabular-nums'] }}>ahora · {hora}</Text>
+      </View>
+      <View style={{ flex: 1, height: 2, backgroundColor: colores.brasa }} />
     </View>
   )
 }

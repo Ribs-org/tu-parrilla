@@ -4,9 +4,14 @@ import {
   DIAS_FIJOS,
   cuandoQuemado,
   diasDeLaAgenda,
+  dondeVaAhora,
+  horaDeAhora,
+  mezclaDeRedes,
   pieDeAyer,
+  resumenDelDia,
   rotuloDelDia,
   seQuemo,
+  servidoEnTodas,
   servidosAyer,
   sumarDias,
 } from './agenda'
@@ -101,5 +106,46 @@ describe('cuandoQuemado', () => {
   it('solo la hora si es de hoy; si no, el día delante', () => {
     expect(cuandoQuemado('2026-10-15T19:00:00-03:00', HOY)).toBe('19:00')
     expect(cuandoQuemado('2026-10-14T09:15:00-03:00', HOY)).toBe('mié 14 de oct · 09:15')
+  })
+})
+
+describe('servidoEnTodas', () => {
+  it('salió en todas y no le falta nada: se hunde', () => {
+    expect(servidoEnTodas(post('a', '2026-10-15T09:00:00-03:00', ['published', 'published']))).toBe(true)
+  })
+
+  it('lo que falta, lo quemado y lo que llegó a la bandeja de TikTok no se hunden', () => {
+    expect(servidoEnTodas(post('a', '2026-10-15T09:00:00-03:00', ['published', 'scheduled']))).toBe(false)
+    expect(servidoEnTodas(post('a', '2026-10-15T09:00:00-03:00', ['published', 'failed']))).toBe(false)
+    const enLaBandeja = post('a', '2026-10-15T09:00:00-03:00', ['published'])
+    enLaBandeja.redes[0]!.sello = 'bandeja'
+    expect(servidoEnTodas(enLaBandeja)).toBe(false)
+  })
+})
+
+describe('resumenDelDia y mezclaDeRedes', () => {
+  it('cuenta lo salido en todas, lo quemado en alguna y lo que falta; y los destinos de cada red', () => {
+    const posts = [
+      post('a', '2026-10-15T09:00:00-03:00', ['published']),
+      post('b', '2026-10-15T10:00:00-03:00', ['published', 'failed']),
+      post('c', '2026-10-15T11:00:00-03:00', ['scheduled']),
+    ]
+    expect(resumenDelDia(posts)).toEqual({ servidos: 1, fallaron: 1, porSalir: 1 })
+    expect(mezclaDeRedes(posts)).toEqual([{ red: 'instagram', destinos: 4 }])
+  })
+})
+
+describe('dondeVaAhora y horaDeAhora', () => {
+  const posts = [post('a', '2026-10-15T09:00:00-03:00', []), post('b', '2026-10-15T14:00:00-03:00', [])]
+
+  it('la línea va después de lo que ya tuvo su hora, por el instante', () => {
+    expect(dondeVaAhora(posts, Date.parse('2026-10-15T12:00:00-03:00'))).toBe(1)
+    expect(dondeVaAhora(posts, Date.parse('2026-10-15T14:00:00-03:00'))).toBe(2)
+    expect(dondeVaAhora(posts, Date.parse('2026-10-15T08:00:00-03:00'))).toBe(0)
+  })
+
+  it('la hora de ahora, en la zona que trae `cuando` y no en la del teléfono', () => {
+    expect(horaDeAhora(Date.parse('2026-10-15T17:20:00Z'), '2026-10-15T09:00:00-03:00')).toBe('14:20')
+    expect(horaDeAhora(Date.parse('2026-10-15T17:20:00Z'), '2026-10-15T09:00:00+05:30')).toBe('22:50')
   })
 })

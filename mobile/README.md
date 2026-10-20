@@ -5,7 +5,8 @@ bife sobre la reja de ícono, desde el build de la Play Store (2026-10-16); el A
 de antes se llama «Vicente · Números» y tiene otro identificador, así que las dos pueden
 convivir instaladas hasta que se borre el APK. Desde el 2026-10-16 tiene las mismas tres
 pestañas que el panel web, en versión corta: **La Parrilla** (lo programado día por
-día, lo que se quemó, los borradores y cuántos cortes salieron ayer), **Publicar** al
+día —con un filtro por red, lo que ya salió hundido en un renglón y, hoy, la línea de
+«ahora»—, lo que se quemó, los borradores y cuántos cortes salieron ayer), **Publicar** al
 medio (eliges fotos o un video de la galería, escribes el texto, marcas las cuentas y lo
 programas, o lo mandas a salir ahora) y **Los Números** (las dos mitades del tablero, con «Tus
 publicaciones» un toque adentro y los seguidores de cada red detrás de «⋯ Más»). Arriba a
@@ -167,7 +168,7 @@ Lo que escribes en Publicar se guarda solo como **borrador**, un momento despué
 panel. Son los mismos borradores del panel (`borradores` y `borrador_media`, por
 `/api/mobile/borradores`): lo empezado en un lado se sigue en el otro. En La Parrilla
 están en **Borradores (N)**, y los que tienen fecha, también en su día con borde
-punteado. **Programar** sale del borrador y el servidor lo borra al crear el post;
+punteado (no con un filtro por red puesto: la app no sabe a qué cuentas va un borrador). **Programar** sale del borrador y el servidor lo borra al crear el post;
 **Nueva publicación** deja el que está en los borradores y vacía el formulario;
 **Descartar** lo borra.
 

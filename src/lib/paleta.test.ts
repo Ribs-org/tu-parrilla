@@ -130,6 +130,12 @@ describe('el color de cada red', () => {
     expect(deNoche('color-marca-tiktok')).toBe(SECUNDARIO)
     expect(delDia('color-marca-tiktok')).toBe(delDia('color-fg-muted'))
   })
+
+  // La app del teléfono los repite a mano en su paleta (`colores.ts`), para el punto de cada red.
+  it.each(REDES)('el de %s en la app del teléfono es el del panel, de noche y de día', (red) => {
+    expect(deLaApp(red), red).toBe(deNoche(`color-marca-${red}`))
+    expect(deLaApp(red, 'COLORES_DIA'), red).toBe(delDia(`color-marca-${red}`))
+  })
 })
 
 describe('los gráficos, de noche y de día', () => {

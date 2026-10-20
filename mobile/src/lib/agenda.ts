@@ -1,4 +1,5 @@
 import { agruparPorDia } from './agrupar'
+import { bordeDe, coccionDe, selloPorEstado } from './parrilla'
 import { servidos, type Tema } from './tema'
 import type { BorradorResumido, PostProgramado } from './tipos'
 
@@ -105,4 +106,64 @@ let toques = 0
 export function marcaDeToque(): string {
   toques += 1
   return String(toques)
+}
+
+/**
+ * Si el post ya salió en todas sus redes y no le falta nada del dueño: es el que deja la chapa y
+ * se hunde, como en el panel (`estadoDeFila`). Lo que llegó a la bandeja de TikTok ya salió, pero
+ * falta terminarlo: no se hunde.
+ */
+export function servidoEnTodas(post: PostProgramado): boolean {
+  const estados = post.redes.map((r) => r.estado)
+  const sellos = post.redes.map((r) => r.sello ?? selloPorEstado(r.estado, r.error))
+  return coccionDe(estados) === 'punto' && bordeDe('punto', sellos) === 'cuenta'
+}
+
+export type Resumen = { servidos: number; fallaron: number; porSalir: number }
+
+/** Cuánto salió, cuánto se quemó y cuánto falta de un día, por la cocción, como en el panel. */
+export function resumenDelDia(posts: readonly PostProgramado[]): Resumen {
+  const resumen: Resumen = { servidos: 0, fallaron: 0, porSalir: 0 }
+  for (const post of posts) {
+    const coccion = coccionDe(post.redes.map((r) => r.estado))
+    if (coccion === 'punto') resumen.servidos++
+    else if (coccion === 'quemada' || coccion === 'parcial') resumen.fallaron++
+    else resumen.porSalir++
+  }
+  return resumen
+}
+
+const ORDEN_DE_REDES = ['instagram', 'tiktok', 'youtube', 'facebook', 'threads', 'x']
+
+/** A qué red va lo del día: cuántos destinos tiene cada una, en el orden de siempre. */
+export function mezclaDeRedes(posts: readonly PostProgramado[]): { red: string; destinos: number }[] {
+  const cuenta = new Map<string, number>()
+  for (const post of posts) for (const { red } of post.redes) cuenta.set(red, (cuenta.get(red) ?? 0) + 1)
+  const orden = (red: string) => (ORDEN_DE_REDES.includes(red) ? ORDEN_DE_REDES.indexOf(red) : ORDEN_DE_REDES.length)
+  return [...cuenta].sort(([a], [b]) => orden(a) - orden(b)).map(([red, destinos]) => ({ red, destinos }))
+}
+
+/**
+ * Cuántos posts de hoy ya tuvieron su hora: la línea de «ahora» va después de ellos. Por el
+ * instante y no por la hora escrita: `cuando` trae la zona del dueño, y el reloj del teléfono
+ * puede estar en otra.
+ */
+export function dondeVaAhora(posts: readonly PostProgramado[], ahora: number): number {
+  let i = 0
+  while (i < posts.length && new Date(posts[i]!.cuando).getTime() <= ahora) i++
+  return i
+}
+
+/**
+ * La hora de ahora en la zona del dueño, «14:20», sacada de la zona que trae `cuando` y no de la
+ * del teléfono, que puede ser otra. Sin un `cuando` del que sacarla, la del teléfono.
+ */
+export function horaDeAhora(ahora: number, cuando?: string): string {
+  const zona = cuando?.match(/([+-])(\d{2}):(\d{2})$/)
+  if (!zona) {
+    const local = new Date(ahora)
+    return `${String(local.getHours()).padStart(2, '0')}:${String(local.getMinutes()).padStart(2, '0')}`
+  }
+  const minutos = (zona[1] === '-' ? -1 : 1) * (Number(zona[2]) * 60 + Number(zona[3]))
+  return new Date(ahora + minutos * 60_000).toISOString().slice(11, 16)
 }

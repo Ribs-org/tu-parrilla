@@ -101,8 +101,15 @@ Cada parte se publica sola y no cambia la API ni los datos: es cómo se dibuja.
   En el teléfono la reja se desliza de lado con el canal de las horas pegado a la izquierda
   (`overflow-clip`, no `overflow-hidden`, para que el canal se quede pegado). No se programa con un
   clic en una hora vacía: el compositor recibe el día, no la hora, y sumarla es otro cambio.
-- **D. El teléfono.** Lo mismo en La Parrilla de la app: el filtro, los colores y lo que ya
-  salió.
+- **D. El teléfono.** Hecha (2026-10-20), en La Parrilla de la app (`(tabs)/index.tsx`): el
+  filtro por red (`filtro-de-redes.tsx`, `lib/filtro.ts`), la mezcla y el renglón de cada día,
+  lo que ya salió en un renglón hundido (`CorteServido`) y la línea de «ahora» en el día de hoy.
+  Tres diferencias con el panel, todas por lo que la app tiene: el color de la red va en un
+  punto y no en el ícono, porque la app no tiene `react-native-svg` y sumarlo pide un build nuevo;
+  la cuenta del filtro es su red y su nombre, porque la API del teléfono no manda el id de la
+  cuenta de cada destino; y el filtro no se guarda ni va a ninguna dirección. La agenda sigue en
+  tarjetas: la app ya muestra un día debajo del otro, y la reja por hora no cabe en un teléfono
+  sin deslizar de lado.
 
 ## Lo que se descartó
 
