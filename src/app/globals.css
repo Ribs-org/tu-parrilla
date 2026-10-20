@@ -50,6 +50,19 @@
    */
   --color-velo: #ffffff;
 
+  /*
+   * El color de marca de cada red, para La Parrilla: el ícono, la franja de un bloque y la
+   * mezcla de redes de cada día (`src/lib/color-de-red.ts`). Nunca de fondo: el fondo rojo es
+   * lo que se quemó, y el rojo de YouTube vive solo en su ícono y su franja. TikTok va en
+   * neutro —su marca es blanco y negro—, el secundario del panel. De día, más hondos
+   * (`.acerado[data-tema='dia']`). Cada uno pasa 3:1 sobre la chapa, el fondo y el tinte de lo
+   * quemado (`src/lib/paleta.test.ts`).
+   */
+  --color-marca-instagram: #e8457f;
+  --color-marca-tiktok: #a39a8f;
+  --color-marca-youtube: #ff2b2b;
+  --color-marca-facebook: #4c8ef7;
+
   --font-titulo: var(--font-oswald), 'Arial Narrow', sans-serif;
 }
 
@@ -462,6 +475,11 @@
     --color-caution: #946000;
     --color-velo: #221f1c;
 
+    --color-marca-instagram: #c13584;
+    --color-marca-tiktok: #5c564e;
+    --color-marca-youtube: #e00000;
+    --color-marca-facebook: #1877f2;
+
     --chart-surface: #fffdf9;
     --chart-grid: #efe8dd;
     --chart-axis: #e2d8c9;
@@ -569,6 +587,34 @@
     .grilla:hover .poner-algo,
     .poner-algo:focus-visible {
       opacity: 1;
+    }
+  }
+
+  /*
+   * Las cuentas de una red en el filtro de La Parrilla (`schedule/filtro-redes.tsx`). El dueño
+   * pidió no mostrar tanto: con mouse aparecen al pasar por la red, y con el teclado al llegar
+   * a ella. Sin mouse no hay «pasar por encima», y un toque en la red ya la elige: entonces sus
+   * cuentas van en una fila debajo, solo con esa red elegida.
+   */
+  .cuentas-al-pasar {
+    display: none;
+  }
+
+  .filtro-red:has(:focus-visible) .cuentas-al-pasar {
+    display: block;
+  }
+
+  .cuentas-en-fila {
+    display: flex;
+  }
+
+  @media (hover: hover) {
+    .filtro-red:hover .cuentas-al-pasar {
+      display: block;
+    }
+
+    .cuentas-en-fila {
+      display: none;
     }
   }
 

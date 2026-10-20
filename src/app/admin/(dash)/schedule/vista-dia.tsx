@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
 import { Corte } from '@/components/corte'
 import { DeNocheYDeDia } from '@/components/de-noche-y-de-dia'
 import { Icon } from '@/components/icon'
+import { colorDeRed } from '@/lib/color-de-red'
 import { networkLabel } from '@/lib/networks'
 import { NOMBRE_COCCION, NOMBRE_FORMATO, calorDelDia } from '@/lib/parrilla'
 import { hourLabel } from '@/lib/schedule-week'
@@ -35,6 +36,7 @@ export function VistaDia({
   nuevoEnDia,
   frias,
   recien = null,
+  sinColumnas = 'No tienes cuentas conectadas, y ese día no hay nada puesto.',
 }: {
   dia: string
   hoy: string
@@ -50,6 +52,8 @@ export function VistaDia({
   frias: ReadonlySet<string>
   /** El post recién programado: sus tarjetas caen en su columna, encendidas una vez. */
   recien?: string | null
+  /** Lo que dice el día sin ninguna columna: con un filtro por red, que esa red no tiene ninguna. */
+  sinColumnas?: string
 }) {
   // En un día que ya pasó no se programa: ni el «+» ni la invitación a prenderlo.
   const abierto = dia >= hoy
@@ -88,7 +92,7 @@ export function VistaDia({
       </div>
 
       {columnas.length === 0 ? (
-        <p className="text-sm italic text-fg-muted">No tienes cuentas conectadas, y ese día no hay nada puesto.</p>
+        <p className="text-sm italic text-fg-muted">{sinColumnas}</p>
       ) : (
         <div className="relative -mx-1 overflow-x-auto px-1 pb-1">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
@@ -144,7 +148,7 @@ function ColumnaDeCuenta({
     <section aria-label={nombreDeColumna(columna)} className="flex flex-col gap-2 sm:w-64 sm:shrink-0">
       <div className="flex items-center justify-between gap-2">
         <p className="flex min-w-0 items-center gap-1.5 text-[0.8rem] text-fg">
-          {red ? <Icon name={red} className="h-3.5 w-3.5 shrink-0" /> : null}
+          {red ? <Icon name={red} className={cn('h-3.5 w-3.5 shrink-0', colorDeRed(red))} /> : null}
           <span className="truncate">
             {columna.cuenta ? (columna.cuenta.handle ?? networkLabel(columna.cuenta.network)) : nombreDeColumna(columna)}
           </span>

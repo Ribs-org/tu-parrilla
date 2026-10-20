@@ -51,6 +51,10 @@ llama «Se echó a perder». La equivalencia está en «El modo día», en [inde
   - `?vista=dia`: un solo día, por cuenta (ver «El día»); con `&fecha=AAAA-MM-DD`, ese día, y
     sin ella, hoy;
   - `?semana=AAAA-MM-DD`: el calendario en la semana que contiene ese día;
+  - `?red=<red>` (`instagram`, `tiktok`, `youtube` o `facebook`): solo lo que sale a esa red,
+    en el calendario, el día y la lista (ver «El filtro por red»); con el id de una cuenta en
+    vez de la red (`?red=<id de la cuenta>`), solo lo de esa cuenta. Una red en la que no
+    tienes cuentas, o un id que no es tuyo, muestra todo;
   - `?componer=1`: el panel «Nueva publicación»; con `&dia=AAAA-MM-DD`, con ese día puesto
     en «Fecha y hora», y con `&cuenta=<id de la cuenta>`, con esa cuenta marcada;
   - `?borrador=<id>`: ese borrador, abierto en el compositor;
@@ -61,8 +65,8 @@ llama «Se echó a perder». La equivalencia está en «El modo día», en [inde
 
 De arriba abajo: el encabezado con sus botones, el aviso «Programado.» (solo cuando se acaba
 de programar), la tarjeta «Conecta tu primera red» (solo sin ninguna red conectada), la
-sección «Se quemó» (solo si algo falló), los botones «Calendario», «Día» y «Lista» con lo
-programado debajo, y el pie de ayer. El formulario para programar, la lista de borradores y la carga por
+sección «Se quemó» (solo si algo falló), los botones «Calendario», «Día» y «Lista» —con el
+filtro por red al lado— y lo programado debajo, y el pie de ayer. El formulario para programar, la lista de borradores y la carga por
 CSV no están en la página: se abren en un panel que se desliza desde la derecha (ver «El panel
 lateral», más abajo).
 
@@ -113,8 +117,10 @@ plegar. Si se deja abierta, la próxima vez que se entre en ese navegador abre a
 Abierta, cada fila es una red donde un corte falló: un corte que falló en dos redes da dos
 filas. Van de la más reciente a la más vieja.
 
-Si lo quemado es de dos redes o más, al lado del título hay un botón por red, con su ícono, su
-nombre y cuántas tiene (por ejemplo «TikTok 8»). Todos parten encendidos, con borde rojo; un
+Si lo quemado es de dos redes o más, al lado del título hay un botón por red, con su ícono (en
+el color de la red), su nombre y cuántas tiene (por ejemplo «TikTok 8»). Es un filtro solo de
+«Se quemó», distinto del filtro por red de lo programado (ver «El filtro por red»): no va en la
+dirección, y apagar una red aquí no cambia el calendario. Todos parten encendidos, con borde rojo; un
 clic apaga esa red —el botón queda con borde punteado y gris— y sus filas salen de la vista, y
 otro clic la vuelve a encender. Apagar una red no borra ni arregla nada: solo deja de
 mostrarla, y al recargar la página vuelven a estar todas. Con todas apagadas, la sección dice
@@ -165,9 +171,12 @@ el tiempo. El halo de lo quemado late tres veces al cargar la página y después
 encendido. Con «reducir movimiento» activado en el sistema, el humo queda en dos volutas
 quietas y el halo encendido sin latir.
 
-Debajo del corte, un chip por destino con el ícono de su red y un signo: «✓» salió, «…»
-saliendo, «✕» se quemó, «◐» en la bandeja de TikTok, «↻» reintentando, «!» fierro frío; sin
-signo, programado. Un lector de pantalla lee el formato y la cocción («Video · Programada»,
+Debajo del corte, un chip por destino con el ícono de su red, en el color de la red —Instagram
+rosado, TikTok gris (su marca es blanco y negro), YouTube rojo, Facebook azul; de día, los
+mismos más hondos—, y un signo: «✓» salió, «…» saliendo, «✕» se quemó, «◐» en la bandeja de
+TikTok, «↻» reintentando, «!» fierro frío; sin signo, programado. El color del ícono dice la
+red, nunca el estado: el estado lo dicen el signo y el borde del chip, y lo quemado, además,
+el chip teñido de rojo. El rojo de YouTube no es un fallo. Un lector de pantalla lee el formato y la cocción («Video · Programada»,
 «Carrusel · Falló en parte») y cada destino con su estado.
 
 La tarjeta en que va el corte es de acero, no del color de la carne, y cambia de borde solo
@@ -180,6 +189,45 @@ Tres botoncitos sobre lo programado. «Calendario» es la vista con que abre la 
 semana. «Día» muestra un solo día, separado por cuenta; abre en el día que se estaba mirando
 (hoy, si la semana a la vista es la de hoy, y si no, el lunes de esa semana). «Lista» cambia a
 la lista. Desde «Día», «Calendario» vuelve a la semana que contiene ese día.
+
+### El filtro por red
+
+A la derecha de «Calendario», «Día» y «Lista» (en el teléfono, debajo, en un solo renglón que
+se desliza de lado), un botón por red: «Todas» y, en este orden, las redes en las que tienes
+cuentas —Instagram, TikTok, YouTube, Facebook—, cada una con su ícono en el color de la red y
+cuántas publicaciones tiene en lo que estás mirando: la semana en el calendario, el día en
+«Día», todo en «Lista». Una publicación que sale a dos redes cuenta en las dos, y una vez en
+«Todas»: cada número es lo que queda a la vista al apretar ese botón. Con una sola cuenta, el
+filtro no aparece.
+
+El botón elegido tiene borde naranjo. Un clic en una red muestra solo lo que sale a ella; otro
+clic en la misma, o «Todas», vuelve a mostrar todo. El filtro sigue puesto al cambiar de
+semana, de día o de vista, porque va en la dirección (`?red=`); entrar a La Parrilla desde la
+barra lo saca.
+
+- **En el calendario y en «Día»**, una publicación que sale a varias redes se ve solo con lo
+  de la red elegida: su corte, cocido según esa red, con una sola marca y un solo chip. En
+  «Día» quedan solo las columnas de las cuentas de esa red.
+- **En la lista** se ve entera, con todas sus píldoras: ahí se sube, se reprograma y se borra
+  el post completo.
+- **«Se quemó» y el pie de ayer no cambian**: muestran todo, con filtro o sin él. Tampoco el
+  aviso del compositor de cuánto tiene ya el día que elegiste.
+- **Los borradores con fecha** se ven si tienen marcada una cuenta de esa red; los que no
+  tienen ninguna cuenta marcada no se ven con un filtro puesto.
+
+**Por cuenta.** Si en una red tienes dos cuentas o más, al pasar el mouse por su botón (o al
+llegar a él con el teclado) se abre debajo un menú «Por cuenta» con cada cuenta y cuántas
+tiene. Un clic en una muestra solo lo de esa cuenta, y el botón de la red pasa a decir «<Red>
+· <usuario>» con lo de esa cuenta. Con una cuenta elegida, el menú empieza con «Todas las de
+<Red>», y un clic en el botón de la red también vuelve a la red entera. En un teléfono, que
+no tiene mouse, las cuentas aparecen en un renglón debajo apenas eliges la red: «Todas las de
+<Red>» y cada cuenta, con lo suyo.
+
+Sin nada en lo elegido, la lista dice «Nada programado en <Red>.» (o «Nada programado en
+<usuario>.», con una cuenta elegida), y el calendario y «Día» muestran sus parrillas frías como
+siempre. Si en «Día» la red elegida no tiene ninguna cuenta conectada y ese día no tiene nada
+ahí: «No tienes ninguna cuenta de <Red> conectada, y ese día no hay nada ahí.» (con una cuenta
+elegida: «<usuario> no está conectada, y ese día no tiene nada.»).
 
 ### El calendario
 
@@ -232,8 +280,8 @@ Arriba, «Día anterior», el día —«Hoy · vie 16 de oct», «Mañana · sá
 Debajo, una columna por cuenta, en el orden de [Los Fierros](los-fierros.md). Cada cuenta
 conectada tiene la suya aunque ese día no tenga nada; una desconectada aparece solo si ese
 día tiene algo, con «reconéctala» al lado del nombre. En el teléfono las columnas van una
-debajo de otra. Cada columna lleva arriba el ícono de la red y el @usuario (o el nombre de la
-página), el fuego de esa cuenta ese día —con las mismas reglas que el día: uno o dos,
+debajo de otra. Cada columna lleva arriba el ícono de la red, en su color, y el @usuario (o el
+nombre de la página), el fuego de esa cuenta ese día —con las mismas reglas que el día: uno o dos,
 «Prendida»; tres o más, «Parrilla llena»— y, si el día no pasó y la cuenta está conectada, un
 «+» que abre «Nueva publicación» con ese día puesto y esa cuenta ya marcada (un lector de
 pantalla lo lee «Programar en <Red> · <usuario>»).
@@ -277,8 +325,8 @@ Cada publicación es una tarjeta con:
   ahora»** (solo si a alguna red le falta salir: programada, publicándose o quemada) y
   **«Eliminar»**, que pregunta antes «¿Eliminar este post? Se borra de La Parrilla y ya no
   sale en ninguna red.».
-- Abajo, una píldora por cada destino: el ícono de la red, el usuario, « · » y el estado
-  (ver la tabla de estados, más abajo). Si hay un motivo de falla, sigue « — <motivo>». Si el
+- Abajo, una píldora por cada destino: el ícono de la red (en su color), el usuario, « · » y
+  el estado (ver la tabla de estados, más abajo); la píldora es verde si ya salió. Si hay un motivo de falla, sigue « — <motivo>». Si el
   destino se quemó, la píldora es roja y termina en el botón subrayado **«Reprogramar»**.
 
 El resultado de «Subir ahora» y los errores de «Eliminar» aparecen arriba de la lista, en
@@ -733,6 +781,15 @@ suben archivos sueltos.
 2. Moverse con «Semana anterior» y «Semana siguiente».
 3. Un clic en una tarjeta abre su editor (o, si es punteada, el borrador).
 
+### Para ver solo una red (o una cuenta)
+
+1. Arriba de lo programado, a la derecha, apretar el botón de la red (por ejemplo «Facebook
+   28»).
+2. Para una sola cuenta de una red que tiene varias: pasar el mouse por el botón de la red y
+   elegir la cuenta en «Por cuenta». En el teléfono: apretar la red y después la cuenta, en el
+   renglón que aparece debajo.
+3. Para volver a ver todo: «Todas».
+
 ### Para ver qué sale en cada cuenta un día
 
 1. Un clic en el nombre del día en el calendario (por ejemplo `sáb 17`), o el botoncito «Día»
@@ -1028,6 +1085,19 @@ programar nada nuevo ahí. Para dejar de intentarlo, desmarcar esa red en el edi
   nombre del día en el calendario, o «Día»: una columna por cuenta, con su propio fuego.
 - **En la vista Día un post aparece dos veces.** Sale a dos cuentas: es una tarjeta por
   cuenta, y «También en» dice cuáles son las otras.
+- **Quiero ver solo Facebook (o solo una red).** El filtro por red, arriba de lo programado a
+  la derecha: el botón de esa red. «Todas» vuelve a mostrar todo.
+- **Quiero ver solo una de mis cuentas de TikTok.** Pasar el mouse por «TikTok» en el filtro y
+  elegirla en «Por cuenta»; en el teléfono, apretar «TikTok» y elegirla en el renglón que
+  aparece debajo.
+- **Programé algo y no aparece.** Mira si hay un filtro puesto: un botón de red con borde
+  naranjo, arriba a la derecha de lo programado. Lo de otras redes no se ve hasta apretar
+  «Todas».
+- **¿Qué es cada color de los íconos?** El de la red: Instagram rosado, TikTok gris, YouTube
+  rojo y Facebook azul. El rojo de YouTube no es un fallo: un fallo tiñe el chip entero de rojo
+  y lleva «✕».
+- **Filtré una red y «Se quemó» sigue mostrando otras.** «Se quemó» no obedece el filtro: lo
+  que falló se ve siempre. Tiene su propio filtro por red, adentro, al abrirla.
 - **En la vista Día no aparece una cuenta.** Está desconectada y ese día no tiene nada:
   reconectarla en [Los Fierros](los-fierros.md).
 - **La fecha viene puesta a las 9.** Es lo que propone al abrir desde un día del calendario;
@@ -1152,6 +1222,8 @@ programar nada nuevo ahí. Para dejar de intentarlo, desmarcar esa red en el edi
 - La vista «Día» no tiene «Subir ahora», «Eliminar» ni «Reprogramar» (están en la lista), no
   alinea las horas entre columnas —cada columna va en su orden, de la más temprana a la más
   tarde— y no muestra varios días a la vez: para eso está la semana.
+- El filtro por red no esconde «Se quemó» ni cambia el pie de ayer, y no se recuerda entre
+  visitas: vive en la dirección (`?red=`), y entrar a La Parrilla desde la barra lo saca.
 - No publica en Threads ni en X / Twitter, que dicen «Próximamente» (ver [Los Fierros](los-fierros.md)).
 - No conecta cuentas: eso es [Los Fierros](los-fierros.md). No muestra cómo le fue a lo
   publicado: eso es [Los Números](los-numeros.md) (cómo te fue en las redes y en tu página; cada
@@ -1174,6 +1246,7 @@ Lo que describe esta página sale de:
   - `src/app/admin/(dash)/schedule/batch-upload.tsx`
   - `src/app/admin/(dash)/schedule/calendar.tsx`
   - `src/app/admin/(dash)/schedule/vista-dia.tsx` y `src/app/admin/(dash)/schedule/dia.ts` (la vista «Día»)
+  - `src/app/admin/(dash)/schedule/filtro-redes.tsx` y `src/app/admin/(dash)/schedule/filtro-red.ts` (el filtro por red)
   - `src/app/admin/(dash)/schedule/se-quemo.tsx`, `src/app/admin/(dash)/schedule/lista-quemados.tsx` y `src/app/admin/(dash)/schedule/filtro-quemados.ts` («Se quemó»)
   - `src/app/admin/(dash)/schedule/queue.tsx`
   - `src/app/admin/(dash)/schedule/reprogramar.tsx`
@@ -1191,7 +1264,7 @@ Lo que describe esta página sale de:
   - `src/app/admin/(dash)/schedule/arreglo.ts` (qué arreglo se ofrece junto a un destino quemado)
   - `src/app/admin/(dash)/schedule/desplazar-a-hoy.tsx` (la semana corrida hasta hoy en el teléfono)
   - `src/app/admin/(dash)/schedule/loading.tsx` y `src/components/esqueleto.tsx` (la carga, con la forma de cada vista y del editor)
-  - `src/app/globals.css` (la parrilla fría de un día vacío, «Poner algo» al pasar el mouse, y el pulso de la carga)
+  - `src/app/globals.css` (la parrilla fría de un día vacío, «Poner algo» al pasar el mouse, el menú «Por cuenta» del filtro, el color de cada red y el pulso de la carga)
 - Lo que hacen sus botones (programar, guardar y descartar un borrador, guardar en el editor, reprogramar, eliminar, «Subir ahora», la carga por CSV y la lectura de la cuenta de TikTok):
   - `src/app/admin/actions.ts`
 - Los borradores (qué se guarda, cuándo hay algo que guardar, la fecha que se propone para un día):
@@ -1245,6 +1318,7 @@ Lo que describe esta página sale de:
   - `src/lib/schedule-week.ts`
   - `src/lib/parrilla.ts`
   - `src/lib/networks.ts`
+  - `src/lib/color-de-red.ts` (el color de cada red)
   - `src/lib/vocabulario.ts`
   - `src/lib/utils.ts`
   - `src/components/ui.tsx`

@@ -24,6 +24,7 @@ export function Queue({
   items,
   volver,
   recien = null,
+  vacio = 'Nada programado todavía.',
 }: {
   items: Array<{
     post: ScheduledPost
@@ -34,6 +35,8 @@ export function Queue({
   volver: string
   /** El post recién programado: su fila se enciende una vez, y la lista la trae a la vista. */
   recien?: string | null
+  /** Lo que dice la lista sin nada: con un filtro por red, que no hay nada en esa red. */
+  vacio?: string
 }) {
   const [pending, start] = useTransition()
   const [error, setError] = useState<string | null>(null)
@@ -48,7 +51,7 @@ export function Queue({
   }, [recien])
 
   if (items.length === 0) {
-    return <p className="py-8 text-center text-sm text-fg-faint">Nada programado todavía.</p>
+    return <p className="py-8 text-center text-sm text-fg-faint">{vacio}</p>
   }
 
   const { visibles, ocultos } = cortarCola(items, VISTA_PREVIA)

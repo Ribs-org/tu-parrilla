@@ -1,11 +1,12 @@
 import { DeNocheYDeDia } from '@/components/de-noche-y-de-dia'
 import { Icon } from '@/components/icon'
+import { colorDeRed } from '@/lib/color-de-red'
 import { networkLabel } from '@/lib/networks'
 import { selloDe, type Sello } from '@/lib/parrilla'
 import type { Tema } from '@/lib/tema'
 import { cn } from '@/lib/utils'
 import { FIERRO_FRIO } from '@/lib/vocabulario'
-import { colorDeDestino, etiquetaDestino, nombreDestino } from './etiqueta'
+import { etiquetaDestino, nombreDestino } from './etiqueta'
 
 type Destino = {
   network: string
@@ -16,18 +17,14 @@ type Destino = {
   lastError?: string | null
 }
 
-/** En la cola, el icono se tiñe solo si se quemó o si ya salió (`colorDeDestino`). */
-const TINTE: Record<ReturnType<typeof colorDeDestino>, string> = {
-  gris: 'text-fg',
-  positivo: 'text-positive',
-  negativo: 'text-negative',
-}
-
 /**
  * El chip de cada destino debajo del corte: dice en texto lo mismo que su marca, en el
- * mismo orden. El color va en el signo y en el borde, nunca de fondo salvo lo quemado, que
- * lleva un tinte; el icono de la red va en el color del texto, sin su color de marca, para
- * que no compita con el estado.
+ * mismo orden. El estado va en el signo y en el borde, nunca de fondo salvo lo quemado, que
+ * lleva un tinte. El icono de la red va en su color de marca (`colorDeRed`): con decenas de
+ * cortes al día, a qué red va cada uno tiene que verse sin leer. Antes iba en el color del
+ * texto, para no competir con el estado; desde el 2026-10-20 el estado no depende del color
+ * del icono —tiene su signo, su borde y su tinte— y la red sí. El rojo de YouTube no se
+ * confunde con lo quemado: lo quemado tiñe el chip entero y lleva ✕.
  */
 const CHIP: Record<Sello, { clase: string; signo: string }> = {
   pendiente: { clase: 'border-acero-700 text-fg', signo: '' },
@@ -69,9 +66,9 @@ export function Redes({
           <span
             key={`${t.network}-${t.handle ?? ''}-${i}`}
             title={`${nombreDestino(t)}: ${etiquetaDestino(t)}`}
-            className={cn('inline-flex items-center gap-1', TINTE[colorDeDestino(t.status)])}
+            className="inline-flex items-center gap-1"
           >
-            <Icon name={t.network} className="h-3.5 w-3.5 shrink-0" />
+            <Icon name={t.network} className={cn('h-3.5 w-3.5 shrink-0', colorDeRed(t.network))} />
             <span className="text-xs text-fg">
               <span className="sr-only">{networkLabel(t.network)} · </span>
               {t.handle ?? nombreDestino(t)}
@@ -97,7 +94,7 @@ export function Redes({
               modo,
             )}
           >
-            <Icon name={t.network} className="h-3 w-3 shrink-0" />
+            <Icon name={t.network} className={cn('h-3 w-3 shrink-0', colorDeRed(t.network))} />
             {CHIP[sello].signo ? <span aria-hidden>{CHIP[sello].signo}</span> : null}
           </span>
         )

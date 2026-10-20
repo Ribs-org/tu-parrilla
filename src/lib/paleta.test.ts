@@ -81,6 +81,57 @@ describe('el panel, de día', () => {
   })
 })
 
+describe('el color de cada red', () => {
+  // Las de noche viven en `@theme`, junto a los demás colores: son las mismas adentro y afuera
+  // del panel. Las de día, en el bloque del día, como todo lo demás.
+  const tema = css.match(/@theme\s*\{([^}]*)\}/)?.[1] ?? ''
+  const deNoche = (variable: string) => tema.match(new RegExp(`--${variable}:\\s*(#[0-9a-f]{6});`))?.[1]
+  const REDES = ['instagram', 'tiktok', 'youtube', 'facebook']
+
+  /** `color` sobre `fondo` a `alfa`: el tinte de una píldora (`bg-negative/15`) ya pintado. */
+  const tinte = (color: string, alfa: number, fondo: string) => {
+    const canal = (hex: string, i: number) => parseInt(hex.slice(1 + i * 2, 3 + i * 2), 16)
+    return `#${[0, 1, 2]
+      .map((i) => Math.round(canal(color, i) * alfa + canal(fondo, i) * (1 - alfa)).toString(16).padStart(2, '0'))
+      .join('')}`
+  }
+
+  // Un ícono, una franja o un tramo de la mezcla de redes es un dibujo, y WCAG le pide 3:1 contra
+  // lo que lo rodea: la chapa, el fondo, un bloque (`acero-800`) y las píldoras de lo que se
+  // quemó y de lo que salió, que llevan un tinte. Contra el tinte de lo quemado es donde el rojo
+  // de YouTube y el de Instagram quedan más justos.
+  it.each(REDES)('%s pasa 3:1 de noche sobre todo lo que lo rodea', (red) => {
+    const color = deNoche(`color-marca-${red}`)
+    expect(color, red).toBeDefined()
+    const chapa = delPanel('color-acero-900') ?? deNoche('color-acero-900')!
+    const negativo = delPanel('color-negative')!
+    const positivo = delPanel('color-positive') ?? deNoche('color-positive')!
+    for (const fondo of [chapa, FONDO, deNoche('color-acero-800')!, tinte(negativo, 0.15, chapa), tinte(positivo, 0.15, chapa)]) {
+      expect(contraste(color!, fondo), `${red} sobre ${fondo}`).toBeGreaterThanOrEqual(3)
+    }
+  })
+
+  it.each(REDES)('%s pasa 3:1 de día sobre todo lo que lo rodea', (red) => {
+    const color = delDia(`color-marca-${red}`)
+    expect(color, red).toBeDefined()
+    const chapa = delDia('color-acero-900')!
+    for (const fondo of [
+      chapa,
+      delDia('color-acero-950')!,
+      delDia('color-acero-800')!,
+      tinte(delDia('color-negative')!, 0.15, chapa),
+      tinte(delDia('color-positive')!, 0.15, chapa),
+    ]) {
+      expect(contraste(color!, fondo), `${red} sobre ${fondo}`).toBeGreaterThanOrEqual(3)
+    }
+  })
+
+  it('TikTok va en neutro, el secundario del panel de cada modo: su marca es blanco y negro', () => {
+    expect(deNoche('color-marca-tiktok')).toBe(SECUNDARIO)
+    expect(delDia('color-marca-tiktok')).toBe(delDia('color-fg-muted'))
+  })
+})
+
 describe('los gráficos, de noche y de día', () => {
   it('las variables de la noche son los hexes de theme.ts', () => {
     expect(delPanel('chart-surface')).toBe(CHART.surface)
