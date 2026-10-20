@@ -1,7 +1,7 @@
 import { Text, View } from 'react-native'
 import { TIPO_TITULO } from './ui'
-import type { Colores } from './colores'
-import { useColores } from './tema'
+import { colorDeRed, type Colores } from './colores'
+import { useColores, useTema } from './tema'
 import { Pieza } from './pieza'
 import {
   bordeDe,
@@ -86,18 +86,18 @@ export function CorteProgramado({ post }: { post: PostProgramado }) {
           {post.redes.map((r, i) => {
             const linea = lineaDe(sellos[i]!, colores)
             return (
-              <Text
-                // `r.id` es el destino, no la red: con dos cuentas de la misma red, `r.red` se
-                // repite dentro de un post.
-                key={r.id}
-                style={{ color: linea.color, fontSize: 12 }}
-                numberOfLines={2}
-              >
-                {linea.signo ? `${linea.signo} ` : ''}
-                {etiquetaCuenta(r)}
-                {linea.sufijo}
-                {r.error ? ` — ${r.error}` : ''}
-              </Text>
+              // `r.id` es el destino, no la red: con dos cuentas de la misma red, `r.red` se
+              // repite dentro de un post. El punto es la red en su color, como el ícono del panel;
+              // el estado sigue en el signo y en el color del texto.
+              <View key={r.id} style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 6 }}>
+                <View style={{ width: 7, height: 7, borderRadius: 4, marginTop: 5, backgroundColor: colorDeRed(colores, r.red) }} />
+                <Text style={{ flex: 1, color: linea.color, fontSize: 12 }} numberOfLines={2}>
+                  {linea.signo ? `${linea.signo} ` : ''}
+                  {etiquetaCuenta(r)}
+                  {linea.sufijo}
+                  {r.error ? ` — ${r.error}` : ''}
+                </Text>
+              </View>
             )
           })}
         </View>
@@ -115,6 +115,54 @@ export function CorteProgramado({ post }: { post: PostProgramado }) {
           {NOMBRE_FORMATO[formato]} · {NOMBRE_COCCION[coccion]}
         </Text>
       </View>
+    </View>
+  )
+}
+
+/**
+ * Un post que ya salió en todas sus redes: deja la chapa y se hunde, como en la semana del panel
+ * (`servidoEnTodas`). Un renglón —el corte en chico y apagado, la hora, el punto de cada red, un
+ * «✓» y el texto—, sin borde y sobre un fondo más hondo que la tarjeta: de noche el fondo, de día
+ * un tostado, porque el fondo del día es casi tan claro como la tarjeta. Con decenas al día, lo
+ * de la mañana en tarjetas enteras empujaba lo que viene media pantalla hacia abajo.
+ */
+export function CorteServido({ post }: { post: PostProgramado }) {
+  const colores = useColores()
+  const { tema } = useTema()
+  const estados = post.redes.map((r) => r.estado)
+  const sellos = post.redes.map((r) => r.sello ?? selloPorEstado(r.estado, r.error))
+  const hora = post.cuando.slice(11, 16)
+  const texto = post.texto || '(sin texto)'
+  return (
+    <View
+      accessible
+      accessibilityLabel={`${hora} · ${texto} · ${post.redes.map((r) => `${etiquetaCuenta(r)}: publicado`).join(', ')}`}
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        borderRadius: 8,
+        paddingVertical: 3,
+        paddingHorizontal: 6,
+        backgroundColor: tema === 'dia' ? `${colores.acero}b3` : `${colores.fondo}bf`,
+      }}
+    >
+      {/* La pieza a menos de la mitad: el lienzo mide 83 × 54 y aquí caben 37 × 24. */}
+      <View style={{ width: 38, height: 24, overflow: 'hidden', opacity: 0.55 }}>
+        <View style={{ transform: [{ scale: 0.45 }], transformOrigin: 'top left' }}>
+          <Pieza formato={post.formato ?? 'bife'} huesos={post.huesos ?? 0} carne={carneDe(estados)} coccion={coccionDe(estados)} sellos={sellos} />
+        </View>
+      </View>
+      <Text style={{ color: colores.suave, fontSize: 11, fontFamily: TIPO_TITULO, letterSpacing: 1 }}>{hora}</Text>
+      <View style={{ flexDirection: 'row', gap: 3 }}>
+        {post.redes.map((r) => (
+          <View key={r.id} style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: colorDeRed(colores, r.red) }} />
+        ))}
+      </View>
+      <Text style={{ color: colores.verde, fontSize: 12 }}>✓</Text>
+      <Text style={{ flex: 1, color: colores.suave, fontSize: 13 }} numberOfLines={1}>
+        {texto}
+      </Text>
     </View>
   )
 }

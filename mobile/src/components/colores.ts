@@ -24,6 +24,15 @@ export type Colores = {
   velo: string
   /** El acero de los bordes y de la pista vacía de un fierro. */
   acero: string
+  /**
+   * El color de marca de cada red, el de `--color-marca-*` del panel: el punto de la red en cada
+   * destino, en el filtro y en la mezcla de redes de cada día. Nunca de fondo: el rojo de fondo es
+   * lo que se quemó. TikTok, en neutro: su marca es blanco y negro.
+   */
+  instagram: string
+  tiktok: string
+  youtube: string
+  facebook: string
 }
 
 export const COLORES_NOCHE: Colores = {
@@ -41,6 +50,10 @@ export const COLORES_NOCHE: Colores = {
   ambar: '#e5a52a',
   velo: '#ffffff',
   acero: '#2a2e33',
+  instagram: '#e8457f',
+  tiktok: '#a39a8f',
+  youtube: '#ff2b2b',
+  facebook: '#4c8ef7',
 }
 
 /**
@@ -60,6 +73,16 @@ export const COLORES_DIA: Colores = {
   ambar: '#946000',
   velo: '#221f1c',
   acero: '#e2d8c9',
+  instagram: '#c13584',
+  tiktok: '#5c564e',
+  youtube: '#e00000',
+  facebook: '#1877f2',
 }
 
 export const PALETAS = { noche: COLORES_NOCHE, dia: COLORES_DIA } as const
+
+/** El color de una red, o el del texto si la red no tiene uno (Threads, X). */
+export function colorDeRed(colores: Colores, red: string): string {
+  if (red === 'instagram' || red === 'tiktok' || red === 'youtube' || red === 'facebook') return colores[red]
+  return colores.texto
+}

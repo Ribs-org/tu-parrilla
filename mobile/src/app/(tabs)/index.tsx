@@ -1,22 +1,38 @@
 import { useCallback, useState } from 'react'
 import { Alert, Pressable, Text, View } from 'react-native'
 import { useFocusEffect, useRouter } from 'expo-router'
-import { CorteProgramado } from '../../components/corte-programado'
+import { CorteProgramado, CorteServido } from '../../components/corte-programado'
+import { FiltroDeRedes } from '../../components/filtro-de-redes'
 import { IconoPoner } from '../../components/iconos'
-import { Grilla, RotuloDia } from '../../components/parrilla'
+import { Grilla, LineaDeAhora, MezclaDelDia, ResumenDelDia, RotuloDia } from '../../components/parrilla'
 import { Pieza } from '../../components/pieza'
 import { useSelectorFecha } from '../../components/selector-fecha'
 import { Boton, Cargando, ErrorConReintento, Pantalla, Sello, TIPO_TITULO, Tarjeta } from '../../components/ui'
 import { useColores, useTema } from '../../components/tema'
-import { cuandoQuemado, diasDeLaAgenda, marcaDeToque, pieDeAyer, rotuloDelDia, seQuemo, servidosAyer } from '../../lib/agenda'
+import {
+  cuandoQuemado,
+  diasDeLaAgenda,
+  dondeVaAhora,
+  horaDeAhora,
+  marcaDeToque,
+  mezclaDeRedes,
+  pieDeAyer,
+  resumenDelDia,
+  rotuloDelDia,
+  seQuemo,
+  servidoEnTodas,
+  servidosAyer,
+} from '../../lib/agenda'
 import { RechazoApi, SesionCaducada, apiPost } from '../../lib/api'
 import { detalleDelBorrador, rotuloBorradores } from '../../lib/borradores'
 import { anotarCambio } from '../../lib/cambios'
+import { hayQueFiltrar, opcionesDelFiltro, recortar, type Filtro } from '../../lib/filtro'
 import { calorDelDia, carneDe, coccionDe, selloPorEstado } from '../../lib/parrilla'
 import { SIN_SENAL, etiquetaCuenta, proximaHoraEnPunto } from '../../lib/publicar'
 import { clearToken } from '../../lib/session'
 import { SE_QUEMO } from '../../lib/tema'
 import { type BorradorResumido, type Calendario } from '../../lib/tipos'
+import { useAhora } from '../../lib/useAhora'
 import { useScreenData } from '../../lib/useScreenData'
 import { useToken } from '../../lib/useToken'
 
@@ -87,6 +103,10 @@ export default function LaParrilla() {
   const [reprogramando, setReprogramando] = useState<string | null>(null)
   // La lista de borradores se abre con un toque, como «⋯ Más» en Los Números.
   const [verBorradores, setVerBorradores] = useState(false)
+  // El filtro por red, como el del panel. Vive mientras la app está abierta: no se guarda.
+  const [filtro, setFiltro] = useState<Filtro | null>(null)
+  // La hora de la línea de «ahora», que se corre sola.
+  const ahora = useAhora()
 
   // Al volver a esta pestaña: si Publicar acaba de crear un post, o la caché ya es vieja,
   // refresca sola. Es lo que hace aparecer el post recién programado.
@@ -104,6 +124,10 @@ export default function LaParrilla() {
   const hoy = data.hoy ?? hoyEnElTelefono()
   const quemados = seQuemo(data.posts)
   const borradores = data.borradores ?? []
+  // Los botones del filtro cuentan lo de hoy en adelante, que es lo que muestra la agenda. Si la
+  // red elegida ya no tiene nada (se borró, o pasó), el filtro se suelta solo.
+  const opciones = opcionesDelFiltro(data.posts.filter((p) => p.cuando.slice(0, 10) >= hoy))
+  const filtroVigente = filtro && opciones.redes.some((r) => r.red === filtro.red) ? filtro : null
 
   /**
    * «Reprogramar» un destino quemado: se elige la hora nueva y el servidor aplica la regla
@@ -238,8 +262,20 @@ export default function LaParrilla() {
         </View>
       ) : null}
 
-      {diasDeLaAgenda(data.posts, hoy, borradores).map(({ dia, posts, borradores: delDia }) => {
+      {/* Después de «Se quemó», que no lo obedece: el filtro es de lo que viene. */}
+      {hayQueFiltrar(opciones.redes) ? (
+        <FiltroDeRedes todas={opciones.todas} redes={opciones.redes} filtro={filtroVigente} alElegir={setFiltro} />
+      ) : null}
+
+      {/* Con un filtro puesto, los borradores no van en sus días: la app no sabe a qué cuentas van. */}
+      {diasDeLaAgenda(recortar(data.posts, filtroVigente), hoy, filtroVigente ? [] : borradores).map(({ dia, posts, borradores: delDia }) => {
         const rotulo = rotuloDelDia(dia, hoy)
+        // Lo que ya salió en todas sus redes va hundido, en un renglón; lo demás, en su tarjeta.
+        const filas = posts.map((post) => (servidoEnTodas(post) ? <CorteServido key={post.id} post={post} /> : <CorteProgramado key={post.id} post={post} />))
+        // Hoy, la línea de «ahora» entre lo que ya tuvo su hora y lo que viene.
+        if (dia === hoy && posts.length > 0) {
+          filas.splice(dondeVaAhora(posts, ahora), 0, <LineaDeAhora key="ahora" hora={horaDeAhora(ahora, posts[0]!.cuando)} />)
+        }
         return (
           <View key={dia}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
@@ -264,6 +300,12 @@ export default function LaParrilla() {
                 <IconoPoner color={colores.texto} />
               </Pressable>
             </View>
+            {posts.length > 0 ? (
+              <>
+                <MezclaDelDia mezcla={mezclaDeRedes(posts)} />
+                <ResumenDelDia resumen={resumenDelDia(posts)} />
+              </>
+            ) : null}
             {posts.length === 0 && delDia.length === 0 ? (
               <Pressable onPress={() => prender(dia)} hitSlop={4} style={{ paddingVertical: 6 }}>
                 <Text style={{ color: colores.brasa, fontSize: 14 }}>No hay nada puesto. Préndela.</Text>
@@ -271,9 +313,7 @@ export default function LaParrilla() {
             ) : (
               // Los borradores no cuentan para el calor: todavía no van a salir.
               <Grilla calor={calorDelDia(posts.length)}>
-                {posts.map((post) => (
-                  <CorteProgramado key={post.id} post={post} />
-                ))}
+                {filas}
                 {delDia.map((b) => (
                   <BorradorEnElDia key={b.id} borrador={b} onAbrir={() => abrirBorrador(b.id)} />
                 ))}
