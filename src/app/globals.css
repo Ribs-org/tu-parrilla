@@ -747,8 +747,8 @@
   /*
    * Los motivos de la parrilla, de día. En vez de los fierros, la tabla de servir: líneas de
    * bambú en el color del borde, sin negro. El fuego del día, un lavado de salmón que sube, con
-   * el mismo umbral (`calorDelDia`); la carga, crema; el fierro de una cuenta irradia salmón; la
-   * miniatura lleva una banda de nori en vez del rayado. La forma de cada uno no cambia.
+   * el mismo umbral (`calorDelDia`); la carga, crema; el fierro de una cuenta es un cuchillo; la
+   * miniatura lleva una banda de nori en vez del rayado.
    */
   .acerado[data-tema='dia'] .grilla::before {
     background: repeating-linear-gradient(to bottom, rgb(120 100 70 / 0.1) 0 2px, transparent 2px 12px);
@@ -782,12 +782,31 @@
     border-color: rgb(184 61 11 / 0.35);
   }
 
+  /*
+   * De día el fierro es un cuchillo (Los Cuchillos, en `vocabulario.ts`): el mango a la
+   * izquierda y la hoja a la derecha, con el lomo recto y la punta arriba, recortados con
+   * `clip-path`. La hoja lleva la temperatura —salmón tostado viva, ámbar si se desafila, acero
+   * si perdió el filo— y, viva, el filo: una línea clara a lo largo del borde de abajo. Sin
+   * resplandor, porque `clip-path` lo recortaría; el color de la hoja dice lo mismo.
+   */
+  .acerado[data-tema='dia'] .fierro {
+    --hoja: var(--color-acero-600);
+    height: 6px;
+    border-radius: 0;
+    box-shadow: none;
+    clip-path: polygon(0 24%, 34% 24%, 34% 0, 100% 0, 100% 14%, 80% 100%, 34% 100%, 34% 76%, 0 76%);
+    background: linear-gradient(to right, var(--color-fg-muted) 0 34%, var(--hoja) 34%);
+  }
+
   .acerado[data-tema='dia'] .fierro-al-rojo {
-    box-shadow: 0 0 10px 1px rgb(184 61 11 / 0.35);
+    --hoja: var(--color-brasa);
+    background:
+      linear-gradient(to top, rgb(255 253 249 / 0.85) 0 1px, transparent 1px) right / 66% 100% no-repeat,
+      linear-gradient(to right, var(--color-fg-muted) 0 34%, var(--hoja) 34%);
   }
 
   .acerado[data-tema='dia'] .fierro-enfriandose {
-    box-shadow: 0 0 8px 1px rgb(148 96 0 / 0.25);
+    --hoja: var(--color-caution);
   }
 
   .acerado[data-tema='dia'] .corte-mini::after {
@@ -802,10 +821,10 @@
 
 /*
  * Lo que cambia con el modo y va dos veces en la página, para que el modo esconda uno: los dos
- * dibujos del corte (`corte.tsx`), la carne de noche y la pieza de sushi de día, y la única
- * palabra que cambia, «Se quemó» (`SE_QUEMO`, en `src/lib/vocabulario.ts`). Fuera de toda capa
- * a propósito: tienen que ganarle a las utilidades de tamaño y de `display` que trae el
- * `className` de cada uno.
+ * dibujos del corte (`corte.tsx`), la carne de noche y la pieza de sushi de día; los íconos de
+ * Tu IA y de Ajustes, y las palabras que cambian de día (`DeNocheYDeDia`, con las de
+ * `src/lib/vocabulario.ts`). Fuera de toda capa a propósito: tienen que ganarle a las utilidades
+ * de tamaño y de `display` que trae el `className` de cada uno.
  *
  * De día, lo de día vuelve al `display` que le dan sus utilidades (`revert-layer` deshace solo
  * esta regla, que no está en ninguna capa): el corte, `block`; una palabra en una frase, en

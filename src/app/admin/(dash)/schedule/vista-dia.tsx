@@ -1,12 +1,14 @@
 import Link from 'next/link'
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
 import { Corte } from '@/components/corte'
+import { DeNocheYDeDia } from '@/components/de-noche-y-de-dia'
 import { Icon } from '@/components/icon'
 import { networkLabel } from '@/lib/networks'
 import { NOMBRE_COCCION, NOMBRE_FORMATO, calorDelDia } from '@/lib/parrilla'
 import { hourLabel } from '@/lib/schedule-week'
 import { cn } from '@/lib/utils'
-import { CLASE_BORDE, CLASE_ESTADO, PonerAlgo, ROTULO_CALOR } from './calendar'
+import { FIERRO_FRIO } from '@/lib/vocabulario'
+import { CLASE_BORDE, CLASE_ESTADO, PonerAlgo, RotuloCalor } from './calendar'
 import { SIN_CUENTA, cortesDelDia, rotuloDelDia, type Columna, type CorteDelDia } from './dia'
 import { bordeDe, dibujoDe, estadoCorto } from './dibujo'
 import { etiquetaDestino, motivoDestino, nombreDestino } from './etiqueta'
@@ -70,7 +72,7 @@ export function VistaDia({
               calor === 'llena' ? 'text-brasa' : 'text-fg-muted',
             )}
           >
-            {ROTULO_CALOR[calor]}
+            <RotuloCalor calor={calor} />
           </span>
           {dia === hoy ? null : (
             <Link href={hoyHref} className="font-mono text-[0.68rem] text-fg-faint underline-offset-2 hover:text-fg hover:underline">
@@ -158,7 +160,7 @@ function ColumnaDeCuenta({
                 calor === 'llena' ? 'text-brasa' : 'text-fg-muted',
               )}
             >
-              {ROTULO_CALOR[calor]}
+              <RotuloCalor calor={calor} />
             </span>
           )}
           {nuevo ? (
@@ -260,7 +262,11 @@ function TarjetaDeDestino({
         </span>
         <span className="mt-1 line-clamp-3 block text-[0.75rem] leading-snug text-fg">{post.caption || '(sin texto)'}</span>
         <span className="mt-1 block text-[0.68rem] leading-snug text-fg">
-          {dibujo.sellos[0] === 'frio' ? 'Su fierro está frío: reconéctala' : etiquetaDestino(destino)}
+          {dibujo.sellos[0] === 'frio' ? (
+            <DeNocheYDeDia noche={FIERRO_FRIO.noche} dia={FIERRO_FRIO.dia} />
+          ) : (
+            etiquetaDestino(destino)
+          )}
           {motivo ? `: ${motivo}` : ''}
         </span>
         {otros.length > 0 ? (

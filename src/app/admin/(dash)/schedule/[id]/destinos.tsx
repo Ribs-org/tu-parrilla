@@ -1,8 +1,10 @@
 import Link from 'next/link'
 import { BOTON_CHICO, BOTON_CHICO_SECUNDARIO } from '@/components/boton'
 import { Corte } from '@/components/corte'
+import { DeNocheYDeDia } from '@/components/de-noche-y-de-dia'
 import type { TargetStatus } from '@/db/schema'
 import { cn } from '@/lib/utils'
+import { FIERRO_FRIO } from '@/lib/vocabulario'
 import { RECONECTAR_EN, arregloDe } from '../arreglo'
 import type { Dibujo } from '../dibujo'
 import { etiquetaDestino, motivoDestino, nombreDestino } from '../etiqueta'
@@ -59,7 +61,8 @@ export function DestinosDelPost({ dibujo, destinos }: { dibujo: Dibujo; destinos
                   <Redes targets={[d]} sellos={[sello]} />
                   <span className="text-sm text-fg">{nombreDestino(d)}</span>
                   <span className={cn('text-sm', CLASE_ESTADO[sello] ?? 'text-fg-muted')}>
-                    · {sello === 'frio' ? 'Su fierro está frío: reconéctala' : etiquetaDestino(d)}
+                    ·{' '}
+                    {sello === 'frio' ? <DeNocheYDeDia noche={FIERRO_FRIO.noche} dia={FIERRO_FRIO.dia} /> : etiquetaDestino(d)}
                   </span>
                 </div>
                 {motivo ? (

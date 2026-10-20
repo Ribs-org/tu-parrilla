@@ -48,6 +48,12 @@ describe('fraseConPendientes', () => {
       'Tiene 3 publicaciones programadas hacia esta cuenta: bórralas en La Parrilla, o espera a que salgan, antes de quitarla.',
     )
   })
+
+  it('de día manda a La Barra, como se llama la pantalla en ese modo', () => {
+    expect(fraseConPendientes(1, 'dia')).toBe(
+      'Tiene una publicación programada hacia esta cuenta: bórrala en La Barra, o espera a que salga, antes de quitarla.',
+    )
+  })
 })
 
 describe('quitarCuenta', () => {

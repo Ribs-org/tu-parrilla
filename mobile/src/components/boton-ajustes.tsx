@@ -1,23 +1,66 @@
 import { useCallback } from 'react'
 import { Pressable, View, type ColorValue } from 'react-native'
 import { useRouter } from 'expo-router'
-import { useColores } from './tema'
+import { useColores, useTema } from './tema'
 import { clearToken } from '../lib/session'
+import { fraseDelAviso, type Tema } from '../lib/tema'
 import type { Fierros } from '../lib/tipos'
 import { useScreenData } from '../lib/useScreenData'
 import { useToken } from '../lib/useToken'
 
 /**
- * El ícono de Ajustes, como el del panel (`src/components/icono-ajustes.tsx`): un trinche de
- * dos puntas y un cuchillo criollo, de pie y lado a lado. Dibujado con vistas, como los íconos
- * de la barra (`iconos.tsx`), con las medidas del SVG del panel pasadas de 24 a 22.
- *
+ * El ícono de Ajustes, como el del panel (`src/components/icono-ajustes.tsx`): de noche, un
+ * trinche de dos puntas y un cuchillo criollo, de pie y lado a lado; de día, dos palillos.
+ * Dibujado con vistas, como los íconos de la barra (`iconos.tsx`), con las medidas del SVG del
+ * panel pasadas de 24 a 22.
+ */
+export function IconoAjustes({ color, fondo, tema }: { color: ColorValue; fondo: ColorValue; tema: Tema }) {
+  return tema === 'dia' ? <Palillos color={color} /> : <TrincheYCuchillo color={color} fondo={fondo} />
+}
+
+/**
+ * Los palillos, como los del panel: dos, en diagonal, que se juntan hacia las puntas, con la
+ * franja que separa la cabeza. Cada uno son dos vistas giradas sobre su centro, la cabeza y el
+ * resto, en la misma recta. Sin el adelgazamiento del SVG, que con vistas no se puede: la punta
+ * redonda hace de punta.
+ */
+function Palillos({ color }: { color: ColorValue }) {
+  // Centro, ancho, largo, giro y redondeo de abajo de cada pieza, medidos sobre el SVG del panel.
+  const piezas: readonly [number, number, number, number, number, number][] = [
+    [13.09, 3.135, 3.0, 4.23, 29, 0],
+    [7.726, 12.81, 1.9, 15.98, 29, 0.95],
+    [18.168, 5.849, 3.0, 4.13, 37.79, 0],
+    [11.558, 14.374, 1.9, 15.59, 37.79, 0.95],
+  ]
+  return (
+    <View style={{ width: 22, height: 22 }}>
+      {piezas.map(([x, y, ancho, largo, giro, redondeo], i) => (
+        <View
+          key={i}
+          style={{
+            position: 'absolute',
+            left: x - ancho / 2,
+            top: y - largo / 2,
+            width: ancho,
+            height: largo,
+            backgroundColor: color,
+            borderBottomLeftRadius: redondeo,
+            borderBottomRightRadius: redondeo,
+            transform: [{ rotate: `${giro}deg` }],
+          }}
+        />
+      ))}
+    </View>
+  )
+}
+
+/**
  * Cruzados en X se leían como herramientas —una llave y un destornillador— y no como cuchillo.
  * De pie, la hoja es un rectángulo con la esquina de arriba a la derecha muy redondeada: el lomo
  * queda recto, la punta arriba y el filo con panza, y es bastante más ancha que el mango, que
  * lleva dos remaches del color del fondo.
  */
-export function IconoAjustes({ color, fondo }: { color: ColorValue; fondo: ColorValue }) {
+function TrincheYCuchillo({ color, fondo }: { color: ColorValue; fondo: ColorValue }) {
   const pieza = { position: 'absolute' as const, backgroundColor: color }
   return (
     <View style={{ width: 22, height: 22 }}>
@@ -71,6 +114,7 @@ export function useFierros() {
  */
 export function BotonAjustes() {
   const colores = useColores()
+  const { tema } = useTema()
   const router = useRouter()
   const { data } = useFierros()
   const aviso = data?.aviso ?? null
@@ -78,7 +122,8 @@ export function BotonAjustes() {
     <Pressable
       onPress={() => router.push('/ajustes')}
       accessibilityRole="button"
-      accessibilityLabel={aviso ? `Ajustes: ${aviso.frase}` : 'Ajustes'}
+      // La frase se arma acá, en el modo que se ve: la que manda el servidor (`aviso.frase`) es la de noche.
+      accessibilityLabel={aviso ? `Ajustes: ${fraseDelAviso(aviso, tema)}` : 'Ajustes'}
       hitSlop={8}
       style={({ pressed }) => ({
         marginRight: 16,
@@ -93,7 +138,7 @@ export function BotonAjustes() {
         opacity: pressed ? 0.7 : 1,
       })}
     >
-      <IconoAjustes color={colores.texto} fondo={colores.tarjeta} />
+      <IconoAjustes color={colores.texto} fondo={colores.tarjeta} tema={tema} />
       {aviso ? (
         <View
           style={{

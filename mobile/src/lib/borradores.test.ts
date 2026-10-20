@@ -1,6 +1,14 @@
 import { describe, expect, it } from 'vitest'
 
-import { cuentasDelBorrador, cuerpoDelBorrador, detalleDelBorrador, tieneContenido, type Formulario } from './borradores'
+import {
+  FRASE_BORRADOR,
+  cuentasDelBorrador,
+  cuerpoDelBorrador,
+  detalleDelBorrador,
+  fraseDelBorrador,
+  tieneContenido,
+  type Formulario,
+} from './borradores'
 import { archivoDelBorrador, archivoElegido } from './publicar'
 import type { CuentaApp } from './tipos'
 
@@ -76,5 +84,15 @@ describe('detalleDelBorrador', () => {
     expect(detalleDelBorrador({ id: 'b', texto: '', cuando: null, guardado: '2026-10-13T14:05:00-03:00', archivos: 0 })).toBe(
       'sin fecha · guardado el mar 13 de oct a las 14:05',
     )
+  })
+})
+
+describe('fraseDelBorrador', () => {
+  it('de día, el borrador perdido manda a mirar La Barra; las demás frases no cambian', () => {
+    expect(fraseDelBorrador('perdido', 'noche')).toBe(FRASE_BORRADOR.perdido)
+    expect(fraseDelBorrador('perdido', 'dia')).toBe(
+      'Este borrador ya no existe: se programó o se descartó. Mira cómo quedó en La Barra.',
+    )
+    expect(fraseDelBorrador('guardado', 'dia')).toBe(FRASE_BORRADOR.guardado)
   })
 })

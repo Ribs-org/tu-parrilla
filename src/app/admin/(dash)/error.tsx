@@ -3,8 +3,8 @@
 import { useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { NombreDe } from '@/components/de-noche-y-de-dia'
 import { Button } from '@/components/ui'
-import { nombreDe } from '@/lib/vocabulario'
 
 /**
  * La red del panel entero: cualquier excepción de una página de `(dash)` cae acá en vez
@@ -42,7 +42,7 @@ export default function PanelError({
         </Button>
         {enLaEntrada ? null : (
           <Link href="/admin/schedule" className="text-sm text-fg-muted transition-colors hover:text-fg">
-            Ir a {nombreDe('/admin/schedule')}
+            Ir a <NombreDe ruta="/admin/schedule" />
           </Link>
         )}
       </div>

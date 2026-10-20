@@ -9,23 +9,42 @@ import { useColores, useTema } from '../components/tema'
 import { useFierros } from '../components/boton-ajustes'
 import { API_BASE } from '../lib/config'
 import { clearToken } from '../lib/session'
-import { otroTema } from '../lib/tema'
+import { LOS_FIERROS, otroTema, type Tema } from '../lib/tema'
 import { NOMBRE_RED, type Fierros } from '../lib/tipos'
 
+/**
+ * Lo que dice la tarjeta de una cuenta según su fierro. De día el fierro es un cuchillo, como en
+ * el panel: se desafila en vez de enfriarse, y queda sin filo en vez de apagarse.
+ */
+const DICE_EL_FIERRO: Record<Tema, Record<'frio' | 'enfriandose' | 'al-rojo', string>> = {
+  noche: {
+    frio: 'Se apagó: así no publica. Reconéctala en el panel.',
+    enfriandose: 'Se está enfriando: su permiso vence esta semana. Reconéctala en el panel.',
+    'al-rojo': 'Al rojo: conectada.',
+  },
+  dia: {
+    frio: 'Sin filo: así no publica. Reconéctala en el panel.',
+    enfriandose: 'Se está desafilando: su permiso vence esta semana. Reconéctala en el panel.',
+    'al-rojo': 'Con filo: conectada.',
+  },
+}
+
 /** El fierro en palabras y en color, como la barra de cada tarjeta de Los Fierros. */
-function fierroDe(cuenta: Fierros['cuentas'][number], colores: Colores): { color: string; barra: string; texto: string } {
+function fierroDe(
+  cuenta: Fierros['cuentas'][number],
+  colores: Colores,
+  tema: Tema,
+): { color: string; barra: string; texto: string } {
   if (!cuenta.conectada) return { color: colores.tenue, barra: colores.acero, texto: 'Desconectada.' }
-  if (cuenta.fierro === 'frio') {
-    return { color: colores.rojo, barra: colores.acero, texto: 'Se apagó: así no publica. Reconéctala en el panel.' }
-  }
+  if (cuenta.fierro === 'frio') return { color: colores.rojo, barra: colores.acero, texto: DICE_EL_FIERRO[tema].frio }
   if (cuenta.fierro === 'enfriandose') {
-    return { color: colores.ambar, barra: colores.ambar, texto: 'Se está enfriando: su permiso vence esta semana. Reconéctala en el panel.' }
+    return { color: colores.ambar, barra: colores.ambar, texto: DICE_EL_FIERRO[tema].enfriandose }
   }
-  return { color: colores.suave, barra: colores.brasa, texto: 'Al rojo: conectada.' }
+  return { color: colores.suave, barra: colores.brasa, texto: DICE_EL_FIERRO[tema]['al-rojo'] }
 }
 
 /**
- * Ajustes, detrás del botón de la cabecera de cada pestaña (un trinche y un cuchillo, lado a lado): Los Fierros, tus cuentas con su temperatura
+ * Ajustes, detrás del botón de la cabecera de cada pestaña (un trinche y un cuchillo, lado a lado; de día, dos palillos): Los Fierros, tus cuentas con su temperatura
  * —las mismas tarjetas de Los Fierros, para leer; conectar y reconectar se hace en el panel,
  * que abre en el navegador— y «Cerrar sesión», que la app no tenía: hasta acá, la única forma
  * de salir era borrar la app.
@@ -64,9 +83,9 @@ export default function Ajustes() {
 
   return (
     <Pantalla refrescando={cargando} onRefrescar={refrescar}>
-      {/* «Los Fierros» y no «Tus cuentas»: así se llama en el panel, y «Tus cuentas» ya es
-          otra cosa en Los Números (los seguidores de cada red). */}
-      <Etiqueta>Los Fierros</Etiqueta>
+      {/* «Los Fierros» y no «Tus cuentas»: así se llama en el panel —de día, Los Cuchillos—, y
+          «Tus cuentas» ya es otra cosa en Los Números (los seguidores de cada red). */}
+      <Etiqueta>{LOS_FIERROS[tema]}</Etiqueta>
       <Sello texto={sello} />
       {!data ? (
         <Text style={{ color: colores.suave, fontSize: 13 }}>
@@ -76,7 +95,7 @@ export default function Ajustes() {
         <Text style={{ color: colores.suave, fontSize: 13 }}>Todavía no conectas ninguna cuenta.</Text>
       ) : (
         data.cuentas.map((cuenta) => {
-          const f = fierroDe(cuenta, colores)
+          const f = fierroDe(cuenta, colores, tema)
           return (
             <Tarjeta key={cuenta.id}>
               <Text style={{ color: colores.texto, fontSize: 14, fontWeight: '600' }}>
@@ -93,7 +112,10 @@ export default function Ajustes() {
         Tus redes conectadas. Se conectan y se reconectan en el panel web.
       </Text>
       <View style={{ flexDirection: 'row' }}>
-        <Boton texto="Abrir Los Fierros en el panel" onPress={() => void Linking.openURL(`${API_BASE}/admin/accounts`)} />
+        <Boton
+          texto={`Abrir ${LOS_FIERROS[tema]} en el panel`}
+          onPress={() => void Linking.openURL(`${API_BASE}/admin/accounts`)}
+        />
       </View>
 
       {/* El modo, como el botón de la barra del panel: dice adónde lleva, no el que está puesto.

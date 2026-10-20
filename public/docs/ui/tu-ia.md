@@ -115,7 +115,8 @@ publicar en el acto, conectar tus redes ni cambiar tu página. Eso lo haces tú,
 Bajo una raya, el título «¿Quieres saber más de Tu Parrilla?», el párrafo «Cada pantalla del
 panel, botón por botón, con lo que dice cada mensaje y qué hacer con él. Lo escribimos para que
 tu IA te guíe sin ver tu pantalla, y por eso es así de detallado: sirve igual para leerlo tú.» y
-el enlace «El manual del parrillero →».
+el enlace «El manual del parrillero →». De día, el enlace dice «El manual del maestro de sushi →»
+y el manual lleva ese título.
 
 ### El manual del parrillero
 

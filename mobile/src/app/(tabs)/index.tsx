@@ -284,7 +284,7 @@ export default function LaParrilla() {
       })}
 
       <Text style={{ color: colores.suave, fontSize: 12, textAlign: 'center', marginTop: 8 }}>
-        {pieDeAyer(servidosAyer(data.posts, hoy))}
+        {pieDeAyer(servidosAyer(data.posts, hoy), tema)}
       </Text>
       {selector}
     </Pantalla>

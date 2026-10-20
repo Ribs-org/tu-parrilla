@@ -1261,6 +1261,8 @@ API: ver `GET /api/metrics/posts` en [la guía de la API](../api-editor.md).
 
 ## Mensajes que puede ver
 
+De día, donde una de estas frases dice «La Parrilla» dice «La Barra», y «Los Fierros» son «Los Cuchillos» (ver «El modo día», en [index.md](index.md)).
+
 | Lo que dice la pantalla | Qué significa | Qué hacer |
 |---|---|---|
 | «La primera fecha tiene que ir antes que la segunda.» (en el selector de fechas) | «Desde» es posterior a «Hasta». | Cambiar una de las dos. |

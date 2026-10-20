@@ -1,4 +1,5 @@
 import { opcionesParaGuardar, subidos, type Archivo, type MediaSubida, type OpcionesApp } from './publicar'
+import { LA_PARRILLA, type Tema } from './tema'
 import type { BorradorResumido, CuentaApp } from './tipos'
 
 // Los borradores en el teléfono, sin pantalla. Son los mismos del compositor del panel: lo
@@ -21,6 +22,11 @@ export const FRASE_BORRADOR: Record<EstadoBorrador, string> = {
   error: 'No se pudo guardar el borrador.',
   // Sin decir dónde: también es lo que queda si este mismo envío salió y se perdió la respuesta.
   perdido: 'Este borrador ya no existe: se programó o se descartó. Mira cómo quedó en La Parrilla.',
+}
+
+/** La frase del borrador en el modo que se ve: la de «perdido» nombra La Parrilla, que de día es La Barra. */
+export function fraseDelBorrador(estado: EstadoBorrador, tema: Tema): string {
+  return FRASE_BORRADOR[estado].replace(LA_PARRILLA.noche, LA_PARRILLA[tema])
 }
 
 export const YA_NO_EXISTE = 'Ese borrador ya no existe: se programó o se descartó.'

@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef, useState, useTransition } from 'react'
 import { AlertTriangle, Check, ChevronDown, Copy, RefreshCw } from 'lucide-react'
 import { disconnectAccount, fusionarCuenta, quitarCuentaAccion, syncSocialNow } from '@/app/admin/actions'
+import { DeNocheYDeDia, NombreDe } from '@/components/de-noche-y-de-dia'
 import { Icon } from '@/components/icon'
 import { Button } from '@/components/ui'
 import { PINTURA } from '@/components/charts/theme'
@@ -12,6 +13,7 @@ import { CONEXION_FALLO } from '@/lib/avisos/reglas'
 import { PROXIMAMENTE, REDES_PROXIMAMENTE, avisosDe, networkLabel } from '@/lib/networks'
 import { estadoDelFierro, type Fierro } from '@/lib/parrilla'
 import { cn } from '@/lib/utils'
+import { seEstaEnfriando } from '@/lib/vocabulario'
 
 const RELATIVE = new Intl.RelativeTimeFormat('es', { numeric: 'auto' })
 
@@ -290,7 +292,10 @@ function Fila({ row, network, vivas }: { row: CuentaRow; network: string; vivas:
     </span>
   ) : fierro === 'enfriandose' && row.expiresAt ? (
     <span className="text-caution">
-      Este fierro se está enfriando: la conexión vence {venceEn(row.expiresAt)}. Reconéctala antes de que se apague.
+      <DeNocheYDeDia
+        noche={seEstaEnfriando(venceEn(row.expiresAt), 'noche')}
+        dia={seEstaEnfriando(venceEn(row.expiresAt), 'dia')}
+      />
     </span>
   ) : (
     <span className="font-mono text-fg-faint">
@@ -479,8 +484,8 @@ function Quitar({ id, nombre, red }: { id: string; nombre: string; red: string }
             ¿Quitar «{nombre}» de Tu Parrilla?
           </p>
           <p className="text-sm text-fg-muted">
-            Se borran la cuenta, sus publicaciones y números ya bajados, sus comentarios y su historial en La
-            Parrilla. No se puede deshacer. En {red} no se borra nada.
+            Se borran la cuenta, sus publicaciones y números ya bajados, sus comentarios y su historial en{' '}
+            <NombreDe ruta="/admin/schedule" />. No se puede deshacer. En {red} no se borra nada.
           </p>
           <p className="text-sm text-fg-muted">
             La cuenta queda libre: tú u otro usuario de Tu Parrilla la pueden volver a conectar, desde cero.

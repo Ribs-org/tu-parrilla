@@ -9,6 +9,7 @@ import {
   guardarBorradorAccion,
   type FormState,
 } from '@/app/admin/actions'
+import { DeNocheYDeDia, NombreDe } from '@/components/de-noche-y-de-dia'
 import { Icon } from '@/components/icon'
 import { Button, Field, GroupLabel, Input, Textarea } from '@/components/ui'
 import {
@@ -26,7 +27,9 @@ import { REDES_PROXIMAMENTE, networkLabel } from '@/lib/networks'
 import { calorDelDia, estadoDelFierro, type Calor, type Fierro, type Sello } from '@/lib/parrilla'
 import { addDays, dayKey, dayLabelConMes, mondayOfKey } from '@/lib/schedule-week'
 import { subirUno, type MediaSubida } from '@/lib/subida-directa'
+import type { Tema } from '@/lib/tema'
 import { cn, toZonedInput } from '@/lib/utils'
+import { SE_ENFRIA, cortes as cortesEnPalabras } from '@/lib/vocabulario'
 import { TablaDeArchivos } from './archivos'
 import { InstagramOpciones } from './instagram-opciones'
 import { PanelLateral } from './panel-lateral'
@@ -86,15 +89,19 @@ function CargaDelDia({ carga, cuando }: { carga: Record<string, number>; cuando:
 
   const cortes = carga[dia] ?? 0
   const calor = calorDelDia(cortes)
+  const consejo = (tema: Tema) =>
+    calor === 'apagada'
+      ? `Ese día está ${tema === 'dia' ? 'vacío' : 'apagado'}. Buen lugar para este.`
+      : calor === 'llena'
+        ? `Ese día ya va lleno, con ${cortes}. Mira si te sirve uno más flojo.`
+        : `Ese día ya tiene ${cortesEnPalabras(cortes, tema)}.`
 
   return (
     <p className="mt-1.5 flex items-center gap-2 text-[0.72rem] text-fg-muted">
       <span className={cn('grilla h-3 w-6 shrink-0', CLASE_CALOR[calor])} aria-hidden />
-      {calor === 'apagada'
-        ? 'Ese día está apagado. Buen lugar para este.'
-        : calor === 'llena'
-          ? `Ese día ya va lleno, con ${cortes}. Mira si te sirve uno más flojo.`
-          : `Ese día ya tiene ${cortes === 1 ? 'un corte' : `${cortes} cortes`}.`}
+      <span>
+        <DeNocheYDeDia noche={consejo('noche')} dia={consejo('dia')} />
+      </span>
     </p>
   )
 }
@@ -112,10 +119,10 @@ const CLASE_FIERRO: Record<Fierro, string> = {
   frio: 'fierro-frio',
 }
 
-const PALABRA_CALOR: Record<Calor, string> = {
-  apagada: 'apagada',
-  prendida: 'prendida',
-  llena: 'llena',
+/** El calor de cada día de la semana en chico, para el lector de pantalla. */
+const PALABRA_CALOR: Record<Tema, Record<Calor, string>> = {
+  noche: { apagada: 'apagada', prendida: 'prendida', llena: 'llena' },
+  dia: { apagada: 'vacía', prendida: 'con piezas', llena: 'llena' },
 }
 
 /** Los días que muestra la semana en chico, desde hoy. */
@@ -686,7 +693,9 @@ export function Composer({
                       {!cuenta.connected ? (
                         <span className="text-xs text-fg-faint">reconéctala</span>
                       ) : fierro === 'enfriandose' ? (
-                        <span className="text-xs text-caution">se enfría</span>
+                        <span className="text-xs text-caution">
+                          <DeNocheYDeDia noche={SE_ENFRIA.noche} dia={SE_ENFRIA.dia} />
+                        </span>
                       ) : null}
                     </label>
                   )
@@ -703,7 +712,7 @@ export function Composer({
                 {dayLabelConMes(vence.slice(0, 10))} a las {vence.slice(11, 16)}, antes de que salga esto: así no va a
                 salir ahí.{' '}
                 <Link className="underline" href="/admin/accounts">
-                  Reconéctala en Los Fierros
+                  Reconéctala en <NombreDe ruta="/admin/accounts" />
                 </Link>{' '}
                 antes, o elige un día anterior.
               </p>
@@ -777,8 +786,10 @@ export function Composer({
                       <span className="font-mono text-[0.78rem] text-fg">{numero}</span>
                       <span className={cn('grilla h-2.5 w-full', CLASE_CALOR[calor])} aria-hidden />
                       <span className="sr-only">
-                        {dayLabelConMes(dia)}: {PALABRA_CALOR[calor]}
-                        {cortes > 0 ? `, ${cortes === 1 ? 'un corte' : `${cortes} cortes`}` : ''}
+                        <DeNocheYDeDia
+                          noche={`${dayLabelConMes(dia)}: ${PALABRA_CALOR.noche[calor]}${cortes > 0 ? `, ${cortesEnPalabras(cortes, 'noche')}` : ''}`}
+                          dia={`${dayLabelConMes(dia)}: ${PALABRA_CALOR.dia[calor]}${cortes > 0 ? `, ${cortesEnPalabras(cortes, 'dia')}` : ''}`}
+                        />
                       </span>
                     </button>
                   )

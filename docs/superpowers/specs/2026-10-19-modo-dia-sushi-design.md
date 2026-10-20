@@ -39,28 +39,49 @@ varias.
    regla: dice lo mismo que su pescado, a punto o no, con otra señal, que además se lee sin
    color.
 
-2. **Las palabras no cambian, salvo una.** Siguen iguales:
-   - los nombres de las pantallas, los botones, los estados («Programada», «Saliendo ahora»,
-     «Falló») y la marca, «Tu Parrilla»;
-   - las frases de error.
+2. **Cambian las palabras que con sushi no tienen sentido; lo demás, no.** La primera vuelta
+   no cambiaba ninguna salvo «Se quemó» (ver abajo). El dueño la usó de día el 2026-10-20 y
+   pidió más: «los fierros no tiene tanto sentido con sushi», y el trinche y el cuchillo de
+   Ajustes «podrían ser palillos». Ahora, de día:
+   - **Dos pantallas se llaman distinto:** La Parrilla es **La Barra** —la barra de sushi, donde
+     se ponen las piezas— y Los Fierros son **Los Cuchillos** —lo que el maestro de sushi
+     mantiene afilado, como el parrillero sus fierros—. Las demás sirven igual con sushi: la
+     mesa, la vitrina (la de la barra, con el pescado a la vista), los maestros, Tu IA y Tu
+     Cuenta.
+   - **Lo que se dice del asado:** el fierro de una cuenta se desafila en vez de enfriarse y
+     queda sin filo en vez de apagarse; un corte es una pieza; el calor de un día es la tabla
+     vacía, con piezas o llena; el manual del parrillero es el del maestro de sushi.
+   - **Siguen iguales:** las direcciones, los botones, los estados («Programada», «Saliendo
+     ahora», «Falló»), la marca «Tu Parrilla» —el nombre del producto y del dominio, el que
+     verificó Google— y las frases de error. Estas son las de la API, algunas se guardan con el
+     destino, y la wiki las cita al pie de la letra: si una dice «Los Fierros», de día es Los
+     Cuchillos.
 
-   Tres razones:
-   - **La wiki de la UI y los agentes guían con los textos literales.** Un modo que cambiara
-     «La Parrilla» por «La Barra» dejaría a la wiki mandando a la persona a un botón que no ve.
-   - **Las guías de la API nombran las pantallas.**
-   - **«Tu Parrilla» es el nombre del producto y del dominio,** el que verificó Google.
+   Todas salen de `src/lib/vocabulario.ts`, y la lista entera es `PALABRAS_DE_DIA`. Las tres
+   razones que la primera vuelta tenía para no cambiar ninguna se resuelven así:
+   - **La wiki y los agentes guían con los textos literales:** «El modo día», en la wiki, da cada
+     palabra con la de noche, y `docs-ui.test.ts` exige que estén todas. La wiki sigue contando
+     la noche, y cada página afectada dice arriba cómo se llama de día.
+   - **Las guías de la API nombran las pantallas:** lo siguen haciendo con el nombre de noche,
+     y le dicen al agente que de día son otros (y dónde verlos).
+   - **«Tu Parrilla» no cambia:** es la marca.
 
-   **La excepción es «Se quemó»**, la sección de La Parrilla con lo que falló: de día dice «Se
-   echó a perder» (`SE_QUEMO`, en `src/lib/vocabulario.ts`). La primera vuelta la dejó igual y
-   le dio el soplete para que fuera verdad: un nigiri se sella, queda a punto y se quema con el
-   soplete del aburi. El dueño la vio el 2026-10-19 y pidió otra cosa, porque quemar pescado no
-   tiene mucho sentido: lo que no se sirvió se echa a perder. Ahora el soplete solo cocina —sella
-   y deja a punto— y lo que falló es pescado pasado (ver «La cocción»).
-   - **La wiki** lo cuenta en «El modo día», para que un agente que oye una palabra sepa que es
-     la otra.
-   - **El correo del resumen** nombra la sección como la ve la cuenta.
+   **La primera excepción fue «Se quemó»**, la sección de La Parrilla con lo que falló: de día
+   dice «Se echó a perder» (`SE_QUEMO`). La primera vuelta la dejó igual y le dio el soplete
+   para que fuera verdad: un nigiri se sella, queda a punto y se quema con el soplete del
+   aburi. El dueño la vio el 2026-10-19 y pidió otra cosa, porque quemar pescado no tiene mucho
+   sentido: lo que no se sirvió se echa a perder. Ahora el soplete solo cocina —sella y deja a
+   punto— y lo que falló es pescado pasado (ver «La cocción»).
+   - **El correo del resumen** nombra la sección, y las pantallas, como las ve la cuenta.
    - **Lo demás de lo que falló sigue neutro:** el estado dice «Falló» o «Falló en parte» en los
      dos modos.
+
+   **Cómo cambian sin recargar:** como los dibujos, cada palabra va en la página en sus dos
+   versiones y el modo esconde una (`DeNocheYDeDia` y `NombreDe`, en
+   `src/components/de-noche-y-de-dia.tsx`). Lo que el CSS no alcanza —un `aria-label`, un
+   `title`, la pregunta de un `confirm`— lo lee del modo que se ve `useTema`
+   (`src/components/tema-vivo.ts`). `vocabulario.test.ts` revisa que ningún texto del panel ni
+   de la portada escriba a mano «La Parrilla» o «Los Fierros».
 
 3. **La noche por defecto, y el modo se elige.** No se adivina por el modo del sistema
    (`prefers-color-scheme`), porque el dueño pidió que la noche fuera la de entrada. Quien
@@ -231,7 +252,8 @@ dónde vive.
 | Saliendo | `.voluta` | el humo, tres volutas | la llama del soplete (`.llama`) |
 | Lo que falló | `.late` | el halo late tres veces | igual, y la banda que falló late con él |
 | Recién programado | `.recien` | el corte cae y se enciende una vez | igual, con el acento del día |
-| El fierro de una cuenta | `.fierro-al-rojo`, `-enfriandose`, `-frio` | una barra que irradia brasa, ámbar o nada | la misma barra: irradia salmón tostado, ámbar o nada. El nombre «Los Fierros» no cambia (regla 2) |
+| El fierro de una cuenta | `.fierro-al-rojo`, `-enfriandose`, `-frio` | una barra que irradia brasa, ámbar o nada | un cuchillo chico: el mango oscuro y la hoja, recortados con `clip-path`, en salmón tostado con su filo claro, en ámbar o en acero. Sin resplandor: el recorte lo cortaría. La pantalla se llama Los Cuchillos (regla 2). Hasta el 2026-10-20 era la misma barra, en salmón |
+| El botón de Ajustes | `icono-ajustes.tsx` | un trinche y un cuchillo criollo, de pie | dos palillos en diagonal, que se juntan hacia las puntas, con la franja de la cabeza: sin ella, a 16 px eran «//». Desde el 2026-10-20 |
 | La miniatura con forma de corte | `.corte-mini` | las esquinas dispares y el rayado del fierro | las mismas esquinas, sin el rayado: una banda de nori en el borde izquierdo |
 | El calor de las barras de views | `.corrio-se-paso`, `-bien`, `-normal` | la brasa a 38 % y a 18 % | el salmón tostado, con las mismas proporciones |
 | La marca | la portada (`landing.tsx`, `MarcaDeTuParrilla` en `corte.tsx`) y el ícono de la app | el bife a punto | el nigiri a punto, en la portada (ver «Decisiones»). El ícono de la app no cambia |
@@ -277,8 +299,9 @@ lo guardó solo en el equipo, con una cookie.
     banda de nori es la marca.
 
   Así, un agente que oye «mi sushi tiene una banderita roja» sabe que se echó a perder —«Se
-  quemó», de noche— y manda a la misma sección. Las páginas que nombran un dibujo enlazan a esa sección. El test de la wiki
-  (`docs-ui.test.ts`) puede exigir que exista.
+  quemó», de noche— y manda a la misma sección. Las páginas que nombran un dibujo enlazan a esa sección. Desde el
+  2026-10-20 la sección da además cada palabra de día con la de noche, y el test de la wiki
+  (`docs-ui.test.ts`) exige que estén todas las de `PALABRAS_DE_DIA`.
 - **README:** una línea en lo del panel. En el árbol, `pieza-sushi.tsx` y el módulo del modo.
 - **`docs/pendientes.md`:** cada tanda saca lo suyo.
 
@@ -336,6 +359,18 @@ panel de día con sus piezas de sushi.
 - **Lo que exige Google:** la portada sigue diciendo qué hace la app y enlazando Privacidad y
   Términos. Lo cuida `landing.test.ts`.
 
+**Tanda 5, las palabras y los íconos de día.** Hecha el 2026-10-20, a pedido del dueño (regla
+2).
+- **El panel y la portada:** La Barra y Los Cuchillos en la barra, en Ajustes y en cada título;
+  lo que se dice del fierro, de los cortes y del calor de cada día; el manual del maestro de
+  sushi; los palillos de Ajustes y el cuchillo de cada cuenta.
+- **Los correos:** el de la caída y el resumen nombran las pantallas como las ve la cuenta, y el
+  resumen dice «Tu barra hoy» y «cuentas con poco en la barra».
+- **La app del teléfono:** lo mismo en sus pantallas —la pestaña, Ajustes, el calor de cada
+  día, el pie de ayer, el borrador perdido— y los palillos de su botón de Ajustes, dibujados con
+  vistas. Las palabras van copiadas en `mobile/src/lib/tema.ts`, y `vocabulario.test.ts` las
+  compara con las del panel. Viaja por aire.
+
 ## Riesgos
 
 - **Recharts y las variables CSS en Safari y Firefox.** En Chrome, los atributos de un SVG
@@ -360,7 +395,8 @@ panel de día con sus piezas de sushi.
 ## Lo que queda como está
 
 - **La noche entera,** que es la de entrada.
-- **Las palabras, salvo «Se quemó» (regla 2); la marca y el ícono de la app.**
+- **Las palabras que sirven igual con sushi, los botones, los estados y las frases de error
+  (regla 2); la marca y el ícono de la app.**
 - **Lo de afuera del panel:** la página pública de cada creador, la API y los correos, salvo
   donde nombran «Se quemó».
 - **Las reglas del producto** de `src/lib/parrilla.ts`: qué es cada post, su cocción y el sello
@@ -383,8 +419,11 @@ La primera, la segunda y la cuarta las tomó el dueño el 2026-10-19.
    - **Recomendación:** no. Pediste la noche por defecto, y el que llega de día con el
      teléfono en modo claro vería otro producto sin haberlo elegido.
 4. **Las palabras.**
-   - **Decidido:** no cambian, salvo «Se quemó», que de día dice «Se echó a perder»: quemar
-     pescado no tiene mucho sentido (regla 2). La primera vuelta recomendaba no cambiar
+   - **Decidido el 2026-10-19:** no cambian, salvo «Se quemó», que de día dice «Se echó a
+     perder»: quemar pescado no tiene mucho sentido. La primera vuelta recomendaba no cambiar
      ninguna.
-   - **Si marketing quiere una voz de día:** que sea en la portada y en lo que se comparte, que
-     no son pantallas que guíe la wiki.
+   - **Decidido el 2026-10-20:** cambian también las que con sushi no tienen sentido —Los
+     Fierros, La Parrilla, el fierro que se enfría, el corte—, y el trinche y el cuchillo de
+     Ajustes son palillos (regla 2, tanda 5). Los nombres los eligió la implementación: La
+     Barra, Los Cuchillos, «se desafila», «sin filo», «pieza». Cambiarlos es tocar
+     `src/lib/vocabulario.ts`, la wiki y, en el teléfono, `mobile/src/lib/tema.ts`.

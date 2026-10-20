@@ -89,6 +89,12 @@ describe('servidosAyer y pieDeAyer', () => {
     expect(pieDeAyer(1)).toBe('Ayer: 1 corte servido')
     expect(pieDeAyer(4)).toBe('Ayer: 4 cortes servidos')
   })
+
+  it('de día, piezas servidas', () => {
+    expect(pieDeAyer(0, 'dia')).toBe('Ayer no salió nada.')
+    expect(pieDeAyer(1, 'dia')).toBe('Ayer: 1 pieza servida')
+    expect(pieDeAyer(4, 'dia')).toBe('Ayer: 4 piezas servidas')
+  })
 })
 
 describe('cuandoQuemado', () => {

@@ -4,12 +4,12 @@
 
 Los Fierros (en llano: las cuentas conectadas) es donde se conectan a Tu Parrilla las cuentas de Instagram, TikTok, YouTube y Facebook, donde se renuevan cuando su permiso vence y donde se desconectan. Threads y X / Twitter también están en la lista, pero dicen «Próximamente»: todavía no se pueden conectar. Cada cuenta es una fila con su «fierro», una barra corta de color que dice si la conexión está viva; lo que se usa poco se abre con la flecha de la fila. Sin una cuenta conectada aquí, el panel no puede publicar en esa red. Las cuatro redes que se conectan sirven para publicar y traen los números de sus posts; los comentarios (en [La Mesa](la-mesa.md)) llegan de Instagram, Facebook y YouTube.
 
-En el modo día el fierro es la misma barra, con el salmón tostado del día en vez del naranjo: ver «El modo día», en [index.md](index.md).
+**De día** esta pantalla se llama «Los Cuchillos», en el menú de Ajustes y en su título, y el fierro de cada cuenta es un cuchillo chico: el mango oscuro y la hoja en salmón tostado (con filo, viva), en ámbar (se desafila: vence en la semana) o gris (sin filo: hay que reconectar). La línea de una cuenta que vence dice «Este cuchillo se está desafilando: la conexión vence <fecha>. Reconéctala antes de que pierda el filo.», el aviso de Ajustes dice «1 se desafila» o «1 sin filo», y el botón Ajustes lleva dos palillos en vez del trinche y el cuchillo. Lo demás, igual: ver «El modo día», en [index.md](index.md).
 
 ## Cómo se llega
 
-1. En la barra de arriba del panel, abre el botón «Ajustes», a la derecha. En un teléfono se ve solo el ícono, un trinche y un cuchillo, lado a lado, sin la palabra.
-2. En el menú que se despliega, elige «Los Fierros» (debajo dice «tus redes conectadas»).
+1. En la barra de arriba del panel, abre el botón «Ajustes», a la derecha. En un teléfono se ve solo el ícono, un trinche y un cuchillo, lado a lado (de día, dos palillos), sin la palabra.
+2. En el menú que se despliega, elige «Los Fierros» (de día, «Los Cuchillos»; debajo dice «tus redes conectadas»).
 
 También se entra directo a `https://tu-parrilla.cl/admin/accounts`. Sin sesión abierta, primero hay que entrar (ver [Ingresar](ingresar.md)).
 

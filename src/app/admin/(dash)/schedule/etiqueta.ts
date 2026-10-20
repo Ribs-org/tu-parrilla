@@ -1,13 +1,17 @@
 // Qué dice el chip de un destino. Puro: la fila que lo dibuja no es la que decide.
 
 import { networkLabel } from '@/lib/networks'
+import type { Tema } from '@/lib/tema'
+import { nombreDe } from '@/lib/vocabulario'
 
 /**
  * Lo que pregunta «Eliminar», en la lista y en el editor, antes de borrar un post: lo mismo
- * que se pierde. Vive acá, en un módulo sin directiva, porque lo leen dos componentes de
- * cliente y un `const` exportado desde uno de ellos llegaría al otro lado como referencia.
+ * que se pierde, con la pantalla como se llama en el modo que se ve (`useTema`). Vive acá, en
+ * un módulo sin directiva, porque lo leen dos componentes de cliente.
  */
-export const CONFIRMAR_ELIMINAR = '¿Eliminar este post? Se borra de La Parrilla y ya no sale en ninguna red.'
+export function confirmarEliminar(tema: Tema): string {
+  return `¿Eliminar este post? Se borra de ${nombreDe('/admin/schedule', tema)} y ya no sale en ninguna red.`
+}
 
 const ESTADO: Record<string, string> = {
   scheduled: 'Programado',

@@ -62,6 +62,12 @@ describe('pieDeAyer', () => {
     expect(pieDeAyer(1, null)).toBe('Ayer: 1 corte servido')
     expect(pieDeAyer(0, null)).toBe('Ayer no salió nada.')
   })
+
+  it('de día cuenta piezas', () => {
+    expect(pieDeAyer(6, null, 'dia')).toBe('Ayer: 6 piezas servidas')
+    expect(pieDeAyer(1, 1234, 'dia')).toBe(`Ayer: 1 pieza servida · ${formatNumber(1234)} miradas`)
+    expect(pieDeAyer(0, null, 'dia')).toBe('Ayer no salió nada.')
+  })
 })
 
 describe('miradasDe', () => {

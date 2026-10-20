@@ -3,9 +3,10 @@
 import Link from 'next/link'
 import { useEffect, useState, useTransition, type ReactNode } from 'react'
 import { deleteScheduledPost, subirAhora } from '@/app/admin/actions'
+import { useTema } from '@/components/tema-vivo'
 import type { ScheduledPost, ScheduledPostTarget } from '@/db/schema'
 import { cn } from '@/lib/utils'
-import { CONFIRMAR_ELIMINAR, motivoDestino, nombreDestino } from './etiqueta'
+import { confirmarEliminar, motivoDestino, nombreDestino } from './etiqueta'
 import { cortarCola } from './orden'
 import { Redes } from './redes'
 import { Reprogramar } from './reprogramar'
@@ -36,6 +37,7 @@ export function Queue({
 }) {
   const [pending, start] = useTransition()
   const [error, setError] = useState<string | null>(null)
+  const tema = useTema()
   // Lo que devolvió «Subir ahora»: cuántos destinos salieron y cuántos quedaron en proceso.
   const [aviso, setAviso] = useState<string | null>(null)
   const [expanded, setExpanded] = useState(false)
@@ -115,7 +117,7 @@ export function Queue({
                 type="button"
                 disabled={pending}
                 onClick={() => {
-                  if (!confirm(CONFIRMAR_ELIMINAR)) return
+                  if (!confirm(confirmarEliminar(tema))) return
                   start(async () => {
                     setError(null)
                     const result = await deleteScheduledPost(post.id)

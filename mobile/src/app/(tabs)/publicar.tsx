@@ -6,21 +6,22 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useSelectorFecha } from '../../components/selector-fecha'
 import { Boton, BotonTexto, Chip, ErrorConReintento, Miniatura } from '../../components/ui'
-import { useColores } from '../../components/tema'
+import { useColores, useTema } from '../../components/tema'
 import { RechazoApi, SesionCaducada, apiDelete, apiGet, apiPost } from '../../lib/api'
 import {
   BORRADOR_NO_EXISTE,
-  FRASE_BORRADOR,
   NO_SE_ABRIO,
   NO_SE_DESCARTO,
   PAUSA_MS,
   YA_NO_EXISTE,
   cuentasDelBorrador,
   cuerpoDelBorrador,
+  fraseDelBorrador,
   tieneContenido,
   type EstadoBorrador,
   type Formulario,
 } from '../../lib/borradores'
+import { LOS_FIERROS } from '../../lib/tema'
 import { anotarCambio } from '../../lib/cambios'
 import {
   ARCHIVO_FALTANTE,
@@ -85,6 +86,7 @@ function fechaLegible(fecha: Date): string {
  */
 export default function Publicar() {
   const colores = useColores()
+  const { tema } = useTema()
   const token = useToken()
   const router = useRouter()
   const insets = useSafeAreaInsets()
@@ -682,7 +684,7 @@ export default function Publicar() {
           // desde acá no se puede distinguir un caso del otro.
           <Text style={{ color: colores.tenue, fontSize: 12 }}>
             No hay ninguna cuenta lista para publicar desde el teléfono. Conéctala en el panel
-            web, en Los Fierros.
+            web, en {LOS_FIERROS[tema]}.
           </Text>
         ) : (
           <>
@@ -765,7 +767,7 @@ export default function Publicar() {
             fontSize: 11,
           }}
         >
-          {FRASE_BORRADOR[estadoBorrador]}
+          {fraseDelBorrador(estadoBorrador, tema)}
         </Text>
         {hayAlgo ? (
           <View style={{ flexDirection: 'row', gap: 20 }}>

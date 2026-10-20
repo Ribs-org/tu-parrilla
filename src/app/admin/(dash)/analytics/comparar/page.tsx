@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { Empty, Panel } from '@/components/charts/panel'
+import { NombreDe } from '@/components/de-noche-y-de-dia'
 import { RangoBar, SelectorEnUrl } from '@/components/filter-bar'
 import { requireUser } from '@/lib/auth'
 import { parseFilters } from '@/lib/filters'
@@ -119,8 +120,9 @@ export default async function CompararPage({ searchParams }: { searchParams: Pro
           <Empty>No publicaste nada en este período. Amplía el período.</Empty>
         ) : !clave ? (
           <Empty>
-            Ninguna publicación del período tiene atributos. Se anotan en el editor de un post de La
-            Parrilla (el campo «Atributos»), desde «Editar atributos» en una pieza, o por la API.
+            Ninguna publicación del período tiene atributos. Se anotan en el editor de un post de{' '}
+            <NombreDe ruta="/admin/schedule" /> (el campo «Atributos»), desde «Editar atributos» en una pieza, o
+            por la API.
           </Empty>
         ) : (
           <>

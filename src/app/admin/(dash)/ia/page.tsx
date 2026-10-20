@@ -1,10 +1,12 @@
 import Link from 'next/link'
 import { headers } from 'next/headers'
 import { Panel } from '@/components/charts/panel'
+import { DeNocheYDeDia } from '@/components/de-noche-y-de-dia'
 import { Encabezado } from '@/components/ui'
 import { requireUser } from '@/lib/auth'
 import { listarLlaves } from '@/lib/llaves'
 import { MAX_NOMBRE, PREFIJO } from '@/lib/llaves-api'
+import { MANUAL } from '@/lib/vocabulario'
 import { BotonRevocar, FormularioLlave } from './llaves'
 
 export const dynamic = 'force-dynamic'
@@ -155,7 +157,7 @@ export default async function TuIaPage() {
           href="/admin/ia/manual"
           className="mt-3 inline-block font-titulo text-sm font-semibold uppercase tracking-[0.08em] text-brasa hover:underline"
         >
-          El manual del parrillero →
+          <DeNocheYDeDia noche={MANUAL.noche} dia={MANUAL.dia} /> →
         </Link>
       </section>
     </>

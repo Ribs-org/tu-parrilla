@@ -11,6 +11,7 @@
  */
 
 import type { TargetStatus } from '@/db/schema'
+import type { Tema } from './tema'
 
 /**
  * La cocción de un corte. «parcial» es «se quemó en una red»: algo salió o sigue en la
@@ -319,8 +320,16 @@ export function avisoDeFierros(
   return enfriandose > 0 ? { nivel: 'enfriandose', cuantos: enfriandose } : null
 }
 
-/** El aviso en palabras: «1 se enfría», «2 se apagaron». */
-export function fraseDelAviso(aviso: { nivel: 'apagado' | 'enfriandose'; cuantos: number }): string {
-  if (aviso.nivel === 'apagado') return aviso.cuantos === 1 ? '1 se apagó' : `${aviso.cuantos} se apagaron`
-  return aviso.cuantos === 1 ? '1 se enfría' : `${aviso.cuantos} se enfrían`
+/**
+ * El aviso en palabras: «1 se enfría», «2 se apagaron». De día el fierro es un cuchillo: «1 se
+ * desafila», «2 sin filo» (ver `src/lib/vocabulario.ts`).
+ */
+export function fraseDelAviso(aviso: { nivel: 'apagado' | 'enfriandose'; cuantos: number }, tema: Tema = 'noche'): string {
+  const { nivel, cuantos } = aviso
+  if (tema === 'dia') {
+    if (nivel === 'apagado') return `${cuantos} sin filo`
+    return cuantos === 1 ? '1 se desafila' : `${cuantos} se desafilan`
+  }
+  if (nivel === 'apagado') return cuantos === 1 ? '1 se apagó' : `${cuantos} se apagaron`
+  return cuantos === 1 ? '1 se enfría' : `${cuantos} se enfrían`
 }

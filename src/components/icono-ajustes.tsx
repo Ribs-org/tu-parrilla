@@ -3,6 +3,8 @@ import { cn } from '@/lib/utils'
 /**
  * El ícono de Ajustes: un trinche de dos puntas y un cuchillo criollo, de pie y lado a lado,
  * como se dejan junto a la parrilla. Reemplaza al engranaje, que no decía nada de una parrilla.
+ * De día, dos palillos: lo que se deja junto al sushi. Los dos van en la página y el modo esconde
+ * uno (`.solo-noche`, `.solo-dia`), como el maestro de Tu IA (`icono-maestro.tsx`).
  *
  * Se probaron cruzados, en X y en V, y a 16 px —el tamaño de la barra— la X se leía como
  * «cerrar» y la V como una letra; de pie, cada uno conserva su cabeza: dos puntas el trinche,
@@ -14,7 +16,7 @@ import { cn } from '@/lib/utils'
  * pintados: así se ven del color de lo que haya detrás, también sobre la brasa del botón activo.
  * La app del teléfono dibuja lo mismo con vistas (`mobile/src/components/boton-ajustes.tsx`).
  */
-export function IconoAjustes({ className }: { className?: string }) {
+function TrincheYCuchillo({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" className={cn('shrink-0', className)} aria-hidden>
       {/* El trinche: dos puntas, el puente que las une, el cuello y el mango. */}
@@ -28,5 +30,33 @@ export function IconoAjustes({ className }: { className?: string }) {
         d="M15.15 14.4H17.85A.95.95 0 0 1 18.8 15.35V21.7A1.3 1.3 0 0 1 17.5 23H15.5A1.3 1.3 0 0 1 14.2 21.7V15.35A.95.95 0 0 1 15.15 14.4ZM15.85 16.9A.65.65 0 1 0 17.15 16.9A.65.65 0 1 0 15.85 16.9ZM15.85 20.5A.65.65 0 1 0 17.15 20.5A.65.65 0 1 0 15.85 20.5Z"
       />
     </svg>
+  )
+}
+
+/**
+ * Los palillos: dos, en diagonal, que se juntan hacia las puntas, como cuando se sostienen. En
+ * diagonal y no de pie: dos barras verticales a 16 px son el ícono de pausa. Lo que los hace
+ * palillos es el adelgazamiento, del extremo cuadrado a la punta redonda, y la franja de arriba,
+ * la que separa la cabeza: sin ella, a 16 px eran dos barras inclinadas, «//».
+ */
+function Palillos({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={cn('shrink-0', className)} aria-hidden>
+      {/* Cada palillo: la cabeza, y el resto hasta la punta. */}
+      <path d="M13.74 0.48L17.06 2.32L14.61 6.25L11.71 4.64Z" />
+      <path d="M11.25 5.57L14.06 7.13L4.81 21.94A.7.7 0 0 1 3.59 21.26Z" />
+      <path d="M19.7 3.44L22.7 5.76L19.75 9.18L17.13 7.14Z" />
+      <path d="M16.55 7.98L19.09 9.94L7.95 22.83A.7.7 0 0 1 6.85 21.97Z" />
+    </svg>
+  )
+}
+
+/** El ícono de Ajustes de cada modo: el trinche y el cuchillo de noche, los palillos de día. */
+export function IconoAjustes({ className }: { className?: string }) {
+  return (
+    <>
+      <TrincheYCuchillo className={cn('solo-noche', className)} />
+      <Palillos className={cn('solo-dia', className)} />
+    </>
   )
 }

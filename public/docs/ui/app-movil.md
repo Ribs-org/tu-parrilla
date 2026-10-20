@@ -19,7 +19,20 @@ Los títulos y rótulos se ven en mayúsculas por diseño; aquí van escritos co
 La app tiene los dos modos del panel, y es el mismo de la cuenta: lo que se elige en Ajustes vale
 también en el panel web, y al revés. Esta página describe la noche, la de entrada. De día el
 fondo es claro, los cortes son piezas de sushi y la sección «Se quemó» se llama «Se echó a
-perder»; la equivalencia de cada dibujo está en «El modo día», en [index.md](index.md). Lo que
+perder»; la equivalencia de cada dibujo está en «El modo día», en [index.md](index.md). Y unas
+palabras cambian, como en el panel:
+- la pestaña «La Parrilla» se llama «La Barra», y donde una frase dice «La Parrilla» dice «La
+  Barra»;
+- en Ajustes, «Los Fierros» son «Los Cuchillos» —también en «Abrir Los Cuchillos en el panel»—,
+  y la frase de cada cuenta es «Con filo: conectada.», «Se está desafilando: su permiso vence
+  esta semana. Reconéctala en el panel.» o «Sin filo: así no publica. Reconéctala en el panel.»;
+- el botón de Ajustes lleva dos palillos en diagonal en vez del trinche y el cuchillo, y su aviso
+  se lee «Ajustes: 1 se desafila» o «Ajustes: 2 sin filo»;
+- el calor de cada día dice «Vacía», «Con piezas» o «Tabla llena», y el pie, «Ayer: 1 pieza
+  servida» o «Ayer: N piezas servidas».
+
+Las frases de error que vienen del servidor no cambian: si una dice «Los Fierros», de día es
+Los Cuchillos. Lo que
 dibuja el teléfono mismo —la pantalla de arranque, el selector de fecha y las preguntas de
 «Cerrar sesión» o de borrar— sigue oscuro en los dos modos.
 
@@ -362,7 +375,7 @@ Lo que describe sale de estos archivos:
 - `mobile/src/app/ajustes.tsx` y `mobile/src/components/boton-ajustes.tsx` (Ajustes y su botón en la cabecera)
 - `src/app/api/mobile/fierros/route.ts` (lo que muestran)
 - `mobile/src/components/pieza.tsx`, `mobile/src/components/pieza-sushi.tsx` y `mobile/src/components/lienzo.tsx` (el corte dibujado, de noche y de día)
-- `mobile/src/components/tema.tsx`, `mobile/src/components/colores.ts` y `mobile/src/lib/tema.ts` (el modo de la cuenta y los colores de cada modo; «Se echó a perder»)
+- `mobile/src/components/tema.tsx`, `mobile/src/components/colores.ts` y `mobile/src/lib/tema.ts` (el modo de la cuenta y los colores de cada modo; las palabras de día: «Se echó a perder», La Barra, Los Cuchillos, el aviso de Ajustes y el pie de ayer)
 - `src/app/api/mobile/tema/route.ts` (leer y cambiar el modo de la cuenta)
 - `mobile/src/components/tus-cuentas.tsx`
 - `mobile/src/components/selector-fecha.tsx` (elegir día y hora: los dos diálogos de Android, o en iPhone —que todavía no se distribuye— la hoja «Cuándo sale» con «Cancelar» y «Listo»)

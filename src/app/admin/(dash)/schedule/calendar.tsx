@@ -1,11 +1,13 @@
 import Link from 'next/link'
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
 import { Corte } from '@/components/corte'
+import { DeNocheYDeDia } from '@/components/de-noche-y-de-dia'
 import type { ScheduledPost, ScheduledPostTarget } from '@/db/schema'
 import { dayLabel, dayKey, groupByDay, hourLabel, weekDays, weekLabel } from '@/lib/schedule-week'
 import { networkLabel } from '@/lib/networks'
-import { NOMBRE_COCCION, NOMBRE_FORMATO, calorDelDia, type Coccion } from '@/lib/parrilla'
+import { NOMBRE_COCCION, NOMBRE_FORMATO, calorDelDia, type Calor, type Coccion } from '@/lib/parrilla'
 import { cn } from '@/lib/utils'
+import { ROTULO_CALOR } from '@/lib/vocabulario'
 import { DesplazarAHoy } from './desplazar-a-hoy'
 import { bordeDe, dibujoDe, estadoCorto, type Borde } from './dibujo'
 import { etiquetaDestino, motivoDestino, nombreDestino } from './etiqueta'
@@ -20,12 +22,13 @@ type Item = {
   media: Array<{ blobUrl: string; mediaType: string }>
 }
 
-/** Lo que dice la grilla de cada día, arriba a la derecha. También la vista «Día». */
-export const ROTULO_CALOR = {
-  apagada: 'Apagada',
-  prendida: 'Prendida',
-  llena: 'Parrilla llena',
-} as const
+/**
+ * Lo que dice la grilla de cada día, arriba a la derecha: su calor, en los dos modos
+ * (`ROTULO_CALOR`, en el vocabulario). También la vista «Día» y la portada.
+ */
+export function RotuloCalor({ calor }: { calor: Calor }) {
+  return <DeNocheYDeDia noche={ROTULO_CALOR.noche[calor]} dia={ROTULO_CALOR.dia[calor]} />
+}
 
 /**
  * La tarjeta de un corte: chapa, y no carne. La carne es el dibujo de arriba; la tarjeta solo
@@ -179,7 +182,7 @@ export function WeekCalendar({
                       calor === 'llena' ? 'text-brasa' : 'text-fg-muted',
                     )}
                   >
-                    {ROTULO_CALOR[calor]}
+                    <RotuloCalor calor={calor} />
                   </span>
                   {abierto ? (
                     <Link

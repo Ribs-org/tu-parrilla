@@ -6,11 +6,12 @@ import { useActionState, useState, useTransition, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowDown, ArrowLeft, ArrowUp, Check, Copy, ExternalLink } from 'lucide-react'
 import { deleteScheduledPost, updateScheduledPost, type FormState } from '@/app/admin/actions'
+import { useTema } from '@/components/tema-vivo'
 import { Button, Field, GroupLabel, Input, Textarea } from '@/components/ui'
 import { REDES_PROXIMAMENTE, networkLabel } from '@/lib/networks'
 import type { CuentaRow } from '@/lib/posts-kpis'
 import { cn } from '@/lib/utils'
-import { CONFIRMAR_ELIMINAR } from '../etiqueta'
+import { confirmarEliminar } from '../etiqueta'
 import { ReglaClave } from '../regla-clave'
 
 // Gemelo de PUBLISHABLE (publish/batch.ts) y de ENABLED en el compositor
@@ -47,6 +48,7 @@ export function Editor({
   atributos: string
   regla: { palabra: string; mensaje: string; respuestaPublica: string } | null
 }) {
+  const tema = useTema()
   const publishing = targets.some((t) => t.status === 'publishing')
   const published = new Set(targets.filter((t) => t.status === 'published').map((t) => t.accountId))
   const initialAccountIds = new Set(targets.map((t) => t.accountId))
@@ -272,7 +274,7 @@ export function Editor({
               disabled={deleting}
               onClick={() => {
                 // Pregunta antes, como en la lista: borrar no se deshace.
-                if (!confirm(CONFIRMAR_ELIMINAR)) return
+                if (!confirm(confirmarEliminar(tema))) return
                 startDelete(async () => {
                   setDeleteError(null)
                   const result = await deleteScheduledPost(postId)

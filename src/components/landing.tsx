@@ -1,13 +1,14 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Plus } from 'lucide-react'
-import { CLASE_BORDE, CLASE_ESTADO, ROTULO_CALOR } from '@/app/admin/(dash)/schedule/calendar'
+import { CLASE_BORDE, CLASE_ESTADO, RotuloCalor } from '@/app/admin/(dash)/schedule/calendar'
 import { bordeDe, estadoCorto } from '@/app/admin/(dash)/schedule/dibujo'
 import { DesplazarAHoy } from '@/app/admin/(dash)/schedule/desplazar-a-hoy'
 import { Redes } from '@/app/admin/(dash)/schedule/redes'
 import { BOTON_CHICO, BOTON_CHICO_SECUNDARIO, ENLACE_BOTON, ENLACE_BOTON_SECUNDARIO } from '@/components/boton'
 import { BotonTema } from '@/components/boton-tema'
 import { Corte, CorteDefs, MarcaDeTuParrilla } from '@/components/corte'
+import { DeNocheYDeDia, NombreDe } from '@/components/de-noche-y-de-dia'
 import { Icon } from '@/components/icon'
 import { ArmaUnCorte, SeArmaMientrasSube } from '@/components/landing-demos'
 import { CONTACTO, RESPONSABLE, RUT } from '@/lib/empresa'
@@ -18,7 +19,7 @@ import { FOTO, SEMANA, VIDEO, fotos, type CorteDeMuestra, type DiaDeMuestra, typ
 import { PiezaDefs } from '@/components/pieza-sushi'
 import type { Tema } from '@/lib/tema'
 import { cn } from '@/lib/utils'
-import { SE_QUEMO, nombreDe } from '@/lib/vocabulario'
+import { SE_ENFRIA, SE_QUEMO, nombreDe } from '@/lib/vocabulario'
 
 /**
  * La cara pública del producto, en el dominio del producto.
@@ -40,20 +41,15 @@ import { SE_QUEMO, nombreDe } from '@/lib/vocabulario'
  * (`DeNocheYDeDia`). Ver `docs/superpowers/specs/2026-10-19-modo-dia-sushi-design.md`, tanda 4.
  */
 
-/**
- * Lo que la portada dice distinto de día, donde el dibujo es sushi: van las dos versiones y el
- * modo esconde una (`.solo-noche`, `.solo-dia`), como los dos dibujos del corte, así cambia con
- * el botón sin recargar. Adentro del panel las palabras no cambian de día, salvo «Se quemó»; la
- * portada sí tiene voz de día, porque no es una pantalla que guíe la wiki. Lo que dice qué hace
- * la app no va acá: es igual en los dos modos.
+/*
+ * Lo que la portada dice distinto de día, donde el dibujo es sushi, va en las dos versiones
+ * (`DeNocheYDeDia`), como en el panel: las pantallas que cambian de nombre (La Barra, Los
+ * Cuchillos) y lo que cuenta el dibujo. Lo que dice qué hace la app es igual en los dos modos.
  */
-function DeNocheYDeDia({ noche, dia }: { noche: React.ReactNode; dia: React.ReactNode }) {
-  return (
-    <>
-      <span className="solo-noche">{noche}</span>
-      <span className="solo-dia">{dia}</span>
-    </>
-  )
+
+/** La semana del inicio en palabras, para el lector de pantalla: el dibujo no se lee. */
+function semanaEnPalabras(tema: Tema): string {
+  return `Una semana en ${nombreDe('/admin/schedule', tema)}, de ejemplo: el lunes salió un video; el martes no hubo nada; el miércoles, ${tema === 'dia' ? 'la tabla llena' : 'la parrilla llena'} con un carrusel, un video y un texto; hoy jueves salió una foto y está saliendo un video a Instagram, TikTok y YouTube; el viernes acaba de caer un carrusel programado; el sábado está vacío, y el domingo hay un texto programado.`
 }
 
 const CLASE_CALOR: Record<Calor, string> = {
@@ -117,7 +113,7 @@ function Dia({ dia }: { dia: DiaDeMuestra }) {
             calor === 'llena' ? 'text-brasa' : 'text-fg-muted',
           )}
         >
-          {ROTULO_CALOR[calor]}
+          <RotuloCalor calor={calor} />
         </span>
       </div>
       <div
@@ -149,18 +145,26 @@ function Dia({ dia }: { dia: DiaDeMuestra }) {
  * desvanece abajo: el miércoles va lleno, y estirada a su alto la semana tapaba la pantalla.
  */
 function Semana() {
+  // El nombre del dibujo, en las dos versiones: un `aria-label` no lo alcanza el CSS del modo, y
+  // `aria-labelledby` lee solo la que se ve.
+  const id = 'semana-de-ejemplo'
   return (
-    <DesplazarAHoy className="relative -mx-6 overflow-x-auto px-6 pb-1 lg:mx-0 lg:overflow-visible lg:px-0">
-      <div
-        role="img"
-        aria-label="Una semana en La Parrilla, de ejemplo: el lunes salió un video; el martes no hubo nada; el miércoles, la parrilla llena con un carrusel, un video y un texto; hoy jueves salió una foto y está saliendo un video a Instagram, TikTok y YouTube; el viernes acaba de caer un carrusel programado; el sábado está vacío, y el domingo hay un texto programado."
-        className="grid h-[25rem] min-w-[52rem] grid-cols-7 gap-2 overflow-hidden [mask-image:linear-gradient(to_bottom,black_78%,transparent)] lg:h-[27rem] lg:min-w-0"
-      >
-        {SEMANA.map((dia) => (
-          <Dia key={dia.dia} dia={dia} />
-        ))}
-      </div>
-    </DesplazarAHoy>
+    <>
+      <span id={id} className="sr-only">
+        <DeNocheYDeDia noche={semanaEnPalabras('noche')} dia={semanaEnPalabras('dia')} />
+      </span>
+      <DesplazarAHoy className="relative -mx-6 overflow-x-auto px-6 pb-1 lg:mx-0 lg:overflow-visible lg:px-0">
+        <div
+          role="img"
+          aria-labelledby={id}
+          className="grid h-[25rem] min-w-[52rem] grid-cols-7 gap-2 overflow-hidden [mask-image:linear-gradient(to_bottom,black_78%,transparent)] lg:h-[27rem] lg:min-w-0"
+        >
+          {SEMANA.map((dia) => (
+            <Dia key={dia.dia} dia={dia} />
+          ))}
+        </div>
+      </DesplazarAHoy>
+    </>
   )
 }
 
@@ -235,14 +239,18 @@ function Fierros() {
             <span className={cn('fierro w-3.5 shrink-0', CLASE_FIERRO[c.fierro])} aria-hidden />
             <Icon name={c.red} className="h-3.5 w-3.5 shrink-0" />
             {networkLabel(c.red)} · {c.usuario}
-            {c.fierro === 'enfriandose' ? <span className="text-xs text-caution">se enfría</span> : null}
+            {c.fierro === 'enfriandose' ? (
+              <span className="text-xs text-caution">
+                <DeNocheYDeDia noche={SE_ENFRIA.noche} dia={SE_ENFRIA.dia} />
+              </span>
+            ) : null}
             {c.fierro === 'frio' ? <span className="text-xs text-fg-faint">reconéctala</span> : null}
           </span>
         ))}
       </div>
       <p className="rounded-lg border border-caution/40 bg-caution/10 px-3 py-2 text-[0.8rem] text-caution">
         El permiso de Facebook · Tu Página vence el martes a las 16:58, antes de que salga esto:
-        así no va a salir ahí. Reconéctala en {nombreDe('/admin/accounts')} antes, o elige un día
+        así no va a salir ahí. Reconéctala en <NombreDe ruta="/admin/accounts" /> antes, o elige un día
         anterior.
       </p>
     </div>
@@ -481,7 +489,7 @@ export function Landing({ tema = 'noche', delEnlace = false }: { tema?: Tema; de
         {/* La leyenda del corte, para tocarla: la sección más ancha, porque es la que enseña. */}
         <section className="mt-8 py-12 sm:mt-12 sm:py-16">
           <Encabezado
-            donde={nombreDe('/admin/schedule')}
+            donde={<NombreDe ruta="/admin/schedule" />}
             titulo={<DeNocheYDeDia noche="Cada publicación es un corte" dia="Cada publicación es una pieza" />}
           />
           <p className="mt-4 max-w-[62ch] text-[0.95rem] leading-relaxed text-fg-muted">
@@ -506,10 +514,12 @@ export function Landing({ tema = 'noche', delEnlace = false }: { tema?: Tema; de
           </p>
         </Rasgo>
 
-        <Rasgo donde={nombreDe('/admin/accounts')} titulo="Avisan antes, no después" muestra={<Fierros />}>
+        <Rasgo donde={<NombreDe ruta="/admin/accounts" />} titulo="Avisan antes, no después" muestra={<Fierros />}>
           <p>
-            Conectas cada cuenta una vez, y su fierro dice cómo está la conexión: al rojo, viva; en
-            ámbar, se está enfriando; gris, se apagó.
+            <DeNocheYDeDia
+              noche="Conectas cada cuenta una vez, y su fierro dice cómo está la conexión: al rojo, viva; en ámbar, se está enfriando; gris, se apagó."
+              dia="Conectas cada cuenta una vez, y su cuchillo dice cómo está la conexión: con filo, viva; en ámbar, se está desafilando; gris, sin filo."
+            />
           </p>
           <p>
             Si el permiso de una cuenta vence antes de que salga lo que programaste, te lo dice ahí
@@ -565,7 +575,7 @@ export function Landing({ tema = 'noche', delEnlace = false }: { tema?: Tema; de
           <p>
             Con tu canal de YouTube, sube los videos que programas y lee sus contadores y sus
             comentarios, tal como los entrega YouTube. Desconectas cuando quieras desde{' '}
-            {nombreDe('/admin/accounts')}. El detalle está en la{' '}
+            <NombreDe ruta="/admin/accounts" />. El detalle está en la{' '}
             <Link href="/privacidad" className="text-fg underline decoration-velo/20 underline-offset-4 transition-colors hover:decoration-velo/50">
               política de privacidad
             </Link>

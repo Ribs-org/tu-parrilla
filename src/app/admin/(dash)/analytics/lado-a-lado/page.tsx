@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowUpRight } from 'lucide-react'
 import { CurvaChart } from '@/components/charts/curva-chart'
 import { Empty, Panel } from '@/components/charts/panel'
 import { SERIES } from '@/components/charts/theme'
+import { NombreDe } from '@/components/de-noche-y-de-dia'
 import { InterruptorEnUrl, RangoBar, SelectorEnUrl } from '@/components/filter-bar'
 import { requireUser } from '@/lib/auth'
 import { parseFilters } from '@/lib/filters'
@@ -376,7 +377,10 @@ export default async function LadoALadoPage({ searchParams }: { searchParams: Pr
             hint="Lo que se le anotó a cada una al programarla. Los que cambian de una a otra van en naranjo: ahí puede estar la diferencia."
           >
             {atributos.length === 0 ? (
-              <Empty>Ninguna de las dos tiene atributos. Se anotan en el editor de un post de La Parrilla, o por la API.</Empty>
+              <Empty>
+                Ninguna de las dos tiene atributos. Se anotan en el editor de un post de{' '}
+                <NombreDe ruta="/admin/schedule" />, o por la API.
+              </Empty>
             ) : (
               <div className="-mx-1 overflow-x-auto px-1">
                 <table className="w-full min-w-[18rem] border-collapse text-[0.85rem]">
