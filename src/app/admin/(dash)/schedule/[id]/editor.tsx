@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useActionState, useState, useTransition, type ReactNode } from 'react'
+import { startTransition, useActionState, useState, useTransition, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowDown, ArrowLeft, ArrowUp, Check, Copy, ExternalLink } from 'lucide-react'
 import { deleteScheduledPost, updateScheduledPost, type FormState } from '@/app/admin/actions'
@@ -10,6 +10,7 @@ import { useTema } from '@/components/tema-vivo'
 import { Button, Field, GroupLabel, Input, Textarea } from '@/components/ui'
 import { REDES_PROXIMAMENTE, networkLabel } from '@/lib/networks'
 import type { CuentaRow } from '@/lib/posts-kpis'
+import { subirArchivos } from '@/lib/subida-directa'
 import { cn } from '@/lib/utils'
 import { confirmarEliminar } from '../etiqueta'
 import { ReglaClave } from '../regla-clave'
@@ -72,6 +73,38 @@ export function Editor({
     updateScheduledPost.bind(null, postId),
     {},
   )
+  // Mientras suben los archivos nuevos: el texto del botón, que dice cuál va.
+  const [subiendo, setSubiendo] = useState<string | null>(null)
+  const [errorSubida, setErrorSubida] = useState<string | null>(null)
+
+  /**
+   * Guardar sube primero los archivos nuevos directo al almacén (`subirArchivos`) y a la acción
+   * le manda solo sus direcciones (`mediaSubida`), como el compositor. Antes viajaban dentro
+   * del formulario y cruzaban la función: Vercel corta los cuerpos en ~4,5 MB, así que un video
+   * de tamaño real terminaba en «Algo se rompió».
+   */
+  async function guardar(formData: FormData) {
+    setErrorSubida(null)
+    const elegidos = formData.getAll('media').filter((f): f is File => f instanceof File && f.size > 0)
+    formData.delete('media')
+    if (elegidos.length > 0) {
+      setSubiendo(elegidos.length === 1 ? 'Subiendo el archivo…' : `Subiendo 1 de ${elegidos.length}…`)
+      try {
+        const subidos = await subirArchivos(elegidos, (hechos, total) => {
+          if (hechos < total) setSubiendo(`Subiendo ${hechos + 1} de ${total}…`)
+        })
+        formData.set('mediaSubida', JSON.stringify(subidos))
+      } catch (fallo) {
+        setErrorSubida(fallo instanceof Error ? fallo.message : 'No se pudo subir el archivo.')
+        return
+      } finally {
+        setSubiendo(null)
+      }
+    }
+    // Dentro de una transición: después de un `await` ya no se está en la del formulario, y
+    // sin ella `pending` no se encendería mientras guarda.
+    startTransition(() => formAction(formData))
+  }
   const [deleteError, setDeleteError] = useState<string | null>(null)
   const [deleting, startDelete] = useTransition()
   const router = useRouter()
@@ -100,11 +133,11 @@ export function Editor({
       {/* Lo publicado, lo quemado y lo que está saliendo lo dice la cabecera, red por red. */}
       {cabecera}
 
-      <form action={formAction}>
+      <form action={guardar}>
         {/* `min-w-0`: un `<fieldset>` trae de fábrica `min-inline-size: min-content`, y crecía
             hasta su línea más larga —el resumen de las opciones de TikTok, una URL—: a 390 px el
             editor medía 464 y la página se corría de lado. */}
-        <fieldset disabled={publishing || pending} className="min-w-0 space-y-4">
+        <fieldset disabled={publishing || pending || subiendo !== null} className="min-w-0 space-y-4">
           <input type="hidden" name="volver" value={volver} />
           <Field label="Texto">
             <Textarea name="caption" defaultValue={caption} rows={4} />
@@ -261,12 +294,12 @@ export function Editor({
             />
           </Field>
 
-          {state.error ? <p className="text-sm text-negative">{state.error}</p> : null}
+          {(errorSubida ?? state.error) ? <p className="text-sm text-negative">{errorSubida ?? state.error}</p> : null}
           {deleteError ? <p className="text-sm text-negative">{deleteError}</p> : null}
 
           <div className="flex items-center gap-3">
-            <Button type="submit" variant="primary" disabled={pending}>
-              {pending ? 'Guardando…' : 'Guardar'}
+            <Button type="submit" variant="primary" disabled={pending || subiendo !== null}>
+              {subiendo ?? (pending ? 'Guardando…' : 'Guardar')}
             </Button>
             <Button
               type="button"

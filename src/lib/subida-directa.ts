@@ -51,14 +51,25 @@ function poner(url: string, tipo: string, file: File, alAvanzar?: (fraccion: num
 }
 
 /**
+ * Para qué es lo que se sube: un archivo de una publicación (bajo `scheduled/`, con los formatos
+ * que se publican) o una imagen del perfil (bajo `uploads/`, el avatar y las miniaturas).
+ */
+export type DestinoSubida = 'publicacion' | 'imagen'
+
+/**
  * Un archivo, firmado y subido. `alAvanzar` recibe cuánto lleva, de 0 a 1; `senal` lo cancela,
  * y entonces revienta con un `AbortError` que quien llama distingue por el nombre.
  */
-export async function subirUno(file: File, alAvanzar?: (fraccion: number) => void, senal?: AbortSignal): Promise<MediaSubida> {
+export async function subirUno(
+  file: File,
+  alAvanzar?: (fraccion: number) => void,
+  senal?: AbortSignal,
+  destino: DestinoSubida = 'publicacion',
+): Promise<MediaSubida> {
   const firma = await fetch('/api/admin/upload-url', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ nombre: file.name, tipo: file.type, bytes: file.size }),
+    body: JSON.stringify({ nombre: file.name, tipo: file.type, bytes: file.size, destino }),
     signal: senal,
   })
   if (!firma.ok) {

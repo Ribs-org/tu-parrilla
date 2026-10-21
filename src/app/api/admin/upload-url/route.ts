@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { NextResponse } from 'next/server'
 import { usuarioActual } from '@/lib/auth'
-import { CUERPO_ILEGIBLE, prepararSubida } from '@/lib/mobile-api'
+import { CUERPO_ILEGIBLE, prepararImagen, prepararSubida } from '@/lib/mobile-api'
 import { tipoDesdeNombre } from '@/lib/social/publish/batch'
 import { SIN_ALMACEN, urlParaSubir } from '@/lib/storage'
 
@@ -17,9 +17,11 @@ export const dynamic = 'force-dynamic'
  * archivo viaja del navegador a R2 sin pasar por la función, y el tope desaparece.
  *
  * `prepararSubida` vive en `lib/mobile-api` por dónde nació, pero no tiene nada de móvil:
- * valida nombre, tipo y tamaño, y arma la clave bajo `scheduled/`.
+ * valida nombre, tipo y tamaño, y arma la clave bajo `scheduled/`. Con `destino: 'imagen'`
+ * firma en cambio una imagen del perfil (`prepararImagen`, bajo `uploads/`): el avatar y las
+ * miniaturas también cruzaban la función, con el mismo tope de Vercel.
  *
- * Lo que se suba y nunca llegue a un post lo borra el barrido diario.
+ * Lo que se suba y nunca llegue a un post o a un perfil lo borra el barrido de huérfanos.
  */
 export async function POST(request: Request) {
   if (!(await usuarioActual())) {
@@ -27,7 +29,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
   }
 
-  let body: { nombre?: unknown; tipo?: unknown; bytes?: unknown }
+  let body: { nombre?: unknown; tipo?: unknown; bytes?: unknown; destino?: unknown }
   try {
     body = await request.json()
   } catch {
@@ -35,11 +37,13 @@ export async function POST(request: Request) {
   }
 
   const nombre = typeof body.nombre === 'string' ? body.nombre : ''
-  // Algunos .mov llegan con `type` vacío desde el navegador: se resuelve por extensión,
-  // igual que hacía `tipoArchivo` cuando el archivo cruzaba la función.
+  // Algunos .mov llegan con `type` vacío desde el navegador: se resuelve por extensión.
   const tipo = (typeof body.tipo === 'string' && body.tipo) || tipoDesdeNombre(nombre)
 
-  const subida = prepararSubida(nombre, tipo, body.bytes, randomUUID())
+  const subida =
+    body.destino === 'imagen'
+      ? prepararImagen(nombre, tipo, body.bytes, randomUUID())
+      : prepararSubida(nombre, tipo, body.bytes, randomUUID())
   if ('error' in subida) return NextResponse.json({ error: subida.error }, { status: 400 })
 
   try {

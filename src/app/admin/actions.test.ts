@@ -690,6 +690,47 @@ describe('createScheduledPost: un trial reel con fotos se rechaza antes de crear
   })
 })
 
+describe('updateScheduledPost: los archivos nuevos llegan ya subidos', () => {
+  function programarFilas() {
+    db.scheduledSelectQueue.push(
+      [{ id: 'post-1', ownerId: 'owner-1', caption: 'Texto', scheduledAt: new Date('2030-01-01T13:00:00Z'), coverUrl: null }],
+      [{ id: 'target-ig', status: 'scheduled', accountId: 'acc-ig', network: 'instagram', containerId: null, updatedAt: new Date() }],
+      [],
+      [{ id: 'acc-ig', network: 'instagram', handle: '@vicente', accessToken: 'token-vivo' }],
+    )
+  }
+
+  function formulario(media: unknown[]) {
+    const formData = new FormData()
+    formData.set('caption', 'Texto')
+    formData.set('cuentas', 'acc-ig')
+    formData.set('scheduledAt', '2030-01-01T10:00')
+    formData.set('mediaSubida', JSON.stringify(media))
+    return formData
+  }
+
+  it('la dirección del almacén se guarda como media del post, sin que el archivo cruce la función', async () => {
+    programarFilas()
+    const url = 'https://cdn.ejemplo.cl/scheduled/0b6f4c1e-foto.jpg'
+
+    await expect(updateScheduledPost('post-1', {}, formulario([{ url, mediaType: 'image' }]))).rejects.toThrow(RedirectSignal)
+
+    const media = db.insertCalls.filter((c) => c.tabla === 'scheduled_post_media')
+    expect(media).toHaveLength(1)
+    expect(media[0]!.values).toMatchObject({ blobUrl: url, mediaType: 'image', position: 0 })
+  })
+
+  it('una dirección que no es del almacén se rechaza sin escribir nada', async () => {
+    programarFilas()
+
+    const result = await updateScheduledPost('post-1', {}, formulario([{ url: 'https://otro.cl/foto.jpg', mediaType: 'image' }]))
+
+    expect(result.error).toBe('Un archivo no es del almacén.')
+    expect(db.insertCalls).toHaveLength(0)
+    expect(db.updateCalls).toHaveLength(0)
+  })
+})
+
 describe('createScheduledPost: el tamaño que cuenta es el del almacén', () => {
   it('un archivo que en el almacén pesa más de 500 MB se rechaza antes de crear nada', async () => {
     // La subida firmada no fija un tamaño: lo que se declaró al pedirla no alcanza.

@@ -215,14 +215,6 @@ export function tipoDesdeNombre(nombre: string): string {
 }
 
 /**
- * Igual, pero para un `File`. La ruta que firma las subidas recibe nombre y tipo sueltos,
- * no un `File`, así que la regla vive arriba y acá solo se aplica.
- */
-export function tipoArchivo(file: File): string {
-  return file.type || tipoDesdeNombre(file.name)
-}
-
-/**
  * Qué destinos pide una fila. Nombrar la cuenta manda sobre nombrar la red: lo primero es
  * siempre inequívoco, y lo segundo solo se puede resolver cuando no hay dos candidatas.
  */

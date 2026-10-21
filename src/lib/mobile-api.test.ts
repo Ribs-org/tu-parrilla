@@ -11,6 +11,7 @@ import {
   parseConteos,
   parseMediaMovil,
   parseRango,
+  prepararImagen,
   prepararSubida,
   resolverCuando,
   resolverDestinos,
@@ -47,6 +48,23 @@ describe('parseRango', () => {
 })
 
 const UUID = '3f2a1b0c-0000-4000-8000-000000000000'
+
+describe('prepararImagen', () => {
+  it('una imagen del perfil va bajo uploads/, con su tipo', () => {
+    expect(prepararImagen('avatar.png', 'image/png', 1000, UUID)).toEqual({
+      key: `uploads/${UUID}-avatar.png`,
+      mediaType: 'image',
+      tipo: 'image/png',
+    })
+  })
+
+  it('las mismas frases y el mismo tope que cuando cruzaba la función', () => {
+    expect(prepararImagen('logo.svg', 'image/svg+xml', 1000, UUID)).toEqual({ error: 'Formato no soportado.' })
+    expect(prepararImagen('clip.mp4', 'video/mp4', 1000, UUID)).toEqual({ error: 'Formato no soportado.' })
+    expect(prepararImagen('foto.jpg', 'image/jpeg', 9 * 1024 * 1024, UUID)).toEqual({ error: 'La imagen supera los 8 MB.' })
+    expect(prepararImagen('foto.jpg', 'image/jpeg', 0, UUID)).toEqual({ error: CUERPO_ILEGIBLE })
+  })
+})
 
 describe('prepararSubida', () => {
   it('arma la key con el prefijo del compositor, el uuid y el nombre base', () => {

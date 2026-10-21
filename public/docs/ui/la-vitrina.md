@@ -237,8 +237,8 @@ Sirve cuando una dirección privada circuló más de la cuenta.
 | «No se pudo guardar. Intenta de nuevo.» | Falla del servidor al guardar. | Volver a apretar «Guardar perfil»; si sigue, esperar un rato. |
 | «La imagen supera los 8 MB.» | La foto o imagen es muy pesada. | Usar una más liviana. |
 | «Formato no soportado.» | No es JPG, PNG, WebP, GIF ni AVIF (por ejemplo, una foto HEIC de iPhone). | Convertirla o elegir otra. |
-| «No llegó ningún archivo.» | La subida llegó vacía. | Volver a elegir la imagen. |
-| «No se pudo subir la imagen.» | Falló el almacenamiento. | Reintentar más tarde. |
+| «No se pudo preparar la subida. (<código>)» o «No se pudo subir el archivo. (<código>)» | La imagen no alcanzó a subir: falló la conexión o el almacenamiento. | Volver a elegir la imagen; si se repite, reintentar más tarde. |
+| «No se pudo subir la imagen.» | Falló la subida sin un motivo que mostrar. | Reintentar más tarde. |
 | «Falta configurar Cloudflare R2 (R2_*).» | El sitio no tiene configurado dónde guardar imágenes. | Avisar a quien administra el sitio; la persona no lo puede arreglar. |
 | «Ponle un nombre al link.» | Se intentó guardar un link sin «Nombre». | Escribir el nombre. |
 | «Falta la URL.» | Se intentó guardar un link sin «URL». | Escribir la dirección. |
@@ -317,6 +317,7 @@ Lo que describe sale de estos archivos:
 - `src/lib/vocabulario.ts`
 - `src/components/ui.tsx`
 - `src/components/image-field.tsx`
+- `src/lib/subida-directa.ts` y `src/app/api/admin/upload-url/route.ts` (la subida directa al almacén, con destino «imagen»)
 - `src/components/profile-view.tsx`
 - `src/components/icon.tsx`
 - `src/lib/slugs.ts`

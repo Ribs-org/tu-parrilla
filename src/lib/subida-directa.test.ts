@@ -46,7 +46,17 @@ describe('subirArchivos', () => {
     await subirArchivos([archivo('a.jpg', 'image/jpeg')])
 
     const firma = llamadas.find((l) => l.url.includes('upload-url'))!
-    expect(JSON.parse(String(firma.init.body))).toEqual({ nombre: 'a.jpg', tipo: 'image/jpeg', bytes: 3 })
+    expect(JSON.parse(String(firma.init.body))).toEqual({ nombre: 'a.jpg', tipo: 'image/jpeg', bytes: 3, destino: 'publicacion' })
+  })
+
+  it('una imagen del perfil pide la firma con destino «imagen»', async () => {
+    responder({ subir: 'https://r2/f', publica: 'https://cdn/uploads/a.png', mediaType: 'image', tipo: 'image/png' })
+
+    const subida = await subirUno(archivo('a.png', 'image/png'), undefined, undefined, 'imagen')
+
+    const firma = llamadas.find((l) => l.url.includes('upload-url'))!
+    expect(JSON.parse(String(firma.init.body))).toMatchObject({ nombre: 'a.png', destino: 'imagen' })
+    expect(subida.url).toBe('https://cdn/uploads/a.png')
   })
 
   it('usa la frase de la ruta cuando la firma falla, que explica el motivo', async () => {
