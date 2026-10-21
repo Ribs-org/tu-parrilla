@@ -135,7 +135,8 @@ no por subcadena parcial ni regex:
 | `Threads todavía no está disponible en Tu Parrilla: próximamente.` | `threads` en `redes`, o una cuenta de Threads en `cuentas`: está en «Próximamente» |
 | `X / Twitter todavía no está disponible en Tu Parrilla: próximamente.` | `x` en `redes`, o una cuenta de X en `cuentas`: está en «Próximamente» |
 | `Hay redes repetidas en la fila.` | `redes` con la misma red dos veces |
-| `No se pudo leer una media de la fila.` | `media` o `portada`: descarga fallida, timeout, o tipo ajeno |
+| `No se pudo leer una media de la fila.` | `media` o `portada`: descarga fallida, timeout, o tipo ajeno; el porqué viene en `motivo` (abajo) |
+| `Al lote se le acabó el tiempo antes de terminar esta fila. Reenvíala.` | el lote llegó a su tiempo máximo (unos tres minutos) antes de terminar la fila; reenviarla con su `ref` es seguro |
 | `La portada requiere un video en media.` | `portada` sin video en `media` |
 | `La portada debe ser una imagen.` | `portada` resultó ser video u otra cosa |
 | `La portada debe ser JPG o PNG.` | `portada` en gif/webp u otro formato |
@@ -159,6 +160,20 @@ no por subcadena parcial ni regex:
 | `Máximo 50 posts por lote.` | `posts` con más de 50 elementos |
 | `El cuerpo debe ser JSON con { posts: [...] }.` | el cuerpo entero no tiene la forma `{ posts: [...] }` |
 | `No se pudo guardar la fila. Inténtalo de nuevo.` | fallo transitorio de base de datos; reintentar esa fila sola |
+
+Además de `ok` y `postId` o `error`, cada resultado trae `ms` (lo que tardó la fila en el
+servidor) y, si la fila llegó a su media, `bytes` (lo que esta fila bajó) y `origen`:
+`descarga`, o `cache` si toda su media venía de otra fila del mismo lote con la misma URL. Una
+fila cuya media no se pudo traer trae también `motivo`, una de estas: `sin respuesta` (30 s sin
+contestar), `estancada` (dejó de llegar 30 s seguidos), `cortada`, `sin tiempo` (el lote llegó a
+su máximo), `http <status>`, `tipo <content-type>` (`tipo text/html` es la página de Drive en vez
+del archivo), `muy grande` (más de 500 MB), `vacía`, `redirecciones` o `url prohibida`. Las tres
+primeras y los `http 5xx`/`http 429` ya se reintentaron una vez. Los resultados vuelven en el
+orden de `posts`.
+
+El lote baja cuatro filas a la vez, y la misma URL una sola vez por lote: un video para varias
+cuentas en filas distintas va mejor en el mismo lote. Dos o tres lotes a la vez son seguros
+(con `ref`, una fila no entra dos veces); más no suele acelerar.
 
 `200` es la respuesta normal aunque haya filas rechazadas — el rechazo por fila es dato, no
 fallo del endpoint. Corrige y reenvía las filas malas. Con `ref` en cada fila puedes reenviar

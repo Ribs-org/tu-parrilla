@@ -18,13 +18,17 @@ import {
   PORTADA_NOT_IMAGE,
   PORTADA_FORMAT,
   type BatchItem,
+  MEDIA_ILEGIBLE,
+  LOTE_SIN_TIEMPO,
+  FILAS_A_LA_VEZ,
+  type BatchResult,
 } from './batch'
 import { ATRIBUTOS_ERROR } from './atributos'
 import { TIKTOK_SIN_PRIVACIDAD, OPCIONES_ERROR, TRIAL_REEL_MEDIA } from './opciones'
 import { TIKTOK_MEDIA } from './validate'
 import { REGLA_PALABRA, REGLA_MENSAJE, REGLA_DOCUMENTO } from '../comentarios/reglas'
 import { verificarCuentas, type CuentaDestino } from '../cuentas'
-import { reglasClave, scheduledPosts } from '@/db'
+import { reglasClave, scheduledPostMedia, scheduledPosts } from '@/db'
 
 // `mediaToBlob` sube con `guardar`; sin precedente en el repo para simularlo, resuelto
 // igual que en `documento.test.ts` — lo que importa es la clave y el content-type con la
@@ -134,6 +138,20 @@ const base: BatchItem = {
   cuentas: [],
   redes: ['facebook'],
   media: [],
+}
+
+/**
+ * Los resultados sin lo que mide la fila (`ms`, `bytes`, `origen`): cambia en cada corrida, y
+ * lo que miden lo prueba su propio bloque, más abajo.
+ */
+function sinMedir(resultados: BatchResult[]) {
+  return resultados.map((resultado) => {
+    const resto: Partial<BatchResult> = { ...resultado }
+    delete resto.ms
+    delete resto.bytes
+    delete resto.origen
+    return resto
+  })
 }
 
 describe('mediaTypeFromUrl', () => {
@@ -365,8 +383,8 @@ describe('mediaToBlob', () => {
   })
 
   it('un archivo que declara más de 500 MB se rechaza sin bajarlo ni subirlo', async () => {
-    const cuerpo = new ReadableStream({ start: (c) => c.enqueue(new Uint8Array([1])) })
-    const cancelar = vi.spyOn(cuerpo, 'cancel')
+    const cancelar = vi.fn()
+    const cuerpo = new ReadableStream({ start: (c) => c.enqueue(new Uint8Array([1])), cancel: cancelar })
     vi.stubGlobal(
       'fetch',
       vi.fn(
@@ -590,7 +608,7 @@ describe('scheduleBatch — el documento antes de escribir la regla, y antes de 
 
     const resultados = await scheduleBatch('owner-1', [itemConMedia])
 
-    expect(resultados).toEqual([{ index: 0, ok: false, error: REGLA_DOCUMENTO }])
+    expect(sinMedir(resultados)).toEqual([{ index: 0, ok: false, error: REGLA_DOCUMENTO }])
     expect(inserts).toEqual([])
     expect(fetchMock).not.toHaveBeenCalled()
     expect(guardarMock).not.toHaveBeenCalled()
@@ -602,7 +620,7 @@ describe('scheduleBatch — el documento antes de escribir la regla, y antes de 
 
     const resultados = await scheduleBatch('owner-1', [item])
 
-    expect(resultados).toEqual([{ index: 0, ok: true, postId: 'post-1' }])
+    expect(sinMedir(resultados)).toEqual([{ index: 0, ok: true, postId: 'post-1' }])
     const reglaInsert = inserts.find((i) => i.tabla === reglasClave)
     const valores = reglaInsert?.valores as { documentoUrl: string | null } | undefined
     expect(valores?.documentoUrl).toBe('https://media.ej.cl/reglas/xyz.pdf')
@@ -640,7 +658,7 @@ describe('scheduleBatch — trial reel, la comprobación de media después de de
 
     const resultados = await scheduleBatch('owner-1', [item])
 
-    expect(resultados).toEqual([{ index: 0, ok: false, error: TRIAL_REEL_MEDIA }])
+    expect(sinMedir(resultados)).toEqual([{ index: 0, ok: false, error: TRIAL_REEL_MEDIA }])
     expect(inserts).toEqual([])
   })
 })
@@ -677,7 +695,7 @@ describe('scheduleBatch — trial reel, la comprobación de media antes de subir
 
     const resultados = await scheduleBatch('owner-1', [item])
 
-    expect(resultados).toEqual([{ index: 0, ok: false, error: TRIAL_REEL_MEDIA }])
+    expect(sinMedir(resultados)).toEqual([{ index: 0, ok: false, error: TRIAL_REEL_MEDIA }])
     expect(fetchMock).not.toHaveBeenCalled()
     expect(inserts).toEqual([])
   })
@@ -717,14 +735,14 @@ describe('scheduleBatch — «19:00» son las 19:00 del dueño', () => {
   it('con el dueño en Madrid, las 19:00 son 17:00Z', async () => {
     zonaDelDueno = 'Europe/Madrid'
     const resultados = await scheduleBatch('owner-1', [item])
-    expect(resultados).toEqual([{ index: 0, ok: true, postId: 'post-1' }])
+    expect(sinMedir(resultados)).toEqual([{ index: 0, ok: true, postId: 'post-1' }])
     expect(instanteGuardado().toISOString()).toBe('2030-10-05T17:00:00.000Z')
   })
 
   it('con el dueño en Santiago, el mismo texto son 22:00Z', async () => {
     zonaDelDueno = 'America/Santiago'
     const resultados = await scheduleBatch('owner-1', [item])
-    expect(resultados).toEqual([{ index: 0, ok: true, postId: 'post-1' }])
+    expect(sinMedir(resultados)).toEqual([{ index: 0, ok: true, postId: 'post-1' }])
     expect(instanteGuardado().toISOString()).toBe('2030-10-05T22:00:00.000Z')
   })
 })
@@ -769,7 +787,7 @@ describe('scheduleBatch — la ref reconoce una fila reenviada', () => {
   })
 
   it('una ref nueva se guarda con el post', async () => {
-    expect(await scheduleBatch('owner-1', [fila])).toEqual([{ index: 0, ok: true, postId: 'post-1' }])
+    expect(sinMedir(await scheduleBatch('owner-1', [fila]))).toEqual([{ index: 0, ok: true, postId: 'post-1' }])
     const post = inserts.find((i) => i.tabla === scheduledPosts)
     expect((post!.valores as { ref: string | null }).ref).toBe('lote-1')
   })
@@ -781,7 +799,7 @@ describe('scheduleBatch — la ref reconoce una fila reenviada', () => {
     // La hora ya pasó desde el primer envío: igual es la misma fila, y no un error.
     const reenviada = { ...fila, fecha: '2020-01-01 10:00', media: ['https://ej.com/a.mp4'] }
 
-    expect(await scheduleBatch('owner-1', [reenviada])).toEqual([
+    expect(sinMedir(await scheduleBatch('owner-1', [reenviada]))).toEqual([
       { index: 0, ok: true, postId: 'post-viejo', repetido: true },
     ])
     expect(inserts).toEqual([])
@@ -789,7 +807,7 @@ describe('scheduleBatch — la ref reconoce una fila reenviada', () => {
   })
 
   it('la misma ref dos veces en un lote: la segunda vuelve como repetida', async () => {
-    expect(await scheduleBatch('owner-1', [fila, { ...fila, texto: 'Otra' }])).toEqual([
+    expect(sinMedir(await scheduleBatch('owner-1', [fila, { ...fila, texto: 'Otra' }]))).toEqual([
       { index: 0, ok: true, postId: 'post-1' },
       { index: 1, ok: true, postId: 'post-1', repetido: true },
     ])
@@ -798,19 +816,178 @@ describe('scheduleBatch — la ref reconoce una fila reenviada', () => {
 
   it('si otro envío guardó la ref mientras esta fila se armaba, vuelve el post de ese envío', async () => {
     choqueDeRef.activo = true
-    expect(await scheduleBatch('owner-1', [fila])).toEqual([
+    expect(sinMedir(await scheduleBatch('owner-1', [fila]))).toEqual([
       { index: 0, ok: true, postId: 'post-ganador', repetido: true },
     ])
   })
 
   it('una ref mal formada rechaza la fila con su frase', async () => {
-    expect(await scheduleBatch('owner-1', [{ ...fila, ref: 7 }])).toEqual([{ index: 0, ok: false, error: REF_ERROR }])
+    expect(sinMedir(await scheduleBatch('owner-1', [{ ...fila, ref: 7 }]))).toEqual([{ index: 0, ok: false, error: REF_ERROR }])
     expect(inserts).toEqual([])
   })
 
   it('sin ref, la fila se programa como siempre y el post va sin ref', async () => {
-    expect(await scheduleBatch('owner-1', [{ ...fila, ref: undefined }])).toEqual([{ index: 0, ok: true, postId: 'post-1' }])
+    expect(sinMedir(await scheduleBatch('owner-1', [{ ...fila, ref: undefined }]))).toEqual([{ index: 0, ok: true, postId: 'post-1' }])
     const post = inserts.find((i) => i.tabla === scheduledPosts)
     expect((post!.valores as { ref: string | null }).ref).toBeNull()
+  })
+})
+
+/**
+ * Lo que el envío del 2026-10-21 (239 filas de Drive) pidió en los issues #235 y #238: varias
+ * filas a la vez, un reintento ante un fallo pasajero, y por fila cuánto tardó, cuánto bajó, de
+ * dónde salió su media y, si falló, por qué.
+ */
+describe('scheduleBatch — las descargas del lote', () => {
+  const fila: BatchItem = {
+    fecha: '2030-10-05 19:00',
+    texto: 'Hola',
+    cuentas: [],
+    redes: ['facebook'],
+    media: ['https://ej.com/a.mp4'],
+  }
+  const video = (bytes = 3) =>
+    new Response(new Uint8Array(bytes), { status: 200, headers: { 'content-type': 'video/mp4' } })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    vi.restoreAllMocks()
+    inserts.length = 0
+    refsGuardadas.clear()
+    guardarMock.mockClear()
+  })
+
+  it('cada fila dice cuánto tardó; la que bajó su media, cuánto bajó y que fue una descarga', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => video(3)))
+    const [resultado] = await scheduleBatch('owner-1', [fila])
+    expect(resultado).toMatchObject({ index: 0, ok: true, bytes: 3, origen: 'descarga' })
+    expect(resultado!.ms).toBeGreaterThanOrEqual(0)
+  })
+
+  it('una fila sin media no trae bytes ni origen', async () => {
+    const [resultado] = await scheduleBatch('owner-1', [{ ...fila, media: [] }])
+    expect(resultado).not.toHaveProperty('bytes')
+    expect(resultado).not.toHaveProperty('origen')
+    expect(typeof resultado!.ms).toBe('number')
+  })
+
+  it('un 503 se reintenta una vez, y la fila entra', async () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const fetchMock = vi.fn(async () => (fetchMock.mock.calls.length === 1 ? new Response('', { status: 503 }) : video()))
+    vi.stubGlobal('fetch', fetchMock)
+    const [resultado] = await scheduleBatch('owner-1', [fila])
+    expect(resultado).toMatchObject({ ok: true, postId: 'post-1' })
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+  })
+
+  it('un 404 no se reintenta, y la fila dice el status como motivo', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    const fetchMock = vi.fn(async () => new Response('', { status: 404 }))
+    vi.stubGlobal('fetch', fetchMock)
+    expect(sinMedir(await scheduleBatch('owner-1', [fila]))).toEqual([
+      { index: 0, ok: false, error: MEDIA_ILEGIBLE, motivo: 'http 404' },
+    ])
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    expect(inserts).toEqual([])
+  })
+
+  it('la página de Drive que no es el archivo dice su tipo', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => new Response('<html>', { status: 200, headers: { 'content-type': 'text/html; charset=utf-8' } })),
+    )
+    const [resultado] = await scheduleBatch('owner-1', [{ ...fila, media: ['https://drive.usercontent.google.com/download?id=X'] }])
+    expect(resultado).toMatchObject({ ok: false, error: MEDIA_ILEGIBLE, motivo: 'tipo text/html' })
+  })
+
+  it('la misma URL en dos filas se baja una vez, y las dos usan la misma copia', async () => {
+    const fetchMock = vi.fn(async () => video(5))
+    vi.stubGlobal('fetch', fetchMock)
+    const resultados = await scheduleBatch('owner-1', [fila, { ...fila, texto: 'Otra cuenta' }])
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    expect(guardarMock).toHaveBeenCalledTimes(1)
+    const origenes = resultados.map((r) => [r.origen, r.bytes])
+    expect(origenes).toContainEqual(['descarga', 5])
+    expect(origenes).toContainEqual(['cache', 0])
+    const urls = inserts.filter((i) => i.tabla === scheduledPostMedia).map((i) => (i.valores as Array<{ blobUrl: string }>)[0]!.blobUrl)
+    expect(urls).toHaveLength(2)
+    expect(urls[0]).toBe(urls[1])
+  })
+
+  it(`corre ${FILAS_A_LA_VEZ} filas a la vez, no más, y devuelve los resultados en orden`, async () => {
+    let enVuelo = 0
+    let maximo = 0
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => {
+        enVuelo++
+        maximo = Math.max(maximo, enVuelo)
+        // La primera fila es la más lenta: termina última y tiene que volver primera igual.
+        await new Promise((seguir) => setTimeout(seguir, url.endsWith('/0.mp4') ? 40 : 10))
+        enVuelo--
+        return video()
+      }),
+    )
+    const filas = Array.from({ length: 7 }, (_, i) => ({ ...fila, media: [`https://ej.com/${i}.mp4`] }))
+    const resultados = await scheduleBatch('owner-1', filas)
+    expect(maximo).toBe(FILAS_A_LA_VEZ)
+    expect(resultados.map((r) => r.index)).toEqual([0, 1, 2, 3, 4, 5, 6])
+    expect(resultados.every((r) => r.ok)).toBe(true)
+  })
+
+  it('dos archivos que juntos no caben en memoria no se leen a la vez', async () => {
+    // 300 MB declarados cada uno: los dos juntos pasan los 400 MB del cupo, así que el segundo
+    // espera a que el primero se suba aunque las dos filas corran en paralelo.
+    let leyendo = 0
+    let maximo = 0
+    const pesado = () =>
+      new Response(
+        new ReadableStream({
+          async pull(salida) {
+            leyendo++
+            maximo = Math.max(maximo, leyendo)
+            await new Promise((seguir) => setTimeout(seguir, 20))
+            leyendo--
+            salida.enqueue(new Uint8Array([1, 2, 3]))
+            salida.close()
+          },
+          // Sin esto el stream se llena solo al crearse, y `pull` no mediría quién lee.
+        }, { highWaterMark: 0 }),
+        { status: 200, headers: { 'content-type': 'video/mp4', 'content-length': String(300 * 1024 * 1024) } },
+      )
+    vi.stubGlobal('fetch', vi.fn(async () => pesado()))
+    const resultados = await scheduleBatch('owner-1', [
+      { ...fila, media: ['https://ej.com/1.mp4'] },
+      { ...fila, media: ['https://ej.com/2.mp4'] },
+    ])
+    expect(resultados.every((r) => r.ok)).toBe(true)
+    expect(maximo).toBe(1)
+  })
+
+  it('con el tiempo del lote vencido no empieza ninguna fila, y cada una lo dice', async () => {
+    const fetchMock = vi.fn()
+    vi.stubGlobal('fetch', fetchMock)
+    expect(sinMedir(await scheduleBatch('owner-1', [fila, fila], Date.now() - 1))).toEqual([
+      { index: 0, ok: false, error: LOTE_SIN_TIEMPO },
+      { index: 1, ok: false, error: LOTE_SIN_TIEMPO },
+    ])
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  it('una descarga que el tiempo del lote corta a mitad dice «sin tiempo»', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    // Contesta, pero el cuerpo nunca llega: lo corta el tope del lote, no el plazo de quietud.
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => new Response(new ReadableStream({ pull: () => new Promise(() => {}) }), {
+        status: 200,
+        headers: { 'content-type': 'video/mp4' },
+      })),
+    )
+    expect(sinMedir(await scheduleBatch('owner-1', [fila], Date.now() + 300))).toEqual([
+      { index: 0, ok: false, error: LOTE_SIN_TIEMPO, motivo: 'sin tiempo' },
+    ])
   })
 })
