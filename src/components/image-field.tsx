@@ -2,7 +2,7 @@
 
 import { useRef, useState, useTransition } from 'react'
 import { ImagePlus, Loader2, X } from 'lucide-react'
-import { uploadImage } from '@/app/admin/actions'
+import { subirUno } from '@/lib/subida-directa'
 import { cn } from '@/lib/utils'
 
 type Props = {
@@ -18,15 +18,18 @@ export function ImageField({ label, value, onChange, hint, shape = 'wide' }: Pro
   const [error, setError] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
 
+  // La imagen sube directo al almacén con una URL firmada (`subirUno`, destino «imagen»): antes
+  // cruzaba la función en una acción de servidor, y Vercel corta los cuerpos en ~4,5 MB aunque
+  // el tope declarado fuera de 8.
   function handleFile(file: File) {
     setError(null)
-    const data = new FormData()
-    data.set('file', file)
-
     startTransition(async () => {
-      const result = await uploadImage(data)
-      if (result.error) setError(result.error)
-      else if (result.url) onChange(result.url)
+      try {
+        const { url } = await subirUno(file, undefined, undefined, 'imagen')
+        onChange(url)
+      } catch (fallo) {
+        setError(fallo instanceof Error ? fallo.message : 'No se pudo subir la imagen.')
+      }
     })
   }
 

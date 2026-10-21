@@ -4,7 +4,7 @@ import { randomUUID } from 'node:crypto'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
-import { basePublica, guardar, keyDesdeUrl, SIN_ALMACEN, tamanoEnAlmacen } from '@/lib/storage'
+import { basePublica, keyDesdeUrl, tamanoEnAlmacen } from '@/lib/storage'
 import { ARCHIVO_MUY_GRANDE, MAX_BYTES_ARCHIVO } from '@/lib/social/publish/limites'
 import { and, asc, eq, inArray, max, ne, sql } from 'drizzle-orm'
 import { getDb, links, profiles, socialAccounts, socialPosts, scheduledPosts, scheduledPostTargets, scheduledPostMedia, reglasClave, users } from '@/db'
@@ -25,7 +25,6 @@ import {
   mediaTypeFromUrl,
   portadaExtensionError,
   portadaTypeError,
-  tipoArchivo,
   PORTADA_NEEDS_VIDEO,
 } from '@/lib/social/publish/batch'
 import {
@@ -403,32 +402,6 @@ export async function reorderLinks(profileId: string, orderedIds: string[]) {
 
   revalidatePath(`/admin/profiles/${profileId}`)
   revalidatePath('/', 'layout')
-}
-
-/* ------------------------------------------------------------------ upload -- */
-
-const MAX_UPLOAD_BYTES = 8 * 1024 * 1024
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif']
-
-export async function uploadImage(formData: FormData): Promise<{ url?: string; error?: string }> {
-  await requireUser()
-
-  const file = formData.get('file')
-  if (!(file instanceof File) || file.size === 0) return { error: 'No llegó ningún archivo.' }
-  if (file.size > MAX_UPLOAD_BYTES) return { error: 'La imagen supera los 8 MB.' }
-  if (!ALLOWED_TYPES.includes(file.type)) return { error: 'Formato no soportado.' }
-
-  try {
-    const url = await guardar(`uploads/${randomUUID()}-${file.name}`, file, tipoArchivo(file))
-    return { url }
-  } catch (error) {
-    // Sin configuración el panel debe decir qué falta, no un genérico: es el mismo
-    // trato que daba la guarda del token de Vercel Blob que esto reemplaza. Se revisa
-    // antes de loguear: una simple falta de configuración no es una falla real.
-    if (error instanceof Error && error.message === SIN_ALMACEN) return { error: SIN_ALMACEN }
-    console.error('[upload] failed', error)
-    return { error: 'No se pudo subir la imagen.' }
-  }
 }
 
 /* ------------------------------------------------------------------ social -- */
@@ -945,7 +918,13 @@ export async function updateScheduledPost(
   const cuentas = [...cuentasPendientes, ...cuentasPublicadasElegidas]
   const scheduledAt = fromZonedInput(String(formData.get('scheduledAt') ?? ''), zona)
   const keptIds = formData.getAll('keptMedia').map(String)
-  const files = formData.getAll('media').filter((f): f is File => f instanceof File && f.size > 0)
+  // Los archivos nuevos ya subieron directo al almacén desde el navegador; acá llegan sus
+  // direcciones (`mediaSubida`), que se revisan como al programar: del almacén, bajo
+  // `scheduled/`, y con lo que de verdad pesan (`mediaYaSubida`). Antes el archivo viajaba
+  // dentro del formulario, y Vercel corta los cuerpos en ~4,5 MB.
+  const subida = await mediaYaSubida(formData.get('mediaSubida'))
+  if ('error' in subida) return { error: subida.error }
+  const nuevos = subida.lista
   const urls = String(formData.get('mediaUrls') ?? '')
     .split(/\r?\n/)
     .map((u) => u.trim())
@@ -989,17 +968,18 @@ export async function updateScheduledPost(
   const reglaCheck = validarRegla(reglaDesdeFormulario(formData))
   if ('error' in reglaCheck) return { error: reglaCheck.error }
 
-  // Pre-validation before touching storage: kept media with their stored types, files
-  // with their real types, URLs counted as images — the batch's deferred-type rule
-  // (image is the guess that never falsely rejects; the re-check below settles it).
+  // Pre-validation before downloading anything: kept media with their stored types, the new
+  // uploads with the type the upload signed, URLs counted as images — the batch's
+  // deferred-type rule (image is the guess that never falsely rejects; the re-check below
+  // settles it).
   const typeById = new Map(existingMedia.map((m) => [m.id, m.mediaType]))
   const urlById = new Map(existingMedia.map((m) => [m.id, m.blobUrl]))
   const keptTypes = keptIds
     .map((id) => typeById.get(id))
     .filter((t): t is 'image' | 'video' => t === 'image' || t === 'video')
-  const fileVideo = files.filter((f) => f.type.startsWith('video/')).length
+  const fileVideo = nuevos.filter((m) => m.mediaType === 'video').length
   const preImages =
-    keptTypes.filter((t) => t === 'image').length + (files.length - fileVideo) + urls.length
+    keptTypes.filter((t) => t === 'image').length + (nuevos.length - fileVideo) + urls.length
   const preVideos = keptTypes.filter((t) => t === 'video').length + fileVideo
   // Igual que arriba con los tipos: la extensión conocida de cada media pendiente,
   // para que TikTok rechace un formato ajeno antes de tocar el almacén.
@@ -1008,7 +988,7 @@ export async function updateScheduledPost(
       .map((id) => urlById.get(id))
       .filter((url): url is string => Boolean(url))
       .map(extensionDe),
-    ...files.map((f) => extensionDe(f.name)),
+    ...nuevos.map((m) => extensionDe(m.url)),
     ...urls.map(extensionDe),
   ]
   if (pendingNetworks.length === 0) {
@@ -1049,12 +1029,7 @@ export async function updateScheduledPost(
     if (!stored) return { error: 'No se pudo leer una media por URL.' }
     urlMedia.push(stored)
   }
-  const fileMedia: Array<{ url: string; mediaType: 'image' | 'video' }> = []
-  for (const file of files) {
-    const url = await guardar(`scheduled/${randomUUID()}-${file.name}`, file, tipoArchivo(file))
-    fileMedia.push({ url, mediaType: file.type.startsWith('video/') ? 'video' : 'image' })
-  }
-  const added = [...fileMedia, ...urlMedia]
+  const added = [...nuevos, ...urlMedia]
 
   const mediaPlan = diffMedia(existingMedia.map((m) => m.id), keptIds, added)
 

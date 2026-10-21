@@ -60,17 +60,14 @@ const nextConfig: NextConfig = {
   },
 
   /**
-   * El compositor manda los archivos dentro del formulario, así que el video cruza la
-   * función y queda bajo el tope de cuerpo de las acciones de servidor, que por defecto
-   * es de 1 MB. Con ese default, programar una publicación con un video real devuelve
-   * `413 Content Too Large` y el panel muestra la pantalla de error genérica.
-   *
-   * Esto es un parche: el archivo sigue cargándose entero en memoria de la función. El
-   * arreglo de fondo es que el panel suba directo a R2 con una URL firmada, como ya hace
-   * la app del teléfono en `api/mobile/upload-url`. Ver `docs/deuda-tecnica.md`.
+   * Los archivos del panel ya no cruzan las acciones de servidor: el compositor, el editor y
+   * las imágenes del perfil suben directo a R2 con una URL firmada (`lib/subida-directa.ts`).
+   * Lo único que todavía viaja dentro de un formulario es el CSV de la carga masiva, y 4 MB es
+   * casi lo más que Vercel deja pasar (corta los cuerpos en ~4,5 MB antes de que Next mire): un
+   * tope mayor no serviría de nada, y el de fábrica (1 MB) rechazaría un CSV largo.
    */
   experimental: {
-    serverActions: { bodySizeLimit: '50mb' },
+    serverActions: { bodySizeLimit: '4mb' },
   },
   images: {
     remotePatterns: [

@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   mediaTypeFromUrl,
-  tipoArchivo,
+  tipoDesdeNombre,
   typeFromContentType,
   validateBatchItem,
   destinoPedido,
@@ -402,21 +402,17 @@ describe('mediaToBlob', () => {
   })
 })
 
-describe('tipoArchivo', () => {
-  it('usa file.type cuando el navegador lo dio', () => {
-    const file = new File(['x'], 'video.mov', { type: 'video/quicktime' })
-    expect(tipoArchivo(file)).toBe('video/quicktime')
+describe('tipoDesdeNombre', () => {
+  // Lo usa la ruta que firma las subidas cuando el navegador no dio el tipo (pasa con algunos .mov).
+  it('infiere el tipo de la extensión', () => {
+    expect(tipoDesdeNombre('foto.jpg')).toBe('image/jpeg')
+    expect(tipoDesdeNombre('foto.png')).toBe('image/png')
+    expect(tipoDesdeNombre('clip.mp4')).toBe('video/mp4')
+    expect(tipoDesdeNombre('clip.mov')).toBe('video/quicktime')
   })
 
-  it('sin file.type, lo infiere de la extensión', () => {
-    expect(tipoArchivo(new File(['x'], 'foto.jpg', { type: '' }))).toBe('image/jpeg')
-    expect(tipoArchivo(new File(['x'], 'foto.png', { type: '' }))).toBe('image/png')
-    expect(tipoArchivo(new File(['x'], 'clip.mp4', { type: '' }))).toBe('video/mp4')
-    expect(tipoArchivo(new File(['x'], 'clip.mov', { type: '' }))).toBe('video/quicktime')
-  })
-
-  it('sin file.type y con extensión desconocida, devuelve vacío', () => {
-    expect(tipoArchivo(new File(['x'], 'archivo.raro', { type: '' }))).toBe('')
+  it('con una extensión desconocida devuelve vacío', () => {
+    expect(tipoDesdeNombre('archivo.raro')).toBe('')
   })
 })
 

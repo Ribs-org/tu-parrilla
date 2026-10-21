@@ -106,6 +106,38 @@ export function prepararSubida(
   }
 }
 
+export const IMAGEN_MUY_GRANDE = 'La imagen supera los 8 MB.'
+export const IMAGEN_NO_SOPORTADA = 'Formato no soportado.'
+const MAX_BYTES_IMAGEN = 8 * 1024 * 1024
+const EXTENSION_DE_IMAGEN: Record<string, string> = {
+  'image/png': 'png',
+  'image/jpeg': 'jpg',
+  'image/webp': 'webp',
+  'image/gif': 'gif',
+  'image/avif': 'avif',
+}
+
+/**
+ * Qué key y qué content-type tendrá una imagen del perfil —el avatar, la portada, la miniatura
+ * de un link— que el panel está por subir directo al almacén. Mismas frases y mismo tope que
+ * cuando cruzaba la función (`uploadImage`): 8 MB y JPG, PNG, WebP, GIF o AVIF. El tope es el
+ * que declara el navegador, como en `prepararSubida`; una imagen del perfil no se publica en
+ * ninguna red. Va bajo `uploads/`, donde siempre vivieron.
+ */
+export function prepararImagen(
+  nombre: string,
+  tipo: string,
+  bytes: unknown,
+  uuid: string,
+): { key: string; mediaType: 'image'; tipo: string } | { error: string } {
+  const extension = EXTENSION_DE_IMAGEN[tipo]
+  if (!extension) return { error: IMAGEN_NO_SOPORTADA }
+  if (typeof bytes !== 'number' || !Number.isFinite(bytes) || bytes <= 0) return { error: CUERPO_ILEGIBLE }
+  if (bytes > MAX_BYTES_IMAGEN) return { error: IMAGEN_MUY_GRANDE }
+  const base = nombre.split(/[\\/]/).pop()?.trim() || `imagen.${extension}`
+  return { key: `uploads/${uuid}-${base.slice(-MAX_NOMBRE)}`, mediaType: 'image', tipo }
+}
+
 // `cuentas` manda sobre `redes` cuando el cuerpo trae las dos (ver Tarea 7): la app
 // nueva elige destino por cuenta, no por red. `redes` se queda para una app vieja
 // instalada que todavía no la manda — se resuelve sola mientras no haya dos cuentas

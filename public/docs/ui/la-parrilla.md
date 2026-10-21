@@ -699,7 +699,9 @@ El formulario, en orden:
    nueva»), un ícono para copiar la dirección («Copiar la URL»; muestra «Copiada» o «No se
    pudo copiar»), dos flechas para subirlo o bajarlo en el orden del carrusel, y «Quitar».
    Debajo, **«Agregar archivos»** (botón de archivos) y **«Agregar por URL»** (placeholder
-   «https://…», con la ayuda «Una por línea»). Lo agregado queda al final del carrusel.
+   «https://…», con la ayuda «Una por línea»). Lo agregado queda al final del carrusel. Los
+   archivos elegidos suben al apretar «Guardar», antes de guardar: el botón dice «Subiendo el
+   archivo…» (o «Subiendo 1 de 3…» con varios) y después «Guardando…».
 5. **«Portada (solo para video)»**: si hay portada, su miniatura con los mismos íconos y
    «Quitar»; debajo, un campo de dirección, «Agregar por URL» o «Cambiar por URL» si ya hay
    una, con el placeholder «https://…/portada.jpg». La portada solo entra por dirección.
@@ -718,7 +720,8 @@ El formulario, en orden:
    de una misma pieza. Sirve para juntar dos hooks del mismo video, o el trial reel y el reel
    normal en la misma cuenta, que por fuerza son dos posts programados. Se puede agregar o
    cambiar también en un post que ya salió: no toca lo publicado.
-8. Los errores, en rojo, y los botones **«Guardar»** («Guardando…») y **«Eliminar»**
+8. Los errores, en rojo, y los botones **«Guardar»** («Subiendo…» mientras suben los archivos
+   nuevos, después «Guardando…») y **«Eliminar»**
    («Eliminando…»), que pregunta antes, como en la lista. Guardar bien devuelve a la vista de
    donde se vino —también a la pieza de Los Números, si se entró desde ahí—; eliminar bien,
    también.
@@ -885,8 +888,9 @@ suben archivos sueltos.
    quitar («Quitar») o agregar archivos, portada, respuesta automática.
 3. Apretar «Guardar».
 
-Para agregar un video grande conviene «Agregar por URL» con un enlace de descarga directa:
-el botón «Agregar archivos» del editor falla cuando lo elegido suma más de unos 4 MB.
+Los archivos del editor suben directo al almacenamiento, como en el compositor: un video de
+hasta 500 MB entra por «Agregar archivos». «Agregar por URL» sirve para lo que ya está en
+internet, con un enlace de descarga directa.
 
 ### Para ponerle portada a un video
 
@@ -1097,7 +1101,8 @@ puede decir:
 | «La portada debe ser una imagen.» / «La portada debe ser JPG o PNG.» | La portada no sirve | Usar una imagen JPG o PNG |
 | «Los atributos deben ser un objeto plano de valores simples.» | El JSON de «Atributos» está mal escrito o es demasiado grande | Corregirlo, o dejar el cuadro vacío |
 | «El post ya no existe.» | Se borró mientras estaba abierto | Volver a La Parrilla |
-| «Algo se rompió», con «No fue nada que hicieras. Vuelve a intentarlo; el detalle quedó en la consola del navegador.» (a veces con «Si se repite, este código ayuda a encontrarlo: <código>.») y los botones «Reintentar» e «Ir a La Parrilla» | Algo falló en el servidor. Si se estaba guardando con «Agregar archivos», lo más probable es que lo elegido pese más de unos 4 MB, que el editor no alcanza a subir | Volver al editor, quitar el archivo y agregarlo con «Agregar por URL»; si no había archivo, «Reintentar» |
+| «Algo se rompió», con «No fue nada que hicieras. Vuelve a intentarlo; el detalle quedó en la consola del navegador.» (a veces con «Si se repite, este código ayuda a encontrarlo: <código>.») y los botones «Reintentar» e «Ir a La Parrilla» | Algo falló en el servidor | «Reintentar»; si se repite, anotar el código y avisar a quien administra el sitio |
+| «Ese tipo de archivo no se puede publicar.», «El archivo supera los 500 MB.», «No se pudo preparar la subida. (<código>)» o «No se pudo subir el archivo. (<código>)», al apretar «Guardar» | Un archivo de «Agregar archivos» no pudo subir; no se guardó nada | Cambiar el archivo, o volver a apretar «Guardar» si fue la conexión |
 | «No encontramos esa página» | El post no existe o no es de esta persona | Volver a La Parrilla |
 
 ### Motivos de un destino que no salió
@@ -1239,8 +1244,8 @@ editor.
   editor no lo permite. Si no ha salido en ninguna red, «Eliminar» y programarlo de nuevo.
 - **En el editor no aparece mi TikTok para agregarlo.** El editor no agrega TikTok a un
   post existente: hay que programar uno nuevo para TikTok.
-- **Al guardar en el editor me sale Algo se rompió.** Si se estaba agregando un archivo, lo
-  más probable es que pese más de unos 4 MB: agregarlo con «Agregar por URL».
+- **Al guardar en el editor me sale Algo se rompió.** Es una falla del servidor: «Reintentar».
+  Un archivo que no pudo subir no llega hasta ahí: lo dice en rojo, arriba de «Guardar».
 - **¿Dónde pongo la portada?** Al programar no hay campo: se pone después en el editor,
   «Portada (solo para video)», con la dirección de una imagen JPG o PNG.
 - **¿Dónde anoto el hook o el tema de un post?** Al programar no hay campo (tampoco en el
