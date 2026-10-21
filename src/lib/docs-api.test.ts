@@ -10,7 +10,8 @@ import {
   REGLA_PALABRA,
   REGLA_RESPUESTA,
 } from './social/comentarios/reglas'
-import { MAX_BATCH_ITEMS, MAX_REF, PUBLISHABLE, REF_ERROR } from './social/publish/batch'
+import { LOTE_SIN_TIEMPO, MAX_BATCH_ITEMS, MAX_REF, MEDIA_ILEGIBLE, PUBLISHABLE, REF_ERROR } from './social/publish/batch'
+import { MOTIVOS_FIJOS } from './social/publish/descarga-segura'
 import { REDES_PROXIMAMENTE, fraseProximamente } from './networks'
 import { TOPE_INSTAGRAM, TRIAL_REEL_NO_DISPONIBLE } from './social/publish/publisher'
 import {
@@ -56,6 +57,18 @@ describe('la documentación para LLM no le miente al código', () => {
       const guia = readFileSync(archivo, 'utf8')
       for (const frase of [REF_ERROR, DIAS_ERROR, HORAS_ERROR, TOPE_INSTAGRAM]) {
         expect(guia, `${archivo}: ${frase}`).toContain(frase)
+      }
+    }
+  })
+
+  it('las frases de la media del lote y cada `motivo` fijo están en las dos guías', () => {
+    // `motivo` es parte de la respuesta: quien llama decide con él si reintentar o arreglar
+    // el enlace, así que un motivo nuevo que las guías no nombran es uno que nadie sabe leer.
+    for (const archivo of ['public/docs/api-llm.md', 'public/docs/api-editor.md']) {
+      const guia = readFileSync(archivo, 'utf8')
+      for (const frase of [MEDIA_ILEGIBLE, LOTE_SIN_TIEMPO]) expect(guia, `${archivo}: ${frase}`).toContain(frase)
+      for (const motivo of [...MOTIVOS_FIJOS, 'http <status>', 'tipo <content-type>']) {
+        expect(guia, `${archivo}: ${motivo}`).toContain(`\`${motivo}\``)
       }
     }
   })

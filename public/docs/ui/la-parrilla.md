@@ -1066,6 +1066,7 @@ puede decir:
 | «No hay una cuenta de <red> conectada.» | No hay cuenta conectada de esa red | Conectarla en Los Fierros, o sacar esa red |
 | «Tienes <N> cuentas de <red> (<usuarios>). Elige cuál con «cuentas».» | Dos cuentas de la misma red | Usar la columna `cuentas` |
 | «No se pudo leer una media de la fila.» | Un enlace de `media` o `portada` no se pudo descargar, o no era imagen ni video (pasa con enlaces de Drive que abren una página) | Usar enlaces de descarga directa |
+| «Al lote se le acabó el tiempo antes de terminar esta fila. Reenvíala.» | El archivo traía tantos videos pesados que no alcanzaron todos en el tiempo de una carga; las filas que dicen «Programado» sí quedaron | Subir un CSV solo con las filas que dicen esto |
 | «La portada requiere un video en media.» | Portada sin video | Quitar la portada o agregar el video |
 | «La portada debe ser una imagen.» | La portada es un video u otra cosa | Usar una imagen |
 | «La portada debe ser JPG o PNG.» | Portada GIF, WebP u otro formato | Convertirla |

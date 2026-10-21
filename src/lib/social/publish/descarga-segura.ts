@@ -10,6 +10,51 @@
 // una redirección en bucle o a abuso.
 const MAX_REDIRECCIONES = 5
 
+/** Lo que se espera a que el origen conteste, contando todas sus redirecciones. */
+export const PLAZO_RESPUESTA_MS = 30_000
+
+/**
+ * Lo que se tolera sin que llegue un byte cuando ya se está leyendo el archivo. No es un
+ * tope del archivo entero: un video de 300 MB que baja parejo a 3 MB/s tarda cien segundos
+ * y no tiene por qué cortarse. Hasta el 2026-10-21 había treinta segundos para todo, cuerpo
+ * incluido, y así fallaban sin motivo aparente los videos grandes de Drive en el lote.
+ */
+export const PLAZO_QUIETO_MS = 30_000
+
+/** El tope de una descarga entera cuando quien llama no pone el suyo: el de siempre. */
+export const TOPE_POR_DEFECTO_MS = 30_000
+
+/**
+ * Por qué no se pudo traer un archivo, en palabras fijas: el lote las devuelve tal cual en
+ * `motivo`, y las guías de la API las listan (`docs-api.test.ts` lo vigila), así que cambiar
+ * una es cambiar la API. Además de estas, `http <status>` y `tipo <content-type>`.
+ */
+export const MOTIVOS_FIJOS = [
+  'url prohibida',
+  'sin respuesta',
+  'estancada',
+  'cortada',
+  'sin tiempo',
+  'redirecciones',
+  'muy grande',
+  'vacía',
+] as const
+
+export type MotivoDeDescarga = (typeof MOTIVOS_FIJOS)[number] | `http ${number}` | `tipo ${string}`
+
+/** El corte que hacemos nosotros. Viaja como error del `fetch` o del cuerpo para que quien lee sepa cuál fue. */
+class Corte extends Error {
+  constructor(readonly motivo: 'sin respuesta' | 'estancada' | 'sin tiempo') {
+    super(`descarga cortada: ${motivo}`)
+  }
+}
+
+function motivoDelError(error: unknown): MotivoDeDescarga {
+  return error instanceof Corte ? error.motivo : 'cortada'
+}
+
+export type Descarga = { ok: true; response: Response } | { ok: false; motivo: MotivoDeDescarga }
+
 /**
  * El IPv4 dentro de una de las tres formas IPv6 que lo embeben, o null si el host no
  * tiene ninguna. `new URL(...).hostname` normaliza cada una a hexadecimal comprimido en
@@ -131,40 +176,67 @@ export function hostPermitido(url: string): boolean {
  * antes de seguirlo, porque una URL pública puede redirigir a la red interna y así
  * saltarse cualquier comprobación hecha solo sobre la URL original.
  *
- * Un solo presupuesto de tiempo para toda la cadena, no uno por salto: la señal se crea
- * una vez, antes del bucle, y se reutiliza en cada `fetch`. Con una señal por salto, una
- * redirección multiplicaría el tiempo (hasta `MAX_REDIRECCIONES` veces) contra el
- * `maxDuration` del endpoint que llama a esto.
+ * Tres plazos, cada uno con su motivo:
+ *
+ * - `PLAZO_RESPUESTA_MS` para que conteste, contando toda la cadena de redirecciones y no
+ *   cada salto: con un plazo por salto, una redirección multiplicaría la espera (hasta
+ *   `MAX_REDIRECCIONES` veces) contra el `maxDuration` del endpoint que llama a esto.
+ * - `PLAZO_QUIETO_MS` sin datos mientras alguien lee el cuerpo. Corre solo mientras hay una
+ *   lectura esperando: si quien llama tarda en leer (el lote espera su cupo de memoria),
+ *   esa pausa no es culpa del origen.
+ * - `hasta`, un instante: el tope de la descarga entera. El lote pasa el suyo para que nada
+ *   siga bajando cuando la función ya tiene que contestar; sin él, `TOPE_POR_DEFECTO_MS`.
  *
  * `etiqueta` nombra lo que se descarga en los mensajes de log ("el documento", "la
  * media del lote"), para que cada archivo que llama vea su propia frase. Nunca lanza:
- * devuelve `null` ante cualquier fallo (esquema o host prohibido, red caída, demasiadas
- * redirecciones, respuesta no-ok, destino de redirección imposible de parsear), con el
- * motivo ya registrado.
+ * ante cualquier fallo (esquema o host prohibido, red caída, un plazo vencido, demasiadas
+ * redirecciones, respuesta no-ok, destino de redirección imposible de parsear) devuelve
+ * su motivo, ya registrado.
  */
-export async function descargarSeguro(url: string, etiqueta: string): Promise<Response | null> {
+export async function descargarSeguro(
+  url: string,
+  etiqueta: string,
+  hasta: number = Date.now() + TOPE_POR_DEFECTO_MS,
+): Promise<Descarga> {
+  if (Date.now() >= hasta) return { ok: false, motivo: 'sin tiempo' }
   let actual = url
-  // Host que se cuelga, o cadena de redirecciones larga: cuestan estos treinta segundos
-  // en total, no treinta por salto — son los mismos treinta segundos que antes de que
-  // esta función existiera tenía un solo `fetch` con redirección automática.
-  const signal = AbortSignal.timeout(30_000)
+  const control = new AbortController()
+  const cortar = (motivo: Corte['motivo']) => control.abort(new Corte(motivo))
+  // `fetch` y cada lectura del cuerpo corren contra esto: un corte nuestro termina la espera
+  // aunque el origen no la suelte por su cuenta. El `catch` vacío es para cuando nadie la
+  // está esperando al cortarse.
+  const cortado = new Promise<never>((_, rechazar) => {
+    control.signal.addEventListener('abort', () => rechazar(control.signal.reason), { once: true })
+  })
+  cortado.catch(() => {})
+  const tope = setTimeout(() => cortar('sin tiempo'), hasta - Date.now())
+  let quieto = setTimeout(() => cortar('sin respuesta'), PLAZO_RESPUESTA_MS)
+  const soltar = () => {
+    clearTimeout(tope)
+    clearTimeout(quieto)
+  }
+  const fallar = (motivo: MotivoDeDescarga): Descarga => {
+    soltar()
+    return { ok: false, motivo }
+  }
+
   for (let salto = 0; salto <= MAX_REDIRECCIONES; salto++) {
     if (!hostPermitido(actual)) {
       console.error(`${etiqueta}: la URL no se puede descargar (esquema o host prohibido):`, actual.slice(0, 200))
-      return null
+      return fallar('url prohibida')
     }
     let response: Response
     try {
-      response = await fetch(actual, { signal, redirect: 'manual' })
+      response = await Promise.race([fetch(actual, { signal: control.signal, redirect: 'manual' }), cortado])
     } catch (error) {
       console.error(`${etiqueta}: no se pudo descargar:`, String(error).slice(0, 200), actual.slice(0, 200))
-      return null
+      return fallar(motivoDelError(error))
     }
     if (response.status >= 300 && response.status < 400) {
       const destino = response.headers.get('location')
       // El cuerpo de un 3xx no se necesita más allá del header: sin cancelarlo, el
       // socket queda abierto en cada salto de la cadena. El `.catch` es necesario y no
-      // decorativo: si el cuerpo ya quedó "errored" (la señal compartida venció justo
+      // decorativo: si el cuerpo ya quedó "errored" (un plazo venció justo
       // entre los headers y este cancel), `cancel()` devuelve la promesa rechazada con
       // ese mismo error — la misma semántica de streams que describe el comentario de
       // `leerConTope` en `documento.ts`. Sin el `.catch`, ese rechazo salía por encima
@@ -172,7 +244,7 @@ export async function descargarSeguro(url: string, etiqueta: string): Promise<Re
       await response.body?.cancel().catch(() => {})
       if (!destino) {
         console.error(`${etiqueta}: redirección sin destino:`, actual.slice(0, 200))
-        return null
+        return fallar('redirecciones')
       }
       // El origen es de un tercero: `Location:` puede traer cualquier cosa, incluida
       // una que `URL` no sepa parsear (`http://[` basta). Se envuelve solo esta línea,
@@ -186,41 +258,90 @@ export async function descargarSeguro(url: string, etiqueta: string): Promise<Re
           String(error).slice(0, 200),
           destino.slice(0, 200),
         )
-        return null
+        return fallar('redirecciones')
       }
       actual = siguiente
       continue
     }
     if (!response.ok) {
       console.error(`${etiqueta}: no se pudo descargar:`, response.status, actual.slice(0, 200))
-      return null
+      await response.body?.cancel().catch(() => {})
+      return fallar(`http ${response.status}`)
     }
-    return response
+    clearTimeout(quieto)
+    const cuerpo = response.body
+    if (!cuerpo) {
+      soltar()
+      return { ok: true, response }
+    }
+    // El cuerpo se entrega envuelto para vigilar `PLAZO_QUIETO_MS`. `highWaterMark: 0` hace
+    // que `pull` corra solo cuando alguien está leyendo, no para llenar un búfer por adelantado.
+    const lector = cuerpo.getReader()
+    const vigilado = new ReadableStream<Uint8Array>(
+      {
+        async pull(salida) {
+          quieto = setTimeout(() => cortar('estancada'), PLAZO_QUIETO_MS)
+          try {
+            const leido = await Promise.race([lector.read(), cortado])
+            if (leido.done) {
+              soltar()
+              salida.close()
+            } else {
+              salida.enqueue(leido.value)
+            }
+          } catch (error) {
+            soltar()
+            // Si el corte fue nuestro, el `fetch` ya se abortó; esto suelta el lector igual.
+            lector.cancel().catch(() => {})
+            salida.error(error)
+          } finally {
+            clearTimeout(quieto)
+          }
+        },
+        cancel(razon) {
+          soltar()
+          return lector.cancel(razon).catch(() => {})
+        },
+      },
+      { highWaterMark: 0 },
+    )
+    return {
+      ok: true,
+      response: new Response(vigilado, {
+        status: response.status,
+        statusText: response.statusText,
+        headers: response.headers,
+      }),
+    }
   }
   console.error(`${etiqueta}: demasiadas redirecciones:`, url.slice(0, 200))
-  return null
+  return fallar('redirecciones')
 }
 
 /**
  * Lee el cuerpo en streaming sin bufferear más que `tope` bytes: si el total supera el
- * tope antes de terminar, cancela la lectura y devuelve `null` sin haber acumulado el
+ * tope antes de terminar, cancela la lectura y devuelve `muy grande` sin haber acumulado el
  * resto. Es la comprobación que de verdad protege — `response.blob()` bufferea el
  * cuerpo entero antes de que cualquier chequeo sobre su tamaño pueda mirarlo, así que un
  * origen que sirve 500 MB los sirve igual aunque la fila termine rechazada; en una
  * función serverless eso es memoria contra el límite del proceso, no solo bytes de más
  * en el almacén.
  *
- * También devuelve `null`, sin lanzar, si `lector.read()` lanza a mitad del cuerpo: el
- * presupuesto de tiempo compartido de `descargarSeguro` puede vencer (`TimeoutError`)
- * después de que ya se leyeron algunos chunks, o la conexión puede cortarse sola. Y
- * devuelve `null` si el cuerpo está vacío, con o sin `body` (un 2xx sin contenido, o un
- * stream que se cierra sin haber entregado nada): un PDF de 0 bytes no es un documento
- * válido, ni un archivo de 0 bytes una media.
+ * Tampoco lanza si `lector.read()` lanza a mitad del cuerpo: devuelve el motivo del plazo
+ * de `descargarSeguro` que venció (`estancada`, `sin tiempo`), o `cortada` si la conexión se
+ * cortó sola. Y devuelve `vacía` si el cuerpo está vacío, con o sin `body` (un 2xx sin
+ * contenido, o un stream que se cierra sin haber entregado nada): un PDF de 0 bytes no es
+ * un documento válido, ni un archivo de 0 bytes una media.
  *
  * La comparten el documento de una regla (`documento.ts`) y la media del lote (`batch.ts`):
  * los dos bajan de un tercero algo que después se copia al almacén.
  */
-export async function leerConTope(response: Response, tope: number, url: string, etiqueta: string): Promise<Blob | null> {
+export async function leerConTope(
+  response: Response,
+  tope: number,
+  url: string,
+  etiqueta: string,
+): Promise<{ blob: Blob } | { motivo: MotivoDeDescarga }> {
   const cuerpo = response.body
   // Un 2xx sin cuerpo (p. ej. un 204, o un origen que declara `content-type:
   // application/pdf` sin escribir nada) no es un PDF de 0 bytes válido: antes de este
@@ -229,7 +350,7 @@ export async function leerConTope(response: Response, tope: number, url: string,
   // rechaza acá, no cuando alguien comente la palabra.
   if (!cuerpo) {
     console.error(`${etiqueta}: la respuesta no tiene cuerpo (2xx vacío):`, url.slice(0, 200))
-    return null
+    return { motivo: 'vacía' }
   }
   const lector = cuerpo.getReader()
   const partes: Buffer[] = []
@@ -240,36 +361,36 @@ export async function leerConTope(response: Response, tope: number, url: string,
       resultado = await lector.read()
     } catch (error) {
       // No hace falta `lector.cancel()` acá: cuando `read()` lanza, el stream ya quedó
-      // en estado "errored" por su cuenta (fue el timeout o el corte de red lo que lo
+      // en estado "errored" por su cuenta (fue un plazo o el corte de red lo que lo
       // dejó así) y el socket ya se cerró como parte de ese error, no como consecuencia
       // de algo que hagamos después. Cancelar un stream ya "errored" solo repite la
       // misma excepción (WHATWG Streams: `ReadableStreamCancel` devuelve la promesa
       // rechazada con el mismo `storedError`), no libera nada nuevo.
       console.error(`${etiqueta}: la descarga se cortó a mitad del cuerpo:`, String(error).slice(0, 200))
-      return null
+      return { motivo: motivoDelError(error) }
     }
     const { done, value } = resultado
     if (done) break
     total += value.byteLength
     if (total > tope) {
       // A diferencia del `catch` de arriba, acá el stream normalmente sigue "readable"
-      // — cancelamos nosotros, no algo que ya lo rompió. Pero puede que no: la señal de
-      // tiempo compartida de `descargarSeguro` puede vencer justo entre el último
+      // — cancelamos nosotros, no algo que ya lo rompió. Pero puede que no: un plazo de
+      // `descargarSeguro` puede vencer justo entre el último
       // `read()` y este `cancel()`, dejando el stream "errored" antes de que lleguemos
       // acá. `cancel()` sobre un stream así devuelve la promesa rechazada con ese mismo
       // error (misma semántica que el comentario de arriba) — el `.catch` es lo que
       // sostiene que esta función nunca lanza.
       await lector.cancel().catch(() => {})
-      return null
+      return { motivo: 'muy grande' }
     }
     partes.push(Buffer.from(value))
   }
   if (total === 0) {
     console.error(`${etiqueta}: la respuesta llegó vacía:`, url.slice(0, 200))
-    return null
+    return { motivo: 'vacía' }
   }
   // El tipo de lib.dom (`BlobPart`) exige un `ArrayBuffer`, no el `ArrayBufferLike` con
   // el que TS tipa genéricamente un `Buffer`/`Uint8Array`; en tiempo de ejecución estos
   // siempre son `ArrayBuffer` (los creó `Buffer.from`, nunca un `SharedArrayBuffer`).
-  return new Blob(partes as BlobPart[])
+  return { blob: new Blob(partes as BlobPart[]) }
 }

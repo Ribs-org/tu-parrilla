@@ -1,15 +1,28 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { descargarSeguro, hostPermitido } from './descarga-segura'
+import {
+  descargarSeguro,
+  hostPermitido,
+  leerConTope,
+  PLAZO_QUIETO_MS,
+  PLAZO_RESPUESTA_MS,
+  type Descarga,
+} from './descarga-segura'
 
 afterEach(() => {
   vi.unstubAllGlobals()
+  vi.useRealTimers()
 })
 
+/** La respuesta de una descarga que tenía que andar; si no anduvo, el test cae con su motivo. */
+function respuesta(descarga: Descarga): Response {
+  if (!descarga.ok) throw new Error(`la descarga falló: ${descarga.motivo}`)
+  return descarga.response
+}
+
 /** Un `fetch` que nunca debería llamarse: si se llama, el mock lanza y el `catch` de
- * `descargarSeguro` lo convierte en `null` — exactamente el mismo resultado que
- * «rechazado antes de tocar la red». Por eso el test tiene que comprobar la llamada en
- * sí (`.not.toHaveBeenCalled()`), no solo el valor devuelto: un `toBeNull()` a solas no
- * distingue las dos causas. */
+ * `descargarSeguro` lo convierte en un fallo — el mismo `ok: false` que «rechazado antes de
+ * tocar la red». Por eso el test tiene que comprobar la llamada en sí
+ * (`.not.toHaveBeenCalled()`), no solo el valor devuelto. */
 function fetchQueNuncaDeberiaLlamarse() {
   const mock = vi.fn(async () => {
     throw new Error('no debía tocar la red')
@@ -154,9 +167,8 @@ describe('descargarSeguro', () => {
       return new Response('ok', { status: 200 })
     })
     vi.stubGlobal('fetch', fetchMock)
-    const response = await descargarSeguro('https://ej.com/inicial.pdf', 'la prueba')
-    expect(response).not.toBeNull()
-    expect(await response!.text()).toBe('ok')
+    const descarga = await descargarSeguro('https://ej.com/inicial.pdf', 'la prueba')
+    expect(await respuesta(descarga).text()).toBe('ok')
     // Exactamente dos: la URL inicial y el destino de su redirección, ni una de más.
     expect(fetchMock).toHaveBeenCalledTimes(2)
   })
@@ -166,7 +178,7 @@ describe('descargarSeguro', () => {
       new Response(null, { status: 302, headers: { location: 'http://169.254.169.254/latest/meta-data' } }),
     )
     vi.stubGlobal('fetch', fetchMock)
-    expect(await descargarSeguro('https://ej.com/redirige.pdf', 'la prueba')).toBeNull()
+    expect(await descargarSeguro('https://ej.com/redirige.pdf', 'la prueba')).toEqual({ ok: false, motivo: 'url prohibida' })
     // La comprobación de host corre antes de cada salto: si esto fuera 2, se habría
     // llegado a pedir la dirección de metadata, que es justo lo que hay que impedir.
     expect(fetchMock).toHaveBeenCalledTimes(1)
@@ -177,7 +189,7 @@ describe('descargarSeguro', () => {
       new Response(null, { status: 302, headers: { location: 'data:application/pdf;base64,AAAA' } }),
     )
     vi.stubGlobal('fetch', fetchMock)
-    expect(await descargarSeguro('https://ej.com/redirige.pdf', 'la prueba')).toBeNull()
+    expect(await descargarSeguro('https://ej.com/redirige.pdf', 'la prueba')).toEqual({ ok: false, motivo: 'url prohibida' })
     expect(fetchMock).toHaveBeenCalledTimes(1)
   })
 
@@ -215,29 +227,29 @@ describe('descargarSeguro', () => {
       return new Response('ok', { status: 200 })
     })
     vi.stubGlobal('fetch', fetchMock)
-    const response = await descargarSeguro('https://ej.com/redirige.pdf', 'la prueba')
+    const descarga = await descargarSeguro('https://ej.com/redirige.pdf', 'la prueba')
     // No lanzó, y siguió la redirección con normalidad: el rechazo del cancel() se
     // sostiene adentro, no interrumpe la cadena.
-    expect(await response!.text()).toBe('ok')
+    expect(await respuesta(descarga).text()).toBe('ok')
   })
 
   it('rechaza un host interno antes de tocar la red', async () => {
     const fetchMock = fetchQueNuncaDeberiaLlamarse()
-    expect(await descargarSeguro('http://127.0.0.1/', 'la prueba')).toBeNull()
+    expect(await descargarSeguro('http://127.0.0.1/', 'la prueba')).toEqual({ ok: false, motivo: 'url prohibida' })
     expect(fetchMock).not.toHaveBeenCalled()
   })
 
-  it('devuelve null si la respuesta no es ok', async () => {
+  it('una respuesta que no es ok dice su status', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => new Response('no', { status: 500 })))
-    expect(await descargarSeguro('https://ej.com/muerto.pdf', 'la prueba')).toBeNull()
+    expect(await descargarSeguro('https://ej.com/muerto.pdf', 'la prueba')).toEqual({ ok: false, motivo: 'http 500' })
   })
 
-  it('devuelve null si la red falla, sin lanzar', async () => {
+  it('si la red falla dice «cortada», sin lanzar', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('dns') }))
-    expect(await descargarSeguro('https://ej.com/inalcanzable.pdf', 'la prueba')).toBeNull()
+    expect(await descargarSeguro('https://ej.com/inalcanzable.pdf', 'la prueba')).toEqual({ ok: false, motivo: 'cortada' })
   })
 
-  it('devuelve null si el destino de la redirección no se puede parsear, sin lanzar', async () => {
+  it('si el destino de la redirección no se puede parsear dice «redirecciones», sin lanzar', async () => {
     // El origen es de un tercero: manda lo que quiera en `Location:`. `http://[` es
     // sintácticamente un IPv6 sin cerrar — `new URL()` lanza `TypeError` al intentar
     // parsearlo, y antes de este arreglo esa excepción salía por encima de esta función.
@@ -245,8 +257,104 @@ describe('descargarSeguro', () => {
       new Response(null, { status: 302, headers: { location: 'http://[' } }),
     )
     vi.stubGlobal('fetch', fetchMock)
-    expect(await descargarSeguro('https://ej.com/redirige.pdf', 'la prueba')).toBeNull()
+    expect(await descargarSeguro('https://ej.com/redirige.pdf', 'la prueba')).toEqual({ ok: false, motivo: 'redirecciones' })
     // No hay segundo salto: el destino ni siquiera llegó a convertirse en una URL.
     expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
+})
+
+/**
+ * Un cuerpo que entrega `trozos` pedazos de un byte, esperando `cada` ms (del reloj falso)
+ * antes de cada uno. Con `quietoTrasElPrimero`, después del primero no entrega nada más: el
+ * origen que se queda quieto.
+ */
+function cuerpoLento(trozos: number, cada: number, quietoTrasElPrimero = false): ReadableStream<Uint8Array> {
+  let entregados = 0
+  return new ReadableStream<Uint8Array>(
+    {
+      async pull(salida) {
+        if (quietoTrasElPrimero && entregados === 1) return new Promise<void>(() => {})
+        await new Promise((seguir) => setTimeout(seguir, cada))
+        entregados++
+        salida.enqueue(new Uint8Array([entregados]))
+        if (entregados === trozos) salida.close()
+      },
+    },
+    { highWaterMark: 0 },
+  )
+}
+
+function servir(cuerpo: ReadableStream<Uint8Array> | null) {
+  vi.stubGlobal('fetch', vi.fn(async () => new Response(cuerpo, { status: 200 })))
+}
+
+describe('los plazos de descargarSeguro', () => {
+  it('un origen que no contesta corta a los treinta segundos con «sin respuesta»', async () => {
+    vi.useFakeTimers()
+    vi.stubGlobal('fetch', vi.fn(() => new Promise<Response>(() => {})))
+    const descarga = descargarSeguro('https://ej.com/v.mp4', 'la prueba', Date.now() + 200_000)
+    await vi.advanceTimersByTimeAsync(PLAZO_RESPUESTA_MS)
+    expect(await descarga).toEqual({ ok: false, motivo: 'sin respuesta' })
+  })
+
+  it('un archivo que baja parejo no se corta aunque tarde mucho más que treinta segundos', async () => {
+    // El caso de los videos de Drive del 2026-10-21: con treinta segundos para todo, morían a
+    // medio cuerpo. Seis trozos cada veinte segundos son dos minutos de descarga.
+    vi.useFakeTimers()
+    servir(cuerpoLento(6, 20_000))
+    const response = respuesta(await descargarSeguro('https://ej.com/v.mp4', 'la prueba', Date.now() + 200_000))
+    const lectura = leerConTope(response, 100, 'https://ej.com/v.mp4', 'la prueba')
+    await vi.advanceTimersByTimeAsync(6 * 20_000)
+    const leido = await lectura
+    expect('blob' in leido && leido.blob.size).toBe(6)
+  })
+
+  it('un archivo que deja de llegar se corta con «estancada»', async () => {
+    vi.useFakeTimers()
+    servir(cuerpoLento(Infinity, 1_000, true))
+    const response = respuesta(await descargarSeguro('https://ej.com/v.mp4', 'la prueba', Date.now() + 200_000))
+    const lectura = leerConTope(response, 100, 'https://ej.com/v.mp4', 'la prueba')
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    await vi.advanceTimersByTimeAsync(1_000 + PLAZO_QUIETO_MS)
+    expect(await lectura).toEqual({ motivo: 'estancada' })
+  })
+
+  it('el tope de quien llama corta aunque el archivo siga llegando, con «sin tiempo»', async () => {
+    vi.useFakeTimers()
+    servir(cuerpoLento(10, 20_000))
+    const response = respuesta(await descargarSeguro('https://ej.com/v.mp4', 'la prueba', Date.now() + 50_000))
+    const lectura = leerConTope(response, 100, 'https://ej.com/v.mp4', 'la prueba')
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    await vi.advanceTimersByTimeAsync(50_000)
+    expect(await lectura).toEqual({ motivo: 'sin tiempo' })
+  })
+
+  it('el rato en que nadie lee no cuenta como quieto', async () => {
+    // El lote puede tener la respuesta abierta mientras espera su cupo de memoria: esa pausa
+    // no es culpa del origen y no puede cortarlo.
+    vi.useFakeTimers()
+    servir(new Response('hola').body)
+    const response = respuesta(await descargarSeguro('https://ej.com/v.mp4', 'la prueba', Date.now() + 200_000))
+    await vi.advanceTimersByTimeAsync(PLAZO_QUIETO_MS * 2)
+    expect(await response.text()).toBe('hola')
+  })
+
+  it('con el tope ya pasado no toca la red', async () => {
+    const fetchMock = fetchQueNuncaDeberiaLlamarse()
+    expect(await descargarSeguro('https://ej.com/v.mp4', 'la prueba', Date.now() - 1)).toEqual({ ok: false, motivo: 'sin tiempo' })
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+})
+
+describe('leerConTope', () => {
+  it('lo que pasa del tope se corta con «muy grande»', async () => {
+    const leido = await leerConTope(new Response(new Uint8Array(11)), 10, 'https://ej.com/v.mp4', 'la prueba')
+    expect(leido).toEqual({ motivo: 'muy grande' })
+  })
+
+  it('un cuerpo vacío es «vacía»', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    expect(await leerConTope(new Response(new Uint8Array(0)), 10, 'https://ej.com/v.mp4', 'la prueba')).toEqual({ motivo: 'vacía' })
+    expect(await leerConTope(new Response(null), 10, 'https://ej.com/v.mp4', 'la prueba')).toEqual({ motivo: 'vacía' })
   })
 })

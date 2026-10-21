@@ -5,8 +5,14 @@ import { duenoDeLaLlave } from '@/lib/llaves'
 export const dynamic = 'force-dynamic'
 // Downloads ride inside this function; same budget as the publish cron.
 export const maxDuration = 240
+/**
+ * Lo que queda después de cortar el lote para contestar: la última subida al almacén y la
+ * transacción de una fila que ya tenía su media no se cortan, y tienen que caber acá.
+ */
+const MARGEN_MS = 40_000
 
 export async function POST(request: Request) {
+  const inicio = Date.now()
   // Lo que entra por acá es del dueño de la llave: el usuario que la generó en Tu Cuenta,
   // o el admin si es la del despliegue.
   const ownerId = await duenoDeLaLlave(request)
@@ -48,7 +54,9 @@ export async function POST(request: Request) {
     )
   }
 
-  // Rejected rows are data, not an endpoint failure — same rule as the cron report.
-  const resultados = await scheduleBatch(ownerId, posts)
+  // Rejected rows are data, not an endpoint failure — same rule as the cron report. Con
+  // tiempo propio para contestar: si la función muriera por `maxDuration`, se perderían
+  // también los resultados de las filas que sí entraron.
+  const resultados = await scheduleBatch(ownerId, posts, inicio + maxDuration * 1000 - MARGEN_MS)
   return NextResponse.json({ resultados })
 }

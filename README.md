@@ -1238,10 +1238,22 @@ cuenta solo cuando el dueño tiene **exactamente una** conectada de esa red — 
 fila se rechaza nombrando las candidatas y sus handles; no hay adivinanza posible.
 Responde el resultado por item; las filas rechazadas traen su motivo.
 
+La media de cada fila se baja de su URL y se copia a R2 dentro de la misma petición
+(`scheduleBatch`, `src/lib/social/publish/batch.ts`). Corren cuatro filas a la vez
+(`FILAS_A_LA_VEZ`), con un cupo de memoria compartido por el proceso (`BYTES_EN_MEMORIA`: cada
+archivo está entero en memoria entre que baja y que se sube), y la misma URL se baja una vez por
+lote. Cada descarga tiene 30 s para contestar y se corta si deja de llegar 30 s seguidos, pero un
+archivo que baja parejo no tiene tope propio: hasta el 2026-10-21 había treinta segundos para
+todo, y así fallaban los videos grandes de Drive. Un fallo pasajero se reintenta una vez. El lote
+entero deja de empezar filas cuarenta segundos antes del `maxDuration` de la ruta y contesta con
+lo que alcanzó; el resto vuelve con su frase. Cada resultado trae `ms` y, si bajó media, `bytes`,
+`origen` y, si falló, `motivo` (las guías de la API los listan).
+
 Cada fila puede traer una `ref`: un texto de hasta 100 caracteres, único por dueño, que el
 que llama elige (el id de la fila en su planilla, por ejemplo). Sirve para el caso que antes
-duplicaba: si la función alcanza su tiempo máximo a mitad de un lote, o se corta la conexión,
-la respuesta se pierde pero las filas ya procesadas quedan programadas. Reenviar el lote
+duplicaba: si se corta la conexión a mitad de un lote, la respuesta se pierde pero las filas ya
+procesadas quedan programadas; y si el lote no alcanza a terminar, las que faltaron vuelven con
+su frase. Reenviar el lote
 entero devuelve esas filas con su `postId` y `repetido: true`, sin programarlas de nuevo —ni
 descargar su media, ni volver a validarlas: su hora pudo pasar desde el primer envío—, y
 programa solo las que faltaban. La `ref` no compara contenidos: si la fila cambió, el post

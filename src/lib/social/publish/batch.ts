@@ -9,7 +9,8 @@ import { and, eq } from 'drizzle-orm'
 import { randomUUID } from 'node:crypto'
 import { CuentaInvalida, cuentaUnicaPorRed, verificarCuentas, type CuentaDestino } from '../cuentas'
 import { validarRegla, REGLA_DOCUMENTO } from '../comentarios/reglas'
-import { descargarSeguro, leerConTope } from './descarga-segura'
+import { descargarSeguro, leerConTope, TOPE_POR_DEFECTO_MS, type MotivoDeDescarga } from './descarga-segura'
+import { Cupo, enParalelo } from './concurrencia'
 import { documentoToBlob } from './documento'
 import { esChoqueCon } from '@/lib/choque-de-unicidad'
 import { buscarPorId } from '@/lib/usuarios'
@@ -51,10 +52,19 @@ export type BatchItem = {
   ref?: unknown
 }
 
-export type BatchResult =
+/** Lo que se dice de una fila, sin su medición. */
+type Veredicto =
   // `repetido`: ya había un post con esa `ref`, y es el que vuelve; la fila no se programó otra vez.
-  | { index: number; ok: true; postId: string; repetido?: true }
-  | { index: number; ok: false; error: string }
+  | { ok: true; postId: string; repetido?: true }
+  // `motivo`: por qué no se pudo traer la media, cuando el problema fue ese.
+  | { ok: false; error: string; motivo?: MotivoDeDescarga }
+
+/**
+ * Cada fila dice además cuánto tardó en el servidor (`ms`). Si llegó a su media, también
+ * cuánto bajó (`bytes`) y de dónde salió (`origen`): `descarga` si bajó algo, `cache` si
+ * todo venía de otra fila del mismo lote con la misma URL.
+ */
+export type BatchResult = { index: number } & Veredicto & { ms: number; bytes?: number; origen?: 'descarga' | 'cache' }
 
 export const MAX_BATCH_ITEMS = 50
 
@@ -380,16 +390,49 @@ export function validateBatchItem(item: BatchItem, now: Date, zone: string): str
   )
 }
 
-export async function mediaToBlob(
-  url: string,
-  expected: 'image' | 'video' | null,
-): Promise<{ url: string; mediaType: 'image' | 'video' } | null> {
-  // Third-party hosting named in a spreadsheet cell: a host that stalls must cost this
-  // row thirty seconds, not the whole batch's 240s budget. `descargarSeguro` es la
-  // comprobación de red interna compartida con `documentoToBlob` (documento.ts): sin
-  // ella, esta fila pedía cualquier URL que trajera el CSV en nombre del servidor.
-  const response = await descargarSeguro(url, 'la media del lote')
-  if (!response) return null
+/** La frase de una media que no se pudo traer; el porqué viaja aparte, en `motivo`. */
+export const MEDIA_ILEGIBLE = 'No se pudo leer una media de la fila.'
+
+/**
+ * La de una fila que no alcanzó a terminar antes de que la función tuviera que contestar.
+ * Reenviarla con su `ref` es seguro: si alcanzó a entrar, vuelve como repetida.
+ */
+export const LOTE_SIN_TIEMPO = 'Al lote se le acabó el tiempo antes de terminar esta fila. Reenvíala.'
+
+/** Una media ya copiada al almacén, con lo que pesó; o por qué no se pudo traer. */
+export type Copia =
+  | { ok: true; url: string; mediaType: 'image' | 'video'; bytes: number }
+  | { ok: false; motivo: MotivoDeDescarga }
+
+/**
+ * Cuántos bytes de media caben en memoria a la vez en este proceso, sumando las filas que
+ * bajan en paralelo y los lotes que caigan en la misma instancia. Cada archivo está entero
+ * en memoria entre que baja y que se sube, y en el peor momento dos veces (`leerConTope`
+ * arma un Blob y `guardar` lo copia a un Buffer): 400 MB de archivos son hasta 800 MB, lejos
+ * de los 2 GB de una función de Vercel. Un archivo más pesado que el cupo —se aceptan hasta
+ * 500 MB, `MAX_BYTES_ARCHIVO`— baja solo, como bajaba todo antes de que hubiera paralelo.
+ */
+const BYTES_EN_MEMORIA = 400 * 1024 * 1024
+const memoria = new Cupo(BYTES_EN_MEMORIA)
+
+const ESPERA_REINTENTO_MS = 2_000
+/** Con menos que esto por delante, un segundo intento moriría a medias: mejor contestar el primero. */
+const MINIMO_PARA_REINTENTAR_MS = 10_000
+
+/** Lo que puede andar a la segunda: el origen no contestó, se quedó quieto, cortó, o tuvo un mal momento. */
+function valeReintentar(motivo: MotivoDeDescarga): boolean {
+  if (motivo === 'sin respuesta' || motivo === 'estancada' || motivo === 'cortada') return true
+  const status = /^http (\d{3})$/.exec(motivo)?.[1]
+  return status !== undefined && (status === '429' || status.startsWith('5'))
+}
+
+async function copiarUnaVez(url: string, expected: 'image' | 'video' | null, hasta: number): Promise<Copia> {
+  // `descargarSeguro` es la comprobación de red interna compartida con `documentoToBlob`
+  // (documento.ts): sin ella, esta fila pedía cualquier URL que trajera el CSV en nombre
+  // del servidor.
+  const descarga = await descargarSeguro(url, 'la media del lote', hasta)
+  if (!descarga.ok) return descarga
+  const response = descarga.response
   const contentType = response.headers.get('content-type') ?? ''
   // The server's content-type is the truth: with an extension it must agree (a PDF
   // renamed .jpg would otherwise reach Meta as an "image"); without one — a Drive
@@ -398,33 +441,133 @@ export async function mediaToBlob(
   const detected = typeFromContentType(contentType)
   if (!detected || (expected && detected.mediaType !== expected)) {
     console.error('Content-type inesperado en la media del lote:', contentType, url.slice(0, 200))
-    return null
+    await response.body?.cancel().catch(() => {})
+    const tipo = (contentType.split(';')[0] ?? '').trim().toLowerCase().slice(0, 60)
+    return { ok: false, motivo: `tipo ${tipo || 'ausente'}` }
   }
   // El cuerpo se lee con tope (`leerConTope`): `response.blob()` bufferea el archivo entero
   // antes de que nadie pueda mirar su tamaño, y un origen que sirve gigas los servía igual.
   // El `content-length` declarado ahorra abrir la lectura de un archivo que ya avisa de más.
-  if (Number(response.headers.get('content-length') ?? '0') > MAX_BYTES_ARCHIVO) {
+  const declarado = Number(response.headers.get('content-length') ?? '0')
+  if (declarado > MAX_BYTES_ARCHIVO) {
     await response.body?.cancel().catch(() => {})
     console.error('La media del lote:', ARCHIVO_MUY_GRANDE, url.slice(0, 200))
-    return null
+    return { ok: false, motivo: 'muy grande' }
   }
-  const cuerpo = await leerConTope(response, MAX_BYTES_ARCHIVO, url, 'la media del lote')
-  if (!cuerpo) return null
-  const publicUrl = await guardar(
-    `scheduled/${randomUUID()}.${detected.extension}`,
-    cuerpo,
-    // El canónico que typeFromContentType ya parseó, no el header crudo: sin sus
-    // parámetros (`; charset=binary` y similares) para que Meta y YouTube lean un
-    // tipo limpio al descargar la media desde acá.
-    detected.tipo,
-  )
-  return { url: publicUrl, mediaType: detected.mediaType }
+  // Sin un tamaño declarado que sirva, se aparta el máximo: es lo que podría llegar a pesar.
+  const soltar = await memoria.tomar(declarado > 0 ? declarado : MAX_BYTES_ARCHIVO)
+  try {
+    const leido = await leerConTope(response, MAX_BYTES_ARCHIVO, url, 'la media del lote')
+    if ('motivo' in leido) return { ok: false, motivo: leido.motivo }
+    const publicUrl = await guardar(
+      `scheduled/${randomUUID()}.${detected.extension}`,
+      leido.blob,
+      // El canónico que typeFromContentType ya parseó, no el header crudo: sin sus
+      // parámetros (`; charset=binary` y similares) para que Meta y YouTube lean un
+      // tipo limpio al descargar la media desde acá.
+      detected.tipo,
+    )
+    return { ok: true, url: publicUrl, mediaType: detected.mediaType, bytes: leido.blob.size }
+  } finally {
+    soltar()
+  }
 }
 
 /**
- * One batch, sequential on purpose: fifty concurrent downloads against third-party
- * hosting is how you meet rate limits. A failed row records its fixed sentence and
- * the loop keeps going — partial success is the contract, Buffer-style.
+ * Una media por URL, copiada al almacén. Si el primer intento falla por algo pasajero
+ * (`valeReintentar`) y queda tiempo, espera un poco y prueba otra vez: así volvían, el
+ * 2026-10-21, filas de Drive con enlaces sanos. No lanza por la descarga; sí si falla
+ * `guardar`, que no es culpa de la URL. `hasta` es el instante en que todo se corta: el del
+ * lote, o `TOPE_POR_DEFECTO_MS` desde ahora, el tope de siempre por archivo.
+ */
+export async function copiarMedia(
+  url: string,
+  expected: 'image' | 'video' | null,
+  hasta: number = Date.now() + TOPE_POR_DEFECTO_MS,
+): Promise<Copia> {
+  const primera = await copiarUnaVez(url, expected, hasta)
+  if (primera.ok || !valeReintentar(primera.motivo)) return primera
+  if (hasta - Date.now() < ESPERA_REINTENTO_MS + MINIMO_PARA_REINTENTAR_MS) return primera
+  console.warn('La media del lote: segundo intento tras', primera.motivo, url.slice(0, 200))
+  await new Promise((seguir) => setTimeout(seguir, ESPERA_REINTENTO_MS))
+  return copiarUnaVez(url, expected, hasta)
+}
+
+/** `copiarMedia` para quien solo necesita saber si se pudo: el editor del panel, que tiene su propia frase. */
+export async function mediaToBlob(
+  url: string,
+  expected: 'image' | 'video' | null,
+): Promise<{ url: string; mediaType: 'image' | 'video' } | null> {
+  const copia = await copiarMedia(url, expected)
+  return copia.ok ? { url: copia.url, mediaType: copia.mediaType } : null
+}
+
+/** Cuántas filas de un lote corren a la vez. El cuello es el origen (Drive), no este servidor. */
+export const FILAS_A_LA_VEZ = 4
+
+/** Lo que comparten las filas de un lote mientras corren a la vez. */
+type Lote = {
+  ownerId: string
+  zone: string
+  now: Date
+  hasta: number
+  /** Una copia por URL en todo el lote: la misma media en tres filas se baja una vez. */
+  copias: Map<string, Promise<Copia>>
+  /** La cola de cada `ref`: dos filas con la misma van una detrás de otra, y la segunda ve a la primera. */
+  refs: Map<string, Promise<unknown>>
+}
+
+/** Lo que una fila bajó, para `bytes` y `origen` en su resultado. */
+type Medicion = { bytes: number; descargo: boolean; reuso: boolean }
+
+/**
+ * La copia de una media para esta fila: la que ya hizo (o está haciendo) otra fila del lote
+ * con la misma URL, o una nueva. Una que falló no queda guardada, para que una fila de más
+ * adelante pueda intentarlo de nuevo. Que dos posts compartan el objeto es seguro: al
+ * publicar, `limpiarMedia` (run.ts) solo lo borra si ningún otro post ni borrador lo usa, y
+ * el barrido de huérfanos (`storage-gc.ts`) solo lo que nadie referencia.
+ */
+async function traerMedia(
+  lote: Lote,
+  medicion: Medicion,
+  url: string,
+  expected: 'image' | 'video' | null,
+): Promise<Copia> {
+  const clave = `${expected ?? 'cualquiera'} ${url}`
+  const enCurso = lote.copias.get(clave)
+  if (enCurso) {
+    medicion.reuso = true
+    return enCurso
+  }
+  const copia = copiarMedia(url, expected, lote.hasta)
+  lote.copias.set(clave, copia)
+  medicion.descargo = true
+  try {
+    const hecha = await copia
+    if (hecha.ok) medicion.bytes += hecha.bytes
+    else lote.copias.delete(clave)
+    return hecha
+  } catch (error) {
+    lote.copias.delete(clave)
+    throw error
+  }
+}
+
+/** El rechazo de una fila cuya media no llegó, con su porqué. */
+function sinMedia(motivo: MotivoDeDescarga): Veredicto {
+  return { ok: false, error: motivo === 'sin tiempo' ? LOTE_SIN_TIEMPO : MEDIA_ILEGIBLE, motivo }
+}
+
+/**
+ * Un lote, con `FILAS_A_LA_VEZ` filas a la vez: así baja varias veces más rápido sin que
+ * cincuenta descargas simultáneas choquen con los límites del origen, y sin pasarse de
+ * memoria (`BYTES_EN_MEMORIA`). La media de cada fila baja en orden, un archivo tras otro.
+ * Una fila rechazada anota su frase fija y las demás siguen: el éxito parcial es el
+ * contrato. Los resultados vuelven en el orden de `items`.
+ *
+ * `hasta` es el instante en que el lote deja de empezar filas y corta las descargas en
+ * curso, para que la función alcance a contestar antes de su `maxDuration`: las que no
+ * alcanzaron vuelven con `LOTE_SIN_TIEMPO`.
  *
  * Una fila con `ref` es reconocible: si el lote se corta a mitad (la función se queda sin
  * tiempo, se cae la conexión), reenviarlo entero devuelve los posts que ya habían entrado,
@@ -432,249 +575,235 @@ export async function mediaToBlob(
  * con sus destinos, su media y su regla en una sola transacción: un corte a mitad de una
  * fila no deja un post a medias que la `ref` daría por hecho.
  */
-export async function scheduleBatch(ownerId: string, items: BatchItem[]): Promise<BatchResult[]> {
-  const db = getDb()
-  const now = new Date()
-  const results: BatchResult[] = []
-
+export async function scheduleBatch(
+  ownerId: string,
+  items: BatchItem[],
+  hasta: number = Date.now() + 200_000,
+): Promise<BatchResult[]> {
   // Una sola vez por lote: las cincuenta filas son del mismo dueño y sus horas se leen
   // en la misma zona. Un dueño que ya no existe no debería llegar acá (la llave o la
   // sesión ya lo resolvieron), pero si llega, el default del sitio es mejor que reventar.
   const zone = (await buscarPorId(ownerId))?.zona ?? ZONA_POR_DEFECTO
+  const lote: Lote = { ownerId, zone, now: new Date(), hasta, copias: new Map(), refs: new Map() }
 
-  for (const [index, item] of items.entries()) {
-    // La `ref` va antes que todo lo demás: una fila reenviada no se vuelve a validar, porque
-    // ya entró y su hora pudo pasar desde el primer envío. Se compara sin mirar el contenido.
-    const refCheck = refDeFila(item.ref)
-    if ('error' in refCheck) {
-      results.push({ index, ok: false, error: refCheck.error })
-      continue
+  return enParalelo(items, FILAS_A_LA_VEZ, async (item, index): Promise<BatchResult> => {
+    const inicio = Date.now()
+    const medicion: Medicion = { bytes: 0, descargo: false, reuso: false }
+    const veredicto = await programarFila(lote, item, index, medicion)
+    const resultado: BatchResult = { index, ...veredicto, ms: Date.now() - inicio }
+    if (medicion.descargo || medicion.reuso) {
+      resultado.bytes = medicion.bytes
+      resultado.origen = medicion.descargo ? 'descarga' : 'cache'
     }
-    const ref = refCheck.ref
-    if (ref) {
-      const existente = await postConRef(ownerId, ref)
-      if (existente) {
-        results.push({ index, ok: true, postId: existente, repetido: true })
-        continue
-      }
-    }
+    return resultado
+  })
+}
 
-    const invalid = validateBatchItem(item, now, zone)
-    if (invalid) {
-      results.push({ index, ok: false, error: invalid })
-      continue
-    }
+async function programarFila(lote: Lote, item: BatchItem, index: number, medicion: Medicion): Promise<Veredicto> {
+  if (Date.now() >= lote.hasta) return { ok: false, error: LOTE_SIN_TIEMPO }
+  // La `ref` va antes que todo lo demás: una fila reenviada no se vuelve a validar, porque
+  // ya entró y su hora pudo pasar desde el primer envío. Se compara sin mirar el contenido.
+  const refCheck = refDeFila(item.ref)
+  if ('error' in refCheck) return { ok: false, error: refCheck.error }
+  const ref = refCheck.ref
+  if (!ref) return programarSinRepetir(lote, item, index, null, medicion)
+  // Otra fila de este mismo lote con la misma `ref`: se espera a que termine, para que esta
+  // la encuentre y vuelva como repetida en vez de bajar la media y chocar al guardar.
+  const anterior = lote.refs.get(ref) ?? Promise.resolve()
+  const esta = anterior.then(() => programarSinRepetir(lote, item, index, ref, medicion))
+  lote.refs.set(ref, esta.catch(() => {}))
+  return esta
+}
 
-    try {
-      // Antes de subir nada: un destino sin cuenta se rechaza acá, no después de gastar
-      // la subida de toda la media de la fila.
-      const pedido = destinoPedido(item)
-      const destinos =
-        'cuentas' in pedido
-          ? await verificarCuentas(ownerId, pedido.cuentas)
-          : [...(await cuentaUnicaPorRed(ownerId, pedido.redes)).values()]
-
-      // Igual de temprano: con cuentas nombradas, `validateBatchItem` solo comprobó la
-      // forma de `opciones` (no conocía la red de cada cuenta sin ir a la base). Ahora
-      // que los destinos están verificados, esta es la comprobación completa.
-      const opcionesCheck = opcionesDeFila(item, destinos)
-      if ('error' in opcionesCheck) {
-        results.push({ index, ok: false, error: opcionesCheck.error })
-        continue
-      }
-      const opciones = opcionesCheck.opciones
-
-      // Igual de temprano: con cuentas nombradas, `validateBatchItem` solo corrió la
-      // regla de media del trial reel con `opciones` vacío (no conocía los destinos).
-      // Ahora que `opciones` está resuelto de verdad, esta es la comprobación completa
-      // con los tipos declarados — todavía antes de descargar nada.
-      const { imageCount: imageCountDeclarado, videoCount: videoCountDeclarado } = contarMedia(item.media)
-      const sinTipoDeclarado = item.media.filter((url) => mediaTypeFromUrl(url) === null).length
-      const mediaPorOpciones = errorDeMediaPorOpciones(opciones, {
-        videos: videoCountDeclarado,
-        fotos: imageCountDeclarado - sinTipoDeclarado,
-        sinTipo: sinTipoDeclarado,
-      })
-      if (mediaPorOpciones) {
-        results.push({ index, ok: false, error: mediaPorOpciones })
-        continue
-      }
-
-      // Las reglas de forma por red (TikTok exige video, X no admite más de 4 fotos, …)
-      // usaban `item.redes`, que con cuentas nombradas puede venir vacío: la red real
-      // de cada destino solo se sabe acá. `validateScheduleDraft` se vuelve a correr
-      // más abajo, siempre con las redes de `destinos`.
-      const networks = [...new Set(destinos.map((d) => d.network))]
-      const scheduledAt = parseFecha(item.fecha, zone)!
-
-      // Todavía antes de subir nada: con redes nombradas, `validateBatchItem` ya corrió
-      // estas mismas reglas de forma (TikTok exige video, X hasta 4 fotos, Threads un
-      // solo archivo, el tope del carrusel, los límites de caption, la fecha futura…).
-      // Con cuentas nombradas, esta es la primera vez que `networks` existe — sin este
-      // chequeo, una fila con fecha pasada o sin texto se descargaba y subía entera
-      // antes de rechazarse.
-      const preUploadError = validateScheduleDraft(
-        {
-          caption: item.texto,
-          imageCount: imageCountDeclarado,
-          videoCount: videoCountDeclarado,
-          networks,
-          scheduledAt,
-          formats: item.media.map(extensionDe),
-        },
-        now,
-      )
-      if (preUploadError) {
-        results.push({ index, ok: false, error: preUploadError })
-        continue
-      }
-
-      // Todavía antes de subir nada: `validarRegla` es pura y `validateBatchItem` ya la
-      // corrió, así que la forma de `documentoUrl` está garantizada; lo que falta es
-      // traer el archivo de verdad. Va acá, junto a los demás rechazos tempranos, y no
-      // más abajo (después del bucle que sube la media) porque el PDF pesa hasta 25 MB
-      // y la media de la fila puede pesar cientos de veces más — una fila que de todos
-      // modos se va a rechazar no debe pagar esa subida primero.
-      const reglaCheck = validarRegla(item.regla)
-      let documentoUrl: string | null = null
-      if (!('error' in reglaCheck) && reglaCheck.regla?.documentoUrl) {
-        documentoUrl = await documentoToBlob(reglaCheck.regla.documentoUrl)
-        if (!documentoUrl) {
-          results.push({ index, ok: false, error: REGLA_DOCUMENTO })
-          continue
-        }
-      }
-
-      const uploaded: Array<{ url: string; mediaType: 'image' | 'video' }> = []
-      let mediaFailed = false
-      for (const url of item.media) {
-        const stored = await mediaToBlob(url, mediaTypeFromUrl(url))
-        if (!stored) {
-          results.push({ index, ok: false, error: 'No se pudo leer una media de la fila.' })
-          mediaFailed = true
-          break
-        }
-        uploaded.push(stored)
-      }
-      if (mediaFailed) continue
-
-      // Deferred types are now real: re-run the composer's rules with the true
-      // image/video split — a Drive link that turned out to be a video where only
-      // images fit fails here, with the same fixed sentence the composer would use.
-      const shapeError = validateScheduleDraft(
-        {
-          caption: item.texto,
-          imageCount: uploaded.filter((m) => m.mediaType === 'image').length,
-          videoCount: uploaded.filter((m) => m.mediaType === 'video').length,
-          networks,
-          scheduledAt,
-          formats: uploaded.map((m) => extensionDe(m.url)),
-        },
-        now,
-      )
-      if (shapeError) {
-        results.push({ index, ok: false, error: shapeError })
-        continue
-      }
-
-      // Misma regla del trial reel, ahora con los tipos reales: un Drive que resultó
-      // imagen (o video de más) se rechaza acá, con la media ya subida pero nada
-      // todavía escrito en la base.
-      const mediaReal = errorDeMediaPorOpciones(opciones, {
-        videos: uploaded.filter((m) => m.mediaType === 'video').length,
-        fotos: uploaded.filter((m) => m.mediaType === 'image').length,
-        sinTipo: 0,
-      })
-      if (mediaReal) {
-        results.push({ index, ok: false, error: mediaReal })
-        continue
-      }
-
-      // La portada sigue la misma tubería que la media, con dos veredictos propios:
-      // los tipos reales deben incluir un video, y la portada misma debe ser imagen.
-      const portada = item.portada?.trim()
-      let coverUrl: string | null = null
-      if (portada) {
-        if (!uploaded.some((m) => m.mediaType === 'video')) {
-          results.push({ index, ok: false, error: PORTADA_NEEDS_VIDEO })
-          continue
-        }
-        // expected=null: deja que el content-type decida, así un .jpg cuyo content-type
-        // real es video cae en PORTADA_NOT_IMAGE en vez de heredar la sospecha por
-        // extensión.
-        const stored = await mediaToBlob(portada, null)
-        if (!stored) {
-          results.push({ index, ok: false, error: 'No se pudo leer una media de la fila.' })
-          continue
-        }
-        const typeError = portadaTypeError(stored)
-        if (typeError) {
-          results.push({ index, ok: false, error: typeError })
-          continue
-        }
-        coverUrl = stored.url
-      }
-
-      const atributosCheck = validateAtributos(item.atributos)
-      const atributos = 'error' in atributosCheck ? null : atributosCheck.atributos
-
-      const postId = await db.transaction(async (tx) => {
-        const [post] = await tx
-          .insert(scheduledPosts)
-          .values({ ownerId, caption: item.texto, scheduledAt, coverUrl, atributos, ref })
-          .returning()
-        if (uploaded.length > 0) {
-          await tx.insert(scheduledPostMedia).values(
-            uploaded.map((m, position) => ({
-              postId: post!.id,
-              blobUrl: m.url,
-              mediaType: m.mediaType,
-              position,
-            })),
-          )
-        }
-        // Dos caminos crean posts programados y no comparten código: este, y
-        // `crearPostProgramado` (`./crear.ts`), que usan el compositor y la ruta móvil.
-        // Ese no sirve acá porque no sabe de `coverUrl` ni de `atributos` — el lote es
-        // hoy el único llamador que los necesita al crear. Un cambio en cómo se escribe
-        // un target (esta forma de `scheduledPostTargets.values`) hay que replicarlo ahí.
-        await tx.insert(scheduledPostTargets).values(
-          destinos.map((cuenta) => ({
-            postId: post!.id,
-            network: cuenta.network,
-            accountId: cuenta.id,
-            opciones: opciones[cuenta.id] ?? null,
-          })),
-        )
-
-        if (!('error' in reglaCheck) && reglaCheck.regla) {
-          // La URL de R2 (`documentoUrl`, del paso de arriba) manda sobre la del que llamó:
-          // `...reglaCheck.regla` la trae también, pero ya copiada, no la ajena.
-          await tx.insert(reglasClave).values({ postId: post!.id, ...reglaCheck.regla, documentoUrl })
-        }
-        return post!.id
-      })
-
-      results.push({ index, ok: true, postId })
-    } catch (error) {
-      if (error instanceof CuentaInvalida) {
-        results.push({ index, ok: false, error: error.message })
-        continue
-      }
-      // Otro envío del mismo lote guardó esta `ref` mientras esta fila descargaba su media:
-      // el post ya está, y es ese el que vuelve. Lo que esta fila subió a R2 queda sin
-      // referencia y se lo lleva el barrido de huérfanos.
-      if (ref && esChoqueCon(error, REF_UNICA)) {
-        const existente = await postConRef(ownerId, ref)
-        if (existente) {
-          results.push({ index, ok: true, postId: existente, repetido: true })
-          continue
-        }
-      }
-      console.error(`Falló el item ${index} del lote:`, error)
-      results.push({ index, ok: false, error: 'No se pudo guardar la fila. Inténtalo de nuevo.' })
-    }
+async function programarSinRepetir(
+  lote: Lote,
+  item: BatchItem,
+  index: number,
+  ref: string | null,
+  medicion: Medicion,
+): Promise<Veredicto> {
+  const { ownerId, zone, now } = lote
+  if (ref) {
+    const existente = await postConRef(ownerId, ref)
+    if (existente) return { ok: true, postId: existente, repetido: true }
   }
 
-  return results
+  const invalid = validateBatchItem(item, now, zone)
+  if (invalid) return { ok: false, error: invalid }
+
+  try {
+    // Antes de subir nada: un destino sin cuenta se rechaza acá, no después de gastar
+    // la subida de toda la media de la fila.
+    const pedido = destinoPedido(item)
+    const destinos =
+      'cuentas' in pedido
+        ? await verificarCuentas(ownerId, pedido.cuentas)
+        : [...(await cuentaUnicaPorRed(ownerId, pedido.redes)).values()]
+
+    // Igual de temprano: con cuentas nombradas, `validateBatchItem` solo comprobó la
+    // forma de `opciones` (no conocía la red de cada cuenta sin ir a la base). Ahora
+    // que los destinos están verificados, esta es la comprobación completa.
+    const opcionesCheck = opcionesDeFila(item, destinos)
+    if ('error' in opcionesCheck) return { ok: false, error: opcionesCheck.error }
+    const opciones = opcionesCheck.opciones
+
+    // Igual de temprano: con cuentas nombradas, `validateBatchItem` solo corrió la
+    // regla de media del trial reel con `opciones` vacío (no conocía los destinos).
+    // Ahora que `opciones` está resuelto de verdad, esta es la comprobación completa
+    // con los tipos declarados — todavía antes de descargar nada.
+    const { imageCount: imageCountDeclarado, videoCount: videoCountDeclarado } = contarMedia(item.media)
+    const sinTipoDeclarado = item.media.filter((url) => mediaTypeFromUrl(url) === null).length
+    const mediaPorOpciones = errorDeMediaPorOpciones(opciones, {
+      videos: videoCountDeclarado,
+      fotos: imageCountDeclarado - sinTipoDeclarado,
+      sinTipo: sinTipoDeclarado,
+    })
+    if (mediaPorOpciones) return { ok: false, error: mediaPorOpciones }
+
+    // Las reglas de forma por red (TikTok exige video, X no admite más de 4 fotos, …)
+    // usaban `item.redes`, que con cuentas nombradas puede venir vacío: la red real
+    // de cada destino solo se sabe acá. `validateScheduleDraft` se vuelve a correr
+    // más abajo, siempre con las redes de `destinos`.
+    const networks = [...new Set(destinos.map((d) => d.network))]
+    const scheduledAt = parseFecha(item.fecha, zone)!
+
+    // Todavía antes de subir nada: con redes nombradas, `validateBatchItem` ya corrió
+    // estas mismas reglas de forma (TikTok exige video, X hasta 4 fotos, Threads un
+    // solo archivo, el tope del carrusel, los límites de caption, la fecha futura…).
+    // Con cuentas nombradas, esta es la primera vez que `networks` existe — sin este
+    // chequeo, una fila con fecha pasada o sin texto se descargaba y subía entera
+    // antes de rechazarse.
+    const preUploadError = validateScheduleDraft(
+      {
+        caption: item.texto,
+        imageCount: imageCountDeclarado,
+        videoCount: videoCountDeclarado,
+        networks,
+        scheduledAt,
+        formats: item.media.map(extensionDe),
+      },
+      now,
+    )
+    if (preUploadError) return { ok: false, error: preUploadError }
+
+    // Todavía antes de subir nada: `validarRegla` es pura y `validateBatchItem` ya la
+    // corrió, así que la forma de `documentoUrl` está garantizada; lo que falta es
+    // traer el archivo de verdad. Va acá, junto a los demás rechazos tempranos, y no
+    // más abajo (después del bucle que sube la media) porque el PDF pesa hasta 25 MB
+    // y la media de la fila puede pesar cientos de veces más — una fila que de todos
+    // modos se va a rechazar no debe pagar esa subida primero.
+    const reglaCheck = validarRegla(item.regla)
+    let documentoUrl: string | null = null
+    if (!('error' in reglaCheck) && reglaCheck.regla?.documentoUrl) {
+      documentoUrl = await documentoToBlob(
+        reglaCheck.regla.documentoUrl,
+        Math.min(lote.hasta, Date.now() + TOPE_POR_DEFECTO_MS),
+      )
+      if (!documentoUrl) {
+        return { ok: false, error: Date.now() >= lote.hasta ? LOTE_SIN_TIEMPO : REGLA_DOCUMENTO }
+      }
+    }
+
+    const uploaded: Array<{ url: string; mediaType: 'image' | 'video' }> = []
+    for (const url of item.media) {
+      const copia = await traerMedia(lote, medicion, url, mediaTypeFromUrl(url))
+      if (!copia.ok) return sinMedia(copia.motivo)
+      uploaded.push(copia)
+    }
+
+    // Deferred types are now real: re-run the composer's rules with the true
+    // image/video split — a Drive link that turned out to be a video where only
+    // images fit fails here, with the same fixed sentence the composer would use.
+    const shapeError = validateScheduleDraft(
+      {
+        caption: item.texto,
+        imageCount: uploaded.filter((m) => m.mediaType === 'image').length,
+        videoCount: uploaded.filter((m) => m.mediaType === 'video').length,
+        networks,
+        scheduledAt,
+        formats: uploaded.map((m) => extensionDe(m.url)),
+      },
+      now,
+    )
+    if (shapeError) return { ok: false, error: shapeError }
+
+    // Misma regla del trial reel, ahora con los tipos reales: un Drive que resultó
+    // imagen (o video de más) se rechaza acá, con la media ya subida pero nada
+    // todavía escrito en la base.
+    const mediaReal = errorDeMediaPorOpciones(opciones, {
+      videos: uploaded.filter((m) => m.mediaType === 'video').length,
+      fotos: uploaded.filter((m) => m.mediaType === 'image').length,
+      sinTipo: 0,
+    })
+    if (mediaReal) return { ok: false, error: mediaReal }
+
+    // La portada sigue la misma tubería que la media, con dos veredictos propios:
+    // los tipos reales deben incluir un video, y la portada misma debe ser imagen.
+    const portada = item.portada?.trim()
+    let coverUrl: string | null = null
+    if (portada) {
+      if (!uploaded.some((m) => m.mediaType === 'video')) return { ok: false, error: PORTADA_NEEDS_VIDEO }
+      // expected=null: deja que el content-type decida, así un .jpg cuyo content-type
+      // real es video cae en PORTADA_NOT_IMAGE en vez de heredar la sospecha por
+      // extensión.
+      const copia = await traerMedia(lote, medicion, portada, null)
+      if (!copia.ok) return sinMedia(copia.motivo)
+      const typeError = portadaTypeError(copia)
+      if (typeError) return { ok: false, error: typeError }
+      coverUrl = copia.url
+    }
+
+    const atributosCheck = validateAtributos(item.atributos)
+    const atributos = 'error' in atributosCheck ? null : atributosCheck.atributos
+
+    const postId = await getDb().transaction(async (tx) => {
+      const [post] = await tx
+        .insert(scheduledPosts)
+        .values({ ownerId, caption: item.texto, scheduledAt, coverUrl, atributos, ref })
+        .returning()
+      if (uploaded.length > 0) {
+        await tx.insert(scheduledPostMedia).values(
+          uploaded.map((m, position) => ({
+            postId: post!.id,
+            blobUrl: m.url,
+            mediaType: m.mediaType,
+            position,
+          })),
+        )
+      }
+      // Dos caminos crean posts programados y no comparten código: este, y
+      // `crearPostProgramado` (`./crear.ts`), que usan el compositor y la ruta móvil.
+      // Ese no sirve acá porque no sabe de `coverUrl` ni de `atributos` — el lote es
+      // hoy el único llamador que los necesita al crear. Un cambio en cómo se escribe
+      // un target (esta forma de `scheduledPostTargets.values`) hay que replicarlo ahí.
+      await tx.insert(scheduledPostTargets).values(
+        destinos.map((cuenta) => ({
+          postId: post!.id,
+          network: cuenta.network,
+          accountId: cuenta.id,
+          opciones: opciones[cuenta.id] ?? null,
+        })),
+      )
+
+      if (!('error' in reglaCheck) && reglaCheck.regla) {
+        // La URL de R2 (`documentoUrl`, del paso de arriba) manda sobre la del que llamó:
+        // `...reglaCheck.regla` la trae también, pero ya copiada, no la ajena.
+        await tx.insert(reglasClave).values({ postId: post!.id, ...reglaCheck.regla, documentoUrl })
+      }
+      return post!.id
+    })
+
+    return { ok: true, postId }
+  } catch (error) {
+    if (error instanceof CuentaInvalida) return { ok: false, error: error.message }
+    // Otro envío guardó esta `ref` mientras esta fila descargaba su media: el post ya está,
+    // y es ese el que vuelve. Lo que esta fila subió a R2 queda sin referencia y se lo lleva
+    // el barrido de huérfanos.
+    if (ref && esChoqueCon(error, REF_UNICA)) {
+      const existente = await postConRef(ownerId, ref)
+      if (existente) return { ok: true, postId: existente, repetido: true }
+    }
+    console.error(`Falló el item ${index} del lote:`, error)
+    return { ok: false, error: 'No se pudo guardar la fila. Inténtalo de nuevo.' }
+  }
 }

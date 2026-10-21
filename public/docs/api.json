@@ -41,7 +41,7 @@
           },
           "media": {
             "type": "array",
-            "description": "URLs públicas. Cada una se descarga (30 s de tope), se verifica su tipo real por content-type, y se re-sube al almacenamiento propio. Imágenes: .jpg .jpeg .png .gif .webp. Videos: .mp4 .mov .webm. Sin extensión reconocible también sirve: el tipo lo decide el content-type real de la descarga (así funcionan los links directos de Google Drive), y tiene que ser uno de esos mismos formatos (image/jpeg, image/png, image/gif, image/webp, video/mp4, video/quicktime, video/webm). Hasta 500 MB por archivo.",
+            "description": "URLs públicas. Cada una se descarga (30 s para empezar a llegar, y se corta si deja de llegar 30 s seguidos; un fallo pasajero se reintenta una vez), se verifica su tipo real por content-type, y se re-sube al almacenamiento propio. La misma URL en varias filas de un lote se baja una vez. Imágenes: .jpg .jpeg .png .gif .webp. Videos: .mp4 .mov .webm. Sin extensión reconocible también sirve: el tipo lo decide el content-type real de la descarga (así funcionan los links directos de Google Drive), y tiene que ser uno de esos mismos formatos (image/jpeg, image/png, image/gif, image/webp, video/mp4, video/quicktime, video/webm). Hasta 500 MB por archivo.",
             "items": { "type": "string", "format": "uri" }
           },
           "portada": {

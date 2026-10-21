@@ -143,9 +143,12 @@ publicar.
 
 ### `media` (opcional)
 
-Array de **URLs públicas**. El sistema las descarga (30 s de tope por archivo),
-verifica que el tipo real coincida, y **las re-sube a su propio almacenamiento** —
-la URL de origen puede morir después sin afectar la publicación.
+Array de **URLs públicas**. El sistema las descarga, verifica que el tipo real coincida, y
+**las re-sube a su propio almacenamiento** — la URL de origen puede morir después sin afectar
+la publicación. Cada archivo tiene 30 s para empezar a llegar, y se corta si deja de llegar
+30 s seguidos; uno que baja parejo no tiene tope propio, solo el del lote (ver «Tiempos»). Si
+falla por algo pasajero —el origen no contestó, se cortó, o respondió `5xx` o `429`—, se
+reintenta una vez antes de rechazar la fila.
 
 - Imágenes: `.jpg .jpeg .png .gif .webp`
 - Videos: `.mp4 .mov .webm`
@@ -397,7 +400,8 @@ Instagram acepta: 1 foto, 1 video, o 2–10 fotos (carrusel).
 | `La fecha no se entendió (usa YYYY-MM-DD HH:MM).` | formato de fecha inválido |
 | `Red desconocida o sin publicación: <red>.` | red inexistente |
 | `Hay redes repetidas en la fila.` | la misma red dos veces |
-| `No se pudo leer una media de la fila.` | descarga fallida, timeout, o tipo ajeno (HTML, PDF) |
+| `No se pudo leer una media de la fila.` | descarga fallida, timeout, o tipo ajeno (HTML, PDF); el porqué exacto viene en `motivo` (ver «Respuesta») |
+| `Al lote se le acabó el tiempo antes de terminar esta fila. Reenvíala.` | el lote llegó a su tiempo máximo antes de terminar esta fila (ver «Tiempos»); reenviarla con su `ref` es seguro |
 | `La portada requiere un video en media.` | portada sin video |
 | `La portada debe ser una imagen.` | la portada resultó ser video u otra cosa |
 | `La portada debe ser JPG o PNG.` | portada gif/webp u otro formato |
@@ -433,24 +437,64 @@ por fila es dato, no error del endpoint.
 ```json
 {
   "resultados": [
-    { "index": 0, "ok": true,  "postId": "3f2a…" },
-    { "index": 1, "ok": false, "error": "El texto es demasiado largo para Instagram." },
-    { "index": 2, "ok": true,  "postId": "9c41…", "repetido": true }
+    { "index": 0, "ok": true,  "postId": "3f2a…", "ms": 8412, "bytes": 41937210, "origen": "descarga" },
+    { "index": 1, "ok": false, "error": "El texto es demasiado largo para Instagram.", "ms": 3 },
+    { "index": 2, "ok": true,  "postId": "9c41…", "repetido": true, "ms": 12 },
+    { "index": 3, "ok": true,  "postId": "77d0…", "ms": 6120, "bytes": 0, "origen": "cache" },
+    { "index": 4, "ok": false, "error": "No se pudo leer una media de la fila.", "motivo": "http 403", "ms": 640, "bytes": 0, "origen": "descarga" }
   ]
 }
 ```
 
-`index` es la posición en tu array `posts` (base 0). `repetido: true` dice que esa fila
-traía una `ref` que ya había entrado: el `postId` es el del post que ya existía, y no se
-programó nada nuevo.
+Los resultados vuelven en el orden de tu array. `index` es la posición en tu array `posts`
+(base 0). `repetido: true` dice que esa fila traía una `ref` que ya había entrado: el `postId`
+es el del post que ya existía, y no se programó nada nuevo.
+
+Cada fila trae además lo que costó, para saber dónde se va el tiempo:
+
+- `ms`: cuánto tardó la fila en el servidor, contando la espera de su media.
+- `bytes` y `origen`, solo si la fila llegó a su media: cuántos bytes bajó **esta** fila, y de
+  dónde salió su media: `descarga` si bajó algo, `cache` si toda venía de otra fila del mismo
+  lote con la misma URL (ahí `bytes` es 0).
+- `motivo`, solo si la media no se pudo traer: el porqué, en palabras fijas.
+
+| `motivo` | Qué pasó |
+|---|---|
+| `sin respuesta` | el origen no contestó en 30 s |
+| `estancada` | el archivo empezó a llegar y dejó de llegar 30 s seguidos |
+| `cortada` | la conexión se cortó, o el nombre del host no existe |
+| `sin tiempo` | el lote llegó a su tiempo máximo con esta descarga a medias |
+| `http <status>` | el origen respondió con ese status (`http 403`: el archivo no está compartido; `http 404`: no existe) |
+| `tipo <content-type>` | no era imagen ni video publicable, o no era lo que decía su extensión (`tipo text/html`: la página de «compartir» de Drive en vez del archivo) |
+| `muy grande` | pasa de 500 MB |
+| `vacía` | la respuesta llegó sin contenido |
+| `redirecciones` | demasiadas redirecciones, o una sin destino válido |
+| `url prohibida` | no es `http`/`https`, o apunta a una red interna |
+
+Los tres primeros y los `http 5xx` o `http 429` ya se reintentaron una vez antes de llegarte.
+
+### Tiempos
+
+El lote baja **cuatro filas a la vez**; los archivos de una misma fila bajan uno tras otro. La
+misma URL en varias filas del **mismo lote** se baja una sola vez y las filas comparten la
+copia: si un video va a varias cuentas en filas distintas, mándalas en el mismo lote.
+
+Cada lote tiene unos tres minutos. Al llegar a ese tiempo deja de empezar filas y corta
+las descargas a medias, y contesta igual: lo que alcanzó a entrar queda programado, y el resto
+vuelve con `Al lote se le acabó el tiempo antes de terminar esta fila. Reenvíala.` Con `ref`,
+reenvía el lote entero. Si tus filas traen videos pesados, los lotes más chicos vuelven antes.
+
+Puedes mandar dos o tres lotes a la vez; no hay un límite por llave, y la `ref` impide que una
+fila entre dos veces aunque vaya en dos lotes al mismo tiempo. Más que eso no suele acelerar:
+el que pone el ritmo es el origen de los archivos, no este servidor.
 
 **Éxito parcial:** las filas buenas quedan programadas aunque otras fallen. Corrige
 las malas y reenvíalas. Con `ref` puedes reenviar el lote entero: lo que ya entró vuelve
 como repetido. Sin `ref` no hay deduplicación: reenviar una fila ya programada la programa
 **otra vez**, así que reenvía solo las malas.
 
-**Si no recibes respuesta** (timeout con muchas descargas, conexión cortada): las filas ya
-procesadas quedaron programadas. Con `ref` en cada fila, reenvía el lote igual y listo. Sin
+**Si no recibes respuesta** (se cortó la conexión): las filas ya procesadas quedaron
+programadas. Con `ref` en cada fila, reenvía el lote igual y listo. Sin
 ella, verifica con `GET /api/schedule/posts` antes de reintentar, o duplicarás posts.
 
 ---
