@@ -20,6 +20,17 @@ Cómo se usa:
 
 ---
 
+## Lo primero
+
+Lo que el dueño marcó como lo más prioritario de toda la lista. Va antes que cualquier otra
+sección.
+
+- **Integrar al chef en la parrilla** (2026-10-21). El chef es el editor del dueño. Hoy el
+  chef propio de cada uno trabaja desde fuera: se conecta con una llave de Tu IA y usa la API.
+  Los requisitos los va a describir el dueño; hasta entonces no hay diseño ni nada
+  implementado. Al diseñarlo, leerlo junto a «El chef de la casa», en «Features y trabajo de
+  código», que también es un chef que deja clips en la parrilla.
+
 ## Bugs
 
 - **Por revisar: el resto de la auditoría de la wiki de la UI** (2026-10-13). Al escribir
