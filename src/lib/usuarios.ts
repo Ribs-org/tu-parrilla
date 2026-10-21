@@ -2,6 +2,7 @@ import 'server-only'
 import { hkdfSync } from 'node:crypto'
 import { and, asc, desc, eq, gt, isNull, lt, sql } from 'drizzle-orm'
 import { codigosIngreso, getDb, profiles, users, type Usuario } from '@/db'
+import { esChoqueCon } from './choque-de-unicidad'
 import { enviarCorreo } from './correo'
 import { env } from './env'
 import { direccionBase, primeraDireccionLibre } from './slugs'
@@ -35,32 +36,16 @@ export function claveCodigos(): string {
 }
 
 // El nombre real de la restricción de unicidad de `profiles.slug`, confirmado en
-// `drizzle/0000_fuzzy_pet_avengers.sql` (no adivinado). Comprobarlo, y no solo el código
-// 23505, es lo que evita confundir este choque con una violación de unicidad ajena —de
-// otra columna o tabla— que debería propagarse en vez de reintentarse como si el slug
-// elegido ya estuviera ocupado. Mismo criterio que `isCampaignUniqueViolation` en
-// `src/lib/social/sync.ts`.
+// `drizzle/0000_fuzzy_pet_avengers.sql` (no adivinado).
 const PROFILES_SLUG_UNIQUE_CONSTRAINT = 'profiles_slug_unique'
 
 /**
- * Un choque con la restricción de unicidad de `profiles.slug`, que Postgres reporta como
- * 23505.
- *
- * Drizzle envuelve el error del driver y deja el original en `cause`, así que se mira en
- * los dos lugares: sin esto, un choque se confundiría con una falla real y la invitación
- * moriría en vez de probar el número siguiente.
+ * Un choque con la restricción de unicidad de `profiles.slug`: sin reconocerlo, un choque se
+ * confundiría con una falla real y la invitación moriría en vez de probar el número
+ * siguiente. Cómo se reconoce, y por qué así, en `esChoqueCon`.
  */
 export function esChoqueDeUnicidad(error: unknown): boolean {
-  const coincide = (candidato: unknown): boolean => {
-    // El driver de este proyecto es `postgres` (postgres-js), no `node-postgres`: mapea el
-    // campo del error a `constraint_name`, no a `constraint` (ver
-    // `node_modules/postgres/src/connection.js:46`). Se comprueban los dos nombres por si
-    // alguna capa lo normaliza, pero el que realmente llega es `constraint_name`.
-    const { code, constraint_name, constraint } =
-      (candidato as { code?: string; constraint_name?: string; constraint?: string }) ?? {}
-    return code === '23505' && (constraint_name ?? constraint) === PROFILES_SLUG_UNIQUE_CONSTRAINT
-  }
-  return coincide(error) || coincide((error as { cause?: unknown })?.cause)
+  return esChoqueCon(error, PROFILES_SLUG_UNIQUE_CONSTRAINT)
 }
 
 /**

@@ -66,6 +66,7 @@ import { borrarBorrador, guardarBorrador, type MediaDeBorrador } from '@/lib/bor
 import { ARCHIVO_AJENO, ARCHIVO_FALTANTE, CUERPO_ILEGIBLE, parseMediaMovil, type MediaMovil } from '@/lib/mobile-api'
 import { esReservado } from '@/lib/slugs'
 import { cerrarSesiones, esChoqueDeUnicidad, invitar, pedir, quitar } from '@/lib/usuarios'
+import { nombreDe } from '@/lib/vocabulario'
 import { fromZonedInput, normalizeUrl, slugify } from '@/lib/utils'
 import { ZONA_INVALIDA, esZonaValida } from '@/lib/zona'
 import { temaDe, type Tema } from '@/lib/tema'
@@ -217,7 +218,7 @@ export async function makeDefault(profileId: string) {
  * `src/app/page.tsx` da por hecho que el admin del despliegue siempre tiene una principal, y
  * nada repromueve otra si esta se borra — dejarlo pasar serviría la pantalla de primer
  * arranque en la raíz de un dominio personal ya en producción. El mensaje dice cómo salir:
- * hacer principal a otra página primero (`makeDefault`, en «Perfiles»). El panel ya no
+ * hacer principal a otra página primero (`makeDefault`, en La Vitrina). El panel ya no
  * ofrece el botón en ninguno de los dos casos (ver el editor), pero el servidor es quien
  * tiene que garantizarlo de verdad.
  *
@@ -247,7 +248,7 @@ export async function deleteProfile(profileId: string): Promise<{ error?: string
       return 'No puedes borrar tu única página: todo usuario necesita al menos una.'
     }
     if (propios.find((p) => p.id === profileId)?.isDefault) {
-      return 'No puedes borrar tu página principal: primero haz principal a otra página, desde «Perfiles».'
+      return `No puedes borrar tu página principal: primero haz principal a otra página, desde «${nombreDe('/admin/profiles')}».`
     }
 
     await tx.delete(profiles).where(and(eq(profiles.id, profileId), eq(profiles.ownerId, ownerId)))

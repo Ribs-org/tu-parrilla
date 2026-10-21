@@ -76,3 +76,33 @@ describe('el journal de drizzle/', () => {
     for (const { idx, tag } of entries) expect(tag.slice(0, 4), tag).toBe(String(idx).padStart(4, '0'))
   })
 })
+
+/*
+ * La base es Supabase, que publica una API de datos con una llave pública por diseño. La app no
+ * la usa: `0005_rls.sql` les quitó los permisos a sus roles y encendió RLS, sin políticas, en
+ * cada tabla, y las que vinieron después lo encienden en su propia migración. Una tabla nueva que
+ * lo olvide queda cuidada solo por los permisos, y el asesor de seguridad de Supabase la marca.
+ */
+describe('RLS en cada tabla', () => {
+  const carpeta = join(process.cwd(), 'drizzle')
+  const sql = readdirSync(carpeta)
+    .filter((nombre) => nombre.endsWith('.sql'))
+    .sort()
+    .map((nombre) => readFileSync(join(carpeta, nombre), 'utf8'))
+    .join('\n')
+  const borradas = new Set([...sql.matchAll(/DROP TABLE (?:IF EXISTS )?"([a-z_]+)"/g)].map((m) => m[1]))
+  const creadas = [...sql.matchAll(/CREATE TABLE (?:IF NOT EXISTS )?"([a-z_]+)"/g)].map((m) => m[1]!).filter((t) => !borradas.has(t))
+  const conRls = new Set([...sql.matchAll(/ALTER TABLE "([a-z_]+)" ENABLE ROW LEVEL SECURITY/g)].map((m) => m[1]))
+
+  it('las migraciones crean tablas: la búsqueda encontró algo', () => {
+    expect(creadas.length).toBeGreaterThan(15)
+  })
+
+  it('cada tabla que crean las migraciones tiene RLS encendido', () => {
+    expect(creadas.filter((tabla) => !conRls.has(tabla))).toEqual([])
+  })
+
+  it('y ninguna migración lo apaga', () => {
+    expect(sql).not.toMatch(/DISABLE ROW LEVEL SECURITY/)
+  })
+})

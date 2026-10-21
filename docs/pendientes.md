@@ -37,6 +37,20 @@ Cómo se usa:
   queda ninguno que crezca con los datos: el conteo de enlaces del panel de páginas y el
   reordenamiento de enlaces, los dos que lanzaban una consulta por fila, son una sola; los
   `Promise.all` que siguen lanzan cuatro consultas como mucho.
+- **[dueño] Probar una vez lo de la revisión de deuda técnica del 2026-10-21 que no se pudo
+  probar en un navegador.** En el teléfono, después de la actualización por aire: que el
+  candado se pida al abrir la app, y que «Cerrar sesión» vuelva a la entrada sin que «atrás»
+  lleve a ninguna pantalla de la cuenta (`Alert` no se dibuja en la versión web). En el panel:
+  agregar un video en el editor de un post programado, que ahora sube directo al almacén
+  (#231).
+- **[dueño] Reconectar el canal de YouTube que perdió el permiso** (2026-10-21). Los registros
+  de producción traen `Google refresh: 400 invalid_grant`: Google ya no acepta el permiso de
+  una cuenta de YouTube, y esa cuenta no publica ni lee hasta que se reconecte en Los Fierros,
+  donde se ve cuál es.
+- **Por revisar: seis issues del 2026-10-21 sobre la media del lote** (#234 a #239). Pedidos
+  y preguntas sobre `POST /api/schedule/batch`: aceptar el lote y copiar los videos en segundo
+  plano, bajarlos en paralelo, no bajar dos veces el mismo archivo de Drive, subir un video una
+  vez para varias filas, y cuánto tardó cada fila. Se abrieron en GitHub; se priorizan acá.
 - **Por revisar en el teléfono: la barra de pestañas de la app** (2026-10-16). En la versión
   web de la app, las etiquetas de las pestañas se ven cortadas por abajo; puede ser solo la
   web. Mirarlo en el teléfono, y si pasa ahí también, darle alto a la barra en
@@ -63,7 +77,18 @@ Cómo se usa:
   2026-10-21.** El detalle no va acá: el repositorio es público, y escribir una
   vulnerabilidad sin arreglar es publicarla. Está en la carpeta privada del dueño,
   `tu-parrilla-privado`, fuera del repo; cada arreglo la cuenta en su propio PR, cuando ya
-  está cerrada.
+  está cerrada. **[dueño]** Algunos no se cierran con código sino desde los paneles de Vercel
+  y de GitHub: los pasos están en el archivo de la auditoría del 2026-10-21, en «Lo que hace
+  el dueño».
+- **[dueño] Encender «Require a pull request before merging» en la protección de `main`**
+  (2026-10-21). Hoy son obligatorias las comprobaciones `sitio` y `app` y que la rama esté al
+  día, pero no el pull request (README, «Cómo entra un cambio»). Con cero aprobaciones
+  pedidas, para que el dueño siga fusionando solo.
+- **[dueño] Probar una vez que un respaldo se restaura** (2026-10-21). Desde el 2026-10-21 el
+  flujo revisa el índice de cada volcado, pero nadie restauró uno entero todavía. Bajar el de
+  un día, descifrarlo con la llave y restaurarlo en una Postgres desechable (README,
+  «Respaldos»). La llave privada la tiene solo el dueño: si se pierde, se pierden los
+  respaldos, así que conviene una segunda copia en un lugar distinto del gestor de contraseñas.
 
 ## Trámites con las plataformas
 

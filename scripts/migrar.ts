@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url'
 import { drizzle } from 'drizzle-orm/postgres-js'
 import { migrate } from 'drizzle-orm/postgres-js/migrator'
 import postgres from 'postgres'
+import { esChoqueCon } from '../src/lib/choque-de-unicidad'
 import { env } from '../src/lib/env'
 import { normalizarCorreo } from '../src/lib/ingreso'
 import { decidirMigracion } from '../src/lib/migraciones'
@@ -51,17 +52,6 @@ async function main() {
  */
 const CON_DUENO = ['profiles', 'social_accounts', 'scheduled_posts', 'source_authors', 'social_posts', 'ajustes']
 
-/**
- * El error de unicidad de `profiles.slug` (23505), tal como lo manda este cliente: `sql`
- * acá es el driver `postgres` crudo, no Drizzle, así que el error trae `code` y
- * `constraint_name` directos —sin el envoltorio en `cause` que sí hace falta en
- * `lib/usuarios.ts` (`esChoqueDeUnicidad`), donde la consulta pasa por Drizzle—.
- */
-function esChoqueDeSlug(error: unknown): boolean {
-  const { code, constraint_name } = (error as { code?: string; constraint_name?: string }) ?? {}
-  return code === '23505' && constraint_name === 'profiles_slug_unique'
-}
-
 export async function adoptarHuerfanas(sql: postgres.Sql): Promise<void> {
   // Misma normalización que usa la app (lib/ingreso.ts), no una a mano: un ADMIN_EMAIL mal
   // formado no debe adoptar filas a nombre de un correo que la app luego rechaza al entrar.
@@ -102,7 +92,9 @@ export async function adoptarHuerfanas(sql: postgres.Sql): Promise<void> {
           values (${admin.id}, ${candidato}, ${nombre}, true, true, false)`
         return true
       } catch (error) {
-        if (esChoqueDeSlug(error)) return false
+        // `sql` acá es el driver crudo, sin Drizzle: el error trae los campos arriba, que
+        // `esChoqueCon` también mira.
+        if (esChoqueCon(error, 'profiles_slug_unique')) return false
         throw error
       }
     })
