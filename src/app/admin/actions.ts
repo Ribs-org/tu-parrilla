@@ -38,6 +38,7 @@ import { extensionDe, validateScheduleDraft } from '@/lib/social/publish/validat
 import { validateAtributos, ATRIBUTOS_ERROR, type Atributos } from '@/lib/social/publish/atributos'
 import { diffMedia, diffTargets } from '@/lib/social/publish/edit'
 import { crearPostProgramado } from '@/lib/social/publish/crear'
+import { REARME, contenedorEsBorrador, enVuelo } from '@/lib/social/publish/publisher'
 import { quitarCuenta } from '@/lib/social/quitar'
 import { CuentaInvalida, verificarCuentas, type CuentaDestino } from '@/lib/social/cuentas'
 // `guardarCuenta` de `social/conectar` guarda una cuenta *de una red*; la acción de abajo,
@@ -889,13 +890,15 @@ export async function updateScheduledPost(
     .select()
     .from(scheduledPostTargets)
     .where(eq(scheduledPostTargets.postId, postId))
-  if (targets.some((t) => t.status === 'publishing')) {
+  // En curso es `publishing`, o un destino que una corrida tiene reclamado ahora mismo
+  // (`enVuelo`): durante su intento sigue diciendo `scheduled`.
+  const ahora = new Date()
+  if (targets.some((t) => t.status === 'publishing' || enVuelo(t, ahora))) {
     return { error: 'Hay una publicación en curso. Vuelve en un minuto.' }
   }
-  // El claim del cron solo bumpa updatedAt (el status sigue 'scheduled' durante el
-  // vuelo): este mapa es lo único que hace visible, en los writes de abajo, un claim
-  // que ocurrió entre esta lectura y el write — si el cron claimeó, el write no-opea
-  // y el target conserva su historia en vez de que la pisemos.
+  // Un reclamo que ocurra entre esta lectura y los writes de abajo también bumpa updatedAt:
+  // este mapa es lo que lo hace visible ahí —si el cron reclamó, el write no-opea y el target
+  // conserva su historia en vez de que la pisemos—.
   const readTargets = new Map(targets.map((t) => [t.id, t]))
 
   const existingMedia = await db
@@ -1109,6 +1112,17 @@ export async function updateScheduledPost(
     coverUrl = stored.url
   }
 
+  // Qué pasa con un contenedor guardado (el de un intento anterior), que lleva lo de antes. Si
+  // cambiaron los archivos —cuáles o en qué orden—, ya no es este post en ninguna red: se tira.
+  // Si cambió solo el texto o la portada, se tira en Instagram, donde el contenedor es un
+  // borrador que todavía no salió (`contenedorEsBorrador`); en las demás la red ya tiene el
+  // video, y subirlo otra vez por un texto dejaría dos.
+  const mediaCambio =
+    mediaPlan.deleteIds.length > 0 ||
+    mediaPlan.order.some((entry, i) => entry.kind === 'new' || entry.id !== existingMedia[i]?.id)
+  const textoCambio = caption !== post.caption || coverUrl !== post.coverUrl
+  const tiraContenedor = (network: string) => mediaCambio || (textoCambio && contenedorEsBorrador(network))
+
   // Sequential writes (neon-http has no interactive transactions); worst-case cut
   // leaves media updated with old targets — the same partial-failure profile already
   // accepted in createScheduledPost. Every target write carries its status guard y el
@@ -1154,18 +1168,13 @@ export async function updateScheduledPost(
     )
   }
   for (const id of targetsPlan.rearmIds) {
-    // containerId/externalId son residuos del intento fallido (el handle async de Meta,
-    // el id remoto a medio crear): el rearm parte de cero, como rescheduleTarget.
+    // El rearme conserva el contenedor (`REARME`): el intento siguiente le pregunta a la red
+    // cómo terminó el anterior antes de subir nada. Salvo que lo de antes ya no sirva
+    // (`tiraContenedor`, arriba).
+    const tirar = tiraContenedor(readTargets.get(id)!.network)
     await db
       .update(scheduledPostTargets)
-      .set({
-        status: 'scheduled',
-        attemptCount: 0,
-        lastError: null,
-        containerId: null,
-        externalId: null,
-        updatedAt: new Date(),
-      })
+      .set({ ...REARME, ...(tirar ? { containerId: null } : {}), updatedAt: new Date() })
       .where(
         and(
           eq(scheduledPostTargets.id, id),
@@ -1173,6 +1182,27 @@ export async function updateScheduledPost(
           eq(scheduledPostTargets.updatedAt, readTargets.get(id)!.updatedAt),
         ),
       )
+  }
+  // Lo mismo para un destino que espera su reintento con su contenedor guardado (el tope
+  // diario de Instagram, una publicación que no contestó): con lo de antes inservible, se tira y
+  // el intento siguiente arma otro con lo de ahora. Si la publicación que no contestó sí había
+  // salido, sale otra con lo nuevo: pasa solo si se edita en el rato entre dos intentos, y lo
+  // contrario —publicar lo viejo— sería peor.
+  if (mediaCambio || textoCambio) {
+    for (const target of targets) {
+      if (target.status !== 'scheduled' || !target.containerId) continue
+      if (!idsElegidosSet.has(target.accountId) || !tiraContenedor(target.network)) continue
+      await db
+        .update(scheduledPostTargets)
+        .set({ containerId: null, publicandoDesde: null, updatedAt: new Date() })
+        .where(
+          and(
+            eq(scheduledPostTargets.id, target.id),
+            eq(scheduledPostTargets.status, 'scheduled'),
+            eq(scheduledPostTargets.updatedAt, readTargets.get(target.id)!.updatedAt),
+          ),
+        )
+    }
   }
 
   // La regla se edita siempre, incluso publicado el post: rige para los comentarios que
@@ -1259,10 +1289,11 @@ export async function subirAhora(postId: string): Promise<{ error?: string; ok?:
   // Lo que falló vuelve a pendiente: pulsar «Subir ahora» sobre algo que no salió es justo
   // cuando más se quiere reintentar, y mandar al dueño a reprogramar con fecha y hora sería
   // un rodeo. Los intentos se reinician porque esto es una decisión suya, no un reintento
-  // automático más. Lo ya publicado no se toca: republicar no es lo que pidió.
+  // automático más. Lo ya publicado no se toca: republicar no es lo que pidió. El contenedor
+  // se queda (`REARME`): si el intento anterior sí salió, el siguiente lo descubre.
   await db
     .update(scheduledPostTargets)
-    .set({ status: 'scheduled', attemptCount: 0, lastError: null, updatedAt: ahora })
+    .set({ ...REARME, updatedAt: ahora })
     .where(and(eq(scheduledPostTargets.postId, post.id), eq(scheduledPostTargets.status, 'failed')))
 
   const { publishDue } = await import('@/lib/social/publish/run')

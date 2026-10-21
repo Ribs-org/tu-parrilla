@@ -675,7 +675,9 @@ Los Fierros, o **«Cambiar el archivo»**, que baja a «Media» en este mismo ed
 recuadro, según el caso:
 
 - «Hay una publicación en curso. Vuelve en un minuto.», en amarillo, si algún destino está
-  «Publicando…». Mientras tanto todo el formulario queda bloqueado, también «Eliminar».
+  «Publicando…». Mientras tanto todo el formulario queda bloqueado, también «Eliminar». La
+  misma frase puede salir al apretar «Guardar» en un post que se veía programado: el
+  publicador lo estaba subiendo justo en ese momento, y no se guardó nada.
 - «Los cambios no tocan lo publicado.», si alguna red ya salió.
 
 El formulario, en orden:
@@ -908,11 +910,14 @@ tres:
   vuelven a publicar; si el post había fallado en otra red más, esa sigue en «Se quemó» con
   su propio «Reprogramar».
 - **Reintentar ya:** «Subir ahora» en la tarjeta de la lista. Devuelve los destinos quemados a
-  la cola y publica en el acto.
+  la cola y publica en el acto. Lo que la red ya había recibido en un intento anterior no se
+  sube de nuevo: primero se le pregunta cómo terminó.
 - **Corregirlo y reintentar:** «Editar», arreglar lo que dice el motivo (por ejemplo, dejar
   un solo video para YouTube) y «Guardar» sin tocar la fecha. Los destinos quemados que sigan marcados
   vuelven a «Programado» y salen en la pasada siguiente (o a su hora, si todavía no llega).
-  Si se cambia la fecha, tiene que ser futura.
+  Si se cambia la fecha, tiene que ser futura. Si YouTube, Facebook o TikTok ya tenían el video
+  de un intento anterior, cambiar solo el texto no lo cambia allá (en Instagram sí): el intento
+  siguiente le pregunta a la red por ese mismo video. Para que suba otro, cambiar el archivo.
 
 ### Para sacar una red de un post sin borrarlo
 
@@ -1074,7 +1079,7 @@ puede decir:
 | Una lista con las partes que apliquen, separadas por comas y con punto final: «<N> publicado» (o «publicados»), «<N> en proceso», «<N> en espera de la red», «<N> para reintentar», «<N> con error» | Cómo le fue a «Subir ahora» | Lo que está en proceso o en espera de la red termina solo; para lo que quedó para reintentar o con error, leer el motivo en la píldora |
 | «Este post no tenía destinos pendientes.» | Ya había salido en todas sus redes | Nada |
 | «El post ya no existe.» | Se borró antes | Recargar |
-| «Ya se publicó (o está publicando): elimínalo en la red.» | Se intentó eliminar algo que ya salió en alguna red | Borrarlo en la red misma; para sacar solo las redes que no salieron, desmarcarlas en el editor |
+| «Ya se publicó (o está publicando): elimínalo en la red.» | Se intentó eliminar algo que ya salió en alguna red, o que el publicador está subiendo en ese momento | Borrarlo en la red misma; para sacar solo las redes que no salieron, desmarcarlas en el editor. Si no había salido en ninguna, era el publicador subiéndolo: recargar en un minuto y ver cómo quedó |
 | «La hora debe estar en el futuro.» | En «Reprogramar», la hora ya pasó | Elegir una futura |
 | «Ese destino ya no existe.» | En «Reprogramar»: esa red del post, o el post entero, se borró mientras la ventana estaba abierta | Recargar |
 
@@ -1082,7 +1087,7 @@ puede decir:
 
 | Lo que dice la pantalla | Qué significa | Qué hacer |
 |---|---|---|
-| «Hay una publicación en curso. Vuelve en un minuto.» | Una red está procesando la publicación; el editor queda bloqueado | Esperar y recargar |
+| «Hay una publicación en curso. Vuelve en un minuto.» | Una red está procesando la publicación (el editor queda bloqueado), o el publicador la estaba subiendo al apretar «Guardar» y no se guardó nada | Esperar un minuto y recargar |
 | «Los cambios no tocan lo publicado.» | Algo ya salió (el recuadro de arriba dice dónde) | Lo que se cambie solo vale para lo que falta salir |
 | «No se puede quitar una cuenta en la que ya se publicó.» | Se intentó desmarcar una red donde ya salió | Dejarla marcada |
 | «No se pudo leer una media por URL.» | Un enlace de «Agregar por URL» o de la portada no se pudo descargar | Usar un enlace de descarga directa |
@@ -1101,15 +1106,19 @@ se reintenta solo; cuando dice «Falló», hay que actuar (ver la tarea de arreg
 quemado, más arriba).
 
 Los de Threads y de X solo aparecen en un post programado antes de que esas redes quedaran en
-«Próximamente»: «Subir ahora» y «Reprogramar» los vuelven a intentar, pero no se puede
-programar nada nuevo ahí. Para dejar de intentarlo, desmarcar esa red en el editor.
+«Próximamente». Un destino así ya no se intenta: se quema en la primera pasada con «Threads
+todavía no está disponible en Tu Parrilla: próximamente.» (o lo mismo con X), y ni «Subir
+ahora» ni «Reprogramar» lo hacen salir. Para sacarlo de «Se quemó», desmarcar esa red en el
+editor.
 
 | Lo que dice la pantalla | Qué significa | Qué hacer |
 |---|---|---|
-| «No se pudo hablar con la red. Se reintentará.» | Falla de conexión | Esperar; si se quema, «Subir ahora» |
+| «No se pudo hablar con la red. Se reintentará.» | Falla de conexión, o la red no contestó a tiempo | Esperar; si se quema, «Subir ahora» |
 | «Instagram llegó a su tope de publicaciones por día: sale apenas se libere un cupo.» | La cuenta ya publicó por la API lo máximo que Instagram deja en 24 horas. No es un fallo: no gasta intentos ni se quema; se vuelve a probar cada hora y sale cuando se libera un cupo, 24 horas después de una publicación anterior | Esperar: sale solo |
 | «La cuenta no está conectada. Reconéctala y reprograma.» | La cuenta perdió la conexión | Reconectar en Los Fierros y «Reprogramar» |
-| «La red no terminó de procesar el video.» | Pasó 24 horas en «Publicando…» | «Subir ahora» o «Reprogramar» |
+| «La red no terminó de procesar el video.» | Pasó 24 horas en «Publicando…», contadas desde que empezó a publicarse. No se reintenta solo: la red ya tiene el video, y subirlo de nuevo dejaría dos | «Subir ahora» o «Reprogramar»: primero se le pregunta a la red por ese mismo video, y si terminó, queda publicado sin subir otro. Si vuelve a quemarse con esta frase, la red no lo va a terminar: revisarlo en la red (puede haber quedado ahí a medias), «Eliminar» el post y programarlo de nuevo |
+| «La publicación se cortó a la mitad y ya no quedan intentos. Revisa el archivo y reprográmala.» | El último intento se cortó a la mitad —la pasada del publicador terminó antes de que la red contestara, sobre todo con videos muy pesados— y ya no quedan intentos | Revisar el archivo (un video más liviano sube más rápido) y «Reprogramar» |
+| «Threads todavía no está disponible en Tu Parrilla: próximamente.» / «X todavía no está disponible en Tu Parrilla: próximamente.» | Un destino de antes a una red que hoy está en «Próximamente» | Desmarcar esa red en el editor |
 | «Instagram rechazó la publicación.» | Instagram dijo que no | «Subir ahora» o «Reprogramar»; si vuelve a fallar, revisar el archivo y el texto |
 | «Instagram no permite trial reels en esta cuenta.» | La cuenta no tiene trial reels; se quema al primer intento | El editor no apaga el trial reel: si nada salió, «Eliminar» y programarlo de nuevo sin trial reel; si otras redes ya salieron, desmarcar Instagram en el editor y programarlo aparte |
 | «Facebook rechazó la publicación.» | Facebook dijo que no | «Subir ahora» o «Reprogramar»; si vuelve a fallar, revisar el archivo y el texto |
@@ -1400,7 +1409,7 @@ Lo que describe esta página sale de:
   - `src/lib/social/publish/borrar.ts`
   - `src/lib/social/publish/reprogramar.ts` (la regla de «Reprogramar», compartida con la app del teléfono)
   - `src/lib/social/publish/tiktok-creador.ts`
-  - `src/lib/social/publish/publisher.ts` (las esperas entre intentos, `ESPERAS_TRAS_FALLO_MS`)
+  - `src/lib/social/publish/publisher.ts` (las esperas entre intentos, `ESPERAS_TRAS_FALLO_MS`; el reclamo, `enVuelo`; el rearme, `REARME`; las frases de los motivos)
   - `src/lib/social/publish/run.ts`
   - `src/lib/social/publish/alert.ts`
   - `src/lib/avisos/reglas.ts` (el resumen del día)

@@ -1,4 +1,5 @@
 import {
+  PLAZO_RED_MS,
   PUBLISH_NETWORK_ERROR,
   type PublishInput,
   type PublishMedia,
@@ -97,7 +98,11 @@ async function postForm(
   url: string,
   params: Record<string, string>,
 ): Promise<Record<string, unknown> | null> {
-  const response = await fetch(url, { method: 'POST', body: new URLSearchParams(params) })
+  const response = await fetch(url, {
+    method: 'POST',
+    body: new URLSearchParams(params),
+    signal: AbortSignal.timeout(PLAZO_RED_MS),
+  })
   if (!response.ok) {
     console.error('Facebook publish:', response.status, (await response.text()).slice(0, 300))
     return null
@@ -113,17 +118,25 @@ export const facebookPublisher: Publisher = {
 
     // Resuming: a previous run posted the video and Facebook was still processing it.
     if (input.containerId) {
-      const response = await fetch(
-        `${GRAPH}/${input.containerId}?fields=status,post_id&access_token=${token}`,
-      )
-      if (!response.ok) {
-        console.error('Facebook video status:', response.status, (await response.text()).slice(0, 300))
-        // A poll that didn't answer says nothing about the video: stay parked instead of
-        // failing — a retry from scratch would upload a second public copy. The 24h stale
-        // cut still bounds how long this can wait.
+      let payload: Record<string, unknown>
+      try {
+        const response = await fetch(
+          `${GRAPH}/${input.containerId}?fields=status,post_id&access_token=${token}`,
+          { signal: AbortSignal.timeout(PLAZO_RED_MS) },
+        )
+        if (!response.ok) {
+          console.error('Facebook video status:', response.status, (await response.text()).slice(0, 300))
+          // A poll that didn't answer says nothing about the video: stay parked instead of
+          // failing — a retry from scratch would upload a second public copy. The 24h stale
+          // cut still bounds how long this can wait.
+          return { kind: 'processing', containerId: input.containerId }
+        }
+        payload = (await response.json()) as Record<string, unknown>
+      } catch (error) {
+        // Lo mismo si la consulta se cortó (el plazo, la red).
+        console.error('Facebook video status:', String(error).slice(0, 300))
         return { kind: 'processing', containerId: input.containerId }
       }
-      const payload = (await response.json()) as Record<string, unknown>
       const verdict = classifyVideoStatus(payload)
       if (verdict === 'error') return { kind: 'failed', reason: FACEBOOK_REJECTED }
       if (verdict === 'processing') return { kind: 'processing', containerId: input.containerId }
@@ -159,6 +172,7 @@ export const facebookPublisher: Publisher = {
         const response = await fetch(`${GRAPH}/${input.accountExternalId}/videos`, {
           method: 'POST',
           body: form,
+          signal: AbortSignal.timeout(PLAZO_RED_MS),
         })
         if (!response.ok) {
           console.error('Facebook publish:', response.status, (await response.text()).slice(0, 300))

@@ -6,13 +6,15 @@ import { COMENTARIO_AUSENTE, PRIVADO_RECHAZADO, RED_RECHAZO, SIN_CREDENCIAL } fr
 import { comentaristaFor } from './index'
 import { CLAVE_TEXTO_PRIVADO, TEXTO_PRIVADO_POR_DEFECTO } from './instrucciones'
 import { mandarPrivado, privadoActivo, tocaPrivado } from './privado'
+import { reclamarEnvio } from './reclamo'
 import { validarRespuesta } from './validar'
 
 type Resultado = { ok: true } | { error: string }
 
 /**
- * Manda la respuesta de un comentario. Relee la fila antes de nada: dos toques, o el panel
- * y el teléfono a la vez, tienen que dar un solo envío. Solo `pendiente` y `fallido` salen.
+ * Manda la respuesta de un comentario. Dos toques, o el panel abierto en dos pestañas, tienen
+ * que dar un solo envío: justo antes de mandar se reclama la fila (`reclamarEnvio`), y quien
+ * no la obtiene no manda nada. Solo `pendiente` y `fallido` salen.
  * La lectura va atada al dueño (mismo molde que `contarPendientes` en comentarios-cola.ts):
  * un comentario de otro dueño no existe para esta llamada, ni distinto de uno borrado.
  */
@@ -56,6 +58,9 @@ export async function responderComentario(ownerId: string, id: string, texto: st
     return { error: SIN_CREDENCIAL }
   }
 
+  // Otro toque la está mandando: esta es la segunda tecla del mismo gesto.
+  if (!(await reclamarEnvio(id))) return { ok: true }
+
   let replyId: string
   try {
     replyId = await comentarista.responder(account, token, fila.externalId, validado.texto)
@@ -83,6 +88,7 @@ export async function responderComentario(ownerId: string, id: string, texto: st
       draft: validado.texto,
       error: null,
       automatico: false,
+      enviandoHasta: null,
       updatedAt: new Date(),
     })
     .where(eq(postComments.id, id))
@@ -114,7 +120,7 @@ export async function descartarComentario(ownerId: string, id: string): Promise<
 async function marcar(id: string, state: 'fallido' | 'descartado', error: string | null) {
   await getDb()
     .update(postComments)
-    .set({ state, error, updatedAt: new Date() })
+    .set({ state, error, enviandoHasta: null, updatedAt: new Date() })
     .where(eq(postComments.id, id))
 }
 

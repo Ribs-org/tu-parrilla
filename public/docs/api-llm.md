@@ -180,12 +180,12 @@ media y su regla—; no hay forma de sacar una sola cuenta de un post con varias
 |---|---|
 | `200` `{ "ok": true, "id": "<id>" }` | Se borró. |
 | `404` `{ "error": "Ese post no existe." }` | No hay un post con ese id para este dueño. No distingue «no existe» de «no es tuyo». |
-| `409` `{ "error": "Ya se publicó (o está publicando): elimínalo en la red." }` | Algún destino ya salió o está saliendo. Borrar la fila no lo despublicaría, así que se rechaza en vez de mentir; se elimina desde la red. |
+| `409` `{ "error": "Ya se publicó (o está publicando): elimínalo en la red." }` | Algún destino ya salió o está saliendo, también uno que el publicador está intentando en ese momento. Borrar la fila no lo despublicaría, así que se rechaza en vez de mentir; se elimina desde la red. Si nada había salido todavía, en un minuto `GET /api/schedule/posts` dice cómo quedó. |
 
 Un post en `failed` (algún destino falló y agotó sus intentos) **sí** se puede borrar: nada
 salió. Un post con un destino publicado y otro programado **no**: el publicado manda. Los
-archivos que subió quedan en el almacén hasta el barrido del día siguiente; no hay que
-hacer nada con ellos.
+archivos que subió quedan en el almacén hasta el barrido de huérfanos, que pasa cada hora; no
+hay que hacer nada con ellos.
 
 ## 3c. Lo que pide atención
 

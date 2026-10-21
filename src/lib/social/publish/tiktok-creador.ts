@@ -3,6 +3,7 @@
 // el compositor para armar el bloque, y el publisher (publish/tiktok.ts) para confirmar
 // antes de subir.
 import { PRIVACIDADES_TIKTOK, type PrivacidadTikTok } from './opciones'
+import { PLAZO_RED_MS } from './publisher'
 
 const API = 'https://open.tiktokapis.com/v2'
 
@@ -51,6 +52,7 @@ export async function consultarCreador(token: string): Promise<{ creador: Creado
     response = await fetch(`${API}/post/publish/creator_info/query/`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json; charset=UTF-8' },
+      signal: AbortSignal.timeout(PLAZO_RED_MS),
     })
   } catch (error) {
     console.error('TikTok creator_info:', String(error).slice(0, 300))

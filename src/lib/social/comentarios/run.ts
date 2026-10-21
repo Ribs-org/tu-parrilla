@@ -194,8 +194,11 @@ async function sondearCuenta(
  * Una pasada de descubrimiento. Corre dentro de la corrida de publicación, después de
  * publicar: el fallo de una cuenta no detiene a las demás, y ninguno detiene la corrida.
  */
-export async function sondearComentarios(now: Date = new Date()): Promise<SondeoReport> {
-  const inicio = Date.now()
+export async function sondearComentarios(
+  now: Date = new Date(),
+  /** Desde cuándo corre la corrida que lo llama: su presupuesto se cuenta desde ahí, no desde acá. */
+  inicio: number = Date.now(),
+): Promise<SondeoReport> {
   const cuentas = await getDb()
     .select()
     .from(socialAccounts)

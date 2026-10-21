@@ -38,6 +38,8 @@ function filaTarget(overrides: Partial<ScheduledPostTarget> = {}): ScheduledPost
     lastError: null,
     reintentarDesde: null,
     opciones: null,
+    reclamadoHasta: null,
+    publicandoDesde: null,
     updatedAt: new Date('2026-01-01'),
     ...overrides,
   }

@@ -3,8 +3,8 @@ import { basePublica, borrar, keyDesdeUrl, listar, type ObjetoAlmacenado } from 
 
 /**
  * Entre el `guardar()` y el `insert()` de la fila hay una ventana real. Una hora es
- * holgadísima para la más lenta de esas escrituras; el barrido corre en cada pasada del
- * cron de publicación, así que lo que quede pasada la hora se va en minutos.
+ * holgadísima para la más lenta de esas escrituras; el barrido corre una vez por hora en el
+ * cron de publicación, así que lo que quede pasada la hora se va en la hora siguiente.
  */
 export const GRACIA_MS = 60 * 60 * 1000
 

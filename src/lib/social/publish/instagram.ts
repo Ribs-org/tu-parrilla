@@ -1,5 +1,5 @@
 import type { PublishMedia, PublishInput, PublishOutcome, Publisher } from './publisher'
-import { PUBLISH_NETWORK_ERROR, PUBLISH_REJECTED, TOPE_INSTAGRAM, TRIAL_REEL_NO_DISPONIBLE } from './publisher'
+import { PLAZO_RED_MS, PUBLISH_NETWORK_ERROR, PUBLISH_REJECTED, TOPE_INSTAGRAM, TRIAL_REEL_NO_DISPONIBLE } from './publisher'
 import type { OpcionesDestino } from './opciones'
 
 /**
@@ -82,16 +82,27 @@ export function carouselParentParams(caption: string, childIds: string[]): Recor
 }
 
 /**
- * Only FINISHED/ERROR/EXPIRED are verdicts. Anything else — IN_PROGRESS, an absent
- * field, a status we don't know — keeps waiting: guessing "done" publishes a broken
+ * Only FINISHED/PUBLISHED/ERROR/EXPIRED are verdicts. Anything else — IN_PROGRESS, an
+ * absent field, a status we don't know — keeps waiting: guessing "done" publishes a broken
  * container, guessing "error" throws away a post that was about to finish.
+ *
+ * PUBLISHED es uno de los estados que Meta documenta para un contenedor: ya salió. Pasa
+ * cuando un intento anterior publicó y su respuesta se perdió (la corrida murió, la llamada
+ * no contestó). Antes caía en «sigue procesando», esperaba 24 horas y se quemaba con el
+ * reel ya publicado; reprogramarlo lo publicaba otra vez.
+ *
+ * EXPIRED es un contenedor que no se publicó en 24 horas y que Meta descartó: nunca salió,
+ * así que se arma otro en el mismo intento. Pasa al reprogramar un destino que se quemó con
+ * su contenedor guardado.
  */
 export function classifyContainerStatus(
   payload: Record<string, unknown>,
-): 'finished' | 'in_progress' | 'error' {
+): 'finished' | 'published' | 'in_progress' | 'error' | 'expired' {
   const status = payload.status_code
   if (status === 'FINISHED') return 'finished'
-  if (status === 'ERROR' || status === 'EXPIRED') return 'error'
+  if (status === 'PUBLISHED') return 'published'
+  if (status === 'ERROR') return 'error'
+  if (status === 'EXPIRED') return 'expired'
   return 'in_progress'
 }
 
@@ -108,7 +119,11 @@ async function postForm(
   url: string,
   params: Record<string, string>,
 ): Promise<{ data: Record<string, unknown> } | { rechazo: string }> {
-  const response = await fetch(url, { method: 'POST', body: new URLSearchParams(params) })
+  const response = await fetch(url, {
+    method: 'POST',
+    body: new URLSearchParams(params),
+    signal: AbortSignal.timeout(PLAZO_RED_MS),
+  })
   if (!response.ok) {
     const rechazo = (await response.text()).slice(0, 2000)
     console.error('Instagram publish:', response.status, rechazo.slice(0, 300))
@@ -148,14 +163,25 @@ function fromCreate(r: { failed: string; definitivo?: true } | { tope: true }): 
   return r.definitivo ? { kind: 'failed', reason: r.failed, definitivo: true } : { kind: 'failed', reason: r.failed }
 }
 
+/**
+ * Publica el contenedor. Si la publicación no dio un id —Meta la rechazó, o la llamada no
+ * contestó—, el fallo se lleva el contenedor: el intento siguiente le pregunta a Meta cómo
+ * quedó antes de hacer otro, porque un `media_publish` sin respuesta pudo haber publicado.
+ */
 async function publishContainer(input: PublishInput, containerId: string): Promise<PublishOutcome> {
-  const r = await postForm(`${GRAPH}/${input.accountExternalId}/media_publish`, {
-    creation_id: containerId,
-    access_token: input.token,
-  })
+  let r: Awaited<ReturnType<typeof postForm>>
+  try {
+    r = await postForm(`${GRAPH}/${input.accountExternalId}/media_publish`, {
+      creation_id: containerId,
+      access_token: input.token,
+    })
+  } catch (error) {
+    console.error('Instagram media_publish sin respuesta:', String(error).slice(0, 300))
+    return { kind: 'failed', reason: PUBLISH_NETWORK_ERROR, containerId }
+  }
   if ('rechazo' in r && esTopeDiario(r.rechazo)) return diferidoPorTope(containerId)
   const id = 'data' in r ? r.data.id : undefined
-  if (typeof id !== 'string') return { kind: 'failed', reason: PUBLISH_REJECTED }
+  if (typeof id !== 'string') return { kind: 'failed', reason: PUBLISH_REJECTED, containerId }
   return { kind: 'published', externalId: id }
 }
 
@@ -165,17 +191,33 @@ export const instagramPublisher: Publisher = {
   async publish(input: PublishInput): Promise<PublishOutcome> {
     // Resuming: a previous run created the container and Meta was still processing.
     if (input.containerId) {
-      const response = await fetch(
-        `${GRAPH}/${input.containerId}?fields=status_code&access_token=${input.token}`,
-      )
-      if (!response.ok) {
-        console.error('Instagram container status:', response.status, (await response.text()).slice(0, 300))
-        return { kind: 'failed', reason: PUBLISH_NETWORK_ERROR }
+      let payload: Record<string, unknown>
+      try {
+        const response = await fetch(
+          `${GRAPH}/${input.containerId}?fields=status_code&access_token=${input.token}`,
+          { signal: AbortSignal.timeout(PLAZO_RED_MS) },
+        )
+        if (!response.ok) {
+          console.error('Instagram container status:', response.status, (await response.text()).slice(0, 300))
+          // Un sondeo que no contestó no dice nada del contenedor: seguir esperando, como
+          // YouTube, Facebook y TikTok. Fallar tiraba el contenedor, y el intento siguiente
+          // creaba otro aunque el primero ya hubiera salido. El corte de 24 horas sigue.
+          return { kind: 'processing', containerId: input.containerId }
+        }
+        payload = await response.json()
+      } catch (error) {
+        console.error('Instagram container status:', String(error).slice(0, 300))
+        return { kind: 'processing', containerId: input.containerId }
       }
-      const verdict = classifyContainerStatus(await response.json())
+      const verdict = classifyContainerStatus(payload)
       if (verdict === 'error') return { kind: 'failed', reason: PUBLISH_REJECTED }
       if (verdict === 'in_progress') return { kind: 'processing', containerId: input.containerId }
-      return publishContainer(input, input.containerId)
+      // Ya salió, pero no sabemos con qué id: el contenedor no lo dice. Sin id, sus números no
+      // se cruzan con este destino; publicarlo otra vez sería peor.
+      if (verdict === 'published') return { kind: 'published', externalId: null }
+      if (verdict === 'finished') return publishContainer(input, input.containerId)
+      // Vencido: Meta lo descartó sin publicarlo. Sigue abajo, como si no hubiera habido
+      // ninguno.
     }
 
     const media = [...input.media].sort((a, b) => a.position - b.position)

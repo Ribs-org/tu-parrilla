@@ -133,4 +133,11 @@ describe('impideBorrar', () => {
     expect(impideBorrar([{ status: 'publishing' }])).toBe(true)
     expect(impideBorrar([])).toBe(false)
   })
+
+  it('un destino que una corrida está publicando ahora impide borrar; un reclamo vencido no', () => {
+    const ahora = new Date('2026-06-20T15:00:00Z')
+    expect(impideBorrar([{ status: 'scheduled', reclamadoHasta: new Date('2026-06-20T15:05:00Z') }], ahora)).toBe(true)
+    expect(impideBorrar([{ status: 'scheduled', reclamadoHasta: new Date('2026-06-20T14:55:00Z') }], ahora)).toBe(false)
+    expect(impideBorrar([{ status: 'scheduled', reclamadoHasta: null }], ahora)).toBe(false)
+  })
 })

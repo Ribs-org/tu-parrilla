@@ -16,6 +16,22 @@ concurrency:
 jobs:
   sitio:
     runs-on: ubuntu-latest
+    # Una Postgres de verdad, vacía, que nace y muere con el job: la usan las pruebas de
+    # integración (`*.integracion.test.ts`), que migran una base desde cero —así también se
+    # prueba que las migraciones corren antes de llegar a producción— y corren el SQL del
+    # reclamo de publicación contra ella. La misma versión que la de Supabase.
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -24,6 +40,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
+        env:
+          DATABASE_URL_PRUEBAS: postgres://postgres:postgres@localhost:5432/postgres
       - run: npm run typecheck
       - run: npm run lint
       # Sin base: `generate` solo compara el esquema con el snapshot. Si aparece un archivo

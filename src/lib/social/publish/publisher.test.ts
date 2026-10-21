@@ -2,8 +2,14 @@ import { describe, expect, it } from 'vitest'
 import {
   ESPERAS_TRAS_FALLO_MS,
   MAX_PUBLISH_ATTEMPTS,
+  PEOR_SUBIDA_YOUTUBE_MS,
+  PUBLISH_NETWORK_ERROR,
   PUBLISH_REJECTED,
+  REARME,
   TOPE_INSTAGRAM,
+  alcanzaElTiempo,
+  contenedorEsBorrador,
+  enVuelo,
   isStaleProcessing,
   resolveOutcome,
   mediaParaBorrar,
@@ -116,6 +122,74 @@ describe('resolveOutcome', () => {
   it('sin definitivo, el mismo fallo en el primer intento sigue el comportamiento de siempre', () => {
     const patch = resolveOutcome({ kind: 'failed', reason: PUBLISH_REJECTED }, 0, AHORA)
     expect(patch.status).toBe('scheduled')
+  })
+
+  it('un fallo que trae su contenedor lo conserva: el reintento pregunta por él en vez de subir otro', () => {
+    const reintento = resolveOutcome({ kind: 'failed', reason: PUBLISH_NETWORK_ERROR, containerId: 'CT_9' }, 0, AHORA)
+    expect(reintento.status).toBe('scheduled')
+    expect(reintento.containerId).toBe('CT_9')
+    // Quemado también: un rearme lo retoma desde ahí.
+    const quemado = resolveOutcome({ kind: 'failed', reason: PUBLISH_NETWORK_ERROR, containerId: 'CT_9' }, 2, AHORA)
+    expect(quemado.status).toBe('failed')
+    expect(quemado.containerId).toBe('CT_9')
+  })
+
+  it('un fallo sin contenedor lo deja en null, como siempre', () => {
+    expect(resolveOutcome({ kind: 'failed', reason: PUBLISH_REJECTED }, 0, AHORA).containerId).toBeNull()
+  })
+})
+
+describe('enVuelo', () => {
+  it('un reclamo vigente está en vuelo; uno vencido o ninguno, no', () => {
+    expect(enVuelo({ reclamadoHasta: new Date(AHORA.getTime() + MIN) }, AHORA)).toBe(true)
+    expect(enVuelo({ reclamadoHasta: new Date(AHORA.getTime() - MIN) }, AHORA)).toBe(false)
+    expect(enVuelo({ reclamadoHasta: AHORA }, AHORA)).toBe(false)
+    expect(enVuelo({ reclamadoHasta: null }, AHORA)).toBe(false)
+    expect(enVuelo({}, AHORA)).toBe(false)
+  })
+})
+
+describe('alcanzaElTiempo', () => {
+  // Una corrida que empezó en 0: puede empezar intentos hasta los 120 s y todo tiene que
+  // terminar antes de los 230 s (los 240 de Vercel menos el margen), como en el cron.
+  const plazos = { empezarHasta: 120_000, terminarAntesDe: 230_000 }
+  const instagram = { network: 'instagram', containerId: null }
+  const youtubeNuevo = { network: 'youtube', containerId: null }
+  const youtubeSondeo = { network: 'youtube', containerId: 'yt-1' }
+
+  it('ningún intento empieza pasado el límite para empezar', () => {
+    expect(alcanzaElTiempo(instagram, plazos, 120_000)).toBe(true)
+    expect(alcanzaElTiempo(instagram, plazos, 120_001)).toBe(false)
+  })
+
+  it('subir un video nuevo a YouTube empieza solo si le caben todos sus plazos', () => {
+    const ultimo = plazos.terminarAntesDe - PEOR_SUBIDA_YOUTUBE_MS
+    expect(alcanzaElTiempo(youtubeNuevo, plazos, ultimo)).toBe(true)
+    expect(alcanzaElTiempo(youtubeNuevo, plazos, ultimo + 1)).toBe(false)
+    // Preguntar por un video ya subido es corto: sigue la regla de todos.
+    expect(alcanzaElTiempo(youtubeSondeo, plazos, ultimo + 1)).toBe(true)
+  })
+
+  it('el peor intento de YouTube cabe en una corrida de 240 segundos con su margen', () => {
+    expect(PEOR_SUBIDA_YOUTUBE_MS).toBeLessThan(plazos.terminarAntesDe)
+  })
+})
+
+describe('REARME', () => {
+  it('vuelve a la fila sin intentos, error ni espera, y no toca el contenedor', () => {
+    expect(REARME).toEqual({
+      status: 'scheduled',
+      attemptCount: 0,
+      lastError: null,
+      reintentarDesde: null,
+      publicandoDesde: null,
+    })
+    expect(REARME).not.toHaveProperty('containerId')
+  })
+
+  it('solo el contenedor de Instagram es un borrador que se puede tirar', () => {
+    expect(contenedorEsBorrador('instagram')).toBe(true)
+    for (const red of ['youtube', 'facebook', 'tiktok']) expect(contenedorEsBorrador(red)).toBe(false)
   })
 })
 

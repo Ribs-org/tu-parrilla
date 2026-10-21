@@ -27,11 +27,16 @@ export type PublishOutcome =
   // espera; con `containerId`, el contenedor ya hecho se guarda para no rehacerlo (el tope
   // diario de Instagram, que se cobra al publicar el contenedor, no al crearlo).
   | { kind: 'deferred'; esperaMs?: number; motivo?: string; containerId?: string }
-  // `definitivo` lo ponen dos sitios, y solo ante un rechazo que reintentar no cambia:
-  // `createContainer` (instagram.ts) cuando `motivoDeRechazo` lo reconoció, y el init de
-  // TikTok cuando la app sin auditar choca con una cuenta pública (tiktok.ts). Un `failed`
-  // sin `definitivo` es indistinguible del de siempre.
-  | { kind: 'failed'; reason: string; definitivo?: true }
+  // `definitivo` lo ponen pocos sitios, y solo ante un rechazo que reintentar no cambia:
+  // `createContainer` (instagram.ts) cuando `motivoDeRechazo` lo reconoció, el init de
+  // TikTok cuando la app sin auditar choca con una cuenta pública (tiktok.ts), y `publishDue`
+  // con lo que se venció, lo que se quedó sin intentos por cortes y las redes en
+  // «Próximamente». Un `failed` sin `definitivo` es indistinguible del de siempre.
+  //
+  // `containerId` viaja cuando la red ya pudo haber recibido el post y el intento siguiente
+  // tiene que mirar ese contenedor antes de rehacerlo: un `media_publish` de Instagram que no
+  // contestó pudo haber publicado, y crear otro contenedor lo publicaría dos veces.
+  | { kind: 'failed'; reason: string; definitivo?: true; containerId?: string }
 
 /** Adding a network in later phases is a file plus a line, same as Connector. */
 export type Publisher = {
@@ -57,9 +62,93 @@ export const PUBLISH_NETWORK_ERROR = 'No se pudo hablar con la red. Se reintenta
 export const NO_PUBLISH_TOKEN = 'La cuenta no está conectada. Reconéctala y reprograma.'
 export const STALE_PROCESSING = 'La red no terminó de procesar el video.'
 export const TOPE_INSTAGRAM = 'Instagram llegó a su tope de publicaciones por día: sale apenas se libere un cupo.'
+export const PUBLICACION_CORTADA = 'La publicación se cortó a la mitad y ya no quedan intentos. Revisa el archivo y reprográmala.'
 
 export const MAX_PUBLISH_ATTEMPTS = 3
 export const STALE_PROCESSING_HOURS = 24
+
+/**
+ * Cuánto se le espera a una llamada a la red antes de darla por perdida. Sin plazo, una
+ * llamada colgada se llevaba la corrida entera hasta que Vercel la cortaba a los 240
+ * segundos, sin anotar nada, y todo lo que venía detrás en la fila esperaba otra corrida.
+ * La subida del video a YouTube y su descarga desde el almacén llevan plazos propios: son
+ * los únicos pasos que mueven el archivo entero. La portada de YouTube lleva uno solo para
+ * sus dos llamadas (bajarla y subirla).
+ */
+export const PLAZO_RED_MS = 30_000
+export const PLAZO_DESCARGA_VIDEO_MS = 45_000
+export const PLAZO_SUBIDA_VIDEO_MS = 120_000
+export const PLAZO_PORTADA_MS = 20_000
+
+/**
+ * Lo más que puede tardar un intento de subir un video nuevo a YouTube, sumando los plazos
+ * de cada paso: renovar el token, bajar el video, subirlo y ponerle la portada. Es el único
+ * intento largo, y tiene que caber entero en una corrida (ver `alcanzaElTiempo`).
+ */
+export const PEOR_SUBIDA_YOUTUBE_MS = PLAZO_RED_MS + PLAZO_DESCARGA_VIDEO_MS + PLAZO_SUBIDA_VIDEO_MS + PLAZO_PORTADA_MS
+
+/** Hasta cuándo una corrida puede empezar intentos, y antes de cuándo tienen que haber terminado. */
+export type Plazos = { empezarHasta: number; terminarAntesDe: number }
+
+/**
+ * Si a la corrida todavía le alcanza el tiempo para empezar el intento de este destino.
+ * Ninguno empieza pasado `empezarHasta`. Subir un video nuevo a YouTube empieza solo si todos
+ * sus plazos caben antes de `terminarAntesDe`: cortado a la mitad, el video pudo quedar en el
+ * canal sin que nadie lo anote, y el reintento subiría otro. Lo que no alcanza lo toma la
+ * corrida siguiente, sin gastar intentos.
+ */
+export function alcanzaElTiempo(
+  target: { network: string; containerId: string | null },
+  plazos: Plazos,
+  ahora: number,
+): boolean {
+  if (ahora > plazos.empezarHasta) return false
+  const subidaNueva = target.network === 'youtube' && !target.containerId
+  return !subidaNueva || ahora + PEOR_SUBIDA_YOUTUBE_MS <= plazos.terminarAntesDe
+}
+
+/**
+ * Cuánto dura el reclamo de un destino (`reclamadoHasta`): bastante más que una corrida —el
+ * cron se corta a los 240 segundos— para que una corrida viva nunca lo pierda, y poco para que
+ * el destino de una corrida que murió vuelva pronto a la fila.
+ */
+export const RECLAMO_MS = 10 * 60_000
+
+/**
+ * Si una corrida tiene el destino entre manos ahora mismo. Mientras dura su reclamo el
+ * destino sigue diciendo `scheduled`, así que su estado solo no alcanza para saber que está
+ * saliendo: el editor y el borrado preguntan por esto antes de tocarlo.
+ */
+export function enVuelo(target: { reclamadoHasta?: Date | null }, now: Date): boolean {
+  return target.reclamadoHasta != null && target.reclamadoHasta.getTime() > now.getTime()
+}
+
+/**
+ * Lo que un rearme le escribe a un destino quemado —«Subir ahora», «Reprogramar», el
+ * editor—: vuelve a `scheduled` sin intentos, sin error ni espera, y las 24 horas de
+ * `publishing` se cuentan de nuevo. El contenedor se queda: el intento siguiente le pregunta
+ * primero a la red cómo terminó el anterior —si salió, se anota sin publicar otra vez; si el
+ * contenedor ya no sirve, empieza de cero—. Tirarlo subía el video otra vez aunque la red ya
+ * lo tuviera.
+ */
+export const REARME = {
+  status: 'scheduled',
+  attemptCount: 0,
+  lastError: null,
+  reintentarDesde: null,
+  publicandoDesde: null,
+} as const
+
+/**
+ * Si el contenedor de un destino es un borrador que todavía no salió. En Instagram lo es: el
+ * contenedor guarda el texto y los archivos, y sale recién con `media_publish`, así que si el
+ * editor cambia el texto se puede tirar y armar otro. En YouTube, Facebook y TikTok el
+ * contenedor es el video que ya se subió y la red está procesando para publicar: tirarlo por
+ * un texto subiría una copia del mismo video.
+ */
+export function contenedorEsBorrador(network: string): boolean {
+  return network === 'instagram'
+}
 
 /**
  * Cuánto se espera después de cada intento fallido antes del siguiente: quince minutos
@@ -125,7 +214,7 @@ export function resolveOutcome(outcome: PublishOutcome, attemptCount: number, no
   const espera = ESPERAS_TRAS_FALLO_MS[Math.min(attempts, ESPERAS_TRAS_FALLO_MS.length) - 1]!
   return {
     status: quemado ? 'failed' : 'scheduled',
-    containerId: null,
+    containerId: outcome.containerId ?? null,
     externalId: null,
     attemptCount: attempts,
     lastError: outcome.reason,
@@ -157,7 +246,11 @@ export function mediaParaBorrar<T extends { mediaType: string }>(
   return publicado ? media.filter((m) => m.mediaType === 'video') : []
 }
 
-/** A target parked in 'publishing' must never wait forever: 24 hours is a verdict. */
-export function isStaleProcessing(updatedAt: Date, now: Date): boolean {
-  return now.getTime() - updatedAt.getTime() >= STALE_PROCESSING_HOURS * 60 * 60 * 1000
+/**
+ * A target parked in 'publishing' must never wait forever: 24 hours is a verdict. Se mide
+ * desde que el destino entró a `publishing` (`publicandoDesde`), no desde la hora del post:
+ * ver `publishDue`.
+ */
+export function isStaleProcessing(desde: Date, now: Date): boolean {
+  return now.getTime() - desde.getTime() >= STALE_PROCESSING_HOURS * 60 * 60 * 1000
 }
