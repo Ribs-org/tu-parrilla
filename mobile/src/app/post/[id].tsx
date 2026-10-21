@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { Boton, Cargando, Etiqueta, Tarjeta } from '../../components/ui'
 import { useColores } from '../../components/tema'
 import { POST_ABIERTO, readCache } from '../../lib/cache'
-import { capitalizar, num, pct, shortDate } from '../../lib/format'
+import { capitalizar, esEnlaceSeguro, num, pct, shortDate } from '../../lib/format'
 import { NOMBRE_RED, RANGOS, type PostMetrica, type Posts } from '../../lib/tipos'
 
 export default function DetallePost() {
@@ -113,7 +113,7 @@ export default function DetallePost() {
         </Tarjeta>
       ) : null}
 
-      {post.permalink ? (
+      {esEnlaceSeguro(post.permalink) ? (
         <Pressable onPress={() => Linking.openURL(post.permalink!)} accessibilityRole="link">
           <Tarjeta>
             {/* En brasa como el resto de las acciones: el verde de esta app dice

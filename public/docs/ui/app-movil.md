@@ -130,7 +130,7 @@ Se abre con «Ver todas las publicaciones →» en Los Números. Arriba, la barr
 
 ### El detalle de una publicación
 
-Arriba, la barra con el título «Publicación» y la flecha para volver. Después: la red y la fecha, el texto completo, y una tarjeta con «Views (acumulado)», «Views ganadas», «Likes», «Comentarios», «Compartidos», «Alcance», «Visitas al sitio», «Clicks», «CTR» y «Arrastre». Si el post tiene atributos, una tarjeta «Atributos» con cada uno. Al final, si existe, «Abrir en Instagram ↗» (o la red que corresponda), que abre el post en su red.
+Arriba, la barra con el título «Publicación» y la flecha para volver. Después: la red y la fecha, el texto completo, y una tarjeta con «Views (acumulado)», «Views ganadas», «Likes», «Comentarios», «Compartidos», «Alcance», «Visitas al sitio», «Clicks», «CTR» y «Arrastre». Si el post tiene atributos, una tarjeta «Atributos» con cada uno. Al final, si la red mandó el enlace del post (y es `https`), «Abrir en Instagram ↗» (o la red que corresponda), que abre el post en su red.
 
 Si el post no está entre lo descargado: «Vuelve a la lista y ábrelo de nuevo: este post no está en lo descargado.» y el botón «Volver».
 

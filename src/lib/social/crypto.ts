@@ -3,6 +3,13 @@ import { env } from '../env'
 
 const VERSION = 'v1'
 const IV_BYTES = 12
+/**
+ * La etiqueta de GCM, entera. Sin fijarla, `createDecipheriv` acepta una etiqueta recortada
+ * —de hasta 4 bytes— y la verifica contra lo que mida, así que un token alterado con una
+ * etiqueta corta tiene muchas más chances de pasar. Las que se escribieron siempre midieron 16:
+ * es lo que da `createCipheriv` por defecto.
+ */
+const TAG_BYTES = 16
 
 /**
  * Derived rather than used raw: AUTH_SECRET also signs the admin session, and a key
@@ -16,7 +23,7 @@ function key(): Buffer {
 
 export function encryptToken(plain: string): string {
   const iv = randomBytes(IV_BYTES)
-  const cipher = createCipheriv('aes-256-gcm', key(), iv)
+  const cipher = createCipheriv('aes-256-gcm', key(), iv, { authTagLength: TAG_BYTES })
   const body = Buffer.concat([cipher.update(plain, 'utf8'), cipher.final()])
   return [
     VERSION,
@@ -31,7 +38,7 @@ export function decryptToken(payload: string): string {
   if (version !== VERSION || !iv || !tag || !body) {
     throw new Error('Unrecognised token payload')
   }
-  const decipher = createDecipheriv('aes-256-gcm', key(), Buffer.from(iv, 'base64url'))
+  const decipher = createDecipheriv('aes-256-gcm', key(), Buffer.from(iv, 'base64url'), { authTagLength: TAG_BYTES })
   decipher.setAuthTag(Buffer.from(tag, 'base64url'))
   // GCM throws here when the ciphertext or tag was altered, which is the point.
   return Buffer.concat([

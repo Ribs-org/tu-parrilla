@@ -22,6 +22,20 @@ export function shortDate(iso: string): string {
   return `${Number(iso.slice(8, 10))} ${mes}, ${iso.slice(11, 16)}`
 }
 
+/**
+ * Si un enlace que llegó de la API se puede abrir desde la app: solo `https`. El de una
+ * publicación lo manda la red, y `Linking.openURL` abre lo que le den —otra app con su esquema,
+ * un `intent:` de Android—; un enlace raro no tiene que sacar a nadie de la app a ciegas.
+ */
+export function esEnlaceSeguro(url: string | null | undefined): url is string {
+  if (!url) return false
+  try {
+    return new URL(url).protocol === 'https:'
+  } catch {
+    return false
+  }
+}
+
 /** Las claves de atributos ya vienen en español (`hook`, `tema`); solo falta mayúscula inicial. */
 export function capitalizar(texto: string): string {
   return texto ? texto[0].toUpperCase() + texto.slice(1) : texto

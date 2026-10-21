@@ -1,6 +1,23 @@
 import { describe, expect, it } from 'vitest'
 
-import { cambio, capitalizar, num, pct, shortDate } from './format'
+import { cambio, capitalizar, esEnlaceSeguro, num, pct, shortDate } from './format'
+
+describe('esEnlaceSeguro', () => {
+  it('solo https se abre desde la app', () => {
+    expect(esEnlaceSeguro('https://www.instagram.com/p/abc/')).toBe(true)
+    expect(esEnlaceSeguro('http://ejemplo.cl')).toBe(false)
+    expect(esEnlaceSeguro('intent://scan/#Intent;scheme=zxing;end')).toBe(false)
+    expect(esEnlaceSeguro('javascript:alert(1)')).toBe(false)
+    expect(esEnlaceSeguro('otra-app://abrir')).toBe(false)
+  })
+
+  it('nada, o algo que no es un enlace, no se abre', () => {
+    expect(esEnlaceSeguro(null)).toBe(false)
+    expect(esEnlaceSeguro(undefined)).toBe(false)
+    expect(esEnlaceSeguro('')).toBe(false)
+    expect(esEnlaceSeguro('no es un enlace')).toBe(false)
+  })
+})
 
 describe('num', () => {
   it('un null es un guion, nunca un cero', () => {
