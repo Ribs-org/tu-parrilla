@@ -20,6 +20,7 @@ tus números.
 | `/api/social/meta/baja` | `POST` de Meta cuando alguien quita la app desde Facebook: deja sin credencial sus cuentas de Instagram y Facebook |
 | `/api/social/meta/borrado` | `POST` de Meta cuando alguien pide borrar sus datos: borra lo que vino de esas dos redes y devuelve el código de estado |
 | `/api/schedule/…`, `/api/metrics/…` | La API para tu agente, con una llave de Tu IA: cargar, ver y sacar lo programado, las cuentas y los números (ver «Carga masiva por API» y las secciones que le siguen) |
+| `/api/media` | `POST` con la misma llave: firma la subida de un archivo directo a R2, para nombrarlo después en varias filas del lote sin que se vuelva a bajar (ver «Carga masiva por API») |
 | `/api/mobile/…` | La API de la app del teléfono, con el token de su sesión (ver `mobile/README.md`) |
 | `/api/cron/…` | Las corridas programadas: la publicación y la sincronización. Solo con `CRON_SECRET` |
 | `/api/track/…` | Las balizas de visitas y clics de las páginas públicas |
@@ -1084,7 +1085,7 @@ Vercel y bajan con `vercel env pull .env.local`.
 | `CRON_SECRET` | Autoriza las corridas programadas: el sync diario y la publicación cada 5 minutos. Vercel la manda sola a su cron; el pinger externo la manda en `Authorization: Bearer …` | Sí — Vercel no la crea: se genera igual que `AUTH_SECRET` y se agrega. Sin ella los crons responden `401` y no corre nada |
 | `MIGRAR_PREVIEWS` | Que los previews migren la base | Solo cuando el preview tenga una base propia; contra la de producción, no |
 | `DATABASE_URL_PRUEBAS` | Solo para las pruebas de integración: una Postgres desechable donde cada archivo crea y migra su propia base (ver «Comandos»). No va en Vercel | No — sin ella esas pruebas se saltan. Nunca la de producción |
-| `SCHEDULE_API_KEY` | La llave del despliegue: abre `POST /api/schedule/batch` (carga masiva), `DELETE /api/schedule/posts/{id}` (sacar lo programado), `GET /api/schedule/posts` (calendario), `GET /api/schedule/resumen` (el resumen del día), `GET /api/schedule/cuentas` (las cuentas), `GET /api/metrics/posts` (métricas) y `GET /api/metrics/mejores` (el mejor X %) a nombre del admin. Es anterior a las llaves por usuario y sigue para el agente que ya la usa | No — sin ella los siete endpoints aceptan solo las llaves que cada usuario genera en Tu IA; si la pones, genérala igual que `CRON_SECRET` |
+| `SCHEDULE_API_KEY` | La llave del despliegue: abre `POST /api/schedule/batch` (carga masiva), `POST /api/media` (subir un archivo una vez), `DELETE /api/schedule/posts/{id}` (sacar lo programado), `GET /api/schedule/posts` (calendario), `GET /api/schedule/resumen` (el resumen del día), `GET /api/schedule/cuentas` (las cuentas), `GET /api/metrics/posts` (métricas) y `GET /api/metrics/mejores` (el mejor X %) a nombre del admin. Es anterior a las llaves por usuario y sigue para el agente que ya la usa | No — sin ella los ocho endpoints aceptan solo las llaves que cada usuario genera en Tu IA; si la pones, genérala igual que `CRON_SECRET` |
 | `RESEND_API_KEY` | Manda los códigos de ingreso y los avisos: la publicación que se quemó, la cuenta que se cayó y el resumen del día (ver «Avisos por correo») | Sí — sin ella nadie puede entrar al panel |
 | `PUBLISH_ALERT_TO` | Adónde va un aviso sin dueño con correo: un post o una cuenta de antes de los usuarios. Lo demás va al correo de su dueño | No — sin ella, lo que no tiene dueño no avisa; el calendario y Los Fierros lo siguen mostrando |
 | `PUBLISH_ALERT_FROM` | Remitente de los avisos | Opcional; default `onboarding@resend.dev`, que solo entrega al correo de la cuenta de Resend |
@@ -1189,7 +1190,7 @@ Tres correos, todos con el remitente `PUBLISH_ALERT_FROM` y al correo del dueño
 
 ### Guía para el editor de contenido
 
-`public/docs/api-editor.md` documenta los siete endpoints en detalle, escrito para que un
+`public/docs/api-editor.md` documenta los ocho endpoints en detalle, escrito para que un
 LLM que crea contenido lo lea entero y no necesite explicaciones: contratos, reglas
 por red, todas las frases de error y qué significa cada métrica. Se sirve tal cual en
 <https://tu-parrilla.cl/docs/api-editor.md>. No contiene secretos — la llave
@@ -1215,7 +1216,7 @@ página cita archivos que ya no existen.
 
 ### La llave de la API
 
-Los siete endpoints de abajo piden el header `Authorization: Bearer <llave>`, y lo que
+Los ocho endpoints de abajo piden el header `Authorization: Bearer <llave>`, y lo que
 hacen lo hacen a nombre del dueño de la llave: sus cuentas, sus posts, su zona. Valen dos
 clases de llave:
 
@@ -1248,6 +1249,14 @@ todo, y así fallaban los videos grandes de Drive. Un fallo pasajero se reintent
 entero deja de empezar filas cuarenta segundos antes del `maxDuration` de la ruta y contesta con
 lo que alcanzó; el resto vuelve con su frase. Cada resultado trae `ms` y, si bajó media, `bytes`,
 `origen` y, si falló, `motivo` (las guías de la API los listan).
+
+Para no bajar nada, `POST /api/media` (`src/app/api/media/route.ts`) firma un PUT directo a R2,
+como el teléfono, y devuelve la URL pública del archivo. La clave va en la carpeta del dueño de
+la llave (`scheduled/<ownerId>/`, `carpetaDeLaApi`), y el lote acepta sin bajarlo lo que esté en
+la carpeta del dueño del lote: solo comprueba con un HEAD que exista, lo que pesa y el tipo con
+que se firmó. Una URL de la carpeta de otro dueño se trata como cualquier URL pública. Varias
+filas pueden nombrar el mismo objeto: `limpiarMedia` no borra un video que otro post todavía usa,
+y el barrido de huérfanos se lleva lo que nadie nombró en una hora.
 
 Cada fila puede traer una `ref`: un texto de hasta 100 caracteres, único por dueño, que el
 que llama elige (el id de la fila en su planilla, por ejemplo). Sirve para el caso que antes
@@ -1420,6 +1429,7 @@ src/
     lado-a-lado.ts         dos publicaciones lado a lado: la curva por edad y sus atributos (sin base)
     metrics-consulta.ts    lo que comparten las rutas de /api/metrics: la llave, el rango, la red y la cuenta
     cuentas-api.ts         las cuentas de GET /api/schedule/cuentas: los dos ids y cómo está la conexión (sin base)
+    media-api.ts           la clave de un archivo que sube un cliente de la API, en la carpeta de su dueño (sin base)
     color-de-red.ts        el color de marca de cada red en La Parrilla, como clases de Tailwind escritas enteras
     piezas.ts              la pieza de una publicación: sus destinos programados unidos a lo publicado
     auth.ts                sesión del panel

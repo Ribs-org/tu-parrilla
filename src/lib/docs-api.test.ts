@@ -12,6 +12,7 @@ import {
 } from './social/comentarios/reglas'
 import { LOTE_SIN_TIEMPO, MAX_BATCH_ITEMS, MAX_REF, MEDIA_ILEGIBLE, PUBLISHABLE, REF_ERROR } from './social/publish/batch'
 import { MOTIVOS_FIJOS } from './social/publish/descarga-segura'
+import { ARCHIVO_MUY_GRANDE, CUERPO_ILEGIBLE, TIPO_NO_PUBLICABLE } from './mobile-api'
 import { REDES_PROXIMAMENTE, fraseProximamente } from './networks'
 import { TOPE_INSTAGRAM, TRIAL_REEL_NO_DISPONIBLE } from './social/publish/publisher'
 import {
@@ -67,6 +68,10 @@ describe('la documentación para LLM no le miente al código', () => {
     for (const archivo of ['public/docs/api-llm.md', 'public/docs/api-editor.md']) {
       const guia = readFileSync(archivo, 'utf8')
       for (const frase of [MEDIA_ILEGIBLE, LOTE_SIN_TIEMPO]) expect(guia, `${archivo}: ${frase}`).toContain(frase)
+      // Los rechazos de `POST /api/media`, que son los de `prepararSubida`.
+      for (const frase of [TIPO_NO_PUBLICABLE, ARCHIVO_MUY_GRANDE, CUERPO_ILEGIBLE]) {
+        expect(guia, `${archivo}: ${frase}`).toContain(frase)
+      }
       for (const motivo of [...MOTIVOS_FIJOS, 'http <status>', 'tipo <content-type>']) {
         expect(guia, `${archivo}: ${motivo}`).toContain(`\`${motivo}\``)
       }

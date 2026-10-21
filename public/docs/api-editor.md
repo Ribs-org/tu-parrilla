@@ -145,7 +145,8 @@ publicar.
 
 Array de **URLs públicas**. El sistema las descarga, verifica que el tipo real coincida, y
 **las re-sube a su propio almacenamiento** — la URL de origen puede morir después sin afectar
-la publicación. Cada archivo tiene 30 s para empezar a llegar, y se corta si deja de llegar
+la publicación. Lo que subiste con `POST /api/media` (sección 1b) no se vuelve a bajar: va su
+`url` tal cual. Cada archivo tiene 30 s para empezar a llegar, y se corta si deja de llegar
 30 s seguidos; uno que baja parejo no tiene tope propio, solo el del lote (ver «Tiempos»). Si
 falla por algo pasajero —el origen no contestó, se cortó, o respondió `5xx` o `429`—, se
 reintenta una vez antes de rechazar la fila.
@@ -454,8 +455,9 @@ Cada fila trae además lo que costó, para saber dónde se va el tiempo:
 
 - `ms`: cuánto tardó la fila en el servidor, contando la espera de su media.
 - `bytes` y `origen`, solo si la fila llegó a su media: cuántos bytes bajó **esta** fila, y de
-  dónde salió su media: `descarga` si bajó algo, `cache` si toda venía de otra fila del mismo
-  lote con la misma URL (ahí `bytes` es 0).
+  dónde salió su media: `descarga` si bajó algo; `cache` si no bajó nada pero algo venía de otra
+  fila del mismo lote con la misma URL; `almacen` si toda estaba subida con `POST /api/media`
+  (sección 1b). En los dos últimos, `bytes` es 0.
 - `motivo`, solo si la media no se pudo traer: el porqué, en palabras fijas.
 
 | `motivo` | Qué pasó |
@@ -470,6 +472,7 @@ Cada fila trae además lo que costó, para saber dónde se va el tiempo:
 | `vacía` | la respuesta llegó sin contenido |
 | `redirecciones` | demasiadas redirecciones, o una sin destino válido |
 | `url prohibida` | no es `http`/`https`, o apunta a una red interna |
+| `no subido` | un archivo de `POST /api/media` que no está: el `PUT` no terminó, o ya se borró (sección 1b) |
 
 Los tres primeros y los `http 5xx` o `http 429` ya se reintentaron una vez antes de llegarte.
 
@@ -477,7 +480,8 @@ Los tres primeros y los `http 5xx` o `http 429` ya se reintentaron una vez antes
 
 El lote baja **cuatro filas a la vez**; los archivos de una misma fila bajan uno tras otro. La
 misma URL en varias filas del **mismo lote** se baja una sola vez y las filas comparten la
-copia: si un video va a varias cuentas en filas distintas, mándalas en el mismo lote.
+copia: si un video va a varias cuentas en filas distintas, mándalas en el mismo lote. Lo más
+rápido es no bajar nada: sube cada archivo una vez con `POST /api/media` (sección 1b).
 
 Cada lote tiene unos tres minutos. Al llegar a ese tiempo deja de empezar filas y corta
 las descargas a medias, y contesta igual: lo que alcanzó a entrar queda programado, y el resto
@@ -496,6 +500,69 @@ como repetido. Sin `ref` no hay deduplicación: reenviar una fila ya programada 
 **Si no recibes respuesta** (se cortó la conexión): las filas ya procesadas quedaron
 programadas. Con `ref` en cada fila, reenvía el lote igual y listo. Sin
 ella, verifica con `GET /api/schedule/posts` antes de reintentar, o duplicarás posts.
+
+---
+
+# 1b. Subir un archivo una vez — `POST /api/media`
+
+Para no pasar por Drive: subes el archivo directo al almacenamiento de Tu Parrilla, una vez, y
+en las filas del lote pones su `url` en `media` (o en `portada`). El lote no lo vuelve a bajar:
+solo comprueba que esté, cuánto pesa y su tipo, así que esas filas vuelven en milisegundos y el
+mismo archivo sirve para todas las filas que quieras.
+
+**1. Pide dónde subirlo:**
+
+```bash
+curl -X POST https://tu-parrilla.cl/api/media \
+  -H "Authorization: Bearer $LLAVE_PARRILLA" \
+  -H "Content-Type: application/json" \
+  -d '{ "nombre": "video-01.mp4", "tipo": "video/mp4", "bytes": 41937210 }'
+```
+
+- `nombre`: el nombre del archivo; queda en la URL, con la extensión de su tipo.
+- `tipo`: su content-type, uno de los que se publican (`image/jpeg`, `image/png`, `image/gif`,
+  `image/webp`, `video/mp4`, `video/quicktime`, `video/webm`).
+- `bytes`: lo que pesa (`0` si no lo sabes). Hasta 500 MB.
+
+Responde:
+
+```json
+{
+  "url": "https://…/scheduled/…/3f2a…-video-01.mp4",
+  "subir": "https://…?X-Amz-Signature=…",
+  "cabeceras": { "Content-Type": "video/mp4", "Cache-Control": "public, max-age=31536000, immutable" },
+  "mediaType": "video",
+  "vence": "2026-10-21T19:40:00.000Z"
+}
+```
+
+**2. Súbelo** con un `PUT` a `subir`, con esas dos cabeceras tal cual (van dentro de la firma: si
+falta una o cambia una letra, el almacenamiento responde `403`), antes de `vence` (una hora):
+
+```bash
+curl -X PUT "$SUBIR" -H "Content-Type: video/mp4" \
+  -H "Cache-Control: public, max-age=31536000, immutable" --data-binary @video-01.mp4
+```
+
+**3. Úsalo:** `"media": ["<url>"]` en cada fila que lleve ese archivo. Esas filas vuelven con
+`"origen": "almacen"`.
+
+Lo que dura: nómbralo en un lote **dentro de la hora** siguiente a subirlo; lo que ningún post
+nombra en una hora se borra. Después vive mientras algún post lo use: un video se borra cuando
+el último post que lo nombra salió en todas sus redes. Una fila que nombra un archivo que no
+está —el `PUT` no terminó, o ya se borró— se rechaza con `No se pudo leer una media de la
+fila.` y `"motivo": "no subido"`.
+
+Vale para los lotes del mismo dueño, con cualquiera de sus llaves: la `url` queda en una carpeta
+suya, y el lote de otro dueño la trataría como cualquier URL pública (la bajaría y la copiaría).
+
+| Respuesta | Cuándo |
+|---|---|
+| `400` `{ "error": "Ese tipo de archivo no se puede publicar." }` | `tipo` no es uno de los de arriba |
+| `400` `{ "error": "El archivo supera los 500 MB." }` | `bytes` pasa de 500 MB |
+| `400` `{ "error": "El cuerpo no se entendió." }` | el cuerpo no es un objeto JSON, o `bytes` no es un número |
+| `401` `No autorizado` | sin llave, o con una que no sirve |
+| `500` `{ "error": "Falta configurar Cloudflare R2 (R2_*)." }` | el almacenamiento no está configurado en este despliegue |
 
 ---
 
@@ -950,7 +1017,8 @@ patrones. Con menos de ~10 posts por valor de atributo, desconfía de la diferen
 
 - **No deduplica sin `ref`**: reenviar el mismo lote sin `ref` programa todo de nuevo. Con
   `ref`, lo que ya entró vuelve como repetido (sección 1).
-- **No programa en el pasado** ni acepta media que no esté en una URL pública.
+- **No programa en el pasado** ni acepta media que no esté en una URL pública o subida con
+  `POST /api/media` (sección 1b).
 - **No edita por API**: para corregir un post ya programado, o lo borras con
   `DELETE /api/schedule/posts/{id}` y lo programas de nuevo, o el dueño lo cambia en su
   panel (`/admin/schedule`), donde puede tocar texto, hora, redes, media, portada y

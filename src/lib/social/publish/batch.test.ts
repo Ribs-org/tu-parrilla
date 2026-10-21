@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   mediaTypeFromUrl,
   tipoDesdeNombre,
@@ -21,6 +21,7 @@ import {
   MEDIA_ILEGIBLE,
   LOTE_SIN_TIEMPO,
   FILAS_A_LA_VEZ,
+  carpetaDeLaApi,
   type BatchResult,
 } from './batch'
 import { ATRIBUTOS_ERROR } from './atributos'
@@ -34,9 +35,18 @@ import { reglasClave, scheduledPostMedia, scheduledPosts } from '@/db'
 // igual que en `documento.test.ts` — lo que importa es la clave y el content-type con la
 // que se llama, no solo que devuelva algo.
 const guardarMock = vi.fn(async (...args: [key: string, body: Blob, contentType: string]) => `https://media.ej.cl/${args[0]}`)
-vi.mock('@/lib/storage', () => ({
-  guardar: (key: string, body: Blob, contentType: string) => guardarMock(key, body, contentType),
-}))
+// Lo que ya está en el almacén, por URL: lo que un test sube con `POST /api/media` y el lote
+// tiene que encontrar sin bajarlo. `keyDesdeUrl` es la real, contra la misma base pública.
+const { enAlmacen } = vi.hoisted(() => ({ enAlmacen: new Map<string, { bytes: number; tipo: string }>() }))
+vi.mock('@/lib/storage', async (importOriginal) => {
+  const real = await importOriginal<typeof import('@/lib/storage')>()
+  return {
+    guardar: (key: string, body: Blob, contentType: string) => guardarMock(key, body, contentType),
+    basePublica: () => 'https://media.ej.cl',
+    keyDesdeUrl: real.keyDesdeUrl,
+    objetoEnAlmacen: async (url: string) => enAlmacen.get(url) ?? null,
+  }
+})
 
 // scheduleBatch es la única función de este archivo que toca la base: se mockea `@/db`
 // (patrón de `automatico.test.ts` y `storage-gc.test.ts`, con `importOriginal` para
@@ -989,5 +999,71 @@ describe('scheduleBatch — las descargas del lote', () => {
     expect(sinMedir(await scheduleBatch('owner-1', [fila], Date.now() + 300))).toEqual([
       { index: 0, ok: false, error: LOTE_SIN_TIEMPO, motivo: 'sin tiempo' },
     ])
+  })
+})
+
+/**
+ * Issue #237: el video se sube una vez con `POST /api/media` y las filas nombran su `url`. El
+ * lote no lo vuelve a bajar: mira que esté en el almacén, en la carpeta del dueño del lote.
+ */
+describe('scheduleBatch — lo que el dueño ya subió con POST /api/media', () => {
+  const propia = `https://media.ej.cl/${carpetaDeLaApi('owner-1')}uuid-1-video.mp4`
+  const fila: BatchItem = { fecha: '2030-10-05 19:00', texto: 'Hola', cuentas: [], redes: ['facebook'], media: [propia] }
+
+  // Ninguna de estas filas debería tocar la red; la que sí, lo dice con su propio `fetch`.
+  beforeEach(() => {
+    vi.stubGlobal('fetch', vi.fn(async () => {
+      throw new Error('no debía tocar la red')
+    }))
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    enAlmacen.clear()
+    inserts.length = 0
+    guardarMock.mockClear()
+  })
+
+  it('se usa tal cual, sin bajarlo ni copiarlo, y la fila dice que vino del almacén', async () => {
+    enAlmacen.set(propia, { bytes: 41_000_000, tipo: 'video/mp4' })
+    const fetchMock = vi.fn()
+    vi.stubGlobal('fetch', fetchMock)
+    const [resultado] = await scheduleBatch('owner-1', [fila, { ...fila, texto: 'Otra cuenta' }])
+    expect(resultado).toMatchObject({ ok: true, origen: 'almacen', bytes: 0 })
+    expect(fetchMock).not.toHaveBeenCalled()
+    expect(guardarMock).not.toHaveBeenCalled()
+    const urls = inserts.filter((i) => i.tabla === scheduledPostMedia).map((i) => (i.valores as Array<{ blobUrl: string }>)[0]!.blobUrl)
+    expect(urls).toEqual([propia, propia])
+  })
+
+  it('si no está —el PUT no terminó, o ya se borró— la fila dice «no subido»', async () => {
+    vi.stubGlobal('fetch', vi.fn())
+    expect(sinMedir(await scheduleBatch('owner-1', [fila]))).toEqual([
+      { index: 0, ok: false, error: MEDIA_ILEGIBLE, motivo: 'no subido' },
+    ])
+    expect(inserts).toEqual([])
+  })
+
+  it('el tipo que quedó firmado manda: un .mp4 que se firmó como imagen se rechaza', async () => {
+    enAlmacen.set(propia, { bytes: 10, tipo: 'image/jpeg' })
+    const [resultado] = await scheduleBatch('owner-1', [fila])
+    expect(resultado).toMatchObject({ ok: false, error: MEDIA_ILEGIBLE, motivo: 'tipo image/jpeg' })
+  })
+
+  it('lo que pasa de 500 MB se rechaza aunque ya esté subido', async () => {
+    enAlmacen.set(propia, { bytes: 600 * 1024 * 1024, tipo: 'video/mp4' })
+    const [resultado] = await scheduleBatch('owner-1', [fila])
+    expect(resultado).toMatchObject({ ok: false, motivo: 'muy grande' })
+  })
+
+  it('lo de la carpeta de otro dueño no se acepta como propio: se baja como cualquier URL', async () => {
+    const ajena = `https://media.ej.cl/${carpetaDeLaApi('otro-dueno')}uuid-2-video.mp4`
+    enAlmacen.set(ajena, { bytes: 10, tipo: 'video/mp4' })
+    const fetchMock = vi.fn(async () => new Response(new Uint8Array(3), { status: 200, headers: { 'content-type': 'video/mp4' } }))
+    vi.stubGlobal('fetch', fetchMock)
+    const [resultado] = await scheduleBatch('owner-1', [{ ...fila, media: [ajena] }])
+    expect(resultado).toMatchObject({ ok: true, origen: 'descarga' })
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    expect(guardarMock).toHaveBeenCalledTimes(1)
   })
 })
