@@ -38,7 +38,10 @@ Cómo se usa:
   las mismas seis tardan milisegundos, y así quedaron (`urlsReferenciadas`). Lo distintivo es
   que eran más consultas a la vez que conexiones en el pool (`max: 5` en `src/db/index.ts`),
   contra el pooler de Supabase en modo transacción. La causa no está explicada: cualquier
-  otro `Promise.all` con más de cinco consultas podría colgarse igual.
+  otro `Promise.all` con más de cinco consultas podría colgarse igual. Desde el 2026-10-21 no
+  queda ninguno que crezca con los datos: el conteo de enlaces del panel de páginas y el
+  reordenamiento de enlaces, los dos que lanzaban una consulta por fila, son una sola; los
+  `Promise.all` que siguen lanzan cuatro consultas como mucho.
 - **Por revisar en el teléfono: la barra de pestañas de la app** (2026-10-16). En la versión
   web de la app, las etiquetas de las pestañas se ven cortadas por abajo; puede ser solo la
   web. Mirarlo en el teléfono, y si pasa ahí también, darle alto a la barra en

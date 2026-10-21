@@ -1,4 +1,5 @@
 import 'server-only'
+import { cache } from 'react'
 import { and, asc, desc, eq, gte, inArray, isNotNull, isNull, lt, lte, or, sql, type SQL } from 'drizzle-orm'
 import {
   clicks,
@@ -394,6 +395,9 @@ export async function getPostSeries(f: Filters): Promise<PostSeriesPoint[]> {
       from ${visits} vi
       join ${socialPosts} p on p.campaign = vi.campaign
       where vi.created_at >= ${f.from.toISOString()} and vi.created_at <= ${f.to.toISOString()} and p.owner_id = ${f.ownerId}
+        -- Las visitas, solo de las páginas del dueño: la campaña es de su publicación, pero
+        -- cualquiera puede pegarla en el enlace de la página de otro.
+        and vi.profile_id in (select pr.id from ${profiles} pr where pr.owner_id = ${f.ownerId})
         ${f.profileId ? sql`and vi.profile_id = ${f.profileId}` : sql``}
         ${f.includeBots ? sql`` : sql`and vi.is_bot = false`}
       group by 1
@@ -441,8 +445,13 @@ export async function getLecturasDe(
     .orderBy(asc(postMetrics.capturedAt))
 }
 
-/** Todas las cuentas, en el orden en que se conectaron; Los Fierros (en Ajustes) las agrupa por red. */
-export async function getCuentas(ownerId: string): Promise<CuentaRow[]> {
+/**
+ * Todas las cuentas, en el orden en que se conectaron; Los Fierros (en Ajustes) las agrupa por
+ * red. Envuelta en `cache()`: el layout del panel las pide para el aviso de fierros fríos y la
+ * página otra vez, y eran dos lecturas iguales por petición. Fuera de un render (una acción,
+ * una ruta) `cache` no guarda nada y cada llamada lee.
+ */
+export const getCuentas = cache(async (ownerId: string): Promise<CuentaRow[]> => {
   const cuentas = await getDb()
     .select()
     .from(socialAccounts)
@@ -458,7 +467,7 @@ export async function getCuentas(ownerId: string): Promise<CuentaRow[]> {
     lastSyncError: a.lastSyncError,
     expiresAt: a.expiresAt?.toISOString() ?? null,
   }))
-}
+})
 
 /** Lets the analytics campaign table show a post's caption instead of a bare tag. */
 export async function getCampaignPosts(

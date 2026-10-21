@@ -77,18 +77,18 @@ export function pasosDeBorrado(metaUserId: string): SQL[] {
  * El `not exists` es la mitad que importa: borra solo lo que **esta** operación dejó
  * huérfano. Un corte que conserve un destino en otra red sigue en la parrilla, y un
  * borrador que ya estaba sin destinos —el dueño lo dejó así— no se toca. La media y la
- * regla cuelgan de `scheduled_posts` en cascada; los archivos los barre R2 al día
- * siguiente, como con cualquier borrado.
+ * regla cuelgan de `scheduled_posts` en cascada; los archivos los borra el barrido de
+ * huérfanos en la hora siguiente, como con cualquier borrado.
+ *
+ * Los ids van en un solo parámetro, un arreglo: uno por id, como antes, deja de funcionar
+ * pasados los 65 535 que Postgres acepta por consulta, y es justo la baja de una cuenta con
+ * mucho historial la que llega ahí.
  *
  * Sin ids devuelve `null`: nada que borrar, ningún paso que correr.
  */
 export function pasoDeHuerfanos(postIds: string[]): SQL | null {
   if (postIds.length === 0) return null
-  const ids = sql.join(
-    postIds.map((id) => sql`${id}`),
-    sql`, `,
-  )
-  return sql`delete from scheduled_posts where id in (${ids}) and not exists (select 1 from scheduled_post_targets t where t.post_id = scheduled_posts.id)`
+  return sql`delete from scheduled_posts where id = any(${sql.param(postIds)}::uuid[]) and not exists (select 1 from scheduled_post_targets t where t.post_id = scheduled_posts.id)`
 }
 
 /**

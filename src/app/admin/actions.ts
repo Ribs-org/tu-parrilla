@@ -37,8 +37,10 @@ import {
 import { extensionDe, validateScheduleDraft } from '@/lib/social/publish/validate'
 import { validateAtributos, ATRIBUTOS_ERROR, type Atributos } from '@/lib/social/publish/atributos'
 import { diffMedia, diffTargets } from '@/lib/social/publish/edit'
-import { crearPostProgramado } from '@/lib/social/publish/crear'
+import { BorradorConsumido, crearPostProgramado } from '@/lib/social/publish/crear'
+import { BORRADOR_NO_EXISTE } from '@/lib/mobile-api'
 import { REARME, contenedorEsBorrador, enVuelo } from '@/lib/social/publish/publisher'
+import { esUuid } from '@/lib/uuid'
 import { quitarCuenta } from '@/lib/social/quitar'
 import { CuentaInvalida, verificarCuentas, type CuentaDestino } from '@/lib/social/cuentas'
 // `guardarCuenta` de `social/conectar` guarda una cuenta *de una red*; la acción de abajo,
@@ -232,10 +234,14 @@ export async function deleteProfile(profileId: string): Promise<{ error?: string
   const db = getDb()
 
   const bloqueo = await db.transaction(async (tx) => {
+    // Las páginas del dueño, bloqueadas hasta terminar (`FOR UPDATE`): dos borrados a la vez
+    // de sus dos últimas páginas veían dos cada uno, y se llevaban las dos. Con el bloqueo, el
+    // segundo espera al primero y ve una.
     const propios = await tx
       .select({ id: profiles.id, isDefault: profiles.isDefault })
       .from(profiles)
       .where(eq(profiles.ownerId, ownerId))
+      .for('update')
     if (propios.length <= 1) {
       return 'No puedes borrar tu única página: todo usuario necesita al menos una.'
     }
@@ -387,20 +393,28 @@ export async function reorderLinks(profileId: string, orderedIds: string[]) {
   const { id: ownerId } = await requireUser()
   const db = getDb()
 
-  await Promise.all(
-    orderedIds.map((id, position) =>
-      db
-        .update(links)
-        .set({ position })
-        .where(
-          and(
-            eq(links.id, id),
-            eq(links.profileId, profileId),
-            inArray(links.profileId, db.select({ id: profiles.id }).from(profiles).where(eq(profiles.ownerId, ownerId))),
-          ),
+  // Una sola sentencia, con la posición de cada enlace en un `case`: el orden se escribe entero
+  // o no se escribe. Antes era un `UPDATE` por enlace, todos a la vez: un corte a la mitad
+  // dejaba el orden mezclado, y más enlaces que conexiones en el pool es la forma de consulta
+  // que una vez se colgó contra el pooler (ver `docs/pendientes.md`). Un id sin forma de uuid
+  // no llega a la base: haría fallar la sentencia entera.
+  const ids = orderedIds.filter(esUuid)
+  if (ids.length > 0) {
+    const posicion = sql`case ${sql.join(
+      ids.map((id, i) => sql`when ${links.id} = ${id} then ${i}::integer`),
+      sql` `,
+    )} end`
+    await db
+      .update(links)
+      .set({ position: posicion })
+      .where(
+        and(
+          inArray(links.id, ids),
+          eq(links.profileId, profileId),
+          inArray(links.profileId, db.select({ id: profiles.id }).from(profiles).where(eq(profiles.ownerId, ownerId))),
         ),
-    ),
-  )
+      )
+  }
 
   revalidatePath(`/admin/profiles/${profileId}`)
   revalidatePath('/', 'layout')
@@ -798,19 +812,24 @@ export async function createScheduledPost(_prev: FormState, formData: FormData):
   const reglaCheck = validarRegla(reglaDesdeFormulario(formData))
   if ('error' in reglaCheck) return { error: reglaCheck.error }
 
-  const id = await crearPostProgramado(ownerId, {
-    caption,
-    scheduledAt: scheduledAt!,
-    media: uploaded,
-    cuentas,
-    opciones: opcionesCheck.opciones,
-    regla: reglaCheck.regla,
-  })
-
-  // Si salió de un borrador, el borrador ya cumplió: se saca, atado al dueño. Después del
-  // post y no antes, para que un fallo al crearlo no se lleve también lo escrito.
-  const borradorId = idDeBorrador(formData.get('borradorId'))
-  if (borradorId) await borrarBorrador(ownerId, borradorId)
+  // Si salió de un borrador, el borrador se consume en la misma transacción que crea el post
+  // (`crearPostProgramado`): si ya no estaba —se programó en otra pestaña o en el teléfono, o
+  // se descartó—, no sale un segundo post, y si crear falla, el borrador sigue.
+  let id: string
+  try {
+    id = await crearPostProgramado(ownerId, {
+      caption,
+      scheduledAt: scheduledAt!,
+      media: uploaded,
+      cuentas,
+      opciones: opcionesCheck.opciones,
+      regla: reglaCheck.regla,
+      borradorId: idDeBorrador(formData.get('borradorId')),
+    })
+  } catch (error) {
+    if (error instanceof BorradorConsumido) return { error: BORRADOR_NO_EXISTE }
+    throw error
+  }
 
   revalidatePath('/admin/schedule')
   return { ok: true, id }
@@ -872,6 +891,9 @@ export async function descartarBorrador(id: string): Promise<{ error?: string }>
   return {}
 }
 
+/** Lo que el editor dice cuando algún destino está saliendo: «Publicando…» o reclamado ahora. */
+const EN_CURSO = 'Hay una publicación en curso. Vuelve en un minuto.'
+
 export async function updateScheduledPost(
   postId: string,
   _prev: FormState,
@@ -894,7 +916,7 @@ export async function updateScheduledPost(
   // (`enVuelo`): durante su intento sigue diciendo `scheduled`.
   const ahora = new Date()
   if (targets.some((t) => t.status === 'publishing' || enVuelo(t, ahora))) {
-    return { error: 'Hay una publicación en curso. Vuelve en un minuto.' }
+    return { error: EN_CURSO }
   }
   // Un reclamo que ocurra entre esta lectura y los writes de abajo también bumpa updatedAt:
   // este mapa es lo que lo hace visible ahí —si el cron reclamó, el write no-opea y el target
@@ -1123,105 +1145,120 @@ export async function updateScheduledPost(
   const textoCambio = caption !== post.caption || coverUrl !== post.coverUrl
   const tiraContenedor = (network: string) => mediaCambio || (textoCambio && contenedorEsBorrador(network))
 
-  // Sequential writes (neon-http has no interactive transactions); worst-case cut
-  // leaves media updated with old targets — the same partial-failure profile already
-  // accepted in createScheduledPost. Every target write carries its status guard y el
-  // updatedAt leído arriba (readTargets), so a cron claim between the read above and
-  // here makes the write no-op instead of clobbering the in-flight attempt.
-  await db
-    .update(scheduledPosts)
-    .set({ caption, scheduledAt: scheduledAt!, coverUrl, atributos, updatedAt: new Date() })
-    .where(eq(scheduledPosts.id, postId))
+  // Las escrituras van en una transacción: un corte a la mitad —la base que no contesta, la
+  // función que se cae— ya no deja la media nueva con los destinos de antes, ni el texto nuevo
+  // sin su regla. Adentro, lo primero es bloquear los destinos del post (`FOR UPDATE`) y volver
+  // a mirar que nada esté saliendo: una corrida que reclamó uno entre la lectura de arriba y acá
+  // se ve ahora, y una que quiera reclamarlo espera a que esto termine —y relee el texto después
+  // de reclamar (`publishDue`)—. Cada escritura de un destino sigue llevando su reja de estado y
+  // el `updatedAt` leído arriba (`readTargets`), así que un reclamo que ya pasó la deja sin
+  // efecto en vez de pisar el intento.
+  const bloqueo = await db.transaction(async (tx) => {
+    const bloqueados = await tx
+      .select({ status: scheduledPostTargets.status, reclamadoHasta: scheduledPostTargets.reclamadoHasta })
+      .from(scheduledPostTargets)
+      .where(eq(scheduledPostTargets.postId, postId))
+      .for('update')
+    if (bloqueados.some((t) => t.status === 'publishing' || enVuelo(t, new Date()))) return EN_CURSO
 
-  if (mediaPlan.deleteIds.length > 0) {
-    await db.delete(scheduledPostMedia).where(inArray(scheduledPostMedia.id, mediaPlan.deleteIds))
-  }
-  for (const [position, entry] of mediaPlan.order.entries()) {
-    if (entry.kind === 'kept') {
-      await db.update(scheduledPostMedia).set({ position }).where(eq(scheduledPostMedia.id, entry.id))
-    } else {
-      await db.insert(scheduledPostMedia).values({
-        postId,
-        blobUrl: entry.url,
-        mediaType: entry.mediaType,
-        position,
-      })
+    await tx
+      .update(scheduledPosts)
+      .set({ caption, scheduledAt: scheduledAt!, coverUrl, atributos, updatedAt: new Date() })
+      .where(eq(scheduledPosts.id, postId))
+
+    if (mediaPlan.deleteIds.length > 0) {
+      await tx.delete(scheduledPostMedia).where(inArray(scheduledPostMedia.id, mediaPlan.deleteIds))
     }
-  }
+    for (const [position, entry] of mediaPlan.order.entries()) {
+      if (entry.kind === 'kept') {
+        await tx.update(scheduledPostMedia).set({ position }).where(eq(scheduledPostMedia.id, entry.id))
+      } else {
+        await tx.insert(scheduledPostMedia).values({
+          postId,
+          blobUrl: entry.url,
+          mediaType: entry.mediaType,
+          position,
+        })
+      }
+    }
 
-  if (targetsPlan.create.length > 0) {
-    await db.insert(scheduledPostTargets).values(
-      targetsPlan.create.map((cuenta) => ({
-        postId,
-        network: cuenta.network,
-        accountId: cuenta.id,
-      })),
-    )
-  }
-  for (const id of targetsPlan.deleteIds) {
-    await db.delete(scheduledPostTargets).where(
-      and(
-        eq(scheduledPostTargets.id, id),
-        inArray(scheduledPostTargets.status, ['scheduled', 'failed']),
-        eq(scheduledPostTargets.updatedAt, readTargets.get(id)!.updatedAt),
-      ),
-    )
-  }
-  for (const id of targetsPlan.rearmIds) {
-    // El rearme conserva el contenedor (`REARME`): el intento siguiente le pregunta a la red
-    // cómo terminó el anterior antes de subir nada. Salvo que lo de antes ya no sirva
-    // (`tiraContenedor`, arriba).
-    const tirar = tiraContenedor(readTargets.get(id)!.network)
-    await db
-      .update(scheduledPostTargets)
-      .set({ ...REARME, ...(tirar ? { containerId: null } : {}), updatedAt: new Date() })
-      .where(
+    if (targetsPlan.create.length > 0) {
+      await tx.insert(scheduledPostTargets).values(
+        targetsPlan.create.map((cuenta) => ({
+          postId,
+          network: cuenta.network,
+          accountId: cuenta.id,
+        })),
+      )
+    }
+    for (const id of targetsPlan.deleteIds) {
+      await tx.delete(scheduledPostTargets).where(
         and(
           eq(scheduledPostTargets.id, id),
-          eq(scheduledPostTargets.status, 'failed'),
+          inArray(scheduledPostTargets.status, ['scheduled', 'failed']),
           eq(scheduledPostTargets.updatedAt, readTargets.get(id)!.updatedAt),
         ),
       )
-  }
-  // Lo mismo para un destino que espera su reintento con su contenedor guardado (el tope
-  // diario de Instagram, una publicación que no contestó): con lo de antes inservible, se tira y
-  // el intento siguiente arma otro con lo de ahora. Si la publicación que no contestó sí había
-  // salido, sale otra con lo nuevo: pasa solo si se edita en el rato entre dos intentos, y lo
-  // contrario —publicar lo viejo— sería peor.
-  if (mediaCambio || textoCambio) {
-    for (const target of targets) {
-      if (target.status !== 'scheduled' || !target.containerId) continue
-      if (!idsElegidosSet.has(target.accountId) || !tiraContenedor(target.network)) continue
-      await db
+    }
+    for (const id of targetsPlan.rearmIds) {
+      // El rearme conserva el contenedor (`REARME`): el intento siguiente le pregunta a la red
+      // cómo terminó el anterior antes de subir nada. Salvo que lo de antes ya no sirva
+      // (`tiraContenedor`, arriba).
+      const tirar = tiraContenedor(readTargets.get(id)!.network)
+      await tx
         .update(scheduledPostTargets)
-        .set({ containerId: null, publicandoDesde: null, updatedAt: new Date() })
+        .set({ ...REARME, ...(tirar ? { containerId: null } : {}), updatedAt: new Date() })
         .where(
           and(
-            eq(scheduledPostTargets.id, target.id),
-            eq(scheduledPostTargets.status, 'scheduled'),
-            eq(scheduledPostTargets.updatedAt, readTargets.get(target.id)!.updatedAt),
+            eq(scheduledPostTargets.id, id),
+            eq(scheduledPostTargets.status, 'failed'),
+            eq(scheduledPostTargets.updatedAt, readTargets.get(id)!.updatedAt),
           ),
         )
     }
-  }
+    // Lo mismo para un destino que espera su reintento con su contenedor guardado (el tope
+    // diario de Instagram, una publicación que no contestó): con lo de antes inservible, se tira y
+    // el intento siguiente arma otro con lo de ahora. Si la publicación que no contestó sí había
+    // salido, sale otra con lo nuevo: pasa solo si se edita en el rato entre dos intentos, y lo
+    // contrario —publicar lo viejo— sería peor.
+    if (mediaCambio || textoCambio) {
+      for (const target of targets) {
+        if (target.status !== 'scheduled' || !target.containerId) continue
+        if (!idsElegidosSet.has(target.accountId) || !tiraContenedor(target.network)) continue
+        await tx
+          .update(scheduledPostTargets)
+          .set({ containerId: null, publicandoDesde: null, updatedAt: new Date() })
+          .where(
+            and(
+              eq(scheduledPostTargets.id, target.id),
+              eq(scheduledPostTargets.status, 'scheduled'),
+              eq(scheduledPostTargets.updatedAt, readTargets.get(target.id)!.updatedAt),
+            ),
+          )
+      }
+    }
 
-  // La regla se edita siempre, incluso publicado el post: rige para los comentarios que
-  // lleguen desde ahora. Palabra vacía la borra.
-  if (reglaCheck.regla) {
-    await db
-      .insert(reglasClave)
-      .values({ postId, ...reglaCheck.regla })
-      .onConflictDoUpdate({
-        target: reglasClave.postId,
-        // Solo las columnas que este editor administra (palabra, mensaje, respuesta
-        // pública): un `set` con la regla entera pisaría `documentoUrl` con `null` en
-        // cada guardado, aunque la regla se haya creado por API con su PDF. Ver
-        // `columnasEditablesDeRegla`.
-        set: { ...columnasEditablesDeRegla(reglaCheck.regla), updatedAt: new Date() },
-      })
-  } else {
-    await db.delete(reglasClave).where(eq(reglasClave.postId, postId))
-  }
+    // La regla se edita siempre, incluso publicado el post: rige para los comentarios que
+    // lleguen desde ahora. Palabra vacía la borra.
+    if (reglaCheck.regla) {
+      await tx
+        .insert(reglasClave)
+        .values({ postId, ...reglaCheck.regla })
+        .onConflictDoUpdate({
+          target: reglasClave.postId,
+          // Solo las columnas que este editor administra (palabra, mensaje, respuesta
+          // pública): un `set` con la regla entera pisaría `documentoUrl` con `null` en
+          // cada guardado, aunque la regla se haya creado por API con su PDF. Ver
+          // `columnasEditablesDeRegla`.
+          set: { ...columnasEditablesDeRegla(reglaCheck.regla), updatedAt: new Date() },
+        })
+    } else {
+      await tx.delete(reglasClave).where(eq(reglasClave.postId, postId))
+    }
+
+    return null
+  })
+  if (bloqueo) return { error: bloqueo }
 
   revalidatePath('/admin/schedule')
 

@@ -36,18 +36,29 @@ export async function reprogramarDestino(
     )
   if (!target) return 'no-existe'
 
-  await db.update(scheduledPosts).set({ scheduledAt, updatedAt: new Date() }).where(eq(scheduledPosts.id, target.postId))
   // De vuelta a la fila (`REARME`): los intentos gastados contra la hora vieja no dicen nada
   // de la nueva. El contenedor se queda, para que el intento siguiente pregunte primero cómo
   // terminó el anterior.
   //
-  // `status = 'failed'` en el `where` —como el rearm del editor— es la reja contra la
-  // carrera con «Subir ahora»: entre la lectura de arriba y esta escritura el destino
-  // puede haber salido publicado, y devolverlo a `scheduled` lo haría publicar de nuevo en
-  // la vuelta siguiente del cron. Si ya no está quemado no casa ninguna fila.
-  await db
-    .update(scheduledPostTargets)
-    .set({ ...REARME, updatedAt: new Date() })
-    .where(and(eq(scheduledPostTargets.id, targetId), eq(scheduledPostTargets.status, 'failed')))
+  // Las dos escrituras van juntas, en una transacción, y en este orden: el destino vuelve a
+  // la fila solo si sigue quemado, y la hora del post se mueve solo si volvió. `status =
+  // 'failed'` en el `where` —como el rearm del editor— es la reja contra la carrera con
+  // «Subir ahora»: entre la lectura de arriba y esta escritura el destino puede haber salido
+  // publicado, y devolverlo a `scheduled` lo haría publicar de nuevo en la vuelta siguiente
+  // del cron. Antes la hora del post iba primero y sin condición, así que en esa carrera se
+  // movía igual, y un destino hermano todavía programado se corría con ella. Si ya no estaba
+  // quemado no se toca nada; la pantalla, al repintarse, muestra cómo quedó.
+  await db.transaction(async (tx) => {
+    const rearmados = await tx
+      .update(scheduledPostTargets)
+      .set({ ...REARME, updatedAt: new Date() })
+      .where(and(eq(scheduledPostTargets.id, targetId), eq(scheduledPostTargets.status, 'failed')))
+      .returning({ id: scheduledPostTargets.id })
+    if (rearmados.length === 0) return
+    await tx
+      .update(scheduledPosts)
+      .set({ scheduledAt, updatedAt: new Date() })
+      .where(and(eq(scheduledPosts.id, target.postId), eq(scheduledPosts.ownerId, ownerId)))
+  })
   return 'reprogramado'
 }

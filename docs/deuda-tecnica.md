@@ -287,20 +287,6 @@ caminos compartan la escritura de la regla en vez de tener cada uno su `insert` 
 de más arriba, «Dos caminos que crean publicaciones, sin código compartido», de la que esta es
 una consecuencia concreta.
 
-## Los `insert` del lote no van en transacción
-
-**Abierto, anterior a esta entrega.**
-
-`POST /api/schedule/batch` escribe cada fila con varios `insert` separados: el post y sus
-destinos, siempre; su media, si la fila trae archivos; y la regla de palabra clave, si la
-fila la pidió — hasta cuatro. Si el de los destinos falla después de que el del post (y,
-si corresponde, el de la media) ya confirmaron, queda un post con su media y **sin ningún
-destino** — invisible para el cron de publicación, porque este solo recorre destinos
-pendientes. El dueño ve un post «fantasma» en la carga masiva que nunca sale, sin ningún
-error visible después del hecho.
-
-Envolverlos todos en una transacción de drizzle lo cierra.
-
 ## La app del teléfono sigue agrupando las métricas por red
 
 **Abierto desde 2026-09-24; el panel lo cerró el 2026-10-13.**
@@ -391,27 +377,6 @@ entrega usando `nombreDe` de `src/lib/vocabulario.ts`; estas dos no, porque las 
 tests que comparan el texto letra por letra (el mensaje de error de `deleteProfile` y su
 reflejo en el editor). Cerrarlo cuesta actualizar esos tests junto con la frase — un cambio
 chico, pero deliberadamente fuera de esta entrega, que no tocaba tests de otras.
-
-## `rescheduleTarget` mueve la hora del post aunque el destino ya no case
-
-**Abierto desde 2026-09-29.** La escritura del destino sí está protegida: desde esta entrega
-el `UPDATE` de `scheduled_post_targets` exige `status = 'failed'` en su `where`, así que un
-destino que salió publicado entre la lectura de la acción y su escritura no vuelve a la cola
-—que es lo que lo habría hecho publicar de nuevo, porque el cron levanta todo lo `scheduled`
-y vencido sin mirar el `externalId`—.
-
-Lo que quedó fuera de esa reja es el `UPDATE` de `scheduled_posts`, que corre antes y sin
-condición: en esa carrera la hora del post se mueve igual. No republica ni revive nada, pero
-deja dos restos. La hora del post pasa a decir algo que ningún destino está esperando, y un
-destino hermano que siguiera en `scheduled` se corre a esa hora nueva: se atrasa, no se
-pierde. La acción además devuelve `ok` en ese caso; el `revalidatePath` repinta la verdad en
-el acto, y distinguirlo en la respuesta pedía una frase de error nueva, que esta entrega no
-podía tocar.
-
-Se dejó así porque cerrarlo no es una condición más: hay que reordenar la acción para
-escribir primero el destino, mirar si casó alguna fila, y solo entonces mover la hora del
-post —o envolver las dos escrituras en una transacción—. Es media hora de trabajo con su
-test del orden nuevo, y nada de lo que hoy se ve en pantalla lo pide.
 
 ## «Se quemó» no tiene ventana de fecha ni forma de podarse
 
@@ -543,7 +508,9 @@ sin id con los videos de esa cuenta que ningún destino tiene, por texto (el má
 comienzo del otro, con doce caracteres o más) y por hora (de una hora antes a dos días
 después de la programada; un mes para un borrador). Los pares se arman del más cercano en
 el tiempo al más lejano y cada lado entra en uno solo (`emparejarVideos`,
-`src/lib/social/tiktok-vinculo.ts`).
+`src/lib/social/tiktok-vinculo.ts`). Lee los videos del último mes y los destinos de los dos
+últimos (`VIDEOS_DESDE_MS`, `DESTINOS_DESDE_MS`): lo más viejo ya pasó por las sincronizaciones
+de cada día.
 
 Lo que queda a medias, a propósito:
 
@@ -591,6 +558,21 @@ mover el cron y «Subir ahora» a encolar, con sus pruebas contra una Postgres d
 (`run.integracion.test.ts` ya tiene el andamiaje). Mientras tanto, contar el intento al
 reclamarlo hace que un destino que se corta una y otra vez se queme con «La publicación se
 cortó a la mitad y ya no quedan intentos.» en vez de reintentarse para siempre.
+
+## La lista de La Parrilla carga el historial entero (2026-10-21)
+
+Desde esta entrega el calendario, «Por hora» y «Día» leen solo la semana o el día que dibujan
+(`cortesEntre`), y «Se quemó» y el aviso del compositor tienen sus propias lecturas
+(`cortesQuemados`, `horasPorVenir`). La vista «Lista» todavía lee todo lo programado del dueño
+—posts, destinos y media— y lo manda entero al navegador, que lo ordena y lo dibuja. Con un año
+de parrilla son cientos de cortes por cada visita a esa pestaña.
+
+Quedó así porque acotarla no es solo una consulta: la lista no tiene páginas ni «cargar más»,
+el filtro por red cuenta lo que está a la vista y el orden (lo que viene primero, lo que ya
+salió después) se arma en el cliente. Terminarlo pide paginarla en el servidor por ese mismo
+orden, con un cursor (la hora y el id del último corte), un «Ver más» al pie, y que los
+contadores del filtro salgan de una consulta propia en vez de contar lo cargado. Medio día de
+trabajo, con su página de la wiki.
 
 ## Lo nativo de la app no cambia de modo (2026-10-19)
 

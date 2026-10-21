@@ -264,9 +264,13 @@ export const socialPosts = pgTable(
     // account_id): declararlas al revés haría que `drizzle-kit generate` propusiera
     // recrear la unique.
     unique('social_posts_account_external_key').on(t.externalId, t.accountId),
-    index('social_posts_campaign_idx').on(t.campaign),
+    // Las de una cuenta por fecha: el sondeo de comentarios (cada cinco minutos) y la
+    // sincronización leen por cuenta, y la unique de arriba empieza por `external_id`.
+    // `campaign` no lleva índice propio: su unique ya es uno.
+    index('social_posts_account_published_idx').on(t.accountId, t.publishedAt),
     index('social_posts_published_idx').on(t.publishedAt),
-    index('social_posts_owner_idx').on(t.ownerId),
+    // Las del dueño por fecha: Los Números filtran por dueño y por rango.
+    index('social_posts_owner_published_idx').on(t.ownerId, t.publishedAt),
   ],
 ).enableRLS()
 
@@ -366,7 +370,9 @@ export const scheduledPosts = pgTable(
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
-    index('scheduled_posts_owner_idx').on(t.ownerId),
+    // Lo del dueño por hora: La Parrilla lee una semana o un día. Lo que busca por dueño solo
+    // lo sirve este, o la unique de abajo.
+    index('scheduled_posts_owner_scheduled_idx').on(t.ownerId, t.scheduledAt),
     // Los nulos no chocan entre sí: un post sin `ref` nunca se topa con otro.
     unique('scheduled_posts_owner_ref_key').on(t.ownerId, t.ref),
   ],
@@ -430,6 +436,9 @@ export const scheduledPostTargets = pgTable(
     // fallaría al aplicarse sobre filas históricas. Solo acelera la búsqueda de reglas por
     // cuenta + external_id que hace `aplicarReglas`/`reglasPara` en cada sondeo.
     index('scheduled_post_targets_account_external_idx').on(t.accountId, t.externalId),
+    // Por `external_id` solo: los atributos de una publicación (`post-attributes.ts`) cruzan
+    // por el id de la red sin saber la cuenta.
+    index('scheduled_post_targets_external_idx').on(t.externalId),
   ],
 ).enableRLS()
 

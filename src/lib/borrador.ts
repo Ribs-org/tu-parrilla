@@ -3,6 +3,7 @@
 // llenar el formulario. Sin base ni `server-only`: lo usan el compositor (navegador), la
 // acción que guarda y los tests.
 import { addDays, dayKey } from './schedule-week'
+import { esUuid } from './uuid'
 
 /** Los valores de un formulario, nombre por nombre, tal como los entrega `FormData.getAll`. */
 export type Campos = Record<string, string[]>
@@ -24,15 +25,13 @@ export function camposDesdeFormulario(formData: FormData): Campos {
   return campos
 }
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-
 /**
  * El id de un borrador tal como llega del navegador, o null si no tiene forma de id. Va
  * antes de cualquier consulta: Postgres rechaza con un error —no con cero filas— un texto
  * que no es uuid en una columna uuid.
  */
 export function idDeBorrador(valor: unknown): string | null {
-  return typeof valor === 'string' && UUID.test(valor) ? valor : null
+  return esUuid(valor) ? valor : null
 }
 
 /** El primer valor de un campo, o cadena vacía. */

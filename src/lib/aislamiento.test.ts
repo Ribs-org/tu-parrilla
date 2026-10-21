@@ -112,10 +112,12 @@ process.env.AUTH_SECRET = 'secreto-de-prueba-para-el-arnes'
 // comentario de sus líneas 50-54).
 const { getRecentVisits } = await import('./analytics')
 const { getCuentas, getLecturasDe, getPostRows } = await import('./posts')
-const { getAllProfiles, getProfileBySlug } = await import('./profiles')
+const { contarEnlacesPorPagina, getAllProfiles, getProfileBySlug } = await import('./profiles')
 const { getCola } = await import('./comentarios-cola')
 const { verificarCuentas, cuentaUnicaPorRed } = await import('./social/cuentas')
-const { todosLosCortes, servidosAyer } = await import('./social/publish/cortes')
+const { todosLosCortes, cortesEntre, cortesQuemados, horasPorVenir, servidosAyer } = await import(
+  './social/publish/cortes'
+)
 const { quitarCuenta, CUENTA_CONECTADA } = await import('./social/quitar')
 const { vincularVideosTikTok } = await import('./social/vincular-tiktok')
 const { listarBorradores, cargarBorrador, guardarBorrador, borrarBorrador } = await import('./borradores')
@@ -305,6 +307,31 @@ describe('aislamiento por dueño (SQL generado, sin base)', () => {
     const consultas = await todasLasConsultas(() => todosLosCortes(DUENO))
     expect(consultas).toHaveLength(1)
     for (const c of consultas) esperarFiltradoPorDueno(c)
+  })
+
+  /**
+   * Las lecturas con ventana de La Parrilla: la semana o el día, lo quemado y la hora de lo que
+   * viene. La subconsulta de `cortesQuemados` y la de `horasPorVenir` no llevan dueño propio
+   * —van por el post de afuera—, así que el dueño tiene que quedar al final del `where` de
+   * afuera, después de ellas.
+   */
+  it('social/publish/cortes: las lecturas con ventana atan su consulta al dueño', async () => {
+    for (const leer of [
+      () => cortesEntre(DUENO, new Date('2026-10-18T03:00:00Z'), new Date('2026-10-27T03:00:00Z')),
+      () => cortesQuemados(DUENO),
+      () => horasPorVenir(DUENO, new Date('2026-10-21T12:00:00Z')),
+    ]) {
+      capturas.length = 0
+      const consultas = await todasLasConsultas(leer)
+      expect(consultas).toHaveLength(1)
+      esperarFiltradoPorDueno(consultas[0]!)
+    }
+  })
+
+  it('profiles: contarEnlacesPorPagina cuenta solo los enlaces de las páginas del dueño', async () => {
+    const consultas = await todasLasConsultas(() => contarEnlacesPorPagina(DUENO))
+    expect(consultas).toHaveLength(1)
+    esperarFiltradoPorDueno(consultas[0]!)
   })
 
   /**

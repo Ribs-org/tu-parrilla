@@ -269,7 +269,9 @@ días desde que salieron; el video no se guarda (`src/lib/lado-a-lado.ts`). El p
 perder de vista el calendario; ahí mismo están «Subir CSV» y «Borradores». Lo que escribes
 se guarda solo como **borrador** un segundo después de la última tecla, como un correo, y los
 archivos se suben apenas los eliges para que el borrador los conserve. «Programar» lo
-convierte en publicación y lo saca de los borradores; «Descartar» lo borra. Los borradores
+convierte en publicación y lo saca de los borradores en la misma operación, así que un
+borrador se programa una sola vez aunque se apriete en dos pestañas, o en el teléfono, a la
+vez; «Descartar» lo borra. Los borradores
 con fecha aparecen en su día del calendario con borde punteado. Viven en sus propias tablas
 (`borradores` y `borrador_media`): el publicador y la API no los ven. La app del teléfono sí:
 Publicar guarda en los mismos borradores (`/api/mobile/borradores`), así que lo empezado en

@@ -1,5 +1,5 @@
 import 'server-only'
-import { and, asc, eq, inArray, isNull, or, gte, lte } from 'drizzle-orm'
+import { and, asc, count, eq, inArray, isNull, or, gte, lte } from 'drizzle-orm'
 import { getDb, links, profiles } from '@/db'
 import type { Link, Profile } from '@/db'
 
@@ -55,6 +55,19 @@ export async function getVisibleLinks(profileId: string): Promise<Link[]> {
       ),
     )
     .orderBy(asc(links.position))
+}
+
+/**
+ * Cuántos enlaces tiene cada página del dueño, en una sola consulta agrupada. El panel de
+ * páginas antes pedía la lista entera de cada una, todas a la vez, para contarlas.
+ */
+export async function contarEnlacesPorPagina(ownerId: string): Promise<Map<string, number>> {
+  const filas = await getDb()
+    .select({ profileId: links.profileId, total: count() })
+    .from(links)
+    .where(inArray(links.profileId, getDb().select({ id: profiles.id }).from(profiles).where(eq(profiles.ownerId, ownerId))))
+    .groupBy(links.profileId)
+  return new Map(filas.map((fila) => [fila.profileId, fila.total]))
 }
 
 export async function getAllLinks(ownerId: string, profileId: string): Promise<Link[]> {

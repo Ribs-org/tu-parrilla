@@ -4,6 +4,7 @@ import { getDb, scheduledPostTargets, socialAccounts } from '@/db'
 import type { Tema } from '@/lib/tema'
 import { nombreDe } from '@/lib/vocabulario'
 import { pasoDeHuerfanos } from './meta-bajas'
+import { esUuid } from '@/lib/uuid'
 
 // «Quitar» en Los Fierros: saca una cuenta de Tu Parrilla con todo su historial, y la deja
 // libre para que otro usuario la conecte. Mientras una fila exista, su cuenta queda atada a
@@ -25,7 +26,6 @@ export function fraseConPendientes(cuantas: number, tema: Tema = 'noche'): strin
     : `Tiene ${cuantas} publicaciones programadas hacia esta cuenta: bórralas en ${donde}, o espera a que salgan, antes de quitarla.`
 }
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 /**
  * Los pasos del borrado de una cuenta, en el orden que manda el esquema —el mismo de
@@ -57,7 +57,7 @@ export async function quitarCuenta(
   accountId: string,
   tema: Tema = 'noche',
 ): Promise<{ nombre: string } | { error: string }> {
-  if (!UUID.test(accountId)) return { error: CUENTA_NO_ESTA }
+  if (!esUuid(accountId)) return { error: CUENTA_NO_ESTA }
   return getDb().transaction(async (tx) => {
     const [cuenta] = await tx
       .select({

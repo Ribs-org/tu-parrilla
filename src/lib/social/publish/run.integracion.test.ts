@@ -177,6 +177,26 @@ describe.skipIf(!URL_PRUEBAS)('contra una Postgres de verdad', () => {
       expect(fila?.containerId).toBe('contenedor-2')
     })
 
+    it('el texto que sale es el guardado al momento del intento, no el de la lista de vencidos', async () => {
+      const { publishDue } = await import('./run')
+      const { scheduledPosts } = await esquema()
+      await destinoVencido({}, new Date(Date.now() - 120_000))
+      const segundo = await destinoVencido({}, new Date(Date.now() - 60_000))
+      const textos: string[] = []
+      publicar.mockImplementation(async (input) => {
+        textos.push(input.caption)
+        // Mientras sale el primero, el dueño guarda un texto nuevo para el segundo en el editor.
+        if (textos.length === 1) {
+          await (await db()).update(scheduledPosts).set({ caption: 'el texto nuevo' }).where(eq(scheduledPosts.id, segundo.postId))
+        }
+        return { kind: 'published', externalId: `media-${textos.length}` }
+      })
+
+      await publishDue()
+
+      expect(textos).toEqual(['hola', 'el texto nuevo'])
+    })
+
     it('sin tiempo para empezar, no reclama nada: lo toma la corrida siguiente', async () => {
       const { publishDue } = await import('./run')
       const destino = await destinoVencido()

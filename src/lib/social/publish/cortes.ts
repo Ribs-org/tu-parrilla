@@ -1,6 +1,7 @@
 import 'server-only'
-import { and, asc, eq, gte, inArray, lt } from 'drizzle-orm'
+import { and, asc, eq, exists, gte, inArray, lt, type SQL } from 'drizzle-orm'
 import {
+  enIds,
   getDb,
   postMetrics,
   scheduledPostMedia,
@@ -27,21 +28,21 @@ export type CorteCargado = {
 
 /**
  * Posts + destinos + el handle de la cuenta por `leftJoin`, y la media en una segunda
- * consulta aparte.
+ * consulta aparte. `condiciones` acota qué posts (una ventana de fechas, solo los quemados).
  *
  * El `leftJoin` con `socialAccounts` es a propósito: un destino cuya cuenta ya no exista
  * no debe desaparecer, debe seguir mostrándose por su red (ver `nombreDestino` en
  * `schedule/etiqueta.ts`). El dueño va al final del `where`, nunca en el `on` de ese join:
  * el arnés mira lo que queda tras el último «where» del SQL.
  */
-async function cargar(ownerId: string): Promise<CorteCargado[]> {
+async function cargar(ownerId: string, condiciones: SQL[] = []): Promise<CorteCargado[]> {
   const db = getDb()
   const rows = await db
     .select({ post: scheduledPosts, target: scheduledPostTargets, handle: socialAccounts.handle })
     .from(scheduledPosts)
     .innerJoin(scheduledPostTargets, eq(scheduledPostTargets.postId, scheduledPosts.id))
     .leftJoin(socialAccounts, eq(socialAccounts.id, scheduledPostTargets.accountId))
-    .where(eq(scheduledPosts.ownerId, ownerId))
+    .where(and(...condiciones, eq(scheduledPosts.ownerId, ownerId)))
     .orderBy(asc(scheduledPosts.scheduledAt))
 
   const posts = new Map<string, CorteCargado>()
@@ -53,13 +54,14 @@ async function cargar(ownerId: string): Promise<CorteCargado[]> {
 
   // Media en su propia consulta: unirla arriba multiplicaría filas post×destino×media
   // para nada, y solo hace falta la primera miniatura de cada post. Va por los ids que la
-  // consulta de arriba ya filtró por dueño, como `post_metrics` en `getPostRows`.
+  // consulta de arriba ya filtró por dueño, como `post_metrics` en `getPostRows`, en un solo
+  // parámetro (`enIds`): la lista entera crece con el historial.
   const ids = [...posts.keys()]
   if (ids.length > 0) {
     const filas = await db
       .select()
       .from(scheduledPostMedia)
-      .where(inArray(scheduledPostMedia.postId, ids))
+      .where(enIds(scheduledPostMedia.postId, ids))
       .orderBy(asc(scheduledPostMedia.position))
     for (const fila of filas) posts.get(fila.postId)?.media.push(fila)
   }
@@ -67,9 +69,59 @@ async function cargar(ownerId: string): Promise<CorteCargado[]> {
   return [...posts.values()]
 }
 
-/** Todo lo programado del dueño, sin ventana: es lo que el calendario siempre mostró. */
+/**
+ * Todo lo programado del dueño, sin ventana: lo pide la lista, que muestra el historial
+ * entero. Paginarla es deuda (ver `docs/deuda-tecnica.md`).
+ */
 export function todosLosCortes(ownerId: string): Promise<CorteCargado[]> {
   return cargar(ownerId)
+}
+
+/**
+ * Lo programado entre dos instantes, `desde` incluido y `hasta` no: la semana del calendario
+ * y de «Por hora», o el día de la vista «Día». Antes cada vista cargaba el historial entero
+ * para dibujar siete días.
+ */
+export function cortesEntre(ownerId: string, desde: Date, hasta: Date): Promise<CorteCargado[]> {
+  return cargar(ownerId, [gte(scheduledPosts.scheduledAt, desde), lt(scheduledPosts.scheduledAt, hasta)])
+}
+
+/**
+ * Los cortes con algún destino quemado, de cuando sean, con todos sus destinos: es lo que
+ * «Se quemó» muestra (`quemados`, en `lib/fuego.ts`), y esa lista no tiene ventana de fecha.
+ */
+export function cortesQuemados(ownerId: string): Promise<CorteCargado[]> {
+  const conAlgunoQuemado = exists(
+    getDb()
+      .select({ id: scheduledPostTargets.id })
+      .from(scheduledPostTargets)
+      .where(and(eq(scheduledPostTargets.postId, scheduledPosts.id), eq(scheduledPostTargets.status, 'failed'))),
+  )
+  return cargar(ownerId, [conAlgunoQuemado])
+}
+
+/**
+ * La hora de cada corte que viene (de `now` en adelante), y nada más: es lo que el compositor
+ * cuenta para decir cómo está el día que elegiste (`contarPorDia`). Los mismos cortes que el
+ * calendario —los que tienen algún destino—, así el aviso y el calendario no se contradicen.
+ */
+export async function horasPorVenir(ownerId: string, now: Date): Promise<Array<{ scheduledAt: Date }>> {
+  const db = getDb()
+  return db
+    .select({ scheduledAt: scheduledPosts.scheduledAt })
+    .from(scheduledPosts)
+    .where(
+      and(
+        gte(scheduledPosts.scheduledAt, now),
+        exists(
+          db
+            .select({ id: scheduledPostTargets.id })
+            .from(scheduledPostTargets)
+            .where(eq(scheduledPostTargets.postId, scheduledPosts.id)),
+        ),
+        eq(scheduledPosts.ownerId, ownerId),
+      ),
+    )
 }
 
 /**

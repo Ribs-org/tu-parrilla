@@ -1,8 +1,20 @@
 import 'server-only'
-import { and, eq, inArray, isNull } from 'drizzle-orm'
+import { and, eq, gte, inArray, isNull } from 'drizzle-orm'
 import { getDb, scheduledPosts, scheduledPostTargets, socialPosts } from '@/db'
 import type { SocialAccount } from '@/db'
-import { emparejarVideos } from './tiktok-vinculo'
+import { DESPUES_BORRADOR_MS, emparejarVideos } from './tiktok-vinculo'
+
+const DIA_MS = 24 * 60 * 60 * 1000
+
+/**
+ * Qué se lee: los videos del último mes y los destinos de los dos últimos. Un destino en modo
+ * borrador puede tener su video hasta treinta días después (`DESPUES_BORRADOR_MS`), así que un
+ * video de este mes puede ser de un destino del mes pasado, y la lista de ids ya tomados tiene
+ * que verlo para no dárselo a otro. Lo más viejo ya pasó por las sincronizaciones de cada día.
+ * Antes se leía el historial entero de la cuenta en cada sincronización.
+ */
+export const VIDEOS_DESDE_MS = DESPUES_BORRADOR_MS + 2 * DIA_MS
+export const DESTINOS_DESDE_MS = 2 * VIDEOS_DESDE_MS
 
 /**
  * Le pone su id de video a lo que salió a TikTok por Tu Parrilla sin él, cruzándolo con los
@@ -16,7 +28,10 @@ import { emparejarVideos } from './tiktok-vinculo'
  * El dueño va en el WHERE de las tres consultas —el destino no tiene `owner_id`, así que se
  * ata por su post—, que es lo que vigila `src/lib/aislamiento.test.ts`.
  */
-export async function vincularVideosTikTok(account: Pick<SocialAccount, 'id' | 'ownerId'>): Promise<number> {
+export async function vincularVideosTikTok(
+  account: Pick<SocialAccount, 'id' | 'ownerId'>,
+  now: Date = new Date(),
+): Promise<number> {
   if (!account.ownerId) return 0
   const db = getDb()
 
@@ -36,6 +51,7 @@ export async function vincularVideosTikTok(account: Pick<SocialAccount, 'id' | '
       and(
         eq(scheduledPostTargets.accountId, account.id),
         eq(scheduledPostTargets.network, 'tiktok'),
+        gte(scheduledPosts.scheduledAt, new Date(now.getTime() - DESTINOS_DESDE_MS)),
         eq(scheduledPosts.ownerId, account.ownerId),
       ),
     )
@@ -48,7 +64,13 @@ export async function vincularVideosTikTok(account: Pick<SocialAccount, 'id' | '
     await db
       .select({ externalId: socialPosts.externalId, caption: socialPosts.caption, publishedAt: socialPosts.publishedAt })
       .from(socialPosts)
-      .where(and(eq(socialPosts.accountId, account.id), eq(socialPosts.ownerId, account.ownerId)))
+      .where(
+        and(
+          eq(socialPosts.accountId, account.id),
+          gte(socialPosts.publishedAt, new Date(now.getTime() - VIDEOS_DESDE_MS)),
+          eq(socialPosts.ownerId, account.ownerId),
+        ),
+      )
   ).filter((v) => !tomados.has(v.externalId))
 
   const pares = emparejarVideos(
