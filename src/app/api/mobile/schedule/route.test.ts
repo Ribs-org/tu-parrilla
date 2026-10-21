@@ -34,7 +34,8 @@ vi.mock('@/lib/mobile-api', async (importOriginal) => {
 })
 
 const crearPostProgramado = vi.fn()
-vi.mock('@/lib/social/publish/crear', () => ({
+vi.mock('@/lib/social/publish/crear', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/social/publish/crear')>()),
   crearPostProgramado: (...args: unknown[]) => crearPostProgramado(...args),
 }))
 
@@ -278,15 +279,16 @@ describe('POST /api/mobile/schedule', () => {
   describe('desde un borrador', () => {
     const BORRADOR = '6f1c2a54-9b1e-4c3d-8f00-0123456789ab'
 
-    it('crea el post y después saca el borrador, atado al dueño', async () => {
+    it('crea el post consumiendo el borrador en la misma transacción', async () => {
       cargarBorrador.mockResolvedValueOnce({ id: BORRADOR, campos: { cuentas: ['c-ig'] }, fecha: null, media: [] })
       resolverDestinos.mockResolvedValueOnce({ cuentas: [IG], networks: ['facebook'] })
       crearPostProgramado.mockResolvedValueOnce('post-1')
       const res = await POST(peticion({ texto: 'Hola', cuentas: ['c-ig'], ahora: true, media: [], borradorId: BORRADOR }))
       expect(res.status).toBe(200)
       expect(cargarBorrador).toHaveBeenCalledWith('owner-1', BORRADOR)
-      expect(borrarBorrador).toHaveBeenCalledWith('owner-1', BORRADOR)
-      expect(crearPostProgramado.mock.invocationCallOrder[0]).toBeLessThan(borrarBorrador.mock.invocationCallOrder[0]!)
+      expect(crearPostProgramado).toHaveBeenCalledWith('owner-1', expect.objectContaining({ borradorId: BORRADOR }))
+      // Ya no hay un borrado aparte después: si fallaba, el borrador quedaba para programarse otra vez.
+      expect(borrarBorrador).not.toHaveBeenCalled()
     })
 
     it('si el borrador ya no existe, no se crea nada: puede ser el mismo envío repetido', async () => {
@@ -316,15 +318,14 @@ describe('POST /api/mobile/schedule', () => {
       expect(borrarBorrador).not.toHaveBeenCalled()
     })
 
-    it('si sacar el borrador falla, el post igual quedó y se dice que salió', async () => {
+    it('si otro envío consumió el borrador entre la revisión y la creación, no sale un segundo post', async () => {
+      const { BorradorConsumido } = await import('@/lib/social/publish/crear')
       cargarBorrador.mockResolvedValueOnce({ id: BORRADOR, campos: {}, fecha: null, media: [] })
       resolverDestinos.mockResolvedValueOnce({ cuentas: [IG], networks: ['facebook'] })
-      crearPostProgramado.mockResolvedValueOnce('post-1')
-      borrarBorrador.mockRejectedValueOnce(new Error('se cayó la base'))
-      const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+      crearPostProgramado.mockRejectedValueOnce(new BorradorConsumido())
       const res = await POST(peticion({ texto: 'Hola', cuentas: ['c-ig'], ahora: true, media: [], borradorId: BORRADOR }))
-      expect(res.status).toBe(200)
-      error.mockRestore()
+      expect(res.status).toBe(404)
+      expect(await res.json()).toEqual({ error: BORRADOR_NO_EXISTE })
     })
   })
 })

@@ -60,10 +60,13 @@ describe('pasoDeHuerfanos', () => {
     expect(pasoDeHuerfanos([])).toBeNull()
   })
 
-  it('borra los cortes por id, con los ids como parámetros', () => {
+  it('borra los cortes por id, con los ids en un solo parámetro', () => {
     const paso = dialecto.sqlToQuery(pasoDeHuerfanos(['p1', 'p2'])!)
     expect(paso.sql).toMatch(/delete from scheduled_posts/i)
-    expect(paso.params).toEqual(['p1', 'p2'])
+    // Un arreglo y no uno por id: con decenas de miles de cortes, la lista pasaría el techo de
+    // parámetros de Postgres.
+    expect(paso.params).toEqual([['p1', 'p2']])
+    expect(paso.sql).toMatch(/id = any\(\$1::uuid\[\]\)/)
     expect(paso.sql).not.toContain('p1')
   })
 

@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
 import type { Usuario } from '@/db'
@@ -26,15 +27,19 @@ export async function destroySession(): Promise<void> {
 /**
  * Quién está detrás de la cookie, o null. Se relee la fila: si el usuario subió su
  * `sesion_version` (cerró todas sus sesiones) o fue quitado, la cookie muere aquí.
+ *
+ * Envuelta en `cache()`: el layout del panel y la página llaman a `requireUser` en la misma
+ * petición, y cada llamada era una lectura de `users`. Fuera de un render (una acción, una
+ * ruta) `cache` no guarda nada y cada llamada lee.
  */
-export async function usuarioActual(): Promise<Usuario | null> {
+export const usuarioActual = cache(async (): Promise<Usuario | null> => {
   const store = await cookies()
   const claims = await leerSesion(store.get(COOKIE_NAME)?.value ?? '')
   if (!claims) return null
   const usuario = await buscarPorId(claims.sub)
   if (!usuario || usuario.sesionVersion !== claims.sv) return null
   return usuario
-}
+})
 
 export async function requireUser(): Promise<Usuario> {
   const usuario = await usuarioActual()

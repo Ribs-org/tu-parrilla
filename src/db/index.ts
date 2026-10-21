@@ -37,3 +37,4 @@ export function getDb(): Db {
 }
 
 export * from './schema'
+export { enIds } from './listas'

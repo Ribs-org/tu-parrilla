@@ -18,17 +18,17 @@ type Params = { slug: string }
  * dominios con usuarios. Es deliberado: la regla queda escrita y el día que haya dominios
  * de terceros se reemplaza solo esta resolución.
  *
- * Envuelta en `cache()`: `load()` corre dos veces por petición (`generateMetadata` y la
- * página), y cada una llamaría a `adminId()` — un `SELECT` — de nuevo. `cache()` comparte
- * el resultado entre las dos pasadas del mismo render, así que la consulta sale una sola
- * vez por visita en vez de dos.
+ * Envuelta en `cache()`, como `load()`: las dos corren en `generateMetadata` y en la página,
+ * y `cache()` comparte el resultado entre las dos pasadas del mismo render, así que cada
+ * consulta sale una vez por visita en vez de dos.
  */
 const duenoDelDominio = cache(async (): Promise<string | undefined> => {
   const host = (await headers()).get('host')
   return esDominioDelProducto(host) ? undefined : await adminId()
 })
 
-async function load(slug: string) {
+/** La página pedida, o null si no existe o no está publicada; una vez por visita (`cache()`). */
+const load = cache(async (slug: string) => {
   try {
     const profile = await getProfileBySlug(slug, await duenoDelDominio())
     return profile?.isPublished ? profile : null
@@ -40,7 +40,7 @@ async function load(slug: string) {
     console.error('[slug]/page: no se pudo resolver el perfil', { slug, error })
     return null
   }
-}
+})
 
 export async function generateMetadata({
   params,

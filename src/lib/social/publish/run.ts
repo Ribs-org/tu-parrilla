@@ -137,9 +137,16 @@ export async function publishDue(
         ...(target.containerId ? { containerId: target.containerId } : {}),
       }
     } else {
+      // El texto y la portada se releen ahora, después del reclamo: la lista de vencidos de
+      // arriba puede tener minutos, y el editor pudo cambiarlos en el medio. Su transacción
+      // bloquea los destinos mientras escribe, así que lo que se lee acá ya es lo guardado.
+      const [vigente] = await db
+        .select({ caption: scheduledPosts.caption, coverUrl: scheduledPosts.coverUrl })
+        .from(scheduledPosts)
+        .where(eq(scheduledPosts.id, post.id))
       outcome = await attempt(target, target.id, post.id, target.containerId, {
-        caption: target.captionOverride ?? post.caption,
-        coverUrl: post.coverUrl,
+        caption: target.captionOverride ?? vigente?.caption ?? post.caption,
+        coverUrl: vigente ? vigente.coverUrl : post.coverUrl,
         opciones: (target.opciones as OpcionesDestino | null) ?? null,
       })
     }

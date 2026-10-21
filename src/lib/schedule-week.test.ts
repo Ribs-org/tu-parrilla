@@ -10,6 +10,7 @@ import {
   mondayOf,
   mondayOfKey,
   normalizeWeekParam,
+  ventanaParaDibujar,
   weekDays,
   weekLabel,
 } from './schedule-week'
@@ -56,6 +57,33 @@ describe('addDays y weekDays', () => {
       '2026-09-07', '2026-09-08', '2026-09-09', '2026-09-10',
       '2026-09-11', '2026-09-12', '2026-09-13',
     ])
+  })
+})
+
+describe('ventanaParaDibujar', () => {
+  it('la semana con un día de margen a cada lado, de medianoche a medianoche en la zona', () => {
+    // Octubre en Santiago es UTC−3: la medianoche local son las 03:00Z.
+    expect(ventanaParaDibujar('2026-10-19', 7, ZONE)).toEqual({
+      desde: new Date('2026-10-18T03:00:00Z'),
+      hasta: new Date('2026-10-27T03:00:00Z'),
+    })
+  })
+
+  it('un día cubre también el anterior y el siguiente', () => {
+    expect(ventanaParaDibujar('2026-10-21', 1, ZONE)).toEqual({
+      desde: new Date('2026-10-20T03:00:00Z'),
+      hasta: new Date('2026-10-23T03:00:00Z'),
+    })
+  })
+
+  it('una semana con cambio de hora queda adentro entera: el margen la cubre', () => {
+    // El 6 de septiembre de 2026 Chile pasa de UTC−4 a UTC−3 a medianoche.
+    const { desde, hasta } = ventanaParaDibujar('2026-08-31', 7, ZONE)
+    for (const dia of weekDays('2026-08-31')) {
+      const mediodia = new Date(`${dia}T16:00:00Z`)
+      expect(mediodia >= desde && mediodia < hasta).toBe(true)
+      expect(dayKey(mediodia, ZONE)).toBe(dia)
+    }
   })
 })
 

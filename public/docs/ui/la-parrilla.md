@@ -962,6 +962,7 @@ alguna, hay que borrarlo en la red misma.
 | «La hora debe estar en el futuro.» | La hora elegida ya pasó (pasa con un borrador que tenía una fecha que ya llegó) | Elegir una futura, o «Ahora» |
 | «Máximo diez archivos por publicación.» | Más de diez archivos (si TikTok es la única red, admite hasta 35 fotos) | Quitar archivos con su ✕ |
 | «Una de las cuentas elegidas no es tuya.» | Una cuenta dejó de existir mientras la pantalla estaba abierta | Cerrar el panel (queda el borrador) y volver a abrirlo desde «Borradores (<N>)» |
+| «Ese borrador ya no existe.» | El borrador abierto en el compositor ya se programó (en otra pestaña o en el teléfono) o se descartó: un borrador no se programa dos veces | Mirar el calendario: si ya está programado, no hay nada que hacer; si no, cerrar el panel y armarlo de nuevo con «Nueva publicación» |
 | «La cuenta <usuario> no está conectada. Vuelve a conectarla en Los Fierros.» | Se desconectó | Reconectarla en Los Fierros y volver: lo escrito sigue en «Borradores» |
 | «Espera a que terminen de subir los archivos.» | Se intentó programar mientras subían archivos | Esperar a que aparezcan en la lista y volver a apretar «Programar» |
 | «Un archivo no llegó: reintenta o quítalo antes de programar.» | Se apretó «Programar» con un archivo que no llegó (con borde rojo y «No llegó») | «Reintentar» en su miniatura, o quitarlo con su ✕ |

@@ -3,46 +3,61 @@ import type { OpcionesDestino } from './opciones'
 
 /**
  * Doble mínimo de `getDb()` para probar `crearPostProgramado` sin una base real. Solo
- * cubre las cuatro llamadas que hace `crear.ts` (`insert(scheduledPosts).values().returning()`,
- * `insert(scheduledPostMedia).values()`, `insert(scheduledPostTargets).values()` e
- * `insert(reglasClave).values()`), con el mismo estado mutable que los tests llenan y leen.
- * Mismo patrón que `src/lib/usuarios.test.ts`. `vi.hoisted` porque `vi.mock` se sube al
- * principio del archivo y necesita verlo ya listo.
+ * cubre lo que hace `crear.ts` dentro de su transacción: borrar el borrador
+ * (`delete(borradores).where().returning()`) y las cuatro inserciones
+ * (`insert(scheduledPosts).values().returning()`, `insert(scheduledPostMedia).values()`,
+ * `insert(scheduledPostTargets).values()` e `insert(reglasClave).values()`), con el mismo
+ * estado mutable que los tests llenan y leen. La transacción no revierte nada: lo que se
+ * prueba es que con el borrador ya consumido no se llegue a insertar. Que una transacción de
+ * verdad revierta lo prueba `crear.integracion.test.ts`. Mismo patrón que
+ * `src/lib/usuarios.test.ts`. `vi.hoisted` porque `vi.mock` se sube al principio del archivo
+ * y necesita verlo ya listo.
  */
 const db = vi.hoisted(() => ({
   postInsertado: { id: 'post-1' } as { id: string },
   media: [] as unknown[],
   targets: [] as unknown[],
   reglas: [] as unknown[],
+  posts: 0,
+  borradoresBorrados: [] as unknown[],
+  borradorExiste: true,
 }))
 
 vi.mock('@/db', async (importOriginal) => {
   const real = await importOriginal<typeof import('@/db')>()
-  return {
-    ...real,
-    getDb: () => ({
-      insert: (tabla: unknown) => ({
-        values: (v: unknown) => {
-          if (tabla === real.scheduledPosts) {
-            return { returning: async () => [db.postInsertado] }
-          }
-          if (tabla === real.scheduledPostMedia) {
-            db.media.push(...(v as unknown[]))
-            return Promise.resolve()
-          }
-          if (tabla === real.scheduledPostTargets) {
-            db.targets.push(...(v as unknown[]))
-            return Promise.resolve()
-          }
-          if (tabla === real.reglasClave) {
-            db.reglas.push(v)
-            return Promise.resolve()
-          }
-          throw new Error('tabla inesperada en el doble')
+  const tx = {
+    delete: (tabla: unknown) => ({
+      where: (condicion: unknown) => ({
+        returning: async () => {
+          if (tabla !== real.borradores) throw new Error('tabla inesperada en el doble')
+          db.borradoresBorrados.push(condicion)
+          return db.borradorExiste ? [{ id: 'borrador-1' }] : []
         },
       }),
     }),
+    insert: (tabla: unknown) => ({
+      values: (v: unknown) => {
+        if (tabla === real.scheduledPosts) {
+          db.posts += 1
+          return { returning: async () => [db.postInsertado] }
+        }
+        if (tabla === real.scheduledPostMedia) {
+          db.media.push(...(v as unknown[]))
+          return Promise.resolve()
+        }
+        if (tabla === real.scheduledPostTargets) {
+          db.targets.push(...(v as unknown[]))
+          return Promise.resolve()
+        }
+        if (tabla === real.reglasClave) {
+          db.reglas.push(v)
+          return Promise.resolve()
+        }
+        throw new Error('tabla inesperada en el doble')
+      },
+    }),
   }
+  return { ...real, getDb: () => ({ transaction: async (cb: (t: typeof tx) => unknown) => cb(tx) }) }
 })
 
 const { crearPostProgramado } = await import('./crear')
@@ -70,6 +85,41 @@ async function crearConDobleFalso(
   }))
   return { destinos }
 }
+
+describe('crearPostProgramado desde un borrador', () => {
+  const base = {
+    caption: 'hola',
+    scheduledAt: new Date('2026-10-01T12:00:00Z'),
+    media: [],
+    cuentas: [{ id: 'ig-1', network: 'instagram', handle: '@vicente' }],
+  }
+
+  it('consume el borrador antes de crear el post, en la misma transacción', async () => {
+    db.posts = 0
+    db.borradoresBorrados.length = 0
+    db.borradorExiste = true
+    const { crearPostProgramado: crear } = await import('./crear')
+    expect(await crear('owner-1', { ...base, borradorId: 'borrador-1' })).toBe('post-1')
+    expect(db.borradoresBorrados).toHaveLength(1)
+    expect(db.posts).toBe(1)
+  })
+
+  it('si el borrador ya no estaba, no crea nada: otro envío lo programó', async () => {
+    db.posts = 0
+    db.borradorExiste = false
+    const { crearPostProgramado: crear, BorradorConsumido } = await import('./crear')
+    await expect(crear('owner-1', { ...base, borradorId: 'borrador-1' })).rejects.toBeInstanceOf(BorradorConsumido)
+    expect(db.posts).toBe(0)
+    db.borradorExiste = true
+  })
+
+  it('sin borrador no toca la tabla de borradores', async () => {
+    db.borradoresBorrados.length = 0
+    const { crearPostProgramado: crear } = await import('./crear')
+    await crear('owner-1', base)
+    expect(db.borradoresBorrados).toHaveLength(0)
+  })
+})
 
 describe('crearPostProgramado', () => {
   it('crea un destino por cuenta, incluso dos de la misma red', async () => {

@@ -11,7 +11,7 @@ import {
 } from '@/db'
 import { localDay } from '@/lib/analytics'
 import { idDeBorrador, soloEnElPanel } from '@/lib/borrador'
-import { borrarBorrador, cargarBorrador, listarBorradores } from '@/lib/borradores'
+import { cargarBorrador, listarBorradores } from '@/lib/borradores'
 import { cuentasParaElTelefono, resumirParaElTelefono } from '@/lib/borradores-movil'
 import { isoInZone } from '@/lib/metrics-api'
 import { cuentasFrias, formatoDe, selloDe, type Formato, type Sello } from '@/lib/parrilla'
@@ -28,7 +28,7 @@ import {
   resolverCuando,
   resolverDestinos,
 } from '@/lib/mobile-api'
-import { crearPostProgramado } from '@/lib/social/publish/crear'
+import { BorradorConsumido, crearPostProgramado } from '@/lib/social/publish/crear'
 import { CuentaInvalida } from '@/lib/social/cuentas'
 import { validateScheduleDraft } from '@/lib/social/publish/validate'
 import { errorDeMediaPorOpciones, validarOpcionesPorCuenta } from '@/lib/social/publish/opciones'
@@ -164,11 +164,13 @@ export async function GET(request: Request) {
  * ida y vuelta, y no vale la pena pagarlo si el post ya iba a rechazarse por otra
  * razón).
  *
- * Con `borradorId`, el post sale de ese borrador y el borrador se borra después de
- * crearlo, como al programar en el panel. Antes, dos rechazos propios: que el borrador ya
- * no exista —se programó o se descartó en otro lado, o este mismo envío ya salió y se
- * perdió la respuesta: repetirlo sería publicar dos veces— y que tenga algo que el
- * teléfono no programa (`soloEnElPanel`), que se perdería con el borrador.
+ * Con `borradorId`, el post sale de ese borrador y el borrador se consume en la misma
+ * transacción que lo crea, como al programar en el panel. Antes, dos rechazos propios: que
+ * el borrador ya no exista —se programó o se descartó en otro lado, o este mismo envío ya
+ * salió y se perdió la respuesta: repetirlo sería publicar dos veces— y que tenga algo que
+ * el teléfono no programa (`soloEnElPanel`), que se perdería con el borrador. La primera
+ * revisión da el motivo; la de la transacción (`BorradorConsumido`) cierra el caso de dos
+ * envíos a la vez, que pasaban los dos por la revisión antes de que ninguno lo borrara.
  */
 export async function POST(request: Request) {
   const usuario = await requireMobileUser(request)
@@ -253,16 +255,13 @@ export async function POST(request: Request) {
       media,
       cuentas,
       opciones: opcionesCheck.opciones,
+      borradorId,
     })
-    // El borrador ya cumplió. Si no se puede sacar, el post igual quedó: se avisa que salió,
-    // y el borrador queda en la lista para descartarlo a mano.
-    if (borradorId) {
-      await borrarBorrador(usuario.id, borradorId).catch((error: unknown) =>
-        console.error('schedule/borrador:', String(error).slice(0, 300)),
-      )
-    }
     return NextResponse.json({ id, cuando: isoInZone(scheduledAt!, usuario.zona) })
   } catch (dbError) {
+    if (dbError instanceof BorradorConsumido) {
+      return NextResponse.json({ error: BORRADOR_NO_EXISTE }, { status: 404 })
+    }
     console.error('schedule/crear:', String(dbError).slice(0, 300))
     return NextResponse.json({ error: NO_SE_GUARDO }, { status: 500 })
   }

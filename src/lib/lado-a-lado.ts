@@ -6,6 +6,7 @@
 import { CLAVE_PIEZA, textoDeAtributo } from './pieza'
 import type { Atributos } from './social/publish/atributos'
 import { sinMetricasDerivadas } from './social/politica-youtube'
+import { esUuid } from './uuid'
 
 /** Hasta qué edad se dibuja la curva: lo que pasa después casi no cambia la comparación. */
 export const DIAS_DE_LA_CURVA = 30
@@ -14,11 +15,10 @@ export const DIAS_DE_LA_CURVA = 30
 export const PORTADAS_POR_LADO = 12
 
 const DIA_MS = 24 * 60 * 60 * 1000
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 /** El id que pide la URL para A o B, si tiene forma de id; si no, null, y entra el de siempre. */
 export function idPedido(valor: unknown): string | null {
-  return typeof valor === 'string' && UUID.test(valor) ? valor : null
+  return esUuid(valor) ? valor : null
 }
 
 export type Lectura = { postId: string; capturedAt: Date; views: number | null }

@@ -90,6 +90,9 @@ const db = vi.hoisted(() => ({
   // El `set` de cada `onConflictDoUpdate`, que es lo que el arreglo #1 tiene que sujetar:
   // que no traiga `documentoUrl` aunque la regla completa sí lo tenga.
   onConflictDoUpdateCalls: [] as { tabla: string; values: unknown; set: unknown }[],
+  // Lo que entregan los `.returning()` de las escrituras, en orden. Vacío = una fila
+  // cualquiera, que es lo que una escritura que casó devolvería.
+  returningQueue: [] as unknown[][],
 }))
 
 // Doble mínimo para `createScheduledPost`: `mediaYaSubida` comprueba que cada URL sea del
@@ -108,15 +111,33 @@ vi.mock('@/lib/social/publish/crear', () => ({
   crearPostProgramado: async (...args: unknown[]) => {
     crear.crearPostProgramadoCalls.push(args)
   },
+  BorradorConsumido: class BorradorConsumido extends Error {},
 }))
 
 vi.mock('@/db', async (importOriginal) => {
   const real = await importOriginal<typeof import('@/db')>()
   /** Un valor esperable directamente (`await ...where()`) que además admite `.orderBy()`
-   * encadenado (la consulta de media de `updateScheduledPost` sí lo encadena). */
+   * encadenado (la consulta de media de `updateScheduledPost` sí lo encadena) y `.for()`
+   * (las lecturas que bloquean filas dentro de una transacción). */
   function filaResultado(filas: unknown) {
     const promesa = Promise.resolve(filas)
-    return Object.assign(promesa, { orderBy: () => Promise.resolve(filas) })
+    return Object.assign(promesa, { orderBy: () => Promise.resolve(filas), for: () => Promise.resolve(filas) })
+  }
+  /** El `where()` de una escritura: corre su efecto al tiro y admite `.returning()`. */
+  function escritura(efecto: () => void) {
+    let hecho: Promise<void>
+    try {
+      efecto()
+      hecho = Promise.resolve()
+    } catch (error) {
+      hecho = Promise.reject(error)
+    }
+    return Object.assign(hecho, {
+      returning: async () => {
+        await hecho
+        return db.returningQueue.length > 0 ? db.returningQueue.shift()! : [{ id: 'fila', postId: 'post-1' }]
+      },
+    })
   }
   const select = () => ({
     from: () => ({
@@ -127,9 +148,10 @@ vi.mock('@/db', async (importOriginal) => {
     }),
   })
   const del = () => ({
-    where: async () => {
-      db.deleteCalls.push(true)
-    },
+    where: () =>
+      escritura(() => {
+        db.deleteCalls.push(true)
+      }),
   })
   const insert = (tabla: unknown) => ({
     values: (values: unknown) => {
@@ -148,11 +170,12 @@ vi.mock('@/db', async (importOriginal) => {
     getDb: () => ({
       update: () => ({
         set: (values: unknown) => ({
-          where: async (condicion: unknown) => {
-            db.updateCalls.push(values)
-            db.updateWheres.push(condicion)
-            if (db.updateError) throw db.updateError
-          },
+          where: (condicion: unknown) =>
+            escritura(() => {
+              db.updateCalls.push(values)
+              db.updateWheres.push(condicion)
+              if (db.updateError) throw db.updateError
+            }),
         }),
       }),
       select,
@@ -162,12 +185,15 @@ vi.mock('@/db', async (importOriginal) => {
       // acá sí simula el efecto que a `makeDefault` le importa: bufferea cada escritura y
       // solo las vuelca a `makeDefaultCalls` si el callback completo sin lanzar. Si la
       // segunda escritura falla, la primera queda en el buffer y nunca llega a
-      // `makeDefaultCalls` — tal como una transacción real la habría revertido.
+      // `makeDefaultCalls` — tal como una transacción real la habría revertido. Cada
+      // escritura también se anota al tiro en `updateCalls`, como las de afuera: así las
+      // acciones que escriben dentro de una transacción se miran igual que antes.
       transaction: async (
         fn: (tx: {
           select: typeof select
           delete: typeof del
-          update: () => { set: (values: unknown) => { where: () => Promise<void> } }
+          insert: typeof insert
+          update: () => { set: (values: unknown) => { where: (condicion: unknown) => ReturnType<typeof escritura> } }
           execute: (consulta: unknown) => Promise<void>
         }) => Promise<unknown>,
       ) => {
@@ -175,20 +201,23 @@ vi.mock('@/db', async (importOriginal) => {
         let llamada = 0
         const update = () => ({
           set: (values: unknown) => ({
-            where: async () => {
-              llamada += 1
-              if (db.makeDefaultErrorAtCall && llamada === db.makeDefaultErrorAtCall) {
-                throw new Error('la base no responde')
-              }
-              buffer.push(values)
-            },
+            where: (condicion: unknown) =>
+              escritura(() => {
+                llamada += 1
+                if (db.makeDefaultErrorAtCall && llamada === db.makeDefaultErrorAtCall) {
+                  throw new Error('la base no responde')
+                }
+                buffer.push(values)
+                db.updateCalls.push(values)
+                db.updateWheres.push(condicion)
+              }),
           }),
         })
         const execute = async (consulta: unknown) => {
           if (db.executeError) throw db.executeError
           db.executeCalls.push(consulta)
         }
-        const resultado = await fn({ select, delete: del, update, execute })
+        const resultado = await fn({ select, delete: del, insert, update, execute })
         db.makeDefaultCalls.push(...buffer)
         return resultado
       },
@@ -227,6 +256,7 @@ beforeEach(() => {
   db.scheduledSelectQueue.length = 0
   db.insertCalls.length = 0
   db.onConflictDoUpdateCalls.length = 0
+  db.returningQueue.length = 0
   crear.crearPostProgramadoCalls.length = 0
   db.executeCalls.length = 0
   db.executeError = null
@@ -707,10 +737,23 @@ describe('rescheduleTarget: la hora nueva solo alcanza a un destino todavía que
 
     expect(await rescheduleTarget('target-1', futuro)).toEqual({ ok: true })
 
-    // Dos escrituras: la hora del post y el destino de vuelta a la cola.
+    // Dos escrituras, en una transacción: primero el destino de vuelta a la cola —solo si
+    // sigue quemado— y después la hora del post.
     expect(db.updateCalls).toHaveLength(2)
-    const where = new PgDialect().sqlToQuery(db.updateWheres[1] as SQL)
+    const where = new PgDialect().sqlToQuery(db.updateWheres[0] as SQL)
     expect(where.params).toEqual(['target-1', 'failed'])
+  })
+
+  it('si el destino ya no está quemado, la hora del post no se mueve', async () => {
+    leeraQuemado([quemado])
+    // El `UPDATE` del destino no casó ninguna fila: salió publicado entre la lectura y la
+    // escritura (otra pestaña apretó «Subir ahora»).
+    db.returningQueue.push([])
+
+    expect(await rescheduleTarget('target-1', futuro)).toEqual({ ok: true })
+
+    expect(db.updateCalls).toHaveLength(1)
+    expect(db.updateCalls[0]).not.toHaveProperty('scheduledAt')
   })
 
   it('repinta las dos pantallas que muestran lo quemado, no solo la parrilla', async () => {
@@ -755,8 +798,9 @@ describe('rescheduleTarget: la hora nueva solo alcanza a un destino todavía que
     }
 
     // Las 19:00 de Madrid en octubre (CEST, UTC+2) son las 17:00Z. En Santiago habrían
-    // sido las 22:00Z: es la diferencia que este test sujeta.
-    const values = db.updateCalls[0] as Record<string, unknown>
+    // sido las 22:00Z: es la diferencia que este test sujeta. La hora del post es la segunda
+    // escritura: la primera devuelve el destino a la cola.
+    const values = db.updateCalls[1] as Record<string, unknown>
     expect(values.scheduledAt).toEqual(new Date('2026-10-01T17:00:00Z'))
   })
 })

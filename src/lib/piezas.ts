@@ -3,6 +3,7 @@ import { and, desc, eq, inArray, sql } from 'drizzle-orm'
 import { getDb, scheduledPosts, scheduledPostTargets, socialAccounts, socialPosts } from '@/db'
 import { CLAVE_PIEZA, clavePieza, esTrialReel } from './pieza'
 import type { Atributos } from './social/publish/atributos'
+import { esUuid } from './uuid'
 
 /** Una versión de la pieza: un destino de un post programado, o la publicación orgánica. */
 export type VersionDePieza = {
@@ -35,7 +36,6 @@ export type Pieza = {
   versiones: VersionDePieza[]
 }
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 // Un tope por si alguien usa `pieza` como si fuera `serie`: la pantalla compara versiones
 // lado a lado, y cien filas ya no se comparan a ojo.
@@ -48,7 +48,7 @@ const MAX_DESTINOS = 100
  * la publicación no existe o es de otro dueño.
  */
 export async function getPieza(ownerId: string, socialPostId: string): Promise<Pieza | null> {
-  if (!UUID.test(socialPostId)) return null
+  if (!esUuid(socialPostId)) return null
   const db = getDb()
 
   const [post] = await db

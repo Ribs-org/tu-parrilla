@@ -20,9 +20,10 @@ import {
   hourLabel,
   mondayOfKey,
   normalizeWeekParam,
+  ventanaParaDibujar,
   weekDays,
 } from '@/lib/schedule-week'
-import { servidosAyer, todosLosCortes } from '@/lib/social/publish/cortes'
+import { cortesEntre, cortesQuemados, horasPorVenir, servidosAyer, todosLosCortes } from '@/lib/social/publish/cortes'
 import { cn, toZonedInput } from '@/lib/utils'
 import { BatchUpload } from './batch-upload'
 import { WeekCalendar } from './calendar'
@@ -80,10 +81,17 @@ export default async function SchedulePage({
   // En serie y no en paralelo: más consultas a la vez que conexiones en el pool se colgaron
   // una vez contra el pooler de Supabase (ver `docs/pendientes.md`), y estas son rápidas.
   const cuentas = await getCuentas(ownerId)
-  // Posts, destinos con handle y media. Sin ventana: el calendario siempre mostró todo lo del
-  // dueño. Vienen por hora ascendente, como el calendario los necesita; la lista los
-  // reordena aparte, y «Se quemó» sale de estas mismas filas.
-  const cortes = await todosLosCortes(ownerId)
+  // Posts, destinos con handle y media, de lo que la vista dibuja: la semana (en filas o por
+  // hora) o el día, con un día de margen a cada lado (`ventanaParaDibujar`); la lista, todo.
+  // Vienen por hora ascendente, como el calendario los necesita; la lista los reordena aparte.
+  // Antes cada vista cargaba el historial entero para dibujar siete días.
+  const ventana =
+    vista === 'lista' ? null : vista === 'dia' ? ventanaParaDibujar(fecha, 1, zona) : ventanaParaDibujar(monday, 7, zona)
+  const cortes = ventana ? await cortesEntre(ownerId, ventana.desde, ventana.hasta) : await todosLosCortes(ownerId)
+  // «Se quemó» y el aviso del compositor no siguen a la vista: lo quemado de cuando sea, y la
+  // hora de lo que viene.
+  const conQuemados = await cortesQuemados(ownerId)
+  const porVenir = await horasPorVenir(ownerId, now)
   const ayer = await servidosAyer(ownerId, now, zona)
   const borradores = await listarBorradores(ownerId)
 
@@ -131,13 +139,10 @@ export default async function SchedulePage({
   // El post que se acaba de programar desde el compositor: se enciende una vez en su día.
   const recien = texto('nuevo') || null
 
-  // Lo que el compositor usa para decir cómo está el día que elegiste. Sale de estas
-  // mismas filas y no de otra consulta, así el aviso y el calendario nunca se
-  // contradicen. Solo lo que viene: no se puede programar en el pasado.
-  const carga = contarPorDia(
-    cortes.map(({ post }) => post).filter((post) => post.scheduledAt >= now),
-    zona,
-  )
+  // Lo que el compositor usa para decir cómo está el día que elegiste: los mismos cortes que
+  // dibuja el calendario (los que tienen algún destino), de ahora en adelante, porque no se
+  // puede programar en el pasado.
+  const carga = contarPorDia(porVenir, zona)
 
   /** El panel lateral que pide la URL, o nada. */
   async function panelPedido() {
@@ -225,7 +230,7 @@ export default async function SchedulePage({
       <div className="space-y-6">
         {hayConectada ? null : <PrimerDia />}
 
-        <SeQuemo filas={quemados(cortes)} now={now} zone={zona} volver={volver} frias={frias} />
+        <SeQuemo filas={quemados(conQuemados)} now={now} zone={zona} volver={volver} frias={frias} />
 
         <div>
           <div className="mb-3 flex flex-wrap items-start justify-between gap-x-4 gap-y-2">

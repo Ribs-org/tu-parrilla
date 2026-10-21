@@ -4,7 +4,7 @@ import { ExternalLink, Plus, Star } from 'lucide-react'
 import { Encabezado, Submit } from '@/components/ui'
 import { requireUser } from '@/lib/auth'
 import { dominioProducto, esDominioDelProducto } from '@/lib/dominios'
-import { getAllLinks, getAllProfiles } from '@/lib/profiles'
+import { contarEnlacesPorPagina, getAllProfiles } from '@/lib/profiles'
 import { adminId } from '@/lib/usuarios'
 import { enlacePublicoDe, rutaMostradaDe } from '@/lib/utils'
 import { createProfile, makeDefault } from '../../actions'
@@ -21,9 +21,8 @@ export default async function ProfilesPage() {
   // `enlacePublicoDe`.
   const dominio = { enElProducto: esDominioDelProducto(host), dominioProducto: dominioProducto() }
   const profiles = await getAllProfiles(ownerId)
-  const counts = await Promise.all(
-    profiles.map(async (profile) => (await getAllLinks(ownerId, profile.id)).length),
-  )
+  const enlaces = await contarEnlacesPorPagina(ownerId)
+  const counts = profiles.map((profile) => enlaces.get(profile.id) ?? 0)
 
   return (
     <>

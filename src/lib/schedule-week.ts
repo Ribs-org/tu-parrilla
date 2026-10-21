@@ -1,6 +1,6 @@
 // Pure week math for the schedule calendar. The zone always arrives as a parameter:
 // importing SITE_TIMEZONE here would drag `server-only` into vitest and the client.
-import { toZonedInput } from '@/lib/utils'
+import { fromZonedInput, toZonedInput } from '@/lib/utils'
 
 /** The wall-clock day (`YYYY-MM-DD`) this instant falls on in `zone`. */
 export function dayKey(date: Date, zone: string): string {
@@ -33,6 +33,21 @@ export function mondayOf(date: Date, zone: string): string {
 
 export function weekDays(monday: string): string[] {
   return Array.from({ length: 7 }, (_, i) => addDays(monday, i))
+}
+
+/**
+ * Lo que hay que leer de la base para dibujar `dias` días de pared desde `primerDia` en
+ * `zone`: de la medianoche del día anterior a la del día siguiente al último (la primera
+ * incluida, la segunda no). El día de margen a cada lado cubre los cambios de hora, donde un
+ * día de pared no dura 24 horas; las vistas igual reparten por `dayKey`, y lo que sobra no se
+ * dibuja.
+ */
+export function ventanaParaDibujar(primerDia: string, dias: number, zone: string): { desde: Date; hasta: Date } {
+  // No pueden ser null: las claves salen de `addDays`, que siempre da `YYYY-MM-DD`.
+  return {
+    desde: fromZonedInput(`${addDays(primerDia, -1)}T00:00`, zone)!,
+    hasta: fromZonedInput(`${addDays(primerDia, dias + 1)}T00:00`, zone)!,
+  }
 }
 
 /**
