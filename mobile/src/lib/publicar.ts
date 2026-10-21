@@ -10,8 +10,9 @@ export const SIN_SENAL_SUBIDA = 'No se pudo subir el archivo. Revisa tu señal.'
 /** Copia la frase del servidor (src/lib/mobile-api.ts): la app tiene que reconocerla. */
 export const ARCHIVO_FALTANTE = 'Falta subir un archivo.'
 
-// La misma tabla que tipoArchivo en el sitio (src/lib/social/publish/batch.ts): el
-// selector de Android a veces entrega mimeType vacío para un .mov.
+// Las mismas extensiones que `tipoDesdeNombre` en el sitio (src/lib/social/publish/batch.ts),
+// con los tipos que la subida acepta (`typeFromContentType`, en el mismo archivo): el selector de
+// Android a veces entrega mimeType vacío para un .mov. Lo compara `src/lib/telefono-copias.test.ts`.
 const TIPO_POR_EXTENSION: Record<string, string> = {
   jpg: 'image/jpeg',
   jpeg: 'image/jpeg',
@@ -21,6 +22,25 @@ const TIPO_POR_EXTENSION: Record<string, string> = {
   mp4: 'video/mp4',
   mov: 'video/quicktime',
   webm: 'video/webm',
+}
+
+/**
+ * Los formatos que la subida acepta: los de `typeFromContentType` en el sitio. Lo demás —un HEIC
+ * de Android, un 3GP— se dice al elegirlo, y no después, cuando la subida falla.
+ */
+const SUBTIPOS: Record<'image' | 'video', ReadonlySet<string>> = {
+  image: new Set(['jpeg', 'png', 'gif', 'webp']),
+  video: new Set(['mp4', 'quicktime', 'webm']),
+}
+
+/** El tipo declarado, canónico si se publica; null si no. */
+function tipoPublicable(declarado: string): string | null {
+  const [clase, crudo = ''] = declarado.split('/')
+  if (clase !== 'image' && clase !== 'video') return null
+  // `image/jpg` no es un tipo registrado, pero hay galerías que lo mandan. El servidor firma la
+  // subida con el canónico, y el PUT tiene que llevar el mismo.
+  const subtipo = crudo === 'jpg' ? 'jpeg' : crudo
+  return SUBTIPOS[clase].has(subtipo) ? `${clase}/${subtipo}` : null
 }
 
 export type Elegido = {
@@ -46,10 +66,11 @@ export function describirArchivo(asset: {
   const nombre = asset.fileName?.trim() || asset.uri.split('/').pop() || 'archivo'
   const extension = nombre.split('.').pop()?.toLowerCase() ?? ''
   const declarado = asset.mimeType?.split(';')[0]?.trim().toLowerCase() ?? ''
+  // Lo que dice el selector manda; la extensión, solo si el selector no dijo nada de media.
   const tipo =
     declarado.startsWith('image/') || declarado.startsWith('video/')
-      ? declarado
-      : (TIPO_POR_EXTENSION[extension] ?? '')
+      ? tipoPublicable(declarado)
+      : (TIPO_POR_EXTENSION[extension] ?? null)
   if (!tipo) return { error: TIPO_NO_PUBLICABLE }
   const bytes = asset.fileSize ?? 0
   if (bytes > MAX_BYTES) return { error: ARCHIVO_MUY_GRANDE }

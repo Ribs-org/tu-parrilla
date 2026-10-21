@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useState } from 'react'
 import { Alert, Pressable, Text, View } from 'react-native'
 import { useFocusEffect, useRouter } from 'expo-router'
 import { CorteProgramado, CorteServido } from '../../components/corte-programado'
@@ -8,6 +8,7 @@ import { Grilla, LineaDeAhora, MezclaDelDia, ResumenDelDia, RotuloDia } from '..
 import { Pieza } from '../../components/pieza'
 import { useSelectorFecha } from '../../components/selector-fecha'
 import { Boton, Cargando, ErrorConReintento, Pantalla, Sello, TIPO_TITULO, Tarjeta } from '../../components/ui'
+import { useSesion } from '../../components/sesion'
 import { useColores, useTema } from '../../components/tema'
 import {
   cuandoQuemado,
@@ -29,12 +30,10 @@ import { anotarCambio } from '../../lib/cambios'
 import { hayQueFiltrar, opcionesDelFiltro, recortar, type Filtro } from '../../lib/filtro'
 import { calorDelDia, carneDe, coccionDe, selloPorEstado } from '../../lib/parrilla'
 import { SIN_SENAL, etiquetaCuenta, proximaHoraEnPunto } from '../../lib/publicar'
-import { clearToken } from '../../lib/session'
 import { SE_QUEMO } from '../../lib/tema'
 import { type BorradorResumido, type Calendario } from '../../lib/tipos'
 import { useAhora } from '../../lib/useAhora'
 import { useScreenData } from '../../lib/useScreenData'
-import { useToken } from '../../lib/useToken'
 
 /** El día de hoy en el teléfono: solo para lo guardado antes de que la API mandara `hoy`. */
 function hoyEnElTelefono(): string {
@@ -83,12 +82,8 @@ function BorradorEnElDia({ borrador, onAbrir }: { borrador: BorradorResumido; on
 export default function LaParrilla() {
   const colores = useColores()
   const { tema } = useTema()
-  const token = useToken()
+  const { token, salir } = useSesion()
   const router = useRouter()
-  const salir = useCallback(async () => {
-    await clearToken()
-    router.replace('/login')
-  }, [router])
 
   const { data, cargando, error, sello, refrescar, refrescarSiVieja } = useScreenData<Calendario>(
     'calendario',

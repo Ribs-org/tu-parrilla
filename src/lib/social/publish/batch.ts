@@ -166,7 +166,7 @@ export function portadaTypeError(stored: { url: string; mediaType: 'image' | 'vi
 
 // Subtypes whose conventional extension is not the subtype itself.
 const EXTENSION_BY_SUBTYPE: Record<string, string> = { jpeg: 'jpg', quicktime: 'mov' }
-// Inverse, for the extension → MIME subtype direction (tipoArchivo, below).
+// Inverse, for the extension → MIME subtype direction (tipoDesdeNombre, below).
 const SUBTYPE_BY_EXTENSION: Record<string, string> = { jpg: 'jpeg', mov: 'quicktime' }
 
 /**

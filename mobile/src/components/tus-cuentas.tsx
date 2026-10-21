@@ -1,13 +1,10 @@
-import { useCallback } from 'react'
 import { Text, View } from 'react-native'
-import { useRouter } from 'expo-router'
 import { Etiqueta, Tarjeta, Vacio } from './ui'
+import { useSesion } from './sesion'
 import { useColores } from './tema'
 import { num } from '../lib/format'
-import { clearToken } from '../lib/session'
 import { NOMBRE_RED, type Cuentas, type Rango } from '../lib/tipos'
 import { useScreenData } from '../lib/useScreenData'
-import { useToken } from '../lib/useToken'
 
 /**
  * «Tus cuentas», detrás del «⋯ Más» de Los Números: los seguidores de cada red con lo ganado
@@ -17,12 +14,7 @@ import { useToken } from '../lib/useToken'
  */
 export function TusCuentas({ rango }: { rango: Rango }) {
   const colores = useColores()
-  const token = useToken()
-  const router = useRouter()
-  const salir = useCallback(async () => {
-    await clearToken()
-    router.replace('/login')
-  }, [router])
+  const { token, salir } = useSesion()
 
   const { data, cargando, error } = useScreenData<Cuentas>(
     `cuentas:${rango}`,

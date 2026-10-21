@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from 'react-native'
-import { useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useSesion } from '../components/sesion'
 import { Boton, Titulo } from '../components/ui'
 import { useColores } from '../components/tema'
 import { CODIGO_ENVIADO, CORREO_INVALIDO, limpiarCodigo, normalizarCorreo } from '../lib/ingreso'
@@ -16,7 +16,7 @@ export default function Login() {
   const [codigo, setCodigo] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [ocupado, setOcupado] = useState(false)
-  const router = useRouter()
+  const { abrir } = useSesion()
   // El proveedor ya lo monta expo-router en su raíz; acá solo se leen los márgenes.
   const insets = useSafeAreaInsets()
 
@@ -48,7 +48,8 @@ export default function Login() {
       setError(resultado.error)
       return
     }
-    router.replace('/(tabs)')
+    // Con la sesión abierta, la raíz deja pasar a las pestañas y saca esta pantalla de la pila.
+    abrir(resultado.token)
   }
 
   function otroCorreo() {
@@ -127,7 +128,7 @@ export default function Login() {
           )}
         </View>
         {paso === 'codigo' ? (
-          <Pressable onPress={otroCorreo} disabled={ocupado} hitSlop={8} style={{ alignSelf: 'center', padding: 8 }}>
+          <Pressable onPress={otroCorreo} disabled={ocupado} hitSlop={8} accessibilityRole="button" style={{ alignSelf: 'center', padding: 8 }}>
             <Text style={{ color: colores.tenue }}>Usar otro correo</Text>
           </Pressable>
         ) : null}

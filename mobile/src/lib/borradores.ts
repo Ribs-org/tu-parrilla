@@ -34,6 +34,14 @@ export const NO_SE_ABRIO = 'No se pudo abrir el borrador. Revisa tu señal.'
 export const NO_SE_DESCARTO = 'No se pudo descartar el borrador: sigue en la lista de borradores.'
 
 /**
+ * «Programar» con el borrador sin guardar. El borrador es lo que impide publicar dos veces: el
+ * servidor lo borra al crear el post, así que un envío repetido —la respuesta que se perdió
+ * en un túnel y se vuelve a tocar— ya no lo encuentra y no crea otro. Sin él, el segundo toque
+ * crearía un post más.
+ */
+export const SIN_BORRADOR = 'No se programó: primero tiene que guardarse el borrador. Revisa tu señal y vuelve a intentarlo.'
+
+/**
  * Si hay algo que guardar. Como en el panel, abrir Publicar y salir no deja un borrador
  * vacío: hace falta texto o un archivo ya subido. Las cuentas y la fecha solas no alcanzan,
  * porque vienen puestas (la cuenta única, el día del «+»).

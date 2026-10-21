@@ -1,15 +1,14 @@
-import { useCallback, useState } from 'react'
+import { useState } from 'react'
 import { Pressable, ScrollView, Text, View } from 'react-native'
 import { useRouter } from 'expo-router'
 import { TusCuentas } from '../../components/tus-cuentas'
 import { Boton, Cargando, Chip, ErrorConReintento, Etiqueta, Pantalla, Sello, TIPO_TITULO, Tarjeta } from '../../components/ui'
+import { useSesion } from '../../components/sesion'
 import { useColores } from '../../components/tema'
 import { POST_ABIERTO, writeCache } from '../../lib/cache'
 import { cambio, num } from '../../lib/format'
-import { clearToken } from '../../lib/session'
 import { ETIQUETA_RANGO, NOMBRE_RED, RANGOS, type CuentaNombrada, type Numeros, type PostMetrica, type Rango } from '../../lib/tipos'
 import { useScreenData } from '../../lib/useScreenData'
-import { useToken } from '../../lib/useToken'
 
 function nombreDeCuenta(cuenta: CuentaNombrada | null, red: string | null): string {
   const nombreRed = red ? (NOMBRE_RED[red] ?? red) : ''
@@ -105,12 +104,8 @@ export default function LosNumeros() {
   const [rango, setRango] = useState<Rango>('30d')
   const [cuenta, setCuenta] = useState<string | null>(null)
   const [mas, setMas] = useState(false)
-  const token = useToken()
+  const { token, salir } = useSesion()
   const router = useRouter()
-  const salir = useCallback(async () => {
-    await clearToken()
-    router.replace('/login')
-  }, [router])
 
   const { data, cargando, error, sello, refrescar } = useScreenData<Numeros>(
     `numeros:${rango}:${cuenta ?? 'todas'}`,

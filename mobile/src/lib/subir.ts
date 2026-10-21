@@ -5,7 +5,8 @@ import type { Elegido } from './publicar'
 
 export type SubidaHecha = { url: string; mediaType: 'image' | 'video' }
 
-type Destino = { subir: string; publica: string; mediaType: 'image' | 'video' }
+/** `tipo` es el que firmó el servidor; uno de antes del 2026-10-21 no lo manda, y vale el del archivo. */
+type Destino = { subir: string; publica: string; mediaType: 'image' | 'video'; tipo?: string }
 
 // Las dos cabeceras van dentro de la firma del PUT: tienen que ir tal cual o R2 responde
 // 403. El valor de Cache-Control es el que pone el servidor en src/lib/storage.ts.
@@ -34,7 +35,7 @@ export async function subirUno(
   // `File` lee desde disco: un video de 200 MB nunca pasa entero por memoria.
   const resultado = await new File(archivo.uri).upload(destino.subir, {
     httpMethod: 'PUT',
-    headers: { 'Content-Type': archivo.tipo, 'Cache-Control': CACHE_INMUTABLE },
+    headers: { 'Content-Type': destino.tipo ?? archivo.tipo, 'Cache-Control': CACHE_INMUTABLE },
     onProgress: ({ bytesSent, totalBytes }) => onProgreso(totalBytes > 0 ? bytesSent / totalBytes : 0),
     signal,
   })

@@ -29,7 +29,9 @@ export async function POST(request: Request) {
 
   try {
     const { subir, publica } = await urlParaSubir(subida.key, subida.tipo)
-    return NextResponse.json({ subir, publica, mediaType: subida.mediaType })
+    // `tipo` es el que quedó firmado, ya canónico: el PUT tiene que mandar ese, letra por letra, o
+    // R2 responde 403. Un `image/jpg` que declaró la galería se firma como `image/jpeg`.
+    return NextResponse.json({ subir, publica, mediaType: subida.mediaType, tipo: subida.tipo })
   } catch (error) {
     console.error('upload-url:', String(error).slice(0, 300))
     return NextResponse.json({ error: SIN_ALMACEN }, { status: 500 })

@@ -7,8 +7,8 @@ Una app para Android que muestra de un vistazo lo programado y cómo van las red
 - Es solo para Android; no hay versión para iPhone. No se encuentra buscándola en una tienda: se instala con el archivo `.apk` que entrega quien administra el sitio, o por la prueba interna de Google Play si a la persona la invitaron. En el teléfono, la de la Play Store se llama «Tu Parrilla», con un bife sobre la reja de ícono; el APK de prueba de antes se llama «Vicente · Números», con la bandera de Chile. Son dos apps distintas para el teléfono: pueden estar las dos instaladas, y el APK se puede borrar cuando la de la tienda funcione.
 - Se entra igual que al panel web ([Entrar al panel](ingresar.md)): con el correo y un código de seis dígitos que llega a ese correo. Entra solo quien está invitado, y cada persona ve sus propias cuentas. No hay contraseña.
 - La primera vez pide el correo y el código. Después la sesión queda abierta: no los vuelve a pedir.
-- Si el teléfono tiene PIN, patrón, huella o reconocimiento de cara, cada vez que se abre la app pide desbloquear con el aviso «Desbloquea para entrar a Tu Parrilla». Si se cancela, la app muestra la pantalla de entrada.
-- Si la sesión deja de valer (por ejemplo, porque quien administra el sitio revocó el acceso de los teléfonos), la app vuelve sola a la pantalla de entrada, sin ningún mensaje.
+- Si el teléfono tiene PIN, patrón, huella o reconocimiento de cara, cada vez que la app arranca pide desbloquear con el aviso «Desbloquea para entrar a Tu Parrilla» (si seguía abierta en segundo plano, al volver a ella no lo pide). Si se cancela, la app muestra la pantalla de entrada, y la próxima vez que arranque lo vuelve a pedir. Sin desbloquear no se llega a ninguna pantalla de la cuenta, ni con un enlace.
+- Si la sesión deja de valer (por ejemplo, porque quien administra el sitio revocó el acceso de los teléfonos), la app vuelve sola a la pantalla de entrada, sin ningún mensaje, y borra lo que tenía guardado de la cuenta, como al cerrar sesión.
 - Para salir: el botón de arriba a la derecha → «Ajustes» → «Cerrar sesión» (ver «Ajustes», más abajo).
 - Al entrar se abre La Parrilla.
 
@@ -113,7 +113,7 @@ Se abre con el botón de Ajustes de cualquier pestaña. Arriba, la flecha para v
   Sin cuentas, «Todavía no conectas ninguna cuenta.». Mientras carga, «Cargando tus cuentas…».
 - Debajo, «Tus redes conectadas. Se conectan y se reconectan en el panel web.» y el botón «Abrir Los Fierros en el panel», que abre [Los Fierros](los-fierros.md) en el navegador del teléfono (ahí puede pedir entrar con el correo, como el panel).
 - **«El modo»**, con la frase «De noche: el acero y los cortes de la parrilla. Se guarda en tu cuenta: vale también en el panel web.» (de día, «De día: el fondo claro y piezas de sushi. Se guarda…») y un botón que dice adónde lleva: «Modo día» de noche, «Modo noche» de día. Cambia en el momento y lo guarda en la cuenta; sin señal, el teléfono lo recuerda y lo manda cuando vuelve la conexión.
-- **«Tu sesión»**, con «Cerrar sesión» en rojo. Pregunta «¿Cerrar sesión en este teléfono?» / «Para volver a entrar te va a llegar un código a tu correo.», con «Cancelar» y «Cerrar sesión». Al confirmar, la app vuelve a la pantalla de entrada. Las cuentas conectadas y lo programado no se tocan.
+- **«Tu sesión»**, con «Cerrar sesión» en rojo. Pregunta «¿Cerrar sesión en este teléfono?» / «Para volver a entrar te va a llegar un código a tu correo.», con «Cancelar» y «Cerrar sesión». Al confirmar, la app vuelve a la pantalla de entrada y borra del teléfono lo que guardó de la cuenta —lo último que mostró cada pantalla—: quien entre después en ese teléfono no lo ve, y «atrás» ya no vuelve a ninguna pantalla de la cuenta. Las cuentas conectadas, lo programado y los borradores no se tocan: están en la cuenta, no en el teléfono.
 - Al pie, la versión de la app: «Versión 1.1.0» y, si llegó una actualización por aire, « · actualización » seguido de ocho letras y números que la identifican. Sirve para saber qué versión tiene alguien que pide ayuda.
 
 Aquí no se conecta ni se desconecta nada: eso es del panel web.
@@ -232,7 +232,7 @@ El borrador desaparece también del panel web.
 ### Si se corta la señal
 
 - **Mientras sube un archivo:** la miniatura queda en rojo con «Reintentar» y abajo sale «No se pudo subir el archivo. Revisa tu señal. Toca el archivo para reintentar.». Cuando vuelva la señal, toca la miniatura. Los demás archivos siguen subiendo.
-- **Al programar:** sale en rojo «No se pudo conectar. Revisa tu señal.». Cuando vuelva, toca de nuevo «Programar» o «Publicar ahora»; los archivos ya subidos no se vuelven a subir. Si el primer intento sí había alcanzado a programarlo, el segundo no lo publica dos veces: sale «Este borrador ya no existe: se programó o se descartó. Mira cómo quedó en La Parrilla.».
+- **Al programar:** sale en rojo «No se pudo conectar. Revisa tu señal.». Cuando vuelva, toca de nuevo «Programar» o «Publicar ahora»; los archivos ya subidos no se vuelven a subir. Si el primer intento sí había alcanzado a programarlo, el segundo no lo publica dos veces: sale «Este borrador ya no existe: se programó o se descartó. Mira cómo quedó en La Parrilla.». Si el servidor no contesta en 30 segundos, la app deja de esperar y dice lo mismo que sin señal. Y si tampoco se pudo guardar el borrador («No se pudo guardar el borrador.»), «Programar» no manda nada y dice «No se programó: primero tiene que guardarse el borrador. Revisa tu señal y vuelve a intentarlo.»: el borrador guardado es lo que impide que un segundo toque publique dos veces.
 
 ### Para cancelar una subida
 
@@ -253,9 +253,10 @@ No se puede desde la app. Se hace en el panel web, en [La Parrilla](la-parrilla.
 | «Demasiados intentos. Pide un código nuevo.» | Cinco códigos equivocados seguidos agotan ese código; también sale con muchos intentos seguidos desde la misma conexión. | «Usar otro correo» y pedir un código nuevo. |
 | «Demasiados intentos en las últimas 24 horas. Prueba de nuevo más tarde.» | Diez códigos equivocados en un día, sumando la web y el teléfono. | Esperar; hasta un día después del primer error. Ver [Entrar al panel](ingresar.md). |
 | «El servidor no respondió bien. Prueba de nuevo en un rato.» | Falla del servidor, no de lo que se escribió. | Esperar y volver a intentar; si se repite, avisar a quien administra el sitio. |
-| «No se pudo conectar. Revisa tu señal.» | Sin conexión al pedir el código, al entrar o al programar el post. | Revisar la señal; en «Publicar», volver a tocar «Programar» o «Publicar ahora». |
+| «No se pudo conectar. Revisa tu señal.» | Sin conexión al pedir el código, al entrar o al programar el post, o el servidor no contestó en 30 segundos. | Revisar la señal; en «Publicar», volver a tocar «Programar» o «Publicar ahora». |
 | «No se pudo actualizar.» | Falló la descarga de datos nuevos; lo que se ve puede ser viejo. | Arrastrar hacia abajo o tocar «Reintentar» cuando haya señal. |
 | «No se pudo cargar.» | No hay datos guardados y no se pudieron descargar. | «Reintentar». |
+| «Algo se rompió», con «No fue nada que hicieras. Vuelve a intentarlo; si se repite, cierra la app y ábrela de nuevo.» y el botón «Reintentar» | Una pantalla falló al dibujarse; lo más probable, un dato que guardó una versión anterior de la app. | «Reintentar»: borra lo que la app guardó de las pantallas y las vuelve a cargar. Si se repite, cerrar la app y abrirla; si sigue, avisar a quien administra el sitio. |
 | «No se pudo reprogramar» con «La hora debe estar en el futuro.» | La hora elegida ya pasó. | Volver a tocar «Reprogramar» y elegir una hora futura. |
 | «No se pudo reprogramar» con «Ese destino ya no existe.» | El post se borró (por ejemplo, desde el panel web). | Arrastrar hacia abajo para actualizar. |
 | «No se pudo reprogramar» con «No se pudo conectar. Revisa tu señal.» | Sin conexión. | Volver a intentarlo cuando haya señal. |
@@ -271,7 +272,7 @@ No se puede desde la app. Se hace en el panel web, en [La Parrilla](la-parrilla.
 | «No publicaste nada en este período.» (en «Tus publicaciones») | No hay publicaciones sincronizadas en el período con ese filtro. | Elegir un período más largo, u otra red. |
 | «Se pasó» (en «Tus publicaciones») | Ese post sacó al menos el doble de views ganadas que la mediana de la lista. | Nada; es una marca para ubicar lo que anduvo mejor. |
 | «Sin permiso para ver la galería.» | El teléfono no le dio permiso a la app para ver fotos y videos. | Dar el permiso en los ajustes del teléfono y volver a tocar «+ Fotos o video». |
-| «Ese tipo de archivo no se puede publicar.» | Uno de los archivos elegidos no es una foto JPG, PNG, GIF o WebP ni un video MP4, MOV o WebM, que es lo que se puede publicar. | Elegir otro archivo. |
+| «Ese tipo de archivo no se puede publicar.» | Uno de los archivos elegidos no es una foto JPG, PNG, GIF o WebP ni un video MP4, MOV o WebM, que es lo que se puede publicar (una foto HEIC o un video 3GP, por ejemplo). Sale al elegirlo. | Elegir otro archivo. |
 | «El archivo supera los 500 MB.» | Un archivo es demasiado grande. | Elegir uno más liviano. |
 | «Elige al menos una cuenta.» | No hay ninguna cuenta marcada. | Tocar al menos una. |
 | «No se pudieron cargar las cuentas.» | Falló la descarga de la lista de cuentas. | «Reintentar». |
@@ -285,6 +286,7 @@ No se puede desde la app. Se hace en el panel web, en [La Parrilla](la-parrilla.
 | «Abriste un borrador: lo que cambies se guarda solo.» | Se abrió un borrador desde «La Parrilla». | Seguir escribiendo, o «Programar». |
 | «Guardando borrador…», «Borrador guardado.» | Lo escrito se está guardando, o ya quedó guardado. | Nada. |
 | «No se pudo guardar el borrador.» | El último guardado falló (sin señal, por ejemplo). | Hacer cualquier cambio cuando haya señal para que lo intente de nuevo. |
+| «No se programó: primero tiene que guardarse el borrador. Revisa tu señal y vuelve a intentarlo.» | Se tocó «Programar» o «Publicar ahora» y el borrador no se pudo guardar (sin señal). Para no publicar dos veces, no se mandó nada. | Volver a tocar cuando haya señal: primero se guarda el borrador y después se programa. |
 | «Este borrador ya no existe: se programó o se descartó. Mira cómo quedó en La Parrilla.» | Ese borrador se programó o se descartó en el panel web o en otro teléfono, o ya se programó desde acá y se perdió la respuesta. La pantalla dejó de guardar y los botones de enviar se apagan. | Mirar «La Parrilla». Para seguir, «Nueva publicación». |
 | «Abriendo borrador…» | Se está descargando el borrador que se tocó. | Esperar. |
 | «Ese borrador ya no existe: se programó o se descartó.» | Se tocó un borrador que ya no está. | Arrastrar «La Parrilla» hacia abajo para actualizar la lista. |
@@ -329,6 +331,8 @@ No se puede desde la app. Se hace en el panel web, en [La Parrilla](la-parrilla.
 - «No aparece mi cuenta» o «dice reconéctala» → las cuentas se conectan y reconectan en el panel web, en [Los Fierros](los-fierros.md). La app no conecta nada.
 - «Los botones Programar y Publicar ahora están grises» → falta texto o un archivo, falta marcar una cuenta, un archivo todavía está subiendo («Subiendo…») o falló («Reintentar» en la miniatura), o el borrador tiene el aviso amarillo de TikTok o palabra clave.
 - «Perdí lo que estaba escribiendo» → se guarda solo: está en «La Parrilla» → «▸ Borradores (N)». Si no está, no tenía texto ni archivos subidos, o el guardado falló («No se pudo guardar el borrador.»).
+- «Toqué Programar y dice que primero tiene que guardarse el borrador» → no hubo señal para guardarlo, y sin borrador la app no programa, para no publicar dos veces. Con señal, volver a tocar «Programar»: guarda el borrador y lo programa.
+- «Me sale Algo se rompió» → «Reintentar». Si se repite, cerrar la app y abrirla de nuevo; si sigue, avisar a quien administra el sitio.
 - «Empecé en el computador y quiero terminar en el teléfono» (o al revés) → es el mismo borrador: en el teléfono, «La Parrilla» → «▸ Borradores (N)»; en el panel web, «Borradores (N)» en [La Parrilla](la-parrilla.md).
 - «Me dice que el borrador va también a TikTok» o «que tiene la palabra clave» → eso no se programa desde el teléfono; se programa en el panel web, en [La Parrilla](la-parrilla.md). Se puede seguir editando el texto en el teléfono sin perderlo.
 - «Toqué la cruz de un día y desapareció lo que estaba escribiendo» → la cruz empieza otra publicación; lo anterior quedó en «▸ Borradores (N)».
@@ -360,7 +364,6 @@ Comparada con el panel web, la app no:
 - edita la página pública ([La Vitrina](la-vitrina.md));
 - cambia la zona horaria ([Tu Cuenta](tu-cuenta.md)) ni genera llaves ([Tu IA](tu-ia.md));
 - invita usuarios ([Los Maestros](los-maestros.md));
-- cierra sesión desde la propia app;
 - manda notificaciones;
 - existe para iPhone.
 
@@ -369,7 +372,8 @@ Comparada con el panel web, la app no:
 Lo que describe sale de estos archivos:
 
 - `mobile/app.json` (el nombre del ícono)
-- `mobile/src/app/_layout.tsx` (el desbloqueo y las cabeceras de «Publicación», «Tus publicaciones» y «Ajustes»)
+- `mobile/src/app/_layout.tsx` (qué pantallas se ven con sesión y sin ella, la pantalla «Algo se rompió» y las cabeceras de «Publicación», «Tus publicaciones» y «Ajustes»)
+- `mobile/src/components/sesion.tsx` (el desbloqueo, entrar y salir)
 - `mobile/src/app/login.tsx`
 - `mobile/src/app/(tabs)/_layout.tsx` (la barra de pestañas)
 - `mobile/src/app/(tabs)/index.tsx` (La Parrilla)

@@ -172,8 +172,11 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
 - **[dueño] La app en la Play Store, pista de pruebas internas** (2026-10-16). La cuenta de
   Play Console (personal) y la app existen: está como «Parrilla», `cl.tuparrilla.app`, en
   borrador. El binario está listo, `tu-parrilla-1.1.0-2.aab` (versión 1.1.0, código 2,
-  salido de `a6bd08f`; nada nativo cambió después, y lo demás le llega por aire en el canal
-  `production`). La versión interna con ese `.aab` se publicó el 2026-10-17, «Tu Parrilla
+  salido de `a6bd08f`; lo demás le llega por aire en el canal `production`). Lo nativo que
+  cambió después entra en el próximo build, sin apuro: desde el 2026-10-21 Android no respalda
+  los datos de la app (`allowBackup: false` en `mobile/app.json`) y salieron dos módulos que no
+  se usaban (`expo-device` y `expo-web-browser`); el binario de hoy sigue respaldando lo que la
+  app guarda. La versión interna con ese `.aab` se publicó el 2026-10-17, «Tu Parrilla
   (Alfa)», sin revisar: hasta que Google revise la app, la tienda se la muestra a los
   probadores como «cl.tuparrilla.app (unreviewed)». Falta, en la consola, lo que pide esa
   revisión —el nombre «Tu Parrilla» y la ficha, y las tarjetas de Contenido de la app—, y en
@@ -236,6 +239,12 @@ Nada de esto bloquea un trámite hoy; conviene ordenarlo antes de abrir a tercer
   `mobile/README.md`. La cuenta de Apple para iPhone conviene sacarla ya a nombre de Pyxis.
 
 ## Features y trabajo de código
+
+- **Por decidir: que la app pida el candado también al volver a ella** (2026-10-21). Hoy lo
+  pide cuando arranca; si quedó abierta en segundo plano, al volver entra sin pedirlo, y quien
+  tenga en la mano el teléfono desbloqueado ve la cuenta. Las apps de bancos lo vuelven a pedir
+  pasado un rato fuera. Es una decisión de producto, no un arreglo: cuánto rato, y si vale la
+  molestia. Se haría en `mobile/src/components/sesion.tsx`, mirando `AppState`.
 
 - **El chef de la casa** (2026-10-19). Un agente nuestro, levemente personalizado por cliente,
   que recibe el material crudo —la res entera de noche, el atún entero de día—, lo despieza en

@@ -28,20 +28,6 @@ export type Fierros = {
 /** Una cuenta del dueño, para elegir destino por cuenta y no por red (Tarea 7). */
 export type CuentaApp = { id: string; red: string; handle: string | null; conectada: boolean }
 
-export type Overview = {
-  desde: string
-  hasta: string
-  truncado: boolean
-  kpis: {
-    viewsGanadas: number | null
-    visitasAlSitio: number | null
-    arrastre: number | null
-    seguidores: number | null
-  }
-  hoy: PostProgramado[]
-  proximos: PostProgramado[]
-}
-
 export type PostMetrica = {
   red: string
   externalId: string

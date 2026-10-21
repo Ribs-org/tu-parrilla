@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useSelectorFecha } from '../../components/selector-fecha'
 import { Boton, BotonTexto, Chip, ErrorConReintento, Miniatura } from '../../components/ui'
+import { useSesion } from '../../components/sesion'
 import { useColores, useTema } from '../../components/tema'
 import { RechazoApi, SesionCaducada, apiDelete, apiGet, apiPost } from '../../lib/api'
 import {
@@ -13,6 +14,7 @@ import {
   NO_SE_ABRIO,
   NO_SE_DESCARTO,
   PAUSA_MS,
+  SIN_BORRADOR,
   YA_NO_EXISTE,
   cuentasDelBorrador,
   cuerpoDelBorrador,
@@ -49,10 +51,8 @@ import {
   volverASubir,
   type Archivo,
 } from '../../lib/publicar'
-import { clearToken } from '../../lib/session'
 import { subirUno } from '../../lib/subir'
 import type { BorradorAbierto, CuentaApp } from '../../lib/tipos'
-import { useToken } from '../../lib/useToken'
 
 const MAX_TEXTO = 2200
 
@@ -87,7 +87,7 @@ function fechaLegible(fecha: Date): string {
 export default function Publicar() {
   const colores = useColores()
   const { tema } = useTema()
-  const token = useToken()
+  const { token, salir } = useSesion()
   const router = useRouter()
   const insets = useSafeAreaInsets()
   const [texto, setTexto] = useState('')
@@ -118,11 +118,6 @@ export default function Publicar() {
   const [abriendo, setAbriendo] = useState(false)
   const [soloEnElPanel, setSoloEnElPanel] = useState<string | null>(null)
   const [estadoBorrador, setEstadoBorrador] = useState<EstadoBorrador>('nada')
-
-  const salir = useCallback(async () => {
-    await clearToken()
-    router.replace('/login')
-  }, [router])
 
   /* ---- los archivos: se suben apenas se eligen ---- */
 
@@ -507,6 +502,13 @@ export default function Publicar() {
       despachar({ tipo: 'cancelar' })
       return
     }
+    // El guardado falló —sin señal— y no hay borrador del que salga el post: sin él, un toque
+    // repetido publicaría dos veces (`SIN_BORRADOR`). Con el botón activo siempre hay qué
+    // guardar, así que sin id es que no se pudo.
+    if (!borradorId.current) {
+      despachar({ tipo: 'rechazado', mensaje: SIN_BORRADOR })
+      return
+    }
     quieto.current = true
     try {
       await apiPost('/api/mobile/schedule', token, {
@@ -516,7 +518,7 @@ export default function Publicar() {
         ahora,
         opciones: opcionesDelBorrador(disponibles, cuentas, trial, archivos),
         media: subidos(archivos).map(({ url, mediaType }) => ({ url, mediaType })),
-        borradorId: borradorId.current ?? undefined,
+        borradorId: borradorId.current,
       })
       despachar({ tipo: 'hecho' })
     } catch (e) {

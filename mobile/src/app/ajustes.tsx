@@ -2,13 +2,13 @@ import { useCallback } from 'react'
 import { Alert, Linking, Text, View } from 'react-native'
 import Constants from 'expo-constants'
 import * as Updates from 'expo-updates'
-import { useFocusEffect, useRouter } from 'expo-router'
+import { useFocusEffect } from 'expo-router'
 import { Boton, BotonTexto, Etiqueta, Pantalla, Sello, Tarjeta } from '../components/ui'
 import type { Colores } from '../components/colores'
+import { useSesion } from '../components/sesion'
 import { useColores, useTema } from '../components/tema'
 import { useFierros } from '../components/boton-ajustes'
 import { API_BASE } from '../lib/config'
-import { clearToken } from '../lib/session'
 import { LOS_FIERROS, otroTema, type Tema } from '../lib/tema'
 import { NOMBRE_RED, type Fierros } from '../lib/tipos'
 
@@ -52,7 +52,7 @@ function fierroDe(
 export default function Ajustes() {
   const colores = useColores()
   const { tema, cambiarTema } = useTema()
-  const router = useRouter()
+  const { salir } = useSesion()
   const { data, cargando, error, sello, refrescar, refrescarSiVieja } = useFierros()
 
   useFocusEffect(
@@ -67,10 +67,9 @@ export default function Ajustes() {
       {
         text: 'Cerrar sesión',
         style: 'destructive',
-        onPress: async () => {
-          await clearToken()
-          router.replace('/login')
-        },
+        // Borra también lo que la app guardó de la cuenta y vuelve a la entrada sin pila
+        // detrás: no queda pantalla de la cuenta a la que volver atrás.
+        onPress: () => void salir(),
       },
     ])
   }

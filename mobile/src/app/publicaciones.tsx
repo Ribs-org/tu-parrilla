@@ -1,15 +1,14 @@
-import { useCallback, useState } from 'react'
+import { useState } from 'react'
 import { Pressable, ScrollView, Text, View } from 'react-native'
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import { Chip, Cargando, ErrorConReintento, Pantalla, Sello, TIPO_TITULO, Tarjeta, Vacio } from '../components/ui'
+import { useSesion } from '../components/sesion'
 import { useColores } from '../components/tema'
 import { MiniCorte } from '../components/parrilla'
 import { num, pct, shortDate } from '../lib/format'
 import { comoSalio, medianaDe } from '../lib/parrilla'
-import { clearToken } from '../lib/session'
 import { useScreenData } from '../lib/useScreenData'
-import { useToken } from '../lib/useToken'
 import { ETIQUETA_RANGO, NOMBRE_RED, RANGOS, type Posts, type Rango } from '../lib/tipos'
 
 // Las redes de las que Tu Parrilla trae publicaciones. Threads y X publican, pero no se
@@ -25,12 +24,8 @@ export default function TusPublicaciones() {
   const colores = useColores()
   const [rango, setRango] = useState<Rango>('30d')
   const [redes, setRedes] = useState<string[]>([])
-  const token = useToken()
+  const { token, salir } = useSesion()
   const router = useRouter()
-  const salir = useCallback(async () => {
-    await clearToken()
-    router.replace('/login')
-  }, [router])
 
   // La caché se llavea solo por rango y las redes se filtran en memoria: así el
   // detalle de un post lo encuentra sin importar qué chips estaban activos, y
@@ -103,6 +98,7 @@ export default function TusPublicaciones() {
         ordenados.map((post) => (
           <Pressable
             key={`${post.red}:${post.externalId}`}
+            accessibilityRole="button"
             onPress={() =>
               router.push({
                 pathname: '/post/[id]',

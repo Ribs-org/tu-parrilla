@@ -123,16 +123,19 @@ Igual que el panel web: la primera vez que se abre, pide el **correo** y despué
 **código de seis dígitos** que llega a ese correo. Entra cualquier usuario invitado en
 Los Maestros, y cada uno ve sus propias cuentas. Se hace una sola vez: después la
 sesión queda abierta. Si el teléfono tiene huella digital o PIN configurado, la app
-usa ese candado para protegerse cada vez que se abre — no hay que volver a pedir un
-código.
+usa ese candado para protegerse cada vez que arranca — no hay que volver a pedir un
+código. Sin el candado no se llega a ninguna pantalla de la cuenta, ni con un enlace: la raíz
+(`src/app/_layout.tsx`) las deja detrás de la sesión (`src/components/sesion.tsx`).
 
 Hasta la versión del 2026-10-15 se entraba con una contraseña del despliegue
 (`ADMIN_PASSWORD`). Ya no existe: una app que todavía la pida es una instalación sin
 actualizar, y se pone al día sola al abrirla dos veces con señal. La sesión que ya
 tenía abierta sigue valiendo mientras tanto.
 
-Para salir: el botón de Ajustes → **Cerrar sesión**. Borra la sesión de este teléfono y nada más;
-para cortar todos los teléfonos a la vez, «Si se pierde el teléfono», abajo.
+Para salir: el botón de Ajustes → **Cerrar sesión**. Borra la sesión de este teléfono y lo que
+la app guardó de la cuenta —lo último que mostró cada pantalla, para abrir al instante—, y nada
+más. Entrar también lo borra, por si el teléfono cambió de manos. Para cortar todos los teléfonos
+a la vez, «Si se pierde el teléfono», abajo.
 
 ## Cómo publicar desde el teléfono
 

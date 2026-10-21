@@ -1,12 +1,10 @@
-import { useCallback } from 'react'
 import { Pressable, View, type ColorValue } from 'react-native'
 import { useRouter } from 'expo-router'
+import { useSesion } from './sesion'
 import { useColores, useTema } from './tema'
-import { clearToken } from '../lib/session'
 import { fraseDelAviso, type Tema } from '../lib/tema'
 import type { Fierros } from '../lib/tipos'
 import { useScreenData } from '../lib/useScreenData'
-import { useToken } from '../lib/useToken'
 
 /**
  * El ícono de Ajustes, como el del panel (`src/components/icono-ajustes.tsx`): de noche, un
@@ -97,12 +95,7 @@ function TrincheYCuchillo({ color, fondo }: { color: ColorValue; fondo: ColorVal
 
 /** Los fierros del dueño, de la caché primero: los comparten el botón de Ajustes y la pantalla. */
 export function useFierros() {
-  const token = useToken()
-  const router = useRouter()
-  const salir = useCallback(async () => {
-    await clearToken()
-    router.replace('/login')
-  }, [router])
+  const { token, salir } = useSesion()
   return useScreenData<Fierros>('fierros', '/api/mobile/fierros', token, salir)
 }
 
