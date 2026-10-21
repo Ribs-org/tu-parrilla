@@ -19,7 +19,7 @@ export const SIN_ALMACEN = 'Falta configurar Cloudflare R2 (R2_*).'
  */
 export const CACHE_INMUTABLE = 'public, max-age=31536000, immutable'
 /** Una hora: un video de 200 MB por datos móviles cabe de sobra, y un link filtrado muere solo. */
-const SUBIDA_SEGUNDOS = 3600
+export const SUBIDA_SEGUNDOS = 3600
 
 export type ObjetoAlmacenado = { key: string; url: string; size: number; uploadedAt: Date }
 
@@ -147,13 +147,21 @@ export async function urlParaSubir(
  * de verdad se subió, no el que declaró quien subía (`prepararSubida`).
  */
 export async function tamanoEnAlmacen(url: string): Promise<number | null> {
+  return (await objetoEnAlmacen(url))?.bytes ?? null
+}
+
+/**
+ * Lo mismo que `tamanoEnAlmacen`, con el content-type que quedó guardado: el lote lo necesita
+ * para saber si un archivo subido con `POST /api/media` es imagen o video sin bajarlo.
+ */
+export async function objetoEnAlmacen(url: string): Promise<{ bytes: number; tipo: string } | null> {
   const conf = config()
   if (!conf) return null
   const key = keyDesdeUrl(conf.base, url)
   if (!key) return null
   try {
     const cabecera = await getCliente().send(new HeadObjectCommand({ Bucket: conf.bucket, Key: key }))
-    return cabecera.ContentLength ?? 0
+    return { bytes: cabecera.ContentLength ?? 0, tipo: cabecera.ContentType ?? '' }
   } catch (error) {
     if ((error as { name?: string }).name === 'NotFound') return null
     throw error

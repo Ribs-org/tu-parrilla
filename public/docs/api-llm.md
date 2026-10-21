@@ -14,7 +14,7 @@ la llave, qué significa un error que le salió—, la wiki de la interfaz está
 Esta guía nombra las pantallas como se ven de noche; en el modo día, La Parrilla es «La Barra»
 y Los Fierros, «Los Cuchillos» (la wiki las da todas, en «El modo día»).
 
-Dos endpoints de escritura: `POST /api/schedule/batch` programa, y `DELETE /api/schedule/posts/{id}` saca lo programado (sección 3b). Autenticación en todos los
+Tres endpoints de escritura: `POST /api/schedule/batch` programa, `DELETE /api/schedule/posts/{id}` saca lo programado (sección 3b), y `POST /api/media` sube un archivo una vez para nombrarlo en varias filas (sección 3e). Autenticación en todos los
 endpoints:
 
 ```
@@ -163,11 +163,13 @@ no por subcadena parcial ni regex:
 
 Además de `ok` y `postId` o `error`, cada resultado trae `ms` (lo que tardó la fila en el
 servidor) y, si la fila llegó a su media, `bytes` (lo que esta fila bajó) y `origen`:
-`descarga`, o `cache` si toda su media venía de otra fila del mismo lote con la misma URL. Una
+`descarga`; `cache` si no bajó nada pero algo venía de otra fila del mismo lote con la misma URL;
+o `almacen` si toda estaba subida con `POST /api/media` (sección 3e). Una
 fila cuya media no se pudo traer trae también `motivo`, una de estas: `sin respuesta` (30 s sin
 contestar), `estancada` (dejó de llegar 30 s seguidos), `cortada`, `sin tiempo` (el lote llegó a
 su máximo), `http <status>`, `tipo <content-type>` (`tipo text/html` es la página de Drive en vez
-del archivo), `muy grande` (más de 500 MB), `vacía`, `redirecciones` o `url prohibida`. Las tres
+del archivo), `muy grande` (más de 500 MB), `vacía`, `redirecciones`, `url prohibida` o `no subido`
+(un archivo de `POST /api/media` que no está: el `PUT` no terminó, o ya se borró). Las tres
 primeras y los `http 5xx`/`http 429` ya se reintentaron una vez. Los resultados vuelven en el
 orden de `posts`.
 
@@ -247,6 +249,28 @@ antigua a la más nueva. Cada una trae:
 Programa solo hacia una con `conectada: true` y `proximamente: false`: las demás rechazan la
 fila. Una con `fierro` `frio` y `conectada: true` acepta la fila, pero no publica hasta que el
 dueño la reconecte en Los Fierros: díselo antes.
+
+## 3e. Subir un archivo una vez, sin Drive
+
+```bash
+curl -X POST https://tu-parrilla.cl/api/media -H "Authorization: Bearer $LLAVE_PARRILLA" \
+  -H "Content-Type: application/json" -d '{ "nombre": "video-01.mp4", "tipo": "video/mp4", "bytes": 41937210 }'
+```
+
+Devuelve `{ url, subir, cabeceras, mediaType, vence }`. Sube el archivo con un `PUT` a `subir`
+con las dos `cabeceras` tal cual (`Content-Type` y `Cache-Control`: van firmadas, y cualquier
+diferencia es `403`), antes de `vence` (una hora). Después pon `url` en el `media` (o en la
+`portada`) de cada fila que lo lleve: el lote no lo vuelve a bajar, la fila vuelve con
+`"origen": "almacen"` y el mismo archivo sirve para todas las filas. Nómbralo en un lote dentro
+de la hora siguiente a subirlo, o se borra; un video se borra cuando salió el último post que
+lo usa. Si no está, la fila trae `No se pudo leer una media de la fila.` con
+`"motivo": "no subido"`. La `url` queda en la carpeta del dueño de la llave: solo los lotes de
+ese mismo dueño la usan sin bajarla.
+
+`tipo` es uno de `image/jpeg`, `image/png`, `image/gif`, `image/webp`, `video/mp4`,
+`video/quicktime`, `video/webm`; `bytes`, un número (`0` si no lo sabes), hasta 500 MB. Los
+rechazos son `400` con `{ error }`: `Ese tipo de archivo no se puede publicar.`,
+`El archivo supera los 500 MB.` o `El cuerpo no se entendió.`; sin llave válida, `401`.
 
 ## 4. Lo que esta API no hace
 

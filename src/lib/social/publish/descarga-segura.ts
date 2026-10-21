@@ -27,7 +27,8 @@ export const TOPE_POR_DEFECTO_MS = 30_000
 /**
  * Por qué no se pudo traer un archivo, en palabras fijas: el lote las devuelve tal cual en
  * `motivo`, y las guías de la API las listan (`docs-api.test.ts` lo vigila), así que cambiar
- * una es cambiar la API. Además de estas, `http <status>` y `tipo <content-type>`.
+ * una es cambiar la API. Además de estas, `http <status>` y `tipo <content-type>`. `no subido`
+ * no sale de una descarga sino del lote: un archivo de `POST /api/media` que no está.
  */
 export const MOTIVOS_FIJOS = [
   'url prohibida',
@@ -38,6 +39,7 @@ export const MOTIVOS_FIJOS = [
   'redirecciones',
   'muy grande',
   'vacía',
+  'no subido',
 ] as const
 
 export type MotivoDeDescarga = (typeof MOTIVOS_FIJOS)[number] | `http ${number}` | `tipo ${string}`

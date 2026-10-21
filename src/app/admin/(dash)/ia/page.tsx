@@ -35,7 +35,7 @@ const GUIAS = [
   },
 ] as const
 
-/** Lo que tu IA hace con la llave: los seis endpoints de la API, en palabras. */
+/** Lo que tu IA hace con la llave: lo que hacen los endpoints de la API, en palabras. */
 const LO_QUE_HACE = [
   'Programar publicaciones, de a una o de a cientos, con sus archivos, sus redes y sus reglas de comentarios.',
   'Sacar lo que programaste y todavía no sale.',

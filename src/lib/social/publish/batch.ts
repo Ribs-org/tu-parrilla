@@ -2,7 +2,7 @@ import { fromZonedInput } from '@/lib/utils'
 import { extensionDe, validateScheduleDraft } from './validate'
 import { validateAtributos } from './atributos'
 import { validarOpcionesPorCuenta, errorDeMediaPorOpciones, OPCIONES_ERROR, type OpcionesDestino } from './opciones'
-import { guardar } from '@/lib/storage'
+import { basePublica, guardar, keyDesdeUrl, objetoEnAlmacen } from '@/lib/storage'
 import { ARCHIVO_MUY_GRANDE, MAX_BYTES_ARCHIVO } from './limites'
 import { getDb, scheduledPosts, scheduledPostMedia, scheduledPostTargets, reglasClave } from '@/db'
 import { and, eq } from 'drizzle-orm'
@@ -62,9 +62,14 @@ type Veredicto =
 /**
  * Cada fila dice además cuánto tardó en el servidor (`ms`). Si llegó a su media, también
  * cuánto bajó (`bytes`) y de dónde salió (`origen`): `descarga` si bajó algo, `cache` si
- * todo venía de otra fila del mismo lote con la misma URL.
+ * no bajó nada pero algo venía de otra fila del mismo lote con la misma URL, y `almacen` si
+ * toda estaba ya en el almacén, subida con `POST /api/media`.
  */
-export type BatchResult = { index: number } & Veredicto & { ms: number; bytes?: number; origen?: 'descarga' | 'cache' }
+export type BatchResult = { index: number } & Veredicto & {
+  ms: number
+  bytes?: number
+  origen?: 'descarga' | 'cache' | 'almacen'
+}
 
 export const MAX_BATCH_ITEMS = 50
 
@@ -518,12 +523,45 @@ type Lote = {
 }
 
 /** Lo que una fila bajó, para `bytes` y `origen` en su resultado. */
-type Medicion = { bytes: number; descargo: boolean; reuso: boolean }
+type Medicion = { bytes: number; descargo: boolean; reuso: boolean; almacen: boolean }
+
+/**
+ * Dónde guarda `POST /api/media` lo que sube cada dueño. El lote acepta sin bajarlo lo que
+ * esté en la carpeta del dueño del lote, y solo eso: una URL de otra carpeta se trata como
+ * cualquier URL pública.
+ */
+export function carpetaDeLaApi(ownerId: string): string {
+  return `scheduled/${ownerId}/`
+}
+
+function esDeSuCarpeta(ownerId: string, url: string): boolean {
+  const base = basePublica()
+  const key = base ? keyDesdeUrl(base, url) : null
+  return key !== null && key.startsWith(carpetaDeLaApi(ownerId))
+}
+
+/**
+ * Un archivo que el dueño subió con `POST /api/media`: ya está en el almacén, así que no se
+ * baja ni se copia; solo se comprueba que esté, lo que pesa y el tipo con que se firmó.
+ * `no subido` es que el PUT nunca terminó, o que el archivo ya se borró: el barrido se lleva
+ * lo que nadie nombró en una hora, y un video se va cuando el último post que lo usa salió.
+ */
+async function verificarSubida(url: string, expected: 'image' | 'video' | null): Promise<Copia> {
+  const objeto = await objetoEnAlmacen(url)
+  if (!objeto) return { ok: false, motivo: 'no subido' }
+  if (objeto.bytes > MAX_BYTES_ARCHIVO) return { ok: false, motivo: 'muy grande' }
+  const detected = typeFromContentType(objeto.tipo)
+  if (!detected || (expected && detected.mediaType !== expected)) {
+    return { ok: false, motivo: `tipo ${objeto.tipo.slice(0, 60) || 'ausente'}` }
+  }
+  return { ok: true, url, mediaType: detected.mediaType, bytes: objeto.bytes }
+}
 
 /**
  * La copia de una media para esta fila: la que ya hizo (o está haciendo) otra fila del lote
  * con la misma URL, o una nueva. Una que falló no queda guardada, para que una fila de más
- * adelante pueda intentarlo de nuevo. Que dos posts compartan el objeto es seguro: al
+ * adelante pueda intentarlo de nuevo. Lo que el dueño ya subió con `POST /api/media` no se
+ * copia: se usa tal cual (`verificarSubida`). Que dos posts compartan el objeto es seguro: al
  * publicar, `limpiarMedia` (run.ts) solo lo borra si ningún otro post ni borrador lo usa, y
  * el barrido de huérfanos (`storage-gc.ts`) solo lo que nadie referencia.
  */
@@ -533,6 +571,10 @@ async function traerMedia(
   url: string,
   expected: 'image' | 'video' | null,
 ): Promise<Copia> {
+  if (esDeSuCarpeta(lote.ownerId, url)) {
+    medicion.almacen = true
+    return verificarSubida(url, expected)
+  }
   const clave = `${expected ?? 'cualquiera'} ${url}`
   const enCurso = lote.copias.get(clave)
   if (enCurso) {
@@ -588,12 +630,12 @@ export async function scheduleBatch(
 
   return enParalelo(items, FILAS_A_LA_VEZ, async (item, index): Promise<BatchResult> => {
     const inicio = Date.now()
-    const medicion: Medicion = { bytes: 0, descargo: false, reuso: false }
+    const medicion: Medicion = { bytes: 0, descargo: false, reuso: false, almacen: false }
     const veredicto = await programarFila(lote, item, index, medicion)
     const resultado: BatchResult = { index, ...veredicto, ms: Date.now() - inicio }
-    if (medicion.descargo || medicion.reuso) {
+    if (medicion.descargo || medicion.reuso || medicion.almacen) {
       resultado.bytes = medicion.bytes
-      resultado.origen = medicion.descargo ? 'descarga' : 'cache'
+      resultado.origen = medicion.descargo ? 'descarga' : medicion.reuso ? 'cache' : 'almacen'
     }
     return resultado
   })

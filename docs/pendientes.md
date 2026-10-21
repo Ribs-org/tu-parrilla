@@ -47,13 +47,12 @@ Cómo se usa:
   de producción traen `Google refresh: 400 invalid_grant`: Google ya no acepta el permiso de
   una cuenta de YouTube, y esa cuenta no publica ni lee hasta que se reconecte en Los Fierros,
   donde se ve cuál es.
-- **Seis issues del 2026-10-21 sobre la media del lote** (#234 a #239). Ya está: bajar en
-  paralelo (#235), cuánto tardó y por qué falló cada fila (#238), los plazos y el reintento de
-  cada descarga, y no bajar dos veces la misma URL dentro de un lote (la parte barata de #236).
-  Falta `POST /api/media` (#237): subir un video una vez al almacén y que las filas lo
-  nombren, sin Drive; con eso #236 sale entero. La cola de #234 no se hace por ahora: es la de
-  `docs/deuda-tecnica.md` («Publicar dentro del cron…»), y con #237 deja de hacer falta para
-  este caso. #239 son preguntas, y se contestan en el issue.
+- **La cola de #234 (copiar los videos del lote en segundo plano) no se hace por ahora**
+  (2026-10-21). Los otros issues de ese envío ya están: bajar en paralelo (#235), cuánto tardó
+  y por qué falló cada fila (#238), una sola descarga por URL en un lote (#236) y
+  `POST /api/media` para subir un video una vez sin Drive (#237). Con eso, la cola deja de
+  hacer falta para ese caso; si vuelve a pedirse, es la de `docs/deuda-tecnica.md` («Publicar
+  dentro del cron…»).
 - **Por revisar en el teléfono: la barra de pestañas de la app** (2026-10-16). En la versión
   web de la app, las etiquetas de las pestañas se ven cortadas por abajo; puede ser solo la
   web. Mirarlo en el teléfono, y si pasa ahí también, darle alto a la barra en
