@@ -5,6 +5,7 @@ import type { SocialAccount } from '@/db'
 import { env } from '@/lib/env'
 import { COMENTARIO_AUSENTE, RED_RECHAZO } from './comentarista'
 import { comentaristaFor } from './index'
+import { reclamarEnvio } from './reclamo'
 import { decidirAutomatica, type ReglaLimpia } from './reglas'
 import { seAcaboElTiempo } from './ventana'
 
@@ -178,13 +179,24 @@ export async function aplicarReglas(
       sitioHost,
     })
     if (plan.accion === 'ignorar') continue
+    // Reclamado antes de mandar: dos sondeos encimados, o el dueño respondiendo a mano a la
+    // vez, mandarían dos respuestas públicas al mismo comentario.
+    if (!(await reclamarEnvio(c.id))) continue
 
     cupo.restantes -= 1
     try {
       const replyId = await comentarista.responder(account, tokenEscritura, c.externalId, plan.publico)
       await db
         .update(postComments)
-        .set({ state: 'enviado', replyExternalId: replyId, draft: plan.publico, error: null, automatico: true, updatedAt: new Date() })
+        .set({
+          state: 'enviado',
+          replyExternalId: replyId,
+          draft: plan.publico,
+          error: null,
+          automatico: true,
+          enviandoHasta: null,
+          updatedAt: new Date(),
+        })
         // El dueño pudo responder a mano mientras esto corría: si la fila ya no está
         // `pendiente`, esta escritura no la pisa.
         .where(and(eq(postComments.id, c.id), eq(postComments.state, 'pendiente')))
@@ -199,6 +211,7 @@ export async function aplicarReglas(
           error: borrado ? COMENTARIO_AUSENTE : RED_RECHAZO,
           draft: plan.publico,
           automatico: true,
+          enviandoHasta: null,
           updatedAt: new Date(),
         })
         // Mismo resguardo: un fallo de la red no debe pisar una respuesta que el dueño

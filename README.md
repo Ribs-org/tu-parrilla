@@ -26,9 +26,12 @@ Corre en planes gratis: Next.js 16 en Vercel, Postgres en Supabase y la media en
 Cada pull request contra `main` dispara la reja: dos trabajos en paralelo que tienen que
 quedar verdes antes de poder fusionar.
 
-- **sitio** corre los tests, el typecheck, el lint y el build de producción. Corre sin
-  ninguna credencial, a propósito: si el build empieza a necesitar un secreto para compilar,
-  queremos enterarnos acá y no en Vercel.
+- **sitio** corre los tests, el typecheck, el lint, el chequeo de que el esquema no cambió
+  sin su migración y el build de producción. Las pruebas de integración usan una Postgres
+  vacía que el trabajo levanta para ellas (ver «Comandos») y migran una base desde cero, así
+  que una migración que no corre se ve acá y no en el despliegue. Corre sin ninguna
+  credencial, a propósito: si el build empieza a necesitar un secreto para compilar, queremos
+  enterarnos acá y no en Vercel.
 - **app** corre los tests, el typecheck y el lint del proyecto de `mobile/`.
 
 `main` está protegida. No se puede empujar directo: todo entra por pull request, los dos
@@ -91,9 +94,9 @@ En tu proyecto de Vercel, pestaña **Storage**:
   su plan gratis son 10 GB con egress $0 y los videos programados no caben en menos.
   En dash.cloudflare.com → R2: crea el bucket, cuélgale un subdominio propio y emite
   un token con permiso solo sobre él. No lo compartas con nada más: un barrido que va
-  en cada corrida del cron de publicación borra del bucket todo lo que la base de datos no
-  referencia y lleva más de una hora subido, así que cualquier otra cosa que guardes ahí
-  dura poco más que eso. Después carga `R2_ACCOUNT_ID`,
+  una vez por hora en el cron de publicación borra del bucket todo lo que la base de datos
+  no referencia y lleva más de una hora subido, así que cualquier otra cosa que guardes ahí
+  dura un par de horas como mucho. Después carga `R2_ACCOUNT_ID`,
   `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET` y `R2_PUBLIC_BASE` (ver
   `.env.example`). Opcional: sin esto todo funciona, solo que no puedes subir media.
 
@@ -472,7 +475,7 @@ una página pública donde ese código confirma cuándo fue y cuántas cuentas s
 que escribiste tú —el texto y la media de una publicación programada— no es de Meta y no
 se toca mientras el corte conserve algún destino: uno que todavía salga en otra red sigue
 en la parrilla. Un corte que se quede sin ningún destino se borra con ellos, texto y media
-incluidos (la media la barre R2 al día siguiente), porque un corte sin destinos no
+incluidos (la media la borra el barrido de huérfanos en una o dos horas), porque un corte sin destinos no
 aparecería en ninguna pantalla y no habría forma de abrirlo ni de borrarlo.
 
 Si tu cuenta se conectó antes del 2026-09-30 y no la has reconectado, su `meta_user_id`
@@ -690,8 +693,10 @@ campo con las instrucciones que sigue el modelo: las editas ahí y rigen desde e
 borrador.
 
 Nada sale sin tu toque. Dos toques, o el panel abierto en dos pestañas, mandan una sola vez
-(la app del teléfono no tiene comentarios):
-antes de enviar se relee el comentario y si ya salió no pasa nada.
+(la app del teléfono no tiene comentarios): justo antes de enviar, la respuesta reclama el
+comentario en la base por dos minutos (`enviando_hasta`), y el toque que no lo obtiene no
+manda nada. Las respuestas automáticas lo reclaman igual, así que dos sondeos encimados, o
+una respuesta a mano en el mismo momento, tampoco mandan dos.
 
 El mensaje privado a quien comentó está escrito y **apagado**. Meta exige para eso
 `pages_messaging` con acceso avanzado, que pasa por revisión de la app. El día que la
@@ -882,10 +887,20 @@ consentimiento.
 
 ```bash
 npm run dev          # servidor local
+npm test             # tests (los de integración, solo con DATABASE_URL_PRUEBAS)
 npm run typecheck    # tipos
 npm run build        # build de producción
 npm run lint         # eslint
 ```
+
+**Pruebas de integración.** Los archivos `*.integracion.test.ts` corren el SQL de verdad
+contra una Postgres: cada uno crea su propia base en el servidor de `DATABASE_URL_PRUEBAS`
+(la borra si ya estaba), le aplica todas las migraciones de `drizzle/` y la usa. Sin esa
+variable se saltan, así que `npm test` sin nada más sigue andando; en el CI, el trabajo
+`sitio` levanta una Postgres 17 vacía para ellas. En local sirve cualquier Postgres
+desechable —`docker run --rm -e POSTGRES_PASSWORD=postgres -p 5432:5432 postgres:17` y
+`DATABASE_URL_PRUEBAS=postgres://postgres:postgres@localhost:5432/postgres npm test`—, nunca la
+de producción: las pruebas crean y borran bases en ese servidor.
 
 **Base de datos**
 
@@ -1013,6 +1028,7 @@ Vercel y bajan con `vercel env pull .env.local`.
 | `X_CLIENT_SECRET` | El secreto de esa app | Junto con el anterior |
 | `CRON_SECRET` | Autoriza las corridas programadas (sync diario y publicación cada 5 minutos) | No — la pone Vercel solo, al declarar el cron |
 | `MIGRAR_PREVIEWS` | Que los previews migren la base | Solo cuando el preview tenga una base propia; contra la de producción, no |
+| `DATABASE_URL_PRUEBAS` | Solo para las pruebas de integración: una Postgres desechable donde cada archivo crea y migra su propia base (ver «Comandos»). No va en Vercel | No — sin ella esas pruebas se saltan. Nunca la de producción |
 | `SCHEDULE_API_KEY` | La llave del despliegue: abre `POST /api/schedule/batch` (carga masiva), `DELETE /api/schedule/posts/{id}` (sacar lo programado), `GET /api/schedule/posts` (calendario), `GET /api/schedule/resumen` (el resumen del día), `GET /api/schedule/cuentas` (las cuentas), `GET /api/metrics/posts` (métricas) y `GET /api/metrics/mejores` (el mejor X %) a nombre del admin. Es anterior a las llaves por usuario y sigue para el agente que ya la usa | No — sin ella los siete endpoints aceptan solo las llaves que cada usuario genera en Tu IA; si la pones, genérala igual que `CRON_SECRET` |
 | `RESEND_API_KEY` | Manda los códigos de ingreso y los avisos: la publicación que se quemó, la cuenta que se cayó y el resumen del día (ver «Avisos por correo») | Sí — sin ella nadie puede entrar al panel |
 | `PUBLISH_ALERT_TO` | Adónde va un aviso sin dueño con correo: un post o una cuenta de antes de los usuarios. Lo demás va al correo de su dueño | No — sin ella, lo que no tiene dueño no avisa; el calendario y Los Fierros lo siguen mostrando |
@@ -1042,12 +1058,32 @@ es el mismo en los dos casos, cambia solo quién lo dispara.
 
 Cada corrida hace cuatro cosas, en orden: publica lo vencido, vigila las conexiones de las
 cuentas (manda el correo de las que se cayeron; ver «Avisos por correo»), sondea comentarios
-(con la mitad del presupuesto como mucho) y barre los archivos huérfanos de R2. Al terminar cada
-fase escribe `[cron] <fase> listo a los N ms` en el log, y el barrido dice cuántos objetos
-leyó: si una corrida muere por `maxDuration` (240 s), la fase colgada es la primera que no
-dejó su línea. El barrido tiene un plazo de un minuto por lectura —el listado de R2 y la
-consulta a la base, cada una con su línea `[barrido]`— y, si no le alcanza, se rinde hasta la
-pasada siguiente sin borrar nada: un barrido que no termina no puede llevarse la corrida.
+(hasta los 120 segundos de la corrida) y, una vez por hora, barre los archivos huérfanos de
+R2: le toca a la corrida que empieza en los primeros cinco minutos de la hora, si no viene
+atrasada. Al terminar cada fase escribe `[cron] <fase> listo a los N ms` en el log, y el
+barrido dice cuántos objetos leyó: si una corrida muere por `maxDuration` (240 s), la fase
+colgada es la primera que no dejó su línea. El barrido tiene un plazo de un minuto por
+lectura —el listado de R2 y la consulta a la base, cada una con su línea `[barrido]`— y, si
+no le alcanza, se rinde hasta la pasada siguiente sin borrar nada: un barrido que no termina
+no puede llevarse la corrida.
+
+**Cada destino sale una sola vez.** Dos corridas pueden cruzarse —la diaria de respaldo cae
+encima del pinger, «Subir ahora» encima de cualquiera—, así que antes de intentar un destino
+la corrida lo reclama por diez minutos (`reclamado_hasta`): la otra lo ve reclamado y lo
+salta, y el editor y el borrado tampoco lo tocan («Hay una publicación en curso.»). El
+intento se cuenta al reclamarlo y no al terminar: si la corrida muere a la mitad, el reclamo
+vence y el destino vuelve a la fila con ese intento gastado; si se le acaban así, se quema con
+«La publicación se cortó a la mitad y ya no quedan intentos. Revisa el archivo y
+reprográmala.». Para que eso casi no pase, cada llamada a una red tiene su tiempo máximo
+—30 segundos; bajar y subir el video de YouTube, 45 y 120—, ninguna corrida empieza un
+intento pasados los 120 segundos, y subir un video nuevo a YouTube empieza solo si le caben
+todos esos plazos antes del corte (si no, lo toma la corrida siguiente). Un video que lleva 24
+horas en «Publicando…», contadas desde que entró ahí (`publicando_desde`), se quema sin
+reintentarse: la red ya lo tiene, y subirlo de nuevo dejaría dos. «Subir ahora» y
+«Reprogramar» conservan el contenedor del intento anterior, y el siguiente le pregunta
+primero a la red cómo terminó; un contenedor de Instagram que Meta ya descartó se rehace en
+el mismo intento. Lo que queda sin cerrar —una función que se cae justo después de que la red
+recibió la publicación— está en `docs/deuda-tecnica.md`.
 
 Un destino que falla se reintenta, hasta tres intentos, salvo los rechazos que la red ya
 decidió, que se queman al primero. Entre un intento y el siguiente hay una espera
@@ -1066,7 +1102,10 @@ horas) no es un fallo: el cupo vuelve solo, una publicación a la vez, 24 horas 
 que lo gastó. Un destino que choca con él no gasta intento ni se quema; espera una hora y
 prueba de nuevo, con el contenedor ya hecho para no volver a subir el video, y el panel lo
 muestra como «Reintentando» con la frase «Instagram llegó a su tope de publicaciones por
-día: sale apenas se libere un cupo.» (`esTopeDiario`, en `social/publish/instagram.ts`).
+día: sale apenas se libere un cupo.» (`esTopeDiario`, en `social/publish/instagram.ts`). Si en
+esa espera se cambia el texto o los archivos en el editor, el contenedor se tira y el intento
+siguiente arma otro con lo nuevo. En las demás redes el contenedor es el video ya subido: se
+tira solo si cambian los archivos, porque subirlo de nuevo por un texto dejaría dos.
 
 ### Avisos por correo
 
@@ -1231,7 +1270,8 @@ Ajustes) —la flecha de la fila—, con un botón para copiarlo.
 
 `DELETE /api/schedule/posts/{id}` con el mismo `Authorization` saca un post programado
 entero —destinos, media y regla— con la regla del panel, que comparten en
-`borrarPostProgramado`: si algún destino ya se publicó o está publicando, responde `409`
+`borrarPostProgramado`: si algún destino ya se publicó o está publicando —también uno que el
+publicador está intentando en ese momento—, responde `409`
 con `Ya se publicó (o está publicando): elimínalo en la red.`, porque borrar la fila no
 despublica nada; si el id no existe (o no es del dueño), `404`; borrado, `200`. No hay
 edición por API: para cambiar algo se borra y se programa de nuevo.
@@ -1311,6 +1351,7 @@ src/
     borradores.ts          los borradores del compositor: guardar, cargar, listar y borrar, siempre por dueño
     borrador.ts            qué se guarda de un formulario y cómo se restaura, también desde el teléfono (sin base)
     borradores-movil.ts    los mismos borradores en la forma de la app del teléfono
+    pruebas/               la Postgres de las pruebas de integración: una base nueva y migrada por archivo
     empresa.ts             quién presta el servicio: lo leen la portada, privacidad y términos
     avisos/                la caída de una cuenta y el resumen del día: las reglas sin base y lo que lee y manda
     social/

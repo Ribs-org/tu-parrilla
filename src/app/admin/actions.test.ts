@@ -525,6 +525,99 @@ describe('updateScheduledPost: no deja que un trial reel programado se convierta
   })
 })
 
+describe('updateScheduledPost: un borrador de Instagram guardado no sale con el texto viejo', () => {
+  /**
+   * Dos destinos que esperan su reintento con el contenedor guardado: el de Instagram es un
+   * borrador con el texto de antes (sale recién con `media_publish`); el de YouTube es el video
+   * que ya se subió. Las filas, en el orden en que `updateScheduledPost` las lee: post,
+   * destinos, media y las cuentas que `verificarCuentas` confirma.
+   */
+  function programarFilas() {
+    db.scheduledSelectQueue.push(
+      [
+        {
+          id: 'post-1',
+          ownerId: 'owner-1',
+          caption: 'Texto de antes',
+          scheduledAt: new Date('2030-01-01T13:00:00Z'),
+          coverUrl: null,
+        },
+      ],
+      [
+        { id: 'target-ig', status: 'scheduled', accountId: 'acc-ig', network: 'instagram', containerId: 'CT_7', updatedAt: new Date() },
+        { id: 'target-yt', status: 'scheduled', accountId: 'acc-yt', network: 'youtube', containerId: 'yt-1', updatedAt: new Date() },
+      ],
+      [{ id: 'media-video', blobUrl: 'https://cdn.ejemplo.cl/scheduled/v.mp4', mediaType: 'video', position: 0 }],
+      [
+        { id: 'acc-ig', network: 'instagram', handle: '@vicente', accessToken: 'token-vivo' },
+        { id: 'acc-yt', network: 'youtube', handle: '@vicente', accessToken: 'token-vivo' },
+      ],
+    )
+  }
+
+  function formulario(caption: string) {
+    const formData = new FormData()
+    formData.set('caption', caption)
+    formData.append('cuentas', 'acc-ig')
+    formData.append('cuentas', 'acc-yt')
+    formData.set('scheduledAt', '2030-01-01T10:00')
+    formData.append('keptMedia', 'media-video')
+    return formData
+  }
+
+  const tiraElContenedor = (set: unknown) =>
+    typeof set === 'object' && set !== null && 'containerId' in set && (set as { containerId: unknown }).containerId === null
+
+  it('con el texto cambiado, el borrador de Instagram se tira y el video de YouTube se queda', async () => {
+    programarFilas()
+
+    await expect(updateScheduledPost('post-1', {}, formulario('Texto editado'))).rejects.toThrow(RedirectSignal)
+
+    const tirados = db.updateCalls.filter(tiraElContenedor)
+    expect(tirados).toHaveLength(1)
+    expect(tirados[0]).toMatchObject({ containerId: null, publicandoDesde: null })
+  })
+
+  it('sin cambiar el texto ni los archivos, ninguno de los dos se toca', async () => {
+    programarFilas()
+
+    await expect(updateScheduledPost('post-1', {}, formulario('Texto de antes'))).rejects.toThrow(RedirectSignal)
+
+    expect(db.updateCalls.filter(tiraElContenedor)).toHaveLength(0)
+  })
+
+  it('con los archivos cambiados, se tiran los dos: lo que la red tiene ya no es este post', async () => {
+    db.scheduledSelectQueue.push(
+      [
+        {
+          id: 'post-1',
+          ownerId: 'owner-1',
+          caption: 'Texto de antes',
+          scheduledAt: new Date('2030-01-01T13:00:00Z'),
+          coverUrl: null,
+        },
+      ],
+      [
+        { id: 'target-ig', status: 'scheduled', accountId: 'acc-ig', network: 'instagram', containerId: 'CT_7', updatedAt: new Date() },
+        { id: 'target-yt', status: 'scheduled', accountId: 'acc-yt', network: 'youtube', containerId: 'yt-1', updatedAt: new Date() },
+      ],
+      [
+        { id: 'media-video', blobUrl: 'https://cdn.ejemplo.cl/scheduled/v.mp4', mediaType: 'video', position: 0 },
+        { id: 'media-otro', blobUrl: 'https://cdn.ejemplo.cl/scheduled/w.mp4', mediaType: 'video', position: 1 },
+      ],
+      [
+        { id: 'acc-ig', network: 'instagram', handle: '@vicente', accessToken: 'token-vivo' },
+        { id: 'acc-yt', network: 'youtube', handle: '@vicente', accessToken: 'token-vivo' },
+      ],
+    )
+
+    // Mismo texto; se queda solo el primer video.
+    await expect(updateScheduledPost('post-1', {}, formulario('Texto de antes'))).rejects.toThrow(RedirectSignal)
+
+    expect(db.updateCalls.filter(tiraElContenedor)).toHaveLength(2)
+  })
+})
+
 describe('createScheduledPost: un trial reel con fotos se rechaza antes de crear nada', () => {
   /**
    * Único destino: la cuenta de Instagram que `verificarCuentas` resuelve vía el mismo

@@ -89,6 +89,7 @@ export const tiktokConnector: Connector = {
 
     const response = await fetch(`${API}/oauth/token/`, {
       method: 'POST',
+      signal: AbortSignal.timeout(30_000),
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
         client_key: clientKey,

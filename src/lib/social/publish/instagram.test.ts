@@ -10,7 +10,7 @@ import {
   photoContainerParams,
   reelContainerParams,
 } from './instagram'
-import { PUBLISH_NETWORK_ERROR, TOPE_INSTAGRAM, TRIAL_REEL_NO_DISPONIBLE } from './publisher'
+import { PUBLISH_NETWORK_ERROR, PUBLISH_REJECTED, TOPE_INSTAGRAM, TRIAL_REEL_NO_DISPONIBLE } from './publisher'
 
 const image = { url: 'https://blob.test/a.jpg', mediaType: 'image' as const, position: 0 }
 const video = { url: 'https://blob.test/b.mp4', mediaType: 'video' as const, position: 0 }
@@ -78,15 +78,19 @@ describe('classifyContainerStatus', () => {
     expect(classifyContainerStatus({ status_code: 'FINISHED' })).toBe('finished')
   })
 
-  it('ERROR y EXPIRED son veredictos, no esperas', () => {
+  it('ERROR y EXPIRED son veredictos, no esperas: un rechazo, y un contenedor que Meta descartó sin publicar', () => {
     expect(classifyContainerStatus({ status_code: 'ERROR' })).toBe('error')
-    expect(classifyContainerStatus({ status_code: 'EXPIRED' })).toBe('error')
+    expect(classifyContainerStatus({ status_code: 'EXPIRED' })).toBe('expired')
+  })
+
+  it('PUBLISHED ya salió: un intento anterior lo publicó y su respuesta se perdió', () => {
+    expect(classifyContainerStatus({ status_code: 'PUBLISHED' })).toBe('published')
   })
 
   it('IN_PROGRESS, ausente o desconocido siguen esperando', () => {
     expect(classifyContainerStatus({ status_code: 'IN_PROGRESS' })).toBe('in_progress')
     expect(classifyContainerStatus({})).toBe('in_progress')
-    expect(classifyContainerStatus({ status_code: 'PUBLISHED' })).toBe('in_progress')
+    expect(classifyContainerStatus({ status_code: 'ALGO_NUEVO' })).toBe('in_progress')
   })
 })
 
@@ -225,5 +229,74 @@ describe('publish: el tope diario espera en vez de fallar', () => {
       externalId: '18000000000000009',
     })
     expect(String(fetchMock.mock.calls[1]![0])).toContain('/media_publish')
+  })
+})
+
+describe('publish: retomar un contenedor guardado sin publicar dos veces', () => {
+  afterEach(() => vi.unstubAllGlobals())
+
+  const foto = {
+    caption: 'Hola',
+    media: [{ url: 'https://blob/a.jpg', mediaType: 'image' as const, position: 0 }],
+    containerId: 'CT_7',
+    token: 't',
+    accountExternalId: '123',
+    coverUrl: null,
+    opciones: null,
+  }
+
+  it('si el sondeo no contesta, sigue esperando con el mismo contenedor', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => new Response('Bad gateway', { status: 502 })))
+    expect(await instagramPublisher.publish(foto)).toEqual({ kind: 'processing', containerId: 'CT_7' })
+  })
+
+  it('si el sondeo se corta (plazo, red), también', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => Promise.reject(new Error('The operation was aborted due to timeout'))))
+    expect(await instagramPublisher.publish(foto)).toEqual({ kind: 'processing', containerId: 'CT_7' })
+  })
+
+  it('PUBLISHED: ya salió en un intento anterior; se anota sin volver a publicar', async () => {
+    const fetchMock = vi.fn(async () => Response.json({ status_code: 'PUBLISHED' }))
+    vi.stubGlobal('fetch', fetchMock)
+    expect(await instagramPublisher.publish(foto)).toEqual({ kind: 'published', externalId: null })
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('EXPIRED: Meta lo descartó sin publicarlo; se arma otro y se publica en el mismo intento', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(Response.json({ status_code: 'EXPIRED' }))
+      .mockResolvedValueOnce(Response.json({ id: 'CT_8' }))
+      .mockResolvedValueOnce(Response.json({ id: '18000000000000010' }))
+    vi.stubGlobal('fetch', fetchMock)
+    expect(await instagramPublisher.publish(foto)).toEqual({ kind: 'published', externalId: '18000000000000010' })
+    expect(String(fetchMock.mock.calls[1]![0])).toMatch(/\/123\/media$/)
+    expect(String(fetchMock.mock.calls[2]![0])).toContain('/media_publish')
+  })
+
+  it('si media_publish no contesta, el fallo se lleva el contenedor para preguntar por él después', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(Response.json({ status_code: 'FINISHED' }))
+      .mockRejectedValueOnce(new Error('The operation was aborted due to timeout'))
+    vi.stubGlobal('fetch', fetchMock)
+    expect(await instagramPublisher.publish(foto)).toEqual({
+      kind: 'failed',
+      reason: PUBLISH_NETWORK_ERROR,
+      containerId: 'CT_7',
+    })
+  })
+
+  it('si Meta rechaza media_publish, también se lleva el contenedor', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(Response.json({ status_code: 'FINISHED' }))
+      .mockResolvedValueOnce(new Response('{"error":{"message":"Invalid parameter","code":100}}', { status: 400 }))
+    vi.stubGlobal('fetch', fetchMock)
+    expect(await instagramPublisher.publish(foto)).toEqual({
+      kind: 'failed',
+      reason: PUBLISH_REJECTED,
+      containerId: 'CT_7',
+    })
   })
 })

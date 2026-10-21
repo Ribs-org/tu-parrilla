@@ -12,7 +12,11 @@ export const DIAS_VENTANA = 7
  * el turno a publicar a tiempo.
  */
 export const MAX_POSTS_POR_PASADA = 20
-/** El cron publica antes de sondear y `maxDuration` son 240 s: al sondeo le toca la mitad, porque publicar a tiempo manda. */
+/**
+ * Hasta cuándo sondea el cron, contado desde el inicio de su corrida (el cron le pasa su
+ * `inicio`): la primera mitad de los 240 s de `maxDuration`, menos lo que ya se llevó
+ * publicar, que va antes porque publicar a tiempo manda.
+ */
 export const MAX_MS_POR_CORRIDA = 120_000
 /**
  * Cuántos borradores como mucho por corrida. La primera pasada después de desplegar

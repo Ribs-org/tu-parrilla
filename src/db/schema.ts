@@ -405,6 +405,16 @@ export const scheduledPostTargets = pgTable(
     // interacciones, comercial). Null en las redes que no piden nada. La forma la valida
     // `lib/social/publish/opciones`; el editor la muestra pero no la cambia.
     opciones: jsonb('opciones'),
+    // El reclamo de la corrida que está publicando este destino ahora mismo: nadie más lo
+    // toca hasta esta hora. Lo pone `publishDue` al empezar un intento y lo saca al escribir
+    // el resultado; si la corrida muere, vence solo (`RECLAMO_MS`). Nulo = nadie lo tiene.
+    // Precisión 3 por la misma razón que `updatedAt`: la escritura final compara por
+    // igualdad contra el valor que la corrida puso.
+    reclamadoHasta: timestamp('reclamado_hasta', { withTimezone: true, precision: 3 }),
+    // Desde cuándo está en `publishing`: el corte de las 24 horas se mide desde acá y no
+    // desde la hora del post. Una publicación vieja que se rearma entra a `publishing` hoy,
+    // y medirla desde su hora la daba por vencida al primer sondeo. Nulo fuera de `publishing`.
+    publicandoDesde: timestamp('publicando_desde', { withTimezone: true }),
     // precision 3 is load-bearing: the cron's optimistic claim and the editor's
     // guards compare this column by equality against a value that round-tripped
     // through a JS Date (millisecond precision). With Postgres's default
@@ -500,6 +510,10 @@ export const postComments = pgTable(
     // Lo respondió una regla de palabra clave, no el dueño: la cola lo etiqueta y la IA
     // nunca le pidió borrador.
     automatico: boolean('automatico').notNull().default(false),
+    // Quien está mandando la respuesta ahora mismo la reclama hasta esta hora: dos toques,
+    // dos pestañas del panel o un sondeo encima de otro mandan una sola. Lo pone
+    // `reclamarEnvio` y lo saca la escritura del resultado; si el envío muere, vence solo.
+    enviandoHasta: timestamp('enviando_hasta', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },

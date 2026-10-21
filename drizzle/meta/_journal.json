@@ -120,6 +120,13 @@
       "when": 1792412443384,
       "tag": "0016_tema_de_la_cuenta",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1792539695423,
+      "tag": "0017_reclamos",
+      "breakpoints": true
     }
   ]
 }

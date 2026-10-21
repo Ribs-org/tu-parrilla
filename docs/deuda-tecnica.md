@@ -560,6 +560,38 @@ Lo que queda a medias, a propósito:
   TikTok no garantiza cuánto tarda la moderación. Costaría guardar el `publish_id` en el
   destino publicado y un sondeo aparte en el cron.
 
+## Publicar dentro del cron deja una ventana para publicar dos veces (2026-10-20)
+
+Desde esta entrega cada destino se reclama antes de intentarlo, cada llamada a una red tiene su
+plazo, el cron solo empieza lo que le cabe y lo atascado no se vuelve a subir (ver «Cada
+destino sale una sola vez» en el README). Lo que no se pudo cerrar sin cambiar de arquitectura
+es el momento entre que la red acepta y que la base lo anota: si la función se cae justo ahí
+—un corte de Vercel, un despliegue a mitad, el proceso que muere—, el resultado se pierde, el
+reclamo vence a los diez minutos y el intento siguiente publica otra vez. Pasa en cuatro
+lugares: la foto suelta de Instagram, que crea su contenedor y lo publica en el mismo intento
+sin anotarlo entre los dos pasos; la subida del video a YouTube, una sola petición con los
+bytes dentro de la función; la subida a Facebook, y el arranque de la publicación en TikTok.
+«Subir ahora» además publica dentro de la acción del panel, sin el presupuesto del cron: un
+video pesado de YouTube puede quedar cortado por el tiempo máximo de la función.
+
+Quedó así porque cerrarlo pide que cada paso que la red no puede deshacer deje su rastro en la
+base antes de darlo, y que el trabajo largo no viva dentro de una petición con tiempo máximo:
+
+- una cola de trabajos —una tabla con `FOR UPDATE SKIP LOCKED`, o un servicio de colas— en vez
+  de un cron que recorre todo lo vencido, con un trabajo por destino y por paso;
+- la subida reanudable de YouTube (`uploadType=resumable`): se pide la dirección de subida y se
+  anota antes de mandar los bytes, y un intento cortado sigue desde donde quedó en vez de subir
+  otro video;
+- en Instagram, anotar el contenedor de la foto antes de publicarlo, como ya pasa con los
+  videos, que esperan a la pasada siguiente;
+- «Subir ahora» encolando el trabajo en vez de publicar dentro de la acción.
+
+Terminarlo cuesta unos días: la tabla de trabajos y su consumidor, la reanudación de YouTube, y
+mover el cron y «Subir ahora» a encolar, con sus pruebas contra una Postgres de verdad
+(`run.integracion.test.ts` ya tiene el andamiaje). Mientras tanto, contar el intento al
+reclamarlo hace que un destino que se corta una y otra vez se queme con «La publicación se
+cortó a la mitad y ya no quedan intentos.» en vez de reintentarse para siempre.
+
 ## Lo nativo de la app no cambia de modo (2026-10-19)
 
 La app del teléfono tiene los dos modos de la cuenta (ver «Tanda 3» en

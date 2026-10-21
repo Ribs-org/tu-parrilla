@@ -909,9 +909,10 @@ patrones. Con menos de ~10 posts por valor de atributo, desconfía de la diferen
   atributos, y ver la semana en calendario.
 - **Sí borra por API**, con la regla del panel: `DELETE /api/schedule/posts/{id}` (el `postId`
   que devolvió el lote, o el `id` de `GET /api/schedule/posts`) saca el post entero con sus
-  destinos, su media y su regla. Si algún destino ya se publicó o está publicando, responde
-  `409` con `Ya se publicó (o está publicando): elimínalo en la red.` — borrar la fila no
-  despublica nada. Si el id no existe (o no es tuyo), `404`. Borrado, `200` con
+  destinos, su media y su regla. Si algún destino ya se publicó o está publicando —también uno
+  que el publicador está intentando en ese momento—, responde `409` con
+  `Ya se publicó (o está publicando): elimínalo en la red.` — borrar la fila no despublica
+  nada. Si el id no existe (o no es tuyo), `404`. Borrado, `200` con
   `{ "ok": true, "id" }`.
 - **No republica lo ya publicado**: corregir un post afecta solo a los destinos que
   aún no salieron.

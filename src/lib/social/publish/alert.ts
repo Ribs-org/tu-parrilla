@@ -31,6 +31,7 @@ export async function enviarAviso(to: string, aviso: { subject: string; text: st
   try {
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
+      signal: AbortSignal.timeout(15_000),
       headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         from: env('PUBLISH_ALERT_FROM') ?? 'onboarding@resend.dev',

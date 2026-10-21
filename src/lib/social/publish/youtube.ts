@@ -1,5 +1,11 @@
 import type { PublishMedia, PublishInput, PublishOutcome, Publisher } from './publisher'
-import { PUBLISH_NETWORK_ERROR } from './publisher'
+import {
+  PLAZO_DESCARGA_VIDEO_MS,
+  PLAZO_PORTADA_MS,
+  PLAZO_RED_MS,
+  PLAZO_SUBIDA_VIDEO_MS,
+  PUBLISH_NETWORK_ERROR,
+} from './publisher'
 import type { SocialAccount } from '@/db'
 import { getDb, socialAccounts } from '@/db'
 import { eq } from 'drizzle-orm'
@@ -80,8 +86,11 @@ export function youtubeUploadBody(
  * Se llama una sola vez, junto al insert; el camino de reanudación no la repite.
  */
 async function setThumbnail(token: string, videoId: string, coverUrl: string): Promise<void> {
+  // Un solo plazo para las dos llamadas: es parte de lo que la corrida le reserva al intento
+  // (`PEOR_SUBIDA_YOUTUBE_MS`).
+  const plazo = AbortSignal.timeout(PLAZO_PORTADA_MS)
   try {
-    const cover = await fetch(coverUrl, { signal: AbortSignal.timeout(30_000) })
+    const cover = await fetch(coverUrl, { signal: plazo })
     if (!cover.ok) {
       console.error('Portada de YouTube:', cover.status, coverUrl.slice(0, 200))
       return
@@ -95,6 +104,7 @@ async function setThumbnail(token: string, videoId: string, coverUrl: string): P
           'Content-Type': cover.headers.get('content-type') ?? 'image/jpeg',
         },
         body: new Uint8Array(await cover.arrayBuffer()),
+        signal: plazo,
       },
     )
     if (!response.ok) {
@@ -127,6 +137,7 @@ export async function ensureYoutubeCredential(account: SocialAccount): Promise<s
 
   const response = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
+    signal: AbortSignal.timeout(PLAZO_RED_MS),
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
       client_id: clientId,
@@ -163,18 +174,26 @@ export const youtubePublisher: Publisher = {
   async publish(input: PublishInput): Promise<PublishOutcome> {
     // Resuming: the video is uploaded and YouTube is still processing it.
     if (input.containerId) {
-      const response = await fetch(
-        `https://www.googleapis.com/youtube/v3/videos?part=status&id=${input.containerId}`,
-        { headers: { Authorization: `Bearer ${input.token}` } },
-      )
-      if (!response.ok) {
-        console.error('YouTube video status:', response.status, (await response.text()).slice(0, 300))
-        // A poll that didn't answer says nothing about the video: stay parked instead of
-        // failing — a retry from scratch would upload a second public copy. The 24h stale
-        // cut still bounds how long this can wait.
+      let payload: Record<string, unknown>
+      try {
+        const response = await fetch(
+          `https://www.googleapis.com/youtube/v3/videos?part=status&id=${input.containerId}`,
+          { headers: { Authorization: `Bearer ${input.token}` }, signal: AbortSignal.timeout(PLAZO_RED_MS) },
+        )
+        if (!response.ok) {
+          console.error('YouTube video status:', response.status, (await response.text()).slice(0, 300))
+          // A poll that didn't answer says nothing about the video: stay parked instead of
+          // failing — a retry from scratch would upload a second public copy. The 24h stale
+          // cut still bounds how long this can wait.
+          return { kind: 'processing', containerId: input.containerId }
+        }
+        payload = await response.json()
+      } catch (error) {
+        // Lo mismo si la consulta se cortó (el plazo, la red).
+        console.error('YouTube video status:', String(error).slice(0, 300))
         return { kind: 'processing', containerId: input.containerId }
       }
-      const verdict = classifyUploadStatus(await response.json())
+      const verdict = classifyUploadStatus(payload)
       if (verdict === 'error') return { kind: 'failed', reason: YOUTUBE_REJECTED }
       if (verdict === 'processing') return { kind: 'processing', containerId: input.containerId }
       return { kind: 'published', externalId: input.containerId }
@@ -185,10 +204,12 @@ export const youtubePublisher: Publisher = {
 
     // Accepted window: if the function dies after Google takes the insert but before
     // the state patch lands, the next run re-uploads and the channel gets a duplicate.
-    // The bytes travel inside this function (no file_url handoff like Facebook), so the
-    // window is real but small under the 240s budget; resumable uploads are the future
-    // fix if it is ever observed.
-    const blob = await fetch(video.url)
+    // The bytes travel inside this function (no file_url handoff like Facebook). El cron
+    // empieza esta subida solo si todos sus plazos caben antes de su corte
+    // (`alcanzaElTiempo`), así que la ventana queda para una caída de la función, o para
+    // «Subir ahora», que corre sin ese presupuesto. Lo que la cierra es la subida
+    // reanudable: ver `docs/deuda-tecnica.md`.
+    const blob = await fetch(video.url, { signal: AbortSignal.timeout(PLAZO_DESCARGA_VIDEO_MS) })
     if (!blob.ok) {
       console.error('No se pudo leer el video del Blob:', blob.status)
       return { kind: 'failed', reason: PUBLISH_NETWORK_ERROR }
@@ -198,6 +219,7 @@ export const youtubePublisher: Publisher = {
     const boundary = `frontera-${randomUUID()}`
     const response = await fetch(UPLOAD_URL, {
       method: 'POST',
+      signal: AbortSignal.timeout(PLAZO_SUBIDA_VIDEO_MS),
       headers: {
         Authorization: `Bearer ${input.token}`,
         'Content-Type': `multipart/related; boundary=${boundary}`,

@@ -1,4 +1,4 @@
-import { PUBLISH_NETWORK_ERROR, type PublishInput, type PublishMedia, type PublishOutcome, type Publisher } from './publisher'
+import { PLAZO_RED_MS, PUBLISH_NETWORK_ERROR, type PublishInput, type PublishMedia, type PublishOutcome, type Publisher } from './publisher'
 import { TIKTOK_SIN_PRIVACIDAD, validarOpciones, type OpcionesTikTok } from './opciones'
 import { TIKTOK_MEDIA } from './validate'
 import { consultarCreador, TIKTOK_RECONECTAR, type CreadorTikTok } from './tiktok-creador'
@@ -243,6 +243,7 @@ async function postJson(path: string, token: string, body: unknown): Promise<Res
       method: 'POST',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json; charset=UTF-8' },
       body: JSON.stringify(body),
+      signal: AbortSignal.timeout(PLAZO_RED_MS),
     })
   } catch (error) {
     console.error('TikTok', path, String(error).slice(0, 300))

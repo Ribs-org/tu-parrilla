@@ -1,5 +1,6 @@
 import { and, eq, inArray } from 'drizzle-orm'
 import { getDb, scheduledPosts, scheduledPostTargets } from '@/db'
+import { REARME } from './publisher'
 
 export const REPROGRAMAR_PASADO = 'La hora debe estar en el futuro.'
 export const DESTINO_NO_EXISTE = 'Ese destino ya no existe.'
@@ -36,16 +37,17 @@ export async function reprogramarDestino(
   if (!target) return 'no-existe'
 
   await db.update(scheduledPosts).set({ scheduledAt, updatedAt: new Date() }).where(eq(scheduledPosts.id, target.postId))
-  // Back to square one: attempts spent against the old hour say nothing about the new one.
+  // De vuelta a la fila (`REARME`): los intentos gastados contra la hora vieja no dicen nada
+  // de la nueva. El contenedor se queda, para que el intento siguiente pregunte primero cómo
+  // terminó el anterior.
   //
   // `status = 'failed'` en el `where` —como el rearm del editor— es la reja contra la
   // carrera con «Subir ahora»: entre la lectura de arriba y esta escritura el destino
-  // puede haber salido publicado, y devolverlo a `scheduled` con `containerId` en null lo
-  // haría publicar de nuevo en la vuelta siguiente del cron. Si ya no está quemado no casa
-  // ninguna fila.
+  // puede haber salido publicado, y devolverlo a `scheduled` lo haría publicar de nuevo en
+  // la vuelta siguiente del cron. Si ya no está quemado no casa ninguna fila.
   await db
     .update(scheduledPostTargets)
-    .set({ status: 'scheduled', attemptCount: 0, lastError: null, containerId: null, updatedAt: new Date() })
+    .set({ ...REARME, updatedAt: new Date() })
     .where(and(eq(scheduledPostTargets.id, targetId), eq(scheduledPostTargets.status, 'failed')))
   return 'reprogramado'
 }
