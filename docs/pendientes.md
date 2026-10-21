@@ -69,6 +69,13 @@ Cómo se usa:
 
 Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataforma.
 
+Lo que falta para abrir cada plataforma, de un vistazo (el detalle está en cada entrada, más
+abajo): el **login con Instagram** sin página de Facebook y los **mensajes privados de
+Instagram** (las dos en «Meta, segunda vuelta»), los permisos de Meta para **anuncios
+pagados**, la **Play Store** (la pista interna ya existe; la tienda pública es otro trámite) y
+el **App Store** de iPhone, las integraciones con **Threads** y con **X**, y **revisar qué
+otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
+
 - **[dueño] TikTok: la cuenta `vicente.pareja` puede volver a ser pública** (2026-10-13). Se
   puso en privada para grabar la revisión de Direct Post, que ya está aprobada, y los avisos
   de «solo en privado» ya se quitaron del panel. Opcional, en el portal de TikTok: dejar en
@@ -95,14 +102,34 @@ Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataf
   Review de Meta, Pyxis declaró revisar la legalidad de cada solicitud, poder impugnarla,
   entregar lo mínimo y documentarla. Que el abogado la deje por escrito, junto con la
   revisión de `/privacidad` y `/terminos`.
-- **Threads y X en «Próximamente»** (2026-10-19). Se apagaron para que un usuario nuevo no
-  se tope con algo que no funciona: Los Fierros dice «Próximamente» y nada deja programar ahí
-  (README, «Conectar y sincronizar»). Para abrir **Threads**: la segunda vuelta del App Review
-  (la entrada de abajo) y su baja y su borrado (`docs/deuda-tecnica.md`). Para abrir **X**:
-  ver por qué no publica; lo primero a mirar es el saldo, porque su API ya no tiene capa
-  gratuita, y pagarla es decisión del **[dueño]**. Abrir cualquiera de las dos es sacarla de
-  `REDES_PROXIMAMENTE` (`src/lib/networks.ts`), y volver a contar su conexión en
-  `public/docs/ui/los-fierros.md`.
+- **Integración con Threads** (en «Próximamente» desde el 2026-10-19). Se apagó, junto con X,
+  para que un usuario nuevo no se tope con algo que no funciona: Los Fierros dice
+  «Próximamente» y nada deja programar ahí (README, «Conectar y sincronizar»). El código para
+  publicar existe (`src/lib/social/publish/threads.ts`). Para abrirla: la segunda vuelta del App
+  Review con `threads_basic` y `threads_content_publish` (la entrada «Meta, segunda vuelta», más
+  abajo), su baja y su borrado (`docs/deuda-tecnica.md`, «Threads se queda fuera de la baja y
+  del borrado de Meta»), sacarla de `REDES_PROXIMAMENTE` (`src/lib/networks.ts`) y volver a
+  contar su conexión en `public/docs/ui/los-fierros.md`.
+- **Integración con X** (en «Próximamente» desde el 2026-10-19). El código para publicar existe
+  (`src/lib/social/publish/x.ts`), pero no publica: lo primero a mirar es el saldo, porque su
+  API ya no tiene capa gratuita, y pagarla es decisión del **[dueño]**. Abrirla es lo mismo que
+  con Threads: sacarla de `REDES_PROXIMAMENTE` y volver a contar su conexión en la wiki.
+- **Meta: permisos para anuncios pagados** (2026-10-21). Hoy Tu Parrilla lee y publica lo
+  orgánico; no ve ni toca anuncios. Para mostrar cómo les fue a los posts promocionados, o
+  promocionar uno desde acá, hace falta la Marketing API: `ads_read` para leer resultados,
+  `ads_management` si además se crean o se promocionan anuncios, y probablemente
+  `business_management` para llegar a las cuentas publicitarias de un negocio. Cada permiso pide
+  su video en un App Review, y el acceso estándar a la Marketing API se apoya en la verificación
+  del negocio (la de Pyxis, en curso, más arriba). Antes del guion hay que decidir el alcance
+  —solo leer, o también promocionar— y qué vería el creador.
+- **Revisar qué otros permisos hacen falta** (2026-10-21). Una pasada red por red de lo que el
+  producto necesita y todavía no pidió, antes de la próxima vuelta de cada revisión, para
+  pedirlo todo de una vez y no volver a grabar. Lo que ya se sabe que falta: el login con
+  Instagram y los mensajes privados (Meta, segunda vuelta), los anuncios (la entrada de arriba)
+  y Threads. Por decidir si hacen falta: más métricas de las que se leen hoy (las historias de
+  Instagram, las estadísticas del perfil de TikTok), responder comentarios de TikTok, y otro
+  alcance de YouTube. Lo que ya se pidió, permiso por permiso, está en
+  `docs/levantamiento-terceros.md` (§2.2 para Meta).
 - **Meta, segunda vuelta: mensajes privados** (el privado con el enlace de la regla de
   palabra clave, `instagram_manage_messages` y `pages_messaging`) y, aparte, **Threads**
   (`threads_basic`, `threads_content_publish`). Se sacaron de la primera solicitud porque
