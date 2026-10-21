@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { SIN_ALMACEN, existe, keyDesdeUrl, urlParaSubir, urlPublica } from './storage'
+import { SIN_ALMACEN, keyDesdeUrl, tamanoEnAlmacen, urlParaSubir, urlPublica } from './storage'
 
 const BASE = 'https://media.ejemplo.com'
 
@@ -72,17 +72,17 @@ describe('sin R2 configurado', () => {
     await expect(urlParaSubir('scheduled/a.mp4', 'video/mp4')).rejects.toThrow(SIN_ALMACEN)
   })
 
-  it('existe() es falso: sin almacén nada existe', async () => {
-    expect(await existe('https://media.ejemplo.com/scheduled/a.mp4')).toBe(false)
+  it('tamanoEnAlmacen() es null: sin almacén nada existe', async () => {
+    expect(await tamanoEnAlmacen('https://media.ejemplo.com/scheduled/a.mp4')).toBeNull()
   })
 })
 
-describe('existe con una URL ajena', () => {
-  it('es falso sin tocar la red, igual que borrar() no toca lo ajeno', async () => {
+describe('tamanoEnAlmacen con una URL ajena', () => {
+  it('es null sin tocar la red, igual que borrar() no toca lo ajeno', async () => {
     process.env.R2_BUCKET = 'b'
     process.env.R2_PUBLIC_BASE = BASE
     try {
-      expect(await existe('https://scontent.cdninstagram.com/v/foto.jpg')).toBe(false)
+      expect(await tamanoEnAlmacen('https://scontent.cdninstagram.com/v/foto.jpg')).toBeNull()
     } finally {
       delete process.env.R2_BUCKET
       delete process.env.R2_PUBLIC_BASE

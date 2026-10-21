@@ -7,6 +7,7 @@ import {
   PUBLISH_NETWORK_ERROR,
 } from './publisher'
 import type { SocialAccount } from '@/db'
+import { ARCHIVO_MUY_GRANDE, MAX_BYTES_ARCHIVO } from './limites'
 import { getDb, socialAccounts } from '@/db'
 import { eq } from 'drizzle-orm'
 import { env } from '@/lib/env'
@@ -213,6 +214,13 @@ export const youtubePublisher: Publisher = {
     if (!blob.ok) {
       console.error('No se pudo leer el video del Blob:', blob.status)
       return { kind: 'failed', reason: PUBLISH_NETWORK_ERROR }
+    }
+    // El tamaño antes de bajarlo: el video entra entero en la memoria de la función, y uno
+    // más grande que lo que se deja programar la tumba. Programar ya lo rechaza; esto cubre
+    // lo que se programó antes de esa comprobación. Reintentar no lo achica: es definitivo.
+    if (Number(blob.headers.get('content-length') ?? '0') > MAX_BYTES_ARCHIVO) {
+      await blob.body?.cancel().catch(() => {})
+      return { kind: 'failed', reason: ARCHIVO_MUY_GRANDE, definitivo: true }
     }
     const bytes = new Uint8Array(await blob.arrayBuffer())
 

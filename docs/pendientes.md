@@ -22,11 +22,6 @@ Cómo se usa:
 
 ## Bugs
 
-- **En local no se puede entrar al panel sin Resend** (2026-10-13). `pedir()`
-  (`src/lib/usuarios.ts`) imprime el código en la consola del servidor justo para probar el
-  ingreso en local, pero si el correo no sale borra la fila del código, así que el código
-  impreso nunca sirve. Mientras tanto, en local se entra con `REVISION_CORREO` y
-  `REVISION_CODIGO`. El arreglo es no borrar la fila fuera de producción.
 - **Por revisar: el resto de la auditoría de la wiki de la UI** (2026-10-13). Al escribir
   `public/docs/ui/` salieron unos cuarenta defectos más —textos que nombran pantallas
   viejas, validaciones que dejan programar lo que va a fallar, números
@@ -64,10 +59,11 @@ Cómo se usa:
 
 ## Seguridad
 
-- **Quedan hallazgos abiertos de la auditoría de seguridad del 2026-10-14.** El detalle no
-  va acá: el repositorio es público, y escribir una vulnerabilidad sin arreglar es
-  publicarla. Está en la carpeta privada del dueño, `tu-parrilla-privado`, fuera del repo;
-  cada arreglo la cuenta en su propio PR, cuando ya está cerrada.
+- **Quedan hallazgos abiertos de las auditorías de seguridad del 2026-10-14 y del
+  2026-10-21.** El detalle no va acá: el repositorio es público, y escribir una
+  vulnerabilidad sin arreglar es publicarla. Está en la carpeta privada del dueño,
+  `tu-parrilla-privado`, fuera del repo; cada arreglo la cuenta en su propio PR, cuando ya
+  está cerrada.
 
 ## Trámites con las plataformas
 

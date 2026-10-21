@@ -10,6 +10,7 @@ import { networkLabel } from '@/lib/networks'
 import { tomadasPorOtro } from '@/lib/social/conectar'
 import { COOKIE_PENDIENTE, LOGIN_VENCIDO, leerPendiente } from '@/lib/social/pendiente'
 import { cn } from '@/lib/utils'
+import { mensajeDeLaUrl } from '@/lib/mensaje-firmado'
 
 export const dynamic = 'force-dynamic'
 
@@ -23,8 +24,9 @@ export default async function Elegir({
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
   const params = await searchParams
-  // Con lugar para nombrar varias cuentas en «… ya están conectadas por otra persona».
-  const mensaje = typeof params.mensaje === 'string' ? params.mensaje.slice(0, 300) : null
+  // Con lugar para nombrar varias cuentas en «… ya están conectadas por otra persona». Solo
+  // la que firmó el servidor (`mensajeDeLaUrl`).
+  const mensaje = mensajeDeLaUrl(params, 300)
   const { id: ownerId } = await requireUser()
   const pendienteCrudo = leerPendiente((await cookies()).get(COOKIE_PENDIENTE)?.value)
   const pendiente = pendienteCrudo && pendienteCrudo.sub === ownerId ? pendienteCrudo : null

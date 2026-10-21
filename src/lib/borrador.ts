@@ -15,6 +15,18 @@ export type Campos = Record<string, string[]>
  */
 const INTERNOS = new Set(['mediaSubida', 'borradorId'])
 
+/**
+ * Lo más que ocupan los campos de un borrador, escritos como JSON. Un formulario de verdad
+ * queda muy por debajo —el texto de un post no pasa de unos miles de caracteres—; esto es
+ * para un cuerpo armado a mano, que sin tope guardaba lo que quisiera en la base.
+ */
+export const MAX_CAMPOS_BORRADOR = 100_000
+
+/** Si los campos de un borrador pasan de `MAX_CAMPOS_BORRADOR`. */
+export function borradorDemasiadoGrande(campos: Campos): boolean {
+  return JSON.stringify(campos).length > MAX_CAMPOS_BORRADOR
+}
+
 /** Todo lo que el formulario dice, menos archivos y campos de transporte. */
 export function camposDesdeFormulario(formData: FormData): Campos {
   const campos: Campos = {}

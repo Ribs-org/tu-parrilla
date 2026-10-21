@@ -5,6 +5,7 @@ import { env } from '@/lib/env'
 import { REDES_PROXIMAMENTE, fraseProximamente } from '@/lib/networks'
 import { COOKIE_AGREGAR } from '@/lib/social/vuelta'
 import { signOAuthState } from '@/lib/social/oauth-state'
+import { conMensaje } from '@/lib/mensaje-firmado'
 
 export const dynamic = 'force-dynamic'
 
@@ -64,7 +65,7 @@ export async function GET(
   // Una red en «Próximamente» no abre la ventana de la red aunque alguien escriba esta
   // dirección a mano: vuelve a Los Fierros con la frase, como cualquier otra vuelta.
   if (REDES_PROXIMAMENTE.has(network)) {
-    return NextResponse.redirect(`${origin}/admin/accounts?mensaje=${encodeURIComponent(fraseProximamente(network))}`)
+    return NextResponse.redirect(`${origin}${conMensaje('/admin/accounts', fraseProximamente(network))}`)
   }
   const redirectUri = `${origin}/api/social/${network}/callback`
 

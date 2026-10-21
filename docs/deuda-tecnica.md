@@ -574,6 +574,37 @@ orden, con un cursor (la hora y el id del último corte), un «Ver más» al pie
 contadores del filtro salgan de una consulta propia en vez de contar lo cargado. Medio día de
 trabajo, con su página de la wiki.
 
+## Los límites de intentos viven en la memoria de cada instancia (2026-10-21)
+
+El pedido y el canje de códigos de ingreso, y las balizas de visitas y clics de las páginas
+públicas, cuentan sus intentos por IP en un mapa en memoria (`src/lib/limite-ip.ts`, con la
+cuenta pura en `src/lib/limite.ts`). Desde esta entrega ese mapa tiene tope y barre lo
+vencido, pero sigue siendo de cada instancia: Vercel levanta varias, cada una con su cuenta, y
+una instancia nueva empieza de cero. Frena a quien insiste desde un solo lugar contra una sola
+instancia; no es un límite del sitio.
+
+Quedó así porque un límite compartido necesita un almacén compartido con escrituras baratas,
+que el proyecto no tiene: la base no conviene para contar cada visita, y no hay Redis. Cerrarlo
+es sumar uno (Upstash Redis tiene plan gratis y una librería de ventanas deslizantes,
+`@upstash/ratelimit`), cambiar `demasiadosIntentos` para que cuente ahí con la misma firma, y
+dejar la cuenta en memoria como respaldo si el almacén no contesta. Medio día, más la variable
+de entorno nueva en el README y en `.env.example`.
+
+## Falta la política de contenido (CSP) (2026-10-21)
+
+Desde esta entrega el sitio manda las cabeceras de seguridad que no cambian nada de lo que se
+ve (`next.config.ts`): sin adivinar tipos, sin marcos ajenos, sin cámara ni micrófono. Falta la
+que más protege, `Content-Security-Policy`, que le dice al navegador de qué orígenes puede
+cargar scripts, estilos e imágenes.
+
+Quedó afuera porque una CSP útil con Next pide un `nonce` por petición para sus scripts en
+línea (se arma en `src/proxy.ts` y lo leen las páginas), y una lista de orígenes que hoy está
+repartida: R2 para la media y las miniaturas de Instagram, Facebook, YouTube y TikTok. Una
+CSP mal armada no avisa: deja la página en blanco o sin imágenes.
+Terminarlo es armarla primero en modo `Content-Security-Policy-Report-Only`, mirar una semana
+qué reporta, completar la lista, y recién ahí pasarla a la cabecera que bloquea. Un día de
+trabajo repartido en esa semana.
+
 ## Lo nativo de la app no cambia de modo (2026-10-19)
 
 La app del teléfono tiene los dos modos de la cuenta (ver «Tanda 3» en

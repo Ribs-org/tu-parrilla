@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { PgDialect } from 'drizzle-orm/pg-core'
 import type { SQL } from 'drizzle-orm'
 import { getTableName } from 'drizzle-orm'
+import { ARCHIVO_MUY_GRANDE } from '@/lib/social/publish/limites'
 
 // `usuarios.ts`, que este archivo importa por debajo de `actions.ts`, trae `server-only`,
 // que solo entiende el bundler de Next: se sustituye por un módulo vacío para poder
@@ -98,10 +99,13 @@ const db = vi.hoisted(() => ({
 // Doble mínimo para `createScheduledPost`: `mediaYaSubida` comprueba que cada URL sea del
 // bucket bajo `scheduled/` y que el objeto exista, sin tocar R2 de verdad (mismo mock que
 // `mobile/schedule/route.test.ts`).
+// Lo que pesa cada archivo en el almacén, según `tamanoEnAlmacen`: un test lo sube para
+// probar el tope de programar.
+const almacen = vi.hoisted(() => ({ bytes: 1024 }))
 vi.mock('@/lib/storage', () => ({
   basePublica: () => 'https://cdn.ejemplo.cl',
   keyDesdeUrl: (base: string, url: string) => (url.startsWith(`${base}/`) ? url.slice(base.length + 1) : null),
-  existe: async () => true,
+  tamanoEnAlmacen: async () => almacen.bytes,
 }))
 
 // Para afirmar que un rechazo antes de crear el post no llega a `crearPostProgramado`: si
@@ -257,6 +261,7 @@ beforeEach(() => {
   db.insertCalls.length = 0
   db.onConflictDoUpdateCalls.length = 0
   db.returningQueue.length = 0
+  almacen.bytes = 1024
   crear.crearPostProgramadoCalls.length = 0
   db.executeCalls.length = 0
   db.executeError = null
@@ -685,6 +690,24 @@ describe('createScheduledPost: un trial reel con fotos se rechaza antes de crear
   })
 })
 
+describe('createScheduledPost: el tamaño que cuenta es el del almacén', () => {
+  it('un archivo que en el almacén pesa más de 500 MB se rechaza antes de crear nada', async () => {
+    // La subida firmada no fija un tamaño: lo que se declaró al pedirla no alcanza.
+    almacen.bytes = 600 * 1024 * 1024
+    db.scheduledSelectQueue.push([{ id: 'acc-ig', network: 'instagram', handle: '@vicente', accessToken: 'token-vivo' }])
+    const formData = new FormData()
+    formData.set('caption', 'Texto del post')
+    formData.set('cuentas', 'acc-ig')
+    formData.set('scheduledAt', '2030-01-01T10:00')
+    formData.set('mediaSubida', JSON.stringify([{ url: 'https://cdn.ejemplo.cl/scheduled/v.mp4', mediaType: 'video' }]))
+
+    const result = await createScheduledPost({}, formData)
+
+    expect(result.error).toBe(ARCHIVO_MUY_GRANDE)
+    expect(crear.crearPostProgramadoCalls).toHaveLength(0)
+  })
+})
+
 describe('fusionarCuenta: una tarjeta muerta se absorbe en la viva de su red', () => {
   const muerta = { id: 'muerta', ownerId: USUARIO.id, network: 'tiktok', accessToken: null }
   const viva = { id: 'viva', ownerId: USUARIO.id, network: 'tiktok', accessToken: 'cifrado' }
@@ -720,7 +743,10 @@ describe('fusionarCuenta: una tarjeta muerta se absorbe en la viva de su red', (
 })
 
 describe('rescheduleTarget: la hora nueva solo alcanza a un destino todavía quemado', () => {
-  const quemado = { id: 'target-1', postId: 'post-1', status: 'failed' }
+  /** Ids con forma de uuid: uno sin ella es «no existe» antes de llegar a la base. */
+  const QUEMADO = '0b6f4c1e-2a3d-4e5f-8a9b-0c1d2e3f4a5b'
+  const AJENO = '9e8d7c6b-5a49-4382-a1b0-c9d8e7f6a5b4'
+  const quemado = { id: QUEMADO, postId: 'post-1', status: 'failed' }
   /** Una hora futura cualquiera, que es lo único que la acción exige del campo. */
   const futuro = '2030-01-01T10:00'
   /**
@@ -735,13 +761,13 @@ describe('rescheduleTarget: la hora nueva solo alcanza a un destino todavía que
   it('el UPDATE del destino pide status = failed, como el rearm del editor', async () => {
     leeraQuemado([quemado])
 
-    expect(await rescheduleTarget('target-1', futuro)).toEqual({ ok: true })
+    expect(await rescheduleTarget(QUEMADO, futuro)).toEqual({ ok: true })
 
     // Dos escrituras, en una transacción: primero el destino de vuelta a la cola —solo si
     // sigue quemado— y después la hora del post.
     expect(db.updateCalls).toHaveLength(2)
     const where = new PgDialect().sqlToQuery(db.updateWheres[0] as SQL)
-    expect(where.params).toEqual(['target-1', 'failed'])
+    expect(where.params).toEqual([QUEMADO, 'failed'])
   })
 
   it('si el destino ya no está quemado, la hora del post no se mueve', async () => {
@@ -750,7 +776,7 @@ describe('rescheduleTarget: la hora nueva solo alcanza a un destino todavía que
     // escritura (otra pestaña apretó «Subir ahora»).
     db.returningQueue.push([])
 
-    expect(await rescheduleTarget('target-1', futuro)).toEqual({ ok: true })
+    expect(await rescheduleTarget(QUEMADO, futuro)).toEqual({ ok: true })
 
     expect(db.updateCalls).toHaveLength(1)
     expect(db.updateCalls[0]).not.toHaveProperty('scheduledAt')
@@ -759,7 +785,7 @@ describe('rescheduleTarget: la hora nueva solo alcanza a un destino todavía que
   it('repinta las dos pantallas que muestran lo quemado, no solo la parrilla', async () => {
     leeraQuemado([quemado])
 
-    await rescheduleTarget('target-1', futuro)
+    await rescheduleTarget(QUEMADO, futuro)
 
     // «Se quemó» vive en La Parrilla, arriba del calendario: con este revalidado, la fila que
     // se acaba de arreglar deja de pedir la acción.
@@ -769,7 +795,7 @@ describe('rescheduleTarget: la hora nueva solo alcanza a un destino todavía que
   it('una hora pasada no escribe nada y devuelve la frase de siempre', async () => {
     leeraQuemado([quemado])
 
-    expect(await rescheduleTarget('target-1', '2020-01-02T03:04')).toEqual({
+    expect(await rescheduleTarget(QUEMADO, '2020-01-02T03:04')).toEqual({
       error: 'La hora debe estar en el futuro.',
     })
     expect(db.updateCalls).toHaveLength(0)
@@ -778,7 +804,7 @@ describe('rescheduleTarget: la hora nueva solo alcanza a un destino todavía que
   it('un destino que la consulta atada al dueño no trae no se toca', async () => {
     leeraQuemado([])
 
-    expect(await rescheduleTarget('target-ajeno', futuro)).toEqual({ error: 'Ese destino ya no existe.' })
+    expect(await rescheduleTarget(AJENO, futuro)).toEqual({ error: 'Ese destino ya no existe.' })
     expect(db.updateCalls).toHaveLength(0)
   })
 
@@ -791,7 +817,7 @@ describe('rescheduleTarget: la hora nueva solo alcanza a un destino todavía que
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-09-30T12:00:00Z'))
     try {
-      expect(await rescheduleTarget('target-1', '2026-10-01T19:00')).toEqual({ ok: true })
+      expect(await rescheduleTarget(QUEMADO, '2026-10-01T19:00')).toEqual({ ok: true })
     } finally {
       vi.useRealTimers()
       USUARIO.zona = zonaDeAntes

@@ -1,6 +1,7 @@
 import { REDES_PROXIMAMENTE, fraseProximamente } from './networks'
 import { avisoDeFierros, estadoDelFierro, fraseDelAviso, type Fierro } from './parrilla'
 import { PUBLISHABLE, typeFromContentType } from './social/publish/batch'
+import { ARCHIVO_MUY_GRANDE, MAX_BYTES_ARCHIVO } from './social/publish/limites'
 import { CuentaInvalida, cuentaUnicaPorRed, verificarCuentas, type CuentaDestino } from './social/cuentas'
 
 // El teléfono ya manda `opciones` por cuenta, pero TikTok todavía exige
@@ -56,12 +57,12 @@ export function parseRango(value: string | null, now: Date): { from: Date; to: D
 
 /* ------------------------------------------------- publicar desde el teléfono -- */
 
-export const MAX_BYTES_SUBIDA = 500 * 1024 * 1024
+export { ARCHIVO_MUY_GRANDE }
+export const MAX_BYTES_SUBIDA = MAX_BYTES_ARCHIVO
 /** Un minuto adelante: el pinger de cinco minutos lo recoge en su próxima pasada. */
 export const AHORA_MS = 60_000
 
 export const TIPO_NO_PUBLICABLE = 'Ese tipo de archivo no se puede publicar.'
-export const ARCHIVO_MUY_GRANDE = 'El archivo supera los 500 MB.'
 export const ARCHIVO_AJENO = 'Un archivo no es del almacén.'
 export const ARCHIVO_FALTANTE = 'Falta subir un archivo.'
 export const CUERPO_ILEGIBLE = 'El cuerpo no se entendió.'
@@ -80,7 +81,8 @@ const MAX_NOMBRE = 100
  *
  * `bytes` en 0 significa "el teléfono no sabe el tamaño" (la galería no siempre lo
  * reporta) y no bloquea la subida: el PUT prefirmado nunca exigió un Content-Length,
- * así que el tope de abajo es solo una cortesía, no una garantía de seguridad.
+ * así que el tope de abajo es solo una cortesía. El que protege es el de programar, que
+ * mira lo que de verdad quedó en el almacén (`tamanoEnAlmacen`).
  */
 export function prepararSubida(
   nombre: string,
@@ -91,7 +93,7 @@ export function prepararSubida(
   const resuelto = typeFromContentType(tipo)
   if (!resuelto) return { error: TIPO_NO_PUBLICABLE }
   if (typeof bytes !== 'number' || !Number.isFinite(bytes) || bytes < 0) return { error: CUERPO_ILEGIBLE }
-  if (bytes > MAX_BYTES_SUBIDA) return { error: ARCHIVO_MUY_GRANDE }
+  if (bytes > MAX_BYTES_ARCHIVO) return { error: ARCHIVO_MUY_GRANDE }
 
   const base = nombre.split(/[\\/]/).pop()?.trim() ?? ''
   const conExtension = /\.[A-Za-z0-9]{1,5}$/.test(base)
@@ -213,13 +215,23 @@ export function parseConteos(body: unknown): { fotos: number; videos: number } |
 }
 
 /** Las URLs ya subidas, en el orden en que se eligieron: ese es el del carrusel. */
+/**
+ * Más archivos de los que cualquier red recibe en un post (TikTok, 35 fotos) o una URL más
+ * larga que cualquiera del almacén solo llegan en un cuerpo armado a mano: sin tope, se
+ * guardaban tal cual en un borrador.
+ */
+const MAX_MEDIA = 35
+const MAX_URL = 2048
+
 export function parseMediaMovil(body: unknown): MediaMovil[] | { error: string } {
   if (!esObjeto(body)) return { error: CUERPO_ILEGIBLE }
   const { media = [] } = body
-  if (!Array.isArray(media)) return { error: CUERPO_ILEGIBLE }
+  if (!Array.isArray(media) || media.length > MAX_MEDIA) return { error: CUERPO_ILEGIBLE }
   const lista: MediaMovil[] = []
   for (const item of media) {
-    if (!esObjeto(item) || typeof item.url !== 'string' || item.url === '') return { error: CUERPO_ILEGIBLE }
+    if (!esObjeto(item) || typeof item.url !== 'string' || item.url === '' || item.url.length > MAX_URL) {
+      return { error: CUERPO_ILEGIBLE }
+    }
     if (item.mediaType !== 'image' && item.mediaType !== 'video') return { error: CUERPO_ILEGIBLE }
     lista.push({ url: item.url, mediaType: item.mediaType })
   }

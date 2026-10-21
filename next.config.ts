@@ -21,7 +21,29 @@ function hostR2(): string | null {
 
 const hostnameR2 = hostR2()
 
+/**
+ * Las cabeceras de seguridad de todo lo que sirve la app. Ninguna cambia lo que se ve: le
+ * dicen al navegador lo que esta app no hace, para que nadie más pueda hacerlo en su nombre.
+ * La política de contenido (CSP), que es la que más protege, queda pendiente: pide revisar
+ * cada script y estilo en línea de Next (ver `docs/deuda-tecnica.md`).
+ */
+const CABECERAS = [
+  // Que el navegador no adivine el tipo de un archivo: lo que dice ser una imagen no se ejecuta.
+  { key: 'X-Content-Type-Options', value: 'nosniff' },
+  // Ninguna página se dibuja dentro de un marco de otro sitio: el panel tiene botones que
+  // publican y borran, y un marco invisible encima es la forma de hacerlos apretar.
+  { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+  // A los sitios que se abren desde acá les llega el origen, no la dirección entera.
+  { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+  // Ni cámara, ni micrófono, ni ubicación: la app no los usa, y así no se los puede pedir nadie.
+  { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+]
+
 const nextConfig: NextConfig = {
+  async headers() {
+    return [{ source: '/:path*', headers: CABECERAS }]
+  },
+
   // `postgres` abre sockets con `node:net`/`node:tls`. No está en la lista que Next
   // excluye sola (ahí figura `pg`, que es otro paquete), así que se declara acá para que
   // el compilador de Server Components no lo empaquete y lo cargue con `require` nativo.

@@ -1,8 +1,16 @@
 import { NextResponse } from 'next/server'
 import { getDb, visits } from '@/db'
+import { demasiadosIntentos } from '@/lib/limite-ip'
 import { buildVisitContext } from '@/lib/tracking'
+import { esUuid } from '@/lib/uuid'
 
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+/**
+ * Cuántas visitas guarda una IP en diez minutos. Generoso a propósito: detrás de una IP de
+ * un operador móvil hay miles de personas, y una página popular las recibe a todas. Lo que
+ * frena es a quien manda balizas en un bucle desde un solo lugar; contra muchas IP no alcanza
+ * (ver `docs/deuda-tecnica.md`).
+ */
+const VISITAS_POR_IP = 600
 
 /**
  * Receives the beacon VisitTracker sends once the page actually ran in a browser.
@@ -23,10 +31,10 @@ export async function POST(request: Request) {
   try {
     const body = await request.json()
 
-    const id = typeof body.visitId === 'string' && UUID.test(body.visitId) ? body.visitId : null
-    const profileId =
-      typeof body.profileId === 'string' && UUID.test(body.profileId) ? body.profileId : null
+    const id = esUuid(body.visitId) ? body.visitId : null
+    const profileId = esUuid(body.profileId) ? body.profileId : null
     if (!id || !profileId) return new NextResponse(null, { status: 204 })
+    if (await demasiadosIntentos('visita', VISITAS_POR_IP, 10 * 60_000)) return new NextResponse(null, { status: 204 })
 
     const query = typeof body.query === 'string' ? body.query.slice(0, 2000) : ''
     const referrer = typeof body.referrer === 'string' ? body.referrer : ''

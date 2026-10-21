@@ -200,3 +200,76 @@ export async function descargarSeguro(url: string, etiqueta: string): Promise<Re
   console.error(`${etiqueta}: demasiadas redirecciones:`, url.slice(0, 200))
   return null
 }
+
+/**
+ * Lee el cuerpo en streaming sin bufferear más que `tope` bytes: si el total supera el
+ * tope antes de terminar, cancela la lectura y devuelve `null` sin haber acumulado el
+ * resto. Es la comprobación que de verdad protege — `response.blob()` bufferea el
+ * cuerpo entero antes de que cualquier chequeo sobre su tamaño pueda mirarlo, así que un
+ * origen que sirve 500 MB los sirve igual aunque la fila termine rechazada; en una
+ * función serverless eso es memoria contra el límite del proceso, no solo bytes de más
+ * en el almacén.
+ *
+ * También devuelve `null`, sin lanzar, si `lector.read()` lanza a mitad del cuerpo: el
+ * presupuesto de tiempo compartido de `descargarSeguro` puede vencer (`TimeoutError`)
+ * después de que ya se leyeron algunos chunks, o la conexión puede cortarse sola. Y
+ * devuelve `null` si el cuerpo está vacío, con o sin `body` (un 2xx sin contenido, o un
+ * stream que se cierra sin haber entregado nada): un PDF de 0 bytes no es un documento
+ * válido, ni un archivo de 0 bytes una media.
+ *
+ * La comparten el documento de una regla (`documento.ts`) y la media del lote (`batch.ts`):
+ * los dos bajan de un tercero algo que después se copia al almacén.
+ */
+export async function leerConTope(response: Response, tope: number, url: string, etiqueta: string): Promise<Blob | null> {
+  const cuerpo = response.body
+  // Un 2xx sin cuerpo (p. ej. un 204, o un origen que declara `content-type:
+  // application/pdf` sin escribir nada) no es un PDF de 0 bytes válido: antes de este
+  // arreglo salía `ok: true` con un Blob vacío, y el comentarista recibía el enlace a un
+  // PDF de 0 bytes. La validación ocurre al programar, no al enviar — así que se
+  // rechaza acá, no cuando alguien comente la palabra.
+  if (!cuerpo) {
+    console.error(`${etiqueta}: la respuesta no tiene cuerpo (2xx vacío):`, url.slice(0, 200))
+    return null
+  }
+  const lector = cuerpo.getReader()
+  const partes: Buffer[] = []
+  let total = 0
+  while (true) {
+    let resultado: ReadableStreamReadResult<Uint8Array>
+    try {
+      resultado = await lector.read()
+    } catch (error) {
+      // No hace falta `lector.cancel()` acá: cuando `read()` lanza, el stream ya quedó
+      // en estado "errored" por su cuenta (fue el timeout o el corte de red lo que lo
+      // dejó así) y el socket ya se cerró como parte de ese error, no como consecuencia
+      // de algo que hagamos después. Cancelar un stream ya "errored" solo repite la
+      // misma excepción (WHATWG Streams: `ReadableStreamCancel` devuelve la promesa
+      // rechazada con el mismo `storedError`), no libera nada nuevo.
+      console.error(`${etiqueta}: la descarga se cortó a mitad del cuerpo:`, String(error).slice(0, 200))
+      return null
+    }
+    const { done, value } = resultado
+    if (done) break
+    total += value.byteLength
+    if (total > tope) {
+      // A diferencia del `catch` de arriba, acá el stream normalmente sigue "readable"
+      // — cancelamos nosotros, no algo que ya lo rompió. Pero puede que no: la señal de
+      // tiempo compartida de `descargarSeguro` puede vencer justo entre el último
+      // `read()` y este `cancel()`, dejando el stream "errored" antes de que lleguemos
+      // acá. `cancel()` sobre un stream así devuelve la promesa rechazada con ese mismo
+      // error (misma semántica que el comentario de arriba) — el `.catch` es lo que
+      // sostiene que esta función nunca lanza.
+      await lector.cancel().catch(() => {})
+      return null
+    }
+    partes.push(Buffer.from(value))
+  }
+  if (total === 0) {
+    console.error(`${etiqueta}: la respuesta llegó vacía:`, url.slice(0, 200))
+    return null
+  }
+  // El tipo de lib.dom (`BlobPart`) exige un `ArrayBuffer`, no el `ArrayBufferLike` con
+  // el que TS tipa genéricamente un `Buffer`/`Uint8Array`; en tiempo de ejecución estos
+  // siempre son `ArrayBuffer` (los creó `Buffer.from`, nunca un `SharedArrayBuffer`).
+  return new Blob(partes as BlobPart[])
+}

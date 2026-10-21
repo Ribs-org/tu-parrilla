@@ -1,7 +1,9 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { ARCHIVO_MUY_GRANDE } from './limites'
 import {
   YOUTUBE_REJECTED,
   classifyUploadStatus,
+  youtubePublisher,
   singleVideo,
   youtubeMetadata,
   youtubeTitle,
@@ -10,6 +12,30 @@ import {
 
 const image = { url: 'https://blob.test/a.jpg', mediaType: 'image' as const, position: 0 }
 const video = { url: 'https://blob.test/b.mp4', mediaType: 'video' as const, position: 0 }
+
+describe('publish: un video más grande que lo que se deja programar', () => {
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('se quema sin bajarlo entero: el video no entra en la memoria de la función', async () => {
+    const cuerpo = new ReadableStream({ start: (c) => c.enqueue(new Uint8Array([1])) })
+    const fetchMock = vi.fn(
+      async () => new Response(cuerpo, { status: 200, headers: { 'content-length': String(700 * 1024 * 1024) } }),
+    )
+    vi.stubGlobal('fetch', fetchMock)
+    const salida = await youtubePublisher.publish({
+      caption: 'Hola',
+      media: [video],
+      containerId: null,
+      token: 't',
+      accountExternalId: 'canal',
+      coverUrl: null,
+      opciones: null,
+    })
+    expect(salida).toEqual({ kind: 'failed', reason: ARCHIVO_MUY_GRANDE, definitivo: true })
+    // Solo la descarga: nunca llegó a subir nada a YouTube.
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
+})
 
 describe('youtubeTitle', () => {
   it('la primera línea es el título; el resto queda para la descripción', () => {

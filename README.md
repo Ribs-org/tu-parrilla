@@ -878,7 +878,8 @@ País, región, ciudad y zona horaria (headers de Vercel), dispositivo, sistema 
 navegador, referrer y red de origen, la etiqueta `?s=`, idioma del navegador y si es un bot.
 
 **La IP nunca se guarda.** El identificador de visitante es
-`SHA-256(IP + user-agent + FINGERPRINT_SALT + fecha UTC)`. Como la fecha entra en el hash,
+`SHA-256(IP + user-agent + FINGERPRINT_SALT + fecha UTC)` (sin `FINGERPRINT_SALT`, la sal sale
+de `AUTH_SECRET`: nunca es una que esté escrita en el código). Como la fecha entra en el hash,
 el mismo visitante recibe uno distinto al día siguiente: "visitantes únicos" es una métrica
 diaria. Ese es el precio deliberado de no usar cookies, y es lo que evita el banner de
 consentimiento.
@@ -1004,7 +1005,7 @@ Vercel y bajan con `vercel env pull .env.local`.
 | `DATABASE_URL` | Supabase Postgres, por el *pooler* | Sí — la pone la integración |
 | `ADMIN_EMAIL` | El correo del primer usuario | Sí |
 | `AUTH_SECRET` | Firma de la cookie de sesión | Sí |
-| `FINGERPRINT_SALT` | Sal del hash de visitante | Sí |
+| `FINGERPRINT_SALT` | Sal del hash de visitante | Conviene — sin ella se usa una derivada de `AUTH_SECRET`; ponerla o cambiarla después cambia los visitantes únicos de ese día |
 | `INGRESO_FROM` | Remitente de los códigos de ingreso | No — sin ella se usa el remitente de prueba de Resend |
 | `R2_ACCOUNT_ID` | ID de tu cuenta de Cloudflare | No — sin ella no puedes subir media |
 | `R2_ACCESS_KEY_ID` | Llave de acceso para R2 | No — sin ella no puedes subir media |

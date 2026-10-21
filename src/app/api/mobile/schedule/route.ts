@@ -20,8 +20,10 @@ import { requireMobileUser } from '@/lib/mobile-guardia'
 import {
   ARCHIVO_AJENO,
   ARCHIVO_FALTANTE,
+  ARCHIVO_MUY_GRANDE,
   BORRADOR_NO_EXISTE,
   CUERPO_ILEGIBLE,
+  MAX_BYTES_SUBIDA,
   NO_SE_GUARDO,
   parseBorradorMovil,
   parseMediaMovil,
@@ -32,7 +34,7 @@ import { BorradorConsumido, crearPostProgramado } from '@/lib/social/publish/cre
 import { CuentaInvalida } from '@/lib/social/cuentas'
 import { validateScheduleDraft } from '@/lib/social/publish/validate'
 import { errorDeMediaPorOpciones, validarOpcionesPorCuenta } from '@/lib/social/publish/opciones'
-import { basePublica, existe, keyDesdeUrl } from '@/lib/storage'
+import { basePublica, keyDesdeUrl, tamanoEnAlmacen } from '@/lib/storage'
 
 export const dynamic = 'force-dynamic'
 
@@ -241,7 +243,10 @@ export async function POST(request: Request) {
 
   try {
     for (const m of media) {
-      if (!(await existe(m.url))) return NextResponse.json({ error: ARCHIVO_FALTANTE }, { status: 400 })
+      // Que exista, y lo que de verdad pesa: la subida firmada no fija un tamaño.
+      const bytes = await tamanoEnAlmacen(m.url)
+      if (bytes === null) return NextResponse.json({ error: ARCHIVO_FALTANTE }, { status: 400 })
+      if (bytes > MAX_BYTES_SUBIDA) return NextResponse.json({ error: ARCHIVO_MUY_GRANDE }, { status: 400 })
     }
   } catch (error) {
     console.error('schedule/existe:', String(error).slice(0, 300))

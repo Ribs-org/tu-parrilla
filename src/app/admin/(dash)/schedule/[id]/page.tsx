@@ -8,6 +8,7 @@ import { toZonedInput } from '@/lib/utils'
 import { resumenOpciones } from '@/lib/social/publish/opciones'
 import { dibujoDe } from '../dibujo'
 import { volverDelEditor } from '../enlace'
+import { esUuid } from '@/lib/uuid'
 import { DestinosDelPost } from './destinos'
 import { Editor } from './editor'
 
@@ -21,6 +22,8 @@ export default async function EditScheduledPostPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
   const { id } = await params
+  // Un id sin forma de uuid es «no existe»: a la base le llegaría como un error, no como cero filas.
+  if (!esUuid(id)) notFound()
   const query = await searchParams
   const volver = volverDelEditor(query.volver)
 

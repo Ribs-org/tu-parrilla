@@ -56,7 +56,7 @@ vi.mock('@/lib/borradores-movil', () => ({
 vi.mock('@/lib/storage', () => ({
   basePublica: () => 'https://cdn.ejemplo.cl',
   keyDesdeUrl: (base: string, url: string) => (url.startsWith(`${base}/`) ? url.slice(base.length + 1) : null),
-  existe: async () => true,
+  tamanoEnAlmacen: async () => 1024,
 }))
 
 const { POST, agruparPostsMovil } = await import('./route')

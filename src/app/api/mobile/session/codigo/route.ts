@@ -1,11 +1,14 @@
-import { NextResponse } from 'next/server'
+import { NextResponse, after } from 'next/server'
 import { normalizarCorreo } from '@/lib/ingreso'
 import { demasiadosIntentos } from '@/lib/limite-ip'
 import { pedir } from '@/lib/usuarios'
 
 export const dynamic = 'force-dynamic'
 
-/** Siempre { ok: true }: la lista de invitados no se revela por la respuesta. */
+/**
+ * Siempre { ok: true }: la lista de invitados no se revela por la respuesta. Ni por el
+ * tiempo: el código se pide después de responder (`after`), como en el panel.
+ */
 export async function POST(request: Request) {
   let correo: string | null = null
   try {
@@ -16,7 +19,14 @@ export async function POST(request: Request) {
   }
   if (correo) {
     if (await demasiadosIntentos('pedir-movil', 10, 10 * 60_000)) return NextResponse.json({ ok: true })
-    await pedir(correo)
+    const pedido = correo
+    after(async () => {
+      try {
+        await pedir(pedido)
+      } catch (error) {
+        console.error('[ingreso] no se pudo pedir el código:', String(error).slice(0, 300))
+      }
+    })
   }
   return NextResponse.json({ ok: true })
 }
