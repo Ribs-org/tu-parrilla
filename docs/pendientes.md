@@ -234,11 +234,6 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   en R2, `R2_PUBLIC_BASE` en Vercel, verificarlo como *URL property* en las dos apps de
   TikTok (si no, `PULL_FROM_URL` falla), y decidir qué pasa con las URLs ya guardadas en la
   base, que apuntan al dominio viejo.
-- **El AM de Vicente** (el repositorio privado `marca-personal`) programa y lee números en
-  `https://www.vicente-pareja.cl/api/…`: sus tres constantes `API`
-  (`pipeline/cortos/programar.py`, `pipeline/cortos/metricas.py` y
-  `pipeline/evento/programar.py`). Se cambian a `tu-parrilla.cl` junto con su llave propia
-  (ver «Pasar el agente del admin a una llave propia», en «Features y trabajo de código»).
 
 ## Que todo quede a nombre de Pyxis
 
@@ -353,15 +348,13 @@ Nada de esto bloquea un trámite hoy; conviene ordenarlo antes de abrir a tercer
   arrastre, lo que vende la portada. Se afloja en `src/lib/social/politica-youtube.ts` y
   `retencion-youtube.ts`. Ver `docs/google-verificacion-guion.md`, «Lo que la auditoría
   mira de los datos guardados».
-- **[dueño] Pasar el agente del admin a una llave propia y retirar `SCHEDULE_API_KEY`**
-  (2026-10-13). Desde que cada usuario genera sus llaves en el panel (hoy en Tu IA), la del
-  despliegue solo sigue para no romper al agente que ya la usa. Pasos: generar una llave en Tu IA,
-  ponerla en ese agente y, cuando ande, borrar la variable en Vercel. En código no hay nada
-  que hacer: sin la variable, la API ya acepta solo las llaves de usuario. Ese agente es el AM
-  de `marca-personal`, y en el mismo cambio conviene ponerle al día su `docs/parrilla.md`, que
-  describe la API de antes: dice que TikTok va por Buffer (hoy publica directo), que la API no
-  evita duplicados (hoy está `ref`), nombra Threads y X entre las redes que publican (hoy en
-  «Próximamente») y no conoce `/api/schedule/resumen` ni `/api/metrics/mejores`.
+- **[dueño] Retirar `SCHEDULE_API_KEY` de Vercel** (2026-10-13). Desde que cada usuario
+  genera sus llaves en Tu IA, la del despliegue solo seguía para el AM de `marca-personal`, y
+  el AM ya se pasó: desde el 2026-10-20 llama a `tu-parrilla.cl`, y su `docs/parrilla.md`
+  describe la API de hoy y dice que usa una llave de Tu IA. Falta confirmar en la
+  máquina del AM que la llave que tiene empieza con `tp_` y, si es así, borrar la variable en
+  Vercel. En código no hay nada que hacer: sin la variable, la API ya acepta solo las llaves
+  de usuario. Después, sacarla de la tabla de variables del `README.md` y de `.env.example`.
 - **Por decidir: que el admin pueda cortar las llaves de otro usuario** (2026-10-13). Hoy
   solo el dueño de una llave la revoca, y «Cerrar sesiones» en Los Maestros no las toca (son
   credenciales aparte, y cortarlas en silencio rompería su agente). Si una se filtra y el
