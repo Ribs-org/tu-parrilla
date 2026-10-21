@@ -11,6 +11,7 @@ import { CuentaInvalida, cuentaUnicaPorRed, verificarCuentas, type CuentaDestino
 import { validarRegla, REGLA_DOCUMENTO } from '../comentarios/reglas'
 import { descargarSeguro, leerConTope } from './descarga-segura'
 import { documentoToBlob } from './documento'
+import { esChoqueCon } from '@/lib/choque-de-unicidad'
 import { buscarPorId } from '@/lib/usuarios'
 import { ZONA_POR_DEFECTO } from '@/lib/zona'
 
@@ -72,19 +73,6 @@ export function refDeFila(raw: unknown): { ref: string | null } | { error: strin
   if (typeof raw !== 'string') return { error: REF_ERROR }
   const ref = raw.trim()
   return ref.length >= 1 && ref.length <= MAX_REF ? { ref } : { error: REF_ERROR }
-}
-
-/**
- * Si el insert chocó con la unicidad de la `ref`. postgres-js llama al campo
- * `constraint_name` y Drizzle lo envuelve en `cause`; el mismo molde que
- * `isCampaignUniqueViolation` (`social/sync.ts`), que también acepta `constraint`.
- */
-function esRefRepetida(error: unknown): boolean {
-  const choca = (e: unknown) => {
-    const { code, constraint_name, constraint } = (e as { code?: string; constraint_name?: string; constraint?: string }) ?? {}
-    return code === '23505' && (constraint_name ?? constraint) === REF_UNICA
-  }
-  return choca(error) || choca((error as { cause?: unknown })?.cause)
 }
 
 /** El post de este dueño que ya lleva esa `ref`, o null. */
@@ -676,7 +664,7 @@ export async function scheduleBatch(ownerId: string, items: BatchItem[]): Promis
       // Otro envío del mismo lote guardó esta `ref` mientras esta fila descargaba su media:
       // el post ya está, y es ese el que vuelve. Lo que esta fila subió a R2 queda sin
       // referencia y se lo lleva el barrido de huérfanos.
-      if (ref && esRefRepetida(error)) {
+      if (ref && esChoqueCon(error, REF_UNICA)) {
         const existente = await postConRef(ownerId, ref)
         if (existente) {
           results.push({ index, ok: true, postId: existente, repetido: true })

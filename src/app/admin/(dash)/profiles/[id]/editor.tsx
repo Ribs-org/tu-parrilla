@@ -423,7 +423,7 @@ export function ProfileEditor({ profile, initialLinks, origin, publicUrl, soloPe
               <p className="text-sm text-fg-muted">
                 {soloPerfil
                   ? 'No puedes borrar tu única página: todo usuario necesita al menos una.'
-                  : 'No puedes borrar tu página principal: primero haz principal a otra página, desde «Perfiles».'}
+                  : `No puedes borrar tu página principal: primero haz principal a otra página, desde «${nombreDe('/admin/profiles')}».`}
               </p>
             )}
           </div>

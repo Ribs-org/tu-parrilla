@@ -1,20 +1,28 @@
-# Portafolio
+# Tu Parrilla
 
-Un linktree propio: varios perfiles públicos, editables desde un panel, con analítica de
-primera parte y sin cookies. Sin suscripción, sin marca de agua, sin que un tercero se
-quede con tus números.
+Programa y publica en Instagram, Facebook, YouTube y TikTok desde un panel o desde la app del
+teléfono, con una página de links propia, los comentarios en un solo lugar y analítica de
+primera parte, sin cookies. Una API deja que un agente —el editor de los videos, por ejemplo—
+cargue y mida lo publicado. Sin suscripción, sin marca de agua, sin que un tercero se quede con
+tus números.
 
-**[Ver uno funcionando →](https://portafolio-page-inky.vercel.app)**
+**[Ver la portada →](https://tu-parrilla.cl)**
 
 | URL | Qué es |
 | --- | --- |
-| `/` | La página principal del dueño del dominio. Cada usuario tiene una principal, pero solo la del admin se sirve en la raíz |
+| `/` | En el dominio del producto (`DOMINIO_PRODUCTO`), la portada de Tu Parrilla, con los enlaces a privacidad y términos. En cualquier otro, la página principal del dueño del dominio: cada usuario tiene una, pero solo la del admin se sirve en la raíz |
+| `/ingresar` | La entrada al panel: el correo y el código de seis dígitos que llega a ese correo. Como el panel, se abre en el dominio del producto |
+| `/privacidad`, `/terminos` | La política de privacidad y los términos, públicos y sin sesión. Google y Meta los revisan para verificar la app |
 | `/<slug>` | La página de un usuario. Cada dominio sirve solo las de su dueño; el del producto las sirve todas |
 | `/admin` | Tu panel: entra a La Parrilla, el calendario con lo que se quemó arriba; adentro, los números, los comentarios, el editor y Tu IA (`/admin/ia`), con las llaves para tu agente y el manual del parrillero (`/admin/ia/manual`). Se abre en el dominio del producto: en cualquier otro, `/admin` e `/ingresar` redirigen ahí con la misma ruta |
 | `/borrado/<código>` | El estado de un borrado que pidió Meta: cuándo fue y cuántas cuentas. Pública, sin sesión; el código es la llave |
 | `/docs/…` | Las guías para LLMs, públicas y sin sesión: la de la API (`api-llm.md`, `api-editor.md`, `api.json`) y la wiki de la interfaz (`ui/index.md`), para guiar a quien se pierde en el panel |
 | `/api/social/meta/baja` | `POST` de Meta cuando alguien quita la app desde Facebook: deja sin credencial sus cuentas de Instagram y Facebook |
 | `/api/social/meta/borrado` | `POST` de Meta cuando alguien pide borrar sus datos: borra lo que vino de esas dos redes y devuelve el código de estado |
+| `/api/schedule/…`, `/api/metrics/…` | La API para tu agente, con una llave de Tu IA: cargar, ver y sacar lo programado, las cuentas y los números (ver «Carga masiva por API» y las secciones que le siguen) |
+| `/api/mobile/…` | La API de la app del teléfono, con el token de su sesión (ver `mobile/README.md`) |
+| `/api/cron/…` | Las corridas programadas: la publicación y la sincronización. Solo con `CRON_SECRET` |
+| `/api/track/…` | Las balizas de visitas y clics de las páginas públicas |
 
 Corre en planes gratis: Next.js 16 en Vercel, Postgres en Supabase y la media en Cloudflare R2
 (10 GB gratis, egress $0).
@@ -51,23 +59,24 @@ misma reja. La app del teléfono queda fuera a propósito. Su JavaScript llega p
 binario ya instalado, y sus módulos nativos los fija el SDK de Expo: subir uno solo puede dejar
 a la app pidiendo algo que el binario no trae. Se actualiza con el SDK entero y un build nuevo.
 
-`main` está protegida. No se puede empujar directo: todo entra por pull request, los dos
-trabajos son obligatorios, y la rama tiene que estar al día con `main` antes de fusionar,
-para que la reja haya corrido sobre el código que de verdad va a quedar.
+`main` está protegida: los dos trabajos son obligatorios, y la rama tiene que estar al día con
+`main` antes de fusionar, para que la reja haya corrido sobre el código que de verdad va a
+quedar. Un empujón directo no entra, porque su commit no trae esas dos comprobaciones: el CI
+corre sobre pull requests.
 
 Por eso Vercel no espera a nadie. Lo que llega a `main` ya pasó por la reja.
 
 Si alguna vez hay que reconfigurar esto, la protección vive en **Settings → Branches →
-Branch protection rules** del repositorio, sobre `main`, con estas casillas: exigir pull
-request antes de fusionar, exigir que las comprobaciones `sitio` y `app` pasen, y exigir que
-la rama esté al día.
+Branch protection rules** del repositorio, sobre `main`. Hoy tiene encendidas dos casillas:
+exigir que las comprobaciones `sitio` y `app` pasen, y exigir que la rama esté al día. La de
+exigir pull request antes de fusionar está apagada; encenderla está en `docs/pendientes.md`.
 
 ---
 
 ## Desplegar el tuyo
 
-Toma unos 10 minutos. Necesitas una cuenta de GitHub, una de Vercel y Node 24 o superior,
-la versión fijada en `.nvmrc`.
+Toma unos 10 minutos. Necesitas una cuenta de GitHub, una de Vercel y Node 24, la versión
+fijada en `.nvmrc` y en `engines` de `package.json`.
 
 ### 1. Genera tus dos secretos
 
@@ -82,7 +91,7 @@ El primero es `AUTH_SECRET` (firma tu sesión del panel), el segundo `FINGERPRIN
 
 ### 2. Aprieta el botón
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FRibs-org%2Fportafolio-page&env=ADMIN_EMAIL,AUTH_SECRET,FINGERPRINT_SALT,RESEND_API_KEY&envDescription=Tu%20correo%2C%20la%20llave%20de%20Resend%20y%20los%20dos%20secretos%20que%20generaste&envLink=https%3A%2F%2Fgithub.com%2FRibs-org%2Fportafolio-page%2Fblob%2Fmain%2F.env.example&project-name=portafolio&repository-name=portafolio)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FRibs-org%2Ftu-parrilla&env=ADMIN_EMAIL,AUTH_SECRET,FINGERPRINT_SALT,RESEND_API_KEY&envDescription=Tu%20correo%2C%20la%20llave%20de%20Resend%20y%20los%20dos%20secretos%20que%20generaste&envLink=https%3A%2F%2Fgithub.com%2FRibs-org%2Ftu-parrilla%2Fblob%2Fmain%2F.env.example&project-name=tu-parrilla&repository-name=tu-parrilla)
 
 Vercel copia este repositorio a tu cuenta de GitHub y te pide cuatro variables:
 
@@ -366,8 +375,8 @@ panel se abre para probar una rama. Sin `DOMINIO_PRODUCTO`, nada se redirige.
 <summary>Sin el botón (fork manual)</summary>
 
 ```bash
-gh repo fork Ribs-org/portafolio-page --clone
-cd portafolio-page
+gh repo fork Ribs-org/tu-parrilla --clone
+cd tu-parrilla
 npm install
 npm run setup        # crea .env.local con AUTH_SECRET y FINGERPRINT_SALT ya generados
 ```
@@ -1354,6 +1363,7 @@ src/
   proxy.ts                 manda el panel abierto en otro dominio al del producto
   app/
     page.tsx               la landing en el dominio del producto; el perfil principal en el resto
+    error.tsx              «Algo se rompió» de las páginas públicas; global-error.tsx, el de la raíz entera
     [slug]/                la página de un usuario, acotada al dueño del dominio
     icon.svg               favicon
     api/track/click/       endpoint del sendBeacon
@@ -1377,6 +1387,16 @@ src/
     charts/                gráficos y paleta validada
   lib/
     tema.ts                el modo de la cuenta (noche o día) y su copia en una cookie; tema-servidor.ts lee la cookie
+    networks.ts            las redes que existen y las que están en «Próximamente»; lo leen el panel y el navegador
+    ingreso-frases.ts      las frases de la entrada, sin código de servidor: las usan los formularios del navegador
+    cron-auth.ts           si una petición trae el CRON_SECRET, comparado en tiempo constante
+    limite.ts              la cuenta de intentos por IP, pura; limite-ip.ts la guarda en la memoria de la instancia
+    mensaje-firmado.ts     el aviso que viaja en la URL de un redirect, firmado para que nadie escriba uno falso
+    uuid.ts                si un texto es un uuid: los ids de las URLs se revisan antes de consultar
+    choque-de-unicidad.ts  si un error de la base es un choque con una restricción de unicidad dada
+    subida-directa.ts      la subida del navegador directo al almacén, con la URL que firma /api/admin/upload-url
+    use-ahora.ts           la hora de ahora, al minuto: la del servidor al hidratar, y después se corre sola
+    copiar.ts              copiar al portapapeles y saber si de verdad se copió
     slugs.ts               qué direcciones están reservadas y cuál le toca a cada correo
     dominios.ts            si un host es el del producto, y adónde va el panel si no lo es
     tracking.ts            contexto de la visita desde headers
@@ -1409,6 +1429,7 @@ public/docs/
   ui/                      la wiki de la interfaz: una página por pantalla, para guiar a quien se pierde
 scripts/
   setup.ts                 genera el .env.local
+  migrar.ts                migra la base en el build de Vercel, y adopta lo que no tenía dueño
   seed.ts                  perfiles iniciales
   demo-data.ts             tráfico falso para probar el dashboard
 ```

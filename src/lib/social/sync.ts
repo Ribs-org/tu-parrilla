@@ -4,6 +4,7 @@ import { and, asc, eq, inArray, isNull, sql } from 'drizzle-orm'
 import { accountMetrics, getDb, postMetrics, socialAccounts, socialPosts } from '@/db'
 import type { SocialAccount } from '@/db'
 import { localDay } from '../analytics'
+import { esChoqueCon } from '../choque-de-unicidad'
 import { env } from '../env'
 import { adminId, buscarPorId } from '../usuarios'
 import { ZONA_POR_DEFECTO } from '../zona'
@@ -45,24 +46,9 @@ async function ensureYouTubeAccount(): Promise<void> {
 // unrelated unique violation (e.g. a future constraint on the table) that should propagate.
 const CAMPAIGN_UNIQUE_CONSTRAINT = 'social_posts_campaign_unique'
 
+/** Where the driver puts the fields, and why both levels are checked: `esChoqueCon`. */
 export function isCampaignUniqueViolation(error: unknown): boolean {
-  const matches = (candidate: unknown): boolean => {
-    // This project's driver is `postgres` (postgres-js), not `node-postgres`: it maps the
-    // field to `constraint_name`, not `constraint` (see
-    // `node_modules/postgres/src/connection.js:46`). Both names are checked in case some
-    // layer normalizes it, but `constraint_name` is what actually arrives.
-    const { code, constraint_name, constraint } =
-      (candidate as { code?: string; constraint_name?: string; constraint?: string }) ?? {}
-    return code === '23505' && (constraint_name ?? constraint) === CAMPAIGN_UNIQUE_CONSTRAINT
-  }
-  // drizzle-orm 0.45.2 wraps every failing query in `DrizzleQueryError` and puts the
-  // driver's original error in `cause` (see `drizzle-orm/errors.cjs:35-45`, and every
-  // `throw new DrizzleQueryError(queryString, params, e)` in
-  // `drizzle-orm/pg-core/session.js`), so the pg fields above live one level down, not on
-  // the error this function catches. No `instanceof Error` guard up front, on purpose: it
-  // would also throw away a `cause` that happened not to be an `Error`. Same shape as
-  // `esChoqueDeUnicidad` in `src/lib/usuarios.ts`.
-  return matches(error) || matches((error as { cause?: unknown })?.cause)
+  return esChoqueCon(error, CAMPAIGN_UNIQUE_CONSTRAINT)
 }
 
 /**

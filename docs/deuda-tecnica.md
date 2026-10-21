@@ -4,33 +4,6 @@ Lo que se dejó a medias a propósito, con el porqué y lo que costaría termina
 lista de deseos: cada entrada nació de un problema real que se parcheó para seguir.
 
 ---
-## Un guardia de choque de unicidad estuvo muerto sin que nadie lo notara
-
-**Abierto el 2026-09-24, cerrado el mismo día.** Queda escrito porque la forma de fallar se
-va a repetir.
-
-`isCampaignUniqueViolation` comparaba el error contra una propiedad `constraint`. Ese es el
-nombre que usa `node-postgres`; el driver de este proyecto es `postgres-js`, que mapea ese
-campo a **`constraint_name`** (`node_modules/postgres/src/connection.js:46`). La función no
-podía devolver `true` nunca, así que un choque de `social_posts_campaign_unique` reventaba
-la sincronización en vez de reintentar con la etiqueta desambiguada, que es justo lo que su
-comentario prometía.
-
-Sobrevivió porque nadie lo probó: `sync.ts` no tenía tests. Y estuvo a punto de propagarse,
-porque se mandó copiar ese archivo como precedente para el guardia equivalente de
-`profiles.slug`.
-
-**Las dos mitades que hay que recordar**, porque arreglar solo una deja el guardia igual de
-muerto:
-
-1. El nombre del campo es `constraint_name`, no `constraint`.
-2. **Drizzle envuelve toda consulta fallida** en `DrizzleQueryError` y deja el error del
-   driver en `cause` (`drizzle-orm/errors.cjs:35-45`, `pg-core/session.js:41`), así que hay
-   que mirar en los dos niveles.
-
-Los dos sitios quedaron arreglados y con tests que usan la forma real del driver envuelta.
-Si aparece un tercer guardia de este tipo, sale de ahí.
-
 ## La página de un usuario se crea al invitarlo, pero nadie rellena hacia atrás
 
 **Abierto desde 2026-09-24.**
@@ -73,17 +46,10 @@ reparte entre procesos.
 Mientras no se identifique, **una corrida roja en CI no se puede dar por buena sin mirar qué
 falló**: puede ser esto o puede ser real, y la diferencia importa.
 
-## Dos guardias de choque de unicidad, idénticos, en dos archivos
-
-**Abierto desde 2026-09-24.**
-
-`esChoqueDeUnicidad` (`src/lib/usuarios.ts`) e `isCampaignUniqueViolation`
-(`src/lib/social/sync.ts`) son la misma función con otro nombre de restricción: una
-comentada en español y otra en inglés, con dos suites de tests que prueban lo mismo. El bug
-del `constraint_name` vivió en las dos copias **justamente por eso**, y se arregló dos veces.
-
-Un `esViolacionDeUnicidad(error, nombreRestriccion)` compartido cierra la puerta. Si aparece
-un tercer guardia de este tipo antes de que eso pase, la deuda ya costó más de lo que ahorró.
+Una causa sí apareció después: un `await import()` dentro de un `it` paga la transformación de
+todo lo que trae en medio de la prueba, y bajo carga se pasa de `testTimeout`. Los que había se
+movieron arriba del archivo (`aislamiento.test.ts`, `usuarios.test.ts` y, el 2026-10-21,
+`filters.test.ts`); no se sabe si era la única.
 
 ## La prueba que «no envejece» solo mira directorios
 
@@ -98,32 +64,6 @@ Pero solo lee **directorios**. Una ruta de convención por archivo —`sitemap.t
 solo porque alguien lo escribió a mano en la lista, que es exactamente lo que este test
 existe para no depender. Hoy no falta ninguna; la garantía es más chica que su promesa.
 
-## El tercer detector de choque de unicidad, y por qué se cuentan tres
-
-**Anotado el 2026-09-24.** Los tres están arreglados; queda escrito el patrón.
-
-`updateProfile` detectaba el choque con `String(error).includes('profiles_slug_unique')`.
-Nunca podía casar: drizzle envuelve la consulta fallida en un `DrizzleQueryError` cuyo
-mensaje es solo `Failed query: <sql>`, y deja el error del driver en `cause`. Venía desde el
-primer commit del repositorio.
-
-Con este van **tres** detectores muertos del mismo choque, escritos en tres formas
-distintas, en tres archivos, a lo largo de meses. Ninguno falló ruidosamente: cada uno
-degradó en silencio —una sincronización que revienta en vez de reintentar, un reintento de
-dirección que nunca ocurre, un mensaje que no dice qué pasó—. El arreglo de los tres cabe en
-una función.
-
-La lección operativa, para la próxima vez que haya que reconocer un error de Postgres:
-
-- **El código va en `cause`**, no en el error que se atrapa. Drizzle envuelve siempre.
-- **El campo es `constraint_name`**, que es lo que expone `postgres-js`. `constraint` es de
-  `node-postgres`, que no es el driver de este proyecto.
-- **Comparar contra el texto del mensaje no funciona** y, peor, no falla: devuelve `false` y
-  el camino alternativo simplemente no ocurre.
-- **Escribe el test con la forma real del driver envuelta por drizzle.** Un test que arma un
-  objeto plano `{ code, constraint }` pasa con la función rota; los tres detectores
-  sobrevivieron justamente porque nadie los probó, o los probó contra una ficción.
-
 ## El arnés de aislamiento solo llega a `src/lib`
 
 **Abierto desde 2026-09-24.**
@@ -132,16 +72,19 @@ La lección operativa, para la próxima vez que haya que reconocer un error de P
 consulta al dueño. Eso deja sin protección cualquier consulta escrita **fuera de
 `src/lib`**. La del calendario (`schedule/page.tsx`) lo estuvo hasta el 2026-09-29, cuando
 El Fuego necesitó la misma lectura y se movió a `src/lib/social/publish/cortes.ts`, donde
-el arnés sí la ve. Eso achicó la superficie en una, no la cerró: `grep -rln "getDb()"
-src/app` (sin contar el test) da hoy doce archivos que arman su propio SQL, en tres clases:
+el arnés sí la ve. Eso achicó la superficie en una, no la cerró: al 2026-10-21, `grep -rln
+"getDb()" src/app` (sin contar los tests) da trece archivos que arman su propio SQL, en
+cuatro clases:
 
-- **Cuatro páginas del panel**: `schedule/[id]/page.tsx`, `profiles/[id]/page.tsx`,
-  `analytics/page.tsx` y `accounts/elegir/page.tsx`.
+- **Tres páginas del panel**: `schedule/[id]/page.tsx`, `profiles/[id]/page.tsx` y
+  `accounts/elegir/page.tsx`.
 - **Las acciones de servidor**, `admin/actions.ts`, con decenas de consultas (la guardia de
   `rescheduleTarget` que se añadió el 2026-09-29 es una de ellas).
-- **Siete rutas de API**: `api/schedule/posts`, `api/mobile/schedule`, `api/mobile/overview`
+- **Ocho rutas de API**: `api/schedule/posts`, `api/mobile/schedule`, `api/mobile/overview`
   (esta con dos consultas, una por ventana), `api/mobile/accounts`,
-  `api/mobile/schedule/accounts`, `api/track/visit` y `api/track/click`.
+  `api/mobile/schedule/accounts`, `api/mobile/tema`, `api/track/visit` y `api/track/click`.
+- **La página de un borrado** (`(legal)/borrado/[codigo]/page.tsx`), que es la excepción de
+  más abajo.
 
 De todas ellas, solo las tres primeras rutas se leyeron a mano el 2026-09-24 y tenían el
 dueño en el `WHERE`; del resto esta entrada no afirma nada, y las dos de `api/track/*`
@@ -152,7 +95,7 @@ chille.
 El calendario no se extrajo por criterio sino porque otra pantalla la pedía; el patrón
 real del repositorio sigue siendo que el arnés llega a `src/lib` y no a las páginas, las
 acciones ni las rutas de API que arman su propio SQL. Cerrarlo de verdad pide decidir
-cuáles de esas doce se trasladan a `src/lib`, o extender el arnés para que también las
+cuáles de esas trece se trasladan a `src/lib`, o extender el arnés para que también las
 alcance ahí donde viven.
 
 Y hay una excepción al revés, dentro de `src/lib`: `src/lib/social/meta-bajas.ts`
@@ -188,7 +131,9 @@ el compositor, el más transitado, a cuestas de un cambio de vocabulario—.
 
 El costo: un cambio futuro en cómo se escriben los destinos de un post (la tabla
 `scheduled_post_targets`, sus columnas, su validación) hay que hacerlo dos veces, y las dos
-copias pueden divergir sin que nada lo note. Cerrarlo pide que `crearPostProgramado` acepte
+copias pueden divergir sin que nada lo note. Desde el 2026-10-21 cada camino escribe en una
+transacción —un post no puede quedar sin sus destinos—, pero cada uno en la suya: la
+atomicidad también está escrita dos veces. Cerrarlo pide que `crearPostProgramado` acepte
 portada y atributos, o que `batch.ts` la llame para escribir destinos y solo haga sus
 propios `insert` para lo que le es propio.
 
@@ -308,24 +253,13 @@ perderlos.
   razonable —ver el ledger de la entrega— pero vale saber dónde vive esa cobertura antes
   de tocar `resolverDestinos`.
 
-## Dos frases de error siguen nombrando «Perfiles», no «La Vitrina»
-
-**Anotado el 2026-09-29**, durante la revisión final del panel con poco a priori (entrega 1
-de navegación). `profiles/[id]/editor.tsx:419` y `src/app/admin/actions.ts:221` comparten,
-letra por letra, «No puedes borrar tu página principal: primero haz principal a otra página,
-desde «Perfiles».» — el nombre viejo de la pestaña que hoy es **La Vitrina**. Las demás cinco
-frases visibles que nombraban pestañas por su nombre viejo se corrigieron en esta misma
-entrega usando `nombreDe` de `src/lib/vocabulario.ts`; estas dos no, porque las dos tienen
-tests que comparan el texto letra por letra (el mensaje de error de `deleteProfile` y su
-reflejo en el editor). Cerrarlo cuesta actualizar esos tests junto con la frase — un cambio
-chico, pero deliberadamente fuera de esta entrega, que no tocaba tests de otras.
-
 ## «Se quemó» no tiene ventana de fecha ni forma de podarse
 
 **Abierto desde 2026-09-29.**
 
-`quemados` (`src/lib/fuego.ts`), sobre todo lo programado del dueño, toma **todo** destino
-en `failed`, sin mirar la fecha, y La Parrilla los lista enteros arriba del calendario. Es a propósito: un fallo viejo
+`cortesQuemados` (`src/lib/social/publish/cortes.ts`) lee **todo** corte del dueño con algún
+destino en `failed`, sin mirar la fecha; `quemados` (`src/lib/fuego.ts`) saca de ahí los
+destinos, y La Parrilla los lista enteros arriba del calendario. Es a propósito: un fallo viejo
 sigue pidiendo la acción hasta que alguien lo reprograma, y esconderlo a los siete días
 sería perderlo en silencio. Desde esta entrega la lista va del más reciente al más viejo y
 cada fila que no es de hoy lleva su día y su mes delante, así que al menos se sabe qué es
@@ -343,7 +277,7 @@ contrario de «solo lo que pide una acción hoy».
 
 Cerrarlo pide una decisión de producto antes que código: qué significa «ya no me importa»
 —una columna `descartado_en` en `scheduled_post_targets`, o un estado nuevo en el enum—, un
-botón que lo escriba, y la condición correspondiente en `quemadosDe`. Con eso decidido son
+botón que lo escriba, y la condición correspondiente en `cortesQuemados`. Con eso decidido son
 una migración, una acción y un test; sin decidirlo, cualquier límite que se ponga hoy
 —«solo los últimos treinta días»— esconde trabajo pendiente sin avisar.
 
@@ -412,8 +346,9 @@ así que no hay dónde darse cuenta. Con el dueño y su teléfono en el mismo si
 hoy— no se nota, y por eso quedó fuera del alcance de la entrega, que nombraba `api/mobile/*`
 y no la app.
 
-Cerrarlo es barato y son dos decisiones, no una: que `GET /api/mobile/overview` devuelva
-`zona` junto a los kpis, y después o bien el selector compone la hora en esa zona (lo
+Cerrarlo es barato y son dos decisiones, no una: que una ruta que la app ya lee devuelva
+`zona` —`GET /api/mobile/schedule`, que ya manda `hoy` en la zona del dueño; `overview` no,
+que la app de hoy no llama—, y después o bien el selector compone la hora en esa zona (lo
 correcto: «19:00» es 19:00 del dueño en los dos lados), o bien la app solo la muestra junto
 al selector («se publicará a las 19:00 de Europe/Madrid») y deja que el dueño traduzca. Lo
 segundo es una tarde; lo primero pide aritmética de zonas en el cliente, que es justo lo
@@ -529,6 +464,71 @@ CSP mal armada no avisa: deja la página en blanco o sin imágenes.
 Terminarlo es armarla primero en modo `Content-Security-Policy-Report-Only`, mirar una semana
 qué reporta, completar la lista, y recién ahí pasarla a la cabecera que bloquea. Un día de
 trabajo repartido en esa semana.
+
+## Las visitas y las métricas no se podan nunca (2026-10-21)
+
+`visits` y `clicks` guardan una fila por visita y por clic de las páginas públicas, y
+`post_metrics` y `account_metrics`, una lectura por publicación y por cuenta cada día que se
+sincroniza. Ninguna se borra, salvo lo de YouTube, que se va a los 30 días sin refrescarse
+porque sus políticas lo piden (`retencion-youtube`). Con pocos usuarios no pesa; con más, son
+las tablas que crecen sin techo, y el plan gratis de Supabase tiene 500 MB.
+
+Quedó así porque podar es decidir qué se pierde: Los Números compara períodos («Todo» empieza
+en 2020) y mira la curva de cada publicación por edad, así que borrar lecturas viejas cambia lo
+que muestran. Cerrarlo pide decidir cuánto se guarda entero —un año, por ejemplo—, juntar lo
+más viejo en resúmenes por día y por mes (una tabla por resumen y un cron que los llena), que
+las consultas de Los Números lean los resúmenes cuando el período lo pide, y contar en
+`/privacidad` cuánto se guarda cada cosa. Unos días, sobre todo por las consultas.
+
+## El aislamiento por dueño vive solo en el código (2026-10-21)
+
+Cada consulta filtra por `owner_id` en su `WHERE`, y lo vigila el arnés de
+`aislamiento.test.ts` (ver «El arnés de aislamiento solo llega a `src/lib`», más arriba). La
+base no lo exige: la app entra como `postgres`, que se salta RLS, y las tablas tienen RLS
+encendido sin políticas solo para dejar a ciegas a la API de datos de Supabase (`0005_rls.sql`;
+`migraciones.test.ts` pide que toda tabla nueva lo encienda). Un `WHERE` que se olvide en una
+consulta nueva lee lo de otro dueño, y solo lo ataja una prueba, si alguien la escribió.
+
+Quedó así porque que la base lo exija pide que cada consulta sepa quién pregunta: un rol que no
+se salte RLS, políticas `owner_id = current_setting('app.dueno')` en cada tabla con dueño, y
+fijar ese valor al empezar cada transacción, que con el pooler de Supabase en modo transacción
+hay que hacer con `set_config(…, true)` dentro de la misma transacción. Las rutas sin dueño
+—las balizas, los callbacks de Meta, los crons— necesitan su propio camino. Es un cambio en
+cómo se abre cada consulta del proyecto; una semana con sus pruebas contra una Postgres de
+verdad.
+
+## La versión de la app no impide mandar por aire lo que el binario no trae (2026-10-21)
+
+`mobile/app.json` usa `runtimeVersion: { policy: "appVersion" }`: toda actualización por aire
+de la versión 1.1.0 le llega a todo binario 1.1.0, sin mirar qué módulos nativos trae cada uno.
+Si un cambio de JavaScript empieza a usar un módulo nativo nuevo y se publica por aire antes del
+build, la app instalada lo pide y no lo tiene, y se cae al abrir. Hoy lo cuida la costumbre: los módulos nativos se agregan junto
+con un build y una versión nueva, y Dependabot no toca la app (`.github/dependabot.yml`). El CI
+tampoco lo ve: prueba el JavaScript de la app, no construye el binario.
+
+Quedó así porque la salida, `policy: "fingerprint"`, calcula la versión a partir de lo nativo y
+cambia cómo se publica: cada cambio nativo da una versión nueva que solo recibe lo publicado
+para ella, y el binario instalado hoy queda sin actualizaciones hasta el próximo build. Hacerlo
+es cambiar la política, construir un binario nuevo para la Play Store, ajustar
+`mobile/README.md` y el script de publicación por aire, y probar que el canal `preview` del APK
+sigue recibiendo lo suyo. Medio día, más la espera del build y de la revisión de Google.
+
+## Los dos compositores son archivos de cientos de líneas (2026-10-21)
+
+`schedule/composer.tsx` en el panel (unas 850 líneas) y `mobile/src/app/(tabs)/publicar.tsx` en
+la app (unas 790) tienen cada uno en un solo componente el formulario, el guardado del
+borrador, la cola de subidas, la validación y el envío, con refs que se cruzan entre awaits. Se
+leen de arriba abajo, pero un cambio en el guardado obliga a entender la subida, y las pruebas
+llegan solo a lo puro que ya salió a `lib/` (`borradores.ts`, `publicar.ts`): el ciclo entero
+—escribir, subir, guardar, programar— no tiene prueba que no sea a mano. `admin/actions.ts`
+(unas 1500 líneas) es el mismo caso del lado del servidor, con todas las acciones del panel
+juntas.
+
+Quedó así porque partirlos toca los dos caminos más usados del producto, y lo que se ganaría no
+arregla nada que hoy falle. Cerrarlo es sacar cada pieza a un hook propio —`useBorrador`,
+`useSubidas`, `useEnvio`— que se pruebe con un renderizador de React (hoy no hay ninguno en el
+repositorio, ni en el sitio ni en la app), y partir `actions.ts` por pantalla. Unos días por
+compositor, mejor de a uno y con el otro quieto.
 
 ## Lo nativo de la app no cambia de modo (2026-10-19)
 

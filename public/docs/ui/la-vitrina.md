@@ -88,7 +88,7 @@ Cómo sale cada tipo en la página pública:
 - «Cambiar la URL secreta»: solo en las páginas que no son la principal.
 - «Borrar perfil»: solo si la página no es la principal y tienes más de una. Si no se puede, en su lugar aparece la razón:
   - «No puedes borrar tu única página: todo usuario necesita al menos una.»
-  - «No puedes borrar tu página principal: primero haz principal a otra página, desde «Perfiles».» («Perfiles» es el nombre antiguo de La Vitrina.)
+  - «No puedes borrar tu página principal: primero haz principal a otra página, desde «La Vitrina».»
 
 **«Vista previa»**: la página como la vería un visitante, con lo que se está escribiendo aunque no se haya guardado. Muestra todos los links prendidos, incluso los que por «Programar visibilidad» todavía no aparecen, o ya desaparecieron, en la página real. Lo que pasa en la vista previa no cuenta como visita ni como clic.
 
@@ -249,7 +249,7 @@ Sirve cuando una dirección privada circuló más de la cuenta.
 | «Se generará una URL nueva y la actual dejará de funcionar.» | Pregunta de «Cambiar la URL secreta». | Aceptar si se quiere invalidar la dirección actual. |
 | «Se borra "nombre" con sus links y métricas. ¿Seguir?» | Pregunta de «Borrar perfil». | Aceptar solo si se quiere perder todo eso. |
 | «No puedes borrar tu única página: todo usuario necesita al menos una.» | Es la única página de la persona. | Se puede vaciar o despublicar, pero no borrar. |
-| «No puedes borrar tu página principal: primero haz principal a otra página, desde «Perfiles».» | Es la principal. «Perfiles» es La Vitrina. | Hacer principal a otra en La Vitrina y después borrar esta. |
+| «No puedes borrar tu página principal: primero haz principal a otra página, desde «La Vitrina».» | Es la principal. | Hacer principal a otra en La Vitrina y después borrar esta. |
 | «Esta es tu página principal, por eso su dirección no se edita aquí. Para cambiarla, haz principal a otra página primero.» | Explica por qué el campo «URL» está gris. | Ver más arriba cómo cambiar la dirección de la página principal. |
 | «No encontramos esa página» / «La dirección no existe, o la página dejó de estar publicada.» (en la página pública) | La dirección está mal escrita, cambió, o la página tiene «Publicado» apagado. | Copiar la dirección de «Compartir» y revisar «Publicado». |
 | «Todavía no hay links acá.» (en la página pública) | La página no tiene ningún link visible ahora: no hay, están apagados o fuera de sus fechas. | Agregar o prender links. |
