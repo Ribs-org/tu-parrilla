@@ -38,15 +38,10 @@ Cómo se usa:
   reordenamiento de enlaces, los dos que lanzaban una consulta por fila, son una sola; los
   `Promise.all` que siguen lanzan cuatro consultas como mucho.
 - **[dueño] Probar una vez lo de la revisión de deuda técnica del 2026-10-21 que no se pudo
-  probar en un navegador.** En el teléfono, después de la actualización por aire: que el
-  candado se pida al abrir la app, y que «Cerrar sesión» vuelva a la entrada sin que «atrás»
-  lleve a ninguna pantalla de la cuenta (`Alert` no se dibuja en la versión web). En el panel:
-  agregar un video en el editor de un post programado, que ahora sube directo al almacén
-  (#231).
-- **[dueño] Reconectar el canal de YouTube que perdió el permiso** (2026-10-21). Los registros
-  de producción traen `Google refresh: 400 invalid_grant`: Google ya no acepta el permiso de
-  una cuenta de YouTube, y esa cuenta no publica ni lee hasta que se reconecte en Los Fierros,
-  donde se ve cuál es.
+  probar en un navegador.** En el panel: agregar un video en el editor de un post
+  programado, que ahora sube directo al almacén (#231). En el teléfono, después de la
+  actualización por aire: que «Cerrar sesión» vuelva a la entrada sin que «atrás» lleve a
+  ninguna pantalla de la cuenta (`Alert` no se dibuja en la versión web).
 - **La cola de #234 (copiar los videos del lote en segundo plano) no se hace por ahora**
   (2026-10-21). Los otros issues de ese envío ya están: bajar en paralelo (#235), cuánto tardó
   y por qué falló cada fila (#238), una sola descarga por URL en un lote (#236) y
@@ -186,8 +181,10 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   de `videos.insert` quedó en 100 (un borrador lo tenía en 1000), y si «Pyxis oficial» se
   reconectó al usuario revisor antes de enviar. Si la respuesta toca alguna, se aclara en el
   mismo hilo. **Mientras tanto:** que «Pyxis oficial» esté conectado al usuario revisor
-  (las instrucciones de acceso lo dan por conectado; verificarlo en Los Fierros entrando
-  como `revision@tu-parrilla.cl`) y que haya algún comentario pendiente en La Mesa (los de
+  (las instrucciones de acceso lo dan por conectado). Al 2026-10-21 no lo está: Google ya no
+  acepta su permiso (`invalid_grant` en los registros de producción, cada media hora), así
+  que hay que entrar como `revision@tu-parrilla.cl` y reconectarlo en Los Fierros. Y que
+  haya algún comentario pendiente en La Mesa (los de
   YouTube se borran a los 30 días). Contestar siempre en el mismo hilo del correo. Al
   aprobarse, ver «Después de aprobar» en el guion.
 - **Por revisar: qué se borra al desconectar YouTube** (2026-10-06). Desconectar borra las
