@@ -1,4 +1,15 @@
 /**
+ * Lo más que pesa un archivo que se puede programar, sea cual sea la red. Lo mira la subida
+ * (`prepararSubida`) contra lo que declara quien sube, y lo vuelven a mirar contra lo que de
+ * verdad quedó en el almacén el programar (`mediaYaSubida`, la ruta del teléfono), la copia
+ * de una media por URL (`mediaToBlob`) y la subida a YouTube. La firma de la subida no fija
+ * un tamaño, así que lo declarado no alcanza: un archivo más grande llegaba igual, y el video
+ * entero entra en la memoria de la función que lo publica.
+ */
+export const MAX_BYTES_ARCHIVO = 500 * 1024 * 1024
+export const ARCHIVO_MUY_GRANDE = 'El archivo supera los 500 MB.'
+
+/**
  * Lo que cada red acepta, medido en el navegador antes de programar.
  *
  * Existe porque una publicación rechazada por el archivo no se sabe hasta veinte minutos

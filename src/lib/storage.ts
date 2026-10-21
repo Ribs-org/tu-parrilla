@@ -141,20 +141,21 @@ export async function urlParaSubir(
 }
 
 /**
- * Si el objeto está en el bucket. Falso ante una URL ajena o sin almacén: lo que no es
- * nuestro no puede «existir» para un post. Cualquier otro error de R2 sube, porque no
- * es lo mismo «no está» que «no pude preguntar».
+ * Cuánto pesa el objeto en el bucket, o null si no está. Null ante una URL ajena o sin
+ * almacén: lo que no es nuestro no puede «existir» para un post. Cualquier otro error de R2
+ * sube, porque no es lo mismo «no está» que «no pude preguntar». El tamaño es el de lo que
+ * de verdad se subió, no el que declaró quien subía (`prepararSubida`).
  */
-export async function existe(url: string): Promise<boolean> {
+export async function tamanoEnAlmacen(url: string): Promise<number | null> {
   const conf = config()
-  if (!conf) return false
+  if (!conf) return null
   const key = keyDesdeUrl(conf.base, url)
-  if (!key) return false
+  if (!key) return null
   try {
-    await getCliente().send(new HeadObjectCommand({ Bucket: conf.bucket, Key: key }))
-    return true
+    const cabecera = await getCliente().send(new HeadObjectCommand({ Bucket: conf.bucket, Key: key }))
+    return cabecera.ContentLength ?? 0
   } catch (error) {
-    if ((error as { name?: string }).name === 'NotFound') return false
+    if ((error as { name?: string }).name === 'NotFound') return null
     throw error
   }
 }

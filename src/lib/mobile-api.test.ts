@@ -262,6 +262,15 @@ describe('parseMediaMovil', () => {
     })
     expect(parseMediaMovil({ media: 'https://m.x/a' })).toEqual({ error: CUERPO_ILEGIBLE })
   })
+
+  it('más archivos de los que recibe cualquier red, o una URL kilométrica, son un cuerpo armado a mano', () => {
+    const una = { url: 'https://m.x/scheduled/a.jpg', mediaType: 'image' }
+    expect(parseMediaMovil({ media: Array.from({ length: 35 }, () => una) })).toHaveLength(35)
+    expect(parseMediaMovil({ media: Array.from({ length: 36 }, () => una) })).toEqual({ error: CUERPO_ILEGIBLE })
+    expect(parseMediaMovil({ media: [{ url: `https://m.x/${'a'.repeat(2100)}`, mediaType: 'image' }] })).toEqual({
+      error: CUERPO_ILEGIBLE,
+    })
+  })
 })
 
 describe('resolverCuando', () => {

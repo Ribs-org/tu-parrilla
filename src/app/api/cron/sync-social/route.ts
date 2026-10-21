@@ -3,6 +3,7 @@ import { enviarResumenes } from '@/lib/avisos/run'
 import { purgarYoutubeViejo } from '@/lib/social/retencion-youtube'
 import { syncAll } from '@/lib/social/sync'
 import { env } from '@/lib/env'
+import { cronAutorizado } from '@/lib/cron-auth'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 300
@@ -11,7 +12,7 @@ export async function GET(request: Request) {
   const secret = env('CRON_SECRET')
   // Without a secret the endpoint stays shut rather than open: an unauthenticated
   // sync is a free way for anyone to burn the day's API quota.
-  if (!secret || request.headers.get('authorization') !== `Bearer ${secret}`) {
+  if (!cronAutorizado(request.headers.get('authorization'), secret)) {
     return new NextResponse('No autorizado', { status: 401 })
   }
 

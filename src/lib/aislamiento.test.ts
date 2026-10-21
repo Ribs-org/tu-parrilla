@@ -583,7 +583,7 @@ describe('aislamiento por dueño, escrituras (SQL generado, sin base)', () => {
   it('admin/actions: deleteScheduledPost ata su lectura y su DELETE al dueño', async () => {
     // Dos consultas en una transacción: los destinos del post, bloqueados (el dueño va en la
     // subconsulta que elige el post), y el DELETE. Con un destino programado sigue al DELETE.
-    const consultas = await consultasEncadenadas(() => deleteScheduledPost('post-x'), [
+    const consultas = await consultasEncadenadas(() => deleteScheduledPost('6f1c2a54-9b1e-4c3d-8f00-0123456789ab'), [
       [{ status: 'scheduled', reclamadoHasta: null }],
     ])
     expect(consultas).toHaveLength(2)

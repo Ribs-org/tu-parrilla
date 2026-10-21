@@ -10,6 +10,7 @@ import { getAllLinks, getAllProfiles } from '@/lib/profiles'
 import { adminId } from '@/lib/usuarios'
 import { enlacePublicoDe, toZonedInput, urlPublicaDe } from '@/lib/utils'
 import { nombreDe } from '@/lib/vocabulario'
+import { esUuid } from '@/lib/uuid'
 import { ProfileEditor } from './editor'
 import type { DraftLink } from './link-row'
 
@@ -17,6 +18,8 @@ export const dynamic = 'force-dynamic'
 
 export default async function EditProfilePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
+  // Un id sin forma de uuid es «no existe»: a la base le llegaría como un error, no como cero filas.
+  if (!esUuid(id)) notFound()
   // `zona` dibuja las ventanas de los links en la zona del dueño, que es la misma en la que
   // `readLinkForm` las vuelve a leer al guardar.
   const { id: ownerId, zona } = await requireUser()

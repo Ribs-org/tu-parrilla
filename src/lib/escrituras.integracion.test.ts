@@ -248,6 +248,32 @@ describe.skipIf(!URL_PRUEBAS)('escrituras y lecturas contra una Postgres de verd
     })
   })
 
+  describe('la baliza de clics', () => {
+    it('un enlace o una visita de otra página no entran en los números de esta', async () => {
+      const { clicks, links, visits } = await esquema()
+      const { POST } = await import('@/app/api/track/click/route')
+      const owner = await dueno()
+      const ajeno = await dueno()
+      const suya = await pagina(owner)
+      const deOtro = await pagina(ajeno)
+      const [suyo] = await (await db()).insert(links).values({ profileId: suya.id, label: 'Mío', url: 'https://ejemplo.cl/mio' }).returning()
+      const [delOtro] = await (await db())
+        .insert(links)
+        .values({ profileId: deOtro.id, label: 'Del otro', url: 'https://ejemplo.cl/otro' })
+        .returning()
+      const [visita] = await (await db()).insert(visits).values({ profileId: suya.id, visitorHash: 'v' }).returning()
+      const clic = (cuerpo: Record<string, unknown>) =>
+        POST(new Request('https://ejemplo.cl/api/track/click', { method: 'POST', body: JSON.stringify(cuerpo) }))
+
+      await clic({ profileId: suya.id, linkId: suyo!.id, visitId: visita!.id })
+      await clic({ profileId: suya.id, linkId: delOtro!.id, visitId: visita!.id })
+
+      const guardados = await (await db()).select().from(clicks).where(eq(clicks.profileId, suya.id))
+      expect(guardados.map((c) => c.linkId).sort()).toEqual([null, suyo!.id].sort())
+      expect(guardados.every((c) => c.visitId === visita!.id)).toBe(true)
+    })
+  })
+
   describe('getPostSeries', () => {
     it('las visitas de una campaña cuentan solo en las páginas del dueño', async () => {
       const { socialPosts, visits } = await esquema()

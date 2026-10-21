@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { traerIdeas } from '@/lib/social/fuentes/run'
 import { env } from '@/lib/env'
+import { cronAutorizado } from '@/lib/cron-auth'
 
 export const dynamic = 'force-dynamic'
 // Holgado: la traída son unas pocas llamadas a X, una por creador de la lista, y corre
@@ -10,7 +11,7 @@ export const maxDuration = 120
 export async function GET(request: Request) {
   const secret = env('CRON_SECRET')
   // Misma disciplina que publish-social: sin secreto el endpoint queda cerrado.
-  if (!secret || request.headers.get('authorization') !== `Bearer ${secret}`) {
+  if (!cronAutorizado(request.headers.get('authorization'), secret)) {
     return new NextResponse('No autorizado', { status: 401 })
   }
 

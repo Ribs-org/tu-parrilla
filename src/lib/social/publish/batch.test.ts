@@ -330,6 +330,18 @@ describe('typeFromContentType', () => {
     expect(typeFromContentType('text/html; charset=utf-8')).toBeNull()
     expect(typeFromContentType('')).toBeNull()
   })
+
+  it('solo los formatos que se publican: un SVG o un MKV no pasan aunque digan ser imagen o video', () => {
+    // El tipo que devuelve queda firmado en el objeto del almacén, que es público: un SVG se
+    // serviría como tal.
+    expect(typeFromContentType('image/svg+xml')).toBeNull()
+    expect(typeFromContentType('image/heic')).toBeNull()
+    expect(typeFromContentType('video/x-matroska')).toBeNull()
+  })
+
+  it('image/jpg, que no es un tipo registrado pero mandan algunos teléfonos, es jpeg', () => {
+    expect(typeFromContentType('image/jpg')).toEqual({ mediaType: 'image', extension: 'jpg', tipo: 'image/jpeg' })
+  })
 })
 
 describe('mediaToBlob', () => {
@@ -350,6 +362,26 @@ describe('mediaToBlob', () => {
     expect(key).toMatch(/^scheduled\/[0-9a-f-]{36}\.jpg$/)
     expect(contentType).toBe('image/jpeg')
     expect(stored?.url).toBe(`https://media.ej.cl/${key}`)
+  })
+
+  it('un archivo que declara más de 500 MB se rechaza sin bajarlo ni subirlo', async () => {
+    const cuerpo = new ReadableStream({ start: (c) => c.enqueue(new Uint8Array([1])) })
+    const cancelar = vi.spyOn(cuerpo, 'cancel')
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        async () =>
+          new Response(cuerpo, {
+            status: 200,
+            headers: { 'content-type': 'video/mp4', 'content-length': String(600 * 1024 * 1024) },
+          }),
+      ),
+    )
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    expect(await mediaToBlob('https://ej.com/v.mp4', 'video')).toBeNull()
+    expect(guardarMock).not.toHaveBeenCalled()
+    expect(cancelar).toHaveBeenCalled()
+    error.mockRestore()
   })
 
   it('rechaza un host de red interna antes de tocar la red', async () => {

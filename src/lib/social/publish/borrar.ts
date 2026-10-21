@@ -1,6 +1,7 @@
 import { and, eq, inArray } from 'drizzle-orm'
 import { getDb, scheduledPosts, scheduledPostTargets } from '@/db'
 import { impideBorrar } from '@/lib/schedule-api'
+import { esUuid } from '@/lib/uuid'
 
 export type ResultadoBorrado = 'borrado' | 'no-existe' | 'publicado'
 
@@ -22,6 +23,8 @@ export type ResultadoBorrado = 'borrado' | 'no-existe' | 'publicado'
  * `DELETE` no encontró nada: «no existe» y «no es tuyo» son la misma respuesta a propósito.
  */
 export async function borrarPostProgramado(ownerId: string, postId: string): Promise<ResultadoBorrado> {
+  // Un id sin forma de uuid no existe: a la base le llegaría como un error, no como cero filas.
+  if (!esUuid(postId)) return 'no-existe'
   return getDb().transaction(async (tx) => {
     const delDueno = tx
       .select({ id: scheduledPosts.id })

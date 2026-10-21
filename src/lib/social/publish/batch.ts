@@ -3,12 +3,13 @@ import { extensionDe, validateScheduleDraft } from './validate'
 import { validateAtributos } from './atributos'
 import { validarOpcionesPorCuenta, errorDeMediaPorOpciones, OPCIONES_ERROR, type OpcionesDestino } from './opciones'
 import { guardar } from '@/lib/storage'
+import { ARCHIVO_MUY_GRANDE, MAX_BYTES_ARCHIVO } from './limites'
 import { getDb, scheduledPosts, scheduledPostMedia, scheduledPostTargets, reglasClave } from '@/db'
 import { and, eq } from 'drizzle-orm'
 import { randomUUID } from 'node:crypto'
 import { CuentaInvalida, cuentaUnicaPorRed, verificarCuentas, type CuentaDestino } from '../cuentas'
 import { validarRegla, REGLA_DOCUMENTO } from '../comentarios/reglas'
-import { descargarSeguro } from './descarga-segura'
+import { descargarSeguro, leerConTope } from './descarga-segura'
 import { documentoToBlob } from './documento'
 import { buscarPorId } from '@/lib/usuarios'
 import { ZONA_POR_DEFECTO } from '@/lib/zona'
@@ -169,15 +170,29 @@ const EXTENSION_BY_SUBTYPE: Record<string, string> = { jpeg: 'jpg', quicktime: '
 const SUBTYPE_BY_EXTENSION: Record<string, string> = { jpg: 'jpeg', mov: 'quicktime' }
 
 /**
+ * Los subtipos que se publican: los mismos formatos que reconocen las extensiones de arriba.
+ * Antes valía cualquier `image/*` o `video/*`, y el tipo que declaraba quien subía quedaba
+ * firmado en el objeto del almacén, que es público: un `image/svg+xml` se servía como tal.
+ */
+const SUBTIPOS: Record<'image' | 'video', ReadonlySet<string>> = {
+  image: new Set(['jpeg', 'png', 'gif', 'webp']),
+  video: new Set(['mp4', 'quicktime', 'webm']),
+}
+
+/**
  * El content-type de la descarga, resuelto a un tipo de media, una extensión para el
  * nombre del blob, y `tipo` — el `tipo/subtipo` canónico, sin parámetros como
- * `; charset=…`, listo para pasarle a Meta o YouTube como content-type del objeto.
+ * `; charset=…`, listo para pasarle a Meta o YouTube como content-type del objeto. Null si
+ * no es un formato que se publica (`SUBTIPOS`).
  */
 export function typeFromContentType(
   contentType: string,
 ): { mediaType: 'image' | 'video'; extension: string; tipo: string } | null {
-  const [type, subtype = ''] = (contentType.split(';')[0] ?? '').trim().toLowerCase().split('/')
+  const [type, crudo = ''] = (contentType.split(';')[0] ?? '').trim().toLowerCase().split('/')
   if (type !== 'image' && type !== 'video') return null
+  // `image/jpg` no es un tipo registrado, pero hay teléfonos que lo mandan.
+  const subtype = crudo === 'jpg' ? 'jpeg' : crudo
+  if (!SUBTIPOS[type].has(subtype)) return null
   return {
     mediaType: type,
     extension: EXTENSION_BY_SUBTYPE[subtype] ?? (subtype || 'bin'),
@@ -405,9 +420,19 @@ export async function mediaToBlob(
     console.error('Content-type inesperado en la media del lote:', contentType, url.slice(0, 200))
     return null
   }
+  // El cuerpo se lee con tope (`leerConTope`): `response.blob()` bufferea el archivo entero
+  // antes de que nadie pueda mirar su tamaño, y un origen que sirve gigas los servía igual.
+  // El `content-length` declarado ahorra abrir la lectura de un archivo que ya avisa de más.
+  if (Number(response.headers.get('content-length') ?? '0') > MAX_BYTES_ARCHIVO) {
+    await response.body?.cancel().catch(() => {})
+    console.error('La media del lote:', ARCHIVO_MUY_GRANDE, url.slice(0, 200))
+    return null
+  }
+  const cuerpo = await leerConTope(response, MAX_BYTES_ARCHIVO, url, 'la media del lote')
+  if (!cuerpo) return null
   const publicUrl = await guardar(
     `scheduled/${randomUUID()}.${detected.extension}`,
-    await response.blob(),
+    cuerpo,
     // El canónico que typeFromContentType ya parseó, no el header crudo: sin sus
     // parámetros (`; charset=binary` y similares) para que Meta y YouTube lean un
     // tipo limpio al descargar la media desde acá.

@@ -56,12 +56,25 @@ function clientIp(headers: Headers): string {
 }
 
 /**
+ * La sal del hash. Sin `FINGERPRINT_SALT` sale de `AUTH_SECRET`, que el despliegue ya tiene:
+ * antes caía en una constante escrita en este mismo repositorio, y con una sal pública el hash
+ * de una IP y un navegador se revierte probando todas las IP. La constante queda solo para un
+ * entorno sin ninguna de las dos, que no es un despliegue.
+ */
+function salDeVisitantes(): string {
+  const propia = env('FINGERPRINT_SALT')
+  if (propia) return propia
+  const secreto = env('AUTH_SECRET')
+  return secreto ? createHash('sha256').update(`visitantes:${secreto}`).digest('hex') : 'dev-salt-change-me'
+}
+
+/**
  * The UTC date is part of the digest, so the same visitor gets a different hash
  * tomorrow. Unique visitors are therefore a per-day metric — the deliberate cost of
  * not setting a cookie.
  */
 function hashVisitor(ip: string, userAgent: string): string {
-  const salt = env('FINGERPRINT_SALT') ?? 'dev-salt-change-me'
+  const salt = salDeVisitantes()
   const day = new Date().toISOString().slice(0, 10)
   return createHash('sha256').update(`${ip}|${userAgent}|${salt}|${day}`).digest('hex')
 }

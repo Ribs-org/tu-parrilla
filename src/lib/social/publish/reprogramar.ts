@@ -1,5 +1,6 @@
 import { and, eq, inArray } from 'drizzle-orm'
 import { getDb, scheduledPosts, scheduledPostTargets } from '@/db'
+import { esUuid } from '@/lib/uuid'
 import { REARME } from './publisher'
 
 export const REPROGRAMAR_PASADO = 'La hora debe estar en el futuro.'
@@ -21,6 +22,8 @@ export async function reprogramarDestino(
   targetId: string,
   scheduledAt: Date,
 ): Promise<ResultadoReprogramar> {
+  // Un id sin forma de uuid no existe: a la base le llegaría como un error, no como cero filas.
+  if (!esUuid(targetId)) return 'no-existe'
   const db = getDb()
   const [target] = await db
     .select()

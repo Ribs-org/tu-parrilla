@@ -4,6 +4,7 @@ import { sondearComentarios } from '@/lib/social/comentarios/run'
 import { publishDue } from '@/lib/social/publish/run'
 import { barrerHuerfanos } from '@/lib/storage-gc'
 import { env } from '@/lib/env'
+import { cronAutorizado } from '@/lib/cron-auth'
 
 export const dynamic = 'force-dynamic'
 // 240 segundos, debajo de los 5 minutos del pinger. Dos corridas igual pueden cruzarse —el
@@ -36,7 +37,7 @@ function tocaBarrer(inicio: number, ahora: number): boolean {
 export async function GET(request: Request) {
   const secret = env('CRON_SECRET')
   // Same discipline as sync-social: without a secret the endpoint stays shut.
-  if (!secret || request.headers.get('authorization') !== `Bearer ${secret}`) {
+  if (!cronAutorizado(request.headers.get('authorization'), secret)) {
     return new NextResponse('No autorizado', { status: 401 })
   }
 

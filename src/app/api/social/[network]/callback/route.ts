@@ -17,6 +17,7 @@ import {
   type FacebookPages,
 } from '@/lib/social/instagram'
 import { oauthStateMatches } from '@/lib/social/oauth-state'
+import { conMensaje } from '@/lib/mensaje-firmado'
 import { COOKIE_PENDIENTE, PENDIENTE_MAX_AGE, serializarPendiente } from '@/lib/social/pendiente'
 
 export const dynamic = 'force-dynamic'
@@ -424,7 +425,7 @@ export async function GET(
     // ayudar a alguien que no pudo conectar empieza por preguntarle qué vio. Son frases nuestras,
     // sin tokens.
     console.warn(`Conexión de ${network} sin terminar: ${message}${detalle ? ` (${detalle})` : ''}`)
-    const fallo = NextResponse.redirect(`${url.origin}/admin/accounts?mensaje=${encodeURIComponent(message)}`)
+    const fallo = NextResponse.redirect(`${url.origin}${conMensaje('/admin/accounts', message)}`)
     // Un login que falló tampoco puede dejar una elección anterior viva: esa cookie
     // mantendría alcanzable un selector abandonado durante sus diez minutos.
     fallo.cookies.delete({ name: COOKIE_PENDIENTE, path: '/admin/accounts' })
@@ -481,7 +482,7 @@ export async function GET(
       // apretó «Agregar cuenta →» y la red entró con la de antes, la frase lo dice y Los
       // Fierros abre la ayuda (`soloSeRenovo`).
       const hecho = NextResponse.redirect(
-        `${url.origin}/admin/accounts?mensaje=${encodeURIComponent(fraseDeVuelta(network, resultado, agregar))}`,
+        `${url.origin}${conMensaje('/admin/accounts', fraseDeVuelta(network, resultado, agregar))}`,
       )
       hecho.cookies.delete({ name: COOKIE_PENDIENTE, path: '/admin/accounts' })
       return sinMarca(hecho)

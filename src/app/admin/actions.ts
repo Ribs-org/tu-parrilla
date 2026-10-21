@@ -4,7 +4,8 @@ import { randomUUID } from 'node:crypto'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
-import { basePublica, existe, guardar, keyDesdeUrl, SIN_ALMACEN } from '@/lib/storage'
+import { basePublica, guardar, keyDesdeUrl, SIN_ALMACEN, tamanoEnAlmacen } from '@/lib/storage'
+import { ARCHIVO_MUY_GRANDE, MAX_BYTES_ARCHIVO } from '@/lib/social/publish/limites'
 import { and, asc, eq, inArray, max, ne, sql } from 'drizzle-orm'
 import { getDb, links, profiles, socialAccounts, socialPosts, scheduledPosts, scheduledPostTargets, scheduledPostMedia, reglasClave, users } from '@/db'
 import { LINK_KINDS, type LinkKind } from '@/db/schema'
@@ -41,6 +42,7 @@ import { BorradorConsumido, crearPostProgramado } from '@/lib/social/publish/cre
 import { BORRADOR_NO_EXISTE } from '@/lib/mobile-api'
 import { REARME, contenedorEsBorrador, enVuelo } from '@/lib/social/publish/publisher'
 import { esUuid } from '@/lib/uuid'
+import { conMensaje } from '@/lib/mensaje-firmado'
 import { quitarCuenta } from '@/lib/social/quitar'
 import { CuentaInvalida, verificarCuentas, type CuentaDestino } from '@/lib/social/cuentas'
 // `guardarCuenta` de `social/conectar` guarda una cuenta *de una red*; la acción de abajo,
@@ -60,7 +62,7 @@ import { TIKTOK_SIN_CUENTA, consultarCreador, type CreadorTikTok } from '@/lib/s
 import { COOKIE_PENDIENTE, LOGIN_VENCIDO, elegidas, leerPendiente } from '@/lib/social/pendiente'
 import { networkLabel } from '@/lib/networks'
 import { crearLlave, revocarLlave } from '@/lib/llaves'
-import { camposDesdeFormulario, idDeBorrador, primero } from '@/lib/borrador'
+import { borradorDemasiadoGrande, camposDesdeFormulario, idDeBorrador, primero } from '@/lib/borrador'
 import { borrarBorrador, guardarBorrador, type MediaDeBorrador } from '@/lib/borradores'
 import { ARCHIVO_AJENO, ARCHIVO_FALTANTE, CUERPO_ILEGIBLE, parseMediaMovil, type MediaMovil } from '@/lib/mobile-api'
 import { esReservado } from '@/lib/slugs'
@@ -505,7 +507,7 @@ export async function quitarCuentaAccion(accountId: string): Promise<{ error: st
   if ('error' in resultado) return resultado
   // Lo que se borró se veía también en La Parrilla y en Los Números.
   revalidatePath('/admin', 'layout')
-  redirect(`/admin/accounts?mensaje=${encodeURIComponent(`«${resultado.nombre}» quitada de Tu Parrilla.`)}`)
+  redirect(conMensaje('/admin/accounts', `«${resultado.nombre}» quitada de Tu Parrilla.`))
 }
 
 export async function disconnectAccount(accountId: string): Promise<void> {
@@ -569,12 +571,12 @@ export async function conectarElegidas(formData: FormData): Promise<void> {
   const jar = await cookies()
   const pendiente = leerPendiente(jar.get(COOKIE_PENDIENTE)?.value)
   if (!pendiente || pendiente.sub !== usuario.id) {
-    redirect(`/admin/accounts?mensaje=${encodeURIComponent(LOGIN_VENCIDO)}`)
+    redirect(conMensaje('/admin/accounts', LOGIN_VENCIDO))
   }
 
   const marcadas = elegidas(pendiente.candidatas, formData.getAll('ids').map(String))
   if (marcadas.length === 0) {
-    redirect(`/admin/accounts/elegir?mensaje=${encodeURIComponent('Elige al menos una cuenta.')}`)
+    redirect(conMensaje('/admin/accounts/elegir', 'Elige al menos una cuenta.'))
   }
 
   // Una cuenta que ya es de otro usuario no se puede marcar en la lista, pero el formulario
@@ -583,7 +585,7 @@ export async function conectarElegidas(formData: FormData): Promise<void> {
   const tomadas = await tomadasPorOtro(usuario.id, pendiente.network, marcadas.map((c) => c.externalId))
   if (tomadas.size > 0) {
     const nombres = marcadas.filter((c) => tomadas.has(c.externalId)).map(nombreDeCandidata)
-    redirect(`/admin/accounts/elegir?mensaje=${encodeURIComponent(fraseCuentaDeOtro(nombres))}`)
+    redirect(conMensaje('/admin/accounts/elegir', fraseCuentaDeOtro(nombres)))
   }
 
   // Facebook: el token de cada página no viajó en la cookie; se pide ahora con el de usuario.
@@ -593,14 +595,14 @@ export async function conectarElegidas(formData: FormData): Promise<void> {
       tokens = await tokensDePaginas(pendiente.accessToken)
     } catch (error) {
       console.error('tokensDePaginas:', String(error).slice(0, 300))
-      redirect(`/admin/accounts?mensaje=${encodeURIComponent(SIN_TOKEN_DE_PAGINA)}`)
+      redirect(conMensaje('/admin/accounts', SIN_TOKEN_DE_PAGINA))
     }
   }
 
   // No se guarda nada hasta que toda cuenta elegida tenga token, así una falla nunca deja
   // la conexión a medias.
   if (pendiente.network === 'facebook' && marcadas.some((c) => !tokens.get(c.externalId))) {
-    redirect(`/admin/accounts?mensaje=${encodeURIComponent(SIN_TOKEN_DE_PAGINA)}`)
+    redirect(conMensaje('/admin/accounts', SIN_TOKEN_DE_PAGINA))
   }
 
   let fallo: string | null = null
@@ -627,7 +629,7 @@ export async function conectarElegidas(formData: FormData): Promise<void> {
   }
   // Fuera del try a propósito: redirect() lanza su propio error de navegación, y dentro
   // el catch lo tragaría como si fuera una falla de la base.
-  if (fallo) redirect(`/admin/accounts?mensaje=${encodeURIComponent(fallo)}`)
+  if (fallo) redirect(conMensaje('/admin/accounts', fallo))
 
   // Con el mismo path con que la puso el callback: borrarla sin path escribe sobre otra
   // cookie y deja esta viva sus diez minutos.
@@ -635,7 +637,7 @@ export async function conectarElegidas(formData: FormData): Promise<void> {
   revalidatePath('/admin/accounts')
   const mensaje =
     marcadas.length === 1 ? `${networkLabel(pendiente.network)} conectado.` : `${marcadas.length} cuentas conectadas.`
-  redirect(`/admin/accounts?mensaje=${encodeURIComponent(mensaje)}`)
+  redirect(conMensaje('/admin/accounts', mensaje))
 }
 
 export async function updatePostCampaign(
@@ -740,8 +742,11 @@ async function mediaYaSubida(
     const key = base ? keyDesdeUrl(base, m.url) : null
     if (!key || !key.startsWith('scheduled/')) return { error: ARCHIVO_AJENO }
   }
+  // Que exista, y lo que de verdad pesa: la subida firmada no fija un tamaño.
   for (const m of lista) {
-    if (!(await existe(m.url))) return { error: ARCHIVO_FALTANTE }
+    const bytes = await tamanoEnAlmacen(m.url)
+    if (bytes === null) return { error: ARCHIVO_FALTANTE }
+    if (bytes > MAX_BYTES_ARCHIVO) return { error: ARCHIVO_MUY_GRANDE }
   }
   return { lista }
 }
@@ -870,6 +875,7 @@ export async function guardarBorradorAccion(formData: FormData): Promise<Borrado
   })
 
   const campos = camposDesdeFormulario(formData)
+  if (borradorDemasiadoGrande(campos)) return { error: CUERPO_ILEGIBLE }
   // La fecha del calendario sale del mismo campo y en la misma zona que al programar. Con
   // «Ahora» no hay día en que ponerlo: el borrador queda sin fecha.
   const fecha = primero(campos, 'cuandoAhora') === 'on' ? null : fromZonedInput(primero(campos, 'scheduledAt'), zona)

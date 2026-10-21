@@ -33,6 +33,8 @@ const db = vi.hoisted(() => ({
   actualizados: [] as unknown[],
   // Lo que `pedir()` de verdad escribió al insertar el código: acá se comprueba el hash.
   valoresCodigo: [] as { hash: string }[],
+  // Cuántas veces corrió el upsert del admin (`asegurarAdmin`).
+  upsertsAdmin: 0,
 }))
 
 vi.mock('@/db', async (importOriginal) => {
@@ -64,7 +66,10 @@ vi.mock('@/db', async (importOriginal) => {
           return {
             returning: async () => db.insertUser,
             // El upsert del admin dentro de `asegurarAdmin()`.
-            onConflictDoUpdate: () => ({ returning: async () => db.adminRow }),
+            onConflictDoUpdate: () => {
+              db.upsertsAdmin += 1
+              return { returning: async () => db.adminRow }
+            },
           }
         },
       }),
@@ -272,9 +277,41 @@ describe('pedir', () => {
     db.borrados = []
     correo.enviado = true
     correo.mandados = []
+    db.upsertsAdmin = 0
   })
 
   afterEach(() => vi.unstubAllEnvs())
+
+  it('un correo que no es el del admin no escribe nada si no está invitado', async () => {
+    db.buscar = []
+    expect(await pedir('cualquiera@ejemplo.cl')).toBe(false)
+    // Antes cada pedido, de cualquier correo, aseguraba al admin: una escritura por pedido.
+    expect(db.upsertsAdmin).toBe(0)
+    expect(db.valoresCodigo).toEqual([])
+  })
+
+  it('el correo del admin sí lo asegura: su primer ingreso funciona sin paso previo', async () => {
+    db.adminRow = [{ id: 'admin-id', correo: 'admin@example.com', nombre: null, rol: 'admin' }]
+    expect(await pedir('admin@example.com')).toBe(true)
+    expect(db.upsertsAdmin).toBe(1)
+  })
+
+  it('fuera de producción, si el correo no sale, el código sigue valiendo: salió por la consola', async () => {
+    correo.enviado = false
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {})
+    expect(await pedir(usuarioRevision.correo)).toBe(true)
+    expect(db.borrados).toEqual([])
+    log.mockRestore()
+  })
+
+  it('en producción, si el correo no sale, la fila se borra: el cupo no cuenta lo que no llegó', async () => {
+    vi.stubEnv('NODE_ENV', 'production')
+    correo.enviado = false
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    expect(await pedir(usuarioRevision.correo)).toBe(false)
+    expect(db.borrados).toHaveLength(1)
+    error.mockRestore()
+  })
 
   // La puerta del revisor de Meta (§4b de la spec): con las dos variables puestas y ese
   // correo exacto, `pedir()` guarda el código fijo en vez de uno al azar y no manda nada —

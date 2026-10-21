@@ -150,7 +150,11 @@ la URL de origen puede morir después sin afectar la publicación.
 - Imágenes: `.jpg .jpeg .png .gif .webp`
 - Videos: `.mp4 .mov .webm`
 - **Sin extensión reconocible también sirve**: el tipo lo decide el `Content-Type`
-  real de la descarga. Esto es lo que hace funcionar los links directos de Google
+  real de la descarga, que tiene que ser uno de esos mismos formatos (`image/jpeg`,
+  `image/png`, `image/gif`, `image/webp`, `video/mp4`, `video/quicktime`, `video/webm`): un
+  `image/svg+xml` o un `video/x-matroska` rechazan la fila.
+- **Hasta 500 MB por archivo**: uno que declara más, o que pasa de eso mientras baja, rechaza
+  la fila sin guardarse. Esto es lo que hace funcionar los links directos de Google
   Drive: usa la forma `https://drive.usercontent.google.com/download?id=<ID>&export=download`
   con el archivo compartido como «cualquiera con el enlace». El link normal de
   «compartir» devuelve una página HTML y la fila se rechaza.

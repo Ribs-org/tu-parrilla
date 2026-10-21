@@ -43,6 +43,9 @@ vi.mock('@/db', async (importOriginal) => {
 
 const { borrarPostProgramado } = await import('./borrar')
 
+/** Un id con forma de uuid: uno sin ella no llega a la base (es «no existe»). */
+const POST = '6f1c2a54-9b1e-4c3d-8f00-0123456789ab'
+
 beforeEach(() => {
   db.destinos = []
   db.delDueno = true
@@ -56,18 +59,18 @@ describe('borrarPostProgramado', () => {
       { status: 'scheduled', reclamadoHasta: null },
       { status: 'failed', reclamadoHasta: null },
     ]
-    expect(await borrarPostProgramado('owner-1', 'p1')).toBe('borrado')
+    expect(await borrarPostProgramado('owner-1', POST)).toBe('borrado')
     expect(db.deleteCalls).toBe(1)
   })
 
   it('un post sin destinos también: no hay nada que lo impida', async () => {
-    expect(await borrarPostProgramado('owner-1', 'p1')).toBe('borrado')
+    expect(await borrarPostProgramado('owner-1', POST)).toBe('borrado')
     expect(db.deleteCalls).toBe(1)
   })
 
   it('un post que no existe (o no es del dueño) es «no-existe»: el DELETE no encontró nada', async () => {
     db.delDueno = false
-    expect(await borrarPostProgramado('owner-1', 'p1')).toBe('no-existe')
+    expect(await borrarPostProgramado('owner-1', POST)).toBe('no-existe')
   })
 
   it('con algún destino publicado o publicando no se borra, y lo dice', async () => {
@@ -75,27 +78,32 @@ describe('borrarPostProgramado', () => {
       { status: 'scheduled', reclamadoHasta: null },
       { status: 'published', reclamadoHasta: null },
     ]
-    expect(await borrarPostProgramado('owner-1', 'p1')).toBe('publicado')
+    expect(await borrarPostProgramado('owner-1', POST)).toBe('publicado')
     expect(db.deleteCalls).toBe(0)
 
     db.destinos = [{ status: 'publishing', reclamadoHasta: null }]
-    expect(await borrarPostProgramado('owner-1', 'p1')).toBe('publicado')
+    expect(await borrarPostProgramado('owner-1', POST)).toBe('publicado')
     expect(db.deleteCalls).toBe(0)
   })
 
   it('con un destino que una corrida tiene entre manos tampoco: sigue diciendo scheduled, pero está saliendo', async () => {
     db.destinos = [{ status: 'scheduled', reclamadoHasta: new Date(Date.now() + 60_000) }]
-    expect(await borrarPostProgramado('owner-1', 'p1')).toBe('publicado')
+    expect(await borrarPostProgramado('owner-1', POST)).toBe('publicado')
     expect(db.deleteCalls).toBe(0)
   })
 
   it('un reclamo vencido no impide nada: la corrida que lo tenía murió', async () => {
     db.destinos = [{ status: 'scheduled', reclamadoHasta: new Date(Date.now() - 60_000) }]
-    expect(await borrarPostProgramado('owner-1', 'p1')).toBe('borrado')
+    expect(await borrarPostProgramado('owner-1', POST)).toBe('borrado')
+  })
+
+  it('un id sin forma de uuid es «no existe» sin tocar la base', async () => {
+    expect(await borrarPostProgramado('owner-1', 'no-es-un-id')).toBe('no-existe')
+    expect(db.bloqueos).toEqual([])
   })
 
   it('los destinos se leen bloqueados, para que ninguna corrida los reclame entre revisar y borrar', async () => {
-    await borrarPostProgramado('owner-1', 'p1')
+    await borrarPostProgramado('owner-1', POST)
     expect(db.bloqueos).toEqual(['update'])
   })
 })

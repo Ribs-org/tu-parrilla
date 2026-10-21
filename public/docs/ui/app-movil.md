@@ -271,7 +271,7 @@ No se puede desde la app. Se hace en el panel web, en [La Parrilla](la-parrilla.
 | «No publicaste nada en este período.» (en «Tus publicaciones») | No hay publicaciones sincronizadas en el período con ese filtro. | Elegir un período más largo, u otra red. |
 | «Se pasó» (en «Tus publicaciones») | Ese post sacó al menos el doble de views ganadas que la mediana de la lista. | Nada; es una marca para ubicar lo que anduvo mejor. |
 | «Sin permiso para ver la galería.» | El teléfono no le dio permiso a la app para ver fotos y videos. | Dar el permiso en los ajustes del teléfono y volver a tocar «+ Fotos o video». |
-| «Ese tipo de archivo no se puede publicar.» | Uno de los archivos elegidos no es una imagen ni un video que se pueda publicar. | Elegir otro archivo. |
+| «Ese tipo de archivo no se puede publicar.» | Uno de los archivos elegidos no es una foto JPG, PNG, GIF o WebP ni un video MP4, MOV o WebM, que es lo que se puede publicar. | Elegir otro archivo. |
 | «El archivo supera los 500 MB.» | Un archivo es demasiado grande. | Elegir uno más liviano. |
 | «Elige al menos una cuenta.» | No hay ninguna cuenta marcada. | Tocar al menos una. |
 | «No se pudieron cargar las cuentas.» | Falló la descarga de la lista de cuentas. | «Reintentar». |

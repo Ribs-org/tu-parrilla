@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
+  MAX_CAMPOS_BORRADOR,
+  borradorDemasiadoGrande,
   camposDesdeFormulario,
   camposDesdeTelefono,
   fechaParaDia,
@@ -14,6 +16,16 @@ import {
 } from './borrador'
 
 const ZONA = 'America/Santiago'
+
+describe('borradorDemasiadoGrande', () => {
+  it('un borrador de verdad, aun con un texto largo, cabe de sobra', () => {
+    expect(borradorDemasiadoGrande({ caption: ['x'.repeat(5000)], cuentas: ['a', 'b'] })).toBe(false)
+  })
+
+  it('lo que pasa del tope no se guarda', () => {
+    expect(borradorDemasiadoGrande({ caption: ['x'.repeat(MAX_CAMPOS_BORRADOR)] })).toBe(true)
+  })
+})
 
 describe('camposDesdeFormulario', () => {
   it('agrupa los valores por nombre y deja fuera archivos y campos de transporte', () => {

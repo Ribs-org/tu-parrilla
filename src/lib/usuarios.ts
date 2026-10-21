@@ -217,8 +217,10 @@ export async function pedidosRecientes(userId: string, now: Date): Promise<Date[
  * respuesta al visitante es la misma exista o no el usuario.
  */
 export async function pedir(correo: string): Promise<boolean> {
-  await asegurarAdmin()
-  const usuario = await buscarPorCorreo(correo)
+  // El admin se asegura solo cuando el que pide es él, que es para lo que existe: su primer
+  // ingreso funciona sin ningún paso previo. Antes corría en cada pedido, así que cada pedido
+  // de código —de cualquier correo, invitado o no— era una escritura en `users`.
+  const usuario = correo === normalizarCorreo(env('ADMIN_EMAIL') ?? '') ? await asegurarAdmin() : await buscarPorCorreo(correo)
   if (!usuario) return false
   const now = new Date()
   if (!puedePedir(await pedidosRecientes(usuario.id, now), now)) return false
@@ -253,6 +255,10 @@ export async function pedir(correo: string): Promise<boolean> {
     text: `Tu código para entrar a Parrilla es ${codigo}. Vale diez minutos. Si no lo pediste, ignora este correo.`,
   })
   if (!enviado) {
+    // Fuera de producción el código ya salió por la consola, que es la entrega: la fila se
+    // queda para que ese código sirva. Antes se borraba igual, y en local no se podía entrar
+    // sin Resend.
+    if (process.env.NODE_ENV !== 'production') return true
     console.error('[ingreso] no se pudo mandar el código a', usuario.correo)
     // El cupo frena a quien martilla «reenviar», no a quien no recibió nada: si el correo no salió, la fila no cuenta.
     await getDb().delete(codigosIngreso).where(eq(codigosIngreso.id, nueva!.id))

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { camposDesdeTelefono, idDeBorrador } from '@/lib/borrador'
+import { borradorDemasiadoGrande, camposDesdeTelefono, idDeBorrador } from '@/lib/borrador'
 import { cargarBorrador, guardarBorrador, type MediaDeBorrador } from '@/lib/borradores'
 import { cuentasParaElTelefono } from '@/lib/borradores-movil'
 import {
@@ -81,6 +81,7 @@ export async function POST(request: Request) {
     { texto: datos.texto, cuentas, scheduledAt: toZonedInput(fecha, usuario.zona), trial },
     ajenas,
   )
+  if (borradorDemasiadoGrande(campos)) return NextResponse.json({ error: CUERPO_ILEGIBLE }, { status: 400 })
 
   const resultado = await guardarBorrador(usuario.id, { id, campos, fecha, media })
   if ('perdido' in resultado) return NextResponse.json({ error: BORRADOR_NO_EXISTE }, { status: 404 })

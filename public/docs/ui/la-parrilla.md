@@ -963,6 +963,7 @@ alguna, hay que borrarlo en la red misma.
 | «Máximo diez archivos por publicación.» | Más de diez archivos (si TikTok es la única red, admite hasta 35 fotos) | Quitar archivos con su ✕ |
 | «Una de las cuentas elegidas no es tuya.» | Una cuenta dejó de existir mientras la pantalla estaba abierta | Cerrar el panel (queda el borrador) y volver a abrirlo desde «Borradores (<N>)» |
 | «Ese borrador ya no existe.» | El borrador abierto en el compositor ya se programó (en otra pestaña o en el teléfono) o se descartó: un borrador no se programa dos veces | Mirar el calendario: si ya está programado, no hay nada que hacer; si no, cerrar el panel y armarlo de nuevo con «Nueva publicación» |
+| «El archivo supera los 500 MB.», al apretar «Programar» | Un archivo de la lista, ya subido, pesa más que el máximo: se mira lo que de verdad quedó en el almacenamiento | Quitarlo con su ✕ y subir uno más liviano |
 | «La cuenta <usuario> no está conectada. Vuelve a conectarla en Los Fierros.» | Se desconectó | Reconectarla en Los Fierros y volver: lo escrito sigue en «Borradores» |
 | «Espera a que terminen de subir los archivos.» | Se intentó programar mientras subían archivos | Esperar a que aparezcan en la lista y volver a apretar «Programar» |
 | «Un archivo no llegó: reintenta o quítalo antes de programar.» | Se apretó «Programar» con un archivo que no llegó (con borde rojo y «No llegó») | «Reintentar» en su miniatura, o quitarlo con su ✕ |
@@ -978,7 +979,7 @@ de esa tanda queda: hay que volver a elegirlos.
 | «Llegando: <N> de <M>.», en «Así va a quedar», y «En cola» o «<N> %» en las miniaturas | Están subiendo los archivos recién elegidos, de a uno | Esperar: «Programar» se enciende cuando llegan todos |
 | «Un archivo no llegó: reintenta o quítalo. Los que siguen esperan.», y «No llegó» en una miniatura con borde rojo | Ese archivo no pudo subir; el error exacto sale en rojo debajo de las miniaturas | «Reintentar» en esa miniatura, o quitarlo con su ✕ |
 | «El archivo supera los 500 MB.» | Un archivo pasa del máximo | Achicarlo |
-| «Ese tipo de archivo no se puede publicar.» | No es imagen ni video | Elegir otro |
+| «Ese tipo de archivo no se puede publicar.» | No es uno de los formatos que se publican: fotos JPG, PNG, GIF o WebP; videos MP4, MOV o WebM | Elegir otro, o exportarlo a uno de esos |
 | «No se pudo preparar la subida. (<código>)», «No se pudo subir el archivo. (<código>)» o «No se pudo subir el archivo.» | Falló la conexión al subir | Volver a elegirlos; si se repite, avisar a quien administra el sitio |
 | «Falta configurar Cloudflare R2 (R2_*).» | El sitio no tiene almacenamiento configurado | Avisar a quien administra el sitio |
 
@@ -1118,6 +1119,7 @@ editor.
 | «Instagram llegó a su tope de publicaciones por día: sale apenas se libere un cupo.» | La cuenta ya publicó por la API lo máximo que Instagram deja en 24 horas. No es un fallo: no gasta intentos ni se quema; se vuelve a probar cada hora y sale cuando se libera un cupo, 24 horas después de una publicación anterior | Esperar: sale solo |
 | «La cuenta no está conectada. Reconéctala y reprograma.» | La cuenta perdió la conexión | Reconectar en Los Fierros y «Reprogramar» |
 | «La red no terminó de procesar el video.» | Pasó 24 horas en «Publicando…», contadas desde que empezó a publicarse. No se reintenta solo: la red ya tiene el video, y subirlo de nuevo dejaría dos | «Subir ahora» o «Reprogramar»: primero se le pregunta a la red por ese mismo video, y si terminó, queda publicado sin subir otro. Si vuelve a quemarse con esta frase, la red no lo va a terminar: revisarlo en la red (puede haber quedado ahí a medias), «Eliminar» el post y programarlo de nuevo |
+| «El archivo supera los 500 MB.» | El video de un post programado antes de que se mirara el tamaño pasa del máximo; YouTube no lo intenta | En el editor, cambiar el video por uno más liviano |
 | «La publicación se cortó a la mitad y ya no quedan intentos. Revisa el archivo y reprográmala.» | El último intento se cortó a la mitad —la pasada del publicador terminó antes de que la red contestara, sobre todo con videos muy pesados— y ya no quedan intentos | Revisar el archivo (un video más liviano sube más rápido) y «Reprogramar» |
 | «Threads todavía no está disponible en Tu Parrilla: próximamente.» / «X todavía no está disponible en Tu Parrilla: próximamente.» | Un destino de antes a una red que hoy está en «Próximamente» | Desmarcar esa red en el editor |
 | «Instagram rechazó la publicación.» | Instagram dijo que no | «Subir ahora» o «Reprogramar»; si vuelve a fallar, revisar el archivo y el texto |
