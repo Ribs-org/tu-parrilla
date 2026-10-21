@@ -1,7 +1,7 @@
 // La semana en filas: cómo va cada fila, cuánto salió y cuánto viene cada día, a qué red va lo
 // del día y dónde cae «ahora». Puro: el calendario lo dibuja, y acá se lo prueba sin pintar.
 
-import { SOCIAL_NETWORKS } from '@/db/schema'
+import { SOCIAL_NETWORKS } from '@/lib/networks'
 import type { Coccion, Sello } from '@/lib/parrilla'
 import { bordeDe } from './dibujo'
 

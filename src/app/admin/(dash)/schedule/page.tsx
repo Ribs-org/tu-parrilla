@@ -172,6 +172,7 @@ export default async function SchedulePage({
           listoHref={scheduleHref(params, { hecho: 'programado' })}
           cerrarHref={cerrarHref}
           zona={zona}
+          desde={now.getTime()}
         />
       )
     }

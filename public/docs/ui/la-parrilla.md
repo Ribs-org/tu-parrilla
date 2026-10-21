@@ -949,7 +949,7 @@ alguna, hay que borrarlo en la red misma.
 | Bloques sin texto que se encienden y se apagan de a poco, en tonos de brasa | La pantalla está cargando | Esperar |
 | «Ayer no salió nada.» | Ningún corte de ayer salió en ninguna red | Si algo debía salir, mirar «Se quemó» |
 | El motivo en rojo bajo una fila de «Se quemó» | Por qué no salió en esa red (ver «Motivos de un destino que no salió») | El botón de abajo: «Reconectar» o «Cambiar el archivo» cuando el motivo lo pide; si no, «Reprogramar» |
-| «Algo se rompió», con «No fue nada que hicieras: una consulta no respondió. Vuelve a intentarlo; el detalle quedó en la consola del navegador.» y el botón «Reintentar» | Una consulta del servidor falló; no fue la persona. Si falló la pantalla principal de La Parrilla, no aparece «Ir a La Parrilla» | «Reintentar» |
+| «Algo se rompió», con «No fue nada que hicieras. Vuelve a intentarlo; el detalle quedó en la consola del navegador.» (a veces con «Si se repite, este código ayuda a encontrarlo: <código>.») y el botón «Reintentar» | Algo falló en el servidor; no fue la persona. Si falló la pantalla principal de La Parrilla, no aparece «Ir a La Parrilla» | «Reintentar» |
 
 ### Al programar
 
@@ -1097,7 +1097,7 @@ puede decir:
 | «La portada debe ser una imagen.» / «La portada debe ser JPG o PNG.» | La portada no sirve | Usar una imagen JPG o PNG |
 | «Los atributos deben ser un objeto plano de valores simples.» | El JSON de «Atributos» está mal escrito o es demasiado grande | Corregirlo, o dejar el cuadro vacío |
 | «El post ya no existe.» | Se borró mientras estaba abierto | Volver a La Parrilla |
-| «Algo se rompió», con «No fue nada que hicieras: una consulta no respondió. Vuelve a intentarlo; el detalle quedó en la consola del navegador.» y los botones «Reintentar» e «Ir a La Parrilla» | Algo falló en el servidor. Si se estaba guardando con «Agregar archivos», lo más probable es que lo elegido pese más de unos 4 MB, que el editor no alcanza a subir | Volver al editor, quitar el archivo y agregarlo con «Agregar por URL»; si no había archivo, «Reintentar» |
+| «Algo se rompió», con «No fue nada que hicieras. Vuelve a intentarlo; el detalle quedó en la consola del navegador.» (a veces con «Si se repite, este código ayuda a encontrarlo: <código>.») y los botones «Reintentar» e «Ir a La Parrilla» | Algo falló en el servidor. Si se estaba guardando con «Agregar archivos», lo más probable es que lo elegido pese más de unos 4 MB, que el editor no alcanza a subir | Volver al editor, quitar el archivo y agregarlo con «Agregar por URL»; si no había archivo, «Reintentar» |
 | «No encontramos esa página» | El post no existe o no es de esta persona | Volver a La Parrilla |
 
 ### Motivos de un destino que no salió

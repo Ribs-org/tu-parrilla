@@ -33,6 +33,7 @@ import {
   updateProfile,
   type FormState,
 } from '../../../actions'
+import { copiarAlPortapapeles } from '@/lib/copiar'
 import { LinkRow, type DraftLink } from './link-row'
 
 const ACCENTS = ['#8b7cff', '#f0885a', '#4ade80', '#38bdf8', '#f472b6', '#facc15', '#f87171', '#a3e635']
@@ -365,9 +366,13 @@ export function ProfileEditor({ profile, initialLinks, origin, publicUrl, soloPe
             <Button
               type="button"
               onClick={() => {
-                void navigator.clipboard.writeText(publicUrl)
-                setCopied(true)
-                setTimeout(() => setCopied(false), 1800)
+                // «Copiado» solo si se copió: sin contexto seguro no hay portapapeles, y antes
+                // esto lanzaba y decía «Copiado» igual.
+                void copiarAlPortapapeles(publicUrl).then((copiado) => {
+                  if (!copiado) return
+                  setCopied(true)
+                  setTimeout(() => setCopied(false), 1800)
+                })
               }}
             >
               {copied ? <Check className="h-4 w-4" aria-hidden /> : <Copy className="h-4 w-4" aria-hidden />}

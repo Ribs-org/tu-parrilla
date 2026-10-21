@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { SOCIAL_NETWORKS } from '@/db/schema'
+import { SOCIAL_NETWORKS } from '@/lib/networks'
 import { localDay } from '@/lib/analytics'
 import { buildMetricPost } from '@/lib/metrics-api'
 import { requireMobileUser } from '@/lib/mobile-guardia'

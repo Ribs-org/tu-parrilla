@@ -1326,7 +1326,7 @@ De día, donde una de estas frases dice «La Parrilla» dice «La Barra», y «L
 | «Ninguna de las dos tiene atributos. Se anotan en el editor de un post de La Parrilla, o por la API.» (en «Sus atributos») | Ninguna salió de La Parrilla con atributos. | Anotarlos en los posts que vienen (ver la guía de la API, sección 2b). |
 | «Y <N> más: se ven en «Tu mejor <P> %».» (en «Las portadas») | La tajada tiene más de 12 publicaciones. | Abrir «Tu mejor 10 %» para verlas todas. |
 | «Sin publicaciones que comparar.» (en «Arriba y el resto» o «Abajo y el resto») | No compite ninguna publicación. | Ampliar el período, u otra métrica. |
-| «Algo se rompió» y «No fue nada que hicieras: una consulta no respondió. Vuelve a intentarlo; el detalle quedó en la consola del navegador.» | Una consulta de la pantalla falló. | Apretar «Reintentar»; si sigue, «Ir a La Parrilla». |
+| «Algo se rompió» y «No fue nada que hicieras. Vuelve a intentarlo; el detalle quedó en la consola del navegador.» (a veces con «Si se repite, este código ayuda a encontrarlo: <código>.») | Algo falló al armar la pantalla. | Apretar «Reintentar»; si sigue, «Ir a La Parrilla». |
 
 ## Si el humano dice…
 

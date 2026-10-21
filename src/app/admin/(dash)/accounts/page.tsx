@@ -15,6 +15,8 @@ export default async function AccountsPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
   const params = await searchParams
+  // La hora con que se arma la página: los tiempos relativos de Los Fierros parten de ella.
+  const ahora = new Date()
   // El resultado del último login: una frase, una vez, y solo si la firmó el servidor
   // (`mensajeDeLaUrl`): un enlace armado a mano no pone texto en el panel.
   const mensaje = mensajeDeLaUrl(params, 200)
@@ -29,7 +31,7 @@ export default async function AccountsPage({
       {/* La ayuda se arma acá, en el servidor: sus frases vienen de los conectores de Meta, que
           no viajan al navegador. */}
       {mensaje ? <AvisoDeConexion mensaje={mensaje} ayuda={ayudaDeConexion(mensaje)} /> : null}
-      <Cuentas rows={cuentas} metaEnRevision={metaEnRevision} />
+      <Cuentas rows={cuentas} metaEnRevision={metaEnRevision} desde={ahora.getTime()} />
     </>
   )
 }

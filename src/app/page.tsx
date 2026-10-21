@@ -37,7 +37,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
   if (esDominioDelProducto(host)) return metadataLanding(host, temaDelEnlace((await searchParams).modo) ?? 'noche')
 
   const { profile } = await load()
-  return profile ? profileMetadata(profile) : { title: 'Portafolio' }
+  return profile ? profileMetadata(profile) : { title: 'Tu Parrilla' }
 }
 
 /** La barra del navegador del teléfono, del fondo de la portada en su modo. La página de un creador se queda con la del layout. */

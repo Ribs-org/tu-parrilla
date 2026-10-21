@@ -357,23 +357,6 @@ export async function updateLink(
   return { ok: true }
 }
 
-export async function toggleLink(linkId: string, profileId: string) {
-  const { id: ownerId } = await requireUser()
-  await getDb()
-    .update(links)
-    .set({ isActive: sql`not ${links.isActive}` })
-    .where(
-      and(
-        eq(links.id, linkId),
-        eq(links.profileId, profileId),
-        inArray(links.profileId, getDb().select({ id: profiles.id }).from(profiles).where(eq(profiles.ownerId, ownerId))),
-      ),
-    )
-
-  revalidatePath(`/admin/profiles/${profileId}`)
-  revalidatePath('/', 'layout')
-}
-
 export async function deleteLink(linkId: string, profileId: string) {
   const { id: ownerId } = await requireUser()
   await getDb()

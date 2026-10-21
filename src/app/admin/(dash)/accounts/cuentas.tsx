@@ -7,7 +7,9 @@ import { DeNocheYDeDia, NombreDe } from '@/components/de-noche-y-de-dia'
 import { Icon } from '@/components/icon'
 import { Button } from '@/components/ui'
 import { PINTURA } from '@/components/charts/theme'
-import { SOCIAL_NETWORKS } from '@/db/schema'
+import { SOCIAL_NETWORKS } from '@/lib/networks'
+import { copiarAlPortapapeles } from '@/lib/copiar'
+import { useAhora } from '@/lib/use-ahora'
 import type { CuentaRow } from '@/lib/posts-kpis'
 import { CONEXION_FALLO } from '@/lib/avisos/reglas'
 import { PROXIMAMENTE, REDES_PROXIMAMENTE, avisosDe, networkLabel } from '@/lib/networks'
@@ -35,15 +37,15 @@ const CLASE_FIERRO: Record<Fierro, string> = {
 }
 
 /** «en 3 días», «mañana». La cuenta regresiva que antes había que sacar de la nada. */
-function venceEn(iso: string): string {
-  const dias = Math.round((new Date(iso).getTime() - Date.now()) / 86.4e6)
+function venceEn(iso: string, ahora: number): string {
+  const dias = Math.round((new Date(iso).getTime() - ahora) / 86.4e6)
   if (dias <= 0) return 'hoy'
   return RELATIVE.format(dias, 'day')
 }
 
-function syncedAgo(iso: string | null): string {
+function syncedAgo(iso: string | null, ahora: number): string {
   if (!iso) return 'nunca'
-  const hours = Math.round((Date.now() - new Date(iso).getTime()) / 3.6e6)
+  const hours = Math.round((ahora - new Date(iso).getTime()) / 3.6e6)
   if (hours < 1) return 'recién'
   if (hours < 24) return RELATIVE.format(-hours, 'hour')
   return RELATIVE.format(-Math.round(hours / 24), 'day')
@@ -71,7 +73,14 @@ function Proximamente() {
  * se mira casi siempre, que es si cada fierro está al rojo. Ahora la fila dice eso y, si hace
  * falta, por qué no; lo demás se abre con la flecha de la fila (`Fila`).
  */
-export function Cuentas({ rows, metaEnRevision }: { rows: CuentaRow[]; metaEnRevision: boolean }) {
+/**
+ * `desde` es la hora con que el servidor armó la página: los tiempos relativos («hace 5
+ * horas», «vence mañana») se cuentan contra ella al dibujar y al hidratar, y recién después
+ * contra el reloj del navegador (`useAhora`). Contarlos con `Date.now()` en el render daba
+ * un texto en cada lado cuando el cálculo cruzaba un cambio de unidad, y React abortaba.
+ */
+export function Cuentas({ rows, metaEnRevision, desde }: { rows: CuentaRow[]; metaEnRevision: boolean; desde: number }) {
+  const ahora = useAhora(desde)
   const [pending, startTransition] = useTransition()
   const [aviso, setAviso] = useState<{ texto: string; ok: boolean } | null>(null)
 
@@ -137,7 +146,13 @@ export function Cuentas({ rows, metaEnRevision }: { rows: CuentaRow[]; metaEnRev
                 ) : null}
                 <ul className="mt-2 space-y-1">
                   {cuentas.map((row) => (
-                    <Fila key={row.id} row={row} network={network} vivas={cuentas.filter((c) => c.connected && c.id !== row.id)} />
+                    <Fila
+                      key={row.id}
+                      row={row}
+                      network={network}
+                      vivas={cuentas.filter((c) => c.connected && c.id !== row.id)}
+                      ahora={ahora}
+                    />
                   ))}
                 </ul>
               </div>
@@ -221,7 +236,7 @@ export function Cuentas({ rows, metaEnRevision }: { rows: CuentaRow[]; metaEnRev
  * y compañía dan un id distinto por app—: al pasar del sandbox a la app real la misma
  * cuenta vuelve como fila nueva, y esta queda muerta con su historial colgando.
  */
-function Fila({ row, network, vivas }: { row: CuentaRow; network: string; vivas: CuentaRow[] }) {
+function Fila({ row, network, vivas, ahora }: { row: CuentaRow; network: string; vivas: CuentaRow[]; ahora: number }) {
   const [pending, startTransition] = useTransition()
   const [abierta, setAbierta] = useState(false)
   const detalle = useId()
@@ -248,12 +263,9 @@ function Fila({ row, network, vivas }: { row: CuentaRow; network: string; vivas:
   // llave lo lee solo en `GET /api/schedule/cuentas`; copiarlo es para el CSV, o para una IA
   // que todavía no tiene llave.
   function copiarId() {
-    const clipboard = navigator.clipboard
-    if (!clipboard) return
-    clipboard
-      .writeText(row.id)
-      .then(() => setIdCopiado(true))
-      .catch(() => {})
+    void copiarAlPortapapeles(row.id).then((copiado) => {
+      if (copiado) setIdCopiado(true)
+    })
   }
 
   function desconectar() {
@@ -282,7 +294,7 @@ function Fila({ row, network, vivas }: { row: CuentaRow; network: string; vivas:
 
   const fierro = estadoDelFierro(
     { connected: row.connected, expiraEn: row.expiresAt, ultimoError: row.lastSyncError, red: network },
-    new Date(),
+    new Date(ahora),
   )
 
   // La línea de estado: lo que pide una acción primero, y si no, cuándo se sincronizó.
@@ -293,8 +305,8 @@ function Fila({ row, network, vivas }: { row: CuentaRow; network: string; vivas:
   ) : fierro === 'enfriandose' && row.expiresAt ? (
     <span className="text-caution">
       <DeNocheYDeDia
-        noche={seEstaEnfriando(venceEn(row.expiresAt), 'noche')}
-        dia={seEstaEnfriando(venceEn(row.expiresAt), 'dia')}
+        noche={seEstaEnfriando(venceEn(row.expiresAt, ahora), 'noche')}
+        dia={seEstaEnfriando(venceEn(row.expiresAt, ahora), 'dia')}
       />
     </span>
   ) : (
@@ -302,7 +314,7 @@ function Fila({ row, network, vivas }: { row: CuentaRow; network: string; vivas:
       {/* Una fila puede sincronizar sin credencial OAuth (YouTube lee con su API key): no
           debe decir lo contrario, así que las dos cosas van juntas. */}
       {!row.connected ? 'Sin credencial · ' : ''}
-      {row.lastSyncedAt ? `Sincronizado ${syncedAgo(row.lastSyncedAt)}` : 'Sin sincronizar'}
+      {row.lastSyncedAt ? `Sincronizado ${syncedAgo(row.lastSyncedAt, ahora)}` : 'Sin sincronizar'}
     </span>
   )
 

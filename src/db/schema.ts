@@ -189,8 +189,9 @@ export const clicks = pgTable(
   ],
 ).enableRLS()
 
-export const SOCIAL_NETWORKS = ['instagram', 'tiktok', 'youtube', 'facebook', 'threads', 'x'] as const
-export type SocialNetwork = (typeof SOCIAL_NETWORKS)[number]
+// La lista vive en `lib/networks.ts`, que el navegador puede importar sin arrastrar el ORM.
+// Ruta relativa a propósito: `drizzle-kit` lee este archivo sin los alias de TypeScript.
+export { SOCIAL_NETWORKS, type SocialNetwork } from '../lib/networks'
 
 /**
  * One connected account. Several rows can share a network; `(network, external_id)` is
