@@ -65,6 +65,22 @@ describe('describirArchivo', () => {
     expect(describirArchivo({ uri: 'content://media/9', fileSize: 1 })).toEqual({ error: TIPO_NO_PUBLICABLE })
   })
 
+  it('rechaza al elegir un formato que la subida no acepta, aunque sea imagen o video', () => {
+    expect(describirArchivo({ uri: 'file:///a/f.heic', fileName: 'f.heic', mimeType: 'image/heic', fileSize: 1 })).toEqual({
+      error: TIPO_NO_PUBLICABLE,
+    })
+    expect(describirArchivo({ uri: 'file:///a/v.3gp', fileName: 'v.3gp', mimeType: 'video/3gpp', fileSize: 1 })).toEqual({
+      error: TIPO_NO_PUBLICABLE,
+    })
+  })
+
+  it('un image/jpg de la galería sale como image/jpeg, el tipo que firma el servidor', () => {
+    expect(describirArchivo({ uri: 'file:///a/f.jpg', fileName: 'f.jpg', mimeType: 'image/jpg', fileSize: 1 })).toMatchObject({
+      tipo: 'image/jpeg',
+      mediaType: 'image',
+    })
+  })
+
   it('rechaza más de 500 MB antes de pedir una URL que el servidor va a negar', () => {
     expect(describirArchivo({ uri: 'file:///v.mp4', mimeType: 'video/mp4', fileSize: MAX_BYTES + 1 })).toEqual({
       error: ARCHIVO_MUY_GRANDE,

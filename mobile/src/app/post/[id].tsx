@@ -114,7 +114,7 @@ export default function DetallePost() {
       ) : null}
 
       {post.permalink ? (
-        <Pressable onPress={() => Linking.openURL(post.permalink!)}>
+        <Pressable onPress={() => Linking.openURL(post.permalink!)} accessibilityRole="link">
           <Tarjeta>
             {/* En brasa como el resto de las acciones: el verde de esta app dice
                 «publicado», y acá no informa un estado, invita a tocar. */}

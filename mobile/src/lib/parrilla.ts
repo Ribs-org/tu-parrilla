@@ -57,9 +57,6 @@ export const GRASA = '#e8d7b8'
 /** El rojo de «se quemó»: el halo y la banderita. Se aleja del naranjo de la brasa. */
 export const QUEMO = '#f2557a'
 
-/** De clara a oscura. */
-export const ORDEN_CARNE: readonly Carne[] = ['cruda', 'sellada', 'punto', 'quemada']
-
 /** Cómo se llama cada cocción, para el lector de pantalla y para la leyenda. */
 export const NOMBRE_COCCION: Record<Coccion, string> = {
   cruda: 'Programada',

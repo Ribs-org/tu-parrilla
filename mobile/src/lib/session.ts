@@ -1,7 +1,11 @@
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import * as SecureStore from 'expo-secure-store'
 
+import { conPlazo } from './api'
+import { borrarCaches } from './cache'
 import { API_BASE } from './config'
 import { SERVIDOR_FALLO, SIN_SENAL, fraseDeRechazo } from './ingreso'
+import { CLAVE_TEMA_SIN_SUBIR } from './tema'
 
 // El almacén seguro está respaldado por el llavero del sistema; la caché de datos
 // vive en AsyncStorage, que es texto plano. El token nunca cruza esa frontera.
@@ -19,21 +23,37 @@ export function clearToken(): Promise<void> {
   return SecureStore.deleteItemAsync(KEY)
 }
 
+/**
+ * Lo que la app guardó de una cuenta en este teléfono: lo último que mostró cada pantalla, y un
+ * cambio de modo que no alcanzó a subir. Se borra al salir y también al entrar —quien canceló el
+ * candado puede entrar con otro correo—, para que nadie vea en este teléfono nada de la cuenta de
+ * antes ni le suba su modo. La copia del modo (`CLAVE_TEMA`) se queda: es del teléfono, y la
+ * pantalla de entrada se dibuja con ella. Lo que falle al borrar no detiene el resto.
+ */
+async function borrarLoDeLaCuenta(): Promise<void> {
+  await Promise.allSettled([borrarCaches(), AsyncStorage.removeItem(CLAVE_TEMA_SIN_SUBIR)])
+}
+
+/** Salir en este teléfono: el token y lo guardado de la cuenta. Termina aunque algo no se borre. */
+export async function cerrarEnElTelefono(): Promise<void> {
+  await Promise.allSettled([clearToken(), borrarLoDeLaCuenta()])
+}
+
 /** Frases fijas: el usuario ve qué pasó, no el detalle del transporte. */
 async function postear(path: string, body: unknown): Promise<{ cuerpo: unknown } | { error: string }> {
-  let response: Response
   try {
-    response = await fetch(`${API_BASE}${path}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    })
+    return await conPlazo(
+      `${API_BASE}${path}`,
+      { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) },
+      async (response) => {
+        const cuerpo: unknown = await response.json().catch(() => null)
+        if (!response.ok) return { error: fraseDeRechazo(cuerpo) }
+        return { cuerpo }
+      },
+    )
   } catch {
     return { error: SIN_SENAL }
   }
-  const cuerpo: unknown = await response.json().catch(() => null)
-  if (!response.ok) return { error: fraseDeRechazo(cuerpo) }
-  return { cuerpo }
 }
 
 /** El mismo ingreso que el panel web: primero el correo, después el código que llega ahí. */
@@ -48,6 +68,7 @@ export async function entrar(correo: string, codigo: string): Promise<{ token: s
   const { cuerpo } = resultado
   const token = cuerpo && typeof cuerpo === 'object' && 'token' in cuerpo ? cuerpo.token : null
   if (typeof token !== 'string' || !token) return { error: SERVIDOR_FALLO }
+  await borrarLoDeLaCuenta()
   await saveToken(token)
   return { token }
 }

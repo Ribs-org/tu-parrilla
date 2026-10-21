@@ -96,20 +96,6 @@ export function Titulo({ children }: { children: string }) {
   )
 }
 
-export function Cifra({ etiqueta, valor }: { etiqueta: string; valor: string }) {
-  const colores = useColores()
-  return (
-    <View style={{ flex: 1, backgroundColor: colores.tarjeta, borderRadius: 16, padding: 14 }}>
-      <Etiqueta>{etiqueta}</Etiqueta>
-      {/* La cifra en sí se queda en la fuente del sistema: Oswald es condensada y los
-          números salen apretados justo donde hay que leerlos de una pasada. */}
-      <Text style={{ color: colores.texto, fontSize: 24, fontWeight: '600', marginTop: 4 }}>
-        {valor}
-      </Text>
-    </View>
-  )
-}
-
 export function Sello({ texto }: { texto: string | null }) {
   const colores = useColores()
   if (!texto) return null
@@ -150,29 +136,6 @@ export function Vacio({ texto }: { texto: string }) {
     <Text style={{ color: colores.tenue, textAlign: 'center', marginTop: 24, lineHeight: 20 }}>
       {texto}
     </Text>
-  )
-}
-
-/** El color del estado de un destino: verde publicado, gris programado, rojo falló, ámbar saliendo. */
-function colorDeEstado(c: Colores, estado: string): string {
-  if (estado === 'published') return c.verde
-  if (estado === 'failed') return c.rojo
-  if (estado === 'publishing') return c.ambar
-  return c.tenue
-}
-
-/** El mismo semáforo del panel: verde publicado, gris programado, rojo falló. */
-export function PuntoEstado({ estado }: { estado: string }) {
-  const colores = useColores()
-  return (
-    <View
-      style={{
-        width: 8,
-        height: 8,
-        borderRadius: 4,
-        backgroundColor: colorDeEstado(colores, estado),
-      }}
-    />
   )
 }
 
