@@ -412,7 +412,7 @@ export async function getPostSeries(f: Filters): Promise<PostSeriesPoint[]> {
   `
 
   const result = await getDb().execute(query)
-  // Filas directas, sin el envoltorio `{ rows }` del driver HTTP de Neon.
+  // `postgres-js` devuelve las filas directas, sin un envoltorio `{ rows }`.
   const rows = result as unknown as Array<{
     bucket: string
     views: number

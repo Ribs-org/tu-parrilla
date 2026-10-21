@@ -16,6 +16,9 @@ on:
 permissions:
   contents: read
 
+# Las acciones van fijadas por commit, como en ci.yml; `eas-cli`, por versión: con `latest`,
+# una versión nueva de la herramienta podía cambiar el build sin que cambiara nada acá.
+
 # Dos binarios a la vez pelearían por el mismo número de versión.
 concurrency:
   group: app-tienda
@@ -23,11 +26,17 @@ concurrency:
 
 jobs:
   construir:
+    # Solo desde main: `workflow_dispatch` deja elegir la rama al apretar «Run», y un binario
+    # de una rama sin revisar terminaría en la tienda con un número de versión gastado.
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    # La cola del plan gratis de EAS más el build: suele ser de diez a treinta minutos, a veces
+    # bastante más esperando turno.
+    timeout-minutes: 120
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -45,9 +54,10 @@ jobs:
       - run: npm run lint
         working-directory: mobile
 
-      - uses: expo/expo-github-action@v8
+      - uses: expo/expo-github-action@c7b66a9c327a43a8fa7c0158e7f30d6040d2481e # 8.2.1
         with:
-          eas-version: latest
+          # La misma versión con que se publican las actualizaciones por aire.
+          eas-version: 24.8.0
           token: ${{ secrets.EXPO_TOKEN }}
 
       # `--wait`: el paso termina cuando el binario está listo, no cuando la cola lo acepta,

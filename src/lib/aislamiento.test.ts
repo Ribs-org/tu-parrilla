@@ -2,12 +2,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 // `npm test` corre en CI sin `DATABASE_URL`: este archivo no puede necesitar una base.
 //
-// `getDb()` (en `src/db`) construye su cliente con `drizzle(neon(DATABASE_URL))`, y ni
-// `neon()` ni `drizzle()` abren una conexión por sí solos — solo la abren al ejecutar una
-// consulta. Así que este test deja pasar una `DATABASE_URL` falsa, sustituye el cliente
-// HTTP de `@neondatabase/serverless` por uno que nunca sale a la red y se limita a anotar
-// el SQL y los parámetros que Drizzle le habría mandado, y llama a las funciones reales
-// del módulo. Cada una revienta al llegar a la "red" (a propósito) salvo que la consulta
+// `getDb()` (en `src/db`) construye su cliente con `drizzle(postgres(DATABASE_URL))`, y ni
+// `postgres()` ni `drizzle()` abren una conexión por sí solos — solo la abren al ejecutar una
+// consulta. Así que este test deja pasar una `DATABASE_URL` falsa, sustituye el cliente de
+// `postgres` (postgres-js) por uno que nunca sale a la red y se limita a anotar el SQL y los
+// parámetros que Drizzle le habría mandado, y llama a las funciones reales del módulo. Cada una revienta al llegar a la "red" (a propósito) salvo que la consulta
 // tenga una respuesta programada (ver `colaRespuestas`), que es lo que hace falta para
 // que una función que encadena varias consultas alcance a construir la segunda, la
 // tercera, etc. — antes de eso, con todo rechazando siempre, la primera consulta frenaba

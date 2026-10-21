@@ -1,0 +1,32 @@
+# Las versiones nuevas, una vez al mes y juntas: un pull request por ecosistema, que pasa por
+# la misma reja que cualquier otro (los trabajos `sitio` y `app` del CI).
+#
+# Lo que queda fuera, a propósito:
+# - Las versiones mayores del sitio (Next, React, Drizzle…): cada una es una mudanza con su
+#   propia lectura de cambios, no algo que se acepta de pasada.
+# - La app del teléfono (`mobile/`). Su JavaScript llega por aire a un binario que ya está
+#   instalado, y las versiones de los módulos nativos las fija el SDK de Expo: subir uno solo
+#   puede dejar al JavaScript pidiendo algo que el binario no trae, y la app se cae al abrir.
+#   Se actualiza con el SDK entero (`npx expo install --fix`) y un build nuevo, a mano. Los
+#   avisos de seguridad de GitHub siguen llegando igual.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 2
+    groups:
+      sitio:
+        update-types: [minor, patch]
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      acciones:
+        patterns: ['*']
