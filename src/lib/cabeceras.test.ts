@@ -15,4 +15,8 @@ describe('las cabeceras de seguridad', () => {
     })
     expect(cabeceras['Permissions-Policy']).toContain('camera=()')
   })
+
+  it('sin X-Powered-By, que solo dice con qué está hecho el sitio', () => {
+    expect(nextConfig.poweredByHeader).toBe(false)
+  })
 })

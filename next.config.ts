@@ -40,6 +40,10 @@ const CABECERAS = [
 ]
 
 const nextConfig: NextConfig = {
+  // Next manda `X-Powered-By: Next.js` en cada respuesta: le dice a quien busca qué atacar sin
+  // que nadie lo necesite.
+  poweredByHeader: false,
+
   async headers() {
     return [{ source: '/:path*', headers: CABECERAS }]
   },
