@@ -50,7 +50,7 @@ export async function GET(request: Request) {
     ...(cuenta ? { accountId: cuenta.id } : {}),
   })
   const lecturas = (await lecturasDeCuentas(ownerId)).filter((l) => cuenta === null || l.accountId === cuenta.id)
-  const tarjetas = buildAccountCards(lecturas, localDay(filters.from, zone), localDay(filters.to, zone), 'cuenta')
+  const tarjetas = buildAccountCards(lecturas, localDay(filters.from, zone), localDay(filters.to, zone))
   const top = topPostsByGain(filas, 5)
   const atributos = await attributesFor(ownerId, top)
   const nombres = new Map(cuentas.map((c) => [c.id, cuentaMovil(c)]))

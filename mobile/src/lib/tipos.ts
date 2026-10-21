@@ -58,6 +58,9 @@ export type Cuentas = {
   desde: string
   hasta: string
   cuentas: {
+    /** La cuenta y su nombre en la red; un servidor de antes del 2026-10-21 no los manda. */
+    id?: string | null
+    nombre?: string | null
     red: string
     seguidores: number | null
     seguidoresGanados: number | null

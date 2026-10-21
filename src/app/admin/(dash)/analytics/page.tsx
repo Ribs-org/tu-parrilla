@@ -206,7 +206,7 @@ async function EnLasRedes({
   const lecturas = (await lecturasDeCuentas(filters.ownerId)).filter((l) => cuenta === null || l.accountId === cuenta.id)
   const desde = localDay(filters.from, filters.zone)
   const hasta = localDay(filters.to, filters.zone)
-  const tarjetas = buildAccountCards(lecturas, desde, hasta, 'cuenta')
+  const tarjetas = buildAccountCards(lecturas, desde, hasta)
   const kpis = postKpisFrom(filas)
   const ganados = seguidoresGanados(tarjetas)
   const top = topPostsByGain(filas, 5)

@@ -73,16 +73,16 @@ consulta al dueño. Eso deja sin protección cualquier consulta escrita **fuera 
 `src/lib`**. La del calendario (`schedule/page.tsx`) lo estuvo hasta el 2026-09-29, cuando
 El Fuego necesitó la misma lectura y se movió a `src/lib/social/publish/cortes.ts`, donde
 el arnés sí la ve. Eso achicó la superficie en una, no la cerró: al 2026-10-21, `grep -rln
-"getDb()" src/app` (sin contar los tests) da trece archivos que arman su propio SQL, en
+"getDb()" src/app` (sin contar los tests) da doce archivos que arman su propio SQL, en
 cuatro clases:
 
 - **Tres páginas del panel**: `schedule/[id]/page.tsx`, `profiles/[id]/page.tsx` y
   `accounts/elegir/page.tsx`.
 - **Las acciones de servidor**, `admin/actions.ts`, con decenas de consultas (la guardia de
   `rescheduleTarget` que se añadió el 2026-09-29 es una de ellas).
-- **Ocho rutas de API**: `api/schedule/posts`, `api/mobile/schedule`, `api/mobile/overview`
-  (esta con dos consultas, una por ventana), `api/mobile/accounts`,
-  `api/mobile/schedule/accounts`, `api/mobile/tema`, `api/track/visit` y `api/track/click`.
+- **Siete rutas de API**: `api/schedule/posts`, `api/mobile/schedule`, `api/mobile/overview`
+  (esta con dos consultas, una por ventana), `api/mobile/schedule/accounts`,
+  `api/mobile/tema`, `api/track/visit` y `api/track/click`.
 - **La página de un borrado** (`(legal)/borrado/[codigo]/page.tsx`), que es la excepción de
   más abajo.
 
@@ -95,7 +95,7 @@ chille.
 El calendario no se extrajo por criterio sino porque otra pantalla la pedía; el patrón
 real del repositorio sigue siendo que el arnés llega a `src/lib` y no a las páginas, las
 acciones ni las rutas de API que arman su propio SQL. Cerrarlo de verdad pide decidir
-cuáles de esas trece se trasladan a `src/lib`, o extender el arnés para que también las
+cuáles de esas doce se trasladan a `src/lib`, o extender el arnés para que también las
 alcance ahí donde viven.
 
 Y hay una excepción al revés, dentro de `src/lib`: `src/lib/social/meta-bajas.ts`
@@ -173,22 +173,6 @@ el día que el editor del panel administre documentos de verdad, la salida buena
 caminos compartan la escritura de la regla en vez de tener cada uno su `insert` —que es la deuda
 de más arriba, «Dos caminos que crean publicaciones, sin código compartido», de la que esta es
 una consecuencia concreta.
-
-## La app del teléfono sigue agrupando las métricas por red
-
-**Abierto desde 2026-09-24; el panel lo cerró el 2026-10-13.**
-
-`buildAccountCards` (`src/lib/account-stats.ts`) agrupa por red o por cuenta. Los Números
-pide por cuenta —una tarjeta por cuenta, con su handle— y además filtra lo de las redes por
-cuenta. La app del teléfono (`api/mobile/accounts`, `src/app/api/mobile/accounts/route.ts`)
-sigue pidiendo por red: con dos cuentas de Instagram conectadas, sus lecturas se mezclan en
-una sola tarjeta. No se suman: la cifra que se ve es la última lectura de una de las dos,
-cualquiera, y lo ganado en el período puede salir de restar lecturas de cuentas distintas.
-
-Se dejó así porque la pantalla de la app muestra una tarjeta por red y no sabe distinguir dos
-de la misma: cambiar solo la API le daría dos tarjetas «Instagram» iguales. Cerrarlo pide que
-la ruta pida `'cuenta'` y devuelva el handle, y que la app rotule cada tarjeta con él; una
-tarde, con su test.
 
 ## Tres cosas de los trial reels que no se pudieron verificar
 

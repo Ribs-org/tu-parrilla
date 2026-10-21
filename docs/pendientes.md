@@ -87,8 +87,8 @@ Cómo se usa:
 - **[dueño] Probar una vez que un respaldo se restaura** (2026-10-21). Desde el 2026-10-21 el
   flujo revisa el índice de cada volcado, pero nadie restauró uno entero todavía. Bajar el de
   un día, descifrarlo con la llave y restaurarlo en una Postgres desechable (README,
-  «Respaldos»). La llave privada la tiene solo el dueño: si se pierde, se pierden los
-  respaldos, así que conviene una segunda copia en un lugar distinto del gestor de contraseñas.
+  «Respaldos»). Sin la llave privada los respaldos no se abren: que siga guardada en más de un
+  lugar.
 
 ## Trámites con las plataformas
 
