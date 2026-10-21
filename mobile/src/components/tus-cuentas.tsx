@@ -35,8 +35,9 @@ export function TusCuentas({ rango }: { rango: Rango }) {
         <Vacio texto="Todavía no hay lecturas de cuenta. La primera llega con la sincronización de esta noche." />
       ) : (
         data.cuentas.map((cuenta) => (
-          <Tarjeta key={cuenta.red}>
-            <Etiqueta>{NOMBRE_RED[cuenta.red] ?? cuenta.red}</Etiqueta>
+          // Una por cuenta: con dos de Instagram, el nombre es lo que las distingue.
+          <Tarjeta key={cuenta.id ?? cuenta.red}>
+            <Etiqueta>{`${NOMBRE_RED[cuenta.red] ?? cuenta.red}${cuenta.nombre ? ` · ${cuenta.nombre}` : ''}`}</Etiqueta>
             <Text style={{ color: colores.texto, fontSize: 24, fontWeight: '600' }}>{num(cuenta.seguidores)}</Text>
             <Text style={{ color: colores.suave, fontSize: 12 }}>
               seguidores

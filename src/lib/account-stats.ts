@@ -5,7 +5,7 @@ import { sinMetricasDerivadas } from './social/politica-youtube'
 
 export type AccountMetricRow = {
   network: string
-  /** La cuenta de la lectura. Hace falta para agrupar por cuenta; por red no se mira. */
+  /** La cuenta de la lectura: las tarjetas se arman por ella. */
   accountId?: string
   day: string
   followers: number | null
@@ -23,7 +23,7 @@ const LA_CUENTA_YA_EXISTIA = '0000-01-01'
 
 export type AccountCard = {
   network: string
-  /** La cuenta de la tarjeta al agrupar por cuenta; null al agrupar por red. */
+  /** La cuenta de la tarjeta; null si las lecturas no traían cuenta. */
   accountId: string | null
   followers: number | null
   /** Seguidores ganados dentro del período; null cuando no hay lectura previa. */
@@ -35,20 +35,14 @@ export type AccountCard = {
 }
 
 /**
- * Una tarjeta por red o una por cuenta. Por red mezcla las lecturas de dos cuentas de la
- * misma red en una sola tarjeta —la cifra es la última lectura de cualquiera de las dos—,
- * así que el panel agrupa por cuenta; la app del teléfono sigue por red hasta que su
- * pantalla sepa mostrar dos tarjetas de una misma red (`docs/deuda-tecnica.md`).
+ * Una tarjeta por cuenta. Por red, dos cuentas de la misma red caían en una sola tarjeta: la
+ * cifra era la última lectura de cualquiera de las dos, y lo ganado salía de restar lecturas de
+ * cuentas distintas. Una lectura sin cuenta va con las de su red.
  */
-export function buildAccountCards(
-  rows: AccountMetricRow[],
-  from: string,
-  to: string,
-  agrupar: 'red' | 'cuenta' = 'red',
-): AccountCard[] {
+export function buildAccountCards(rows: AccountMetricRow[], from: string, to: string): AccountCard[] {
   const grupos = new Map<string, AccountMetricRow[]>()
   for (const row of rows) {
-    const clave = agrupar === 'cuenta' ? (row.accountId ?? row.network) : row.network
+    const clave = row.accountId ?? row.network
     const list = grupos.get(clave) ?? []
     list.push(row)
     grupos.set(clave, list)
@@ -70,7 +64,7 @@ export function buildAccountCards(
 
     return {
       network,
-      accountId: agrupar === 'cuenta' ? (list[0]!.accountId ?? null) : null,
+      accountId: list[0]!.accountId ?? null,
       followers: followers.current,
       // Los suscriptores ganados de YouTube salen de restar dos lecturas: una métrica
       // derivada, que sus políticas no permiten (`politica-youtube`). El total sí.

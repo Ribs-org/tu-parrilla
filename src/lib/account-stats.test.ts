@@ -13,7 +13,7 @@ const rows: AccountMetricRow[] = [
 ]
 
 describe('buildAccountCards', () => {
-  it('una tarjeta por red, con seguidores actuales y lo ganado en el período', () => {
+  it('con lecturas sin cuenta, una tarjeta por red, con seguidores actuales y lo ganado en el período', () => {
     expect(buildAccountCards(rows, '2026-09-02', '2026-09-03')).toEqual([
       {
         network: 'instagram',
@@ -46,7 +46,7 @@ describe('buildAccountCards', () => {
     expect(youtube!.followersChange).toBeNull()
   })
 
-  it('por cuenta, dos cuentas de la misma red no se mezclan', () => {
+  it('dos cuentas de la misma red no se mezclan', () => {
     // Por red, la tarjeta de Instagram tomaría la última lectura de cualquiera de las dos y
     // restaría lecturas de cuentas distintas: 900 - 1500 no es lo que ganó nadie.
     const dos: AccountMetricRow[] = [
@@ -55,7 +55,7 @@ describe('buildAccountCards', () => {
       { network: 'instagram', accountId: 'b', day: '2026-09-01', followers: 880, profileViews: null, reach: null },
       { network: 'instagram', accountId: 'b', day: '2026-09-03', followers: 900, profileViews: null, reach: null },
     ]
-    const cards = buildAccountCards(dos, '2026-09-02', '2026-09-03', 'cuenta')
+    const cards = buildAccountCards(dos, '2026-09-02', '2026-09-03')
     expect(cards.map((c) => [c.accountId, c.followers, c.followersChange])).toEqual([
       ['a', 1540, 40],
       ['b', 900, 20],
