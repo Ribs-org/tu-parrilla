@@ -1,8 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { previousPeriod } from './analytics'
 import { parseFilters } from './filters'
 
 // `previousPeriod` vive en `analytics.ts`, que importa `server-only`: solo lo entiende el
-// bundler de Next (mismo arreglo que en `sync.test.ts`).
+// bundler de Next (mismo arreglo que en `sync.test.ts`). El import va arriba y no dentro de la
+// prueba que lo usa: Vitest sube este `vi.mock` antes que los imports, y un import dinámico
+// dentro de un `it` pagaría la transformación de todo `analytics.ts` en medio de la prueba.
 vi.mock('server-only', () => ({}))
 
 const ZONA = 'America/Santiago'
@@ -57,8 +60,7 @@ describe('parseFilters: el período', () => {
     expect(f.periodo.desde).toBe('2020-01-01')
   })
 
-  it('el período anterior de unas fechas a mano es uno del mismo largo, justo antes', async () => {
-    const { previousPeriod } = await import('./analytics')
+  it('el período anterior de unas fechas a mano es uno del mismo largo, justo antes', () => {
     const f = parseFilters({ desde: '2026-09-01', hasta: '2026-09-07' }, 'u', ZONA)
     const antes = previousPeriod(f)
     expect(antes.to.toISOString()).toBe(f.from.toISOString())

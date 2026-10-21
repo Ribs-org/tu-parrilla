@@ -191,8 +191,9 @@ De aquí en adelante casi nunca vas a volver a esta consola.
   `mobile/README.md`.
 - **Cambio nativo**, que es raro: en la app de GitHub, **Actions → «App a la tienda» →
   Run**. GitHub corre las pruebas de la app, EAS construye el binario, lo envía a la pista interna,
-  y Google lo distribuye. El flujo vive en `.github/workflows/app-tienda.yml` y tiene una
-  casilla por si alguna vez quieres construir sin enviar.
+  y Google lo distribuye. El flujo vive en `.github/workflows/app-tienda.yml`, corre solo
+  desde `main` (con otra rama elegida al apretar «Run», no hace nada) y tiene una casilla por
+  si alguna vez quieres construir sin enviar.
 
 **El número de versión lo lleva EAS**, no un archivo: `eas.json` declara `autoIncrement` y
 el proyecto guarda la cuenta en el servidor. Por eso el error de abajo no debería aparecer

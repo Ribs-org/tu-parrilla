@@ -28,6 +28,8 @@ concurrency:
 jobs:
   volcar:
     runs-on: ubuntu-latest
+    # Tarda menos de un minuto; el tope deja crecer la base sin dejar colgado un volcado.
+    timeout-minutes: 15
     env:
       # Publicarla no abre nada: solo sirve para cifrar.
       DESTINATARIO: age1pksey0x576yzrqauqwf8sh564dhy7lzzh46knyhwxdtaagrvdqeq37nght
@@ -57,13 +59,40 @@ jobs:
           # La URL viaja como variable de entorno y no como argumento para que no quede
           # escrita en la línea de comandos del proceso. El volcado sale por la salida
           # estándar directo a `age`: en claro no existe ni en el disco del runner.
+          #
+          # De paso, una copia del mismo chorro pasa por `pg_restore --list`, que lee el índice
+          # del volcado y lo deja en `indice.txt`: solo nombres de tablas, que el esquema del
+          # repositorio ya publica. Si el volcado no se puede leer, o le faltan las tablas de
+          # siempre —una URL que apunta a una base vacía da un volcado válido y sin nada—, el
+          # paso falla: un respaldo que no se restaura no sirve, y sin esto se sabría recién el
+          # día que haga falta.
+          #
+          # La copia va por un caño con nombre y el lector corre en segundo plano, para poder
+          # esperarlo y saber cómo terminó. `pg_restore --list` deja de leer apenas tiene el
+          # índice y cierra el caño: `tee -p` sigue entonces escribiendo hacia `age` en vez de
+          # morir con SIGPIPE, que dejaría el respaldo cortado a la mitad.
+          mkfifo respaldo/indice.fifo
+          docker run -i --rm postgres:17 pg_restore --list < respaldo/indice.fifo > respaldo/indice.txt &
+          lector=$!
           docker run --rm -e PGURL="$URL" postgres:17 \
             sh -c 'pg_dump "$PGURL" --format=custom --no-owner --no-privileges' \
+            | tee -p respaldo/indice.fifo \
             | age -r "$DESTINATARIO" -o respaldo/parrilla.dump.age
+          if ! wait "$lector"; then
+            echo "pg_restore no pudo leer el volcado."
+            exit 1
+          fi
+          for tabla in users profiles social_accounts scheduled_posts scheduled_post_targets; do
+            if ! grep -Eq " TABLE DATA public $tabla( |$)" respaldo/indice.txt; then
+              echo "El volcado no trae los datos de $tabla."
+              exit 1
+            fi
+          done
+          echo "Tablas con datos en el volcado: $(grep -c ' TABLE DATA ' respaldo/indice.txt)"
           ls -lh respaldo/parrilla.dump.age
 
       - name: Guardar el respaldo
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: respaldo-${{ github.run_id }}
           path: respaldo/parrilla.dump.age

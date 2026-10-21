@@ -1,5 +1,10 @@
 # Mudanza de la base: de Neon a Supabase
 
+> **Esto ya pasó.** La mudanza se hizo el 2026-09-21, y desde entonces producción corre en
+> Supabase. Lo de abajo queda como registro de por qué se dejó Neon y de cómo se movieron los
+> datos, por si alguna vez hay que repetir algo parecido. No es un pendiente: lo de hoy está en
+> el README («Variables de entorno», «Respaldos»).
+
 El 2026-09-21 el plan gratis de Neon cortó producción con `HTTP 402` en cada consulta:
 la base había gastado sus 100 CU-horas del mes. No fue el tráfico. El pinger de
 cron-job.org golpea cada 5 minutos y Neon se duerme recién a los 5, así que la base nunca

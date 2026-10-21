@@ -34,6 +34,23 @@ quedar verdes antes de poder fusionar.
   enterarnos acá y no en Vercel.
 - **app** corre los tests, el typecheck y el lint del proyecto de `mobile/`.
 
+Entre los tests del sitio hay dos que cuidan lo que no se ve leyendo el código:
+
+- `src/lib/variables-de-entorno.test.ts` pide que cada variable que lee el código esté en
+  `.env.example` y en la tabla de «Variables de entorno», y que esas dos no nombren ninguna que
+  ya no se lea.
+- `src/lib/migraciones.test.ts` revisa el journal de `drizzle/`: numerado de corrido, cada
+  migración más nueva que la anterior, y cada una con su archivo. El migrador aplica solo las
+  más nuevas que la última aplicada, así que una fuera de orden se saltaría en silencio.
+
+Las acciones de los flujos van fijadas por commit, no por etiqueta (una etiqueta se puede mover
+a otro código), y cada trabajo tiene su tope de minutos. Una vez al mes Dependabot
+(`.github/dependabot.yml`) abre un pull request con lo nuevo de las dependencias del sitio —sin
+las versiones mayores, que son mudanzas— y otro con lo de las acciones, y los dos pasan por la
+misma reja. La app del teléfono queda fuera a propósito. Su JavaScript llega por aire a un
+binario ya instalado, y sus módulos nativos los fija el SDK de Expo: subir uno solo puede dejar
+a la app pidiendo algo que el binario no trae. Se actualiza con el SDK entero y un build nuevo.
+
 `main` está protegida. No se puede empujar directo: todo entra por pull request, los dos
 trabajos son obligatorios, y la rama tiene que estar al día con `main` antes de fusionar,
 para que la reja haya corrido sobre el código que de verdad va a quedar.
@@ -930,6 +947,18 @@ npm run analytics:check  # imprime la última visita y el último click
 que crea llevan un prefijo `demo:` en `visitor_hash`, así que `demo:clear` las quita sin
 tocar nada real.
 
+**Reparaciones de una vez**
+
+Dos scripts de `scripts/` no tienen comando en `package.json`, a propósito: arreglaron datos de
+antes de un cambio y no hay que correrlos de nuevo salvo que vuelva a pasar lo mismo. Se corren
+con `npx dotenv -e .env.local -- tsx scripts/<archivo>.ts`, y cada uno explica al principio qué
+toca:
+
+- `marcar-bots-historicos.ts` reclasifica como bots las visitas de antes de la baliza del
+  navegador que tienen la firma de un escáner (sin `?s=`, sin referente, entre otras señales).
+- `reparar-ids-facebook.ts` pasa los `externalId` de Facebook publicados antes del arreglo del
+  publicador al formato `páginaID_postID`, el mismo con que se leen las métricas.
+
 ## Cómo cambia el esquema
 
 El esquema vive en `src/db/schema.ts` y cambia por migraciones en `drizzle/`, que van en el
@@ -957,16 +986,23 @@ producción se despliega primero, el build intentará aplicar la migración inic
 fallará en la primera tabla que ya existe y no se promoverá (sin daño, pero un deploy
 perdido).
 
-### Si una migración falla a medias
+### Si una migración falla
 
-El migrador aplica las sentencias de cada archivo una por una, sin
-transacción, y solo registra la migración cuando todas terminan bien. Si una falla a
-mitad de camino, las sentencias anteriores quedan aplicadas y nada queda registrado: el
-próximo build vuelve a intentar el mismo archivo desde el principio y falla en la primera
-sentencia con «already exists». Se repara a mano: se aplican las sentencias que faltaban y
-se inserta la fila correspondiente en `drizzle.__drizzle_migrations`, con el hash del
-archivo y el `when` del journal. Por eso conviene una sola sentencia por migración: así una
-falla a medias dura cero sentencias aplicadas.
+El migrador de Drizzle aplica todas las migraciones pendientes de un despliegue en una sola
+transacción, y registra cada una dentro de ella (`migrate` en
+`drizzle-orm/pg-core/dialect.js`). Si una sentencia falla, se deshace todo, también las
+migraciones anteriores de esa misma tanda, y la base queda como estaba. El build cae, el código
+nuevo no se promueve, y el próximo despliegue vuelve a intentar desde la misma migración. Se
+arregla el SQL en otro pull request, y listo: no hay nada que reparar a mano.
+
+Lo que no cabe en esa transacción tiene que ir aparte:
+
+- `CREATE INDEX CONCURRENTLY`, que Postgres no acepta dentro de una transacción;
+- usar en la misma tanda un valor que se acaba de agregar a un enum (`ALTER TYPE … ADD VALUE`).
+
+Una migración así va sola en su despliegue. Si ni así se puede, se aplica a mano: la sentencia
+en el editor SQL de Supabase y la fila en `drizzle.__drizzle_migrations`, con el hash del
+archivo y el `when` del journal.
 
 ## Respaldos
 
@@ -1003,8 +1039,10 @@ Vercel y bajan con `vercel env pull .env.local`.
 | Variable | Para qué | ¿Obligatoria? |
 | --- | --- | --- |
 | `DATABASE_URL` | Supabase Postgres, por el *pooler* | Sí — la pone la integración |
+| `DATABASE_URL_UNPOOLED` | La misma base por el *session pooler* (puerto 5432): la usan las migraciones al desplegar y el respaldo diario, que necesitan una conexión de verdad | Sí — sin ella el migrador prueba con `DATABASE_URL` y lo más probable es que falle; el respaldo la lee de los secretos del repositorio |
 | `ADMIN_EMAIL` | El correo del primer usuario | Sí |
-| `AUTH_SECRET` | Firma de la cookie de sesión | Sí |
+| `AUTH_SECRET` | Firma las sesiones —la cookie del panel y el token del teléfono— y los mensajes de los redirects, y de ella sale la llave que cifra los tokens de las redes guardados en la base | Sí — cambiarla cierra todas las sesiones y deja ilegibles los tokens guardados: hay que reconectar cada cuenta |
+| `MOBILE_TOKEN_VERSION` | La versión de las sesiones de la app del teléfono: subirla en 1 cierra la de todos los teléfonos a la vez (ver `mobile/README.md`, «Si se pierde el teléfono») | No — por defecto `1` |
 | `FINGERPRINT_SALT` | Sal del hash de visitante | Conviene — sin ella se usa una derivada de `AUTH_SECRET`; ponerla o cambiarla después cambia los visitantes únicos de ese día |
 | `INGRESO_FROM` | Remitente de los códigos de ingreso | No — sin ella se usa el remitente de prueba de Resend |
 | `R2_ACCOUNT_ID` | ID de tu cuenta de Cloudflare | No — sin ella no puedes subir media |
@@ -1029,7 +1067,12 @@ Vercel y bajan con `vercel env pull .env.local`.
 | `THREADS_APP_SECRET` | El secreto de ese caso de uso | Junto con el anterior |
 | `X_CLIENT_ID` | Conectar X para publicar (OAuth 2.0 + PKCE); hoy en «Próximamente» | El Client ID de la app en developer.x.com |
 | `X_CLIENT_SECRET` | El secreto de esa app | Junto con el anterior |
-| `CRON_SECRET` | Autoriza las corridas programadas (sync diario y publicación cada 5 minutos) | No — la pone Vercel solo, al declarar el cron |
+| `X_BEARER_TOKEN` | Leer los tuits públicos de los creadores del modo Tinder (ver «Modo Tinder») | No — sin ella el modo Tinder no trae nada de X |
+| `AI_GATEWAY_API_KEY` | Redactar con un modelo los borradores de respuesta a comentarios (ver «Responder comentarios») | No — en Vercel puede omitirse si el proyecto usa OIDC; sin ninguna de las dos, los comentarios entran a la cola sin borrador |
+| `COMENTARIOS_MODELO` | El modelo de esos borradores, con la forma `proveedor/modelo` | No — tiene uno por defecto |
+| `COMENTARIOS_DM` | Con `1`, tras responder un comentario de Instagram o Facebook se le manda un privado a quien comentó | No — apagada por defecto; exige `pages_messaging` aprobado por Meta |
+| `SITE_URL` | Tu dominio, para etiquetar los enlaces del mensaje automático | No — sin ella se usa el dominio de producción de Vercel |
+| `CRON_SECRET` | Autoriza las corridas programadas: el sync diario y la publicación cada 5 minutos. Vercel la manda sola a su cron; el pinger externo la manda en `Authorization: Bearer …` | Sí — Vercel no la crea: se genera igual que `AUTH_SECRET` y se agrega. Sin ella los crons responden `401` y no corre nada |
 | `MIGRAR_PREVIEWS` | Que los previews migren la base | Solo cuando el preview tenga una base propia; contra la de producción, no |
 | `DATABASE_URL_PRUEBAS` | Solo para las pruebas de integración: una Postgres desechable donde cada archivo crea y migra su propia base (ver «Comandos»). No va en Vercel | No — sin ella esas pruebas se saltan. Nunca la de producción |
 | `SCHEDULE_API_KEY` | La llave del despliegue: abre `POST /api/schedule/batch` (carga masiva), `DELETE /api/schedule/posts/{id}` (sacar lo programado), `GET /api/schedule/posts` (calendario), `GET /api/schedule/resumen` (el resumen del día), `GET /api/schedule/cuentas` (las cuentas), `GET /api/metrics/posts` (métricas) y `GET /api/metrics/mejores` (el mejor X %) a nombre del admin. Es anterior a las llaves por usuario y sigue para el agente que ya la usa | No — sin ella los siete endpoints aceptan solo las llaves que cada usuario genera en Tu IA; si la pones, genérala igual que `CRON_SECRET` |
