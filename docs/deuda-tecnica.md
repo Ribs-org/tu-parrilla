@@ -42,26 +42,6 @@ El editor es más enredado porque teje los archivos con `keptMedia` y con `media
 que merece su propio rato. `uploadImage` además **miente**: declara un máximo de 8 MB que
 la plataforma nunca deja llegar.
 
-## El boundary del panel esconde el error real
-
-**Abierto desde 2026-09-22.**
-
-`src/app/admin/(dash)/error.tsx` dice «una consulta no respondió» pase lo que pase. Cuando
-el fallo fue un `413` por tamaño de archivo, esa frase mandó la depuración en la dirección
-equivocada durante una hora: se buscó un problema de base de datos que no existía.
-
-Conviene que el boundary distinga al menos entre un fallo de red o tamaño y uno de
-consulta, o que el compositor atrape el `413` y diga que el archivo es muy grande.
-
-## El panel muestra tiempos relativos sin protección de hidratación
-
-**Abierto desde 2026-09-22.**
-
-Textos como «Sincronizado hace 5 horas» o «la conexión vence mañana» se calculan en el
-servidor y otra vez en el cliente. Si el cálculo cruza un cambio de unidad entre ambos,
-React aborta la hidratación con el error #418 y cae al boundary — que además muestra la
-frase equivocada, ver arriba. Es intermitente y difícil de reproducir a pedido.
-
 ## Un guardia de choque de unicidad estuvo muerto sin que nadie lo notara
 
 **Abierto el 2026-09-24, cerrado el mismo día.** Queda escrito porque la forma de fallar se
@@ -476,23 +456,6 @@ correcto: «19:00» es 19:00 del dueño en los dos lados), o bien la app solo la
 al selector («se publicará a las 19:00 de Europe/Madrid») y deja que el dueño traduzca. Lo
 segundo es una tarde; lo primero pide aritmética de zonas en el cliente, que es justo lo
 que `fromZonedInput` ya resuelve en el servidor.
-
-## Los Fierros mandan `drizzle-orm` al navegador
-
-**Abierto desde 2026-09-30.**
-
-`src/app/admin/(dash)/accounts/cuentas.tsx` es un componente de cliente y hace
-`import { SOCIAL_NETWORKS } from '@/db/schema'` —un import de valor—. `db/schema` importa
-`drizzle-orm/pg-core` y construye las tablas al cargarse, así que el chunk de cliente de
-`/admin/accounts` (unos 52 KB) lleva el núcleo de `drizzle-orm` dentro. Es el único
-componente de cliente del repositorio que importa el esquema como valor; la revisión de la
-entrega C lo vio en el manifiesto del build. No rompe nada: es peso y una dependencia del
-navegador que no tiene por qué estar ahí.
-
-Cerrarlo: sacar `SOCIAL_NETWORKS` y `SocialNetwork` a un módulo sin drizzle (el candidato
-natural es `src/lib/networks.ts`, que ya es lo que el cliente importa) y que `db/schema`
-los reexporte, para no tocar los demás imports. Una tarde, con un `grep` de los sitios que
-los importan y el build para confirmar que el chunk se achica.
 
 ## TikTok: el id del video se recupera por texto y hora (2026-10-16)
 

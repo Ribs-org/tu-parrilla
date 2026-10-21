@@ -5,6 +5,7 @@ import { Check, Copy } from 'lucide-react'
 import { generarLlaveApi, revocarLlaveApi, type LlaveState } from '@/app/admin/actions'
 import { Button, Field, Input, Submit } from '@/components/ui'
 import { PINTURA } from '@/components/charts/theme'
+import { copiarAlPortapapeles } from '@/lib/copiar'
 
 /** Lo que dura un acuse de recibo antes de irse solo, como los «Copiado» del panel. */
 const AVISO_MS = 2000
@@ -37,14 +38,10 @@ function BotonCopiar({ texto, children }: { texto: string; children: React.React
     <Button
       type="button"
       onClick={() => {
-        // Sin contexto seguro (http que no es localhost) `navigator.clipboard` no existe; la
-        // llave sigue a la vista para copiarla a mano.
-        const clipboard = navigator.clipboard
-        if (!clipboard) return
-        clipboard
-          .writeText(texto)
-          .then(() => setCopiado(true))
-          .catch(() => {})
+        // Sin portapapeles la llave sigue a la vista para copiarla a mano.
+        void copiarAlPortapapeles(texto).then((copiado) => {
+          if (copiado) setCopiado(true)
+        })
       }}
     >
       {copiado ? (

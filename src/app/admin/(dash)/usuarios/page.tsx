@@ -6,10 +6,11 @@ import { FormularioInvitar, BotonQuitar, BotonCerrarSesiones } from './formulari
 
 export const dynamic = 'force-dynamic'
 
-const FECHA = new Intl.DateTimeFormat('es-CL', { dateStyle: 'medium' })
-
 export default async function UsuariosPage() {
-  await requireAdmin()
+  const { zona } = await requireAdmin()
+  // En la zona del admin: sin `timeZone`, el formato usaba la del servidor (UTC en Vercel), y
+  // una invitación de las nueve de la noche en Chile salía con la fecha del día siguiente.
+  const FECHA = new Intl.DateTimeFormat('es-CL', { dateStyle: 'medium', timeZone: zona })
   const usuarios = await listarUsuarios()
   return (
     <>

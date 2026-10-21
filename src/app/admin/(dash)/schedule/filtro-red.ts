@@ -2,7 +2,7 @@
 // cuántos tiene cada red en lo que se está mirando. Puro: la página trae las filas y esto
 // decide, para poder probarlo sin base.
 
-import { SOCIAL_NETWORKS } from '@/db/schema'
+import { SOCIAL_NETWORKS } from '@/lib/networks'
 
 /** Una cuenta del dueño, como la lista Los Fierros. */
 export type CuentaDelFiltro = { id: string; network: string; handle: string | null }

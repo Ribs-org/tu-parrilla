@@ -1,29 +1,13 @@
 'use client'
 
-import { Children, useSyncExternalStore, type ReactNode } from 'react'
+import { Children, type ReactNode } from 'react'
 import { hourLabel } from '@/lib/schedule-week'
+import { useAhora } from '@/lib/use-ahora'
 import { horasDeLaReja, minutoDelDia, rotuloDeHora } from './horas'
 import { dondeVaAhora } from './semana'
 
-const MINUTO = 60_000
-
-// Un reloj al minuto que todos los que lo miran comparten: cada uno se suscribe, y un solo
-// intervalo por suscriptor le avisa cuando cambia el minuto.
-function suscribir(aviso: () => void): () => void {
-  const intervalo = setInterval(aviso, 15_000)
-  return () => clearInterval(intervalo)
-}
-
-const minutoDeAhora = () => Math.floor(Date.now() / MINUTO) * MINUTO
-
-/**
- * La hora de ahora, al minuto, y que se mueve sola. Al dibujarse en el servidor y al hidratar
- * es `desde`, la hora con que el servidor armó la página: así el primer dibujo del navegador es
- * el mismo, y apenas hidrata se corre a la de verdad.
- */
-export function useAhora(desde: number): number {
-  return useSyncExternalStore(suscribir, minutoDeAhora, () => desde)
-}
+// El reloj al minuto (`useAhora`) vive en `lib/use-ahora.ts`: lo comparten el calendario, Los
+// Fierros, La Mesa y el compositor.
 
 /**
  * Las filas de hoy, con la línea de «ahora» metida entre lo que ya tuvo su hora y lo que viene.

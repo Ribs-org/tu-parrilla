@@ -24,7 +24,10 @@ export default function PanelError({
   const enLaEntrada = usePathname() === '/admin/schedule'
 
   // El mensaje puede venir de una fila de la base o de la respuesta de una red: a la
-  // consola, donde lo lee quien depura, y nunca a la pantalla.
+  // consola, donde lo lee quien depura, y nunca a la pantalla. Lo que sí va es el `digest`,
+  // que no dice nada del error pero lo encuentra en los logs de Vercel. Antes la pantalla
+  // decía «una consulta no respondió» pasara lo que pasara, y un 413 por un archivo grande
+  // mandó a buscar en la base un problema que no existía.
   useEffect(() => {
     console.error(error)
   }, [error])
@@ -33,8 +36,9 @@ export default function PanelError({
     <section className="chapa mx-auto mt-10 max-w-md rounded-2xl p-6 text-center">
       <h1 className="font-titulo text-lg font-semibold uppercase tracking-[0.03em]">Algo se rompió</h1>
       <p className="mt-2 text-sm leading-relaxed text-fg-muted">
-        No fue nada que hicieras: una consulta no respondió. Vuelve a intentarlo; el detalle
-        quedó en la consola del navegador.
+        No fue nada que hicieras. Vuelve a intentarlo; el detalle quedó en la consola del
+        navegador.
+        {error.digest ? ` Si se repite, este código ayuda a encontrarlo: ${error.digest}.` : ''}
       </p>
       <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
         <Button type="button" variant="primary" onClick={() => retry()}>

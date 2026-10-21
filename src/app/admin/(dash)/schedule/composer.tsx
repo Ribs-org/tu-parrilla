@@ -40,6 +40,7 @@ import { formatoConLoQueSube, fraseDeLlegada, llenadoDe, siguienteEnCola, tipoDe
 import { TikTokOpciones } from './tiktok-opciones'
 import { venceAntesDe } from './vence'
 import { VistaPrevia } from './vista-previa'
+import { useAhora } from '@/lib/use-ahora'
 
 // Twin of PUBLISHABLE (publish/batch.ts). NETWORKS in the editor
 // (schedule/[id]/editor.tsx) deliberately lacks tiktok: the editor cannot collect
@@ -202,6 +203,7 @@ export function Composer({
   listoHref,
   cerrarHref,
   zona,
+  desde,
 }: {
   carga: Record<string, number>
   cuentas: CuentaRow[]
@@ -220,8 +222,16 @@ export function Composer({
   cerrarHref: string
   /** La zona del dueño: la de la fecha del campo, de la semana en chico y de los vencimientos. */
   zona: string
+  /**
+   * La hora con que el servidor armó la página: la semana en chico y el estado de cada fierro
+   * se cuentan contra ella al dibujar y al hidratar, y después contra el reloj del navegador
+   * (`useAhora`). Con `new Date()` en el render, servidor y navegador podían caer en minutos
+   * —o días— distintos.
+   */
+  desde: number
 }) {
   const router = useRouter()
+  const ahoraMs = useAhora(desde)
   const captionId = useId()
   const campos = borrador?.campos ?? null
 
@@ -570,7 +580,7 @@ export function Composer({
   // fierro se apagó), cuánta carne llegó y la parrilla del día elegido con este post encima.
   const { formato, huesos } = formatoConLoQueSube(media, subidas)
   const elegidas = publicables.filter((c) => marcadas.has(c.id))
-  const ahoraMismo = new Date()
+  const ahoraMismo = new Date(ahoraMs)
   const fierroDe = (c: CuentaRow): Fierro =>
     estadoDelFierro({ connected: c.connected, expiraEn: c.expiresAt, ultimoError: c.lastSyncError, red: c.network }, ahoraMismo)
   // Las marcadas cuyo permiso vence antes de la hora elegida: así como está, ahí no va a salir.

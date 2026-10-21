@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useActionState } from 'react'
 import { Submit } from '@/components/ui'
-import { CODIGO_ENVIADO } from '@/lib/ingreso'
+import { CODIGO_ENVIADO } from '@/lib/ingreso-frases'
 import { canjearCodigo, pedirCodigo, type FormState } from './acciones'
 
 const CAMPO =

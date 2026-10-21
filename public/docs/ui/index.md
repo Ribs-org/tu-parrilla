@@ -90,9 +90,11 @@ teléfono](app-movil.md).
    publicaciones», «Comparar por atributo», «Tu mejor 10 %» o «Tu peor 10 %» (o 5, 20, 25) o «Lado a lado», o si arriba del título dice «Pieza» en chico y el
    título es el texto de un post, está dentro de Los Números ([los-numeros.md](los-numeros.md)).
 2. **Si no sabe el nombre, tradúcelo desde lo que quiere hacer** (la tabla de abajo).
-3. **Si ve «Algo se rompió»**, es la pantalla de error del panel: una consulta falló, no fue
-   culpa suya. Tiene el botón «Reintentar» y, salvo que la que falló sea la pantalla principal
-   de La Parrilla, el enlace «Ir a La Parrilla». La barra de arriba sigue ahí.
+3. **Si ve «Algo se rompió»**, es la pantalla de error del panel: algo falló en el servidor, no
+   fue culpa suya. Tiene el botón «Reintentar» y, salvo que la que falló sea la pantalla
+   principal de La Parrilla, el enlace «Ir a La Parrilla». La barra de arriba sigue ahí. Si
+   trae un código («Si se repite, este código ayuda a encontrarlo: …»), conviene anotarlo para
+   quien administra el sitio: con él se encuentra el error en los registros.
 4. **Si ve «No encontramos esa página»** («La dirección no existe, o la página dejó de estar
    publicada.»), la dirección no existe. «Ir al inicio» lleva a la portada del sitio, no al
    panel: que entre de nuevo a `https://tu-parrilla.cl/admin`.

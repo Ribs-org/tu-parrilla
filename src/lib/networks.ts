@@ -1,4 +1,10 @@
-import type { SocialNetwork } from '@/db/schema'
+/**
+ * Las redes que conoce la app. Viven acá y no en el esquema (`db/schema.ts`, que las
+ * reexporta) porque lo que corre en el navegador las necesita, y el esquema arrastra
+ * `drizzle-orm`: importarlas de ahí mandaba el ORM entero al navegador.
+ */
+export const SOCIAL_NETWORKS = ['instagram', 'tiktok', 'youtube', 'facebook', 'threads', 'x'] as const
+export type SocialNetwork = (typeof SOCIAL_NETWORKS)[number]
 
 /**
  * Maps a referrer hostname to a normalised traffic source.

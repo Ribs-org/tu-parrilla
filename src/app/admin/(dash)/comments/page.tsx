@@ -40,6 +40,8 @@ export default async function CommentsPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
   const params = await searchParams
+  // La hora con que se arma la página: «hace 3 horas» parte de ella.
+  const ahora = new Date()
   const estado = (ESTADOS_COLA as readonly string[]).includes(String(params.estado))
     ? (params.estado as EstadoCola)
     : 'pendientes'
@@ -94,7 +96,7 @@ export default async function CommentsPage({
         ))}
       </div>
 
-      <Cola filas={filas} mostrarPrivado={privadoActivo()} estado={estado} />
+      <Cola filas={filas} mostrarPrivado={privadoActivo()} estado={estado} desde={ahora.getTime()} />
     </>
   )
 }

@@ -27,9 +27,11 @@ const jetbrains = JetBrains_Mono({
   display: 'swap',
 })
 
+// El título de lo que no pone el suyo (la entrada, las páginas de error): el nombre del
+// producto, no el del portafolio con que empezó. La portada y cada página pública ponen el suyo.
 export const metadata: Metadata = {
-  title: 'Portafolio',
-  description: 'Todo en un solo lugar.',
+  title: 'Tu Parrilla',
+  description: 'Programa tus publicaciones en todas tus redes y mira cómo les fue.',
 }
 
 export const viewport: Viewport = {

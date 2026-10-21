@@ -11,6 +11,7 @@ import { networkLabel } from '@/lib/networks'
 import { hasNoPlatformMetrics, type PostRow } from '@/lib/posts-kpis'
 import { NombreDe } from '@/components/de-noche-y-de-dia'
 import { cn, formatNumber } from '@/lib/utils'
+import { copiarAlPortapapeles } from '@/lib/copiar'
 
 type Column = 'views' | 'likes' | 'comments' | 'shares' | 'visits' | 'clicks' | 'ctr' | 'pull'
 
@@ -422,27 +423,18 @@ function CampaignCell({ postId, campaign, baseEnlace }: { postId: string; campai
   }
 
   function copy() {
-    // An insecure context (plain http against a LAN address, say) leaves
-    // `navigator.clipboard` undefined altogether, and reading `.writeText` off it throws
-    // synchronously — past the `.catch` below, which only ever sees a rejection.
-    const clipboard = navigator.clipboard
-    if (!clipboard) {
-      setError('No se pudo copiar el link.')
-      return
-    }
-
     // La página principal del dueño y no `window.location.origin`: el panel vive en
     // tu-parrilla.cl, cuya raíz es la portada del producto y no anota visitas, así que ese
-    // link perdía toda la atribución. Encadenado a la escritura real: un permiso negado
-    // rechaza, y un visto que miente es peor que ninguno.
-    clipboard
-      .writeText(`${baseEnlace}?s=${value}`)
-      .then(() => {
-        setCopied(true)
-        setError(null)
-        setTimeout(() => setCopied(false), 1500)
-      })
-      .catch(() => setError('No se pudo copiar el link.'))
+    // link perdía toda la atribución. El visto, solo si se copió de verdad (`copiarAlPortapapeles`).
+    void copiarAlPortapapeles(`${baseEnlace}?s=${value}`).then((copiado) => {
+      if (!copiado) {
+        setError('No se pudo copiar el link.')
+        return
+      }
+      setCopied(true)
+      setError(null)
+      setTimeout(() => setCopied(false), 1500)
+    })
   }
 
   return (

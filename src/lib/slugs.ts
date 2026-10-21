@@ -27,11 +27,6 @@ export const RESERVADOS: ReadonlySet<string> = new Set([
   'sitemap.xml',
   // `public/`
   'docs',
-  'file.svg',
-  'globe.svg',
-  'next.svg',
-  'vercel.svg',
-  'window.svg',
   // Del framework, nunca llegan a `/[slug]` pero se reservan igual
   '_next',
   'favicon.ico',

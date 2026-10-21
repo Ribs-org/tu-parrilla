@@ -1,6 +1,6 @@
 import 'server-only'
 import { NextResponse } from 'next/server'
-import { SOCIAL_NETWORKS } from '@/db/schema'
+import { SOCIAL_NETWORKS } from '@/lib/networks'
 import { duenoDeLaLlave } from './llaves'
 import { cuentaApi, parseRango, resolverCuenta, type CuentaApi } from './metrics-api'
 import { getCuentas, type CuentaRow } from './posts'

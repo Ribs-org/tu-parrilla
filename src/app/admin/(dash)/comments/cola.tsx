@@ -9,6 +9,7 @@ import type { DmState } from '@/db/schema'
 import type { ComentarioFila, EstadoCola } from '@/lib/comentarios-cola'
 import { agruparPorPublicacion } from '@/lib/social/comentarios/agrupar'
 import { networkLabel } from '@/lib/networks'
+import { useAhora } from '@/lib/use-ahora'
 
 const ETIQUETA_DM: Record<DmState, string> = {
   no: '',
@@ -19,22 +20,29 @@ const ETIQUETA_DM: Record<DmState, string> = {
 
 const RELATIVE = new Intl.RelativeTimeFormat('es', { numeric: 'auto' })
 
-function hace(fecha: Date): string {
-  const horas = Math.round((Date.now() - fecha.getTime()) / 3.6e6)
+function hace(fecha: Date, ahora: number): string {
+  const horas = Math.round((ahora - fecha.getTime()) / 3.6e6)
   if (horas < 1) return 'recién'
   if (horas < 24) return RELATIVE.format(-horas, 'hour')
   return RELATIVE.format(-Math.round(horas / 24), 'day')
 }
 
+/**
+ * `desde` es la hora con que el servidor armó la página: «hace 3 horas» se cuenta contra ella al
+ * dibujar y al hidratar, y recién después contra el reloj del navegador (`useAhora`).
+ */
 export function Cola({
   filas,
   mostrarPrivado,
   estado,
+  desde,
 }: {
   filas: ComentarioFila[]
   mostrarPrivado: boolean
   estado: EstadoCola
+  desde: number
 }) {
+  const ahora = useAhora(desde)
   if (filas.length === 0) {
     const cronico = estado === 'pendientes' || estado === 'todos'
     return (
@@ -79,7 +87,7 @@ export function Cola({
               </div>
             </header>
             {g.comentarios.map((c) => (
-              <Tarjeta key={c.id} fila={c} mostrarPrivado={mostrarPrivado} />
+              <Tarjeta key={c.id} fila={c} mostrarPrivado={mostrarPrivado} ahora={ahora} />
             ))}
           </section>
         )
@@ -88,7 +96,7 @@ export function Cola({
   )
 }
 
-function Tarjeta({ fila, mostrarPrivado }: { fila: ComentarioFila; mostrarPrivado: boolean }) {
+function Tarjeta({ fila, mostrarPrivado, ahora }: { fila: ComentarioFila; mostrarPrivado: boolean; ahora: number }) {
   const editable = fila.state === 'pendiente' || fila.state === 'fallido'
   const [texto, setTexto] = useState(fila.draft ?? '')
   // «Reintentar borrador» escribe el borrador en el servidor y `revalidatePath` vuelve a
@@ -125,7 +133,7 @@ function Tarjeta({ fila, mostrarPrivado }: { fila: ComentarioFila; mostrarPrivad
   return (
     <article className="chapa rounded-xl p-4">
       <p className="text-[0.78rem] text-fg-faint">
-        <span className="text-fg">{fila.author ?? 'Alguien'}</span> · {hace(fila.publishedAt)}
+        <span className="text-fg">{fila.author ?? 'Alguien'}</span> · {hace(fila.publishedAt, ahora)}
       </p>
       <p className="mt-1 whitespace-pre-wrap text-sm">{fila.text}</p>
       {editable ? (
