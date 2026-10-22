@@ -38,8 +38,8 @@ sección «Tu propio chef» con tres bloques; y al final, el manual.
 
 ### Bloque «El chef de la casa», con la cocina apagada
 
-Es lo que ve casi todo el mundo: la cocina se enciende cuenta por cuenta, en Los Maestros. El
-párrafo «El chef de la casa edita tus videos: le llevas un video largo, un podcast en
+Es lo que ve casi todo el mundo: la cocina se enciende cuenta por cuenta, en Los Maestros. Arriba,
+un dibujo ancho (ver «La escena», abajo), con el fuego en brasas. Después, el párrafo «El chef de la casa edita tus videos: le llevas un video largo, un podcast en
 videollamada o tus tomas sueltas, y te devuelve una tanda de clips y carruseles con sus textos,
 para que los programes en tus redes. Está en piloto, con pocas cuentas.», y debajo:
 
@@ -50,7 +50,7 @@ para que los programes en tus redes. Está en piloto, con pocas cuentas.», y de
 ### Bloque «El chef de la casa», con la cocina encendida
 
 Bajo el título, en letra chica: «Le llevas el material crudo y te devuelve los creativos, listos
-para programar.». Después, una línea con un punto de color:
+para programar.». Después, el dibujo ancho de la escena y una línea con un punto de color:
 
 - punto verde y «La cocina está abierta.»: el servidor del chef está conectado;
 - punto ámbar y «La cocina está cerrada por ahora: lo que pidas espera su turno.»: el servidor
@@ -101,6 +101,19 @@ comandas.». Con comandas, una tarjeta por comanda, de la más nueva a la más v
 De día, «El chef mira la res» es «El chef mira el atún», «El desposte» es «El despiece», «Al
 fuego» es «Armando las piezas», el mesón es «la bandeja», los cortes son piezas y «No se puede
 cocinar» es «No se puede preparar» (ver «El modo día» en [index.md](index.md)).
+
+### La escena
+
+Arriba del bloque «El chef de la casa», un dibujo ancho. Es solo un dibujo: no se aprieta.
+
+- **De noche:** un parrillero medio gaucho, de sombrero, pañuelo rojo, poncho con flecos y mate en
+  la mano, aviva con el atizador el fuego de un asado al palo, con el cordero abierto en la cruz.
+- **De día:** un maestro de sushi, de gorrito alto y chaqueta de cuello cruzado, con el cuchillo
+  largo levantado sobre un atún entero, sobre el mesón de madera, y un farol de papel colgando.
+
+Con la cocina abierta, el fuego arde con sus llamas y el farol está prendido. Cerrada o apagada,
+quedan las brasas con un hilo de humo, y el farol apagado. Dice lo mismo que la línea del punto de
+color.
 
 ### Pedir una comanda
 
@@ -594,6 +607,7 @@ Sale de:
   tres bloques, la lista de llaves y el final con el manual.
 - `src/app/admin/(dash)/ia/chef-de-la-casa.tsx`: «El chef de la casa», apagado y encendido, la
   línea de la cocina abierta o cerrada y las tarjetas de las comandas.
+- `src/components/escena-cocina.tsx`: la escena, de noche y de día, con el fuego y el farol.
 - `src/app/admin/(dash)/ia/cancelar.tsx` y `src/app/admin/cocina-actions.ts`: «Cancelar la
   comanda», su pregunta y sus mensajes, y lo que hace «Colgar la comanda».
 - `src/app/admin/(dash)/ia/pedir/page.tsx` y `src/app/admin/(dash)/ia/pedir/formulario.tsx`:

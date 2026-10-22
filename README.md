@@ -1549,6 +1549,7 @@ src/
   components/
     corte.tsx              el corte dibujado de La Parrilla: silueta, carne, marcas, halo y humo
     pieza-sushi.tsx        el mismo corte en el modo día: nigiri, roll, sashimi y temaki
+    escena-cocina.tsx      la escena de La Cocina: el parrillero y el asado al palo de noche, el maestro de sushi y el atún de día; el fuego y el farol dicen si la cocina está abierta
     dibujos-insumo.tsx     lo que se le lleva a La Cocina: la res, el cerdo y las verduras de noche; el atún, el salmón y el arroz de día
     boton-tema.tsx         el botón de la barra que cambia entre la noche y el día
     de-noche-y-de-dia.tsx  lo que se dice distinto de día, en sus dos versiones (el modo esconde una), y el nombre de cada pantalla

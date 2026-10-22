@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Panel } from '@/components/charts/panel'
 import { DeNocheYDeDia } from '@/components/de-noche-y-de-dia'
 import { DibujoDeInsumo } from '@/components/dibujos-insumo'
+import { EscenaCocina } from '@/components/escena-cocina'
 import type { EstadoComanda } from '@/db/schema'
 import { TERMINALES } from '@/lib/cocina/estados'
 import { NOMBRE_ESTADO } from '@/lib/cocina/nombres'
@@ -26,6 +27,7 @@ const QUE_ES =
 export function ChefDeLaCasaApagado({ esAdmin }: { esAdmin: boolean }) {
   return (
     <Panel title="El chef de la casa" className="mb-8">
+      <EscenaCocina encendida={false} className="mb-5" />
       <p className="max-w-2xl text-sm text-fg-muted">{QUE_ES}</p>
       <p className="mt-3 max-w-2xl text-sm text-fg-muted">
         {esAdmin ? (
@@ -65,6 +67,8 @@ export function ChefDeLaCasa({
       hint="Le llevas el material crudo y te devuelve los creativos, listos para programar."
       className="mb-8"
     >
+      {/* La escena dice lo mismo que la línea de abajo, sin palabras: el fuego arde si la cocina está abierta. */}
+      <EscenaCocina encendida={cocina.abierta} className="mb-5" />
       <p className="flex items-start gap-2 text-sm">
         <span aria-hidden className={cn('mt-1.5 h-2 w-2 shrink-0 rounded-full', cocina.abierta ? 'bg-positive' : 'bg-caution')} />
         {cocina.abierta ? 'La cocina está abierta.' : 'La cocina está cerrada por ahora: lo que pidas espera su turno.'}

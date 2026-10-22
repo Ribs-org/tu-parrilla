@@ -746,6 +746,20 @@
   }
 
   /*
+   * La fogata de La Cocina (`escena-cocina.tsx`): la misma llama que respira, pero que crece desde
+   * abajo, desde los leños. Solo arde con la cocina abierta. Su versión quieta, al final del archivo.
+   */
+  .fogata {
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+    animation: llama 0.9s ease-in-out infinite alternate;
+  }
+
+  .fogata-2 {
+    animation-duration: 0.7s;
+  }
+
+  /*
    * El corte recién programado: cae en su día y se enciende una vez, al volver del compositor,
    * para que se vea dónde quedó (`nuevo`, en `schedule/page.tsx`). Una vez y no en bucle: el
    * fuego, solo cuando algo pasa. `backwards` y no `both`: al terminar no se queda con nada, y
@@ -1082,6 +1096,11 @@
 
   /* La llama quieta: sigue diciendo, entera, que algo está saliendo. */
   .llama {
+    animation: none !important;
+  }
+
+  /* La fogata quieta: sigue diciendo, encendida, que la cocina está abierta. */
+  .fogata {
     animation: none !important;
   }
 
