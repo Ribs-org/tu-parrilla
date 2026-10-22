@@ -1,5 +1,13 @@
 import type { PublishMedia, PublishInput, PublishOutcome, Publisher } from './publisher'
-import { PLAZO_RED_MS, PUBLISH_NETWORK_ERROR, PUBLISH_REJECTED, TOPE_INSTAGRAM, TRIAL_REEL_NO_DISPONIBLE } from './publisher'
+import {
+  PLAZO_RED_MS,
+  PUBLISH_NETWORK_ERROR,
+  PUBLISH_REJECTED,
+  TOPE_INSTAGRAM,
+  rechazoDeInstagram,
+  trialNoDisponible,
+  trialSinSeguidores,
+} from './publisher'
 import type { OpcionesDestino } from './opciones'
 
 /**
@@ -36,20 +44,102 @@ export function reelContainerParams(
 }
 
 /**
- * Meta does not document which code a trial-reel rejection carries, so this matches on
- * the message text — and only when a trial reel was asked for, so an unrelated error
- * that happens to say "trial" on a normal reel keeps its usual treatment. The cost
- * when the wording does not match (Meta changes it, or rejects for a reason it phrases
- * without the word — a private account, say): the rejection is treated as
- * a network failure and retried up to MAX_PUBLISH_ATTEMPTS times before the target
- * fails, with a sentence that promises a retry Meta already refused. That is the same
- * treatment every non-ok gets on a normal reel today; this function only narrows it
- * for the one case Meta lets us recognise. The daily quota is the other one, and it is
- * not a rejection: `esTopeDiario`. Tracked in docs/deuda-tecnica.md.
+ * Lo que Meta dice de un rechazo. `titulo` y `mensaje` son los que Meta le muestra a una
+ * persona (`error_user_title`, `error_user_msg`), en el idioma de quien conectó la cuenta;
+ * `tecnico` es su `message`, en inglés y a veces genérico («Application does not have
+ * permission for this action»). Cualquiera puede faltar.
  */
-export function motivoDeRechazo(cuerpo: string, opciones: OpcionesDestino | null): string | null {
+export type ErrorDeMeta = {
+  codigo: number | null
+  subcodigo: number | null
+  titulo: string | null
+  mensaje: string | null
+  tecnico: string | null
+}
+
+function textoDe(cuerpo: string, campo: string): string | null {
+  const m = new RegExp(`"${campo}"\\s*:\\s*"((?:[^"\\\\]|\\\\.)*)"`).exec(cuerpo)
+  if (!m) return null
+  try {
+    const texto = (JSON.parse(`"${m[1]}"`) as string).trim()
+    return texto || null
+  } catch {
+    return null
+  }
+}
+
+function numeroDe(cuerpo: string, campo: string): number | null {
+  const m = new RegExp(`"${campo}"\\s*:\\s*(\\d+)`).exec(cuerpo)
+  return m ? Number(m[1]) : null
+}
+
+/**
+ * El error de Meta dentro del cuerpo de un rechazo, o null si el cuerpo no es uno (un 502 de
+ * un proxy, por ejemplo). Con expresiones y no con `JSON.parse`, como `esTopeDiario`: el
+ * cuerpo llega cortado a 2000 caracteres, y un campo cortado a la mitad solo se pierde él.
+ */
+export function leerErrorDeMeta(cuerpo: string): ErrorDeMeta | null {
+  const e: ErrorDeMeta = {
+    codigo: numeroDe(cuerpo, 'code'),
+    subcodigo: numeroDe(cuerpo, 'error_subcode'),
+    titulo: textoDe(cuerpo, 'error_user_title'),
+    mensaje: textoDe(cuerpo, 'error_user_msg'),
+    tecnico: textoDe(cuerpo, 'message'),
+  }
+  if (e.codigo === null && !e.titulo && !e.mensaje && !e.tecnico) return null
+  return e
+}
+
+/** Cuánto de lo que dijo Meta entra en una frase: lo de una persona, no un párrafo. */
+const LARGO_EXPLICACION = 280
+
+/**
+ * Lo que dijo Meta, listo para ir en una frase: entre comillas, con su código al final para
+ * buscarlo. Prefiere lo que Meta le muestra a una persona; si no hay, su mensaje técnico.
+ */
+export function explicacionDeMeta(e: ErrorDeMeta): string {
+  const humano = [e.titulo, e.mensaje].filter(Boolean).join('. ').replace(/\.\.\s/g, '. ')
+  let texto = humano || e.tecnico || 'sin explicación'
+  if (texto.length > LARGO_EXPLICACION) texto = `${texto.slice(0, LARGO_EXPLICACION - 1).trimEnd()}…`
+  const codigo =
+    e.codigo === null ? '' : e.subcodigo === null ? ` (código ${e.codigo})` : ` (código ${e.codigo}, subcódigo ${e.subcodigo})`
+  return `«${texto}»${codigo}`
+}
+
+/**
+ * El subcódigo con que Meta rechaza un trial reel porque la cuenta no tiene los seguidores
+ * que pide la función. Visto en producción el 2026-10-22, en una cuenta nueva: código 10,
+ * `is_transient: false`, «No tienes suficientes seguidores para crear reels de prueba».
+ */
+export const SUBCODIGO_TRIAL_SIN_SEGUIDORES = 2207081
+
+/**
+ * Si el rechazo de un trial reel es uno que reintentar no cambia, la frase con que falla.
+ * Solo cuando se pidió un trial reel, para que un reel normal siga con su trato de siempre.
+ *
+ * El subcódigo es lo seguro: Meta lo documenta poco, pero no lo traduce. El texto es el
+ * respaldo para un rechazo de trial reels con otro código, y busca en inglés y en español
+ * porque el mensaje que lee una persona llega traducido: así se escapó el primero que se vio,
+ * que decía «reels de prueba» y no «trial». Lo que no reconoce ninguna de las dos se reintenta
+ * como cualquier rechazo, ahora con lo que Meta dijo a la vista (`rechazoDeInstagram`).
+ * El tope diario es aparte, y no es un rechazo: `esTopeDiario`.
+ */
+export function motivoDeRechazo(
+  cuerpo: string,
+  opciones: OpcionesDestino | null,
+  cuenta: string | null = null,
+): string | null {
   if (!opciones || !('trialReel' in opciones)) return null
-  return /trial/i.test(cuerpo) ? TRIAL_REEL_NO_DISPONIBLE : null
+  const e = leerErrorDeMeta(cuerpo)
+  if (e?.subcodigo === SUBCODIGO_TRIAL_SIN_SEGUIDORES) return trialSinSeguidores(cuenta)
+  if (/trial|reels? de prueba/i.test(cuerpo)) return trialNoDisponible(cuenta, e ? explicacionDeMeta(e) : null)
+  return null
+}
+
+/** Lo que se le dice al dueño de un rechazo que no se reconoce: con lo que Meta dijo, si dijo algo. */
+function rechazoSinReconocer(cuerpo: string, cuenta: string | null | undefined, sinExplicacion: string): string {
+  const e = leerErrorDeMeta(cuerpo)
+  return e ? rechazoDeInstagram(cuenta, explicacionDeMeta(e)) : sinExplicacion
 }
 
 /**
@@ -106,6 +196,16 @@ export function classifyContainerStatus(
   return 'in_progress'
 }
 
+/**
+ * La frase de un contenedor que Meta dio por fallido: con su `status`, que dice el porqué
+ * («Error: …»), cuando trae algo más que el estado. Sin eso, la frase de siempre.
+ */
+export function rechazoDelContenedor(payload: Record<string, unknown>, cuenta: string | null | undefined): string {
+  const status = typeof payload.status === 'string' ? payload.status.trim() : ''
+  if (!status || status === payload.status_code) return PUBLISH_REJECTED
+  return rechazoDeInstagram(cuenta, explicacionDeMeta({ codigo: null, subcodigo: null, titulo: null, mensaje: null, tecnico: status }))
+}
+
 const GRAPH = 'https://graph.facebook.com/v23.0'
 
 // POST with form params, never JSON: it is what /media and /media_publish expect.
@@ -149,8 +249,10 @@ async function createContainer(
   })
   if ('rechazo' in r) {
     if (esTopeDiario(r.rechazo)) return { tope: true }
-    const motivo = motivoDeRechazo(r.rechazo, input.opciones)
-    return motivo ? { failed: motivo, definitivo: true } : { failed: PUBLISH_NETWORK_ERROR }
+    const motivo = motivoDeRechazo(r.rechazo, input.opciones, input.cuenta)
+    if (motivo) return { failed: motivo, definitivo: true }
+    // Sin el error de Meta en el cuerpo, no sabemos si fue Meta: se sigue tratando como la red.
+    return { failed: rechazoSinReconocer(r.rechazo, input.cuenta, PUBLISH_NETWORK_ERROR) }
   }
   const id = r.data.id
   return typeof id === 'string' ? { id } : { failed: PUBLISH_NETWORK_ERROR }
@@ -179,8 +281,11 @@ async function publishContainer(input: PublishInput, containerId: string): Promi
     console.error('Instagram media_publish sin respuesta:', String(error).slice(0, 300))
     return { kind: 'failed', reason: PUBLISH_NETWORK_ERROR, containerId }
   }
-  if ('rechazo' in r && esTopeDiario(r.rechazo)) return diferidoPorTope(containerId)
-  const id = 'data' in r ? r.data.id : undefined
+  if ('rechazo' in r) {
+    if (esTopeDiario(r.rechazo)) return diferidoPorTope(containerId)
+    return { kind: 'failed', reason: rechazoSinReconocer(r.rechazo, input.cuenta, PUBLISH_REJECTED), containerId }
+  }
+  const id = r.data.id
   if (typeof id !== 'string') return { kind: 'failed', reason: PUBLISH_REJECTED, containerId }
   return { kind: 'published', externalId: id }
 }
@@ -194,7 +299,7 @@ export const instagramPublisher: Publisher = {
       let payload: Record<string, unknown>
       try {
         const response = await fetch(
-          `${GRAPH}/${input.containerId}?fields=status_code&access_token=${input.token}`,
+          `${GRAPH}/${input.containerId}?fields=status_code,status&access_token=${input.token}`,
           { signal: AbortSignal.timeout(PLAZO_RED_MS) },
         )
         if (!response.ok) {
@@ -210,7 +315,7 @@ export const instagramPublisher: Publisher = {
         return { kind: 'processing', containerId: input.containerId }
       }
       const verdict = classifyContainerStatus(payload)
-      if (verdict === 'error') return { kind: 'failed', reason: PUBLISH_REJECTED }
+      if (verdict === 'error') return { kind: 'failed', reason: rechazoDelContenedor(payload, input.cuenta) }
       if (verdict === 'in_progress') return { kind: 'processing', containerId: input.containerId }
       // Ya salió, pero no sabemos con qué id: el contenedor no lo dice. Sin id, sus números no
       // se cruzan con este destino; publicarlo otra vez sería peor.

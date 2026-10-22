@@ -323,6 +323,7 @@ async function attempt(
       accountExternalId: account.externalId,
       coverUrl: content.coverUrl,
       opciones: content.opciones,
+      cuenta: account.handle,
     })
   } catch (error) {
     // A publisher that throws (network hiccup, DNS, a timeout) is a retryable failure, not

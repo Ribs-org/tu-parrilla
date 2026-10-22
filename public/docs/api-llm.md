@@ -147,7 +147,7 @@ no por subcadena parcial ni regex:
 | `Las opciones de la red no se entendieron.` | `opciones` mal formado, o para un destino que no las pide |
 | `TikTok recibe un video, o hasta 35 fotos JPG o WebP.` | `media` con dos videos, mezcla, más de 35 fotos, u otro formato |
 | `Un trial reel es un solo video, sin fotos.` | `opciones.<destino>.trialReel: true` con fotos, carrusel, dos videos o sin ningún video en `media` |
-| `Instagram no permite trial reels en esta cuenta.` | no es un error de fila — la fila con `trialReel: true` se acepta al programar; esta frase aparece después, como el `error` de ese destino en `GET /api/schedule/posts`, porque Instagram solo revela la elegibilidad al publicar |
+| `@<cuenta> no tiene trial reels: Instagram los da solo a cuentas con un mínimo de seguidores, y esta no lo alcanza. Prográmalo como reel normal o en otra cuenta.` o `@<cuenta> no tiene trial reels disponibles, probablemente porque Instagram no le habilitó la función. Prográmalo como reel normal o en otra cuenta.` | no es un error de fila — la fila con `trialReel: true` se acepta al programar; esta frase aparece después, como el `error` de ese destino en `GET /api/schedule/posts`, porque Instagram solo revela la elegibilidad al publicar |
 | `Una de las cuentas elegidas no es tuya.` | `cuentas` con un identificador que no es del dueño |
 | `La cuenta <handle> no está conectada. Vuelve a conectarla en Los Fierros.` | `cuentas` con un identificador válido pero desconectado |
 | `No hay una cuenta de <red> conectada.` | `redes` con un nombre sin ninguna cuenta conectada de esa red |
@@ -220,7 +220,9 @@ defecto) y `horas` de 1 a 168 (24 por defecto); fuera de rango, `400` con
 `«dias» tiene que ser un entero de 1 a 30.` o `«horas» tiene que ser un entero de 1 a 168.`
 
 Una cuenta fría no publica hasta que el dueño la reconecte en Los Fierros: si aparece, díselo
-antes de programarle nada. Un destino de Instagram que espera con el `error`
+antes de programarle nada. Un rechazo de Instagram trae lo que dijo Meta, con la cuenta
+delante: `Instagram rechazó la publicación en @<cuenta>: «<lo que dijo Meta>» (código <n>, subcódigo <n>).`. Léelo antes de reintentar: si Meta dice que la cuenta no puede hacer algo,
+reintentar no lo cambia. Un destino de Instagram que espera con el `error`
 `Instagram llegó a su tope de publicaciones por día: sale apenas se libere un cupo.` no está
 fallido: sale solo cuando la cuenta recupere cupo, sin gastar intentos.
 
@@ -314,10 +316,14 @@ Tres cosas, en orden:
    antes de subir un byte.
 2. **La elegibilidad se descubre al publicar, no al programar.** Instagram exige la función
    habilitada en esa cuenta (profesional, pública, con seguidores suficientes, según los
-   términos de Meta); una fila aceptada acá puede fallar después en ese destino, con
-   `Instagram no permite trial reels en esta cuenta.` en el `error` de ese destino —y el
-   destino queda en fallo en esa misma corrida, sin los reintentos que sí recibe un error
-   de red normal.
+   términos de Meta); una fila aceptada acá puede fallar después en ese destino, y queda en
+   fallo en esa misma corrida, sin los reintentos que sí recibe cualquier otro rechazo. El
+   `error` empieza con la cuenta. Si faltan seguidores (una cuenta nueva):
+   `@<cuenta> no tiene trial reels: Instagram los da solo a cuentas con un mínimo de seguidores, y esta no lo alcanza. Prográmalo como reel normal o en otra cuenta.`
+   Por otro motivo, seguida de lo que Meta dijo:
+   `@<cuenta> no tiene trial reels disponibles, probablemente porque Instagram no le habilitó la función. Prográmalo como reel normal o en otra cuenta.`
+   Con cualquiera de las dos, los demás trial reels de esa cuenta van a fallar igual:
+   pásalos a reels normales o a otra cuenta.
 3. **No se sabe si se graduó, por API.** El dueño lo comparte con todos desde la app de
    Instagram cuando quiera; no hay endpoint que lo dispare ni que lo consulte.
 

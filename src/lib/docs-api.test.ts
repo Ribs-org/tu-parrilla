@@ -14,7 +14,7 @@ import { LOTE_SIN_TIEMPO, MAX_BATCH_ITEMS, MAX_REF, MEDIA_ILEGIBLE, PUBLISHABLE,
 import { MOTIVOS_FIJOS } from './social/publish/descarga-segura'
 import { ARCHIVO_MUY_GRANDE, CUERPO_ILEGIBLE, TIPO_NO_PUBLICABLE } from './mobile-api'
 import { REDES_PROXIMAMENTE, fraseProximamente } from './networks'
-import { TOPE_INSTAGRAM, TRIAL_REEL_NO_DISPONIBLE } from './social/publish/publisher'
+import { SIN_SEGUIDORES_PARA_TRIAL, TOPE_INSTAGRAM, TRIAL_REEL_NO_DISPONIBLE } from './social/publish/publisher'
 import {
   CONEXION_DESCONECTADA,
   CONEXION_FALLO,
@@ -47,6 +47,7 @@ describe('la documentación para LLM no le miente al código', () => {
       REGLA_DOCUMENTO,
       TRIAL_REEL_MEDIA,
       TRIAL_REEL_NO_DISPONIBLE,
+      SIN_SEGUIDORES_PARA_TRIAL,
       BORRADO_YA_PUBLICADO,
     ]) {
       expect(guia).toContain(frase)

@@ -14,6 +14,8 @@ export type PublishInput = {
   coverUrl: string | null
   /** Lo que la red exigió elegir por destino (TikTok, Instagram); null en las redes que no piden nada. */
   opciones: OpcionesDestino | null
+  /** El handle de la cuenta (`@vicente`), para nombrarla en las frases de error; null si no lo tiene. */
+  cuenta?: string | null
 }
 
 export type PublishOutcome =
@@ -55,14 +57,52 @@ export type TargetPatch = {
   reintentarDesde: Date | null
 }
 
-// Every sentence the owner can see. Upstream detail goes to the server log only.
+// Every sentence the owner can see. Upstream detail goes to the server log, salvo en
+// Instagram: ahí el rechazo nombra la cuenta y cita lo que Meta dijo (las funciones de abajo),
+// porque «Instagram rechazó la publicación.» a secas no deja decidir si esperar, reconectar o
+// cambiar el plan.
 export const PUBLISH_REJECTED = 'Instagram rechazó la publicación.'
-export const TRIAL_REEL_NO_DISPONIBLE = 'Instagram no permite trial reels en esta cuenta.'
 export const PUBLISH_NETWORK_ERROR = 'No se pudo hablar con la red. Se reintentará.'
 export const NO_PUBLISH_TOKEN = 'La cuenta no está conectada. Reconéctala y reprograma.'
 export const STALE_PROCESSING = 'La red no terminó de procesar el video.'
 export const TOPE_INSTAGRAM = 'Instagram llegó a su tope de publicaciones por día: sale apenas se libere un cupo.'
 export const PUBLICACION_CORTADA = 'La publicación se cortó a la mitad y ya no quedan intentos. Revisa el archivo y reprográmala.'
+
+/**
+ * Las colas fijas de los dos rechazos de un trial reel: la frase entera empieza con la cuenta
+ * (`trialSinSeguidores`, `trialNoDisponible`). Las guías las citan así, con la cuenta delante.
+ */
+export const SIN_SEGUIDORES_PARA_TRIAL =
+  'no tiene trial reels: Instagram los da solo a cuentas con un mínimo de seguidores, y esta no lo alcanza. Prográmalo como reel normal o en otra cuenta.'
+export const TRIAL_REEL_NO_DISPONIBLE =
+  'no tiene trial reels disponibles, probablemente porque Instagram no le habilitó la función. Prográmalo como reel normal o en otra cuenta.'
+
+function alEmpezar(cuenta: string | null | undefined): string {
+  return cuenta?.trim() || 'La cuenta'
+}
+
+/** Meta dijo, con su código, que a la cuenta le faltan seguidores para los trial reels. */
+export function trialSinSeguidores(cuenta: string | null | undefined): string {
+  return `${alEmpezar(cuenta)} ${SIN_SEGUIDORES_PARA_TRIAL}`
+}
+
+/**
+ * Meta rechazó el trial reel hablando de trial reels, pero sin un código que digamos conocer:
+ * el porqué es una suposición, y lo que Meta dijo va al final, para que se pueda corregir.
+ */
+export function trialNoDisponible(cuenta: string | null | undefined, explicacion: string | null): string {
+  const base = `${alEmpezar(cuenta)} ${TRIAL_REEL_NO_DISPONIBLE}`
+  return explicacion ? `${base} Instagram dice: ${explicacion}.` : base
+}
+
+/**
+ * Cualquier otro rechazo de Instagram que traiga su explicación (`explicacionDeMeta`, en
+ * instagram.ts). Se reintenta como antes —no sabemos si es pasajero—; lo que cambia es que se
+ * lee qué pasó.
+ */
+export function rechazoDeInstagram(cuenta: string | null | undefined, explicacion: string): string {
+  return `Instagram rechazó la publicación en ${cuenta?.trim() || 'la cuenta'}: ${explicacion}.`
+}
 
 export const MAX_PUBLISH_ATTEMPTS = 3
 export const STALE_PROCESSING_HOURS = 24

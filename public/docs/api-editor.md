@@ -318,10 +318,20 @@ rechaza con `Un trial reel es un solo video, sin fotos.`, antes de subir nada.
 
 **La elegibilidad se descubre al publicar, no al programar.** Instagram tiene que tener la
 función habilitada en esa cuenta (profesional, pública y con seguidores suficientes, según
-los términos de Meta): una fila aceptada acá puede fallar después en ese destino, con su
-propia frase: `Instagram no permite trial reels en esta cuenta.` Ese rechazo lo reconoce
-Meta como definitivo, así que el destino queda en fallo en la misma corrida, sin reintentos
-—a diferencia de un error de red normal, que se reintenta hasta tres veces antes de fallar.
+los términos de Meta): una fila aceptada acá puede fallar después en ese destino, con una
+frase que empieza con la cuenta. Si Meta dice que faltan seguidores —le pasa a una cuenta
+nueva—, el `error` es:
+
+`@<cuenta> no tiene trial reels: Instagram los da solo a cuentas con un mínimo de seguidores, y esta no lo alcanza. Prográmalo como reel normal o en otra cuenta.`
+
+Si rechaza el trial reel por otro motivo, es esta, seguida de lo que Meta dijo (`Instagram dice: «…» (código …).`):
+
+`@<cuenta> no tiene trial reels disponibles, probablemente porque Instagram no le habilitó la función. Prográmalo como reel normal o en otra cuenta.`
+
+Las dos son definitivas: el destino queda en fallo en la misma corrida, sin reintentos —a
+diferencia de cualquier otro rechazo, que se reintenta hasta tres veces antes de fallar—. En
+una cuenta sin los seguidores se quema cada trial reel que tenga programado, así que conviene
+pasarlos a reels normales o a otra cuenta apenas aparece la primera.
 
 **Después no hay forma de saber por API si se graduó.** Eso se mira en la app de Instagram.
 
@@ -418,7 +428,8 @@ Instagram acepta: 1 foto, 1 video, o 2–10 fotos (carrusel).
 | `«<clave1>» y «<clave2>» en opciones nombran el mismo destino. Deja una sola clave por destino.` | dos claves de `opciones` (por ejemplo el id de una cuenta y el nombre de su única red) resuelven al mismo destino |
 | `TikTok recibe un video, o hasta 35 fotos JPG o WebP.` | dos videos, mezcla, más de 35 fotos, png/gif, o video que no es mp4/mov/webm |
 | `Un trial reel es un solo video, sin fotos.` | `opciones.<destino>.trialReel: true` con fotos, carrusel, dos videos o sin ningún video en `media` |
-| `Instagram no permite trial reels en esta cuenta.` | **no es un error de fila:** la fila con `trialReel: true` se acepta al programar; esta frase aparece después, en el `error` del destino que ya publicó (panel y `GET /api/schedule/posts`), porque Instagram solo revela la elegibilidad al crear el contenedor |
+| `@<cuenta> no tiene trial reels: Instagram los da solo a cuentas con un mínimo de seguidores, y esta no lo alcanza. Prográmalo como reel normal o en otra cuenta.` | **no es un error de fila:** la fila con `trialReel: true` se acepta al programar; esta frase aparece después, en el `error` del destino que ya publicó (panel y `GET /api/schedule/posts`), porque Instagram solo revela la elegibilidad al crear el contenedor |
+| `@<cuenta> no tiene trial reels disponibles, probablemente porque Instagram no le habilitó la función. Prográmalo como reel normal o en otra cuenta. Instagram dice: «…».` | igual que la anterior, cuando Meta rechaza el trial reel sin decir que son los seguidores |
 | `Una de las cuentas elegidas no es tuya.` | un identificador en `cuentas` que no es una cuenta del dueño (o no existe) |
 | `La cuenta <handle> no está conectada. Vuelve a conectarla en Los Fierros.` | un identificador en `cuentas` que existe pero perdió la credencial — **solo con `cuentas`**: con `redes`, una cuenta desconectada da la frase de abajo |
 | `No hay una cuenta de <red> conectada.` | un nombre en `redes` sin ninguna cuenta *conectada* de esa red — no tiene ninguna, o la única que tiene está desconectada; las dos dan la misma frase |
@@ -857,7 +868,9 @@ Un rango pasado vale (lista lo ya publicado). Formato inválido o rango invertid
   «Sincronizar ahora» en Los Fierros— lo completa cruzando el video por su texto y su hora,
   y desde ahí cruza con sus métricas y sus `atributos`; un borrador, recién cuando el dueño
   lo publica desde su app. `failed` agotó los tres intentos y
-  `error` dice por qué con una frase fija. `intentos` cuenta los intentos hechos.
+  `error` dice por qué. Casi siempre es una frase fija; un rechazo de Instagram nombra la
+  cuenta y cita lo que Meta dijo, para decidir si esperar, reconectar o cambiar el plan:
+  `Instagram rechazó la publicación en @<cuenta>: «<lo que dijo Meta>» (código <n>, subcódigo <n>).`. `intentos` cuenta los intentos hechos.
   Un `scheduled` con `error` es uno que falló y espera el siguiente intento:
   **`proximoIntento`** dice cuándo (quince minutos después del primer fallo, dos horas
   después del segundo), y es `null` en todo destino que no espera nada más que su hora. Un
@@ -913,7 +926,7 @@ Parámetros, ambos opcionales:
 ```
 
 - **`fallidos`**: los destinos que se quemaron en las últimas `horas`, el más reciente
-  primero. `fecha` es la hora de salida del post; `error`, la misma frase fija de
+  primero. `fecha` es la hora de salida del post; `error`, la misma frase de
   `/api/schedule/posts`. Para reprogramarlo, el dueño tiene «Reprogramar» en su panel; por
   API, se borra y se programa de nuevo.
 - **`cuentas`**: las que hay que reconectar. `fierro` `frio` ya no publica (la conexión
