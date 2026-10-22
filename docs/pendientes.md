@@ -38,14 +38,20 @@ sección.
   las decisiones del dueño del 2026-10-22, y el feedback del equipo de creación de contenido de ese
   mismo día, que entró entero.
 
-  - **Ya existe** (2026-10-22): qué cuenta acepta trial reels, y la base de la fase 0, que son las
-    tablas y la API del chef, con su contrato en `docs/cocina-api.md`.
+  - **Ya existe** (2026-10-22): qué cuenta acepta trial reels, y de la fase 0 la base, que son
+    las tablas y la API del chef, con su contrato en `docs/cocina-api.md`, y la subida por partes
+    del panel.
   - **Lo siguiente, en orden:**
-    1. La pestaña La Cocina en el panel: encenderla desde Los Maestros, subir el material, pedir y
-       seguir la comanda.
+    1. La pestaña La Cocina en el panel, en lugar de Tu IA y con «Tu propio chef» adentro:
+       encenderla desde Los Maestros, subir el material con la subida por partes, pedir y seguir
+       la comanda.
     2. El mesón: programar, descartar con motivo y los barridos de 14 y 30 días.
   - **[dueño]** Generar `COCINA_SECRET` y ponerla en Vercel (Production) y en el servidor del
     chef. Sin ella, la API de la cocina responde `401`.
+  - **[dueño] Por decidir: el nombre de día del mesón** (2026-10-22). El diseño le puso «La vitrina»,
+    pero La Vitrina ya es el nombre de tus páginas públicas, en los dos modos, y dos pantallas con
+    el mismo nombre confunden a la persona y a la wiki. Propuesta: «La bandeja», como la de sushi
+    que se pide en Chile. Hace falta antes del mesón.
   - **Del equipo de contenido:** el cliente del chef en `marca-personal`, contra
     `docs/cocina-api.md`.
 

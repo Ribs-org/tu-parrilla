@@ -95,8 +95,8 @@ export const COLUMNAS_DE_ARCHIVO = [
   // La media de los borradores: el compositor la sube apenas se elige, y el borrador puede
   // esperar días. Sin esta línea el barrido la borraría a la hora.
   { tabla: 'borrador_media', columna: 'blob_url', ref: borradorMedia.blobUrl },
-  // La Cocina: lo que el usuario le lleva al chef y lo que el chef entrega. Los insumos se borran
-  // a los 14 días por su cuenta (`expira_en`); acá solo se cuida que el barrido no se adelante.
+  // La Cocina: lo que el usuario le lleva al chef y lo que el chef entrega. Los insumos tienen su
+  // propia regla de borrado (`expira_en`); acá solo se cuida que este barrido no se adelante.
   { tabla: 'insumos', columna: 'url', ref: insumos.url },
   { tabla: 'creativos', columna: 'portada_url', ref: creativos.portadaUrl },
   { tabla: 'creativo_media', columna: 'url', ref: creativoMedia.url },

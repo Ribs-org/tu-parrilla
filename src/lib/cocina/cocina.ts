@@ -27,6 +27,7 @@ import {
 } from '@/lib/storage'
 import { esUuid } from '@/lib/uuid'
 import type { CreativoAnunciado } from './creativo'
+import { baseDeNombre } from './insumos'
 import { TERMINALES, puedePasar } from './estados'
 import { ordenarFila } from './fila'
 
@@ -284,15 +285,7 @@ export type ResultadoAnuncio =
 /** La clave de un archivo de un creativo, en la carpeta del dueño: programarlo no lo vuelve a bajar. */
 export function claveDeCreativo(ownerId: string, comandaId: string, nombre: string, tipo: string, uuid: string): string {
   const extension = typeFromContentType(tipo)?.extension ?? 'bin'
-  const base =
-    nombre
-      .replace(/\.[^.]+$/, '')
-      .normalize('NFD')
-      .replace(/[̀-ͯ]/g, '')
-      .replace(/[^a-zA-Z0-9-]+/g, '-')
-      .replace(/^-+|-+$/g, '')
-      .slice(0, 80) || 'archivo'
-  return `${carpetaDeLaApi(ownerId)}cocina/${comandaId}/${uuid}-${base}.${extension}`
+  return `${carpetaDeLaApi(ownerId)}cocina/${comandaId}/${uuid}-${baseDeNombre(nombre)}.${extension}`
 }
 
 async function firmar(
