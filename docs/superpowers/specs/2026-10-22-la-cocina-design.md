@@ -4,7 +4,8 @@ Fecha: 2026-10-22. **Diseño, nada implementado.** Reemplaza y amplía «El chef
 (`2026-10-19-chef-de-la-casa-design.md`), que ya decía para qué sirve el chef y cómo se dibuja;
 esto dice cómo se pide, cómo se sigue y qué se entrega, y fija el contrato entre Tu Parrilla y
 el chef. Lo pidió el dueño el 2026-10-22, y los nueve puntos del líder de creación de contenido
-de ese día están acá adentro, cada uno con lo que se decidió.
+de ese día están acá adentro, cada uno con lo que se decidió. Lo que el dueño contestó a las
+preguntas que este diseño dejaba abiertas está al final, en «Decisiones del dueño».
 
 ## La idea
 
@@ -89,6 +90,11 @@ Cada comanda **congela la receta resuelta** al crearse: la marca, los estilos co
 sus pesos, y la versión del catálogo. Si el usuario cambia su paleta a mitad de camino, lo que ya
 está en el horno no cambia.
 
+La misma idea vale del lado del chef, y ya es la regla de su catálogo: **un cambio grande a un estilo
+que un cliente aprobó se publica como un estilo nuevo** (`golpes-2`), no como una edición del que
+existe. Así nadie amanece con otro look sin haberlo elegido, y lo que ya se midió de un estilo sigue
+siendo de ese estilo.
+
 ### 5. Probar antes de cocinar
 
 El probador ya existe del lado del chef. En la pantalla es el paso «Prueba tus estilos»: un clip
@@ -99,9 +105,13 @@ lo que hace barato equivocarse: un clip en vez de treinta.
 
 Un agente elige qué partes del video sirven y escribe los titulares, el b-roll y los textos: eso
 es trabajo editorial, y a veces tiene una duda. Por eso hay un estado **«El chef te pregunta»**
-(por ejemplo, qué tema destacar), que espera la respuesta del usuario. Y cada creativo entregado
-se puede **comentar** («la letra se ve chica»): el comentario le llega al chef como memoria de la
-marca, que hoy vive en el cuerpo de la paleta, junto al ajuste que lo resuelve.
+(por ejemplo, qué tema destacar), que espera la respuesta del usuario. Cada pregunta trae **su plazo
+y la opción por defecto**, dichos en la misma pregunta: «Si no me contestas antes de las 18:00, sigo
+con la parte de ventas». Pasado el plazo, el chef sigue con esa opción, y una comanda nunca queda
+colgada para siempre. Y cada creativo entregado se puede **comentar** («la letra se ve chica») o
+**descartar con un motivo de un toque** («el corte», «la letra», «el tema», «el audio»), además del
+texto libre: le llega al chef como memoria de la marca, que hoy vive en el cuerpo de la paleta, junto
+al ajuste que lo resuelve. Un motivo le sirve más que un «descartado» a secas.
 
 ### 7. Cerrar el ciclo con las métricas
 
@@ -114,12 +124,16 @@ produce. Es lo que nos diferencia de un editor.
 
 - **Aislamiento:** cada usuario ve solo sus comandas, sus insumos, sus marcas y sus creativos,
   como hoy ve solo sus cuentas.
-- **Retención:** los insumos crudos se borran a los N días de servida la comanda, en Tu Parrilla
-  y en el servidor del chef.
+- **Retención:** los insumos crudos se borran a los 14 días de servida la comanda, en Tu Parrilla
+  y en el servidor del chef. **Los clips ya cortados** —lo que el chef horneó a partir del crudo, antes
+  de vestirlo en cada estilo— **se guardan en el servidor del chef mientras el cliente esté activo**:
+  es lo que permite pedir otros estilos con el mismo material sin volver a subir nada. Los términos lo
+  dicen.
 - **Derechos:** al subir, el usuario declara que tiene los derechos de lo que sube y el permiso de
   quienes aparecen.
 - **Cupos por plan:** minutos de material al mes. Con un solo servidor, el cupo es lo que decide
-  cuántos clientes caben, y es donde se pone el precio.
+  cuántos clientes caben, y es donde se pone el precio. Se construye desde el principio, pero parte
+  sin tope: primero se ve la cocina funcionando.
 
 ### 9. Fases
 
@@ -163,14 +177,16 @@ programa es el usuario, desde la vitrina. Apagar la cocina en el panel es desped
 
 ### Dónde vive: La Cocina
 
-Una pestaña **«La Cocina»**, con el dibujo del maestro cocinero que hoy lleva Tu IA. Recomendado:
-que **reemplace a Tu IA**, con dos partes.
+Una pestaña **«La Cocina»**, con el dibujo del maestro cocinero que hoy lleva Tu IA, que
+**reemplaza a Tu IA**, con dos partes:
 
 - **«El chef de la casa»**: arriba, lo nuevo.
-- **«Tu propio chef»**: abajo, lo de hoy, con la llave, la guía y el manual.
+- **«Tu propio chef»**: abajo, para quien quiere usar su propio Claude u otro agente. Como mínimo,
+  generar la llave y saber dónde están las guías de la API, que es lo de hoy. Un comando que lo
+  conecte en un paso queda como idea para después, sin complicarlo ahora.
 
 Las dos cosas son el chef, el nuestro o el tuyo, y dos pestañas con el mismo dibujo confundirían.
-Es una decisión de navegación y está en «Preguntas abiertas».
+Cambia la navegación y la wiki.
 
 Dentro de «El chef de la casa» hay cuatro lugares:
 
@@ -225,7 +241,8 @@ La paleta es **el catálogo del chef visto desde una marca**:
    marca.
 3. Los resultados vuelven lado a lado. Cada uno se aprueba, se comenta o se saca de la paleta.
 
-La carta, la misma del chef, se descarga en PDF. Una prueba consume poco cupo, y la primera es gratis.
+La carta, la misma del chef, se descarga en PDF. Las dos primeras pruebas son gratis por ahora: el
+modelo de negocio se decide después.
 
 ### La comanda nueva
 
@@ -254,6 +271,19 @@ Cuatro pasos, en una página:
 
 Una comanda se puede **cancelar** mientras no esté en el horno, y devuelve el cupo.
 
+Hay tres tipos de comanda:
+
+| Tipo | Qué es | Cuánto horno |
+|---|---|---|
+| `tanda` | la de arriba: material nuevo, cocinado en los estilos de la paleta | horas: un largo son unas cinco tandas |
+| `prueba` | un clip en cada estilo, para elegir (ver «Tu paleta») | minutos: unos diez. **Se salta la fila**: no espera detrás de un largo de cuatro horas |
+| `reestilo` | **«Otros estilos con el mismo material»**: sobre una comanda ya servida, sin subir nada | lo del horno, sin la parte editorial: los clips ya están cortados |
+
+El `reestilo` es la comanda más barata y la que más vende la paleta: con los clips que el chef ya
+cortó, salen las mismas ideas en estilos nuevos. Se pide desde una comanda servida («Pedir otros
+estilos»), eligiendo los estilos que no tuvo. Lo hizo el chef a mano el 2026-10-22: unos 190 reels en
+estilos nuevos a partir de diez largos, sin tocar el material crudo.
+
 ### La fila de comandas
 
 Una tarjeta por comanda, la más reciente arriba. Cada una muestra:
@@ -269,25 +299,51 @@ sus opciones), y la pestaña lleva un aviso, como «Se quemó». Responder la de
 
 ### El mesón (de día, la vitrina)
 
-Lo entregado, por comanda y dentro de ella por estilo. Cada creativo trae:
+Lo entregado, por comanda y dentro de ella **por pieza**: varios creativos son la misma idea en
+estilos distintos (el clip 08 en golpes, en cinética y en pantalla animada), y se ven juntos, uno al
+lado del otro. La `pieza` viaja como atributo, igual que hoy en Los Números, donde las versiones de una
+pieza ya se comparan lado a lado. Cada creativo trae:
 
 - el video o las láminas, que se reproducen o se pasan ahí mismo;
 - la portada;
-- el texto que propone el chef, que se puede corregir antes de programar;
+- **los textos**, que se pueden corregir antes de programar:
+  - el texto que propone el chef;
+  - aparte, **el título de YouTube**, de hasta 100 caracteres, como ya lo escribe el chef: en YouTube
+    la primera línea es el título;
 - el estilo y lo que rotó: la letra, la entrada, la música;
 - y tres acciones, «Programar», «Comentar» y «Descartar».
 
-- **«Programar»** abre el compositor de siempre con todo puesto: la media, la portada, el texto y
-  los `atributos`, para elegir cuentas y hora.
+Lo entregado llega **por tanda, no al final**: el chef sube cada tanda apenas sale del horno, y la
+comanda dice «Sirviendo: 3 de 5 tandas en el mesón». Se revisa y se programa lo que ya está, sin
+esperar el resto.
+
+- **«Programar»** abre el compositor de siempre con todo puesto: la media, la portada, el texto, los
+  `atributos` y, si eliges YouTube, su título como primera línea del texto de ese destino (el texto
+  por destino que el publicador ya respeta, `captionOverride`). Faltan las cuentas y la hora.
 - **«Servir todo como propone el chef»**, en la fase 2, programa la comanda entera con el plan que
   el chef sugiere: qué cuentas, qué días, cuántos trial reels. Usa el planificador que el chef ya
-  tiene y respeta los topes de cada red. Antes de confirmar se ve el calendario que quedaría.
+  tiene, con sus reglas:
+  - una idea no se repite el mismo día en una cuenta;
+  - la variante sale después de su base;
+  - cada video va una vez por red;
+  - se respetan los topes de cada red;
+  - no se propone un trial reel a una cuenta que no los acepta (ver abajo).
+
+  Antes de confirmar se ve el calendario que quedaría.
 - **«Comentar»** deja una nota sobre ese creativo, que le llega al chef como memoria de la marca.
   Cuando el chef la lee, la nota lo dice («El chef lo leyó»), y si la resolvió con un ajuste o con un
   estilo propio, también lo dice.
-- **«Descartar»** lo saca del mesón y le dice al chef que ese no sirvió, que también es dato.
+- **«Descartar»** lo saca del mesón y le dice al chef que ese no sirvió, que también es dato. Pide
+  un motivo de un toque —«El corte», «La letra», «El tema», «El audio»— y, si se quiere, una nota.
 
-Un creativo que pasa N días sin programar se borra, con aviso una semana antes: un video pesa, y
+**Qué cuenta acepta trial reels.** Meta los rechaza en una cuenta con pocos seguidores (subcódigo
+2207081, el de #250), y eso no cambia de un día para otro. Tu Parrilla guarda, por cuenta de
+Instagram, si acepta trial reels —sí, no o todavía no se sabe— y el motivo real, aprendido de lo que
+contestó Meta al publicar. Lo muestran Los Fierros y `GET /api/schedule/cuentas`, el compositor avisa
+antes de programar un trial reel donde no va a salir, y «Servir todo» no lo propone. Sirve también
+fuera de la cocina, así que se hace aparte y antes.
+
+Un creativo que pasa 30 días sin programar se borra, con aviso una semana antes: un video pesa, y
 el mesón no es un archivo. Lo programado sigue la regla de siempre: el video se borra del almacén
 cuando salió en todas sus redes.
 
@@ -323,12 +379,12 @@ gramática de los cortes (`src/components/corte.tsx` y el diseño del modo día)
 | Acompañamiento · imágenes o b-roll | fotos, clips sin voz | los intercala sobre la voz; las fotos de un evento con voz en off | **las verduras**: choclo y pimentón | **el arroz**: un bol |
 | Condimento · letras | `.ttf` u `.otf` | los titulares y el texto | **la sal**: el salero | **la soya**: la botellita |
 | Condimento · colores, logo, CTA | lo que identifica a la marca | el acento, el @, el llamado final | **el chimichurri** | **el wasabi** |
-| Condimento · música | una pista propia, o ninguna | la cama bajo la voz | **el vino** | **el té** |
+| Condimento · música | una pista propia, o ninguna | la cama bajo la voz | **la piscola**, o la botella de pisco | **el té** |
 
 El dueño propuso pollo, cerdo y sal de noche, y arroz, nigiri y soya de día, y dejó el resto a
 criterio del diseño. Quedó cerdo para lo que acompaña a la res, porque es otra carne que va a la
 misma parrilla. La sal y la soya son lo que sazona: la marca. El arroz es el acompañamiento del
-sushi. El nigiri no entra porque ya es lo cocinado: un video entregado se dibuja como nigiri (de
+sushi. La música, de noche, es la piscola o la botella de pisco, como la pidió el dueño. El nigiri no entra porque ya es lo cocinado: un video entregado se dibuja como nigiri (de
 noche, como entraña), y confundirlo con un insumo rompería la lectura.
 
 ## La comanda
@@ -343,16 +399,17 @@ noche, como entraña), y confundirlo con un insumo rompería la lectura.
 | `probando` | opcional: un clip en cada estilo, para elegir antes de cocinar todo. Espera la elección | «La degustación» | «La degustación» | el chef → el usuario |
 | `pregunta` | el chef necesita una respuesta. Espera; responder la devuelve al estado de antes | «El chef te pregunta» | «El chef te pregunta» | el chef → el usuario |
 | `en_el_horno` | render y armado, en la cola del chef. Son horas | «Al fuego» | «Armando las piezas» | el chef |
-| `lista` | los creativos están en el mesón, por revisar | «Listo: N cortes en el mesón» | «Listo: N piezas en la vitrina» | el chef |
-| `servida` | cerrada: el usuario programó o descartó lo que quiso | «Servida» | «Servida» | el usuario, o sola a los N días |
+| `sirviendo` | algunas tandas ya están en el mesón y otras siguen en el horno | «Sirviendo: 3 de 5 tandas en el mesón» | «Sirviendo: 3 de 5 tandas en la vitrina» | el chef, al subir cada tanda |
+| `lista` | todas las tandas están en el mesón, por revisar | «Listo: N cortes en el mesón» | «Listo: N piezas en la vitrina» | el chef |
+| `servida` | cerrada: el usuario programó o descartó lo que quiso | «Servida» | «Servida» | el usuario, o sola a los 30 días, cuando vence lo que quedó en el mesón |
 | `rechazada` | fuera de alcance, con el motivo, al revisar. No consume cupo | «No se puede cocinar» | «No se puede preparar» | el chef |
 | `cancelada` | la canceló el usuario antes del horno. Devuelve el cupo | «Cancelada» | «Cancelada» | el usuario |
 | `fallida` | algo se rompió y no se pudo terminar, con el motivo. Devuelve el cupo | «No se pudo terminar» | «No se pudo terminar» | el chef |
 
 ```
-recibida → revisando → en_preparacion → (probando) → en_el_horno → lista → servida
-              ↓              ↕                ↕            ↓
-          rechazada       pregunta         pregunta      fallida
+recibida → revisando → en_preparacion → (probando) → en_el_horno → sirviendo → lista → servida
+              ↓              ↕                ↕            ↓           ↓
+          rechazada       pregunta         pregunta      fallida     fallida
 recibida, revisando, en_preparacion, probando, pregunta → cancelada (por el usuario)
 ```
 
@@ -395,19 +452,23 @@ barrido de huérfanos (`storage-gc.ts`). Si no entra, el barrido la borra a la h
 | `comanda_eventos` | la línea de tiempo: estado, mensaje, `eta`, hora |
 | `insumos` | `owner_id`, `comanda_id`, tipo, nombre, URL, bytes, duración, tipo de archivo, la validación (estado y motivos), cuándo se declararon los derechos y `expira_en` |
 | `subidas` | las subidas por partes en curso: el id de la subida en el almacén, la clave y las partes que ya llegaron, para retomar |
-| `preguntas` | `comanda_id`, el texto, las opciones si las hay, la respuesta y cuándo se respondió |
-| `creativos` | `owner_id`, `marca_id`, `comanda_id`, tipo (video, carrusel, imagen), la portada, el texto propuesto, el estilo y los `atributos`, la duración, `estado` (en el mesón, programado, descartado), el `post_id` cuando se programa y `expira_en` |
+| `preguntas` | `comanda_id`, el texto, las opciones si las hay, **el plazo y la opción por defecto**, la respuesta, cuándo se respondió y si fue por plazo |
+| `creativos` | `owner_id`, `marca_id`, `comanda_id`, **la `pieza` y la tanda**, tipo (video, carrusel, imagen), la portada, **los textos (el propuesto y el título de YouTube)**, el estilo y los `atributos`, la duración, `estado` (en el mesón, programado, descartado), **el motivo del descarte y su nota**, el `post_id` cuando se programa y `expira_en` |
 | `creativo_media` | los archivos de cada creativo en su orden: el video, o las láminas de un carrusel |
 | `comentarios` | `creativo_id`, el texto, cuándo lo leyó el chef y qué hizo con él |
+
+En `comandas` van además el `tipo` (`tanda`, `prueba` o `reestilo`), la comanda de origen de un
+`reestilo` y las tandas, servidas y en total, que dibujan el «3 de 5». En las cuentas de Instagram
+(`social_accounts`), si aceptan trial reels y por qué.
 
 El plan y el cupo van en el usuario al principio: si tiene la cocina, cuántos minutos al mes y desde
 cuándo. El cobro, a mano. Lo consumido se calcula sumando los `minutos` de sus comandas del mes que
 no se rechazaron, cancelaron ni fallaron.
 
 **La retención.** Un barrido diario, como el de huérfanos, borra los insumos cuya `expira_en` pasó:
-N días después de servida la comanda, o de rechazada, cancelada o fallida. El chef borra su copia
+14 días después de servida la comanda, o de rechazada, cancelada o fallida. El chef borra su copia
 local con la misma regla, y lo dice al servir. Los creativos que nadie programó se borran a su
-`expira_en`, con aviso una semana antes.
+`expira_en`, a los 30 días, con aviso una semana antes.
 
 ## Cómo hablan el chef y Tu Parrilla
 
@@ -429,16 +490,16 @@ Los archivos se mueven con enlaces firmados que vencen en una hora y nombran un 
 |---|---|
 | `POST /api/cocina/latido` | el chef dice que está vivo: cuántos trabajos tiene, cuánto tarda una comanda en promedio, su versión. Tu Parrilla muestra «La cocina está abierta» o «La cocina está cerrada por ahora: tu comanda espera su turno» si pasan diez minutos sin latido |
 | `PUT /api/cocina/catalogo` | publica el catálogo: el global, o el de una marca. Las muestras se suben antes, con enlaces firmados |
-| `GET /api/cocina/comandas?estado=recibida` | las comandas que esperan, la más vieja primero, con su receta y sus insumos (sin enlaces) |
+| `GET /api/cocina/comandas?estado=recibida` | las comandas que esperan, con su receta y sus insumos (sin enlaces). **Las pruebas primero**, y después la más vieja; nunca dos seguidas del mismo usuario si otro espera |
 | `POST /api/cocina/comandas/{id}/tomar` | la toma. Si ya es suya no hace nada, y si es de otro trabajador devuelve `409` |
 | `GET /api/cocina/insumos/{id}/enlace` | un enlace firmado para bajar ese insumo, si es de una comanda tomada |
 | `POST /api/cocina/insumos/{id}/validacion` | el resultado de la revisión rápida: si sirve y, si no, por qué, en palabras para el usuario |
-| `POST /api/cocina/comandas/{id}/estado` | un cambio de estado, con su mensaje y su hora estimada. Tu Parrilla valida que la transición exista |
-| `POST /api/cocina/comandas/{id}/preguntas` | una pregunta, con opciones si las tiene. Pasa la comanda a `pregunta` |
-| `GET /api/cocina/comandas/{id}/respuestas` | las respuestas que llegaron |
-| `POST /api/cocina/comandas/{id}/creativos` | anuncia un creativo: sus archivos (nombre, tipo, bytes), su texto, su estilo y sus `atributos`. Devuelve un enlace firmado por archivo, en la carpeta del dueño. Su `ref` evita duplicarlo si se reenvía |
+| `POST /api/cocina/comandas/{id}/estado` | un cambio de estado, con su mensaje, su hora estimada y, al servir, las tandas («3 de 5»). Tu Parrilla valida que la transición exista |
+| `POST /api/cocina/comandas/{id}/preguntas` | una pregunta, con opciones si las tiene, **su plazo y la opción por defecto**. Pasa la comanda a `pregunta` |
+| `GET /api/cocina/comandas/{id}/respuestas` | las respuestas que llegaron. Una pregunta con el plazo vencido vuelve respondida con su opción por defecto, y lo dice (`porPlazo: true`) |
+| `POST /api/cocina/comandas/{id}/creativos` | anuncia un creativo: sus archivos (nombre, tipo, bytes), **su `pieza` y su tanda**, sus textos (el propuesto y el título de YouTube), su estilo y sus `atributos`. Devuelve un enlace firmado por archivo, en la carpeta del dueño. Su `ref` evita duplicarlo si se reenvía |
 | `POST /api/cocina/creativos/{id}/listo` | lo cierra después de subir. Tu Parrilla mira que cada archivo exista y pese lo que se dijo (`objetoEnAlmacen`, el mismo de `POST /api/media`) y recién ahí lo muestra en el mesón |
-| `GET /api/cocina/comentarios?desde=…` | los comentarios nuevos sobre creativos de usuarios con la cocina encendida |
+| `GET /api/cocina/comentarios?desde=…` | los comentarios nuevos sobre creativos de usuarios con la cocina encendida, y los descartes con su motivo |
 | `POST /api/cocina/comentarios/{id}/leido` | lo marca leído, con lo que hizo el chef: «subí el tamaño de la letra en tu paleta» |
 | `POST /api/cocina/marcas/{id}/propuesta` | fase 3: propone un cambio de paleta (pesos, ajustes), con el porqué y los números. El usuario lo aprueba o no en el panel |
 
@@ -457,7 +518,8 @@ Va en `marca-personal`, y su plan lo escribe el equipo de contenido. Lo que este
 ese lado:
 
 - **Un módulo `pipeline/cocina`:**
-  - el cliente de esta API: tomar, bajar, informar, preguntar, entregar;
+  - el cliente de esta API: tomar, bajar, informar, preguntar, entregar **por tanda**, con la `pieza`,
+    los textos y el título de YouTube de cada creativo;
   - un servicio de `systemd` que pregunta cada minuto y late;
   - en la fase 0, una herramienta de línea de comandos para que el operador mueva las comandas a mano.
 - **`estilos exportar`:** el catálogo como JSON, con:
@@ -480,6 +542,8 @@ ese lado:
 - **Entregar a Tu Parrilla y no a Drive.** `cortos.upload` y el subir de carruseles suman el destino
   «comanda», con el texto (`captions.json`), el estilo y lo que rotó como `atributos`. Lo de Drive
   queda para el respaldo propio.
+- **Guardar los clips ya cortados** de cada cliente mientras esté activo, para el `reestilo`; el
+  crudo, solo 14 días.
 - **Avisar los estados desde la cola.** Cuando un trabajo de una tanda de comanda empieza, termina o
   falla, la cola lo informa a Tu Parrilla, además de al celular.
 
@@ -525,9 +589,12 @@ reparte entre todos los clientes, y es lo que el cupo protege:
 
 - **El cupo, en minutos del plato principal al mes**, porque es lo que hace crecer el trabajo: más
   material da más clips, más tandas y más horno. Se descuenta al confirmar, y se devuelve si la
-  comanda se rechaza, se cancela o falla.
+  comanda se rechaza, se cancela o falla. Al principio no tiene tope: la cuenta se lleva y se
+  muestra, pero no frena nada, hasta que se decida el número.
 - **Una fila pareja:** el chef no toma dos comandas del mismo usuario mientras haya otro esperando.
   Un cliente con diez comandas no tapa a los demás.
+- **Las pruebas se saltan la fila:** son unos diez minutos de horno, y no esperan detrás de un largo de
+  cuatro horas. El chef las toma primero.
 - **Lo que se mide por comanda**, para poner el precio con datos (el piloto ya anota esto a mano):
   - las horas de cada estado;
   - los minutos de horno;
@@ -541,7 +608,8 @@ reparte entre todos los clientes, y es lo que el cupo protege:
 - La casilla de derechos, guardada con su hora, en cada insumo y en cada condimento: letras,
   música, logo.
 - `/privacidad` y `/terminos` dicen que el material se procesa en un servidor propio y con la API de
-  Anthropic, qué se guarda y por cuánto tiempo. Ya está pendiente que los revise un abogado
+  Anthropic, qué se guarda y por cuánto tiempo: el crudo, 14 días; los clips ya cortados, mientras el
+  cliente esté activo. Ya está pendiente que los revise un abogado
   **[dueño]**.
 - Si el chef genera algo sintético, como voz en off o imágenes, TikTok y YouTube piden declararlo. Hoy
   la música se compone en el servidor y la voz es la de la persona; si eso cambia, se revisa antes de
@@ -554,8 +622,9 @@ Las del líder, con lo que cada una pide de cada lado.
 
 | Fase | Para qué | En Tu Parrilla | En el chef |
 |---|---|---|---|
-| **0. La comanda a mano** | validar la demanda sin construirlo todo | La Cocina con «Las comandas»: el formulario (el plato principal por partes, las notas, la marca básica), la fila con sus estados, el mesón con «Programar», la credencial de la cocina con lo mínimo (tomar, enlace del insumo, estado, entregar) | el operador mueve las comandas con la línea de comandos: baja los insumos a una tanda, cocina como hoy, entrega al mesón. Nada automático todavía |
-| **1. La prueba** | elegir estilos con un clip y no con una tanda | «Prueba tus estilos»: la comanda de tipo `prueba`, los resultados lado a lado, la carta en PDF; las preguntas del chef con su respuesta | el probador recibe la comanda de prueba; la carta sale del catálogo |
+| **Antes** | que «Servir todo» y el compositor sepan dónde no sale un trial reel | qué cuenta acepta trial reels, aprendido de Meta, en Los Fierros, en `GET /api/schedule/cuentas` y en el compositor | nada |
+| **0. La comanda a mano** | validar la demanda sin construirlo todo | La Cocina con «Las comandas»: el formulario (el plato principal por partes, las notas, la marca básica), la fila con sus estados y su «Sirviendo: 3 de 5», el mesón por pieza con los dos textos, «Programar» y «Descartar» con motivo, la credencial de la cocina con lo mínimo (tomar, enlace del insumo, estado, entregar por tanda) | el dueño, que hoy pilota con un cliente, mueve las comandas con la línea de comandos: baja los insumos a una tanda, cocina como hoy, entrega al mesón. Nada automático todavía |
+| **1. La prueba** | elegir estilos con un clip y no con una tanda | «Prueba tus estilos»: la comanda de tipo `prueba`, que se salta la fila, los resultados lado a lado, la carta en PDF; el `reestilo` («Otros estilos con el mismo material»); las preguntas del chef con su plazo y su opción por defecto | el probador recibe la comanda de prueba; la carta sale del catálogo; el `reestilo` sale de los clips ya cortados |
 | **2. La paleta sola** | que el usuario arme su fábrica sin hablar con nadie | el catálogo publicado, «Tu paleta» generada de él, «Tu marca» completa, la receta congelada, los comentarios, «Servir todo como propone el chef» | `estilos exportar`, el servicio que pregunta y late, la revisión rápida automática, la memoria desde los comentarios, el plan sugerido de cada comanda |
 | **3. La fábrica que aprende** | que la paleta se ajuste con lo que rinde | «Tus estilos» en Los Números (cada estilo contra la mediana de su red y su modo), las propuestas del chef para aprobar | `estilos evaluar` lee lo que necesita por la API y propone por `marcas/{id}/propuesta` |
 | Después | | varias marcas por usuario, comandas por API, el plato principal desde el teléfono (build nativo), el cobro | más servidores, o uno con GPU |
@@ -579,26 +648,41 @@ Cada fase deja la documentación al día al terminar (`AGENTS.md`):
 - **Que la pantalla prometa lo que el chef no hace.** Por eso el formulario sale del catálogo, y la
   revisión rápida rechaza antes del horno.
 
-## Preguntas abiertas
+## Decisiones del dueño
 
-Para el dueño. Cada una con la recomendación de este diseño.
+Las contestó el 2026-10-22, sobre las ocho preguntas que este diseño dejaba abiertas:
 
-1. **¿La Cocina reemplaza a Tu IA, o es una pestaña más?** Recomendado: que la reemplace, con «Tu
-   propio chef» adentro. Cambia la navegación y la wiki.
-2. **¿Los nombres?** «La Cocina», «Las comandas», «El mesón» de noche y «La vitrina» de día. Y los
-   insumos de la tabla de arriba: cerdo y salmón, verduras y arroz, sal y soya, chimichurri y wasabi,
-   vino y té.
-3. **¿El cupo, en minutos o en comandas?** Recomendado: minutos del plato principal al mes, con un tope
-   de comandas a la vez.
-4. **¿Cuántos días se guardan los insumos y el mesón?** Recomendado: 14 días los insumos después de
-   servida la comanda, y 30 días lo que nadie programó.
-5. **¿La primera prueba es gratis?** Recomendado: sí. Es lo que vende el resto.
-6. **¿Quién opera la fase 0, y cuántos clientes entran?** Recomendado: el líder de contenido, con dos
-   o tres clientes del piloto, hasta medir cuánto tarda y cuánto cuesta una comanda.
-7. **¿Varias marcas por usuario desde el principio?** Recomendado: no. Una por usuario hasta que una
-   agencia lo pida pagando; el modelo ya lo permite.
-8. **¿Lo cocinado puede programarse solo?** Recomendado: no en las fases 0 y 1. Nada sale publicado
-   sin que el usuario lo vea; «Servir todo» es un botón, no un automático.
+1. **La Cocina reemplaza a Tu IA**, y adentro sigue «Tu propio chef» para quien quiere usar su propio
+   Claude: como mínimo, generar la llave y saber dónde están las guías. Un comando que lo conecte en
+   un paso queda como idea, sin complicarlo ahora.
+2. **Los nombres, aprobados:** La Cocina, Las comandas, El mesón de noche y La vitrina de día, y los
+   insumos de la tabla, con la piscola en vez del vino.
+3. **El cupo se construye, pero parte sin tope:** primero ver la cocina funcionando. El número, y el
+   precio, después.
+4. **Los insumos se guardan 14 días** después de servida la comanda. Lo que nadie programó en el
+   mesón, 30 días, como proponía el diseño, hasta que se diga otra cosa.
+5. **Las dos primeras pruebas de estilos son gratis** por ahora. El modelo de negocio se decide
+   después.
+6. **La fase 0 la opera el dueño**, que hoy pilota con un cliente.
+7. **Una marca por usuario.** El modelo ya permite varias, para cuando una agencia lo pida.
+8. **Nada se programa solo.** «Servir todo como propone el chef» es un botón que el usuario aprieta,
+   después de ver el calendario que quedaría.
+
+## El feedback del equipo de contenido
+
+Lo mandó el 2026-10-22, después de leer este diseño. Entraron los nueve puntos:
+
+| Punto | Dónde quedó |
+|---|---|
+| 1. Entregar por tanda, no al final | el estado `sirviendo` («3 de 5 tandas en el mesón») y la entrega por tanda en la API |
+| 2. Pedir más sobre lo ya cocinado | la comanda `reestilo` («Otros estilos con el mismo material»), y la retención: el crudo 14 días, los clips ya cortados mientras el cliente esté activo |
+| 3. La pieza en cada creativo | el mesón agrupa por pieza, y «Servir todo» respeta las reglas del planificador |
+| 4. Qué cuenta acepta trial reels | se guarda por cuenta, aprendido de Meta, y se hace antes de la fase 0 |
+| 5. Las pruebas se saltan la fila | la prioridad propia, en la API y en «Capacidad» |
+| 6. Las preguntas con plazo | el plazo y la opción por defecto en cada pregunta |
+| 7. Un texto por red | el texto propuesto y el título de YouTube, aparte |
+| 8. Descartar con un motivo rápido | los cuatro motivos de un toque, más la nota |
+| 9. Un cambio grande es un estilo nuevo | junto a la receta congelada, en la decisión 4 |
 
 ## Para quien siga
 

@@ -35,8 +35,9 @@ sección.
 
   El diseño está en `docs/superpowers/specs/2026-10-22-la-cocina-design.md`, y reemplaza a «El chef
   de la casa». Trae los nueve puntos del líder de creación de contenido, las fases de la 0 a la 3 y
-  ocho preguntas abiertas para el **[dueño]**. Nada está implementado. Lo siguiente: contestar esas
-  preguntas y arrancar la fase 0, la comanda a mano.
+  las decisiones del dueño del 2026-10-22, y el feedback del equipo de creación de contenido de ese
+  mismo día, que entró entero. Nada está implementado todavía. El orden: primero qué cuenta acepta
+  trial reels, que el diseño pone antes; después la fase 0, la comanda a mano.
 
 ## Bugs
 
