@@ -27,9 +27,14 @@ sección.
 
 - **Integrar al chef en la parrilla** (2026-10-21). El chef es el editor del dueño. Hoy el
   chef propio de cada uno trabaja desde fuera: se conecta con una llave de Tu IA y usa la API.
-  Los requisitos los va a describir el dueño; hasta entonces no hay diseño ni nada
-  implementado. Al diseñarlo, leerlo junto a «El chef de la casa», en «Features y trabajo de
-  código», que también es un chef que deja clips en la parrilla.
+  Lo que pidió el dueño el 2026-10-22: que cada usuario pueda arrastrar o subir, desde la app,
+  el material crudo —de noche la carne sin cortar, de día el atún crudo— y después sumarle más
+  archivos: la grabación de otra cámara, imágenes complementarias. Cada insumo podría tener su
+  dibujo (de día arroz, nigiri o soya; de noche pollo, cerdo o sal), a criterio del diseño. Con
+  eso se le mandan cosas al editor desde la app. Falta el diseño, nada está implementado. Parte
+  de «El chef de la casa» (`docs/superpowers/specs/2026-10-19-chef-de-la-casa-design.md`), que
+  ya dibuja la pieza entera y lo que el chef devuelve; lo nuevo es la entrada —subir la pieza y
+  sus insumos— y cómo la recoge el chef propio de cada uno por la API.
 
 ## Bugs
 
