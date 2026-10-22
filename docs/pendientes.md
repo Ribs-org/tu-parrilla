@@ -25,16 +25,18 @@ Cómo se usa:
 Lo que el dueño marcó como lo más prioritario de toda la lista. Va antes que cualquier otra
 sección.
 
-- **Integrar al chef en la parrilla** (2026-10-21). El chef es el editor del dueño. Hoy el
-  chef propio de cada uno trabaja desde fuera: se conecta con una llave de Tu IA y usa la API.
-  Lo que pidió el dueño el 2026-10-22: que cada usuario pueda arrastrar o subir, desde la app,
-  el material crudo —de noche la carne sin cortar, de día el atún crudo— y después sumarle más
-  archivos: la grabación de otra cámara, imágenes complementarias. Cada insumo podría tener su
-  dibujo (de día arroz, nigiri o soya; de noche pollo, cerdo o sal), a criterio del diseño. Con
-  eso se le mandan cosas al editor desde la app. Falta el diseño, nada está implementado. Parte
-  de «El chef de la casa» (`docs/superpowers/specs/2026-10-19-chef-de-la-casa-design.md`), que
-  ya dibuja la pieza entera y lo que el chef devuelve; lo nuevo es la entrada —subir la pieza y
-  sus insumos— y cómo la recoge el chef propio de cada uno por la API.
+- **Integrar al chef en la parrilla: La Cocina** (pedido el 2026-10-21, diseñado el
+  2026-10-22). El chef es el editor del dueño: el pipeline de `marca-personal`, que corre en un
+  servidor propio. Cada usuario tiene su fábrica de creativos dentro de Tu Parrilla:
+  - sube el material crudo y lo que lo acompaña, cada cosa con su tipo y su dibujo;
+  - elige sus estilos, que salen del catálogo del chef, y los prueba con un clip;
+  - recibe los creativos en el mesón (de día, la vitrina), con sus textos y sus atributos, y los
+    programa.
+
+  El diseño está en `docs/superpowers/specs/2026-10-22-la-cocina-design.md`, y reemplaza a «El chef
+  de la casa». Trae los nueve puntos del líder de creación de contenido, las fases de la 0 a la 3 y
+  ocho preguntas abiertas para el **[dueño]**. Nada está implementado. Lo siguiente: contestar esas
+  preguntas y arrancar la fase 0, la comanda a mano.
 
 ## Bugs
 
@@ -281,12 +283,6 @@ Nada de esto bloquea un trámite hoy; conviene ordenarlo antes de abrir a tercer
   pasado un rato fuera. Es una decisión de producto, no un arreglo: cuánto rato, y si vale la
   molestia. Se haría en `mobile/src/components/sesion.tsx`, mirando `AppState`.
 
-- **El chef de la casa** (2026-10-19). Un agente nuestro, levemente personalizado por cliente,
-  que recibe el material crudo —la res entera de noche, el atún entero de día—, lo despieza en
-  clips y los deja en la parrilla de cada cliente para que los apruebe. Es un servicio pagado, y
-  convive con el chef propio de cada uno en Tu IA. Nada está implementado: espera el servidor,
-  que el **[dueño]** está configurando; la lista de lo que necesita está en el diseño, junto con
-  las fases y las preguntas abiertas: `docs/superpowers/specs/2026-10-19-chef-de-la-casa-design.md`.
 - **El modo día con sushi** (2026-10-18). Pedido del dueño, para el público que la estética de
   asado deja fuera. Están hechas las cuatro tandas: el panel, sus motivos, la app del teléfono y
   la portada. El diseño está en `docs/superpowers/specs/2026-10-19-modo-dia-sushi-design.md`.

@@ -1,8 +1,10 @@
 # El chef de la casa: un agente nuestro que cocina el material de cada cliente
 
-Fecha: 2026-10-19. **Diseño, nada implementado.** Espera el servidor, que el dueño está
-montando. Fija la idea, lo que ya existe y sirve, lo que faltaría construir y en qué orden,
-para que el día que el servidor esté listo no se parta de cero.
+Fecha: 2026-10-19. **Reemplazado el 2026-10-22 por «La Cocina»**
+(`2026-10-22-la-cocina-design.md`), que dice cómo se pide, cómo se sigue y qué se entrega, y fija el
+contrato entre Tu Parrilla y el chef. Desde entonces el servidor existe y el chef ya es multiusuario.
+De acá sigue valiendo el dibujo de la pieza entera y las palabras de cada estado; lo demás manda el
+diseño nuevo, también donde lo contradice, por ejemplo en la llave del chef por cliente.
 
 ## La idea
 
