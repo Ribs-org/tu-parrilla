@@ -77,6 +77,12 @@ describe('seQuemo', () => {
     const filas = seQuemo([viejo, nuevo, post('bien', '2026-10-14T20:00:00-03:00', ['published'])])
     expect(filas.map((f) => f.destino.id)).toEqual(['nuevo-0', 'nuevo-2', 'viejo-0'])
   })
+
+  it('lo archivado no sale: ya no pide una acción', () => {
+    const quemado = post('q', '2026-10-14T19:00:00-03:00', ['failed', 'failed'])
+    quemado.redes[1]!.archivado = true
+    expect(seQuemo([quemado]).map((f) => f.destino.id)).toEqual(['q-0'])
+  })
 })
 
 describe('servidosAyer y pieDeAyer', () => {

@@ -59,7 +59,16 @@ export type PostMovil = {
    * es el que sabe si la cuenta se enfrió y si TikTok recibió un borrador, para que el
    * teléfono no repita la regla.
    */
-  redes: Array<{ id: string; red: string; handle: string | null; estado: string; error: string | null; sello: Sello }>
+  redes: Array<{
+    id: string
+    red: string
+    handle: string | null
+    estado: string
+    error: string | null
+    sello: Sello
+    /** Un destino quemado que alguien archivó: «Se quemó» no lo muestra (`seQuemo`, en la app). */
+    archivado: boolean
+  }>
 }
 
 /**
@@ -99,6 +108,7 @@ export function agruparPostsMovil(
       estado: target.status,
       error: target.lastError,
       sello: selloDe(target, frias.has(target.accountId) ? 'frio' : 'al-rojo'),
+      archivado: Boolean(target.archivadoEn),
     })
     mapa.set(post.id, entrada)
   }

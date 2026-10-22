@@ -19,7 +19,7 @@ tus números.
 | `/docs/…` | Las guías para LLMs, públicas y sin sesión: la de la API (`api-llm.md`, `api-editor.md`, `api.json`) y la wiki de la interfaz (`ui/index.md`), para guiar a quien se pierde en el panel |
 | `/api/social/meta/baja` | `POST` de Meta cuando alguien quita la app desde Facebook: deja sin credencial sus cuentas de Instagram y Facebook |
 | `/api/social/meta/borrado` | `POST` de Meta cuando alguien pide borrar sus datos: borra lo que vino de esas dos redes y devuelve el código de estado |
-| `/api/schedule/…`, `/api/metrics/…` | La API para tu agente, con una llave de Tu IA: cargar, ver y sacar lo programado, las cuentas y los números (ver «Carga masiva por API» y las secciones que le siguen) |
+| `/api/schedule/…`, `/api/metrics/…` | La API para tu agente, con una llave de Tu IA: cargar, ver y sacar lo programado, archivar lo quemado, las cuentas y los números (ver «Carga masiva por API» y las secciones que le siguen) |
 | `/api/media` | `POST` con la misma llave: firma la subida de un archivo directo a R2, para nombrarlo después en varias filas del lote sin que se vuelva a bajar (ver «Carga masiva por API») |
 | `/api/mobile/…` | La API de la app del teléfono, con el token de su sesión (ver `mobile/README.md`) |
 | `/api/cron/…` | Las corridas programadas: la publicación y la sincronización. Solo con `CRON_SECRET` |
@@ -1085,7 +1085,7 @@ Vercel y bajan con `vercel env pull .env.local`.
 | `CRON_SECRET` | Autoriza las corridas programadas: el sync diario y la publicación cada 5 minutos. Vercel la manda sola a su cron; el pinger externo la manda en `Authorization: Bearer …` | Sí — Vercel no la crea: se genera igual que `AUTH_SECRET` y se agrega. Sin ella los crons responden `401` y no corre nada |
 | `MIGRAR_PREVIEWS` | Que los previews migren la base | Solo cuando el preview tenga una base propia; contra la de producción, no |
 | `DATABASE_URL_PRUEBAS` | Solo para las pruebas de integración: una Postgres desechable donde cada archivo crea y migra su propia base (ver «Comandos»). No va en Vercel | No — sin ella esas pruebas se saltan. Nunca la de producción |
-| `SCHEDULE_API_KEY` | La llave del despliegue: abre `POST /api/schedule/batch` (carga masiva), `POST /api/media` (subir un archivo una vez), `DELETE /api/schedule/posts/{id}` (sacar lo programado), `GET /api/schedule/posts` (calendario), `GET /api/schedule/resumen` (el resumen del día), `GET /api/schedule/cuentas` (las cuentas), `GET /api/metrics/posts` (métricas) y `GET /api/metrics/mejores` (el mejor X %) a nombre del admin. Es anterior a las llaves por usuario y sigue para el agente que ya la usa | No — sin ella los ocho endpoints aceptan solo las llaves que cada usuario genera en Tu IA; si la pones, genérala igual que `CRON_SECRET` |
+| `SCHEDULE_API_KEY` | La llave del despliegue: abre `POST /api/schedule/batch` (carga masiva), `POST /api/media` (subir un archivo una vez), `DELETE /api/schedule/posts/{id}` (sacar lo programado), `POST /api/schedule/posts/{id}/archivar` y `…/desarchivar` (archivar lo quemado), `GET /api/schedule/posts` (calendario), `GET /api/schedule/resumen` (el resumen del día), `GET /api/schedule/cuentas` (las cuentas), `GET /api/metrics/posts` (métricas) y `GET /api/metrics/mejores` (el mejor X %) a nombre del admin. Es anterior a las llaves por usuario y sigue para el agente que ya la usa | No — sin ella los diez endpoints aceptan solo las llaves que cada usuario genera en Tu IA; si la pones, genérala igual que `CRON_SECRET` |
 | `RESEND_API_KEY` | Manda los códigos de ingreso y los avisos: la publicación que se quemó, la cuenta que se cayó y el resumen del día (ver «Avisos por correo») | Sí — sin ella nadie puede entrar al panel |
 | `PUBLISH_ALERT_TO` | Adónde va un aviso sin dueño con correo: un post o una cuenta de antes de los usuarios. Lo demás va al correo de su dueño | No — sin ella, lo que no tiene dueño no avisa; el calendario y Los Fierros lo siguen mostrando |
 | `PUBLISH_ALERT_FROM` | Remitente de los avisos | Opcional; default `onboarding@resend.dev`, que solo entrega al correo de la cuenta de Resend |
@@ -1180,8 +1180,8 @@ Tres correos, todos con el remitente `PUBLISH_ALERT_FROM` y al correo del dueño
   post: `social_accounts.caida_avisada_en` lo marca y se borra cuando el fierro vuelve a
   calentarse. Una cuenta que el dueño desconectó a propósito no avisa. El día que esto se
   despliega, cada cuenta que ya estaba caída manda el suyo una vez.
-- **El resumen del día**: lo que se quemó en las últimas 24 horas (con la cuenta en el modo
-  día, lo que «se echó a perder», como se llama ahí la sección), las cuentas por reconectar
+- **El resumen del día**: lo que se quemó en las últimas 24 horas y nadie archivó (con la
+  cuenta en el modo día, lo que «se echó a perder», como se llama ahí la sección), las cuentas por reconectar
   (frías o a menos de siete días de vencer) y las cuentas en uso —con algo programado en los
   últimos 30 días— que tienen menos de tres días programados hacia adelante. Sale después de
   la sincronización diaria (9:00 UTC), y solo los días en que hay algo que contar. Lo mismo
@@ -1190,7 +1190,7 @@ Tres correos, todos con el remitente `PUBLISH_ALERT_FROM` y al correo del dueño
 
 ### Guía para el editor de contenido
 
-`public/docs/api-editor.md` documenta los ocho endpoints en detalle, escrito para que un
+`public/docs/api-editor.md` documenta los diez endpoints en detalle, escrito para que un
 LLM que crea contenido lo lea entero y no necesite explicaciones: contratos, reglas
 por red, todas las frases de error y qué significa cada métrica. Se sirve tal cual en
 <https://tu-parrilla.cl/docs/api-editor.md>. No contiene secretos — la llave
@@ -1216,7 +1216,7 @@ página cita archivos que ya no existen.
 
 ### La llave de la API
 
-Los ocho endpoints de abajo piden el header `Authorization: Bearer <llave>`, y lo que
+Los diez endpoints de abajo piden el header `Authorization: Bearer <llave>`, y lo que
 hacen lo hacen a nombre del dueño de la llave: sus cuentas, sus posts, su zona. Valen dos
 clases de llave:
 
@@ -1333,13 +1333,15 @@ moverle la respuesta a quien ya la usa; la lógica, sin base, está en `src/lib/
 
 `GET /api/schedule/posts` con el mismo `Authorization`. Parámetros opcionales `desde`
 y `hasta` (`YYYY-MM-DD` en la zona horaria del dueño, la de Tu Cuenta; ambos inclusive; por defecto de hoy a 30
-días). Devuelve `{ desde, hasta, posts }` con lo programado cuya **hora de salida** cae
-en la ventana, salido o no: texto, `fecha` (ISO con offset), portada, media en orden,
+días), y `estado`, que deja solo los posts con algún destino en ese estado; con `estado` y sin
+fechas no hay ventana, así que `?estado=failed` es todo lo quemado. Devuelve
+`{ desde, hasta, posts }` con lo programado cuya **hora de salida** cae en la ventana, salido o
+no: texto, `fecha` (ISO con offset), portada, media en orden,
 `atributos`, la `ref` con que llegó por el lote (o `null`), y por cada destino su estado
 (`scheduled`, `publishing`, `published`, `failed`), el `externalId` si ya salió, los
 intentos, la frase de error del último intento fallido (también en un `scheduled` que espera
-reintentarse), `proximoIntento` (cuándo vuelve a probar uno que espera, o `null`), y
-`cuentaId`/`handle` de la cuenta. Los ids de todas las cuentas, también los de una recién
+reintentarse), `proximoIntento` (cuándo vuelve a probar uno que espera, o `null`),
+`cuentaId`/`handle` de la cuenta y `archivado`. Los ids de todas las cuentas, también los de una recién
 conectada que todavía no tiene nada programado, los lista `GET /api/schedule/cuentas` (ver
 «Cuentas por API»); en el panel están en el detalle de cada fila de **Los Fierros** (en
 Ajustes) —la flecha de la fila—, con un botón para copiarlo.
@@ -1352,12 +1354,21 @@ con `Ya se publicó (o está publicando): elimínalo en la red.`, porque borrar 
 despublica nada; si el id no existe (o no es del dueño), `404`; borrado, `200`. No hay
 edición por API: para cambiar algo se borra y se programa de nuevo.
 
+`POST /api/schedule/posts/{id}/archivar` archiva lo quemado sin borrarlo —con
+`{ "cuentaId": "…" }`, ese destino; sin cuerpo, todos los quemados del post—, y `…/desarchivar`
+lo devuelve. Un destino archivado sigue `failed` y con su error, pero ya no sale en «Se
+quemó» (panel y teléfono), en el resumen ni en el correo del día; el calendario lo sigue
+dibujando quemado, y el rearme («Reprogramar», «Subir ahora», el editor) lo desarchiva. La
+regla, la misma del botón «Archivar» del panel, vive en `archivarQuemados`
+(`src/lib/social/publish/archivar.ts`); solo se archiva lo quemado (`409` si no), y repetirlo
+no hace nada.
+
 ### Resumen por API
 
 `GET /api/schedule/resumen` con el mismo `Authorization` devuelve lo mismo que el resumen
 del día que llega por correo (ver «Avisos por correo»), calculado en el momento: `fallidos`
-(los destinos que se quemaron en las últimas `horas`, con su post, red, cuenta, motivo e
-intentos), `cuentas` (las que hay que reconectar: `fierro` `frio` o `enfriandose`, cuándo
+(los destinos que se quemaron en las últimas `horas` y nadie archivó, con su post, red,
+cuenta, motivo e intentos), `cuentas` (las que hay que reconectar: `fierro` `frio` o `enfriandose`, cuándo
 vence y el motivo) y `pista` (las cuentas en uso con menos de `dias` días programados: la
 hora de lo último que tienen por salir, o `null`, y los días completos que quedan).
 Parámetros opcionales: `dias`, entero de 1 a 30 (3 por defecto), y `horas`, entero de 1 a
@@ -1430,6 +1441,7 @@ src/
     metrics-consulta.ts    lo que comparten las rutas de /api/metrics: la llave, el rango, la red y la cuenta
     cuentas-api.ts         las cuentas de GET /api/schedule/cuentas: los dos ids y cómo está la conexión (sin base)
     media-api.ts           la clave de un archivo que sube un cliente de la API, en la carpeta de su dueño (sin base)
+    archivar-api.ts        el cuerpo y las respuestas de archivar y desarchivar lo quemado por API
     color-de-red.ts        el color de marca de cada red en La Parrilla, como clases de Tailwind escritas enteras
     piezas.ts              la pieza de una publicación: sus destinos programados unidos a lo publicado
     auth.ts                sesión del panel

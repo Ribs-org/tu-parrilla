@@ -115,6 +115,7 @@ teléfono](app-movil.md).
 | Programar un post o un video; subir varios por CSV | La Parrilla, botones «Nueva publicación» y «Subir CSV», o el «+» de un día del calendario ([la-parrilla.md](la-parrilla.md)) |
 | Retomar algo que dejó a medias; ver lo que escribió y no programó | La Parrilla, botón «Borradores (N)» ([la-parrilla.md](la-parrilla.md)); en el teléfono, La Parrilla → «Borradores (N)» ([app-movil.md](app-movil.md)) |
 | Cambiar o borrar algo programado; reprogramar lo que falló | La Parrilla, abriendo el post ([la-parrilla.md](la-parrilla.md)); lo que falló, también desde «Se quemó», arriba del calendario |
+| Sacar de «Se quemó» lo que ya no pide nada, sin borrarlo | «Archivar», en la fila de «Se quemó»; se desarchiva desde el editor del post ([la-parrilla.md](la-parrilla.md)) |
 | Una palabra clave que responde comentarios sola | Al programar el post, en La Parrilla; las respuestas se ven en La Mesa |
 | Saber cómo le fue en el período: views y seguidores ganados, visitas a su página | Los Números, el tablero ([los-numeros.md](los-numeros.md)) |
 | Ver vistas, likes, visitas y clics de cada publicación; cambiar su etiqueta `?s=` o copiar su link | Los Números → «Ver todas las publicaciones →», la pantalla «Tus publicaciones» ([los-numeros.md](los-numeros.md)) |
@@ -146,8 +147,11 @@ esto es lo que quiere decir:
   dice también en palabras: cruda = «Programada», sellada = «Saliendo ahora», a punto =
   «Publicada», quemada = «Falló».
 - **Se quemó / quemado:** falló al publicarse en alguna red. Lo que se quemó se ve en La
-  Parrilla, en la sección «Se quemó», arriba del calendario, con su motivo y el botón
-  «Reprogramar». En el modo día la sección se llama «Se echó a perder» (ver «El modo día»).
+  Parrilla, en la sección «Se quemó», arriba del calendario, con su motivo y los botones
+  «Reprogramar» y «Archivar». En el modo día la sección se llama «Se echó a perder» (ver «El
+  modo día»).
+- **Archivar:** sacar de «Se quemó» un destino quemado que ya no pide nada, sin borrarlo: sigue
+  quemado y con su motivo, pero no sale en «Se quemó» ni en el resumen del día.
 - **El calor de un día:** apagado (nada programado), prendido (uno o dos cortes) o lleno (tres
   o más). Apagado se ve como una parrilla fría: los fierros en gris ceniza y nada de brasa.
 - **Fierro:** una red conectada. Su fila en Los Fierros lleva una barra de color, el

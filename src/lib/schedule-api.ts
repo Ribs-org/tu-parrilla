@@ -2,6 +2,7 @@
 // module must stay importable by vitest (no server-only imports).
 import { isoInZone, parseRango } from '@/lib/metrics-api'
 import { addDays, dayKey } from '@/lib/schedule-week'
+import { TARGET_STATUSES, type TargetStatus } from '@/db/schema'
 import type { Atributos } from '@/lib/social/publish/atributos'
 import { enVuelo } from '@/lib/social/publish/publisher'
 
@@ -55,6 +56,18 @@ export function parseVentana(
   return { ...rango, desde: desdeKey, hasta: hastaKey }
 }
 
+export const ESTADO_ERROR = '«estado» tiene que ser scheduled, publishing, published o failed.'
+
+/**
+ * El filtro `estado` del calendario: solo los posts con algún destino en ese estado, con todos
+ * sus destinos. Sirve sobre todo para pedir lo quemado (`failed`) sin bajar el calendario
+ * entero; por eso, con `estado` y sin `desde` ni `hasta`, no hay ventana de fechas.
+ */
+export function parseEstado(valor: string | null): { estado: TargetStatus | null } | { error: string } {
+  if (valor === null || valor === '') return { estado: null }
+  return (TARGET_STATUSES as readonly string[]).includes(valor) ? { estado: valor as TargetStatus } : { error: ESTADO_ERROR }
+}
+
 export type FilaProgramada = {
   post: {
     id: string
@@ -72,6 +85,8 @@ export type FilaProgramada = {
     attemptCount: number
     reintentarDesde: Date | null
     accountId: string
+    // Cuándo se archivó, si se quemó y alguien lo archivó (`archivar.ts`); null si no.
+    archivadoEn?: Date | null
   }
   // De un `leftJoin` con `socialAccounts`: null si la cuenta ya no existe. El
   // identificador (`target.accountId`) sí sigue firme — es a la fila de destino a la
@@ -110,6 +125,9 @@ export type PostProgramadoApi = {
     // los pide en `cuentas`, y este es el único lugar público donde se pueden leer.
     cuentaId: string
     handle: string | null
+    // Un destino quemado que alguien archivó: sigue `failed` y con su error, pero ya no cuenta
+    // en el resumen ni en «Se quemó».
+    archivado: boolean
   }>
 }
 
@@ -154,6 +172,7 @@ export function armarProgramados(
         target.status === 'scheduled' && target.reintentarDesde ? isoInZone(target.reintentarDesde, zone) : null,
       cuentaId: target.accountId,
       handle,
+      archivado: Boolean(target.archivadoEn),
     })
     posts.set(post.id, entrada)
   }

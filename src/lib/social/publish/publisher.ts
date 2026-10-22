@@ -170,6 +170,9 @@ export function enVuelo(target: { reclamadoHasta?: Date | null }, now: Date): bo
  * primero a la red cómo terminó el anterior —si salió, se anota sin publicar otra vez; si el
  * contenedor ya no sirve, empieza de cero—. Tirarlo subía el video otra vez aunque la red ya
  * lo tuviera.
+ *
+ * Y deja de estar archivado: lo que vuelve a la parrilla puede quemarse otra vez, y entonces
+ * tiene que volver a pedir una acción en «Se quemó».
  */
 export const REARME = {
   status: 'scheduled',
@@ -177,6 +180,7 @@ export const REARME = {
   lastError: null,
   reintentarDesde: null,
   publicandoDesde: null,
+  archivadoEn: null,
 } as const
 
 /**

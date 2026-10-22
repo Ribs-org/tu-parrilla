@@ -820,9 +820,14 @@ Lo que hay en el calendario entre dos días, **por fecha de salida** y sin impor
 ya salió: programado, publicando, publicado o fallido. Úsalo antes de armar una tanda,
 para no pisar horas ni repetir temas, y después, para saber qué salió y qué falló.
 
-Parámetros, ambos opcionales, `YYYY-MM-DD` en la zona del dueño, **ambos inclusive**:
+Parámetros, todos opcionales. `desde` y `hasta` van en `YYYY-MM-DD`, en la zona del dueño, y
+son **ambos inclusive**:
 - `desde`: por defecto hoy.
 - `hasta`: por defecto 30 días después de `desde`.
+- `estado`: `scheduled`, `publishing`, `published` o `failed`. Trae solo los posts con algún
+  destino en ese estado, con todos sus destinos. **Con `estado` y sin `desde` ni `hasta` no hay
+  ventana**: `?estado=failed` es todo lo quemado, de cualquier día, sin bajar el calendario
+  entero. Otro valor: `400` con `«estado» tiene que ser scheduled, publishing, published o failed.`
 
 Un rango pasado vale (lista lo ya publicado). Formato inválido o rango invertido:
 `400` con `El rango de fechas no se entendió (usa YYYY-MM-DD).`
@@ -843,15 +848,17 @@ Un rango pasado vale (lista lo ya publicado). Formato inválido o rango invertid
       "atributos": { "hook": "pregunta-polemica", "tema": "retail" },
       "ref": "septiembre-fila-12",
       "redes": [
-        { "red": "instagram", "estado": "published", "error": null, "externalId": "18114074218999893", "intentos": 1, "proximoIntento": null, "cuentaId": "8f0a…", "handle": "@vicente" },
-        { "red": "youtube", "estado": "scheduled", "error": "No se pudo hablar con la red. Se reintentará.", "externalId": null, "intentos": 1, "proximoIntento": "2026-09-10T09:15:00-03:00", "cuentaId": "b21c…", "handle": null },
-        { "red": "tiktok", "estado": "failed", "error": "TikTok no acepta el archivo: revisa formato, tamaño o duración.", "externalId": null, "intentos": 3, "proximoIntento": null, "cuentaId": "9d4e…", "handle": "@vicente" }
+        { "red": "instagram", "estado": "published", "error": null, "externalId": "18114074218999893", "intentos": 1, "proximoIntento": null, "cuentaId": "8f0a…", "handle": "@vicente", "archivado": false },
+        { "red": "youtube", "estado": "scheduled", "error": "No se pudo hablar con la red. Se reintentará.", "externalId": null, "intentos": 1, "proximoIntento": "2026-09-10T09:15:00-03:00", "cuentaId": "b21c…", "handle": null, "archivado": false },
+        { "red": "tiktok", "estado": "failed", "error": "TikTok no acepta el archivo: revisa formato, tamaño o duración.", "externalId": null, "intentos": 3, "proximoIntento": null, "cuentaId": "9d4e…", "handle": "@vicente", "archivado": false }
       ]
     }
   ]
 }
 ```
 
+- **`desde`** y **`hasta`** son la ventana que se aplicó. Con `estado` y sin fechas vienen las
+  dos en `null`, y entonces viene también **`estado`**.
 - **`id`** es el `postId` que devolvió el lote al programar.
 - **`fecha`** es la hora de salida, ISO con el offset de la zona del dueño. Los posts vienen
   ordenados por ella.
@@ -880,7 +887,9 @@ Un rango pasado vale (lista lo ya publicado). Formato inválido o rango invertid
   **`cuentaId`** es el identificador de cuenta de ese destino — la fuente para el
   campo `cuentas` de la sección 1, cuando nombrar la red no alcanza — y **`handle`**
   es el de esa cuenta, o `null` si la cuenta ya no existe (el destino se conserva
-  igual, solo pierde el handle).
+  igual, solo pierde el handle). **`archivado`** es `true` en un destino quemado que se
+  archivó (sección 3d): sigue `failed` y con su `error`, pero ya no cuenta en el resumen ni en
+  «Se quemó». `false` en todo lo demás.
 
 Un post `published` en todas sus redes aparece en `/api/metrics/posts` desde la
 sincronización del día siguiente, con `atributos` idénticos: ese es el puente entre
@@ -925,10 +934,11 @@ Parámetros, ambos opcionales:
 }
 ```
 
-- **`fallidos`**: los destinos que se quemaron en las últimas `horas`, el más reciente
-  primero. `fecha` es la hora de salida del post; `error`, la misma frase de
+- **`fallidos`**: los destinos que se quemaron en las últimas `horas` y nadie archivó, el más
+  reciente primero. `fecha` es la hora de salida del post; `error`, la misma frase de
   `/api/schedule/posts`. Para reprogramarlo, el dueño tiene «Reprogramar» en su panel; por
-  API, se borra y se programa de nuevo.
+  API, se borra y se programa de nuevo. Lo que ya no pide nada —lo programaste aparte, o era
+  una prueba— se archiva (sección 3d) y deja de salir acá.
 - **`cuentas`**: las que hay que reconectar. `fierro` `frio` ya no publica (la conexión
   falló, venció, o el dueño quitó la app desde Facebook); `enfriandose` vence en menos de
   siete días, y `vence` dice cuándo (`null` en TikTok, YouTube y X, que se renuevan solas y
@@ -1001,6 +1011,44 @@ Fierros.
 
 ---
 
+# 3d. Archivar lo quemado — `POST /api/schedule/posts/{id}/archivar`
+
+```http
+POST /api/schedule/posts/3f2a…/archivar
+Authorization: Bearer <tu llave>
+Content-Type: application/json
+
+{ "cuentaId": "8f0a…" }
+```
+
+Saca un destino quemado de lo que pide atención **sin borrar el post**: deja de salir en
+`fallidos` del resumen (sección 3b), en «Se quemó» del panel y del teléfono, y en el correo del
+día. Se queda con su `error` y sus `intentos`, y en `GET /api/schedule/posts` sigue `failed`,
+con `archivado: true`. Es para lo quemado que ya no pide nada: lo volviste a programar aparte,
+o era una prueba. Borrar el post también lo saca, pero se lleva el error, que es la evidencia
+para reportar un fallo.
+
+- Con `cuentaId` (el de `GET /api/schedule/posts` o el de `GET /api/schedule/cuentas`),
+  archiva ese destino. Sin cuerpo, o sin `cuentaId`, archiva **todos** los quemados del post.
+- Solo se archiva lo quemado, y repetirlo no hace nada.
+- `POST /api/schedule/posts/{id}/desarchivar`, con el mismo cuerpo, lo devuelve a `fallidos` y
+  a «Se quemó».
+- Si el dueño lo reprograma desde su panel, deja de estar archivado: si se vuelve a quemar,
+  vuelve a pedir atención.
+- Para ver todo lo quemado, archivado o no: `GET /api/schedule/posts?estado=failed`
+  (sección 3), y en cada destino, `archivado`.
+
+| Respuesta | Cuándo |
+|---|---|
+| `200` `{ "ok": true, "id": "<id>", "archivados": <n> }` | Se archivó (`desarchivados` en `…/desarchivar`). `<n>` cuenta los destinos que cambiaron: `0` si ya estaban así, porque repetirlo no hace nada. |
+| `400` `{ "error": "El cuerpo no se entendió." }` | El cuerpo no es un objeto JSON, o `cuentaId` no es texto. |
+| `404` `{ "error": "Ese post no existe." }` | No hay un post con ese id para este dueño. No distingue «no existe» de «no es tuyo». |
+| `404` `{ "error": "Ese post no tiene un destino en esa cuenta." }` | Ese `cuentaId` no es destino de ese post. |
+| `409` `{ "error": "Ese post no tiene nada quemado." }` | Sin `cuentaId`, y ningún destino del post está quemado. |
+| `409` `{ "error": "Ese destino no está quemado: solo lo quemado se archiva o se desarchiva." }` | El destino de ese `cuentaId` está programado, publicando o publicado. |
+
+---
+
 # 4. El ciclo completo
 
 1. **Mira** `/api/schedule/cuentas` para saber a qué cuentas puedes programar,
@@ -1011,7 +1059,9 @@ Fierros.
    reintenta hasta tres intentos —quince minutos después del primero, dos horas después
    del segundo—; al tercer fallo el dueño recibe un correo y el post queda marcado en rojo
    en su calendario, y en `failed` en `/api/schedule/posts`. Si lo que falló es la conexión
-   de la cuenta, el correo es uno solo por cuenta, no uno por post.
+   de la cuenta, el correo es uno solo por cuenta, no uno por post. Cuando ya lo resolviste
+   —lo programaste de nuevo aparte—, archívalo (sección 3d), para que lo que quede en el
+   resumen sea justo lo que pide una decisión.
 4. La sincronización diaria trae **métricas reales**.
 5. **Lee** `/api/metrics/posts` sobre un rango con suficiente historia, o pide directo
    `/api/metrics/mejores` para ver lo mejor de cada cuenta y qué lo distingue.

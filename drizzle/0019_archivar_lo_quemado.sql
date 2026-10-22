@@ -1,0 +1,1 @@
+ALTER TABLE "scheduled_post_targets" ADD COLUMN "archivado_en" timestamp with time zone;

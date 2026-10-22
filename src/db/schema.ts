@@ -385,7 +385,9 @@ export const scheduledPosts = pgTable(
  *
  * `containerId` is Meta's async-processing handle: a video target parks in
  * 'publishing' holding it, and the next cron run asks Meta whether it finished.
- * `lastError` is always one of our fixed Spanish sentences — never upstream text.
+ * `lastError` is one of our Spanish sentences. Almost all are fixed; Instagram's rejections
+ * name the account and quote what Meta said (`rechazoDeInstagram` y compañía, en
+ * `social/publish/publisher.ts`), porque sin eso no se sabía qué hacer con el fallo.
  */
 export const scheduledPostTargets = pgTable(
   'scheduled_post_targets',
@@ -422,6 +424,12 @@ export const scheduledPostTargets = pgTable(
     // desde la hora del post. Una publicación vieja que se rearma entra a `publishing` hoy,
     // y medirla desde su hora la daba por vencida al primer sondeo. Nulo fuera de `publishing`.
     publicandoDesde: timestamp('publicando_desde', { withTimezone: true }),
+    // Cuándo se archivó un destino quemado: «Se quemó» (panel y teléfono), el resumen y el
+    // correo del día ya no lo cuentan. Sigue `failed` y con su error —archivar no cambia lo que
+    // pasó, solo deja de pedir una acción—, y el calendario lo sigue dibujando quemado. Solo
+    // un destino `failed` se archiva (`archivar.ts`); el rearme lo vuelve a nulo (`REARME`).
+    // No toca `updatedAt`, que es lo que comparan el reclamo del cron y las guardas del editor.
+    archivadoEn: timestamp('archivado_en', { withTimezone: true }),
     // precision 3 is load-bearing: the cron's optimistic claim and the editor's
     // guards compare this column by equality against a value that round-tripped
     // through a JS Date (millisecond precision). With Postgres's default

@@ -17,6 +17,7 @@ import { FUSION_FALLO, FUSION_NO_ES_TUYA, decidirFusion, pasosDeFusion } from '@
 import { BORRADO_YA_PUBLICADO } from '@/lib/schedule-api'
 import { borrarPostProgramado } from '@/lib/social/publish/borrar'
 import { DESTINO_NO_EXISTE, REPROGRAMAR_PASADO, reprogramarDestino } from '@/lib/social/publish/reprogramar'
+import { FRASE_DE_FALLA, archivarDestino } from '@/lib/social/publish/archivar'
 import { csvToBatchItems } from '@/lib/social/publish/csv'
 import {
   scheduleBatch,
@@ -1249,6 +1250,31 @@ export async function rescheduleTarget(targetId: string, localDatetime: string):
   // «Se quemó», arriba del calendario, muestra los mismos destinos con el mismo botón: sin
   // esto, la fila que se acaba de arreglar sigue pidiendo una acción que ya se hizo.
   revalidatePath('/admin/schedule')
+  return { ok: true }
+}
+
+/**
+ * «Archivar» un destino quemado: deja de salir en «Se quemó», en el resumen y en el correo del
+ * día, y se queda con su error y sus intentos. «Desarchivar» lo devuelve. La regla, la misma de
+ * `POST /api/schedule/posts/{id}/archivar`, vive en `archivarQuemados`.
+ */
+export async function archivarDestinoQuemado(targetId: string): Promise<FormState> {
+  return cambiarArchivo(targetId, true)
+}
+
+export async function desarchivarDestinoQuemado(targetId: string): Promise<FormState> {
+  return cambiarArchivo(targetId, false)
+}
+
+async function cambiarArchivo(targetId: string, archivar: boolean): Promise<FormState> {
+  const { id: ownerId } = await requireUser()
+  const resultado = await archivarDestino(ownerId, targetId, archivar)
+  if ('falla' in resultado) {
+    return { error: resultado.falla === 'no-existe' ? DESTINO_NO_EXISTE : FRASE_DE_FALLA[resultado.falla] }
+  }
+  // «Se quemó» vive arriba del calendario, y el editor del post muestra el mismo destino.
+  revalidatePath('/admin/schedule')
+  revalidatePath(`/admin/schedule/${resultado.postId}`)
   return { ok: true }
 }
 

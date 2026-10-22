@@ -176,13 +176,15 @@ describe('alcanzaElTiempo', () => {
 })
 
 describe('REARME', () => {
-  it('vuelve a la fila sin intentos, error ni espera, y no toca el contenedor', () => {
+  it('vuelve a la fila sin intentos, error ni espera, desarchivado, y no toca el contenedor', () => {
     expect(REARME).toEqual({
       status: 'scheduled',
       attemptCount: 0,
       lastError: null,
       reintentarDesde: null,
       publicandoDesde: null,
+      // Lo que vuelve a la parrilla puede quemarse otra vez, y entonces tiene que pedir una acción.
+      archivadoEn: null,
     })
     expect(REARME).not.toHaveProperty('containerId')
   })

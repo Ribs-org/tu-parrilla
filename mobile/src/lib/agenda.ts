@@ -60,10 +60,14 @@ export function diasDeLaAgenda(
 
 export type Quemado = { post: PostProgramado; destino: PostProgramado['redes'][number] }
 
-/** Cada destino que falló, del más reciente al más viejo: un corte que falló en dos redes son dos filas. */
+/**
+ * Cada destino que falló y nadie archivó, del más reciente al más viejo: un corte que falló en
+ * dos redes son dos filas. Lo archivado (en el panel o por la API) ya no pide una acción, como
+ * en «Se quemó» del panel.
+ */
 export function seQuemo(posts: PostProgramado[]): Quemado[] {
   return posts
-    .flatMap((post) => post.redes.filter((r) => r.estado === 'failed').map((destino) => ({ post, destino })))
+    .flatMap((post) => post.redes.filter((r) => r.estado === 'failed' && !r.archivado).map((destino) => ({ post, destino })))
     .sort((a, b) => b.post.cuando.localeCompare(a.post.cuando))
 }
 

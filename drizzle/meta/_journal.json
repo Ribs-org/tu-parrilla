@@ -134,6 +134,13 @@
       "when": 1792542851876,
       "tag": "0018_indices",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1792684630663,
+      "tag": "0019_archivar_lo_quemado",
+      "breakpoints": true
     }
   ]
 }

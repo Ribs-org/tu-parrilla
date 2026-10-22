@@ -8,7 +8,16 @@ export type PostProgramado = {
   // clave de React en La Parrilla. Con dos cuentas de una red, `red` ya
   // no es única dentro de un post — solo el destino lo es. `sello` es la marca de ese
   // destino en el corte; un servidor de antes no lo manda.
-  redes: { id: string; red: string; handle: string | null; estado: string; error?: string | null; sello?: Sello }[]
+  redes: {
+    id: string
+    red: string
+    handle: string | null
+    estado: string
+    error?: string | null
+    sello?: Sello
+    /** Un destino quemado que alguien archivó; un servidor de antes no lo manda y vale `false`. */
+    archivado?: boolean
+  }[]
   portada?: string | null
   miniatura?: string | null
   /** Qué corte se dibuja; un servidor de antes no lo manda y queda el bife. */

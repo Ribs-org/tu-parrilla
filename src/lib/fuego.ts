@@ -25,12 +25,13 @@ export type Corte = {
     externalId: string | null
     opciones: unknown
     lastError: string | null
+    archivadoEn?: Date | null
   }>
 }
 
 /**
- * Cada destino que se quemó, con su corte: es lo único de La Parrilla que pide una acción
- * sin que nadie la busque.
+ * Cada destino que se quemó y nadie archivó, con su corte: es lo único de La Parrilla que pide
+ * una acción sin que nadie la busque. Lo archivado ya no la pide (`archivar.ts`).
  *
  * Del más reciente al más viejo, y el orden es la información: esta lectura no tiene
  * ventana de fecha —un fallo viejo sigue pidiendo la acción hasta que alguien lo
@@ -39,7 +40,9 @@ export type Corte = {
  */
 export function quemados<T extends Corte>(cortes: T[]): Array<{ corte: T; destino: T['targets'][number] }> {
   return cortes
-    .flatMap((corte) => corte.targets.filter((t) => t.status === 'failed').map((destino) => ({ corte, destino })))
+    .flatMap((corte) =>
+      corte.targets.filter((t) => t.status === 'failed' && !t.archivadoEn).map((destino) => ({ corte, destino })),
+    )
     .sort((a, b) => b.corte.post.scheduledAt.getTime() - a.corte.post.scheduledAt.getTime())
 }
 
