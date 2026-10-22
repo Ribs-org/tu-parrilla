@@ -124,6 +124,7 @@ const { cuentasParaElTelefono } = await import('./borradores-movil')
 const { leerAjuste } = await import('./ajustes')
 const { listarLlaves, crearLlave } = await import('./llaves')
 const { leerResumen } = await import('./avisos/run')
+const { archivarQuemados, archivarDestino } = await import('./social/publish/archivar')
 const { makeDefault, updateProfile, deleteScheduledPost, guardarCuenta, guardarTema, revocarLlaveApi } = await import(
   '@/app/admin/actions'
 )
@@ -577,6 +578,27 @@ describe('aislamiento por dueño, escrituras (SQL generado, sin base)', () => {
     expect(sql.split(/\bwhere\b/i).pop()).toMatch(/"id"\s*=\s*\$/)
     expect(params).toContain(DUENO)
     expect(sql).not.toContain(DUENO)
+  })
+
+  it('social/publish/archivar: archivarQuemados ata su lectura y su UPDATE al dueño', async () => {
+    // Con un destino quemado sin archivar, la función sigue de la lectura a la escritura. La
+    // fila va como arreglo, en el orden de las columnas elegidas: así la entrega postgres-js
+    // cuando Drizzle mapea columnas (`values()`).
+    const consultas = await consultasEncadenadas(
+      () => archivarQuemados(DUENO, '6f1c2a54-9b1e-4c3d-8f00-0123456789ab', { archivar: true }),
+      [[['0d6e3b1a-2c4f-4b8e-9a7d-5f1e2d3c4b5a', 'a1', 'failed', null]]],
+    )
+    expect(consultas).toHaveLength(2)
+    expect(consultas[1]!.sql).toMatch(/^update "scheduled_post_targets"/i)
+    for (const c of consultas) esperarFiltradoPorDueno(c)
+  })
+
+  it('social/publish/archivar: archivarDestino busca el destino atado al dueño antes de seguir', async () => {
+    const consultas = await todasLasConsultas(() =>
+      archivarDestino(DUENO, '0d6e3b1a-2c4f-4b8e-9a7d-5f1e2d3c4b5a', true),
+    )
+    expect(consultas).toHaveLength(1)
+    esperarFiltradoPorDueno(consultas[0]!)
   })
 
   it('admin/actions: deleteScheduledPost ata su lectura y su DELETE al dueño', async () => {

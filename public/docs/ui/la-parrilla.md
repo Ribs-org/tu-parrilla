@@ -110,7 +110,8 @@ igual debajo de ella.
 
 En el modo día se llama «Se echó a perder»; lo demás es igual.
 
-Aparece solo si hay algo que falló, de cualquier fecha; si no falló nada, la sección no existe.
+Aparece solo si hay algo que falló y nadie archivó, de cualquier fecha; si no, la sección no
+existe.
 Parte plegada, en una sola línea: «Se quemó» en rojo, cuántas hay (por ejemplo «22»), los
 cortes quemados en chico —uno por cada uno, hasta cinco, y «+<N>» si hay más— y «Ver» con una
 flecha. Un clic en esa línea la abre (y la flecha pasa a «Ocultar»); otro la vuelve a
@@ -144,7 +145,12 @@ líneas:
   naranjo: **«Reconectar»** cuando la cuenta perdió la conexión (lleva a [Los
   Fierros](los-fierros.md)) o **«Cambiar el archivo»** cuando la red no acepta los archivos
   (abre el editor del post, en sus archivos). Al lado, siempre, **«Reprogramar»**, que abre la
-  misma ventana que el de la lista (ver «La ventana «Reprogramar»», más abajo).
+  misma ventana que el de la lista (ver «La ventana «Reprogramar»», más abajo), y
+  **«Archivar»** (mientras se guarda dice «Archivando…»), que saca la fila de «Se quemó» sin
+  borrar nada. Es para lo que ya no pide nada: lo programaste aparte, o era una prueba. El post
+  se queda con su motivo y el calendario lo sigue mostrando quemado; tampoco sale en el resumen
+  del día. Se desarchiva desde el editor del post (ver «El editor de un post»), y vuelve solo
+  si se reprograma y se quema de nuevo.
 
 ### El corte
 
@@ -670,8 +676,12 @@ estado en palabras («· Programado», «· Reintentando», «· Publicando…»
 bandeja de TikTok», «· Falló» o «· Su fierro está frío: reconéctala»). Si el destino reintenta
 o falló, debajo va el motivo, en ámbar o en rojo. Si falló, debajo del motivo van los mismos
 botones que en «Se quemó»: el arreglo cuando el motivo lo dice —**«Reconectar»**, que lleva a
-Los Fierros, o **«Cambiar el archivo»**, que baja a «Media» en este mismo editor— y
-**«Reprogramar»**. Si el fierro de su cuenta está frío, **«Reconectar»**. Al pie del
+Los Fierros, o **«Cambiar el archivo»**, que baja a «Media» en este mismo editor—,
+**«Reprogramar»** y **«Archivar»**. Si ya estaba archivado, debajo del motivo dice
+«Archivado: ya no sale en «Se quemó» ni en el resumen del día.» (de día, «Se echó a perder»), y
+en vez de «Archivar» va **«Desarchivar»** («Desarchivando…» mientras se guarda), que lo
+devuelve a «Se quemó». Es el único lugar del panel donde se ve lo archivado. Si el fierro de
+su cuenta está frío, **«Reconectar»**. Al pie del
 recuadro, según el caso:
 
 - «Hay una publicación en curso. Vuelve en un minuto.», en amarillo, si algún destino está
@@ -1088,7 +1098,8 @@ puede decir:
 | «El post ya no existe.» | Se borró antes | Recargar |
 | «Ya se publicó (o está publicando): elimínalo en la red.» | Se intentó eliminar algo que ya salió en alguna red, o que el publicador está subiendo en ese momento | Borrarlo en la red misma; para sacar solo las redes que no salieron, desmarcarlas en el editor. Si no había salido en ninguna, era el publicador subiéndolo: recargar en un minuto y ver cómo quedó |
 | «La hora debe estar en el futuro.» | En «Reprogramar», la hora ya pasó | Elegir una futura |
-| «Ese destino ya no existe.» | En «Reprogramar»: esa red del post, o el post entero, se borró mientras la ventana estaba abierta | Recargar |
+| «Ese destino ya no existe.» | En «Reprogramar» o en «Archivar»: esa red del post, o el post entero, se borró mientras la ventana estaba abierta | Recargar |
+| «Ese destino no está quemado: solo lo quemado se archiva o se desarchiva.» | En «Archivar» o «Desarchivar»: ese destino ya no está quemado (alguien lo reprogramó, o salió con «Subir ahora») | Recargar y ver cómo quedó |
 
 ### Editor
 
@@ -1372,6 +1383,7 @@ Lo que describe esta página sale de:
   - `src/app/admin/(dash)/schedule/se-quemo.tsx`, `src/app/admin/(dash)/schedule/lista-quemados.tsx` y `src/app/admin/(dash)/schedule/filtro-quemados.ts` («Se quemó»)
   - `src/app/admin/(dash)/schedule/queue.tsx`
   - `src/app/admin/(dash)/schedule/reprogramar.tsx`
+  - `src/app/admin/(dash)/schedule/archivar.tsx` (el botón «Archivar» / «Desarchivar»)
   - `src/app/admin/(dash)/schedule/revision-media.tsx`
   - `src/app/admin/(dash)/schedule/redes.tsx`
   - `src/app/admin/(dash)/schedule/regla-clave.tsx`
@@ -1419,6 +1431,7 @@ Lo que describe esta página sale de:
   - `src/lib/social/publish/edit.ts`
   - `src/lib/social/publish/borrar.ts`
   - `src/lib/social/publish/reprogramar.ts` (la regla de «Reprogramar», compartida con la app del teléfono)
+  - `src/lib/social/publish/archivar.ts` (la regla de «Archivar», compartida con la API)
   - `src/lib/social/publish/tiktok-creador.ts`
   - `src/lib/social/publish/publisher.ts` (las esperas entre intentos, `ESPERAS_TRAS_FALLO_MS`; el reclamo, `enVuelo`; el rearme, `REARME`; las frases de los motivos)
   - `src/lib/social/publish/run.ts`

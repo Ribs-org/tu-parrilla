@@ -14,7 +14,7 @@ la llave, qué significa un error que le salió—, la wiki de la interfaz está
 Esta guía nombra las pantallas como se ven de noche; en el modo día, La Parrilla es «La Barra»
 y Los Fierros, «Los Cuchillos» (la wiki las da todas, en «El modo día»).
 
-Tres endpoints de escritura: `POST /api/schedule/batch` programa, `DELETE /api/schedule/posts/{id}` saca lo programado (sección 3b), y `POST /api/media` sube un archivo una vez para nombrarlo en varias filas (sección 3e). Autenticación en todos los
+Cinco endpoints de escritura: `POST /api/schedule/batch` programa, `DELETE /api/schedule/posts/{id}` saca lo programado (sección 3b), `POST /api/schedule/posts/{id}/archivar` y `…/desarchivar` archivan lo quemado sin borrarlo (sección 3f), y `POST /api/media` sube un archivo una vez para nombrarlo en varias filas (sección 3e). Autenticación en todos los
 endpoints:
 
 ```
@@ -200,7 +200,8 @@ media y su regla—; no hay forma de sacar una sola cuenta de un post con varias
 | `409` `{ "error": "Ya se publicó (o está publicando): elimínalo en la red." }` | Algún destino ya salió o está saliendo, también uno que el publicador está intentando en ese momento. Borrar la fila no lo despublicaría, así que se rechaza en vez de mentir; se elimina desde la red. Si nada había salido todavía, en un minuto `GET /api/schedule/posts` dice cómo quedó. |
 
 Un post en `failed` (algún destino falló y agotó sus intentos) **sí** se puede borrar: nada
-salió. Un post con un destino publicado y otro programado **no**: el publicado manda. Los
+salió. Si solo quieres que deje de pedir atención, archívalo (sección 3f): borrar se lleva el
+error y los intentos. Un post con un destino publicado y otro programado **no**: el publicado manda. Los
 archivos que subió quedan en el almacén hasta el barrido de huérfanos, que pasa cada hora; no
 hay que hacer nada con ellos.
 
@@ -211,7 +212,7 @@ curl -s "https://tu-parrilla.cl/api/schedule/resumen" -H "Authorization: Bearer 
 ```
 
 Devuelve `{ generado, horas, dias, fallidos, cuentas, pista }`: los destinos que se quemaron en
-las últimas `horas` (con su `postId`, red, `cuentaId` y `error`), las cuentas que hay que
+las últimas `horas` y nadie archivó (con su `postId`, red, `cuentaId` y `error`), las cuentas que hay que
 reconectar (`fierro` `frio` ya no publica; `enfriandose` vence en menos de siete días, con
 `vence`) y las cuentas en uso con menos de `dias` días programados hacia adelante (`ultima`,
 la hora de lo último que tienen por salir o `null`, y `dias`). Es lo mismo que el resumen que
@@ -273,6 +274,36 @@ ese mismo dueño la usan sin bajarla.
 `video/quicktime`, `video/webm`; `bytes`, un número (`0` si no lo sabes), hasta 500 MB. Los
 rechazos son `400` con `{ error }`: `Ese tipo de archivo no se puede publicar.`,
 `El archivo supera los 500 MB.` o `El cuerpo no se entendió.`; sin llave válida, `401`.
+
+## 3f. Archivar lo quemado, sin borrarlo
+
+```bash
+curl -X POST https://tu-parrilla.cl/api/schedule/posts/<id>/archivar \
+  -H "Authorization: Bearer $LLAVE_PARRILLA" \
+  -H "Content-Type: application/json" \
+  -d '{ "cuentaId": "<cuentaId>" }'
+```
+
+Un destino quemado que ya no pide nada —lo programaste de nuevo aparte, o era una prueba— deja
+de salir en `fallidos` del resumen, en «Se quemó» del panel y del teléfono, y en el correo del
+día. No se borra: sigue `failed`, con su `error` y sus `intentos`, y en
+`GET /api/schedule/posts` trae `archivado: true`. Con `cuentaId`, ese destino; sin cuerpo,
+todos los quemados del post. Repetirlo no hace nada. `…/desarchivar`, con el mismo cuerpo, lo
+devuelve. Si el dueño lo reprograma desde su panel, deja de estar archivado solo.
+
+Para encontrar todo lo quemado sin bajar el calendario entero:
+`GET /api/schedule/posts?estado=failed`. Con `estado` y sin `desde` ni `hasta` no hay ventana
+de fechas; `estado` acepta `scheduled`, `publishing`, `published` y `failed`, y otro valor da
+`400` con `«estado» tiene que ser scheduled, publishing, published o failed.`
+
+| Respuesta | Cuándo |
+|---|---|
+| `200` `{ "ok": true, "id": "<id>", "archivados": <n> }` | Se archivó (`desarchivados` en `…/desarchivar`). `<n>` cuenta los destinos que cambiaron: `0` si ya estaban así, porque repetirlo no hace nada. |
+| `400` `{ "error": "El cuerpo no se entendió." }` | El cuerpo no es un objeto JSON, o `cuentaId` no es texto. |
+| `404` `{ "error": "Ese post no existe." }` | No hay un post con ese id para este dueño. No distingue «no existe» de «no es tuyo». |
+| `404` `{ "error": "Ese post no tiene un destino en esa cuenta." }` | Ese `cuentaId` no es destino de ese post. |
+| `409` `{ "error": "Ese post no tiene nada quemado." }` | Sin `cuentaId`, y ningún destino del post está quemado. |
+| `409` `{ "error": "Ese destino no está quemado: solo lo quemado se archiva o se desarchiva." }` | El destino de ese `cuentaId` está programado, publicando o publicado. |
 
 ## 4. Lo que esta API no hace
 

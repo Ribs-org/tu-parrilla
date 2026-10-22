@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { RANGO_ERROR } from './metrics-api'
-import { armarProgramados, impideBorrar, parseVentana } from './schedule-api'
+import { ESTADO_ERROR, armarProgramados, impideBorrar, parseEstado, parseVentana } from './schedule-api'
 
 const ZONE = 'America/Santiago'
 // 20 de junio de 2026, 11:00 en Chile (UTC-4 en invierno).
@@ -61,7 +61,7 @@ describe('armarProgramados', () => {
     },
     {
       post,
-      target: { network: 'x', status: 'failed', lastError: 'X aún no recibe video desde el calendario.', externalId: null, attemptCount: 3, accountId: 'acc-x', reintentarDesde: new Date('2026-06-21T23:00:00Z') },
+      target: { network: 'x', status: 'failed', lastError: 'X aún no recibe video desde el calendario.', externalId: null, attemptCount: 3, accountId: 'acc-x', reintentarDesde: new Date('2026-06-21T23:00:00Z'), archivadoEn: new Date('2026-06-22T10:00:00Z') },
       handle: null,
     },
     {
@@ -90,9 +90,10 @@ describe('armarProgramados', () => {
       atributos: { hook: 'pregunta' },
       ref: 'lote-7',
       redes: [
-        { red: 'instagram', estado: 'published', error: null, externalId: '18', intentos: 1, proximoIntento: null, cuentaId: 'acc-ig', handle: '@vicente' },
-        // Quemado: la hora de su último reintento ya no dice nada, aunque la fila la traiga.
-        { red: 'x', estado: 'failed', error: 'X aún no recibe video desde el calendario.', externalId: null, intentos: 3, proximoIntento: null, cuentaId: 'acc-x', handle: null },
+        { red: 'instagram', estado: 'published', error: null, externalId: '18', intentos: 1, proximoIntento: null, cuentaId: 'acc-ig', handle: '@vicente', archivado: false },
+        // Quemado y archivado: la hora de su último reintento ya no dice nada, aunque la fila la
+        // traiga, y el error se queda aunque esté archivado.
+        { red: 'x', estado: 'failed', error: 'X aún no recibe video desde el calendario.', externalId: null, intentos: 3, proximoIntento: null, cuentaId: 'acc-x', handle: null, archivado: true },
       ],
     })
   })
@@ -123,6 +124,22 @@ describe('armarProgramados', () => {
 
   it('respeta el orden de llegada de las filas: el query ya ordena por fecha', () => {
     expect(armarProgramados(filas, medias, ZONE).map((p) => p.id)).toEqual(['p1', 'p2'])
+  })
+})
+
+describe('parseEstado', () => {
+  it('sin estado no filtra', () => {
+    expect(parseEstado(null)).toEqual({ estado: null })
+    expect(parseEstado('')).toEqual({ estado: null })
+  })
+
+  it('acepta los cuatro estados de un destino, tal cual', () => {
+    for (const estado of ['scheduled', 'publishing', 'published', 'failed']) expect(parseEstado(estado)).toEqual({ estado })
+  })
+
+  it('cualquier otro es la frase fija', () => {
+    expect(parseEstado('quemado')).toEqual({ error: ESTADO_ERROR })
+    expect(parseEstado('FAILED')).toEqual({ error: ESTADO_ERROR })
   })
 })
 

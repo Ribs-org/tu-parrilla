@@ -4,7 +4,8 @@ import { Corte } from '@/components/corte'
 import { DeNocheYDeDia } from '@/components/de-noche-y-de-dia'
 import type { TargetStatus } from '@/db/schema'
 import { cn } from '@/lib/utils'
-import { FIERRO_FRIO } from '@/lib/vocabulario'
+import { FIERRO_FRIO, SE_QUEMO } from '@/lib/vocabulario'
+import { Archivar } from '../archivar'
 import { RECONECTAR_EN, arregloDe } from '../arreglo'
 import type { Dibujo } from '../dibujo'
 import { etiquetaDestino, motivoDestino, nombreDestino } from '../etiqueta'
@@ -20,6 +21,7 @@ type Destino = {
   lastError: string | null
   opciones: unknown
   externalId: string | null
+  archivadoEn: Date | null
 }
 
 /** El color del estado en palabras, por la marca del destino. */
@@ -34,8 +36,10 @@ const CLASE_ESTADO: Record<string, string> = {
 /**
  * Cómo va el post en cada red, arriba del editor: su corte con todas las marcas y, al lado, una
  * línea por destino con su chip, su estado en palabras, el motivo si falló o reintenta, y lo
- * que se puede hacer —el arreglo exacto cuando lo hay (`arregloDe`) y «Reprogramar» si se
- * quemó, o «Reconectar» si su fierro está frío—.
+ * que se puede hacer —el arreglo exacto cuando lo hay (`arregloDe`), «Reprogramar» y
+ * «Archivar» si se quemó, o «Reconectar» si su fierro está frío—. Un quemado archivado lo
+ * dice, y se desarchiva acá: es el único lugar del panel donde se ve, porque «Se quemó» ya no
+ * lo muestra.
  *
  * Antes el editor solo decía «Ya publicado en …» en verde: de un post que salió en Instagram y
  * se quemó en TikTok contaba lo que salió y callaba lo que falló, y había que volver al
@@ -68,6 +72,12 @@ export function DestinosDelPost({ dibujo, destinos }: { dibujo: Dibujo; destinos
                 {motivo ? (
                   <p className={cn('mt-0.5 text-[0.8rem]', d.status === 'failed' ? 'text-negative' : 'text-caution')}>{motivo}</p>
                 ) : null}
+                {d.status === 'failed' && d.archivadoEn ? (
+                  <p className="mt-0.5 text-[0.8rem] text-fg-muted">
+                    Archivado: ya no sale en «<DeNocheYDeDia noche={SE_QUEMO.noche} dia={SE_QUEMO.dia} />» ni en el
+                    resumen del día.
+                  </p>
+                ) : null}
                 {d.status === 'failed' || sello === 'frio' ? (
                   <div className="mt-1.5 flex flex-wrap items-center gap-2">
                     {arreglo ? (
@@ -80,7 +90,10 @@ export function DestinosDelPost({ dibujo, destinos }: { dibujo: Dibujo; destinos
                       </Link>
                     ) : null}
                     {d.status === 'failed' ? (
-                      <Reprogramar targetId={d.id} titulo={nombreDestino(d)} className={BOTON_CHICO_SECUNDARIO} />
+                      <>
+                        <Reprogramar targetId={d.id} titulo={nombreDestino(d)} className={BOTON_CHICO_SECUNDARIO} />
+                        <Archivar targetId={d.id} archivado={Boolean(d.archivadoEn)} className={BOTON_CHICO_SECUNDARIO} />
+                      </>
                     ) : null}
                   </div>
                 ) : null}

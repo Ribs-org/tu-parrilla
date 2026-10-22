@@ -35,6 +35,7 @@ function destino(id: string, accountId: string, network: string, status = 'sched
     opciones: null,
     reclamadoHasta: null,
     publicandoDesde: null,
+    archivadoEn: null,
     updatedAt: new Date(),
     handle: null,
   }

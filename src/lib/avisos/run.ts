@@ -156,6 +156,8 @@ export async function leerResumen(
       and(
         eq(scheduledPosts.ownerId, ownerId),
         eq(scheduledPostTargets.status, 'failed'),
+        // Lo archivado ya no pide nada (`archivar.ts`): ni en el correo ni en la API.
+        isNull(scheduledPostTargets.archivadoEn),
         gte(scheduledPostTargets.updatedAt, desdeFallidos),
       ),
     )

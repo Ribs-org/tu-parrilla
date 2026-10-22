@@ -1,5 +1,5 @@
 import 'server-only'
-import { and, asc, eq, exists, gte, inArray, lt, type SQL } from 'drizzle-orm'
+import { and, asc, eq, exists, gte, inArray, isNull, lt, type SQL } from 'drizzle-orm'
 import {
   enIds,
   getDb,
@@ -87,15 +87,22 @@ export function cortesEntre(ownerId: string, desde: Date, hasta: Date): Promise<
 }
 
 /**
- * Los cortes con algún destino quemado, de cuando sean, con todos sus destinos: es lo que
- * «Se quemó» muestra (`quemados`, en `lib/fuego.ts`), y esa lista no tiene ventana de fecha.
+ * Los cortes con algún destino quemado y sin archivar, de cuando sean, con todos sus destinos:
+ * es lo que «Se quemó» muestra (`quemados`, en `lib/fuego.ts`), y esa lista no tiene ventana de
+ * fecha. Lo archivado ya no pide una acción (`archivar.ts`).
  */
 export function cortesQuemados(ownerId: string): Promise<CorteCargado[]> {
   const conAlgunoQuemado = exists(
     getDb()
       .select({ id: scheduledPostTargets.id })
       .from(scheduledPostTargets)
-      .where(and(eq(scheduledPostTargets.postId, scheduledPosts.id), eq(scheduledPostTargets.status, 'failed'))),
+      .where(
+        and(
+          eq(scheduledPostTargets.postId, scheduledPosts.id),
+          eq(scheduledPostTargets.status, 'failed'),
+          isNull(scheduledPostTargets.archivadoEn),
+        ),
+      ),
   )
   return cargar(ownerId, [conAlgunoQuemado])
 }

@@ -3,6 +3,7 @@ import { BOTON_CHICO, BOTON_CHICO_SECUNDARIO } from '@/components/boton'
 import { Corte } from '@/components/corte'
 import { horaConDia } from '@/lib/fuego'
 import type { CorteCargado } from '@/lib/social/publish/cortes'
+import { Archivar } from './archivar'
 import { arregloDe } from './arreglo'
 import { dibujoDe } from './dibujo'
 import { nombreDestino } from './etiqueta'
@@ -14,8 +15,9 @@ import { Reprogramar } from './reprogramar'
  * Lo que se quemó, arriba del calendario: es lo único de La Parrilla que pide una acción
  * sin que nadie la busque. Una fila por destino que falló, del más reciente al más viejo,
  * con el corte en chico —cuál de sus marcas se quemó—, su motivo y, pegados al motivo, el
- * arreglo exacto cuando lo hay («Reconectar», «Cambiar el archivo»; ver `arregloDe`) y
- * «Reprogramar». Sin nada quemado la sección no existe: un «no se quemó nada» sería una fila
+ * arreglo exacto cuando lo hay («Reconectar», «Cambiar el archivo»; ver `arregloDe`),
+ * «Reprogramar» y «Archivar», para lo que ya no pide nada: se volvió a programar aparte, o era
+ * una prueba. Sin nada quemado la sección no existe: un «no se quemó nada» sería una fila
  * que hay que leer todos los días para enterarse de que no pasa nada.
  *
  * Esta lista no tiene ventana de fecha, así que puede crecer: parte plegada en una línea —con
@@ -71,8 +73,8 @@ export function SeQuemo({
                       {corte.post.caption || '(sin texto)'}
                     </Link>
                   </div>
-                  {/* El motivo, una de nuestras frases fijas —`lastError` nunca trae texto de la
-                      red; ver `scheduledPostTargets` en `db/schema.ts`—. */}
+                  {/* El motivo, con nuestras palabras —y, en un rechazo de Instagram, también las
+                      de Meta; ver `scheduledPostTargets` en `db/schema.ts`—. */}
                   {destino.lastError ? (
                     <p className="mt-0.5 line-clamp-2 text-[0.75rem] text-negative">{destino.lastError}</p>
                   ) : null}
@@ -83,6 +85,7 @@ export function SeQuemo({
                       </Link>
                     ) : null}
                     <Reprogramar targetId={destino.id} titulo={nombreDestino(destino)} className={BOTON_CHICO_SECUNDARIO} />
+                    <Archivar targetId={destino.id} className={BOTON_CHICO_SECUNDARIO} />
                   </div>
                 </div>
               </li>

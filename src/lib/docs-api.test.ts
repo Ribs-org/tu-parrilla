@@ -23,7 +23,8 @@ import {
   DIAS_ERROR,
   HORAS_ERROR,
 } from './avisos/reglas'
-import { BORRADO_YA_PUBLICADO } from './schedule-api'
+import { BORRADO_YA_PUBLICADO, ESTADO_ERROR } from './schedule-api'
+import { FRASE_DE_FALLA } from './social/publish/archivar'
 import { TRIAL_REEL_MEDIA } from './social/publish/opciones'
 import { LADO_ERROR, METRICA_ERROR, PERCENTIL_ERROR, RECIENTES_ERROR } from './mejores'
 import { RANGO_ERROR, cuentaAmbigua, cuentaDesconocida } from './metrics-api'
@@ -57,7 +58,7 @@ describe('la documentación para LLM no le miente al código', () => {
   it('las frases de la ref, del resumen y del tope de Instagram son las del código, en las dos guías', () => {
     for (const archivo of ['public/docs/api-llm.md', 'public/docs/api-editor.md']) {
       const guia = readFileSync(archivo, 'utf8')
-      for (const frase of [REF_ERROR, DIAS_ERROR, HORAS_ERROR, TOPE_INSTAGRAM]) {
+      for (const frase of [REF_ERROR, DIAS_ERROR, HORAS_ERROR, TOPE_INSTAGRAM, ESTADO_ERROR, ...Object.values(FRASE_DE_FALLA)]) {
         expect(guia, `${archivo}: ${frase}`).toContain(frase)
       }
     }

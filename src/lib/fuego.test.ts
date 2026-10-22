@@ -50,6 +50,12 @@ describe('quemados', () => {
     // Entran en el orden en que los da la base, que es ascendente por hora.
     expect(quemados([viejo, medio, hoy]).map((q) => q.corte.post.id)).toEqual(['h', 'm', 'v'])
   })
+
+  it('lo archivado no sale: ya no pide una acción, aunque siga quemado', () => {
+    const archivado = { ...destino('failed', 'Falló.'), id: 't-archivado', archivadoEn: new Date('2026-09-29T12:00:00Z') }
+    const c = corte('a', '2026-09-28T12:00:00Z', [destino('failed', 'Falló.'), archivado])
+    expect(quemados([c]).map((q) => q.destino.id)).toEqual(['t-failed'])
+  })
 })
 
 describe('pieDeAyer', () => {
