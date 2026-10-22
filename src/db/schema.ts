@@ -1,4 +1,5 @@
 import {
+  bigint,
   boolean,
   date,
   doublePrecision,
@@ -6,10 +7,12 @@ import {
   integer,
   jsonb,
   pgTable,
+  real,
   text,
   timestamp,
   unique,
   uuid,
+  type AnyPgColumn,
 } from 'drizzle-orm/pg-core'
 
 export const ROLES = ['admin', 'usuario'] as const
@@ -36,6 +39,12 @@ export const users = pgTable('users', {
   sesionVersion: integer('sesion_version').notNull().default(1),
   invitadoEn: timestamp('invitado_en', { withTimezone: true }).notNull().defaultNow(),
   primerIngresoEn: timestamp('primer_ingreso_en', { withTimezone: true }),
+  /**
+   * Desde cuándo tiene La Cocina, el chef de la casa
+   * (`docs/superpowers/specs/2026-10-22-la-cocina-design.md`). Nulo es que no la tiene: el chef no
+   * ve sus comandas y el panel no le ofrece pedir. En el piloto la enciende el admin.
+   */
+  cocinaDesde: timestamp('cocina_desde', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 }).enableRLS()
@@ -729,6 +738,230 @@ export const solicitudesBorrado = pgTable('solicitudes_borrado', {
   creadoEn: timestamp('creado_en', { withTimezone: true }).notNull().defaultNow(),
 }).enableRLS()
 
+// --- La Cocina ----------------------------------------------------------------------------
+// El diseño, con el porqué de cada tabla, está en
+// `docs/superpowers/specs/2026-10-22-la-cocina-design.md`, «Lo que se guarda». La API con la que
+// el chef las lee y las escribe, en `docs/cocina-api.md`.
+
+export const ESTADOS_COMANDA = [
+  'recibida',
+  'revisando',
+  'en_preparacion',
+  'probando',
+  'pregunta',
+  'en_el_horno',
+  'sirviendo',
+  'lista',
+  'servida',
+  'rechazada',
+  'cancelada',
+  'fallida',
+] as const
+export type EstadoComanda = (typeof ESTADOS_COMANDA)[number]
+
+export const TIPOS_COMANDA = ['tanda', 'prueba', 'reestilo'] as const
+export type TipoComanda = (typeof TIPOS_COMANDA)[number]
+
+/** El plato principal y sus acompañamientos: cada tipo entra al chef por un camino distinto. */
+export const TIPOS_INSUMO = ['principal', 'camara', 'pantalla', 'imagen'] as const
+export type TipoInsumo = (typeof TIPOS_INSUMO)[number]
+
+/** `subiendo` mientras el chef sube sus archivos; `mesa` está en el mesón, por revisar. */
+export const ESTADOS_CREATIVO = ['subiendo', 'mesa', 'programado', 'descartado'] as const
+export type EstadoCreativo = (typeof ESTADOS_CREATIVO)[number]
+
+/**
+ * La marca de un usuario, la que el chef usa para vestir lo que cocina. En la fase 0 es la
+ * básica —nombre, @, el color de acento y el texto del llamado final—; las letras, el logo y la
+ * música entran con «Tu marca», en la fase 2. Una por usuario por ahora, aunque la tabla permite
+ * varias (una agencia).
+ */
+export const marcas = pgTable(
+  'marcas',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    ownerId: uuid('owner_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    nombre: text('nombre').notNull(),
+    handle: text('handle'),
+    acento: text('acento'),
+    ctaTexto: text('cta_texto'),
+    creadaEn: timestamp('creada_en', { withTimezone: true }).notNull().defaultNow(),
+    actualizadaEn: timestamp('actualizada_en', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('marcas_owner_idx').on(t.ownerId)],
+).enableRLS()
+
+/**
+ * Un encargo al chef. `receta` es lo que se congeló al crearla —la marca y lo que se pidió—, y no
+ * cambia aunque el usuario cambie su marca después: lo que está en el horno no cambia. `ref` evita
+ * duplicarla si el formulario se manda dos veces. `minutos` es lo que consume del cupo (el plato
+ * principal); el cupo todavía no tiene tope. Los estados y quién mueve cada uno están en
+ * `src/lib/cocina/estados.ts`.
+ */
+export const comandas = pgTable(
+  'comandas',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    ownerId: uuid('owner_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    marcaId: uuid('marca_id').references(() => marcas.id, { onDelete: 'set null' }),
+    ref: text('ref').notNull(),
+    tipo: text('tipo').$type<TipoComanda>().notNull().default('tanda'),
+    // La comanda servida cuyo material reusa un `reestilo`.
+    origenId: uuid('origen_id').references((): AnyPgColumn => comandas.id, { onDelete: 'set null' }),
+    estado: text('estado').$type<EstadoComanda>().notNull().default('recibida'),
+    pedido: jsonb('pedido').$type<Record<string, unknown>>().notNull(),
+    receta: jsonb('receta').$type<Record<string, unknown>>().notNull(),
+    minutos: integer('minutos').notNull().default(0),
+    // La hora estimada de entrega que dio el chef en su último cambio, y lo que dijo.
+    eta: timestamp('eta', { withTimezone: true }),
+    mensaje: text('mensaje'),
+    // Por qué se rechazó o falló, en palabras para el usuario.
+    motivo: text('motivo'),
+    // El «3 de 5»: las tandas que ya están en el mesón, y cuántas son (nulo si no se sabe).
+    tandasServidas: integer('tandas_servidas').notNull().default(0),
+    tandasTotal: integer('tandas_total'),
+    // Quién la tomó, del lado del chef, y cuándo.
+    tomadaPor: text('tomada_por'),
+    tomadaEn: timestamp('tomada_en', { withTimezone: true }),
+    listaEn: timestamp('lista_en', { withTimezone: true }),
+    servidaEn: timestamp('servida_en', { withTimezone: true }),
+    creadaEn: timestamp('creada_en', { withTimezone: true }).notNull().defaultNow(),
+    actualizadaEn: timestamp('actualizada_en', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    unique('comandas_owner_ref_key').on(t.ownerId, t.ref),
+    index('comandas_owner_idx').on(t.ownerId, t.creadaEn),
+    index('comandas_estado_idx').on(t.estado),
+  ],
+).enableRLS()
+
+/** La línea de tiempo de una comanda: cada cambio, con lo que dijo el chef y su hora estimada. */
+export const comandaEventos = pgTable(
+  'comanda_eventos',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    comandaId: uuid('comanda_id')
+      .notNull()
+      .references(() => comandas.id, { onDelete: 'cascade' }),
+    estado: text('estado').$type<EstadoComanda>().notNull(),
+    mensaje: text('mensaje'),
+    eta: timestamp('eta', { withTimezone: true }),
+    creadoEn: timestamp('creado_en', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('comanda_eventos_comanda_idx').on(t.comandaId, t.creadoEn)],
+).enableRLS()
+
+/**
+ * Un archivo que el usuario le lleva al chef: el plato principal o un acompañamiento. Vive en el
+ * almacén (`cocina/<dueño>/…`) y se borra a los 14 días de terminada la comanda (`expiraEn`,
+ * `borradoEn`). `derechosEn` es cuándo el usuario declaró que tiene los derechos de lo que sube.
+ * Sin comanda mientras el formulario no se manda: una subida abandonada se barre.
+ */
+export const insumos = pgTable(
+  'insumos',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    ownerId: uuid('owner_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    comandaId: uuid('comanda_id').references(() => comandas.id, { onDelete: 'cascade' }),
+    tipo: text('tipo').$type<TipoInsumo>().notNull(),
+    // Del plato principal: un largo, un podcast en videollamada o tomas sueltas.
+    subtipo: text('subtipo'),
+    nombre: text('nombre').notNull(),
+    url: text('url').notNull(),
+    bytes: bigint('bytes', { mode: 'number' }).notNull(),
+    duracionS: real('duracion_s'),
+    tipoArchivo: text('tipo_archivo').notNull(),
+    derechosEn: timestamp('derechos_en', { withTimezone: true }).notNull(),
+    expiraEn: timestamp('expira_en', { withTimezone: true }),
+    borradoEn: timestamp('borrado_en', { withTimezone: true }),
+    creadoEn: timestamp('creado_en', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('insumos_owner_idx').on(t.ownerId), index('insumos_comanda_idx').on(t.comandaId)],
+).enableRLS()
+
+/**
+ * Lo que el chef entrega: un video, un carrusel o una imagen, con sus textos, su pieza y su estilo,
+ * listo para programar. Vive en el mesón (de día, la vitrina) hasta que se programa o se descarta;
+ * lo que nadie programó se borra a los 30 días (`expiraEn`). Sus archivos van en la carpeta del
+ * dueño (`scheduled/<dueño>/cocina/…`), así que programarlo no los vuelve a bajar. `ref` evita
+ * duplicarlo si el chef lo reenvía.
+ */
+export const creativos = pgTable(
+  'creativos',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    ownerId: uuid('owner_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    comandaId: uuid('comanda_id')
+      .notNull()
+      .references(() => comandas.id, { onDelete: 'cascade' }),
+    marcaId: uuid('marca_id').references(() => marcas.id, { onDelete: 'set null' }),
+    ref: text('ref').notNull(),
+    // La idea: varios creativos son la misma pieza en estilos distintos, y el mesón los junta.
+    pieza: text('pieza'),
+    tanda: text('tanda'),
+    tipo: text('tipo').$type<'video' | 'carrusel' | 'imagen'>().notNull(),
+    portadaUrl: text('portada_url'),
+    texto: text('texto').notNull().default(''),
+    // En YouTube la primera línea es el título: el chef lo escribe aparte, de hasta 100 caracteres.
+    tituloYoutube: text('titulo_youtube'),
+    estilo: text('estilo'),
+    atributos: jsonb('atributos'),
+    duracionS: real('duracion_s'),
+    estado: text('estado').$type<EstadoCreativo>().notNull().default('subiendo'),
+    descarteMotivo: text('descarte_motivo'),
+    descarteNota: text('descarte_nota'),
+    postId: uuid('post_id').references(() => scheduledPosts.id, { onDelete: 'set null' }),
+    expiraEn: timestamp('expira_en', { withTimezone: true }),
+    creadoEn: timestamp('creado_en', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    unique('creativos_comanda_ref_key').on(t.comandaId, t.ref),
+    index('creativos_owner_idx').on(t.ownerId, t.estado),
+  ],
+).enableRLS()
+
+/**
+ * Los archivos de un creativo: el video o las láminas de un carrusel, en su orden (`rol` `media`), y
+ * su portada (`rol` `portada`). La portada va también acá para que se verifique al cerrar el
+ * creativo y para que el barrido de huérfanos la cuide como a los demás.
+ */
+export const creativoMedia = pgTable(
+  'creativo_media',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    creativoId: uuid('creativo_id')
+      .notNull()
+      .references(() => creativos.id, { onDelete: 'cascade' }),
+    url: text('url').notNull(),
+    mediaType: text('media_type').$type<'image' | 'video'>().notNull(),
+    rol: text('rol').$type<'media' | 'portada'>().notNull().default('media'),
+    nombre: text('nombre').notNull(),
+    tipoArchivo: text('tipo_archivo').notNull(),
+    bytes: bigint('bytes', { mode: 'number' }).notNull(),
+    position: integer('position').notNull(),
+  },
+  (t) => [index('creativo_media_creativo_idx').on(t.creativoId)],
+).enableRLS()
+
+/**
+ * El último latido de cada trabajador del chef: si pasan diez minutos sin uno, el panel dice que
+ * la cocina está cerrada por ahora. `datos` es lo que el chef cuenta de sí (cuántos trabajos
+ * tiene, cuánto tarda una comanda en promedio, su versión).
+ */
+export const latidos = pgTable('latidos', {
+  trabajador: text('trabajador').primaryKey(),
+  en: timestamp('en', { withTimezone: true }).notNull(),
+  datos: jsonb('datos').$type<Record<string, unknown>>(),
+}).enableRLS()
+
 export type Profile = typeof profiles.$inferSelect
 export type Link = typeof links.$inferSelect
 export type Visit = typeof visits.$inferSelect
@@ -750,3 +983,9 @@ export type CodigoIngreso = typeof codigosIngreso.$inferSelect
 export type LlaveApi = typeof llavesApi.$inferSelect
 export type Borrador = typeof borradores.$inferSelect
 export type BorradorMedia = typeof borradorMedia.$inferSelect
+export type Marca = typeof marcas.$inferSelect
+export type Comanda = typeof comandas.$inferSelect
+export type ComandaEvento = typeof comandaEventos.$inferSelect
+export type Insumo = typeof insumos.$inferSelect
+export type Creativo = typeof creativos.$inferSelect
+export type CreativoMedia = typeof creativoMedia.$inferSelect

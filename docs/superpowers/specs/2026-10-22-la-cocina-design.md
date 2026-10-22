@@ -1,7 +1,8 @@
 # La Cocina: la fábrica de creativos del chef, dentro de Tu Parrilla
 
-Fecha: 2026-10-22. **Diseño. Implementado solo lo de «Antes»**: qué cuenta acepta trial reels
-(2026-10-22). Reemplaza y amplía «El chef de la casa»
+Fecha: 2026-10-22. **Diseño. Implementado** lo de «Antes» (qué cuenta acepta trial reels) y la
+base de la fase 0: las tablas y la API del chef, cuyo contrato está en `docs/cocina-api.md`. Todavía
+nada que vea el usuario. Reemplaza y amplía «El chef de la casa»
 (`2026-10-19-chef-de-la-casa-design.md`), que ya decía para qué sirve el chef y cómo se dibuja;
 esto dice cómo se pide, cómo se sigue y qué se entrega, y fija el contrato entre Tu Parrilla y
 el chef. Lo pidió el dueño el 2026-10-22, y los nueve puntos del líder de creación de contenido
@@ -484,6 +485,9 @@ las rutas de `/api/cocina/…`:
 - no programa ni borra nada.
 
 Los archivos se mueven con enlaces firmados que vencen en una hora y nombran un solo objeto.
+
+El contrato de lo que ya existe, con cada respuesta y cada frase de error, está en
+`docs/cocina-api.md`, y se completa con cada fase.
 
 ### Las operaciones
 

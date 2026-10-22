@@ -20,6 +20,7 @@ tus números.
 | `/api/social/meta/baja` | `POST` de Meta cuando alguien quita la app desde Facebook: deja sin credencial sus cuentas de Instagram y Facebook |
 | `/api/social/meta/borrado` | `POST` de Meta cuando alguien pide borrar sus datos: borra lo que vino de esas dos redes y devuelve el código de estado |
 | `/api/schedule/…`, `/api/metrics/…` | La API para tu agente, con una llave de Tu IA: cargar, ver y sacar lo programado, archivar lo quemado, las cuentas y los números (ver «Carga masiva por API» y las secciones que le siguen) |
+| `/api/cocina/…` | La API de La Cocina, con `COCINA_SECRET`: el servidor del chef toma las comandas, baja sus insumos, informa cada estado y entrega lo cocinado al mesón del dueño (ver «La Cocina» y `docs/cocina-api.md`) |
 | `/api/media` | `POST` con la misma llave: firma la subida de un archivo directo a R2, para nombrarlo después en varias filas del lote sin que se vuelva a bajar (ver «Carga masiva por API») |
 | `/api/mobile/…` | La API de la app del teléfono, con el token de su sesión (ver `mobile/README.md`) |
 | `/api/cron/…` | Las corridas programadas: la publicación y la sincronización. Solo con `CRON_SECRET` |
@@ -323,23 +324,30 @@ Los dos perfiles de ejemplo están para que los edites, no para que los borres y
 de cero.
 
 Cada fila de cada tabla (perfiles, cuentas, posts, borradores, comentarios, ajustes, llaves
-de API) tiene dueño: el panel solo te muestra lo tuyo, nunca lo de otro usuario invitado. Lo mismo
+de API, y las marcas, comandas, insumos y creativos de La Cocina) tiene dueño: el panel solo te muestra lo tuyo, nunca lo de otro usuario invitado. Lo mismo
 la API: lo que entra con una llave es del dueño de la llave, y un agente con la tuya no ve
 ni toca lo de nadie más. Tu fila de usuario —el nombre, la zona y el modo del panel— la
 cambias solo tú: Tu Cuenta, el botón del modo y la app del teléfono escriben la fila de la
 sesión o del token, nunca una que llegue en la petición. Los crons (sync,
 publicación, comentarios) siguen recorriendo *todo* el despliegue sin filtrar por
-dueño — un cron por inquilino es otro subproyecto, no esta entrega. La llave del despliegue
+dueño — un cron por inquilino es otro subproyecto, no esta entrega. La credencial de La
+Cocina (`COCINA_SECRET`) también cruza dueños, pero solo los que tienen la cocina encendida, y
+de ellos solo sus comandas, sus insumos y sus creativos: el servidor del chef no ve posts,
+cuentas ni números de nadie (ver «La Cocina»). La llave del despliegue
 (`SCHEDULE_API_KEY`) y la raíz pública (`/`) siguen siendo del admin. Y hasta la entrega
 3, dos usuarios todavía no pueden conectar la misma cuenta de la misma red: quien llega
 segundo recibe un aviso, no la cuenta de otro. Eso es entre dos usuarios distintos: un
 mismo dueño sí puede conectar varias cuentas suyas de la misma red y elegir a cuáles sale
 cada publicación — ver «Varias cuentas de una misma red», más abajo.
 
-La única tabla sin dueño es `solicitudes_borrado`, donde queda constancia de cada borrado
-que Meta pide: cuando se escribe una fila, ese dueño ya no tiene cuentas de Meta y Meta no
-sabe quién es. La escribe `/api/social/meta/borrado`, y `/borrado/<código>` la lee por el
-código —tampoco por dueño, por la misma razón—.
+Las únicas tablas sin dueño son dos:
+
+- **`solicitudes_borrado`**, donde queda constancia de cada borrado que Meta pide: cuando se
+  escribe una fila, ese dueño ya no tiene cuentas de Meta y Meta no sabe quién es. La escribe
+  `/api/social/meta/borrado`, y `/borrado/<código>` la lee por el código —tampoco por dueño,
+  por la misma razón—.
+- **`latidos`**, donde el servidor del chef anota que está vivo: es de la cocina, no de un
+  usuario.
 
 > El segundo perfil nace con un slug aleatorio (`circulo-a1b2c3d4`) y con `noindex`, para
 > que exista una versión que solo compartes a mano. Cámbialo por lo que quieras.
@@ -1082,6 +1090,7 @@ Vercel y bajan con `vercel env pull .env.local`.
 | `COMENTARIOS_MODELO` | El modelo de esos borradores, con la forma `proveedor/modelo` | No — tiene uno por defecto |
 | `COMENTARIOS_DM` | Con `1`, tras responder un comentario de Instagram o Facebook se le manda un privado a quien comentó | No — apagada por defecto; exige `pages_messaging` aprobado por Meta |
 | `SITE_URL` | Tu dominio, para etiquetar los enlaces del mensaje automático | No — sin ella se usa el dominio de producción de Vercel |
+| `COCINA_SECRET` | La credencial de La Cocina: la que el servidor del chef manda en `Authorization: Bearer …` a `/api/cocina/…` para tomar comandas, bajar insumos, informar estados y entregar creativos (ver «La Cocina» y `docs/cocina-api.md`). La conocen solo este despliegue y el servidor del chef | No — sin ella esas rutas responden `401` y la cocina queda cerrada; si la pones, genérala igual que `CRON_SECRET` y dásela al servidor del chef |
 | `CRON_SECRET` | Autoriza las corridas programadas: el sync diario y la publicación cada 5 minutos. Vercel la manda sola a su cron; el pinger externo la manda en `Authorization: Bearer …` | Sí — Vercel no la crea: se genera igual que `AUTH_SECRET` y se agrega. Sin ella los crons responden `401` y no corre nada |
 | `MIGRAR_PREVIEWS` | Que los previews migren la base | Solo cuando el preview tenga una base propia; contra la de producción, no |
 | `DATABASE_URL_PRUEBAS` | Solo para las pruebas de integración: una Postgres desechable donde cada archivo crea y migra su propia base (ver «Comandos»). No va en Vercel | No — sin ella esas pruebas se saltan. Nunca la de producción |
@@ -1392,6 +1401,55 @@ nada; Los Fierros y el compositor lo muestran como aviso. Sin parámetros. Antes
 ya programado, y para una recién conectada había que pedirle al dueño que lo copiara de Los
 Fierros. Lo puro está en `src/lib/cuentas-api.ts`.
 
+## La Cocina
+
+La Cocina es la fábrica de creativos de cada usuario dentro de Tu Parrilla:
+
+1. el usuario sube su material crudo y pide una comanda;
+2. el chef la cocina: es el pipeline de edición de `marca-personal`, que corre en un servidor
+   propio;
+3. el chef devuelve los creativos al mesón del usuario, listos para programar.
+
+El diseño, con sus fases, está en `docs/superpowers/specs/2026-10-22-la-cocina-design.md`.
+
+**Hoy existe la base: las tablas y la API por la que habla el chef.** Lo que ve el usuario llega
+en las entregas siguientes, así que ningún usuario ve nada todavía:
+
+- encenderle la cocina a alguien desde Los Maestros;
+- la pestaña donde sube, pide y sigue la comanda;
+- el mesón donde programa.
+
+Mientras tanto, la cocina de un usuario se enciende a mano, en `users.cocina_desde`.
+
+**El chef pregunta; Tu Parrilla nunca lo llama.** El servidor del chef no expone puertos:
+
+- toma las comandas que esperan;
+- baja sus insumos con un enlace firmado que vence en una hora;
+- informa cada estado;
+- entrega cada creativo apenas sale, por tanda.
+
+Habla con `/api/cocina/…` y la credencial `COCINA_SECRET`, comparada en tiempo constante como
+`CRON_SECRET`. Sin la variable, esas rutas responden `401`. El contrato entero, con cada respuesta,
+cada frase de error y un ejemplo de punta a punta, está en `docs/cocina-api.md`.
+
+**La credencial alcanza poco, a propósito.** Ve solo las comandas de los usuarios con la cocina
+encendida, sus insumos y sus creativos. No lee posts, cuentas ni números, y no programa nada: lo
+cocinado espera en el mesón del dueño, que es quien lo programa.
+
+**Una comanda no se salta estados.** Cada cambio pasa por la tabla de transiciones
+(`src/lib/cocina/estados.ts`) y por una condición sobre el estado actual en la misma escritura.
+Por eso dos trabajadores no toman la misma comanda, y un cambio que llega tarde no pisa una
+cancelación. Servir y cancelar son del usuario: el chef no lleva a ninguno de los dos.
+
+**Un creativo llega al mesón solo con sus archivos arriba.** Pasa por tres pasos:
+
+1. se anuncia, y a cada archivo le toca su lugar en la carpeta del dueño
+   (`scheduled/<dueño>/cocina/<comanda>/`), para que programarlo no lo vuelva a bajar;
+2. se sube con PUTs firmados;
+3. se cierra: Tu Parrilla mira que cada archivo esté en el almacén y pese lo anunciado.
+
+La `ref` de cada creativo lo hace repetible: un reintento del chef nunca lo duplica.
+
 ## Estructura
 
 ```
@@ -1446,6 +1504,7 @@ src/
     cuentas-api.ts         las cuentas de GET /api/schedule/cuentas: los dos ids y cómo está la conexión (sin base)
     media-api.ts           la clave de un archivo que sube un cliente de la API, en la carpeta de su dueño (sin base)
     archivar-api.ts        el cuerpo y las respuestas de archivar y desarchivar lo quemado por API
+    cocina/                La Cocina: los estados de una comanda, la fila del chef, lo que entrega y lo que lee y escribe su API (/api/cocina)
     color-de-red.ts        el color de marca de cada red en La Parrilla, como clases de Tailwind escritas enteras
     piezas.ts              la pieza de una publicación: sus destinos programados unidos a lo publicado
     auth.ts                sesión del panel

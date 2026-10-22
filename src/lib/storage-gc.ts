@@ -1,4 +1,15 @@
-import { borradorMedia, getDb, links, profiles, reglasClave, scheduledPostMedia, scheduledPosts } from '@/db'
+import {
+  borradorMedia,
+  creativoMedia,
+  creativos,
+  getDb,
+  insumos,
+  links,
+  profiles,
+  reglasClave,
+  scheduledPostMedia,
+  scheduledPosts,
+} from '@/db'
 import { basePublica, borrar, keyDesdeUrl, listar, type ObjetoAlmacenado } from '@/lib/storage'
 
 /**
@@ -68,7 +79,7 @@ export function keysReferenciadas(urls: Set<string>, base: string): Set<string> 
  * «se olvida en el barrido», simplemente no existe para él.
  *
  * Lo que falta a propósito, con su motivo (y lo que hace que un test —no la memoria de
- * quien lea esto— note una séptima columna que nadie registre): `social_posts.
+ * quien lea esto— note una columna nueva que nadie registre): `social_posts.
  * thumbnail_url` es el CDN de la red, no algo que copiamos; `source_posts.url` es el
  * tuit ajeno, otra red también; `links.url` es el destino que escribe el dueño del
  * link, no un archivo. Ver `storage-gc.test.ts`, que deriva esta lista del esquema real
@@ -84,6 +95,11 @@ export const COLUMNAS_DE_ARCHIVO = [
   // La media de los borradores: el compositor la sube apenas se elige, y el borrador puede
   // esperar días. Sin esta línea el barrido la borraría a la hora.
   { tabla: 'borrador_media', columna: 'blob_url', ref: borradorMedia.blobUrl },
+  // La Cocina: lo que el usuario le lleva al chef y lo que el chef entrega. Los insumos se borran
+  // a los 14 días por su cuenta (`expira_en`); acá solo se cuida que el barrido no se adelante.
+  { tabla: 'insumos', columna: 'url', ref: insumos.url },
+  { tabla: 'creativos', columna: 'portada_url', ref: creativos.portadaUrl },
+  { tabla: 'creativo_media', columna: 'url', ref: creativoMedia.url },
 ] as const
 
 export async function urlsReferenciadas(): Promise<Set<string>> {
