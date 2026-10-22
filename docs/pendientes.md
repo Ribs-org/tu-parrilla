@@ -192,10 +192,10 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   de `videos.insert` quedó en 100 (un borrador lo tenía en 1000), y si «Pyxis oficial» se
   reconectó al usuario revisor antes de enviar. Si la respuesta toca alguna, se aclara en el
   mismo hilo. **Mientras tanto:** que «Pyxis oficial» esté conectado al usuario revisor
-  (las instrucciones de acceso lo dan por conectado). Al 2026-10-21 no lo está: Google ya no
-  acepta su permiso (`invalid_grant` en los registros de producción, cada media hora), así
-  que hay que entrar como `revision@tu-parrilla.cl` y reconectarlo en Los Fierros. Y que
-  haya algún comentario pendiente en La Mesa (los de
+  (las instrucciones de acceso lo dan por conectado; si los registros de producción traen
+  `Google refresh: 400 invalid_grant` al leer sus comentarios, perdió el permiso y se
+  reconecta en Los Fierros entrando como `revision@tu-parrilla.cl`) y que haya algún
+  comentario pendiente en La Mesa (los de
   YouTube se borran a los 30 días). Contestar siempre en el mismo hilo del correo. Al
   aprobarse, ver «Después de aprobar» en el guion.
 - **Por revisar: qué se borra al desconectar YouTube** (2026-10-06). Desconectar borra las
