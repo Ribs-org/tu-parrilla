@@ -204,11 +204,18 @@ export function Composer({
   cerrarHref,
   zona,
   desde,
+  creativo = null,
 }: {
   carga: Record<string, number>
   cuentas: CuentaRow[]
   /** El borrador que se abre; sin él, el formulario nace vacío. */
   borrador?: { id: string; campos: Campos; media: MediaSubida[] } | null
+  /**
+   * Si el borrador salió del mesón de La Cocina: su estilo y el título de YouTube que propuso el
+   * chef. Con él, el formulario lleva «Título de YouTube»; la portada y los atributos los pone el
+   * post al programarse (`crearPostProgramado`).
+   */
+  creativo?: { estilo: string | null; tituloYoutube: string | null } | null
   /** «YYYY-MM-DDTHH:MM» en la zona del dueño: la del borrador, o la del día del calendario. */
   fechaInicial?: string
   /**
@@ -638,6 +645,25 @@ export function Composer({
             frase={frasePrevia}
             idDeLlenado={`llenado-${idDeLlenado.replace(/[^a-zA-Z0-9_-]/g, '')}`}
           />
+
+          {creativo ? (
+            <div className="space-y-3 rounded-lg border border-acero-700 p-3">
+              <p className="text-sm text-fg-muted">
+                <DeNocheYDeDia noche="Viene del mesón" dia="Viene de la vitrina" />
+                {creativo.estilo ? `, en el estilo «${creativo.estilo}»` : ''}: lleva su portada y sus atributos.
+              </p>
+              <Field
+                label="Título de YouTube"
+                hint="En YouTube va como primera línea del texto, que es de donde YouTube saca el título. Hasta 100 caracteres. Vacío, YouTube usa la primera línea del texto."
+              >
+                <Input
+                  name="tituloYoutube"
+                  maxLength={100}
+                  defaultValue={campos?.tituloYoutube ? primero(campos, 'tituloYoutube') : (creativo.tituloYoutube ?? '')}
+                />
+              </Field>
+            </div>
+          ) : null}
 
           <Field label="Texto">
             <Textarea

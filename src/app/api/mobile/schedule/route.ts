@@ -30,7 +30,8 @@ import {
   resolverCuando,
   resolverDestinos,
 } from '@/lib/mobile-api'
-import { BorradorConsumido, crearPostProgramado } from '@/lib/social/publish/crear'
+import { BorradorConsumido, CreativoNoEsta, crearPostProgramado } from '@/lib/social/publish/crear'
+import { CREATIVO_NO_ESTA } from '@/lib/cocina/meson-motivos'
 import { CuentaInvalida } from '@/lib/social/cuentas'
 import { validateScheduleDraft } from '@/lib/social/publish/validate'
 import { errorDeMediaPorOpciones, validarOpcionesPorCuenta } from '@/lib/social/publish/opciones'
@@ -276,6 +277,9 @@ export async function POST(request: Request) {
   } catch (dbError) {
     if (dbError instanceof BorradorConsumido) {
       return NextResponse.json({ error: BORRADOR_NO_EXISTE }, { status: 404 })
+    }
+    if (dbError instanceof CreativoNoEsta) {
+      return NextResponse.json({ error: CREATIVO_NO_ESTA }, { status: 409 })
     }
     console.error('schedule/crear:', String(dbError).slice(0, 300))
     return NextResponse.json({ error: NO_SE_GUARDO }, { status: 500 })

@@ -44,9 +44,11 @@ sección.
     - la pestaña La Cocina en lugar de Tu IA, con el seguimiento de las comandas y su
       cancelación, y el interruptor de cada cuenta en Los Maestros;
     - pedir desde el panel: el formulario con la subida por partes, la marca básica y el dibujo de
-      cada insumo.
-  - **Lo siguiente:** el mesón, que es programar, descartar con motivo y los barridos de 14 y 30
-    días. Con él se cierra la fase 0.
+      cada insumo;
+    - el mesón: programar por un borrador, con la portada, los atributos y el título de YouTube, y
+      descartar con motivo.
+  - **Lo siguiente:** los barridos de 14 días (lo crudo) y de 30 (lo que nadie programó en el
+    mesón), con el aviso una semana antes. Con eso se cierra la fase 0.
   - **[dueño]** Generar `COCINA_SECRET` y ponerla en Vercel (Production) y en el servidor del
     chef. Sin ella, la API de la cocina responde `401`.
   - **[dueño] Probar una vez la subida por partes contra el almacén de verdad** (2026-10-22). En

@@ -14,7 +14,7 @@ const MAX_ETIQUETA = 200
 
 export const CREATIVO_ILEGIBLE = 'El creativo no se entendió.'
 export const CREATIVO_SIN_MEDIA = 'Un creativo trae al menos un archivo que publicar.'
-export const PORTADA_NO_ES_IMAGEN = 'La portada tiene que ser una imagen.'
+export const PORTADA_NO_ES_IMAGEN = 'La portada tiene que ser una imagen JPG o PNG.'
 
 export type ArchivoAnunciado = { nombre: string; tipo: string; mediaType: 'image' | 'video'; bytes: number; rol: 'media' | 'portada' }
 
@@ -82,7 +82,8 @@ export function leerCreativo(crudo: unknown): CreativoAnunciado | { error: strin
     if (bytes > MAX_BYTES_ARCHIVO) return { error: `${nombre}: ${ARCHIVO_MUY_GRANDE}` }
     const publicable = typeof tipo === 'string' ? typeFromContentType(tipo) : null
     if (!publicable) return { error: `${nombre}: ese tipo de archivo no se puede publicar.` }
-    if (rol === 'portada' && publicable.mediaType !== 'image') return { error: PORTADA_NO_ES_IMAGEN }
+    // JPG o PNG: es lo que aceptan de portada las redes (`portadaTypeError`, en el lote).
+    if (rol === 'portada' && !['image/jpeg', 'image/png'].includes(publicable.tipo)) return { error: PORTADA_NO_ES_IMAGEN }
     archivos.push({ nombre: nombre.trim(), tipo: publicable.tipo, mediaType: publicable.mediaType, bytes, rol })
   }
   const media = archivos.filter((a) => a.rol === 'media')

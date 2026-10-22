@@ -499,6 +499,20 @@ es cambiar la política, construir un binario nuevo para la Play Store, ajustar
 `mobile/README.md` y el script de publicación por aire, y probar que el canal `preview` del APK
 sigue recibiendo lo suyo. Medio día, más la espera del build y de la revisión de Google.
 
+## El texto de YouTube de un post del mesón no sigue al editor (2026-10-22)
+
+Un post programado desde el mesón de La Cocina lleva en su destino de YouTube el título del
+creativo como primera línea del texto, en `scheduled_post_targets.caption_override`. Lo escribe
+`crearPostProgramado` al programarlo. El editor de un post (`/admin/schedule/<id>`) no conoce ese
+campo: si después se cambia el texto ahí, Instagram, Facebook y TikTok salen con el texto nuevo, y
+YouTube con el de cuando se programó, título incluido.
+
+Quedó así porque el editor no tiene texto por destino, y dárselo es diseño, no un arreglo: qué se
+muestra, si el título se edita aparte, qué pasa con un post que no vino del mesón. Cerrarlo es
+sumarle al editor el «Título de YouTube» cuando un destino de YouTube tiene `caption_override`, y
+reescribir el override con el texto nuevo al guardar. Medio día, con sus pruebas. Mientras tanto,
+para cambiar el texto de un post así se saca el destino de YouTube y se programa de nuevo.
+
 ## Los dos compositores son archivos de cientos de líneas (2026-10-21)
 
 `schedule/composer.tsx` en el panel (unas 850 líneas) y `mobile/src/app/(tabs)/publicar.tsx` en

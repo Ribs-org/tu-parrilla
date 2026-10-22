@@ -1,6 +1,6 @@
 import 'server-only'
 import { and, asc, desc, eq, inArray } from 'drizzle-orm'
-import { borradorMedia, borradores, getDb } from '@/db'
+import { borradorMedia, borradores, creativos, getDb } from '@/db'
 import type { Campos } from './borrador'
 
 /** Un archivo de un borrador, en el orden del carrusel. */
@@ -11,6 +11,8 @@ export type BorradorCargado = {
   id: string
   campos: Campos
   fecha: Date | null
+  /** El creativo del mesón del que salió, si salió de ahí. */
+  creativoId: string | null
   media: MediaDeBorrador[]
 }
 
@@ -54,7 +56,7 @@ export async function listarBorradores(ownerId: string): Promise<BorradorResumid
 export async function cargarBorrador(ownerId: string, id: string): Promise<BorradorCargado | null> {
   const db = getDb()
   const [fila] = await db
-    .select({ id: borradores.id, campos: borradores.campos, fecha: borradores.fecha })
+    .select({ id: borradores.id, campos: borradores.campos, fecha: borradores.fecha, creativoId: borradores.creativoId })
     .from(borradores)
     .where(and(eq(borradores.id, id), eq(borradores.ownerId, ownerId)))
     .limit(1)
@@ -120,7 +122,17 @@ export async function guardarBorrador(
  * bucket sin nadie que los nombre, y el barrido de huérfanos los borra a la hora.
  */
 export async function borrarBorrador(ownerId: string, id: string): Promise<void> {
-  await getDb()
-    .delete(borradores)
-    .where(and(eq(borradores.id, id), eq(borradores.ownerId, ownerId)))
+  await getDb().transaction(async (tx) => {
+    const [borrado] = await tx
+      .delete(borradores)
+      .where(and(eq(borradores.id, id), eq(borradores.ownerId, ownerId)))
+      .returning({ creativoId: borradores.creativoId })
+    // Uno que salió del mesón devuelve su creativo al mesón: descartar el borrador no lo pierde.
+    if (borrado?.creativoId) {
+      await tx
+        .update(creativos)
+        .set({ estado: 'mesa' })
+        .where(and(eq(creativos.id, borrado.creativoId), eq(creativos.estado, 'borrador')))
+    }
+  })
 }

@@ -70,7 +70,7 @@ se ve arriba, grande y en mayúsculas.
 | La Parrilla | lo que viene y cómo salió lo que ya se fue | `/admin/schedule` | Primera pestaña. Es la entrada: se llega acá al entrar, y `/admin` lleva acá. El calendario: programar, borradores, lo que se quemó, editar, reprogramar | [la-parrilla.md](la-parrilla.md) |
 | La Mesa | lo que te responden y tus respuestas | `/admin/comments` | Pestaña. Los comentarios y sus respuestas | [la-mesa.md](la-mesa.md) |
 | Los Números | cómo te fue en las redes y en tu página | `/admin/analytics` | Pestaña. Un tablero con dos mitades: «En las redes» (views y seguidores ganados) y «En tu página» (visitas y clicks en su página de links). Un clic adentro, «Tus publicaciones» (`/admin/analytics/publicaciones`): cada publicación con sus números y su etiqueta `?s=`; la pieza de cada una, con sus versiones (`/admin/analytics/publicaciones/<id>`); «Comparar por atributo» (`/admin/analytics/comparar`); «Tu mejor 10 %» (`/admin/analytics/mejores`), lo que más rindió —o lo que menos, con «Lo peor»— y qué tiene en común; y «Lado a lado» (`/admin/analytics/lado-a-lado`), dos publicaciones con su portada, el link a la red y cómo crecieron | [los-numeros.md](los-numeros.md) |
-| La Cocina | el chef de la casa y tu propio chef | `/admin/ia` | Cuarta pestaña, la última. Arriba, el chef de la casa: el editor de videos, que se enciende por cuenta, sus comandas y «Pedir una comanda» (`/admin/ia/pedir`), donde se sube el material. Abajo, «Tu propio chef»: generar y revocar las llaves de API de la IA propia, y las guías que tiene que leer. Al final, el manual del parrillero (`/admin/ia/manual`): esta misma wiki, para que la lea la persona. Hasta el 2026-10-22 se llamaba «Tu IA» | [la-cocina.md](la-cocina.md) |
+| La Cocina | el chef de la casa y tu propio chef | `/admin/ia` | Cuarta pestaña, la última. Arriba, el chef de la casa: el editor de videos, que se enciende por cuenta, sus comandas, «Pedir una comanda» (`/admin/ia/pedir`), donde se sube el material, y el mesón (`/admin/ia/meson`), donde espera lo que el chef entregó. Abajo, «Tu propio chef»: generar y revocar las llaves de API de la IA propia, y las guías que tiene que leer. Al final, el manual del parrillero (`/admin/ia/manual`): esta misma wiki, para que la lea la persona. Hasta el 2026-10-22 se llamaba «Tu IA» | [la-cocina.md](la-cocina.md) |
 | Los Fierros | tus redes conectadas | `/admin/accounts` | Botón «Ajustes». Conectar y desconectar redes | [los-fierros.md](los-fierros.md) |
 | La Vitrina | tus páginas públicas | `/admin/profiles` | Botón «Ajustes». Su página de links | [la-vitrina.md](la-vitrina.md) |
 | Los Maestros | quién puede entrar | `/admin/usuarios` | Botón «Ajustes», solo el admin. Invitar gente | [los-maestros.md](los-maestros.md) |
@@ -131,6 +131,7 @@ teléfono](app-movil.md).
 | Generar o revocar la llave que te dio a ti, o a otro agente | La Cocina, sección «Tu propio chef», bloque «1. Su llave» ([la-cocina.md](la-cocina.md)). Hasta el 2026-10-19 estaba en Tu Cuenta, y hasta el 2026-10-22 la pestaña se llamaba «Tu IA» |
 | Pedirle videos al chef de la casa: subir el material crudo y decir qué se quiere | La Cocina → «Pedir una comanda» ([la-cocina.md](la-cocina.md)) |
 | Seguir una comanda del chef de la casa, o cancelarla | La Cocina, bloque «El chef de la casa» ([la-cocina.md](la-cocina.md)) |
+| Programar o descartar lo que entregó el chef de la casa | La Cocina → «El mesón (<N>)» ([la-cocina.md](la-cocina.md)) |
 | Leer cómo funciona el panel, pantalla por pantalla | La Cocina → «El manual del parrillero →»: esta misma wiki, en el panel ([la-cocina.md](la-cocina.md)) |
 | Invitar a alguien; cerrar las sesiones de alguien; encenderle la cocina | Los Maestros, solo el admin ([los-maestros.md](los-maestros.md)) |
 | Publicar desde el teléfono | [La app del teléfono](app-movil.md) |
@@ -217,6 +218,7 @@ vale para la de día:
 | «El chef mira la res» | «El chef mira el atún» | El estado de una comanda, en La Cocina |
 | «El desposte» | «El despiece» | El estado de una comanda |
 | «Al fuego» | «Armando las piezas» | El estado de una comanda |
+| «El mesón» | «La vitrina» | Lo que el chef entregó, en La Cocina. **No es La Vitrina** de las páginas públicas, aunque de día se llame igual |
 | «Lista en el mesón» | «Lista en la vitrina» | El estado de una comanda; el mesón también al servir: «Sirviendo: 3 de 5 tandas en la vitrina» |
 | «No se puede cocinar» | «No se puede preparar» | El estado de una comanda que el chef rechazó |
 
