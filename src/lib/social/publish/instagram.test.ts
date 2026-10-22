@@ -240,7 +240,13 @@ describe('publish: el rechazo de un trial reel', () => {
     const salida = await instagramPublisher.publish({ ...input, opciones: { trialReel: true } })
     // `definitivo: true` es lo que hace que `resolveOutcome` no lo reintente: Meta ya
     // contestó que no, no es un fallo de red que valga la pena repetir.
-    expect(salida).toEqual({ kind: 'failed', reason: trialSinSeguidores('@vicente_edits2'), definitivo: true })
+    // `sinTrial` es lo que `trial-reels.ts` anota en la cuenta: no acepta trial reels.
+    expect(salida).toEqual({
+      kind: 'failed',
+      reason: trialSinSeguidores('@vicente_edits2'),
+      definitivo: true,
+      sinTrial: true,
+    })
   })
 
   it('un rechazo que habla de trial también falla al tiro', async () => {
@@ -250,6 +256,7 @@ describe('publish: el rechazo de un trial reel', () => {
       kind: 'failed',
       reason: trialNoDisponible('@vicente_edits2', '«Trial reels are not available for this account»'),
       definitivo: true,
+      sinTrial: true,
     })
   })
 

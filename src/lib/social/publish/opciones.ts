@@ -49,6 +49,16 @@ export const TIKTOK_PATROCINADO_PRIVADO = 'Un contenido patrocinado no puede ser
 export const OPCIONES_ERROR = 'Las opciones de la red no se entendieron.'
 export const TRIAL_REEL_MEDIA = 'Un trial reel es un solo video, sin fotos.'
 
+/**
+ * El aviso de una cuenta donde Meta ya rechazó un trial reel (`trial-reels.ts`): la frase del
+ * rechazo, que nombra la cuenta y dice el porqué, o esta si no quedó ninguna.
+ */
+export const SIN_TRIAL_GENERICO = 'Instagram ya rechazó un trial reel en esta cuenta: prográmalo como reel normal.'
+
+export function avisoSinTrial(motivo: string | null | undefined): string {
+  return motivo?.trim() || SIN_TRIAL_GENERICO
+}
+
 const MAX_SERIALIZED = 2000
 
 function esObjeto(value: unknown): value is Record<string, unknown> {

@@ -71,9 +71,34 @@ describe('GET /api/schedule/cuentas', () => {
           fierro: 'al-rojo',
           vence: '2030-01-15T10:00:00+01:00',
           motivo: null,
+          // Facebook no tiene trial reels: nulo aunque la fila trajera algo.
+          trialReels: null,
+          trialReelsMotivo: null,
         },
       ],
     })
+  })
+
+  it('dice si una cuenta de Instagram acepta trial reels, y por qué no', async () => {
+    const base = {
+      network: 'instagram',
+      externalId: '1',
+      connected: true,
+      lastSyncedAt: null,
+      lastSyncError: null,
+      expiresAt: null,
+    }
+    cuentas.mockResolvedValueOnce([
+      { ...base, id: 'a', handle: '@grande', trialReels: 'si', trialReelsMotivo: null },
+      { ...base, id: 'b', handle: '@nueva', trialReels: 'no', trialReelsMotivo: '@nueva no tiene trial reels: …' },
+      { ...base, id: 'c', handle: '@sin-saber', trialReels: null, trialReelsMotivo: null },
+    ])
+    const cuerpo = await (await GET(peticion())).json()
+    expect(cuerpo.cuentas.map((c: { trialReels: unknown; trialReelsMotivo: unknown }) => [c.trialReels, c.trialReelsMotivo])).toEqual([
+      ['si', null],
+      ['no', '@nueva no tiene trial reels: …'],
+      [null, null],
+    ])
   })
 
   it('un dueño sin cuentas recibe la lista vacía', async () => {

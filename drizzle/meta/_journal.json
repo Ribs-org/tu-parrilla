@@ -141,6 +141,13 @@
       "when": 1792684630663,
       "tag": "0019_archivar_lo_quemado",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1792690025061,
+      "tag": "0020_trial_reels_por_cuenta",
+      "breakpoints": true
     }
   ]
 }

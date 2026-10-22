@@ -26,6 +26,8 @@ export async function GET(request: Request) {
       id: socialAccounts.id,
       network: socialAccounts.network,
       handle: socialAccounts.handle,
+      trialReels: socialAccounts.trialReels,
+      trialReelsMotivo: socialAccounts.trialReelsMotivo,
       // El booleano se calcula en la consulta: seleccionar `accessToken` para
       // descartarlo después igual lo trae a este proceso, y es un secreto que no hace
       // falta materializar solo para preguntarle si es null.
@@ -36,6 +38,15 @@ export async function GET(request: Request) {
     .orderBy(asc(socialAccounts.network), asc(socialAccounts.createdAt))
 
   return NextResponse.json({
-    cuentas: filas.map((f) => ({ id: f.id, red: f.network, handle: f.handle, conectada: f.conectada })),
+    cuentas: filas.map((f) => ({
+      id: f.id,
+      red: f.network,
+      handle: f.handle,
+      conectada: f.conectada,
+      // Si Meta ya rechazó un trial reel de esta cuenta, la app lo dice junto al interruptor.
+      ...(f.network === 'instagram' && f.trialReels
+        ? { trialReels: f.trialReels, trialReelsMotivo: f.trialReels === 'no' ? f.trialReelsMotivo : null }
+        : {}),
+    })),
   })
 }

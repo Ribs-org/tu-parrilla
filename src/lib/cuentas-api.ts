@@ -23,6 +23,14 @@ export type CuentaParaApi = {
   vence: string | null
   /** Por qué hay que reconectarla, con la frase del resumen; nulo al rojo. */
   motivo: string | null
+  /**
+   * Si la cuenta acepta trial reels, aprendido de Meta al publicar: `si`, `no` o nulo mientras no
+   * se sepa (y en las redes que no los tienen). Programar uno donde dice `no` se acepta igual,
+   * porque una cuenta que crece pasa a aceptarlos, pero Meta lo va a rechazar.
+   */
+  trialReels: 'si' | 'no' | null
+  /** La frase con que Meta rechazó el último, cuando `trialReels` es `no`. */
+  trialReelsMotivo: string | null
 }
 
 /**
@@ -47,6 +55,8 @@ export function cuentasParaApi(cuentas: readonly CuentaRow[], zona: string, ahor
       fierro,
       vence: c.connected && c.expiresAt && !seRenuevaSola(c.network) ? isoInZone(new Date(c.expiresAt), zona) : null,
       motivo: motivoDelFierro({ conCredencial: c.connected, lastSyncError: c.lastSyncError }, fierro),
+      trialReels: c.network === 'instagram' ? (c.trialReels ?? null) : null,
+      trialReelsMotivo: c.network === 'instagram' && c.trialReels === 'no' ? (c.trialReelsMotivo ?? null) : null,
     }
   })
 }

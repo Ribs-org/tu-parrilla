@@ -85,7 +85,38 @@ describe.skipIf(!URL_PRUEBAS)('contra una Postgres de verdad', () => {
 
   afterAll(() => soltar?.())
 
-  describe('publishDue', () => {
+  describe('publishDue', () => {
+    it('lo que Meta dice de los trial reels queda en la cuenta: «no» al rechazarlo, «sí» cuando uno sale', async () => {
+      const { publishDue } = await import('./run')
+      const { socialAccounts } = await esquema()
+      const leerCuenta = async () =>
+        (await (await db()).select().from(socialAccounts).where(eq(socialAccounts.id, cuentaId)))[0]!
+      const motivo = '@prueba no tiene trial reels: Instagram los da solo a cuentas con un mínimo de seguidores.'
+
+      await destinoVencido({ opciones: { trialReel: true } })
+      publicar.mockResolvedValueOnce({ kind: 'failed', reason: motivo, definitivo: true, sinTrial: true })
+      await publishDue()
+      let cuenta = await leerCuenta()
+      expect(cuenta.trialReels).toBe('no')
+      expect(cuenta.trialReelsMotivo).toBe(motivo)
+      expect(cuenta.trialReelsEn).not.toBeNull()
+
+      // Una cuenta que creció: el primero que sale la corrige sola.
+      await destinoVencido({ opciones: { trialReel: true } })
+      publicar.mockResolvedValueOnce({ kind: 'published', externalId: 'ig-trial' })
+      await publishDue()
+      cuenta = await leerCuenta()
+      expect(cuenta.trialReels).toBe('si')
+      expect(cuenta.trialReelsMotivo).toBeNull()
+
+      // Un reel normal que sale no dice nada de los trial reels.
+      await (await db()).update(socialAccounts).set({ trialReels: null, trialReelsEn: null }).where(eq(socialAccounts.id, cuentaId))
+      await destinoVencido()
+      publicar.mockResolvedValueOnce({ kind: 'published', externalId: 'ig-normal' })
+      await publishDue()
+      expect((await leerCuenta()).trialReels).toBeNull()
+    })
+
     it('dos corridas a la vez publican una sola vez', async () => {
       const { publishDue } = await import('./run')
       const destino = await destinoVencido()

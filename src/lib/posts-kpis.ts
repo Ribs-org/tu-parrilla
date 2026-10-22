@@ -20,6 +20,12 @@ export type CuentaRow = {
    * red no da caducidad.
    */
   expiresAt: string | null
+  /**
+   * Si acepta trial reels, aprendido de Meta al publicar (`trial-reels.ts`): «no» con la frase del
+   * rechazo, «si», o nulo mientras no se sepa. Solo Instagram. Opcional para las filas de prueba.
+   */
+  trialReels?: 'si' | 'no' | null
+  trialReelsMotivo?: string | null
 }
 
 export type PostRow = {

@@ -242,7 +242,7 @@ async function postForm(
 async function createContainer(
   input: PublishInput,
   params: Record<string, string>,
-): Promise<{ id: string } | { failed: string; definitivo?: true } | { tope: true }> {
+): Promise<{ id: string } | { failed: string; definitivo?: true; sinTrial?: true } | { tope: true }> {
   const r = await postForm(`${GRAPH}/${input.accountExternalId}/media`, {
     ...params,
     access_token: input.token,
@@ -250,7 +250,8 @@ async function createContainer(
   if ('rechazo' in r) {
     if (esTopeDiario(r.rechazo)) return { tope: true }
     const motivo = motivoDeRechazo(r.rechazo, input.opciones, input.cuenta)
-    if (motivo) return { failed: motivo, definitivo: true }
+    // Un rechazo de trial reel que se reconoce es de la cuenta: no acepta trial reels.
+    if (motivo) return { failed: motivo, definitivo: true, sinTrial: true }
     // Sin el error de Meta en el cuerpo, no sabemos si fue Meta: se sigue tratando como la red.
     return { failed: rechazoSinReconocer(r.rechazo, input.cuenta, PUBLISH_NETWORK_ERROR) }
   }
@@ -260,9 +261,12 @@ async function createContainer(
 
 /** El `PublishOutcome` que corresponde a lo que devolvió `createContainer` sin un id:
  * la espera del tope, o el `failed` llevando `definitivo` solo si venía puesto. */
-function fromCreate(r: { failed: string; definitivo?: true } | { tope: true }): PublishOutcome {
+function fromCreate(r: { failed: string; definitivo?: true; sinTrial?: true } | { tope: true }): PublishOutcome {
   if ('tope' in r) return diferidoPorTope()
-  return r.definitivo ? { kind: 'failed', reason: r.failed, definitivo: true } : { kind: 'failed', reason: r.failed }
+  if (!r.definitivo) return { kind: 'failed', reason: r.failed }
+  return r.sinTrial
+    ? { kind: 'failed', reason: r.failed, definitivo: true, sinTrial: true }
+    : { kind: 'failed', reason: r.failed, definitivo: true }
 }
 
 /**

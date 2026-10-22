@@ -545,7 +545,10 @@ Con dos cuentas de TikTok marcadas hay dos bloques, y cada uno se llena por sepa
 
 Un solo interruptor, **«Publicar como trial reel»**, apagado al partir (en un borrador, como
 quedó), con «Solo lo ven quienes no te siguen. Tú decides desde Instagram cuándo compartirlo
-con todos.»
+con todos.» Si Instagram ya rechazó un trial reel de esa cuenta, debajo va, en ámbar, la frase
+del rechazo («@cuenta no tiene trial reels: Instagram los da solo a cuentas con un mínimo de
+seguidores…», o «Instagram ya rechazó un trial reel en esta cuenta: prográmalo como reel normal.»). El interruptor se puede encender igual, porque una cuenta que crece pasa
+a aceptarlos, pero lo más probable es que se queme: conviene programarlo como reel normal.
 
 #### «Respuesta automática por palabra clave»
 

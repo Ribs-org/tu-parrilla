@@ -38,7 +38,10 @@ export type PublishOutcome =
   // `containerId` viaja cuando la red ya pudo haber recibido el post y el intento siguiente
   // tiene que mirar ese contenedor antes de rehacerlo: un `media_publish` de Instagram que no
   // contestó pudo haber publicado, y crear otro contenedor lo publicaría dos veces.
-  | { kind: 'failed'; reason: string; definitivo?: true; containerId?: string }
+  //
+  // `sinTrial` dice que la cuenta no acepta trial reels: lo pone `instagram.ts` cuando reconoce
+  // el rechazo de elegibilidad, y `trial-reels.ts` lo anota en la cuenta.
+  | { kind: 'failed'; reason: string; definitivo?: true; containerId?: string; sinTrial?: true }
 
 /** Adding a network in later phases is a file plus a line, same as Connector. */
 export type Publisher = {

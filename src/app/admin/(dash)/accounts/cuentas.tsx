@@ -14,6 +14,7 @@ import type { CuentaRow } from '@/lib/posts-kpis'
 import { CONEXION_FALLO } from '@/lib/avisos/reglas'
 import { PROXIMAMENTE, REDES_PROXIMAMENTE, avisosDe, networkLabel } from '@/lib/networks'
 import { estadoDelFierro, type Fierro } from '@/lib/parrilla'
+import { avisoSinTrial } from '@/lib/social/publish/opciones'
 import { cn } from '@/lib/utils'
 import { seEstaEnfriando } from '@/lib/vocabulario'
 
@@ -368,6 +369,12 @@ function Fila({ row, network, vivas, ahora }: { row: CuentaRow; network: string;
       </div>
 
       <div id={detalle} hidden={!abierta} className="space-y-1.5 pb-2.5 pl-10 pr-1">
+        {/* Si acepta trial reels, como lo dijo Meta al publicar uno (`trial-reels.ts`). */}
+        {network === 'instagram' && row.trialReels ? (
+          <p className={cn('text-[0.72rem]', row.trialReels === 'no' ? 'text-caution' : 'text-fg-muted')}>
+            {row.trialReels === 'si' ? 'Acepta trial reels.' : avisoSinTrial(row.trialReelsMotivo)}
+          </p>
+        ) : null}
         {row.externalId ? (
           <p className="truncate font-mono text-[0.68rem] text-fg-faint">
             <span className="whitespace-nowrap text-fg-muted">En la red: </span>

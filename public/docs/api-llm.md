@@ -247,7 +247,10 @@ antigua a la más nueva. Cada una trae:
 - `motivo`: `null` al rojo; si no, una de cuatro frases:
   `La conexión está por vencer; reconéctala antes.`, `La conexión falló; reconecta la cuenta.`,
   `La conexión venció; reconecta la cuenta.` o
-  `La cuenta está desconectada; reconéctala para programarle.`
+  `La cuenta está desconectada; reconéctala para programarle.`;
+- `trialReels`: en Instagram, `si` si un trial reel ya salió en esa cuenta, `no` si Meta rechazó
+  uno por elegibilidad (con la frase del rechazo en `trialReelsMotivo`), y `null` mientras no se
+  sepa; `null` también en las otras redes.
 
 Programa solo hacia una con `conectada: true` y `proximamente: false`: las demás rechazan la
 fila. Una con `fierro` `frio` y `conectada: true` acepta la fila, pero no publica hasta que el
@@ -354,7 +357,8 @@ Tres cosas, en orden:
    Por otro motivo, seguida de lo que Meta dijo:
    `@<cuenta> no tiene trial reels disponibles, probablemente porque Instagram no le habilitó la función. Prográmalo como reel normal o en otra cuenta.`
    Con cualquiera de las dos, los demás trial reels de esa cuenta van a fallar igual:
-   pásalos a reels normales o a otra cuenta.
+   pásalos a reels normales o a otra cuenta. Desde ese rechazo, `GET /api/schedule/cuentas` dice
+   `trialReels: "no"` en esa cuenta (sección 3d): no le propongas trial reels mientras diga eso.
 3. **No se sabe si se graduó, por API.** El dueño lo comparte con todos desde la app de
    Instagram cuando quiera; no hay endpoint que lo dispare ni que lo consulte.
 

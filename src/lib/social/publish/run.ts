@@ -30,6 +30,7 @@ import { sendFailureAlert } from './alert'
 import { MOTIVOS_DE_CONEXION } from './conexion'
 import type { OpcionesDestino } from './opciones'
 import { marcarCaida } from '@/lib/avisos/run'
+import { aprenderTrialReels } from './trial-reels'
 
 export type Report = {
   published: number
@@ -175,6 +176,10 @@ export async function publishDue(
     // (`vigilarConexiones`, después de esta corrida) y no recién cuando el post se queme.
     const deConexion = outcome.kind === 'failed' && MOTIVOS_DE_CONEXION.has(outcome.reason) ? outcome.reason : null
     if (deConexion) await marcarCaida(target.accountId, deConexion)
+
+    // Lo que Meta reveló de los trial reels de esta cuenta: un rechazo por elegibilidad la marca
+    // «no», uno que salió, «sí» (`trial-reels.ts`).
+    await aprenderTrialReels(target.accountId, target.network, outcome, (target.opciones as OpcionesDestino | null) ?? null, now)
 
     if (patch.status === 'published') {
       report.published++

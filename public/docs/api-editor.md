@@ -331,7 +331,9 @@ Si rechaza el trial reel por otro motivo, es esta, seguida de lo que Meta dijo (
 Las dos son definitivas: el destino queda en fallo en la misma corrida, sin reintentos —a
 diferencia de cualquier otro rechazo, que se reintenta hasta tres veces antes de fallar—. En
 una cuenta sin los seguidores se quema cada trial reel que tenga programado, así que conviene
-pasarlos a reels normales o a otra cuenta apenas aparece la primera.
+pasarlos a reels normales o a otra cuenta apenas aparece la primera. Desde ese rechazo,
+`GET /api/schedule/cuentas` dice `trialReels: "no"` en esa cuenta (sección 3c): míralo antes de
+programar el próximo.
 
 **Después no hay forma de saber por API si se graduó.** Eso se mira en la app de Instagram.
 
@@ -969,9 +971,10 @@ Pídela antes de la primera tanda, y cada vez que el dueño te cuente que conect
 ```json
 {
   "cuentas": [
-    { "id": "8f0a…", "red": "instagram", "handle": "@vicente", "externalId": "17841400000000000", "conectada": true, "proximamente": false, "fierro": "al-rojo", "vence": "2026-12-01T10:00:00-03:00", "motivo": null },
-    { "id": "9d4e…", "red": "tiktok", "handle": "@vicente", "externalId": "-000Ab1Cd2…", "conectada": true, "proximamente": false, "fierro": "al-rojo", "vence": null, "motivo": null },
-    { "id": "c71d…", "red": "facebook", "handle": "Vicente Pareja", "externalId": "1029384756", "conectada": false, "proximamente": false, "fierro": "frio", "vence": null, "motivo": "La cuenta está desconectada; reconéctala para programarle." }
+    { "id": "8f0a…", "red": "instagram", "handle": "@vicente", "externalId": "17841400000000000", "conectada": true, "proximamente": false, "fierro": "al-rojo", "vence": "2026-12-01T10:00:00-03:00", "motivo": null, "trialReels": "si", "trialReelsMotivo": null },
+    { "id": "a20b…", "red": "instagram", "handle": "@vicente_nueva", "externalId": "17841400000000001", "conectada": true, "proximamente": false, "fierro": "al-rojo", "vence": "2026-12-03T10:00:00-03:00", "motivo": null, "trialReels": "no", "trialReelsMotivo": "@vicente_nueva no tiene trial reels: Instagram los da solo a cuentas con un mínimo de seguidores, y esta no lo alcanza. Prográmalo como reel normal o en otra cuenta." },
+    { "id": "9d4e…", "red": "tiktok", "handle": "@vicente", "externalId": "-000Ab1Cd2…", "conectada": true, "proximamente": false, "fierro": "al-rojo", "vence": null, "motivo": null, "trialReels": null, "trialReelsMotivo": null },
+    { "id": "c71d…", "red": "facebook", "handle": "Vicente Pareja", "externalId": "1029384756", "conectada": false, "proximamente": false, "fierro": "frio", "vence": null, "motivo": "La cuenta está desconectada; reconéctala para programarle.", "trialReels": null, "trialReelsMotivo": null }
   ]
 }
 ```
@@ -1004,6 +1007,13 @@ Pídela antes de la primera tanda, y cada vez que el dueño te cuente que conect
   `La conexión falló; reconecta la cuenta.`, `La conexión venció; reconecta la cuenta.` o
   `La cuenta está desconectada; reconéctala para programarle.` Las tres primeras son las del
   resumen (sección 3b), que no nombra las desconectadas a propósito; esta lista sí.
+- **`trialReels`** dice si la cuenta de Instagram acepta trial reels, como lo reveló Meta al
+  publicar uno: `si` cuando uno salió, `no` cuando Meta lo rechazó por elegibilidad, y `null`
+  mientras no se sepa (y en las otras redes, que no los tienen). Con `no`, **`trialReelsMotivo`**
+  trae la frase del rechazo, la misma que quedó en el `error` de ese destino. Programar un trial
+  reel donde dice `no` se acepta igual —una cuenta que crece pasa a aceptarlos, y el primero que
+  sale la vuelve a `si`—, pero lo más probable es que Meta lo rechace otra vez: pásalo a reel
+  normal o a otra cuenta.
 
 Vienen ordenadas por red, en orden alfabético, y dentro de una red de la más antigua a la más
 nueva. Conectar, reconectar o quitar una cuenta no se hace por API: lo hace el dueño en Los

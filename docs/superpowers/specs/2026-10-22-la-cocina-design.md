@@ -1,6 +1,7 @@
 # La Cocina: la fábrica de creativos del chef, dentro de Tu Parrilla
 
-Fecha: 2026-10-22. **Diseño, nada implementado.** Reemplaza y amplía «El chef de la casa»
+Fecha: 2026-10-22. **Diseño. Implementado solo lo de «Antes»**: qué cuenta acepta trial reels
+(2026-10-22). Reemplaza y amplía «El chef de la casa»
 (`2026-10-19-chef-de-la-casa-design.md`), que ya decía para qué sirve el chef y cómo se dibuja;
 esto dice cómo se pide, cómo se sigue y qué se entrega, y fija el contrato entre Tu Parrilla y
 el chef. Lo pidió el dueño el 2026-10-22, y los nueve puntos del líder de creación de contenido
