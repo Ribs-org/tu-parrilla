@@ -1445,7 +1445,7 @@ además en `marcas`, para la siguiente. La `ref` que pone el formulario al abrir
 dos veces no la duplique, y un archivo solo entra si es del dueño y no está en otra comanda. En esta
 fase no hay catálogo todavía, así que los estilos los elige el chef (`receta.estilos: "chef"`).
 
-**El mesón** (`/admin/ia/meson`; de día, la vitrina) es donde espera lo que el chef entregó, por
+**El mesón** (`/admin/ia/meson`; de día, la bandeja) es donde espera lo que el chef entregó, por
 comanda y por pieza, para programarlo o descartarlo:
 
 - **«Programar»** lo pasa a un borrador de La Parrilla (`borradores.creativo_id`) y abre el

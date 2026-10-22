@@ -30,7 +30,7 @@ sección.
   servidor propio. Cada usuario tiene su fábrica de creativos dentro de Tu Parrilla:
   - sube el material crudo y lo que lo acompaña, cada cosa con su tipo y su dibujo;
   - elige sus estilos, que salen del catálogo del chef, y los prueba con un clip;
-  - recibe los creativos en el mesón (de día, la vitrina), con sus textos y sus atributos, y los
+  - recibe los creativos en el mesón (de día, la bandeja), con sus textos y sus atributos, y los
     programa.
 
   El diseño está en `docs/superpowers/specs/2026-10-22-la-cocina-design.md`, y reemplaza a «El chef
@@ -65,10 +65,6 @@ sección.
     mentira, así que lo que no se pudo ver es si el CORS del bucket deja pasar los PUT de las
     partes y si R2 contesta `ListParts` como se espera. Si falla, la frase del error lo dice en la
     fila del archivo.
-  - **[dueño] Por decidir: el nombre de día del mesón** (2026-10-22). El diseño le puso «La vitrina»,
-    pero La Vitrina ya es el nombre de tus páginas públicas, en los dos modos, y dos pantallas con
-    el mismo nombre confunden a la persona y a la wiki. Propuesta: «La bandeja», como la de sushi
-    que se pide en Chile. Hace falta antes del mesón.
   - **Del equipo de contenido:** el cliente del chef en `marca-personal`, contra
     `docs/cocina-api.md`.
 

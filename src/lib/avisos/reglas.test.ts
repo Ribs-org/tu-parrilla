@@ -212,7 +212,7 @@ describe('correoDeResumen', () => {
     expect(correo.text).toContain('Instagram · @vicente — lo último sale el')
   })
 
-  it('lo que vence en el mesón: cuántos por comanda y desde cuándo, con su enlace, y de día en la vitrina', () => {
+  it('lo que vence en el mesón: cuántos por comanda y desde cuándo, con su enlace, y de día en la bandeja', () => {
     const meson = [
       { comanda: 'video9.mp4', cuantos: 3, vence: new Date('2026-10-20T15:00:00Z') },
       { comanda: null, cuantos: 1, vence: new Date('2026-10-22T15:00:00Z') },
@@ -226,8 +226,8 @@ describe('correoDeResumen', () => {
     expect(correo.text).toContain('salvo lo del mesón')
 
     const deDia = correoDeResumen({ ...vacio, meson: meson.slice(1) }, ZONA, '', AHORA, 'dia')!
-    expect(deDia.subject).toContain('1 creativo por vencer en la vitrina')
-    expect(deDia.text).toContain('La vitrina: lo que nadie programa en 30 días se borra (1):')
+    expect(deDia.subject).toContain('1 creativo por vencer en la bandeja')
+    expect(deDia.text).toContain('La bandeja: lo que nadie programa en 30 días se borra (1):')
   })
 
   it('con muchos quemados nombra los primeros y cuenta el resto', () => {

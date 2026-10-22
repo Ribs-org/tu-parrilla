@@ -12,16 +12,16 @@ const comanda = (estado: Parameters<typeof estadoEnPalabras>[0]['estado'], extra
 })
 
 describe('el estado en la tarjeta', () => {
-  it('sirviendo dice cuántas tandas llegaron al mesón, y de día a la vitrina', () => {
+  it('sirviendo dice cuántas tandas llegaron al mesón, y de día a la bandeja', () => {
     const c = comanda('sirviendo', { tandasServidas: 3, tandasTotal: 5 })
     expect(estadoEnPalabras(c, 'noche')).toBe('Sirviendo: 3 de 5 tandas en el mesón')
-    expect(estadoEnPalabras(c, 'dia')).toBe('Sirviendo: 3 de 5 tandas en la vitrina')
+    expect(estadoEnPalabras(c, 'dia')).toBe('Sirviendo: 3 de 5 tandas en la bandeja')
     expect(estadoEnPalabras({ ...c, tandasTotal: null, tandasServidas: 2 }, 'noche')).toBe('Sirviendo: 2 tandas en el mesón')
   })
 
   it('lista dice cuántos cortes esperan en el mesón; de día, piezas', () => {
     expect(estadoEnPalabras(comanda('lista', { enElMeson: 12 }), 'noche')).toBe('Lista en el mesón: 12 cortes')
-    expect(estadoEnPalabras(comanda('lista', { enElMeson: 1 }), 'dia')).toBe('Lista en la vitrina: una pieza')
+    expect(estadoEnPalabras(comanda('lista', { enElMeson: 1 }), 'dia')).toBe('Lista en la bandeja: una pieza')
   })
 
   it('los demás, con su nombre de noche y de día', () => {

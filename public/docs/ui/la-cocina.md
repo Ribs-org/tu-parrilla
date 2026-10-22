@@ -59,7 +59,7 @@ para programar.». Después, una línea con un punto de color:
 
 Debajo, el subtítulo «Las comandas» y, a su derecha, el botón anaranjado «Pedir una comanda»,
 que lleva a pedir una (ver «Pedir una comanda», abajo). Si hay algo esperando en el mesón, antes
-va el botón «El mesón (<N>)» —de día, «La vitrina (<N>)»—, que lleva al mesón (ver «El mesón»,
+va el botón «El mesón (<N>)» —de día, «La bandeja (<N>)»—, que lleva al mesón (ver «El mesón»,
 abajo). Sin ninguna comanda, «Todavía no tienes
 comandas.». Con comandas, una tarjeta por comanda, de la más nueva a la más vieja (las últimas
 50). Cada tarjeta trae:
@@ -77,7 +77,7 @@ comandas.». Con comandas, una tarjeta por comanda, de la más nueva a la más v
 - «Hora estimada: <fecha y hora>», si se sabe: la da el chef al tomarla y la corrige en cada
   paso; mientras espera, sale de la fila y de lo que tarda una comanda en promedio;
 - «El chef: «<mensaje>»», si el chef dejó un mensaje en el último paso;
-- «Ver en el mesón →» —de día, «Ver en la vitrina →»—, si algo de esa comanda espera en el mesón:
+- «Ver en el mesón →» —de día, «Ver en la bandeja →»—, si algo de esa comanda espera en el mesón:
   lleva al mesón con solo lo de esa comanda;
 - en una rechazada o que no se pudo terminar, el motivo que escribió el chef, en palabras;
 - «Lo que pasó», un desplegable con cada paso: la fecha y hora, el estado y, si lo hubo, el
@@ -99,7 +99,7 @@ comandas.». Con comandas, una tarjeta por comanda, de la más nueva a la más v
 | «Cancelada» | La canceló la persona. | La persona |
 
 De día, «El chef mira la res» es «El chef mira el atún», «El desposte» es «El despiece», «Al
-fuego» es «Armando las piezas», el mesón es «la vitrina», los cortes son piezas y «No se puede
+fuego» es «Armando las piezas», el mesón es «la bandeja», los cortes son piezas y «No se puede
 cocinar» es «No se puede preparar» (ver «El modo día» en [index.md](index.md)).
 
 ### Pedir una comanda
@@ -197,16 +197,16 @@ aparece arriba de todo, «Comanda colgada».
 
 ### El mesón
 
-`/admin/ia/meson` —de día, la vitrina—: lo que el chef entregó, listo para revisar y programar o
+`/admin/ia/meson` —de día, la bandeja—: lo que el chef entregó, listo para revisar y programar o
 descartar. Se llega con «El mesón (<N>)» o con «Ver en el mesón →» de una comanda, que agrega
 `?comanda=<id>` y muestra solo esa. Solo con la cocina encendida. Mientras se está acá, la pestaña
 «La Cocina» queda marcada.
 
-**Ojo con el nombre de día:** «La vitrina» es también el nombre de tus páginas públicas (La
-Vitrina, en Ajustes). Si la persona dice «la vitrina» hablando de videos que le entregó el chef,
-es el mesón; si habla de su página de links, es La Vitrina ([la-vitrina.md](la-vitrina.md)).
+No es La Vitrina, que son las páginas públicas ([la-vitrina.md](la-vitrina.md)). Si la persona
+dice «la vitrina» hablando de los videos que le entregó el chef, casi seguro quiere decir el mesón:
+el primer día se llamó así de día, y después pasó a llamarse «La bandeja».
 
-Arriba, el enlace «← La Cocina», el título «El mesón» (de día, «La vitrina») y el párrafo «Lo que
+Arriba, el enlace «← La Cocina», el título «El mesón» (de día, «La bandeja») y el párrafo «Lo que
 el chef te entregó, listo para programar. Las versiones de una misma pieza —la misma idea en
 estilos distintos— van juntas. Programa las que te gusten y descarta las que no, diciendo por qué:
 el chef aprende de eso. Lo que nadie programa en 30 días se borra solo.». Con una sola comanda,
@@ -214,7 +214,7 @@ debajo, «Ver todo el mesón». Si hay creativos que
 se pasaron a un borrador y todavía no se programaron: «<N> esperan en tus borradores de La
 Parrilla, con sus cuentas y su hora por elegir.» y el enlace «Ver los borradores».
 
-Sin nada, «Todavía no hay nada en el mesón.» (de día, «… en la vitrina.»). Con algo, un bloque por
+Sin nada, «Todavía no hay nada en el mesón.» (de día, «… en la bandeja.»). Con algo, un bloque por
 comanda, de la más nueva a la más vieja, con el nombre del plato principal de título y «Pedida el
 <fecha>» debajo. Adentro, lo entregado por pieza: «Pieza «<pieza>» · <N> estilos» y sus versiones
 una al lado de la otra (en el teléfono, de a dos). Cada creativo es una tarjeta:
@@ -530,8 +530,7 @@ obligatorio, en su idioma.
 - **«¿Cuánto se guarda lo que subí?».** Hasta 14 días después de terminada la comanda (cancelada,
   rechazada, que no se pudo terminar, o servida). Lo que se subió y no se pidió, tres días.
 - **«¿Dónde está lo que me cocinó el chef?».** En el mesón: La Cocina → «El mesón (<N>)», o «Ver en
-  el mesón →» en la comanda. De día se llama «La vitrina», pero no es La Vitrina de las páginas
-  públicas.
+  el mesón →» en la comanda. De día se llama «La bandeja».
 - **«Apreté Programar y no lo programé».** Quedó en un borrador de La Parrilla («Borradores (<N>)»),
   con todo puesto: abrirlo, marcar las cuentas y la hora, y «Programar». Si se descarta el
   borrador, el creativo vuelve al mesón.

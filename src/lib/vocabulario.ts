@@ -115,11 +115,11 @@ export const MANUAL: Record<Tema, string> = { noche: 'El manual del parrillero',
 
 /**
  * Lo que el chef entregó y espera que el dueño lo programe, dentro de La Cocina: en una parrilla,
- * los cortes esperan en el mesón; en una barra de sushi, las piezas se exhiben en la vitrina. De día
- * se llama como La Vitrina, la de las páginas públicas: el nombre está por decidirse
- * (`docs/pendientes.md`), y la wiki lo advierte.
+ * los cortes esperan en el mesón; en una barra de sushi, las piezas salen en la bandeja, como la
+ * que se pide en Chile. No es «la vitrina», que sería lo natural, porque La Vitrina ya son las
+ * páginas públicas: lo decidió el dueño el 2026-10-22.
  */
-export const MESON: Record<Tema, string> = { noche: 'El mesón', dia: 'La vitrina' }
+export const MESON: Record<Tema, string> = { noche: 'El mesón', dia: 'La bandeja' }
 
 /** Lo que dice el destino de una cuenta con el fierro frío: de día, el cuchillo perdió el filo. */
 export const FIERRO_FRIO: Record<Tema, string> = {

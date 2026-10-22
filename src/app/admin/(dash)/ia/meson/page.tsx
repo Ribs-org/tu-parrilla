@@ -11,7 +11,7 @@ import { TarjetaDelCreativo } from './tarjeta'
 export const dynamic = 'force-dynamic'
 
 /**
- * El mesón —de día, la vitrina—: lo que el chef entregó, por comanda y por pieza, para revisarlo y
+ * El mesón —de día, la bandeja—: lo que el chef entregó, por comanda y por pieza, para revisarlo y
  * programarlo o descartarlo (`docs/superpowers/specs/2026-10-22-la-cocina-design.md`, «El mesón»).
  * Con `?comanda=`, solo lo de esa. Solo con la cocina encendida.
  */
@@ -41,7 +41,7 @@ export default async function MesonPage({ searchParams }: { searchParams: Promis
         </p>
         {soloUna ? (
           <Link href="/admin/ia/meson" className="mt-2 inline-block text-sm text-brasa underline-offset-2 hover:underline">
-            <DeNocheYDeDia noche="Ver todo el mesón" dia="Ver toda la vitrina" />
+            <DeNocheYDeDia noche="Ver todo el mesón" dia="Ver toda la bandeja" />
           </Link>
         ) : null}
         {enBorradores > 0 ? (
@@ -57,7 +57,7 @@ export default async function MesonPage({ searchParams }: { searchParams: Promis
 
       {meson.length === 0 ? (
         <p className="text-sm text-fg-faint">
-          <DeNocheYDeDia noche="Todavía no hay nada en el mesón." dia="Todavía no hay nada en la vitrina." />
+          <DeNocheYDeDia noche="Todavía no hay nada en el mesón." dia="Todavía no hay nada en la bandeja." />
         </p>
       ) : (
         <div className="space-y-6">

@@ -57,7 +57,7 @@ el chef pregunta, y una forma de decirle qué no gustó.
 - el resumen del día y los correos;
 - el modo día, con su vocabulario y sus dibujos.
 
-Lo que falta es lo que los une: la comanda, los insumos en el almacén, la vitrina de lo
+Lo que falta es lo que los une: la comanda, los insumos en el almacén, el mesón de lo
 entregado y el contrato con el chef.
 
 ## Las decisiones de fondo
@@ -83,7 +83,7 @@ tabla está en «Los insumos y sus dibujos».
 ### 3. Todo en el almacén de Tu Parrilla, no en Drive
 
 El usuario sube a Tu Parrilla, el chef baja de ahí con un enlace firmado, y lo que entrega vuelve
-como media a la vitrina del usuario, lista para programar. Drive deja de estar en el camino: hoy
+como media al mesón del usuario, lista para programar. Drive deja de estar en el camino: hoy
 es el cuello de botella (carpetas públicas por enlace, el tope de unos 100 MB del enlace
 directo, la lentitud). Un largo crudo pesa varios GB, así que la subida es por partes y se puede
 retomar («Subir archivos grandes»).
@@ -180,7 +180,7 @@ ya «El chef de la casa».
 
 El chef no usa la llave de API de cada usuario para cocinar: con la credencial de la cocina solo ve
 lo que una comanda le entrega, y no puede programar, borrar ni leer nada más de nadie. Lo que
-programa es el usuario, desde la vitrina. Apagar la cocina en el panel es despedir al chef.
+programa es el usuario, desde el mesón. Apagar la cocina en el panel es despedir al chef.
 
 ## Cómo se ve
 
@@ -202,18 +202,18 @@ Dentro de «El chef de la casa» hay cuatro lugares:
 | Lugar | De noche | De día | Qué hay |
 |---|---|---|---|
 | Las comandas | «Las comandas» | «Las comandas» | Pedir una nueva y seguir las que van: su estado dibujado, la hora estimada, las preguntas del chef |
-| Lo entregado | **«El mesón»** | **«La vitrina»** | Los creativos listos, por comanda y por estilo: revisar, comentar, descartar, programar |
+| Lo entregado | **«El mesón»** | **«La bandeja»** | Los creativos listos, por comanda y por estilo: revisar, comentar, descartar, programar |
 | La marca | «Tu marca» | «Tu marca» | Los condimentos: nombre, @, colores, letras, logo, música, CTA |
 | Los estilos | «Tu paleta» | «Tu paleta» | Los estilos que usa tu marca, sus ajustes y sus pesos, y el probador |
 
 El porqué del nombre de lo entregado: en una parrilla, los cortes esperan en el **mesón** antes de
-ir al fuego; en una barra de sushi, las piezas se exhiben en la **vitrina**. Lo que está ahí todavía
+ir al fuego; en una barra de sushi, las piezas salen en la **bandeja**. Lo que está ahí todavía
 no está programado: cuando se programa, pasa a La Parrilla (de día, La Barra), como cualquier post.
 Las dos palabras van a `PALABRAS_DE_DIA` y a la wiki.
 
-**Por decidir:** «La vitrina» ya nombra tus páginas públicas (`/admin/profiles`), en los dos modos.
-Antes de construir el mesón hay que elegir otra palabra de día; la propuesta es «La bandeja» (ver
-`docs/pendientes.md`).
+De día se pensó primero en «La vitrina», donde se exhibe el pescado, pero ese nombre ya es de las
+páginas públicas (`/admin/profiles`), en los dos modos. El dueño eligió «La bandeja» el 2026-10-22,
+como la bandeja de sushi que se pide en Chile.
 
 ### Tu marca: los condimentos
 
@@ -310,7 +310,7 @@ Una tarjeta por comanda, la más reciente arriba. Cada una muestra:
 Cuando el chef pregunta, la tarjeta se pone de color y trae la pregunta con su campo de respuesta (o
 sus opciones), y la pestaña lleva un aviso, como «Se quemó». Responder la devuelve al chef.
 
-### El mesón (de día, la vitrina)
+### El mesón (de día, la bandeja)
 
 Lo entregado, por comanda y dentro de ella **por pieza**: varios creativos son la misma idea en
 estilos distintos (el clip 08 en golpes, en cinética y en pantalla animada), y se ven juntos, uno al
@@ -412,8 +412,8 @@ noche, como entraña), y confundirlo con un insumo rompería la lectura.
 | `probando` | opcional: un clip en cada estilo, para elegir antes de cocinar todo. Espera la elección | «La degustación» | «La degustación» | el chef → el usuario |
 | `pregunta` | el chef necesita una respuesta. Espera; responder la devuelve al estado de antes | «El chef te pregunta» | «El chef te pregunta» | el chef → el usuario |
 | `en_el_horno` | render y armado, en la cola del chef. Son horas | «Al fuego» | «Armando las piezas» | el chef |
-| `sirviendo` | algunas tandas ya están en el mesón y otras siguen en el horno | «Sirviendo: 3 de 5 tandas en el mesón» | «Sirviendo: 3 de 5 tandas en la vitrina» | el chef, al subir cada tanda |
-| `lista` | todas las tandas están en el mesón, por revisar | «Listo: N cortes en el mesón» | «Listo: N piezas en la vitrina» | el chef |
+| `sirviendo` | algunas tandas ya están en el mesón y otras siguen en el horno | «Sirviendo: 3 de 5 tandas en el mesón» | «Sirviendo: 3 de 5 tandas en la bandeja» | el chef, al subir cada tanda |
+| `lista` | todas las tandas están en el mesón, por revisar | «Listo: N cortes en el mesón» | «Listo: N piezas en la bandeja» | el chef |
 | `servida` | cerrada: el usuario programó o descartó lo que quiso | «Servida» | «Servida» | el usuario, o sola a los 30 días, cuando vence lo que quedó en el mesón |
 | `rechazada` | fuera de alcance, con el motivo, al revisar. No consume cupo | «No se puede cocinar» | «No se puede preparar» | el chef |
 | `cancelada` | la canceló el usuario antes del horno. Devuelve el cupo | «Cancelada» | «Cancelada» | el usuario |
@@ -671,8 +671,9 @@ Las contestó el 2026-10-22, sobre las ocho preguntas que este diseño dejaba ab
 1. **La Cocina reemplaza a Tu IA**, y adentro sigue «Tu propio chef» para quien quiere usar su propio
    Claude: como mínimo, generar la llave y saber dónde están las guías. Un comando que lo conecte en
    un paso queda como idea, sin complicarlo ahora.
-2. **Los nombres, aprobados:** La Cocina, Las comandas, El mesón de noche y La vitrina de día, y los
-   insumos de la tabla, con la piscola en vez del vino.
+2. **Los nombres, aprobados:** La Cocina, Las comandas, El mesón de noche y, de día, La bandeja,
+   y los insumos de la tabla, con la piscola en vez del vino. Primero se aprobó «La vitrina» de
+   día; ese mismo día se cambió por «La bandeja», porque La Vitrina ya son las páginas públicas.
 3. **El cupo se construye, pero parte sin tope:** primero ver la cocina funcionando. El número, y el
    precio, después.
 4. **Los insumos se guardan 14 días** después de servida la comanda. Lo que nadie programó en el
