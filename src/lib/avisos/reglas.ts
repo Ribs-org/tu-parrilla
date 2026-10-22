@@ -343,7 +343,7 @@ export function correoDeResumen(
 
   if (r.meson.length > 0) {
     const total = r.meson.reduce((suma, m) => suma + m.cuantos, 0)
-    const donde = tema === 'dia' ? 'en la vitrina' : 'en el mesón'
+    const donde = tema === 'dia' ? 'en la bandeja' : 'en el mesón'
     partes.push(plural(total, `creativo por vencer ${donde}`, `creativos por vencer ${donde}`))
     lineas.push(`${MESON[tema]}: lo que nadie programa en 30 días se borra (${total}):`)
     for (const m of r.meson) {

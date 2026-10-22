@@ -218,8 +218,8 @@ vale para la de día:
 | «El chef mira la res» | «El chef mira el atún» | El estado de una comanda, en La Cocina |
 | «El desposte» | «El despiece» | El estado de una comanda |
 | «Al fuego» | «Armando las piezas» | El estado de una comanda |
-| «El mesón» | «La vitrina» | Lo que el chef entregó, en La Cocina. **No es La Vitrina** de las páginas públicas, aunque de día se llame igual |
-| «Lista en el mesón» | «Lista en la vitrina» | El estado de una comanda; el mesón también al servir: «Sirviendo: 3 de 5 tandas en la vitrina» |
+| «El mesón» | «La bandeja» | Lo que el chef entregó, en La Cocina. No es La Vitrina, las páginas públicas |
+| «Lista en el mesón» | «Lista en la bandeja» | El estado de una comanda; el mesón también al servir: «Sirviendo: 3 de 5 tandas en la bandeja» |
 | «No se puede cocinar» | «No se puede preparar» | El estado de una comanda que el chef rechazó |
 
 Y unas frases enteras: en Los Fierros, «Este fierro se está enfriando: la conexión vence <fecha>.

@@ -929,7 +929,7 @@ export const subidas = pgTable(
 
 /**
  * Lo que el chef entrega: un video, un carrusel o una imagen, con sus textos, su pieza y su estilo,
- * listo para programar. Vive en el mesón (de día, la vitrina) hasta que se programa o se descarta;
+ * listo para programar. Vive en el mesón (de día, la bandeja) hasta que se programa o se descarta;
  * lo que nadie programó vence a los 30 días (`expiraEn`; el barrido que lo borra llega con el mesón). Sus archivos van en la carpeta del
  * dueño (`scheduled/<dueño>/cocina/…`), así que programarlo no los vuelve a bajar. `ref` evita
  * duplicarlo si el chef lo reenvía.

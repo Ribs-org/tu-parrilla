@@ -444,7 +444,7 @@ formulario viene abierto, con el cursor en «Texto». En este orden:
 
    Si el borrador viene del mesón de La Cocina (se abrió con «Programar» en un creativo), antes del
    texto va un recuadro: «Viene del mesón, en el estilo «<estilo>»: lleva su portada y sus
-   atributos.» (de día, «Viene de la vitrina…»), y el campo **«Título de YouTube»**, con lo que
+   atributos.» (de día, «Viene de la bandeja…»), y el campo **«Título de YouTube»**, con lo que
    escribió el chef y la ayuda «En YouTube va como primera línea del texto, que es de donde
    YouTube saca el título. Hasta 100 caracteres. Vacío, YouTube usa la primera línea del texto.».
    Solo cuenta si se marca una cuenta de YouTube. Al programarlo, el post lleva la portada y los

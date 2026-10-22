@@ -649,7 +649,7 @@ export function Composer({
           {creativo ? (
             <div className="space-y-3 rounded-lg border border-acero-700 p-3">
               <p className="text-sm text-fg-muted">
-                <DeNocheYDeDia noche="Viene del mesón" dia="Viene de la vitrina" />
+                <DeNocheYDeDia noche="Viene del mesón" dia="Viene de la bandeja" />
                 {creativo.estilo ? `, en el estilo «${creativo.estilo}»` : ''}: lleva su portada y sus atributos.
               </p>
               <Field

@@ -157,7 +157,7 @@ function Tarjeta({
           href={`/admin/ia/meson?comanda=${c.id}`}
           className="mt-2 inline-block text-sm text-brasa underline-offset-2 hover:underline"
         >
-          <DeNocheYDeDia noche="Ver en el mesón →" dia="Ver en la vitrina →" />
+          <DeNocheYDeDia noche="Ver en el mesón →" dia="Ver en la bandeja →" />
         </Link>
       ) : null}
       {c.cancelable ? (

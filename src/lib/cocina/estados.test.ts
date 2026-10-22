@@ -73,9 +73,9 @@ describe('lo demás de los estados', () => {
     expect(esEstado(3)).toBe(false)
   })
 
-  it('el «3 de 5» en el mesón de noche y en la vitrina de día', () => {
+  it('el «3 de 5» en el mesón de noche y en la bandeja de día', () => {
     expect(tandasEnPalabras(3, 5, 'noche')).toBe('3 de 5 tandas en el mesón')
-    expect(tandasEnPalabras(1, 1, 'dia')).toBe('1 de 1 tanda en la vitrina')
+    expect(tandasEnPalabras(1, 1, 'dia')).toBe('1 de 1 tanda en la bandeja')
     expect(tandasEnPalabras(2, null, 'noche')).toBe('2 tandas en el mesón')
   })
 })

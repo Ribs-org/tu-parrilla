@@ -17,16 +17,16 @@ export const NOMBRE_ESTADO: Record<EstadoComanda, Record<Tema, string>> = {
   pregunta: { noche: 'El chef te pregunta', dia: 'El chef te pregunta' },
   en_el_horno: { noche: 'Al fuego', dia: 'Armando las piezas' },
   sirviendo: { noche: 'Sirviendo', dia: 'Sirviendo' },
-  lista: { noche: 'Lista en el mesón', dia: 'Lista en la vitrina' },
+  lista: { noche: 'Lista en el mesón', dia: 'Lista en la bandeja' },
   servida: { noche: 'Servida', dia: 'Servida' },
   rechazada: { noche: 'No se puede cocinar', dia: 'No se puede preparar' },
   cancelada: { noche: 'Cancelada', dia: 'Cancelada' },
   fallida: { noche: 'No se pudo terminar', dia: 'No se pudo terminar' },
 }
 
-/** «3 de 5 tandas en el mesón» (de día, en la vitrina), o solo cuántas si el total no se sabe. */
+/** «3 de 5 tandas en el mesón» (de día, en la bandeja), o solo cuántas si el total no se sabe. */
 export function tandasEnPalabras(servidas: number, total: number | null, tema: Tema): string {
-  const donde = tema === 'dia' ? 'en la vitrina' : 'en el mesón'
+  const donde = tema === 'dia' ? 'en la bandeja' : 'en el mesón'
   const tandas = (n: number) => (n === 1 ? 'tanda' : 'tandas')
   if (total && total > 0) return `${servidas} de ${total} ${tandas(total)} ${donde}`
   return `${servidas} ${tandas(servidas)} ${donde}`

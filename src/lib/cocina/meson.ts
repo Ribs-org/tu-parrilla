@@ -3,7 +3,7 @@ import { borradorMedia, borradores, comandaEventos, comandas, creativoMedia, cre
 import { borrar } from '@/lib/storage'
 import { DIAS_INSUMO } from './panel'
 
-// El mesón (de día, la vitrina): lo que el chef entregó y espera que el dueño lo programe o lo
+// El mesón (de día, la bandeja): lo que el chef entregó y espera que el dueño lo programe o lo
 // descarte (`docs/superpowers/specs/2026-10-22-la-cocina-design.md`, «El mesón»). Se agrupa por
 // comanda y, dentro, por pieza: la misma idea en estilos distintos va junta. Todo por dueño.
 
