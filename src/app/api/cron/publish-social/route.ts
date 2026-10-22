@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { vigilarConexiones } from '@/lib/avisos/run'
 import { sondearComentarios } from '@/lib/social/comentarios/run'
 import { publishDue } from '@/lib/social/publish/run'
+import { barrerCocina } from '@/lib/cocina/barrido'
 import { barrerSubidas } from '@/lib/cocina/subidas'
 import { barrerHuerfanos } from '@/lib/storage-gc'
 import { env } from '@/lib/env'
@@ -26,7 +27,8 @@ const MARGEN_MS = 10_000
 /**
  * El barrido de huérfanos va una vez por hora y no en cada corrida: lista el almacén entero
  * y lee completa cada tabla que guarda un archivo (`COLUMNAS_DE_ARCHIVO`), y cada cinco minutos
- * eso era tráfico de la base para nada. El de las subidas de la cocina va con él.
+ * eso era tráfico de la base para nada. Los dos de la cocina —el de las subidas y el de la
+ * retención— van con él.
  * Le toca a la corrida que empieza en los primeros cinco minutos de la hora —con el pinger
  * cada cinco minutos, siempre hay una— y que no viene atrasada: una que ya gastó su mitad
  * publicando lo deja para la hora siguiente. El barrido espera de todos modos una hora antes
@@ -90,8 +92,11 @@ export async function GET(request: Request) {
     // Las subidas de la cocina: las abiertas y abandonadas, y lo subido que nunca llegó a una
     // comanda. Tampoco lanza (`barrerSubidas`).
     const subidas = toca ? await barrerSubidas() : null
+    // La retención de la cocina: lo crudo a los 14 días de terminada su comanda, y lo que pasó 30
+    // días en el mesón sin programarse. Tampoco lanza (`barrerCocina`).
+    const cocina = toca ? await barrerCocina() : null
     marca('barrido')
-    return NextResponse.json({ report, conexiones, comentarios, barrido, subidas })
+    return NextResponse.json({ report, conexiones, comentarios, barrido, subidas, cocina })
   } catch (error) {
     console.error('Falló la corrida de publicación:', error)
     return NextResponse.json({ error: 'La publicación falló por completo.' }, { status: 500 })

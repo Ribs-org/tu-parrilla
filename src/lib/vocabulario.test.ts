@@ -102,7 +102,9 @@ describe('el modo día', () => {
           .map(({ renglon, texto }) => `${relative(raiz, archivo)}:${renglon}: ${texto.trim().slice(0, 80)}`),
       )
     expect(hallazgos).toEqual([])
-  })
+    // Lee cada archivo del panel, así que tarda lo que crece el repositorio: bajo la carga de la
+    // suite entera pasaba los 5 segundos de siempre (`docs/deuda-tecnica.md`, la suite que falla).
+  }, 20_000)
 })
 
 describe('el vocabulario del panel', () => {

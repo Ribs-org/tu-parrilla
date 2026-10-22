@@ -93,7 +93,7 @@ comandas.». Con comandas, una tarjeta por comanda, de la más nueva a la más v
 | «Al fuego» | Se arman las piezas en cada estilo. Son horas. | El chef |
 | «Sirviendo: 3 de 5 tandas en el mesón» | Llegaron algunas tandas al mesón y otras siguen en el horno. «Sirviendo: 2 tandas en el mesón» si el chef no sabe cuántas van a ser. | El chef, con cada tanda |
 | «Lista en el mesón: N cortes» | Todo llegó al mesón. | El chef |
-| «Servida» | Todo lo que entregó se programó o se descartó: la comanda se cerró sola. | Sola |
+| «Servida» | Todo lo que entregó se programó, se descartó o venció a los 30 días: la comanda se cerró sola. | Sola |
 | «No se puede cocinar» | El chef la rechazó al revisarla, por algo fuera de alcance. El motivo va debajo. | El chef |
 | «No se pudo terminar» | Algo se rompió. El motivo va debajo. | El chef |
 | «Cancelada» | La canceló la persona. | La persona |
@@ -209,7 +209,8 @@ es el mesón; si habla de su página de links, es La Vitrina ([la-vitrina.md](la
 Arriba, el enlace «← La Cocina», el título «El mesón» (de día, «La vitrina») y el párrafo «Lo que
 el chef te entregó, listo para programar. Las versiones de una misma pieza —la misma idea en
 estilos distintos— van juntas. Programa las que te gusten y descarta las que no, diciendo por qué:
-el chef aprende de eso.». Con una sola comanda, debajo, «Ver todo el mesón». Si hay creativos que
+el chef aprende de eso. Lo que nadie programa en 30 días se borra solo.». Con una sola comanda,
+debajo, «Ver todo el mesón». Si hay creativos que
 se pasaron a un borrador y todavía no se programaron: «<N> esperan en tus borradores de La
 Parrilla, con sus cuentas y su hora por elegir.» y el enlace «Ver los borradores».
 
@@ -220,6 +221,7 @@ una al lado de la otra (en el teléfono, de a dos). Cada creativo es una tarjeta
 
 - el video, que se reproduce ahí mismo, con su portada antes de darle play; o la primera lámina
   del carrusel con «<N> láminas» encima y las demás en chico debajo;
+- en su última semana, en ámbar, «Se borra el <fecha> si no lo programas.»;
 - «Estilo: <estilo> · <N> s» y, en etiquetas, lo que rotó: la letra, la entrada, la música;
 - «Título de YouTube: …», si el chef lo escribió;
 - «El texto», un desplegable con el texto que propone el chef;
@@ -488,6 +490,7 @@ Al final de la pantalla, «El manual del parrillero →». Adentro, elegir la p�
 | «Uno de los archivos pasó a otra comanda mientras pedías: recarga la página y revisa la comanda.» | Otra pestaña colgó una comanda con el mismo archivo justo a la vez. | Recargar y mirar La Cocina: la comanda puede estar ya colgada. |
 | «¿Sacar «<archivo>»? Se borra de la cocina.» | Confirmación antes de borrar un archivo de «Ya subiste». | Aceptar para borrarlo; cancelar para dejarlo. |
 | «Todavía no hay nada en el mesón.» | El chef no ha entregado nada, o todo se programó o se descartó. | Nada. |
+| «Se borra el <fecha> si no lo programas.» | Ese creativo lleva más de tres semanas en el mesón: a los 30 días se borra solo. El resumen del día lo avisa también. | Programarlo o descartarlo antes de esa fecha. |
 | «Ese creativo ya no está en el mesón.» | Se programó o se descartó entre que se cargó la página y se apretó el botón (por ejemplo, en otra pestaña). | Recargar el mesón. Si se programó, está en los borradores de La Parrilla. |
 | «Elige por qué no sirvió: el corte, la letra, el tema o el audio.» | Se intentó descartar sin motivo. | Elegir uno de los cuatro. |
 | «La nota cabe en 500 caracteres.» | La nota del descarte es demasiado larga. | Acortarla. |
@@ -521,6 +524,11 @@ obligatorio, en su idioma.
   material. Lo que se quiera destacar o evitar va en «Qué destacar o qué evitar».
 - **«¿Puedo pedir desde la app del teléfono?».** No: la app no tiene La Cocina. Desde el navegador
   del teléfono sí se puede, pero un video de varios GB sube mejor desde el computador.
+- **«Algo desapareció del mesón».** Lo que nadie programa en 30 días se borra solo; en su última
+  semana, la tarjeta y el resumen del día lo avisan. Lo que se pasó a un borrador no vence: está en
+  los borradores de La Parrilla.
+- **«¿Cuánto se guarda lo que subí?».** Hasta 14 días después de terminada la comanda (cancelada,
+  rechazada, que no se pudo terminar, o servida). Lo que se subió y no se pidió, tres días.
 - **«¿Dónde está lo que me cocinó el chef?».** En el mesón: La Cocina → «El mesón (<N>)», o «Ver en
   el mesón →» en la comanda. De día se llama «La vitrina», pero no es La Vitrina de las páginas
   públicas.
@@ -602,6 +610,7 @@ Sale de:
   «Descartar» con sus motivos.
 - `src/lib/cocina/meson.ts` y `src/lib/cocina/meson-motivos.ts`: qué se ve en el mesón, el
   borrador que abre «Programar», qué hace descartar y cuándo una comanda queda servida.
+- `src/lib/cocina/barrido.ts`: lo que se borra solo, cuándo, y desde cuándo avisa la tarjeta.
 - `src/lib/social/publish/crear.ts`: lo que el post se lleva del creativo al programarse.
 - `src/lib/cocina/panel.ts`: qué comandas se ven, cuántas van antes, la hora estimada de la fila,
   los diez minutos sin señal y qué hace cancelar.

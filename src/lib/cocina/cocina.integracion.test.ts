@@ -177,8 +177,16 @@ describe.skipIf(!URL_PRUEBAS)('la API de la cocina, contra una Postgres de verda
     const cambiar = (cuerpo: unknown) => POST(pedido(`/api/cocina/comandas/${c.id}/estado`, cuerpo), params(c.id))
 
     expect((await cambiar({ estado: 'rechazada' })).status).toBe(400)
+    const crudo = await insumo(conCocina, c.id)
+    const antes = Date.now()
     const r = await cambiar({ estado: 'rechazada', motivo: 'El video está en inglés: por ahora el chef trabaja en español.' })
     expect(r.status).toBe(200)
+    // Rechazada, lo crudo se guarda 14 días más y lo borra el barrido de la cocina.
+    const { insumos } = await esquema()
+    const [fila] = await (await db()).select().from(insumos).where(eq(insumos.id, crudo.id))
+    const plazo = (fila!.expiraEn!.getTime() - antes) / 86_400_000
+    expect(plazo).toBeGreaterThan(13.99)
+    expect(plazo).toBeLessThan(14.01)
     expect((await cambiar({ estado: 'en_preparacion' })).status).toBe(409)
   })
 

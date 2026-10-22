@@ -1,3 +1,4 @@
+import { DIAS_DE_AVISO } from '@/lib/cocina/barrido'
 import type { CreativoDelMeson } from '@/lib/cocina/meson'
 import { AccionesDelCreativo } from './acciones'
 
@@ -9,7 +10,9 @@ const YA_A_LA_VISTA = new Set(['estilo', 'pieza'])
  * carrusel; su estilo y lo que rotó; el título de YouTube y el texto que propone el chef; y
  * «Programar» y «Descartar».
  */
-export function TarjetaDelCreativo({ creativo: c }: { creativo: CreativoDelMeson }) {
+export function TarjetaDelCreativo({ creativo: c, ahora, zona }: { creativo: CreativoDelMeson; ahora: Date; zona: string }) {
+  // En su última semana, dice cuándo se borra: el resumen del día lo avisa también.
+  const porVencer = c.expiraEn && c.expiraEn.getTime() - ahora.getTime() < DIAS_DE_AVISO * 86_400_000 ? c.expiraEn : null
   const otros = Object.entries(c.atributos).filter(([clave]) => !YA_A_LA_VISTA.has(clave))
   const primera = c.media[0]
   return (
@@ -42,6 +45,11 @@ export function TarjetaDelCreativo({ creativo: c }: { creativo: CreativoDelMeson
       ) : null}
 
       <div className="mt-3 min-w-0 flex-1 space-y-2 text-sm">
+        {porVencer ? (
+          <p className="text-xs text-caution">
+            Se borra el {new Intl.DateTimeFormat('es-CL', { dateStyle: 'medium', timeZone: zona }).format(porVencer)} si no lo programas.
+          </p>
+        ) : null}
         <p className="text-xs text-fg-faint">
           {c.estilo ? `Estilo: ${c.estilo}` : 'Sin estilo'}
           {c.duracionS ? ` · ${Math.round(c.duracionS)} s` : ''}

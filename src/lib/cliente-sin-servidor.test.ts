@@ -92,7 +92,9 @@ describe('lo del navegador no alcanza código de servidor', () => {
     expect(delNavegador.length).toBeGreaterThan(20)
   })
 
+  // Recorre cada archivo del sitio, así que tarda lo que crece el repositorio: bajo la carga de la
+  // suite entera pasaba los 5 segundos de siempre (`docs/deuda-tecnica.md`, la suite que falla).
   it('ninguno alcanza el ORM, la base, node:, server-only, postgres ni next/headers', () => {
     expect(delNavegador.flatMap(alcanzados)).toEqual([])
-  })
+  }, 20_000)
 })

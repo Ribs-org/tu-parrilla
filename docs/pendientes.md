@@ -46,9 +46,17 @@ sección.
     - pedir desde el panel: el formulario con la subida por partes, la marca básica y el dibujo de
       cada insumo;
     - el mesón: programar por un borrador, con la portada, los atributos y el título de YouTube, y
-      descartar con motivo.
-  - **Lo siguiente:** los barridos de 14 días (lo crudo) y de 30 (lo que nadie programó en el
-    mesón), con el aviso una semana antes. Con eso se cierra la fase 0.
+      descartar con motivo;
+    - los barridos de 14 días (lo crudo) y de 30 (lo que nadie programó), con su aviso en el
+      resumen del día.
+
+    Con eso está la fase 0 entera.
+  - **Lo siguiente, la fase 1:**
+    - las preguntas del chef con plazo y opción por defecto;
+    - el probador («Prueba tus estilos», las comandas de tipo `prueba`);
+    - el `reestilo` («Otros estilos con el mismo material»).
+
+    El diseño dice qué trae cada una.
   - **[dueño]** Generar `COCINA_SECRET` y ponerla en Vercel (Production) y en el servidor del
     chef. Sin ella, la API de la cocina responde `401`.
   - **[dueño] Probar una vez la subida por partes contra el almacén de verdad** (2026-10-22). En

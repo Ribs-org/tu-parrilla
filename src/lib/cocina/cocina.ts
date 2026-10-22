@@ -30,6 +30,7 @@ import type { CreativoAnunciado } from './creativo'
 import { baseDeNombre } from './insumos'
 import { TERMINALES, puedePasar } from './estados'
 import { ordenarFila } from './fila'
+import { DIAS_INSUMO } from './panel'
 
 // Lo que la API de la cocina lee y escribe (`/api/cocina/…`, `docs/cocina-api.md`). El chef entra
 // con la credencial de la cocina, no con la llave de un usuario: ve solo las comandas de quien
@@ -218,32 +219,44 @@ export async function cambiarEstado(id: string, cambio: CambioDeEstado, ahora: D
   const terminaMal = cambio.estado === 'rechazada' || cambio.estado === 'fallida'
   if (terminaMal && !cambio.motivo?.trim()) return { falla: 'motivo' }
 
-  const db = getDb()
-  const [escrita] = await db
-    .update(comandas)
-    .set({
+  // El cambio, su paso en la línea de tiempo y, si terminó mal, el vencimiento de lo crudo: las
+  // tres cosas o ninguna.
+  const escrita = await getDb().transaction(async (tx) => {
+    const [fila] = await tx
+      .update(comandas)
+      .set({
+        estado: cambio.estado,
+        mensaje: cambio.mensaje?.trim() || null,
+        ...(cambio.eta !== undefined ? { eta: cambio.eta } : {}),
+        ...(terminaMal ? { motivo: cambio.motivo!.trim() } : {}),
+        ...(cambio.tandas ? { tandasServidas: cambio.tandas.servidas, tandasTotal: cambio.tandas.total } : {}),
+        ...(cambio.estado === 'lista' ? { listaEn: ahora } : {}),
+        actualizadaEn: ahora,
+      })
+      .where(and(eq(comandas.id, id), eq(comandas.estado, actual.estado)))
+      .returning()
+    if (!fila) return null
+    await tx.insert(comandaEventos).values({
+      comandaId: id,
       estado: cambio.estado,
-      mensaje: cambio.mensaje?.trim() || null,
-      ...(cambio.eta !== undefined ? { eta: cambio.eta } : {}),
-      ...(terminaMal ? { motivo: cambio.motivo!.trim() } : {}),
-      ...(cambio.tandas ? { tandasServidas: cambio.tandas.servidas, tandasTotal: cambio.tandas.total } : {}),
-      ...(cambio.estado === 'lista' ? { listaEn: ahora } : {}),
-      actualizadaEn: ahora,
+      mensaje: fila.mensaje ?? (terminaMal ? fila.motivo : null),
+      eta: fila.eta,
+      creadoEn: ahora,
     })
-    .where(and(eq(comandas.id, id), eq(comandas.estado, actual.estado)))
-    .returning()
+    // Rechazada o fallida, lo crudo se guarda `DIAS_INSUMO` más y lo borra el barrido de la cocina.
+    if (terminaMal) {
+      await tx
+        .update(insumos)
+        .set({ expiraEn: new Date(ahora.getTime() + DIAS_INSUMO * 86_400_000) })
+        .where(and(eq(insumos.comandaId, id), isNull(insumos.expiraEn)))
+    }
+    return fila
+  })
   if (!escrita) {
     const ahoraEsta = await leer(id)
     if (!ahoraEsta) return { falla: 'no-existe' }
     return TERMINALES.has(ahoraEsta.estado) ? { falla: 'terminada' } : { falla: 'transicion', de: ahoraEsta.estado }
   }
-  await db.insert(comandaEventos).values({
-    comandaId: id,
-    estado: cambio.estado,
-    mensaje: escrita.mensaje ?? (terminaMal ? escrita.motivo : null),
-    eta: escrita.eta,
-    creadoEn: ahora,
-  })
   return { ok: true, comanda: escrita }
 }
 

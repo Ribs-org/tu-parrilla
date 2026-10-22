@@ -1,8 +1,9 @@
 // La base y el correo de los avisos: la caída de una cuenta y el resumen del día. Las
 // reglas —qué es una caída, qué entra en el resumen, qué dice cada correo— están en
 // `./reglas.ts`, puras; esto solo las alimenta y manda lo que digan.
-import { and, count, desc, eq, gt, gte, inArray, isNotNull, isNull, max, sql } from 'drizzle-orm'
-import { getDb, scheduledPosts, scheduledPostTargets, socialAccounts, users } from '@/db'
+import { and, count, desc, eq, gt, gte, inArray, isNotNull, isNull, lt, max, sql } from 'drizzle-orm'
+import { creativos, getDb, insumos, scheduledPosts, scheduledPostTargets, socialAccounts, users } from '@/db'
+import { DIAS_DE_AVISO } from '@/lib/cocina/barrido'
 import { dominioProducto } from '@/lib/dominios'
 import { destinatario, enviarAviso } from '@/lib/social/publish/alert'
 import { temaDe } from '@/lib/tema'
@@ -17,6 +18,7 @@ import {
   estaCaida,
   pistaCorta,
   type CuentaVigilada,
+  type PorVencer,
   type Resumen,
 } from './reglas'
 
@@ -204,7 +206,34 @@ export async function leerResumen(
       ahora,
       opciones.dias,
     ),
+    meson: await porVencerEnElMeson(ownerId, ahora),
   }
+}
+
+/** Lo que vence en el mesón en los próximos `DIAS_DE_AVISO` días, por comanda, del que vence antes al que vence después. */
+async function porVencerEnElMeson(ownerId: string, ahora: Date): Promise<PorVencer[]> {
+  const db = getDb()
+  const hasta = new Date(ahora.getTime() + DIAS_DE_AVISO * 86_400_000)
+  const filas = await db
+    .select({ comandaId: creativos.comandaId, vence: creativos.expiraEn })
+    .from(creativos)
+    .where(and(eq(creativos.ownerId, ownerId), eq(creativos.estado, 'mesa'), gt(creativos.expiraEn, ahora), lt(creativos.expiraEn, hasta)))
+  if (filas.length === 0) return []
+  const porComanda = new Map<string, { cuantos: number; vence: Date }>()
+  for (const f of filas) {
+    const antes = porComanda.get(f.comandaId)
+    porComanda.set(f.comandaId, {
+      cuantos: (antes?.cuantos ?? 0) + 1,
+      vence: antes && antes.vence < f.vence! ? antes.vence : f.vence!,
+    })
+  }
+  const nombres = await db
+    .select({ comandaId: insumos.comandaId, nombre: insumos.nombre })
+    .from(insumos)
+    .where(and(inArray(insumos.comandaId, [...porComanda.keys()]), eq(insumos.tipo, 'principal')))
+  return [...porComanda]
+    .map(([comandaId, p]) => ({ comanda: nombres.find((n) => n.comandaId === comandaId)?.nombre ?? null, ...p }))
+    .sort((a, b) => a.vence.getTime() - b.vence.getTime())
 }
 
 /**

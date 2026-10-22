@@ -140,7 +140,9 @@ describe('resumenParaApi', () => {
       fallidos: [fallido],
       cuentas: [{ cuentaId: 'ig-1', red: 'instagram', handle: '@vicente', fierro: 'enfriandose', vence: new Date('2026-10-19T15:00:00Z'), motivo: CONEXION_POR_VENCER }],
       pista: [{ cuentaId: 'tt-1', red: 'tiktok', handle: '@tt', ultima: null, dias: 0 }],
+      meson: [{ comanda: 'video9.mp4', cuantos: 2, vence: new Date('2026-10-20T15:00:00Z') }],
     }
+    // Lo del mesón va solo en el correo: la API sigue con sus tres secciones.
     expect(resumenParaApi(r, ZONA, AHORA, { dias: 3, horas: 24 })).toEqual({
       generado: '2026-10-17T09:00:00-03:00',
       horas: 24,
@@ -180,7 +182,7 @@ describe('correoDeCaida', () => {
 })
 
 describe('correoDeResumen', () => {
-  const vacio: Resumen = { fallidos: [], cuentas: [], pista: [] }
+  const vacio: Resumen = { fallidos: [], cuentas: [], pista: [], meson: [] }
 
   it('sin nada que contar no hay correo', () => {
     expect(correoDeResumen(vacio, ZONA, '', AHORA)).toBeNull()
@@ -195,6 +197,7 @@ describe('correoDeResumen', () => {
           { cuentaId: 'ig-1', red: 'instagram', handle: '@vicente', ultima: new Date('2026-10-18T22:00:00Z'), dias: 1 },
           { cuentaId: 'fb-1', red: 'facebook', handle: 'Página', ultima: null, dias: 0 },
         ],
+        meson: [],
       },
       ZONA,
       'https://tu-parrilla.cl',
@@ -207,6 +210,24 @@ describe('correoDeResumen', () => {
     expect(correo.text).toContain('https://tu-parrilla.cl/admin/accounts')
     expect(correo.text).toContain('Facebook · Página — no tiene nada programado.')
     expect(correo.text).toContain('Instagram · @vicente — lo último sale el')
+  })
+
+  it('lo que vence en el mesón: cuántos por comanda y desde cuándo, con su enlace, y de día en la vitrina', () => {
+    const meson = [
+      { comanda: 'video9.mp4', cuantos: 3, vence: new Date('2026-10-20T15:00:00Z') },
+      { comanda: null, cuantos: 1, vence: new Date('2026-10-22T15:00:00Z') },
+    ]
+    const correo = correoDeResumen({ ...vacio, meson }, ZONA, 'https://tu-parrilla.cl', AHORA)!
+    expect(correo.subject).toBe('Tu parrilla hoy: 4 creativos por vencer en el mesón')
+    expect(correo.text).toContain('El mesón: lo que nadie programa en 30 días se borra (4):')
+    expect(correo.text).toContain('- video9.mp4: 3 creativos, desde el')
+    expect(correo.text).toContain('- Una comanda: 1 creativo, desde el')
+    expect(correo.text).toContain('https://tu-parrilla.cl/admin/ia/meson')
+    expect(correo.text).toContain('salvo lo del mesón')
+
+    const deDia = correoDeResumen({ ...vacio, meson: meson.slice(1) }, ZONA, '', AHORA, 'dia')!
+    expect(deDia.subject).toContain('1 creativo por vencer en la vitrina')
+    expect(deDia.text).toContain('La vitrina: lo que nadie programa en 30 días se borra (1):')
   })
 
   it('con muchos quemados nombra los primeros y cuenta el resto', () => {
@@ -222,6 +243,7 @@ describe('correoDeResumen', () => {
         fallidos: [fallido],
         cuentas: [{ cuentaId: 'tt-1', red: 'tiktok', handle: '@tt', fierro: 'frio', vence: null, motivo: CONEXION_FALLO }],
         pista: [{ cuentaId: 'fb-1', red: 'facebook', handle: 'Página', ultima: null, dias: 0 }],
+        meson: [],
       },
       ZONA,
       'https://tu-parrilla.cl',

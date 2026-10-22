@@ -11,7 +11,8 @@ solo. El porqué de cada cosa está en el diseño,
 - el usuario sube su material, pide y sigue su comanda en La Cocina;
 - lo que el chef entrega espera en el mesón, donde el usuario lo programa o lo descarta.
 
-Lo que falta es el barrido que borra lo vencido.
+Lo crudo se borra a los 14 días de terminada su comanda, y lo que nadie programa en 30 días en el
+mesón, también.
 
 ## Cómo se habla
 
@@ -180,8 +181,8 @@ Responde `{ "url": "<GET firmado>", "vence": "<ISO>" }`.
 - Con la comanda terminada: `409`.
 - Un insumo que ya se borró: `404` con `Ese insumo no existe, o ya se borró.`
 
-  Hoy nada los borra. El barrido que falta los va a borrar a los 14 días de terminada la
-  comanda.
+  Se borran a los 14 días de terminada la comanda: cancelada, rechazada, fallida o servida. Una
+  comanda se sirve cuando todo lo que entregó se programó o se descartó.
 
 ### `POST /api/cocina/comandas/{id}/estado`
 
@@ -274,8 +275,9 @@ Responde `201` con:
 ### `POST /api/cocina/creativos/{id}/listo`
 
 Lo cierra después de subir. Tu Parrilla mira que cada archivo esté en el almacén y pese lo
-anunciado. Recién ahí lo pasa a `mesa`: aparece en el mesón del dueño, con vencimiento a 30
-días. El barrido que cumple ese vencimiento todavía no existe.
+anunciado. Recién ahí lo pasa a `mesa`: aparece en el mesón del dueño, con 30 días para
+programarse. Lo que nadie programa en ese plazo se borra y queda descartado con el motivo
+`vencido`, que no es un juicio sobre lo que cocinó el chef.
 
 | Respuesta | Cuándo |
 |---|---|

@@ -1128,7 +1128,8 @@ es el mismo en los dos casos, cambia solo quién lo dispara.
 Cada corrida hace cuatro cosas, en orden: publica lo vencido, vigila las conexiones de las
 cuentas (manda el correo de las que se cayeron; ver «Avisos por correo»), sondea comentarios
 (hasta los 120 segundos de la corrida) y, una vez por hora, barre los archivos huérfanos de
-R2 y las subidas de La Cocina que quedaron a medias (ver «La Cocina»): le toca a la corrida que
+R2, las subidas de La Cocina que quedaron a medias y lo que en La Cocina ya venció (ver «La
+Cocina»): le toca a la corrida que
 empieza en los primeros cinco minutos de la hora, si no viene atrasada. Al terminar cada fase escribe `[cron] <fase> listo a los N ms` en el log, y el
 barrido dice cuántos objetos leyó: si una corrida muere por `maxDuration` (240 s), la fase
 colgada es la primera que no dejó su línea. El barrido tiene un plazo de un minuto por
@@ -1196,10 +1197,11 @@ Tres correos, todos con el remitente `PUBLISH_ALERT_FROM` y al correo del dueño
 - **El resumen del día**: lo que se quemó en las últimas 24 horas y nadie archivó (con la
   cuenta en el modo día, lo que «se echó a perder», como se llama ahí la sección), las cuentas por reconectar
   (frías o a menos de siete días de vencer) y las cuentas en uso —con algo programado en los
-  últimos 30 días— que tienen menos de tres días programados hacia adelante. Sale después de
-  la sincronización diaria (9:00 UTC), y solo los días en que hay algo que contar. Lo mismo
-  se lee por API en `GET /api/schedule/resumen` (ver «Resumen por API»), para que quien
-  programa con un agente se entere aunque los correos le lleguen al dueño.
+  últimos 30 días— que tienen menos de tres días programados hacia adelante. Con La Cocina,
+  también lo que vence en el mesón en los próximos siete días, por comanda. Sale después de
+  la sincronización diaria (9:00 UTC), y solo los días en que hay algo que contar. Lo mismo,
+  salvo lo del mesón, se lee por API en `GET /api/schedule/resumen` (ver «Resumen por API»),
+  para que quien programa con un agente se entere aunque los correos le lleguen al dueño.
 
 ### Guía para el editor de contenido
 
@@ -1460,8 +1462,17 @@ comanda y por pieza, para programarlo o descartarlo:
   archivos y deja la fila con su motivo, que es memoria para el chef.
 - **Una comanda lista queda servida** sola cuando ya no le queda nada por decidir.
 
-**Lo que todavía no existe:** el barrido que borra lo crudo a los 14 días de terminada la comanda y
-lo que lleva 30 días en el mesón, y el aviso de lo que está por vencer.
+**Lo que vence se borra solo** (`barrerCocina`, una vez por hora con el barrido de huérfanos):
+
+- **Lo crudo**, a los 14 días de terminada la comanda: cancelada, rechazada, fallida o servida.
+  La fila queda con `borrado_en`, para la historia de la comanda. Uno que el almacén no dejó
+  borrar se intenta en la pasada siguiente.
+- **Lo que nadie programó en el mesón**, a los 30 días: sale como descartado, con el motivo
+  `vencido` para que el chef no lo tome como un juicio, y suelta sus archivos. Lo que espera en un
+  borrador no vence: ya está en La Parrilla.
+
+Una comanda que se quedó sin nada por decidir queda servida. En su última semana, la tarjeta del
+mesón dice cuándo se borra, y el resumen del día lo avisa.
 
 **El chef pregunta; Tu Parrilla nunca lo llama.** El servidor del chef no expone puertos:
 

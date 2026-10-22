@@ -180,16 +180,25 @@ export async function creativoParaElCompositor(
   return c ?? null
 }
 
-/** Los archivos de un creativo en el almacén: su media y su portada. */
-async function archivosDe(creativoId: string, portadaUrl: string | null): Promise<string[]> {
-  const filas = await getDb().select({ url: creativoMedia.url }).from(creativoMedia).where(eq(creativoMedia.creativoId, creativoId))
-  return [...new Set([...filas.map((f) => f.url), ...(portadaUrl ? [portadaUrl] : [])])]
+/**
+ * Suelta los archivos de un creativo que ya no se va a programar: los borra del almacén y borra las
+ * filas que los nombran (su media y su portada). Uno que no se pudo borrar queda sin nadie que lo
+ * nombre, y lo recoge el barrido de huérfanos en una hora. La fila del creativo queda, con su estilo
+ * y su motivo: es lo que el chef va a leer.
+ */
+export async function soltarArchivos(creativoId: string, portadaUrl: string | null): Promise<void> {
+  const db = getDb()
+  const filas = await db.select({ url: creativoMedia.url }).from(creativoMedia).where(eq(creativoMedia.creativoId, creativoId))
+  for (const url of new Set([...filas.map((f) => f.url), ...(portadaUrl ? [portadaUrl] : [])])) {
+    await borrar(url).catch((e) => console.error('soltar archivos: no se pudo borrar', String(e).slice(0, 200)))
+  }
+  await db.delete(creativoMedia).where(eq(creativoMedia.creativoId, creativoId))
+  await db.update(creativos).set({ portadaUrl: null }).where(eq(creativos.id, creativoId))
 }
 
 /**
  * Lo saca del mesón con su motivo, que le queda al chef como memoria de la marca. Sus archivos se
- * borran del almacén en el acto: un video pesa, y descartado no se va a programar. La fila queda,
- * con su estilo y su motivo: es lo que el chef va a leer.
+ * borran del almacén en el acto (`soltarArchivos`): un video pesa, y descartado no se va a programar.
  */
 export async function descartarCreativo(
   ownerId: string,
@@ -204,10 +213,7 @@ export async function descartarCreativo(
     .where(and(eq(creativos.id, id), eq(creativos.ownerId, ownerId), eq(creativos.estado, 'mesa')))
     .returning({ comandaId: creativos.comandaId, portadaUrl: creativos.portadaUrl })
   if (!descartado) return { falla: 'no-esta' }
-  for (const url of await archivosDe(id, descartado.portadaUrl)) {
-    // Uno que no se pudo borrar lo recoge el barrido de huérfanos cuando la fila deje de nombrarlo.
-    await borrar(url).catch((e) => console.error('descartar: no se pudo borrar', String(e).slice(0, 200)))
-  }
+  await soltarArchivos(id, descartado.portadaUrl)
   await servirSiTermino(descartado.comandaId, ahora)
   return { ok: true }
 }
