@@ -36,9 +36,18 @@ sección.
   El diseño está en `docs/superpowers/specs/2026-10-22-la-cocina-design.md`, y reemplaza a «El chef
   de la casa». Trae los nueve puntos del líder de creación de contenido, las fases de la 0 a la 3 y
   las decisiones del dueño del 2026-10-22, y el feedback del equipo de creación de contenido de ese
-  mismo día, que entró entero. Hecho lo que el diseño pone antes: qué cuenta acepta trial reels,
-  en Los Fierros, en `GET /api/schedule/cuentas` y en los compositores. Lo siguiente: la fase 0,
-  la comanda a mano.
+  mismo día, que entró entero.
+
+  - **Ya existe** (2026-10-22): qué cuenta acepta trial reels, y la base de la fase 0, que son las
+    tablas y la API del chef, con su contrato en `docs/cocina-api.md`.
+  - **Lo siguiente, en orden:**
+    1. La pestaña La Cocina en el panel: encenderla desde Los Maestros, subir el material, pedir y
+       seguir la comanda.
+    2. El mesón: programar, descartar con motivo y los barridos de 14 y 30 días.
+  - **[dueño]** Generar `COCINA_SECRET` y ponerla en Vercel (Production) y en el servidor del
+    chef. Sin ella, la API de la cocina responde `401`.
+  - **Del equipo de contenido:** el cliente del chef en `marca-personal`, contra
+    `docs/cocina-api.md`.
 
 ## Bugs
 

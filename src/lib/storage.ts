@@ -1,5 +1,6 @@
 import {
   DeleteObjectCommand,
+  GetObjectCommand,
   HeadObjectCommand,
   ListObjectsV2Command,
   PutObjectCommand,
@@ -138,6 +139,17 @@ export async function urlParaSubir(
     { expiresIn: SUBIDA_SEGUNDOS },
   )
   return { subir, publica: urlPublica(conf.base, key) }
+}
+
+/**
+ * Un enlace firmado para bajar un objeto del almacén, que vence en `segundos`. Es por donde el
+ * chef baja un insumo de una comanda (`/api/cocina/insumos/{id}/enlace`): el enlace nombra un solo
+ * objeto y no sirve para nada más.
+ */
+export async function urlParaBajar(key: string, segundos: number = SUBIDA_SEGUNDOS): Promise<string> {
+  const conf = config()
+  if (!conf) throw new Error(SIN_ALMACEN)
+  return getSignedUrl(getCliente(), new GetObjectCommand({ Bucket: conf.bucket, Key: key }), { expiresIn: segundos })
 }
 
 /**
