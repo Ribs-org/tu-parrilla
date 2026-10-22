@@ -190,29 +190,31 @@ comprobar:
    el dueño lo comparte, así que `GET /{ig-user-id}/media` podría no listarlo — el post
    quedaría `published` sin números en el panel hasta la graduación, y hoy eso no está dicho
    en ningún lado.
-3. **La forma exacta del error de rechazo.** `motivoDeRechazo` (mismo archivo) detecta el
-   rechazo por texto (`/trial/i` en el cuerpo), porque Meta no documenta el código. `postForm`
-   registra el cuerpo completo en el log del servidor (`console.error('Instagram publish:',
-   …)`) a propósito: es la única forma de aprender la frase real de Meta el día que el rechazo
-   ocurra de verdad, sin haber apostado antes a una forma adivinada.
+3. **La forma exacta del error de rechazo, en parte.** Se vio una vez, el 2026-10-22, en una
+   cuenta nueva: código 10, subcódigo 2207081, `is_transient: false`. El porqué venía solo en
+   lo que Meta le muestra a una persona (`error_user_title`, `error_user_msg`), traducido: «No
+   tienes suficientes seguidores para crear reels de prueba». El `message` en inglés era
+   genérico («Application does not have permission for this action») y no decía «trial». Por
+   eso `/trial/i` no lo vio, y cinco trial reels seguidos se reintentaron como error de red.
+   Desde entonces `motivoDeRechazo` (mismo archivo) lo reconoce por el subcódigo, que Meta no
+   traduce, y el texto —ahora `/trial|reels? de prueba/i`— queda de respaldo para un rechazo
+   de trial reels con otro código, que todavía no se ha visto.
 
-   Lo que cuesta mientras tanto, dicho sin suavizar: un rechazo definitivo que Meta redacte
-   sin la palabra —una cuenta privada, por ejemplo— cae en «No se pudo hablar con la
-   red. Se reintentará.» y se reintenta hasta tres veces antes de fallar, prometiendo un
-   reintento que Meta ya negó. Es el mismo trato que hoy recibe cualquier no-ok en un reel
-   normal; el mapeo solo lo estrecha para el único caso que Meta deja reconocer. Cerrarlo
-   pide ver el error real una vez, y entonces reconocerlo por su código y no por su texto.
-   La cuota diaria ya no está en este caso: Meta sí documenta su código (9, subcódigo
-   2207042), y `esTopeDiario` la reconoce y la hace esperar sin gastar intentos (2026-10-17).
+   Lo que cuesta mientras tanto: un rechazo definitivo por otro motivo, que no hable de trial
+   reels —una cuenta privada, por ejemplo—, se reintenta hasta tres veces antes de fallar.
+   Al menos ya no dice «No se pudo hablar con la red.»: el `error` nombra la cuenta y cita lo
+   que dijo Meta (`rechazoDeInstagram`, en `publisher.ts`), así que se lee qué pasó. Cerrarlo
+   del todo es lo mismo que con los seguidores: ver ese rechazo una vez, en el log
+   (`postForm` registra el cuerpo), y reconocerlo por su código. La cuota diaria no está en
+   este caso: `esTopeDiario` la reconoce y la hace esperar sin gastar intentos (2026-10-17).
 
-   El rechazo que sí reconoce por texto ya no se reintenta: `createContainer` marca ese
-   `failed` con `definitivo: true`, y `resolveOutcome` (`publisher.ts`) lo hace fallar en
-   el mismo intento en vez de esperar al tercero. Lo de arriba es justo lo que queda fuera
-   de ese reconocimiento.
+   Lo que sí se reconoce ya no se reintenta: `createContainer` marca ese `failed` con
+   `definitivo: true`, y `resolveOutcome` (`publisher.ts`) lo hace fallar en el mismo intento
+   en vez de esperar al tercero.
 
-Cerrar las tres pide lo mismo: una cuenta de Instagram con trial reels habilitados y una
-tarde — un trial reel con portada, un trial reel sin graduar mirado desde `/api/metrics/posts`,
-y una cuenta sin la función para leer el rechazo real del log.
+Cerrar las dos primeras pide una cuenta de Instagram con trial reels habilitados y una tarde:
+un trial reel con portada, y uno sin graduar mirado desde `/api/metrics/posts`. Desde octubre
+publica trial reels @vicente_pareja_j, que sirve para mirarlas.
 
 **El calendario y la cola no marcan un trial reel.** Distinto de las tres de arriba: esto no
 falta por no haberse podido probar, falta porque no se construyó. Solo la página del editor

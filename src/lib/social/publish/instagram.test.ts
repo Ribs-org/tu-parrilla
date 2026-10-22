@@ -5,12 +5,24 @@ import {
   classifyContainerStatus,
   ESPERA_TOPE_INSTAGRAM_MS,
   esTopeDiario,
+  explicacionDeMeta,
   instagramPublisher,
+  leerErrorDeMeta,
   motivoDeRechazo,
   photoContainerParams,
+  rechazoDelContenedor,
   reelContainerParams,
+  SUBCODIGO_TRIAL_SIN_SEGUIDORES,
 } from './instagram'
-import { PUBLISH_NETWORK_ERROR, PUBLISH_REJECTED, TOPE_INSTAGRAM, TRIAL_REEL_NO_DISPONIBLE } from './publisher'
+import {
+  PUBLISH_NETWORK_ERROR,
+  PUBLISH_REJECTED,
+  rechazoDeInstagram,
+  SIN_SEGUIDORES_PARA_TRIAL,
+  TOPE_INSTAGRAM,
+  trialNoDisponible,
+  trialSinSeguidores,
+} from './publisher'
 
 const image = { url: 'https://blob.test/a.jpg', mediaType: 'image' as const, position: 0 }
 const video = { url: 'https://blob.test/b.mp4', mediaType: 'video' as const, position: 0 }
@@ -119,15 +131,88 @@ describe('reelContainerParams con trial reel', () => {
   })
 })
 
+// Lo que Meta contestó el 2026-10-22 al trial reel de una cuenta nueva. El registro cortó
+// `error_user_msg` en «no alcanza el mínim»; el final es una reconstrucción.
+const SIN_SEGUIDORES = JSON.stringify({
+  error: {
+    message: 'Application does not have permission for this action',
+    type: 'OAuthException',
+    code: 10,
+    error_subcode: SUBCODIGO_TRIAL_SIN_SEGUIDORES,
+    is_transient: false,
+    error_user_title: 'No tienes suficientes seguidores para crear reels de prueba',
+    error_user_msg: 'La cuenta de Instagram no alcanza el mínimo de seguidores.',
+    fbtrace_id: 'A1b2',
+  },
+})
+
+describe('leerErrorDeMeta y explicacionDeMeta', () => {
+  it('lee el código, el subcódigo y lo que Meta le muestra a una persona, con sus tildes', () => {
+    // JSON.stringify no escapa la í; Meta sí (`í`). Las dos se leen igual.
+    const escapado = SIN_SEGUIDORES.replace('mínimo', 'm\\u00ednimo')
+    expect(leerErrorDeMeta(escapado)).toEqual({
+      codigo: 10,
+      subcodigo: SUBCODIGO_TRIAL_SIN_SEGUIDORES,
+      titulo: 'No tienes suficientes seguidores para crear reels de prueba',
+      mensaje: 'La cuenta de Instagram no alcanza el mínimo de seguidores.',
+      tecnico: 'Application does not have permission for this action',
+    })
+  })
+
+  it('la explicación prefiere lo de una persona y lleva el código al final', () => {
+    expect(explicacionDeMeta(leerErrorDeMeta(SIN_SEGUIDORES)!)).toBe(
+      '«No tienes suficientes seguidores para crear reels de prueba. La cuenta de Instagram no alcanza el mínimo de seguidores.» (código 10, subcódigo 2207081)',
+    )
+    expect(explicacionDeMeta(leerErrorDeMeta('{"error":{"message":"Invalid parameter","code":100}}')!)).toBe(
+      '«Invalid parameter» (código 100)',
+    )
+  })
+
+  it('un cuerpo cortado pierde solo el campo cortado', () => {
+    const cortado = SIN_SEGUIDORES.slice(0, SIN_SEGUIDORES.indexOf('mínimo'))
+    const e = leerErrorDeMeta(cortado)!
+    expect(e.subcodigo).toBe(SUBCODIGO_TRIAL_SIN_SEGUIDORES)
+    expect(e.titulo).toBe('No tienes suficientes seguidores para crear reels de prueba')
+    expect(e.mensaje).toBeNull()
+  })
+
+  it('lo que no es un error de Meta no se lee como uno', () => {
+    expect(leerErrorDeMeta('Bad gateway')).toBeNull()
+    expect(leerErrorDeMeta('<html>502</html>')).toBeNull()
+  })
+
+  it('una explicación larga se corta', () => {
+    const largo = JSON.stringify({ error: { message: 'x'.repeat(1000), code: 1 } })
+    expect(explicacionDeMeta(leerErrorDeMeta(largo)!).length).toBeLessThan(320)
+  })
+})
+
 describe('motivoDeRechazo', () => {
   const cuerpo = '{"error":{"message":"Trial reels are not available for this account","code":100}}'
 
-  it('un rechazo que habla de trial, en un trial reel, es la frase fija', () => {
-    expect(motivoDeRechazo(cuerpo, { trialReel: true })).toBe(TRIAL_REEL_NO_DISPONIBLE)
+  it('el subcódigo de los seguidores, en un trial reel, nombra la cuenta y dice el porqué', () => {
+    expect(motivoDeRechazo(SIN_SEGUIDORES, { trialReel: true }, '@vicente_edits2')).toBe(
+      `@vicente_edits2 ${SIN_SEGUIDORES_PARA_TRIAL}`,
+    )
+    expect(trialSinSeguidores(null)).toBe(`La cuenta ${SIN_SEGUIDORES_PARA_TRIAL}`)
   })
 
-  it('el mismo cuerpo sin trial reel pedido no es esa frase: se trata como hasta ahora', () => {
+  it('un rechazo que habla de trial sin ese código: probablemente la función, con lo que Meta dijo', () => {
+    expect(motivoDeRechazo(cuerpo, { trialReel: true }, '@a')).toBe(
+      trialNoDisponible('@a', '«Trial reels are not available for this account» (código 100)'),
+    )
+  })
+
+  it('también si Meta lo dijo en español, como lo dice a una persona', () => {
+    const enEspanol = '{"error":{"code":100,"error_user_title":"No puedes crear reels de prueba"}}'
+    expect(motivoDeRechazo(enEspanol, { trialReel: true }, '@a')).toBe(
+      trialNoDisponible('@a', '«No puedes crear reels de prueba» (código 100)'),
+    )
+  })
+
+  it('sin trial reel pedido no es ninguna de esas frases: se trata como hasta ahora', () => {
     expect(motivoDeRechazo(cuerpo, null)).toBeNull()
+    expect(motivoDeRechazo(SIN_SEGUIDORES, null)).toBeNull()
   })
 
   it('otro rechazo en un trial reel tampoco: solo se explica lo que se sabe explicar', () => {
@@ -145,20 +230,40 @@ describe('publish: el rechazo de un trial reel', () => {
     token: 't',
     accountExternalId: '123',
     coverUrl: null,
+    cuenta: '@vicente_edits2',
   }
   const cuatrocientos = () =>
     new Response('{"error":{"message":"Trial reels are not available for this account"}}', { status: 400 })
 
-  it('en un trial reel, falla con la frase fija y no se reintenta como fallo de red', async () => {
-    vi.stubGlobal('fetch', vi.fn(async () => cuatrocientos()))
+  it('sin los seguidores: falla al tiro, sin reintentos, con la cuenta y el porqué', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(SIN_SEGUIDORES, { status: 400 })))
     const salida = await instagramPublisher.publish({ ...input, opciones: { trialReel: true } })
     // `definitivo: true` es lo que hace que `resolveOutcome` no lo reintente: Meta ya
     // contestó que no, no es un fallo de red que valga la pena repetir.
-    expect(salida).toEqual({ kind: 'failed', reason: TRIAL_REEL_NO_DISPONIBLE, definitivo: true })
+    expect(salida).toEqual({ kind: 'failed', reason: trialSinSeguidores('@vicente_edits2'), definitivo: true })
   })
 
-  it('en un reel normal, el mismo 400 sigue siendo el fallo de red de siempre', async () => {
+  it('un rechazo que habla de trial también falla al tiro', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => cuatrocientos()))
+    const salida = await instagramPublisher.publish({ ...input, opciones: { trialReel: true } })
+    expect(salida).toEqual({
+      kind: 'failed',
+      reason: trialNoDisponible('@vicente_edits2', '«Trial reels are not available for this account»'),
+      definitivo: true,
+    })
+  })
+
+  it('en un reel normal, el mismo 400 se reintenta como siempre, ahora con lo que Meta dijo', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => cuatrocientos()))
+    const salida = await instagramPublisher.publish({ ...input, opciones: null })
+    expect(salida).toEqual({
+      kind: 'failed',
+      reason: rechazoDeInstagram('@vicente_edits2', '«Trial reels are not available for this account»'),
+    })
+  })
+
+  it('una respuesta que no es de Meta sigue siendo el fallo de red', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => new Response('Bad gateway', { status: 502 })))
     const salida = await instagramPublisher.publish({ ...input, opciones: null })
     expect(salida).toEqual({ kind: 'failed', reason: PUBLISH_NETWORK_ERROR })
   })
@@ -287,16 +392,31 @@ describe('publish: retomar un contenedor guardado sin publicar dos veces', () =>
     })
   })
 
-  it('si Meta rechaza media_publish, también se lleva el contenedor', async () => {
+  it('si Meta rechaza media_publish, también se lleva el contenedor, y dice qué dijo Meta', async () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(Response.json({ status_code: 'FINISHED' }))
       .mockResolvedValueOnce(new Response('{"error":{"message":"Invalid parameter","code":100}}', { status: 400 }))
     vi.stubGlobal('fetch', fetchMock)
-    expect(await instagramPublisher.publish(foto)).toEqual({
+    expect(await instagramPublisher.publish({ ...foto, cuenta: '@vicente' })).toEqual({
       kind: 'failed',
-      reason: PUBLISH_REJECTED,
+      reason: 'Instagram rechazó la publicación en @vicente: «Invalid parameter» (código 100).',
       containerId: 'CT_7',
     })
+  })
+
+  it('un contenedor en ERROR dice el porqué que trae su status; sin él, la frase de siempre', async () => {
+    const fetchMock = vi.fn<(url: string) => Promise<Response>>(async () =>
+      Response.json({ status_code: 'ERROR', status: 'Error: Media upload has failed with error code 2207026' }),
+    )
+    vi.stubGlobal('fetch', fetchMock)
+    expect(await instagramPublisher.publish({ ...foto, cuenta: '@vicente' })).toEqual({
+      kind: 'failed',
+      reason: 'Instagram rechazó la publicación en @vicente: «Error: Media upload has failed with error code 2207026».',
+    })
+    // Meta solo manda `status` si se lo pide.
+    expect(String(fetchMock.mock.calls[0]![0])).toContain('fields=status_code,status&')
+    expect(rechazoDelContenedor({ status_code: 'ERROR', status: 'ERROR' }, '@vicente')).toBe(PUBLISH_REJECTED)
+    expect(rechazoDelContenedor({ status_code: 'ERROR' }, '@vicente')).toBe(PUBLISH_REJECTED)
   })
 })

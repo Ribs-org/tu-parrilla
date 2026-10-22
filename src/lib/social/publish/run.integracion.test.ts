@@ -263,6 +263,8 @@ describe.skipIf(!URL_PRUEBAS)('contra una Postgres de verdad', () => {
       await publishDue(new Date(nuevaHora.getTime() + 60_000))
       expect(publicar).toHaveBeenCalledTimes(1)
       expect(publicar.mock.calls[0]![0].containerId).toBe('contenedor-3')
+      // El handle viaja para que un rechazo nombre la cuenta (`rechazoDeInstagram`).
+      expect(publicar.mock.calls[0]![0].cuenta).toBe('@prueba')
       expect((await leer(destino.id))?.status).toBe('published')
     })
   })

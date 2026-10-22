@@ -33,10 +33,11 @@ const DE_ARCHIVO: ReadonlySet<string> = new Set([
  * rechazo sin explicación, una red que no respondió— no tiene más arreglo que «Reprogramar»,
  * que va siempre aparte, y esto devuelve `null`.
  *
- * Funciona porque `lastError` es siempre una de nuestras frases fijas (`scheduledPostTargets`,
- * en `db/schema.ts`): se compara contra las constantes que la escriben, no contra texto libre.
- * Una frase nueva que no esté en estas listas cae en `null`, que es lo seguro: no ofrece un
- * arreglo que no sabe si sirve.
+ * Se compara contra las constantes que escriben `lastError`, no contra texto libre. Casi todas
+ * son frases fijas; las de un rechazo de Instagram nombran la cuenta y citan a Meta
+ * (`rechazoDeInstagram` y compañía, en `social/publish/publisher.ts`), y como no están en
+ * estas listas caen en `null`, igual que una frase nueva: es lo seguro, no ofrece un arreglo
+ * que no sabe si sirve.
  *
  * `archivoHref` es adónde lleva «Cambiar el archivo»: los archivos del editor de ese post
  * (`#media`). Guardar el editor vuelve a poner en la parrilla el destino quemado
