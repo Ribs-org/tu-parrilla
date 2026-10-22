@@ -378,9 +378,10 @@ describe('aislamiento por dueño (SQL generado, sin base)', () => {
     expect(metricas.params).toContain('social-post-1') // post_metrics: por el id que ya filtró `posts`.
   })
 
-  it('avisos/run: leerResumen ata sus cuatro consultas al dueño: quemados, cuentas, cuentas en uso y lo último por salir', async () => {
-    const consultas = await consultasEncadenadas(() => leerResumen(DUENO, new Date('2026-10-17T12:00:00Z')), [[], [], [], []])
-    expect(consultas).toHaveLength(4)
+  it('avisos/run: leerResumen ata sus cinco consultas al dueño: quemados, cuentas, cuentas en uso, lo último por salir y lo que vence en el mesón', async () => {
+    // Sin nada por vencer en el mesón, no pregunta los nombres de las comandas: son cinco.
+    const consultas = await consultasEncadenadas(() => leerResumen(DUENO, new Date('2026-10-17T12:00:00Z')), [[], [], [], [], []])
+    expect(consultas).toHaveLength(5)
     for (const c of consultas) esperarFiltradoPorDueno(c)
   })
 

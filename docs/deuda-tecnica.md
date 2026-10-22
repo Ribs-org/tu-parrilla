@@ -49,7 +49,15 @@ falló**: puede ser esto o puede ser real, y la diferencia importa.
 Una causa sí apareció después: un `await import()` dentro de un `it` paga la transformación de
 todo lo que trae en medio de la prueba, y bajo carga se pasa de `testTimeout`. Los que había se
 movieron arriba del archivo (`aislamiento.test.ts`, `usuarios.test.ts` y, el 2026-10-21,
-`filters.test.ts`); no se sabe si era la única.
+`filters.test.ts`); no se sabe si era la única. Otra apareció el 2026-10-22: dos pruebas leen
+cada archivo del sitio y tardan lo que crece el repositorio, y bajo la carga de la suite entera
+pasaron los 5 segundos. Son la que revisa que lo del navegador no alcance código de servidor
+(`cliente-sin-servidor.test.ts`) y la de los nombres escritos a mano (`vocabulario.test.ts`).
+Desde entonces tienen 20. Ese mismo día, con la Postgres desechable de una máquina Windows
+(`embedded-postgres`), los archivos de integración que preparan su base a la vez —cada uno crea
+la suya y corre todas las migraciones— pasaron a veces los 60 segundos del `beforeAll`, y el
+archivo entero cae con «Hook timed out». En el CI, con su propia Postgres, no ha pasado. Una
+corrida que cae así se repite antes de buscar otra causa.
 
 ## La prueba que «no envejece» solo mira directorios
 

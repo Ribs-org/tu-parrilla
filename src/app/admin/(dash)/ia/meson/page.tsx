@@ -23,6 +23,7 @@ export default async function MesonPage({ searchParams }: { searchParams: Promis
   const meson = await mesonDelDueno(usuario.id, soloUna)
   const enBorradores = await cuantosEnBorradores(usuario.id)
   const fecha = new Intl.DateTimeFormat('es-CL', { dateStyle: 'medium', timeZone: usuario.zona })
+  const ahora = new Date()
 
   return (
     <>
@@ -36,7 +37,7 @@ export default async function MesonPage({ searchParams }: { searchParams: Promis
         <p className="mt-1 max-w-2xl text-sm text-fg-muted">
           Lo que el chef te entregó, listo para programar. Las versiones de una misma pieza —la misma idea en
           estilos distintos— van juntas. Programa las que te gusten y descarta las que no, diciendo por qué: el
-          chef aprende de eso.
+          chef aprende de eso. Lo que nadie programa en 30 días se borra solo.
         </p>
         {soloUna ? (
           <Link href="/admin/ia/meson" className="mt-2 inline-block text-sm text-brasa underline-offset-2 hover:underline">
@@ -72,7 +73,7 @@ export default async function MesonPage({ searchParams }: { searchParams: Promis
                     ) : null}
                     <ul className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
                       {p.creativos.map((cr) => (
-                        <TarjetaDelCreativo key={cr.id} creativo={cr} />
+                        <TarjetaDelCreativo key={cr.id} creativo={cr} ahora={ahora} zona={usuario.zona} />
                       ))}
                     </ul>
                   </section>

@@ -1,9 +1,15 @@
 # La Cocina: la fábrica de creativos del chef, dentro de Tu Parrilla
 
-Fecha: 2026-10-22. **Diseño. Implementado** lo de «Antes» (qué cuenta acepta trial reels) y, de
-la fase 0, la base —las tablas y la API del chef, cuyo contrato está en `docs/cocina-api.md`—, la
-subida por partes del panel (`subidas`), la pestaña La Cocina, donde se pide y se sigue una
-comanda, y el mesón; faltan los barridos de 14 y 30 días. Reemplaza y amplía «El chef de la casa»
+Fecha: 2026-10-22. **Diseño. Implementado** lo de «Antes» (qué cuenta acepta trial reels) y la
+fase 0 entera:
+
+- la base: las tablas y la API del chef, cuyo contrato está en `docs/cocina-api.md`;
+- la subida por partes del panel (`subidas`);
+- la pestaña La Cocina, donde se pide y se sigue una comanda;
+- el mesón;
+- los barridos de 14 y 30 días.
+
+Lo siguiente es la fase 1. Reemplaza y amplía «El chef de la casa»
 (`2026-10-19-chef-de-la-casa-design.md`), que ya decía para qué sirve el chef y cómo se dibuja;
 esto dice cómo se pide, cómo se sigue y qué se entrega, y fija el contrato entre Tu Parrilla y
 el chef. Lo pidió el dueño el 2026-10-22, y los nueve puntos del líder de creación de contenido

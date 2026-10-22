@@ -11,10 +11,12 @@ vi.mock('@/lib/social/comentarios/run', () => ({
 }))
 vi.mock('@/lib/storage-gc', () => ({ barrerHuerfanos: vi.fn(async () => ({ borrados: 2, bytes: 10 })) }))
 vi.mock('@/lib/cocina/subidas', () => ({ barrerSubidas: vi.fn(async () => ({ abortadas: 1, sueltos: 0 })) }))
+vi.mock('@/lib/cocina/barrido', () => ({ barrerCocina: vi.fn(async () => ({ crudos: 2, vencidos: 1, servidas: 0 })) }))
 
 const { GET } = await import('./route')
 const { barrerHuerfanos } = await import('@/lib/storage-gc')
 const { barrerSubidas } = await import('@/lib/cocina/subidas')
+const { barrerCocina } = await import('@/lib/cocina/barrido')
 
 const corrida = (authorization?: string) =>
   GET(new Request('https://tu-parrilla.cl/api/cron/publish-social', authorization ? { headers: { authorization } } : {}))
@@ -35,19 +37,21 @@ describe('la corrida de publicación', () => {
     expect((await corrida('Bearer otro')).status).toBe(401)
   })
 
-  it('en los primeros cinco minutos de la hora barre los huérfanos y las subidas de la cocina', async () => {
+  it('en los primeros cinco minutos de la hora barre los huérfanos, las subidas de la cocina y lo vencido', async () => {
     vi.setSystemTime(new Date('2026-10-23T12:02:00Z'))
     const r = await corrida('Bearer secreto-del-cron')
     expect(barrerHuerfanos).toHaveBeenCalledTimes(1)
     expect(barrerSubidas).toHaveBeenCalledTimes(1)
-    expect(await r.json()).toMatchObject({ barrido: { borrados: 2 }, subidas: { abortadas: 1, sueltos: 0 } })
+    expect(barrerCocina).toHaveBeenCalledTimes(1)
+    expect(await r.json()).toMatchObject({ barrido: { borrados: 2 }, subidas: { abortadas: 1, sueltos: 0 }, cocina: { crudos: 2, vencidos: 1 } })
   })
 
-  it('el resto de la hora no barre ninguno de los dos', async () => {
+  it('el resto de la hora no barre ninguno', async () => {
     vi.setSystemTime(new Date('2026-10-23T12:35:00Z'))
     const r = await corrida('Bearer secreto-del-cron')
     expect(barrerHuerfanos).not.toHaveBeenCalled()
     expect(barrerSubidas).not.toHaveBeenCalled()
-    expect(await r.json()).toMatchObject({ barrido: null, subidas: null })
+    expect(barrerCocina).not.toHaveBeenCalled()
+    expect(await r.json()).toMatchObject({ barrido: null, subidas: null, cocina: null })
   })
 })

@@ -5,7 +5,7 @@ import { isoInZone } from '@/lib/metrics-api'
 import { networkLabel } from '@/lib/networks'
 import { estadoDelFierro, seRenuevaSola, type Fierro } from '@/lib/parrilla'
 import type { Tema } from '@/lib/tema'
-import { SE_QUEMO, nombreDe } from '@/lib/vocabulario'
+import { MESON, SE_QUEMO, nombreDe } from '@/lib/vocabulario'
 
 /** Debajo de cuántos días programados una cuenta entra en el resumen por quedarse sin parrilla. */
 export const DIAS_DE_PISTA = 3
@@ -150,10 +150,16 @@ export type Fallido = {
   intentos: number
 }
 
-export type Resumen = { fallidos: Fallido[]; cuentas: CuentaEnRiesgo[]; pista: Pista[] }
+/**
+ * Lo que espera en el mesón de La Cocina y se borra pronto si nadie lo programa, por comanda: cuántos
+ * y cuándo vence el primero. Va en el correo y no en `GET /api/schedule/resumen`.
+ */
+export type PorVencer = { comanda: string | null; cuantos: number; vence: Date }
+
+export type Resumen = { fallidos: Fallido[]; cuentas: CuentaEnRiesgo[]; pista: Pista[]; meson: PorVencer[] }
 
 export function resumenVacio(r: Resumen): boolean {
-  return r.fallidos.length === 0 && r.cuentas.length === 0 && r.pista.length === 0
+  return r.fallidos.length === 0 && r.cuentas.length === 0 && r.pista.length === 0 && r.meson.length === 0
 }
 
 /** Los parámetros de `GET /api/schedule/resumen`, con sus defaults, o la frase del error. */
@@ -335,13 +341,26 @@ export function correoDeResumen(
     lineas.push('')
   }
 
+  if (r.meson.length > 0) {
+    const total = r.meson.reduce((suma, m) => suma + m.cuantos, 0)
+    const donde = tema === 'dia' ? 'en la vitrina' : 'en el mesón'
+    partes.push(plural(total, `creativo por vencer ${donde}`, `creativos por vencer ${donde}`))
+    lineas.push(`${MESON[tema]}: lo que nadie programa en 30 días se borra (${total}):`)
+    for (const m of r.meson) {
+      lineas.push(`- ${m.comanda ?? 'Una comanda'}: ${plural(m.cuantos, 'creativo', 'creativos')}, desde el ${fechaLegible(m.vence, zona)}.`)
+    }
+    lineas.push(`Prográmalos o descártalos: ${sitio}/admin/ia/meson`, '')
+  }
+
   return {
     subject: `${DEL_RESUMEN[tema].asunto}: ${partes.join(', ')}`,
     text: [
       `Resumen de Tu Parrilla, ${fechaLegible(ahora, zona)}.`,
       '',
       ...lineas,
-      'Este resumen llega solo los días en que hay algo que mirar. Lo mismo, para un agente, en GET /api/schedule/resumen.',
+      r.meson.length > 0
+        ? 'Este resumen llega solo los días en que hay algo que mirar. Lo mismo, salvo lo del mesón, para un agente, en GET /api/schedule/resumen.'
+        : 'Este resumen llega solo los días en que hay algo que mirar. Lo mismo, para un agente, en GET /api/schedule/resumen.',
     ].join('\n'),
   }
 }
