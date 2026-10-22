@@ -22,7 +22,7 @@ export default async function CuentaPage() {
           <Link href="/admin/ia" className="text-brasa underline-offset-2 hover:underline">
             {nombreDe('/admin/ia')}
           </Link>
-          .
+          , en «Tu propio chef».
         </p>
       </header>
       <Panel title="Tus datos">

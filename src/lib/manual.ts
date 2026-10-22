@@ -1,5 +1,5 @@
 // El manual del parrillero: la wiki de la UI (`public/docs/ui/`), armada para leerla en el
-// panel, dentro de Tu IA. La wiki está escrita para que un LLM guíe a una persona sin ver su
+// panel, dentro de La Cocina. La wiki está escrita para que un LLM guíe a una persona sin ver su
 // pantalla, con el texto literal de cada botón; el manual la muestra tal cual, para que la lea
 // la persona misma. Lo que cambia es solo la forma: sin el pie para quien la mantiene, y con
 // los enlaces entre páginas llevados al manual. Puro a propósito: la página lee los archivos.
@@ -16,7 +16,7 @@ export const PAGINAS = [
   'la-parrilla',
   'la-mesa',
   'los-numeros',
-  'tu-ia',
+  'la-cocina',
   'los-fierros',
   'la-vitrina',
   'los-maestros',

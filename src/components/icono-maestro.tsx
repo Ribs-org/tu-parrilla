@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils'
 
 /*
- * El ícono de Tu IA: el maestro que cocina por ti. De noche, un parrillero de sombrero de ala
+ * El ícono de La Cocina: el maestro que cocina por ti. De noche, un parrillero de sombrero de ala
  * ancha, pañuelo al cuello y delantal; de día, un maestro de sushi con su gorrito de chef y el
  * cuello cruzado de la chaqueta japonesa. Los dos van en la página y el modo esconde uno, como
  * el corte y la pieza de sushi (`.solo-noche`, `.solo-dia` en `globals.css`).

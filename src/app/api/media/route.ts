@@ -11,7 +11,8 @@ export const dynamic = 'force-dynamic'
  * Un PUT firmado para que un cliente de la API suba un archivo directo al almacén, una vez,
  * y lo nombre después en el `media` de las filas del lote por su `url`: el lote no lo vuelve
  * a bajar (`traerMedia`, batch.ts). Es lo que hace el teléfono (`api/mobile/upload-url`), con
- * la llave de Tu IA en vez del token del teléfono, y la clave en la carpeta del dueño.
+ * una llave de «Tu propio chef» (La Cocina) en vez del token del teléfono, y la clave en la
+ * carpeta del dueño.
  *
  * Lo que se suba y ningún post nombre en la hora siguiente lo borra el barrido de huérfanos
  * (`storage-gc.ts`).

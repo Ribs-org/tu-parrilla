@@ -33,9 +33,10 @@ registro abierto.
 Está siempre, fija arriba, en todas las pantallas del panel. De izquierda a derecha:
 
 1. **«Panel»**, en mayúsculas. Es un rótulo, no un botón. En un teléfono no aparece: le deja el lugar a las pestañas.
-2. **Cuatro pestañas**, iguales para todos: «La Parrilla», «La Mesa», «Los Números» y «Tu IA».
+2. **Cuatro pestañas**, iguales para todos: «La Parrilla», «La Mesa», «Los Números» y «La Cocina»
+   (hasta el 2026-10-22, «Tu IA»).
    De día, la primera se llama «La Barra» (ver «El modo día», abajo).
-   «Tu IA» lleva al lado el dibujo de un maestro cocinero: de noche, un parrillero de sombrero
+   «La Cocina» lleva al lado el dibujo de un maestro cocinero: de noche, un parrillero de sombrero
    de ala ancha y delantal; de día, un maestro de sushi con su gorrito alto. La activa
    se pinta con fondo naranjo. En una pantalla angosta (un
    teléfono) no caben las cuatro: la fila se desplaza de lado y la última se desvanece en el
@@ -69,7 +70,7 @@ se ve arriba, grande y en mayúsculas.
 | La Parrilla | lo que viene y cómo salió lo que ya se fue | `/admin/schedule` | Primera pestaña. Es la entrada: se llega acá al entrar, y `/admin` lleva acá. El calendario: programar, borradores, lo que se quemó, editar, reprogramar | [la-parrilla.md](la-parrilla.md) |
 | La Mesa | lo que te responden y tus respuestas | `/admin/comments` | Pestaña. Los comentarios y sus respuestas | [la-mesa.md](la-mesa.md) |
 | Los Números | cómo te fue en las redes y en tu página | `/admin/analytics` | Pestaña. Un tablero con dos mitades: «En las redes» (views y seguidores ganados) y «En tu página» (visitas y clicks en su página de links). Un clic adentro, «Tus publicaciones» (`/admin/analytics/publicaciones`): cada publicación con sus números y su etiqueta `?s=`; la pieza de cada una, con sus versiones (`/admin/analytics/publicaciones/<id>`); «Comparar por atributo» (`/admin/analytics/comparar`); «Tu mejor 10 %» (`/admin/analytics/mejores`), lo que más rindió —o lo que menos, con «Lo peor»— y qué tiene en común; y «Lado a lado» (`/admin/analytics/lado-a-lado`), dos publicaciones con su portada, el link a la red y cómo crecieron | [los-numeros.md](los-numeros.md) |
-| Tu IA | tu propio chef: la llave y la guía para conectarla | `/admin/ia` | Cuarta pestaña, la última. Conectar la IA propia: generar y revocar llaves de API, y las guías que tiene que leer. Al final, el manual del parrillero (`/admin/ia/manual`): esta misma wiki, para que la lea la persona | [tu-ia.md](tu-ia.md) |
+| La Cocina | el chef de la casa y tu propio chef | `/admin/ia` | Cuarta pestaña, la última. Arriba, el chef de la casa: el editor de videos, que se enciende por cuenta, y el seguimiento de sus comandas. Abajo, «Tu propio chef»: generar y revocar las llaves de API de la IA propia, y las guías que tiene que leer. Al final, el manual del parrillero (`/admin/ia/manual`): esta misma wiki, para que la lea la persona. Hasta el 2026-10-22 se llamaba «Tu IA» | [la-cocina.md](la-cocina.md) |
 | Los Fierros | tus redes conectadas | `/admin/accounts` | Botón «Ajustes». Conectar y desconectar redes | [los-fierros.md](los-fierros.md) |
 | La Vitrina | tus páginas públicas | `/admin/profiles` | Botón «Ajustes». Su página de links | [la-vitrina.md](la-vitrina.md) |
 | Los Maestros | quién puede entrar | `/admin/usuarios` | Botón «Ajustes», solo el admin. Invitar gente | [los-maestros.md](los-maestros.md) |
@@ -127,9 +128,10 @@ teléfono](app-movil.md).
 | Responder comentarios; darle instrucciones a la IA que redacta los borradores | La Mesa ([la-mesa.md](la-mesa.md)) |
 | Editar su página de links: foto, bio, colores, links, dirección | La Vitrina ([la-vitrina.md](la-vitrina.md)) |
 | Cambiar su nombre o su zona horaria | Tu Cuenta ([tu-cuenta.md](tu-cuenta.md)) |
-| Generar o revocar la llave que te dio a ti, o a otro agente | Tu IA, bloque «1. Su llave» ([tu-ia.md](tu-ia.md)). Hasta el 2026-10-19 estaba en Tu Cuenta |
-| Leer cómo funciona el panel, pantalla por pantalla | Tu IA → «El manual del parrillero →»: esta misma wiki, en el panel ([tu-ia.md](tu-ia.md)) |
-| Invitar a alguien; cerrar las sesiones de alguien | Los Maestros, solo el admin ([los-maestros.md](los-maestros.md)) |
+| Generar o revocar la llave que te dio a ti, o a otro agente | La Cocina, sección «Tu propio chef», bloque «1. Su llave» ([la-cocina.md](la-cocina.md)). Hasta el 2026-10-19 estaba en Tu Cuenta, y hasta el 2026-10-22 la pestaña se llamaba «Tu IA» |
+| Seguir una comanda del chef de la casa, o cancelarla | La Cocina, bloque «El chef de la casa» ([la-cocina.md](la-cocina.md)) |
+| Leer cómo funciona el panel, pantalla por pantalla | La Cocina → «El manual del parrillero →»: esta misma wiki, en el panel ([la-cocina.md](la-cocina.md)) |
+| Invitar a alguien; cerrar las sesiones de alguien; encenderle la cocina | Los Maestros, solo el admin ([los-maestros.md](los-maestros.md)) |
 | Publicar desde el teléfono | [La app del teléfono](app-movil.md) |
 
 ## El vocabulario del asado
@@ -201,7 +203,7 @@ vale para la de día:
 | «La Parrilla» | «La Barra» | La pestaña, su título y cada frase que nombra la pantalla |
 | «Los Fierros» | «Los Cuchillos» | La entrada de Ajustes, su título y cada frase que la nombra |
 | «Se quemó» | «Se echó a perder» | La sección de La Parrilla con lo que falló, y el correo |
-| «El manual del parrillero» | «El manual del maestro de sushi» | Al final de Tu IA, y el título del manual |
+| «El manual del parrillero» | «El manual del maestro de sushi» | Al final de La Cocina, y el título del manual |
 | «Su fierro está frío: reconéctala» | «Su cuchillo está sin filo: reconéctala» | Un destino hacia una cuenta que hay que reconectar |
 | «se enfría» | «se desafila» | Al lado de una cuenta cuyo permiso vence en la semana, en el compositor |
 | «1 se enfría» | «1 se desafila» | El aviso de Ajustes; con más, «2 se desafilan» |
@@ -211,6 +213,11 @@ vale para la de día:
 | «Apagada» | «Vacía» | El calor de un día del calendario |
 | «Prendida» | «Con piezas» | El calor de un día |
 | «Parrilla llena» | «Tabla llena» | El calor de un día |
+| «El chef mira la res» | «El chef mira el atún» | El estado de una comanda, en La Cocina |
+| «El desposte» | «El despiece» | El estado de una comanda |
+| «Al fuego» | «Armando las piezas» | El estado de una comanda |
+| «Lista en el mesón» | «Lista en la vitrina» | El estado de una comanda; el mesón también al servir: «Sirviendo: 3 de 5 tandas en la vitrina» |
+| «No se puede cocinar» | «No se puede preparar» | El estado de una comanda que el chef rechazó |
 
 Y unas frases enteras: en Los Fierros, «Este fierro se está enfriando: la conexión vence <fecha>.
 Reconéctala antes de que se apague.» es «Este cuchillo se está desafilando: la conexión vence
@@ -249,7 +256,7 @@ equivalencia con lo que dicen las páginas:
 - **Elegir los creadores del «modo Tinder».** La traída de ideas existe por dentro, pero no
   tiene pantalla todavía.
 - **Ver una llave de API ya generada.** Se ve una sola vez al crearla; después solo se revoca
-  y se genera otra (Tu IA).
+  y se genera otra (La Cocina, en «Tu propio chef»).
 - **El Fuego** (la pantalla de entrada de antes, con el botón «Poner al fuego»). Ya no está:
   lo que mostraba —lo que se quemó, la tarjeta para conectar la primera red y lo que salió
   ayer— está en La Parrilla, que es ahora la entrada.

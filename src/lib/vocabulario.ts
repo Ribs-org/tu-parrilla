@@ -11,6 +11,7 @@
 // rutas, las frases de error y la API no cambian. Cada palabra de día sale de acá, y la wiki las
 // cuenta todas en «El modo día» (`PALABRAS_DE_DIA`, que `docs-ui.test.ts` le exige).
 
+import { NOMBRE_ESTADO } from './cocina/nombres'
 import { fraseDelAviso, type Calor } from './parrilla'
 import type { Tema } from './tema'
 
@@ -29,9 +30,11 @@ export type Pantalla = {
 // la entrada era El Fuego, con su propia pestaña; se fundió en La Parrilla (ver
 // `docs/superpowers/specs/2026-10-13-parrilla-entrada-y-borradores-design.md`). Ese mismo
 // día Los Cortes dejó de ser pestaña: sus publicaciones viven dentro de Los Números
-// (`docs/superpowers/specs/2026-10-13-numeros-tablero-design.md`). Tu IA es pestaña desde el
+// (`docs/superpowers/specs/2026-10-13-numeros-tablero-design.md`). Tu IA fue pestaña desde el
 // 2026-10-19, a pedido del dueño: conectar la IA propia tiene que estar a la vista, no dentro de
-// Ajustes. Se llevó las llaves, que antes vivían en Tu Cuenta.
+// Ajustes; se llevó las llaves, que antes vivían en Tu Cuenta. El 2026-10-22 la reemplazó La
+// Cocina, en la misma ruta, con el chef de la casa arriba y «Tu propio chef» —lo de Tu IA— abajo
+// (`docs/superpowers/specs/2026-10-22-la-cocina-design.md`).
 //
 // De día, la barra de sushi es donde se ponen las piezas, como la parrilla los cortes, y los
 // cuchillos son al maestro de sushi lo que los fierros al parrillero: hay que mantenerlos, y
@@ -47,7 +50,7 @@ export const PANTALLAS: readonly Pantalla[] = [
   },
   { ruta: '/admin/comments', nombre: 'La Mesa', subtitulo: 'lo que te responden y tus respuestas', grupo: 'pestana' },
   { ruta: '/admin/analytics', nombre: 'Los Números', subtitulo: 'cómo te fue en las redes y en tu página', grupo: 'pestana' },
-  { ruta: '/admin/ia', nombre: 'Tu IA', subtitulo: 'tu propio chef: la llave y la guía para conectarla', grupo: 'pestana' },
+  { ruta: '/admin/ia', nombre: 'La Cocina', subtitulo: 'el chef de la casa y tu propio chef', grupo: 'pestana' },
   {
     ruta: '/admin/accounts',
     nombre: 'Los Fierros',
@@ -107,7 +110,7 @@ export function nombreDe(ruta: string, tema: Tema = 'noche'): string {
  */
 export const SE_QUEMO: Record<Tema, string> = { noche: 'Se quemó', dia: 'Se echó a perder' }
 
-/** La wiki de la UI dentro de Tu IA, para que la lea la persona. */
+/** La wiki de la UI dentro de La Cocina, para que la lea la persona. */
 export const MANUAL: Record<Tema, string> = { noche: 'El manual del parrillero', dia: 'El manual del maestro de sushi' }
 
 /** Lo que dice el destino de una cuenta con el fierro frío: de día, el cuchillo perdió el filo. */
@@ -165,4 +168,6 @@ export const PALABRAS_DE_DIA: ReadonlyArray<Record<Tema, string>> = [
     noche: ROTULO_CALOR.noche[calor],
     dia: ROTULO_CALOR.dia[calor],
   })),
+  // Los estados de una comanda que se dicen distinto de día: la res es el atún.
+  ...Object.values(NOMBRE_ESTADO).filter((n) => n.noche !== n.dia),
 ]

@@ -4,8 +4,8 @@
 menú). La ven todos los usuarios.
 
 Tu Cuenta guarda dos datos de la persona: su nombre y su zona horaria. Las llaves de API, que
-estaban acá hasta el 2026-10-19, se mudaron a Tu IA, la cuarta pestaña de la barra
-([tu-ia.md](tu-ia.md)).
+estaban acá hasta el 2026-10-19, se mudaron a la cuarta pestaña de la barra, que hoy se llama
+La Cocina: están en su sección «Tu propio chef» ([la-cocina.md](la-cocina.md)).
 
 ## Cómo se llega
 
@@ -19,7 +19,8 @@ O directo: `https://tu-parrilla.cl/admin/cuenta`.
 
 Arriba, el título «Tu Cuenta» (se ve en mayúsculas), debajo «tu nombre y tu hora», y el párrafo
 «Con qué nombre apareces y en qué zona horaria vives. El correo con el que entras no se cambia
-acá. Las llaves para tu IA están en Tu IA.», donde «Tu IA» es un enlace a esa pantalla.
+acá. Las llaves para tu IA están en La Cocina, en «Tu propio chef».», donde «La Cocina» es un
+enlace a esa pantalla.
 Después, un bloque.
 
 ### Bloque «Tus datos»
@@ -61,9 +62,9 @@ muestra con la hora de la zona nueva.
 
 ## Si el humano dice…
 
-- **«¿Dónde genero una llave?» / «Antes las llaves estaban acá».** Se mudaron a Tu IA, la cuarta
-  pestaña de la barra ([tu-ia.md](tu-ia.md)); el enlace «Tu IA» del párrafo de arriba lleva
-  ahí. Las que ya tenía siguen vivas.
+- **«¿Dónde genero una llave?» / «Antes las llaves estaban acá».** Se mudaron a La Cocina, la
+  cuarta pestaña de la barra, sección «Tu propio chef» ([la-cocina.md](la-cocina.md)); el enlace
+  «La Cocina» del párrafo de arriba lleva ahí. Las que ya tenía siguen vivas.
 - **«Las horas me salen corridas».** Revisar «Zona horaria» y la línea «Ahora son las…».
 - **«Quiero cambiar mi correo».** No se puede, ni acá ni en otra pantalla.
 - **«Quiero cambiar el nombre o la foto de mi página».** Eso es La Vitrina (tus páginas
@@ -76,7 +77,7 @@ muestra con la hora de la zona nueva.
 - No cambia el correo, y no hay contraseña que cambiar (se entra con código,
   [ingresar.md](ingresar.md)).
 - No cambia el nombre, la foto ni la dirección de la página pública: eso es La Vitrina.
-- No genera ni revoca llaves: eso es Tu IA.
+- No genera ni revoca llaves: eso es La Cocina, en «Tu propio chef».
 - No conecta redes: eso es Los Fierros (tus redes conectadas, [los-fierros.md](los-fierros.md)).
 
 ## Para quien mantiene esta página

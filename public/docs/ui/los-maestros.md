@@ -47,6 +47,11 @@ del admin. Cada fila trae:
 | «invitado <fecha>» | Fue invitado ese día y todavía no ha entrado nunca. | «Quitar» |
 | «entró <fecha>» | Ya entró; la fecha es la de su **primer** ingreso, no la del último. | «Cerrar sesiones» |
 
+- con la cocina encendida, «cocina desde <fecha>»;
+- en todas las filas, también la del admin, el botón de La Cocina: «Encender la cocina» o
+  «Apagar la cocina» (mientras trabaja, «Encendiendo…» o «Apagando…»). Ver «Para encender o
+  apagar la cocina de alguien», abajo.
+
 Las fechas van en números (día-mes-año).
 
 ## Qué se puede hacer
@@ -89,7 +94,21 @@ Solo para quien ya entró (etiqueta «entró <fecha>»).
 No aparece confirmación: la fila queda igual. Desde su siguiente paso, esa persona sale del
 panel en todos sus navegadores y de la app del teléfono, y tiene que pedir un código nuevo.
 **No le quita el acceso**: su correo sigue invitado y puede volver a entrar cuando quiera. Y no
-toca sus llaves de API, que siguen funcionando hasta que ella las revoque en Tu IA.
+toca sus llaves de API, que siguen funcionando hasta que ella las revoque en La Cocina, en «Tu
+propio chef».
+
+### Para encender o apagar la cocina de alguien
+
+La Cocina es el chef de la casa: el editor que recibe el material crudo y devuelve los creativos
+([la-cocina.md](la-cocina.md)). Está en piloto, y cada cuenta la tiene encendida o apagada.
+
+- **Para encenderla:** apretar «Encender la cocina» en su fila. No pregunta. La fila pasa a decir
+  «cocina desde <fecha>», y esa persona ve sus comandas en La Cocina.
+- **Para apagarla:** apretar «Apagar la cocina». El navegador pregunta «¿Apagar la cocina de
+  <correo>? El chef deja de ver sus comandas.». Aceptar. Las comandas no se borran: el chef deja
+  de verlas, y vuelve a verlas si se enciende de nuevo.
+
+El admin también la enciende para sí mismo, en su propia fila.
 
 ## Mensajes que puede ver
 
@@ -104,6 +123,8 @@ toca sus llaves de API, que siguen funcionando hasta que ella las revoque en Tu 
 | «Ese usuario ya entró alguna vez; no se puede quitar todavía.» | La persona entró después de que se cargó la lista. | Recargar: su fila ahora dice «entró <fecha>». |
 | «No se pudo quitar al usuario. Intenta de nuevo.» | Falló el borrado. | Volver a intentar. |
 | «¿Cerrar las sesiones de esta persona? Tendrá que entrar de nuevo con un código.» | Confirmación antes de cortar sus sesiones. | Aceptar o cancelar. |
+| «¿Apagar la cocina de <correo>? El chef deja de ver sus comandas.» | Confirmación antes de apagarle la cocina. | Aceptar o cancelar. |
+| «Esa persona ya no está en Los Maestros.» | Se quitó entre que se cargó la lista y se apretó el botón de la cocina. | Recargar. |
 
 Si se aprieta «Invitar» con el correo vacío o con una forma que el navegador no acepta, el
 navegador muestra su propio aviso, en su idioma.
@@ -121,11 +142,14 @@ navegador muestra su propio aviso, en su idioma.
   saca de sus sesiones abiertas, pero puede volver a entrar pidiendo un código.
 - **«A alguien le robaron el teléfono» / «se filtró su acceso».** «Cerrar sesiones» corta el
   panel y la app de esa persona. Si además se filtró una llave de API, la tiene que revocar ella
-  en Tu Cuenta ([tu-cuenta.md](tu-cuenta.md)): el admin no puede.
+  en La Cocina, en «Tu propio chef» ([la-cocina.md](la-cocina.md)): el admin no puede.
 - **«¿Cuándo entró por última vez?».** No se muestra: «entró <fecha>» es su primer ingreso.
 - **«No veo el botón Quitar».** Solo aparece para quien nunca entró.
-- **«No veo Cerrar sesiones en mi propia fila».** La fila del admin no tiene botones. Para salir
-  del propio navegador está «Salir», en la barra de arriba.
+- **«No veo Cerrar sesiones en mi propia fila».** La fila del admin no lo tiene: solo el botón de
+  La Cocina. Para salir del propio navegador está «Salir», en la barra de arriba.
+- **«¿Cómo le doy el chef de la casa a alguien?».** «Encender la cocina», en su fila.
+- **«Apagué la cocina de alguien: ¿perdió sus comandas?».** No: siguen ahí. El chef deja de verlas
+  hasta que se encienda de nuevo.
 
 ## Lo que esta pantalla no hace
 
@@ -142,10 +166,11 @@ navegador muestra su propio aviso, en su idioma.
 Sale de:
 
 - `src/app/admin/(dash)/usuarios/page.tsx`: la pantalla, la lista y sus etiquetas.
-- `src/app/admin/(dash)/usuarios/formularios.tsx`: «Invitar», «Quitar», «Cerrar sesiones», sus
-  confirmaciones y sus mensajes.
-- `src/app/admin/actions.ts` (`invitarUsuario`, `quitarUsuario`, `cerrarSesionesUsuario`): el
-  aviso del correo que no salió y el error de la página.
+- `src/app/admin/(dash)/usuarios/formularios.tsx`: «Invitar», «Quitar», «Cerrar sesiones», el
+  botón de La Cocina, sus confirmaciones y sus mensajes.
+- `src/lib/cocina/panel.ts` (`encenderCocinaDe`): qué hace encender o apagar la cocina.
+- `src/app/admin/actions.ts` (`invitarUsuario`, `quitarUsuario`, `cerrarSesionesUsuario`,
+  `encenderCocina`): el aviso del correo que no salió, el error de la página y el de la cocina.
 - `src/lib/usuarios.ts`: invitar, la página que se crea, quitar y cerrar sesiones.
 - `src/lib/ingreso.ts`: «Ese correo no se ve bien.», «Ese correo ya está invitado.» y «Ese
   usuario ya entró alguna vez; no se puede quitar todavía.».

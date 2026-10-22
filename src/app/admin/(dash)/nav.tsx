@@ -14,11 +14,11 @@ import { cn } from '@/lib/utils'
 /** Dónde vive el aviso de los fierros dentro del menú: la entrada de Los Fierros. */
 const RUTA_FIERROS = '/admin/accounts'
 
-/** La única pestaña con dibujo: Tu IA lleva a su maestro, parrillero de noche y de sushi de día. */
-const RUTA_IA = '/admin/ia'
+/** La única pestaña con dibujo: La Cocina lleva a su maestro, parrillero de noche y de sushi de día. */
+const RUTA_COCINA = '/admin/ia'
 
 /**
- * Cuatro pestañas —la última, Tu IA, con su maestro dibujado— y el botón de Ajustes —un trinche
+ * Cuatro pestañas —la última, La Cocina, con su maestro dibujado— y el botón de Ajustes —un trinche
  * y un cuchillo, lado a lado; de día, dos palillos—. Lo que no pide
  * una acción todos los días —las cuentas, las páginas públicas, quién entra— va dentro de
  * Ajustes: sigue a un clic, pero ya no ocupa la barra. Los nombres y las rutas salen del
@@ -75,7 +75,7 @@ export function AdminNav({
                 active ? 'bg-brasa text-acero-950' : 'text-fg-muted hover:text-fg',
               )}
             >
-              {p.ruta === RUTA_IA ? <IconoMaestro className="h-4 w-4" /> : null}
+              {p.ruta === RUTA_COCINA ? <IconoMaestro className="h-4 w-4" /> : null}
               <DeNocheYDeDia noche={p.nombre} dia={nombreEn(p, 'dia')} />
             </Link>
           )

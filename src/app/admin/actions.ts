@@ -67,6 +67,7 @@ import { borrarBorrador, guardarBorrador, type MediaDeBorrador } from '@/lib/bor
 import { ARCHIVO_AJENO, ARCHIVO_FALTANTE, CUERPO_ILEGIBLE, parseMediaMovil, type MediaMovil } from '@/lib/mobile-api'
 import { esReservado } from '@/lib/slugs'
 import { cerrarSesiones, esChoqueDeUnicidad, invitar, pedir, quitar } from '@/lib/usuarios'
+import { encenderCocinaDe } from '@/lib/cocina/panel'
 import { nombreDe } from '@/lib/vocabulario'
 import { fromZonedInput, normalizeUrl, slugify } from '@/lib/utils'
 import { ZONA_INVALIDA, esZonaValida } from '@/lib/zona'
@@ -1454,6 +1455,18 @@ export async function cerrarSesionesUsuario(id: string): Promise<{ error?: strin
   await requireAdmin()
   await cerrarSesiones(id)
   revalidatePath('/admin/usuarios')
+  return {}
+}
+
+/**
+ * Le enciende o le apaga La Cocina a alguien, desde Los Maestros. Apagarla es despedir al chef:
+ * deja de ver sus comandas, aunque ellas siguen ahí. Solo el admin.
+ */
+export async function encenderCocina(id: string, encender: boolean): Promise<{ error?: string }> {
+  await requireAdmin()
+  if (!esUuid(id) || !(await encenderCocinaDe(id, encender, new Date()))) return { error: 'Esa persona ya no está en Los Maestros.' }
+  revalidatePath('/admin/usuarios')
+  revalidatePath('/admin/ia')
   return {}
 }
 

@@ -76,7 +76,7 @@ describe('una página del manual', () => {
     const html = htmlDe('La frase «Tu llave «<nombre>». Cópiala ahora», y «<N> se enfrían».')
     expect(html).toContain('«Tu llave «&lt;nombre&gt;». Cópiala ahora»')
     expect(html).toContain('«&lt;N&gt; se enfrían»')
-    expect(htmlDe(cuerpoDe(readFileSync(join(DIR, 'tu-ia.md'), 'utf8')))).toContain('«creada &lt;fecha&gt; · sin usar»')
+    expect(htmlDe(cuerpoDe(readFileSync(join(DIR, 'la-cocina.md'), 'utf8')))).toContain('«creada &lt;fecha&gt; · sin usar»')
   })
 
   it('ningún enlace de la wiki de verdad queda apuntando a un .md suelto de la carpeta', () => {

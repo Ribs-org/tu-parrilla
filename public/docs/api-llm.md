@@ -21,8 +21,9 @@ endpoints:
 Authorization: Bearer <tu llave>
 ```
 
-La llave te la da la persona dueña de las cuentas, que la genera en su panel, en Tu IA
-(`/admin/ia`; las que salen de ahí empiezan con `tp_`). Todo lo que hagas con ella es a su nombre: sus cuentas, sus posts, su zona horaria.
+La llave te la da la persona dueña de las cuentas, que la genera en su panel, en La Cocina,
+sección «Tu propio chef» (`/admin/ia`; hasta el 2026-10-22 la pestaña se llamaba Tu IA; las que
+salen de ahí empiezan con `tp_`). Todo lo que hagas con ella es a su nombre: sus cuentas, sus posts, su zona horaria.
 Sin ella, con una incorrecta o con una revocada: `401` con el cuerpo `No autorizado`. Un
 `401` con una llave que antes andaba es que la revocaron: no reintentes, pide una nueva.
 
