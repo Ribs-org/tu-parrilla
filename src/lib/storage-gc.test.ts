@@ -53,7 +53,7 @@ describe('COLUMNAS_DE_ARCHIVO', () => {
     // La spec (docs/superpowers/specs/2026-09-26-documento-por-privado-design.md:136-139)
     // promete comparar contra lo que el ESQUEMA declara, no contra una lista escrita a
     // mano en el propio test: esa segunda forma sujeta lo que hay hoy, pero no ve una
-    // séptima columna nueva en `schema.ts` que nadie registre — sus archivos se
+    // columna nueva en `schema.ts` que nadie registre — sus archivos se
     // borrarían solos y ningún test se pondría rojo. Por eso este test recorre las
     // tablas de verdad con `getTableColumns`, no una copia de `COLUMNAS_DE_ARCHIVO`.
     const registradas = new Set(COLUMNAS_DE_ARCHIVO.map((c) => `${c.tabla}.${c.columna}`))

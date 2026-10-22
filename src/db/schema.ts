@@ -857,9 +857,11 @@ export const comandaEventos = pgTable(
 
 /**
  * Un archivo que el usuario le lleva al chef: el plato principal o un acompañamiento. Vive en el
- * almacén (`cocina/<dueño>/…`) y se borra a los 14 días de terminada la comanda (`expiraEn`,
- * `borradoEn`). `derechosEn` es cuándo el usuario declaró que tiene los derechos de lo que sube.
- * Sin comanda mientras el formulario no se manda: una subida abandonada se barre.
+ * almacén (`cocina/<dueño>/insumos/…`), y nace al cerrar su subida (`subidas`). La regla es
+ * borrarlo a los 14 días de terminada la comanda (`expiraEn`, `borradoEn`); el barrido que la
+ * cumple llega con el mesón. `derechosEn` es cuándo el usuario declaró que tiene los derechos de lo
+ * que sube. Sin comanda mientras el formulario no se manda: lo que se subió y no se pidió se borra a
+ * los tres días (`barrerSubidas`).
  */
 export const insumos = pgTable(
   'insumos',
@@ -886,9 +888,41 @@ export const insumos = pgTable(
 ).enableRLS()
 
 /**
+ * Una subida por partes: el plato principal pesa de 2 a 20 GB, más de lo que acepta un solo PUT,
+ * así que el navegador lo sube en partes de 64 MB directo al almacén. Acá queda lo que hace falta
+ * para retomarla si se corta —el id de la subida en el almacén, la clave y el tamaño de cada
+ * parte— y lo que va a ser el insumo al cerrarla. Las partes que ya llegaron no se guardan: se le
+ * preguntan al almacén. Cerrada, nombra su insumo; abierta y abandonada, el barrido la aborta a las
+ * 24 horas (`barrerSubidas`). No guarda una URL, sino la clave: el objeto no existe hasta cerrarla.
+ */
+export const subidas = pgTable(
+  'subidas',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    ownerId: uuid('owner_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    idEnAlmacen: text('id_en_almacen').notNull(),
+    clave: text('clave').notNull(),
+    nombre: text('nombre').notNull(),
+    tipoArchivo: text('tipo_archivo').notNull(),
+    bytes: bigint('bytes', { mode: 'number' }).notNull(),
+    tamanoParte: integer('tamano_parte').notNull(),
+    tipo: text('tipo').$type<TipoInsumo>().notNull(),
+    subtipo: text('subtipo'),
+    duracionS: real('duracion_s'),
+    derechosEn: timestamp('derechos_en', { withTimezone: true }).notNull(),
+    insumoId: uuid('insumo_id').references(() => insumos.id, { onDelete: 'set null' }),
+    creadaEn: timestamp('creada_en', { withTimezone: true }).notNull().defaultNow(),
+    cerradaEn: timestamp('cerrada_en', { withTimezone: true }),
+  },
+  (t) => [index('subidas_owner_idx').on(t.ownerId)],
+).enableRLS()
+
+/**
  * Lo que el chef entrega: un video, un carrusel o una imagen, con sus textos, su pieza y su estilo,
  * listo para programar. Vive en el mesón (de día, la vitrina) hasta que se programa o se descarta;
- * lo que nadie programó se borra a los 30 días (`expiraEn`). Sus archivos van en la carpeta del
+ * lo que nadie programó vence a los 30 días (`expiraEn`; el barrido que lo borra llega con el mesón). Sus archivos van en la carpeta del
  * dueño (`scheduled/<dueño>/cocina/…`), así que programarlo no los vuelve a bajar. `ref` evita
  * duplicarlo si el chef lo reenvía.
  */
@@ -987,5 +1021,6 @@ export type Marca = typeof marcas.$inferSelect
 export type Comanda = typeof comandas.$inferSelect
 export type ComandaEvento = typeof comandaEventos.$inferSelect
 export type Insumo = typeof insumos.$inferSelect
+export type Subida = typeof subidas.$inferSelect
 export type Creativo = typeof creativos.$inferSelect
 export type CreativoMedia = typeof creativoMedia.$inferSelect

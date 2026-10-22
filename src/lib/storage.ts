@@ -1,10 +1,15 @@
 import {
+  AbortMultipartUploadCommand,
+  CompleteMultipartUploadCommand,
+  CreateMultipartUploadCommand,
   DeleteObjectCommand,
   GetObjectCommand,
   HeadObjectCommand,
   ListObjectsV2Command,
+  ListPartsCommand,
   PutObjectCommand,
   S3Client,
+  UploadPartCommand,
 } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { env } from '@/lib/env'
@@ -150,6 +155,94 @@ export async function urlParaBajar(key: string, segundos: number = SUBIDA_SEGUND
   const conf = config()
   if (!conf) throw new Error(SIN_ALMACEN)
   return getSignedUrl(getCliente(), new GetObjectCommand({ Bucket: conf.bucket, Key: key }), { expiresIn: segundos })
+}
+
+// La subida por partes: lo que un solo PUT no alcanza (el almacén acepta hasta 5 GB por PUT, y
+// un largo crudo pesa de 2 a 20). El navegador sube cada parte directo con su enlace firmado, y
+// ninguna cruza una función. Las partes que llegaron se le preguntan al almacén (`ListParts`) en
+// vez de pedirle al navegador sus ETag: así el CORS del bucket no tiene que dejar leer esa
+// cabecera, y el servidor no le cree al navegador lo que dice haber subido.
+
+/** Abre una subida por partes y devuelve su id en el almacén. El objeto va a nacer con su tipo y su caché. */
+export async function abrirPorPartes(key: string, contentType: string): Promise<string> {
+  const conf = config()
+  if (!conf) throw new Error(SIN_ALMACEN)
+  const r = await getCliente().send(
+    new CreateMultipartUploadCommand({
+      Bucket: conf.bucket,
+      Key: key,
+      ContentType: contentType,
+      CacheControl: CACHE_INMUTABLE,
+    }),
+  )
+  if (!r.UploadId) throw new Error('El almacén no devolvió el id de la subida')
+  return r.UploadId
+}
+
+/** Un PUT firmado para una parte (1..10000). Sin cabeceras en la firma: el navegador manda solo los bytes. */
+export async function urlParaParte(key: string, idEnAlmacen: string, numero: number): Promise<string> {
+  const conf = config()
+  if (!conf) throw new Error(SIN_ALMACEN)
+  return getSignedUrl(
+    getCliente(),
+    new UploadPartCommand({ Bucket: conf.bucket, Key: key, UploadId: idEnAlmacen, PartNumber: numero }),
+    { expiresIn: SUBIDA_SEGUNDOS },
+  )
+}
+
+export type ParteSubida = { numero: number; etag: string; bytes: number }
+
+/** Las partes que ya llegaron, según el almacén. Null si la subida ya no existe: se cerró o se abortó. */
+export async function partesSubidas(key: string, idEnAlmacen: string): Promise<ParteSubida[] | null> {
+  const conf = config()
+  if (!conf) throw new Error(SIN_ALMACEN)
+  const partes: ParteSubida[] = []
+  let marcador: string | undefined
+  do {
+    let pagina
+    try {
+      pagina = await getCliente().send(
+        new ListPartsCommand({ Bucket: conf.bucket, Key: key, UploadId: idEnAlmacen, PartNumberMarker: marcador }),
+      )
+    } catch (error) {
+      if ((error as { name?: string }).name === 'NoSuchUpload') return null
+      throw error
+    }
+    for (const p of pagina.Parts ?? []) {
+      if (p.PartNumber && p.ETag) partes.push({ numero: p.PartNumber, etag: p.ETag, bytes: p.Size ?? 0 })
+    }
+    const siguiente = pagina.IsTruncated ? pagina.NextPartNumberMarker : undefined
+    if (siguiente && siguiente === marcador) throw new Error('El almacén repitió el marcador de las partes')
+    marcador = siguiente
+  } while (marcador)
+  return partes
+}
+
+/** Junta las partes en el objeto, en orden. */
+export async function cerrarPorPartes(key: string, idEnAlmacen: string, partes: ParteSubida[]): Promise<void> {
+  const conf = config()
+  if (!conf) throw new Error(SIN_ALMACEN)
+  const enOrden = [...partes].sort((a, b) => a.numero - b.numero)
+  await getCliente().send(
+    new CompleteMultipartUploadCommand({
+      Bucket: conf.bucket,
+      Key: key,
+      UploadId: idEnAlmacen,
+      MultipartUpload: { Parts: enOrden.map((p) => ({ PartNumber: p.numero, ETag: p.etag })) },
+    }),
+  )
+}
+
+/** La aborta, y el almacén borra sus partes. Una que ya no existe no es un error. */
+export async function abortarPorPartes(key: string, idEnAlmacen: string): Promise<void> {
+  const conf = config()
+  if (!conf) throw new Error(SIN_ALMACEN)
+  try {
+    await getCliente().send(new AbortMultipartUploadCommand({ Bucket: conf.bucket, Key: key, UploadId: idEnAlmacen }))
+  } catch (error) {
+    if ((error as { name?: string }).name === 'NoSuchUpload') return
+    throw error
+  }
 }
 
 /**

@@ -22,6 +22,7 @@ tus números.
 | `/api/schedule/…`, `/api/metrics/…` | La API para tu agente, con una llave de Tu IA: cargar, ver y sacar lo programado, archivar lo quemado, las cuentas y los números (ver «Carga masiva por API» y las secciones que le siguen) |
 | `/api/cocina/…` | La API de La Cocina, con `COCINA_SECRET`: el servidor del chef toma las comandas, baja sus insumos, informa cada estado y entrega lo cocinado al mesón del dueño (ver «La Cocina» y `docs/cocina-api.md`) |
 | `/api/media` | `POST` con la misma llave: firma la subida de un archivo directo a R2, para nombrarlo después en varias filas del lote sin que se vuelva a bajar (ver «Carga masiva por API») |
+| `/api/admin/…` | Lo que el panel llama desde el navegador, con la cookie de la sesión: la firma de una subida directa (`upload-url`) y las subidas por partes de La Cocina (`cocina/…`; ver «La Cocina») |
 | `/api/mobile/…` | La API de la app del teléfono, con el token de su sesión (ver `mobile/README.md`) |
 | `/api/cron/…` | Las corridas programadas: la publicación y la sincronización. Solo con `CRON_SECRET` |
 | `/api/track/…` | Las balizas de visitas y clics de las páginas públicas |
@@ -1124,8 +1125,8 @@ es el mismo en los dos casos, cambia solo quién lo dispara.
 Cada corrida hace cuatro cosas, en orden: publica lo vencido, vigila las conexiones de las
 cuentas (manda el correo de las que se cayeron; ver «Avisos por correo»), sondea comentarios
 (hasta los 120 segundos de la corrida) y, una vez por hora, barre los archivos huérfanos de
-R2: le toca a la corrida que empieza en los primeros cinco minutos de la hora, si no viene
-atrasada. Al terminar cada fase escribe `[cron] <fase> listo a los N ms` en el log, y el
+R2 y las subidas de La Cocina que quedaron a medias (ver «La Cocina»): le toca a la corrida que
+empieza en los primeros cinco minutos de la hora, si no viene atrasada. Al terminar cada fase escribe `[cron] <fase> listo a los N ms` en el log, y el
 barrido dice cuántos objetos leyó: si una corrida muere por `maxDuration` (240 s), la fase
 colgada es la primera que no dejó su línea. El barrido tiene un plazo de un minuto por
 lectura —el listado de R2 y la consulta a la base, cada una con su línea `[barrido]`— y, si
@@ -1412,8 +1413,12 @@ La Cocina es la fábrica de creativos de cada usuario dentro de Tu Parrilla:
 
 El diseño, con sus fases, está en `docs/superpowers/specs/2026-10-22-la-cocina-design.md`.
 
-**Hoy existe la base: las tablas y la API por la que habla el chef.** Lo que ve el usuario llega
-en las entregas siguientes, así que ningún usuario ve nada todavía:
+**Hoy existen dos piezas:**
+
+- la base: las tablas y la API por la que habla el chef;
+- la subida por partes, por la que el panel le va a llevar el material.
+
+Lo que ve el usuario llega en las entregas siguientes, así que ningún usuario ve nada todavía:
 
 - encenderle la cocina a alguien desde Los Maestros;
 - la pestaña donde sube, pide y sigue la comanda;
@@ -1449,6 +1454,34 @@ cancelación. Servir y cancelar son del usuario: el chef no lleva a ninguno de l
 3. se cierra: Tu Parrilla mira que cada archivo esté en el almacén y pese lo anunciado.
 
 La `ref` de cada creativo lo hace repetible: un reintento del chef nunca lo duplica.
+
+**El material sube por partes, directo al almacén.** Un largo crudo pesa de 2 a 20 GB, y un solo
+PUT llega hasta 5, así que el navegador lo corta en partes de 64 MB y sube tres a la vez, cada una
+con su enlace firmado. Ninguna parte cruza una función de Vercel. Va por cuatro pasos:
+
+1. `/api/admin/cocina/subidas` abre la subida;
+2. `…/partes` firma los enlaces de a pocos, justo antes de usarlos;
+3. el navegador sube las partes;
+4. `…/cerrar` junta las partes. Ahí nace el insumo, todavía sin comanda.
+
+Las partes que llegaron se le preguntan al almacén (`ListParts`), no al navegador. Por eso:
+
+- el CORS del bucket no tiene que dejar leer la cabecera `ETag`;
+- una parte que llegó con otro peso se vuelve a subir;
+- si la subida se corta, elegir el mismo archivo otra vez la retoma donde quedó, porque el
+  navegador recuerda qué subida era.
+
+El servidor está en `src/lib/cocina/subidas.ts`, y el navegador en `src/lib/subida-por-partes.ts`.
+
+**Lo crudo vive fuera de `scheduled/`.** Va en `cocina/<dueño>/insumos/`, con un uuid en la clave, y
+su URL nunca sale al navegador: el chef lo baja con un enlace firmado que vence en una hora. Pesa:
+con la cocina encendida, el almacén pasa fácil los 10 GB gratis de R2, y cada GB de más cuesta
+unos US$0,015 al mes.
+
+**Lo que queda a medias se barre** una vez por hora, con el barrido de huérfanos (`barrerSubidas`):
+
+- una subida abierta hace más de 24 horas se aborta, y el almacén borra sus partes;
+- lo que se subió y lleva tres días sin llegar a una comanda se borra.
 
 ## Estructura
 
@@ -1489,6 +1522,7 @@ src/
     uuid.ts                si un texto es un uuid: los ids de las URLs se revisan antes de consultar
     choque-de-unicidad.ts  si un error de la base es un choque con una restricción de unicidad dada
     subida-directa.ts      la subida del navegador directo al almacén, con la URL que firma /api/admin/upload-url
+    subida-por-partes.ts   la subida por partes del navegador, para los archivos grandes de La Cocina: varias partes a la vez, y se retoma si se corta
     use-ahora.ts           la hora de ahora, al minuto: la del servidor al hidratar, y después se corre sola
     copiar.ts              copiar al portapapeles y saber si de verdad se copió
     slugs.ts               qué direcciones están reservadas y cuál le toca a cada correo
@@ -1504,7 +1538,7 @@ src/
     cuentas-api.ts         las cuentas de GET /api/schedule/cuentas: los dos ids y cómo está la conexión (sin base)
     media-api.ts           la clave de un archivo que sube un cliente de la API, en la carpeta de su dueño (sin base)
     archivar-api.ts        el cuerpo y las respuestas de archivar y desarchivar lo quemado por API
-    cocina/                La Cocina: los estados de una comanda, la fila del chef, lo que entrega y lo que lee y escribe su API (/api/cocina)
+    cocina/                La Cocina: los estados de una comanda, la fila del chef, lo que entrega, lo que lee y escribe su API (/api/cocina) y las subidas por partes del panel (/api/admin/cocina)
     color-de-red.ts        el color de marca de cada red en La Parrilla, como clases de Tailwind escritas enteras
     piezas.ts              la pieza de una publicación: sus destinos programados unidos a lo publicado
     auth.ts                sesión del panel

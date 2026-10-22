@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { vigilarConexiones } from '@/lib/avisos/run'
 import { sondearComentarios } from '@/lib/social/comentarios/run'
 import { publishDue } from '@/lib/social/publish/run'
+import { barrerSubidas } from '@/lib/cocina/subidas'
 import { barrerHuerfanos } from '@/lib/storage-gc'
 import { env } from '@/lib/env'
 import { cronAutorizado } from '@/lib/cron-auth'
@@ -24,7 +25,8 @@ const MARGEN_MS = 10_000
 
 /**
  * El barrido de huérfanos va una vez por hora y no en cada corrida: lista el almacén entero
- * y lee siete tablas completas, y cada cinco minutos eso era tráfico de la base para nada.
+ * y lee completa cada tabla que guarda un archivo (`COLUMNAS_DE_ARCHIVO`), y cada cinco minutos
+ * eso era tráfico de la base para nada. El de las subidas de la cocina va con él.
  * Le toca a la corrida que empieza en los primeros cinco minutos de la hora —con el pinger
  * cada cinco minutos, siempre hay una— y que no viene atrasada: una que ya gastó su mitad
  * publicando lo deja para la hora siguiente. El barrido espera de todos modos una hora antes
@@ -83,9 +85,13 @@ export async function GET(request: Request) {
     // Después de publicar, no antes: `limpiarMedia` acaba de liberar los videos, y el
     // barrido los ve en su pasada de la hora. No hace falta envolverlo: `barrerHuerfanos`
     // no lanza nunca.
-    const barrido = tocaBarrer(inicio, Date.now()) ? await barrerHuerfanos() : null
+    const toca = tocaBarrer(inicio, Date.now())
+    const barrido = toca ? await barrerHuerfanos() : null
+    // Las subidas de la cocina: las abiertas y abandonadas, y lo subido que nunca llegó a una
+    // comanda. Tampoco lanza (`barrerSubidas`).
+    const subidas = toca ? await barrerSubidas() : null
     marca('barrido')
-    return NextResponse.json({ report, conexiones, comentarios, barrido })
+    return NextResponse.json({ report, conexiones, comentarios, barrido, subidas })
   } catch (error) {
     console.error('Falló la corrida de publicación:', error)
     return NextResponse.json({ error: 'La publicación falló por completo.' }, { status: 500 })

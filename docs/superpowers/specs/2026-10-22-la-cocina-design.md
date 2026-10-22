@@ -1,8 +1,8 @@
 # La Cocina: la fábrica de creativos del chef, dentro de Tu Parrilla
 
-Fecha: 2026-10-22. **Diseño. Implementado** lo de «Antes» (qué cuenta acepta trial reels) y la
-base de la fase 0: las tablas y la API del chef, cuyo contrato está en `docs/cocina-api.md`. Todavía
-nada que vea el usuario. Reemplaza y amplía «El chef de la casa»
+Fecha: 2026-10-22. **Diseño. Implementado** lo de «Antes» (qué cuenta acepta trial reels) y, de
+la fase 0, la base —las tablas y la API del chef, cuyo contrato está en `docs/cocina-api.md`— y la
+subida por partes del panel (`subidas`). Todavía nada que vea el usuario. Reemplaza y amplía «El chef de la casa»
 (`2026-10-19-chef-de-la-casa-design.md`), que ya decía para qué sirve el chef y cómo se dibuja;
 esto dice cómo se pide, cómo se sigue y qué se entrega, y fija el contrato entre Tu Parrilla y
 el chef. Lo pidió el dueño el 2026-10-22, y los nueve puntos del líder de creación de contenido
@@ -203,6 +203,10 @@ El porqué del nombre de lo entregado: en una parrilla, los cortes esperan en el
 ir al fuego; en una barra de sushi, las piezas se exhiben en la **vitrina**. Lo que está ahí todavía
 no está programado: cuando se programa, pasa a La Parrilla (de día, La Barra), como cualquier post.
 Las dos palabras van a `PALABRAS_DE_DIA` y a la wiki.
+
+**Por decidir:** «La vitrina» ya nombra tus páginas públicas (`/admin/profiles`), en los dos modos.
+Antes de construir el mesón hay que elegir otra palabra de día; la propuesta es «La bandeja» (ver
+`docs/pendientes.md`).
 
 ### Tu marca: los condimentos
 
