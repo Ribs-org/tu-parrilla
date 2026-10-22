@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils'
  * El ícono de Ajustes: un trinche de dos puntas y un cuchillo criollo, de pie y lado a lado,
  * como se dejan junto a la parrilla. Reemplaza al engranaje, que no decía nada de una parrilla.
  * De día, dos palillos: lo que se deja junto al sushi. Los dos van en la página y el modo esconde
- * uno (`.solo-noche`, `.solo-dia`), como el maestro de Tu IA (`icono-maestro.tsx`).
+ * uno (`.solo-noche`, `.solo-dia`), como el maestro de La Cocina (`icono-maestro.tsx`).
  *
  * Se probaron cruzados, en X y en V, y a 16 px —el tamaño de la barra— la X se leía como
  * «cerrar» y la V como una letra; de pie, cada uno conserva su cabeza: dos puntas el trinche,

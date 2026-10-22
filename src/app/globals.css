@@ -910,7 +910,7 @@
 /*
  * Lo que cambia con el modo y va dos veces en la página, para que el modo esconda uno: los dos
  * dibujos del corte (`corte.tsx`), la carne de noche y la pieza de sushi de día; los íconos de
- * Tu IA y de Ajustes, y las palabras que cambian de día (`DeNocheYDeDia`, con las de
+ * La Cocina y de Ajustes, y las palabras que cambian de día (`DeNocheYDeDia`, con las de
  * `src/lib/vocabulario.ts`). Fuera de toda capa a propósito: tienen que ganarle a las utilidades
  * de tamaño y de `display` que trae el `className` de cada uno.
  *

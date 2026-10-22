@@ -4,9 +4,11 @@ import { Panel } from '@/components/charts/panel'
 import { DeNocheYDeDia } from '@/components/de-noche-y-de-dia'
 import { Encabezado } from '@/components/ui'
 import { requireUser } from '@/lib/auth'
+import { comandasDelDueno, estadoDeLaCocina } from '@/lib/cocina/panel'
 import { listarLlaves } from '@/lib/llaves'
 import { MAX_NOMBRE, PREFIJO } from '@/lib/llaves-api'
 import { MANUAL } from '@/lib/vocabulario'
+import { ChefDeLaCasa, ChefDeLaCasaApagado } from './chef-de-la-casa'
 import { BotonRevocar, FormularioLlave } from './llaves'
 
 export const dynamic = 'force-dynamic'
@@ -45,13 +47,20 @@ const LO_QUE_HACE = [
 ] as const
 
 /**
- * Tu IA: conectar el agente propio —el «chef» que cocina por ti— con una llave y las guías de
- * la API, y abajo el manual del panel para leerlo uno mismo. Pestaña desde el 2026-10-19, a
- * pedido del dueño; las llaves vivían antes en Tu Cuenta.
+ * La Cocina: los dos chefs que pueden cocinar para el dueño. Arriba, el de la casa —el editor de
+ * `marca-personal`, que recibe comandas—; abajo, «Tu propio chef»: la IA propia, con una llave y
+ * las guías de la API, y el manual del panel para leerlo uno mismo. Reemplazó a Tu IA el
+ * 2026-10-22, en la misma ruta: las dos cosas son el chef, el nuestro o el tuyo, y dos pestañas con
+ * el mismo dibujo confundían. Tu IA era pestaña desde el 2026-10-19; las llaves vivían antes en
+ * Tu Cuenta.
  */
-export default async function TuIaPage() {
+export default async function LaCocinaPage() {
   const usuario = await requireUser()
+  const ahora = new Date()
   const llaves = await listarLlaves(usuario.id)
+  // En serie, como el resto de la cocina: son consultas chicas (`src/lib/cocina/panel.ts`).
+  const cocina = usuario.cocinaDesde ? await estadoDeLaCocina(ahora) : null
+  const comandas = usuario.cocinaDesde ? await comandasDelDueno(usuario.id) : []
 
   // La base de la API es el dominio donde está abierto el panel: en producción el panel solo
   // se abre en el del producto (`panelEnElProducto`), y en local o en un preview la llave sirve
@@ -70,81 +79,98 @@ export default async function TuIaPage() {
       <header className="mb-6">
         <Encabezado ruta="/admin/ia" />
         <p className="mt-1 max-w-2xl text-sm text-fg-muted">
+          Dos chefs pueden cocinar para ti. El de la casa edita tus videos y te devuelve los creativos, listos
+          para programar. El tuyo es tu propia IA, que programa y lee en Tu Parrilla a tu nombre, sin entrar al
+          panel.
+        </p>
+      </header>
+
+      {cocina ? (
+        <ChefDeLaCasa cocina={cocina} comandas={comandas} zona={usuario.zona} ahora={ahora} />
+      ) : (
+        <ChefDeLaCasaApagado esAdmin={usuario.rol === 'admin'} />
+      )}
+
+      <section aria-labelledby="tu-propio-chef">
+        <h2 id="tu-propio-chef" className="font-titulo text-lg font-semibold uppercase tracking-[0.05em]">
+          Tu propio chef
+        </h2>
+        <p className="mb-6 mt-1 max-w-2xl text-sm text-fg-muted">
           Tu IA puede programar y leer en Tu Parrilla por ti: le pides «programa estos cinco videos para la
           semana» o «¿qué publicación me trajo más visitas?», y lo hace a tu nombre, sin entrar al panel.
           Sirve cualquier agente que sepa llamar a una API: el que te edita los videos, un asistente con
           herramientas, un script. Son dos pasos.
         </p>
-      </header>
 
-      <Panel
-        title="1. Su llave"
-        hint="Con una llave, tu IA programa posts, los saca, lee tu calendario y tus números a tu nombre, sin entrar al panel."
-        className="mb-6"
-      >
-        <p className="mb-4 max-w-2xl text-sm text-fg-muted">
-          Quien tenga la llave puede hacer todo eso con tus cuentas: dásela solo a la IA que la va a usar.
-          Una por cada IA: así revocas la de una sin tocar las otras.
-        </p>
-        <FormularioLlave base={base} maxNombre={MAX_NOMBRE} />
-        {llaves.length > 0 ? (
-          <ul className="mt-6 divide-y divide-velo/[0.06] border-t border-velo/[0.06]">
-            {llaves.map((llave) => (
-              <li key={llave.id} className="flex flex-wrap items-center gap-3 py-3 text-sm">
-                <span className="min-w-0 flex-1 truncate">{llave.nombre}</span>
-                <span className="font-mono text-xs text-fg-faint">
-                  {PREFIJO}…{llave.final}
+        <Panel
+          title="1. Su llave"
+          hint="Con una llave, tu IA programa posts, los saca, lee tu calendario y tus números a tu nombre, sin entrar al panel."
+          className="mb-6"
+        >
+          <p className="mb-4 max-w-2xl text-sm text-fg-muted">
+            Quien tenga la llave puede hacer todo eso con tus cuentas: dásela solo a la IA que la va a usar.
+            Una por cada IA: así revocas la de una sin tocar las otras.
+          </p>
+          <FormularioLlave base={base} maxNombre={MAX_NOMBRE} />
+          {llaves.length > 0 ? (
+            <ul className="mt-6 divide-y divide-velo/[0.06] border-t border-velo/[0.06]">
+              {llaves.map((llave) => (
+                <li key={llave.id} className="flex flex-wrap items-center gap-3 py-3 text-sm">
+                  <span className="min-w-0 flex-1 truncate">{llave.nombre}</span>
+                  <span className="font-mono text-xs text-fg-faint">
+                    {PREFIJO}…{llave.final}
+                  </span>
+                  <span className="text-xs text-fg-faint">
+                    creada {fecha.format(llave.creadaEn)} ·{' '}
+                    {llave.usadaEn ? `usada por última vez ${fechaHora.format(llave.usadaEn)}` : 'sin usar'}
+                  </span>
+                  <BotonRevocar id={llave.id} nombre={llave.nombre} />
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-6 text-sm text-fg-faint">Todavía no tienes llaves.</p>
+          )}
+        </Panel>
+
+        <Panel
+          title="2. Su guía"
+          hint="Tu IA no conoce Tu Parrilla: todo lo que sabe hacer acá está en la guía."
+          className="mb-6"
+        >
+          <p className="mb-4 max-w-2xl text-sm text-fg-muted">
+            Al generar la llave, «Copiar con instrucciones para tu agente» le pasa todo de una vez: la llave,
+            dónde está la API y qué leer. Pégaselo en su chat o en su configuración. Si te pide los enlaces,
+            son estos:
+          </p>
+          <ul className="space-y-3">
+            {GUIAS.map((guia) => (
+              <li key={guia.ruta} className="text-sm">
+                <a href={guia.ruta} target="_blank" rel="noreferrer" className="text-brasa underline-offset-2 hover:underline">
+                  {guia.nombre}
+                </a>
+                <span className="ml-2 font-mono text-xs text-fg-faint">
+                  {base}
+                  {guia.ruta}
                 </span>
-                <span className="text-xs text-fg-faint">
-                  creada {fecha.format(llave.creadaEn)} ·{' '}
-                  {llave.usadaEn ? `usada por última vez ${fechaHora.format(llave.usadaEn)}` : 'sin usar'}
-                </span>
-                <BotonRevocar id={llave.id} nombre={llave.nombre} />
+                <p className="mt-0.5 text-fg-muted">{guia.para}</p>
               </li>
             ))}
           </ul>
-        ) : (
-          <p className="mt-6 text-sm text-fg-faint">Todavía no tienes llaves.</p>
-        )}
-      </Panel>
+        </Panel>
 
-      <Panel
-        title="2. Su guía"
-        hint="Tu IA no conoce Tu Parrilla: todo lo que sabe hacer acá está en la guía."
-        className="mb-6"
-      >
-        <p className="mb-4 max-w-2xl text-sm text-fg-muted">
-          Al generar la llave, «Copiar con instrucciones para tu agente» le pasa todo de una vez: la llave,
-          dónde está la API y qué leer. Pégaselo en su chat o en su configuración. Si te pide los enlaces,
-          son estos:
-        </p>
-        <ul className="space-y-3">
-          {GUIAS.map((guia) => (
-            <li key={guia.ruta} className="text-sm">
-              <a href={guia.ruta} target="_blank" rel="noreferrer" className="text-brasa underline-offset-2 hover:underline">
-                {guia.nombre}
-              </a>
-              <span className="ml-2 font-mono text-xs text-fg-faint">
-                {base}
-                {guia.ruta}
-              </span>
-              <p className="mt-0.5 text-fg-muted">{guia.para}</p>
-            </li>
-          ))}
-        </ul>
-      </Panel>
-
-      <Panel title="Lo que puede hacer" className="mb-10">
-        <ul className="max-w-2xl list-disc space-y-1.5 pl-5 text-sm text-fg-muted">
-          {LO_QUE_HACE.map((cosa) => (
-            <li key={cosa}>{cosa}</li>
-          ))}
-        </ul>
-        <p className="mt-4 max-w-2xl text-sm text-fg-muted">
-          Lo que no hace: editar un post ya programado (lo saca y lo programa de nuevo), publicar en el acto,
-          conectar tus redes ni cambiar tu página. Eso lo haces tú, en el panel.
-        </p>
-      </Panel>
+        <Panel title="Lo que puede hacer" className="mb-10">
+          <ul className="max-w-2xl list-disc space-y-1.5 pl-5 text-sm text-fg-muted">
+            {LO_QUE_HACE.map((cosa) => (
+              <li key={cosa}>{cosa}</li>
+            ))}
+          </ul>
+          <p className="mt-4 max-w-2xl text-sm text-fg-muted">
+            Lo que no hace: editar un post ya programado (lo saca y lo programa de nuevo), publicar en el acto,
+            conectar tus redes ni cambiar tu página. Eso lo haces tú, en el panel.
+          </p>
+        </Panel>
+      </section>
 
       <section className="max-w-2xl border-t border-acero-700 pt-6">
         <h2 className="font-titulo text-sm font-semibold uppercase tracking-[0.08em]">¿Quieres saber más de Tu Parrilla?</h2>

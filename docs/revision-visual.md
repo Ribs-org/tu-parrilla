@@ -2,7 +2,7 @@
 
 > Es la lista de cuando llegó esa piel, y las pantallas cambiaron después: El Fuego y Los
 > Cortes ya no existen (lo suyo está en La Parrilla y en «Tus publicaciones», dentro de Los
-> Números), y Tu IA (`/admin/ia`) es nueva. Los siete puntos de abajo siguen valiendo; la
+> Números), y La Cocina (`/admin/ia`; hasta el 2026-10-22, Tu IA) es nueva. Los siete puntos de abajo siguen valiendo; la
 > lista de pantallas al día está en `public/docs/ui/index.md`.
 
 Lista para dar por buena la piel nueva del panel (acero frío, brasa `#e8621f` como único

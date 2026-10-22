@@ -2,7 +2,7 @@ import { Panel } from '@/components/charts/panel'
 import { Encabezado } from '@/components/ui'
 import { requireAdmin } from '@/lib/auth'
 import { listarUsuarios } from '@/lib/usuarios'
-import { FormularioInvitar, BotonQuitar, BotonCerrarSesiones } from './formularios'
+import { FormularioInvitar, BotonQuitar, BotonCerrarSesiones, BotonCocina } from './formularios'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,6 +27,8 @@ export default async function UsuariosPage() {
             <li key={u.id} className="flex flex-wrap items-center gap-3 py-3 text-sm">
               <span className="min-w-0 flex-1 truncate">{u.nombre ? `${u.nombre} · ` : ''}{u.correo}</span>
               <span className="text-xs text-fg-faint">{u.rol === 'admin' ? 'admin' : u.primerIngresoEn ? `entró ${FECHA.format(u.primerIngresoEn)}` : `invitado ${FECHA.format(u.invitadoEn)}`}</span>
+              {u.cocinaDesde ? <span className="text-xs text-fg-faint">cocina desde {FECHA.format(u.cocinaDesde)}</span> : null}
+              <BotonCocina id={u.id} correo={u.correo} encendida={Boolean(u.cocinaDesde)} />
               {u.rol !== 'admin' && !u.primerIngresoEn ? <BotonQuitar id={u.id} /> : null}
               {u.rol !== 'admin' && u.primerIngresoEn ? <BotonCerrarSesiones id={u.id} /> : null}
             </li>

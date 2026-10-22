@@ -33,7 +33,7 @@ function leer(pagina: PaginaDelManual): Promise<string> {
 
 /**
  * El manual del parrillero —de día, el del maestro de sushi—: una página de la wiki de la UI por dirección
- * (`/admin/ia/manual/la-parrilla`), con la lista de todas al lado. Vive dentro de Tu IA, que
+ * (`/admin/ia/manual/la-parrilla`), con la lista de todas al lado. Vive dentro de La Cocina, que
  * queda marcada en la barra mientras se lee.
  */
 export default async function ManualPage({ params }: { params: Promise<{ pagina?: string[] }> }) {

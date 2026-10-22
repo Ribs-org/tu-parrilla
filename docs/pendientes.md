@@ -38,13 +38,14 @@ sección.
   las decisiones del dueño del 2026-10-22, y el feedback del equipo de creación de contenido de ese
   mismo día, que entró entero.
 
-  - **Ya existe** (2026-10-22): qué cuenta acepta trial reels, y de la fase 0 la base, que son
-    las tablas y la API del chef, con su contrato en `docs/cocina-api.md`, y la subida por partes
-    del panel.
+  - **Ya existe** (2026-10-22): qué cuenta acepta trial reels, y de la fase 0:
+    - la base, que son las tablas y la API del chef, con su contrato en `docs/cocina-api.md`;
+    - la subida por partes del panel;
+    - la pestaña La Cocina en lugar de Tu IA, con el seguimiento de las comandas y su
+      cancelación, y el interruptor de cada cuenta en Los Maestros.
   - **Lo siguiente, en orden:**
-    1. La pestaña La Cocina en el panel, en lugar de Tu IA y con «Tu propio chef» adentro:
-       encenderla desde Los Maestros, subir el material con la subida por partes, pedir y seguir
-       la comanda.
+    1. Pedir desde el panel: el formulario de la comanda, con la subida por partes, la marca
+       básica y el dibujo de cada insumo.
     2. El mesón: programar, descartar con motivo y los barridos de 14 y 30 días.
   - **[dueño]** Generar `COCINA_SECRET` y ponerla en Vercel (Production) y en el servidor del
     chef. Sin ella, la API de la cocina responde `401`.
@@ -375,9 +376,10 @@ Nada de esto bloquea un trámite hoy; conviene ordenarlo antes de abrir a tercer
   `retencion-youtube.ts`. Ver `docs/google-verificacion-guion.md`, «Lo que la auditoría
   mira de los datos guardados».
 - **[dueño] Retirar `SCHEDULE_API_KEY` de Vercel** (2026-10-13). Desde que cada usuario
-  genera sus llaves en Tu IA, la del despliegue solo seguía para el AM de `marca-personal`, y
+  genera sus llaves en su panel (hoy en La Cocina, «Tu propio chef»), la del despliegue solo
+  seguía para el AM de `marca-personal`, y
   el AM ya se pasó: desde el 2026-10-20 llama a `tu-parrilla.cl`, y su `docs/parrilla.md`
-  describe la API de hoy y dice que usa una llave de Tu IA. Falta confirmar en la
+  describe la API de hoy y dice que usa una llave de Tu IA (el nombre de entonces de La Cocina). Falta confirmar en la
   máquina del AM que la llave que tiene empieza con `tp_` y, si es así, borrar la variable en
   Vercel. En código no hay nada que hacer: sin la variable, la API ya acepta solo las llaves
   de usuario. Después, sacarla de la tabla de variables del `README.md` y de `.env.example`.

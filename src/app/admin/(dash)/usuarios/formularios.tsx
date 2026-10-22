@@ -1,7 +1,7 @@
 'use client'
 
 import { useActionState, useState, useTransition } from 'react'
-import { cerrarSesionesUsuario, invitarUsuario, quitarUsuario, type FormState } from '@/app/admin/actions'
+import { cerrarSesionesUsuario, encenderCocina, invitarUsuario, quitarUsuario, type FormState } from '@/app/admin/actions'
 import { Button, Field, Input, Submit } from '@/components/ui'
 
 export function FormularioInvitar() {
@@ -25,6 +25,30 @@ export function BotonQuitar({ id }: { id: string }) {
     <>
       <Button variant="ghost" disabled={pending} onClick={() => { if (!confirm('¿Quitar la invitación?')) return; start(async () => { const r = await quitarUsuario(id); setError(r.error ?? null) }) }}>
         Quitar
+      </Button>
+      {error ? <span role="alert" className="text-xs text-negative">{error}</span> : null}
+    </>
+  )
+}
+
+/** Encender o apagar La Cocina de alguien. Apagarla pregunta antes: el chef deja de ver sus comandas. */
+export function BotonCocina({ id, correo, encendida }: { id: string; correo: string; encendida: boolean }) {
+  const [pending, start] = useTransition()
+  const [error, setError] = useState<string | null>(null)
+  return (
+    <>
+      <Button
+        variant="ghost"
+        disabled={pending}
+        onClick={() => {
+          if (encendida && !confirm(`¿Apagar la cocina de ${correo}? El chef deja de ver sus comandas.`)) return
+          start(async () => {
+            const r = await encenderCocina(id, !encendida)
+            setError(r.error ?? null)
+          })
+        }}
+      >
+        {pending ? (encendida ? 'Apagando…' : 'Encendiendo…') : encendida ? 'Apagar la cocina' : 'Encender la cocina'}
       </Button>
       {error ? <span role="alert" className="text-xs text-negative">{error}</span> : null}
     </>
