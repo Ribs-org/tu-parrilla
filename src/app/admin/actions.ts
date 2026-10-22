@@ -38,7 +38,8 @@ import {
 import { extensionDe, validateScheduleDraft } from '@/lib/social/publish/validate'
 import { validateAtributos, ATRIBUTOS_ERROR, type Atributos } from '@/lib/social/publish/atributos'
 import { diffMedia, diffTargets } from '@/lib/social/publish/edit'
-import { BorradorConsumido, crearPostProgramado } from '@/lib/social/publish/crear'
+import { BorradorConsumido, CreativoNoEsta, crearPostProgramado } from '@/lib/social/publish/crear'
+import { CREATIVO_NO_ESTA } from '@/lib/cocina/meson-motivos'
 import { BORRADOR_NO_EXISTE } from '@/lib/mobile-api'
 import { REARME, contenedorEsBorrador, enVuelo } from '@/lib/social/publish/publisher'
 import { esUuid } from '@/lib/uuid'
@@ -789,9 +790,12 @@ export async function createScheduledPost(_prev: FormState, formData: FormData):
       opciones: opcionesCheck.opciones,
       regla: reglaCheck.regla,
       borradorId: idDeBorrador(formData.get('borradorId')),
+      // Solo lo dibuja el compositor de un borrador del mesón; vacío también cuenta: sin título.
+      tituloYoutube: formData.has('tituloYoutube') ? String(formData.get('tituloYoutube')).trim().slice(0, 100) : undefined,
     })
   } catch (error) {
     if (error instanceof BorradorConsumido) return { error: BORRADOR_NO_EXISTE }
+    if (error instanceof CreativoNoEsta) return { error: CREATIVO_NO_ESTA }
     throw error
   }
 

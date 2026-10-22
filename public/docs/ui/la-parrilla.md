@@ -441,6 +441,14 @@ formulario viene abierto, con el cursor en «Texto». En este orden:
    de <M>.» o «Un archivo no llegó: reintenta o quítalo. Los que siguen esperan.».
 2. **«Texto»**, con el placeholder «Texto del post…». No deja escribir más de 2200
    caracteres.
+
+   Si el borrador viene del mesón de La Cocina (se abrió con «Programar» en un creativo), antes del
+   texto va un recuadro: «Viene del mesón, en el estilo «<estilo>»: lleva su portada y sus
+   atributos.» (de día, «Viene de la vitrina…»), y el campo **«Título de YouTube»**, con lo que
+   escribió el chef y la ayuda «En YouTube va como primera línea del texto, que es de donde
+   YouTube saca el título. Hasta 100 caracteres. Vacío, YouTube usa la primera línea del texto.».
+   Solo cuenta si se marca una cuenta de YouTube. Al programarlo, el post lleva la portada y los
+   atributos del creativo, aunque no se vean acá ([la-cocina.md](la-cocina.md), «El mesón»).
 3. **«Archivos»**: una zona con borde punteado que dice «Suelta fotos o un video acá, o
    elígelos» y, debajo, «Opcional. Suben apenas los sueltas y se guardan con el borrador.»
    Se puede soltar ahí archivos arrastrados desde la computadora (la zona se pinta de
@@ -590,7 +598,8 @@ que se guardó con «Ahora» encendido vuelve sin fecha y con «Ahora» apagado.
   pie, el panel sigue abierto y el borrador se guarda de nuevo, con lo último que se escribió.
 - **«Descartar»** pregunta «¿Descartar este borrador? Lo escrito y los archivos elegidos se
   pierden.»; al aceptar, borra el borrador y cierra el panel. En un formulario nuevo y vacío no
-  pregunta: solo lo cierra.
+  pregunta: solo lo cierra. Un borrador que vino del mesón devuelve su creativo al mesón: ahí
+  sigue, con sus archivos.
 
 Los borradores son los mismos que los de la app del teléfono ([La app del teléfono](app-movil.md)):
 lo empezado en Publicar, en el teléfono, aparece acá en «Borradores (<N>)» y se sigue acá, y al
@@ -1009,6 +1018,7 @@ de esa tanda queda: hay que volver a elegirlos.
 | «No se pudo guardar el borrador.» | El último guardado falló | Hacer cualquier cambio para que lo intente de nuevo; si sigue fallando, copiar el texto antes de cerrar |
 | «Este borrador ya no existe: se programó o se descartó en otra pestaña o en el teléfono. Cierra el panel para ver cómo quedó.» | Ese mismo borrador se programó o se descartó en otra pestaña o ventana, o en la app del teléfono; este panel dejó de guardar y «Programar» quedó apagado | Cerrar el panel y mirar el calendario. Si no estaba programado y se quiere, abrir «Nueva publicación» y escribirlo de nuevo |
 | «¿Descartar este borrador? Lo escrito y los archivos elegidos se pierden.» | La pregunta de «Descartar» | Aceptar para borrarlo; cancelar para seguir escribiendo |
+| «Ese creativo ya no está en el mesón.» | Al programar un borrador que vino del mesón, su creativo ya no estaba esperando en un borrador | Recargar La Parrilla y mirar el mesón, en La Cocina |
 | «No tienes borradores.» | No hay ningún borrador guardado (o el que se pidió ya no existe y era el último) | Nada |
 
 ### Por red

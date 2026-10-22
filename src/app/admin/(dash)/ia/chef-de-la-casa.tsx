@@ -8,7 +8,7 @@ import { NOMBRE_ESTADO } from '@/lib/cocina/nombres'
 import { etaEnLaFila, type ComandaDelPanel, type EstadoDeLaCocina } from '@/lib/cocina/panel'
 import { antesEnLaFila, estadoEnPalabras } from '@/lib/cocina/tarjeta'
 import { cn } from '@/lib/utils'
-import { nombreDe } from '@/lib/vocabulario'
+import { MESON, nombreDe } from '@/lib/vocabulario'
 import { BotonCancelarComanda } from './cancelar'
 
 // «El chef de la casa», la parte de arriba de La Cocina: el chef de `marca-personal`, que edita
@@ -47,11 +47,14 @@ export function ChefDeLaCasaApagado({ esAdmin }: { esAdmin: boolean }) {
 export function ChefDeLaCasa({
   cocina,
   comandas,
+  enElMeson,
   zona,
   ahora,
 }: {
   cocina: EstadoDeLaCocina
   comandas: ComandaDelPanel[]
+  /** Cuántos creativos esperan en el mesón, de todas las comandas. */
+  enElMeson: number
   zona: string
   ahora: Date
 }) {
@@ -69,12 +72,22 @@ export function ChefDeLaCasa({
 
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
         <h3 className="font-titulo text-sm font-semibold uppercase tracking-[0.08em]">Las comandas</h3>
-        <Link
-          href="/admin/ia/pedir"
-          className="rounded-lg bg-brasa px-3 py-1.5 text-sm font-medium text-acero-950 transition hover:brightness-110"
-        >
-          Pedir una comanda
-        </Link>
+        <span className="flex flex-wrap gap-2">
+          {enElMeson > 0 ? (
+            <Link
+              href="/admin/ia/meson"
+              className="rounded-lg border border-acero-700 px-3 py-1.5 text-sm text-fg-muted transition hover:bg-acero-800 hover:text-fg"
+            >
+              <DeNocheYDeDia noche={MESON.noche} dia={MESON.dia} /> ({enElMeson})
+            </Link>
+          ) : null}
+          <Link
+            href="/admin/ia/pedir"
+            className="rounded-lg bg-brasa px-3 py-1.5 text-sm font-medium text-acero-950 transition hover:brightness-110"
+          >
+            Pedir una comanda
+          </Link>
+        </span>
       </div>
       {comandas.length === 0 ? (
         <p className="mt-2 text-sm text-fg-faint">Todavía no tienes comandas.</p>
@@ -139,6 +152,14 @@ function Tarjeta({
         </details>
       ) : null}
 
+      {c.enElMeson > 0 ? (
+        <Link
+          href={`/admin/ia/meson?comanda=${c.id}`}
+          className="mt-2 inline-block text-sm text-brasa underline-offset-2 hover:underline"
+        >
+          <DeNocheYDeDia noche="Ver en el mesón →" dia="Ver en la vitrina →" />
+        </Link>
+      ) : null}
       {c.cancelable ? (
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <BotonCancelarComanda id={c.id} />

@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { requireUser } from '@/lib/auth'
+import { CREATIVO_NO_ESTA, descartarCreativo, leerDescarte, programarCreativo } from '@/lib/cocina/meson'
 import { COMANDA_AJENA, COMANDA_NO_CANCELABLE, cancelarComanda } from '@/lib/cocina/panel'
 import { leerPedido } from '@/lib/cocina/pedido'
 import { ACOMPANAMIENTO_NO_SIRVE, ARCHIVOS_CAMBIARON, PRINCIPAL_NO_SIRVE, pedirComanda } from '@/lib/cocina/pedir'
@@ -43,4 +44,34 @@ export async function pedirComandaPropia(datos: unknown): Promise<{ error?: stri
   if ('falla' in r) return { error: NO_SE_PIDIO[r.falla] }
   revalidatePath('/admin/ia')
   redirect('/admin/ia')
+}
+
+/**
+ * Saca un creativo del mesón con su motivo y su nota, que le quedan al chef. Si era lo último de una
+ * comanda lista, la comanda queda servida.
+ */
+export async function descartarCreativoPropio(id: string, motivo: unknown, nota: unknown): Promise<{ error?: string }> {
+  const usuario = await requireUser()
+  if (!esUuid(id)) return { error: CREATIVO_NO_ESTA }
+  const descarte = leerDescarte(motivo, nota)
+  if ('error' in descarte) return { error: descarte.error }
+  const r = await descartarCreativo(usuario.id, id, descarte.motivo, descarte.nota, new Date())
+  revalidatePath('/admin/ia/meson')
+  revalidatePath('/admin/ia')
+  return 'falla' in r ? { error: CREATIVO_NO_ESTA } : {}
+}
+
+/**
+ * «Programar» desde el mesón: lo pasa a un borrador de La Parrilla con su texto, su título de YouTube
+ * y su media, y abre el compositor con ese borrador. Faltan las cuentas y la hora; la portada y los
+ * atributos los pone el post al programarse.
+ */
+export async function programarCreativoPropio(id: string): Promise<{ error?: string }> {
+  const usuario = await requireUser()
+  if (!esUuid(id)) return { error: CREATIVO_NO_ESTA }
+  const r = await programarCreativo(usuario.id, id, new Date())
+  if ('falla' in r) return { error: CREATIVO_NO_ESTA }
+  revalidatePath('/admin/ia/meson')
+  revalidatePath('/admin/schedule')
+  redirect(`/admin/schedule?borrador=${r.borradorId}`)
 }

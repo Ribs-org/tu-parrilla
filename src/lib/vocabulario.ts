@@ -113,6 +113,14 @@ export const SE_QUEMO: Record<Tema, string> = { noche: 'Se quemó', dia: 'Se ech
 /** La wiki de la UI dentro de La Cocina, para que la lea la persona. */
 export const MANUAL: Record<Tema, string> = { noche: 'El manual del parrillero', dia: 'El manual del maestro de sushi' }
 
+/**
+ * Lo que el chef entregó y espera que el dueño lo programe, dentro de La Cocina: en una parrilla,
+ * los cortes esperan en el mesón; en una barra de sushi, las piezas se exhiben en la vitrina. De día
+ * se llama como La Vitrina, la de las páginas públicas: el nombre está por decidirse
+ * (`docs/pendientes.md`), y la wiki lo advierte.
+ */
+export const MESON: Record<Tema, string> = { noche: 'El mesón', dia: 'La vitrina' }
+
 /** Lo que dice el destino de una cuenta con el fierro frío: de día, el cuchillo perdió el filo. */
 export const FIERRO_FRIO: Record<Tema, string> = {
   noche: 'Su fierro está frío: reconéctala',
@@ -158,6 +166,7 @@ export const PALABRAS_DE_DIA: ReadonlyArray<Record<Tema, string>> = [
   ...PANTALLAS.flatMap((p) => (p.nombreDeDia ? [{ noche: p.nombre, dia: p.nombreDeDia }] : [])),
   SE_QUEMO,
   MANUAL,
+  MESON,
   FIERRO_FRIO,
   SE_ENFRIA,
   { noche: fraseDelAviso({ nivel: 'enfriandose', cuantos: 1 }), dia: fraseDelAviso({ nivel: 'enfriandose', cuantos: 1 }, 'dia') },

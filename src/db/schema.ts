@@ -674,6 +674,11 @@ export const borradores = pgTable(
       .references(() => users.id, { onDelete: 'cascade' }),
     campos: jsonb('campos').$type<Record<string, string[]>>().notNull().default({}),
     fecha: timestamp('fecha', { withTimezone: true }),
+    // El creativo del mesón del que salió, si salió de ahí: al programarlo, el post lleva su
+    // portada, sus atributos y su título de YouTube, y el creativo queda programado
+    // (`crearPostProgramado`). Va en una columna y no en `campos` porque el autoguardado reescribe
+    // `campos` entero con lo que el formulario tiene a la vista.
+    creativoId: uuid('creativo_id').references((): AnyPgColumn => creativos.id, { onDelete: 'set null' }),
     creadoEn: timestamp('creado_en', { withTimezone: true }).notNull().defaultNow(),
     actualizadoEn: timestamp('actualizado_en', { withTimezone: true }).notNull().defaultNow(),
   },
@@ -766,8 +771,11 @@ export type TipoComanda = (typeof TIPOS_COMANDA)[number]
 export const TIPOS_INSUMO = ['principal', 'camara', 'pantalla', 'imagen'] as const
 export type TipoInsumo = (typeof TIPOS_INSUMO)[number]
 
-/** `subiendo` mientras el chef sube sus archivos; `mesa` está en el mesón, por revisar. */
-export const ESTADOS_CREATIVO = ['subiendo', 'mesa', 'programado', 'descartado'] as const
+/**
+ * `subiendo` mientras el chef sube sus archivos; `mesa` está en el mesón, por revisar; `borrador`,
+ * en un borrador de La Parrilla, esperando sus cuentas y su hora; `programado`, ya es un post.
+ */
+export const ESTADOS_CREATIVO = ['subiendo', 'mesa', 'borrador', 'programado', 'descartado'] as const
 export type EstadoCreativo = (typeof ESTADOS_CREATIVO)[number]
 
 /**

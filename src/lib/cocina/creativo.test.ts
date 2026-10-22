@@ -72,6 +72,13 @@ describe('leerCreativo', () => {
     expect(leerCreativo({ ref: 'r', archivos: [video, portada, portada] })).toEqual({ error: CREATIVO_ILEGIBLE })
   })
 
+  it('la portada es JPG o PNG, lo que las redes aceptan de portada', () => {
+    expect(leerCreativo({ ref: 'r', archivos: [video, { ...portada, nombre: 'p.png', tipo: 'image/png' }] })).toMatchObject({ tipo: 'video' })
+    expect(leerCreativo({ ref: 'r', archivos: [video, { ...portada, nombre: 'p.webp', tipo: 'image/webp' }] })).toEqual({
+      error: PORTADA_NO_ES_IMAGEN,
+    })
+  })
+
   it('el título de YouTube no pasa de 100 caracteres, y la ref es obligatoria', () => {
     expect(leerCreativo({ ref: 'r', tituloYoutube: 'x'.repeat(MAX_TITULO_YOUTUBE + 1), archivos: [video] })).toEqual({
       error: CREATIVO_ILEGIBLE,

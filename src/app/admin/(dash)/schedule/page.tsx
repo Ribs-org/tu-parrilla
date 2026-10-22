@@ -7,6 +7,7 @@ import { Encabezado } from '@/components/ui'
 import { requireUser } from '@/lib/auth'
 import { fechaParaDia, idDeBorrador, primero, textoDe } from '@/lib/borrador'
 import { cargarBorrador, listarBorradores } from '@/lib/borradores'
+import { creativoParaElCompositor } from '@/lib/cocina/meson'
 import { pieDeAyer, quemados } from '@/lib/fuego'
 import { networkLabel } from '@/lib/networks'
 import { cuentasFrias } from '@/lib/parrilla'
@@ -152,6 +153,7 @@ export default async function SchedulePage({
     if (texto('componer') === '1' || pedido) {
       const borrador = pedido ? await cargarBorrador(ownerId, pedido) : null
       if (pedido && !borrador) return listaDeBorradores(cerrarHref)
+      const creativo = borrador?.creativoId ? await creativoParaElCompositor(ownerId, borrador.creativoId) : null
       return (
         <Composer
           // Otro borrador u otro día es otro formulario: se monta de cero.
@@ -159,6 +161,7 @@ export default async function SchedulePage({
           carga={carga}
           cuentas={cuentas}
           borrador={borrador ? { id: borrador.id, campos: borrador.campos, media: borrador.media } : null}
+          creativo={creativo}
           // El instante guardado, en la zona de hoy: si la zona cambió en Tu Cuenta, el
           // compositor y el calendario siguen diciendo la misma hora.
           fechaInicial={

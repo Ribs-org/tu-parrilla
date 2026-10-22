@@ -5,9 +5,13 @@ existe. En la fase 0 es una herramienta de línea de comandos; después, un serv
 solo. El porqué de cada cosa está en el diseño,
 `docs/superpowers/specs/2026-10-22-la-cocina-design.md`; esto es el contrato de lo que ya existe.
 
-**Lo que existe hoy son las tablas, estas rutas y la pestaña del panel.** En el panel, el admin
-le enciende la cocina a una cuenta en Los Maestros, y el usuario sube su material, pide y sigue su
-comanda en La Cocina. Lo que falta es el mesón, donde el usuario va a programar lo cocinado.
+**Lo que existe hoy son las tablas, estas rutas y la pestaña del panel.** En el panel:
+
+- el admin le enciende la cocina a una cuenta en Los Maestros;
+- el usuario sube su material, pide y sigue su comanda en La Cocina;
+- lo que el chef entrega espera en el mesón, donde el usuario lo programa o lo descarta.
+
+Lo que falta es el barrido que borra lo vencido.
 
 ## Cómo se habla
 
@@ -176,8 +180,8 @@ Responde `{ "url": "<GET firmado>", "vence": "<ISO>" }`.
 - Con la comanda terminada: `409`.
 - Un insumo que ya se borró: `404` con `Ese insumo no existe, o ya se borró.`
 
-  Hoy nada los borra. El barrido que llega con el mesón los va a borrar a los 14 días de
-  terminada la comanda.
+  Hoy nada los borra. El barrido que falta los va a borrar a los 14 días de terminada la
+  comanda.
 
 ### `POST /api/cocina/comandas/{id}/estado`
 
@@ -231,15 +235,16 @@ Anuncia un creativo de una comanda en curso.
   misma `ref` no duplica nada.
 - **`pieza`** junta en el mesón los creativos de la misma idea en estilos distintos. Es la misma
   `pieza` de los `atributos` que ya se miden en Los Números.
-- **`texto`** llega hasta 2200 caracteres; **`tituloYoutube`**, hasta 100. El mesón, cuando
-  llegue, va a poner el título como primera línea del texto del destino de YouTube, que es de
-  donde YouTube lo saca.
+- **`texto`** llega hasta 2200 caracteres; **`tituloYoutube`**, hasta 100. Al programarlo desde
+  el mesón, el título va como primera línea del texto del destino de YouTube, que es de donde
+  YouTube lo saca, y el usuario lo puede corregir antes en el compositor.
 - **`atributos`** siguen las reglas del lote: un objeto plano de valores simples, hasta 20 claves.
-  Van a viajar con el post cuando se programe desde el mesón, y con ellos Los Números mide qué
-  estilo rinde, como ya lo mide con lo que llega por el lote.
+  Viajan con el post cuando se programa desde el mesón, junto con la `pieza` y el `estilo`, y con
+  ellos Los Números mide qué estilo rinde, como ya lo mide con lo que llega por el lote.
 - **`archivos`** son de 1 a 20:
   - con `rol` `media`, el video o las láminas, en orden;
-  - con `rol` `portada`, una imagen, que es opcional.
+  - con `rol` `portada`, una imagen JPG o PNG, que es opcional: es lo que las redes aceptan de
+    portada, y va con el post al programarlo.
 
   El tipo de cada archivo tiene que ser publicable (MP4, MOV o WebM; JPEG, PNG, WebP o GIF), y cada
   uno pesa hasta 500 MB. El tipo del creativo sale de los archivos: un video es `video`, varios son
@@ -264,13 +269,13 @@ Responde `201` con:
 - **Los archivos van en la carpeta del dueño**, así que programarlo después no los vuelve a bajar.
 - **Errores:** `409` si la comanda no está tomada o ya terminó. `400` con la frase si algo del
   creativo no vale; por ejemplo `v10r15.mp4: El archivo supera los 500 MB.` o
-  `La portada tiene que ser una imagen.`
+  `La portada tiene que ser una imagen JPG o PNG.`
 
 ### `POST /api/cocina/creativos/{id}/listo`
 
 Lo cierra después de subir. Tu Parrilla mira que cada archivo esté en el almacén y pese lo
-anunciado. Recién ahí lo pasa a `mesa`, el mesón del dueño, con vencimiento a 30 días; el barrido
-que cumple ese vencimiento llega con el mesón.
+anunciado. Recién ahí lo pasa a `mesa`: aparece en el mesón del dueño, con vencimiento a 30
+días. El barrido que cumple ese vencimiento todavía no existe.
 
 | Respuesta | Cuándo |
 |---|---|

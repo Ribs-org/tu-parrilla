@@ -58,7 +58,9 @@ para programar.». Después, una línea con un punto de color:
   Nada se pierde: las comandas esperan.
 
 Debajo, el subtítulo «Las comandas» y, a su derecha, el botón anaranjado «Pedir una comanda»,
-que lleva a pedir una (ver «Pedir una comanda», abajo). Sin ninguna comanda, «Todavía no tienes
+que lleva a pedir una (ver «Pedir una comanda», abajo). Si hay algo esperando en el mesón, antes
+va el botón «El mesón (<N>)» —de día, «La vitrina (<N>)»—, que lleva al mesón (ver «El mesón»,
+abajo). Sin ninguna comanda, «Todavía no tienes
 comandas.». Con comandas, una tarjeta por comanda, de la más nueva a la más vieja (las últimas
 50). Cada tarjeta trae:
 
@@ -75,6 +77,8 @@ comandas.». Con comandas, una tarjeta por comanda, de la más nueva a la más v
 - «Hora estimada: <fecha y hora>», si se sabe: la da el chef al tomarla y la corrige en cada
   paso; mientras espera, sale de la fila y de lo que tarda una comanda en promedio;
 - «El chef: «<mensaje>»», si el chef dejó un mensaje en el último paso;
+- «Ver en el mesón →» —de día, «Ver en la vitrina →»—, si algo de esa comanda espera en el mesón:
+  lleva al mesón con solo lo de esa comanda;
 - en una rechazada o que no se pudo terminar, el motivo que escribió el chef, en palabras;
 - «Lo que pasó», un desplegable con cada paso: la fecha y hora, el estado y, si lo hubo, el
   mensaje del chef;
@@ -89,6 +93,7 @@ comandas.». Con comandas, una tarjeta por comanda, de la más nueva a la más v
 | «Al fuego» | Se arman las piezas en cada estilo. Son horas. | El chef |
 | «Sirviendo: 3 de 5 tandas en el mesón» | Llegaron algunas tandas al mesón y otras siguen en el horno. «Sirviendo: 2 tandas en el mesón» si el chef no sabe cuántas van a ser. | El chef, con cada tanda |
 | «Lista en el mesón: N cortes» | Todo llegó al mesón. | El chef |
+| «Servida» | Todo lo que entregó se programó o se descartó: la comanda se cerró sola. | Sola |
 | «No se puede cocinar» | El chef la rechazó al revisarla, por algo fuera de alcance. El motivo va debajo. | El chef |
 | «No se pudo terminar» | Algo se rompió. El motivo va debajo. | El chef |
 | «Cancelada» | La canceló la persona. | La persona |
@@ -189,6 +194,52 @@ puede, está apagado y al lado dice qué falta: «Marca la casilla de los derech
 principal.», «Espera a que termine de subir.», «El plato principal no subió: reintenta o elige
 otro.» o «Elige qué quieres que salga.». Al colgarla, la pantalla vuelve a La Cocina y la comanda
 aparece arriba de todo, «Comanda colgada».
+
+### El mesón
+
+`/admin/ia/meson` —de día, la vitrina—: lo que el chef entregó, listo para revisar y programar o
+descartar. Se llega con «El mesón (<N>)» o con «Ver en el mesón →» de una comanda, que agrega
+`?comanda=<id>` y muestra solo esa. Solo con la cocina encendida. Mientras se está acá, la pestaña
+«La Cocina» queda marcada.
+
+**Ojo con el nombre de día:** «La vitrina» es también el nombre de tus páginas públicas (La
+Vitrina, en Ajustes). Si la persona dice «la vitrina» hablando de videos que le entregó el chef,
+es el mesón; si habla de su página de links, es La Vitrina ([la-vitrina.md](la-vitrina.md)).
+
+Arriba, el enlace «← La Cocina», el título «El mesón» (de día, «La vitrina») y el párrafo «Lo que
+el chef te entregó, listo para programar. Las versiones de una misma pieza —la misma idea en
+estilos distintos— van juntas. Programa las que te gusten y descarta las que no, diciendo por qué:
+el chef aprende de eso.». Con una sola comanda, debajo, «Ver todo el mesón». Si hay creativos que
+se pasaron a un borrador y todavía no se programaron: «<N> esperan en tus borradores de La
+Parrilla, con sus cuentas y su hora por elegir.» y el enlace «Ver los borradores».
+
+Sin nada, «Todavía no hay nada en el mesón.» (de día, «… en la vitrina.»). Con algo, un bloque por
+comanda, de la más nueva a la más vieja, con el nombre del plato principal de título y «Pedida el
+<fecha>» debajo. Adentro, lo entregado por pieza: «Pieza «<pieza>» · <N> estilos» y sus versiones
+una al lado de la otra (en el teléfono, de a dos). Cada creativo es una tarjeta:
+
+- el video, que se reproduce ahí mismo, con su portada antes de darle play; o la primera lámina
+  del carrusel con «<N> láminas» encima y las demás en chico debajo;
+- «Estilo: <estilo> · <N> s» y, en etiquetas, lo que rotó: la letra, la entrada, la música;
+- «Título de YouTube: …», si el chef lo escribió;
+- «El texto», un desplegable con el texto que propone el chef;
+- los botones «Programar» y «Descartar».
+
+**«Programar»** (mientras trabaja, «Abriendo…») pasa el creativo a un borrador de La Parrilla y
+abre el compositor con él: el texto, el título de YouTube y los archivos ya puestos. Faltan las
+cuentas y la hora ([la-parrilla.md](la-parrilla.md), «El compositor»). El creativo sale del mesón
+mientras espera en ese borrador. Al programarlo, el post lleva además la portada y los atributos
+del creativo (con su pieza y su estilo, para que Los Números compare versiones y estilos), y en
+YouTube el título va como primera línea del texto. Si el borrador se descarta, el creativo vuelve
+al mesón.
+
+**«Descartar»** abre, en la misma tarjeta, «¿Por qué no sirvió?» y cuatro botones: «El corte», «La
+letra», «El tema» y «El audio». Hay que elegir uno. Debajo, una nota opcional para el chef, de hasta
+500 caracteres, y los botones «Descartar» (mientras trabaja, «Descartando…») y «Volver». El
+creativo sale del mesón, sus archivos se borran, y el motivo y la nota le quedan al chef.
+
+Cuando todo lo que entregó una comanda lista se programó o se descartó, la comanda queda
+«Servida».
 
 ### Sección «Tu propio chef»
 
@@ -336,6 +387,24 @@ Lo que alcanzó a subir entero y no se pidió aparece en «Ya subiste»: «Usar�
 En su fila, «Sacar» (si está subiendo, «Cancelar»). Se borra de la cocina. En «Ya subiste»,
 «Sacar» pregunta antes.
 
+### Para programar lo que entregó el chef
+
+1. En La Cocina, «El mesón (<N>)», o «Ver en el mesón →» en la comanda.
+2. Mirar cada versión. Las de una misma pieza están juntas.
+3. En la que sirve, «Programar».
+4. En el compositor que se abre, revisar el texto y el «Título de YouTube», marcar las cuentas y
+   elegir la hora.
+5. «Programar».
+
+### Para descartar un creativo
+
+1. En su tarjeta del mesón, «Descartar».
+2. Elegir por qué: «El corte», «La letra», «El tema» o «El audio». Si se quiere, escribir una nota
+   para el chef.
+3. «Descartar».
+
+No se deshace: los archivos se borran.
+
 ### Para seguir una comanda
 
 En «El chef de la casa», buscar su tarjeta por el nombre del plato principal. El estado dice en
@@ -418,6 +487,10 @@ Al final de la pantalla, «El manual del parrillero →». Adentro, elegir la p�
 | «Uno de los acompañamientos ya no está, o ya es parte de otra comanda: sácalo y súbelo de nuevo.» | Lo mismo, con un acompañamiento. | «Sacar» ese acompañamiento y agregarlo de nuevo. |
 | «Uno de los archivos pasó a otra comanda mientras pedías: recarga la página y revisa la comanda.» | Otra pestaña colgó una comanda con el mismo archivo justo a la vez. | Recargar y mirar La Cocina: la comanda puede estar ya colgada. |
 | «¿Sacar «<archivo>»? Se borra de la cocina.» | Confirmación antes de borrar un archivo de «Ya subiste». | Aceptar para borrarlo; cancelar para dejarlo. |
+| «Todavía no hay nada en el mesón.» | El chef no ha entregado nada, o todo se programó o se descartó. | Nada. |
+| «Ese creativo ya no está en el mesón.» | Se programó o se descartó entre que se cargó la página y se apretó el botón (por ejemplo, en otra pestaña). | Recargar el mesón. Si se programó, está en los borradores de La Parrilla. |
+| «Elige por qué no sirvió: el corte, la letra, el tema o el audio.» | Se intentó descartar sin motivo. | Elegir uno de los cuatro. |
+| «La nota cabe en 500 caracteres.» | La nota del descarte es demasiado larga. | Acortarla. |
 | «Ponle un nombre: el del agente que la va a usar.» | El nombre de la llave quedó vacío (por ejemplo, solo con espacios). | Escribir un nombre y volver a «Generar llave». |
 | «El nombre puede tener hasta 60 caracteres.» | El nombre de la llave es demasiado largo. | Acortarlo. |
 | «Ya tienes 10 llaves: revoca una antes de generar otra.» | Se llegó al tope de diez llaves por persona. | Revocar alguna que no se use (las «sin usar», o las de uso más viejo) y generar de nuevo. |
@@ -448,6 +521,16 @@ obligatorio, en su idioma.
   material. Lo que se quiera destacar o evitar va en «Qué destacar o qué evitar».
 - **«¿Puedo pedir desde la app del teléfono?».** No: la app no tiene La Cocina. Desde el navegador
   del teléfono sí se puede, pero un video de varios GB sube mejor desde el computador.
+- **«¿Dónde está lo que me cocinó el chef?».** En el mesón: La Cocina → «El mesón (<N>)», o «Ver en
+  el mesón →» en la comanda. De día se llama «La vitrina», pero no es La Vitrina de las páginas
+  públicas.
+- **«Apreté Programar y no lo programé».** Quedó en un borrador de La Parrilla («Borradores (<N>)»),
+  con todo puesto: abrirlo, marcar las cuentas y la hora, y «Programar». Si se descarta el
+  borrador, el creativo vuelve al mesón.
+- **«¿Por qué YouTube le puso ese título?».** Es el «Título de YouTube» del compositor, que viene
+  del chef y se puede cambiar antes de programar. Vacío, YouTube usa la primera línea del texto.
+- **«Descarté uno sin querer».** No se deshace: el archivo se borró. Se le puede pedir al chef en
+  una comanda nueva.
 - **«Me dice que hay comandas antes que la mía».** Es la fila: el chef cocina una de cada cuenta
   por vuelta. «Hora estimada» dice cuándo debería salir.
 - **«¿Cuándo está lista mi comanda?».** En su tarjeta, «Hora estimada». Si no aparece, el chef
@@ -480,7 +563,10 @@ obligatorio, en su idioma.
 
 ## Lo que esta pantalla no hace
 
-- Todavía no muestra el mesón ni lo cocinado.
+- En el mesón no se comenta todavía: lo que se le dice al chef va en el motivo y la nota de un
+  descarte.
+- No programa solo: cada creativo se programa a mano, desde el compositor.
+- No deshace un descarte.
 - No elige estilos: en esta fase los elige el chef.
 - No pide desde la app del teléfono: solo desde el panel.
 - No se actualiza sola: el estado de una comanda se ve al recargar.
@@ -511,6 +597,12 @@ Sale de:
 - `src/lib/cocina/pedido.ts` y `src/lib/cocina/pedir.ts`: lo que se pide, sus frases, la marca que
   se guarda, lo que se congela y lo que entra en una comanda.
 - `src/lib/subida-por-partes.ts`: la subida por partes, retomar y cancelar.
+- `src/app/admin/(dash)/ia/meson/page.tsx`, `src/app/admin/(dash)/ia/meson/tarjeta.tsx` y
+  `src/app/admin/(dash)/ia/meson/acciones.tsx`: el mesón, cada creativo, «Programar» y
+  «Descartar» con sus motivos.
+- `src/lib/cocina/meson.ts` y `src/lib/cocina/meson-motivos.ts`: qué se ve en el mesón, el
+  borrador que abre «Programar», qué hace descartar y cuándo una comanda queda servida.
+- `src/lib/social/publish/crear.ts`: lo que el post se lleva del creativo al programarse.
 - `src/lib/cocina/panel.ts`: qué comandas se ven, cuántas van antes, la hora estimada de la fila,
   los diez minutos sin señal y qué hace cancelar.
 - `src/lib/cocina/nombres.ts` y `src/lib/cocina/tarjeta.ts`: el estado en palabras, de noche y de

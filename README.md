@@ -1443,7 +1443,25 @@ además en `marcas`, para la siguiente. La `ref` que pone el formulario al abrir
 dos veces no la duplique, y un archivo solo entra si es del dueño y no está en otra comanda. En esta
 fase no hay catálogo todavía, así que los estilos los elige el chef (`receta.estilos: "chef"`).
 
-**Lo que todavía no existe:** el mesón donde se programa lo cocinado.
+**El mesón** (`/admin/ia/meson`; de día, la vitrina) es donde espera lo que el chef entregó, por
+comanda y por pieza, para programarlo o descartarlo:
+
+- **«Programar»** lo pasa a un borrador de La Parrilla (`borradores.creativo_id`) y abre el
+  compositor con el texto, el título de YouTube y los archivos puestos. El creativo sale del mesón
+  mientras espera ahí, y si se descarta el borrador, vuelve.
+- **Al programarse**, el post se lleva del creativo lo que el compositor no tiene
+  (`crearPostProgramado`):
+  - la portada;
+  - los atributos, con su pieza y su estilo;
+  - en cada destino de YouTube, el título como primera línea del texto (`captionOverride`).
+
+  Lo hace el mismo camino para el panel y el teléfono.
+- **«Descartar»** pide el motivo de un toque (el corte, la letra, el tema o el audio), borra los
+  archivos y deja la fila con su motivo, que es memoria para el chef.
+- **Una comanda lista queda servida** sola cuando ya no le queda nada por decidir.
+
+**Lo que todavía no existe:** el barrido que borra lo crudo a los 14 días de terminada la comanda y
+lo que lleva 30 días en el mesón, y el aviso de lo que está por vencer.
 
 **El chef pregunta; Tu Parrilla nunca lo llama.** El servidor del chef no expone puertos:
 
@@ -1558,7 +1576,7 @@ src/
     cuentas-api.ts         las cuentas de GET /api/schedule/cuentas: los dos ids y cómo está la conexión (sin base)
     media-api.ts           la clave de un archivo que sube un cliente de la API, en la carpeta de su dueño (sin base)
     archivar-api.ts        el cuerpo y las respuestas de archivar y desarchivar lo quemado por API
-    cocina/                La Cocina: los estados de una comanda, la fila del chef, lo que entrega, lo que lee y escribe su API (/api/cocina), las subidas por partes del panel (/api/admin/cocina) y colgar una comanda
+    cocina/                La Cocina: los estados de una comanda, la fila del chef, lo que entrega, lo que lee y escribe su API (/api/cocina), las subidas por partes del panel (/api/admin/cocina), colgar una comanda y el mesón
     color-de-red.ts        el color de marca de cada red en La Parrilla, como clases de Tailwind escritas enteras
     piezas.ts              la pieza de una publicación: sus destinos programados unidos a lo publicado
     auth.ts                sesión del panel
