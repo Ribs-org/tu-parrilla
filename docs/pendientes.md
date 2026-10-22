@@ -42,13 +42,19 @@ sección.
     - la base, que son las tablas y la API del chef, con su contrato en `docs/cocina-api.md`;
     - la subida por partes del panel;
     - la pestaña La Cocina en lugar de Tu IA, con el seguimiento de las comandas y su
-      cancelación, y el interruptor de cada cuenta en Los Maestros.
-  - **Lo siguiente, en orden:**
-    1. Pedir desde el panel: el formulario de la comanda, con la subida por partes, la marca
-       básica y el dibujo de cada insumo.
-    2. El mesón: programar, descartar con motivo y los barridos de 14 y 30 días.
+      cancelación, y el interruptor de cada cuenta en Los Maestros;
+    - pedir desde el panel: el formulario con la subida por partes, la marca básica y el dibujo de
+      cada insumo.
+  - **Lo siguiente:** el mesón, que es programar, descartar con motivo y los barridos de 14 y 30
+    días. Con él se cierra la fase 0.
   - **[dueño]** Generar `COCINA_SECRET` y ponerla en Vercel (Production) y en el servidor del
     chef. Sin ella, la API de la cocina responde `401`.
+  - **[dueño] Probar una vez la subida por partes contra el almacén de verdad** (2026-10-22). En
+    Los Maestros, encenderse la cocina; en La Cocina → «Pedir una comanda», subir un video de más
+    de 64 MB, para que vaya en varias partes, y colgarla. Las pruebas corren contra un almacén de
+    mentira, así que lo que no se pudo ver es si el CORS del bucket deja pasar los PUT de las
+    partes y si R2 contesta `ListParts` como se espera. Si falla, la frase del error lo dice en la
+    fila del archivo.
   - **[dueño] Por decidir: el nombre de día del mesón** (2026-10-22). El diseño le puso «La vitrina»,
     pero La Vitrina ya es el nombre de tus páginas públicas, en los dos modos, y dos pantallas con
     el mismo nombre confunden a la persona y a la wiki. Propuesta: «La bandeja», como la de sushi

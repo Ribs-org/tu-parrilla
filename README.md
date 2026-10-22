@@ -1426,16 +1426,24 @@ El diseño, con sus fases, está en `docs/superpowers/specs/2026-10-22-la-cocina
 - la pestaña La Cocina (`/admin/ia`), que reemplazó a Tu IA el 2026-10-22: arriba «El chef de la
   casa» y abajo «Tu propio chef», con las llaves de siempre;
 - si la cocina está abierta (algún latido del chef en los últimos diez minutos);
-- sus comandas, con su estado, cuántas van antes, la hora estimada y lo que pasó;
-- «Cancelar la comanda», mientras no esté en el horno.
+- sus comandas, con el dibujo de su plato principal, su estado, cuántas van antes, la hora
+  estimada y lo que pasó;
+- «Cancelar la comanda», mientras no esté en el horno;
+- «Pedir una comanda» (`/admin/ia/pedir`). Ahí sube el plato principal y lo que lo acompaña, cada
+  archivo por partes y apenas lo elige, con su dibujo y su barra. Dice qué quiere que salga, guarda
+  su marca básica (nombre, @, color de acento y llamado final) y ve la fila y la hora estimada antes
+  de colgarla. Lo que subió y no pidió se le ofrece de nuevo, y se borra a los tres días.
 
 El admin enciende y apaga la cocina de cada cuenta en Los Maestros (`users.cocina_desde`).
 Apagarla es despedir al chef: deja de ver esas comandas, aunque siguen ahí.
 
-**Lo que todavía no existe:**
+**Colgar una comanda congela su receta.** La marca y lo que se pidió se guardan en la comanda,
+así que lo que está en el horno no cambia aunque el dueño cambie su marca después. La marca queda
+además en `marcas`, para la siguiente. La `ref` que pone el formulario al abrirse hace que mandarla
+dos veces no la duplique, y un archivo solo entra si es del dueño y no está en otra comanda. En esta
+fase no hay catálogo todavía, así que los estilos los elige el chef (`receta.estilos: "chef"`).
 
-- pedir una comanda desde el panel: hoy las crea a mano quien administra la cocina;
-- el mesón donde se programa lo cocinado.
+**Lo que todavía no existe:** el mesón donde se programa lo cocinado.
 
 **El chef pregunta; Tu Parrilla nunca lo llama.** El servidor del chef no expone puertos:
 
@@ -1512,6 +1520,7 @@ src/
   components/
     corte.tsx              el corte dibujado de La Parrilla: silueta, carne, marcas, halo y humo
     pieza-sushi.tsx        el mismo corte en el modo día: nigiri, roll, sashimi y temaki
+    dibujos-insumo.tsx     lo que se le lleva a La Cocina: la res, el cerdo y las verduras de noche; el atún, el salmón y el arroz de día
     boton-tema.tsx         el botón de la barra que cambia entre la noche y el día
     de-noche-y-de-dia.tsx  lo que se dice distinto de día, en sus dos versiones (el modo esconde una), y el nombre de cada pantalla
     tema-vivo.ts           el modo que se ve ahora, para lo que el CSS no alcanza: un aria-label, un title, un confirm
@@ -1549,7 +1558,7 @@ src/
     cuentas-api.ts         las cuentas de GET /api/schedule/cuentas: los dos ids y cómo está la conexión (sin base)
     media-api.ts           la clave de un archivo que sube un cliente de la API, en la carpeta de su dueño (sin base)
     archivar-api.ts        el cuerpo y las respuestas de archivar y desarchivar lo quemado por API
-    cocina/                La Cocina: los estados de una comanda, la fila del chef, lo que entrega, lo que lee y escribe su API (/api/cocina) y las subidas por partes del panel (/api/admin/cocina)
+    cocina/                La Cocina: los estados de una comanda, la fila del chef, lo que entrega, lo que lee y escribe su API (/api/cocina), las subidas por partes del panel (/api/admin/cocina) y colgar una comanda
     color-de-red.ts        el color de marca de cada red en La Parrilla, como clases de Tailwind escritas enteras
     piezas.ts              la pieza de una publicación: sus destinos programados unidos a lo publicado
     auth.ts                sesión del panel

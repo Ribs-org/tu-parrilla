@@ -2,8 +2,8 @@
 
 Fecha: 2026-10-22. **Diseño. Implementado** lo de «Antes» (qué cuenta acepta trial reels) y, de
 la fase 0, la base —las tablas y la API del chef, cuyo contrato está en `docs/cocina-api.md`—, la
-subida por partes del panel (`subidas`) y la pestaña La Cocina con el seguimiento de las comandas;
-falta pedir desde el panel y el mesón. Reemplaza y amplía «El chef de la casa»
+subida por partes del panel (`subidas`) y la pestaña La Cocina, donde se pide y se sigue una
+comanda; falta el mesón. Reemplaza y amplía «El chef de la casa»
 (`2026-10-19-chef-de-la-casa-design.md`), que ya decía para qué sirve el chef y cómo se dibuja;
 esto dice cómo se pide, cómo se sigue y qué se entrega, y fija el contrato entre Tu Parrilla y
 el chef. Lo pidió el dueño el 2026-10-22, y los nueve puntos del líder de creación de contenido

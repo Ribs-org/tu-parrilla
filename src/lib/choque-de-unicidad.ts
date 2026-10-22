@@ -1,9 +1,9 @@
 /**
  * Si un error de la base es un choque con una restricción de unicidad en particular (23505).
- * La comparten los cinco sitios que reaccionan a uno: el slug de una página al invitar o
+ * La comparten los seis sitios que reaccionan a uno: el slug de una página al invitar o
  * adoptar (`usuarios.ts`, `scripts/migrar.ts`), la etiqueta de campaña al sincronizar
- * (`social/sync.ts`), la `ref` de una fila del lote (`social/publish/batch.ts`) y la de un
- * creativo de la cocina (`cocina/cocina.ts`).
+ * (`social/sync.ts`), la `ref` de una fila del lote (`social/publish/batch.ts`), la de un
+ * creativo de la cocina (`cocina/cocina.ts`) y la de una comanda (`cocina/pedir.ts`).
  *
  * Fue una sola función porque las copias fallaban igual y en silencio: hasta el 2026-09-24
  * hubo tres detectores de este choque escritos de tres formas, y ninguno podía devolver `true`.

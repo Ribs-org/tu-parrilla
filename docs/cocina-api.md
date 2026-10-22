@@ -5,14 +5,9 @@ existe. En la fase 0 es una herramienta de línea de comandos; después, un serv
 solo. El porqué de cada cosa está en el diseño,
 `docs/superpowers/specs/2026-10-22-la-cocina-design.md`; esto es el contrato de lo que ya existe.
 
-**Lo que existe hoy son las tablas y estas rutas.** Las dos piezas del usuario llegan en las
-entregas siguientes:
-
-- la pestaña del panel, donde sube su material, pide y sigue la comanda;
-- el mesón, donde programa lo cocinado.
-
-Hasta entonces, la cocina de un usuario se enciende a mano en la base (`users.cocina_desde`), y
-una comanda de prueba se crea ahí mismo.
+**Lo que existe hoy son las tablas, estas rutas y la pestaña del panel.** En el panel, el admin
+le enciende la cocina a una cuenta en Los Maestros, y el usuario sube su material, pide y sigue su
+comanda en La Cocina. Lo que falta es el mesón, donde el usuario va a programar lo cocinado.
 
 ## Cómo se habla
 
@@ -122,8 +117,8 @@ Con otro estado, por fecha.
       "estado": "recibida",
       "ref": "…",
       "dueno": { "id": "8f0a…", "nombre": "Vicente" },
-      "pedido": { "formatos": ["clips"], "cantidad": "lo-que-de", "notas": "la parte de ventas" },
-      "receta": { "marca": { "nombre": "…", "handle": "@…", "acento": "#3D7BFF", "cta": "…" } },
+      "pedido": { "formatos": ["clips", "carruseles"], "cantidad": "unos-10", "notas": "la parte de ventas", "paraCuando": "2026-10-24", "estilos": "chef" },
+      "receta": { "marca": { "id": "5b1e…", "nombre": "…", "handle": "@…", "acento": "#3D7BFF", "cta": "…" }, "estilos": "chef" },
       "minutos": 30,
       "origenId": null,
       "tomadaPor": null,
@@ -138,8 +133,20 @@ Con otro estado, por fecha.
 
 - **`tipo`** es `tanda` (material nuevo), `prueba` (un clip en cada estilo, fase 1) o `reestilo`
   (otros estilos con lo ya cortado de `origenId`, fase 1).
+- **`pedido`** es lo que el usuario pidió en el formulario:
+  - `formatos`: `clips` (clips verticales), `carruseles` o los dos;
+  - `cantidad`: `lo-que-de` (lo que dé el material), `unos-10` o `unos-20`;
+  - `notas`: qué destacar o qué evitar, en texto libre (puede venir vacío);
+  - `paraCuando`: una fecha `AAAA-MM-DD`, informativa, o `null`;
+  - `estilos`: `chef`, porque en esta fase los elige el chef.
 - **`receta`** es lo que se congeló al pedir: lo que está en el horno no cambia aunque el usuario
   cambie su marca después.
+  - `marca`: su `id`, el que identifica la copia de trabajo del chef; `nombre`; `handle`, con su
+    arroba, o `null`; `acento`, un color `#RRGGBB`, o `null` para usar el del estilo; y `cta`, el
+    llamado final, o `null`.
+  - `estilos`: `chef`, igual que en el pedido.
+- **`minutos`** son los del plato principal, redondeados hacia arriba, según la duración que leyó
+  el navegador. Cero si no la pudo leer.
 - **`insumos`** no traen URL: cada uno se pide aparte, porque el enlace vence.
   - `principal`: el plato principal; `subtipo` dice `largo`, `podcast` o `tomas`.
   - `camara` y `pantalla`: se sincronizan con el principal.
