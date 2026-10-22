@@ -221,9 +221,20 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   servidor, y adaptar a él la publicación, la sincronización y los comentarios de Instagram. Los
   trial reels por esa vía, por confirmar. La idea: «Conectar con Instagram» como camino
   principal en Los Fierros, y el login de Facebook para quien además maneja páginas.
-- **[dueño] Google — auditoría de cuota de YouTube (trámite B): enviada el 2026-10-10,
-  esperando respuesta.** YouTube acusó recibo por correo a pyxis.latam@gmail.com, sin número
-  de caso; suele tardar semanas. Se pidieron 100.000 unidades al día del cupo general (el
+- **[dueño] Google — auditoría de cuota de YouTube (trámite B): YouTube pidió más
+  información el 2026-10-22; contestar antes del lunes 2026-11-02** (siete días hábiles), en el
+  mismo hilo del correo. El correo entero, con notas para la respuesta, está en
+  `2026-10-22-pedido-de-informacion.txt`, en la carpeta del trámite. Pide dos cosas:
+  - **Si la API se usa en Android y en iOS.** Si se usa, quiere un screencast de programar y
+    publicar videos cortos en varias redes, YouTube incluida, y de responder comentarios
+    desde una sola cola (La Mesa), con el resultado final. La API de YouTube la llama solo el
+    servidor: el panel y la app de Android pasan por él. En iOS todavía no hay app.
+  - **Credenciales de demo, con usuario y contraseña.** El panel no tiene contraseña: se entra
+    con el correo y un código, así que la cuenta del revisor, con su código fijo
+    (`REVISION_CODIGO`), cumple ese papel y hay que explicarlo.
+
+  Lo de antes: se envió el 2026-10-10, y YouTube acusó recibo por correo a
+  pyxis.latam@gmail.com, sin número de caso. Se pidieron 100.000 unidades al día del cupo general (el
   cálculo está en el guion) y ningún aumento del cupo de subidas. Lo enviado está al final
   de `TEXTOS-FORMULARIO.txt`, sección por sección, y la evidencia en `evidencia/`, en la
   misma carpeta. Antes de enviar se corrigió lo que las políticas de YouTube prohíben (#157;
