@@ -57,11 +57,9 @@ sección.
     - el `reestilo` («Otros estilos con el mismo material»).
 
     El diseño dice qué trae cada una.
-  - **[dueño]** Generar `COCINA_SECRET` y ponerla en Vercel (Production) y en el servidor del
-    chef. Sin ella, la API de la cocina responde `401`.
-  - **[dueño] Probar una vez la subida por partes contra el almacén de verdad** (2026-10-22). En
-    Los Maestros, encenderse la cocina; en La Cocina → «Pedir una comanda», subir un video de más
-    de 64 MB, para que vaya en varias partes, y colgarla. Las pruebas corren contra un almacén de
+  - **[dueño] Probar una vez la subida por partes contra el almacén de verdad** (2026-10-22). La
+    cocina del dueño ya está encendida: en La Cocina → «Pedir una comanda», subir un video de más
+    de 64 MB, para que vaya en varias partes, y colgarla. Después se puede cancelar. Las pruebas corren contra un almacén de
     mentira, así que lo que no se pudo ver es si el CORS del bucket deja pasar los PUT de las
     partes y si R2 contesta `ListParts` como se espera. Si falla, la frase del error lo dice en la
     fila del archivo.
