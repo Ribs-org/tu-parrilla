@@ -102,3 +102,18 @@ de eso. `docs/pendientes.md` es la lista única de lo que se decidió posponer.
 - **Lo que solo el dueño puede cerrar** (un panel externo, un formulario, un pago) va
   marcado **[dueño]**.
 - **Al terminar algo que estaba ahí, se borra en el mismo commit.** Lo hecho queda en git.
+
+# Los comentarios en GitHub se firman como el equipo
+
+Todo comentario que un agente publique en GitHub —en un issue o en un pull request— termina
+con la firma del equipo de desarrollo, no con la de Claude:
+
+```
+---
+💻 Equipo de desarrollo de parrilla
+```
+
+Los issues los abre el equipo de creación de contenido, que firma «🧑‍🍳 Generado por el equipo
+de creación de contenido», y los dos equipos publican con la misma cuenta de GitHub: la firma
+es lo que dice quién habla. Vale para los comentarios; la descripción de un pull request no
+cambia.
