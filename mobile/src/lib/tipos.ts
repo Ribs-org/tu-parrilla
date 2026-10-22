@@ -35,7 +35,15 @@ export type Fierros = {
 }
 
 /** Una cuenta del dueño, para elegir destino por cuenta y no por red (Tarea 7). */
-export type CuentaApp = { id: string; red: string; handle: string | null; conectada: boolean }
+export type CuentaApp = {
+  id: string
+  red: string
+  handle: string | null
+  conectada: boolean
+  /** Si acepta trial reels, como lo dijo Meta al publicar; falta mientras no se sepa. Solo Instagram. */
+  trialReels?: 'si' | 'no'
+  trialReelsMotivo?: string | null
+}
 
 export type PostMetrica = {
   red: string

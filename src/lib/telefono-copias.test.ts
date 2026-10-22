@@ -15,6 +15,7 @@ import {
 } from './parrilla'
 import { tipoDesdeNombre, typeFromContentType } from './social/publish/batch'
 import { ARCHIVO_MUY_GRANDE, MAX_BYTES_ARCHIVO } from './social/publish/limites'
+import { SIN_TRIAL_GENERICO, avisoSinTrial } from './social/publish/opciones'
 
 // `batch.ts` trae `usuarios.ts`, que es solo de servidor; acá no se habla con la base.
 vi.mock('server-only', () => ({}))
@@ -59,11 +60,20 @@ const publicar = delTelefono<{
   describirArchivo: (asset: { uri: string; fileName?: string | null; mimeType?: string | null; fileSize?: number | null }) => Descrito
 }>('publicar')
 const borradores = delTelefono<{ BORRADOR_NO_EXISTE: string }>('borradores')
+const avisos = delTelefono<{ SIN_TRIAL_GENERICO: string; avisoSinTrial: (motivo: string | null | undefined) => string }>(
+  'publicar',
+)
 
 describe('las frases que la app reconoce por su texto', () => {
   it('son las del servidor, letra por letra', () => {
     expect(borradores.BORRADOR_NO_EXISTE).toBe(BORRADOR_NO_EXISTE)
     expect(publicar.ARCHIVO_FALTANTE).toBe(ARCHIVO_FALTANTE)
+  })
+
+  it('el aviso de una cuenta sin trial reels es el del panel', () => {
+    expect(avisos.SIN_TRIAL_GENERICO).toBe(SIN_TRIAL_GENERICO)
+    expect(avisos.avisoSinTrial(null)).toBe(avisoSinTrial(null))
+    expect(avisos.avisoSinTrial('@a no tiene trial reels.')).toBe(avisoSinTrial('@a no tiene trial reels.'))
   })
 
   it('las de un archivo que no se puede elegir dicen lo mismo que diría el servidor', () => {

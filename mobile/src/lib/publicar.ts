@@ -290,6 +290,17 @@ function esUnVideo(archivos: Pick<Elegido, 'mediaType'>[]): boolean {
 }
 
 /**
+ * El aviso de una cuenta donde Meta ya rechazó un trial reel (`src/lib/social/publish/trial-reels.ts`,
+ * en el sitio): la frase del rechazo, que nombra la cuenta y dice el porqué, o esta si no quedó ninguna.
+ * La misma del panel: la cuida `src/lib/telefono-copias.test.ts`.
+ */
+export const SIN_TRIAL_GENERICO = 'Instagram ya rechazó un trial reel en esta cuenta: prográmalo como reel normal.'
+
+export function avisoSinTrial(motivo: string | null | undefined): string {
+  return motivo?.trim() || SIN_TRIAL_GENERICO
+}
+
+/**
  * Las cuentas a las que se les ofrece el trial reel: las de Instagram marcadas, y solo
  * cuando hay exactamente un video elegido — un trial reel es un solo video, sin fotos,
  * y ofrecer el interruptor con fotos sería ofrecer algo que el servidor va a rechazar.

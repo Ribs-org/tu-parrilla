@@ -61,6 +61,9 @@ function cuenta(overrides: Record<string, unknown> = {}) {
     expiresAt: null,
     lastSyncError: null,
     caidaAvisadaEn: null,
+    trialReels: null,
+    trialReelsMotivo: null,
+    trialReelsEn: null,
     correo: 'dueno@ejemplo.cl',
     ...overrides,
   }

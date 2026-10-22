@@ -220,6 +220,13 @@ export const socialAccounts = pgTable(
     // escribe `vigilarConexiones` (`lib/avisos/run.ts`) al avisar y la borra cuando el fierro
     // vuelve a calentarse: así llega un correo por caída, no uno por cada post que no sale.
     caidaAvisadaEn: timestamp('caida_avisada_en', { withTimezone: true }),
+    // Si la cuenta acepta trial reels, aprendido de Meta al publicar (`trial-reels.ts`): «no»
+    // cuando rechazó uno por elegibilidad (pocos seguidores, el subcódigo 2207081), «si» cuando
+    // uno salió. Nulo mientras no se sepa. Solo Instagram. El motivo es la frase del rechazo,
+    // para mostrarla tal cual.
+    trialReels: text('trial_reels').$type<'si' | 'no'>(),
+    trialReelsMotivo: text('trial_reels_motivo'),
+    trialReelsEn: timestamp('trial_reels_en', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [

@@ -33,6 +33,7 @@ import {
   SIN_SENAL_SUBIDA,
   archivoDelBorrador,
   archivoElegido,
+  avisoSinTrial,
   cuentasConTrial,
   describirArchivo,
   estadoSubidas,
@@ -737,6 +738,14 @@ export default function Publicar() {
                   Un trial reel solo lo ven quienes no te siguen. Tú decides desde Instagram cuándo
                   compartirlo con todos.
                 </Text>
+                {/* Las cuentas donde Meta ya rechazó uno, con la frase del rechazo. */}
+                {cuentasConTrial(disponibles, cuentas, archivos)
+                  .filter((c) => c.trialReels === 'no')
+                  .map((c) => (
+                    <Text key={`sin-trial:${c.id}`} style={{ color: colores.ambar, fontSize: 11 }}>
+                      {avisoSinTrial(c.trialReelsMotivo)}
+                    </Text>
+                  ))}
               </>
             ) : null}
           </>

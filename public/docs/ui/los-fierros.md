@@ -58,6 +58,7 @@ Avisos de un momento, debajo de la fila: «Desconectada.» después de desconect
 
 **El detalle**, al abrir la flecha:
 
+- En una cuenta de Instagram, si acepta trial reels, cuando ya se sabe: «Acepta trial reels.», en gris, o en ámbar la frase con que Instagram rechazó el último, por ejemplo «@cuenta no tiene trial reels: Instagram los da solo a cuentas con un mínimo de seguidores, y esta no lo alcanza. Prográmalo como reel normal o en otra cuenta.» (o «Instagram ya rechazó un trial reel en esta cuenta: prográmalo como reel normal.», si no quedó la frase). Se aprende al publicar: no sale nada mientras la cuenta no haya intentado un trial reel.
 - «En la red: » y el identificador que la red le da a la cuenta. Es solo informativo.
 - «En Tu Parrilla: » y el **id de la cuenta en Tu Parrilla**, con un ícono de copiar. Es un botón: al apretarlo copia el id y el ícono pasa a un visto durante dos segundos. Al pasar el mouse dice «Id de cuenta — para «cuentas» en el CSV o la API».
 - Solo si la cuenta no tiene credencial y la misma red tiene otra cuenta conectada: «¿Es la misma cuenta con otro identificador? Fusiónala y su historial pasa a la viva.», una lista desplegable con las cuentas conectadas de esa red y el botón «Es la misma cuenta →» (dice «Fusionando…» mientras trabaja).

@@ -1384,7 +1384,11 @@ cuentas del dueño de la llave, también las desconectadas, cada una con su `id`
 su `handle`, su `externalId` (el id que le da la red), si tiene credencial (`conectada`), si es
 de una red en «Próximamente» y cómo está su conexión: el `fierro`, cuándo `vence` y el
 `motivo` para reconectarla, con las frases del resumen más una para la desconectada a
-propósito. Sin parámetros. Antes, un agente solo veía el id de una cuenta pasando por un post
+propósito. En Instagram, además, si acepta trial reels (`trialReels`: `si`, `no` o `null`) y la
+frase con que Meta rechazó el último. Eso lo aprende la corrida del publicador: un rechazo por
+elegibilidad (pocos seguidores, el subcódigo 2207081) marca la cuenta `no`, y un trial reel que
+sale la marca `si` (`src/lib/social/publish/trial-reels.ts`, en `social_accounts`). No bloquea
+nada; Los Fierros y el compositor lo muestran como aviso. Sin parámetros. Antes, un agente solo veía el id de una cuenta pasando por un post
 ya programado, y para una recién conectada había que pedirle al dueño que lo copiara de Los
 Fierros. Lo puro está en `src/lib/cuentas-api.ts`.
 
