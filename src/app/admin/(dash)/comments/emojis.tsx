@@ -6,12 +6,15 @@ import { useState } from 'react'
  * Los emojis que más se usan al contestar un comentario: agradecer, querer, celebrar, reírse.
  * No es un teclado entero: para lo raro está el del sistema (Win + . en Windows, el del
  * teléfono). Cada uno es un solo punto de código o una secuencia que todos los sistemas
- * dibujan, para que el contador de caracteres de la red no se lleve sorpresas.
+ * dibujan, para que el contador de caracteres de la red no se lleve sorpresas. La bandera de
+ * Chile es la excepción a lo de «todos dibujan»: Windows no pinta banderas y en el panel se ve
+ * como «CL», pero en las apps de las redes sale la bandera.
  */
 export const EMOJIS = [
   '🙌', '🙏', '❤️', '🔥', '😊', '😂', '🥹', '😍',
   '👏', '💪', '✨', '🎉', '👀', '😉', '🤝', '💯',
   '👌', '🥳', '😅', '🤗', '💛', '🧡', '⭐', '✅',
+  '🇨🇱',
 ] as const
 
 /**
