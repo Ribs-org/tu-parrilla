@@ -13,6 +13,22 @@ export type ComentarioLeido = {
   authorExternalId: string | null
   text: string
   publishedAt: Date
+  /**
+   * Las respuestas que ya tiene en la red, las que la red entrega en la misma lectura. Con
+   * ellas el sondeo reconoce un comentario que el dueño respondió desde la app de la red, para
+   * que no se le responda dos veces desde la cola. Puede no traerlas todas: YouTube entrega
+   * unas pocas por hilo.
+   */
+  respuestas: RespuestaLeida[]
+}
+
+/** Una respuesta que un comentario ya tiene en la red. */
+export type RespuestaLeida = {
+  externalId: string
+  /** Como `author` en `ComentarioLeido`: el usuario con @ en Instagram, el nombre en las demás. */
+  author: string | null
+  authorExternalId: string | null
+  text: string
 }
 
 /**

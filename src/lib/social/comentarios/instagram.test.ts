@@ -44,7 +44,21 @@ describe('normalizeInstagramComment', () => {
       authorExternalId: '17841400000000999',
       text: '¿Cuánto cobras por esto?',
       publishedAt: new Date('2026-09-10T18:22:04+0000'),
+      respuestas: [],
     })
+  })
+
+  it('trae las respuestas que el comentario ya tiene, para ver si el dueño respondió desde la app', () => {
+    const c = normalizeInstagramComment(
+      {
+        id: '1',
+        text: 'hola',
+        timestamp: '2026-09-10T18:22:04+0000',
+        replies: { data: [{ id: 'r1', text: '¡Gracias!', username: 'micuenta', from: { id: '178', username: 'micuenta' } }, { text: 'sin id' }] },
+      },
+      'p',
+    )
+    expect(c?.respuestas).toEqual([{ externalId: 'r1', author: '@micuenta', authorExternalId: '178', text: '¡Gracias!' }])
   })
 
   it('tolera un comentario sin from ni username', () => {

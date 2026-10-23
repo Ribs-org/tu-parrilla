@@ -1,5 +1,5 @@
 import 'server-only'
-import { and, desc, eq, gte, inArray, isNotNull, isNull } from 'drizzle-orm'
+import { and, desc, eq, gte, inArray, isNotNull, isNull, lt, or } from 'drizzle-orm'
 import { getDb, postComments, scheduledPostTargets, socialAccounts, socialPosts } from '@/db'
 import type { SocialAccount } from '@/db'
 import { connectorFor } from '../index'
@@ -7,7 +7,15 @@ import { aplicarReglas } from './automatico'
 import { comentaristaFor } from './index'
 import { redactarPendientes, type RedaccionReport } from './redaccion'
 import { MAX_AUTOMATICAS_POR_CORRIDA } from './reglas'
-import { DIAS_VENTANA, estadoInicial, postsAsondear, seAcaboElTiempo, tocaSondear, unirPosts } from './ventana'
+import {
+  DIAS_VENTANA,
+  estadoInicial,
+  postsAsondear,
+  respuestaDelDueno,
+  seAcaboElTiempo,
+  tocaSondear,
+  unirPosts,
+} from './ventana'
 
 /**
  * Lo único que el dueño llega a leer de un sondeo fallido. El detalle de la red —que trae
@@ -32,6 +40,8 @@ export type SondeoReport = {
     salteados: number
     /** Comentarios que una regla de palabra clave respondió en el acto, en esta pasada. */
     automaticas: number
+    /** Comentarios que el dueño ya había respondido desde la app de la red: salieron de la cola. */
+    enLaRed: number
     error?: string
   }>
   /** Cuentas que el tope de tiempo dejó para la pasada siguiente; no es un fallo. */
@@ -40,7 +50,7 @@ export type SondeoReport = {
   redaccion: RedaccionReport
 }
 
-type Cuenta = { posts: number; nuevos: number; salteados: number; automaticas: number }
+type Cuenta = { posts: number; nuevos: number; salteados: number; automaticas: number; enLaRed: number }
 
 async function sondearCuenta(
   account: SocialAccount,
@@ -48,7 +58,7 @@ async function sondearCuenta(
   cupo: { restantes: number },
   inicio: number,
 ): Promise<Cuenta> {
-  const vacio: Cuenta = { posts: 0, nuevos: 0, salteados: 0, automaticas: 0 }
+  const vacio: Cuenta = { posts: 0, nuevos: 0, salteados: 0, automaticas: 0, enLaRed: 0 }
   const comentarista = comentaristaFor(account.network)
   if (!comentarista) return vacio
   const db = getDb()
@@ -109,19 +119,21 @@ async function sondearCuenta(
   if (ids.length === 0) return vacio
 
   // Todos los comentarios ya conocidos de esta cuenta en esos posts, de una consulta:
-  // preguntar por cada comentario sería una consulta por comentario y por pasada.
-  const conocidos = new Set(
+  // preguntar por cada comentario sería una consulta por comentario y por pasada. Con su
+  // estado, para saber cuáles siguen esperando en la cola.
+  const conocidos = new Map(
     (
       await db
-        .select({ externalId: postComments.externalId })
+        .select({ externalId: postComments.externalId, state: postComments.state })
         .from(postComments)
         .where(and(eq(postComments.accountId, account.id), inArray(postComments.postExternalId, ids)))
-    ).map((fila) => fila.externalId),
+    ).map((fila) => [fila.externalId, fila.state]),
   )
 
   let nuevos = 0
   let salteados = 0
   let automaticas = 0
+  let enLaRed = 0
   let seguidos = 0
   for (const [i, postExternalId] of ids.entries()) {
     // Cada publicación va sola. Una borrada en la red sigue sin `archivedAt` hasta el sync
@@ -130,8 +142,47 @@ async function sondearCuenta(
     try {
       const leidos = await comentarista.listar(account, token, postExternalId)
       seguidos = 0
+
+      // Lo que sigue en la cola y el dueño ya respondió desde la app de la red sale de ella,
+      // para que no se le responda dos veces. En cada pasada, porque leer las respuestas no
+      // cuesta una llamada más.
+      for (const c of leidos) {
+        const estado = conocidos.get(c.externalId)
+        if (estado !== 'pendiente' && estado !== 'fallido') continue
+        const suya = respuestaDelDueno(c.respuestas, account)
+        if (!suya) continue
+        const ahora = new Date()
+        const movidos = await db
+          .update(postComments)
+          .set({ state: 'en_la_red', replyExternalId: suya.externalId, draft: suya.text, error: null, updatedAt: ahora })
+          // Sigue esperando y nadie la está mandando: un envío en curso desde la cola escribe
+          // su propio resultado, y esta escritura no lo pisa.
+          .where(
+            and(
+              eq(postComments.accountId, account.id),
+              eq(postComments.externalId, c.externalId),
+              inArray(postComments.state, ['pendiente', 'fallido']),
+              or(isNull(postComments.enviandoHasta), lt(postComments.enviandoHasta, ahora)),
+            ),
+          )
+          .returning({ id: postComments.id })
+        if (movidos.length > 0) {
+          conocidos.set(c.externalId, 'en_la_red')
+          enLaRed += 1
+        }
+      }
+
       const frescos = leidos.filter((c) => !conocidos.has(c.externalId))
       if (frescos.length === 0) continue
+
+      // Con qué estado entra cada uno: el que el dueño ya respondió desde la red no entra a la cola.
+      const entrada = new Map(
+        frescos.map((c) => {
+          const inicial = estadoInicial(c.authorExternalId, account.externalId)
+          const suya = inicial === 'pendiente' ? respuestaDelDueno(c.respuestas, account) : null
+          return [c.externalId, { state: suya ? ('en_la_red' as const) : inicial, suya }]
+        }),
+      )
 
       const insertados = await db
         .insert(postComments)
@@ -145,7 +196,9 @@ async function sondearCuenta(
             authorExternalId: c.authorExternalId,
             text: c.text,
             publishedAt: c.publishedAt,
-            state: estadoInicial(c.authorExternalId, account.externalId),
+            state: entrada.get(c.externalId)!.state,
+            replyExternalId: entrada.get(c.externalId)!.suya?.externalId ?? null,
+            draft: entrada.get(c.externalId)!.suya?.text ?? null,
           })),
         )
         // Dos pasadas que se solapan verían los mismos comentarios; la unique decide y la
@@ -153,8 +206,9 @@ async function sondearCuenta(
         .onConflictDoNothing({ target: [postComments.accountId, postComments.externalId] })
         .returning({ id: postComments.id, externalId: postComments.externalId })
       const idPorExternal = new Map(insertados.map((f) => [f.externalId, f.id]))
-      for (const c of frescos) conocidos.add(c.externalId)
+      for (const c of frescos) conocidos.set(c.externalId, entrada.get(c.externalId)!.state)
       nuevos += frescos.length
+      enLaRed += insertados.filter((f) => entrada.get(f.externalId)?.state === 'en_la_red').length
 
       const { respondidos } = await aplicarReglas(
         account,
@@ -162,7 +216,7 @@ async function sondearCuenta(
         frescos.flatMap((c) => {
           const id = idPorExternal.get(c.externalId)
           return id
-            ? [{ id, postExternalId: c.postExternalId, externalId: c.externalId, authorExternalId: c.authorExternalId, text: c.text, publishedAt: c.publishedAt, state: estadoInicial(c.authorExternalId, account.externalId) }]
+            ? [{ id, postExternalId: c.postExternalId, externalId: c.externalId, authorExternalId: c.authorExternalId, text: c.text, publishedAt: c.publishedAt, state: entrada.get(c.externalId)!.state }]
             : []
         }),
         cupo,
@@ -187,7 +241,7 @@ async function sondearCuenta(
     }
   }
 
-  return { posts: ids.length, nuevos, salteados, automaticas }
+  return { posts: ids.length, nuevos, salteados, automaticas, enLaRed }
 }
 
 /**
@@ -244,6 +298,7 @@ export async function sondearComentarios(
         nuevos: 0,
         salteados: 0,
         automaticas: 0,
+        enLaRed: 0,
         error: SONDEO_FALLIDO,
       })
     }

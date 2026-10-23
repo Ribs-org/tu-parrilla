@@ -7,6 +7,7 @@ import {
   estadoInicial,
   postsAsondear,
   recortar,
+  respuestaDelDueno,
   seAcaboElTiempo,
   tocaSondear,
   unirPosts,
@@ -192,6 +193,36 @@ describe('estadoInicial', () => {
     expect(estadoInicial(null, cuenta)).toBe('pendiente')
     expect(estadoInicial(cuenta, null)).toBe('pendiente')
     expect(estadoInicial(null, null)).toBe('pendiente')
+  })
+})
+
+describe('respuestaDelDueno', () => {
+  const cuenta = { externalId: '17841400000000000', handle: 'micuenta' }
+  const otra = { externalId: 'r0', author: '@alguien', authorExternalId: '999', text: 'yo también quiero' }
+
+  it('encuentra la respuesta de la cuenta por su id', () => {
+    const suya = { externalId: 'r1', author: '@micuenta', authorExternalId: cuenta.externalId, text: '¡Gracias!' }
+    expect(respuestaDelDueno([otra, suya], cuenta)).toBe(suya)
+  })
+
+  it('sin id de autor, en Instagram la reconoce por el @, sin importar mayúsculas', () => {
+    const suya = { externalId: 'r1', author: '@MiCuenta', authorExternalId: null, text: '¡Gracias!' }
+    expect(respuestaDelDueno([suya], { externalId: null, handle: '@micuenta' })).toBe(suya)
+  })
+
+  it('un nombre sin @ no cuenta como usuario: dos páginas pueden llamarse igual', () => {
+    expect(
+      respuestaDelDueno([{ externalId: 'r1', author: 'micuenta', authorExternalId: '615', text: 'x' }], cuenta),
+    ).toBeNull()
+  })
+
+  it('si solo respondieron otras personas, null: sigue en la cola', () => {
+    expect(respuestaDelDueno([otra], cuenta)).toBeNull()
+    expect(respuestaDelDueno([], cuenta)).toBeNull()
+  })
+
+  it('sin id ni handle de la cuenta no hay con qué reconocerla', () => {
+    expect(respuestaDelDueno([{ ...otra, authorExternalId: null }], { externalId: null, handle: null })).toBeNull()
   })
 })
 

@@ -212,6 +212,10 @@ function Tarjeta({ fila, mostrarPrivado, ahora }: { fila: ComentarioFila; mostra
                 </span>
               ) : null}
             </p>
+          ) : fila.state === 'en_la_red' ? (
+            <p className="text-fg-muted">
+              <span className="text-positive">Respondido desde {networkLabel(fila.network)}:</span> {fila.draft}
+            </p>
           ) : (
             <p className="text-fg-faint">Descartado{fila.error ? ` · ${fila.error}` : ''}</p>
           )}

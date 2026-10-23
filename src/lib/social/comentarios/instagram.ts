@@ -9,12 +9,22 @@ const LIMITE = 2200
 // Salvaguarda de cuota y de tiempo, no promesa de completitud: lo de la página seis se ve en la pasada siguiente.
 const MAX_PAGINAS = 5
 
-export type InstagramCommentPayload = {
+type InstagramReplyPayload = {
   id?: string
   text?: string
-  timestamp?: string
   username?: string
   from?: { id?: string; username?: string }
+}
+
+export type InstagramCommentPayload = InstagramReplyPayload & {
+  timestamp?: string
+  replies?: { data?: InstagramReplyPayload[] }
+}
+
+/** El usuario con @, como se muestra en la cola; null si Graph no lo dio. */
+function arroba(raw: InstagramReplyPayload): string | null {
+  const usuario = raw.from?.username ?? raw.username ?? null
+  return usuario ? `@${usuario}` : null
 }
 
 /** Null cuando el payload no trae id: sin identidad no hay fila que insertar. */
@@ -23,17 +33,19 @@ export function normalizeInstagramComment(
   postExternalId: string,
 ): ComentarioLeido | null {
   if (!raw.id) return null
-  const usuario = raw.from?.username ?? raw.username ?? null
   const fecha = new Date(raw.timestamp ?? '')
   return {
     externalId: raw.id,
     postExternalId,
-    author: usuario ? `@${usuario}` : null,
+    author: arroba(raw),
     authorExternalId: raw.from?.id ?? null,
     // La columna es NOT NULL y un comentario puede ser solo una imagen o un sticker.
     text: raw.text ?? '',
     // Sin fecha de la red, la del descubrimiento: 1970 hundiría la fila al fondo de la cola.
     publishedAt: Number.isNaN(fecha.getTime()) ? new Date() : fecha,
+    respuestas: (raw.replies?.data ?? []).flatMap((r) =>
+      r.id ? [{ externalId: r.id, author: arroba(r), authorExternalId: r.from?.id ?? null, text: r.text ?? '' }] : [],
+    ),
   }
 }
 
@@ -46,7 +58,8 @@ export const instagramComentarista: Comentarista = {
   limiteTexto: LIMITE,
 
   async listar(_account, token, postExternalId) {
-    const fields = 'id,text,timestamp,username,from'
+    // Las respuestas vienen en la misma llamada: así se ve lo que el dueño ya respondió desde la app.
+    const fields = 'id,text,timestamp,username,from,replies{id,text,username,from}'
     // El borde de comentarios va del más viejo al más nuevo: con una sola página, una
     // publicación de más de cincuenta comentarios nunca dejaría ver los nuevos.
     let url = `${GRAPH}/${postExternalId}/comments?fields=${fields}&limit=50&access_token=${token}`

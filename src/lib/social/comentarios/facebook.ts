@@ -8,11 +8,15 @@ const LIMITE = 8000
 // Salvaguarda de cuota y de tiempo, no promesa de completitud: lo de la página seis se ve en la pasada siguiente.
 const MAX_PAGINAS = 5
 
-export type FacebookCommentPayload = {
+type FacebookReplyPayload = {
   id?: string
   message?: string
-  created_time?: string
   from?: { id?: string; name?: string }
+}
+
+export type FacebookCommentPayload = FacebookReplyPayload & {
+  created_time?: string
+  comments?: { data?: FacebookReplyPayload[] }
 }
 
 export function normalizeFacebookComment(
@@ -31,6 +35,9 @@ export function normalizeFacebookComment(
     text: raw.message ?? '',
     // Sin fecha de la red, la del descubrimiento: 1970 hundiría la fila al fondo de la cola.
     publishedAt: Number.isNaN(fecha.getTime()) ? new Date() : fecha,
+    respuestas: (raw.comments?.data ?? []).flatMap((r) =>
+      r.id ? [{ externalId: r.id, author: r.from?.name ?? null, authorExternalId: r.from?.id ?? null, text: r.message ?? '' }] : [],
+    ),
   }
 }
 
@@ -40,7 +47,8 @@ export const facebookComentarista: Comentarista = {
   limiteTexto: LIMITE,
 
   async listar(_account, token, postExternalId) {
-    const fields = 'id,message,created_time,from'
+    // Las respuestas vienen en la misma llamada: así se ve lo que el dueño ya respondió desde la app.
+    const fields = 'id,message,created_time,from,comments.limit(25){id,message,from}'
     // El borde de comentarios va del más viejo al más nuevo: con una sola página, una
     // publicación de más de cincuenta comentarios nunca dejaría ver los nuevos.
     let url = `${GRAPH}/${postExternalId}/comments?fields=${fields}&limit=50&access_token=${token}`

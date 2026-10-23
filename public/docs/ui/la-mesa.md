@@ -6,6 +6,8 @@ La Mesa (en llano: los comentarios) es la cola de los comentarios que la gente d
 
 Los comentarios llegan solos: cada cinco minutos Tu Parrilla revisa las publicaciones de los últimos siete días de cada cuenta conectada de Instagram y Facebook; las de YouTube, cada media hora. Para eso la cuenta tiene que estar conectada en [Los Fierros](los-fierros.md). Los comentarios que deja la propia cuenta no entran a la cola.
 
+Lo que se responde directo en la app de la red (Instagram, Facebook o YouTube) no hay que responderlo de nuevo aquí: en cada revisión Tu Parrilla mira también las respuestas de cada comentario, y si una es de la cuenta conectada, el comentario sale de «Pendientes» y pasa a «Enviados» como «Respondido desde Instagram: …» (con la red que corresponda). Puede tardar hasta la revisión siguiente: cinco minutos, o media hora en YouTube.
+
 ## Cómo se llega
 
 1. En la barra de arriba del panel, aprieta la pestaña «La Mesa» (entre «La Parrilla» y «Los Números»). En un teléfono la fila de pestañas se desliza hacia el lado si no cabe entera.
@@ -36,7 +38,7 @@ Una fila de botones redondeados; el elegido se ve resaltado.
 
 - Por estado: «Pendientes» (el que viene elegido), «Enviados», «Automáticas», «Descartados», «Todos».
   - «Pendientes»: los que esperan respuesta, incluidos los que se intentaron mandar y fallaron.
-  - «Enviados»: los ya respondidos, a mano o por la respuesta automática.
+  - «Enviados»: los ya respondidos: desde aquí a mano, por la respuesta automática, o directo en la app de la red.
   - «Automáticas»: los que tomó la respuesta automática por palabra clave, en cualquier estado.
   - «Descartados»: los que se decidió no responder.
   - «Todos»: todo lo anterior junto.
@@ -76,6 +78,7 @@ De arriba abajo:
 No tiene botones.
 
 - Respondido: «Respondido:» y el texto que salió. Si lo mandó la respuesta automática, al lado una etiqueta «Automática».
+- Respondido en la red: «Respondido desde Instagram:» (o «desde Facebook:», «desde YouTube:») y lo que la cuenta respondió directo en la app de la red, fuera de Tu Parrilla.
 - Descartado: «Descartado», o «Descartado · El comentario ya no está en la red.» si se descartó solo porque su autor lo borró.
 - Solo si la instalación tiene encendidos los mensajes privados (vienen apagados), una línea más en Instagram y Facebook: «Privado: pendiente», «Privado: enviado» o «Privado: no salió», a veces seguida de « · No se pudo mandar el privado.».
 
@@ -161,6 +164,8 @@ Aprieta el filtro «Automáticas». Ahí están todos los que tomó, también lo
 - **«No veo los comentarios de TikTok, Threads o X»** → Esas redes no tienen cola de comentarios.
 - **«El cuadro de respuesta está vacío»** → La IA todavía no escribió el borrador, la instalación no tiene IA, o el comentario dice la palabra clave de la publicación y está esperando la respuesta automática. Se puede escribir a mano o apretar «Reintentar borrador».
 - **«Cambié las instrucciones y el borrador sigue igual»** → Las instrucciones rigen desde el siguiente borrador; los ya escritos se corrigen a mano.
+- **«Lo respondí desde Instagram y sigue en Pendientes»** → Hay que esperar la revisión siguiente (cinco minutos; media hora en YouTube) y recargar la página. Tiene que ser una respuesta a ese comentario —no un comentario nuevo en la publicación— y hecha con la misma cuenta que está conectada. En YouTube solo se ven las primeras respuestas de cada comentario: si el comentario ya tenía muchas, la tuya puede no verse, y entonces se descarta a mano con «Descartar». Si ya se ve en «Enviados» como «Respondido desde…», no hay que hacer nada.
+- **«¿Tengo que responder dos veces, en Instagram y aquí?»** → No: responde donde te quede más cómodo. Lo que respondes en la app de la red sale solo de «Pendientes».
 - **«Descarté uno por error»** → No se deshace desde el panel; se puede responder directamente en la app de la red.
 - **«Se me perdió un comentario de la cola»** → Mirar en «Enviados» y «Descartados» (si su autor lo borró, aparece ahí con «El comentario ya no está en la red.»). Los de YouTube se borran solos a los 30 días. Cada filtro muestra solo los 200 más nuevos.
 - **«La respuesta automática no respondió»** → La palabra tiene que ir entera; la regla solo existe en publicaciones programadas desde Tu Parrilla con el bloque «Respuesta automática por palabra clave»; hay que esperar la revisión siguiente; y si la red la rechazó, está en «Pendientes» con su aviso.
@@ -198,7 +203,7 @@ Lo que describe sale de:
 - `src/lib/social/comentarios/instrucciones.ts` (las instrucciones de la casa, el tope de 2000)
 - `src/lib/social/comentarios/reglas.ts` y `src/lib/social/comentarios/automatico.ts` (la respuesta automática)
 - `src/lib/social/comentarios/privado.ts` (el privado, apagado)
-- `src/lib/social/comentarios/ventana.ts` y `src/lib/social/comentarios/run.ts` (cada cuánto, los siete días, los comentarios propios)
+- `src/lib/social/comentarios/ventana.ts` y `src/lib/social/comentarios/run.ts` (cada cuánto, los siete días, los comentarios propios, los respondidos desde la app de la red)
 - `src/lib/social/comentarios/agrupar.ts`
 - `src/lib/social/retencion-youtube.ts` (los comentarios de YouTube se borran a los 30 días)
 - `src/lib/social/comentarios/index.ts`, `src/lib/social/comentarios/instagram.ts`, `src/lib/social/comentarios/facebook.ts` y `src/lib/social/comentarios/youtube.ts` (qué redes, el largo máximo de cada una)
