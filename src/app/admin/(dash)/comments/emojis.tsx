@@ -24,22 +24,33 @@ export function insertar(texto: string, emoji: string, desde: number, hasta: num
   return { texto: texto.slice(0, inicio) + emoji + texto.slice(fin), cursor: inicio + emoji.length }
 }
 
-/** El botón «Emojis» y, al apretarlo, la fila de emojis para sumar a la respuesta. */
-export function Emojis({ alElegir, disabled }: { alElegir: (emoji: string) => void; disabled?: boolean }) {
+/**
+ * El botón «Emojis» y, al apretarlo, la fila de emojis para sumar a la respuesta. Va arriba del
+ * cuadro y en voz baja: es un adorno de la respuesta, no compite con «Enviar».
+ */
+export function Emojis({
+  alElegir,
+  disabled,
+  className,
+}: {
+  alElegir: (emoji: string) => void
+  disabled?: boolean
+  className?: string
+}) {
   const [abierto, setAbierto] = useState(false)
   return (
-    <div className="mt-2">
+    <div className={className}>
       <button
         type="button"
         onClick={() => setAbierto((a) => !a)}
         disabled={disabled}
         aria-expanded={abierto}
-        className="text-[0.78rem] text-fg-faint hover:text-fg disabled:opacity-50"
+        className="text-[0.72rem] text-fg-faint opacity-70 transition-opacity hover:opacity-100 disabled:opacity-40"
       >
         <span aria-hidden>🙂</span> {abierto ? 'Cerrar emojis' : 'Emojis'}
       </button>
       {abierto ? (
-        <div role="group" aria-label="Emojis" className="mt-1.5 flex flex-wrap gap-1">
+        <div role="group" aria-label="Emojis" className="mt-1 flex flex-wrap gap-0.5">
           {EMOJIS.map((e) => (
             <button
               key={e}
@@ -47,7 +58,7 @@ export function Emojis({ alElegir, disabled }: { alElegir: (emoji: string) => vo
               onClick={() => alElegir(e)}
               disabled={disabled}
               aria-label={`Poner ${e}`}
-              className="grid h-8 w-8 place-items-center rounded-md text-lg hover:bg-velo/[0.08] disabled:opacity-50"
+              className="grid h-7 w-7 place-items-center rounded-md text-base opacity-75 transition hover:bg-velo/[0.06] hover:opacity-100 disabled:opacity-40"
             >
               {e}
             </button>

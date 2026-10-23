@@ -195,8 +195,14 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   pedirlo todo de una vez y no volver a grabar. Lo que ya se sabe que falta: el login con
   Instagram y los mensajes privados (Meta, segunda vuelta), los anuncios (la entrada de arriba)
   y Threads. Por decidir si hacen falta: más métricas de las que se leen hoy (las historias de
-  Instagram, las estadísticas del perfil de TikTok), responder comentarios de TikTok, y otro
-  alcance de YouTube. Lo que ya se pidió, permiso por permiso, está en
+  Instagram, las estadísticas del perfil de TikTok) y otro alcance de YouTube. Los comentarios
+  de TikTok ya se decidió quererlos, en la entrada de abajo.
+- **Comentarios de TikTok en La Mesa** (2026-10-23, lo pidió el dueño). La API que usa Tu
+  Parrilla (Login Kit, Display y Content Posting de developers.tiktok.com) no lee ni responde
+  comentarios: solo da el número. La vía parece ser la API for Business de TikTok (sus API
+  «Organic», para cuentas de empresa), que es otra app, otro portal y otra revisión. Falta
+  confirmarlo en business-api.tiktok.com y ver si sirve para cuentas de creador. Con eso, es un
+  `Comentarista` más en `src/lib/social/comentarios/`. Lo que ya se pidió, permiso por permiso, está en
   `docs/levantamiento-terceros.md` (§2.2 para Meta).
 - **Meta, segunda vuelta: mensajes privados** (el privado con el enlace de la regla de
   palabra clave, `instagram_manage_messages` y `pages_messaging`) y, aparte, **Threads**

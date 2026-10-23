@@ -729,9 +729,11 @@ primera persona, breve y cálido, sin inventar datos ni dar precios.
 
 La cola vive en **La Mesa** (Comentarios), en el panel. Cada comentario nuevo llega con el borrador que
 escribió el modelo; lo corriges si quieres y lo mandas con **Enviar**, o lo descartas. Si el
-modelo no pudo redactar, la tarjeta lo dice y tiene **Reintentar borrador**. Arriba está el
-campo con las instrucciones que sigue el modelo: las editas ahí y rigen desde el siguiente
-borrador.
+modelo no pudo redactar, la tarjeta lo dice. La flecha de arriba a la derecha de cada tarjeta
+pide otro borrador, haya o no uno. Arriba está el campo con las instrucciones que sigue el
+modelo: las editas ahí y rigen desde el siguiente borrador. **Regenerar todos**, al lado de
+Guardar, rehace con ellas los borradores pendientes que ya estaban escritos, hasta 40 por vez y
+cuatro a la par, dentro de unos 40 segundos.
 
 Nada sale sin tu toque. Dos toques, o el panel abierto en dos pestañas, mandan una sola vez
 (la app del teléfono no tiene comentarios): justo antes de enviar, la respuesta reclama el
