@@ -5,8 +5,16 @@ import { recortar } from './ventana'
 const API = 'https://www.googleapis.com/youtube/v3'
 const LIMITE = 10000
 
+type YouTubeCommentSnippet = {
+  textOriginal?: string
+  authorDisplayName?: string
+  authorChannelId?: { value?: string }
+}
+
 export type YouTubeThreadPayload = {
   id?: string
+  /** Unas pocas respuestas del hilo, no todas: YouTube decide cuántas. */
+  replies?: { comments?: Array<{ id?: string; snippet?: YouTubeCommentSnippet }> }
   snippet?: {
     topLevelComment?: {
       id?: string
@@ -39,6 +47,16 @@ export function normalizeYouTubeThread(
     text: snippet.textOriginal ?? '',
     // Sin fecha de la red, la del descubrimiento: 1970 hundiría la fila al fondo de la cola.
     publishedAt: Number.isNaN(fecha.getTime()) ? new Date() : fecha,
+    respuestas: (raw.replies?.comments ?? []).flatMap((r) =>
+      r.id
+        ? [{
+            externalId: r.id,
+            author: r.snippet?.authorDisplayName ?? null,
+            authorExternalId: r.snippet?.authorChannelId?.value ?? null,
+            text: r.snippet?.textOriginal ?? '',
+          }]
+        : [],
+    ),
   }
 }
 
@@ -50,7 +68,8 @@ export const youtubeComentarista: Comentarista = {
 
   async listar(_account, token, postExternalId) {
     const response = await fetch(
-      `${API}/commentThreads?part=snippet&videoId=${postExternalId}&maxResults=50&order=time`,
+      // `replies` no cuesta cuota aparte: la llamada vale una unidad con las partes que pida.
+      `${API}/commentThreads?part=snippet,replies&videoId=${postExternalId}&maxResults=50&order=time`,
       { headers: { Authorization: `Bearer ${token}` } },
     )
     if (!response.ok) {

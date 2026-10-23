@@ -11,10 +11,11 @@ export type EstadoCola = (typeof ESTADOS_COLA)[number]
 /** Lo pendiente incluye lo fallido: las dos cosas esperan un toque del dueño. */
 const POR_ESTADO: Record<EstadoCola, CommentState[]> = {
   pendientes: ['pendiente', 'fallido'],
-  enviados: ['enviado'],
+  // Lo que el dueño respondió desde la app de la red también está respondido.
+  enviados: ['enviado', 'en_la_red'],
   automaticas: ['pendiente', 'fallido', 'enviado', 'descartado'],
   descartados: ['descartado'],
-  todos: ['pendiente', 'fallido', 'enviado', 'descartado'],
+  todos: ['pendiente', 'fallido', 'enviado', 'descartado', 'en_la_red'],
 }
 
 /** Tope de la cola en pantalla: más que esto no se revisa de una sentada. */

@@ -503,7 +503,11 @@ export const reglasClave = pgTable('reglas_clave', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 }).enableRLS()
 
-export const COMMENT_STATES = ['pendiente', 'enviado', 'descartado', 'propio', 'fallido'] as const
+/**
+ * `en_la_red`: el dueño ya lo respondió fuera de Tu Parrilla, desde la app de la red. El sondeo
+ * lo ve en las respuestas del comentario y lo saca de la cola; `draft` guarda lo que respondió.
+ */
+export const COMMENT_STATES = ['pendiente', 'enviado', 'descartado', 'propio', 'fallido', 'en_la_red'] as const
 export type CommentState = (typeof COMMENT_STATES)[number]
 
 /** El privado de la sección 7 del diseño: `no` hasta que la bandera lo encienda. */

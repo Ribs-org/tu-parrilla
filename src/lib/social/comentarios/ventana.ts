@@ -3,6 +3,7 @@
 // red.
 
 import type { CommentState } from '@/db/schema'
+import type { RespuestaLeida } from './comentarista'
 
 /** Coincide con el plazo del mensaje privado de Meta, que es lo que viene después. */
 export const DIAS_VENTANA = 7
@@ -101,6 +102,26 @@ export function estadoInicial(
   // cola, que es donde el error se ve y se descarta a mano.
   if (!autorExternalId || !cuentaExternalId) return 'pendiente'
   return autorExternalId === cuentaExternalId ? 'propio' : 'pendiente'
+}
+
+/**
+ * La respuesta que el dueño ya le dejó a un comentario desde la red, o null. Se reconoce por el
+ * id de la cuenta, como en `estadoInicial`. En Instagram también por el usuario: el handle de la
+ * cuenta es el mismo @ que firma la respuesta.
+ */
+export function respuestaDelDueno(
+  respuestas: RespuestaLeida[],
+  cuenta: { externalId: string | null; handle: string | null },
+): RespuestaLeida | null {
+  const usuario = (nombre: string | null) => (nombre?.startsWith('@') ? nombre.slice(1).toLowerCase() : null)
+  const handle = cuenta.handle?.replace(/^@/, '').toLowerCase() || null
+  return (
+    respuestas.find(
+      (r) =>
+        (cuenta.externalId !== null && r.authorExternalId === cuenta.externalId) ||
+        (handle !== null && usuario(r.author) === handle),
+    ) ?? null
+  )
 }
 
 /** Sin puntos suspensivos a propósito: esto se publica, no se muestra. */

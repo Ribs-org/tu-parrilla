@@ -739,6 +739,14 @@ comentario en la base por dos minutos (`enviando_hasta`), y el toque que no lo o
 manda nada. Las respuestas automáticas lo reclaman igual, así que dos sondeos encimados, o
 una respuesta a mano en el mismo momento, tampoco mandan dos.
 
+Lo que respondes directo en la app de Instagram, Facebook o YouTube tampoco se responde dos
+veces. El sondeo pide cada comentario con sus respuestas, en la misma llamada y sin gastar cuota
+extra. Si una respuesta es de tu cuenta, el comentario sale de la cola al estado `en_la_red`, con
+tu respuesta guardada, y se ve en «Enviados». Lo hace en cada pasada, sobre todo lo que sigue
+pendiente de los últimos siete días. Una fila que se está mandando desde la cola (`enviando_hasta`
+vigente) no se toca. YouTube entrega solo unas pocas respuestas por hilo, así que en un
+comentario con muchas la tuya puede no verse.
+
 El mensaje privado a quien comentó está escrito y **apagado**. Meta exige para eso
 `pages_messaging` con acceso avanzado, que pasa por revisión de la app. El día que la
 consigas, `COMENTARIOS_DM=1` en Vercel lo enciende para Instagram y Facebook, dentro de los

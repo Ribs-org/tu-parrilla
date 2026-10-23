@@ -165,7 +165,9 @@ export async function redactarPendientes(inicio: number): Promise<RedaccionRepor
       await db
         .update(postComments)
         .set({ draft: borrador, draftError: null, updatedAt: new Date() })
-        .where(eq(postComments.id, fila.id))
+        // Si mientras el modelo escribía el sondeo vio que el dueño ya respondió desde la red,
+        // `draft` guarda esa respuesta y el borrador no la pisa.
+        .where(and(eq(postComments.id, fila.id), eq(postComments.state, 'pendiente')))
       reporte.redactados += 1
     } catch (error) {
       console.error(`[comentarios] borrador ${fila.network}:`, String(error).slice(0, 300))

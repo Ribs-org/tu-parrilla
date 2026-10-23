@@ -43,7 +43,21 @@ describe('normalizeFacebookComment', () => {
       authorExternalId: '61550000000042',
       text: 'Gran video',
       publishedAt: new Date('2026-09-10T18:22:04+0000'),
+      respuestas: [],
     })
+  })
+
+  it('trae las respuestas que el comentario ya tiene', () => {
+    const c = normalizeFacebookComment(
+      {
+        id: '1',
+        message: 'hola',
+        created_time: '2026-09-10T18:22:04+0000',
+        comments: { data: [{ id: 'r1', message: 'Gracias', from: { id: '615', name: 'Mi página' } }] },
+      },
+      'p',
+    )
+    expect(c?.respuestas).toEqual([{ externalId: 'r1', author: 'Mi página', authorExternalId: '615', text: 'Gracias' }])
   })
 
   it('tolera el from ausente, que es lo que Graph devuelve sin el permiso de identidad', () => {

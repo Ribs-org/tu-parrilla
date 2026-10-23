@@ -29,7 +29,23 @@ describe('normalizeYouTubeThread', () => {
       authorExternalId: 'UCanaperez',
       text: 'Buenísimo el dato',
       publishedAt: new Date('2026-09-10T18:22:04Z'),
+      respuestas: [],
     })
+  })
+
+  it('trae las respuestas del hilo que YouTube entrega', () => {
+    const c = normalizeYouTubeThread(
+      {
+        snippet: { topLevelComment: { id: 'x', snippet: { textOriginal: 'hola', publishedAt: '2026-09-10T18:22:04Z' } } },
+        replies: {
+          comments: [
+            { id: 'x.r1', snippet: { textOriginal: 'Gracias', authorDisplayName: '@micanal', authorChannelId: { value: 'UCmio' } } },
+          ],
+        },
+      },
+      'v',
+    )
+    expect(c?.respuestas).toEqual([{ externalId: 'x.r1', author: '@micanal', authorExternalId: 'UCmio', text: 'Gracias' }])
   })
 
   it('sin comentario de primer nivel devuelve null', () => {
