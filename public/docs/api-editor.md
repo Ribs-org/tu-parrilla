@@ -296,6 +296,8 @@ el JSON.
   aplican a fotos.
 - `comercial`: `no`, `marca_propia` (etiqueta «Contenido promocional») o `patrocinado`
   (etiqueta «Colaboración pagada»; no puede ir con `SELF_ONLY`).
+- `ia`: booleano, ausente vale `false`. En `true`, TikTok etiqueta el post como contenido
+  generado con IA. Para videos y fotos.
 
 Media de TikTok: **un solo video** (mp4, mov, webm) **o de 1 a 35 fotos** (jpg, webp),
 nunca mezcla.

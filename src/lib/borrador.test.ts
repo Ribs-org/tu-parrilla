@@ -88,6 +88,7 @@ describe('lo que se restaura de un borrador', () => {
       duo: false,
       pegar: false,
       comercial: 'patrocinado',
+      ia: false,
     })
     expect(tiktokInicial(campos, 't2')).toMatchObject({ borrador: true, comercial: 'no' })
     // Una cuenta que no tenía bloque en el borrador nace como la guía de TikTok exige.

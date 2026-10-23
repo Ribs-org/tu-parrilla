@@ -69,6 +69,7 @@ export type TikTokInicial = {
   duo: boolean
   pegar: boolean
   comercial: 'no' | 'marca_propia' | 'patrocinado'
+  ia: boolean
 }
 
 export function tiktokInicial(campos: Campos, cuentaId: string): TikTokInicial | null {
@@ -81,6 +82,7 @@ export function tiktokInicial(campos: Campos, cuentaId: string): TikTokInicial |
     duo: primero(campos, `tiktokDuo:${cuentaId}`) === 'on',
     pegar: primero(campos, `tiktokPegar:${cuentaId}`) === 'on',
     comercial: comercial === 'marca_propia' || comercial === 'patrocinado' ? comercial : 'no',
+    ia: primero(campos, `tiktokIA:${cuentaId}`) === 'on',
   }
 }
 

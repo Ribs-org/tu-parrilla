@@ -52,6 +52,7 @@ export function TikTokOpciones({
   const [tipoComercial, setTipoComercial] = useState<'marca_propia' | 'patrocinado'>(
     inicial?.comercial === 'patrocinado' ? 'patrocinado' : 'marca_propia',
   )
+  const [ia, setIa] = useState(inicial?.ia ?? false)
 
   useEffect(() => {
     let vivo = true
@@ -201,6 +202,18 @@ export function TikTokOpciones({
               </div>
             ) : null}
           </div>
+
+          <Toggle
+            name={`tiktokIA:${cuenta.id}`}
+            label="Hecho con IA"
+            hint={
+              ia
+                ? 'TikTok lo etiquetará como contenido generado con IA.'
+                : 'Enciéndelo si la imagen o la voz se hicieron o se cambiaron con IA de forma realista.'
+            }
+            checked={ia}
+            onChange={setIa}
+          />
 
           <p className="text-[0.72rem] text-fg-faint">
             {patrocinado ? (

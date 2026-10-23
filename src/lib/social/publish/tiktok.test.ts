@@ -394,3 +394,22 @@ describe('tiktokPublisher.publish', () => {
     expect(await tiktokPublisher.publish(resume)).toEqual({ kind: 'processing', containerId: 'v_pub.123' })
   })
 })
+
+describe('cuerpoInit con la etiqueta de IA', () => {
+  it('en el video va dentro de post_info', () => {
+    const { body } = cuerpoInit({ ...directo, ia: true }, 'Hola', { kind: 'video', url: video.url }, null)
+    expect((body.post_info as Record<string, unknown>).is_aigc).toBe(true)
+    expect(body.is_aigc).toBeUndefined()
+  })
+
+  it('en las fotos va al nivel del cuerpo', () => {
+    const { body } = cuerpoInit({ ...directo, ia: true }, 'Hola', { kind: 'fotos', urls: [video.url] }, null)
+    expect(body.is_aigc).toBe(true)
+    expect((body.post_info as Record<string, unknown>).is_aigc).toBeUndefined()
+  })
+
+  it('apagada no se manda', () => {
+    const { body } = cuerpoInit(directo, 'Hola', { kind: 'video', url: video.url }, null)
+    expect('is_aigc' in (body.post_info as Record<string, unknown>)).toBe(false)
+  })
+})
