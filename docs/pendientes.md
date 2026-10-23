@@ -314,6 +314,31 @@ Nada de esto bloquea un trámite hoy; conviene ordenarlo antes de abrir a tercer
   acepta más versiones. Después, `owner` en `mobile/app.json` y los enlaces de
   `mobile/README.md`. La cuenta de Apple para iPhone conviene sacarla ya a nombre de Pyxis.
 
+## Finanzas: planes y pagos
+
+Pedido del dueño el 2026-10-23, como uno de los dos ejes de trabajo, junto con los trámites. Hoy
+nadie paga: todas las cuentas son iguales y el README dice «Sin suscripción».
+
+- **Tres niveles de cuenta y una forma de pagar** (2026-10-23). Tres planes, cada uno con sus
+  límites, y una integración para que la gente pague desde Tu Parrilla. Por decidir: el nombre y
+  el precio de cada plan, qué limita cada uno (las cuentas conectadas, lo programado, las comandas
+  de La Cocina, el espacio de la media) y con qué proveedor se cobra. Se apoya en «Cupos y reparto
+  de los crons por usuario», en la sección de abajo, que todavía no está hecho. Si se cobra dentro de
+  la app del teléfono, las tiendas tienen sus propias reglas de cobro: por revisar antes de
+  elegir.
+- **Que el admin maneje los planes a mano** (2026-10-23). Desde la cuenta del dueño, en Los
+  Maestros o al lado: mover los límites de cada plan, cambiarle el plan a una cuenta y dar cuentas
+  gratis, sin pasar por el cobro.
+- **[dueño] Lo que pide cobrar, fuera del código** (2026-10-23):
+  - la cuenta del proveedor de pagos a nombre de Pyxis;
+  - la boleta o factura electrónica de cada cobro;
+  - que `/terminos` y `/privacidad` cuenten los planes, el cobro y la baja, en la misma revisión
+    del abogado («Que todo quede a nombre de Pyxis», arriba);
+  - Vercel Pro, que ya hacía falta antes de abrir a terceros.
+
+  Al salir, cambian también el README (la frase «Sin suscripción», arriba de todo) y la portada,
+  que debe seguir describiendo la app y enlazando Privacidad y Términos.
+
 ## Features y trabajo de código
 
 - **Por decidir: que la app pida el candado también al volver a ella** (2026-10-21). Hoy lo
