@@ -543,6 +543,11 @@ formulario viene abierto, con el cursor en «Texto». En este orden:
     como Colaboración pagada»). Con «Contenido patrocinado», «Solo yo» queda deshabilitado
     en la lista y, mientras no haya otra privacidad elegida, sale en rojo «Un contenido
     patrocinado no puede ser privado. Vuelve a elegir quién puede verlo.»
+  - El interruptor **«Hecho con IA»**, apagado al partir (en un borrador, como quedó). Apagado
+    dice «Enciéndelo si la imagen o la voz se hicieron o se cambiaron con IA de forma
+    realista.»; encendido, «TikTok lo etiquetará como contenido generado con IA.». TikTok le
+    pone al post la etiqueta de contenido generado con IA. Vale para videos y fotos; en el
+    camino del borrador no está, y la etiqueta se pone en la app de TikTok al terminarlo.
   - Al pie, «Al publicar aceptas la Music Usage Confirmation de TikTok.» (con contenido
     patrocinado, también la «Branded Content Policy»), seguido de «Después de publicar,
     TikTok puede tardar unos minutos en mostrarlo en tu perfil.»
@@ -714,7 +719,8 @@ El formulario, en orden:
    que desmarcarla para poder guardar. Junto a un destino
    con opciones va, tras un punto medio, un resumen: «Borrador a tu bandeja de TikTok»;
    «Directo» seguido de la privacidad y de lo permitido, por ejemplo «Directo · Solo yo · sin
-   comentarios · sin dúo · sin pegar · sin comercial»; o «Trial reel — lo compartes tú desde
+   comentarios · sin dúo · sin pegar · sin comercial», con « · hecho con IA» al final si
+   lleva la etiqueta de IA; o «Trial reel — lo compartes tú desde
    Instagram». Esas opciones no se pueden cambiar aquí.
 4. **«Media»**: una fila por archivo, con su miniatura (los videos se pueden reproducir ahí
    mismo), su dirección, un ícono para abrirlo en otra pestaña («Abrir en una pestaña
@@ -820,7 +826,8 @@ Si hay que dejarlo a medias, basta con cerrar el panel: queda como borrador.
      dejar abierto.
 5. Si el video promociona una marca, encender «Este contenido promociona una marca» y elegir
    «Mi marca» o «Contenido patrocinado» (este último no admite «Solo yo»).
-6. Elegir «Fecha y hora» (o «Ahora») y apretar «Programar».
+6. Si el video se hizo o se cambió con IA, encender «Hecho con IA»: TikTok lo etiqueta.
+7. Elegir «Fecha y hora» (o «Ahora») y apretar «Programar».
 
 Para fotos en TikTok es igual, con hasta 35 fotos JPG o WebP y sin video (hasta diez si el
 post va también a otra red).

@@ -15,6 +15,11 @@ export type OpcionesTikTok =
       duo: boolean
       pegar: boolean
       comercial: ComercialTikTok
+      /**
+       * Hecho con IA: TikTok le pone la etiqueta «Creator labeled as AI-generated» (`is_aigc`).
+       * Opcional y solo cuando está encendido, para que lo guardado antes siga igual.
+       */
+      ia?: true
     }
 
 /**
@@ -87,7 +92,8 @@ function validarTikTok(raw: unknown): { opciones: OpcionesTikTok } | { error: st
   const comentarios = casilla(raw.comentarios)
   const duo = casilla(raw.duo)
   const pegar = casilla(raw.pegar)
-  if (comentarios === null || duo === null || pegar === null) return { error: OPCIONES_ERROR }
+  const ia = casilla(raw.ia)
+  if (comentarios === null || duo === null || pegar === null || ia === null) return { error: OPCIONES_ERROR }
   const comercial = raw.comercial === undefined ? 'no' : raw.comercial
   if (!(COMERCIALES as readonly unknown[]).includes(comercial)) return { error: OPCIONES_ERROR }
   if (comercial === 'patrocinado' && raw.privacidad === 'SELF_ONLY') {
@@ -102,6 +108,7 @@ function validarTikTok(raw: unknown): { opciones: OpcionesTikTok } | { error: st
       duo,
       pegar,
       comercial: comercial as ComercialTikTok,
+      ...(ia ? { ia: true as const } : {}),
     },
   }
 }
@@ -218,6 +225,7 @@ export function opcionesDesdeFormularioPorCuenta(
             duo: formData.get(`tiktokDuo:${cuenta.id}`) === 'on',
             pegar: formData.get(`tiktokPegar:${cuenta.id}`) === 'on',
             comercial: String(formData.get(`tiktokComercial:${cuenta.id}`) ?? 'no'),
+            ia: formData.get(`tiktokIA:${cuenta.id}`) === 'on',
           }
   }
   return raw
@@ -243,5 +251,6 @@ export function resumenOpciones(network: string, opciones: unknown): string | nu
     o.duo ? 'con dúo' : 'sin dúo',
     o.pegar ? 'con pegar' : 'sin pegar',
     comercial,
+    ...(o.ia ? ['hecho con IA'] : []),
   ].join(' · ')
 }

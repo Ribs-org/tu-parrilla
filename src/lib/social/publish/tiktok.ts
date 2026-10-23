@@ -88,6 +88,9 @@ export function cuerpoInit(
     brand_content_toggle: opciones.comercial === 'patrocinado',
   }
   const interacciones = interaccionesEfectivas(opciones, creador)
+  // La etiqueta de IA: en el video va dentro de `post_info`; en las fotos, al nivel del cuerpo
+  // (así lo piden las dos referencias de TikTok). Apagada no se manda.
+  const ia = opciones.ia ? { is_aigc: true } : {}
 
   if (media.kind === 'video') {
     return {
@@ -100,6 +103,7 @@ export function cuerpoInit(
           // Sin portada externa: TikTok no la acepta; el primer frame es la portada.
           video_cover_timestamp_ms: 0,
           ...comercial,
+          ...ia,
         },
         source_info: fuente(media),
       },
@@ -110,6 +114,7 @@ export function cuerpoInit(
     body: {
       post_mode: 'DIRECT_POST',
       media_type: 'PHOTO',
+      ...ia,
       post_info: {
         title: tituloFoto(caption),
         description: caption,

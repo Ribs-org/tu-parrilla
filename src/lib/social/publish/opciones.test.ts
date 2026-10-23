@@ -212,6 +212,7 @@ describe('opcionesDesdeFormularioPorCuenta', () => {
       duo: false,
       pegar: false,
       comercial: 'no',
+      ia: false,
     })
     expect(validarOpcionesPorCuenta(cuentas, raw)).toEqual({ error: TIKTOK_SIN_PRIVACIDAD })
   })
@@ -299,5 +300,32 @@ describe('resumenOpciones para instagram', () => {
     expect(resumenOpciones('instagram', { trialReel: true })).toBe('Trial reel — lo compartes tú desde Instagram')
     expect(resumenOpciones('instagram', null)).toBeNull()
     expect(resumenOpciones('instagram', { trialReel: false })).toBeNull()
+  })
+})
+
+describe('la etiqueta de IA de TikTok', () => {
+  it('encendida se guarda; apagada o ausente no deja rastro, como lo guardado antes', () => {
+    expect(validarOpciones('tiktok', { ...directo, ia: true })).toEqual({ opciones: { ...directo, ia: true } })
+    expect(validarOpciones('tiktok', { ...directo, ia: false })).toEqual({ opciones: directo })
+    expect(validarOpciones('tiktok', directo)).toEqual({ opciones: directo })
+  })
+
+  it('algo que no es booleano es un error de forma', () => {
+    expect(validarOpciones('tiktok', { ...directo, ia: 'si' })).toEqual({ error: OPCIONES_ERROR })
+  })
+
+  it('el formulario la lee de tiktokIA:<id>', () => {
+    const fd = new FormData()
+    fd.set('tiktokModo:t1', 'directo')
+    fd.set('tiktokPrivacidad:t1', 'SELF_ONLY')
+    fd.set('tiktokIA:t1', 'on')
+    const raw = opcionesDesdeFormularioPorCuenta(fd, [{ id: 't1', network: 'tiktok' } as never])
+    expect(raw.t1).toMatchObject({ ia: true })
+  })
+
+  it('el resumen la nombra al final', () => {
+    expect(resumenOpciones('tiktok', { ...directo, ia: true })).toBe(
+      'Directo · Solo yo · con comentarios · sin dúo · sin pegar · sin comercial · hecho con IA',
+    )
   })
 })
