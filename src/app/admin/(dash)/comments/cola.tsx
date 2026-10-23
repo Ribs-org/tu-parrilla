@@ -1,5 +1,6 @@
 'use client'
 
+import { RotateCcw } from 'lucide-react'
 import Image from 'next/image'
 import { useRef, useState, useTransition } from 'react'
 import { descartarComentario, reintentarBorrador, responderComentario } from '@/app/admin/actions'
@@ -126,7 +127,12 @@ function Tarjeta({ fila, mostrarPrivado, ahora }: { fila: ComentarioFila; mostra
   }
   const [error, setError] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
+  // Cuál de los botones trabaja: la flecha gira solo cuando es ella.
+  const [regenerando, setRegenerando] = useState(false)
   const cuadro = useRef<HTMLTextAreaElement>(null)
+  // La respuesta automática fallida trae en el cuadro el mensaje de su regla: un borrador del
+  // modelo lo reemplazaría por otra cosa, así que ahí no hay flecha.
+  const regenerable = !fila.automatico
 
   function enviar() {
     setError(null)
@@ -144,9 +150,14 @@ function Tarjeta({ fila, mostrarPrivado, ahora }: { fila: ComentarioFila; mostra
     })
   }
   function reintentar() {
+    // Lo que el dueño ya corrigió a mano no se pierde sin preguntar.
+    const corregido = texto.trim() !== '' && texto !== (fila.draft ?? '')
+    if (corregido && !confirm('¿Cambiar lo que escribiste por un borrador nuevo?')) return
     setError(null)
+    setRegenerando(true)
     startTransition(async () => {
       const r = await sinRomper(() => reintentarBorrador(fila.id))
+      setRegenerando(false)
       if (r.error) setError(r.error)
     })
   }
@@ -163,9 +174,23 @@ function Tarjeta({ fila, mostrarPrivado, ahora }: { fila: ComentarioFila; mostra
 
   return (
     <article className="chapa rounded-xl p-4">
-      <p className="text-[0.78rem] text-fg-faint">
-        <span className="text-fg">{fila.author ?? 'Alguien'}</span> · {hace(fila.publishedAt, ahora)}
-      </p>
+      <div className="flex items-start justify-between gap-3">
+        <p className="text-[0.78rem] text-fg-faint">
+          <span className="text-fg">{fila.author ?? 'Alguien'}</span> · {hace(fila.publishedAt, ahora)}
+        </p>
+        {editable && regenerable ? (
+          <button
+            type="button"
+            onClick={reintentar}
+            disabled={pending}
+            aria-label={fila.draft === null ? 'Reintentar borrador' : 'Escribir otro borrador'}
+            title={fila.draft === null ? 'Reintentar borrador' : 'Escribir otro borrador'}
+            className="-mr-1 -mt-1 grid h-8 w-8 shrink-0 place-items-center rounded-full text-fg-faint transition-colors hover:bg-velo/[0.08] hover:text-fg disabled:opacity-50"
+          >
+            <RotateCcw aria-hidden className={regenerando ? 'h-4 w-4 animate-spin [animation-direction:reverse]' : 'h-4 w-4'} />
+          </button>
+        ) : null}
+      </div>
       <p className="mt-1 whitespace-pre-wrap text-sm">{fila.text}</p>
       {editable ? (
         <>
@@ -177,16 +202,16 @@ function Tarjeta({ fila, mostrarPrivado, ahora }: { fila: ComentarioFila; mostra
               La regla de palabra clave intentó responder y la red no aceptó; «Enviar» lo reintenta.
             </p>
           ) : null}
+          <Emojis alElegir={ponerEmoji} disabled={pending} className="mt-3" />
           <Textarea
             ref={cuadro}
             aria-label="Tu respuesta"
-            className="mt-3"
+            className="mt-1.5"
             rows={3}
             value={texto}
             onChange={(e) => setTexto(e.target.value)}
             disabled={pending}
           />
-          <Emojis alElegir={ponerEmoji} disabled={pending} />
           {fila.state === 'fallido' && fila.error ? (
             <p className="mt-2 text-sm text-negative">{fila.error}</p>
           ) : null}
@@ -195,9 +220,6 @@ function Tarjeta({ fila, mostrarPrivado, ahora }: { fila: ComentarioFila; mostra
               {pending ? 'Enviando…' : 'Enviar'}
             </Button>
             <Button variant="ghost" onClick={descartar} disabled={pending}>Descartar</Button>
-            {fila.draft === null ? (
-              <Button variant="ghost" onClick={reintentar} disabled={pending}>Reintentar borrador</Button>
-            ) : null}
             {error ? <span role="alert" className="text-sm text-negative">{error}</span> : null}
           </div>
         </>

@@ -1410,6 +1410,17 @@ export async function reintentarBorrador(id: string): Promise<FormState> {
   return 'error' in resultado ? { error: resultado.error } : { ok: true }
 }
 
+/** «Regenerar todos», en las instrucciones de La Mesa. */
+export async function regenerarBorradoresComentarios(): Promise<
+  { regenerados: number; fallidos: number; quedan: number } | { error: string }
+> {
+  const { id: ownerId } = await requireUser()
+  const { regenerarBorradores } = await import('@/lib/social/comentarios/redaccion')
+  const resultado = await regenerarBorradores(ownerId)
+  revalidatePath('/admin/comments')
+  return resultado
+}
+
 export async function guardarInstruccionesComentarios(
   _prev: FormState,
   formData: FormData,

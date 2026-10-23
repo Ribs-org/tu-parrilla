@@ -1,5 +1,5 @@
 import 'server-only'
-import { and, desc, eq, inArray, isNull } from 'drizzle-orm'
+import { and, desc, eq, inArray, isNotNull, isNull, or } from 'drizzle-orm'
 import { getDb, postComments, scheduledPostTargets, scheduledPosts, socialAccounts, socialPosts } from '@/db'
 import { leerAjuste } from '@/lib/ajustes'
 import { reglasPara } from './automatico'
@@ -190,6 +190,81 @@ export async function redactarPendientes(inicio: number): Promise<RedaccionRepor
   }
 
   return reporte
+}
+
+/** Cuántos borradores como mucho rehace «Regenerar todos» de una vez, y cuántos a la par. */
+export const MAX_REGENERAR = 40
+const A_LA_PAR = 4
+/** Lo que se le da a «Regenerar todos» antes de devolver lo que alcanzó: el dueño está esperando. */
+const REGENERAR_MS = 40_000
+
+export type Regenerado = { regenerados: number; fallidos: number; quedan: number } | { error: string }
+
+/**
+ * «Regenerar todos», arriba de la cola: vuelve a escribir, con las instrucciones guardadas, los
+ * borradores de lo pendiente del dueño, del más nuevo al más viejo. Solo los que el modelo ya
+ * escribió o intentó escribir: los que esperan su primer borrador los toma la fase del cron, y
+ * los de la respuesta automática traen el mensaje de su regla, que no es del modelo. Un borrador
+ * que no se pudo rehacer queda como estaba.
+ */
+export async function regenerarBorradores(ownerId: string, inicio: number = Date.now()): Promise<Regenerado> {
+  if (!hayPasarela()) return { error: SIN_BORRADOR }
+  const db = getDb()
+  const filas = await db
+    .select({
+      id: postComments.id,
+      network: postComments.network,
+      text: postComments.text,
+      author: postComments.author,
+      postExternalId: postComments.postExternalId,
+      accountId: postComments.accountId,
+    })
+    .from(postComments)
+    .where(
+      and(
+        inArray(postComments.state, ['pendiente', 'fallido']),
+        eq(postComments.automatico, false),
+        or(isNotNull(postComments.draft), isNotNull(postComments.draftError)),
+        inArray(
+          postComments.accountId,
+          db.select({ id: socialAccounts.id }).from(socialAccounts).where(eq(socialAccounts.ownerId, ownerId)),
+        ),
+      ),
+    )
+    .orderBy(desc(postComments.publishedAt))
+  const instrucciones = normalizarInstrucciones(await leerAjuste(ownerId, CLAVE_INSTRUCCIONES))
+  const lote = filas.slice(0, MAX_REGENERAR)
+  let regenerados = 0
+  let fallidos = 0
+  let hechos = 0
+  for (let i = 0; i < lote.length; i += A_LA_PAR) {
+    if (Date.now() - inicio >= REGENERAR_MS) break
+    await Promise.all(
+      lote.slice(i, i + A_LA_PAR).map(async (fila) => {
+        const comentarista = comentaristaFor(fila.network)
+        if (!comentarista) return
+        try {
+          const borrador = await redactarFila(
+            fila,
+            await captionDe(fila.accountId, fila.postExternalId),
+            instrucciones,
+            comentarista.limiteTexto,
+          )
+          await db
+            .update(postComments)
+            .set({ draft: borrador, draftError: null, updatedAt: new Date() })
+            // Si se mandó o salió de la cola mientras el modelo escribía, no se toca.
+            .where(and(eq(postComments.id, fila.id), inArray(postComments.state, ['pendiente', 'fallido'])))
+          regenerados += 1
+        } catch (error) {
+          console.error(`[comentarios] regenerar ${fila.network}:`, String(error).slice(0, 300))
+          fallidos += 1
+        }
+      }),
+    )
+    hechos = Math.min(i + A_LA_PAR, lote.length)
+  }
+  return { regenerados, fallidos, quedan: filas.length - hechos }
 }
 
 /**

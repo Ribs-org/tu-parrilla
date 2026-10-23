@@ -31,6 +31,7 @@ Un recuadro con el título «Instrucciones para el modelo» y debajo «Se guarda
 
 - El campo «Cómo responde el modelo», un cuadro de texto de hasta 2000 caracteres. Trae las instrucciones guardadas o, si nunca se cambiaron, las de la casa: «Responde en español, en primera persona, breve y cálido: una o dos frases. Agradece cuando el comentario es un elogio, responde la pregunta cuando la hay, y si preguntan por precios o por trabajar juntos, invita a escribir por mensaje directo sin dar cifras. No inventes datos que no estén en la publicación. No uses hashtags. Un emoji como máximo, y solo si el comentario tiene uno.»
 - El botón «Guardar» (dice «Guardando…» mientras trabaja) y, al terminar, «Guardado.».
+- Al lado, «Regenerar todos», con una flecha circular (dice «Regenerando…» y la flecha gira mientras trabaja). Vuelve a escribir, con las instrucciones guardadas, los borradores de los comentarios pendientes. Ver «Para regenerar todos los borradores», abajo.
 
 ### Los filtros
 
@@ -61,17 +62,19 @@ Debajo, una tarjeta por comentario. Si el filtro no tiene nada: «No hay comenta
 
 De arriba abajo:
 
-1. Quién comentó (o «Alguien», si la red no dio el nombre) y hace cuánto: «recién», «hace 3 horas», «ayer», «anteayer», «hace 5 días».
+1. Quién comentó (o «Alguien», si la red no dio el nombre) y hace cuánto: «recién», «hace 3 horas», «ayer», «anteayer», «hace 5 días». En la misma línea, arriba a la derecha, un botón redondo con una flecha que vuelve hacia atrás: pide otro borrador a la IA. Al pasar el mouse dice «Escribir otro borrador», o «Reintentar borrador» si todavía no hay ninguno. Mientras trabaja, la flecha gira. No está en los que tomó la respuesta automática: su cuadro trae el mensaje de la regla.
 2. El texto del comentario.
 3. Solo si la IA no pudo escribir el borrador, en rojo: «No se pudo redactar la respuesta.»
 4. Solo si la respuesta automática lo intentó y la red no la aceptó: «La regla de palabra clave intentó responder y la red no aceptó; «Enviar» lo reintenta.»
-5. El cuadro de la respuesta, con el borrador ya escrito. Está vacío si todavía no hay borrador.
-   Debajo, «🙂 Emojis»: al apretarlo se abre una fila de 24 emojis (🙌 🙏 ❤️ 🔥 😊 😂 y otros) y el
-   botón pasa a decir «🙂 Cerrar emojis». Apretar un emoji lo pone donde estaba el cursor del
-   cuadro, o en lugar de lo seleccionado, y el cursor queda justo después para seguir
-   escribiendo. Para otros emojis sirve el teclado del sistema (Win + . en Windows).
+5. Justo encima del cuadro, en letra chica y apagada, «🙂 Emojis»: al apretarlo se abre una
+   fila de 24 emojis (🙌 🙏 ❤️ 🔥 😊 😂 y otros) y el botón pasa a decir «🙂 Cerrar emojis».
+   Apretar un emoji lo pone donde estaba el cursor del cuadro, o en lugar de lo seleccionado, y
+   el cursor queda justo después para seguir escribiendo. Para otros emojis sirve el teclado del
+   sistema (Win + . en Windows).
+   Debajo, el cuadro de la respuesta, con el borrador ya escrito. Está vacío si todavía no hay
+   borrador.
 6. Solo si un envío anterior falló, en rojo, el motivo: «La red no aceptó la respuesta. Inténtalo de nuevo.» o «Esa cuenta ya no está conectada.»
-7. Los botones: «Enviar» (el principal), «Descartar» y, solo cuando la IA no ha dejado borrador, «Reintentar borrador». Mientras cualquiera de ellos trabaja, los tres se apagan y «Enviar» dice «Enviando…». Si algo falla, el error aparece en rojo al lado de los botones.
+7. Los botones: «Enviar» (el principal) y «Descartar». Mientras cualquiera de ellos, o la flecha de arriba, trabaja, todos se apagan y «Enviar» dice «Enviando…». Si algo falla, el error aparece en rojo al lado de los botones.
 
 ### La tarjeta de un comentario ya resuelto
 
@@ -108,9 +111,24 @@ Apretar dos veces no manda dos respuestas. El largo máximo depende de la red: 2
 ### Para responder uno que llegó sin borrador
 
 1. Escribe la respuesta en el cuadro vacío y aprieta «Enviar».
-2. O aprieta «Reintentar borrador» para pedírselo de nuevo a la IA: el cuadro se llena con el borrador nuevo, o aparece «No se pudo redactar la respuesta.» y queda escribirlo a mano.
+2. O aprieta la flecha de arriba a la derecha («Reintentar borrador») para pedírselo de nuevo a la IA: el cuadro se llena con el borrador nuevo, o aparece «No se pudo redactar la respuesta.» y queda escribirlo a mano.
 
-Un borrador que ya existe no se puede pedir de nuevo: se corrige a mano.
+### Para pedir otro borrador
+
+1. Aprieta la flecha de arriba a la derecha de la tarjeta («Escribir otro borrador»).
+2. Si ya cambiaste el texto del cuadro, el navegador pregunta «¿Cambiar lo que escribiste por un borrador nuevo?». Acepta para reemplazarlo.
+3. El cuadro se llena con el borrador nuevo, escrito con las instrucciones guardadas.
+
+### Para regenerar todos los borradores
+
+Sirve después de cambiar las instrucciones, para que lo que ya estaba escrito siga las nuevas.
+
+1. Si cambiaste las instrucciones, aprieta primero «Guardar». Si no, «Regenerar todos» avisa «Guarda las instrucciones antes de regenerar: se usan las guardadas.».
+2. Aprieta «Regenerar todos». El navegador pregunta «¿Volver a escribir los borradores pendientes con estas instrucciones? Lo que corregiste en un cuadro y no mandaste se reemplaza.». Acepta.
+3. Espera: dice «Regenerando…» y puede tardar hasta unos 40 segundos.
+4. Al terminar, al lado del botón: «12 borradores nuevos.» (con el número que corresponda). Si alguno no se pudo rehacer, se agrega «2 no se pudieron rehacer y quedaron como estaban.». Si había más de los que alcanzó, se agrega «Quedan 8: aprieta «Regenerar todos» otra vez.».
+
+Rehace hasta 40 por vez, de los más nuevos a los más viejos. Toca solo los pendientes que ya tenían borrador o en los que la IA ya había fallado. Los que todavía esperan su primer borrador los escribe Tu Parrilla sola, ya con las instrucciones nuevas, y los de la respuesta automática no se tocan.
 
 ### Para descartar un comentario
 
@@ -154,6 +172,12 @@ Aprieta el filtro «Automáticas». Ahí están todos los que tomó, también lo
 | «No se pudo hablar con Tu Parrilla. Recarga la página: si la respuesta salió, está en «Enviados».» | Al apretar «Enviar», «Descartar» o «Reintentar borrador», no llegó la respuesta del servidor: se cortó la conexión, o Tu Parrilla se actualizó mientras la página estaba abierta. No se sabe si la respuesta salió. | Recargar la página y mirar «Enviados» antes de mandarla otra vez. |
 | «La regla de palabra clave intentó responder y la red no aceptó; «Enviar» lo reintenta.» | Falló la respuesta automática. | Revisar el texto del cuadro y apretar «Enviar». |
 | «¿Descartar este comentario? No se va a responder.» | Confirmación antes de descartar. | Aceptar para descartar, cancelar para dejarlo. |
+| «¿Cambiar lo que escribiste por un borrador nuevo?» | Se apretó la flecha de la tarjeta con el cuadro ya corregido a mano. | Aceptar para reemplazarlo, cancelar para quedarse con lo escrito. |
+| «¿Volver a escribir los borradores pendientes con estas instrucciones? Lo que corregiste en un cuadro y no mandaste se reemplaza.» | Confirmación de «Regenerar todos». | Aceptar, o cancelar y mandar primero lo que ya corregiste. |
+| «Guarda las instrucciones antes de regenerar: se usan las guardadas.» | Se apretó «Regenerar todos» con las instrucciones cambiadas y sin guardar. | «Guardar» y después «Regenerar todos». |
+| «12 borradores nuevos.» / «Un borrador nuevo.» | «Regenerar todos» terminó. Puede seguir «… no se pudieron rehacer y quedaron como estaban.» o «Quedan 8: aprieta «Regenerar todos» otra vez.». | Revisar los cuadros; si quedan, apretarlo otra vez. |
+| «No hay borradores pendientes que regenerar.» | No hay pendientes con borrador. | Nada. |
+| «No se pudo hablar con Tu Parrilla. Recarga la página y vuelve a intentarlo.» | «Regenerar todos» no recibió respuesta del servidor. | Recargar; lo que alcanzó a rehacerse ya está en los cuadros. |
 | «Guardado.» | Se guardaron las instrucciones. | Nada. |
 | «Privado: no salió · No se pudo mandar el privado.» | Solo con los privados encendidos: la respuesta pública salió, el privado no. | Nada que hacer desde aquí. |
 
@@ -162,8 +186,10 @@ Aprieta el filtro «Automáticas». Ahí están todos los que tomó, también lo
 - **«¿Cómo respondo comentarios?»** → Pestaña «La Mesa» → filtro «Pendientes» → corregir el borrador → «Enviar».
 - **«No me aparecen comentarios»** → Revisar, en orden: que sean de Instagram, Facebook o YouTube; que la publicación tenga siete días o menos; que la cuenta esté conectada en [Los Fierros](los-fierros.md) (si se conectó antes de que existieran los comentarios, hay que apretar «Reconectar» una vez para dar ese permiso); que hayan pasado cinco minutos (media hora en YouTube); y que los filtros estén en «Todos» y «Todas». Los comentarios de la propia cuenta no aparecen nunca.
 - **«No veo los comentarios de TikTok, Threads o X»** → Esas redes no tienen cola de comentarios.
-- **«El cuadro de respuesta está vacío»** → La IA todavía no escribió el borrador, la instalación no tiene IA, o el comentario dice la palabra clave de la publicación y está esperando la respuesta automática. Se puede escribir a mano o apretar «Reintentar borrador».
-- **«Cambié las instrucciones y el borrador sigue igual»** → Las instrucciones rigen desde el siguiente borrador; los ya escritos se corrigen a mano.
+- **«El cuadro de respuesta está vacío»** → La IA todavía no escribió el borrador, la instalación no tiene IA, o el comentario dice la palabra clave de la publicación y está esperando la respuesta automática. Se puede escribir a mano o apretar la flecha de arriba a la derecha de la tarjeta («Reintentar borrador»).
+- **«Cambié las instrucciones y el borrador sigue igual»** → Las instrucciones rigen desde el siguiente borrador. Para rehacer los que ya estaban: «Guardar» y después «Regenerar todos»; o, en una tarjeta sola, la flecha de arriba a la derecha.
+- **«¿Dónde está "Reintentar borrador"?»** → Es la flecha redonda arriba a la derecha de cada tarjeta pendiente.
+- **«No veo los emojis»** → «🙂 Emojis», en letra chica justo encima del cuadro de la respuesta.
 - **«Lo respondí desde Instagram y sigue en Pendientes»** → Hay que esperar la revisión siguiente (cinco minutos; media hora en YouTube) y recargar la página. Tiene que ser una respuesta a ese comentario —no un comentario nuevo en la publicación— y hecha con la misma cuenta que está conectada. En YouTube solo se ven las primeras respuestas de cada comentario: si el comentario ya tenía muchas, la tuya puede no verse, y entonces se descarta a mano con «Descartar». Si ya se ve en «Enviados» como «Respondido desde…», no hay que hacer nada.
 - **«¿Tengo que responder dos veces, en Instagram y aquí?»** → No: responde donde te quede más cómodo. Lo que respondes en la app de la red sale solo de «Pendientes».
 - **«Descarté uno por error»** → No se deshace desde el panel; se puede responder directamente en la app de la red.
@@ -179,7 +205,6 @@ Aprieta el filtro «Automáticas». Ahí están todos los que tomó, también lo
 - No trae comentarios de TikTok, Threads ni X, ni de publicaciones de más de siete días.
 - No da «me gusta», no oculta ni borra comentarios en la red.
 - No edita ni borra una respuesta ya enviada, y no deshace un descarte.
-- No vuelve a escribir un borrador que ya existe.
 - No responde sola, salvo la respuesta automática por palabra clave, y esa no se configura aquí sino en [La Parrilla](la-parrilla.md).
 - No manda mensajes privados: vienen apagados y no tienen botón.
 - No existe en la app del teléfono.
@@ -191,9 +216,9 @@ Lo que describe sale de:
 - `src/app/admin/(dash)/comments/page.tsx`
 - `src/app/admin/(dash)/comments/cola.tsx` (también el mensaje de cuando no se pudo hablar con el servidor)
 - `src/app/admin/(dash)/comments/emojis.tsx` (los emojis)
-- `src/app/admin/(dash)/comments/instrucciones.tsx`
+- `src/app/admin/(dash)/comments/instrucciones.tsx` y `src/app/admin/(dash)/comments/regenerar.ts` («Regenerar todos» y sus frases)
 - `src/app/admin/(dash)/comments/loading.tsx` y `src/components/esqueleto.tsx` (la carga)
-- `src/app/admin/actions.ts` (`responderComentario`, `descartarComentario`, `reintentarBorrador`, `guardarInstruccionesComentarios`)
+- `src/app/admin/actions.ts` (`responderComentario`, `descartarComentario`, `reintentarBorrador`, `regenerarBorradoresComentarios`, `guardarInstruccionesComentarios`)
 - `src/lib/comentarios-cola.ts` (los filtros, el tope de 200)
 - `src/lib/social/comentarios/comentarista.ts` (las frases de fallo)
 - `src/lib/social/comentarios/responder.ts`
