@@ -72,7 +72,8 @@ export function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return <input {...props} className={cn(CONTROL, props.className)} />
 }
 
-export function Textarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
+// Con `ref`: La Mesa pone el emoji donde está el cursor.
+export function Textarea(props: React.ComponentProps<'textarea'>) {
   return <textarea {...props} className={cn(CONTROL, 'resize-y', props.className)} />
 }
 

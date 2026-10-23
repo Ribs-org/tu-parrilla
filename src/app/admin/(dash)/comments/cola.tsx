@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { useState, useTransition } from 'react'
+import { useRef, useState, useTransition } from 'react'
 import { descartarComentario, reintentarBorrador, responderComentario } from '@/app/admin/actions'
 import { Empty } from '@/components/charts/panel'
 import { Button, Textarea } from '@/components/ui'
@@ -10,6 +10,24 @@ import type { ComentarioFila, EstadoCola } from '@/lib/comentarios-cola'
 import { agruparPorPublicacion } from '@/lib/social/comentarios/agrupar'
 import { networkLabel } from '@/lib/networks'
 import { useAhora } from '@/lib/use-ahora'
+import { Emojis, insertar } from './emojis'
+
+/**
+ * Lo que se muestra cuando la llamada misma al servidor falla —la conexión se cortó, o Tu
+ * Parrilla se actualizó con la página abierta y la acción ya no existe—, en vez de una respuesta
+ * con su `error`. Sin atraparla, React la lleva al límite de error y la página entera pasa a
+ * «Algo se rompió». No se sabe si la respuesta alcanzó a salir: por eso pide recargar y mirar.
+ */
+export const SE_CORTO = 'No se pudo hablar con Tu Parrilla. Recarga la página: si la respuesta salió, está en «Enviados».'
+
+async function sinRomper<T>(accion: () => Promise<T>): Promise<T | { error: string }> {
+  try {
+    return await accion()
+  } catch (fallo) {
+    console.error('[La Mesa]', fallo)
+    return { error: SE_CORTO }
+  }
+}
 
 const ETIQUETA_DM: Record<DmState, string> = {
   no: '',
@@ -108,25 +126,38 @@ function Tarjeta({ fila, mostrarPrivado, ahora }: { fila: ComentarioFila; mostra
   }
   const [error, setError] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
+  const cuadro = useRef<HTMLTextAreaElement>(null)
 
   function enviar() {
     setError(null)
     startTransition(async () => {
-      const r = await responderComentario(fila.id, texto)
+      const r = await sinRomper(() => responderComentario(fila.id, texto))
       if (r.error) setError(r.error)
     })
   }
   function descartar() {
     if (!confirm('¿Descartar este comentario? No se va a responder.')) return
+    setError(null)
     startTransition(async () => {
-      await descartarComentario(fila.id)
+      const r = await sinRomper(() => descartarComentario(fila.id))
+      if (r.error) setError(r.error)
     })
   }
   function reintentar() {
     setError(null)
     startTransition(async () => {
-      const r = await reintentarBorrador(fila.id)
+      const r = await sinRomper(() => reintentarBorrador(fila.id))
       if (r.error) setError(r.error)
+    })
+  }
+  function ponerEmoji(emoji: string) {
+    const caja = cuadro.current
+    const nuevo = insertar(texto, emoji, caja?.selectionStart ?? texto.length, caja?.selectionEnd ?? texto.length)
+    setTexto(nuevo.texto)
+    // El cursor vuelve al cuadro, justo después del emoji, para seguir escribiendo.
+    requestAnimationFrame(() => {
+      caja?.focus()
+      caja?.setSelectionRange(nuevo.cursor, nuevo.cursor)
     })
   }
 
@@ -147,6 +178,7 @@ function Tarjeta({ fila, mostrarPrivado, ahora }: { fila: ComentarioFila; mostra
             </p>
           ) : null}
           <Textarea
+            ref={cuadro}
             aria-label="Tu respuesta"
             className="mt-3"
             rows={3}
@@ -154,6 +186,7 @@ function Tarjeta({ fila, mostrarPrivado, ahora }: { fila: ComentarioFila; mostra
             onChange={(e) => setTexto(e.target.value)}
             disabled={pending}
           />
+          <Emojis alElegir={ponerEmoji} disabled={pending} />
           {fila.state === 'fallido' && fila.error ? (
             <p className="mt-2 text-sm text-negative">{fila.error}</p>
           ) : null}

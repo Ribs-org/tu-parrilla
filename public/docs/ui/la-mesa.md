@@ -64,6 +64,10 @@ De arriba abajo:
 3. Solo si la IA no pudo escribir el borrador, en rojo: «No se pudo redactar la respuesta.»
 4. Solo si la respuesta automática lo intentó y la red no la aceptó: «La regla de palabra clave intentó responder y la red no aceptó; «Enviar» lo reintenta.»
 5. El cuadro de la respuesta, con el borrador ya escrito. Está vacío si todavía no hay borrador.
+   Debajo, «🙂 Emojis»: al apretarlo se abre una fila de 24 emojis (🙌 🙏 ❤️ 🔥 😊 😂 y otros) y el
+   botón pasa a decir «🙂 Cerrar emojis». Apretar un emoji lo pone donde estaba el cursor del
+   cuadro, o en lugar de lo seleccionado, y el cursor queda justo después para seguir
+   escribiendo. Para otros emojis sirve el teclado del sistema (Win + . en Windows).
 6. Solo si un envío anterior falló, en rojo, el motivo: «La red no aceptó la respuesta. Inténtalo de nuevo.» o «Esa cuenta ya no está conectada.»
 7. Los botones: «Enviar» (el principal), «Descartar» y, solo cuando la IA no ha dejado borrador, «Reintentar borrador». Mientras cualquiera de ellos trabaja, los tres se apagan y «Enviar» dice «Enviando…». Si algo falla, el error aparece en rojo al lado de los botones.
 
@@ -91,7 +95,8 @@ Se configura por publicación al programarla en [La Parrilla](la-parrilla.md), e
 ### Para responder un comentario
 
 1. En «Pendientes», busca el comentario.
-2. Lee el borrador en el cuadro y corrígelo o reescríbelo si hace falta.
+2. Lee el borrador en el cuadro y corrígelo o reescríbelo si hace falta. Para sumar un emoji,
+   «🙂 Emojis» y el que quieras.
 3. Aprieta «Enviar». Mientras sale dice «Enviando…».
 4. La respuesta se publica en la red como respuesta a ese comentario, a nombre de la cuenta conectada. El comentario sale de «Pendientes» y aparece en «Enviados» como «Respondido: …».
 
@@ -143,6 +148,7 @@ Aprieta el filtro «Automáticas». Ahí están todos los que tomó, también lo
 | «Esa cuenta ya no está conectada.» | La cuenta de ese comentario se desconectó o perdió el permiso. | Reconectarla en [Los Fierros](los-fierros.md) y volver a «Enviar». |
 | «La red no aceptó la respuesta. Inténtalo de nuevo.» | La red rechazó la respuesta. | «Enviar» de nuevo. Si se repite, apretar «Reconectar» en la tarjeta de la cuenta en [Los Fierros](los-fierros.md), por si le falta el permiso de comentarios. |
 | «El comentario ya no está en la red.» | Su autor lo borró; se pasó a «Descartados». | Nada. |
+| «No se pudo hablar con Tu Parrilla. Recarga la página: si la respuesta salió, está en «Enviados».» | Al apretar «Enviar», «Descartar» o «Reintentar borrador», no llegó la respuesta del servidor: se cortó la conexión, o Tu Parrilla se actualizó mientras la página estaba abierta. No se sabe si la respuesta salió. | Recargar la página y mirar «Enviados» antes de mandarla otra vez. |
 | «La regla de palabra clave intentó responder y la red no aceptó; «Enviar» lo reintenta.» | Falló la respuesta automática. | Revisar el texto del cuadro y apretar «Enviar». |
 | «¿Descartar este comentario? No se va a responder.» | Confirmación antes de descartar. | Aceptar para descartar, cancelar para dejarlo. |
 | «Guardado.» | Se guardaron las instrucciones. | Nada. |
@@ -178,7 +184,8 @@ Aprieta el filtro «Automáticas». Ahí están todos los que tomó, también lo
 Lo que describe sale de:
 
 - `src/app/admin/(dash)/comments/page.tsx`
-- `src/app/admin/(dash)/comments/cola.tsx`
+- `src/app/admin/(dash)/comments/cola.tsx` (también el mensaje de cuando no se pudo hablar con el servidor)
+- `src/app/admin/(dash)/comments/emojis.tsx` (los emojis)
 - `src/app/admin/(dash)/comments/instrucciones.tsx`
 - `src/app/admin/(dash)/comments/loading.tsx` y `src/components/esqueleto.tsx` (la carga)
 - `src/app/admin/actions.ts` (`responderComentario`, `descartarComentario`, `reintentarBorrador`, `guardarInstruccionesComentarios`)
