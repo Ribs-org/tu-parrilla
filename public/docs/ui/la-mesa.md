@@ -67,7 +67,9 @@ De arriba abajo:
 3. Solo si la IA no pudo escribir el borrador, en rojo: «No se pudo redactar la respuesta.»
 4. Solo si la respuesta automática lo intentó y la red no la aceptó: «La regla de palabra clave intentó responder y la red no aceptó; «Enviar» lo reintenta.»
 5. Justo encima del cuadro, en letra chica y apagada, «🙂 Emojis»: al apretarlo se abre una
-   fila de 24 emojis (🙌 🙏 ❤️ 🔥 😊 😂 y otros) y el botón pasa a decir «🙂 Cerrar emojis».
+   fila de 25 emojis (🙌 🙏 ❤️ 🔥 😊 😂 y otros, y al final la bandera de Chile 🇨🇱) y el
+   botón pasa a decir «🙂 Cerrar emojis». En Windows la bandera se ve como «CL», porque Windows
+   no dibuja banderas; en la red sale la bandera.
    Apretar un emoji lo pone donde estaba el cursor del cuadro, o en lugar de lo seleccionado, y
    el cursor queda justo después para seguir escribiendo. Para otros emojis sirve el teclado del
    sistema (Win + . en Windows).
@@ -189,6 +191,7 @@ Aprieta el filtro «Automáticas». Ahí están todos los que tomó, también lo
 - **«El cuadro de respuesta está vacío»** → La IA todavía no escribió el borrador, la instalación no tiene IA, o el comentario dice la palabra clave de la publicación y está esperando la respuesta automática. Se puede escribir a mano o apretar la flecha de arriba a la derecha de la tarjeta («Reintentar borrador»).
 - **«Cambié las instrucciones y el borrador sigue igual»** → Las instrucciones rigen desde el siguiente borrador. Para rehacer los que ya estaban: «Guardar» y después «Regenerar todos»; o, en una tarjeta sola, la flecha de arriba a la derecha.
 - **«¿Dónde está "Reintentar borrador"?»** → Es la flecha redonda arriba a la derecha de cada tarjeta pendiente.
+- **«La bandera de Chile sale como "CL"»** → Es Windows, que no dibuja banderas. En Instagram, Facebook y YouTube la respuesta sale con la bandera.
 - **«No veo los emojis»** → «🙂 Emojis», en letra chica justo encima del cuadro de la respuesta.
 - **«Lo respondí desde Instagram y sigue en Pendientes»** → Hay que esperar la revisión siguiente (cinco minutos; media hora en YouTube) y recargar la página. Tiene que ser una respuesta a ese comentario —no un comentario nuevo en la publicación— y hecha con la misma cuenta que está conectada. En YouTube solo se ven las primeras respuestas de cada comentario: si el comentario ya tenía muchas, la tuya puede no verse, y entonces se descarta a mano con «Descartar». Si ya se ve en «Enviados» como «Respondido desde…», no hay que hacer nada.
 - **«¿Tengo que responder dos veces, en Instagram y aquí?»** → No: responde donde te quede más cómodo. Lo que respondes en la app de la red sale solo de «Pendientes».
