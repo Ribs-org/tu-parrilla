@@ -88,6 +88,10 @@ sección.
   programado, que ahora sube directo al almacén (#231). En el teléfono, después de la
   actualización por aire: que «Cerrar sesión» vuelva a la entrada sin que «atrás» lleve a
   ninguna pantalla de la cuenta (`Alert` no se dibuja en la versión web).
+- **[dueño] Probar dos cosas recién hechas que solo se ven con cuentas reales** (2026-10-24):
+  responder un comentario directo en la app de Instagram y ver que, a los cinco minutos, sale
+  de «Pendientes» y queda en «Enviados» como «Respondido desde Instagram: …» (#273); y publicar
+  un video en TikTok con «Hecho con IA» encendido y ver que TikTok le pone la etiqueta (#272).
 - **La cola de #234 (copiar los videos del lote en segundo plano) no se hace por ahora**
   (2026-10-21). Los otros issues de ese envío ya están: bajar en paralelo (#235), cuánto tardó
   y por qué falló cada fila (#238), una sola descarga por URL en un lote (#236) y
@@ -440,6 +444,22 @@ nadie paga: todas las cuentas son iguales y el README dice «Sin suscripción».
   credenciales aparte, y cortarlas en silencio rompería su agente). Si una se filtra y el
   usuario no responde, el admin no tiene cómo cortarla sin tocar la base. Opciones: que
   «Cerrar sesiones» también las borre, o una lista de llaves por usuario en Los Maestros.
+- **Por decidir: el nombre de La Mesa** (2026-10-23). El dueño dudó de que «La Mesa» se
+  entienda como el lugar donde se responden comentarios. La propuesta es «El Comedor» (o «Las
+  Mesas»): sigue la metáfora del restorán y suena a donde está la gente. Falta que el dueño
+  elija; el cambio toca la pestaña, la ruta de la wiki (`public/docs/ui/la-mesa.md`) y los
+  textos que la nombran.
+- **Por decidir: que «Pedir una comanda» avise si falta el nombre de la marca** (2026-10-23).
+  Hoy la comanda sale igual y el chef tiene que preguntar. Se propuso un aviso antes de
+  mandarla; falta el sí del dueño.
+- **Por revisar: «las notificaciones de Google»** (2026-10-23). El dueño las nombró al pedir
+  los preparativos de YouTube y no quedó claro dónde las ve (¿correos de Google Cloud?, ¿el
+  Verification Center?, ¿avisos en la app?). Preguntarle antes de tocar nada.
+- **Revisar los pull requests de Dependabot #241 y #242** (2026-10-21). Siguen abiertos; ver
+  que el CI pase y que no rompan nada antes de fusionarlos.
+- **[dueño] Borrar el almacén viejo de Vercel Blob** (2026-10-22). La media ya vive en R2 y el
+  código no lo usa; no se borró porque borrar es irreversible y pide el sí del dueño. Antes,
+  mirar que no quede nada que se quiera guardar.
 - **Por decidir: que los avisos lleguen a quien lleva el calendario** (2026-10-17). El correo
   de una cuenta caída, el de un post quemado y el resumen del día van al correo del dueño de
   las cuentas. Si el calendario lo lleva otra persona con la llave del dueño —un agente que
