@@ -90,10 +90,10 @@ describe('armarProgramados', () => {
       atributos: { hook: 'pregunta' },
       ref: 'lote-7',
       redes: [
-        { red: 'instagram', estado: 'published', error: null, externalId: '18', intentos: 1, proximoIntento: null, cuentaId: 'acc-ig', handle: '@vicente', archivado: false },
+        { red: 'instagram', estado: 'published', error: null, externalId: '18', intentos: 1, proximoIntento: null, cuentaId: 'acc-ig', handle: '@vicente', archivado: false, opciones: null },
         // Quemado y archivado: la hora de su último reintento ya no dice nada, aunque la fila la
         // traiga, y el error se queda aunque esté archivado.
-        { red: 'x', estado: 'failed', error: 'X aún no recibe video desde el calendario.', externalId: null, intentos: 3, proximoIntento: null, cuentaId: 'acc-x', handle: null, archivado: true },
+        { red: 'x', estado: 'failed', error: 'X aún no recibe video desde el calendario.', externalId: null, intentos: 3, proximoIntento: null, cuentaId: 'acc-x', handle: null, archivado: true, opciones: null },
       ],
     })
   })
@@ -115,6 +115,25 @@ describe('armarProgramados', () => {
     const [post] = armarProgramados([fila], [], ZONE)
     expect(post!.ref).toBeNull()
     expect(post!.redes[0]!.proximoIntento).toBe('2026-06-21T18:15:00-04:00')
+  })
+
+  it('cada destino trae sus opciones con las casillas de TikTok explícitas, ia incluida', () => {
+    const base = { post: { id: 'p4', caption: '', scheduledAt: new Date('2026-06-21T22:00:00Z'), coverUrl: null, atributos: null, ref: null }, handle: null }
+    const destino = { status: 'scheduled', lastError: null, externalId: null, attemptCount: 0, reintentarDesde: null }
+    const [post] = armarProgramados(
+      [
+        { ...base, target: { ...destino, network: 'tiktok', accountId: 'acc-tt', opciones: { modo: 'directo', privacidad: 'PUBLIC_TO_EVERYONE', comentarios: true, duo: true, pegar: true, comercial: 'no' } } },
+        { ...base, target: { ...destino, network: 'instagram', accountId: 'acc-ig', opciones: { trialReel: true } } },
+        { ...base, target: { ...destino, network: 'threads', accountId: 'acc-th', opciones: null } },
+      ],
+      [],
+      ZONE,
+    )
+    expect(post!.redes.map((r) => r.opciones)).toEqual([
+      { modo: 'directo', privacidad: 'PUBLIC_TO_EVERYONE', comentarios: true, duo: true, pegar: true, comercial: 'no', ia: false },
+      { trialReel: true },
+      null,
+    ])
   })
 
   it('un post sin media ni atributos viaja con lista vacía y null, nunca 0', () => {

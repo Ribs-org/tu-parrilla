@@ -122,6 +122,7 @@ const { vincularVideosTikTok } = await import('./social/vincular-tiktok')
 const { listarBorradores, cargarBorrador, guardarBorrador, borrarBorrador } = await import('./borradores')
 const { cuentasParaElTelefono } = await import('./borradores-movil')
 const { leerAjuste } = await import('./ajustes')
+const { leerProgramados } = await import('./schedule-leer')
 const { listarLlaves, crearLlave } = await import('./llaves')
 const { leerResumen } = await import('./avisos/run')
 const { archivarQuemados, archivarDestino } = await import('./social/publish/archivar')
@@ -383,6 +384,15 @@ describe('aislamiento por dueño (SQL generado, sin base)', () => {
     const consultas = await consultasEncadenadas(() => leerResumen(DUENO, new Date('2026-10-17T12:00:00Z')), [[], [], [], [], []])
     expect(consultas).toHaveLength(5)
     for (const c of consultas) esperarFiltradoPorDueno(c)
+  })
+
+  it('schedule-leer: leerProgramados ata los posts al dueño, y su media va por los ids ya filtrados', async () => {
+    const consultas = await consultasEncadenadas(() => leerProgramados(DUENO, [], 'America/Santiago'), [
+      [['post-1']],
+    ])
+    expect(consultas).toHaveLength(2)
+    esperarFiltradoPorDueno(consultas[0]!)
+    expect(consultas[1]!.params).toContain('post-1')
   })
 
   it('ajustes: leerAjuste filtra por dueño', async () => {

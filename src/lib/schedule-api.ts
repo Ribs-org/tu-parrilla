@@ -1,9 +1,10 @@
-// Pure pieces of GET /api/schedule/posts. The zone arrives as a parameter — this
+// Pure pieces of GET /api/schedule/posts (and /{id}). The zone arrives as a parameter — this
 // module must stay importable by vitest (no server-only imports).
 import { isoInZone, parseRango } from '@/lib/metrics-api'
 import { addDays, dayKey } from '@/lib/schedule-week'
 import { TARGET_STATUSES, type TargetStatus } from '@/db/schema'
 import type { Atributos } from '@/lib/social/publish/atributos'
+import { opcionesParaApi } from '@/lib/social/publish/opciones'
 import { enVuelo } from '@/lib/social/publish/publisher'
 
 /**
@@ -87,6 +88,8 @@ export type FilaProgramada = {
     accountId: string
     // Cuándo se archivó, si se quemó y alguien lo archivó (`archivar.ts`); null si no.
     archivadoEn?: Date | null
+    // Lo que la red pidió elegir al programar (TikTok, Instagram); null en las demás.
+    opciones?: unknown
   }
   // De un `leftJoin` con `socialAccounts`: null si la cuenta ya no existe. El
   // identificador (`target.accountId`) sí sigue firme — es a la fila de destino a la
@@ -128,6 +131,9 @@ export type PostProgramadoApi = {
     // Un destino quemado que alguien archivó: sigue `failed` y con su error, pero ya no cuenta
     // en el resumen ni en «Se quemó».
     archivado: boolean
+    // Lo que se eligió para esta red al programar (`opcionesParaApi`), o null si no pide nada.
+    // Es lo que Tu Parrilla le manda a la red; lo que la red hizo con ello se ve en la red.
+    opciones: Record<string, unknown> | null
   }>
 }
 
@@ -173,6 +179,7 @@ export function armarProgramados(
       cuentaId: target.accountId,
       handle,
       archivado: Boolean(target.archivadoEn),
+      opciones: opcionesParaApi(target.network, target.opciones),
     })
     posts.set(post.id, entrada)
   }
