@@ -269,9 +269,10 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   se usaban (`expo-device` y `expo-web-browser`); el binario de hoy sigue respaldando lo que la
   app guarda. La versión interna con ese `.aab` se publicó el 2026-10-17, «Tu Parrilla
   (Alfa)», sin revisar: hasta que Google revise la app, la tienda se la muestra a los
-  probadores como «cl.tuparrilla.app (unreviewed)». Falta, en la consola, lo que pide esa
-  revisión —el nombre «Tu Parrilla» y la ficha, y las tarjetas de Contenido de la app—, y en
-  el teléfono, unirse como probador e instalarla. Para que lo siguiente salga sin entrar a la
+  probadores como «cl.tuparrilla.app (unreviewed)». Desde el 2026-10-26 el dueño está en la
+  lista de verificadores «Tu Parrilla - interno» y tiene la app instalada desde la tienda.
+  Falta, en la consola, lo que pide esa revisión —el nombre «Tu Parrilla» y la ficha, y las
+  tarjetas de Contenido de la app—. Para que lo siguiente salga sin entrar a la
   consola: la cuenta de servicio con
   su clave JSON para EAS (nunca en un chat ni en el repo) y el secreto `EXPO_TOKEN` en
   GitHub, que el flujo «App a la tienda» necesita y todavía no está. El paso a paso y los
