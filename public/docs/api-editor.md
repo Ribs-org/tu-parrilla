@@ -893,9 +893,9 @@ Un rango pasado vale (lista lo ya publicado). Formato inválido o rango invertid
       "atributos": { "hook": "pregunta-polemica", "tema": "retail" },
       "ref": "septiembre-fila-12",
       "redes": [
-        { "red": "instagram", "estado": "published", "error": null, "externalId": "18114074218999893", "intentos": 1, "proximoIntento": null, "cuentaId": "8f0a…", "handle": "@vicente", "archivado": false },
-        { "red": "youtube", "estado": "scheduled", "error": "No se pudo hablar con la red. Se reintentará.", "externalId": null, "intentos": 1, "proximoIntento": "2026-09-10T09:15:00-03:00", "cuentaId": "b21c…", "handle": null, "archivado": false },
-        { "red": "tiktok", "estado": "failed", "error": "TikTok no acepta el archivo: revisa formato, tamaño o duración.", "externalId": null, "intentos": 3, "proximoIntento": null, "cuentaId": "9d4e…", "handle": "@vicente", "archivado": false }
+        { "red": "instagram", "estado": "published", "error": null, "externalId": "18114074218999893", "intentos": 1, "proximoIntento": null, "cuentaId": "8f0a…", "handle": "@vicente", "archivado": false, "opciones": null },
+        { "red": "youtube", "estado": "scheduled", "error": "No se pudo hablar con la red. Se reintentará.", "externalId": null, "intentos": 1, "proximoIntento": "2026-09-10T09:15:00-03:00", "cuentaId": "b21c…", "handle": null, "archivado": false, "opciones": null },
+        { "red": "tiktok", "estado": "failed", "error": "TikTok no acepta el archivo: revisa formato, tamaño o duración.", "externalId": null, "intentos": 3, "proximoIntento": null, "cuentaId": "9d4e…", "handle": "@vicente", "archivado": false, "opciones": { "modo": "directo", "privacidad": "PUBLIC_TO_EVERYONE", "comentarios": true, "duo": true, "pegar": true, "comercial": "no", "ia": true } }
       ]
     }
   ]
@@ -935,6 +935,26 @@ Un rango pasado vale (lista lo ya publicado). Formato inválido o rango invertid
   igual, solo pierde el handle). **`archivado`** es `true` en un destino quemado que se
   archivó (sección 3d): sigue `failed` y con su `error`, pero ya no cuenta en el resumen ni en
   «Se quemó». `false` en todo lo demás.
+  **`opciones`** es lo que se eligió para esa red al programar (sección 1, `opciones`): en
+  TikTok `directo`, todas las casillas explícitas —`comentarios`, `duo`, `pegar`, `ia` en
+  `false` si no se encendieron—, así que una clave que mandaste y no aparece no se guardó; en
+  TikTok `borrador`, `{ "modo": "borrador" }`; en un trial reel, `{ "trialReel": true }`; en una
+  historia, `{ "historia": true }` o, en una secuencia, `{ "historia": { "secuencia": …, "orden": … } }`;
+  `null` en las redes que no piden nada. Es lo que Tu Parrilla le manda a la red, no lo que la red
+  aplicó: lo que la cuenta tiene bloqueado (un dúo deshabilitado en TikTok) se manda apagado sin
+  fallar, y eso solo se ve en la red.
+
+## Un post por su id — `GET /api/schedule/posts/{id}`
+
+```http
+GET /api/schedule/posts/3f2a…
+Authorization: Bearer <tu llave>
+```
+
+El mismo objeto que un elemento de `posts`, para uno solo: el `postId` que devolvió el lote.
+Sirve para comprobar, justo después de programar, que lo guardado es lo que pediste —las
+`opciones` sobre todo— sin adivinar la ventana de fechas. `404` con `Ese post no existe.` si
+no hay un post con ese id para el dueño de la llave (no distingue «no existe» de «no es tuyo»).
 
 Un post `published` en todas sus redes aparece en `/api/metrics/posts` desde la
 sincronización del día siguiente, con `atributos` idénticos: ese es el puente entre

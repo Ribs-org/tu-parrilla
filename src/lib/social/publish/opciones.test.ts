@@ -15,6 +15,7 @@ import {
   esHistoria,
   historiaDe,
   opcionesDesdeFormularioPorCuenta,
+  opcionesParaApi,
   resumenOpciones,
   validarOpciones,
   validarOpcionesPorCuenta,
@@ -425,5 +426,25 @@ describe('historias', () => {
   it('el resumen dice que es una historia y, si es de una secuencia, cuál', () => {
     expect(resumenOpciones('instagram', { historia: true })).toBe('Historia')
     expect(resumenOpciones('facebook', { historia: secuencia })).toBe('Historia 2 de una secuencia')
+  })
+})
+
+describe('opcionesParaApi', () => {
+  const directo = { modo: 'directo', privacidad: 'SELF_ONLY', comentarios: true, duo: false, pegar: false, comercial: 'no' }
+
+  it('TikTok directo sale con la casilla de IA explícita, encendida o apagada', () => {
+    expect(opcionesParaApi('tiktok', directo)).toEqual({ ...directo, ia: false })
+    expect(opcionesParaApi('tiktok', { ...directo, ia: true })).toEqual({ ...directo, ia: true })
+  })
+
+  it('un borrador, un trial reel y una red sin opciones salen como se guardaron', () => {
+    expect(opcionesParaApi('tiktok', { modo: 'borrador' })).toEqual({ modo: 'borrador' })
+    expect(opcionesParaApi('instagram', { trialReel: true })).toEqual({ trialReel: true })
+    expect(opcionesParaApi('threads', null)).toBeNull()
+  })
+
+  it('una fila vieja que ya no valida sale tal cual, no se pierde', () => {
+    expect(opcionesParaApi('tiktok', { modo: 'otro' })).toEqual({ modo: 'otro' })
+    expect(opcionesParaApi('tiktok', 'basura')).toBeNull()
   })
 })

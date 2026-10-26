@@ -229,6 +229,21 @@ function errorDeHistoriaEnDestinos(cuentas: CuentaDestino[], opciones: Record<st
 }
 
 /**
+ * Las opciones guardadas de un destino como las devuelve `GET /api/schedule/posts`: la forma
+ * que se aceptó, con cada casilla de TikTok explícita —`ia: false` incluida— para que quien
+ * programó a ciegas pueda comprobar qué quedó sin adivinar qué significa una clave ausente.
+ * Lo guardado ya pasó por `validarOpciones`; si una fila vieja no la pasara, sale tal cual.
+ */
+export function opcionesParaApi(network: string, guardadas: unknown): Record<string, unknown> | null {
+  if (guardadas === undefined || guardadas === null) return null
+  const check = validarOpciones(network, guardadas)
+  if ('error' in check) return esObjeto(guardadas) ? guardadas : null
+  const o = check.opciones
+  if (o && 'modo' in o && o.modo === 'directo') return { ...o, ia: Boolean(o.ia) }
+  return o
+}
+
+/**
  * Un trial reel es exactamente un video, sin fotos. Depende de la opción y no de la red,
  * por eso no vive en `validateScheduleDraft`: la aplican los cuatro caminos que crean
  * posts (lote, compositor, chequeo y creación del teléfono) sobre las opciones ya

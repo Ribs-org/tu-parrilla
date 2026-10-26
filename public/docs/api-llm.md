@@ -318,6 +318,33 @@ de fechas; `estado` acepta `scheduled`, `publishing`, `published` y `failed`, y 
 | `409` `{ "error": "Ese post no tiene nada quemado." }` | Sin `cuentaId`, y ningún destino del post está quemado. |
 | `409` `{ "error": "Ese destino no está quemado: solo lo quemado se archiva o se desarchiva." }` | El destino de ese `cuentaId` está programado, publicando o publicado. |
 
+## 3g. Comprobar lo que quedó programado
+
+```bash
+curl https://tu-parrilla.cl/api/schedule/posts/<id>   -H "Authorization: Bearer $LLAVE_PARRILLA"
+```
+
+`<id>` es el `postId` que devolvió el lote. Responde el post con la misma forma que cada
+elemento de `posts` en `GET /api/schedule/posts`: texto, `fecha`, media, `atributos`, `ref` y
+`redes`, con el estado de cada destino y sus **`opciones`** tal como se guardaron. Úsalo justo
+después de programar, en vez de decirle a la persona que lo revise en la red:
+
+- TikTok en `directo` trae todas sus casillas explícitas —`privacidad`, `comentarios`, `duo`,
+  `pegar`, `comercial` e `ia`—, con `false` en las que no se encendieron. Una clave que
+  mandaste y no está ahí no se guardó (TikTok ignora claves desconocidas).
+- TikTok en `borrador` trae `{ "modo": "borrador" }`; un trial reel, `{ "trialReel": true }`;
+  una red que no pide nada, `null`.
+
+Son las opciones que **Tu Parrilla le manda** a la red. Lo que la cuenta no permite (un dúo
+deshabilitado en TikTok, por ejemplo) se manda apagado sin fallar, y eso solo se ve en la red.
+
+| Respuesta | Cuándo |
+|---|---|
+| `200` con el post | Existe y es del dueño de la llave. |
+| `404` `{ "error": "Ese post no existe." }` | No hay un post con ese id para este dueño. No distingue «no existe» de «no es tuyo». |
+
+`GET /api/schedule/posts` (por fechas o por `estado`) trae las mismas `opciones` en cada destino.
+
 ## 4. Lo que esta API no hace
 
 - **No edita un post programado.** Para cambiar texto, hora, destinos o media hay que
@@ -330,9 +357,9 @@ de fechas; `estado` acepta `scheduled`, `publishing`, `published` y `failed`, y 
   va únicamente a TikTok **no hace nada** —no falla, no avisa: nunca se dispara,
   porque nadie lee esos comentarios—. La regla vale la pena solo si el post sale a alguna de esas
   tres.
-- **No devuelve las opciones de un post ya programado.** `GET /api/schedule/posts` no trae
-  `opciones` por destino, así que un trial reel programado por esta vía no se puede verificar
-  después por API — ni que se aceptó como trial, ni si ya se graduó.
+- **No dice qué hizo la red con las opciones.** `GET /api/schedule/posts/{id}` (sección 3g)
+  muestra lo que quedó guardado y lo que se le va a mandar a la red, no lo que la red aplicó
+  después: si TikTok le negó el dúo a esa cuenta o si un trial reel ya se graduó se ve en la red.
 
 ## 5. Trial reels de Instagram
 
