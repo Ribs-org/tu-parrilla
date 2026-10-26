@@ -233,17 +233,22 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   servidor, y adaptar a él la publicación, la sincronización y los comentarios de Instagram. Los
   trial reels por esa vía, por confirmar. La idea: «Conectar con Instagram» como camino
   principal en Los Fierros, y el login de Facebook para quien además maneja páginas.
-- **[dueño] Google — auditoría de cuota de YouTube (trámite B): YouTube pidió más
-  información el 2026-10-22; contestar antes del lunes 2026-11-02** (siete días hábiles), en el
-  mismo hilo del correo. El correo entero, con notas para la respuesta, está en
-  `2026-10-22-pedido-de-informacion.txt`, en la carpeta del trámite. Pide dos cosas:
-  - **Si la API se usa en Android y en iOS.** Si se usa, quiere un screencast de programar y
-    publicar videos cortos en varias redes, YouTube incluida, y de responder comentarios
-    desde una sola cola (La Mesa), con el resultado final. La API de YouTube la llama solo el
-    servidor: el panel y la app de Android pasan por él. En iOS todavía no hay app.
-  - **Credenciales de demo, con usuario y contraseña.** El panel no tiene contraseña: se entra
-    con el correo y un código, así que la cuenta del revisor, con su código fijo
-    (`REVISION_CODIGO`), cumple ese papel y hay que explicarlo.
+- **[dueño] Google — auditoría de cuota de YouTube (trámite B): se contestó el 2026-10-26;
+  queda esperar.** El 2026-10-22 YouTube pidió dos cosas (el correo está en
+  `2026-10-22-pedido-de-informacion.txt`, en la carpeta del trámite): si la API se usa en
+  Android y en iOS, con un screencast de publicar en varias redes y responder desde una sola
+  cola, y credenciales de demo. Se respondió en el mismo hilo que la API la llama solo el
+  servidor, que la app de Android pasa por él y que en iOS no hay app; el screencast quedó no
+  listado en el canal Pyxis oficial (`https://youtu.be/ekfLmNq8wqw`, el archivo y el texto
+  enviado en `2026-10-23-RESPUESTA-Y-SCREENCAST.txt`), y las credenciales son las del revisor
+  con su código fijo, explicado como contraseña. Los Shorts que sube Tu Parrilla salen
+  públicos: la regla de subir en privado no se le aplica a este proyecto.
+
+  Para que el revisor pueda probar La Mesa tiene que haber un comentario de YouTube en
+  «Pendientes»: el 2026-10-26 quedó uno en el Short público «canal video 2» de Pyxis
+  oficial. La Mesa solo lee los videos de los últimos siete días, y los comentarios de YouTube
+  se borran a los 30, así que si la revisión se alarga más allá del 2026-11-25 hay que subir
+  otro Short público desde Studio, sincronizar al revisor y comentarlo desde parejavice.
 
   Lo de antes: se envió el 2026-10-10, y YouTube acusó recibo por correo a
   pyxis.latam@gmail.com, sin número de caso. Se pidieron 100.000 unidades al día del cupo general (el
