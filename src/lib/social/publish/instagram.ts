@@ -4,11 +4,12 @@ import {
   PUBLISH_NETWORK_ERROR,
   PUBLISH_REJECTED,
   TOPE_INSTAGRAM,
+  historiaSoloEmpresa,
   rechazoDeInstagram,
   trialNoDisponible,
   trialSinSeguidores,
 } from './publisher'
-import type { OpcionesDestino } from './opciones'
+import { esHistoria, type OpcionesDestino } from './opciones'
 
 /**
  * Cada cuánto se vuelve a probar un destino que chocó con el tope diario. El tope es una
@@ -41,6 +42,16 @@ export function reelContainerParams(
   if (coverUrl) params.cover_url = coverUrl
   if (opciones && 'trialReel' in opciones) params.trial_params = TRIAL_PARAMS
   return params
+}
+
+/**
+ * Una historia: el mismo contenedor con `media_type=STORIES`, sin texto ni portada, porque una
+ * historia no los lleva. Foto o video, uno solo.
+ */
+export function storyContainerParams(media: PublishMedia): Record<string, string> {
+  return media.mediaType === 'video'
+    ? { media_type: 'STORIES', video_url: media.url }
+    : { media_type: 'STORIES', image_url: media.url }
 }
 
 /**
@@ -123,12 +134,19 @@ export const SUBCODIGO_TRIAL_SIN_SEGUIDORES = 2207081
  * que decía «reels de prueba» y no «trial». Lo que no reconoce ninguna de las dos se reintenta
  * como cualquier rechazo, ahora con lo que Meta dijo a la vista (`rechazoDeInstagram`).
  * El tope diario es aparte, y no es un rechazo: `esTopeDiario`.
+ *
+ * Una historia desde una cuenta de creador también es definitiva: Instagram la rechazaba con el
+ * código 10 diciendo que la cuenta no es de empresa, y eso no lo cambia reintentar.
  */
 export function motivoDeRechazo(
   cuerpo: string,
   opciones: OpcionesDestino | null,
   cuenta: string | null = null,
 ): string | null {
+  if (esHistoria(opciones)) {
+    const e = leerErrorDeMeta(cuerpo)
+    return e?.codigo === 10 && /business|empresa/i.test(cuerpo) ? historiaSoloEmpresa(cuenta) : null
+  }
   if (!opciones || !('trialReel' in opciones)) return null
   const e = leerErrorDeMeta(cuerpo)
   if (e?.subcodigo === SUBCODIGO_TRIAL_SIN_SEGUIDORES) return trialSinSeguidores(cuenta)
@@ -250,7 +268,9 @@ async function createContainer(
   if ('rechazo' in r) {
     if (esTopeDiario(r.rechazo)) return { tope: true }
     const motivo = motivoDeRechazo(r.rechazo, input.opciones, input.cuenta)
-    // Un rechazo de trial reel que se reconoce es de la cuenta: no acepta trial reels.
+    // Un rechazo de trial reel que se reconoce es de la cuenta: no acepta trial reels. El de
+    // una historia también es definitivo, pero no dice nada de los trial reels.
+    if (motivo && esHistoria(input.opciones)) return { failed: motivo, definitivo: true }
     if (motivo) return { failed: motivo, definitivo: true, sinTrial: true }
     // Sin el error de Meta en el cuerpo, no sabemos si fue Meta: se sigue tratando como la red.
     return { failed: rechazoSinReconocer(r.rechazo, input.cuenta, PUBLISH_NETWORK_ERROR) }
@@ -330,6 +350,15 @@ export const instagramPublisher: Publisher = {
     }
 
     const media = [...input.media].sort((a, b) => a.position - b.position)
+
+    // Historia: un solo archivo. La foto sale en la misma corrida, como la foto suelta; el video
+    // queda procesando y la corrida siguiente lo publica, como un reel.
+    if (esHistoria(input.opciones) && media.length === 1) {
+      const r = await createContainer(input, storyContainerParams(media[0]!))
+      if (!('id' in r)) return fromCreate(r)
+      if (media[0]!.mediaType === 'image') return publishContainer(input, r.id)
+      return { kind: 'processing', containerId: r.id }
+    }
 
     // Single photo is the one synchronous path: containers for images are ready at
     // once, so create-and-publish in the same run.

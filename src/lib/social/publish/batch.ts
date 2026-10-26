@@ -1,7 +1,15 @@
 import { fromZonedInput } from '@/lib/utils'
 import { extensionDe, validateScheduleDraft } from './validate'
 import { validateAtributos } from './atributos'
-import { validarOpcionesPorCuenta, errorDeMediaPorOpciones, OPCIONES_ERROR, type OpcionesDestino } from './opciones'
+import {
+  validarOpcionesPorCuenta,
+  errorDeHistoria,
+  errorDeMediaPorOpciones,
+  HISTORIA_MEDIA,
+  MAX_HISTORIAS_SECUENCIA,
+  OPCIONES_ERROR,
+  type OpcionesDestino,
+} from './opciones'
 import { basePublica, guardar, keyDesdeUrl, objetoEnAlmacen } from '@/lib/storage'
 import { ARCHIVO_MUY_GRANDE, MAX_BYTES_ARCHIVO } from './limites'
 import { getDb, scheduledPosts, scheduledPostMedia, scheduledPostTargets, reglasClave } from '@/db'
@@ -50,6 +58,54 @@ export type BatchItem = {
   regla?: unknown
   /** La referencia del que llama, única por dueño, para reconocer la fila si reenvía el lote; se valida con refDeFila. */
   ref?: unknown
+  /**
+   * El atajo de las secuencias: la fila sale como una historia por archivo, en el orden de
+   * `media` y a la misma hora (`expandirHistoria`). Sin él, cada fila es un post.
+   */
+  historia?: boolean
+}
+
+export const HISTORIA_CON_OPCIONES = 'Con «historia» la fila no lleva «opciones»: la historia ya dice todo.'
+export const HISTORIA_DEMASIADAS = `Una secuencia lleva hasta ${MAX_HISTORIAS_SECUENCIA} historias.`
+
+/**
+ * El atajo: una fila con `historia: true` se expande en una historia por archivo, en ese
+ * orden, con la misma hora y una secuencia compartida (`secuencia`), para que salgan en orden
+ * (`secuencia.ts`). Con un solo archivo es una historia suelta. Las opciones las pone el atajo,
+ * para cada destino de la fila —por cuenta o por red, como las pediría el que llama—; si la
+ * fila trae las suyas, se rechaza en vez de elegir unas en silencio. Una `ref` se vuelve una por
+ * historia (`<ref>#1`, `<ref>#2`…), así un reenvío reconoce las que ya entraron.
+ */
+export function expandirHistoria(item: BatchItem, secuencia: string): BatchItem[] | { error: string } {
+  if (item.historia !== true) return [item]
+  if (item.opciones !== undefined && item.opciones !== null) return { error: HISTORIA_CON_OPCIONES }
+  if (item.media.length === 0) return { error: HISTORIA_MEDIA }
+  if (item.media.length > MAX_HISTORIAS_SECUENCIA) return { error: HISTORIA_DEMASIADAS }
+  const claves = item.cuentas.length > 0 ? item.cuentas : item.redes
+  const suelta = item.media.length === 1
+  return item.media.map((url, i) => {
+    const historia = suelta ? true : { secuencia, orden: i + 1 }
+    return {
+      ...item,
+      historia: undefined,
+      media: [url],
+      opciones: Object.fromEntries(claves.map((clave) => [clave, { historia }])),
+      ref: typeof item.ref === 'string' && !suelta ? `${item.ref}#${i + 1}` : item.ref,
+    }
+  })
+}
+
+/**
+ * Lo que vuelve de una fila del atajo: un resultado con un `postId` por historia, en su orden
+ * (`null` la que no entró). Sale bien si entraron todas; si no, con la frase de la primera que
+ * falló, y las demás quedan programadas igual: una historia que falla no arrastra al resto.
+ */
+function juntarHistorias(index: number, partes: BatchResult[]): BatchResult {
+  const postIds = partes.map((p) => (p.ok ? p.postId : null))
+  const ms = partes.reduce((total, p) => total + p.ms, 0)
+  const fallida = partes.find((p): p is BatchResult & { ok: false } => !p.ok)
+  if (!fallida) return { index, ok: true, postId: postIds[0]!, postIds, ms }
+  return { index, ok: false, error: fallida.error, ...(fallida.motivo ? { motivo: fallida.motivo } : {}), postIds, ms }
 }
 
 /** Lo que se dice de una fila, sin su medición. */
@@ -69,6 +125,8 @@ export type BatchResult = { index: number } & Veredicto & {
   ms: number
   bytes?: number
   origen?: 'descarga' | 'cache' | 'almacen'
+  /** Solo en una fila del atajo de historias: un id por historia, en su orden (`juntarHistorias`). */
+  postIds?: Array<string | null>
 }
 
 export const MAX_BATCH_ITEMS = 50
@@ -376,6 +434,17 @@ export function validateBatchItem(item: BatchItem, now: Date, zone: string): str
   const reglaCheck = validarRegla(item.regla)
   if ('error' in reglaCheck) return reglaCheck.error
 
+  // Lo que una historia no lleva. Con cuentas nombradas `opciones` viene vacío y lo corre
+  // `scheduleBatch`; un link sin tipo conocido espera a que se descargue para lo del JPG.
+  const historia = errorDeHistoria(opcionesCheck.opciones, {
+    caption: item.texto,
+    conPalabraClave: reglaCheck.regla !== null,
+    conPortada: Boolean(item.portada?.trim()),
+    aInstagram: 'redes' in pedido && pedido.redes.includes('instagram'),
+    fotos: item.media.filter((url) => mediaTypeFromUrl(url) === 'image').map(extensionDe),
+  })
+  if (historia) return historia
+
   // Igual que con las opciones: las reglas de forma por red (TikTok, X, Threads, el
   // tope del carrusel) solo se pueden aplicar cuando la fila nombra redes. Con cuentas
   // nombradas, `scheduleBatch` las vuelve a correr con las redes reales de los destinos
@@ -628,16 +697,33 @@ export async function scheduleBatch(
   const zone = (await buscarPorId(ownerId))?.zona ?? ZONA_POR_DEFECTO
   const lote: Lote = { ownerId, zone, now: new Date(), hasta, copias: new Map(), refs: new Map() }
 
-  return enParalelo(items, FILAS_A_LA_VEZ, async (item, index): Promise<BatchResult> => {
+  // El atajo de las historias se expande antes: cada historia es una fila más del lote, y su
+  // resultado vuelve a juntarse en el índice de la fila que la pidió.
+  const filas: Array<{ item: BatchItem; origen: number }> = []
+  const rechazadas = new Map<number, string>()
+  items.forEach((item, origen) => {
+    const expandida = expandirHistoria(item, randomUUID())
+    if ('error' in expandida) rechazadas.set(origen, expandida.error)
+    else for (const fila of expandida) filas.push({ item: fila, origen })
+  })
+
+  const hechos = await enParalelo(filas, FILAS_A_LA_VEZ, async ({ item, origen }, index): Promise<BatchResult> => {
     const inicio = Date.now()
     const medicion: Medicion = { bytes: 0, descargo: false, reuso: false, almacen: false }
     const veredicto = await programarFila(lote, item, index, medicion)
-    const resultado: BatchResult = { index, ...veredicto, ms: Date.now() - inicio }
+    const resultado: BatchResult = { index: origen, ...veredicto, ms: Date.now() - inicio }
     if (medicion.descargo || medicion.reuso || medicion.almacen) {
       resultado.bytes = medicion.bytes
       resultado.origen = medicion.descargo ? 'descarga' : medicion.reuso ? 'cache' : 'almacen'
     }
     return resultado
+  })
+
+  return items.map((item, index): BatchResult => {
+    const rechazo = rechazadas.get(index)
+    if (rechazo) return { index, ok: false, error: rechazo, ms: 0 }
+    const partes = hechos.filter((h) => h.index === index)
+    return item.historia === true ? juntarHistorias(index, partes) : partes[0]!
   })
 }
 
@@ -735,6 +821,14 @@ async function programarSinRepetir(
     // y la media de la fila puede pesar cientos de veces más — una fila que de todos
     // modos se va a rechazar no debe pagar esa subida primero.
     const reglaCheck = validarRegla(item.regla)
+    const historia = errorDeHistoria(opciones, {
+      caption: item.texto,
+      conPalabraClave: !('error' in reglaCheck) && reglaCheck.regla !== null,
+      conPortada: Boolean(item.portada?.trim()),
+      aInstagram: networks.includes('instagram'),
+      fotos: item.media.filter((url) => mediaTypeFromUrl(url) === 'image').map(extensionDe),
+    })
+    if (historia) return { ok: false, error: historia }
     let documentoUrl: string | null = null
     if (!('error' in reglaCheck) && reglaCheck.regla?.documentoUrl) {
       documentoUrl = await documentoToBlob(
@@ -778,6 +872,14 @@ async function programarSinRepetir(
       sinTipo: 0,
     })
     if (mediaReal) return { ok: false, error: mediaReal }
+    // Y lo del JPG con los tipos reales: un Drive que resultó PNG no sale como historia.
+    const historiaReal = errorDeHistoria(opciones, {
+      caption: item.texto,
+      conPalabraClave: false,
+      aInstagram: networks.includes('instagram'),
+      fotos: uploaded.filter((m) => m.mediaType === 'image').map((m) => extensionDe(m.url)),
+    })
+    if (historiaReal) return { ok: false, error: historiaReal }
 
     // La portada sigue la misma tubería que la media, con dos veredictos propios:
     // los tipos reales deben incluir un video, y la portada misma debe ser imagen.

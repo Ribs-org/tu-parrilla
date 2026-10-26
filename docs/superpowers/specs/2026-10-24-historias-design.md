@@ -216,3 +216,18 @@ Cada parte deja la documentación cierta al terminar (`AGENTS.md`).
   mensaje de la sección 5 ya está; si no, se borra la frase.
 - **El primer intento real** en Facebook con video: la guía de Meta tiene contradicciones
   (60 vs. 90 s). Se prueba con una página propia antes de anunciarlo.
+
+## 12. Lo que cambió al construir la parte 1 (2026-10-25)
+
+- **Tampoco portada.** Una historia con `portada` se rechaza con `Una historia no lleva portada.`,
+  por la misma razón que el texto: mejor rechazarla que perderla en silencio.
+- **El atajo de la API** se llama `historia` en la fila. Con `opciones` propias en la misma fila
+  se rechaza (`Con «historia» la fila no lleva «opciones»: la historia ya dice todo.`), y una
+  `ref` se vuelve una por historia (`<ref>#1`, `<ref>#2`…).
+- **El `finish` de un video de Facebook espera solo la subida** (`uploading_phase` completa), no
+  el procesamiento: la guía de Meta no pide esperarlo, y el de una historia sigue después.
+- **Las apps sin actualizar no reciben `choripan`.** La app vieja se caía con un formato que no
+  conoce, así que la nueva avisa con `X-Parrilla-Cortes: choripan` y a las demás la historia les
+  llega con el corte de su archivo (`aceptaChoripan`, en `api/mobile/schedule`).
+- **El «1/3» junto al corte y el detalle «Historia en Instagram · @cuenta»** pasan a la parte 2,
+  con el compositor: son de la pantalla, no del motor.

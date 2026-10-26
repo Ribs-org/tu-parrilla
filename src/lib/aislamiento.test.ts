@@ -114,6 +114,7 @@ const { getCuentas, getLecturasDe, getPostRows } = await import('./posts')
 const { contarEnlacesPorPagina, getAllProfiles, getProfileBySlug } = await import('./profiles')
 const { getCola } = await import('./comentarios-cola')
 const { verificarCuentas, cuentaUnicaPorRed } = await import('./social/cuentas')
+const { esperaALaAnterior } = await import('./social/publish/secuencia')
 const { todosLosCortes, cortesEntre, cortesQuemados, horasPorVenir, servidosAyer } = await import(
   './social/publish/cortes'
 )
@@ -289,6 +290,14 @@ describe('aislamiento por dueño (SQL generado, sin base)', () => {
 
   it('social/cuentas: verificarCuentas ata la consulta al dueño', async () => {
     const consultas = await todasLasConsultas(() => verificarCuentas(DUENO, ['cuenta-1']))
+    expect(consultas).toHaveLength(1)
+    esperarFiltradoPorDueno(consultas[0]!)
+  })
+
+  it('social/publish/secuencia: esperaALaAnterior busca la historia anterior atada al dueño del post', async () => {
+    const consultas = await todasLasConsultas(() =>
+      esperaALaAnterior(DUENO, 'cuenta-1', { secuencia: 'abc', orden: 2 }),
+    )
     expect(consultas).toHaveLength(1)
     esperarFiltradoPorDueno(consultas[0]!)
   })

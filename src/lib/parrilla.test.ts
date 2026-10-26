@@ -113,6 +113,12 @@ describe('formatoDe', () => {
     expect(formatoDe([])).toEqual({ formato: 'chori', huesos: 0 })
   })
 
+  it('una historia es un choripán, sea foto o video', () => {
+    expect(formatoDe([{ mediaType: 'video' }], 0, true)).toEqual({ formato: 'choripan', huesos: 0 })
+    expect(formatoDe([{ mediaType: 'image' }], 0, true)).toEqual({ formato: 'choripan', huesos: 0 })
+    expect(formatoDe([], 1, true)).toEqual({ formato: 'choripan', huesos: 0 })
+  })
+
   it('un video es una entraña y una foto un bife', () => {
     expect(formatoDe([{ mediaType: 'video' }])).toEqual({ formato: 'entrana', huesos: 0 })
     expect(formatoDe([{ mediaType: 'image' }])).toEqual({ formato: 'bife', huesos: 0 })

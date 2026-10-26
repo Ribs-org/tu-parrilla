@@ -160,6 +160,8 @@ parrilla. El dibujo no lleva texto encima; lo dice todo en cuatro cosas que se l
 - **La forma es el formato.** Una entraña (larga y con la fibra en diagonal) es un video; una
   tira de asado, con un hueso por archivo, es un carrusel (cinco huesos, cinco fotos; se
   dibujan hasta diez); un bife (ovalado) es una foto; un chori, sin archivos, es solo texto.
+  Un choripán al paso —el chori parado dentro de su pan, angosto y vertical— es una historia
+  de Instagram o de Facebook, sea foto o video.
   Un video que ya salió en todas sus redes sigue siendo entraña, aunque su archivo ya no esté
   en el sitio.
 - **La carne es cómo va.** De clara a oscura: cruda (rosada), programada; sellada (naranjo),
@@ -186,7 +188,7 @@ TikTok, «↻» reintentando, «!» fierro frío; sin signo, programado. El colo
 red, nunca el estado: el estado lo dicen el signo y el borde del chip, y lo quemado, además,
 el chip teñido de rojo. El rojo de YouTube no es un fallo. En el calendario, lo que ya salió en
 todas sus redes lleva solo los íconos, sin chip, y un «✓» para todas. Un lector de pantalla lee el formato y la cocción («Video · Programada»,
-«Carrusel · Falló en parte») y cada destino con su estado.
+«Carrusel · Falló en parte», «Historia · Publicada») y cada destino con su estado.
 
 La tarjeta en que va el corte (en el calendario, su fila; en «Día», su bloque) es de acero, no del color de la carne,
 y cambia de borde solo cuando pide algo: ámbar si algo espera en la bandeja de TikTok, reintenta
@@ -1323,7 +1325,7 @@ editor.
 - **En el calendario no está el botón para borrar o subir.** Esos botones están en la
   «Lista»; en el calendario, un clic en la fila abre el editor, que tiene «Eliminar».
 - **¿Qué significa el dibujo de cada publicación?** La forma es el formato (entraña video, tira
-  carrusel, bife foto, chori texto); el color de la carne, cómo va (rosada programada, naranja
+  carrusel, bife foto, chori texto, choripán al paso historia); el color de la carne, cómo va (rosada programada, naranja
   saliendo, dorada publicada, negra falló); cada diagonal, un destino (llena salió, punteada
   todavía no). El halo rojo y la banderita, que algo se quemó. Con borde punteado y sin
   dibujo, es un borrador. Detalle en «El corte».

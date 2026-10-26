@@ -12,9 +12,12 @@ import {
   photoContainerParams,
   rechazoDelContenedor,
   reelContainerParams,
+  storyContainerParams,
   SUBCODIGO_TRIAL_SIN_SEGUIDORES,
 } from './instagram'
 import {
+  HISTORIA_SOLO_EMPRESA,
+  historiaSoloEmpresa,
   PUBLISH_NETWORK_ERROR,
   PUBLISH_REJECTED,
   rechazoDeInstagram,
@@ -425,5 +428,56 @@ describe('publish: retomar un contenedor guardado sin publicar dos veces', () =>
     expect(String(fetchMock.mock.calls[0]![0])).toContain('fields=status_code,status&')
     expect(rechazoDelContenedor({ status_code: 'ERROR', status: 'ERROR' }, '@vicente')).toBe(PUBLISH_REJECTED)
     expect(rechazoDelContenedor({ status_code: 'ERROR' }, '@vicente')).toBe(PUBLISH_REJECTED)
+  })
+})
+
+describe('historias', () => {
+  afterEach(() => vi.unstubAllGlobals())
+
+  const base = {
+    caption: '',
+    containerId: null,
+    token: 't',
+    accountExternalId: '123',
+    coverUrl: null,
+    cuenta: '@vicente_edits2',
+    opciones: { historia: true as const },
+  }
+
+  it('el contenedor es STORIES, sin texto ni portada', () => {
+    expect(storyContainerParams(image)).toEqual({ media_type: 'STORIES', image_url: 'https://blob.test/a.jpg' })
+    expect(storyContainerParams(video)).toEqual({ media_type: 'STORIES', video_url: 'https://blob.test/b.mp4' })
+  })
+
+  it('una foto sale en la misma corrida: crea el contenedor y lo publica', async () => {
+    const fetchMock = vi
+      .fn<(url: string, init?: RequestInit) => Promise<Response>>()
+      .mockResolvedValueOnce(Response.json({ id: 'CT_1' }))
+      .mockResolvedValueOnce(Response.json({ id: 'IG_1' }))
+    vi.stubGlobal('fetch', fetchMock)
+    expect(await instagramPublisher.publish({ ...base, media: [image] })).toEqual({ kind: 'published', externalId: 'IG_1' })
+    const cuerpo = new URLSearchParams(String(fetchMock.mock.calls[0]![1]!.body))
+    expect(cuerpo.get('media_type')).toBe('STORIES')
+    expect(cuerpo.get('caption')).toBeNull()
+  })
+
+  it('un video queda procesando, como un reel', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => Response.json({ id: 'CT_2' })))
+    expect(await instagramPublisher.publish({ ...base, media: [video] })).toEqual({ kind: 'processing', containerId: 'CT_2' })
+  })
+
+  it('una cuenta que no es de empresa falla al tiro, sin decir nada de los trial reels', async () => {
+    const creador = '{"error":{"message":"The user is not an Instagram Business","code":10}}'
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(creador, { status: 400 })))
+    expect(await instagramPublisher.publish({ ...base, media: [image] })).toEqual({
+      kind: 'failed',
+      reason: historiaSoloEmpresa('@vicente_edits2'),
+      definitivo: true,
+    })
+    expect(historiaSoloEmpresa('@a')).toBe(`@a ${HISTORIA_SOLO_EMPRESA}`)
+  })
+
+  it('otro rechazo de una historia se reintenta como cualquiera', () => {
+    expect(motivoDeRechazo('{"error":{"message":"Invalid parameter","code":100}}', { historia: true })).toBeNull()
   })
 })

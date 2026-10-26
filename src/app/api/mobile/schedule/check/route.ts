@@ -8,7 +8,7 @@ import {
   resolverDestinos,
 } from '@/lib/mobile-api'
 import { validateScheduleDraft } from '@/lib/social/publish/validate'
-import { errorDeMediaPorOpciones, validarOpcionesPorCuenta } from '@/lib/social/publish/opciones'
+import { errorDeHistoria, errorDeMediaPorOpciones, validarOpcionesPorCuenta } from '@/lib/social/publish/opciones'
 import { CuentaInvalida } from '@/lib/social/cuentas'
 
 export const dynamic = 'force-dynamic'
@@ -63,6 +63,14 @@ export async function POST(request: Request) {
     sinTipo: 0,
   })
   if (mediaPorOpciones) return NextResponse.json({ error: mediaPorOpciones }, { status: 400 })
+  // Aquí solo llegan los conteos: lo del JPG lo mira el `POST`, que ya tiene los archivos.
+  const historia = errorDeHistoria(opcionesCheck.opciones, {
+    caption: borrador.texto,
+    conPalabraClave: false,
+    aInstagram: networks.includes('instagram'),
+    fotos: [],
+  })
+  if (historia) return NextResponse.json({ error: historia }, { status: 400 })
 
   const now = new Date()
   const error = validateScheduleDraft(

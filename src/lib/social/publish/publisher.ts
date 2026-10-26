@@ -80,6 +80,18 @@ export const SIN_SEGUIDORES_PARA_TRIAL =
 export const TRIAL_REEL_NO_DISPONIBLE =
   'no tiene trial reels disponibles, probablemente porque Instagram no le habilitó la función. Prográmalo como reel normal o en otra cuenta.'
 
+/**
+ * La cola fija del rechazo de una historia desde una cuenta de creador: Instagram respondía
+ * con el código 10 («The user is not an Instagram Business»). La frase empieza con la cuenta.
+ */
+export const HISTORIA_SOLO_EMPRESA =
+  'no puede publicar historias por API: Instagram solo lo permite a cuentas de empresa (Business). Cámbiala en Instagram o publica la historia desde la app.'
+
+/** Meta rechazó una historia porque la cuenta no es de empresa. */
+export function historiaSoloEmpresa(cuenta: string | null | undefined): string {
+  return `${alEmpezar(cuenta)} ${HISTORIA_SOLO_EMPRESA}`
+}
+
 function alEmpezar(cuenta: string | null | undefined): string {
   return cuenta?.trim() || 'La cuenta'
 }

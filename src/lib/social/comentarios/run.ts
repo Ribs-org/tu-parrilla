@@ -1,5 +1,5 @@
 import 'server-only'
-import { and, desc, eq, gte, inArray, isNotNull, isNull, lt, or } from 'drizzle-orm'
+import { and, desc, eq, gte, inArray, isNotNull, isNull, lt, or, sql } from 'drizzle-orm'
 import { getDb, postComments, scheduledPostTargets, socialAccounts, socialPosts } from '@/db'
 import type { SocialAccount } from '@/db'
 import { connectorFor } from '../index'
@@ -87,7 +87,9 @@ async function sondearCuenta(
         ),
       )
       .orderBy(desc(socialPosts.publishedAt)),
-    // Lo que el sync ya archivó (borrado en la red) no vuelve por esta puerta.
+    // Lo que el sync ya archivó (borrado en la red) no vuelve por esta puerta. Las historias
+    // tampoco: no tienen comentarios, y cada una que falla al listarlos suma a los tres fallos
+    // seguidos que dejan sin mirar a los posts de verdad de la cuenta.
     db
       .select({ externalId: scheduledPostTargets.externalId, publishedAt: scheduledPostTargets.updatedAt })
       .from(scheduledPostTargets)
@@ -105,6 +107,7 @@ async function sondearCuenta(
           isNotNull(scheduledPostTargets.externalId),
           gte(scheduledPostTargets.updatedAt, desde),
           isNull(socialPosts.archivedAt),
+          isNull(sql`${scheduledPostTargets.opciones} -> 'historia'`),
         ),
       ),
   ])

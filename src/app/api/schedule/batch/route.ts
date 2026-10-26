@@ -45,6 +45,8 @@ export async function POST(request: Request) {
         regla: p.regla,
         // Cruda también: un número donde va un texto lo rechaza `refDeFila` con su frase.
         ref: p.ref,
+        // El atajo de las historias: solo `true` lo prende (`expandirHistoria`).
+        historia: p.historia === true ? true : undefined,
       }
     })
   } catch {

@@ -38,6 +38,13 @@ describe('dibujoDe', () => {
     expect(dibujo.carne).toBe('punto')
   })
 
+  it('si todos sus destinos son historia, es un choripán; si uno no lo es, no', () => {
+    const historia = { opciones: { historia: true } }
+    const dos = [destino('a', 'scheduled', historia), destino('b', 'scheduled', { ...historia, network: 'facebook' })]
+    expect(dibujoDe(dos, [{ mediaType: 'image' }], new Set()).formato).toBe('choripan')
+    expect(dibujoDe([dos[0]!, destino('b', 'scheduled')], [{ mediaType: 'image' }], new Set()).formato).toBe('bife')
+  })
+
   it('un video que salió en todas sus redes se dibuja a punto y como entraña, sin su archivo', () => {
     const dibujo = dibujoDe([destino('a', 'published'), destino('b', 'published')], [], new Set(), 1)
     expect(dibujo).toMatchObject({ formato: 'entrana', carne: 'punto' })
