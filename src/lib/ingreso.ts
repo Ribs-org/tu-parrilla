@@ -34,9 +34,10 @@ export function normalizarCorreo(bruto: string): string | null {
 }
 
 /**
- * El revisor de Meta tiene que poder entrar sin leer nuestro correo: para un solo correo,
- * mientras estén puestas las dos variables, el código que vale es fijo y no se manda nada.
- * Se quita el día que la app pase a Live. Sin variables, esto no existe.
+ * Los revisores de Meta y de YouTube tienen que poder entrar sin leer nuestro correo: para un
+ * solo correo, mientras estén puestas las dos variables, el código que vale es fijo y no se
+ * manda nada. Se queda aunque la app de Meta esté en Live, porque Meta vuelve a revisar las
+ * apps aprobadas y pide que la cuenta de prueba siga activa. Sin variables, esto no existe.
  */
 export function codigoDeRevision(correo: string): string | null {
   const revision = env('REVISION_CORREO')
