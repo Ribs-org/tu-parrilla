@@ -68,6 +68,14 @@ sección.
 
 ## Bugs
 
+- **En la app, la entraña de un video se lee como una longaniza** (2026-10-26, lo vio el dueño
+  al publicar un video desde el teléfono). El formato llega bien del servidor (`entrana`);
+  el problema es el dibujo. Sin `react-native-svg`, `mobile/src/components/pieza.tsx` arma
+  cada silueta con vistas de bordes redondeados, y la entraña queda como una barra larga y
+  angosta (62 × 14), casi la forma del chori. Lo de fondo es la tanda 6 de
+  `docs/auditoria-ui-2026-10-16.md`: `react-native-svg` en el próximo build nativo, con las
+  curvas del panel. Mientras tanto, se puede retocar la silueta por aire (más ancha, con un
+  extremo afinado o las vetas más marcadas) para que no se confunda.
 - **Por revisar: el resto de la auditoría de la wiki de la UI** (2026-10-13). Al escribir
   `public/docs/ui/` salieron unos cuarenta defectos más —textos que nombran pantallas
   viejas, validaciones que dejan programar lo que va a fallar, números
@@ -225,17 +233,22 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   servidor, y adaptar a él la publicación, la sincronización y los comentarios de Instagram. Los
   trial reels por esa vía, por confirmar. La idea: «Conectar con Instagram» como camino
   principal en Los Fierros, y el login de Facebook para quien además maneja páginas.
-- **[dueño] Google — auditoría de cuota de YouTube (trámite B): YouTube pidió más
-  información el 2026-10-22; contestar antes del lunes 2026-11-02** (siete días hábiles), en el
-  mismo hilo del correo. El correo entero, con notas para la respuesta, está en
-  `2026-10-22-pedido-de-informacion.txt`, en la carpeta del trámite. Pide dos cosas:
-  - **Si la API se usa en Android y en iOS.** Si se usa, quiere un screencast de programar y
-    publicar videos cortos en varias redes, YouTube incluida, y de responder comentarios
-    desde una sola cola (La Mesa), con el resultado final. La API de YouTube la llama solo el
-    servidor: el panel y la app de Android pasan por él. En iOS todavía no hay app.
-  - **Credenciales de demo, con usuario y contraseña.** El panel no tiene contraseña: se entra
-    con el correo y un código, así que la cuenta del revisor, con su código fijo
-    (`REVISION_CODIGO`), cumple ese papel y hay que explicarlo.
+- **[dueño] Google — auditoría de cuota de YouTube (trámite B): se contestó el 2026-10-26;
+  queda esperar.** El 2026-10-22 YouTube pidió dos cosas (el correo está en
+  `2026-10-22-pedido-de-informacion.txt`, en la carpeta del trámite): si la API se usa en
+  Android y en iOS, con un screencast de publicar en varias redes y responder desde una sola
+  cola, y credenciales de demo. Se respondió en el mismo hilo que la API la llama solo el
+  servidor, que la app de Android pasa por él y que en iOS no hay app; el screencast quedó no
+  listado en el canal Pyxis oficial (`https://youtu.be/ekfLmNq8wqw`, el archivo y el texto
+  enviado en `2026-10-23-RESPUESTA-Y-SCREENCAST.txt`), y las credenciales son las del revisor
+  con su código fijo, explicado como contraseña. Los Shorts que sube Tu Parrilla salen
+  públicos: la regla de subir en privado no se le aplica a este proyecto.
+
+  Para que el revisor pueda probar La Mesa tiene que haber un comentario de YouTube en
+  «Pendientes»: el 2026-10-26 quedó uno en el Short público «canal video 2» de Pyxis
+  oficial. La Mesa solo lee los videos de los últimos siete días, y los comentarios de YouTube
+  se borran a los 30, así que si la revisión se alarga más allá del 2026-11-25 hay que subir
+  otro Short público desde Studio, sincronizar al revisor y comentarlo desde parejavice.
 
   Lo de antes: se envió el 2026-10-10, y YouTube acusó recibo por correo a
   pyxis.latam@gmail.com, sin número de caso. Se pidieron 100.000 unidades al día del cupo general (el
@@ -269,9 +282,10 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   se usaban (`expo-device` y `expo-web-browser`); el binario de hoy sigue respaldando lo que la
   app guarda. La versión interna con ese `.aab` se publicó el 2026-10-17, «Tu Parrilla
   (Alfa)», sin revisar: hasta que Google revise la app, la tienda se la muestra a los
-  probadores como «cl.tuparrilla.app (unreviewed)». Falta, en la consola, lo que pide esa
-  revisión —el nombre «Tu Parrilla» y la ficha, y las tarjetas de Contenido de la app—, y en
-  el teléfono, unirse como probador e instalarla. Para que lo siguiente salga sin entrar a la
+  probadores como «cl.tuparrilla.app (unreviewed)». Desde el 2026-10-26 el dueño está en la
+  lista de verificadores «Tu Parrilla - interno» y tiene la app instalada desde la tienda.
+  Falta, en la consola, lo que pide esa revisión —el nombre «Tu Parrilla» y la ficha, y las
+  tarjetas de Contenido de la app—. Para que lo siguiente salga sin entrar a la
   consola: la cuenta de servicio con
   su clave JSON para EAS (nunca en un chat ni en el repo) y el secreto `EXPO_TOKEN` en
   GitHub, que el flujo «App a la tienda» necesita y todavía no está. El paso a paso y los
@@ -399,6 +413,15 @@ nadie paga: todas las cuentas son iguales y el README dice «Sin suscripción».
   trinchado (necesita tabla nueva y decidir si una familia admite dos cuentas de la misma
   red); un archivo de tokens común para el panel y la app; y, con un build nativo, el corte
   en SVG y la vibración en la app.
+- **Gamificar las notificaciones de cada red** (2026-10-25, lo pidió el dueño). Que lo que cada
+  red le avisa a un creador —seguidores nuevos, comentarios, reacciones a un post— se viva en Tu
+  Parrilla como un juego, red por red. Falta definir con el dueño qué cuenta como notificación y
+  cuál es el juego (puntos, rachas, logros, en qué pantalla). Hasta donde se sabe, ninguna de las
+  APIs que se usan entrega la bandeja de notificaciones de la red, así que el juego se arma con lo
+  que ya se lee: los comentarios de La Mesa, las métricas de cada post y los seguidores de cada
+  cuenta (`src/lib/social/account-metrics.ts`). La app del teléfono no manda notificaciones:
+  avisar allí pide `expo-notifications`, que es nativo, y un build nuevo. Se cruza con «Mientras
+  no mirabas», de la entrada de arriba, que también necesita guardar la última visita por usuario.
 - **Cupos y reparto de los crons por usuario** (`docs/levantamiento-terceros.md` §5.4). Hace
   falta cuando la beta pase de unos diez usuarios.
 - **El privado de Meta (DM con el PDF)** necesita `instagram_manage_messages` y
