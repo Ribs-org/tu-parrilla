@@ -149,6 +149,15 @@ no por subcadena parcial ni regex:
 | `TikTok recibe un video, o hasta 35 fotos JPG o WebP.` | `media` con dos videos, mezcla, más de 35 fotos, u otro formato |
 | `Un trial reel es un solo video, sin fotos.` | `opciones.<destino>.trialReel: true` con fotos, carrusel, dos videos o sin ningún video en `media` |
 | `@<cuenta> no tiene trial reels: Instagram los da solo a cuentas con un mínimo de seguidores, y esta no lo alcanza. Prográmalo como reel normal o en otra cuenta.` o `@<cuenta> no tiene trial reels disponibles, probablemente porque Instagram no le habilitó la función. Prográmalo como reel normal o en otra cuenta.` | no es un error de fila — la fila con `trialReel: true` se acepta al programar; esta frase aparece después, como el `error` de ese destino en `GET /api/schedule/posts`, porque Instagram solo revela la elegibilidad al publicar |
+| `Una historia va solo a Instagram y Facebook, y todos sus destinos son historia.` | `opciones.<destino>.historia` en unos destinos y no en otros, o una historia hacia otra red (sección 5b) |
+| `Una historia no lleva texto.` | una historia con `texto` |
+| `Una historia es un solo archivo, foto o video.` | una historia con más de un archivo, o sin ninguno |
+| `Instagram recibe la historia en foto solo en JPG.` | una historia hacia Instagram con una foto PNG, WebP u otro formato |
+| `Una historia no tiene comentarios: no lleva palabra clave.` | una historia con `regla` |
+| `Una historia no lleva portada.` | una historia con `portada` |
+| `Una historia no puede ser trial reel.` | `opciones.instagram` con `historia` y `trialReel` a la vez |
+| `Con «historia» la fila no lleva «opciones»: la historia ya dice todo.` | el atajo `"historia": true` con `opciones` en la misma fila |
+| `Una secuencia lleva hasta 30 historias.` | el atajo `"historia": true` con más de 30 archivos en `media` |
 | `Una de las cuentas elegidas no es tuya.` | `cuentas` con un identificador que no es del dueño |
 | `La cuenta <handle> no está conectada. Vuelve a conectarla en Los Fierros.` | `cuentas` con un identificador válido pero desconectado |
 | `No hay una cuenta de <red> conectada.` | `redes` con un nombre sin ninguna cuenta conectada de esa red |
@@ -389,6 +398,64 @@ Tres cosas, en orden:
    `trialReels: "no"` en esa cuenta (sección 3d): no le propongas trial reels mientras diga eso.
 3. **No se sabe si se graduó, por API.** El dueño lo comparte con todos desde la app de
    Instagram cuando quiera; no hay endpoint que lo dispare ni que lo consulte.
+
+## 5b. Historias de Instagram y Facebook
+
+Una historia es un post con **un solo archivo** (foto o video) que sale como historia en
+Instagram, en la página de Facebook, o en las dos. Se pide por destino, igual que el trial reel:
+
+```json
+{
+  "fecha": "2026-11-02 19:00",
+  "texto": "",
+  "redes": ["instagram", "facebook"],
+  "media": ["https://ej.com/historia.jpg"],
+  "opciones": { "instagram": { "historia": true }, "facebook": { "historia": true } }
+}
+```
+
+Para una **secuencia** —varias historias que salen en orden—, el atajo: `"historia": true` en
+la fila y varios archivos en `media`. La fila se expande en una historia por archivo, en ese
+orden, a la misma `fecha`; cada una espera a que salga la anterior en la misma cuenta. Su
+resultado trae `postIds`, un id por historia en su orden (`null` la que no entró), y `postId`
+es el de la primera. Con `ref`, cada historia guarda `<ref>#1`, `<ref>#2`…, y reenviar la
+fila devuelve las que ya entraron.
+
+```json
+{
+  "fecha": "2026-11-02 19:00",
+  "texto": "",
+  "redes": ["instagram"],
+  "media": ["https://ej.com/1.jpg", "https://ej.com/2.mp4", "https://ej.com/3.jpg"],
+  "historia": true
+}
+```
+
+Lo que una historia no lleva, con la frase con que se rechaza la fila:
+
+- **Texto:** `Una historia no lleva texto.` Manda `texto` vacío.
+- **Otro tipo de destino:** `Una historia va solo a Instagram y Facebook, y todos sus destinos son historia.`
+  Un reel en Instagram y una historia en Facebook son dos filas.
+- **Más de un archivo** (sin el atajo): `Una historia es un solo archivo, foto o video.`
+- **Foto que no sea JPG, si va a Instagram:** `Instagram recibe la historia en foto solo en JPG.`
+  Facebook acepta PNG.
+- **Palabra clave:** `Una historia no tiene comentarios: no lleva palabra clave.`
+- **Portada:** `Una historia no lleva portada.`
+- **Trial reel a la vez:** `Una historia no puede ser trial reel.`
+- **El atajo con `opciones` propias:** `Con «historia» la fila no lleva «opciones»: la historia ya dice todo.`
+- **El atajo con más de 30 archivos:** `Una secuencia lleva hasta 30 historias.`
+
+Antes de proponer una historia:
+
+1. **Vertical y corta.** El servidor no mide el archivo. Un video de más de 60 segundos o que
+   no sea vertical se acepta al programar, y si Meta lo rechaza, el destino falla con lo que
+   Meta dijo.
+2. **Solo cuentas de empresa en Instagram.** Instagram ha rechazado historias por API desde
+   cuentas de creador. Si pasa, el destino falla al publicar, sin reintentos, con
+   `@<cuenta> no puede publicar historias por API: Instagram solo lo permite a cuentas de empresa (Business). Cámbiala en Instagram o publica la historia desde la app.`
+3. **Sin enlaces, stickers ni encuestas.** La API de Meta no los permite.
+4. **Sin métricas ni comentarios.** Una historia no aparece en las métricas de Tu Parrilla
+   ni en La Mesa.
 
 ## 6. Lo que Meta no permite (léelo antes de proponer mandar el PDF adjunto)
 

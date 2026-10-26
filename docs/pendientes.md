@@ -222,6 +222,11 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   no salen en su video; cada una necesita su guion y su grabación. Ver
   `docs/levantamiento-terceros.md` §2.2 y §7.
 
+  En la misma vuelta, **las historias** (2026-10-25). No piden permisos nuevos: alcanzan
+  `instagram_content_publish` y `pages_manage_posts`, ya aprobados. Pero si Meta vuelve a
+  revisar la app, cuenta que el uso aprobado describa lo que hace: nombrarlas en la descripción
+  de esos dos permisos y mostrar una en el video.
+
   En la misma vuelta, **Instagram sin página de Facebook** (2026-10-19). La conexión de hoy es
   Instagram con login de Facebook, que encuentra el Instagram solo a través de una página que la
   persona administre: sin página enlazada, Meta no entrega ninguno, aunque se acepten todos los
@@ -364,6 +369,20 @@ nadie paga: todas las cuentas son iguales y el README dice «Sin suscripción».
   que debe seguir describiendo la app y enlazando Privacidad y Términos.
 
 ## Features y trabajo de código
+
+- **Historias en Instagram y Facebook: lo que falta** (2026-10-25). El motor está hecho —el
+  contrato, los publicadores, la secuencia en orden, el choripán al paso y la API y el CSV—;
+  el diseño entero está en `docs/superpowers/specs/2026-10-24-historias-design.md`. Falta:
+  - el compositor del panel, con el selector «Post · Historia» y las tarjetas verticales
+    (parte 2), y en La Parrilla el número de la secuencia («1/3») junto al corte y, en el
+    detalle del post, «Historia en Instagram · @cuenta»;
+  - Publicar en el teléfono, con el visor 9:16 (parte 3), por OTA;
+  - **[dueño] la primera historia real**, con una cuenta de prueba: si Instagram la rechaza
+    desde una cuenta de creador (@vicente_edits2, si es Creator), y un video a la página de
+    Facebook, cuya guía se contradice entre 60 y 90 segundos. Si Instagram ya no rechaza las de
+    creador, se borra la frase `HISTORIA_SOLO_EMPRESA` y su mención en las guías de la API;
+  - las métricas de las historias, fuera de esta entrega: Instagram las da solo durante 24
+    horas, y las de Facebook no están documentadas.
 
 - **Por decidir: que la app pida el candado también al volver a ella** (2026-10-21). Hoy lo
   pide cuando arranca; si quedó abierta en segundo plano, al volver entra sin pedirlo, y quien

@@ -340,6 +340,37 @@ programar el próximo.
 
 **Después no hay forma de saber por API si se graduó.** Eso se mira en la app de Instagram.
 
+**Instagram y Facebook — historias.** Con destinos de Instagram o de Facebook, `opciones`
+acepta `historia`:
+
+```json
+"opciones": { "instagram": { "historia": true }, "facebook": { "historia": true } }
+```
+
+Una historia es un post con **un solo archivo**, foto o video, **sin texto, sin palabra clave
+y sin portada**. Todos sus destinos son historia: un reel en Instagram y una historia en
+Facebook son dos filas. Hacia Instagram, la foto tiene que ser JPG; Facebook acepta PNG. El
+servidor no mide el archivo: un video de más de 60 segundos o que no sea vertical se acepta, y
+si Meta lo rechaza, el destino falla con lo que Meta dijo. Las frases de cada rechazo están en
+la tabla de errores, más abajo.
+
+Para una **secuencia** que sale en orden, el atajo: `"historia": true` en la fila (no en
+`opciones`) y varios archivos en `media`. La fila se expande en una historia por archivo, en
+ese orden y a la misma `fecha`, y cada una espera a que salga la anterior en la misma cuenta.
+El resultado de la fila trae `postIds`, un id por historia en su orden (`null` la que no
+entró); `postId` es el de la primera. Con `ref`, cada historia guarda `<ref>#1`, `<ref>#2`…
+Sin el atajo, la forma completa de una historia de una secuencia es
+`{ "historia": { "secuencia": "<texto de 1 a 64 letras, números, - o _>", "orden": <1 a 30> } }`,
+con la misma `secuencia` en todas.
+
+Instagram ha rechazado historias por API desde cuentas de creador. Si pasa, el destino
+falla al publicar, sin reintentos, con:
+
+`@<cuenta> no puede publicar historias por API: Instagram solo lo permite a cuentas de empresa (Business). Cámbiala en Instagram o publica la historia desde la app.`
+
+Una historia no tiene comentarios ni métricas en Tu Parrilla, y la API de Meta no permite
+enlaces, stickers ni encuestas.
+
 ### `regla` (opcional) — respuesta automática por palabra clave
 
 ```json
@@ -435,6 +466,15 @@ Instagram acepta: 1 foto, 1 video, o 2–10 fotos (carrusel).
 | `Un trial reel es un solo video, sin fotos.` | `opciones.<destino>.trialReel: true` con fotos, carrusel, dos videos o sin ningún video en `media` |
 | `@<cuenta> no tiene trial reels: Instagram los da solo a cuentas con un mínimo de seguidores, y esta no lo alcanza. Prográmalo como reel normal o en otra cuenta.` | **no es un error de fila:** la fila con `trialReel: true` se acepta al programar; esta frase aparece después, en el `error` del destino que ya publicó (panel y `GET /api/schedule/posts`), porque Instagram solo revela la elegibilidad al crear el contenedor |
 | `@<cuenta> no tiene trial reels disponibles, probablemente porque Instagram no le habilitó la función. Prográmalo como reel normal o en otra cuenta. Instagram dice: «…».` | igual que la anterior, cuando Meta rechaza el trial reel sin decir que son los seguidores |
+| `Una historia va solo a Instagram y Facebook, y todos sus destinos son historia.` | `opciones.<destino>.historia` en unos destinos y no en otros, o una historia hacia otra red (ver «Instagram y Facebook — historias», arriba) |
+| `Una historia no lleva texto.` | una historia con `texto` |
+| `Una historia es un solo archivo, foto o video.` | una historia con más de un archivo, o sin ninguno |
+| `Instagram recibe la historia en foto solo en JPG.` | una historia hacia Instagram con una foto PNG, WebP u otro formato |
+| `Una historia no tiene comentarios: no lleva palabra clave.` | una historia con `regla` |
+| `Una historia no lleva portada.` | una historia con `portada` |
+| `Una historia no puede ser trial reel.` | `opciones.instagram` con `historia` y `trialReel` a la vez |
+| `Con «historia» la fila no lleva «opciones»: la historia ya dice todo.` | el atajo `"historia": true` con `opciones` en la misma fila |
+| `Una secuencia lleva hasta 30 historias.` | el atajo `"historia": true` con más de 30 archivos en `media` |
 | `Una de las cuentas elegidas no es tuya.` | un identificador en `cuentas` que no es una cuenta del dueño (o no existe) |
 | `La cuenta <handle> no está conectada. Vuelve a conectarla en Los Fierros.` | un identificador en `cuentas` que existe pero perdió la credencial — **solo con `cuentas`**: con `redes`, una cuenta desconectada da la frase de abajo |
 | `No hay una cuenta de <red> conectada.` | un nombre en `redes` sin ninguna cuenta *conectada* de esa red — no tiene ninguna, o la única que tiene está desconectada; las dos dan la misma frase |
@@ -898,8 +938,9 @@ Un rango pasado vale (lista lo ya publicado). Formato inválido o rango invertid
   **`opciones`** es lo que se eligió para esa red al programar (sección 1, `opciones`): en
   TikTok `directo`, todas las casillas explícitas —`comentarios`, `duo`, `pegar`, `ia` en
   `false` si no se encendieron—, así que una clave que mandaste y no aparece no se guardó; en
-  TikTok `borrador`, `{ "modo": "borrador" }`; en un trial reel, `{ "trialReel": true }`; `null`
-  en las redes que no piden nada. Es lo que Tu Parrilla le manda a la red, no lo que la red
+  TikTok `borrador`, `{ "modo": "borrador" }`; en un trial reel, `{ "trialReel": true }`; en una
+  historia, `{ "historia": true }` o, en una secuencia, `{ "historia": { "secuencia": …, "orden": … } }`;
+  `null` en las redes que no piden nada. Es lo que Tu Parrilla le manda a la red, no lo que la red
   aplicó: lo que la cuenta tiene bloqueado (un dúo deshabilitado en TikTok) se manda apagado sin
   fallar, y eso solo se ve en la red.
 

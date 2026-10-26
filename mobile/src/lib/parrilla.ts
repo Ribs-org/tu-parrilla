@@ -19,8 +19,11 @@ export type Coccion = 'cruda' | 'sellada' | 'punto' | 'parcial' | 'quemada'
 export type Carne = 'cruda' | 'sellada' | 'punto' | 'quemada'
 export type Calor = 'apagada' | 'prendida' | 'llena'
 
-/** Qué corte es un post: lo decide el servidor (`formatoDe` en el panel) y llega en la API. */
-export type Formato = 'entrana' | 'tira' | 'bife' | 'chori'
+/**
+ * Qué corte es un post: lo decide el servidor (`formatoDe` en el panel) y llega en la API.
+ * `choripan` es una historia, sea foto o video.
+ */
+export type Formato = 'entrana' | 'tira' | 'bife' | 'chori' | 'choripan'
 
 /** Cómo le fue a cada destino: su marca en el corte. También llega decidido en la API. */
 export type Sello = 'pendiente' | 'saliendo' | 'servido' | 'bandeja' | 'reintento' | 'quemado' | 'frio'
@@ -72,6 +75,7 @@ export const NOMBRE_FORMATO: Record<Formato, string> = {
   tira: 'Carrusel',
   bife: 'Foto',
   chori: 'Texto',
+  choripan: 'Historia',
 }
 
 /**

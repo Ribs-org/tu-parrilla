@@ -60,7 +60,7 @@ vi.mock('@/lib/storage', () => ({
   tamanoEnAlmacen: async () => 1024,
 }))
 
-const { POST, agruparPostsMovil } = await import('./route')
+const { POST, aceptaChoripan, agruparPostsMovil } = await import('./route')
 
 function filaPost(overrides: Partial<ScheduledPost> = {}): ScheduledPost {
   return {
@@ -108,6 +108,17 @@ function filaTarget(overrides: Partial<ScheduledPostTarget> = {}): ScheduledPost
  * Calendario del teléfono pueden usar de clave de React (repaso final de la rama).
  */
 describe('agruparPostsMovil (GET /api/mobile/schedule)', () => {
+  it('una historia es un choripán solo para la app que sabe dibujarlo; a la vieja, el corte de su archivo', () => {
+    const post = filaPost()
+    const filas = [{ post, target: filaTarget({ opciones: { historia: true } }), handle: '@vicente' }]
+    const media = new Map([[post.id, [{ blobUrl: 'https://b/h.jpg', mediaType: 'image' }]]])
+    expect(agruparPostsMovil(filas, media, 'America/Santiago', new Set(), true)[0]!.formato).toBe('choripan')
+    expect(agruparPostsMovil(filas, media, 'America/Santiago', new Set(), false)[0]!.formato).toBe('bife')
+    const nueva = new Request('https://ej.cl/api/mobile/schedule', { headers: { 'X-Parrilla-Cortes': 'choripan' } })
+    expect(aceptaChoripan(nueva)).toBe(true)
+    expect(aceptaChoripan(new Request('https://ej.cl/api/mobile/schedule'))).toBe(false)
+  })
+
   it('dos destinos de la misma red en un post traen ids de destino distintos', () => {
     const post = filaPost()
     const filas = [

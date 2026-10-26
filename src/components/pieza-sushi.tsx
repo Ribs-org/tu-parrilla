@@ -101,6 +101,16 @@ const TEMAKI = {
 }
 
 /**
+ * El onigiri, la historia: lo que se come al paso en Japón, como el choripán acá. Un triángulo
+ * de arroz parado, con el salmón asomando arriba —lo que se cocina— y la banda de nori abajo.
+ */
+const ONIGIRI = {
+  silueta: 'M60 3C66 3 70 7 74 14L89 44C93 52 89 60 79 60L41 60C31 60 27 52 31 44L46 14C50 7 54 3 60 3Z',
+  pescado: 'M51 21C52 14 68 14 69 21C71 28 65 33 60 33C55 33 49 28 51 21Z',
+  nori: 'M46 40H74L76 60H44Z',
+}
+
+/**
  * Dónde va cada rodaja del maki, y su radio: como los huesos de la tira, una por archivo.
  * Juntas, apenas montadas una sobre otra: separadas, las bandas caían en los huecos y no se
  * veían, y el pescado del centro quedaba chico para decir la cocción.
@@ -159,6 +169,7 @@ export function siluetaDe(formato: Formato, huesos: number, cortado = true): str
   if (formato === 'entrana') return NIGIRI.silueta
   if (formato === 'tira') return cortado ? siluetaMaki(huesos) : siluetaRoll(huesos)
   if (formato === 'bife') return SASHIMI.silueta
+  if (formato === 'choripan') return ONIGIRI.silueta
   return TEMAKI.silueta
 }
 
@@ -179,7 +190,7 @@ export function PiezaDefs() {
   return (
     <svg width="0" height="0" className="absolute" aria-hidden focusable="false">
       <defs>
-        {(['entrana', 'bife', 'chori'] as const).map((formato) => (
+        {(['entrana', 'bife', 'chori', 'choripan'] as const).map((formato) => (
           <clipPath key={formato} id={idDeSilueta(formato, 0)}>
             <path d={siluetaDe(formato, 0)} />
           </clipPath>
@@ -369,6 +380,20 @@ function Temaki({ carne }: { carne: Carne }) {
   )
 }
 
+function Onigiri({ carne }: { carne: Carne }) {
+  const v = vetas(carne)
+  return (
+    <>
+      <path d={ONIGIRI.silueta} fill="url(#tp-arroz)" stroke={ARROZ.borde} strokeWidth=".9" />
+      <Granos puntos={[[48, 36, 20], [72, 35, -15], [40, 50, 10], [80, 51, -20], [56, 9, 15], [64, 38, -10]]} />
+      <path d={ONIGIRI.pescado} fill={`url(#tp-pescado-${carne})`} />
+      <path d="M54 20C57 17 63 17 66 20M54 26C57 23 63 23 66 26" stroke={v.color} strokeOpacity={v.opacidad} strokeWidth="1.5" fill="none" strokeLinecap="round" />
+      <path d={ONIGIRI.nori} fill={NORI.cuerpo} />
+      <path d="M72 40L74 60" stroke={NORI.brillo} strokeWidth=".9" />
+    </>
+  )
+}
+
 /** Una elipse como trazo, para el motor de la imagen para compartir, que se queda con trazos. */
 function elipse(cx: number, cy: number, rx: number, ry: number): string {
   return `M${cx - rx} ${cy}a${rx} ${ry} 0 1 0 ${2 * rx} 0a${rx} ${ry} 0 1 0 ${-2 * rx} 0Z`
@@ -403,6 +428,13 @@ export function capasDeMuestra(formato: Formato, huesos: number, carne: Carne): 
       { d: SASHIMI.wasabi, relleno: WASABI },
     ]
   }
+  if (formato === 'choripan') {
+    return [
+      { d: ONIGIRI.silueta, relleno: ARROZ.claro },
+      { d: ONIGIRI.pescado, relleno: 'pescado' },
+      { d: ONIGIRI.nori, relleno: NORI.cuerpo },
+    ]
+  }
   if (formato === 'chori') {
     return [
       { d: TEMAKI.cono, relleno: SOYA.claro },
@@ -416,10 +448,14 @@ export function capasDeMuestra(formato: Formato, huesos: number, carne: Carne): 
   return [{ d: siluetaRoll(huesos), relleno: 'pescado' }, ...capasDelCorte(x1 - cara, (arriba + abajo) / 2, cara, (abajo - arriba) / 2)]
 }
 
-/** Dónde cae la banda de cada destino: repartidas entre 30 y 90, o al centro si es una. */
-function posiciones(n: number): number[] {
+/**
+ * Dónde cae la banda de cada destino: repartidas entre 30 y 90, o al centro si es una. En el
+ * onigiri, que es más angosto, entre 46 y 74.
+ */
+function posiciones(n: number, formato: Formato): number[] {
+  const [desde, hasta] = formato === 'choripan' ? [46, 74] : [30, 90]
   if (n <= 1) return [60]
-  return Array.from({ length: n }, (_, i) => 30 + (i * 60) / (n - 1))
+  return Array.from({ length: n }, (_, i) => desde + (i * (hasta - desde)) / (n - 1))
 }
 
 /**
@@ -512,7 +548,7 @@ export function PiezaSushi({
 }) {
   const quemado = coccion === 'parcial' || coccion === 'quemada'
   const saliendo = sellos.includes('saliendo')
-  const xs = formato === 'tira' ? posicionesMaki(sellos.length, huesos) : posiciones(sellos.length)
+  const xs = formato === 'tira' ? posicionesMaki(sellos.length, huesos) : posiciones(sellos.length, formato)
   const cortado = rollCortado(carne)
   const silueta = siluetaDe(formato, huesos, cortado)
   const lleno = Math.max(0, Math.min(1, llenado))
@@ -539,13 +575,14 @@ export function PiezaSushi({
             </clipPath>
           </defs>
         ) : null}
-        <ellipse cx="60" cy="59" rx="46" ry="4" fill="#6b5a44" opacity=".22" filter="url(#tp-sushi-sombra)" />
+        <ellipse cx="60" cy="59" rx={formato === 'choripan' ? 30 : 46} ry="4" fill="#6b5a44" opacity=".22" filter="url(#tp-sushi-sombra)" />
         {aMedias ? <path d={silueta} fill="rgba(34,31,28,.03)" stroke="rgba(34,31,28,.32)" strokeWidth="1.1" strokeDasharray="3 3" /> : null}
         <g clipPath={aMedias ? `url(#${idDeLlenado})` : undefined}>
           {formato === 'entrana' ? <Nigiri carne={carne} /> : null}
           {formato === 'tira' ? (cortado ? <MakiEnRodajas carne={carne} n={huesos} /> : <MakiEntero carne={carne} n={huesos} />) : null}
           {formato === 'bife' ? <Sashimi carne={carne} /> : null}
           {formato === 'chori' ? <Temaki carne={carne} /> : null}
+          {formato === 'choripan' ? <Onigiri carne={carne} /> : null}
           {carne !== 'quemada' ? (
             <ellipse cx="46" cy={brilloY} rx="24" ry="4" fill="#ffffff" opacity={carne === 'cruda' ? 0.4 : 0.22} filter="url(#tp-sushi-difuso)" clipPath={`url(#${recorte})`} />
           ) : null}

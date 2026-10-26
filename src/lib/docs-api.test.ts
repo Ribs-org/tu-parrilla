@@ -14,7 +14,12 @@ import { LOTE_SIN_TIEMPO, MAX_BATCH_ITEMS, MAX_REF, MEDIA_ILEGIBLE, PUBLISHABLE,
 import { MOTIVOS_FIJOS } from './social/publish/descarga-segura'
 import { ARCHIVO_MUY_GRANDE, CUERPO_ILEGIBLE, TIPO_NO_PUBLICABLE } from './mobile-api'
 import { REDES_PROXIMAMENTE, fraseProximamente } from './networks'
-import { SIN_SEGUIDORES_PARA_TRIAL, TOPE_INSTAGRAM, TRIAL_REEL_NO_DISPONIBLE } from './social/publish/publisher'
+import {
+  HISTORIA_SOLO_EMPRESA,
+  SIN_SEGUIDORES_PARA_TRIAL,
+  TOPE_INSTAGRAM,
+  TRIAL_REEL_NO_DISPONIBLE,
+} from './social/publish/publisher'
 import {
   CONEXION_DESCONECTADA,
   CONEXION_FALLO,
@@ -25,7 +30,17 @@ import {
 } from './avisos/reglas'
 import { BORRADO_YA_PUBLICADO, ESTADO_ERROR } from './schedule-api'
 import { FRASE_DE_FALLA } from './social/publish/archivar'
-import { TRIAL_REEL_MEDIA } from './social/publish/opciones'
+import {
+  HISTORIA_DESTINOS,
+  HISTORIA_JPG,
+  HISTORIA_MEDIA,
+  HISTORIA_SIN_CLAVE,
+  HISTORIA_SIN_PORTADA,
+  HISTORIA_SIN_TEXTO,
+  HISTORIA_TRIAL,
+  TRIAL_REEL_MEDIA,
+} from './social/publish/opciones'
+import { HISTORIA_CON_OPCIONES, HISTORIA_DEMASIADAS } from './social/publish/batch'
 import { LADO_ERROR, METRICA_ERROR, PERCENTIL_ERROR, RECIENTES_ERROR } from './mejores'
 import { RANGO_ERROR, cuentaAmbigua, cuentaDesconocida } from './metrics-api'
 
@@ -50,6 +65,16 @@ describe('la documentación para LLM no le miente al código', () => {
       TRIAL_REEL_NO_DISPONIBLE,
       SIN_SEGUIDORES_PARA_TRIAL,
       BORRADO_YA_PUBLICADO,
+      HISTORIA_DESTINOS,
+      HISTORIA_SIN_TEXTO,
+      HISTORIA_MEDIA,
+      HISTORIA_JPG,
+      HISTORIA_SIN_CLAVE,
+      HISTORIA_SIN_PORTADA,
+      HISTORIA_TRIAL,
+      HISTORIA_CON_OPCIONES,
+      HISTORIA_DEMASIADAS,
+      HISTORIA_SOLO_EMPRESA,
     ]) {
       expect(guia).toContain(frase)
     }
@@ -152,7 +177,7 @@ describe('la documentación para LLM no le miente al código', () => {
     const esquema = JSON.parse(readFileSync('public/docs/api.json', 'utf8'))
     const declarados = Object.keys(esquema.properties.posts.items.properties).sort()
     expect(declarados).toEqual(
-      ['atributos', 'cuentas', 'fecha', 'media', 'opciones', 'portada', 'redes', 'ref', 'regla', 'texto'].sort(),
+      ['atributos', 'cuentas', 'fecha', 'historia', 'media', 'opciones', 'portada', 'redes', 'ref', 'regla', 'texto'].sort(),
     )
   })
 })

@@ -1,4 +1,4 @@
-import type { Carne } from './parrilla'
+import type { Carne, Formato } from './parrilla'
 
 /*
  * Las medidas de la pieza de sushi, en el lienzo de 120 × 64 del panel: las mismas funciones
@@ -39,10 +39,14 @@ export function rollCortado(carne: Carne): boolean {
   return carne === 'punto'
 }
 
-/** Dónde cae la banda de cada destino: repartidas entre 30 y 90, o al centro si es una. */
-export function posiciones(n: number): number[] {
+/**
+ * Dónde cae la banda de cada destino: repartidas entre 30 y 90, o al centro si es una. En el
+ * onigiri, que es más angosto, entre 46 y 74.
+ */
+export function posiciones(n: number, formato?: Formato): number[] {
+  const [desde, hasta] = formato === 'choripan' ? [46, 74] : [30, 90]
   if (n <= 1) return [60]
-  return Array.from({ length: n }, (_, i) => 30 + (i * 60) / (n - 1))
+  return Array.from({ length: n }, (_, i) => desde + (i * (hasta - desde)) / (n - 1))
 }
 
 /**

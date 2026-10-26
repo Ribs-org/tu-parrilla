@@ -27,6 +27,16 @@ const SILUETA: Record<Formato, ViewStyle> = {
   tira: { left: 2, top: 8, width: 60, height: 18, borderRadius: 5 },
   entrana: { left: 1, top: 11, width: 62, height: 14, borderTopLeftRadius: 8, borderTopRightRadius: 7, borderBottomRightRadius: 6, borderBottomLeftRadius: 5 },
   chori: { left: 8, top: 10, width: 48, height: 14, borderRadius: 7 },
+  // El choripán al paso: el pan parado, angosto como una historia, con el chori adentro.
+  choripan: { left: 22, top: 1, width: 20, height: 32, borderRadius: 6 },
+}
+
+/** El pan del choripán: se tuesta con el chori que lleva adentro, como en el panel. */
+const PAN: Record<Carne, { miga: string; corteza: string }> = {
+  cruda: { miga: '#f1d29a', corteza: '#d9a861' },
+  sellada: { miga: '#ebc286', corteza: '#cf9550' },
+  punto: { miga: '#e0ac68', corteza: '#b97a35' },
+  quemada: { miga: '#5e4532', corteza: '#3a2a1f' },
 }
 
 /** Lo que acompaña a cada carne, como en el panel: se oscurece con la cocción. */
@@ -37,10 +47,14 @@ const VETAS: Record<Carne, { grasa: string; hueso: string; tuetano: string; nudo
   quemada: { grasa: '#4a3a33', hueso: '#5d4f47', tuetano: '#2e221d', nudo: '#1a1210' },
 }
 
-/** Dónde cae la marca de cada destino, en el lienzo del panel: entre 34 y 92, o al centro. */
-function posiciones(n: number): number[] {
-  if (n <= 1) return [62]
-  return Array.from({ length: n }, (_, i) => 34 + (i * 58) / (n - 1))
+/**
+ * Dónde cae la marca de cada destino, en el lienzo del panel: entre 34 y 92, o al centro. En el
+ * choripán, que es angosto, entre 50 y 70, como en el panel.
+ */
+function posiciones(n: number, formato: Formato): number[] {
+  const [desde, hasta, centro] = formato === 'choripan' ? [50, 70, 60] : [34, 92, 62]
+  if (n <= 1) return [centro]
+  return Array.from({ length: n }, (_, i) => desde + (i * (hasta - desde)) / (n - 1))
 }
 
 /** La marca de un destino: una diagonal del fierro, inclinada como en el panel. */
@@ -122,6 +136,20 @@ function Textura({ formato, carne, huesos, ancho }: { formato: Formato; carne: C
   }
   if (formato === 'entrana') {
     return <View style={{ position: 'absolute', left: 3, right: 4, top: 5, height: 1.5, borderRadius: 1, backgroundColor: v.grasa, opacity: 0.55 }} />
+  }
+  if (formato === 'choripan') {
+    // Las dos mitades del pan tapan los costados: al medio queda el chori, que lleva la cocción.
+    const pan = PAN[carne]
+    const mitad: ViewStyle = { position: 'absolute', top: 0, bottom: 0, width: 6, backgroundColor: pan.miga, borderColor: pan.corteza }
+    return (
+      <>
+        {[5, 12, 19, 26].map((top, i) => (
+          <View key={top} style={{ position: 'absolute', left: i % 2 ? 9 : 11, top, width: 1.6, height: 1.6, borderRadius: 1, backgroundColor: v.grasa, opacity: 0.7 }} />
+        ))}
+        <View style={[mitad, { left: 0, borderRightWidth: 1 }]} />
+        <View style={[mitad, { right: 0, borderLeftWidth: 1 }]} />
+      </>
+    )
   }
   return (
     <>
@@ -233,7 +261,7 @@ function PiezaDeCarne({ formato, huesos = 0, carne, coccion, sellos }: PropsDePi
   const izquierda = silueta.left as number
   const ancho = silueta.width as number
   const v = VETAS[carne]
-  const xs = posiciones(sellos.length).map((x) => x * ESCALA - izquierda)
+  const xs = posiciones(sellos.length, formato).map((x) => x * ESCALA - izquierda)
   // La entraña va apenas torcida: así una tira larga se lee como entraña y no como un palo.
   const giro: ViewStyle['transform'] = formato === 'entrana' ? [{ rotate: '-3deg' }] : []
   return (

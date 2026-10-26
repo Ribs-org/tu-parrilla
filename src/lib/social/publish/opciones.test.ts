@@ -1,10 +1,19 @@
 import { describe, expect, it } from 'vitest'
 import {
+  HISTORIA_DESTINOS,
+  HISTORIA_JPG,
+  HISTORIA_MEDIA,
+  HISTORIA_SIN_CLAVE,
+  HISTORIA_SIN_TEXTO,
+  HISTORIA_TRIAL,
   OPCIONES_ERROR,
   TIKTOK_PATROCINADO_PRIVADO,
   TIKTOK_SIN_PRIVACIDAD,
   TRIAL_REEL_MEDIA,
+  errorDeHistoria,
   errorDeMediaPorOpciones,
+  esHistoria,
+  historiaDe,
   opcionesDesdeFormularioPorCuenta,
   opcionesParaApi,
   resumenOpciones,
@@ -328,6 +337,95 @@ describe('la etiqueta de IA de TikTok', () => {
     expect(resumenOpciones('tiktok', { ...directo, ia: true })).toBe(
       'Directo · Solo yo · con comentarios · sin dúo · sin pegar · sin comercial · hecho con IA',
     )
+  })
+})
+
+describe('historias', () => {
+  const secuencia = { secuencia: 'abc-123', orden: 2 }
+
+  it('Instagram y Facebook aceptan una historia suelta o de una secuencia', () => {
+    expect(validarOpciones('instagram', { historia: true })).toEqual({ opciones: { historia: true } })
+    expect(validarOpciones('facebook', { historia: true })).toEqual({ opciones: { historia: true } })
+    expect(validarOpciones('facebook', { historia: secuencia })).toEqual({ opciones: { historia: secuencia } })
+  })
+
+  it('historia apagada o ausente no guarda nada; Facebook sin opciones sigue siendo null', () => {
+    expect(validarOpciones('instagram', { historia: false })).toEqual({ opciones: null })
+    expect(validarOpciones('facebook', { historia: false })).toEqual({ opciones: null })
+    expect(validarOpciones('facebook', undefined)).toEqual({ opciones: null })
+  })
+
+  it('historia y trial reel se excluyen', () => {
+    expect(validarOpciones('instagram', { historia: true, trialReel: true })).toEqual({ error: HISTORIA_TRIAL })
+  })
+
+  it('una forma de secuencia que no se entiende es error de forma', () => {
+    for (const historia of [
+      'si',
+      { secuencia: 'a b', orden: 1 },
+      { secuencia: 'a', orden: 0 },
+      { secuencia: 'a', orden: 1.5 },
+      { secuencia: 'a', orden: 31 },
+      { secuencia: 'a', orden: 1, extra: true },
+    ]) {
+      expect(validarOpciones('instagram', { historia })).toEqual({ error: OPCIONES_ERROR })
+    }
+    expect(validarOpciones('facebook', { trialReel: true })).toEqual({ error: OPCIONES_ERROR })
+  })
+
+  it('todos los destinos de un post historia son historia, y la misma', () => {
+    const cuentas = [
+      { id: 'ig', network: 'instagram', handle: '@a' },
+      { id: 'fb', network: 'facebook', handle: 'Página' },
+    ]
+    expect(validarOpcionesPorCuenta(cuentas, { ig: { historia: true }, fb: { historia: true } })).toEqual({
+      opciones: { ig: { historia: true }, fb: { historia: true } },
+    })
+    expect(validarOpcionesPorCuenta(cuentas, { ig: { historia: true } })).toEqual({ error: HISTORIA_DESTINOS })
+    expect(validarOpcionesPorCuenta(cuentas, { ig: { historia: true }, fb: { historia: secuencia } })).toEqual({
+      error: OPCIONES_ERROR,
+    })
+    const conTikTok = [...cuentas, { id: 'tt', network: 'tiktok', handle: '@t' }]
+    expect(
+      validarOpcionesPorCuenta(conTikTok, { ig: { historia: true }, fb: { historia: true }, tt: { modo: 'borrador' } }),
+    ).toEqual({ error: HISTORIA_DESTINOS })
+  })
+
+  it('una historia es exactamente un archivo, foto o video', () => {
+    const opciones = { ig: { historia: true as const } }
+    expect(errorDeMediaPorOpciones(opciones, { videos: 1, fotos: 0, sinTipo: 0 })).toBeNull()
+    expect(errorDeMediaPorOpciones(opciones, { videos: 0, fotos: 1, sinTipo: 0 })).toBeNull()
+    expect(errorDeMediaPorOpciones(opciones, { videos: 0, fotos: 0, sinTipo: 1 })).toBeNull()
+    expect(errorDeMediaPorOpciones(opciones, { videos: 1, fotos: 1, sinTipo: 0 })).toBe(HISTORIA_MEDIA)
+    expect(errorDeMediaPorOpciones(opciones, { videos: 0, fotos: 0, sinTipo: 0 })).toBe(HISTORIA_MEDIA)
+  })
+
+  it('sin texto, sin palabra clave y, hacia Instagram, la foto en JPG', () => {
+    const opciones = { ig: { historia: true as const } }
+    const base = { caption: '', conPalabraClave: false, aInstagram: true, fotos: ['jpg'] }
+    expect(errorDeHistoria(opciones, base)).toBeNull()
+    expect(errorDeHistoria(opciones, { ...base, caption: 'hola' })).toBe(HISTORIA_SIN_TEXTO)
+    expect(errorDeHistoria(opciones, { ...base, caption: '   ' })).toBeNull()
+    expect(errorDeHistoria(opciones, { ...base, conPalabraClave: true })).toBe(HISTORIA_SIN_CLAVE)
+    expect(errorDeHistoria(opciones, { ...base, fotos: ['png'] })).toBe(HISTORIA_JPG)
+    expect(errorDeHistoria(opciones, { ...base, aInstagram: false, fotos: ['png'] })).toBeNull()
+    // Un post que no es historia no se mira.
+    expect(errorDeHistoria({}, { ...base, caption: 'hola', fotos: ['png'] })).toBeNull()
+  })
+
+  it('historiaDe y esHistoria leen lo guardado', () => {
+    expect(historiaDe('instagram', { historia: secuencia })).toEqual(secuencia)
+    expect(historiaDe('facebook', { historia: true })).toBe(true)
+    expect(historiaDe('instagram', { trialReel: true })).toBeNull()
+    expect(historiaDe('youtube', { historia: true })).toBeNull()
+    expect(esHistoria({ historia: true })).toBe(true)
+    expect(esHistoria({ trialReel: true })).toBe(false)
+    expect(esHistoria(null)).toBe(false)
+  })
+
+  it('el resumen dice que es una historia y, si es de una secuencia, cuál', () => {
+    expect(resumenOpciones('instagram', { historia: true })).toBe('Historia')
+    expect(resumenOpciones('facebook', { historia: secuencia })).toBe('Historia 2 de una secuencia')
   })
 })
 

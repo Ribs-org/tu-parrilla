@@ -234,11 +234,14 @@ esa; «Se quemó» no lo obedece. El ícono de cada red va en su color de marca
 (`--color-marca-*`, `src/lib/color-de-red.ts`), nunca de fondo: el fondo rojo es lo quemado.
 El porqué, en `docs/superpowers/specs/2026-10-20-parrilla-en-el-tiempo-design.md`. Cada post se dibuja como un **corte** (`src/components/corte.tsx`):
 la silueta dice el formato —entraña video, tira de asado carrusel con un hueso por archivo,
-bife foto, chori texto—, la carne cómo va, una marca por destino que se quema cuando ese
+bife foto, chori texto, choripán al paso historia—, la carne cómo va, una marca por destino que se quema cuando ese
 destino sale, y un halo rojo con banderita si algo se quemó; humo mientras sale. El texto va
 al lado, en la chapa, nunca sobre la carne. La app del teléfono dibuja el mismo corte con
 vistas (`mobile/src/components/pieza.tsx`), con el formato y el sello de cada destino que le
-manda `GET /api/mobile/schedule`. El porqué, en
+manda `GET /api/mobile/schedule`. Un formato nuevo solo le llega a la app que dice saber
+dibujarlo en el encabezado `X-Parrilla-Cortes` (hoy, `choripan`): una instalación vieja que
+recibiera uno desconocido se caería al dibujarlo, así que a ella la historia le llega con el
+corte de su archivo. El porqué, en
 `docs/superpowers/specs/2026-10-16-el-corte-que-se-lee-design.md`. El panel tiene además un
 **modo día**, que se elige con el botón de la barra y se recuerda en la cuenta (`users.tema`,
 `src/lib/tema.ts`), así que vale en cualquier equipo donde entres y en la app del teléfono, que lo lee y lo cambia
@@ -636,6 +639,18 @@ del servidor queda como reja de fondo, no como el primer filtro. La app
 del teléfono todavía no ofrece TikTok como destino: el bloque de TikTok necesita consultar
 la cuenta del creador (`creator_info`) y sus interacciones, y eso el teléfono todavía no lo
 tiene.
+
+Un post también puede salir como **historia** en Instagram y en la página de Facebook: es
+otra opción por destino (`{ historia: true }`), con un solo archivo, sin texto, sin palabra
+clave ni portada, y todos sus destinos tienen que ser historia. Una secuencia son varios posts,
+uno por archivo, que comparten `{ secuencia, orden }`: el publicador no publica la historia
+`n` de una cuenta hasta que salió la `n − 1` (o se quemó, o la borraron), así que salen en
+orden aunque tengan la misma hora (`secuencia.ts`). Instagram la publica con un contenedor
+`STORIES`; Facebook, con `/photo_stories` o, el video, con `/video_stories` en tres pasos. En La
+Parrilla una historia es el **choripán al paso**, y en el modo día un onigiri. Hoy se
+programan por la API y el CSV; el compositor del panel y el teléfono las ofrecen en las
+entregas siguientes (`docs/superpowers/specs/2026-10-24-historias-design.md`). Las historias no
+entran al sondeo de comentarios ni a las métricas.
 
 ### TikTok
 
@@ -1311,7 +1326,10 @@ permite corregirlo.
 Y `opciones`, obligatorio cuando algún destino de la fila es una cuenta de TikTok (el
 modo, la privacidad y las casillas que TikTok exige elegir por publicación) y opcional
 para Instagram (`trialReel`, para que el reel salga como trial reel — solo lo ven quienes
-no siguen la cuenta, hasta que el dueño lo comparte desde la app). Se llavea por destino:
+no siguen la cuenta, hasta que el dueño lo comparte desde la app) y para Instagram y
+Facebook (`historia`, para que salga como historia). Una fila con `"historia": true` y varios
+archivos es el atajo de una secuencia: se expande en una historia por archivo y vuelve con
+`postIds`. Se llavea por destino:
 cada clave se busca primero entre los identificadores de cuenta de la fila, y si no
 coincide con ninguno se acepta como nombre de red — resuelta solo si la fila tiene una
 única cuenta de esa red, igual que `redes`. El detalle está en `public/docs/api-editor.md`.
@@ -1619,6 +1637,7 @@ src/
       lectura.ts           qué publicaciones se leen cada día: lo nuevo a diario, lo viejo cada vez más espaciado
       politica-youtube.ts  lo que las políticas de YouTube no dejan hacer con sus datos
       retencion-youtube.ts borra lo de YouTube que lleva 30 días sin refrescarse
+      publish/secuencia.ts las historias de una secuencia salen en orden: cada una espera a la anterior
 public/docs/
   api-llm.md, api-editor.md, api.json   las guías de la API para un LLM
   ui/                      la wiki de la interfaz: una página por pantalla, para guiar a quien se pierde

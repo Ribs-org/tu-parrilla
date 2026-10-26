@@ -13,6 +13,7 @@ import {
   type Formato,
   type Sello,
 } from '@/lib/parrilla'
+import { esHistoria } from '@/lib/social/publish/opciones'
 
 type Destino = {
   accountId: string
@@ -41,7 +42,8 @@ export function dibujoDe(
 ): Dibujo {
   const estados = destinos.map((d) => d.status)
   return {
-    ...formatoDe(media, videosLiberados),
+    // Una historia lo es en todos sus destinos (`validarOpcionesPorCuenta`): basta que lo sean todos.
+    ...formatoDe(media, videosLiberados, destinos.length > 0 && destinos.every((d) => esHistoria(d.opciones))),
     coccion: coccionDe(estados),
     carne: carneDe(estados),
     sellos: destinos.map((d) => selloDe(d, frias.has(d.accountId) ? 'frio' : 'al-rojo')),

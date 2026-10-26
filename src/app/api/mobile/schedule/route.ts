@@ -33,8 +33,8 @@ import {
 import { BorradorConsumido, CreativoNoEsta, crearPostProgramado } from '@/lib/social/publish/crear'
 import { CREATIVO_NO_ESTA } from '@/lib/cocina/meson-motivos'
 import { CuentaInvalida } from '@/lib/social/cuentas'
-import { validateScheduleDraft } from '@/lib/social/publish/validate'
-import { errorDeMediaPorOpciones, validarOpcionesPorCuenta } from '@/lib/social/publish/opciones'
+import { extensionDe, validateScheduleDraft } from '@/lib/social/publish/validate'
+import { errorDeHistoria, errorDeMediaPorOpciones, esHistoria, validarOpcionesPorCuenta } from '@/lib/social/publish/opciones'
 import { basePublica, keyDesdeUrl, tamanoEnAlmacen } from '@/lib/storage'
 
 export const dynamic = 'force-dynamic'
@@ -83,12 +83,17 @@ export type PostMovil = {
  *
  * `mediaPorPost` son los archivos de cada post en su orden: la miniatura es la primera foto
  * y el formato sale de todos. `frias`, las cuentas con el fierro frío (`cuentasFrias`).
+ *
+ * `conChoripan`: si la app que pregunta sabe dibujar una historia (`aceptaChoripan`). A una
+ * que no, la historia le llega con el corte de su archivo, como antes de que existiera: una
+ * app sin actualizar que recibiera un formato desconocido se caía al dibujarlo.
  */
 export function agruparPostsMovil(
   filas: FilaDestinoMovil[],
   mediaPorPost: Map<string, Array<{ blobUrl: string; mediaType: string }>>,
   zone: string,
   frias: ReadonlySet<string> = new Set(),
+  conChoripan = true,
 ): PostMovil[] {
   const mapa = new Map<string, PostMovil>()
   for (const { post, target, handle } of filas) {
@@ -99,7 +104,8 @@ export function agruparPostsMovil(
       cuando: isoInZone(post.scheduledAt, zone),
       portada: post.coverUrl,
       miniatura: media.find((m) => m.mediaType === 'image')?.blobUrl ?? null,
-      ...formatoDe(media, post.videosLiberados),
+      // Una historia lo es en todos sus destinos: el primero basta para decir el corte.
+      ...formatoDe(media, post.videosLiberados, conChoripan && esHistoria(target.opciones)),
       redes: [],
     }
     entrada.redes.push({
@@ -114,6 +120,14 @@ export function agruparPostsMovil(
     mapa.set(post.id, entrada)
   }
   return [...mapa.values()]
+}
+
+/**
+ * La app avisa qué cortes nuevos sabe dibujar en `X-Parrilla-Cortes` (`mobile/src/lib/api.ts`).
+ * Las instalaciones que todavía no reciben la actualización por aire no lo mandan.
+ */
+export function aceptaChoripan(request: Request): boolean {
+  return (request.headers.get('x-parrilla-cortes') ?? '').split(',').some((c) => c.trim() === 'choripan')
 }
 
 export async function GET(request: Request) {
@@ -160,7 +174,7 @@ export async function GET(request: Request) {
   // el reloj del teléfono, que puede estar en otra zona.
   return NextResponse.json({
     hoy: localDay(now, usuario.zona),
-    posts: agruparPostsMovil(filas, mediaPorPost, usuario.zona, frias),
+    posts: agruparPostsMovil(filas, mediaPorPost, usuario.zona, frias, aceptaChoripan(request)),
     borradores,
   })
 }
@@ -237,6 +251,14 @@ export async function POST(request: Request) {
   const videos = media.filter((m) => m.mediaType === 'video').length
   const mediaPorOpciones = errorDeMediaPorOpciones(opcionesCheck.opciones, { videos, fotos, sinTipo: 0 })
   if (mediaPorOpciones) return NextResponse.json({ error: mediaPorOpciones }, { status: 400 })
+  // El teléfono no pone palabra clave: esa parte de la regla no tiene cómo dispararse aquí.
+  const historia = errorDeHistoria(opcionesCheck.opciones, {
+    caption: borrador.texto,
+    conPalabraClave: false,
+    aInstagram: networks.includes('instagram'),
+    fotos: media.filter((m) => m.mediaType === 'image').map((m) => extensionDe(m.url)),
+  })
+  if (historia) return NextResponse.json({ error: historia }, { status: 400 })
 
   const now = new Date()
   const scheduledAt = resolverCuando(borrador.ahora, borrador.cuando, now)

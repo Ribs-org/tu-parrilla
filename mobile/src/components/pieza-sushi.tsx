@@ -266,7 +266,7 @@ function caja(x: number, y: number, ancho: number, alto: number, radio: number):
 export function PiezaDeSushi({ formato, huesos = 0, carne, coccion, sellos }: PropsDePieza) {
   const quieto = useQuieto()
   const cortado = rollCortado(carne)
-  const xs = (formato === 'tira' ? posicionesMaki(sellos.length, huesos) : posiciones(sellos.length)).map(u)
+  const xs = (formato === 'tira' ? posicionesMaki(sellos.length, huesos) : posiciones(sellos.length, formato)).map(u)
   // Las formas que llevan el halo si algo falló.
   const formas: ViewStyle[] = []
   let dibujo: ReactNode
@@ -329,6 +329,20 @@ export function PiezaDeSushi({ formato, huesos = 0, carne, coccion, sellos }: Pr
           </Pescado>
         ))}
         <View style={{ position: 'absolute', left: u(100), top: u(47), width: u(14), height: u(10), borderRadius: u(5), backgroundColor: WASABI }} />
+      </>
+    )
+  } else if (formato === 'choripan') {
+    // El onigiri, la historia: el triángulo de arroz parado —una caja con la punta redonda,
+    // sin SVG—, el salmón asomando arriba, que es lo que se cocina, y la banda de nori abajo.
+    const arroz: ViewStyle = { ...caja(31, 3, 58, 57, 10), borderTopLeftRadius: u(29), borderTopRightRadius: u(29) }
+    formas.push(arroz)
+    dibujo = (
+      <>
+        <View style={[arroz, { position: 'absolute', overflow: 'hidden', backgroundColor: ARROZ.claro, borderWidth: 0.5, borderColor: ARROZ.borde }]}>
+          <View style={{ position: 'absolute', left: u(15), bottom: 0, width: u(28), height: u(20), backgroundColor: NORI.cuerpo }} />
+          <Bandas xs={xs} sellos={sellos} izquierda={u(31)} ancho={u(58)} alto={u(57)} />
+        </View>
+        <Pescado carne={carne} style={caja(51, 15, 18, 18, 9)} ancho={u(18)} />
       </>
     )
   } else {

@@ -31,6 +31,7 @@ import { MOTIVOS_DE_CONEXION } from './conexion'
 import type { OpcionesDestino } from './opciones'
 import { marcarCaida } from '@/lib/avisos/run'
 import { aprenderTrialReels } from './trial-reels'
+import { esperaALaAnterior, lugarEnSecuencia, ordenarParaPublicar } from './secuencia'
 
 export type Report = {
   published: number
@@ -84,7 +85,7 @@ export async function publishDue(
     )
     .orderBy(asc(scheduledPosts.scheduledAt))
 
-  for (const { target, post } of due) {
+  for (const { target, post } of ordenarParaPublicar(due)) {
     let outcome: PublishOutcome
 
     // Sin tiempo para un intento entero: lo que queda lo toma la corrida siguiente. Empezar
@@ -92,6 +93,14 @@ export async function publishDue(
     // anota el resultado.
     if (plazos && !alcanzaElTiempo(target, plazos, Date.now())) {
       report.sinTiempo++
+      continue
+    }
+
+    // Una historia de una secuencia espera a la anterior de la misma cuenta, sin gastar intento:
+    // la corrida siguiente la vuelve a mirar (`secuencia.ts`).
+    const lugar = target.status === 'scheduled' ? lugarEnSecuencia(target.network, target.opciones) : null
+    if (lugar && post.ownerId && (await esperaALaAnterior(post.ownerId, target.accountId, lugar))) {
+      report.deferred++
       continue
     }
 

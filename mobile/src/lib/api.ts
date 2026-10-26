@@ -35,7 +35,9 @@ export async function conPlazo<R>(url: string, init: RequestInit, leer: (respues
 function pedir<T>(path: string, token: string, init: RequestInit = {}): Promise<T> {
   return conPlazo(
     `${API_BASE}${path}`,
-    { ...init, headers: { Authorization: `Bearer ${token}`, ...init.headers } },
+    // `X-Parrilla-Cortes`: los cortes que esta versión sabe dibujar además de los de siempre. Sin
+    // él, el servidor le manda a una historia el corte de su archivo (`aceptaChoripan`).
+    { ...init, headers: { Authorization: `Bearer ${token}`, 'X-Parrilla-Cortes': 'choripan', ...init.headers } },
     async (response) => {
       if (response.status === 401) throw new SesionCaducada()
       if (!response.ok) {

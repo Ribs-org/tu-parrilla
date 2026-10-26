@@ -57,7 +57,7 @@
           },
           "opciones": {
             "type": "object",
-            "description": "Lo que cada destino exige elegir. Obligatorio si algún destino de la fila es una cuenta de TikTok; opcional para Instagram. La clave del objeto es el identificador de cuenta del destino, o el nombre de la red si la fila tiene exactamente una cuenta de esa red. Forma para TikTok: { modo: 'directo'|'borrador', privacidad?: 'PUBLIC_TO_EVERYONE'|'MUTUAL_FOLLOW_FRIENDS'|'FOLLOWER_OF_CREATOR'|'SELF_ONLY' (obligatoria en 'directo'), comentarios?: boolean, duo?: boolean, pegar?: boolean, comercial?: 'no'|'marca_propia'|'patrocinado', ia?: boolean (true: TikTok lo etiqueta como contenido generado con IA) }. Forma para Instagram: { trialReel?: boolean } — un trial reel exige exactamente un video en 'media' y ninguna foto, o la fila se rechaza con 'Un trial reel es un solo video, sin fotos.'.",
+            "description": "Lo que cada destino exige elegir. Obligatorio si algún destino de la fila es una cuenta de TikTok; opcional para Instagram y Facebook. La clave del objeto es el identificador de cuenta del destino, o el nombre de la red si la fila tiene exactamente una cuenta de esa red. Forma para TikTok: { modo: 'directo'|'borrador', privacidad?: 'PUBLIC_TO_EVERYONE'|'MUTUAL_FOLLOW_FRIENDS'|'FOLLOWER_OF_CREATOR'|'SELF_ONLY' (obligatoria en 'directo'), comentarios?: boolean, duo?: boolean, pegar?: boolean, comercial?: 'no'|'marca_propia'|'patrocinado', ia?: boolean (true: TikTok lo etiqueta como contenido generado con IA) }. Forma para Instagram: { trialReel?: boolean } o { historia: true | { secuencia, orden } } — un trial reel exige exactamente un video en 'media' y ninguna foto, o la fila se rechaza con 'Un trial reel es un solo video, sin fotos.'. Forma para Facebook: { historia: true | { secuencia, orden } }. Una historia lleva un solo archivo, sin texto, sin regla y sin portada, y todos los destinos de la fila tienen que ser historia; hacia Instagram, la foto va en JPG. 'secuencia' es un texto de 1 a 64 letras, números, '-' o '_', compartido por las historias que salen en orden; 'orden' va de 1 a 30.",
             "additionalProperties": true
           },
           "regla": {
@@ -97,6 +97,10 @@
             "description": "Opcional y recomendada: una referencia tuya para la fila (el id de la fila en tu planilla, por ejemplo), única por dueño de la llave. Si una fila trae una 'ref' que ya entró, no se programa de nuevo: vuelve con el 'postId' de antes y 'repetido': true, sin descargar ni validar nada. Sirve para reenviar entero un lote cuya respuesta no llegó. No compara contenidos. Se recortan los espacios de los bordes.",
             "minLength": 1,
             "maxLength": 100
+          },
+          "historia": {
+            "type": "boolean",
+            "description": "El atajo de las secuencias de historias: con true, la fila sale como una historia por archivo de 'media', en ese orden y a la misma 'fecha', en sus destinos de Instagram y Facebook, y cada una espera a que salga la anterior en la misma cuenta. Con un solo archivo es una historia suelta. La fila no lleva 'opciones' (las pone el atajo) y su resultado trae 'postIds', un id por historia en su orden (null la que no entró). Con 'ref', cada historia guarda '<ref>#1', '<ref>#2'…"
           }
         }
       }

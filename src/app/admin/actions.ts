@@ -29,7 +29,10 @@ import {
   PORTADA_NEEDS_VIDEO,
 } from '@/lib/social/publish/batch'
 import {
+  HISTORIA_DESTINOS,
+  errorDeHistoria,
   errorDeMediaPorOpciones,
+  esHistoria,
   opcionesDesdeFormularioPorCuenta,
   validarOpciones,
   validarOpcionesPorCuenta,
@@ -777,6 +780,14 @@ export async function createScheduledPost(_prev: FormState, formData: FormData):
   const reglaCheck = validarRegla(reglaDesdeFormulario(formData))
   if ('error' in reglaCheck) return { error: reglaCheck.error }
 
+  const historia = errorDeHistoria(opcionesCheck.opciones, {
+    caption,
+    conPalabraClave: reglaCheck.regla !== null,
+    aInstagram: networks.includes('instagram'),
+    fotos: uploaded.filter((m) => m.mediaType !== 'video').map((m) => extensionDe(m.url)),
+  })
+  if (historia) return { error: historia }
+
   // Si salió de un borrador, el borrador se consume en la misma transacción que crea el post
   // (`crearPostProgramado`): si ya no estaba —se programó en otra pestaña o en el teléfono, o
   // se descartó—, no sale un segundo post, y si crear falla, el borrador sigue.
@@ -971,6 +982,10 @@ export async function updateScheduledPost(
     const check = validarOpciones(cuenta.network, null)
     if ('error' in check) return { error: check.error }
   }
+  // Por lo mismo, a una historia no se le suma una cuenta: saldría como post normal.
+  if (targetsPlan.create.length > 0 && targets.some((t) => esHistoria(t.opciones))) {
+    return { error: HISTORIA_DESTINOS }
+  }
 
   const reglaCheck = validarRegla(reglaDesdeFormulario(formData))
   if ('error' in reglaCheck) return { error: reglaCheck.error }
@@ -1080,6 +1095,15 @@ export async function updateScheduledPost(
       sinTipo: 0,
     })
     if (mediaPorOpciones) return { error: mediaPorOpciones }
+
+    const historia = errorDeHistoria(opcionesDeTargets, {
+      caption,
+      conPalabraClave: reglaCheck.regla !== null,
+      conPortada: Boolean(portadaUrl) || (Boolean(keepPortada) && keepPortada === post.coverUrl),
+      aInstagram: pendingNetworks.includes('instagram'),
+      fotos: finalTypes.flatMap((t, i) => (t === 'image' ? [finalFormats[i]!] : [])),
+    })
+    if (historia) return { error: historia }
   }
 
   // Conservar solo coteja contra lo guardado — el mismo trato que keptMedia con sus

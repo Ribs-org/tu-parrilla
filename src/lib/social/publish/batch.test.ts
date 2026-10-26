@@ -4,6 +4,8 @@ import {
   tipoDesdeNombre,
   typeFromContentType,
   validateBatchItem,
+  expandirHistoria,
+  HISTORIA_CON_OPCIONES,
   destinoPedido,
   clavesDeOpciones,
   opcionesClaveAmbigua,
@@ -25,7 +27,17 @@ import {
   type BatchResult,
 } from './batch'
 import { ATRIBUTOS_ERROR } from './atributos'
-import { TIKTOK_SIN_PRIVACIDAD, OPCIONES_ERROR, TRIAL_REEL_MEDIA } from './opciones'
+import {
+  HISTORIA_DESTINOS,
+  HISTORIA_JPG,
+  HISTORIA_MEDIA,
+  HISTORIA_SIN_CLAVE,
+  HISTORIA_SIN_PORTADA,
+  HISTORIA_SIN_TEXTO,
+  TIKTOK_SIN_PRIVACIDAD,
+  OPCIONES_ERROR,
+  TRIAL_REEL_MEDIA,
+} from './opciones'
 import { TIKTOK_MEDIA } from './validate'
 import { REGLA_PALABRA, REGLA_MENSAJE, REGLA_DOCUMENTO } from '../comentarios/reglas'
 import { verificarCuentas, type CuentaDestino } from '../cuentas'
@@ -1065,5 +1077,97 @@ describe('scheduleBatch — lo que el dueño ya subió con POST /api/media', () 
     expect(resultado).toMatchObject({ ok: true, origen: 'descarga' })
     expect(fetchMock).toHaveBeenCalledTimes(1)
     expect(guardarMock).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('historias en el lote', () => {
+  const historia = {
+    ...base,
+    texto: '',
+    redes: ['instagram', 'facebook'],
+    media: ['https://ej.com/a.jpg'],
+    opciones: { instagram: { historia: true }, facebook: { historia: true } },
+  }
+
+  it('una historia en las dos redes, con un archivo y sin texto, pasa', () => {
+    expect(validateBatchItem(historia, now, ZONA)).toBeNull()
+    expect(validateBatchItem({ ...historia, media: ['https://ej.com/a.mp4'] }, now, ZONA)).toBeNull()
+  })
+
+  it('todos los destinos son historia', () => {
+    expect(validateBatchItem({ ...historia, opciones: { instagram: { historia: true } } }, now, ZONA)).toBe(
+      HISTORIA_DESTINOS,
+    )
+  })
+
+  it('un solo archivo, sin texto, sin palabra clave y sin portada', () => {
+    expect(validateBatchItem({ ...historia, media: ['https://ej.com/a.jpg', 'https://ej.com/b.jpg'] }, now, ZONA)).toBe(
+      HISTORIA_MEDIA,
+    )
+    expect(validateBatchItem({ ...historia, texto: 'Hola' }, now, ZONA)).toBe(HISTORIA_SIN_TEXTO)
+    expect(validateBatchItem({ ...historia, regla: { palabra: 'GUIA', mensaje: 'Toma' } }, now, ZONA)).toBe(
+      HISTORIA_SIN_CLAVE,
+    )
+    expect(
+      validateBatchItem({ ...historia, media: ['https://ej.com/a.mp4'], portada: 'https://ej.com/p.jpg' }, now, ZONA),
+    ).toBe(HISTORIA_SIN_PORTADA)
+  })
+
+  it('hacia Instagram la foto tiene que ser JPG; solo a Facebook, no', () => {
+    expect(validateBatchItem({ ...historia, media: ['https://ej.com/a.png'] }, now, ZONA)).toBe(HISTORIA_JPG)
+    expect(
+      validateBatchItem(
+        { ...historia, redes: ['facebook'], media: ['https://ej.com/a.png'], opciones: { facebook: { historia: true } } },
+        now,
+        ZONA,
+      ),
+    ).toBeNull()
+  })
+})
+
+describe('el atajo de las secuencias', () => {
+  const fila: BatchItem = {
+    ...base,
+    texto: '',
+    redes: ['instagram', 'facebook'],
+    media: ['https://ej.com/1.jpg', 'https://ej.com/2.mp4'],
+    historia: true,
+  }
+
+  it('una historia por archivo, en orden, con la secuencia compartida', () => {
+    const filas = expandirHistoria({ ...fila, ref: 'lunes' }, 'sec-1')
+    expect(filas).toEqual([
+      {
+        ...fila,
+        historia: undefined,
+        media: ['https://ej.com/1.jpg'],
+        ref: 'lunes#1',
+        opciones: {
+          instagram: { historia: { secuencia: 'sec-1', orden: 1 } },
+          facebook: { historia: { secuencia: 'sec-1', orden: 1 } },
+        },
+      },
+      {
+        ...fila,
+        historia: undefined,
+        media: ['https://ej.com/2.mp4'],
+        ref: 'lunes#2',
+        opciones: {
+          instagram: { historia: { secuencia: 'sec-1', orden: 2 } },
+          facebook: { historia: { secuencia: 'sec-1', orden: 2 } },
+        },
+      },
+    ])
+  })
+
+  it('con cuentas nombradas, las opciones van por cuenta; con un archivo, es una historia suelta', () => {
+    const [una] = expandirHistoria({ ...fila, cuentas: ['ig-1'], media: ['https://ej.com/1.jpg'] }, 's') as BatchItem[]
+    expect(una!.opciones).toEqual({ 'ig-1': { historia: true } })
+  })
+
+  it('sin el atajo no toca la fila; con opciones propias o sin archivos, la rechaza', () => {
+    expect(expandirHistoria(base, 's')).toEqual([base])
+    expect(expandirHistoria({ ...fila, opciones: { instagram: { historia: true } } }, 's')).toEqual({ error: HISTORIA_CON_OPCIONES })
+    expect(expandirHistoria({ ...fila, media: [] }, 's')).toEqual({ error: HISTORIA_MEDIA })
   })
 })

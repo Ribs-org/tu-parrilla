@@ -238,6 +238,7 @@ equivalencia con lo que dicen las páginas:
 | Una tira de asado, un hueso por archivo | Un roll envuelto en salmón: entero, con una línea por donde se va a cortar, mientras no sale; en rodajas —una por archivo— cuando ya salió | Un carrusel |
 | Un bife | Un sashimi: tres láminas sobre una hoja verde, con wasabi | Una foto |
 | Un chori | Un temaki: un cono rosado | Un texto, sin archivos |
+| Un choripán al paso: el chori parado dentro de su pan | Un onigiri: un triángulo de arroz con salmón arriba y una banda de alga abajo | Una historia de Instagram o Facebook |
 | La carne cruda, sellada, a punto, quemada | El pescado crudo, dorado, tostado y, si falló, pasado: verde gris, con manchas de moho y tres ondas de olor encima | Programada, saliendo ahora, publicada, falló |
 | Una marca del fierro por destino | Una banda de alga oscura (nori) por destino | Cómo le fue a cada red |
 | La marca carbonizada, con una brasa adentro | La banda pasada, cruzada por una línea roja | Esa red falló |

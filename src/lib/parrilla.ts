@@ -118,9 +118,10 @@ export function carneDe(estados: readonly TargetStatus[]): Carne {
 /**
  * Qué corte es un post, por sus archivos: la silueta dice el formato antes de leer nada.
  * Un video es una entraña; dos archivos o más, una tira de asado con un hueso por archivo;
- * una foto, un bife; sin archivos —un tuit, un post de Threads—, un chori.
+ * una foto, un bife; sin archivos —un tuit, un post de Threads—, un chori. Una historia, sea
+ * foto o video, es un choripán al paso: el chori parado en su pan, vertical como la historia.
  */
-export type Formato = 'entrana' | 'tira' | 'bife' | 'chori'
+export type Formato = 'entrana' | 'tira' | 'bife' | 'chori' | 'choripan'
 
 /** Los huesos que se dibujan, como mucho: a 120 de ancho, once ya no se cuentan. */
 export const MAX_HUESOS = 10
@@ -131,17 +132,24 @@ export const NOMBRE_FORMATO: Record<Formato, string> = {
   tira: 'Carrusel',
   bife: 'Foto',
   chori: 'Texto',
+  choripan: 'Historia',
 }
 
 /**
  * `videosLiberados` son los videos que el post llevaba y ya no están en el almacén
  * (`scheduled_posts.videos_liberados`): cuentan para la forma igual que los archivos que
  * quedan. Sin ellos, una entraña que salió en todas sus redes se dibujaba como chori.
+ *
+ * `historia` lo decide el que llama, por las opciones de los destinos (`esHistoria`): si todos
+ * son historia, el corte es el choripán, sin importar el archivo. El mismo precedente que
+ * `selloDe`, que también mira opciones.
  */
 export function formatoDe(
   media: readonly { mediaType: string }[],
   videosLiberados = 0,
+  historia = false,
 ): { formato: Formato; huesos: number } {
+  if (historia) return { formato: 'choripan', huesos: 0 }
   const archivos = media.length + videosLiberados
   if (archivos === 0) return { formato: 'chori', huesos: 0 }
   if (archivos > 1) return { formato: 'tira', huesos: Math.min(archivos, MAX_HUESOS) }

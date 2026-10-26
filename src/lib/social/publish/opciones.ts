@@ -1,5 +1,5 @@
-// Lo que cada red obliga a elegir por destino antes de publicar. TikTok e Instagram piden
-// algo hoy; la unión crece red por red y el resto del sistema solo transporta el objeto.
+// Lo que cada red obliga a elegir por destino antes de publicar. TikTok, Instagram y Facebook
+// piden algo hoy; la unión crece red por red y el resto del sistema solo transporta el objeto.
 
 import type { CuentaDestino } from '../cuentas'
 
@@ -29,9 +29,19 @@ export type OpcionesTikTok =
  * que se quiera que decida Instagram, es un campo opcional acá con `manual` por defecto,
  * y lo ya guardado sigue valiendo.
  */
-export type OpcionesInstagram = { trialReel: true }
+export type OpcionesInstagram = { trialReel: true } | { historia: Historia }
 
-export type OpcionesDestino = OpcionesTikTok | OpcionesInstagram
+/** Facebook solo pide algo cuando el post es una historia de la página. */
+export type OpcionesFacebook = { historia: Historia }
+
+/**
+ * Una historia de Instagram o de Facebook. Suelta es `true`; parte de una secuencia que sale
+ * en orden lleva la secuencia que comparten todas y su lugar en ella, desde 1. Cada historia
+ * es su propio post con un solo archivo: una que falla no arrastra a las demás.
+ */
+export type Historia = true | { secuencia: string; orden: number }
+
+export type OpcionesDestino = OpcionesTikTok | OpcionesInstagram | OpcionesFacebook
 
 export const PRIVACIDADES_TIKTOK: readonly PrivacidadTikTok[] = [
   'PUBLIC_TO_EVERYONE',
@@ -53,6 +63,17 @@ export const TIKTOK_SIN_PRIVACIDAD = 'TikTok necesita que elijas la privacidad.'
 export const TIKTOK_PATROCINADO_PRIVADO = 'Un contenido patrocinado no puede ser privado.'
 export const OPCIONES_ERROR = 'Las opciones de la red no se entendieron.'
 export const TRIAL_REEL_MEDIA = 'Un trial reel es un solo video, sin fotos.'
+export const HISTORIA_DESTINOS = 'Una historia va solo a Instagram y Facebook, y todos sus destinos son historia.'
+export const HISTORIA_SIN_TEXTO = 'Una historia no lleva texto.'
+export const HISTORIA_SIN_CLAVE = 'Una historia no tiene comentarios: no lleva palabra clave.'
+export const HISTORIA_SIN_PORTADA = 'Una historia no lleva portada.'
+export const HISTORIA_MEDIA = 'Una historia es un solo archivo, foto o video.'
+export const HISTORIA_JPG = 'Instagram recibe la historia en foto solo en JPG.'
+export const HISTORIA_TRIAL = 'Una historia no puede ser trial reel.'
+
+/** Cuántas historias como mucho en una secuencia; Instagram no pone tope, esto es cordura. */
+export const MAX_HISTORIAS_SECUENCIA = 30
+const SECUENCIA = /^[A-Za-z0-9_-]{1,64}$/
 
 /**
  * El aviso de una cuenta donde Meta ya rechazó un trial reel (`trial-reels.ts`): la frase del
@@ -118,16 +139,65 @@ function validarTikTok(raw: unknown): { opciones: OpcionesTikTok } | { error: st
  * Cualquier otra forma se rechaza —incluida una clave desconocida—: quien manda
  * `trialreel` mal escrito, o una `graduacion` que todavía no existe, tiene que enterarse,
  * no recibir un reel normal creyendo que pidió otra cosa. (TikTok ignora claves de más;
- * acá no, porque esta opción la manda sobre todo un modelo a ciegas.)
+ * acá no, porque esta opción la manda sobre todo un modelo a ciegas.) Lo mismo vale para
+ * `historia`, que excluye al trial reel.
  */
 function validarInstagram(raw: unknown): { opciones: OpcionesInstagram | null } | { error: string } {
   if (raw === undefined || raw === null) return { opciones: null }
   if (!esObjeto(raw)) return { error: OPCIONES_ERROR }
   if (JSON.stringify(raw).length > MAX_SERIALIZED) return { error: OPCIONES_ERROR }
-  for (const clave of Object.keys(raw)) if (clave !== 'trialReel') return { error: OPCIONES_ERROR }
+  for (const clave of Object.keys(raw)) if (clave !== 'trialReel' && clave !== 'historia') return { error: OPCIONES_ERROR }
   const trialReel = casilla(raw.trialReel)
   if (trialReel === null) return { error: OPCIONES_ERROR }
+  const check = validarHistoria(raw.historia)
+  if ('error' in check) return check
+  if (check.historia !== null && trialReel) return { error: HISTORIA_TRIAL }
+  if (check.historia !== null) return { opciones: { historia: check.historia } }
   return { opciones: trialReel ? { trialReel: true } : null }
+}
+
+/** Facebook: solo `historia`, con la misma forma que en Instagram. */
+function validarFacebook(raw: unknown): { opciones: OpcionesFacebook | null } | { error: string } {
+  if (raw === undefined || raw === null) return { opciones: null }
+  if (!esObjeto(raw)) return { error: OPCIONES_ERROR }
+  if (JSON.stringify(raw).length > MAX_SERIALIZED) return { error: OPCIONES_ERROR }
+  for (const clave of Object.keys(raw)) if (clave !== 'historia') return { error: OPCIONES_ERROR }
+  const check = validarHistoria(raw.historia)
+  if ('error' in check) return check
+  return { opciones: check.historia !== null ? { historia: check.historia } : null }
+}
+
+/**
+ * `historia`: ausente o `false` es que no lo es; `true`, una suelta; un objeto, una de una
+ * secuencia. Lo demás es un error de forma, como en el trial reel.
+ */
+function validarHistoria(raw: unknown): { historia: Historia | null } | { error: string } {
+  if (raw === undefined || raw === false) return { historia: null }
+  if (raw === true) return { historia: true }
+  if (!esObjeto(raw)) return { error: OPCIONES_ERROR }
+  for (const clave of Object.keys(raw)) if (clave !== 'secuencia' && clave !== 'orden') return { error: OPCIONES_ERROR }
+  const { secuencia, orden } = raw
+  if (typeof secuencia !== 'string' || !SECUENCIA.test(secuencia)) return { error: OPCIONES_ERROR }
+  if (typeof orden !== 'number' || !Number.isInteger(orden) || orden < 1 || orden > MAX_HISTORIAS_SECUENCIA) {
+    return { error: OPCIONES_ERROR }
+  }
+  return { historia: { secuencia, orden } }
+}
+
+/** Si estas opciones son de una historia. Acepta lo que venga de la base, sin validar. */
+export function esHistoria(opciones: unknown): boolean {
+  return esObjeto(opciones) && opciones.historia !== undefined && opciones.historia !== false
+}
+
+/**
+ * La historia de un destino tal como quedó guardada, o null si no lo es (o si lo guardado no
+ * se entiende). La leen el publicador, la parrilla y la regla de la secuencia.
+ */
+export function historiaDe(network: string, opciones: unknown): Historia | null {
+  const check =
+    network === 'instagram' ? validarInstagram(opciones) : network === 'facebook' ? validarFacebook(opciones) : null
+  if (!check || 'error' in check || !check.opciones || !('historia' in check.opciones)) return null
+  return check.opciones.historia
 }
 
 /**
@@ -140,8 +210,22 @@ export function validarOpciones(
 ): { opciones: OpcionesDestino | null } | { error: string } {
   if (network === 'tiktok') return validarTikTok(raw)
   if (network === 'instagram') return validarInstagram(raw)
+  if (network === 'facebook') return validarFacebook(raw)
   if (raw === undefined || raw === null) return { opciones: null }
   return { error: OPCIONES_ERROR }
+}
+
+/**
+ * Un post historia es historia en todos sus destinos, y en todos la misma: «reel en Instagram
+ * e historia en Facebook» son dos posts. Se mira sobre las opciones ya limpias de la fila.
+ */
+function errorDeHistoriaEnDestinos(cuentas: CuentaDestino[], opciones: Record<string, OpcionesDestino>): string | null {
+  const historias = cuentas.map((c) => opciones[c.id]).filter(esHistoria) as Array<{ historia: Historia }>
+  if (historias.length === 0) return null
+  if (historias.length !== cuentas.length) return HISTORIA_DESTINOS
+  const primera = JSON.stringify(historias[0]!.historia)
+  if (historias.some((h) => JSON.stringify(h.historia) !== primera)) return OPCIONES_ERROR
+  return null
 }
 
 /**
@@ -171,10 +255,38 @@ export function errorDeMediaPorOpciones(
   opciones: Record<string, OpcionesDestino>,
   conteos: { videos: number; fotos: number; sinTipo: number },
 ): string | null {
+  if (Object.values(opciones).some(esHistoria)) {
+    return conteos.videos + conteos.fotos + conteos.sinTipo === 1 ? null : HISTORIA_MEDIA
+  }
   const hayTrial = Object.values(opciones).some((o) => 'trialReel' in o)
   if (!hayTrial) return null
   if (conteos.fotos > 0 || conteos.videos > 1) return TRIAL_REEL_MEDIA
   if (conteos.videos + conteos.sinTipo !== 1) return TRIAL_REEL_MEDIA
+  return null
+}
+
+/**
+ * Lo que una historia no lleva, más allá de los archivos: texto, palabra clave, portada, y —si
+ * va a Instagram— una foto que no sea JPG (Meta no acepta otra y el almacén no convierte nada).
+ * `fotos` son las extensiones de las fotos de tipo conocido; un archivo todavía sin tipo (un
+ * link de Drive) no cuenta hasta que la re-validación lo descargue. El texto se rechaza en vez
+ * de perderlo en silencio.
+ */
+export function errorDeHistoria(
+  opciones: Record<string, OpcionesDestino>,
+  post: {
+    caption: string
+    conPalabraClave: boolean
+    conPortada?: boolean
+    aInstagram: boolean
+    fotos: readonly string[]
+  },
+): string | null {
+  if (!Object.values(opciones).some(esHistoria)) return null
+  if (post.caption.trim().length > 0) return HISTORIA_SIN_TEXTO
+  if (post.conPalabraClave) return HISTORIA_SIN_CLAVE
+  if (post.conPortada) return HISTORIA_SIN_PORTADA
+  if (post.aInstagram && post.fotos.some((f) => f !== 'jpg' && f !== 'jpeg')) return HISTORIA_JPG
   return null
 }
 
@@ -206,6 +318,8 @@ export function validarOpcionesPorCuenta(
     }
     if (check.opciones) opciones[cuenta.id] = check.opciones
   }
+  const historia = errorDeHistoriaEnDestinos(cuentas, opciones)
+  if (historia) return { error: historia }
   return { opciones }
 }
 
@@ -248,6 +362,8 @@ export function opcionesDesdeFormularioPorCuenta(
 
 /** Una línea para el editor y el calendario; null cuando no hay nada legible. */
 export function resumenOpciones(network: string, opciones: unknown): string | null {
+  const historia = historiaDe(network, opciones)
+  if (historia !== null) return historia === true ? 'Historia' : `Historia ${historia.orden} de una secuencia`
   if (network === 'instagram') {
     const check = validarInstagram(opciones)
     return 'error' in check || !check.opciones ? null : 'Trial reel — lo compartes tú desde Instagram'

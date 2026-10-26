@@ -37,6 +37,10 @@ export const SILUETA: Record<Formato, string> = {
   entrana:
     'M3 30C16 20 32 18 48 22C64 26 76 28 92 23C104 19 113 19 117 23C119 30 118 37 116 42C104 40 94 43 82 46C64 50 50 46 36 45C22 44 11 47 4 48C1 42 1 36 3 30Z',
   chori: 'M14 31C14 21 26 18 40 19C54 20 66 23 80 22C96 21 106 23 107 32C108 42 96 46 80 46C66 46 54 43 40 44C26 45 14 41 14 31Z',
+  // El choripán al paso, parado como una historia (9:16): el pan, y el chori asomando por
+  // arriba y por abajo.
+  choripan:
+    'M53 7C53 1 67 1 67 7V10H73C77 10 78 12 78 16V49C78 53 77 55 73 55H67V57C67 63 53 63 53 57V55H47C43 55 42 53 42 49V16C42 12 43 10 47 10H53Z',
 }
 
 const FORMATOS = Object.keys(SILUETA) as Formato[]
@@ -50,6 +54,17 @@ const VETAS: Record<Carne, { grasa: string; hueso: string; tuetano: string; nudo
   sellada: { grasa: '#f0d6b0', hueso: '#efe0c8', tuetano: '#b98366', nudo: '#93452c', brillo: ['#ffffff', 0.12] },
   punto: { grasa: '#e3b878', hueso: GRASA, tuetano: '#9a6a44', nudo: '#5e3418', brillo: ['#f6c27a', 0.22] },
   quemada: { grasa: '#4a3a33', hueso: '#5d4f47', tuetano: '#2e221d', nudo: '#1a1210', brillo: null },
+}
+
+/**
+ * El pan del choripán, según la cocción del chori que lleva adentro: se tuesta con él, y en
+ * el quemado también se quema.
+ */
+const PAN: Record<Carne, { miga: string; corteza: string }> = {
+  cruda: { miga: '#f1d29a', corteza: '#d9a861' },
+  sellada: { miga: '#ebc286', corteza: '#cf9550' },
+  punto: { miga: '#e0ac68', corteza: '#b97a35' },
+  quemada: { miga: '#5e4532', corteza: '#3a2a1f' },
 }
 
 /** Las motas del chori. */
@@ -138,6 +153,30 @@ function Textura({ formato, carne, huesos }: { formato: Formato; carne: Carne; h
       </>
     )
   }
+  if (formato === 'choripan') {
+    // Las dos mitades del pan tapan los costados: lo que queda a la vista, al medio, es el
+    // chori, y es lo que lleva la cocción.
+    const pan = PAN[carne]
+    return (
+      <>
+        {[6, 22, 38, 58].map((cy, i) => (
+          <circle key={cy} cx={i % 2 ? 58 : 62} cy={cy} r="1.3" fill={v.grasa} opacity=".7" />
+        ))}
+        <path d="M40 10H54C52 22 52 43 54 55H40Z" fill={pan.miga} />
+        <path d="M80 10H66C68 22 68 43 66 55H80Z" fill={pan.miga} />
+        <path d="M54 10C52 22 52 43 54 55M66 10C68 22 68 43 66 55" stroke={pan.corteza} strokeWidth="1.6" fill="none" />
+        <path d="M42 13C46 11 50 11 54 12M66 12C70 11 74 11 78 13" stroke={pan.corteza} strokeWidth="1.2" fill="none" />
+        <path
+          d="M46 16C45 28 45 40 47 51M74 16C75 28 75 40 73 51"
+          stroke="#ffffff"
+          strokeOpacity=".22"
+          strokeWidth="1.4"
+          fill="none"
+          strokeLinecap="round"
+        />
+      </>
+    )
+  }
   if (formato === 'entrana') {
     // La fibra en diagonal: es lo que hace que una tira larga se lea como entraña.
     return (
@@ -160,10 +199,14 @@ function Textura({ formato, carne, huesos }: { formato: Formato; carne: Carne; h
   )
 }
 
-/** Dónde cae la marca de cada destino: repartidas entre 34 y 92, o al centro si es una. */
-function posiciones(n: number): number[] {
-  if (n <= 1) return [62]
-  return Array.from({ length: n }, (_, i) => 34 + (i * 58) / (n - 1))
+/**
+ * Dónde cae la marca de cada destino: repartidas entre 34 y 92, o al centro si es una. En el
+ * choripán, que es angosto, entre 50 y 70: más afuera, la silueta las recortaría enteras.
+ */
+function posiciones(n: number, formato: Formato): number[] {
+  const [desde, hasta, centro] = formato === 'choripan' ? [50, 70, 60] : [34, 92, 62]
+  if (n <= 1) return [centro]
+  return Array.from({ length: n }, (_, i) => desde + (i * (hasta - desde)) / (n - 1))
 }
 
 /**
@@ -276,7 +319,7 @@ function CorteDeCarne({
   const quemado = coccion === 'parcial' || coccion === 'quemada'
   const saliendo = sellos.includes('saliendo')
   const v = VETAS[carne]
-  const xs = posiciones(sellos.length)
+  const xs = posiciones(sellos.length, formato)
   const silueta = SILUETA[formato]
   const lleno = Math.max(0, Math.min(1, llenado))
   const aMedias = lleno < 1
@@ -306,7 +349,7 @@ function CorteDeCarne({
             </clipPath>
           </defs>
         ) : null}
-        <ellipse cx="60" cy="59" rx="46" ry="4.5" fill="#000" opacity=".55" filter="url(#tp-sombra)" />
+        <ellipse cx="60" cy="59" rx={formato === 'choripan' ? 22 : 46} ry="4.5" fill="#000" opacity=".55" filter="url(#tp-sombra)" />
         {/* Lo que todavía no llegó: la silueta punteada, debajo de la carne que ya está. */}
         {aMedias ? (
           <path d={silueta} fill="rgba(242,235,226,.04)" stroke="rgba(242,235,226,.34)" strokeWidth="1.1" strokeDasharray="3 3" />
