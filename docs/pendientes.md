@@ -68,6 +68,14 @@ sección.
 
 ## Bugs
 
+- **En la app, la entraña de un video se lee como una longaniza** (2026-10-26, lo vio el dueño
+  al publicar un video desde el teléfono). El formato llega bien del servidor (`entrana`);
+  el problema es el dibujo. Sin `react-native-svg`, `mobile/src/components/pieza.tsx` arma
+  cada silueta con vistas de bordes redondeados, y la entraña queda como una barra larga y
+  angosta (62 × 14), casi la forma del chori. Lo de fondo es la tanda 6 de
+  `docs/auditoria-ui-2026-10-16.md`: `react-native-svg` en el próximo build nativo, con las
+  curvas del panel. Mientras tanto, se puede retocar la silueta por aire (más ancha, con un
+  extremo afinado o las vetas más marcadas) para que no se confunda.
 - **Por revisar: el resto de la auditoría de la wiki de la UI** (2026-10-13). Al escribir
   `public/docs/ui/` salieron unos cuarenta defectos más —textos que nombran pantallas
   viejas, validaciones que dejan programar lo que va a fallar, números
