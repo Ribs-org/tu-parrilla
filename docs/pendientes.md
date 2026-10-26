@@ -399,6 +399,15 @@ nadie paga: todas las cuentas son iguales y el README dice «Sin suscripción».
   trinchado (necesita tabla nueva y decidir si una familia admite dos cuentas de la misma
   red); un archivo de tokens común para el panel y la app; y, con un build nativo, el corte
   en SVG y la vibración en la app.
+- **Gamificar las notificaciones de cada red** (2026-10-25, lo pidió el dueño). Que lo que cada
+  red le avisa a un creador —seguidores nuevos, comentarios, reacciones a un post— se viva en Tu
+  Parrilla como un juego, red por red. Falta definir con el dueño qué cuenta como notificación y
+  cuál es el juego (puntos, rachas, logros, en qué pantalla). Hasta donde se sabe, ninguna de las
+  APIs que se usan entrega la bandeja de notificaciones de la red, así que el juego se arma con lo
+  que ya se lee: los comentarios de La Mesa, las métricas de cada post y los seguidores de cada
+  cuenta (`src/lib/social/account-metrics.ts`). La app del teléfono no manda notificaciones:
+  avisar allí pide `expo-notifications`, que es nativo, y un build nuevo. Se cruza con «Mientras
+  no mirabas», de la entrada de arriba, que también necesita guardar la última visita por usuario.
 - **Cupos y reparto de los crons por usuario** (`docs/levantamiento-terceros.md` §5.4). Hace
   falta cuando la beta pase de unos diez usuarios.
 - **El privado de Meta (DM con el PDF)** necesita `instagram_manage_messages` y
