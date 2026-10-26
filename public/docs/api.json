@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "POST /api/schedule/batch",
-  "description": "Cuerpo exacto que acepta el único endpoint que programa posts. Documentación complementaria en /docs/api-llm.md (guía de tareas) y /docs/api-editor.md (guía para personas, misma API). El otro endpoint de escritura es DELETE /api/schedule/posts/{id}, que saca un post programado entero (sección 3b de api-llm.md); no hay edición por API.",
+  "description": "Cuerpo exacto que acepta el único endpoint que programa posts. Documentación complementaria en /docs/api-llm.md (guía de tareas) y /docs/api-editor.md (guía para personas, misma API). DELETE /api/schedule/posts/{id} saca un post programado entero (sección 3b de api-llm.md) y GET /api/schedule/posts/{id} lo devuelve con las opciones que quedaron guardadas por destino, para comprobarlas (sección 3g); no hay edición por API.",
   "type": "object",
   "required": ["posts"],
   "additionalProperties": false,

@@ -1108,7 +1108,7 @@ Vercel y bajan con `vercel env pull .env.local`.
 | `CRON_SECRET` | Autoriza las corridas programadas: el sync diario y la publicación cada 5 minutos. Vercel la manda sola a su cron; el pinger externo la manda en `Authorization: Bearer …` | Sí — Vercel no la crea: se genera igual que `AUTH_SECRET` y se agrega. Sin ella los crons responden `401` y no corre nada |
 | `MIGRAR_PREVIEWS` | Que los previews migren la base | Solo cuando el preview tenga una base propia; contra la de producción, no |
 | `DATABASE_URL_PRUEBAS` | Solo para las pruebas de integración: una Postgres desechable donde cada archivo crea y migra su propia base (ver «Comandos»). No va en Vercel | No — sin ella esas pruebas se saltan. Nunca la de producción |
-| `SCHEDULE_API_KEY` | La llave del despliegue: abre `POST /api/schedule/batch` (carga masiva), `POST /api/media` (subir un archivo una vez), `DELETE /api/schedule/posts/{id}` (sacar lo programado), `POST /api/schedule/posts/{id}/archivar` y `…/desarchivar` (archivar lo quemado), `GET /api/schedule/posts` (calendario), `GET /api/schedule/resumen` (el resumen del día), `GET /api/schedule/cuentas` (las cuentas), `GET /api/metrics/posts` (métricas) y `GET /api/metrics/mejores` (el mejor X %) a nombre del admin. Es anterior a las llaves por usuario y sigue para el agente que ya la usa | No — sin ella los diez endpoints aceptan solo las llaves que cada usuario genera en La Cocina («Tu propio chef»); si la pones, genérala igual que `CRON_SECRET` |
+| `SCHEDULE_API_KEY` | La llave del despliegue: abre `POST /api/schedule/batch` (carga masiva), `POST /api/media` (subir un archivo una vez), `GET` y `DELETE /api/schedule/posts/{id}` (un post, o sacarlo), `POST /api/schedule/posts/{id}/archivar` y `…/desarchivar` (archivar lo quemado), `GET /api/schedule/posts` (calendario), `GET /api/schedule/resumen` (el resumen del día), `GET /api/schedule/cuentas` (las cuentas), `GET /api/metrics/posts` (métricas) y `GET /api/metrics/mejores` (el mejor X %) a nombre del admin. Es anterior a las llaves por usuario y sigue para el agente que ya la usa | No — sin ella los once endpoints aceptan solo las llaves que cada usuario genera en La Cocina («Tu propio chef»); si la pones, genérala igual que `CRON_SECRET` |
 | `RESEND_API_KEY` | Manda los códigos de ingreso y los avisos: la publicación que se quemó, la cuenta que se cayó y el resumen del día (ver «Avisos por correo») | Sí — sin ella nadie puede entrar al panel |
 | `PUBLISH_ALERT_TO` | Adónde va un aviso sin dueño con correo: un post o una cuenta de antes de los usuarios. Lo demás va al correo de su dueño | No — sin ella, lo que no tiene dueño no avisa; el calendario y Los Fierros lo siguen mostrando |
 | `PUBLISH_ALERT_FROM` | Remitente de los avisos | Opcional; default `onboarding@resend.dev`, que solo entrega al correo de la cuenta de Resend |
@@ -1215,7 +1215,7 @@ Tres correos, todos con el remitente `PUBLISH_ALERT_FROM` y al correo del dueño
 
 ### Guía para el editor de contenido
 
-`public/docs/api-editor.md` documenta los diez endpoints en detalle, escrito para que un
+`public/docs/api-editor.md` documenta los once endpoints en detalle, escrito para que un
 LLM que crea contenido lo lea entero y no necesite explicaciones: contratos, reglas
 por red, todas las frases de error y qué significa cada métrica. Se sirve tal cual en
 <https://tu-parrilla.cl/docs/api-editor.md>. No contiene secretos — la llave
@@ -1241,7 +1241,7 @@ página cita archivos que ya no existen.
 
 ### La llave de la API
 
-Los diez endpoints de abajo piden el header `Authorization: Bearer <llave>`, y lo que
+Los once endpoints de abajo piden el header `Authorization: Bearer <llave>`, y lo que
 hacen lo hacen a nombre del dueño de la llave: sus cuentas, sus posts, su zona. Valen dos
 clases de llave:
 
@@ -1366,7 +1366,11 @@ no: texto, `fecha` (ISO con offset), portada, media en orden,
 (`scheduled`, `publishing`, `published`, `failed`), el `externalId` si ya salió, los
 intentos, la frase de error del último intento fallido (también en un `scheduled` que espera
 reintentarse), `proximoIntento` (cuándo vuelve a probar uno que espera, o `null`),
-`cuentaId`/`handle` de la cuenta y `archivado`. Los ids de todas las cuentas, también los de una recién
+`cuentaId`/`handle` de la cuenta, `archivado` y `opciones` (lo elegido para esa red al
+programar, con las casillas de TikTok explícitas; `null` si la red no pide nada).
+`GET /api/schedule/posts/{id}` devuelve un solo post con esa misma forma, para comprobar lo
+guardado justo después de programar. Las dos leen con `leerProgramados`
+(`src/lib/schedule-leer.ts`). Los ids de todas las cuentas, también los de una recién
 conectada que todavía no tiene nada programado, los lista `GET /api/schedule/cuentas` (ver
 «Cuentas por API»); en el panel están en el detalle de cada fila de **Los Fierros** (en
 Ajustes) —la flecha de la fila—, con un botón para copiarlo.

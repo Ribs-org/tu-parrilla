@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
-import { and, asc, eq, exists, gte, inArray, lt, type SQL } from 'drizzle-orm'
-import { getDb, scheduledPosts, scheduledPostMedia, scheduledPostTargets, socialAccounts } from '@/db'
+import { and, eq, exists, gte, lt, type SQL } from 'drizzle-orm'
+import { getDb, scheduledPosts, scheduledPostTargets } from '@/db'
 import { duenoDeLaLlave } from '@/lib/llaves'
-import { armarProgramados, parseEstado, parseVentana } from '@/lib/schedule-api'
+import { parseEstado, parseVentana } from '@/lib/schedule-api'
+import { leerProgramados } from '@/lib/schedule-leer'
 import { buscarPorId } from '@/lib/usuarios'
 import { ZONA_POR_DEFECTO } from '@/lib/zona'
 
@@ -49,27 +50,12 @@ export async function GET(request: Request) {
       ),
     )
   }
-  // `leftJoin` y no `innerJoin` con `socialAccounts`: un destino cuya cuenta ya no
-  // exista no debe desaparecer de la respuesta — mismo criterio que el calendario del
-  // panel (`(dash)/schedule/page.tsx`). El id del destino sigue viniendo de
-  // `scheduledPostTargets.accountId`, no de este join; solo el handle depende de él.
-  const filas = await db
-    .select({ post: scheduledPosts, target: scheduledPostTargets, handle: socialAccounts.handle })
-    .from(scheduledPosts)
-    .innerJoin(scheduledPostTargets, eq(scheduledPostTargets.postId, scheduledPosts.id))
-    .leftJoin(socialAccounts, eq(socialAccounts.id, scheduledPostTargets.accountId))
-    .where(and(...condiciones, eq(scheduledPosts.ownerId, ownerId)))
-    .orderBy(asc(scheduledPosts.scheduledAt), asc(scheduledPostTargets.network))
-
-  const ids = [...new Set(filas.map((f) => f.post.id))]
-  const medias = ids.length
-    ? await db.select().from(scheduledPostMedia).where(inArray(scheduledPostMedia.postId, ids))
-    : []
+  const posts = await leerProgramados(ownerId, condiciones, zone)
 
   return NextResponse.json({
     desde: ventana?.desde ?? null,
     hasta: ventana?.hasta ?? null,
     ...(filtro.estado ? { estado: filtro.estado } : {}),
-    posts: armarProgramados(filas, medias, zone),
+    posts,
   })
 }

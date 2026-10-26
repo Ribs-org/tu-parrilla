@@ -6,6 +6,7 @@ import {
   TRIAL_REEL_MEDIA,
   errorDeMediaPorOpciones,
   opcionesDesdeFormularioPorCuenta,
+  opcionesParaApi,
   resumenOpciones,
   validarOpciones,
   validarOpcionesPorCuenta,
@@ -327,5 +328,25 @@ describe('la etiqueta de IA de TikTok', () => {
     expect(resumenOpciones('tiktok', { ...directo, ia: true })).toBe(
       'Directo · Solo yo · con comentarios · sin dúo · sin pegar · sin comercial · hecho con IA',
     )
+  })
+})
+
+describe('opcionesParaApi', () => {
+  const directo = { modo: 'directo', privacidad: 'SELF_ONLY', comentarios: true, duo: false, pegar: false, comercial: 'no' }
+
+  it('TikTok directo sale con la casilla de IA explícita, encendida o apagada', () => {
+    expect(opcionesParaApi('tiktok', directo)).toEqual({ ...directo, ia: false })
+    expect(opcionesParaApi('tiktok', { ...directo, ia: true })).toEqual({ ...directo, ia: true })
+  })
+
+  it('un borrador, un trial reel y una red sin opciones salen como se guardaron', () => {
+    expect(opcionesParaApi('tiktok', { modo: 'borrador' })).toEqual({ modo: 'borrador' })
+    expect(opcionesParaApi('instagram', { trialReel: true })).toEqual({ trialReel: true })
+    expect(opcionesParaApi('threads', null)).toBeNull()
+  })
+
+  it('una fila vieja que ya no valida sale tal cual, no se pierde', () => {
+    expect(opcionesParaApi('tiktok', { modo: 'otro' })).toEqual({ modo: 'otro' })
+    expect(opcionesParaApi('tiktok', 'basura')).toBeNull()
   })
 })
