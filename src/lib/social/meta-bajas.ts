@@ -4,18 +4,32 @@ import { and, eq, inArray, sql, type SQL } from 'drizzle-orm'
 import { getDb, scheduledPostTargets, socialAccounts, solicitudesBorrado } from '@/db'
 
 // Las dos cosas que Meta puede pedirnos por un usuario que quitó la app: la baja
-// (deauthorize) y el borrado (data deletion request).
+// (deauthorize) y el borrado (data deletion request). Vienen de dos casos de uso de la misma
+// app, cada uno con sus propios callbacks: el de Instagram y Facebook, que identifica a la
+// persona por su `meta_user_id`, y el de Threads, que la identifica por su id de Threads, el
+// mismo que su cuenta guarda en `external_id`.
 //
-// Buscan por `meta_user_id` y no por dueño **a propósito**: Meta no sabe quién es nuestro
+// Buscan por ese id y no por dueño **a propósito**: Meta no sabe quién es nuestro
 // dueño, y la petición no llega con una sesión sino firmada con el app secret. Es la única
 // excepción al arnés de aislamiento de `src/lib` (ver `docs/deuda-tecnica.md`, entrada «El
 // arnés de aislamiento solo llega a `src/lib`»), y por eso nada de acá se llama desde una
 // acción con sesión sin haber pasado antes por `leerSignedRequest`.
 
 export const BAJA_DESDE_FACEBOOK = 'Quitaste la app desde Facebook: vuelve a conectar.'
+export const BAJA_DESDE_THREADS = 'Quitaste la app desde Threads: vuelve a conectar.'
 
-/** Las dos redes que salen de la misma app de Meta; nada más se toca por un callback suyo. */
+/** De qué caso de uso llegó el callback: decide qué cuentas toca y cómo se las busca. */
+export type Origen = 'meta' | 'threads'
+
+/** Las dos redes que salen del caso de uso de Instagram y Facebook; nada más se toca por un callback suyo. */
 const REDES_META = ['instagram', 'facebook'] as const
+
+/** Las cuentas de esa persona, acotadas a las redes de ese origen. */
+function suyas(origen: Origen, userId: string) {
+  return origen === 'threads'
+    ? and(eq(socialAccounts.externalId, userId), eq(socialAccounts.network, 'threads'))
+    : and(eq(socialAccounts.metaUserId, userId), inArray(socialAccounts.network, [...REDES_META]))
+}
 
 /**
  * Deja sin credencial las cuentas de Meta de ese usuario; devuelve cuántas.
@@ -24,11 +38,12 @@ const REDES_META = ['instagram', 'facebook'] as const
  * para que la tarjeta diga por qué. El historial se queda: quitar la app no es pedir que
  * se borre lo que ya pasó.
  */
-export async function darDeBaja(metaUserId: string): Promise<number> {
+export async function darDeBaja(userId: string, origen: Origen = 'meta'): Promise<number> {
+  const motivo = origen === 'threads' ? BAJA_DESDE_THREADS : BAJA_DESDE_FACEBOOK
   const filas = await getDb()
     .update(socialAccounts)
-    .set({ accessToken: null, refreshToken: null, expiresAt: null, lastSyncError: BAJA_DESDE_FACEBOOK })
-    .where(and(eq(socialAccounts.metaUserId, metaUserId), inArray(socialAccounts.network, [...REDES_META])))
+    .set({ accessToken: null, refreshToken: null, expiresAt: null, lastSyncError: motivo })
+    .where(suyas(origen, userId))
     .returning({ id: socialAccounts.id })
   return filas.length
 }
@@ -52,10 +67,13 @@ export async function darDeBaja(metaUserId: string): Promise<number> {
  * Devuelve `SQL` y no texto —mismo criterio que `pasosDeFusion`— para que el test pueda
  * renderizarlo con el dialecto y afirmar el orden y los parámetros sin base.
  */
-export function pasosDeBorrado(metaUserId: string): SQL[] {
-  // Las redes van literales y no como parámetros: es la lista cerrada de `REDES_META`,
-  // y así la condición se lee en el texto de cada paso.
-  const cuentas = sql`select id from social_accounts where meta_user_id = ${metaUserId} and network in ('instagram', 'facebook')`
+export function pasosDeBorrado(userId: string, origen: Origen = 'meta'): SQL[] {
+  // Las redes van literales y no como parámetros: es la lista cerrada de cada origen, y así
+  // la condición se lee en el texto de cada paso.
+  const cuentas =
+    origen === 'threads'
+      ? sql`select id from social_accounts where external_id = ${userId} and network = 'threads'`
+      : sql`select id from social_accounts where meta_user_id = ${userId} and network in ('instagram', 'facebook')`
   return [
     sql`delete from post_metrics where post_id in (select id from social_posts where account_id in (${cuentas}))`,
     sql`delete from post_comments where account_id in (${cuentas})`,
@@ -109,14 +127,14 @@ export function codigoDeBorrado(): string {
  * tocaban esas cuentas se leen antes también, por la misma razón: el quinto paso borra
  * sus destinos, que es el único camino que llevaba hasta ellos.
  */
-export async function borrarDatosDe(metaUserId: string): Promise<{ codigo: string; cuentas: number }> {
+export async function borrarDatosDe(userId: string, origen: Origen = 'meta'): Promise<{ codigo: string; cuentas: number }> {
   const db = getDb()
   const codigo = codigoDeBorrado()
   return db.transaction(async (tx) => {
     const afectadas = await tx
       .select({ id: socialAccounts.id })
       .from(socialAccounts)
-      .where(and(eq(socialAccounts.metaUserId, metaUserId), inArray(socialAccounts.network, [...REDES_META])))
+      .where(suyas(origen, userId))
     const cuentaIds = afectadas.map((c) => c.id)
     const cortes = cuentaIds.length
       ? await tx
@@ -124,10 +142,11 @@ export async function borrarDatosDe(metaUserId: string): Promise<{ codigo: strin
           .from(scheduledPostTargets)
           .where(inArray(scheduledPostTargets.accountId, cuentaIds))
       : []
-    for (const paso of pasosDeBorrado(metaUserId)) await tx.execute(paso)
+    for (const paso of pasosDeBorrado(userId, origen)) await tx.execute(paso)
     const huerfanos = pasoDeHuerfanos(cortes.map((c) => c.postId))
     if (huerfanos) await tx.execute(huerfanos)
-    await tx.insert(solicitudesBorrado).values({ codigo, red: 'meta', metaUserId, cuentas: afectadas.length })
+    // `meta_user_id` guarda el id con que llegó el pedido; `red` dice cuál de los dos es.
+    await tx.insert(solicitudesBorrado).values({ codigo, red: origen, metaUserId: userId, cuentas: afectadas.length })
     return { codigo, cuentas: afectadas.length }
   })
 }

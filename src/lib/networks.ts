@@ -137,13 +137,13 @@ export function avisosDe(network: SocialNetwork, metaEnRevision: boolean): strin
  *
  * - **Threads** espera la segunda vuelta del App Review de Meta (`threads_basic` y
  *   `threads_content_publish`, `docs/pendientes.md`): con la app en Live, sin esa aprobación
- *   solo autoriza quien tiene un rol en ella. Antes de abrirla falta además su baja y su
- *   borrado (`docs/deuda-tecnica.md`).
+ *   solo autoriza quien tiene un rol en ella. Para grabar esa revisión, `proximamentePara`
+ *   (`src/lib/redes-abiertas.ts`) la abre solo para la cuenta del revisor.
  * - **X** no publica hoy (2026-10-19). Antes de abrirla hay que ver por qué, empezando por el
  *   saldo: la API de X ya no tiene capa gratuita (README, «Modo Tinder»).
  *
- * Lo ya programado a una de estas redes no se toca: el publicador lo sigue intentando, y para
- * editarlo hay que sacarle ese destino.
+ * Lo ya programado a una de estas redes se quema en su primer intento, con `fraseProximamente`;
+ * para editarlo hay que sacarle ese destino.
  */
 export const REDES_PROXIMAMENTE: ReadonlySet<string> = new Set<SocialNetwork>(['threads', 'x'])
 

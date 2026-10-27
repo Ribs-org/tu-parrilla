@@ -50,15 +50,18 @@ function tiktokMediaError(draft: ScheduleDraft): string | null {
  * The composer's whole rulebook, pure so it is testable and shared: the server action
  * runs it as the real gate. Returns a fixed sentence or null.
  *
- * Antes que cualquier regla de forma va la reja de «Próximamente» (`REDES_PROXIMAMENTE`): a
- * esas redes no se programa nada, por ningún camino, y sus reglas de forma no vienen al caso.
+ * Antes que cualquier regla de forma va la reja de «Próximamente»: a esas redes no se programa
+ * nada, por ningún camino, y sus reglas de forma no vienen al caso. Son las del dueño
+ * (`proximamentePara`, que puede dejarle Threads abierto al revisor); sin decirlas, las de
+ * `REDES_PROXIMAMENTE`.
  */
 export function validateScheduleDraft(
   draft: ScheduleDraft,
   now: Date,
-  opts?: { allowPast?: boolean },
+  opts?: { allowPast?: boolean; proximamente?: ReadonlySet<string> },
 ): string | null {
-  const proxima = draft.networks.find((n) => REDES_PROXIMAMENTE.has(n))
+  const proximamente = opts?.proximamente ?? REDES_PROXIMAMENTE
+  const proxima = draft.networks.find((n) => proximamente.has(n))
   if (proxima) return fraseProximamente(proxima)
   return reglasDeForma(draft, now, opts)
 }

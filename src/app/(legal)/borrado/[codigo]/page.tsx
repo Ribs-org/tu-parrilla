@@ -33,7 +33,7 @@ const SIN_CODIGO = 'No conocemos ese código de borrado.'
 export default async function BorradoPage({ params }: { params: Promise<{ codigo: string }> }) {
   const { codigo } = await params
   const [solicitud] = await getDb()
-    .select({ cuentas: solicitudesBorrado.cuentas, creadoEn: solicitudesBorrado.creadoEn })
+    .select({ cuentas: solicitudesBorrado.cuentas, creadoEn: solicitudesBorrado.creadoEn, red: solicitudesBorrado.red })
     .from(solicitudesBorrado)
     .where(eq(solicitudesBorrado.codigo, codigo))
     .limit(1)
@@ -53,7 +53,8 @@ export default async function BorradoPage({ params }: { params: Promise<{ codigo
                 solicitud.creadoEn,
               )}
             </span>
-            : {solicitud.cuentas} {solicitud.cuentas === 1 ? 'cuenta' : 'cuentas'} de Instagram y Facebook.
+            : {solicitud.cuentas} {solicitud.cuentas === 1 ? 'cuenta' : 'cuentas'}{' '}
+            {solicitud.red === 'threads' ? 'de Threads' : 'de Instagram y Facebook'}.
           </>
         ) : (
           SIN_CODIGO

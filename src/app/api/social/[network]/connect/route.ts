@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server'
 import { createHash, randomBytes } from 'node:crypto'
 import { usuarioActual } from '@/lib/auth'
 import { env } from '@/lib/env'
-import { REDES_PROXIMAMENTE, fraseProximamente } from '@/lib/networks'
+import { fraseProximamente } from '@/lib/networks'
+import { proximamentePara } from '@/lib/redes-abiertas'
 import { COOKIE_AGREGAR } from '@/lib/social/vuelta'
 import { signOAuthState } from '@/lib/social/oauth-state'
 import { conMensaje } from '@/lib/mensaje-firmado'
@@ -81,7 +82,7 @@ export async function GET(
 
   // Una red en «Próximamente» no abre la ventana de la red aunque alguien escriba esta
   // dirección a mano: vuelve a Los Fierros con la frase, como cualquier otra vuelta.
-  if (REDES_PROXIMAMENTE.has(network)) {
+  if (proximamentePara(usuario.id).has(network)) {
     return NextResponse.redirect(`${origin}${conMensaje('/admin/accounts', fraseProximamente(network))}`)
   }
   const redirectUri = `${origin}/api/social/${network}/callback`

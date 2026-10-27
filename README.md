@@ -526,11 +526,12 @@ Si tu cuenta se conectó antes del 2026-09-30 y no la has reconectado, su `meta_
 está vacío: el callback responde igual, pero con cero cuentas afectadas.
 
 **Estas dos URLs cubren Instagram y Facebook, no Threads.** Threads se conecta por el caso
-de uso «API de Threads» de la misma app, que tiene su propio par de campos —firmados con
-`THREADS_APP_SECRET`, no con el de arriba— y **todavía no está implementado**: quien quite
-la app o pida el borrado desde Threads no llega a ninguna parte. Está anotado en
-`docs/deuda-tecnica.md`. Mientras Threads esté en «Próximamente» (ver «Conectar y
-sincronizar») nadie nuevo lo conecta.
+de uso «API de Threads» de la misma app, que tiene su propio par de campos, firmados con
+`THREADS_APP_SECRET` y no con el de arriba: en ese caso de uso, *Uninstall callback URL* es
+`https://<tu-dominio>/api/social/threads/baja` y *Delete callback URL*
+`https://<tu-dominio>/api/social/threads/borrado`. Hacen lo mismo que las de Meta, con las
+cuentas de Threads de esa persona, que se buscan por su id de Threads (`external_id`), y la
+página de estado del borrado dice que eran de Threads.
 
 #### Dejar entrar al revisor de Meta
 
@@ -852,8 +853,12 @@ editor y el teléfono no las ofrecen como destino, y lo que llegue por la API o 
 rechaza con una frase fija (`REDES_PROXIMAMENTE` y `fraseProximamente`, en
 `src/lib/networks.ts`; la reja vive en `validateScheduleDraft`). Así un usuario nuevo no se
 topa con una red que no funciona: Threads espera la segunda vuelta del App Review de Meta, y X
-no publica hoy (el detalle, en `docs/pendientes.md`). Lo programado antes a esas redes se
-sigue intentando. Abrir una es sacarla de esa lista.
+no publica hoy (el detalle, en `docs/pendientes.md`). Lo programado antes a esas redes se quema
+en su primer intento, con la misma frase. Abrir una es sacarla de esa lista. Para grabar la
+revisión de Threads, `THREADS_ABIERTO_PARA` la abre solo para los usuarios que nombra
+(`proximamentePara`, en `src/lib/redes-abiertas.ts`): para ellos, Los Fierros, el compositor, el
+editor, la API y el publicador la tratan como cualquier otra red. La portada sigue con la lista
+fija.
 
 **Qué se lee cada día.** La lectura va por edad, no por cantidad (`src/lib/social/lectura.ts`).
 Lo publicado en los últimos 10 días —y, como mínimo, las 200 publicaciones más nuevas de la
@@ -1120,7 +1125,8 @@ Vercel y bajan con `vercel env pull .env.local`.
 | `REVISION_CORREO` | El único correo (ya invitado en Los Maestros) que recibe un código de ingreso fijo en vez de uno mandado por correo, para que el revisor de Meta entre | No — solo con la app de Meta en revisión o publicada (Meta vuelve a revisarla) |
 | `REVISION_CODIGO` | El código fijo de seis dígitos que vale para ese correo; el mismo que dicen las instrucciones para revisores en Meta | No — va junto a `REVISION_CORREO` |
 | `THREADS_APP_ID` | Conectar Threads para publicar; hoy en «Próximamente» (ver «Conectar y sincronizar») | El Threads App ID del caso de uso «API de Threads» de la app de Meta |
-| `THREADS_APP_SECRET` | El secreto de ese caso de uso | Junto con el anterior |
+| `THREADS_APP_SECRET` | El secreto de ese caso de uso; firma también la baja y el borrado que manda Threads (`/api/social/threads/baja` y `/borrado`) | Junto con el anterior |
+| `THREADS_ABIERTO_PARA` | Ids de usuario, separados por comas, para los que Threads no dice «Próximamente»: pueden conectarlo, programarle y publicar en él | No — es para grabar la revisión de Meta de Threads con la cuenta del revisor; aprobada, Threads sale de «Próximamente» para todos y esta variable sobra |
 | `X_CLIENT_ID` | Conectar X para publicar (OAuth 2.0 + PKCE); hoy en «Próximamente» | El Client ID de la app en developer.x.com |
 | `X_CLIENT_SECRET` | El secreto de esa app | Junto con el anterior |
 | `X_BEARER_TOKEN` | Leer los tuits públicos de los creadores del modo Tinder (ver «Modo Tinder») | No — sin ella el modo Tinder no trae nada de X |

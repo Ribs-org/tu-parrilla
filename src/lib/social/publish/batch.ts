@@ -23,6 +23,8 @@ import { documentoToBlob } from './documento'
 import { esChoqueCon } from '@/lib/choque-de-unicidad'
 import { buscarPorId } from '@/lib/usuarios'
 import { ZONA_POR_DEFECTO } from '@/lib/zona'
+import { REDES_PROXIMAMENTE } from '@/lib/networks'
+import { proximamentePara } from '@/lib/redes-abiertas'
 
 /**
  * Parse a fecha string (YYYY-MM-DD HH:MM format) to a Date in the owner's timezone.
@@ -376,7 +378,12 @@ export function opcionesDeFila(
  * `zone` es la del dueño del lote: «2026-10-01 19:00» son las siete de su tarde, no las
  * de un sitio.
  */
-export function validateBatchItem(item: BatchItem, now: Date, zone: string): string | null {
+export function validateBatchItem(
+  item: BatchItem,
+  now: Date,
+  zone: string,
+  proximamente: ReadonlySet<string> = REDES_PROXIMAMENTE,
+): string | null {
   const scheduledAt = parseFecha(item.fecha, zone)
   if (!scheduledAt) return 'La fecha no se entendió (usa YYYY-MM-DD HH:MM).'
 
@@ -461,6 +468,7 @@ export function validateBatchItem(item: BatchItem, now: Date, zone: string): str
       formats: item.media.map(extensionDe),
     },
     now,
+    { proximamente: proximamente },
   )
 }
 
@@ -756,7 +764,10 @@ async function programarSinRepetir(
     if (existente) return { ok: true, postId: existente, repetido: true }
   }
 
-  const invalid = validateBatchItem(item, now, zone)
+  // Las redes en «Próximamente» para este dueño (`proximamentePara`): las mismas en las dos
+  // pasadas de la regla común, la de la forma y la de después de subir.
+  const proximamente = proximamentePara(ownerId)
+  const invalid = validateBatchItem(item, now, zone, proximamente)
   if (invalid) return { ok: false, error: invalid }
 
   try {
@@ -811,6 +822,7 @@ async function programarSinRepetir(
         formats: item.media.map(extensionDe),
       },
       now,
+      { proximamente: proximamente },
     )
     if (preUploadError) return { ok: false, error: preUploadError }
 
@@ -860,6 +872,7 @@ async function programarSinRepetir(
         formats: uploaded.map((m) => extensionDe(m.url)),
       },
       now,
+      { proximamente: proximamente },
     )
     if (shapeError) return { ok: false, error: shapeError }
 

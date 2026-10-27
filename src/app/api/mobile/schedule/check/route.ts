@@ -10,6 +10,7 @@ import {
 import { validateScheduleDraft } from '@/lib/social/publish/validate'
 import { errorDeHistoria, errorDeMediaPorOpciones, validarOpcionesPorCuenta } from '@/lib/social/publish/opciones'
 import { CuentaInvalida } from '@/lib/social/cuentas'
+import { proximamentePara } from '@/lib/redes-abiertas'
 
 export const dynamic = 'force-dynamic'
 
@@ -82,6 +83,7 @@ export async function POST(request: Request) {
       scheduledAt: resolverCuando(borrador.ahora, borrador.cuando, now),
     },
     now,
+    { proximamente: proximamentePara(usuario.id) },
   )
   if (error) return NextResponse.json({ error }, { status: 400 })
 

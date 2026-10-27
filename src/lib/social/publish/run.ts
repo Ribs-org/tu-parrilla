@@ -8,7 +8,8 @@ import {
   socialAccounts,
   users,
 } from '@/db'
-import { REDES_PROXIMAMENTE, fraseProximamente } from '@/lib/networks'
+import { fraseProximamente } from '@/lib/networks'
+import { proximamentePara } from '@/lib/redes-abiertas'
 import { CONNECTORS } from '@/lib/social'
 import { PUBLISHERS } from './index'
 import { borrar } from '@/lib/storage'
@@ -158,6 +159,7 @@ export async function publishDue(
         caption: target.captionOverride ?? vigente?.caption ?? post.caption,
         coverUrl: vigente ? vigente.coverUrl : post.coverUrl,
         opciones: (target.opciones as OpcionesDestino | null) ?? null,
+        ownerId: post.ownerId,
       })
     }
 
@@ -296,14 +298,14 @@ async function attempt(
   targetId: string,
   postId: string,
   containerId: string | null,
-  content: { caption: string; coverUrl: string | null; opciones: OpcionesDestino | null },
+  content: { caption: string; coverUrl: string | null; opciones: OpcionesDestino | null; ownerId: string | null },
 ): Promise<PublishOutcome> {
   const db = getDb()
   const network = target.network
-  // Threads y X dicen «Próximamente» (`REDES_PROXIMAMENTE`): un destino viejo a una de ellas
-  // no va a salir por reintentar, así que se quema en el primer intento y con su frase, en vez
-  // de gastar tres y mandar el correo de una red que nunca respondió.
-  if (REDES_PROXIMAMENTE.has(network)) return { kind: 'failed', reason: fraseProximamente(network), definitivo: true }
+  // Threads y X dicen «Próximamente» para casi todos (`proximamentePara`): un destino viejo a una
+  // de ellas no va a salir por reintentar, así que se quema en el primer intento y con su frase,
+  // en vez de gastar tres y mandar el correo de una red que nunca respondió.
+  if (proximamentePara(content.ownerId).has(network)) return { kind: 'failed', reason: fraseProximamente(network), definitivo: true }
   const publisher = PUBLISHERS.find((p) => p.network === network)
   if (!publisher) return { kind: 'failed', reason: NO_PUBLISH_TOKEN }
   // The publisher's own credential wins: YouTube reads with an API key but writes

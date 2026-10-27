@@ -185,11 +185,14 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
 - **Integración con Threads** (en «Próximamente» desde el 2026-10-19). Se apagó, junto con X,
   para que un usuario nuevo no se tope con algo que no funciona: Los Fierros dice
   «Próximamente» y nada deja programar ahí (README, «Conectar y sincronizar»). El código para
-  publicar existe (`src/lib/social/publish/threads.ts`). Para abrirla: la segunda vuelta del App
-  Review con `threads_basic` y `threads_content_publish` (la entrada «Meta, segunda vuelta», más
-  abajo), su baja y su borrado (`docs/deuda-tecnica.md`, «Threads se queda fuera de la baja y
-  del borrado de Meta»), sacarla de `REDES_PROXIMAMENTE` (`src/lib/networks.ts`) y volver a
-  contar su conexión en `public/docs/ui/los-fierros.md`.
+  publicar existe (`src/lib/social/publish/threads.ts`), y desde el 2026-10-27 también su baja y
+  su borrado. Para grabar la revisión, `THREADS_ABIERTO_PARA=<id del revisor>` la abre solo para
+  esa cuenta. **[dueño]** En el caso de uso de Threads de la app de Meta, poner
+  *Uninstall callback URL* `https://tu-parrilla.cl/api/social/threads/baja` y *Delete callback
+  URL* `https://tu-parrilla.cl/api/social/threads/borrado`. Para abrirla a todos: la aprobación
+  de `threads_basic` y `threads_content_publish` (la entrada «Meta, segunda vuelta», más abajo),
+  sacarla de `REDES_PROXIMAMENTE` (`src/lib/networks.ts`) y volver a contar su conexión en
+  `public/docs/ui/los-fierros.md`.
 - **Integración con X** (en «Próximamente» desde el 2026-10-19). El código para publicar existe
   (`src/lib/social/publish/x.ts`), pero no publica: lo primero a mirar es el saldo, porque su
   API ya no tiene capa gratuita, y pagarla es decisión del **[dueño]**. Abrirla es lo mismo que

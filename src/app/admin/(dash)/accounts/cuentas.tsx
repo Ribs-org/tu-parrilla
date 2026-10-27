@@ -12,7 +12,7 @@ import { copiarAlPortapapeles } from '@/lib/copiar'
 import { useAhora } from '@/lib/use-ahora'
 import type { CuentaRow } from '@/lib/posts-kpis'
 import { CONEXION_FALLO } from '@/lib/avisos/reglas'
-import { PROXIMAMENTE, REDES_PROXIMAMENTE, avisosDe, networkLabel } from '@/lib/networks'
+import { PROXIMAMENTE, avisosDe, networkLabel } from '@/lib/networks'
 import { estadoDelFierro, type Fierro } from '@/lib/parrilla'
 import { avisoSinTrial } from '@/lib/social/publish/opciones'
 import { cn } from '@/lib/utils'
@@ -80,8 +80,23 @@ function Proximamente() {
  * contra el reloj del navegador (`useAhora`). Contarlos con `Date.now()` en el render daba
  * un texto en cada lado cuando el cálculo cruzaba un cambio de unidad, y React abortaba.
  */
-export function Cuentas({ rows, metaEnRevision, desde }: { rows: CuentaRow[]; metaEnRevision: boolean; desde: number }) {
+/**
+ * `proximamente`: las redes que para este dueño dicen «Próximamente» (`proximamentePara`, en el
+ * servidor): una lista y no la constante, porque Threads puede estar abierta solo para el revisor.
+ */
+export function Cuentas({
+  rows,
+  metaEnRevision,
+  desde,
+  proximamente,
+}: {
+  rows: CuentaRow[]
+  metaEnRevision: boolean
+  desde: number
+  proximamente: readonly string[]
+}) {
   const ahora = useAhora(desde)
+  const esProxima = (red: string) => proximamente.includes(red)
   const [pending, startTransition] = useTransition()
   const [aviso, setAviso] = useState<{ texto: string; ok: boolean } | null>(null)
 
@@ -118,7 +133,7 @@ export function Cuentas({ rows, metaEnRevision, desde }: { rows: CuentaRow[]; me
                 <div className="flex items-center gap-2">
                   <Icon name={network} className="h-4 w-4 shrink-0" />
                   <h2 className="font-titulo text-sm font-semibold uppercase tracking-[0.03em]">{networkLabel(network)}</h2>
-                  {REDES_PROXIMAMENTE.has(network) ? (
+                  {esProxima(network) ? (
                     <Proximamente />
                   ) : (
                     // `agregar=1`: si la red vuelve con la cuenta de antes, Los Fierros lo dice en vez
@@ -153,6 +168,7 @@ export function Cuentas({ rows, metaEnRevision, desde }: { rows: CuentaRow[]; me
                       network={network}
                       vivas={cuentas.filter((c) => c.connected && c.id !== row.id)}
                       ahora={ahora}
+                      proxima={esProxima(network)}
                     />
                   ))}
                 </ul>
@@ -173,7 +189,7 @@ export function Cuentas({ rows, metaEnRevision, desde }: { rows: CuentaRow[]; me
                 <li key={network}>
                   <div className="flex items-center gap-2">
                     <Icon name={network} className="h-4 w-4 shrink-0 text-fg-muted" />
-                    {REDES_PROXIMAMENTE.has(network) ? (
+                    {esProxima(network) ? (
                       <>
                         <span className="text-sm text-fg-muted">{networkLabel(network)}</span>
                         <Proximamente />
@@ -237,7 +253,19 @@ export function Cuentas({ rows, metaEnRevision, desde }: { rows: CuentaRow[]; me
  * y compañía dan un id distinto por app—: al pasar del sandbox a la app real la misma
  * cuenta vuelve como fila nueva, y esta queda muerta con su historial colgando.
  */
-function Fila({ row, network, vivas, ahora }: { row: CuentaRow; network: string; vivas: CuentaRow[]; ahora: number }) {
+function Fila({
+  row,
+  network,
+  vivas,
+  ahora,
+  proxima,
+}: {
+  row: CuentaRow
+  network: string
+  vivas: CuentaRow[]
+  ahora: number
+  proxima: boolean
+}) {
   const [pending, startTransition] = useTransition()
   const [abierta, setAbierta] = useState(false)
   const detalle = useId()
@@ -341,7 +369,7 @@ function Fila({ row, network, vivas, ahora }: { row: CuentaRow; network: string;
         </div>
         {/* En una red en «Próximamente» el bloque ya lo dice arriba; la fila se queda con su
             detalle, para poder desconectarla o quitarla. */}
-        {REDES_PROXIMAMENTE.has(network) ? null : (
+        {proxima ? null : (
           <a
             href={`/api/social/${network}/connect`}
             className="shrink-0 text-[0.75rem] text-fg-muted transition-colors hover:text-fg"

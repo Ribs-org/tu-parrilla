@@ -6,6 +6,7 @@ import { Encabezado } from '@/components/ui'
 import { mensajeDeLaUrl } from '@/lib/mensaje-firmado'
 import { AvisoDeConexion } from './aviso-de-conexion'
 import { Cuentas } from './cuentas'
+import { proximamentePara } from '@/lib/redes-abiertas'
 
 export const dynamic = 'force-dynamic'
 
@@ -31,7 +32,12 @@ export default async function AccountsPage({
       {/* La ayuda se arma acá, en el servidor: sus frases vienen de los conectores de Meta, que
           no viajan al navegador. */}
       {mensaje ? <AvisoDeConexion mensaje={mensaje} ayuda={ayudaDeConexion(mensaje)} /> : null}
-      <Cuentas rows={cuentas} metaEnRevision={metaEnRevision} desde={ahora.getTime()} />
+      <Cuentas
+        rows={cuentas}
+        metaEnRevision={metaEnRevision}
+        desde={ahora.getTime()}
+        proximamente={[...proximamentePara(ownerId)]}
+      />
     </>
   )
 }

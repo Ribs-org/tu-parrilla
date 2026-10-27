@@ -205,9 +205,12 @@ export function Composer({
   zona,
   desde,
   creativo = null,
+  proximamente = [...REDES_PROXIMAMENTE],
 }: {
   carga: Record<string, number>
   cuentas: CuentaRow[]
+  /** Las redes que para este dueño dicen «Próximamente» (`proximamentePara`, en el servidor). */
+  proximamente?: readonly string[]
   /** El borrador que se abre; sin él, el formulario nace vacío. */
   borrador?: { id: string; campos: Campos; media: MediaSubida[] } | null
   /**
@@ -243,9 +246,9 @@ export function Composer({
   const campos = borrador?.campos ?? null
 
   // Cuentas cuya red todavía publica desde aquí. Una cuenta de una red que no está en
-  // `ENABLED`, o que está en «Próximamente» (`REDES_PROXIMAMENTE`), no se ofrece, esté o no
-  // conectada.
-  const publicables = cuentas.filter((c) => ENABLED.has(c.network) && !REDES_PROXIMAMENTE.has(c.network))
+  // `ENABLED`, o que para este dueño está en «Próximamente» (`proximamente`), no se ofrece,
+  // esté o no conectada.
+  const publicables = cuentas.filter((c) => ENABLED.has(c.network) && !proximamente.includes(c.network))
   // Las marcadas al abrir: las del borrador; si no, la que pidió la vista «Día»; si no, la
   // única conectada.
   const pedida = publicables.find((c) => c.id === cuentaInicial && c.connected)

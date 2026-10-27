@@ -11,6 +11,7 @@ import { volverDelEditor } from '../enlace'
 import { esUuid } from '@/lib/uuid'
 import { DestinosDelPost } from './destinos'
 import { Editor } from './editor'
+import { proximamentePara } from '@/lib/redes-abiertas'
 
 export const dynamic = 'force-dynamic'
 
@@ -63,6 +64,7 @@ export default async function EditScheduledPostPage({
       caption={post.caption}
       scheduledAtLocal={toZonedInput(post.scheduledAt, zona)}
       cuentas={cuentas}
+      proximamente={[...proximamentePara(ownerId)]}
       targets={targets.map((t) => ({
         accountId: t.accountId,
         network: t.network,

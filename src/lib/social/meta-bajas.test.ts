@@ -92,3 +92,16 @@ describe('codigoDeBorrado', () => {
     expect(codigoDeBorrado()).not.toBe(codigoDeBorrado())
   })
 })
+
+describe('pasosDeBorrado desde Threads', () => {
+  const dialecto = new PgDialect()
+  const pasos = pasosDeBorrado('TH_1', 'threads').map((p) => dialecto.sqlToQuery(p))
+
+  it('busca las cuentas por su id de Threads y no sale de Threads', () => {
+    for (const p of pasos) {
+      expect(p.params).toContain('TH_1')
+      expect(p.sql).toMatch(/external_id\s*=\s*\$\d+\s+and\s+network\s*=\s*'threads'/i)
+      expect(p.sql).not.toMatch(/'instagram'|'facebook'/)
+    }
+  })
+})
