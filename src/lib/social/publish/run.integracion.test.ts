@@ -60,6 +60,9 @@ async function corridaColgada(destinoId: string) {
   )
   const corrida = publishDue()
   await vi.waitFor(async () => expect((await leer(destinoId))?.reclamadoHasta).not.toBeNull())
+  // Colgada de verdad: adentro de la publicación, no solo con el reclamo puesto. Entre una cosa y
+  // la otra hay varias consultas, y la corrida siguiente de la prueba podía adelantarse.
+  await vi.waitFor(() => expect(publicar).toHaveBeenCalledTimes(1))
   return { corrida }
 }
 
@@ -85,7 +88,8 @@ describe.skipIf(!URL_PRUEBAS)('contra una Postgres de verdad', () => {
 
   afterAll(() => soltar?.())
 
-  describe('publishDue', () => {
+  describe('publishDue', () => {
+
     it('lo que Meta dice de los trial reels queda en la cuenta: «no» al rechazarlo, «sí» cuando uno sale', async () => {
       const { publishDue } = await import('./run')
       const { socialAccounts } = await esquema()
