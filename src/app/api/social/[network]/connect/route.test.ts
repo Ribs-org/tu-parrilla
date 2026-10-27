@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 vi.mock('server-only', () => ({}))
 vi.mock('@/lib/auth', () => ({ usuarioActual: async () => ({ id: 'owner-1' }) }))
 
-const { GET } = await import('./route')
+const { GET, scopesDe } = await import('./route')
 
 function conectar(red: string, consulta = '') {
   return GET(new Request(`https://tu-parrilla.cl/api/social/${red}/connect${consulta}`), {
@@ -61,5 +61,15 @@ describe('GET /api/social/<red>/connect', () => {
     const sinMarca = await conectar('tiktok')
     // Borrar una cookie es mandarla vacía y ya vencida.
     expect(sinMarca.headers.get('set-cookie')).toMatch(/agregar_cuenta=;.*Path=\/api\/social\/tiktok/i)
+  })
+})
+
+describe('los permisos del privado', () => {
+  it('solo con la bandera, y solo en Instagram y Facebook', () => {
+    expect(scopesDe('instagram', false)).not.toContain('instagram_manage_messages')
+    expect(scopesDe('instagram', true)).toMatch(/,instagram_manage_messages,pages_messaging$/)
+    expect(scopesDe('facebook', true)).toMatch(/,pages_messaging$/)
+    expect(scopesDe('tiktok', true)).toBe(scopesDe('tiktok', false))
+    expect(scopesDe('linkedin', true)).toBeUndefined()
   })
 })

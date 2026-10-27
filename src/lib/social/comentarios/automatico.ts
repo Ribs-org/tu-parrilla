@@ -3,9 +3,10 @@ import { and, desc, eq, inArray, isNotNull } from 'drizzle-orm'
 import { getDb, postComments, reglasClave, scheduledPostTargets } from '@/db'
 import type { SocialAccount } from '@/db'
 import { env } from '@/lib/env'
-import { COMENTARIO_AUSENTE, RED_RECHAZO } from './comentarista'
+import { COMENTARIO_AUSENTE, PRIVADO_RECHAZADO, RED_RECHAZO } from './comentarista'
 import { comentaristaFor } from './index'
 import { reclamarEnvio } from './reclamo'
+import { mandarPrivado, privadoActivo } from './privado'
 import { decidirAutomatica, type ReglaLimpia } from './reglas'
 import { seAcaboElTiempo } from './ventana'
 
@@ -101,9 +102,11 @@ type Nuevo = {
  * rezagado nunca vuelve a aparecer en `nuevos` (la pasada siguiente lo trae como
  * `conocido`, no como insertado) y queda huérfano: ni la regla lo toma de nuevo ni
  * `redactarPendientes` lo redacta, porque coincide con una regla y ella lo salta a
- * propósito. Corre dentro del sondeo, con el token que el sondeo ya consiguió. El privado
- * llega en la entrega 2: hoy el plan siempre se decide sin él. `cupo.restantes` es
- * compartido por toda la corrida.
+ * propósito. Corre dentro del sondeo, con el token que el sondeo ya consiguió. Con el privado
+ * encendido para el dueño (`privadoActivo`), la respuesta pública es la corta y el mensaje con
+ * el enlace va por privado, una sola vez por persona en cada post: Meta deja uno por comentario,
+ * y a quien comenta dos veces la palabra le basta con uno. `cupo.restantes` es compartido por
+ * toda la corrida.
  */
 export async function aplicarReglas(
   account: SocialAccount,
@@ -161,6 +164,7 @@ export async function aplicarReglas(
 
   const sitioHost = hostDelSitio()
   const now = new Date()
+  const conPrivado = privadoActivo(account.ownerId)
 
   for (const c of candidatos) {
     if (cupo.restantes <= 0 || seAcaboElTiempo(inicio, Date.now())) break
@@ -170,11 +174,11 @@ export async function aplicarReglas(
     const plan = decidirAutomatica({
       texto: c.text,
       esPropio: false,
-      yaRecibioPrivado: false,
+      yaRecibioPrivado: conPrivado && (await yaRecibioPrivado(account.id, c.postExternalId, c.authorExternalId)),
       network: account.network,
       publishedAt: c.publishedAt,
       now,
-      privadoEncendido: false,
+      privadoEncendido: conPrivado,
       regla,
       sitioHost,
     })
@@ -201,6 +205,7 @@ export async function aplicarReglas(
         // `pendiente`, esta escritura no la pisa.
         .where(and(eq(postComments.id, c.id), eq(postComments.state, 'pendiente')))
       resultado.respondidos += 1
+      if (plan.privado) await mandarYAnotar(account, tokenEscritura, c, plan.privado)
     } catch (error) {
       console.error(`[comentarios] automática ${account.network}:`, String(error).slice(0, 300))
       const borrado = error instanceof Error && error.message === COMENTARIO_AUSENTE
@@ -221,4 +226,43 @@ export async function aplicarReglas(
     }
   }
   return resultado
+}
+
+/**
+ * Si quien comentó ya recibió el privado de este post: comentar la palabra dos veces no le
+ * manda el enlace dos veces. Sin autor conocido no se puede saber, y se le manda.
+ */
+async function yaRecibioPrivado(accountId: string, postExternalId: string, autor: string | null): Promise<boolean> {
+  if (!autor) return false
+  const [fila] = await getDb()
+    .select({ id: postComments.id })
+    .from(postComments)
+    .where(
+      and(
+        eq(postComments.accountId, accountId),
+        eq(postComments.postExternalId, postExternalId),
+        eq(postComments.authorExternalId, autor),
+        eq(postComments.dmState, 'enviado'),
+      ),
+    )
+    .limit(1)
+  return fila !== undefined
+}
+
+/**
+ * El privado de la regla, después de la respuesta pública que ya salió. Su fallo no deshace esa
+ * respuesta: queda anotado en la fila (`dm_state`) y se ve en La Mesa.
+ */
+async function mandarYAnotar(account: SocialAccount, token: string, c: Nuevo, texto: string): Promise<void> {
+  let dmState: 'enviado' | 'fallido' = 'enviado'
+  try {
+    await mandarPrivado(account, token, c.externalId, texto)
+  } catch (error) {
+    console.error(`[comentarios] privado automático ${account.network}:`, String(error).slice(0, 300))
+    dmState = 'fallido'
+  }
+  await getDb()
+    .update(postComments)
+    .set({ dmState, dmError: dmState === 'fallido' ? PRIVADO_RECHAZADO : null, updatedAt: new Date() })
+    .where(eq(postComments.id, c.id))
 }

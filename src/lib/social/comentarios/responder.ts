@@ -133,7 +133,7 @@ async function privadoSiToca(
   account: typeof socialAccounts.$inferSelect,
   token: string,
 ) {
-  if (!tocaPrivado(fila.network, fila.publishedAt, new Date(), privadoActivo())) return
+  if (!tocaPrivado(fila.network, fila.publishedAt, new Date(), privadoActivo(account.ownerId))) return
   const db = getDb()
   // Sin id externo de la cuenta no hay a qué endpoint mandar el privado: es una cuenta mal
   // guardada, no un rechazo de la red, pero la fila se marca igual para no reintentar sola.

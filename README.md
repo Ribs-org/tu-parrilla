@@ -764,10 +764,17 @@ pendiente de los últimos siete días. Una fila que se está mandando desde la c
 vigente) no se toca. YouTube entrega solo unas pocas respuestas por hilo, así que en un
 comentario con muchas la tuya puede no verse.
 
-El mensaje privado a quien comentó está escrito y **apagado**. Meta exige para eso
-`pages_messaging` con acceso avanzado, que pasa por revisión de la app. El día que la
-consigas, `COMENTARIOS_DM=1` en Vercel lo enciende para Instagram y Facebook, dentro de los
-siete días que Meta permite. Hasta entonces la cola no muestra nada del privado.
+El mensaje privado a quien comentó está escrito y **apagado** salvo para quien diga
+`COMENTARIOS_DM`. Meta exige `instagram_manage_messages` y `pages_messaging`; sin su acceso
+avanzado, que pasa por la revisión de la app, solo deja escribirle a quien tiene un rol en ella.
+Para grabar esa revisión, `COMENTARIOS_DM` lleva el id del usuario revisor (una lista de ids
+separados por comas lo enciende solo para esos); aprobado, `COMENTARIOS_DM=1` lo enciende para
+todos, en Instagram y Facebook, dentro de los siete días que Meta permite. Los permisos se piden
+al conectar solo con `META_PERMISOS_PRIVADO=1`, que se enciende después de activarlos en los
+casos de uso de la app de Meta, y la cuenta tiene que reconectarse para concederlos. En
+Instagram el privado sale de la página de Facebook enlazada, con su token, que se busca al
+mandarlo (`paginaParaPrivado`, en `comentarios/privado.ts`). Con el privado apagado, la cola no
+muestra nada de él.
 
 Después de fusionar, la migración se aplica sola al desplegar: la tabla de comentarios gana
 dos columnas para el estado del privado.
@@ -778,10 +785,12 @@ Al programar un post puedes ponerle una palabra clave, un mensaje con enlace y u
 respuesta pública. Funciona en Instagram, Facebook y YouTube: cuando alguien comenta esa
 palabra, la corrida siguiente del cron que la sondea (cinco minutos como mucho en Instagram y
 Facebook; en YouTube, media hora) responde sola, sin pasar
-por la cola de aprobación, y la cola lo marca como «Automática». Hoy el mensaje con el
-enlace se publica siempre como la respuesta pública; el privado (respuesta corta en público
-y el mensaje por DM, en Instagram y Facebook) llega en la próxima entrega, y va a depender
-de que Meta apruebe `pages_messaging` con acceso avanzado y de `COMENTARIOS_DM=1`. TikTok
+por la cola de aprobación, y la cola lo marca como «Automática». Con el privado encendido para
+el dueño (`COMENTARIOS_DM`), en Instagram y Facebook la respuesta pública es la corta y el
+mensaje con el enlace va por privado, una sola vez por persona en cada post; si el privado no
+sale, queda anotado en la fila y la respuesta pública ya salió igual. Con el privado apagado, o
+en YouTube, o pasados los siete días, el mensaje con el enlace se publica como la respuesta
+pública: nunca se promete un privado que no salió. TikTok
 todavía no tiene cola de comentarios, así que una regla en un post que solo va a TikTok no
 hace nada. Si el enlace es de tu sitio, se le agrega `?s=dm-<palabra>` y aparece como fila
 propia en **Los Números** (Analítica) → «En tu página» → «⋯ Más» → «Todas las etiquetas». Para eso el servidor necesita saber
@@ -792,8 +801,8 @@ La regla puede traer además un PDF (`documentoUrl` en la API de lote, hasta 25 
 descarga y se copia al almacenamiento propio al programar, no al comentar, para que un
 enlace que muere después o una página de Drive no rompan la respuesta días más tarde. El
 documento nunca se manda como adjunto, siempre como enlace al final del mismo mensaje —así
-que hoy, igual que el resto de la regla, sale en la respuesta pública hasta que el privado
-esté encendido.
+que, igual que el resto de la regla, sale en la respuesta pública mientras el privado esté
+apagado.
 
 ### Modo Tinder
 
@@ -1117,7 +1126,8 @@ Vercel y bajan con `vercel env pull .env.local`.
 | `X_BEARER_TOKEN` | Leer los tuits públicos de los creadores del modo Tinder (ver «Modo Tinder») | No — sin ella el modo Tinder no trae nada de X |
 | `AI_GATEWAY_API_KEY` | Redactar con un modelo los borradores de respuesta a comentarios (ver «Responder comentarios») | No — en Vercel puede omitirse si el proyecto usa OIDC; sin ninguna de las dos, los comentarios entran a la cola sin borrador |
 | `COMENTARIOS_MODELO` | El modelo de esos borradores, con la forma `proveedor/modelo` | No — tiene uno por defecto |
-| `COMENTARIOS_DM` | Con `1`, tras responder un comentario de Instagram o Facebook se le manda un privado a quien comentó | No — apagada por defecto; exige `pages_messaging` aprobado por Meta |
+| `COMENTARIOS_DM` | El privado a quien comentó en Instagram o Facebook, tras responderle a mano y en la regla de palabra clave. `1` lo enciende para todos; una lista de ids de usuario separados por comas, solo para esos (la cuenta del revisor de Meta mientras revisa) | No — apagada por defecto; exige `instagram_manage_messages` y `pages_messaging` (sin acceso avanzado, solo llega a quien tiene un rol en la app de Meta) |
+| `META_PERMISOS_PRIVADO` | Con `1`, conectar Instagram y Facebook pide además los permisos del privado | No — encenderla solo después de activarlos en los casos de uso de la app de Meta: si no, Meta rechaza la ventana entera |
 | `SITE_URL` | Tu dominio, para etiquetar los enlaces del mensaje automático | No — sin ella se usa el dominio de producción de Vercel |
 | `COCINA_SECRET` | La credencial de La Cocina: la que el servidor del chef manda en `Authorization: Bearer …` a `/api/cocina/…` para tomar comandas, bajar insumos, informar estados y entregar creativos (ver «La Cocina» y `docs/cocina-api.md`). La conocen solo este despliegue y el servidor del chef | No — sin ella esas rutas responden `401` y la cocina queda cerrada; si la pones, genérala igual que `CRON_SECRET` y dásela al servidor del chef |
 | `CRON_SECRET` | Autoriza las corridas programadas: el sync diario y la publicación cada 5 minutos. Vercel la manda sola a su cron; el pinger externo la manda en `Authorization: Bearer …` | Sí — Vercel no la crea: se genera igual que `AUTH_SECRET` y se agrega. Sin ella los crons responden `401` y no corre nada |
