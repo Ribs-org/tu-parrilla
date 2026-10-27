@@ -443,9 +443,14 @@ nadie paga: todas las cuentas son iguales y el README dice «Sin suscripción».
   no mirabas», de la entrada de arriba, que también necesita guardar la última visita por usuario.
 - **Cupos y reparto de los crons por usuario** (`docs/levantamiento-terceros.md` §5.4). Hace
   falta cuando la beta pase de unos diez usuarios.
-- **El privado de Meta (DM con el PDF)** necesita `instagram_manage_messages` y
-  `pages_messaging` en una segunda vuelta de App Review (`docs/levantamiento-terceros.md`
-  §2.2 y §7).
+- **[dueño] El privado de Meta (DM con el PDF): construido, falta la aprobación** (2026-10-27).
+  El privado tras responder a mano y el de la regla de palabra clave están hechos y apagados.
+  Para la segunda vuelta del App Review: activar `instagram_manage_messages` y
+  `pages_messaging` en los casos de uso de la app de Meta; después `META_PERMISOS_PRIVADO=1`
+  y `COMENTARIOS_DM=<id del usuario revisor>` en Vercel; reconectar Instagram y Facebook en el
+  revisor, y grabar. Con la aprobación, `COMENTARIOS_DM=1` lo enciende para todos (cada
+  cuenta tiene que reconectarse una vez para conceder los permisos). Ver el README, el párrafo
+  del mensaje privado en lo de La Mesa.
 - **El privado con botón, y la guía solo para seguidores** (2026-10-15). En vez de mandar
   el PDF de una en el privado, mandar un botón: «¿Quieres que te mande la guía?». Al
   apretarlo, la guía llega solo si la persona sigue la cuenta; si no, recibe «Esta guía es
