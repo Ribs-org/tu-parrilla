@@ -50,6 +50,23 @@ const SCOPES: Record<string, string> = {
   tiktok: 'user.info.basic,video.list,video.upload,video.publish',
 }
 
+/**
+ * Los permisos del privado (`privado.ts`), solo con `META_PERMISOS_PRIVADO=1`: Meta rechaza
+ * la ventana entera si pide uno que la app no tiene activado en sus casos de uso, así que se
+ * enciende después de activarlos en el panel de Meta, no antes. Una cuenta conectada antes
+ * tiene que reconectarse para concederlos.
+ */
+const SCOPES_PRIVADO: Record<string, string> = {
+  instagram: 'instagram_manage_messages,pages_messaging',
+  facebook: 'pages_messaging',
+}
+
+export function scopesDe(network: string, conPrivado: boolean): string | undefined {
+  const base = SCOPES[network]
+  const privado = conPrivado ? SCOPES_PRIVADO[network] : undefined
+  return base && privado ? `${base},${privado}` : base
+}
+
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ network: string }> },
@@ -58,7 +75,7 @@ export async function GET(
   if (!usuario) return new NextResponse('No autorizado', { status: 401 })
 
   const { network } = await params
-  const scope = SCOPES[network]
+  const scope = scopesDe(network, env('META_PERMISOS_PRIVADO') === '1')
   if (!scope) return new NextResponse('Esa red no usa OAuth', { status: 400 })
 
   const origin = new URL(request.url).origin

@@ -380,9 +380,11 @@ enlaces, stickers ni encuestas.
 Cuando alguien comente esa palabra (completa, sin importar mayúsculas ni tildes), el
 sistema responde solo en la corrida siguiente del cron, en Instagram, Facebook y YouTube
 (TikTok todavía no tiene cola de comentarios, así que una regla en un post que solo va a
-TikTok no hace nada). Hoy el mensaje con el enlace se publica siempre como `mensaje`, la
-respuesta pública; el privado (`respuestaPublica` en público y `mensaje` por DM, en
-Instagram y Facebook) llega en una próxima entrega. Si el enlace es del sitio propio se le
+TikTok no hace nada). Mientras el privado esté apagado para la cuenta, `mensaje`, con su
+enlace, se publica como la respuesta pública. Encendido, en Instagram y Facebook
+`respuestaPublica` va en público y `mensaje` por DM, una vez por persona en cada post y
+dentro de los 7 días que Meta permite; en YouTube, o pasado ese plazo, sigue en público. Hoy
+está apagado mientras Meta revisa los permisos de mensajes. Si el enlace es del sitio propio se le
 agrega `?s=dm-<palabra>` y aparece como fila propia en Analítica. `palabra`: una sola
 palabra, hasta 30 letras. `mensaje`: 1 a 1000 caracteres. `respuestaPublica`: opcional, 1 a
 300. En el CSV es la séptima columna, después de `opciones`.
@@ -392,9 +394,8 @@ palabra, hasta 30 letras. `mensaje`: 1 a 1000 caracteres. `respuestaPublica`: op
 — y se copia al almacenamiento propio, porque el enlace que mandaste puede morir antes de
 que alguien comente, o ser un enlace de Drive que sirve una página HTML y no el PDF. El
 documento **nunca se manda como adjunto**: su enlace (ya el propio, no el tuyo) se agrega
-al final de `mensaje`, separado por una línea en blanco, así que hoy sale dentro de la
-misma respuesta pública que el resto de `mensaje` — la nota del párrafo de arriba sobre el
-privado aplica igual al documento.
+al final de `mensaje`, separado por una línea en blanco, así que sale donde salga
+`mensaje`: en público o por DM, según el párrafo de arriba.
 
 ### `ref` (opcional, recomendado) — para reenviar un lote sin duplicar
 

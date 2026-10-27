@@ -96,7 +96,7 @@ export default async function CommentsPage({
         ))}
       </div>
 
-      <Cola filas={filas} mostrarPrivado={privadoActivo()} estado={estado} desde={ahora.getTime()} />
+      <Cola filas={filas} mostrarPrivado={privadoActivo(ownerId)} estado={estado} desde={ahora.getTime()} />
     </>
   )
 }

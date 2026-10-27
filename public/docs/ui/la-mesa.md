@@ -87,14 +87,14 @@ No tiene botones.
 - Respondido: «Respondido:» y el texto que salió. Si lo mandó la respuesta automática, al lado una etiqueta «Automática».
 - Respondido en la red: «Respondido desde Instagram:» (o «desde Facebook:», «desde YouTube:») y lo que la cuenta respondió directo en la app de la red, fuera de Tu Parrilla.
 - Descartado: «Descartado», o «Descartado · El comentario ya no está en la red.» si se descartó solo porque su autor lo borró.
-- Solo si la instalación tiene encendidos los mensajes privados (vienen apagados), una línea más en Instagram y Facebook: «Privado: pendiente», «Privado: enviado» o «Privado: no salió», a veces seguida de « · No se pudo mandar el privado.».
+- Solo si los mensajes privados están encendidos para la cuenta (hoy, apagados mientras Meta revisa sus permisos), una línea más en Instagram y Facebook: «Privado: pendiente», «Privado: enviado» o «Privado: no salió», a veces seguida de « · No se pudo mandar el privado.».
 
 ### Lo que hace la respuesta automática por palabra clave
 
 Se configura por publicación al programarla en [La Parrilla](la-parrilla.md), en el bloque «Respuesta automática por palabra clave» del compositor. Solo existe en publicaciones que salieron desde Tu Parrilla, y solo en Instagram, Facebook y YouTube.
 
 - Cuando alguien comenta la palabra, Tu Parrilla responde solo en la revisión siguiente (hasta cinco minutos en Instagram y Facebook, hasta media hora en YouTube), sin pasar por «Enviar». Cuenta la palabra entera, sin importar mayúsculas ni tildes: para la palabra «guia», «#GUÍA!» cuenta y «guiar» no.
-- Hoy la respuesta es el «Mensaje» de la regla, con su enlace, publicado como respuesta pública al comentario; si la regla trae un documento, su enlace va al final. El mensaje privado todavía no existe. Si el enlace es del sitio propio, sus visitas se cuentan aparte en [Los Números](los-numeros.md).
+- Con los mensajes privados apagados (hoy), la respuesta es el «Mensaje» de la regla, con su enlace, publicado como respuesta pública al comentario; si la regla trae un documento, su enlace va al final. Encendidos, en Instagram y Facebook la respuesta pública es la corta y el «Mensaje» va por privado, una sola vez a cada persona en cada publicación y dentro de siete días; la tarjeta dice «Privado: enviado» o «Privado: no salió». Si el enlace es del sitio propio, sus visitas se cuentan aparte en [Los Números](los-numeros.md).
 - Mientras espera la revisión, ese comentario aparece en «Pendientes» sin borrador: la IA no le escribe uno. Si alguien lo responde a mano antes de esa revisión, la respuesta automática ya no lo toma.
 - Si salió bien: «Respondido: <el mensaje>» con la etiqueta «Automática».
 - Si la red no la aceptó: se queda en «Pendientes» con «La regla de palabra clave intentó responder y la red no aceptó; «Enviar» lo reintenta.» y el mensaje en el cuadro. Al mandarlo con «Enviar» cuenta como respuesta a mano: pierde la etiqueta «Automática» y sale del filtro «Automáticas».
@@ -200,7 +200,7 @@ Aprieta el filtro «Automáticas». Ahí están todos los que tomó, también lo
 - **«Descarté uno por error»** → No se deshace desde el panel; se puede responder directamente en la app de la red.
 - **«Se me perdió un comentario de la cola»** → Mirar en «Enviados» y «Descartados» (si su autor lo borró, aparece ahí con «El comentario ya no está en la red.»). Los de YouTube se borran solos a los 30 días. Cada filtro muestra solo los 200 más nuevos.
 - **«La respuesta automática no respondió»** → La palabra tiene que ir entera; la regla solo existe en publicaciones programadas desde Tu Parrilla con el bloque «Respuesta automática por palabra clave»; hay que esperar la revisión siguiente; y si la red la rechazó, está en «Pendientes» con su aviso.
-- **«La respuesta automática publicó el enlace en público»** → Es lo esperado hoy: el mensaje privado todavía no existe.
+- **«La respuesta automática publicó el enlace en público»** → Es lo esperado mientras los mensajes privados estén apagados para la cuenta (hoy lo están), en YouTube, o pasados siete días desde la publicación.
 - **«¿Dónde pongo la palabra clave?»** → Al programar la publicación en [La Parrilla](la-parrilla.md), bloque «Respuesta automática por palabra clave».
 - **«El botón dice "Enviando…" y yo apreté Descartar»** → «Enviar» dice «Enviando…» mientras cualquier botón de esa tarjeta trabaja; hay que esperar a que termine.
 - **«¿Puedo responder desde el teléfono?»** → No: la app del teléfono no tiene esta cola (ver [la app del teléfono](app-movil.md)).
@@ -211,7 +211,7 @@ Aprieta el filtro «Automáticas». Ahí están todos los que tomó, también lo
 - No da «me gusta», no oculta ni borra comentarios en la red.
 - No edita ni borra una respuesta ya enviada, y no deshace un descarte.
 - No responde sola, salvo la respuesta automática por palabra clave, y esa no se configura aquí sino en [La Parrilla](la-parrilla.md).
-- No manda mensajes privados: vienen apagados y no tienen botón.
+- No manda mensajes privados a mano: no tienen botón. Encendidos para la cuenta, salen solos después de responder.
 - No existe en la app del teléfono.
 
 ## Para quien mantiene esta página
@@ -232,7 +232,7 @@ Lo que describe sale de:
 - `src/lib/social/comentarios/prompt.ts` (lo que recibe la IA)
 - `src/lib/social/comentarios/instrucciones.ts` (las instrucciones de la casa, el tope de 2000)
 - `src/lib/social/comentarios/reglas.ts` y `src/lib/social/comentarios/automatico.ts` (la respuesta automática)
-- `src/lib/social/comentarios/privado.ts` (el privado, apagado)
+- `src/lib/social/comentarios/privado.ts` (el privado, y para quién está encendido) y `automatico.ts` (el privado de la regla)
 - `src/lib/social/comentarios/ventana.ts` y `src/lib/social/comentarios/run.ts` (cada cuánto, los siete días, los comentarios propios, los respondidos desde la app de la red)
 - `src/lib/social/comentarios/agrupar.ts`
 - `src/lib/social/retencion-youtube.ts` (los comentarios de YouTube se borran a los 30 días)

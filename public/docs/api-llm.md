@@ -474,13 +474,13 @@ Una sola respuesta privada por comentario, y ningún segundo mensaje hasta que l
 responda. Con eso descartado, la única forma de entregar el PDF es un enlace dentro del único
 mensaje que sí se puede enviar — nunca dos envíos (texto y luego archivo).
 
-**Estado de hoy, y lo que cambia:** el envío por mensaje privado está construido pero apagado
-en este despliegue (falta el App Review de Meta para `instagram_manage_messages` y
-`pages_messaging`). Mientras esté apagado, todo — el `mensaje` completo, con el enlace del
-documento si lo hay — sale como **respuesta pública** al comentario, nunca por DM. Cuando el
-privado se encienda, en Instagram y Facebook `mensaje` (con el documento) pasará a ir por DM y
-`respuestaPublica` quedará como la respuesta pública corta; en las demás redes, o si ya
-pasaron más de 7 días desde que se publicó el post, seguirá siendo público igual que hoy. El
+**Estado de hoy, y lo que cambia:** el envío por mensaje privado está construido, y apagado
+mientras Meta revisa `instagram_manage_messages` y `pages_messaging` (solo la cuenta de
+revisión lo tiene encendido). Mientras esté apagado, todo — el `mensaje` completo, con el
+enlace del documento si lo hay — sale como **respuesta pública** al comentario, nunca por DM.
+Encendido, en Instagram y Facebook `mensaje` (con el documento) va por DM, una vez por persona
+en cada post, y `respuestaPublica` queda como la respuesta pública corta; en las demás redes, o
+si ya pasaron más de 7 días desde que se publicó el post, sigue siendo público. El
 documento en sí no cambia de forma con este interruptor: siempre es un enlace, nunca un
 adjunto — eso lo impone Meta, no la bandera.
 
