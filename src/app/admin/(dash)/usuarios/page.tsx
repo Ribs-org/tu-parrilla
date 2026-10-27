@@ -31,6 +31,9 @@ export default async function UsuariosPage() {
               <BotonCocina id={u.id} correo={u.correo} encendida={Boolean(u.cocinaDesde)} />
               {u.rol !== 'admin' && !u.primerIngresoEn ? <BotonQuitar id={u.id} /> : null}
               {u.rol !== 'admin' && u.primerIngresoEn ? <BotonCerrarSesiones id={u.id} /> : null}
+              {/* El id, para copiarlo: es lo que llevan las variables que encienden algo solo para una
+                  cuenta (`COMENTARIOS_DM`, `THREADS_ABIERTO_PARA`). */}
+              <span className="basis-full select-all font-mono text-[0.7rem] text-fg-faint">id {u.id}</span>
             </li>
           ))}
         </ul>

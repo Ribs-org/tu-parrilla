@@ -48,6 +48,9 @@ del admin. Cada fila trae:
 | «entró <fecha>» | Ya entró; la fecha es la de su **primer** ingreso, no la del último. | «Cerrar sesiones» |
 
 - con la cocina encendida, «cocina desde <fecha>»;
+- en todas las filas, abajo y en letra chica, «id» y el identificador del usuario, que se puede
+  seleccionar y copiar. Es lo que piden las variables que encienden algo solo para una cuenta
+  (por ejemplo, el mensaje privado o Threads para la cuenta del revisor de Meta);
 - en todas las filas, también la del admin, el botón de La Cocina: «Encender la cocina» o
   «Apagar la cocina» (mientras trabaja, «Encendiendo…» o «Apagando…»). Ver «Para encender o
   apagar la cocina de alguien», abajo.
