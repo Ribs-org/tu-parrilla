@@ -36,6 +36,7 @@ import { CuentaInvalida } from '@/lib/social/cuentas'
 import { extensionDe, validateScheduleDraft } from '@/lib/social/publish/validate'
 import { errorDeHistoria, errorDeMediaPorOpciones, esHistoria, validarOpcionesPorCuenta } from '@/lib/social/publish/opciones'
 import { basePublica, keyDesdeUrl, tamanoEnAlmacen } from '@/lib/storage'
+import { proximamentePara } from '@/lib/redes-abiertas'
 
 export const dynamic = 'force-dynamic'
 
@@ -271,6 +272,7 @@ export async function POST(request: Request) {
       scheduledAt,
     },
     now,
+    { proximamente: proximamentePara(usuario.id) },
   )
   if (error) return NextResponse.json({ error }, { status: 400 })
 

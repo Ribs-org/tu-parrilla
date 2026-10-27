@@ -265,6 +265,11 @@ export default function PrivacidadPage() {
           media incluidos; Facebook te devuelve un código con una dirección de este sitio que
           confirma cuándo ocurrió y cuántas cuentas se borraron.
         </p>
+        <p className="leading-relaxed text-fg-muted">
+          Con Threads es igual, desde los permisos de apps y sitios web de su configuración:
+          quitar esta app desconecta tu cuenta de Threads, y pedir el borrado borra todo lo que
+          vino de ella, con el mismo código para confirmarlo.
+        </p>
       </section>
     </article>
   )

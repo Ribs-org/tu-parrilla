@@ -39,7 +39,12 @@ export type CuentaParaApi = {
  * las muestra, y un agente que no las viera no sabría por qué el dueño le habla de una cuenta
  * que no está.
  */
-export function cuentasParaApi(cuentas: readonly CuentaRow[], zona: string, ahora: Date): CuentaParaApi[] {
+export function cuentasParaApi(
+  cuentas: readonly CuentaRow[],
+  zona: string,
+  ahora: Date,
+  proximamente: ReadonlySet<string> = REDES_PROXIMAMENTE,
+): CuentaParaApi[] {
   return cuentas.map((c) => {
     const fierro = estadoDelFierro(
       { connected: c.connected, expiraEn: c.expiresAt, ultimoError: c.lastSyncError, red: c.network },
@@ -51,7 +56,7 @@ export function cuentasParaApi(cuentas: readonly CuentaRow[], zona: string, ahor
       handle: c.handle,
       externalId: c.externalId,
       conectada: c.connected,
-      proximamente: REDES_PROXIMAMENTE.has(c.network),
+      proximamente: proximamente.has(c.network),
       fierro,
       vence: c.connected && c.expiresAt && !seRenuevaSola(c.network) ? isoInZone(new Date(c.expiresAt), zona) : null,
       motivo: motivoDelFierro({ conCredencial: c.connected, lastSyncError: c.lastSyncError }, fierro),

@@ -4,6 +4,7 @@ import { duenoDeLaLlave } from '@/lib/llaves'
 import { getCuentas } from '@/lib/posts'
 import { buscarPorId } from '@/lib/usuarios'
 import { ZONA_POR_DEFECTO } from '@/lib/zona'
+import { proximamentePara } from '@/lib/redes-abiertas'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,5 +19,5 @@ export async function GET(request: Request) {
   if (!ownerId) return new NextResponse('No autorizado', { status: 401 })
   const [dueno, cuentas] = await Promise.all([buscarPorId(ownerId), getCuentas(ownerId)])
   const zona = dueno?.zona ?? ZONA_POR_DEFECTO
-  return NextResponse.json({ cuentas: cuentasParaApi(cuentas, zona, new Date()) })
+  return NextResponse.json({ cuentas: cuentasParaApi(cuentas, zona, new Date(), proximamentePara(ownerId)) })
 }

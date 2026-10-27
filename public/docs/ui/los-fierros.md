@@ -134,6 +134,8 @@ El aviso del bloque habla de publicar, no de conectar: una cuenta pública se co
 
 Todavía no se pueden conectar, y no hay nada que hacer de este lado: en vez de «Conectar →» dicen «Próximamente». Si alguien abre a mano la dirección de conexión de una de ellas, vuelve a Los Fierros con «Threads todavía no está disponible en Tu Parrilla: próximamente.» (o «X / Twitter todavía no está disponible en Tu Parrilla: próximamente.»), sin que se abra la ventana de la red. Tampoco se puede programar nada hacia ellas (ver [La Parrilla](la-parrilla.md)).
 
+Mientras Meta revisa Threads, la cuenta que la instalación tenga habilitada para esa revisión (la del revisor) ve Threads como cualquier otra red: con «Conectar →», y puede programarle. Para las demás sigue en «Próximamente».
+
 Una cuenta de Threads o de X conectada antes sigue en su bloque, sin «Reconectar»: se puede desconectar y quitar como cualquier otra (ver «Para quitar una cuenta»).
 
 ### Para agregar otra cuenta de la misma red
@@ -310,7 +312,7 @@ Lo que describe sale de:
 - `src/app/admin/actions.ts` (`syncSocialNow`, `disconnectAccount`, `quitarCuentaAccion`, `fusionarCuenta`, `conectarElegidas`)
 - `src/app/api/social/[network]/connect/route.ts`
 - `src/app/api/social/[network]/callback/route.ts`
-- `src/lib/networks.ts` (nombres de las redes, avisos, `META_EN_REVISION` y las redes en «Próximamente»)
+- `src/lib/networks.ts` (nombres de las redes, avisos, `META_EN_REVISION` y las redes en «Próximamente») y `src/lib/redes-abiertas.ts` (Threads abierto para el revisor)
 - `src/lib/parrilla.ts` (`estadoDelFierro`, los siete días del aviso)
 - `src/lib/avisos/reglas.ts` (la frase «La conexión falló; reconecta la cuenta.», qué es una caída y los correos de la caída y del resumen) y `src/lib/avisos/run.ts` (cuándo salen)
 - `src/app/globals.css` (los colores del fierro)

@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 import { usuarioActual } from '@/lib/auth'
 import { env } from '@/lib/env'
-import { REDES_PROXIMAMENTE, fraseProximamente } from '@/lib/networks'
+import { fraseProximamente } from '@/lib/networks'
+import { proximamentePara } from '@/lib/redes-abiertas'
 import { CuentaDeOtro, guardarCuenta, siQueriasOtra } from '@/lib/social/conectar'
 import { COOKIE_AGREGAR, fraseDeVuelta, pidioAgregar } from '@/lib/social/vuelta'
 import {
@@ -434,7 +435,7 @@ export async function GET(
 
   // Una red en «Próximamente» tampoco termina una conexión empezada antes de quedar así: no
   // se guarda nada.
-  if (REDES_PROXIMAMENTE.has(network)) return back(fraseProximamente(network))
+  if (proximamentePara(usuario.id).has(network)) return back(fraseProximamente(network))
 
   // Sin código, la red suele decir por qué (`error=access_denied` al cancelar en su ventana):
   // al registro, para distinguir un «cancelé» de un rechazo de la red.

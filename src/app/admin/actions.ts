@@ -76,6 +76,7 @@ import { nombreDe } from '@/lib/vocabulario'
 import { fromZonedInput, normalizeUrl, slugify } from '@/lib/utils'
 import { ZONA_INVALIDA, esZonaValida } from '@/lib/zona'
 import { temaDe, type Tema } from '@/lib/tema'
+import { proximamentePara } from '@/lib/redes-abiertas'
 
 /**
  * Lo que devuelve una acción de formulario. `id` es el del post recién programado: con él, el
@@ -759,6 +760,7 @@ export async function createScheduledPost(_prev: FormState, formData: FormData):
       formats: uploaded.map((m) => extensionDe(m.url)),
     },
     new Date(),
+    { proximamente: proximamentePara(ownerId) },
   )
   if (error) return { error }
 
@@ -1032,7 +1034,7 @@ export async function updateScheduledPost(
         formats: preFormats,
       },
       new Date(),
-      { allowPast: dateUnchanged },
+      { allowPast: dateUnchanged, proximamente: proximamentePara(ownerId) },
     )
     if (preError) return { error: preError }
   }
@@ -1074,7 +1076,7 @@ export async function updateScheduledPost(
         formats: finalFormats,
       },
       new Date(),
-      { allowPast: dateUnchanged },
+      { allowPast: dateUnchanged, proximamente: proximamentePara(ownerId) },
     )
     if (error) return { error }
 

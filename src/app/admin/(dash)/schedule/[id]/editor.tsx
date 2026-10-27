@@ -35,6 +35,7 @@ export function Editor({
   coverUrl,
   atributos,
   regla,
+  proximamente = [...REDES_PROXIMAMENTE],
 }: {
   postId: string
   volver: string
@@ -48,6 +49,8 @@ export function Editor({
   coverUrl: string | null
   atributos: string
   regla: { palabra: string; mensaje: string; respuestaPublica: string } | null
+  /** Las redes que para este dueño dicen «Próximamente» (`proximamentePara`, en el servidor). */
+  proximamente?: readonly string[]
 }) {
   const tema = useTema()
   const publishing = targets.some((t) => t.status === 'publishing')
@@ -59,11 +62,11 @@ export function Editor({
   // seguir nombrando su red sin la cuenta.
   const networkPorAccountId = new Map(targets.map((t) => [t.accountId, t.network]))
   // Las cuentas que se pueden agregar desde el editor: `tiktok` no se ofrece porque no
-  // puede pedir sus opciones acá, igual que antes con la red, ni una red en «Próximamente»
-  // (`REDES_PROXIMAMENTE`). Un destino que ya existe se dibuja aunque su cuenta no se pueda
+  // puede pedir sus opciones acá, igual que antes con la red, ni una red que para este dueño
+  // esté en «Próximamente» (`proximamente`). Un destino que ya existe se dibuja aunque su cuenta no se pueda
   // agregar (una de tiktok, una de X, o desconectada); uno de X o de Threads que siga por
   // salir hay que desmarcarlo para guardar, porque la regla común lo rechaza.
-  const ofertables = cuentas.filter((c) => ENABLED_NETWORKS.has(c.network) && !REDES_PROXIMAMENTE.has(c.network))
+  const ofertables = cuentas.filter((c) => ENABLED_NETWORKS.has(c.network) && !proximamente.includes(c.network))
   const drawnIds = [...new Set([...ofertables.map((c) => c.id), ...targets.map((t) => t.accountId)])]
   const resumen = new Map(targets.map((t) => [t.accountId, t.opciones]))
 

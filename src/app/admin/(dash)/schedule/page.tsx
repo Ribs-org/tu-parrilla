@@ -40,6 +40,7 @@ import { Queue } from './queue'
 import { SeQuemo } from './se-quemo'
 import { SemanaPorHora } from './semana-por-hora'
 import { VistaDia } from './vista-dia'
+import { proximamentePara } from '@/lib/redes-abiertas'
 
 export const dynamic = 'force-dynamic'
 
@@ -160,6 +161,7 @@ export default async function SchedulePage({
           key={borrador?.id ?? `nuevo-${texto('dia')}-${texto('cuenta')}`}
           carga={carga}
           cuentas={cuentas}
+          proximamente={[...proximamentePara(ownerId)]}
           borrador={borrador ? { id: borrador.id, campos: borrador.campos, media: borrador.media } : null}
           creativo={creativo}
           // El instante guardado, en la zona de hoy: si la zona cambió en Tu Cuenta, el
