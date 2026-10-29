@@ -3,6 +3,7 @@
 import { useId, useRef, useState, useTransition } from 'react'
 import { rescheduleTarget } from '@/app/admin/actions'
 import { Button, Input } from '@/components/ui'
+import { useVeloQueCierra } from '@/components/velo'
 
 /**
  * Le da hora nueva a un destino que se quemó: el botón, el campo, la llamada y su error,
@@ -34,6 +35,7 @@ import { Button, Input } from '@/components/ui'
  */
 export function Reprogramar({ targetId, titulo, className = 'ml-2 underline' }: { targetId: string; titulo?: string; className?: string }) {
   const panel = useRef<HTMLDialogElement>(null)
+  const velo = useVeloQueCierra(() => panel.current?.close())
   const rotulo = useId()
   const [when, setWhen] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -79,10 +81,8 @@ export function Reprogramar({ targetId, titulo, className = 'ml-2 underline' }: 
         aria-labelledby={titulo ? rotulo : undefined}
         // `close` llega por cualquier salida, también por la Esc que maneja el navegador.
         onClose={limpiar}
-        // Un clic en el velo tiene al diálogo por destino; uno en el contenido, al hijo.
-        onClick={(event) => {
-          if (event.target === event.currentTarget) panel.current?.close()
-        }}
+        // Un clic que empieza y termina en el velo lo cierra (`useVeloQueCierra`).
+        {...velo}
         className="m-auto w-[20rem] max-w-[calc(100vw-2rem)] rounded-xl border border-velo/10 bg-acero-900/95 text-fg shadow-xl backdrop-blur backdrop:bg-acero-950/80"
       >
         <div className="p-3">

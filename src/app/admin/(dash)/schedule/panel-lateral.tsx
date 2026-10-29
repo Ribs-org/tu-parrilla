@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { X } from 'lucide-react'
+import { useVeloQueCierra } from '@/components/velo'
 
 /**
  * El panel que se desliza desde la derecha sobre La Parrilla: ahí se compone, se eligen
@@ -26,6 +27,7 @@ export function PanelLateral({
   children: React.ReactNode
 }) {
   const panel = useRef<HTMLDialogElement>(null)
+  const velo = useVeloQueCierra(onCerrar)
 
   useEffect(() => {
     const dialogo = panel.current
@@ -40,10 +42,9 @@ export function PanelLateral({
         event.preventDefault()
         onCerrar()
       }}
-      // Un clic en el velo tiene al diálogo por destino; uno en el contenido, a un hijo.
-      onClick={(event) => {
-        if (event.target === event.currentTarget) onCerrar()
-      }}
+      // Un clic que empieza y termina en el velo cierra; seleccionar un texto arrastrando y
+      // soltar afuera, no (`useVeloQueCierra`).
+      {...velo}
       className="m-0 ml-auto h-dvh max-h-dvh w-full max-w-xl border-l border-acero-700 bg-acero-900 p-0 text-fg shadow-2xl backdrop:bg-acero-950/70"
     >
       <div className="flex h-full flex-col">

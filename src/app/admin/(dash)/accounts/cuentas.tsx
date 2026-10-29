@@ -17,6 +17,7 @@ import { estadoDelFierro, type Fierro } from '@/lib/parrilla'
 import { avisoSinTrial } from '@/lib/social/publish/opciones'
 import { cn } from '@/lib/utils'
 import { seEstaEnfriando } from '@/lib/vocabulario'
+import { useVeloQueCierra } from '@/components/velo'
 
 const RELATIVE = new Intl.RelativeTimeFormat('es', { numeric: 'auto' })
 
@@ -496,6 +497,9 @@ function Quitar({ id, nombre, red }: { id: string; nombre: string; red: string }
   const titulo = useId()
   const [error, setError] = useState<string | null>(null)
   const [quitando, startQuitar] = useTransition()
+  const velo = useVeloQueCierra(() => {
+    if (!quitando) ventana.current?.close()
+  })
 
   function quitar() {
     startQuitar(async () => {
@@ -521,9 +525,7 @@ function Quitar({ id, nombre, red }: { id: string; nombre: string; red: string }
       <dialog
         ref={ventana}
         aria-labelledby={titulo}
-        onClick={(event) => {
-          if (event.target === event.currentTarget && !quitando) ventana.current?.close()
-        }}
+        {...velo}
         className="m-auto w-[24rem] max-w-[calc(100vw-2rem)] rounded-xl border border-velo/10 bg-acero-900/95 text-fg shadow-xl backdrop-blur backdrop:bg-acero-950/80"
       >
         <div className="space-y-3 p-4">

@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef } from 'react'
 import { BOTON_CHICO, BOTON_CHICO_SECUNDARIO } from '@/components/boton'
 import type { AyudaDeConexion } from '@/lib/social/ayuda-conexion'
+import { useVeloQueCierra } from '@/components/velo'
 
 /**
  * La frase con que volvió una conexión, arriba de Los Fierros. Cuando trae un arreglo conocido
@@ -13,6 +14,7 @@ import type { AyudaDeConexion } from '@/lib/social/ayuda-conexion'
  */
 export function AvisoDeConexion({ mensaje, ayuda }: { mensaje: string; ayuda: AyudaDeConexion | null }) {
   const ventana = useRef<HTMLDialogElement>(null)
+  const velo = useVeloQueCierra(() => ventana.current?.close())
   const titulo = useId()
 
   useEffect(() => {
@@ -40,9 +42,7 @@ export function AvisoDeConexion({ mensaje, ayuda }: { mensaje: string; ayuda: Ay
         <dialog
           ref={ventana}
           aria-labelledby={titulo}
-          onClick={(event) => {
-            if (event.target === event.currentTarget) ventana.current?.close()
-          }}
+          {...velo}
           className="m-auto w-[28rem] max-w-[calc(100vw-2rem)] rounded-xl border border-velo/10 bg-acero-900/95 text-fg shadow-xl backdrop-blur backdrop:bg-acero-950/80"
         >
           <div className="space-y-3 p-4">
