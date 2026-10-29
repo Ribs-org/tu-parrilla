@@ -285,12 +285,13 @@ export async function sondearComentarios(
     }
     const desdeCuenta = Date.now()
     try {
-      reporte.cuentas.push({
-        network: cuenta.network,
-        handle: cuenta.handle,
-        ...(await sondearCuenta(cuenta, now, cupo, inicio)),
-      })
-      console.log(`[comentarios] ${cuenta.network} ${cuenta.handle ?? ''}: ${Date.now() - desdeCuenta} ms`)
+      const resultado = await sondearCuenta(cuenta, now, cupo, inicio)
+      reporte.cuentas.push({ network: cuenta.network, handle: cuenta.handle, ...resultado })
+      // Cuántas publicaciones miró y qué encontró: sin eso, «no llegó el comentario» no distingue
+      // entre una publicación que no se miró y una red que no lo entregó.
+      console.log(
+        `[comentarios] ${cuenta.network} ${cuenta.handle ?? ''}: ${Date.now() - desdeCuenta} ms · ${resultado.posts} publicaciones · ${resultado.nuevos} nuevos · ${resultado.automaticas} automáticas`,
+      )
     } catch (error) {
       // El detalle de la red se queda en el log: la respuesta del cron lleva una frase fija.
       console.error(`[comentarios] ${cuenta.network}:`, String(error).slice(0, 300))
