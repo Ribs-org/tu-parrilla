@@ -24,12 +24,13 @@ export function ReglaClave({
         <Field label="Mensaje" hint={`Pon el enlace aquí; si es de tu sitio se mide solo en ${nombreDe('/admin/analytics')}.`}>
           <Textarea name="reglaMensaje" rows={3} maxLength={MAX_MENSAJE} defaultValue={inicial?.mensaje ?? ''} placeholder="Acá tienes la guía: https://…" />
         </Field>
-        <Field label="Respuesta pública" hint="Se usará cuando el privado esté activo; por ahora se publica el mensaje completo.">
+        <Field label="Respuesta pública" hint="La que se publica bajo el comentario cuando el mensaje sale por privado.">
           <Input name="reglaRespuesta" maxLength={MAX_RESPUESTA} defaultValue={inicial?.respuestaPublica ?? RESPUESTA_PUBLICA_POR_DEFECTO} />
         </Field>
         <p className="text-[0.72rem] text-fg-faint">
-          Hoy la respuesta se publica con el mensaje y el enlace en Instagram, Facebook y YouTube. El privado llega
-          con la próxima entrega; en TikTok todavía no hay cola de comentarios.
+          Con el mensaje privado encendido para tu cuenta, en Instagram y Facebook se publica esta respuesta y el
+          mensaje con el enlace va por privado, una vez a cada persona. Si no, en YouTube o pasados siete días, el
+          mensaje con el enlace se publica como respuesta. En TikTok todavía no hay cola de comentarios.
         </p>
       </div>
     </details>

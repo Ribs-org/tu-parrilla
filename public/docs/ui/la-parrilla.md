@@ -421,7 +421,7 @@ que se desliza desde la derecha, encima de la pantalla, que queda oscurecida det
 teléfono ocupa la pantalla entera. Arriba lleva su título —«Nueva publicación», «Borrador»,
 «Borradores» o «Subir CSV»— y a la derecha una ✕ para cerrarlo (un lector de pantalla la lee
 «Cerrar»). También se cierra con la tecla Escape o con un clic en la parte oscurecida, fuera
-del panel. Cerrar el compositor no pierde lo escrito: queda como borrador (ver «Los
+del panel; seleccionar un texto arrastrando el mouse y soltarlo afuera no lo cierra. Cerrar el compositor no pierde lo escrito: queda como borrador (ver «Los
 borradores», más abajo).
 
 ### El compositor: «Nueva publicación» o «Borrador»
@@ -574,11 +574,13 @@ a aceptarlos, pero lo más probable es que se queme: conviene programarlo como r
 - **«Mensaje»**, con el placeholder «Acá tienes la guía: https://…» y la ayuda «Pon el
   enlace aquí; si es de tu sitio se mide solo en Los Números.» Hasta 1000 caracteres.
 - **«Respuesta pública»**, que viene escrita con «Te lo mandé por privado» seguido de un
-  emoji de sobre, y la ayuda «Se usará cuando el privado esté activo; por ahora se publica el
-  mensaje completo.» Hasta 300 caracteres.
-- Al pie: «Hoy la respuesta se publica con el mensaje y el enlace en Instagram, Facebook y
-  YouTube. El privado llega con la próxima entrega; en TikTok todavía no hay cola de
-  comentarios.»
+  emoji de sobre, y la ayuda «La que se publica bajo el comentario cuando el mensaje sale por
+  privado.» Hasta 300 caracteres.
+- Al pie: «Con el mensaje privado encendido para tu cuenta, en Instagram y Facebook se publica
+  esta respuesta y el mensaje con el enlace va por privado, una vez a cada persona. Si no, en
+  YouTube o pasados siete días, el mensaje con el enlace se publica como respuesta. En TikTok
+  todavía no hay cola de comentarios.» Hoy el mensaje privado está apagado para casi todas las
+  cuentas, mientras Meta revisa sus permisos (ver [La Mesa](la-mesa.md)).
 
 Sin palabra no hay regla, aunque el mensaje esté escrito. Aquí no hay dónde adjuntar un PDF:
 eso solo se puede por API o en la columna `regla` del CSV.
