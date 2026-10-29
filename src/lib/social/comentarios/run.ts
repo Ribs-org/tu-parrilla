@@ -303,6 +303,7 @@ export async function sondearComentarios(
         network: cuenta.network,
         handle: cuenta.handle,
         posts: 0,
+        leidos: 0,
         nuevos: 0,
         salteados: 0,
         automaticas: 0,
