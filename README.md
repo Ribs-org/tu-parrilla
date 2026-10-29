@@ -1218,6 +1218,11 @@ esa espera se cambia el texto o los archivos en el editor, el contenedor se tira
 siguiente arma otro con lo nuevo. En las demás redes el contenedor es el video ya subido: se
 tira solo si cambian los archivos, porque subirlo de nuevo por un texto dejaría dos.
 
+Tampoco es un fallo que Meta diga que el contenedor no está listo para publicarse (subcódigo
+2207027, «Espera un momento»): le pasa a veces hasta a una foto, que suele estar lista al tiro.
+El destino queda saliendo con su contenedor, y la corrida siguiente pregunta su estado y lo
+publica cuando termine (`esMediaNoLista`, en `social/publish/instagram.ts`).
+
 ### Avisos por correo
 
 Tres correos, todos con el remitente `PUBLISH_ALERT_FROM` y al correo del dueño (o a

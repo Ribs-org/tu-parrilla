@@ -3,6 +3,7 @@ import {
   carouselChildParams,
   carouselParentParams,
   classifyContainerStatus,
+  esMediaNoLista,
   ESPERA_TOPE_INSTAGRAM_MS,
   esTopeDiario,
   explicacionDeMeta,
@@ -479,5 +480,36 @@ describe('historias', () => {
 
   it('otro rechazo de una historia se reintenta como cualquiera', () => {
     expect(motivoDeRechazo('{"error":{"message":"Invalid parameter","code":100}}', { historia: true })).toBeNull()
+  })
+})
+
+describe('la foto que Meta todavía no tiene lista', () => {
+  afterEach(() => vi.unstubAllGlobals())
+
+  const noLista =
+    '{"error":{"message":"Media ID is not available","code":9007,"error_subcode":2207027,"error_user_msg":"El contenido multimedia no está listo para publicarse. Espera un momento."}}'
+
+  it('se reconoce por su subcódigo', () => {
+    expect(esMediaNoLista(noLista)).toBe(true)
+    expect(esMediaNoLista('{"error":{"code":9007,"error_subcode":22070270}}')).toBe(false)
+  })
+
+  it('no es un rechazo: queda procesando con su contenedor, y la corrida siguiente lo publica', async () => {
+    const fetchMock = vi
+      .fn<(url: string, init?: RequestInit) => Promise<Response>>()
+      .mockResolvedValueOnce(Response.json({ id: 'CT_9' }))
+      .mockResolvedValueOnce(new Response(noLista, { status: 400 }))
+    vi.stubGlobal('fetch', fetchMock)
+    const salida = await instagramPublisher.publish({
+      caption: 'Hola',
+      media: [image],
+      containerId: null,
+      token: 't',
+      accountExternalId: '123',
+      coverUrl: null,
+      opciones: null,
+      cuenta: '@vicente',
+    })
+    expect(salida).toEqual({ kind: 'processing', containerId: 'CT_9' })
   })
 })

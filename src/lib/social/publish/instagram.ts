@@ -173,6 +173,16 @@ export function esTopeDiario(cuerpo: string): boolean {
   return /"error_subcode"\s*:\s*2207042\b/.test(cuerpo)
 }
 
+/**
+ * Si Meta dijo que el contenedor todavía no está listo para publicarse: el subcódigo 2207027
+ * (código 9007, «El contenido multimedia no está listo para publicarse. Espera un momento.»). Le
+ * pasa también a una foto, que suele estar lista al tiro. No es un rechazo: el contenedor sigue
+ * siendo bueno, y la corrida siguiente le pregunta su estado y lo publica cuando termine.
+ */
+export function esMediaNoLista(cuerpo: string): boolean {
+  return /"error_subcode"\s*:\s*2207027\b/.test(cuerpo)
+}
+
 /** La espera del tope diario, con el contenedor ya hecho si lo hay: el reintento solo lo publica. */
 function diferidoPorTope(containerId?: string): PublishOutcome {
   return { kind: 'deferred', esperaMs: ESPERA_TOPE_INSTAGRAM_MS, motivo: TOPE_INSTAGRAM, ...(containerId ? { containerId } : {}) }
@@ -307,6 +317,7 @@ async function publishContainer(input: PublishInput, containerId: string): Promi
   }
   if ('rechazo' in r) {
     if (esTopeDiario(r.rechazo)) return diferidoPorTope(containerId)
+    if (esMediaNoLista(r.rechazo)) return { kind: 'processing', containerId }
     return { kind: 'failed', reason: rechazoSinReconocer(r.rechazo, input.cuenta, PUBLISH_REJECTED), containerId }
   }
   const id = r.data.id
