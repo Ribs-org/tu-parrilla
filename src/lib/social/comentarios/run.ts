@@ -35,6 +35,8 @@ export type SondeoReport = {
     network: string
     handle: string | null
     posts: number
+    /** Los comentarios que la red devolvió en esta pasada, nuevos o ya conocidos. */
+    leidos: number
     nuevos: number
     /** Publicaciones que la red no dejó leer en esta pasada; las demás igual se sondearon. */
     salteados: number
@@ -50,7 +52,7 @@ export type SondeoReport = {
   redaccion: RedaccionReport
 }
 
-type Cuenta = { posts: number; nuevos: number; salteados: number; automaticas: number; enLaRed: number }
+type Cuenta = { posts: number; leidos: number; nuevos: number; salteados: number; automaticas: number; enLaRed: number }
 
 async function sondearCuenta(
   account: SocialAccount,
@@ -58,7 +60,7 @@ async function sondearCuenta(
   cupo: { restantes: number },
   inicio: number,
 ): Promise<Cuenta> {
-  const vacio: Cuenta = { posts: 0, nuevos: 0, salteados: 0, automaticas: 0, enLaRed: 0 }
+  const vacio: Cuenta = { posts: 0, leidos: 0, nuevos: 0, salteados: 0, automaticas: 0, enLaRed: 0 }
   const comentarista = comentaristaFor(account.network)
   if (!comentarista) return vacio
   const db = getDb()
@@ -134,6 +136,7 @@ async function sondearCuenta(
   )
 
   let nuevos = 0
+  let totalLeidos = 0
   let salteados = 0
   let automaticas = 0
   let enLaRed = 0
@@ -144,6 +147,7 @@ async function sondearCuenta(
     // fallo saliera de acá dejaría a la cuenta sin descubrir nada por hasta un día entero.
     try {
       const leidos = await comentarista.listar(account, token, postExternalId)
+      totalLeidos += leidos.length
       seguidos = 0
 
       // Lo que sigue en la cola y el dueño ya respondió desde la app de la red sale de ella,
@@ -244,7 +248,7 @@ async function sondearCuenta(
     }
   }
 
-  return { posts: ids.length, nuevos, salteados, automaticas, enLaRed }
+  return { posts: ids.length, leidos: totalLeidos, nuevos, salteados, automaticas, enLaRed }
 }
 
 /**
@@ -290,7 +294,7 @@ export async function sondearComentarios(
       // Cuántas publicaciones miró y qué encontró: sin eso, «no llegó el comentario» no distingue
       // entre una publicación que no se miró y una red que no lo entregó.
       console.log(
-        `[comentarios] ${cuenta.network} ${cuenta.handle ?? ''}: ${Date.now() - desdeCuenta} ms · ${resultado.posts} publicaciones · ${resultado.nuevos} nuevos · ${resultado.automaticas} automáticas`,
+        `[comentarios] ${cuenta.network} ${cuenta.handle ?? ''}: ${Date.now() - desdeCuenta} ms · ${resultado.posts} publicaciones · ${resultado.leidos} comentarios leídos · ${resultado.nuevos} nuevos ·${resultado.automaticas} automáticas`,
       )
     } catch (error) {
       // El detalle de la red se queda en el log: la respuesta del cron lleva una frase fija.
@@ -299,6 +303,7 @@ export async function sondearComentarios(
         network: cuenta.network,
         handle: cuenta.handle,
         posts: 0,
+        leidos: 0,
         nuevos: 0,
         salteados: 0,
         automaticas: 0,
