@@ -142,6 +142,8 @@ export function ParaLlevar({ periodo, filtros }: { periodo: string; filtros: str
         onClose={() => {
           pedido.current?.abort()
           pedido.current = null
+          // Y el reloj de la animación se detiene: cerrada, la ventana no está armando nada.
+          setEstado({ paso: 'mirando', adelanto: null })
         }}
         // Un clic afuera mientras se arma no tira lo que ya se cocinó: para eso está «Cancelar».
         alVelo={() => {
