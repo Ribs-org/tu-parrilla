@@ -329,7 +329,9 @@ error. Ese día, el primer `media_publish` de una foto contestó «no está list
 publicó igual; el segundo, sobre el mismo contenedor, contestó «Se bloqueó la acción»
 (2207051), que era el duplicado. Tras un rechazo, `publish/instagram.ts` busca entre las
 últimas diez publicaciones de la cuenta una con el mismo texto de las dos últimas horas
-(`buscarPublicada`), y si la encuentra la anota publicada con su id. Si no, y el contenedor
+(`buscarPublicada`), y si la encuentra la anota publicada con su id. Lo mismo hace cada
+reintento antes de subir nada, y un contenedor en ERROR, que es como queda el del duplicado
+bloqueado: si no, el intento siguiente armaba un contenedor nuevo y publicaba otra copia. Si no, y el contenedor
 dice PUBLISHED, la anota sin id, y la sincronización siguiente se lo encuentra con la misma
 regla que a TikTok. En Instagram el id importa más que en otras redes: la regla de palabra
 clave se busca por él, y sin el id no responde a nadie. Lo que no cubre: una publicación sin

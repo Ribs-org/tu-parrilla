@@ -451,6 +451,42 @@ describe('publish: retomar un contenedor guardado sin publicar dos veces', () =>
     expect(String(fetchMock.mock.calls[3]![0])).toContain('/CT_7?fields=status_code')
   })
 
+  it('un reintento que encuentra lo publicado por el intento anterior no sube otra copia', async () => {
+    const hace10min = new Date(Date.now() - 10 * 60_000).toISOString()
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(Response.json({ data: [{ id: '18000000000000088', caption: 'Hola', timestamp: hace10min }] }))
+    vi.stubGlobal('fetch', fetchMock)
+    expect(await instagramPublisher.publish({ ...foto, containerId: null, reintento: true })).toEqual({
+      kind: 'published',
+      externalId: '18000000000000088',
+    })
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('un reintento que no lo encuentra sigue como siempre', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(Response.json({ data: [] }))
+      .mockResolvedValueOnce(Response.json({ status_code: 'FINISHED' }))
+      .mockResolvedValueOnce(Response.json({ id: '18000000000000099' }))
+    vi.stubGlobal('fetch', fetchMock)
+    expect(await instagramPublisher.publish({ ...foto, reintento: true })).toEqual({
+      kind: 'published',
+      externalId: '18000000000000099',
+    })
+  })
+
+  it('un contenedor en ERROR tras el duplicado: si ya salió con el mismo texto, publicado con su id', async () => {
+    const hace10min = new Date(Date.now() - 10 * 60_000).toISOString()
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(Response.json({ status_code: 'ERROR', status: 'Error: Media upload has failed' }))
+      .mockResolvedValueOnce(Response.json({ data: [{ id: '18000000000000066', caption: 'Hola', timestamp: hace10min }] }))
+    vi.stubGlobal('fetch', fetchMock)
+    expect(await instagramPublisher.publish(foto)).toEqual({ kind: 'published', externalId: '18000000000000066' })
+  })
+
   it('si tras el rechazo ni la búsqueda ni el estado contestan, el fallo se lleva el contenedor como siempre', async () => {
     const fetchMock = vi
       .fn()

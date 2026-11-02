@@ -403,6 +403,12 @@ export const instagramPublisher: Publisher = {
   network: 'instagram',
 
   async publish(input: PublishInput): Promise<PublishOutcome> {
+    // Un reintento mira primero si el intento anterior ya publicó: tras el duplicado bloqueado,
+    // el contenedor queda en ERROR y se pierde, y el intento siguiente subiría otra copia.
+    if (input.reintento) {
+      const yaSalio = await buscarPublicada(input)
+      if (yaSalio) return { kind: 'published', externalId: yaSalio }
+    }
     // Resuming: a previous run created the container and Meta was still processing.
     if (input.containerId) {
       let payload: Record<string, unknown>
@@ -424,7 +430,12 @@ export const instagramPublisher: Publisher = {
         return { kind: 'processing', containerId: input.containerId }
       }
       const verdict = classifyContainerStatus(payload)
-      if (verdict === 'error') return { kind: 'failed', reason: rechazoDelContenedor(payload, input.cuenta) }
+      if (verdict === 'error') {
+        // El contenedor de un duplicado bloqueado queda en ERROR aunque el primero salió.
+        const yaSalio = input.reintento ? null : await buscarPublicada(input)
+        if (yaSalio) return { kind: 'published', externalId: yaSalio }
+        return { kind: 'failed', reason: rechazoDelContenedor(payload, input.cuenta) }
+      }
       if (verdict === 'in_progress') return { kind: 'processing', containerId: input.containerId }
       // Ya salió, pero no sabemos con qué id: el contenedor no lo dice. La sincronización
       // siguiente se lo encuentra por texto y hora (`vincularSinId`); publicarlo otra vez

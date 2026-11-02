@@ -16,6 +16,11 @@ export type PublishInput = {
   opciones: OpcionesDestino | null
   /** El handle de la cuenta (`@vicente`), para nombrarla en las frases de error; null si no lo tiene. */
   cuenta?: string | null
+  /**
+   * Ya hubo un intento antes que no terminó bien. Lo que salió en él pudo salir sin que la red lo
+   * dijera, y un publicador que sabe buscarlo lo mira antes de subir otra copia (Instagram).
+   */
+  reintento?: boolean
 }
 
 export type PublishOutcome =
