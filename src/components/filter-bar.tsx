@@ -251,7 +251,7 @@ export function InterruptorEnUrl({ clave, texto, titulo }: { clave: string; text
       type="button"
       aria-pressed={prendido}
       onClick={() => cambiar(clave, prendido ? null : '1')}
-      title={titulo}
+      data-globito={titulo}
       className={cn(
         'chapa rounded-xl px-3 py-2 text-xs transition-colors',
         prendido ? 'border-brasa text-brasa' : 'text-fg-muted hover:text-fg',
@@ -271,7 +271,7 @@ export function BotonBots() {
     <button
       type="button"
       onClick={() => cambiar('bots', bots ? null : '1')}
-      title="Los bots se excluyen salvo que actives esto"
+      data-globito="Los bots se excluyen salvo que actives esto"
       className={cn(
         'chapa flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs transition-colors',
         bots ? 'border-brasa text-brasa' : 'text-fg-muted hover:text-fg',

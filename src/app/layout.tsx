@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Bricolage_Grotesque, Instrument_Sans, JetBrains_Mono, Oswald } from 'next/font/google'
+import { Globitos } from '@/components/globitos'
 import './globals.css'
 
 const bricolage = Bricolage_Grotesque({
@@ -46,7 +47,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="es"
       className={`${bricolage.variable} ${instrument.variable} ${jetbrains.variable} ${oswald.variable}`}
     >
-      <body>{children}</body>
+      <body>
+        {children}
+        <Globitos />
+      </body>
     </html>
   )
 }

@@ -227,7 +227,7 @@ export function WeekCalendar({
                       href={b.href}
                       scroll={false}
                       prefetch={false}
-                      title={b.texto || '(sin texto)'}
+                      data-globito={b.texto || '(sin texto)'}
                       className="flex items-center gap-1.5 rounded-[4px] border border-dashed border-velo/30 px-1.5 py-1 transition-colors hover:border-velo/60"
                     >
                       <span className="font-titulo text-[0.58rem] uppercase tracking-[0.12em] text-fg-muted">Borrador</span>
@@ -325,7 +325,7 @@ export function CabezaDeDia({
 
 /**
  * Un corte en la semana: una fila de una línea. El texto no cabe en una columna de un séptimo
- * de pantalla; va en el `title`, con cómo le fue a cada red y su motivo, y en el editor, que
+ * de pantalla; va en su globito (`data-globito`), con cómo le fue a cada red y su motivo, y en el editor, que
  * abre la fila.
  */
 function FilaDeCorte({
@@ -348,7 +348,7 @@ function FilaDeCorte({
       // Sin prefetch: una semana cargada son cientos de filas, y cada una pedía su editor por
       // adelantado (ver `docs/pendientes.md`).
       prefetch={false}
-      title={[
+      data-globito={[
         `${hora} · ${texto}`,
         ...targets.map((t) => {
           const motivo = motivoDestino(t)
@@ -404,7 +404,7 @@ export function MezclaDelDia({ items }: { items: ReadonlyArray<{ targets: Readon
   return (
     <span
       className="relative flex h-1 overflow-hidden rounded-full bg-acero-700"
-      title={total > 0 ? enPalabras.join(' · ') : undefined}
+      data-globito={total > 0 ? enPalabras.join(' · ') : undefined}
     >
       {mezcla.map((m) => (
         <span key={m.red} className={fondoDeRed(m.red)} style={{ width: `${(m.destinos / total) * 100}%` }} />

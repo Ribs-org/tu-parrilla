@@ -190,7 +190,8 @@ la cuenta.
 - «El nombre», obligatorio.
 - «El @ (opcional)»: se le pone la arroba si no la tiene.
 - «El color de acento (opcional)», con la ayuda «El de los titulares. Sin él, el chef usa el del
-  estilo.»: un cuadrado de color que abre el selector del navegador, el código al lado (o «el
+  estilo.»: un cuadrado de color que abre la ventana del color (ver «Las ventanas del panel» en
+  [index.md](index.md)), el código al lado (o «el
   del estilo») y, con un color elegido, el botón «Usar el del estilo», que lo quita.
 - «El llamado final (opcional)», con la ayuda «El texto del cierre: «Sígueme para más», «Agenda tu
   clase».».

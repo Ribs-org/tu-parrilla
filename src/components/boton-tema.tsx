@@ -56,7 +56,7 @@ export function BotonTema({
       type="button"
       onClick={cambiar}
       aria-label={nombre}
-      title={nombre}
+      data-globito={nombre}
       className="flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm text-fg-muted transition-colors hover:text-fg"
     >
       {destino === 'dia' ? <Sun className="h-4 w-4" aria-hidden /> : <Moon className="h-4 w-4" aria-hidden />}

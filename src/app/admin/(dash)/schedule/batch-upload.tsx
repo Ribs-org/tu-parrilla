@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { uploadBatch } from '@/app/admin/actions'
 import { NombreDe } from '@/components/de-noche-y-de-dia'
+import { CampoDeArchivos } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import { PanelLateral } from './panel-lateral'
 
@@ -38,7 +39,7 @@ export function BatchUpload({ cerrarHref }: { cerrarHref: string }) {
           </p>
           <pre className="overflow-x-auto rounded-lg bg-velo/[0.06] p-3 text-xs text-fg-muted">{PLANTILLA}</pre>
 
-          <input type="file" name="archivo" accept=".csv,text/csv" className="block text-sm text-fg-muted" />
+          <CampoDeArchivos name="archivo" accept=".csv,text/csv" texto="Elegir el CSV" />
 
           {state.error && <p className="text-sm text-negative">{state.error}</p>}
 

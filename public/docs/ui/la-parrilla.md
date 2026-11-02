@@ -636,7 +636,8 @@ descartó—, se abre esta lista en su lugar.
 
 Adentro, un párrafo de ayuda que resume el formato y termina en «Máximo 50 filas.», con un
 enlace «Los Fierros» que lleva a [Los Fierros](los-fierros.md); un ejemplo de tres filas en
-letra de máquina; el botón de archivo del navegador (solo deja elegir `.csv`), y el botón
+letra de máquina; el botón «Elegir el CSV» (solo deja elegir `.csv`), con el nombre del archivo al lado o
+«Ninguno elegido», y el botón
 **«Cargar lote»**, que dice «Cargando…» mientras procesa. Las fechas del ejemplo ya pasaron:
 copiado tal cual, todas las filas fallan por hora.
 
@@ -731,7 +732,8 @@ El formulario, en orden:
    mismo), su dirección, un ícono para abrirlo en otra pestaña («Abrir en una pestaña
    nueva»), un ícono para copiar la dirección («Copiar la URL»; muestra «Copiada» o «No se
    pudo copiar»), dos flechas para subirlo o bajarlo en el orden del carrusel, y «Quitar».
-   Debajo, **«Agregar archivos»** (botón de archivos) y **«Agregar por URL»** (placeholder
+   Debajo, **«Agregar archivos»** (el botón «Elegir archivos», con lo elegido al lado o «Ninguno
+   elegido») y **«Agregar por URL»** (placeholder
    «https://…», con la ayuda «Una por línea»). Lo agregado queda al final del carrusel. Los
    archivos elegidos suben al apretar «Guardar», antes de guardar: el botón dice «Subiendo el
    archivo…» (o «Subiendo 1 de 3…» con varios) y después «Guardando…».

@@ -5,6 +5,7 @@ import { pedirComandaPropia } from '@/app/admin/cocina-actions'
 import { Panel } from '@/components/charts/panel'
 import { useConfirmar } from '@/components/confirmar'
 import { DibujoDeInsumo } from '@/components/dibujos-insumo'
+import { SelectorColor } from '@/components/selector-color'
 import { SelectorFecha } from '@/components/selector-fecha'
 import { Button, Field, Input, Textarea } from '@/components/ui'
 import type { TipoInsumo } from '@/db/schema'
@@ -426,12 +427,11 @@ export function FormularioComanda({
           </Field>
           <Field label="El color de acento (opcional)" hint="El de los titulares. Sin él, el chef usa el del estilo.">
             <span className="flex items-center gap-2">
-              <input
-                type="color"
+              <SelectorColor
                 aria-label="El color de acento"
-                className="h-9 w-12 cursor-pointer rounded border border-acero-700 bg-transparent"
+                className="h-9 w-12"
                 value={marca.acento ?? '#3D7BFF'}
-                onChange={(e) => setMarca({ ...marca, acento: e.target.value.toUpperCase() })}
+                onChange={(acento) => setMarca({ ...marca, acento: acento.toUpperCase() })}
               />
               <span className="font-mono text-xs text-fg-faint">{marca.acento ?? 'el del estilo'}</span>
               {marca.acento ? (

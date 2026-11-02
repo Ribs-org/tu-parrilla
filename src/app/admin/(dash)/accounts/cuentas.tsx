@@ -28,7 +28,7 @@ const AVISO_MS = 2000
 /**
  * Lo que devuelve Meta cuando un token murió es una frase en inglés con códigos adentro,
  * y aparece justo cuando algo se rompió. La pantalla dice qué hacer; el texto original
- * queda en el `title` para quien lo necesite. Es la misma frase del resumen del día y de
+ * queda en su globito (`data-globito`) para quien lo necesite. Es la misma frase del resumen del día y de
  * `GET /api/schedule/resumen`, para que la tarjeta y el aviso digan lo mismo.
  */
 const FALLO_DE_SYNC = CONEXION_FALLO
@@ -336,7 +336,7 @@ function Fila({
 
   // La línea de estado: lo que pide una acción primero, y si no, cuándo se sincronizó.
   const estado = row.lastSyncError ? (
-    <span className="text-negative" title={row.lastSyncError}>
+    <span className="text-negative" data-globito={row.lastSyncError}>
       {FALLO_DE_SYNC}
     </span>
   ) : fierro === 'enfriandose' && row.expiresAt ? (
@@ -425,7 +425,7 @@ function Fila({
         <button
           type="button"
           onClick={copiarId}
-          title="Id de cuenta — para «cuentas» en el CSV o la API"
+          data-globito="Id de cuenta — para «cuentas» en el CSV o la API"
           className="flex max-w-full items-center gap-1 font-mono text-[0.68rem] text-fg-faint transition-colors hover:text-fg-muted"
         >
           <span className="shrink-0 whitespace-nowrap text-fg-muted">En Tu Parrilla: </span>

@@ -272,6 +272,16 @@ de una de estas.
   escriben con el teclado (las flechas arriba y abajo los suben y bajan); «Listo» la guarda. Además
   están «Hoy», «Quitar» (en los campos que pueden quedar vacíos y ya tienen fecha) y «Cancelar».
   Con el teclado, las flechas recorren los días y Re Pág y Av Pág cambian de mes.
+- **El color.** Un cuadrado del color elegido abre una ventana con una muestra de setenta y dos
+  colores (seis filas de doce, la última de grises) y, debajo, el código del color para escribirlo
+  exacto (por ejemplo «#3d7bff»; si no se entiende, dice en rojo «Escribe un código como #3d7bff.»).
+  «Listo» lo pone; «Cancelar», Esc o un clic fuera lo dejan como estaba.
+- **Los archivos.** Elegir un archivo abre el selector de archivos del teléfono o del computador:
+  ese sí es del sistema, no hay otro. El campo, en cambio, es del panel: un botón («Elegir
+  archivos», «Elegir el CSV») y al lado el nombre de lo elegido, o «Ninguno elegido».
+- **Los globitos.** Al dejar el mouse quieto sobre algo que lo trae, o al llegar a eso con Tab,
+  aparece un recuadro chico con la explicación, en los colores del modo. En un teléfono no
+  aparecen: lo que dicen está también en otro lado (el editor, la ficha).
 - **Los formularios.** Un campo que falta no lo avisa el navegador con un globito: el mensaje sale
   en rojo en el mismo formulario, y el cursor vuelve a ese campo.
 
@@ -312,6 +322,9 @@ Sale de:
   «Tus publicaciones», dentro de Los Números.
 - `src/components/confirmar.tsx` y `src/components/ventana.tsx` (las preguntas y la ventana en que salen)
 - `src/components/selector-fecha.tsx` y `src/lib/calendario.ts` (el calendario)
+- `src/components/selector-color.tsx` y `src/lib/paleta-de-acento.ts` (el color)
+- `src/components/globitos.tsx` y `src/lib/globito.ts` (los globitos)
+- `src/components/ui-cliente.tsx` (el campo de archivos, `CampoDeArchivos`)
 - `src/components/revision.ts` y `src/lib/revisiones.ts` (lo que un formulario revisa antes de enviar)
 - `src/lib/vocabulario.ts`: los nombres, subtítulos y rutas de cada pantalla, y quién las ve.
 - `src/lib/parrilla.ts`: la cocción, el calor del día, la temperatura del fierro y el aviso del

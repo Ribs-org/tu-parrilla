@@ -96,7 +96,7 @@ export default async function ProfilesPage() {
                       única acción de esta página que se nota fuera del panel. */}
                   <Submit
                     variant="ghost"
-                    title="Servir este perfil en /"
+                    data-globito="Servir este perfil en /"
                     className="border-transparent px-2.5 py-1.5 text-xs text-fg-faint"
                     pendingLabel="Cambiando…"
                     icono={<Star className="h-3.5 w-3.5" aria-hidden />}

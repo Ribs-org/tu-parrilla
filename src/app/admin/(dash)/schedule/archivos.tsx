@@ -148,7 +148,7 @@ function Miniatura({
   const llegando = estado === 'cola' || estado === 'subiendo'
   return (
     <li
-      title={error ? `${nombre}: ${error}` : nombre}
+      data-globito={error ? `${nombre}: ${error}` : nombre}
       className={cn(
         'relative aspect-[4/5] overflow-hidden rounded-lg border bg-acero-950',
         estado === 'fallo' ? 'border-negative/70' : 'border-acero-700',

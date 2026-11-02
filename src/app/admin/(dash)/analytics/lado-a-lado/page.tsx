@@ -425,7 +425,7 @@ export default async function LadoALadoPage({ searchParams }: { searchParams: Pr
                         <Link
                           href={numerosHref(RUTA, params, { [lado.clave]: m.fila.id })}
                           scroll={false}
-                          title={m.fila.caption || `?s=${m.fila.campaign}`}
+                          data-globito={m.fila.caption || `?s=${m.fila.campaign}`}
                           className={cn(
                             'block overflow-hidden rounded-lg border-2 transition-colors',
                             m.fila.id === lado.elegida ? 'border-brasa' : 'border-transparent hover:border-velo/20',

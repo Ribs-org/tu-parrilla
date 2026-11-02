@@ -186,7 +186,7 @@ function Tarjeta({ fila, mostrarPrivado, ahora }: { fila: ComentarioFila; mostra
             onClick={() => void reintentar()}
             disabled={pending}
             aria-label={fila.draft === null ? 'Reintentar borrador' : 'Escribir otro borrador'}
-            title={fila.draft === null ? 'Reintentar borrador' : 'Escribir otro borrador'}
+            data-globito={fila.draft === null ? 'Reintentar borrador' : 'Escribir otro borrador'}
             className="-mr-1 -mt-1 grid h-8 w-8 shrink-0 place-items-center rounded-full text-fg-faint transition-colors hover:bg-velo/[0.08] hover:text-fg disabled:opacity-50"
           >
             <RotateCcw aria-hidden className={regenerando ? 'h-4 w-4 animate-spin [animation-direction:reverse]' : 'h-4 w-4'} />

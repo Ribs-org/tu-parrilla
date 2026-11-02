@@ -23,6 +23,7 @@ import { useConfirmar } from '@/components/confirmar'
 import { ImageField } from '@/components/image-field'
 import { ProfileView } from '@/components/profile-view'
 import { useRevision } from '@/components/revision'
+import { SelectorColor } from '@/components/selector-color'
 import { Button, Field, Input, Select, Textarea, Toggle } from '@/components/ui'
 import type { Profile } from '@/db'
 import { revisarLinkNuevo } from '@/lib/revisiones'
@@ -268,12 +269,10 @@ export function ProfileEditor({ profile, initialLinks, origin, publicUrl, soloPe
                     style={{ background: color }}
                   />
                 ))}
-                <input
-                  type="color"
+                <SelectorColor
                   name="accentColor"
                   value={draft.accentColor}
-                  onChange={(event) => setDraft((d) => ({ ...d, accentColor: event.target.value }))}
-                  className="h-7 w-10 cursor-pointer rounded border border-velo/10 bg-transparent"
+                  onChange={(accentColor) => setDraft((d) => ({ ...d, accentColor }))}
                   aria-label="Color personalizado"
                 />
               </div>

@@ -8,7 +8,7 @@ import { nombreEn, pantallaDe } from '@/lib/vocabulario'
 import { cn } from '@/lib/utils'
 
 export { Button } from './ui-boton'
-export { Submit, Switch, Toggle } from './ui-cliente'
+export { CampoDeArchivos, Submit, Switch, Toggle } from './ui-cliente'
 
 /**
  * El título de una pantalla del panel, con su subtítulo en llano debajo: la red de

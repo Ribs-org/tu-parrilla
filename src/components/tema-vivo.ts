@@ -3,7 +3,7 @@
 import { useSyncExternalStore } from 'react'
 import { temaDe, type Tema } from '@/lib/tema'
 
-// El modo que se ve ahora, para lo que el CSS no puede cambiar: un `aria-label`, un `title`, el
+// El modo que se ve ahora, para lo que el CSS no puede cambiar: un `aria-label`, un globito (`data-globito`), el
 // texto de una pregunta (`confirmar.tsx`). Se lee del `data-tema` del contenedor del panel (`.acerado`) y se
 // sigue cuando el botón del modo lo cambia (`boton-tema.tsx`), sin recargar.
 //

@@ -41,7 +41,7 @@ export function Heatmap({ cells }: { cells: HeatCell[] }) {
               return (
                 <span
                   key={hour}
-                  title={`${day} ${String(hour).padStart(2, '0')}:00 · ${value} visita${value === 1 ? '' : 's'}`}
+                  data-globito={`${day} ${String(hour).padStart(2, '0')}:00 · ${value} visita${value === 1 ? '' : 's'}`}
                   className="h-4 flex-1 rounded-[3px] transition-transform hover:scale-125"
                   style={{ background: step(value, max) }}
                 />

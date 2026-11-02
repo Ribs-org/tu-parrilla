@@ -258,7 +258,7 @@ export function PostTable({
                           href={row.permalink}
                           target="_blank"
                           rel="noreferrer"
-                          title={`Ver en ${networkLabel(row.network)}`}
+                          data-globito={`Ver en ${networkLabel(row.network)}`}
                           aria-label={`Ver en ${networkLabel(row.network)}`}
                           className="ml-1 inline-flex align-middle text-fg-faint transition-colors hover:text-fg"
                         >
@@ -274,7 +274,7 @@ export function PostTable({
                     {comoSalio(row.viewsChange, mediana) === 'se-paso' ? (
                       <span
                         className="ml-1.5 whitespace-nowrap font-titulo text-[0.6rem] uppercase tracking-[0.12em] text-brasa"
-                        title="El doble o más de las vistas ganadas por la mitad de tus posts del período"
+                        data-globito="El doble o más de las vistas ganadas por la mitad de tus posts del período"
                       >
                         Se pasó
                       </span>
@@ -456,7 +456,7 @@ function CampaignCell({ postId, campaign, baseEnlace }: { postId: string; campai
           type="button"
           onClick={startEditing}
           disabled={pending}
-          title="Editar la etiqueta"
+          data-globito="Editar la etiqueta"
           className="rounded bg-velo/[0.06] px-1.5 py-0.5 font-mono text-[0.65rem] text-fg-muted transition-colors hover:text-fg"
         >
           ?s={value}
@@ -467,7 +467,7 @@ function CampaignCell({ postId, campaign, baseEnlace }: { postId: string; campai
         type="button"
         onClick={copy}
         disabled={pending}
-        title="Copiar el link con la etiqueta"
+        data-globito="Copiar el link con la etiqueta"
         className="text-fg-faint transition-colors hover:text-fg"
       >
         {copied ? <Check className="h-3 w-3" aria-hidden /> : <Copy className="h-3 w-3" aria-hidden />}

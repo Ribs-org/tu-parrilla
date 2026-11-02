@@ -282,7 +282,7 @@ function Atributo({ clave, valor, href }: { clave: string; valor: string; href?:
   return (
     <li className="chapa rounded-md px-2 py-0.5 font-mono text-[0.7rem] text-fg-muted">
       {href ? (
-        <Link href={href} title={`Comparar por ${clave}`} className="transition-colors hover:text-fg">
+        <Link href={href} data-globito={`Comparar por ${clave}`} className="transition-colors hover:text-fg">
           {contenido}
         </Link>
       ) : (

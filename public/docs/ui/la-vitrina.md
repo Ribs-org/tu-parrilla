@@ -45,7 +45,7 @@ Debajo, cuatro bloques en este orden. En pantallas anchas hay además una column
 - «URL»: una barra `/` seguida del campo con la dirección. Debajo puede salir una ayuda:
   - en la página principal: «Esta es tu página principal, por eso su dirección no se edita aquí. Para cambiarla, haz principal a otra página primero.» (el campo aparece gris y no se puede escribir);
   - si la página se sirve en la raíz de la dirección donde está abierto el panel: «Este perfil se sirve en la raíz del sitio.» En tu-parrilla.cl esto no aparece nunca.
-- «Color de acento»: ocho círculos de colores (el elegido lleva un anillo blanco) y un cuadrito más para elegir cualquier color.
+- «Color de acento»: ocho círculos de colores (el elegido lleva un anillo blanco) y un cuadrito más para elegir cualquier color, que abre la ventana del color: una muestra y el código, con «Listo» y «Cancelar».
 - Dos interruptores con texto:
   - «Publicado», con la ayuda «Si lo apagas, la URL responde 404»;
   - «Ocultar de buscadores», con la ayuda «Recomendado para el perfil privado».
@@ -110,7 +110,7 @@ Para dejarla sin foto: «Quitar» y después «Guardar perfil». Sin foto, la p�
 
 ### Para cambiar el color
 
-1. Toca uno de los ocho círculos de «Color de acento», o el cuadrito del final para elegir cualquier color.
+1. Toca uno de los ocho círculos de «Color de acento», o el cuadrito del final para elegir cualquier color: en la ventana, toca un color de la muestra o escribe su código, y aprieta «Listo».
 2. Aprieta «Guardar perfil».
 
 El color tiñe la bajada, el anillo de la foto, el bloque «Agendar» y los resplandores del fondo. No hay otro ajuste de diseño: ni imagen de fondo, ni tipografía, ni plantillas.
