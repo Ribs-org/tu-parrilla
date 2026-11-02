@@ -168,7 +168,7 @@ function BloqueDeCorte({
     <Link
       href={`/admin/schedule/${post.id}?volver=${encodeURIComponent(volver)}`}
       prefetch={false}
-      title={[`${hora} · ${texto}`, ...destinos].join('\n')}
+      data-globito={[`${hora} · ${texto}`, ...destinos].join('\n')}
       data-recien={post.id === recien ? '' : undefined}
       className={cn(
         'relative flex h-full items-center gap-0.5 overflow-hidden rounded-[3px] border pl-[0.4rem] pr-0.5 transition-colors',
@@ -206,7 +206,7 @@ function BloqueDeBorrador({ borrador, zone }: { borrador: BorradorEnCalendario; 
       href={borrador.href}
       scroll={false}
       prefetch={false}
-      title={`Borrador · ${hora} · ${borrador.texto || '(sin texto)'}`}
+      data-globito={`Borrador · ${hora} · ${borrador.texto || '(sin texto)'}`}
       className="flex h-full items-center overflow-hidden rounded-[3px] border border-dashed border-velo/30 bg-acero-900 px-1 transition-colors hover:border-velo/60"
     >
       <span className="font-mono text-[0.58rem] leading-none text-fg-muted">{hora}</span>

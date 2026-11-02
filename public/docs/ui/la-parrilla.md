@@ -397,8 +397,8 @@ Cada publicación es una tarjeta con:
   ejemplo «jue 15 de oct · 13:00».
 - A la derecha (en un teléfono, debajo del texto): **«Editar»** (abre el editor), **«Subir
   ahora»** (solo si a alguna red le falta salir: programada, publicándose o quemada) y
-  **«Eliminar»**, que pregunta antes «¿Eliminar este post? Se borra de La Parrilla y ya no
-  sale en ninguna red.».
+  **«Eliminar»**, que pregunta antes en una ventana «¿Eliminar este post?» y «Se borra de La
+  Parrilla y ya no sale en ninguna red.».
 - Abajo, una píldora por cada destino: el ícono de la red (en su color), el usuario, « · » y
   el estado (ver la tabla de estados, más abajo); la píldora es verde si ya salió. Si hay un motivo de falla, sigue « — <motivo>». Si el
   destino se quemó, la píldora es roja y termina en el botón subrayado **«Reprogramar»**.
@@ -494,7 +494,8 @@ formulario viene abierto, con el cursor en «Texto». En este orden:
    hay exactamente un archivo y es un video (ver abajo).
 8. **«Respuesta automática por palabra clave»**, plegado (ver abajo); viene abierto y lleno si
    el borrador tenía una palabra.
-9. **«Fecha y hora»**, un selector de día y hora con el botón «Ahora» al lado. Al abrir desde
+9. **«Fecha y hora»**, el campo de día y hora («Elegir día y hora» mientras está vacío), que
+   abre el calendario ([index.md](index.md), «Las ventanas del panel»), con el botón «Ahora» al lado. Al abrir desde
    un día del calendario, viene puesto ese día a las 09:00; si el día es hoy, la hora en punto
    siguiente (o las 09:00, si todavía no son las nueve), y vacío desde las 23:00. Al abrir un
    borrador, viene la fecha que tenía. Al elegir el día aparece debajo cómo está ese día según
@@ -535,7 +536,7 @@ formulario viene abierto, con el cursor en «Texto». En este orden:
 - Apagado (publicación directa), aparece:
   - **«Quién puede verlo»**, una lista que parte en «Elige quién puede verlo» y ofrece
     «Todos», «Amigos mutuos», «Seguidores» y «Solo yo» (solo las que la cuenta permite). Es
-    obligatoria: sin elegir, el navegador no deja programar.
+    obligatoria: sin elegir, «Programar» dice en rojo «TikTok necesita que elijas la privacidad.».
   - **«Permitir»**, con las casillas «Comentarios», «Dúos» y «Pegar (Stitch)», todas
     desmarcadas al partir (en un borrador, como quedaron). «Dúos» y «Pegar (Stitch)» no
     aparecen cuando todos los archivos son fotos. Una casilla gris es algo que la cuenta tiene
@@ -605,8 +606,8 @@ que se guardó con «Ahora» encendido vuelve sin fecha y con «Ahora» apagado.
 - **«Programar»** convierte el borrador en publicación y lo saca de los borradores. Si sale
   bien, el panel se cierra y la pantalla dice «Programado.». Si no, el error sale en rojo en el
   pie, el panel sigue abierto y el borrador se guarda de nuevo, con lo último que se escribió.
-- **«Descartar»** pregunta «¿Descartar este borrador? Lo escrito y los archivos elegidos se
-  pierden.»; al aceptar, borra el borrador y cierra el panel. En un formulario nuevo y vacío no
+- **«Descartar»** abre una ventana con «¿Descartar este borrador?» y «Lo escrito y los archivos
+  elegidos se pierden.»; «Descartar», en la ventana, borra el borrador y cierra el panel. En un formulario nuevo y vacío no
   pregunta: solo lo cierra. Un borrador que vino del mesón devuelve su creativo al mesón: ahí
   sigue, con sus archivos.
 
@@ -635,7 +636,8 @@ descartó—, se abre esta lista en su lugar.
 
 Adentro, un párrafo de ayuda que resume el formato y termina en «Máximo 50 filas.», con un
 enlace «Los Fierros» que lleva a [Los Fierros](los-fierros.md); un ejemplo de tres filas en
-letra de máquina; el botón de archivo del navegador (solo deja elegir `.csv`), y el botón
+letra de máquina; el botón «Elegir el CSV» (solo deja elegir `.csv`), con el nombre del archivo al lado o
+«Ninguno elegido», y el botón
 **«Cargar lote»**, que dice «Cargando…» mientras procesa. Las fechas del ejemplo ya pasaron:
 copiado tal cual, todas las filas fallan por hora.
 
@@ -730,7 +732,8 @@ El formulario, en orden:
    mismo), su dirección, un ícono para abrirlo en otra pestaña («Abrir en una pestaña
    nueva»), un ícono para copiar la dirección («Copiar la URL»; muestra «Copiada» o «No se
    pudo copiar»), dos flechas para subirlo o bajarlo en el orden del carrusel, y «Quitar».
-   Debajo, **«Agregar archivos»** (botón de archivos) y **«Agregar por URL»** (placeholder
+   Debajo, **«Agregar archivos»** (el botón «Elegir archivos», con lo elegido al lado o «Ninguno
+   elegido») y **«Agregar por URL»** (placeholder
    «https://…», con la ayuda «Una por línea»). Lo agregado queda al final del carrusel. Los
    archivos elegidos suben al apretar «Guardar», antes de guardar: el botón dice «Subiendo el
    archivo…» (o «Subiendo 1 de 3…» con varios) y después «Guardando…».
@@ -766,7 +769,7 @@ no existe o ya se borró, el editor muestra la página «No encontramos esa pág
 Se abre al apretar «Reprogramar» en una píldora roja de la lista, en una fila de «Se quemó» o
 en un destino quemado del editor, y
 queda al centro, encima de todo, con el fondo oscurecido. Arriba dice de qué destino se trata,
-«<Red> · <usuario>»; debajo, un selector de fecha y hora, **«Guardar»** (bloqueado hasta
+«<Red> · <usuario>»; debajo, el campo «Elegir día y hora», que abre el calendario encima, **«Guardar»** (bloqueado hasta
 elegir una hora) y **«Cancelar»**. Se cierra también con Esc o con un clic fuera. Al guardar
 bien, la ventana se cierra y la fila sale de «Se quemó».
 
@@ -784,7 +787,7 @@ se puede por API: ver [la guía de la API](../api-llm.md).
    de subir: aparecen en la lista numerada.
 4. En «Cuentas», marcar la ficha de cada cuenta donde tiene que salir.
 5. Si apareció un bloque de TikTok o de Instagram, llenarlo (ver las tareas de abajo).
-6. En «Fecha y hora», elegir día y hora: en el selector, o con un clic en un día de la semana
+6. En «Fecha y hora», elegir día y hora: en el calendario, o con un clic en un día de la semana
    en chico. Mirar el aviso de debajo: si dice que el día va lleno, conviene otro. Si aparece
    en ámbar que el permiso de una cuenta vence antes, reconectarla en Los Fierros o elegir un
    día anterior.
@@ -813,7 +816,7 @@ Si hay que dejarlo a medias, basta con cerrar el panel: queda como borrador.
 ### Para descartar un borrador
 
 1. Abrirlo, como en la tarea anterior.
-2. Apretar «Descartar» y aceptar la pregunta. Se borra con sus archivos y no se puede
+2. Apretar «Descartar», y otra vez «Descartar» en la ventana. Se borra con sus archivos y no se puede
    deshacer.
 
 ### Para programar un video para TikTok
@@ -849,8 +852,8 @@ post va también a otra red).
   Queda para el minuto siguiente y sale en la pasada siguiente del publicador, en unos
   minutos.
 - Si ya está programado (o se quemó) y tiene que salir en el acto: en «Lista», apretar
-  «Subir ahora» en su tarjeta y aceptar la pregunta «¿Subirlo ahora, sin esperar la hora
-  programada? Se publica en tus redes de inmediato.». Arriba de la lista aparece cómo le
+  «Subir ahora» en su tarjeta y, en la ventana «¿Subirlo ahora, sin esperar la hora programada?»,
+  «Subir ahora» otra vez: «Se publica en tus redes de inmediato.». Arriba de la lista aparece cómo le
   fue, por ejemplo `1 publicado, 1 en proceso.`. Lo que quede en proceso termina solo en
   las pasadas siguientes. Lo ya publicado no se vuelve a publicar.
 
@@ -968,9 +971,9 @@ de un post que ya salió en otras redes.
 
 ### Para borrar un post
 
-Apretar «Eliminar» en su tarjeta de la lista, o «Eliminar» en el editor, y aceptar la
-pregunta «¿Eliminar este post? Se borra de La Parrilla y ya no sale en ninguna red.». No se
-puede deshacer. Solo funciona si no salió ni se está publicando en ninguna red; si ya salió en
+Apretar «Eliminar» en su tarjeta de la lista, o «Eliminar» en el editor, y otra vez «Eliminar»
+en la ventana «¿Eliminar este post?» («Se borra de La Parrilla y ya no sale en ninguna red.»). No
+se puede deshacer. Solo funciona si no salió ni se está publicando en ninguna red; si ya salió en
 alguna, hay que borrarlo en la red misma.
 
 ## Mensajes que puede ver
@@ -1028,7 +1031,7 @@ de esa tanda queda: hay que volver a elegirlos.
 | «Borrador guardado.» | Lo escrito quedó guardado; se puede cerrar el panel sin perderlo | Nada |
 | «No se pudo guardar el borrador.» | El último guardado falló | Hacer cualquier cambio para que lo intente de nuevo; si sigue fallando, copiar el texto antes de cerrar |
 | «Este borrador ya no existe: se programó o se descartó en otra pestaña o en el teléfono. Cierra el panel para ver cómo quedó.» | Ese mismo borrador se programó o se descartó en otra pestaña o ventana, o en la app del teléfono; este panel dejó de guardar y «Programar» quedó apagado | Cerrar el panel y mirar el calendario. Si no estaba programado y se quiere, abrir «Nueva publicación» y escribirlo de nuevo |
-| «¿Descartar este borrador? Lo escrito y los archivos elegidos se pierden.» | La pregunta de «Descartar» | Aceptar para borrarlo; cancelar para seguir escribiendo |
+| «¿Descartar este borrador?» y «Lo escrito y los archivos elegidos se pierden.» | La ventana de «Descartar» | «Descartar» para borrarlo; «Cancelar» para seguir escribiendo |
 | «Ese creativo ya no está en el mesón.» | Al programar un borrador que vino del mesón, su creativo ya no estaba esperando en un borrador | Recargar La Parrilla y mirar el mesón, en La Cocina |
 | «No tienes borradores.» | No hay ningún borrador guardado (o el que se pidió ya no existe y era el último) | Nada |
 
@@ -1115,8 +1118,8 @@ puede decir:
 | Lo que dice la pantalla | Qué significa | Qué hacer |
 |---|---|---|
 | «Nada programado todavía.» | No hay nada programado | Programar algo |
-| «¿Subirlo ahora, sin esperar la hora programada? Se publica en tus redes de inmediato.» | Pregunta de «Subir ahora» | Aceptar para publicar ya; cancelar para dejarlo como estaba |
-| «¿Eliminar este post? Se borra de La Parrilla y ya no sale en ninguna red.» | Pregunta de «Eliminar», en la lista y en el editor | Aceptar para borrarlo; cancelar para dejarlo como estaba |
+| «¿Subirlo ahora, sin esperar la hora programada?» y «Se publica en tus redes de inmediato.» | La ventana de «Subir ahora» | «Subir ahora» para publicar ya; «Cancelar» para dejarlo como estaba |
+| «¿Eliminar este post?» y «Se borra de La Parrilla y ya no sale en ninguna red.» | La ventana de «Eliminar», en la lista y en el editor | «Eliminar» para borrarlo; «Cancelar» para dejarlo como estaba |
 | Una lista con las partes que apliquen, separadas por comas y con punto final: «<N> publicado» (o «publicados»), «<N> en proceso», «<N> en espera de la red», «<N> para reintentar», «<N> con error» | Cómo le fue a «Subir ahora» | Lo que está en proceso o en espera de la red termina solo; para lo que quedó para reintentar o con error, leer el motivo en la píldora |
 | «Este post no tenía destinos pendientes.» | Ya había salido en todas sus redes | Nada |
 | «El post ya no existe.» | Se borró antes | Recargar |
@@ -1250,8 +1253,9 @@ editor.
   [Los Fierros](los-fierros.md). Si no aparece ninguna, no hay cuentas conectadas.
 - **La pantalla dice Conecta tu primera red.** No hay ninguna red conectada. Se conecta en
   Los Fierros, dentro del botón «Ajustes».
-- **El botón Programar no hace nada / el navegador me marca un campo.** Falta «Fecha y
-  hora» (o apretar «Ahora»), o falta «Quién puede verlo» en un bloque de TikTok.
+- **El botón Programar no programa.** El motivo sale en rojo en el pie del panel: «Elige la
+  fecha y la hora.» (falta «Fecha y hora», o apretar «Ahora») o «TikTok necesita que elijas la
+  privacidad.» (falta «Quién puede verlo» en un bloque de TikTok).
 - **No veo lo de trial reel.** Solo aparece con exactamente un archivo, que sea video, y
   una cuenta de Instagram marcada.
 - **No veo Dúos ni Pegar.** No aparecen cuando todos los archivos son fotos, ni cuando
@@ -1358,7 +1362,7 @@ editor.
 - No publica borradores: un borrador no sale nunca solo, aunque tenga fecha y esa fecha pase.
 - No cambia ni borra nada en las redes: editar lo ya publicado no toca la red, y lo publicado
   no se puede eliminar desde aquí.
-- No pregunta antes de «Eliminar», ni deja deshacer un borrado ni un «Descartar».
+- No deja deshacer un borrado ni un «Descartar».
 - No tiene una forma de descartar un destino quemado: se reprograma, se sube, se desmarca en el
   editor o se borra el post entero.
 - No cambia las opciones de TikTok ni el trial reel de algo ya programado, ni agrega TikTok

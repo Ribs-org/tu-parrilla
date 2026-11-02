@@ -6,8 +6,9 @@ import { nombreDe } from '@/lib/vocabulario'
  * modo, sin recargar, y sirve igual en un componente del servidor que en uno del cliente. Si las
  * dos dicen lo mismo, va una sola.
  *
- * Para lo que no es texto a la vista —un `aria-label`, un `title`, la pregunta de un `confirm`—
- * no sirve, porque el CSS no lo alcanza: ahí va `useTema` (`tema-vivo.ts`).
+ * Para lo que no es texto a la vista —un `aria-label`, un globito (`data-globito`), o lo que se arma como cadena
+ * para una pregunta (`confirmar.tsx`)— no sirve, porque el CSS no lo alcanza: ahí va `useTema`
+ * (`tema-vivo.ts`).
  */
 export function DeNocheYDeDia({ noche, dia }: { noche: React.ReactNode; dia: React.ReactNode }) {
   if (noche === dia) return <>{noche}</>

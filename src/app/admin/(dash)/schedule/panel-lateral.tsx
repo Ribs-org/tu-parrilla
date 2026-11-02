@@ -8,9 +8,9 @@ import { useVeloQueCierra } from '@/components/velo'
  * El panel que se desliza desde la derecha sobre La Parrilla: ahí se compone, se eligen
  * borradores y se sube un CSV, sin perder de vista el calendario que queda atenuado detrás.
  *
- * Es un `<dialog>` abierto con `showModal()`, por las mismas razones que el de
- * «Reprogramar» (`reprogramar.tsx`): el navegador atrapa el foco adentro, Escape lo cierra y
- * el velo se traga los clics. Lo que cambia es quién cierra: el panel existe porque la URL
+ * Es un `<dialog>` abierto con `showModal()`, por las mismas razones que una `Ventana`
+ * (`components/ventana.tsx`): el navegador atrapa el foco adentro, Escape lo cierra y el velo se
+ * traga los clics. Lo que cambia es la forma, y quién cierra: el panel existe porque la URL
  * lo pide (`?componer=1`, `?borrador=…`, `?panel=…`), así que cerrarlo es navegar, y eso lo
  * decide `onCerrar`. Por eso Escape no cierra solo: el `cancel` se cancela y se avisa, y el
  * compositor alcanza a guardar el borrador antes de que la navegación lo desmonte.

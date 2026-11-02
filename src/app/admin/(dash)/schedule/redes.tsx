@@ -56,7 +56,7 @@ export const SIGNO: Record<Sello, { signo: string; color: string }> = {
  * página manda, porque solo ella sabe qué cuentas se enfriaron. Con `detalle`, cada icono
  * lleva al lado el handle y el estado en palabras (la cola).
  *
- * Lo que decía el chip de texto sigue diciéndose: en el `title` de cada chip, y en un
+ * Lo que decía el chip de texto sigue diciéndose: en el globito de cada chip, y en un
  * `sr-only` — de la fila sin `detalle`, o delante de cada icono con `detalle`, porque ahí el
  * texto visible ya dice el handle y el estado y solo falta la red; un `sr-only` de fila
  * repetiría los dos.
@@ -79,7 +79,7 @@ export function Redes({
         {targets.map((t, i) => (
           <span
             key={`${t.network}-${t.handle ?? ''}-${i}`}
-            title={`${nombreDestino(t)}: ${etiquetaDestino(t)}`}
+            data-globito={`${nombreDestino(t)}: ${etiquetaDestino(t)}`}
             className="inline-flex items-center gap-1"
           >
             <Icon name={t.network} className={cn('h-3.5 w-3.5 shrink-0', colorDeRed(t.network))} />
@@ -101,7 +101,7 @@ export function Redes({
         const chip = (titulo: string, modo?: 'solo-noche' | 'solo-dia') => (
           <span
             key={`${t.network}-${t.handle ?? ''}-${i}${modo ? `-${modo}` : ''}`}
-            title={titulo}
+            data-globito={titulo}
             className={cn(
               'inline-flex h-[1.15rem] items-center gap-0.5 rounded-[3px] border px-1 font-mono text-[0.62rem] leading-none',
               CHIP[sello].clase,
@@ -112,7 +112,7 @@ export function Redes({
             {CHIP[sello].signo ? <span aria-hidden>{CHIP[sello].signo}</span> : null}
           </span>
         )
-        // El chip de una cuenta fría nombra su fierro en el `title`, que el CSS no alcanza: de día
+        // El chip de una cuenta fría nombra su fierro en el globito, que el CSS no alcanza: de día
         // va otro chip con el del cuchillo, y el modo esconde uno, como los dos dibujos del corte.
         if (sello === 'frio') return [chip(textoDe(t, sello, 'noche'), 'solo-noche'), chip(textoDe(t, sello, 'dia'), 'solo-dia')]
         return chip(textoDe(t, sello, 'noche'))

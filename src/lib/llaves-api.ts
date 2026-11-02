@@ -2,6 +2,7 @@
 // se lee del header. Sin `server-only` ni base, para que vitest las importe; lo que toca la
 // tabla vive en `llaves-api-guardia.ts`.
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto'
+import { NOMBRE_VACIO } from './revisiones'
 
 /**
  * Lo que distingue una llave de usuario de `SCHEDULE_API_KEY` y de cualquier otro secreto:
@@ -14,7 +15,7 @@ export const MAX_LLAVES = 10
 
 export const MAX_NOMBRE = 60
 
-export const NOMBRE_VACIO = 'Ponle un nombre: el del agente que la va a usar.'
+export { NOMBRE_VACIO }
 export const NOMBRE_LARGO = `El nombre puede tener hasta ${MAX_NOMBRE} caracteres.`
 export const DEMASIADAS_LLAVES = `Ya tienes ${MAX_LLAVES} llaves: revoca una antes de generar otra.`
 

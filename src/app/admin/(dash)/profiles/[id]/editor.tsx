@@ -19,10 +19,14 @@ import {
 } from '@dnd-kit/sortable'
 import { Check, Copy, Eye, Plus, RefreshCw, Trash2, X } from 'lucide-react'
 import { Panel } from '@/components/charts/panel'
+import { useConfirmar } from '@/components/confirmar'
 import { ImageField } from '@/components/image-field'
 import { ProfileView } from '@/components/profile-view'
+import { useRevision } from '@/components/revision'
+import { SelectorColor } from '@/components/selector-color'
 import { Button, Field, Input, Select, Textarea, Toggle } from '@/components/ui'
 import type { Profile } from '@/db'
+import { revisarLinkNuevo } from '@/lib/revisiones'
 import { cn } from '@/lib/utils'
 import { nombreDe } from '@/lib/vocabulario'
 import {
@@ -70,6 +74,7 @@ export function ProfileEditor({ profile, initialLinks, origin, publicUrl, soloPe
   const [copied, setCopied] = useState(false)
   const [deleteError, setDeleteError] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
+  const confirmar = useConfirmar()
 
   // Re-sync after a server action adds or removes a row. Comparing the id list
   // rather than array identity keeps unsaved edits alive through unrelated
@@ -89,6 +94,8 @@ export function ProfileEditor({ profile, initialLinks, origin, publicUrl, soloPe
     createLink.bind(null, profile.id),
     {},
   )
+  const revisionDeLink = useRevision(revisarLinkNuevo)
+  const errorDeLink = revisionDeLink.error ?? linkState.error
 
   useEffect(() => {
     if (linkState.ok) router.refresh()
@@ -135,6 +142,31 @@ export function ProfileEditor({ profile, initialLinks, origin, publicUrl, soloPe
         profile.id,
         next.map((link) => link.id),
       )
+    })
+  }
+
+  async function cambiarUrl() {
+    const seguir = await confirmar({
+      titulo: 'Cambiar la URL secreta',
+      detalle: 'Se generará una URL nueva y la actual dejará de funcionar.',
+      accion: 'Cambiar la URL',
+      peligro: true,
+    })
+    if (!seguir) return
+    startTransition(() => {
+      void rotateSlug(profile.id).then(() => router.refresh())
+    })
+  }
+
+  async function borrarPerfil() {
+    const seguir = await confirmar({
+      titulo: `Se borra "${profile.displayName}" con sus links y métricas. ¿Seguir?`,
+      accion: 'Borrar perfil',
+      peligro: true,
+    })
+    if (!seguir) return
+    startTransition(() => {
+      void deleteProfile(profile.id).then((result) => setDeleteError(result?.error ?? null))
     })
   }
 
@@ -237,12 +269,10 @@ export function ProfileEditor({ profile, initialLinks, origin, publicUrl, soloPe
                     style={{ background: color }}
                   />
                 ))}
-                <input
-                  type="color"
+                <SelectorColor
                   name="accentColor"
                   value={draft.accentColor}
-                  onChange={(event) => setDraft((d) => ({ ...d, accentColor: event.target.value }))}
-                  className="h-7 w-10 cursor-pointer rounded border border-velo/10 bg-transparent"
+                  onChange={(accentColor) => setDraft((d) => ({ ...d, accentColor }))}
                   aria-label="Color personalizado"
                 />
               </div>
@@ -327,7 +357,7 @@ export function ProfileEditor({ profile, initialLinks, origin, publicUrl, soloPe
             </p>
           ) : null}
 
-          <form action={addLink} className="mt-4 space-y-3 rounded-xl border border-velo/[0.06] p-3">
+          <form {...revisionDeLink.formulario} action={addLink} className="mt-4 space-y-3 rounded-xl border border-velo/[0.06] p-3">
             <div className="grid gap-3 sm:grid-cols-[10rem_minmax(0,1fr)]">
               <Field label="Tipo">
                 <Select name="kind" defaultValue="standard">
@@ -338,17 +368,17 @@ export function ProfileEditor({ profile, initialLinks, origin, publicUrl, soloPe
                 </Select>
               </Field>
               <Field label="Nombre">
-                <Input name="label" placeholder="Mi proyecto" required />
+                <Input name="label" placeholder="Mi proyecto" />
               </Field>
             </div>
             <Field label="URL">
-              <Input name="url" placeholder="ejemplo.com" inputMode="url" required />
+              <Input name="url" placeholder="ejemplo.com" inputMode="url" />
             </Field>
             <input type="hidden" name="isActive" value="on" />
 
-            {linkState.error ? (
+            {errorDeLink ? (
               <p role="alert" className="text-sm text-negative">
-                {linkState.error}
+                {errorDeLink}
               </p>
             ) : null}
 
@@ -390,15 +420,7 @@ export function ProfileEditor({ profile, initialLinks, origin, publicUrl, soloPe
         <Panel title="Zona peligrosa">
           <div className="flex flex-wrap gap-2">
             {!profile.isDefault ? (
-              <Button
-                type="button"
-                onClick={() => {
-                  if (!confirm('Se generará una URL nueva y la actual dejará de funcionar.')) return
-                  startTransition(() => {
-                    void rotateSlug(profile.id).then(() => router.refresh())
-                  })
-                }}
-              >
+              <Button type="button" onClick={() => void cambiarUrl()}>
                 <RefreshCw className="h-4 w-4" aria-hidden /> Cambiar la URL secreta
               </Button>
             ) : null}
@@ -406,17 +428,7 @@ export function ProfileEditor({ profile, initialLinks, origin, publicUrl, soloPe
                 que sea la principal habiendo otras. La interfaz no debe ofrecer un botón
                 que solo lleva a ese error. */}
             {!soloPerfil && !profile.isDefault ? (
-              <Button
-                type="button"
-                variant="danger"
-                onClick={() => {
-                  if (!confirm(`Se borra "${profile.displayName}" con sus links y métricas. ¿Seguir?`))
-                    return
-                  startTransition(() => {
-                    void deleteProfile(profile.id).then((result) => setDeleteError(result?.error ?? null))
-                  })
-                }}
-              >
+              <Button type="button" variant="danger" onClick={() => void borrarPerfil()}>
                 <Trash2 className="h-4 w-4" aria-hidden /> Borrar perfil
               </Button>
             ) : (

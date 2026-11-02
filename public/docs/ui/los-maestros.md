@@ -96,7 +96,7 @@ la invitación se le venció, ahí pide otro con su correo ([ingresar.md](ingres
 Solo para quien nunca entró (etiqueta «invitado <fecha>»).
 
 1. Apretar «Quitar» en su fila.
-2. El navegador pregunta «¿Quitar la invitación?». Aceptar.
+2. Se abre una ventana con «¿Quitar la invitación?». Apretar «Quitar», en la ventana.
 
 La fila desaparece. Se borra también la página pública que se le creó al invitarlo. Ese correo
 ya no puede entrar, y se puede volver a invitar cuando se quiera.
@@ -106,8 +106,8 @@ ya no puede entrar, y se puede volver a invitar cuando se quiera.
 Solo para quien ya entró (etiqueta «entró <fecha>»).
 
 1. Apretar «Cerrar sesiones» en su fila.
-2. El navegador pregunta «¿Cerrar las sesiones de esta persona? Tendrá que entrar de nuevo con
-   un código.». Aceptar.
+2. Se abre una ventana con «¿Cerrar las sesiones de esta persona?» y «Tendrá que entrar de nuevo
+   con un código.». Apretar «Cerrar sesiones», en la ventana.
 
 No aparece confirmación: la fila queda igual. Desde su siguiente paso, esa persona sale del
 panel en todos sus navegadores y de la app del teléfono, y tiene que pedir un código nuevo.
@@ -122,8 +122,8 @@ La Cocina es el chef de la casa: el editor que recibe el material crudo y devuel
 
 - **Para encenderla:** apretar «Encender la cocina» en su fila. No pregunta. La fila pasa a decir
   «cocina desde <fecha>», y esa persona ve sus comandas en La Cocina.
-- **Para apagarla:** apretar «Apagar la cocina». El navegador pregunta «¿Apagar la cocina de
-  <correo>? El chef deja de ver sus comandas.». Aceptar. Las comandas no se borran: el chef deja
+- **Para apagarla:** apretar «Apagar la cocina». Se abre una ventana con «¿Apagar la cocina de
+  <correo>?» y «El chef deja de ver sus comandas.». Apretar «Apagar la cocina», en la ventana. Las comandas no se borran: el chef deja
   de verlas, y vuelve a verlas si se enciende de nuevo.
 
 El admin también la enciende para sí mismo, en su propia fila.
@@ -137,8 +137,8 @@ todo lo que se bajó de ella ([los-fierros.md](los-fierros.md)).
 1. En «Traspasar una cuenta», elegir la cuenta en «Cuenta».
 2. Elegir en «Pasa a» a quién se la lleva.
 3. Apretar «Traspasar».
-4. El navegador pregunta «¿Traspasar <cuenta> de <correo> a <correo>? Se lleva <publicaciones>, sus
-   números y sus comentarios. Se puede devolver desde aquí.». Aceptar.
+4. Se abre una ventana con «¿Traspasar <cuenta> de <correo> a <correo>?» y «Se lleva <publicaciones>,
+   sus números y sus comentarios. Se puede devolver desde aquí.». Apretar «Traspasar», en la ventana.
 5. Con «<cuenta> ya es de <correo>. Falta que esa persona la reconecte en Los Fierros.», la cuenta
    ya está en el otro usuario.
 6. Quien la recibió aprieta «Reconectar» en Los Fierros, para dejar la conexión a su nombre.
@@ -161,20 +161,18 @@ Para devolverla, se traspasa de vuelta, con estos mismos pasos.
 | «Ese correo no se ve bien.» | Lo escrito en «Correo» no tiene forma de correo. | Corregirlo. |
 | «Ese correo ya está invitado.» | Ya hay alguien con ese correo en «Invitados». | Nada que invitar. Si no le llega el código, que lo pida en `/ingresar`. |
 | «No se pudo invitar: la página del usuario no se pudo crear. Intenta de nuevo.» | Falló la creación de su página; la invitación no quedó hecha. | Volver a apretar «Invitar». |
-| «¿Quitar la invitación?» | Confirmación antes de quitar. | Aceptar para quitar; cancelar para dejarla. |
+| «Ese correo no se ve bien.» | Se apretó «Invitar» con el correo vacío o sin forma de correo. | Corregirlo. |
+| «¿Quitar la invitación?» | Ventana antes de quitar. | «Quitar» para quitarla; «Cancelar» para dejarla. |
 | «Ese usuario ya entró alguna vez; no se puede quitar todavía.» | La persona entró después de que se cargó la lista. | Recargar: su fila ahora dice «entró <fecha>». |
 | «No se pudo quitar al usuario. Intenta de nuevo.» | Falló el borrado. | Volver a intentar. |
-| «¿Cerrar las sesiones de esta persona? Tendrá que entrar de nuevo con un código.» | Confirmación antes de cortar sus sesiones. | Aceptar o cancelar. |
-| «¿Apagar la cocina de <correo>? El chef deja de ver sus comandas.» | Confirmación antes de apagarle la cocina. | Aceptar o cancelar. |
+| «¿Cerrar las sesiones de esta persona?» y «Tendrá que entrar de nuevo con un código.» | Ventana antes de cortar sus sesiones. | «Cerrar sesiones» o «Cancelar». |
+| «¿Apagar la cocina de <correo>?» y «El chef deja de ver sus comandas.» | Ventana antes de apagarle la cocina. | «Apagar la cocina» o «Cancelar». |
 | «Esa persona ya no está en Los Maestros.» | Se quitó entre que se cargó la lista y se apretó el botón de la cocina o «Traspasar». | Recargar. |
-| «¿Traspasar <cuenta> de <correo> a <correo>? Se lleva <publicaciones>, sus números y sus comentarios. Se puede devolver desde aquí.» | Confirmación antes de traspasar. | Aceptar o cancelar. |
+| «¿Traspasar <cuenta> de <correo> a <correo>?» y «Se lleva <publicaciones>, sus números y sus comentarios. Se puede devolver desde aquí.» | Ventana antes de traspasar. | «Traspasar» o «Cancelar». |
 | «<cuenta> ya es de <correo>. Falta que esa persona la reconecte en Los Fierros.» | El traspaso salió. | Avisarle a esa persona que apriete «Reconectar». |
 | «Esa cuenta ya no está.» | La quitaron entre que se cargó la lista y se apretó «Traspasar». | Recargar. |
 | «Esa cuenta ya es de esa persona.» | Alguien la traspasó entre que se cargó la lista y se apretó «Traspasar». | Recargar. |
 | «No se pudo traspasar la cuenta. Intenta de nuevo.» | Falló el traspaso y no cambió nada. | Volver a intentar. |
-
-Si se aprieta «Invitar» con el correo vacío o con una forma que el navegador no acepta, el
-navegador muestra su propio aviso, en su idioma.
 
 ## Si el humano dice…
 

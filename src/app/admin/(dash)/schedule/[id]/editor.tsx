@@ -6,8 +6,10 @@ import { startTransition, useActionState, useState, useTransition, type ReactNod
 import { useRouter } from 'next/navigation'
 import { ArrowDown, ArrowLeft, ArrowUp, Check, Copy, ExternalLink } from 'lucide-react'
 import { deleteScheduledPost, updateScheduledPost, type FormState } from '@/app/admin/actions'
+import { useConfirmar } from '@/components/confirmar'
 import { useTema } from '@/components/tema-vivo'
-import { Button, Field, GroupLabel, Input, Textarea } from '@/components/ui'
+import { SelectorFecha } from '@/components/selector-fecha'
+import { Button, CampoDeArchivos, Field, GroupLabel, Input, Textarea } from '@/components/ui'
 import { REDES_PROXIMAMENTE, networkLabel } from '@/lib/networks'
 import type { CuentaRow } from '@/lib/posts-kpis'
 import { subirArchivos } from '@/lib/subida-directa'
@@ -53,6 +55,7 @@ export function Editor({
   proximamente?: readonly string[]
 }) {
   const tema = useTema()
+  const confirmar = useConfirmar()
   const publishing = targets.some((t) => t.status === 'publishing')
   const published = new Set(targets.filter((t) => t.status === 'published').map((t) => t.accountId))
   const initialAccountIds = new Set(targets.map((t) => t.accountId))
@@ -147,12 +150,8 @@ export function Editor({
           </Field>
 
           <Field label="Fecha y hora">
-            <Input
-              type="datetime-local"
-              name="scheduledAt"
-              defaultValue={scheduledAtLocal}
-              className="max-w-[16rem]"
-            />
+            {/* Con `key`: lo guardado vuelve a ser el punto de partida, como el `defaultValue` de antes. */}
+            <SelectorFecha key={scheduledAtLocal} name="scheduledAt" defaultValue={scheduledAtLocal} className="max-w-[16rem]" />
           </Field>
 
           <div>
@@ -257,9 +256,10 @@ export function Editor({
                 ))}
               </ul>
             ) : null}
-            <Field label="Agregar archivos">
-              <Input type="file" name="media" multiple accept="image/*,video/*" />
-            </Field>
+            <div>
+              <GroupLabel>Agregar archivos</GroupLabel>
+              <CampoDeArchivos name="media" multiple accept="image/*,video/*" />
+            </div>
             <div className="mt-2">
               <Field label="Agregar por URL" hint="Una por línea">
                 <Textarea name="mediaUrls" rows={2} placeholder="https://…" />
@@ -308,9 +308,9 @@ export function Editor({
               type="button"
               variant="danger"
               disabled={deleting}
-              onClick={() => {
+              onClick={async () => {
                 // Pregunta antes, como en la lista: borrar no se deshace.
-                if (!confirm(confirmarEliminar(tema))) return
+                if (!(await confirmar(confirmarEliminar(tema)))) return
                 startDelete(async () => {
                   setDeleteError(null)
                   const result = await deleteScheduledPost(postId)
@@ -360,18 +360,18 @@ function MediaActions({ url }: { url: string }) {
         target="_blank"
         rel="noreferrer"
         aria-label="Abrir en una pestaña nueva"
-        title="Abrir en una pestaña nueva"
+        data-globito="Abrir en una pestaña nueva"
         className="text-fg-faint transition-colors hover:text-fg"
       >
         <ExternalLink className="h-4 w-4" aria-hidden />
       </a>
       {/* Ícono y no texto: los tres estados medían distinto y la fila saltaba de ancho
-          cada vez que se copiaba una URL. El `title` dice lo que el ícono calla. */}
+          cada vez que se copiaba una URL. El globito dice lo que el ícono calla. */}
       <button
         type="button"
         onClick={copy}
         aria-label={failed ? 'No se pudo copiar la URL' : 'Copiar la URL'}
-        title={copied ? 'Copiada' : failed ? 'No se pudo copiar' : 'Copiar la URL'}
+        data-globito={copied ? 'Copiada' : failed ? 'No se pudo copiar' : 'Copiar la URL'}
         className={cn(
           'transition-colors hover:text-fg',
           failed ? 'text-negative' : 'text-fg-faint',

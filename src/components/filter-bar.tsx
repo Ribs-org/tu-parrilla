@@ -3,7 +3,8 @@
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useId, useState, useTransition } from 'react'
 import { Bot, CalendarDays } from 'lucide-react'
-import { Button, Input } from '@/components/ui'
+import { SelectorFecha } from '@/components/selector-fecha'
+import { Button } from '@/components/ui'
 import { RANGES, type Periodo } from '@/lib/filters'
 import { PRIMER_DIA, atajosDeFechas, etiquetaDeFechas, problemaDeFechas, type Fechas } from '@/lib/rango'
 import { cn } from '@/lib/utils'
@@ -136,25 +137,27 @@ function SelectorDeFechas({
         <div className="flex flex-wrap items-end gap-3">
           <label htmlFor={`${id}-desde`} className="space-y-1 text-[0.75rem] text-fg-muted">
             <span className="block">Desde</span>
-            <Input
+            <SelectorFecha
               id={`${id}-desde`}
-              type="date"
+              modo="fecha"
               value={fechas.desde}
               min={PRIMER_DIA}
               max={periodo.hoy}
-              onChange={(event) => setFechas((f) => ({ ...f, desde: event.target.value }))}
+              hoy={periodo.hoy}
+              onChange={(desde) => setFechas((f) => ({ ...f, desde }))}
               className="w-[10.5rem]"
             />
           </label>
           <label htmlFor={`${id}-hasta`} className="space-y-1 text-[0.75rem] text-fg-muted">
             <span className="block">Hasta</span>
-            <Input
+            <SelectorFecha
               id={`${id}-hasta`}
-              type="date"
+              modo="fecha"
               value={fechas.hasta}
               min={PRIMER_DIA}
               max={periodo.hoy}
-              onChange={(event) => setFechas((f) => ({ ...f, hasta: event.target.value }))}
+              hoy={periodo.hoy}
+              onChange={(hasta) => setFechas((f) => ({ ...f, hasta }))}
               className="w-[10.5rem]"
             />
           </label>
@@ -248,7 +251,7 @@ export function InterruptorEnUrl({ clave, texto, titulo }: { clave: string; text
       type="button"
       aria-pressed={prendido}
       onClick={() => cambiar(clave, prendido ? null : '1')}
-      title={titulo}
+      data-globito={titulo}
       className={cn(
         'chapa rounded-xl px-3 py-2 text-xs transition-colors',
         prendido ? 'border-brasa text-brasa' : 'text-fg-muted hover:text-fg',
@@ -268,7 +271,7 @@ export function BotonBots() {
     <button
       type="button"
       onClick={() => cambiar('bots', bots ? null : '1')}
-      title="Los bots se excluyen salvo que actives esto"
+      data-globito="Los bots se excluyen salvo que actives esto"
       className={cn(
         'chapa flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs transition-colors',
         bots ? 'border-brasa text-brasa' : 'text-fg-muted hover:text-fg',

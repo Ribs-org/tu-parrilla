@@ -390,6 +390,24 @@ nadie paga: todas las cuentas son iguales y el README dice «Sin suscripción».
 
 ## Features y trabajo de código
 
+- **Lo que todavía dibuja el navegador** (2026-11-02). Las preguntas, los calendarios, el color,
+  los avisos de los formularios y los globitos ya son del panel (rama `ventanas-propias`, ver
+  «Las ventanas del panel» en `public/docs/ui/index.md`). Quedan, a propósito:
+  - los `<select>` nativos, ocho en el código (`Select` de `ui.tsx` en Tu Cuenta, La Vitrina
+    ×2, el bloque de TikTok y Los Maestros ×2; `SelectorEnUrl` de `filter-bar.tsx`, que usan
+    todas las pantallas de Los Números; y el de fusionar en Los Fierros), y el `<datalist>` de
+    «Icono» en un link de La Vitrina: su lista la dibuja el navegador. Pide un menú propio,
+    con teclado y lector de pantalla;
+  - el `title` de cada link en la página pública de un creador (`profile-view.tsx`): esa
+    página tiene la identidad del creador, no la del panel;
+  - sin reemplazo posible: el selector de archivos del sistema, y el aviso del navegador al
+    cerrar la pestaña con una subida en curso en La Cocina (`beforeunload` en
+    `ia/pedir/formulario.tsx`), que el navegador no deja dibujar a nadie más.
+- **Sacar `@react-native-community/datetimepicker` de la app** (2026-11-02). Ya no se usa: el día
+  y la hora se eligen en la hoja de la app (`mobile/src/components/selector-fecha.tsx`). Se dejó
+  en `package.json` y en los plugins de `app.json` para que este cambio llegue solo por aire;
+  sacarlo cambia el binario, así que va con el próximo build nativo.
+
 - **Historias en Instagram y Facebook: lo que falta** (2026-10-25). El motor está hecho —el
   contrato, los publicadores, la secuencia en orden, el choripán al paso y la API y el CSV—;
   el diseño entero está en `docs/superpowers/specs/2026-10-24-historias-design.md`. Falta:
@@ -416,8 +434,8 @@ nadie paga: todas las cuentas son iguales y el README dice «Sin suscripción».
   Falta:
   - mirar de día los gráficos en Safari y en Firefox: en Chrome, recharts toma las variables
     del modo; si otro navegador no, saldrían con el color por defecto de cada atributo;
-  - lo nativo de la app, que sigue de noche en los dos modos (ver `docs/deuda-tecnica.md`, «Lo
-    nativo de la app no cambia de modo»).
+  - la pantalla de arranque de la app, que sigue de noche en los dos modos (ver
+    `docs/deuda-tecnica.md`, «Lo nativo de la app no cambia de modo»).
 - **Llevar el resto de la interfaz al nivel del corte** (2026-10-16). La auditoría de ese
   día propone seis tandas que se publican solas. La primera, lo roto, ya está. Quedan: el
   corte en los flujos (el compositor, la parrilla fría y la carga tibia ya están; faltan La

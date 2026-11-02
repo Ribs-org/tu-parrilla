@@ -120,7 +120,7 @@ Apretar dos veces no manda dos respuestas. El largo máximo depende de la red: 2
 ### Para pedir otro borrador
 
 1. Aprieta la flecha de arriba a la derecha de la tarjeta («Escribir otro borrador»).
-2. Si ya cambiaste el texto del cuadro, el navegador pregunta «¿Cambiar lo que escribiste por un borrador nuevo?». Acepta para reemplazarlo.
+2. Si ya cambiaste el texto del cuadro, se abre una ventana con «¿Cambiar lo que escribiste por un borrador nuevo?». Aprieta «Cambiarlo» para reemplazarlo.
 3. El cuadro se llena con el borrador nuevo, escrito con las instrucciones guardadas.
 
 ### Para regenerar todos los borradores
@@ -128,7 +128,7 @@ Apretar dos veces no manda dos respuestas. El largo máximo depende de la red: 2
 Sirve después de cambiar las instrucciones, para que lo que ya estaba escrito siga las nuevas.
 
 1. Si cambiaste las instrucciones, aprieta primero «Guardar». Si no, «Regenerar todos» avisa «Guarda las instrucciones antes de regenerar: se usan las guardadas.».
-2. Aprieta «Regenerar todos». El navegador pregunta «¿Volver a escribir los borradores pendientes con estas instrucciones? Lo que corregiste en un cuadro y no mandaste se reemplaza.». Acepta.
+2. Aprieta «Regenerar todos». Se abre una ventana con «¿Volver a escribir los borradores pendientes con estas instrucciones?» y «Lo que corregiste en un cuadro y no mandaste se reemplaza.». Aprieta «Regenerar todos», en la ventana.
 3. Espera: dice «Regenerando…» y puede tardar hasta unos 40 segundos.
 4. Al terminar, al lado del botón: «12 borradores nuevos.» (con el número que corresponda). Si alguno no se pudo rehacer, se agrega «2 no se pudieron rehacer y quedaron como estaban.». Si había más de los que alcanzó, se agrega «Quedan 8: aprieta «Regenerar todos» otra vez.».
 
@@ -137,7 +137,7 @@ Rehace hasta 40 por vez, de los más nuevos a los más viejos. Toca solo los pen
 ### Para descartar un comentario
 
 1. Aprieta «Descartar».
-2. El navegador pregunta «¿Descartar este comentario? No se va a responder.». Acepta.
+2. Se abre una ventana con «¿Descartar este comentario?» y «No se va a responder.». Aprieta «Descartar», en la ventana.
 3. Pasa a «Descartados». No se publica nada y el comentario sigue en la red.
 
 No se puede deshacer desde el panel.
@@ -175,9 +175,9 @@ Aprieta el filtro «Automáticas». Ahí están todos los que tomó, también lo
 | «El comentario ya no está en la red.» | Su autor lo borró; se pasó a «Descartados». | Nada. |
 | «No se pudo hablar con Tu Parrilla. Recarga la página: si la respuesta salió, está en «Enviados».» | Al apretar «Enviar», «Descartar» o «Reintentar borrador», no llegó la respuesta del servidor: se cortó la conexión, o Tu Parrilla se actualizó mientras la página estaba abierta. No se sabe si la respuesta salió. | Recargar la página y mirar «Enviados» antes de mandarla otra vez. |
 | «La regla de palabra clave intentó responder y la red no aceptó; «Enviar» lo reintenta.» | Falló la respuesta automática. | Revisar el texto del cuadro y apretar «Enviar». |
-| «¿Descartar este comentario? No se va a responder.» | Confirmación antes de descartar. | Aceptar para descartar, cancelar para dejarlo. |
-| «¿Cambiar lo que escribiste por un borrador nuevo?» | Se apretó la flecha de la tarjeta con el cuadro ya corregido a mano. | Aceptar para reemplazarlo, cancelar para quedarse con lo escrito. |
-| «¿Volver a escribir los borradores pendientes con estas instrucciones? Lo que corregiste en un cuadro y no mandaste se reemplaza.» | Confirmación de «Regenerar todos». | Aceptar, o cancelar y mandar primero lo que ya corregiste. |
+| «¿Descartar este comentario?» y «No se va a responder.» | Ventana antes de descartar. | «Descartar» para descartarlo, «Cancelar» para dejarlo. |
+| «¿Cambiar lo que escribiste por un borrador nuevo?» | Se apretó la flecha de la tarjeta con el cuadro ya corregido a mano. | «Cambiarlo» para reemplazarlo, «Cancelar» para quedarse con lo escrito. |
+| «¿Volver a escribir los borradores pendientes con estas instrucciones?» y «Lo que corregiste en un cuadro y no mandaste se reemplaza.» | Ventana de «Regenerar todos». | «Regenerar todos», o «Cancelar» y mandar primero lo que ya corregiste. |
 | «Guarda las instrucciones antes de regenerar: se usan las guardadas.» | Se apretó «Regenerar todos» con las instrucciones cambiadas y sin guardar. | «Guardar» y después «Regenerar todos». |
 | «12 borradores nuevos.» / «Un borrador nuevo.» | «Regenerar todos» terminó. Puede seguir «… no se pudieron rehacer y quedaron como estaban.» o «Quedan 8: aprieta «Regenerar todos» otra vez.». | Revisar los cuadros; si quedan, apretarlo otra vez. |
 | «No hay borradores pendientes que regenerar.» | No hay pendientes con borrador. | Nada. |

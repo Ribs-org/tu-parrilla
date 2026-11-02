@@ -220,8 +220,11 @@ nunca escritos a mano, y lo que sombrea con transparencia usa el velo del modo
 post también son dos, el corte de carne (`src/components/pieza.tsx`) y la pieza de sushi
 (`src/components/pieza-sushi.tsx`), y `Pieza` elige según el modo.
 
-Lo que dibuja el teléfono mismo —la pantalla de arranque, el selector de fecha, las alertas—
-sigue oscuro en los dos modos: cambiarlo pide un build nativo (ver `docs/deuda-tecnica.md`).
+Lo único que dibuja el teléfono mismo es la pantalla de arranque, y sigue oscura en los dos
+modos: cambiarla pide un build nativo (ver `docs/deuda-tecnica.md`). Las preguntas
+(`src/components/ventana.tsx`, con `useVentanas()`) y el selector de día y hora
+(`src/components/selector-fecha.tsx`) son de la app, con sus colores: nada de `Alert.alert` ni de
+los selectores del sistema, que no siguen el modo y llegan solo con un build nuevo.
 
 ## iPhone (iOS)
 
@@ -237,9 +240,7 @@ sigue oscuro en los dos modos: cambiarlo pide un build nativo (ver `docs/deuda-t
 - Los permisos que iOS exige escribir: el de Face ID (`expo-local-authentication`; sin
   ese texto, la app se cerraría al pedir la cara) y el de las fotos. Cámara y micrófono
   quedan fuera: la app no los usa, y Apple rechaza permisos que no se usan.
-- Lo que en el código era solo de Android: el día y la hora se eligen en una hoja con
-  el selector del sistema (`src/components/selector-fecha.tsx`) en vez de los dos
-  diálogos de Android; el teclado empuja la pantalla con `padding`, que es lo que
+- Lo que en el código era solo de Android: el teclado empuja la pantalla con `padding`, que es lo que
   corresponde en iOS; la cabecera mide 44 puntos; las fotos llegan en JPEG y no en HEIC
   (Instagram y Facebook rechazan HEIC), y no se pide acceso a la galería entera.
 - `npx expo export --platform ios` arma el paquete de iOS sin errores. Ninguna de estas

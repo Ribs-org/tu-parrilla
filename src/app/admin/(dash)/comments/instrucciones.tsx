@@ -7,6 +7,7 @@ import {
   regenerarBorradoresComentarios,
   type FormState,
 } from '@/app/admin/actions'
+import { useConfirmar } from '@/components/confirmar'
 import { Button, Field, Submit, Textarea } from '@/components/ui'
 import { SE_CORTO_REGENERAR, SIN_CAMBIOS_GUARDADOS, fraseRegenerado } from './regenerar'
 
@@ -20,6 +21,7 @@ export function Instrucciones({ valor, tope }: { valor: string; tope: number }) 
   const [escrito, setEscrito] = useState(valor)
   const [aviso, setAviso] = useState<{ texto: string; error: boolean } | null>(null)
   const [regenerando, startTransition] = useTransition()
+  const confirmar = useConfirmar()
   // Cada guardado trae un `state` nuevo: recién ahí lo escrito pasa a ser lo guardado.
   const [visto, setVisto] = useState(state)
   if (state !== visto) {
@@ -28,12 +30,18 @@ export function Instrucciones({ valor, tope }: { valor: string; tope: number }) 
   }
   const sinGuardar = escrito !== guardado
 
-  function regenerar() {
+  async function regenerar() {
     if (sinGuardar) {
       setAviso({ texto: SIN_CAMBIOS_GUARDADOS, error: true })
       return
     }
-    if (!confirm('¿Volver a escribir los borradores pendientes con estas instrucciones? Lo que corregiste en un cuadro y no mandaste se reemplaza.')) return
+    const seguir = await confirmar({
+      titulo: '¿Volver a escribir los borradores pendientes con estas instrucciones?',
+      detalle: 'Lo que corregiste en un cuadro y no mandaste se reemplaza.',
+      accion: 'Regenerar todos',
+      peligro: true,
+    })
+    if (!seguir) return
     setAviso(null)
     startTransition(async () => {
       try {
@@ -62,7 +70,7 @@ export function Instrucciones({ valor, tope }: { valor: string; tope: number }) 
       </Field>
       <div className="flex flex-wrap items-center gap-3">
         <Submit pendingLabel="Guardando…">Guardar</Submit>
-        <Button type="button" variant="ghost" onClick={regenerar} disabled={regenerando} className="inline-flex items-center gap-2">
+        <Button type="button" variant="ghost" onClick={() => void regenerar()} disabled={regenerando} className="inline-flex items-center gap-2">
           <RefreshCw aria-hidden className={regenerando ? 'h-4 w-4 animate-spin' : 'h-4 w-4'} />
           {regenerando ? 'Regenerando…' : 'Regenerar todos'}
         </Button>

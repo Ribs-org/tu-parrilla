@@ -3,9 +3,12 @@
 import { useActionState, useEffect, useState, useTransition } from 'react'
 import { Check, Copy } from 'lucide-react'
 import { generarLlaveApi, revocarLlaveApi, type LlaveState } from '@/app/admin/actions'
+import { useConfirmar } from '@/components/confirmar'
+import { useRevision } from '@/components/revision'
 import { Button, Field, Input, Submit } from '@/components/ui'
 import { PINTURA } from '@/components/charts/theme'
 import { copiarAlPortapapeles } from '@/lib/copiar'
+import { revisarNombreDeLlave } from '@/lib/revisiones'
 
 /** Lo que dura un acuse de recibo antes de irse solo, como los «Copiado» del panel. */
 const AVISO_MS = 2000
@@ -63,18 +66,20 @@ function BotonCopiar({ texto, children }: { texto: string; children: React.React
  */
 export function FormularioLlave({ base, maxNombre }: { base: string; maxNombre: number }) {
   const [state, action] = useActionState<LlaveState, FormData>(generarLlaveApi, {})
+  const revision = useRevision(revisarNombreDeLlave)
+  const error = revision.error ?? state.error
 
   return (
     <div className="space-y-4">
-      <form action={action} className="flex flex-wrap items-end gap-3">
+      <form {...revision.formulario} action={action} className="flex flex-wrap items-end gap-3">
         <Field label="Nombre" hint="Para reconocerla en la lista: el del agente o el programa que la usa.">
-          <Input name="nombre" required maxLength={maxNombre} placeholder="Editor de videos" className="min-w-[16rem]" />
+          <Input name="nombre" maxLength={maxNombre} placeholder="Editor de videos" className="min-w-[16rem]" />
         </Field>
         <Submit pendingLabel="Generando…">Generar llave</Submit>
       </form>
-      {state.error ? (
+      {error ? (
         <p role="alert" className="text-sm text-negative">
-          {state.error}
+          {error}
         </p>
       ) : null}
       {state.llave ? (
@@ -99,19 +104,25 @@ export function FormularioLlave({ base, maxNombre }: { base: string; maxNombre: 
 export function BotonRevocar({ id, nombre }: { id: string; nombre: string }) {
   const [pending, start] = useTransition()
   const [error, setError] = useState<string | null>(null)
+  const confirmar = useConfirmar()
+
+  async function revocar() {
+    const seguir = await confirmar({
+      titulo: `¿Revocar «${nombre}»?`,
+      detalle: 'Lo que la use deja de entrar en su próxima petición.',
+      accion: 'Revocar',
+      peligro: true,
+    })
+    if (!seguir) return
+    start(async () => {
+      const r = await revocarLlaveApi(id)
+      setError(r.error ?? null)
+    })
+  }
+
   return (
     <>
-      <Button
-        variant="danger"
-        disabled={pending}
-        onClick={() => {
-          if (!confirm(`¿Revocar «${nombre}»? Lo que la use deja de entrar en su próxima petición.`)) return
-          start(async () => {
-            const r = await revocarLlaveApi(id)
-            setError(r.error ?? null)
-          })
-        }}
-      >
+      <Button variant="danger" disabled={pending} onClick={() => void revocar()}>
         {pending ? 'Revocando…' : 'Revocar'}
       </Button>
       {error ? (

@@ -9,12 +9,12 @@ function destino(over: Partial<Destino> & Pick<Destino, 'network' | 'status'>): 
   return { handle: null, externalId: null, opciones: null, ...over }
 }
 
-// El `title` de cada icono repite el handle a propósito (issue #5 de la revisión: mismo
-// vocabulario en el `title` del enlace y en los iconos), así que las pruebas de «una sola
-// vez» descartan los atributos antes de contar — lo que se prueba es que el `sr-only` no
-// lo repita, no que el atributo `title` deje de existir.
+// El globito de cada icono (`data-globito`) repite el handle a propósito (issue #5 de la
+// revisión: mismo vocabulario en el globito del enlace y en los iconos), así que las pruebas de
+// «una sola vez» descartan los atributos antes de contar — lo que se prueba es que el `sr-only`
+// no lo repita, no que el globito deje de existir.
 function sinAtributos(html: string): string {
-  return html.replace(/title="[^"]*"/g, '')
+  return html.replace(/data-globito="[^"]*"/g, '')
 }
 
 describe('Redes', () => {

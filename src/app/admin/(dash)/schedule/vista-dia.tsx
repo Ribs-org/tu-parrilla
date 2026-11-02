@@ -250,7 +250,7 @@ function BloqueDeDestino({
       href={`/admin/schedule/${post.id}?volver=${encodeURIComponent(volver)}`}
       // Sin prefetch, como en la semana: un día cargado son muchos bloques.
       prefetch={false}
-      title={[
+      data-globito={[
         `${hora} · ${texto}`,
         `${nombreDestino(destino)}: ${etiquetaDestino(destino)}${sello === 'frio' ? ' — reconéctala' : ''}${motivo ? ` — ${motivo}` : ''}`,
         ...(otros.length > 0 ? [`También en: ${otros.map((o) => `${nombreDestino(o)}: ${etiquetaDestino(o)}`).join(' · ')}`] : []),
@@ -298,7 +298,7 @@ function BloqueDeBorrador({ borrador, zone }: { borrador: BorradorDelDia; zone: 
       href={borrador.href}
       scroll={false}
       prefetch={false}
-      title={`Borrador · ${hora} · ${texto}`}
+      data-globito={`Borrador · ${hora} · ${texto}`}
       className="flex h-full items-center gap-1 overflow-hidden rounded-[4px] border border-dashed border-velo/30 bg-acero-900 px-1.5 transition-colors hover:border-velo/60"
     >
       <span className="font-titulo text-[0.56rem] uppercase tracking-[0.12em] text-fg-muted">Borrador</span>

@@ -45,7 +45,7 @@ Debajo, cuatro bloques en este orden. En pantallas anchas hay además una column
 - «URL»: una barra `/` seguida del campo con la dirección. Debajo puede salir una ayuda:
   - en la página principal: «Esta es tu página principal, por eso su dirección no se edita aquí. Para cambiarla, haz principal a otra página primero.» (el campo aparece gris y no se puede escribir);
   - si la página se sirve en la raíz de la dirección donde está abierto el panel: «Este perfil se sirve en la raíz del sitio.» En tu-parrilla.cl esto no aparece nunca.
-- «Color de acento»: ocho círculos de colores (el elegido lleva un anillo blanco) y un cuadrito más para elegir cualquier color.
+- «Color de acento»: ocho círculos de colores (el elegido lleva un anillo blanco) y un cuadrito más para elegir cualquier color, que abre la ventana del color: una muestra y el código, con «Listo» y «Cancelar».
 - Dos interruptores con texto:
   - «Publicado», con la ayuda «Si lo apagas, la URL responde 404»;
   - «Ocultar de buscadores», con la ayuda «Recomendado para el perfil privado».
@@ -69,7 +69,7 @@ Una fila desplegada muestra:
 - «Descripción corta», con el ejemplo «Opcional».
 - «URL».
 - Solo en los tipos «Link normal» y «Destacado con imagen»: «Imagen», con «Subir imagen» / «Cambiar» / «Quitar» como la foto de perfil. La ayuda dice «Se muestra grande, ideal 16:9» en el destacado y «Reemplaza al icono» en el link normal.
-- «Programar visibilidad», una sección plegada que al abrirse muestra dos campos de fecha y hora: «Aparece desde» y «Desaparece». Las horas se leen en la zona horaria de [Tu Cuenta](tu-cuenta.md).
+- «Programar visibilidad», una sección plegada que al abrirse muestra dos campos de fecha y hora: «Aparece desde» y «Desaparece», que abren el calendario del panel; con una fecha puesta, el calendario ofrece «Quitar» para dejar el campo vacío. Las horas se leen en la zona horaria de [Tu Cuenta](tu-cuenta.md).
 - Los botones «Guardar link» (mientras guarda, «Guardando…»; al terminar, «Guardado») y, a la derecha, «Borrar».
 
 Cómo sale cada tipo en la página pública:
@@ -110,7 +110,7 @@ Para dejarla sin foto: «Quitar» y después «Guardar perfil». Sin foto, la p�
 
 ### Para cambiar el color
 
-1. Toca uno de los ocho círculos de «Color de acento», o el cuadrito del final para elegir cualquier color.
+1. Toca uno de los ocho círculos de «Color de acento», o el cuadrito del final para elegir cualquier color: en la ventana, toca un color de la muestra o escribe su código, y aprieta «Listo».
 2. Aprieta «Guardar perfil».
 
 El color tiñe la bajada, el anillo de la foto, el bloque «Agendar» y los resplandores del fondo. No hay otro ajuste de diseño: ni imagen de fondo, ni tipografía, ni plantillas.
@@ -127,7 +127,7 @@ Si dejas «URL» vacío, la dirección se arma con el nombre. La dirección ante
 
 La principal no deja editar su dirección. El camino es:
 
-1. En La Vitrina, aprieta «Hacer principal» en otra página y acepta.
+1. En La Vitrina, aprieta «Hacer principal» en otra página, y otra vez «Hacer principal» en la ventana que se abre.
 2. Edita la que era principal y cámbiale la dirección como cualquier otra.
 3. Si quieres, vuelve a hacerla principal.
 
@@ -161,7 +161,7 @@ La página sigue abierta para quien tenga la dirección; solo se les pide a los 
 ### Para que un link aparezca o desaparezca solo en ciertas fechas
 
 1. Despliega el link y abre «Programar visibilidad».
-2. Llena «Aparece desde», «Desaparece», o los dos. Un campo vacío significa sin límite por ese lado. La hora se entiende en la zona horaria de [Tu Cuenta](tu-cuenta.md).
+2. Llena «Aparece desde», «Desaparece», o los dos. Un campo vacío significa sin límite por ese lado; para vaciar uno, se abre y se aprieta «Quitar». La hora se entiende en la zona horaria de [Tu Cuenta](tu-cuenta.md).
 3. Aprieta «Guardar link».
 
 El link además tiene que estar prendido. La lista del editor no marca qué links tienen fechas y la vista previa los muestra igual: para comprobar si un link está visible ahora, hay que abrir la página real con «Ver página».
@@ -182,7 +182,7 @@ Los links de tipo «Red social» siempre salen juntos en la fila de íconos de a
 ### Para borrar un link
 
 1. Despliega el link.
-2. Aprieta «Borrar» (abajo a la derecha) y acepta la pregunta «¿Borrar "<nombre del link>"?».
+2. Aprieta «Borrar» (abajo a la derecha). Se abre una ventana con «¿Borrar "<nombre del link>"?»: aprieta «Borrar» en ella.
 
 No se puede deshacer. Para sacarlo solo por un tiempo, mejor apágalo.
 
@@ -208,7 +208,7 @@ No se puede deshacer. Para sacarlo solo por un tiempo, mejor apágalo.
 ### Para hacer principal otra página
 
 1. En La Vitrina, aprieta «Hacer principal» en la tarjeta de esa página.
-2. Acepta la pregunta. Si la página estaba como borrador, queda publicada.
+2. En la ventana que se abre, aprieta «Hacer principal». Si la página estaba como borrador, queda publicada.
 
 Qué significa ser principal: para el dueño del sitio, es la página que sale en la raíz de su dominio propio. Para cualquier otro usuario no cambia nada de lo que ve el público; solo significa que esa página no se puede borrar ni cambiarle la dirección desde el editor.
 
@@ -217,14 +217,14 @@ Qué significa ser principal: para el dueño del sitio, es la página que sale e
 Sirve cuando una dirección privada circuló más de la cuenta.
 
 1. En el editor, en «Zona peligrosa», aprieta «Cambiar la URL secreta».
-2. Acepta la pregunta. La dirección queda con un final nuevo al azar (por ejemplo `circulo-9f8e7d6c`) y la anterior deja de funcionar. La nueva sale en «Compartir».
+2. En la ventana que se abre, aprieta «Cambiar la URL». La dirección queda con un final nuevo al azar (por ejemplo `circulo-9f8e7d6c`) y la anterior deja de funcionar. La nueva sale en «Compartir».
 3. Recarga la página del navegador antes de volver a apretar «Guardar perfil»: el campo «URL» sigue mostrando la dirección vieja, y guardar sin recargar la devuelve a la anterior.
 
 ### Para borrar una página
 
 1. Si es la principal, primero haz principal a otra (ver arriba).
 2. En su editor, en «Zona peligrosa», aprieta «Borrar perfil».
-3. Acepta la pregunta. Se borran la página, sus links y sus métricas, y vuelves a La Vitrina. No se puede deshacer.
+3. En la ventana que se abre, aprieta «Borrar perfil». Se borran la página, sus links y sus métricas, y vuelves a La Vitrina. No se puede deshacer.
 
 ## Mensajes que puede ver
 
@@ -244,10 +244,10 @@ Sirve cuando una dirección privada circuló más de la cuenta.
 | «Falta la URL.» | Se intentó guardar un link sin «URL». | Escribir la dirección. |
 | «El perfil ya no existe.» | La página se borró (por ejemplo, desde otra pestaña). | Volver a La Vitrina. |
 | «Sin links todavía. Agrega el primero abajo.» | La página no tiene links. | Usar el formulario de abajo y «Agregar link». |
-| ««nombre» se servirá en / y el perfil principal de ahora pasará a su propia URL. Si era borrador, queda publicado. ¿Seguir?» | Pregunta de «Hacer principal». Lo de «se servirá en /» solo vale para el dueño del sitio en su dominio propio. | «Aceptar» para seguir, «Cancelar» para no hacer nada. |
-| «¿Borrar "nombre"?» | Pregunta antes de borrar un link. | Aceptar solo si se quiere borrar para siempre. |
-| «Se generará una URL nueva y la actual dejará de funcionar.» | Pregunta de «Cambiar la URL secreta». | Aceptar si se quiere invalidar la dirección actual. |
-| «Se borra "nombre" con sus links y métricas. ¿Seguir?» | Pregunta de «Borrar perfil». | Aceptar solo si se quiere perder todo eso. |
+| ««nombre» se servirá en / y el perfil principal de ahora pasará a su propia URL.» y «Si era borrador, queda publicado. ¿Seguir?» | Ventana de «Hacer principal». Lo de «se servirá en /» solo vale para el dueño del sitio en su dominio propio. | «Hacer principal» para seguir, «Cancelar» para no hacer nada. |
+| «¿Borrar "nombre"?» | Ventana antes de borrar un link. | «Borrar» solo si se quiere borrar para siempre. |
+| «Cambiar la URL secreta» y «Se generará una URL nueva y la actual dejará de funcionar.» | Ventana de «Cambiar la URL secreta». | «Cambiar la URL» si se quiere invalidar la dirección actual. |
+| «Se borra "nombre" con sus links y métricas. ¿Seguir?» | Ventana de «Borrar perfil». | «Borrar perfil» solo si se quiere perder todo eso. |
 | «No puedes borrar tu única página: todo usuario necesita al menos una.» | Es la única página de la persona. | Se puede vaciar o despublicar, pero no borrar. |
 | «No puedes borrar tu página principal: primero haz principal a otra página, desde «La Vitrina».» | Es la principal. | Hacer principal a otra en La Vitrina y después borrar esta. |
 | «Esta es tu página principal, por eso su dirección no se edita aquí. Para cambiarla, haz principal a otra página primero.» | Explica por qué el campo «URL» está gris. | Ver más arriba cómo cambiar la dirección de la página principal. |

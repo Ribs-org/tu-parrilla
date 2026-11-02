@@ -161,7 +161,7 @@ Cuándo: el fierro está en ámbar, dice «La conexión falló; reconecta la cue
 ### Para desconectar una cuenta
 
 1. Abre el detalle de la cuenta con la flecha de su fila y aprieta «Desconectar».
-2. El navegador pregunta: «Se desconecta «<nombre>» de <red>. Sus posts y métricas ya bajados se quedan, pero no se sincroniza nada más hasta que la vuelvas a conectar. ¿Seguir?». Acepta.
+2. Se abre una ventana: «Se desconecta «<nombre>» de <red>.» y «Sus posts y métricas ya bajados se quedan, pero no se sincroniza nada más hasta que la vuelvas a conectar. ¿Seguir?». Aprieta «Desconectar», en la ventana.
 3. Aparece «Desconectada.» un momento, y la fila queda con «Sin credencial» y «Conectar →».
 
 La fila no desaparece. Una cuenta desconectada deja de traer números y comentarios, sus comentarios pendientes en La Mesa ya no se pueden responder, y no se puede publicar en ella hasta reconectarla. Para sacarla del todo, «Quitar» (abajo).
@@ -193,7 +193,7 @@ Cuándo: hay dos filas de la misma cuenta, una «Sin credencial» y otra conecta
 
 1. Abre el detalle de la cuenta «Sin credencial» con la flecha de su fila y, bajo «¿Es la misma cuenta con otro identificador? …», elige en la lista desplegable la cuenta conectada.
 2. Aprieta «Es la misma cuenta →».
-3. El navegador pregunta: ««<la vieja>» se fusiona en «<la conectada>»: sus posts, sus métricas y su historial de publicaciones pasan a esa cuenta, y esta desaparece de la lista. No se puede deshacer. ¿Seguir?». Acepta.
+3. Se abre una ventana: ««<la vieja>» se fusiona en «<la conectada>»» y «Sus posts, sus métricas y su historial de publicaciones pasan a esa cuenta, y esta desaparece de la lista. No se puede deshacer. ¿Seguir?». Aprieta «Fusionar», en la ventana.
 4. Aparece «Fusionada en «<la conectada>».» y la fila vieja desaparece. Sus comentarios también pasan a la conectada.
 
 No se puede deshacer. Si las dos están conectadas, la opción no aparece: primero hay que desconectar la vieja.
@@ -238,13 +238,13 @@ Trae los posts y los números de las cuentas de Instagram, TikTok, YouTube y Fac
 | «Este fierro se está enfriando: la conexión vence <hoy / mañana / pasado mañana / dentro de N días>. Reconéctala antes de que se apague.» | El permiso de esa cuenta vence pronto. Mientras tanto, el botón «Ajustes» lleva un punto ámbar. | «Reconectar» en esa fila, con la misma cuenta. |
 | «La conexión falló; reconecta la cuenta.» | La última vez que se trajeron sus números, o al publicar, la red rechazó la conexión (permiso vencido o quitado desde la red). Si fue al publicar, al pasar el mouse aparece el motivo de esa publicación, por ejemplo «Reconecta TikTok para autorizar la publicación.»; vuelve a la normalidad con la próxima sincronización que funcione, o al reconectar. Si al pasar el mouse dice «Quitaste la app desde Facebook: vuelve a conectar.», alguien quitó Tu Parrilla desde la configuración de Facebook. | «Reconectar» (o «Conectar →») en esa fila. |
 | «Sin credencial» | La cuenta no está conectada; su historial se conserva. | «Conectar →» en la fila, o fusionarla si es una repetida (en su detalle). |
-| «Se desconecta «<nombre>» de <red>. Sus posts y métricas ya bajados se quedan, pero no se sincroniza nada más hasta que la vuelvas a conectar. ¿Seguir?» | Confirmación antes de desconectar. | Aceptar para desconectar, cancelar para dejarla. |
+| «Se desconecta «<nombre>» de <red>.» y «Sus posts y métricas ya bajados se quedan, pero no se sincroniza nada más hasta que la vuelvas a conectar. ¿Seguir?» | Ventana antes de desconectar. | «Desconectar» para desconectarla, «Cancelar» para dejarla. |
 | «Desconectada.» | Se desconectó. | Nada. |
 | ««<nombre>» quitada de Tu Parrilla.» | Se quitó la cuenta con su historial. | Nada. Para volver a tenerla, «Conectar →» en el bloque de su red. |
 | «Desconecta la cuenta antes de quitarla.» (en la ventana de «Quitar») | La cuenta se volvió a conectar mientras la ventana estaba abierta (por ejemplo, en otra pestaña). | Cerrar la ventana, «Desconectar» y volver a «Quitar». |
 | «Tiene una publicación programada hacia esta cuenta: bórrala en La Parrilla, o espera a que salga, antes de quitarla.» (o «Tiene N publicaciones programadas…») | Hay publicaciones por salir hacia esa cuenta; quitarla las dejaría sin ese destino. | Borrarlas en [La Parrilla](la-parrilla.md), o esperar a que salgan, y volver a «Quitar». |
 | «Esa cuenta ya no está.» (en la ventana de «Quitar») | Se quitó o se fusionó mientras la ventana estaba abierta. | Recargar la página. |
-| ««<la vieja>» se fusiona en «<la conectada>»: sus posts, sus métricas y su historial de publicaciones pasan a esa cuenta, y esta desaparece de la lista. No se puede deshacer. ¿Seguir?» | Confirmación antes de fusionar. | Aceptar solo si de verdad son la misma cuenta. |
+| ««<la vieja>» se fusiona en «<la conectada>»» y «Sus posts, sus métricas y su historial de publicaciones pasan a esa cuenta, y esta desaparece de la lista. No se puede deshacer. ¿Seguir?» | Ventana antes de fusionar. | «Fusionar» solo si de verdad son la misma cuenta. |
 | «Fusionada en «<la conectada>».» | Se fusionó. | Nada. |
 | «La cuenta que se absorbe tiene que estar sin credencial. Desconéctala primero si es lo que quieres.» | La cuenta vieja quedó conectada mientras tanto. | Recargar la página; si de verdad es la misma cuenta, desconectarla primero. |
 | «La cuenta que absorbe tiene que estar conectada.» | La cuenta elegida en la lista perdió su conexión. | Reconectarla y repetir. |

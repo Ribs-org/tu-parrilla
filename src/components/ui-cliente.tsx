@@ -2,9 +2,11 @@
 
 // Las piezas del panel que necesitan el navegador: el envío que lee el estado de su
 // formulario y los interruptores. Se importan desde `ui.tsx`, que las reexporta.
-import { useId } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { useFormStatus } from 'react-dom'
 import { cn } from '@/lib/utils'
+import { useConfirmar, type Pregunta } from './confirmar'
+import { BOTON_CHICO_SECUNDARIO } from './boton'
 import { Button } from './ui-boton'
 
 /**
@@ -15,8 +17,10 @@ import { Button } from './ui-boton'
  * formulario que está por encima de quien lo llama — dentro del mismo componente que
  * renderiza el `<form>` devolvería siempre `pending: false`.
  *
- * `confirm` pregunta antes de enviar. El diálogo va en el click y no en el `onSubmit`
- * del formulario para que un «cancelar» no llegue nunca a encolar la acción.
+ * `pregunta` pregunta antes de enviar (`confirmar.tsx`). Va en el click y no en el `onSubmit`
+ * del formulario para que un «Cancelar» no llegue nunca a encolar la acción. La ventana responde
+ * después de que el click terminó, así que el envío lo pide `requestSubmit` con este mismo botón:
+ * el formulario sale igual que con un click, y `useFormStatus` lo ve.
  *
  * `icono` va aparte de los hijos porque es lo único que sobrevive al cambio de texto:
  * adentro de `children` desaparecería al llegar `pendingLabel`, y el botón encogería
@@ -26,7 +30,7 @@ export function Submit({
   children,
   icono,
   pendingLabel,
-  confirm: question,
+  pregunta,
   variant = 'primary',
   onClick,
   disabled,
@@ -35,9 +39,10 @@ export function Submit({
   variant?: 'primary' | 'ghost' | 'danger'
   icono?: React.ReactNode
   pendingLabel: string
-  confirm?: string
+  pregunta?: Pregunta
 }) {
   const { pending } = useFormStatus()
+  const confirmar = useConfirmar()
 
   return (
     <Button
@@ -46,16 +51,67 @@ export function Submit({
       variant={variant}
       disabled={pending || disabled}
       onClick={(event) => {
-        if (question && !window.confirm(question)) {
-          event.preventDefault()
-          return
-        }
         onClick?.(event)
+        if (!pregunta) return
+        event.preventDefault()
+        const boton = event.currentTarget
+        void confirmar(pregunta).then((si) => {
+          if (si) boton.form?.requestSubmit(boton)
+        })
       }}
     >
       {icono}
       {pending ? pendingLabel : children}
     </Button>
+  )
+}
+
+/**
+ * Un campo de archivos con la cara del panel. El `<input type="file">` sigue adentro —es el que
+ * abre el selector de archivos del sistema, que no tiene reemplazo— pero escondido: su botón y su
+ * «Ningún archivo seleccionado» los dibujaba el navegador, en su idioma y con sus colores.
+ *
+ * Es un `<label>`: no va dentro de un `Field`, que ya es uno. Cuando React vacía el formulario
+ * al volver una acción, el `reset` del formulario borra también los nombres.
+ */
+export function CampoDeArchivos({
+  name,
+  accept,
+  multiple,
+  texto = multiple ? 'Elegir archivos' : 'Elegir un archivo',
+}: {
+  name: string
+  accept?: string
+  multiple?: boolean
+  texto?: string
+}) {
+  const input = useRef<HTMLInputElement>(null)
+  const [nombres, setNombres] = useState<string[]>([])
+
+  useEffect(() => {
+    const formulario = input.current?.form
+    if (!formulario) return
+    const vaciar = () => setNombres([])
+    formulario.addEventListener('reset', vaciar)
+    return () => formulario.removeEventListener('reset', vaciar)
+  }, [])
+
+  return (
+    <label className="flex w-fit max-w-full cursor-pointer items-center gap-3 rounded-lg has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-brasa">
+      <input
+        ref={input}
+        type="file"
+        name={name}
+        accept={accept}
+        multiple={multiple}
+        className="sr-only"
+        onChange={(event) => setNombres(Array.from(event.currentTarget.files ?? [], (f) => f.name))}
+      />
+      <span className={BOTON_CHICO_SECUNDARIO}>{texto}</span>
+      <span className="truncate text-[0.8rem] text-fg-muted">
+        {nombres.length === 0 ? 'Ninguno elegido' : nombres.length === 1 ? nombres[0] : `${nombres.length} archivos`}
+      </span>
+    </label>
   )
 }
 

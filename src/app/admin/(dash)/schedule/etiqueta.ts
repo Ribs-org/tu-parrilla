@@ -1,5 +1,6 @@
 // Qué dice el chip de un destino. Puro: la fila que lo dibuja no es la que decide.
 
+import type { Pregunta } from '@/components/confirmar'
 import { networkLabel } from '@/lib/networks'
 import type { Tema } from '@/lib/tema'
 import { nombreDe } from '@/lib/vocabulario'
@@ -9,8 +10,13 @@ import { nombreDe } from '@/lib/vocabulario'
  * que se pierde, con la pantalla como se llama en el modo que se ve (`useTema`). Vive acá, en
  * un módulo sin directiva, porque lo leen dos componentes de cliente.
  */
-export function confirmarEliminar(tema: Tema): string {
-  return `¿Eliminar este post? Se borra de ${nombreDe('/admin/schedule', tema)} y ya no sale en ninguna red.`
+export function confirmarEliminar(tema: Tema): Pregunta {
+  return {
+    titulo: '¿Eliminar este post?',
+    detalle: `Se borra de ${nombreDe('/admin/schedule', tema)} y ya no sale en ninguna red.`,
+    accion: 'Eliminar',
+    peligro: true,
+  }
 }
 
 const ESTADO: Record<string, string> = {

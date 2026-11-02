@@ -86,7 +86,7 @@ export function Emojis({
               onClick={() => alElegir(e)}
               disabled={disabled}
               aria-label={`Poner ${DIBUJOS[e]?.nombre ?? e}`}
-              title={DIBUJOS[e]?.ayuda}
+              data-globito={DIBUJOS[e]?.ayuda}
               className="grid h-7 w-7 place-items-center rounded-md text-base opacity-75 transition hover:bg-velo/[0.06] hover:opacity-100 disabled:opacity-40"
             >
               {DIBUJOS[e]?.dibujo ?? e}

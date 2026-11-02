@@ -3,7 +3,10 @@
 import { useEffect, useRef, useState, useTransition } from 'react'
 import { pedirComandaPropia } from '@/app/admin/cocina-actions'
 import { Panel } from '@/components/charts/panel'
+import { useConfirmar } from '@/components/confirmar'
 import { DibujoDeInsumo } from '@/components/dibujos-insumo'
+import { SelectorColor } from '@/components/selector-color'
+import { SelectorFecha } from '@/components/selector-fecha'
 import { Button, Field, Input, Textarea } from '@/components/ui'
 import type { TipoInsumo } from '@/db/schema'
 import { SUBTIPOS_PRINCIPAL, aceptaTipo, maxBytesDe, muyGrande, tipoDeArchivo, tipoNoAceptado, type SubtipoPrincipal } from '@/lib/cocina/insumos'
@@ -138,6 +141,7 @@ export function FormularioComanda({
   const [error, setError] = useState<string | null>(null)
   const [enviando, enviar] = useTransition()
   const controles = useRef(new Map<string, AbortController>())
+  const confirmar = useConfirmar()
 
   const subiendo = [principal, ...acompanamientos].some((r) => r?.estado === 'subiendo')
   // Cerrar la pestaña con algo subiendo lo corta: se retoma eligiendo el mismo archivo, pero mejor avisar.
@@ -233,7 +237,7 @@ export function FormularioComanda({
   }
 
   async function sacarSuelto(i: InsumoSubido) {
-    if (!confirm(`¿Sacar «${i.nombre}»? Se borra de la cocina.`)) return
+    if (!(await confirmar({ titulo: `¿Sacar «${i.nombre}»?`, detalle: 'Se borra de la cocina.', accion: 'Sacar', peligro: true }))) return
     await fetch(`/api/admin/cocina/insumos/${i.id}`, { method: 'DELETE' }).catch(() => null)
     setSueltos((lista) => lista.filter((s) => s.id !== i.id))
   }
@@ -408,7 +412,7 @@ export function FormularioComanda({
             <Textarea rows={3} maxLength={MAX_NOTAS} value={notas} onChange={(e) => setNotas(e.target.value)} />
           </Field>
           <Field label="Para cuándo (opcional)" hint="Informativo: la hora real la estima el chef.">
-            <Input type="date" value={paraCuando} onChange={(e) => setParaCuando(e.target.value)} />
+            <SelectorFecha modo="fecha" quitable value={paraCuando} onChange={setParaCuando} />
           </Field>
         </div>
       </Panel>
@@ -423,12 +427,11 @@ export function FormularioComanda({
           </Field>
           <Field label="El color de acento (opcional)" hint="El de los titulares. Sin él, el chef usa el del estilo.">
             <span className="flex items-center gap-2">
-              <input
-                type="color"
+              <SelectorColor
                 aria-label="El color de acento"
-                className="h-9 w-12 cursor-pointer rounded border border-acero-700 bg-transparent"
+                className="h-9 w-12"
                 value={marca.acento ?? '#3D7BFF'}
-                onChange={(e) => setMarca({ ...marca, acento: e.target.value.toUpperCase() })}
+                onChange={(acento) => setMarca({ ...marca, acento: acento.toUpperCase() })}
               />
               <span className="font-mono text-xs text-fg-faint">{marca.acento ?? 'el del estilo'}</span>
               {marca.acento ? (

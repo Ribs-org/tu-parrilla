@@ -14,6 +14,7 @@ import { normalizeCampaignTag } from '@/lib/social/campaign'
 import { volverDelEditor } from './(dash)/schedule/enlace'
 import { columnasEditablesDeRegla, validarRegla } from '@/lib/social/comentarios/reglas'
 import { FUSION_FALLO, FUSION_NO_ES_TUYA, decidirFusion, pasosDeFusion } from '@/lib/social/fusion'
+import { LINK_SIN_NOMBRE, LINK_SIN_URL } from '@/lib/revisiones'
 import { BORRADO_YA_PUBLICADO } from '@/lib/schedule-api'
 import { borrarPostProgramado } from '@/lib/social/publish/borrar'
 import { DESTINO_NO_EXISTE, REPROGRAMAR_PASADO, reprogramarDestino } from '@/lib/social/publish/reprogramar'
@@ -315,8 +316,8 @@ export async function createLink(
   const { id: ownerId, zona } = await requireUser()
   const values = readLinkForm(formData, zona)
 
-  if (!values.label) return { error: 'Ponle un nombre al link.' }
-  if (!values.url) return { error: 'Falta la URL.' }
+  if (!values.label) return { error: LINK_SIN_NOMBRE }
+  if (!values.url) return { error: LINK_SIN_URL }
 
   const db = getDb()
   const [profile] = await db
@@ -346,8 +347,8 @@ export async function updateLink(
   const { id: ownerId, zona } = await requireUser()
   const values = readLinkForm(formData, zona)
 
-  if (!values.label) return { error: 'Ponle un nombre al link.' }
-  if (!values.url) return { error: 'Falta la URL.' }
+  if (!values.label) return { error: LINK_SIN_NOMBRE }
+  if (!values.url) return { error: LINK_SIN_URL }
 
   await getDb()
     .update(links)

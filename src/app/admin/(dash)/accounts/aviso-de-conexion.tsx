@@ -3,7 +3,7 @@
 import { useEffect, useId, useRef } from 'react'
 import { BOTON_CHICO, BOTON_CHICO_SECUNDARIO } from '@/components/boton'
 import type { AyudaDeConexion } from '@/lib/social/ayuda-conexion'
-import { useVeloQueCierra } from '@/components/velo'
+import { Ventana } from '@/components/ventana'
 
 /**
  * La frase con que volvió una conexión, arriba de Los Fierros. Cuando trae un arreglo conocido
@@ -14,7 +14,6 @@ import { useVeloQueCierra } from '@/components/velo'
  */
 export function AvisoDeConexion({ mensaje, ayuda }: { mensaje: string; ayuda: AyudaDeConexion | null }) {
   const ventana = useRef<HTMLDialogElement>(null)
-  const velo = useVeloQueCierra(() => ventana.current?.close())
   const titulo = useId()
 
   useEffect(() => {
@@ -39,11 +38,11 @@ export function AvisoDeConexion({ mensaje, ayuda }: { mensaje: string; ayuda: Ay
         ) : null}
       </p>
       {ayuda ? (
-        <dialog
+        <Ventana
           ref={ventana}
           aria-labelledby={titulo}
-          {...velo}
-          className="m-auto w-[28rem] max-w-[calc(100vw-2rem)] rounded-xl border border-velo/10 bg-acero-900/95 text-fg shadow-xl backdrop-blur backdrop:bg-acero-950/80"
+          alVelo={() => ventana.current?.close()}
+          className="w-[28rem]"
         >
           <div className="space-y-3 p-4">
             <p id={titulo} className="font-titulo text-sm font-semibold uppercase tracking-[0.03em]">
@@ -65,7 +64,7 @@ export function AvisoDeConexion({ mensaje, ayuda }: { mensaje: string; ayuda: Ay
               </button>
             </div>
           </div>
-        </dialog>
+        </Ventana>
       ) : null}
     </>
   )

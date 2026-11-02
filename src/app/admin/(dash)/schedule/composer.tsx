@@ -9,8 +9,11 @@ import {
   guardarBorradorAccion,
   type FormState,
 } from '@/app/admin/actions'
+import { useConfirmar } from '@/components/confirmar'
 import { DeNocheYDeDia, NombreDe } from '@/components/de-noche-y-de-dia'
 import { Icon } from '@/components/icon'
+import { useRevision } from '@/components/revision'
+import { SelectorFecha } from '@/components/selector-fecha'
 import { Button, Field, GroupLabel, Input, Textarea } from '@/components/ui'
 import {
   camposDesdeFormulario,
@@ -26,6 +29,7 @@ import { colorDeRed } from '@/lib/color-de-red'
 import type { CuentaRow } from '@/lib/posts-kpis'
 import { REDES_PROXIMAMENTE, networkLabel } from '@/lib/networks'
 import { calorDelDia, estadoDelFierro, type Calor, type Fierro, type Sello } from '@/lib/parrilla'
+import { FALTA_FECHA } from '@/lib/revisiones'
 import { addDays, dayKey, dayLabelConMes, mondayOfKey } from '@/lib/schedule-week'
 import { subirUno, type MediaSubida } from '@/lib/subida-directa'
 import type { Tema } from '@/lib/tema'
@@ -241,6 +245,7 @@ export function Composer({
   desde: number
 }) {
   const router = useRouter()
+  const confirmar = useConfirmar()
   const ahoraMs = useAhora(desde)
   const captionId = useId()
   const campos = borrador?.campos ?? null
@@ -307,6 +312,7 @@ export function Composer({
   const [cuando, setCuando] = useState(fechaInicial)
   // «Ahora» deja el campo de fecha fuera de juego: la hora la decide el servidor.
   const [ahora, setAhora] = useState(false)
+  const revision = useRevision(() => (ahora || cuando ? null : { campo: 'scheduledAt', mensaje: FALTA_FECHA }))
 
   /* ---- el borrador ---- */
 
@@ -419,7 +425,16 @@ export function Composer({
     // Sin borrador y sin nada escrito no hay qué perder: se cierra sin preguntar.
     const foto = formRef.current ? new FormData(formRef.current) : ultimaFoto.current
     const hayAlgo = Boolean(borradorId.current) || (foto ? tieneContenido(camposDesdeFormulario(foto), mediaRef.current.length) : false)
-    if (hayAlgo && !window.confirm('¿Descartar este borrador? Lo escrito y los archivos elegidos se pierden.')) return
+    if (
+      hayAlgo &&
+      !(await confirmar({
+        titulo: '¿Descartar este borrador?',
+        detalle: 'Lo escrito y los archivos elegidos se pierden.',
+        accion: 'Descartar',
+        peligro: true,
+      }))
+    )
+      return
     terminado.current = true
     if (pausa.current) clearTimeout(pausa.current)
     await enCurso.current
@@ -626,7 +641,10 @@ export function Composer({
         // Se envía a mano y no con `action={…}`: con `action`, React vacía los campos del
         // formulario al terminar la acción, también cuando vuelve con un error de validación.
         // Eso borraba lo escrito, y el guardado siguiente pisaba el borrador con el vacío.
+        noValidate
         onSubmit={(event) => {
+          revision.formulario.onSubmit(event)
+          if (event.defaultPrevented) return
           event.preventDefault()
           const datos = new FormData(event.currentTarget)
           startTransition(() => programar(datos))
@@ -780,16 +798,19 @@ export function Composer({
 
           <ReglaClave inicial={reglaGuardada} />
 
-          <Field label="Fecha y hora">
+          {/* Un `div` y no un `Field`: el `<label>` de `Field` envuelve todo, y un clic en la semana o
+              en el consejo abriría el calendario. */}
+          <div>
+            <GroupLabel>Fecha y hora</GroupLabel>
             <div className="flex flex-wrap items-center gap-2">
-              <Input
-                type="datetime-local"
+              <SelectorFecha
                 name="scheduledAt"
-                required={!ahora}
+                aria-label="Fecha y hora"
                 disabled={ahora}
+                hoy={hoy}
                 className="max-w-[16rem]"
                 value={ahora ? '' : cuando}
-                onChange={(event) => setCuando(event.target.value)}
+                onChange={setCuando}
               />
               {/*
                 «Ahora» no escribe una hora en el campo: manda una marca y la hora la pone el
@@ -838,13 +859,13 @@ export function Composer({
             )}
             {/* Con «Ahora» no hay día que mirar: la hora la pone el servidor al enviar. */}
             {ahora ? null : <CargaDelDia carga={carga} cuando={cuando} />}
-          </Field>
+          </div>
         </div>
 
         <div className="sticky bottom-0 space-y-2 border-t border-acero-700 bg-acero-900 px-5 py-3">
-          {state.error ? (
+          {(revision.error ?? state.error) ? (
             <p role="alert" className="text-sm text-negative">
-              {state.error}
+              {revision.error ?? state.error}
             </p>
           ) : null}
           <div className="flex flex-wrap items-center gap-3">

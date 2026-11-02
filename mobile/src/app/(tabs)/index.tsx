@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Alert, Pressable, Text, View } from 'react-native'
+import { Pressable, Text, View } from 'react-native'
 import { useFocusEffect, useRouter } from 'expo-router'
 import { CorteProgramado, CorteServido } from '../../components/corte-programado'
 import { FiltroDeRedes } from '../../components/filtro-de-redes'
@@ -10,6 +10,7 @@ import { useSelectorFecha } from '../../components/selector-fecha'
 import { Boton, Cargando, ErrorConReintento, Pantalla, Sello, TIPO_TITULO, Tarjeta } from '../../components/ui'
 import { useSesion } from '../../components/sesion'
 import { useColores, useTema } from '../../components/tema'
+import { useVentanas } from '../../components/ventana'
 import {
   cuandoQuemado,
   diasDeLaAgenda,
@@ -92,8 +93,9 @@ export default function LaParrilla() {
     salir,
   )
 
-  // Los diálogos de Android o la hoja de iOS para la hora nueva de «Reprogramar».
+  // La hoja «Cuándo sale», para la hora nueva de «Reprogramar».
   const { abrir: abrirSelector, selector } = useSelectorFecha()
+  const { avisar } = useVentanas()
   // El destino que se está reprogramando: mientras viaja, los botones esperan.
   const [reprogramando, setReprogramando] = useState<string | null>(null)
   // La lista de borradores se abre con un toque, como «⋯ Más» en Los Números.
@@ -141,7 +143,7 @@ export default function LaParrilla() {
           await salir()
           return
         }
-        Alert.alert('No se pudo reprogramar', e instanceof RechazoApi ? e.message : SIN_SENAL)
+        void avisar('No se pudo reprogramar', e instanceof RechazoApi ? e.message : SIN_SENAL)
       } finally {
         setReprogramando(null)
       }

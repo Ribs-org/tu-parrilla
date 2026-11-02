@@ -11,15 +11,21 @@ import { PALETAS } from '../components/colores'
 import { ProveedorDeSesion, useSesion } from '../components/sesion'
 import { Cargando, TIPO_TITULO } from '../components/ui'
 import { ProveedorDeTema, useColores, useTema } from '../components/tema'
+import { ProveedorDeVentanas } from '../components/ventana'
 import { borrarCaches } from '../lib/cache'
 
-/** El modo de la cuenta, para toda la app: cada pantalla pide sus colores con `useColores()`. */
+/**
+ * El modo de la cuenta, para toda la app: cada pantalla pide sus colores con `useColores()`, y sus
+ * preguntas con `useVentanas()`, que las dibuja con esos colores.
+ */
 export default function RootLayout() {
   return (
     <ProveedorDeTema>
-      <ProveedorDeSesion>
-        <Raiz />
-      </ProveedorDeSesion>
+      <ProveedorDeVentanas>
+        <ProveedorDeSesion>
+          <Raiz />
+        </ProveedorDeSesion>
+      </ProveedorDeVentanas>
     </ProveedorDeTema>
   )
 }

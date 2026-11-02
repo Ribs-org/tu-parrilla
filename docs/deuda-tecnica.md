@@ -516,15 +516,15 @@ compositor, mejor de a uno y con el otro quieto.
 
 La app del teléfono tiene los dos modos de la cuenta (ver «Tanda 3» en
 `docs/superpowers/specs/2026-10-19-modo-dia-sushi-design.md`), pero lo que dibuja el teléfono
-mismo y no la app sigue oscuro también de día: la pantalla de arranque, el selector de fecha y
-hora de Android, y las preguntas de «Cerrar sesión» o de descartar un borrador (`Alert`).
+mismo y no la app sigue oscuro también de día: la pantalla de arranque. (Hasta el 2026-11-02
+también el selector de fecha y hora de Android y las preguntas de `Alert`; desde entonces son de
+la app —`mobile/src/components/selector-fecha.tsx` y `ventana.tsx`— y siguen el modo.)
 
-Quedó así a propósito: el modo día viaja por aire, y esas tres cosas salen de
+Quedó así a propósito: el modo día viaja por aire, y el arranque sale de
 `userInterfaceStyle: "dark"` y del color de arranque de `mobile/app.json`, que solo cambian con
 un build nuevo y una versión en la Play Store. Lo que sí cambia por aire, cambia: las pantallas,
 las cabeceras y la barra del sistema con la hora, que se oscurece sobre el papel de arroz.
 
-Terminarlo cuesta un build nativo: `userInterfaceStyle: "automatic"`, que el selector y las
-alertas sigan el tema que la app le pase con `Appearance.setColorScheme` según el modo de la
-cuenta, y probar que el arranque —que sale antes de saber el modo— no destelle claro a quien
+Terminarlo cuesta un build nativo: `userInterfaceStyle: "automatic"`, un color de arranque por
+modo, y probar que el arranque —que sale antes de saber el modo— no destelle claro a quien
 usa la noche.

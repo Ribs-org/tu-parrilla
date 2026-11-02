@@ -4,8 +4,10 @@ import { useActionState, useId, useState, useTransition } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { Check, ChevronDown, GripVertical, Trash2 } from 'lucide-react'
+import { useConfirmar } from '@/components/confirmar'
 import { ICON_NAMES } from '@/components/icon'
 import { ImageField } from '@/components/image-field'
+import { SelectorFecha } from '@/components/selector-fecha'
 import { Button, Field, Input, Select, Switch } from '@/components/ui'
 import { cn, displayHost } from '@/lib/utils'
 import { deleteLink, updateLink, type FormState } from '../../../actions'
@@ -44,6 +46,7 @@ export function LinkRow({
   const [open, setOpen] = useState(false)
   const [pending, startTransition] = useTransition()
   const listId = useId()
+  const confirmar = useConfirmar()
 
   const [state, formAction, saving] = useActionState<FormState, FormData>(
     updateLink.bind(null, link.id, profileId),
@@ -195,20 +198,10 @@ export function LinkRow({
             </summary>
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
               <Field label="Aparece desde">
-                <Input
-                  type="datetime-local"
-                  name="startsAt"
-                  value={link.startsAt}
-                  onChange={(event) => onChange({ startsAt: event.target.value })}
-                />
+                <SelectorFecha name="startsAt" quitable value={link.startsAt} onChange={(startsAt) => onChange({ startsAt })} />
               </Field>
               <Field label="Desaparece">
-                <Input
-                  type="datetime-local"
-                  name="endsAt"
-                  value={link.endsAt}
-                  onChange={(event) => onChange({ endsAt: event.target.value })}
-                />
+                <SelectorFecha name="endsAt" quitable value={link.endsAt} onChange={(endsAt) => onChange({ endsAt })} />
               </Field>
             </div>
           </details>
@@ -239,10 +232,12 @@ export function LinkRow({
               variant="danger"
               className="ml-auto"
               onClick={() => {
-                if (!confirm(`¿Borrar "${link.label}"?`)) return
-                onRemoved()
-                startTransition(() => {
-                  void deleteLink(link.id, profileId)
+                void confirmar({ titulo: `¿Borrar "${link.label}"?`, accion: 'Borrar', peligro: true }).then((si) => {
+                  if (!si) return
+                  onRemoved()
+                  startTransition(() => {
+                    void deleteLink(link.id, profileId)
+                  })
                 })
               }}
             >

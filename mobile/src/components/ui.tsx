@@ -272,29 +272,38 @@ export function Miniatura({
   )
 }
 
+/**
+ * `peligro`, lleno de rojo: el último botón antes de lo que no tiene vuelta, en las preguntas de
+ * `ventana.tsx` («Descartar», «Cerrar sesión»).
+ */
 export function Boton({
   texto,
   onPress,
   deshabilitado,
   destacado,
+  peligro,
 }: {
   texto: string
   onPress: () => void
   deshabilitado?: boolean
   destacado?: boolean
+  peligro?: boolean
 }) {
   const colores = useColores()
+  const lleno = destacado || peligro
   return (
     <Pressable
       onPress={onPress}
       disabled={deshabilitado}
-      android_ripple={deshabilitado ? undefined : destacado ? RIPPLE_DESTACADO : ripple(colores)}
+      accessibilityRole="button"
+      accessibilityState={{ disabled: deshabilitado }}
+      android_ripple={deshabilitado ? undefined : lleno ? RIPPLE_DESTACADO : ripple(colores)}
       style={({ pressed }) => ({
         flex: 1,
-        backgroundColor: destacado ? colores.brasa : colores.tarjeta,
+        backgroundColor: peligro ? colores.rojo : destacado ? colores.brasa : colores.tarjeta,
         // El secundario es del color de la tarjeta: puesto sobre una, sin borde no se veía que
         // era un botón («Reprogramar» en «Se quemó» se leía como texto suelto).
-        borderWidth: destacado ? 0 : 1,
+        borderWidth: lleno ? 0 : 1,
         borderColor: bordeTocable(colores),
         borderRadius: 12,
         // Sin esto el ripple se dibuja rectangular, por fuera de las esquinas redondas.
@@ -306,7 +315,7 @@ export function Boton({
         opacity: deshabilitado ? 0.5 : pressed ? 0.7 : 1,
       })}
     >
-      <Text style={{ color: destacado ? colores.fondo : colores.texto, fontWeight: '600' }}>{texto}</Text>
+      <Text style={{ color: lleno ? colores.fondo : colores.texto, fontWeight: '600' }}>{texto}</Text>
     </Pressable>
   )
 }

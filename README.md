@@ -1613,7 +1613,13 @@ src/
     dibujos-insumo.tsx     lo que se le lleva a La Cocina: la res, el cerdo y las verduras de noche; el atún, el salmón y el arroz de día
     boton-tema.tsx         el botón de la barra que cambia entre la noche y el día
     de-noche-y-de-dia.tsx  lo que se dice distinto de día, en sus dos versiones (el modo esconde una), y el nombre de cada pantalla
-    tema-vivo.ts           el modo que se ve ahora, para lo que el CSS no alcanza: un aria-label, un title, un confirm
+    tema-vivo.ts           el modo que se ve ahora, para lo que el CSS no alcanza: un aria-label, un title, el texto de una pregunta
+    ventana.tsx            la ventana del panel: un <dialog> modal con el velo, que comparten las preguntas, los selectores y «Reprogramar»
+    confirmar.tsx          las preguntas del panel, en vez del confirm() del navegador: useConfirmar() y la ventana del layout
+    revision.ts            un formulario que se revisa solo, con su mensaje en línea y no el globito del navegador
+    selector-color.tsx     el color a elección, en vez del type="color": una muestra y el código, en una ventana
+    globitos.tsx           los globitos de ayuda de todo el sitio, en vez del title del navegador: data-globito="…"
+    selector-fecha.tsx     el campo de fecha y de fecha y hora, con su calendario: manda el mismo texto que el campo del navegador
     icono-maestro.tsx      el dibujo de la pestaña La Cocina: el parrillero de noche, el maestro de sushi de día
     icono-ajustes.tsx      el botón de Ajustes: el trinche y el cuchillo de noche, los palillos de día
     landing.tsx            la portada del producto, armada con las piezas del panel y con los dos modos; landing-demos.tsx, lo que se toca
@@ -1626,6 +1632,11 @@ src/
     tema.ts                el modo de la cuenta (noche o día) y su copia en una cookie; tema-servidor.ts lee la cookie
     networks.ts            las redes que existen y las que están en «Próximamente»; lo leen el panel y el navegador
     ingreso-frases.ts      las frases de la entrada, sin código de servidor: las usan los formularios del navegador
+    forma-del-correo.ts    qué correo vale: lo comparten el servidor y el navegador
+    revisiones.ts          lo que cada formulario revisa antes de enviar, con las frases del servidor
+    paleta-de-acento.ts    la muestra del selector de color y la lectura de un código escrito a mano
+    globito.ts             dónde va un globito: encima, o debajo si no cabe, y siempre adentro de la pantalla
+    calendario.ts          la aritmética del calendario del panel, en texto y sin zona: meses, semanas, teclas y la hora
     cron-auth.ts           si una petición trae el CRON_SECRET, comparado en tiempo constante
     limite.ts              la cuenta de intentos por IP, pura; limite-ip.ts la guarda en la memoria de la instancia
     mensaje-firmado.ts     el aviso que viaja en la URL de un redirect, firmado para que nadie escriba uno falso

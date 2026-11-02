@@ -251,6 +251,40 @@ equivalencia con lo que dicen las páginas:
 | El fierro, la barrita de color de cada cuenta | Un cuchillo chico: el mango oscuro a la izquierda y la hoja a la derecha, en salmón tostado; ámbar si se desafila, gris si perdió el filo | Cómo está la conexión |
 | El trinche y el cuchillo del botón «Ajustes» | Dos palillos en diagonal | El mismo botón |
 
+## Las ventanas del panel
+
+Todo lo que el panel pregunta o pide elegir sale en una ventana propia, con los colores del modo:
+ninguna es del navegador. Si la persona dice «me salió un aviso del navegador», casi seguro habla
+de una de estas.
+
+- **Las preguntas.** Antes de algo que no se deshace, o que no conviene hacer sin querer, se abre
+  una ventana en el centro, con el resto de la pantalla atenuado: la pregunta en mayúsculas, a veces
+  un detalle debajo, y dos botones. El de la izquierda lleva el nombre de lo que va a pasar
+  («Eliminar», «Descartar», «Revocar»), no «Aceptar», y va en rojo cuando borra o no tiene vuelta. El
+  otro es «Cancelar» (en «Cancelar la comanda», «Volver»). Esc o un clic fuera de la ventana es lo
+  mismo que «Cancelar»: no pasa nada.
+- **El calendario.** Un campo de fecha muestra el día escrito («mar 3 nov 2026», o con la hora:
+  «mar 3 nov 2026 · 18:30») o, vacío, «Elegir el día» o «Elegir día y hora». Apretarlo abre el mes
+  en una ventana: arriba el mes y el año con las flechas «Mes anterior» y «Mes siguiente»; abajo
+  los días de lunes a domingo, hoy con un borde naranjo y el elegido relleno. Los días que no se
+  pueden elegir salen apagados. Si es solo un día, un clic en él lo elige y cierra. Si lleva hora,
+  el día queda marcado y debajo van dos cuadros bajo «Hora», las horas y los minutos, que se
+  escriben con el teclado (las flechas arriba y abajo los suben y bajan); «Listo» la guarda. Además
+  están «Hoy», «Quitar» (en los campos que pueden quedar vacíos y ya tienen fecha) y «Cancelar».
+  Con el teclado, las flechas recorren los días y Re Pág y Av Pág cambian de mes.
+- **El color.** Un cuadrado del color elegido abre una ventana con una muestra de setenta y dos
+  colores (seis filas de doce, la última de grises) y, debajo, el código del color para escribirlo
+  exacto (por ejemplo «#3d7bff»; si no se entiende, dice en rojo «Escribe un código como #3d7bff.»).
+  «Listo» lo pone; «Cancelar», Esc o un clic fuera lo dejan como estaba.
+- **Los archivos.** Elegir un archivo abre el selector de archivos del teléfono o del computador:
+  ese sí es del sistema, no hay otro. El campo, en cambio, es del panel: un botón («Elegir
+  archivos», «Elegir el CSV») y al lado el nombre de lo elegido, o «Ninguno elegido».
+- **Los globitos.** Al dejar el mouse quieto sobre algo que lo trae, o al llegar a eso con Tab,
+  aparece un recuadro chico con la explicación, en los colores del modo. En un teléfono no
+  aparecen: lo que dicen está también en otro lado (el editor, la ficha).
+- **Los formularios.** Un campo que falta no lo avisa el navegador con un globito: el mensaje sale
+  en rojo en el mismo formulario, y el cursor vuelve a ese campo.
+
 ## Lo que no existe (no la mandes a buscarlo)
 
 - **Registro abierto.** Solo entra quien invitó el admin, desde Los Maestros.
@@ -286,6 +320,12 @@ Sale de:
 - `src/app/admin/(dash)/page.tsx`: `/admin` lleva a La Parrilla.
 - `src/app/admin/(dash)/content/page.tsx`: la dirección de la antigua pestaña Los Cortes lleva a
   «Tus publicaciones», dentro de Los Números.
+- `src/components/confirmar.tsx` y `src/components/ventana.tsx` (las preguntas y la ventana en que salen)
+- `src/components/selector-fecha.tsx` y `src/lib/calendario.ts` (el calendario)
+- `src/components/selector-color.tsx` y `src/lib/paleta-de-acento.ts` (el color)
+- `src/components/globitos.tsx` y `src/lib/globito.ts` (los globitos)
+- `src/components/ui-cliente.tsx` (el campo de archivos, `CampoDeArchivos`)
+- `src/components/revision.ts` y `src/lib/revisiones.ts` (lo que un formulario revisa antes de enviar)
 - `src/lib/vocabulario.ts`: los nombres, subtítulos y rutas de cada pantalla, y quién las ve.
 - `src/lib/parrilla.ts`: la cocción, el calor del día, la temperatura del fierro y el aviso del
   botón «Ajustes» (`avisoDeFierros`).
