@@ -57,6 +57,12 @@ sección.
     - el `reestilo` («Otros estilos con el mismo material»).
 
     El diseño dice qué trae cada una.
+  - **Pedido del dueño: ver que la comanda avanza y saber cuándo terminó** (2026-10-30). Dos cosas
+    que faltan para quien espera:
+    - una animación de «en proceso» en la tarjeta mientras el servidor del chef trabaja; hoy la
+      tarjeta solo cambia de texto, y el estado se ve al recargar;
+    - el correo de «lista», que el diseño ya pide («Avisos») y nadie envía: la cocina no manda
+      correos todavía. `src/lib/correo.ts` ya sirve para eso.
   - **[dueño] Probar una vez la subida por partes contra el almacén de verdad** (2026-10-22). La
     cocina del dueño ya está encendida: en La Cocina → «Pedir una comanda», subir un video de más
     de 64 MB, para que vaya en varias partes, y colgarla. Después se puede cancelar. Las pruebas corren contra un almacén de
@@ -76,6 +82,17 @@ sección.
   `docs/auditoria-ui-2026-10-16.md`: `react-native-svg` en el próximo build nativo, con las
   curvas del panel. Mientras tanto, se puede retocar la silueta por aire (más ancha, con un
   extremo afinado o las vetas más marcadas) para que no se confunda.
+- **Por revisar: Instagram no entrega los comentarios de @vicente_edits2** (2026-10-30). Los cuenta
+  y los muestra en la app, pero `/comments` devuelve vacío, sin error, en el sondeo y en el
+  Explorador, también con comentarios de personas externas y en una foto subida a mano. Con el
+  mismo token, @vicente_pareja_j y @vicente.ingeniero sí los entregan, y la configuración de
+  comentarios y las tareas sobre la página están bien. La causa no está explicada y Meta no la
+  documenta; la cuenta tiene 0 seguidores. Hay que grabar la escena del privado con otra cuenta.
+- **Por revisar: en qué orden entrega Instagram los comentarios** (2026-10-30). El comentario de
+  `src/lib/social/comentarios/instagram.ts` dice que el borde va del más viejo al más nuevo, y la
+  referencia de Meta dice lo contrario: «Returns results in reverse chronological order by
+  default». No rompe la lectura, que recorre hasta cinco páginas igual, pero uno de los dos
+  miente: mirarlo con una publicación de muchos comentarios y corregir el comentario si hace falta.
 - **Por revisar: el resto de la auditoría de la wiki de la UI** (2026-10-13). Al escribir
   `public/docs/ui/` salieron unos cuarenta defectos más —textos que nombran pantallas
   viejas, validaciones que dejan programar lo que va a fallar, números
@@ -173,9 +190,9 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   cuentas conectadas, @vicente_edits2 y la página Tu-Parrilla, y `REVISION_CORREO` y
   `REVISION_CODIGO` en Vercel. Meta vuelve a revisar las apps aprobadas y pide que las
   credenciales de prueba sigan activas un año (README, «Dejar entrar al revisor de Meta»).
-  Una cuenta de Instagram la conecta una sola persona en Tu Parrilla: para usar
-  @vicente_edits2 en otra cuenta, primero hay que conectarle al revisor otro Instagram de
-  prueba. El video y los textos de esta vuelta (`meta-app-review-demo.mp4`,
+  Una cuenta de Instagram la tiene una sola persona en Tu Parrilla: para usar @vicente_edits2 en
+  otra cuenta, primero hay que dejarle al revisor otro Instagram de prueba, conectándolo o
+  traspasándolo en Los Maestros. El video y los textos de esta vuelta (`meta-app-review-demo.mp4`,
   `TEXTOS-FORMULARIO.txt`) están en la carpeta «Meta - Verification» del escritorio de
   Vicente, y sirven de molde para la segunda.
 - **[dueño] Política interna ante solicitudes de autoridades** (2026-10-06). En el App
