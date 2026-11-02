@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useRef, useState, type ReactNode } from 'react'
 import { Modal, Pressable, ScrollView, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import {
@@ -151,7 +151,7 @@ export function SelectorFecha({
           ))}
         </View>
 
-        <Fila titulo="Hora">
+        <Fila titulo="Hora" cantidad={HORAS.length} indice={hora}>
           {HORAS.map((h) => (
             <Chip
               key={h}
@@ -166,7 +166,7 @@ export function SelectorFecha({
             />
           ))}
         </Fila>
-        <Fila titulo="Minutos">
+        <Fila titulo="Minutos" cantidad={minutosOfrecidos(minuto).length} indice={minutosOfrecidos(minuto).indexOf(minuto)}>
           {minutosOfrecidos(minuto).map((m) => (
             <Chip key={m} texto={`:${dosCifras(m)}`} activo={m === minuto} deshabilitado={yaPaso(hora, m)} onPress={() => setMinuto(m)} />
           ))}
@@ -197,13 +197,28 @@ function Flecha({ texto, etiqueta, onPress, deshabilitado }: { texto: string; et
   )
 }
 
-/** Una fila de fichas que se desliza de lado, con su rótulo. */
-function Fila({ titulo, children }: { titulo: string; children: ReactNode }) {
+/**
+ * Una fila de fichas que se desliza de lado, con su rótulo. Abre corrida hasta la elegida: las
+ * 10 de la mañana quedaban fuera de la pantalla, detrás de las horas que ya pasaron.
+ */
+function Fila({ titulo, cantidad, indice, children }: { titulo: string; cantidad: number; indice: number; children: ReactNode }) {
   const colores = useColores()
+  const fila = useRef<ScrollView>(null)
+  const corrida = useRef(false)
   return (
     <View style={{ gap: 6 }}>
       <Text style={{ color: colores.tenue, fontSize: 11, fontFamily: TIPO_TITULO, letterSpacing: 1.2, textTransform: 'uppercase' }}>{titulo}</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6 }}>
+      <ScrollView
+        ref={fila}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ gap: 6 }}
+        onContentSizeChange={(ancho) => {
+          if (corrida.current || indice <= 0) return
+          corrida.current = true
+          fila.current?.scrollTo({ x: Math.max(0, (ancho / cantidad) * (indice - 1)), animated: false })
+        }}
+      >
         {children}
       </ScrollView>
     </View>
