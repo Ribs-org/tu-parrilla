@@ -2,18 +2,13 @@
 // los campos, el botón) se dibuja en el servidor cuando lo pide una página del servidor, y lo
 // que necesita el navegador —el envío con su estado, los interruptores— vive en `ui-cliente.tsx`
 // y se reexporta acá, así que quien importa no tiene que saber de qué lado está cada una.
+import { CONTROL } from '@/components/boton'
 import { DeNocheYDeDia } from '@/components/de-noche-y-de-dia'
 import { nombreEn, pantallaDe } from '@/lib/vocabulario'
 import { cn } from '@/lib/utils'
 
 export { Button } from './ui-boton'
 export { Submit, Switch, Toggle } from './ui-cliente'
-
-// `color-scheme: dark` es para lo que dibuja el sistema y no el CSS: la lista desplegable de
-// un `<select>` y el calendario de un `datetime-local`. Sin él salen con fondo claro y
-// heredan el texto claro del panel, así que se leen blanco sobre blanco.
-const CONTROL =
-  'w-full rounded-lg border border-acero-700 bg-acero-800 px-3 py-2 text-sm outline-none transition-colors [color-scheme:dark] placeholder:text-fg-faint focus:border-brasa'
 
 /**
  * El título de una pantalla del panel, con su subtítulo en llano debajo: la red de

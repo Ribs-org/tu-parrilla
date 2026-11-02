@@ -494,7 +494,8 @@ formulario viene abierto, con el cursor en «Texto». En este orden:
    hay exactamente un archivo y es un video (ver abajo).
 8. **«Respuesta automática por palabra clave»**, plegado (ver abajo); viene abierto y lleno si
    el borrador tenía una palabra.
-9. **«Fecha y hora»**, un selector de día y hora con el botón «Ahora» al lado. Al abrir desde
+9. **«Fecha y hora»**, el campo de día y hora («Elegir día y hora» mientras está vacío), que
+   abre el calendario ([index.md](index.md), «Las ventanas del panel»), con el botón «Ahora» al lado. Al abrir desde
    un día del calendario, viene puesto ese día a las 09:00; si el día es hoy, la hora en punto
    siguiente (o las 09:00, si todavía no son las nueve), y vacío desde las 23:00. Al abrir un
    borrador, viene la fecha que tenía. Al elegir el día aparece debajo cómo está ese día según
@@ -766,7 +767,7 @@ no existe o ya se borró, el editor muestra la página «No encontramos esa pág
 Se abre al apretar «Reprogramar» en una píldora roja de la lista, en una fila de «Se quemó» o
 en un destino quemado del editor, y
 queda al centro, encima de todo, con el fondo oscurecido. Arriba dice de qué destino se trata,
-«<Red> · <usuario>»; debajo, un selector de fecha y hora, **«Guardar»** (bloqueado hasta
+«<Red> · <usuario>»; debajo, el campo «Elegir día y hora», que abre el calendario encima, **«Guardar»** (bloqueado hasta
 elegir una hora) y **«Cancelar»**. Se cierra también con Esc o con un clic fuera. Al guardar
 bien, la ventana se cierra y la fila sale de «Se quemó».
 
@@ -784,7 +785,7 @@ se puede por API: ver [la guía de la API](../api-llm.md).
    de subir: aparecen en la lista numerada.
 4. En «Cuentas», marcar la ficha de cada cuenta donde tiene que salir.
 5. Si apareció un bloque de TikTok o de Instagram, llenarlo (ver las tareas de abajo).
-6. En «Fecha y hora», elegir día y hora: en el selector, o con un clic en un día de la semana
+6. En «Fecha y hora», elegir día y hora: en el calendario, o con un clic en un día de la semana
    en chico. Mirar el aviso de debajo: si dice que el día va lleno, conviene otro. Si aparece
    en ámbar que el permiso de una cuenta vence antes, reconectarla en Los Fierros o elegir un
    día anterior.

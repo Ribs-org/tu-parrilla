@@ -13,6 +13,7 @@ import { useConfirmar } from '@/components/confirmar'
 import { DeNocheYDeDia, NombreDe } from '@/components/de-noche-y-de-dia'
 import { Icon } from '@/components/icon'
 import { useRevision } from '@/components/revision'
+import { SelectorFecha } from '@/components/selector-fecha'
 import { Button, Field, GroupLabel, Input, Textarea } from '@/components/ui'
 import {
   camposDesdeFormulario,
@@ -797,15 +798,19 @@ export function Composer({
 
           <ReglaClave inicial={reglaGuardada} />
 
-          <Field label="Fecha y hora">
+          {/* Un `div` y no un `Field`: el `<label>` de `Field` envuelve todo, y un clic en la semana o
+              en el consejo abriría el calendario. */}
+          <div>
+            <GroupLabel>Fecha y hora</GroupLabel>
             <div className="flex flex-wrap items-center gap-2">
-              <Input
-                type="datetime-local"
+              <SelectorFecha
                 name="scheduledAt"
+                aria-label="Fecha y hora"
                 disabled={ahora}
+                hoy={hoy}
                 className="max-w-[16rem]"
                 value={ahora ? '' : cuando}
-                onChange={(event) => setCuando(event.target.value)}
+                onChange={setCuando}
               />
               {/*
                 «Ahora» no escribe una hora en el campo: manda una marca y la hora la pone el
@@ -854,7 +859,7 @@ export function Composer({
             )}
             {/* Con «Ahora» no hay día que mirar: la hora la pone el servidor al enviar. */}
             {ahora ? null : <CargaDelDia carga={carga} cuando={cuando} />}
-          </Field>
+          </div>
         </div>
 
         <div className="sticky bottom-0 space-y-2 border-t border-acero-700 bg-acero-900 px-5 py-3">

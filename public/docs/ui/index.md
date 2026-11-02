@@ -263,6 +263,15 @@ de una de estas.
   («Eliminar», «Descartar», «Revocar»), no «Aceptar», y va en rojo cuando borra o no tiene vuelta. El
   otro es «Cancelar» (en «Cancelar la comanda», «Volver»). Esc o un clic fuera de la ventana es lo
   mismo que «Cancelar»: no pasa nada.
+- **El calendario.** Un campo de fecha muestra el día escrito («mar 3 nov 2026», o con la hora:
+  «mar 3 nov 2026 · 18:30») o, vacío, «Elegir el día» o «Elegir día y hora». Apretarlo abre el mes
+  en una ventana: arriba el mes y el año con las flechas «Mes anterior» y «Mes siguiente»; abajo
+  los días de lunes a domingo, hoy con un borde naranjo y el elegido relleno. Los días que no se
+  pueden elegir salen apagados. Si es solo un día, un clic en él lo elige y cierra. Si lleva hora,
+  el día queda marcado y debajo van dos cuadros bajo «Hora», las horas y los minutos, que se
+  escriben con el teclado (las flechas arriba y abajo los suben y bajan); «Listo» la guarda. Además
+  están «Hoy», «Quitar» (en los campos que pueden quedar vacíos y ya tienen fecha) y «Cancelar».
+  Con el teclado, las flechas recorren los días y Re Pág y Av Pág cambian de mes.
 - **Los formularios.** Un campo que falta no lo avisa el navegador con un globito: el mensaje sale
   en rojo en el mismo formulario, y el cursor vuelve a ese campo.
 
@@ -302,6 +311,7 @@ Sale de:
 - `src/app/admin/(dash)/content/page.tsx`: la dirección de la antigua pestaña Los Cortes lleva a
   «Tus publicaciones», dentro de Los Números.
 - `src/components/confirmar.tsx` y `src/components/ventana.tsx` (las preguntas y la ventana en que salen)
+- `src/components/selector-fecha.tsx` y `src/lib/calendario.ts` (el calendario)
 - `src/components/revision.ts` y `src/lib/revisiones.ts` (lo que un formulario revisa antes de enviar)
 - `src/lib/vocabulario.ts`: los nombres, subtítulos y rutas de cada pantalla, y quién las ve.
 - `src/lib/parrilla.ts`: la cocción, el calor del día, la temperatura del fierro y el aviso del

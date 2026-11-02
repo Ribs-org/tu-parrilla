@@ -76,7 +76,8 @@ teléfono angosto, «Fechas» baja a una segunda línea dentro de la misma fila.
 «Fechas» abre, debajo de la fila (y en su propia línea, después de los demás controles de la
 fila si los hay), el **selector de fechas**:
 
-- Dos campos de fecha, «Desde» y «Hasta», que abren el calendario del navegador. Vienen con el
+- Dos campos de fecha, «Desde» y «Hasta», que abren el calendario del panel (un clic en un día lo
+  elige y cierra; ver [index.md](index.md), «Las ventanas del panel»). Vienen con el
   período que está puesto: con «30 días», de hace treinta días a hoy. No dejan elegir antes del
   1 de enero de 2020 ni después de hoy.
 - Cuatro accesos rápidos: «Esta semana», «La semana pasada», «Este mes» y «El mes pasado». Cada

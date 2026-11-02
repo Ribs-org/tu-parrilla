@@ -5,6 +5,7 @@ import { pedirComandaPropia } from '@/app/admin/cocina-actions'
 import { Panel } from '@/components/charts/panel'
 import { useConfirmar } from '@/components/confirmar'
 import { DibujoDeInsumo } from '@/components/dibujos-insumo'
+import { SelectorFecha } from '@/components/selector-fecha'
 import { Button, Field, Input, Textarea } from '@/components/ui'
 import type { TipoInsumo } from '@/db/schema'
 import { SUBTIPOS_PRINCIPAL, aceptaTipo, maxBytesDe, muyGrande, tipoDeArchivo, tipoNoAceptado, type SubtipoPrincipal } from '@/lib/cocina/insumos'
@@ -410,7 +411,7 @@ export function FormularioComanda({
             <Textarea rows={3} maxLength={MAX_NOTAS} value={notas} onChange={(e) => setNotas(e.target.value)} />
           </Field>
           <Field label="Para cuándo (opcional)" hint="Informativo: la hora real la estima el chef.">
-            <Input type="date" value={paraCuando} onChange={(e) => setParaCuando(e.target.value)} />
+            <SelectorFecha modo="fecha" quitable value={paraCuando} onChange={setParaCuando} />
           </Field>
         </div>
       </Panel>

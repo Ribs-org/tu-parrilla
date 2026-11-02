@@ -1617,6 +1617,7 @@ src/
     ventana.tsx            la ventana del panel: un <dialog> modal con el velo, que comparten las preguntas, los selectores y «Reprogramar»
     confirmar.tsx          las preguntas del panel, en vez del confirm() del navegador: useConfirmar() y la ventana del layout
     revision.ts            un formulario que se revisa solo, con su mensaje en línea y no el globito del navegador
+    selector-fecha.tsx     el campo de fecha y de fecha y hora, con su calendario: manda el mismo texto que el campo del navegador
     icono-maestro.tsx      el dibujo de la pestaña La Cocina: el parrillero de noche, el maestro de sushi de día
     icono-ajustes.tsx      el botón de Ajustes: el trinche y el cuchillo de noche, los palillos de día
     landing.tsx            la portada del producto, armada con las piezas del panel y con los dos modos; landing-demos.tsx, lo que se toca
@@ -1631,6 +1632,7 @@ src/
     ingreso-frases.ts      las frases de la entrada, sin código de servidor: las usan los formularios del navegador
     forma-del-correo.ts    qué correo vale: lo comparten el servidor y el navegador
     revisiones.ts          lo que cada formulario revisa antes de enviar, con las frases del servidor
+    calendario.ts          la aritmética del calendario del panel, en texto y sin zona: meses, semanas, teclas y la hora
     cron-auth.ts           si una petición trae el CRON_SECRET, comparado en tiempo constante
     limite.ts              la cuenta de intentos por IP, pura; limite-ip.ts la guarda en la memoria de la instancia
     mensaje-firmado.ts     el aviso que viaja en la URL de un redirect, firmado para que nadie escriba uno falso

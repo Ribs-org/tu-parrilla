@@ -180,7 +180,7 @@ acompañamientos.».
 - La línea «Los estilos los elige el chef, con lo que mejor le vaya al material.».
 - «Qué destacar o qué evitar (opcional)», un texto libre de hasta 1000 caracteres, con el ejemplo
   «Por ejemplo: «la parte de ventas», «no uses la anécdota del final».».
-- «Para cuándo (opcional)», una fecha, con la ayuda «Informativo: la hora real la estima el
+- «Para cuándo (opcional)», un campo de fecha que abre el calendario del panel («Quitar» la borra), con la ayuda «Informativo: la hora real la estima el
   chef.».
 
 **Bloque «Tu marca».** Bajo el título: «Lo que el chef usa para vestir lo que cocina. Se guarda

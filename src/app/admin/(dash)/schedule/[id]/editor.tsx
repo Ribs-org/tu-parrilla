@@ -8,6 +8,7 @@ import { ArrowDown, ArrowLeft, ArrowUp, Check, Copy, ExternalLink } from 'lucide
 import { deleteScheduledPost, updateScheduledPost, type FormState } from '@/app/admin/actions'
 import { useConfirmar } from '@/components/confirmar'
 import { useTema } from '@/components/tema-vivo'
+import { SelectorFecha } from '@/components/selector-fecha'
 import { Button, Field, GroupLabel, Input, Textarea } from '@/components/ui'
 import { REDES_PROXIMAMENTE, networkLabel } from '@/lib/networks'
 import type { CuentaRow } from '@/lib/posts-kpis'
@@ -149,12 +150,8 @@ export function Editor({
           </Field>
 
           <Field label="Fecha y hora">
-            <Input
-              type="datetime-local"
-              name="scheduledAt"
-              defaultValue={scheduledAtLocal}
-              className="max-w-[16rem]"
-            />
+            {/* Con `key`: lo guardado vuelve a ser el punto de partida, como el `defaultValue` de antes. */}
+            <SelectorFecha key={scheduledAtLocal} name="scheduledAt" defaultValue={scheduledAtLocal} className="max-w-[16rem]" />
           </Field>
 
           <div>

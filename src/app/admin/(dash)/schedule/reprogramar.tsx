@@ -2,7 +2,8 @@
 
 import { useId, useRef, useState, useTransition } from 'react'
 import { rescheduleTarget } from '@/app/admin/actions'
-import { Button, Input } from '@/components/ui'
+import { SelectorFecha } from '@/components/selector-fecha'
+import { Button } from '@/components/ui'
 import { Ventana } from '@/components/ventana'
 
 /**
@@ -72,13 +73,7 @@ export function Reprogramar({ targetId, titulo, className = 'ml-2 underline' }: 
         <div className="p-3">
           {titulo ? <p id={rotulo} className="mb-2 text-xs text-fg-faint">{titulo}</p> : null}
           <div className="flex flex-wrap items-center gap-2">
-            <Input
-              type="datetime-local"
-              aria-label="Nueva fecha y hora"
-              value={when}
-              onChange={(event) => setWhen(event.target.value)}
-              className="max-w-[16rem]"
-            />
+            <SelectorFecha aria-label="Nueva fecha y hora" value={when} onChange={setWhen} className="max-w-[16rem]" />
             <Button type="button" variant="primary" disabled={pending || when === ''} onClick={save}>
               Guardar
             </Button>

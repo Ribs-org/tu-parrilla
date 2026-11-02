@@ -1,4 +1,15 @@
 /**
+ * El aspecto de un campo: la caja de `Input`, `Textarea` y `Select` (`ui.tsx`), y la del botón
+ * que abre el calendario (`selector-fecha.tsx`), que tiene que verse como un campo más.
+ *
+ * `color-scheme: dark` es para lo que todavía dibuja el sistema y no el CSS: la lista desplegable
+ * de un `<select>`. Sin él sale con fondo claro y hereda el texto claro del panel, así que se lee
+ * blanco sobre blanco.
+ */
+export const CONTROL =
+  'w-full rounded-lg border border-acero-700 bg-acero-800 px-3 py-2 text-sm outline-none transition-colors [color-scheme:dark] placeholder:text-fg-faint focus:border-brasa'
+
+/**
  * El aspecto de un botón, en un solo sitio, para las dos cosas que lo tienen: el `<button>`
  * de `ui.tsx` y el enlace que parece uno.
  *

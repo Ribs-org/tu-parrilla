@@ -17,6 +17,9 @@ import { useVeloQueCierra } from './velo'
  * cumple. Y sirve sobre otra ventana: el compositor pregunta desde adentro de su panel lateral, y
  * la última abierta queda encima.
  *
+ * Esc la cierra y ahí termina: no sigue hasta la página, donde otro `keydown` de Escape —el del
+ * selector de fechas de Los Números, por ejemplo— cerraría además lo que está debajo.
+ *
  * `alVelo` es qué pasa con un clic que empieza y termina en el velo (`useVeloQueCierra`). El
  * padding va en el hijo y no aquí para que no quede un anillo alrededor del contenido que sea del
  * diálogo: ahí un clic contaría como «clic en el velo» y cerraría.
@@ -30,6 +33,7 @@ import { useVeloQueCierra } from './velo'
 export function Ventana({
   alVelo,
   className,
+  onKeyDown,
   ...props
 }: ComponentProps<'dialog'> & { alVelo: () => void }) {
   const velo = useVeloQueCierra(alVelo)
@@ -37,6 +41,10 @@ export function Ventana({
     <dialog
       {...props}
       {...velo}
+      onKeyDown={(event) => {
+        if (event.key === 'Escape') event.stopPropagation()
+        onKeyDown?.(event)
+      }}
       className={cn(
         'ventana m-auto max-h-[calc(100dvh-2rem)] w-[24rem] max-w-[calc(100vw-2rem)] rounded-xl border border-velo/10 bg-acero-900/95 text-fg shadow-xl backdrop-blur backdrop:bg-acero-950/80',
         className,

@@ -69,7 +69,7 @@ Una fila desplegada muestra:
 - «Descripción corta», con el ejemplo «Opcional».
 - «URL».
 - Solo en los tipos «Link normal» y «Destacado con imagen»: «Imagen», con «Subir imagen» / «Cambiar» / «Quitar» como la foto de perfil. La ayuda dice «Se muestra grande, ideal 16:9» en el destacado y «Reemplaza al icono» en el link normal.
-- «Programar visibilidad», una sección plegada que al abrirse muestra dos campos de fecha y hora: «Aparece desde» y «Desaparece». Las horas se leen en la zona horaria de [Tu Cuenta](tu-cuenta.md).
+- «Programar visibilidad», una sección plegada que al abrirse muestra dos campos de fecha y hora: «Aparece desde» y «Desaparece», que abren el calendario del panel; con una fecha puesta, el calendario ofrece «Quitar» para dejar el campo vacío. Las horas se leen en la zona horaria de [Tu Cuenta](tu-cuenta.md).
 - Los botones «Guardar link» (mientras guarda, «Guardando…»; al terminar, «Guardado») y, a la derecha, «Borrar».
 
 Cómo sale cada tipo en la página pública:
@@ -161,7 +161,7 @@ La página sigue abierta para quien tenga la dirección; solo se les pide a los 
 ### Para que un link aparezca o desaparezca solo en ciertas fechas
 
 1. Despliega el link y abre «Programar visibilidad».
-2. Llena «Aparece desde», «Desaparece», o los dos. Un campo vacío significa sin límite por ese lado. La hora se entiende en la zona horaria de [Tu Cuenta](tu-cuenta.md).
+2. Llena «Aparece desde», «Desaparece», o los dos. Un campo vacío significa sin límite por ese lado; para vaciar uno, se abre y se aprieta «Quitar». La hora se entiende en la zona horaria de [Tu Cuenta](tu-cuenta.md).
 3. Aprieta «Guardar link».
 
 El link además tiene que estar prendido. La lista del editor no marca qué links tienen fechas y la vista previa los muestra igual: para comprobar si un link está visible ahora, hay que abrir la página real con «Ver página».
