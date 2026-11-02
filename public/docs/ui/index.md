@@ -43,9 +43,12 @@ Está siempre, fija arriba, en todas las pantallas del panel. De izquierda a der
    borde. La pestaña en la que está se ve siempre entera; si no ve otra, que deslice la barra.
 3. **El botón «Ajustes»**, a la derecha, con el ícono de un trinche y un cuchillo, lado a lado (antes era un engranaje:
    si alguien dice «el engranaje», es este); de día, dos palillos en diagonal. En pantallas angostas se ve solo el ícono, sin la
-   palabra. Abre un menú con cuatro entradas, cada una con su subtítulo debajo: «Los Fierros»
+   palabra. Abre un menú con cuatro pantallas, cada una con su subtítulo debajo: «Los Fierros»
    (tus redes conectadas; de día, «Los Cuchillos»), «La Vitrina» (tus páginas públicas), «Los Maestros» (quién puede
-   entrar; **solo lo ve el admin**) y «Tu Cuenta» (tu nombre y tu hora). Cuando la
+   entrar; **solo lo ve el admin**) y «Tu Cuenta» (tu nombre y tu hora). Al final, separada por una
+   línea, «El libro de sugerencias» (ideas, reclamos o lo que quieras decirnos; de día, «La caja de
+   sugerencias»): no lleva a una pantalla, abre una ventana para escribirle al equipo que hace Tu
+   Parrilla ([libro-de-sugerencias.md](libro-de-sugerencias.md)). Cuando la
    persona está en una de esas pantallas, el botón queda pintado de naranjo. Si el permiso
    de alguna cuenta conectada vence en la semana, el botón lleva un punto ámbar; si alguna
    ya se apagó (venció o dejó de sincronizar), un punto rojo. Adentro, la entrada «Los Fierros»
@@ -80,7 +83,8 @@ De día, dos se llaman distinto, en la barra, en Ajustes y en su título: La Par
 Barra»** y Los Fierros son **«Los Cuchillos»**. La dirección y lo que se hace en cada una no
 cambian (ver «El modo día»).
 
-Y dos páginas que no son una pantalla del panel: [Entrar al panel](ingresar.md) y [La app del
+Y tres páginas que no son una pantalla del panel: [Entrar al panel](ingresar.md), [El libro de
+sugerencias](libro-de-sugerencias.md), una ventana que se abre desde Ajustes, y [La app del
 teléfono](app-movil.md).
 
 ## Cómo ubicar a una persona perdida
@@ -135,6 +139,7 @@ teléfono](app-movil.md).
 | Leer cómo funciona el panel, pantalla por pantalla | La Cocina → «El manual del parrillero →»: esta misma wiki, en el panel ([la-cocina.md](la-cocina.md)) |
 | Invitar a alguien; cerrar las sesiones de alguien; encenderle la cocina | Los Maestros, solo el admin ([los-maestros.md](los-maestros.md)) |
 | Publicar desde el teléfono | [La app del teléfono](app-movil.md) |
+| Pedir una función, reclamar algo que no funciona o decirle algo a quienes hacen Tu Parrilla | «Ajustes» → «El libro de sugerencias», al final del menú; en el teléfono, al final de «Ajustes» ([libro-de-sugerencias.md](libro-de-sugerencias.md)) |
 
 ## El vocabulario del asado
 
@@ -206,6 +211,9 @@ vale para la de día:
 | «Los Fierros» | «Los Cuchillos» | La entrada de Ajustes, su título y cada frase que la nombra |
 | «Se quemó» | «Se echó a perder» | La sección de La Parrilla con lo que falló, y el correo |
 | «El manual del parrillero» | «El manual del maestro de sushi» | Al final de La Cocina, y el título del manual |
+| «El libro de sugerencias» | «La caja de sugerencias» | La última entrada de Ajustes y el título de su ventana; en el teléfono, al final de Ajustes |
+| «Dejarlo en el libro» | «Echarlo a la caja» | El botón que manda lo escrito en el libro de sugerencias |
+| «Quedó en el libro.» | «Quedó en la caja.» | Lo que dice el libro de sugerencias al recibir |
 | «Su fierro está frío: reconéctala» | «Su cuchillo está sin filo: reconéctala» | Un destino hacia una cuenta que hay que reconectar |
 | «se enfría» | «se desafila» | Al lado de una cuenta cuyo permiso vence en la semana, en el compositor |
 | «1 se enfría» | «1 se desafila» | El aviso de Ajustes; con más, «2 se desafilan» |
@@ -250,6 +258,7 @@ equivalencia con lo que dicen las páginas:
 | El naranjo de lo activo (la pestaña, los botones llenos) | Un salmón tostado, más oscuro | Lo mismo |
 | El fierro, la barrita de color de cada cuenta | Un cuchillo chico: el mango oscuro a la izquierda y la hoja a la derecha, en salmón tostado; ámbar si se desafila, gris si perdió el filo | Cómo está la conexión |
 | El trinche y el cuchillo del botón «Ajustes» | Dos palillos en diagonal | El mismo botón |
+| El libro abierto del libro de sugerencias, con su lápiz atado | Una caja de madera con una ranura arriba | Donde se le escribe al equipo |
 
 ## Las ventanas del panel
 
@@ -309,7 +318,8 @@ Sale de:
 
 - `src/app/admin/(dash)/layout.tsx` y `src/app/admin/(dash)/nav.tsx`: la barra, las pestañas,
   el botón «Ajustes» y «Salir». El ícono de Ajustes, con los palillos de día, en
-  `src/components/icono-ajustes.tsx`.
+  `src/components/icono-ajustes.tsx`. La entrada del libro de sugerencias, al final del menú, abre
+  la ventana de `src/components/libro-de-sugerencias.tsx`.
 - El modo día: el botón, en `src/components/boton-tema.tsx`; el modo, en la cuenta
   (`users.tema`, que guarda `guardarTema` en `src/app/admin/actions.ts`), con su copia en una
   cookie para la puerta, en `src/lib/tema.ts` y `src/lib/tema-servidor.ts`; las piezas de sushi, en

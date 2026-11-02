@@ -46,6 +46,7 @@ const NO_ES_NUESTRO_ALMACEN: Record<string, string> = {
   'social_posts.thumbnail_url': 'CDN de la red social, no algo que copiamos a nuestro almacén.',
   'source_posts.url': 'El tuit ajeno: la URL de otra red, no un archivo nuestro.',
   'links.url': 'El destino que escribe el dueño del link, no un archivo.',
+  'sugerencias.issue_url': 'El issue que abrió en GitHub el libro de sugerencias, no un archivo.',
 }
 
 describe('COLUMNAS_DE_ARCHIVO', () => {

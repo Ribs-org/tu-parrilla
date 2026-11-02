@@ -121,6 +121,25 @@ export const MANUAL: Record<Tema, string> = { noche: 'El manual del parrillero',
  */
 export const MESON: Record<Tema, string> = { noche: 'El mesón', dia: 'La bandeja' }
 
+/**
+ * Donde una persona le escribe al equipo que hace Tu Parrilla: una idea, algo que no funciona u
+ * otra cosa. De noche es el libro de sugerencias y reclamos que tiene todo restorán en Chile; de
+ * día, la caja de sugerencias —el 御意見箱 de los locales japoneses, una caja de madera con una
+ * ranura— porque en una barra de sushi no hay libro. Lo pidió el dueño el 2026-11-02, con «un
+ * dibujito de una caja de sugerencias». Es la última entrada del menú de Ajustes y abre una
+ * ventana, no una pantalla: por eso no está en `PANTALLAS`.
+ */
+export const LIBRO: Record<Tema, string> = { noche: 'El libro de sugerencias', dia: 'La caja de sugerencias' }
+
+/** El subtítulo del libro, igual en los dos modos, como el de cada pantalla. */
+export const LIBRO_SUBTITULO = 'ideas, reclamos o lo que quieras decirnos'
+
+/** El botón que lo manda: se deja en el libro, se echa a la caja. */
+export const ECHAR_AL_LIBRO: Record<Tema, string> = { noche: 'Dejarlo en el libro', dia: 'Echarlo a la caja' }
+
+/** Lo que dice la ventana cuando ya se recibió. */
+export const QUEDO_EN_EL_LIBRO: Record<Tema, string> = { noche: 'Quedó en el libro.', dia: 'Quedó en la caja.' }
+
 /** Lo que dice el destino de una cuenta con el fierro frío: de día, el cuchillo perdió el filo. */
 export const FIERRO_FRIO: Record<Tema, string> = {
   noche: 'Su fierro está frío: reconéctala',
@@ -167,6 +186,9 @@ export const PALABRAS_DE_DIA: ReadonlyArray<Record<Tema, string>> = [
   SE_QUEMO,
   MANUAL,
   MESON,
+  LIBRO,
+  ECHAR_AL_LIBRO,
+  QUEDO_EN_EL_LIBRO,
   FIERRO_FRIO,
   SE_ENFRIA,
   { noche: fraseDelAviso({ nivel: 'enfriandose', cuantos: 1 }), dia: fraseDelAviso({ nivel: 'enfriandose', cuantos: 1 }, 'dia') },

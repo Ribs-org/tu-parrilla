@@ -127,6 +127,7 @@ const { leerProgramados } = await import('./schedule-leer')
 const { listarLlaves, crearLlave } = await import('./llaves')
 const { leerResumen } = await import('./avisos/run')
 const { archivarQuemados, archivarDestino } = await import('./social/publish/archivar')
+const { recibirSugerencia } = await import('./sugerencias/guardar')
 const { makeDefault, updateProfile, deleteScheduledPost, guardarCuenta, guardarTema, revocarLlaveApi } = await import(
   '@/app/admin/actions'
 )
@@ -821,6 +822,30 @@ describe('aislamiento por dueño, escrituras (SQL generado, sin base)', () => {
     esperarFiltradoPorDueno(consultas[0]!)
     expect(consultas[0]!.params).toContain('9692387a-41cc-4a81-9f8f-7b07135d742a')
     expect(consultas.every((c) => !/^\s*delete/i.test(c.sql))).toBe(true)
+  })
+
+  /**
+   * El libro de sugerencias cuenta el tope del día y las cuentas por red de quien escribe, y
+   * guarda a su nombre: sin el dueño en el WHERE, el tope sería el de todos y el issue diría las
+   * cuentas de otro.
+   */
+  it('sugerencias/guardar: recibirSugerencia cuenta el tope y las cuentas del dueño, y guarda a su nombre', async () => {
+    const consultas = await consultasEncadenadas(
+      () =>
+        recibirSugerencia(USUARIO, { tipo: 'idea', texto: 'Quiero X' }, { origen: 'panel', pantalla: null, navegador: 'Chrome 131 en Windows' }),
+      [[[0]], [['instagram', 2]], [['sugerencia-1']]],
+    )
+    expect(consultas).toHaveLength(3)
+    const [tope, cuentas, insercion] = consultas as [Captura, Captura, Captura]
+    expect(tope.sql).toMatch(/from "sugerencias"/i)
+    esperarFiltradoPorDueno(tope)
+    expect(cuentas.sql).toMatch(/from "social_accounts"/i)
+    esperarFiltradoPorDueno(cuentas)
+    expect(insercion.sql).toMatch(/insert into "sugerencias"/i)
+    expect(insercion.params).toContain(DUENO)
+    expect(insercion.sql).not.toContain(DUENO)
+    // El correo no viaja a la fila que se vuelve issue.
+    expect(JSON.stringify(insercion.params)).not.toContain(USUARIO.correo)
   })
 
   it('social/quitar: una cuenta conectada no se quita, y no se borra nada', async () => {

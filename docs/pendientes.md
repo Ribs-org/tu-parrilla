@@ -162,6 +162,14 @@ sección.
   «Respaldos»). Sin la llave privada los respaldos no se abren: que siga guardada en más de un
   lugar.
 
+- **[dueño] El token del libro de sugerencias** (2026-11-02). Sin él, lo que la gente escribe en
+  el libro de sugerencias se guarda pero no llega a GitHub. Crear en
+  github.com/settings/personal-access-tokens un token *fine-grained* con dueño `Ribs-org`, acceso
+  solo a `Ribs-org/tu-parrilla` y un único permiso, «Issues: Read and write»; cargarlo en Vercel
+  como `SUGERENCIAS_GITHUB_TOKEN` (production) y redesplegar. Lo que se juntó mientras tanto sale
+  solo en la sincronización diaria siguiente. `SUGERENCIAS_REPO` solo hace falta si los issues
+  deben caer en otro repositorio (README, «El libro de sugerencias»).
+
 ## Trámites con las plataformas
 
 Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataforma.

@@ -10,7 +10,8 @@ import { useColores, useTema } from '../components/tema'
 import { useVentanas } from '../components/ventana'
 import { useFierros } from '../components/boton-ajustes'
 import { API_BASE } from '../lib/config'
-import { LOS_FIERROS, otroTema, type Tema } from '../lib/tema'
+import { LibroDeSugerencias } from '../components/libro-de-sugerencias'
+import { LIBRO, LOS_FIERROS, otroTema, type Tema } from '../lib/tema'
 import { NOMBRE_RED, type Fierros } from '../lib/tipos'
 
 /**
@@ -48,7 +49,7 @@ function fierroDe(
  * Ajustes, detrás del botón de la cabecera de cada pestaña (un trinche y un cuchillo, lado a lado; de día, dos palillos): Los Fierros, tus cuentas con su temperatura
  * —las mismas tarjetas de Los Fierros, para leer; conectar y reconectar se hace en el panel,
  * que abre en el navegador— y «Cerrar sesión», que la app no tenía: hasta acá, la única forma
- * de salir era borrar la app.
+ * de salir era borrar la app. Al final, el libro de sugerencias (`libro-de-sugerencias.tsx`).
  */
 export default function Ajustes() {
   const colores = useColores()
@@ -134,6 +135,11 @@ export default function Ajustes() {
       <View style={{ alignItems: 'flex-start' }}>
         <BotonTexto texto="Cerrar sesión" onPress={() => void cerrarSesion()} peligro />
       </View>
+
+      {/* Al final, como en el menú de Ajustes del panel: el libro de sugerencias (de día, la caja)
+          para escribirle al equipo que hace Tu Parrilla. */}
+      <Etiqueta margenArriba>{LIBRO[tema]}</Etiqueta>
+      <LibroDeSugerencias />
 
       <Text style={{ color: colores.tenue, fontSize: 11, marginTop: 16 }}>
         Versión {version}

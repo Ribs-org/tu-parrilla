@@ -82,7 +82,8 @@ export function keysReferenciadas(urls: Set<string>, base: string): Set<string> 
  * quien lea esto— note una columna nueva que nadie registre): `social_posts.
  * thumbnail_url` es el CDN de la red, no algo que copiamos; `source_posts.url` es el
  * tuit ajeno, otra red también; `links.url` es el destino que escribe el dueño del
- * link, no un archivo. Ver `storage-gc.test.ts`, que deriva esta lista del esquema real
+ * link, no un archivo; `sugerencias.issue_url` es el issue de GitHub que abrió el libro de
+ * sugerencias. Ver `storage-gc.test.ts`, que deriva esta lista del esquema real
  * en vez de repetirla a mano.
  */
 export const COLUMNAS_DE_ARCHIVO = [
