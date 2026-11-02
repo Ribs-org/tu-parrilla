@@ -57,21 +57,26 @@ para programar.». Después, el dibujo ancho de la escena y una línea con un pu
   del chef no da señales hace más de diez minutos (un corte de luz o de internet donde está).
   Nada se pierde: las comandas esperan.
 
-Debajo, el subtítulo «Las comandas» y, a su derecha, el botón anaranjado «Pedir una comanda»,
+Debajo, el subtítulo «Las comandas»; al lado, mientras alguna comanda está en marcha (de «Comanda
+colgada» a «Sirviendo»), un punto anaranjado que late y «Se actualiza sola». A la derecha, el botón
+anaranjado «Pedir una comanda»,
 que lleva a pedir una (ver «Pedir una comanda», abajo). Si hay algo esperando en el mesón, antes
 va el botón «El mesón (<N>)» —de día, «La bandeja (<N>)»—, que lleva al mesón (ver «El mesón»,
 abajo). Sin ninguna comanda, «Todavía no tienes
 comandas.». Con comandas, una tarjeta por comanda, de la más nueva a la más vieja (las últimas
 50). Cada tarjeta trae:
 
-- a la izquierda, el dibujo del plato principal: de noche, la media res colgada del gancho; de
-  día, el atún entero sobre la tabla. Desde «El desposte» lleva marcadas con líneas punteadas
-  las partes por donde se corta. Una rechazada, una que no se pudo terminar o una cancelada lo
-  lleva apagado, en gris;
+- a la izquierda, un cuadro con su estación: un dibujo que cambia según en qué va la comanda y
+  que, mientras el chef trabaja, se mueve (ver «La estación de cada comanda», abajo). Es solo un
+  dibujo: no se aprieta;
 - arriba, el nombre del archivo del plato principal (por ejemplo, «video9.mp4»), o «Comanda sin
   plato principal», y a la derecha «pedida <fecha y hora>»;
 - el estado, en palabras (la tabla de abajo). Una comanda rechazada o que no se pudo terminar
   lleva el borde y el estado en rojo;
+- debajo del estado, el recorrido: cinco rayitas, una por tramo —colgada, el chef mira, el
+  desposte, al fuego y el mesón—. Las hechas van en anaranjado; la de ahora, con una luz que la
+  cruza; al servir, la última se llena con las tandas que llegaron. Llena entera, la comanda llegó
+  toda al mesón. Una rechazada, que no se pudo terminar o cancelada no lo lleva;
 - mientras espera su turno, cuántas van antes: «Es la próxima en la fila.», «Hay 1 comanda antes
   que la tuya.» o «Hay N comandas antes que la tuya.»;
 - «Hora estimada: <fecha y hora>», si se sabe: la da el chef al tomarla y la corrige en cada
@@ -80,6 +85,8 @@ comandas.». Con comandas, una tarjeta por comanda, de la más nueva a la más v
 - «Ver en el mesón →» —de día, «Ver en la bandeja →»—, si algo de esa comanda espera en el mesón:
   lleva al mesón con solo lo de esa comanda;
 - en una rechazada o que no se pudo terminar, el motivo que escribió el chef, en palabras;
+- «Tu instrucción al chef: «<texto>»», en letra chica, si se la escribió al pedirla (hasta tres
+  líneas; lo que sigue se corta con «…»);
 - «Lo que pasó», un desplegable con cada paso: la fecha y hora, el estado y, si lo hubo, el
   mensaje del chef;
 - «Cancelar la comanda», el botón rojo, mientras no esté en el horno (mientras está «Comanda
@@ -102,6 +109,40 @@ De día, «El chef mira la res» es «El chef mira el atún», «El desposte» e
 fuego» es «Armando las piezas», el mesón es «la bandeja», los cortes son piezas y «No se puede
 cocinar» es «No se puede preparar» (ver «El modo día» en [index.md](index.md)).
 
+**La tarjeta se actualiza sola.** Mientras haya alguna comanda en marcha y la pestaña esté a la
+vista, el panel mira cada pocos segundos si algo cambió y, si cambió, pone las tarjetas al día sin
+recargar la página: el estado, la estación, el recorrido, el mensaje del chef, «Ver en el mesón
+→». Un paso del chef se ve en unos 5 a 15 segundos. Con la pestaña en segundo plano no mira, y al
+volver a ella mira de inmediato. Con todas listas, servidas o terminadas, deja de mirar y se va
+«Se actualiza sola».
+
+**Llega un correo cuando termina.** Al quedar «Lista en el mesón», el dueño recibe un correo con
+cuántos cortes quedaron en el mesón y el enlace para verlos; al quedar «No se puede cocinar» o «No
+se pudo terminar», uno con el motivo del chef. Llega uno por comanda, al correo con que entra al
+panel, en su modo (de día, «Lista en la bandeja»). «Servida» y «Cancelada» no mandan correo: las
+hace la persona.
+
+### La estación de cada comanda
+
+El cuadro a la izquierda de cada tarjeta. De noche es la parrilla, sobre fondo oscuro; de día, la
+barra de sushi, sobre papel claro.
+
+| Estado | De noche | De día |
+|---|---|---|
+| «Comanda colgada» | La comanda de papel, colgada de un riel, se mece; abajo, el pase con su campanilla. | Lo mismo, con el riel de madera. |
+| «El chef mira la res» | Una lupa recorre la media res colgada. | Una lupa recorre el atún sobre la tabla. |
+| «El desposte» | La res con las líneas por donde se corta, que avanzan, y un cuchillo que va y viene. | Lo mismo, con el atún y un cuchillo largo. |
+| «Al fuego» | La parrilla prendida: tres cortes sobre la rejilla, las llamas y las brasas debajo, y el humo que sube. | Tres piezas de arroz sobre una tabla con patas; el pescado cae sobre cada una, y un soplete azul arde encima. |
+| «Sirviendo» | La parrilla chica a la izquierda; un corte viaja de ella a la tabla de la derecha, donde esperan los que ya salieron (uno por tanda, hasta tres). | Lo mismo, con una pieza que viaja a la bandeja. |
+| «Lista en el mesón» | La tabla llena, con cuatro cortes, una ramita de romero y el humo. | La bandeja con tres piezas, una hoja de shiso y wasabi, y una luz que la cruza. |
+| «Servida» | La tabla vacía, con la ramita de romero. | La bandeja vacía, con la hoja de shiso. |
+| «No se puede cocinar», «No se pudo terminar», «Cancelada» | La res apagada, en gris. | El atún apagado, en gris. |
+
+Con el movimiento reducido del sistema (la opción de accesibilidad «Reducir movimiento», en el
+teléfono o el computador), nada se mueve: cada estación queda quieta en un cuadro que dice lo
+mismo —la comanda colgada, la lupa sobre la carne, la parrilla prendida, el corte ya en la tabla—,
+y el punto de «Se actualiza sola» deja de latir. La tarjeta se sigue actualizando igual.
+
 ### La escena
 
 Arriba del bloque «El chef de la casa», un dibujo ancho. Es solo un dibujo: no se aprieta.
@@ -122,7 +163,7 @@ dirección lleva de vuelta a La Cocina. Mientras se está acá, la pestaña «La
 
 Arriba, el enlace «← La Cocina», el título «Pedir una comanda» y el párrafo «Le llevas al chef de
 la casa tu material crudo y le dices qué quieres que salga. Lo cocina en unas horas, o al día
-siguiente, y te avisa en cada paso.». Después, cinco bloques.
+siguiente, y te avisa en cada paso.». Después, seis bloques.
 
 **Bloque «1. El plato principal».** Bajo el título: «El video que el chef va a cocinar. Empieza a
 subir apenas lo eliges.».
@@ -178,10 +219,25 @@ acompañamientos.».
 - «Los formatos»: «Clips verticales» (viene marcado) y «Carruseles». Al menos uno.
 - «Cuántos, más o menos»: «Lo que dé el material» (viene marcado), «Unos 10» o «Unos 20».
 - La línea «Los estilos los elige el chef, con lo que mejor le vaya al material.».
-- «Qué destacar o qué evitar (opcional)», un texto libre de hasta 1000 caracteres, con el ejemplo
-  «Por ejemplo: «la parte de ventas», «no uses la anécdota del final».».
 - «Para cuándo (opcional)», un campo de fecha que abre el calendario del panel («Quitar» la borra), con la ayuda «Informativo: la hora real la estima el
   chef.».
+
+**Bloque «4. Tu instrucción al chef».** Bajo el título: «Opcional. Lo que le dirías al chef al
+pasarle el material: la duración, el tono, qué destacar o qué evitar.». Hasta el 2026-11-02 esto
+era el campo «Qué destacar o qué evitar (opcional)», dentro del bloque 3.
+
+- Un texto libre, vacío, con el ejemplo gris «Por ejemplo: «Quiero que este contenido sea formato
+  bajo 30 segundos.»». El chef lo recibe tal cual.
+- Debajo, a la izquierda, «El chef la lee tal cual, junto con tu material y tu marca.» y, a la
+  derecha, el contador: «<N> / 1000». Desde los 900 caracteres se pone ámbar; pasado el tope, rojo.
+- Pasado el tope, el recuadro se pone rojo y debajo aparece, en rojo, «Tu instrucción al chef cabe
+  en 1000 caracteres: acórtala.». Se puede seguir escribiendo, pero no colgar la comanda hasta
+  acortarla. Los espacios del principio y del final no cuentan.
+- «Ideas para empezar: un toque las suma a lo que escribiste.», y cinco botones redondeados, cada
+  uno con un «+»: «Clips de menos de 30 segundos.», «Destaca la parte de ventas.», «No uses la
+  anécdota del final.», «Empieza cada clip con la pregunta, no con la respuesta.» y «Tono cercano,
+  como una conversación.». Uno apretado se suma al final del texto y queda apagado; también se
+  apaga si ya no cabe.
 
 **Bloque «Tu marca».** Bajo el título: «Lo que el chef usa para vestir lo que cocina. Se guarda
 para las comandas que vengan.». Viene con lo de la última comanda; la primera vez, el nombre de
@@ -196,9 +252,9 @@ la cuenta.
 - «El llamado final (opcional)», con la ayuda «El texto del cierre: «Sígueme para más», «Agenda tu
   clase».».
 
-**Bloque «4. Confirmar».** Lo que se va a pedir, una línea por cosa: «Plato principal: <nombre>
-(<qué es>) · <minutos> min», los acompañamientos, «Qué sale: …», «Los estilos: los elige el chef»
-y «Tu marca: …». Debajo, cuántas irían antes («Hay 2 comandas antes que la tuya.»), la «Hora
+**Bloque «5. Confirmar».** Lo que se va a pedir, una línea por cosa: «Plato principal: <nombre>
+(<qué es>) · <minutos> min», los acompañamientos, «Qué sale: …», «Los estilos: los elige el chef»,
+«Tu instrucción al chef: «<texto>»» (o «ninguna») y «Tu marca: …». Debajo, cuántas irían antes («Hay 2 comandas antes que la tuya.»), la «Hora
 estimada» si se puede calcular, «La cocina está cerrada por ahora: tu comanda espera su turno.»
 si lo está, y cuánto cupo consume: «Consume <N> minutos de tu cupo, los del plato principal. Por
 ahora el cupo no tiene tope.».
@@ -206,7 +262,7 @@ ahora el cupo no tiene tope.».
 Al final, el botón anaranjado «Colgar la comanda» (mientras trabaja, «Colgando…»). Mientras no se
 puede, está apagado y al lado dice qué falta: «Marca la casilla de los derechos.», «Sube el plato
 principal.», «Espera a que termine de subir.», «El plato principal no subió: reintenta o elige
-otro.» o «Elige qué quieres que salga.». Al colgarla, la pantalla vuelve a La Cocina y la comanda
+otro.», «Elige qué quieres que salga.» o «Acorta tu instrucción al chef.». Al colgarla, la pantalla vuelve a La Cocina y la comanda
 aparece arriba de todo, «Comanda colgada».
 
 ### El mesón
@@ -380,10 +436,11 @@ pestaña «La Cocina» queda marcada.
    subir solo.
 4. Si hay otra cámara, la pantalla o fotos, en «2. Los acompañamientos» elegir qué es y agregar el
    archivo.
-5. En «3. Qué quieres que salga», elegir los formatos y cuántos; si se quiere, qué destacar o
-   evitar y para cuándo.
-6. Revisar «Tu marca».
-7. Esperar a que todo diga «Subido.» y apretar «Colgar la comanda».
+5. En «3. Qué quieres que salga», elegir los formatos y cuántos y, si se quiere, para cuándo.
+6. Si se quiere, en «4. Tu instrucción al chef», escribirle lo que se le pide: la duración, el
+   tono, qué destacar o qué evitar. Las ideas de abajo se suman con un toque.
+7. Revisar «Tu marca».
+8. Esperar a que todo diga «Subido.» y apretar «Colgar la comanda».
 
 Mientras sube, la página tiene que quedar abierta. Un archivo de varios GB tarda lo que tarde la
 conexión: un largo de 4 GB por una conexión doméstica puede ser media hora o más.
@@ -424,8 +481,9 @@ No se deshace: los archivos se borran.
 ### Para seguir una comanda
 
 En «El chef de la casa», buscar su tarjeta por el nombre del plato principal. El estado dice en
-qué va, y «Lo que pasó» cuenta cada paso con su hora. La página no se actualiza sola: recargar
-para ver el último paso.
+qué va, la estación y el recorrido lo muestran, y «Lo que pasó» cuenta cada paso con su hora. No
+hace falta recargar: mientras la pestaña esté a la vista, la tarjeta se pone al día sola en unos
+segundos. Cuando termina, llega un correo.
 
 ### Para cancelar una comanda
 
@@ -484,6 +542,9 @@ Al final de la pantalla, «El manual del parrillero →». Adentro, elegir la p�
 | «La cocina está abierta.» | El servidor del chef está conectado. | Nada. |
 | «La cocina está cerrada por ahora: lo que pidas espera su turno.» | El servidor del chef no da señales hace más de diez minutos. | Esperar: las comandas no se pierden, pero la hora estimada se corre. |
 | «Todavía no tienes comandas.» | No hay ninguna comanda en esta cuenta. | Nada. |
+| «Se actualiza sola» | Hay comandas en marcha, y las tarjetas se ponen al día sin recargar. | Nada: dejar la pestaña abierta para verlas avanzar. |
+| «Tu instrucción al chef cabe en 1000 caracteres: acórtala.» | La instrucción al chef pasó el tope. | Acortarla hasta que el contador diga 1000 o menos. |
+| «Acorta tu instrucción al chef.» | Al lado de «Colgar la comanda», apagado: la instrucción pasó el tope. | Acortarla en el bloque 4. |
 | «¿Cancelar esta comanda?» y «El chef deja de prepararla, y lo que subiste se borra en 14 días.» | Ventana antes de cancelar. | «Cancelar la comanda» para cancelarla; «Volver» para dejarla. |
 | «Esa comanda ya está en el horno o terminó: no se puede cancelar.» | El chef la metió al horno, o terminó, entre que se cargó la página y se apretó el botón. | Recargar: la tarjeta muestra su estado de ahora. |
 | «Esa comanda no existe.» | La comanda ya no está, o no es de esta cuenta. | Recargar. |
@@ -533,7 +594,19 @@ Al final de la pantalla, «El manual del parrillero →». Adentro, elegir la p�
   mismo archivo: sigue donde quedó. Si ya había terminado de subir, está en «Ya subiste».
 - **«¿Qué tan grande puede ser el video?».** Hasta 20 GB; las fotos, hasta 50 MB.
 - **«¿Qué estilos va a usar?».** Por ahora los elige el chef, con lo que mejor le vaya al
-  material. Lo que se quiera destacar o evitar va en «Qué destacar o qué evitar».
+  material. Lo que se quiera destacar o evitar va en «4. Tu instrucción al chef».
+- **«Quiero clips cortos» / «¿Cómo le digo al chef lo que quiero?».** En «Pedir una comanda», el
+  bloque «4. Tu instrucción al chef»: escribirlo ahí, por ejemplo «Quiero que este contenido sea
+  formato bajo 30 segundos.». Una comanda ya colgada no se corrige: si todavía se puede cancelar,
+  cancelarla y pedirla de nuevo.
+- **«¿Dónde quedó “Qué destacar o qué evitar”?».** Desde el 2026-11-02 es «4. Tu instrucción al
+  chef», su propio bloque.
+- **«¿Me avisan cuando esté lista?».** Sí: llega un correo cuando queda lista en el mesón, y
+  también si el chef la rechaza o no la pudo terminar. Mientras tanto, la tarjeta se actualiza
+  sola. Si no llegó, mirar la carpeta de spam; la tarjeta dice el estado igual.
+- **«La animación no se mueve».** Con «Reducir movimiento» activado en el sistema, las estaciones
+  quedan quietas a propósito. Una comanda lista, servida o terminada tampoco se mueve: no hay
+  nada en marcha.
 - **«¿Puedo pedir desde la app del teléfono?».** No: la app no tiene La Cocina. Desde el navegador
   del teléfono sí se puede, pero un video de varios GB sube mejor desde el computador.
 - **«Algo desapareció del mesón».** Lo que nadie programa en 30 días se borra solo; en su última
@@ -588,7 +661,9 @@ Al final de la pantalla, «El manual del parrillero →». Adentro, elegir la p�
 - No deshace un descarte.
 - No elige estilos: en esta fase los elige el chef.
 - No pide desde la app del teléfono: solo desde el panel.
-- No se actualiza sola: el estado de una comanda se ve al recargar.
+- No avisa por correo cada paso: solo cuando la comanda termina (lista, rechazada o que no se
+  pudo terminar).
+- No cambia la instrucción al chef de una comanda ya colgada.
 - No vuelve a mostrar una llave ya generada, no permite renombrarla y no limita lo que puede
   hacer: todas las llaves pueden lo mismo.
 - Las llaves no vencen solas: valen hasta que se revocan.
@@ -607,14 +682,21 @@ Sale de:
 - `src/app/admin/(dash)/ia/chef-de-la-casa.tsx`: «El chef de la casa», apagado y encendido, la
   línea de la cocina abierta o cerrada y las tarjetas de las comandas.
 - `src/components/escena-cocina.tsx`: la escena, de noche y de día, con el fuego y el farol.
+- `src/components/estacion-comanda.tsx`: la estación de cada tarjeta, de noche y de día, y lo que
+  se mueve en cada estado; sus movimientos y su versión quieta están en `src/app/globals.css`.
+- `src/app/admin/(dash)/ia/vigia.tsx` y `src/app/api/admin/cocina/pulso/route.ts`: «Se actualiza
+  sola», cada cuánto mira y cuándo deja de mirar.
+- `src/lib/cocina/correo-de-comanda.ts`: el correo cuando la comanda termina, su asunto y su texto.
 - `src/app/admin/(dash)/ia/cancelar.tsx` y `src/app/admin/cocina-actions.ts`: «Cancelar la
   comanda», su pregunta y sus mensajes, y lo que hace «Colgar la comanda».
 - `src/app/admin/(dash)/ia/pedir/page.tsx` y `src/app/admin/(dash)/ia/pedir/formulario.tsx`:
-  «Pedir una comanda», sus cinco bloques, las filas de cada archivo y lo que falta para colgar.
+  «Pedir una comanda», sus seis bloques, «Tu instrucción al chef» con su contador y sus ideas, las
+  filas de cada archivo y lo que falta para colgar.
 - `src/components/dibujos-insumo.tsx`: la res, el cerdo y las verduras de noche; el atún, el
   salmón y el arroz de día.
 - `src/lib/cocina/insumos.ts`: lo que se puede subir, los topes y sus frases.
-- `src/lib/cocina/pedido.ts` y `src/lib/cocina/pedir.ts`: lo que se pide, sus frases, la marca que
+- `src/lib/cocina/pedido.ts` y `src/lib/cocina/pedir.ts`: lo que se pide, el tope y las ideas de
+  la instrucción al chef, sus frases, la marca que
   se guarda, lo que se congela y lo que entra en una comanda.
 - `src/lib/subida-por-partes.ts`: la subida por partes, retomar y cancelar.
 - `src/app/admin/(dash)/ia/meson/page.tsx`, `src/app/admin/(dash)/ia/meson/tarjeta.tsx` y
@@ -627,7 +709,7 @@ Sale de:
 - `src/lib/cocina/panel.ts`: qué comandas se ven, cuántas van antes, la hora estimada de la fila,
   los diez minutos sin señal y qué hace cancelar.
 - `src/lib/cocina/nombres.ts` y `src/lib/cocina/tarjeta.ts`: el estado en palabras, de noche y de
-  día, y cuántas van antes.
+  día, cuántas van antes y el tramo del recorrido.
 - `src/app/admin/(dash)/ia/llaves.tsx`: generar, la llave visible una vez, los dos botones de
   copiar y su texto, y «Revocar».
 - `src/app/admin/(dash)/ia/manual/[[...pagina]]/page.tsx` y `src/lib/manual.ts`: el manual del

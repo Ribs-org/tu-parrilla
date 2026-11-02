@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, useTransition } from 'react'
+import { useEffect, useId, useRef, useState, useTransition } from 'react'
 import { pedirComandaPropia } from '@/app/admin/cocina-actions'
 import { Panel } from '@/components/charts/panel'
 import { useConfirmar } from '@/components/confirmar'
@@ -12,11 +12,14 @@ import type { TipoInsumo } from '@/db/schema'
 import { SUBTIPOS_PRINCIPAL, aceptaTipo, maxBytesDe, muyGrande, tipoDeArchivo, tipoNoAceptado, type SubtipoPrincipal } from '@/lib/cocina/insumos'
 import {
   CANTIDADES,
+  EJEMPLOS_DE_INSTRUCCION,
   FORMATOS,
+  INSTRUCCION_LARGA,
   MAX_ACOMPANAMIENTOS,
-  MAX_NOTAS,
+  MAX_INSTRUCCION,
   NOMBRE_CANTIDAD,
   NOMBRE_FORMATO,
+  largoDeInstruccion,
   minutosDe,
   type CantidadPedida,
   type FormatoPedido,
@@ -29,7 +32,8 @@ import { cn } from '@/lib/utils'
 // El formulario de una comanda (`docs/superpowers/specs/2026-10-22-la-cocina-design.md`, «La comanda
 // nueva»): cada archivo empieza a subir apenas se elige, por partes y directo al almacén, con su
 // dibujo y su barra; lo que ya se subió y no se pidió vuelve a ofrecerse, y elegir otra vez el mismo
-// archivo retoma una subida cortada. Colgar la comanda manda solo los ids.
+// archivo retoma una subida cortada. Colgar la comanda manda solo los ids. «Tu instrucción al chef»
+// tiene su propio bloque: es lo único que el chef lee en palabras de la persona.
 
 const NOMBRE_SUBTIPO: Record<SubtipoPrincipal, string> = {
   largo: 'Un video largo',
@@ -255,7 +259,9 @@ export function FormularioComanda({
           ? 'El plato principal no subió: reintenta o elige otro.'
           : formatos.length === 0
             ? 'Elige qué quieres que salga.'
-            : null
+            : largoDeInstruccion(notas) > MAX_INSTRUCCION
+              ? 'Acorta tu instrucción al chef.'
+              : null
 
   function colgar() {
     setError(null)
@@ -407,15 +413,14 @@ export function FormularioComanda({
           </fieldset>
         </div>
         <p className="mt-4 text-sm text-fg-muted">Los estilos los elige el chef, con lo que mejor le vaya al material.</p>
-        <div className="mt-4 grid gap-4 sm:grid-cols-[minmax(0,1fr)_12rem]">
-          <Field label="Qué destacar o qué evitar (opcional)" hint="Por ejemplo: «la parte de ventas», «no uses la anécdota del final».">
-            <Textarea rows={3} maxLength={MAX_NOTAS} value={notas} onChange={(e) => setNotas(e.target.value)} />
-          </Field>
+        <div className="mt-4 max-w-[14rem]">
           <Field label="Para cuándo (opcional)" hint="Informativo: la hora real la estima el chef.">
             <SelectorFecha modo="fecha" quitable value={paraCuando} onChange={setParaCuando} />
           </Field>
         </div>
       </Panel>
+
+      <InstruccionAlChef valor={notas} onCambiar={setNotas} />
 
       <Panel title="Tu marca" hint="Lo que el chef usa para vestir lo que cocina. Se guarda para las comandas que vengan.">
         <div className="grid gap-4 sm:grid-cols-2">
@@ -447,7 +452,7 @@ export function FormularioComanda({
         </div>
       </Panel>
 
-      <Panel title="4. Confirmar">
+      <Panel title="5. Confirmar">
         <ul className="max-w-2xl space-y-1 text-sm text-fg-muted">
           <li>
             Plato principal:{' '}
@@ -459,6 +464,9 @@ export function FormularioComanda({
             Qué sale: {formatos.map((f) => NOMBRE_FORMATO[f]).join(' y ') || 'nada todavía'} · {NOMBRE_CANTIDAD[cantidad]}
           </li>
           <li>Los estilos: los elige el chef</li>
+          <li className="line-clamp-3 whitespace-pre-line break-words">
+            Tu instrucción al chef: {notas.trim() ? `«${notas.trim()}»` : 'ninguna'}
+          </li>
           <li>
             Tu marca: {marca.nombre || 'sin nombre'}
             {marca.handle ? ` · ${marca.handle}` : ''}
@@ -486,6 +494,80 @@ export function FormularioComanda({
         </div>
       </Panel>
     </div>
+  )
+}
+
+/**
+ * «Tu instrucción al chef»: lo que la persona le pide en sus palabras —«Quiero que este contenido
+ * sea formato bajo 30 segundos»—, que el chef recibe tal cual (`instruccion`, en
+ * `docs/cocina-api.md`). Con su contador y su aviso en línea al pasarse del tope, y unas ideas que
+ * se suman al texto con un toque. El tope lo cuenta igual que el servidor: sin los espacios de las
+ * puntas (`largoDeInstruccion`).
+ */
+function InstruccionAlChef({ valor, onCambiar }: { valor: string; onCambiar: (valor: string) => void }) {
+  const id = useId()
+  const largo = largoDeInstruccion(valor)
+  const pasada = largo > MAX_INSTRUCCION
+  const cerca = !pasada && largo >= MAX_INSTRUCCION * 0.9
+
+  function sumar(ejemplo: string) {
+    const actual = valor.trimEnd()
+    if (!actual) return onCambiar(ejemplo)
+    onCambiar(`${actual}${/[.!?…»]$/.test(actual) ? '' : '.'} ${ejemplo}`)
+  }
+
+  return (
+    <Panel
+      title="4. Tu instrucción al chef"
+      hint="Opcional. Lo que le dirías al chef al pasarle el material: la duración, el tono, qué destacar o qué evitar."
+    >
+      <label htmlFor={`${id}texto`} className="sr-only">
+        Tu instrucción al chef
+      </label>
+      <Textarea
+        id={`${id}texto`}
+        rows={4}
+        value={valor}
+        onChange={(e) => onCambiar(e.target.value)}
+        placeholder="Por ejemplo: «Quiero que este contenido sea formato bajo 30 segundos.»"
+        aria-invalid={pasada || undefined}
+        aria-describedby={`${id}cuenta ${id}error`}
+        className={cn('max-w-2xl', pasada && 'border-negative/70 focus:border-negative')}
+      />
+      <div className="mt-1 flex max-w-2xl flex-wrap items-start justify-between gap-x-4 gap-y-1">
+        <p className="text-[0.72rem] text-fg-faint">El chef la lee tal cual, junto con tu material y tu marca.</p>
+        <span
+          id={`${id}cuenta`}
+          className={cn('font-mono text-[0.72rem] tabular-nums', pasada ? 'text-negative' : cerca ? 'text-caution' : 'text-fg-faint')}
+        >
+          {largo} / {MAX_INSTRUCCION}
+        </span>
+      </div>
+      <p id={`${id}error`} role="alert" className="mt-1 max-w-2xl text-sm text-negative empty:hidden">
+        {pasada ? INSTRUCCION_LARGA : null}
+      </p>
+
+      <p className="mt-4 text-xs text-fg-muted">Ideas para empezar: un toque las suma a lo que escribiste.</p>
+      <ul className="mt-2 flex max-w-2xl flex-wrap gap-2">
+        {EJEMPLOS_DE_INSTRUCCION.map((ejemplo) => {
+          const yaEsta = valor.includes(ejemplo)
+          const noCabe = largo + ejemplo.length + 2 > MAX_INSTRUCCION
+          return (
+            <li key={ejemplo}>
+              <button
+                type="button"
+                onClick={() => sumar(ejemplo)}
+                disabled={yaEsta || noCabe}
+                className="rounded-full border border-acero-600 px-3 py-1 text-left text-xs text-fg-muted transition hover:border-brasa hover:text-fg disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:border-acero-600 disabled:hover:text-fg-muted"
+              >
+                <span aria-hidden className="mr-1 text-brasa">+</span>
+                {ejemplo}
+              </button>
+            </li>
+          )
+        })}
+      </ul>
+    </Panel>
   )
 }
 

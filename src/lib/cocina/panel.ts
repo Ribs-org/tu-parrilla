@@ -1,7 +1,9 @@
-import { and, asc, count, desc, eq, inArray, isNotNull } from 'drizzle-orm'
+import { createHash } from 'node:crypto'
+import { and, asc, count, desc, eq, inArray, isNotNull, max, sql } from 'drizzle-orm'
 import { comandaEventos, comandas, creativos, getDb, insumos, latidos, users, type EstadoComanda } from '@/db'
-import { CANCELABLES } from './estados'
+import { CANCELABLES, EN_MARCHA } from './estados'
 import { ordenarFila } from './fila'
+import { instruccionDe } from './pedido'
 
 // Lo que la pestaña La Cocina lee y escribe para su dueño: sus comandas con su línea de tiempo, si
 // la cocina está abierta, y cancelar. Todo por dueño; lo de los demás entra solo como una cuenta
@@ -68,6 +70,8 @@ export type ComandaDelPanel = {
   tandasTotal: number | null
   /** El nombre del plato principal, para reconocerla. */
   principal: string | null
+  /** «Tu instrucción al chef», si la dejó. */
+  instruccion: string | null
   /** Cuántos creativos esperan en el mesón. */
   enElMeson: number
   /** Cuántas comandas van antes en la fila; solo mientras espera. */
@@ -127,6 +131,7 @@ export async function comandasDelDueno(ownerId: string): Promise<ComandaDelPanel
       tandasServidas: c.tandasServidas,
       tandasTotal: c.tandasTotal,
       principal: principales.find((p) => p.comandaId === c.id)?.nombre ?? null,
+      instruccion: instruccionDe(c.pedido),
       enElMeson: enMesa.find((m) => m.comandaId === c.id)?.n ?? 0,
       antes: c.estado === 'recibida' && lugar >= 0 ? lugar : null,
       cancelable: CANCELABLES.has(c.estado),
@@ -135,6 +140,51 @@ export async function comandasDelDueno(ownerId: string): Promise<ComandaDelPanel
         .map((e) => ({ estado: e.estado, mensaje: e.mensaje, eta: e.eta, creadoEn: e.creadoEn })),
     }
   })
+}
+
+export type PulsoDeLaCocina = {
+  /** Cuántas comandas del dueño están en marcha (`EN_MARCHA`): sin ninguna, nadie pregunta. */
+  vivas: number
+  /** Cambia cuando cambia algo de lo que muestra la tarjeta; no dice qué. */
+  firma: string
+}
+
+/**
+ * Lo mínimo para saber si la tarjeta de La Cocina quedó vieja, sin armarla: lo pregunta el panel
+ * cada pocos segundos mientras hay comandas en marcha (`/api/admin/cocina/pulso`), y solo si la
+ * firma cambió vuelve a pedir la página. Entran en la firma las comandas del dueño (cuántas y la
+ * última vez que alguna cambió), lo que tiene en el mesón, si la cocina está abierta y, mientras
+ * alguna suya espera, cuántas esperan en total: cuando el chef toma la de otro, la suya avanza en
+ * la fila. Va hecha un resumen para no contar afuera cuántas comandas hay de los demás.
+ */
+export async function pulsoDeLaCocina(ownerId: string, ahora: Date): Promise<PulsoDeLaCocina> {
+  const db = getDb()
+  const [propias] = await db
+    .select({
+      n: count(),
+      vivas: sql<number>`count(*) filter (where ${inArray(comandas.estado, [...EN_MARCHA])})`.mapWith(Number),
+      esperan: sql<number>`count(*) filter (where ${eq(comandas.estado, 'recibida')})`.mapWith(Number),
+      ultima: max(comandas.actualizadaEn),
+    })
+    .from(comandas)
+    .where(eq(comandas.ownerId, ownerId))
+  const [{ mesa } = { mesa: 0 }] = await db
+    .select({ mesa: count() })
+    .from(creativos)
+    .where(and(eq(creativos.ownerId, ownerId), eq(creativos.estado, 'mesa')))
+  const [{ fila } = { fila: 0 }] = propias?.esperan
+    ? await db
+        .select({ fila: count() })
+        .from(comandas)
+        .innerJoin(users, eq(users.id, comandas.ownerId))
+        .where(and(eq(comandas.estado, 'recibida'), isNotNull(users.cocinaDesde)))
+    : []
+  const { abierta } = await estadoDeLaCocina(ahora)
+  const partes = [propias?.n ?? 0, propias?.ultima?.toISOString() ?? '', mesa, fila, abierta ? 1 : 0]
+  return {
+    vivas: propias?.vivas ?? 0,
+    firma: createHash('sha256').update(partes.join('|')).digest('hex').slice(0, 16),
+  }
 }
 
 /**

@@ -30,6 +30,21 @@ export function puedePasar(de: EstadoComanda, a: EstadoComanda): boolean {
 /** Hasta dónde la puede cancelar el usuario: mientras no esté en el horno. */
 export const CANCELABLES: ReadonlySet<EstadoComanda> = new Set(['recibida', 'revisando', 'en_preparacion', 'probando', 'pregunta'])
 
+/**
+ * Las que están en marcha: el chef las tiene o las va a tomar, y lo próximo que les pase lo hace
+ * él. Mientras el dueño tenga alguna, la tarjeta de La Cocina se actualiza sola (`pulsoDeLaCocina`).
+ * `lista` no: de ahí la mueve solo el dueño, desde el mesón.
+ */
+export const EN_MARCHA: ReadonlySet<EstadoComanda> = new Set([
+  'recibida',
+  'revisando',
+  'en_preparacion',
+  'probando',
+  'pregunta',
+  'en_el_horno',
+  'sirviendo',
+])
+
 export function esEstado(valor: unknown): valor is EstadoComanda {
   return typeof valor === 'string' && (ESTADOS_COMANDA as readonly string[]).includes(valor)
 }

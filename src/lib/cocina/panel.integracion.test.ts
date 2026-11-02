@@ -173,6 +173,48 @@ describe.skipIf(!URL_PRUEBAS)('la pestaña La Cocina, contra una Postgres de ver
     expect(await cancelarComandaPropia(mia.id)).toEqual({ error: COMANDA_NO_CANCELABLE })
   })
 
+  it('el pulso: cambia con lo que la tarjeta muestra, y no con lo de nadie más', async () => {
+    const { pulsoDeLaCocina } = await import('./panel')
+    const { comandas, creativos, latidos } = await esquema()
+    const ahora = new Date('2026-10-22T12:00:00Z')
+    const pulso = () => pulsoDeLaCocina(duena.id, ahora)
+
+    expect(await pulso()).toMatchObject({ vivas: 0 })
+    const mia = await comanda(duena.id, { actualizadaEn: new Date('2026-10-22T11:00:00Z') })
+    const colgada = await pulso()
+    expect(colgada.vivas).toBe(1)
+    expect(colgada.firma).toMatch(/^[0-9a-f]{16}$/)
+    expect((await pulso()).firma).toBe(colgada.firma)
+
+    // Lo de otra que no mueve la fila de la suya no cuenta; una que se cuelga y espera, sí.
+    await comanda(otra.id, { estado: 'en_el_horno' })
+    expect((await pulso()).firma).toBe(colgada.firma)
+    const ajena = await comanda(otra.id)
+    const conFila = await pulso()
+    expect(conFila.firma).not.toBe(colgada.firma)
+
+    // El chef la toma: cambia.
+    await (await db()).update(comandas).set({ estado: 'revisando', actualizadaEn: new Date('2026-10-22T11:30:00Z') }).where(eq(comandas.id, mia.id))
+    const tomada = await pulso()
+    expect(tomada.firma).not.toBe(conFila.firma)
+    // Ya no espera: la fila de los demás deja de contar.
+    await (await db()).delete(comandas).where(eq(comandas.id, ajena.id))
+    expect((await pulso()).firma).toBe(tomada.firma)
+
+    // Llega algo al mesón: cambia.
+    await (await db()).insert(creativos).values({ ownerId: duena.id, comandaId: mia.id, ref: 'a', tipo: 'video', estado: 'mesa' })
+    const conMeson = await pulso()
+    expect(conMeson.firma).not.toBe(tomada.firma)
+
+    // Se abre la cocina: cambia.
+    await (await db()).insert(latidos).values({ trabajador: 'casa', en: new Date('2026-10-22T11:58:00Z') })
+    expect((await pulso()).firma).not.toBe(conMeson.firma)
+
+    // Lista, ya no está en marcha: el panel deja de preguntar.
+    await (await db()).update(comandas).set({ estado: 'lista' }).where(eq(comandas.id, mia.id))
+    expect((await pulso()).vivas).toBe(0)
+  })
+
   it('encender y apagar la cocina de alguien: solo el admin', async () => {
     const { encenderCocina } = await import('@/app/admin/actions')
     const { users } = await esquema()

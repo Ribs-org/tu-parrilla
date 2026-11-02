@@ -22,7 +22,7 @@ tus números.
 | `/api/schedule/…`, `/api/metrics/…` | La API para tu agente, con una llave de La Cocina («Tu propio chef»): cargar, ver y sacar lo programado, archivar lo quemado, las cuentas y los números (ver «Carga masiva por API» y las secciones que le siguen) |
 | `/api/cocina/…` | La API de La Cocina, con `COCINA_SECRET`: el servidor del chef toma las comandas, baja sus insumos, informa cada estado y entrega lo cocinado al mesón del dueño (ver «La Cocina» y `docs/cocina-api.md`) |
 | `/api/media` | `POST` con la misma llave: firma la subida de un archivo directo a R2, para nombrarlo después en varias filas del lote sin que se vuelva a bajar (ver «Carga masiva por API») |
-| `/api/admin/…` | Lo que el panel llama desde el navegador, con la cookie de la sesión: la firma de una subida directa (`upload-url`), las subidas por partes de La Cocina (`cocina/…`; ver «La Cocina») y la planilla de Excel de Los Números (`planilla`, y `planilla/adelanto` para lo que no cabe; ver «Llevar para la casa») |
+| `/api/admin/…` | Lo que el panel llama desde el navegador, con la cookie de la sesión: la firma de una subida directa (`upload-url`), las subidas por partes de La Cocina (`cocina/…`) y el pulso que mantiene al día sus tarjetas (`cocina/pulso`; ver «La Cocina») y la planilla de Excel de Los Números (`planilla`, y `planilla/adelanto` para lo que no cabe; ver «Llevar para la casa») |
 | `/api/mobile/…` | La API de la app del teléfono, con el token de su sesión (ver `mobile/README.md`) |
 | `/api/cron/…` | Las corridas programadas: la publicación y la sincronización, que también reintenta los mensajes del libro de sugerencias que no salieron a GitHub. Solo con `CRON_SECRET` |
 | `/api/track/…` | Las balizas de visitas y clics de las páginas públicas |
@@ -1163,7 +1163,7 @@ Vercel y bajan con `vercel env pull .env.local`.
 | `MIGRAR_PREVIEWS` | Que los previews migren la base | Solo cuando el preview tenga una base propia; contra la de producción, no |
 | `DATABASE_URL_PRUEBAS` | Solo para las pruebas de integración: una Postgres desechable donde cada archivo crea y migra su propia base (ver «Comandos»). No va en Vercel | No — sin ella esas pruebas se saltan. Nunca la de producción |
 | `SCHEDULE_API_KEY` | La llave del despliegue: abre `POST /api/schedule/batch` (carga masiva), `POST /api/media` (subir un archivo una vez), `GET` y `DELETE /api/schedule/posts/{id}` (un post, o sacarlo), `POST /api/schedule/posts/{id}/archivar` y `…/desarchivar` (archivar lo quemado), `GET /api/schedule/posts` (calendario), `GET /api/schedule/resumen` (el resumen del día), `GET /api/schedule/cuentas` (las cuentas), `GET /api/metrics/posts` (métricas) y `GET /api/metrics/mejores` (el mejor X %) a nombre del admin. Es anterior a las llaves por usuario y sigue para el agente que ya la usa | No — sin ella los once endpoints aceptan solo las llaves que cada usuario genera en La Cocina («Tu propio chef»); si la pones, genérala igual que `CRON_SECRET` |
-| `RESEND_API_KEY` | Manda los códigos de ingreso y los avisos: la publicación que se quemó, la cuenta que se cayó y el resumen del día (ver «Avisos por correo») | Sí — sin ella nadie puede entrar al panel |
+| `RESEND_API_KEY` | Manda los códigos de ingreso y los avisos: la publicación que se quemó, la cuenta que se cayó, el resumen del día y la comanda de La Cocina que terminó (ver «Avisos por correo») | Sí — sin ella nadie puede entrar al panel |
 | `PUBLISH_ALERT_TO` | Adónde va un aviso sin dueño con correo: un post o una cuenta de antes de los usuarios. Lo demás va al correo de su dueño | No — sin ella, lo que no tiene dueño no avisa; el calendario y Los Fierros lo siguen mostrando |
 | `PUBLISH_ALERT_FROM` | Remitente de los avisos | Opcional; default `onboarding@resend.dev`, que solo entrega al correo de la cuenta de Resend |
 | `SUGERENCIAS_GITHUB_TOKEN` | Abre un issue en GitHub por cada mensaje del libro de sugerencias (ver «El libro de sugerencias»). Un token *fine-grained* con acceso solo al repositorio de `SUGERENCIAS_REPO` y un único permiso: Issues, lectura y escritura | No — sin ella los mensajes se guardan igual y salen solos con el cron diario el primer día que la tenga |
@@ -1250,7 +1250,7 @@ publica cuando termine (`esMediaNoLista`, en `social/publish/instagram.ts`).
 
 ### Avisos por correo
 
-Tres correos, todos con el remitente `PUBLISH_ALERT_FROM` y al correo del dueño (o a
+Cuatro correos, todos con el remitente `PUBLISH_ALERT_FROM` y al correo del dueño (o a
 `PUBLISH_ALERT_TO` si lo que avisa no tiene dueño con correo). Las reglas viven en
 `src/lib/avisos/reglas.ts`, sin base; lo que lee y manda, en `src/lib/avisos/run.ts`.
 
@@ -1273,6 +1273,9 @@ Tres correos, todos con el remitente `PUBLISH_ALERT_FROM` y al correo del dueño
   la sincronización diaria (9:00 UTC), y solo los días en que hay algo que contar. Lo mismo,
   salvo lo del mesón, se lee por API en `GET /api/schedule/resumen` (ver «Resumen por API»),
   para que quien programa con un agente se entere aunque los correos le lleguen al dueño.
+- **Una comanda de La Cocina que terminó**: «Lista en el mesón: «<archivo>»», «No se puede
+  cocinar: …» o «No se pudo terminar: …» (de día, con las palabras del día). Sale una vez por
+  comanda, cuando el chef la deja lista, la rechaza o la da por fallida (ver «La Cocina»).
 
 ### El libro de sugerencias
 
@@ -1537,11 +1540,22 @@ El diseño, con sus fases, está en `docs/superpowers/specs/2026-10-22-la-cocina
 - la pestaña La Cocina (`/admin/ia`), que reemplazó a Tu IA el 2026-10-22: arriba «El chef de la
   casa» y abajo «Tu propio chef», con las llaves de siempre;
 - si la cocina está abierta (algún latido del chef en los últimos diez minutos);
-- sus comandas, con el dibujo de su plato principal, su estado, cuántas van antes, la hora
-  estimada y lo que pasó;
+- sus comandas, cada una con su estación —un dibujo que se mueve según en qué va: la comanda
+  que se mece en el riel, la lupa, el cuchillo, la parrilla con fuego y humo, la tanda que viaja a
+  la tabla; de día, la barra de sushi con el soplete—, su estado, el recorrido en cinco tramos,
+  cuántas van antes, la hora estimada, su instrucción al chef y lo que pasó. Con
+  `prefers-reduced-motion`, cada estación queda quieta en un cuadro que dice lo mismo
+  (`src/components/estacion-comanda.tsx`);
+- **las tarjetas se actualizan solas** mientras alguna comanda está en marcha (de colgada a
+  sirviendo): con la pestaña a la vista, el panel pregunta cada 4 a 15 segundos a
+  `/api/admin/cocina/pulso`, que devuelve una firma de lo que la tarjeta muestra en cuatro
+  consultas chicas, y solo si cambió vuelve a pedir la página (`router.refresh`, sin recargarla).
+  Con la pestaña oculta o sin nada en marcha, no pregunta (`ia/vigia.tsx`);
 - «Cancelar la comanda», mientras no esté en el horno;
 - «Pedir una comanda» (`/admin/ia/pedir`). Ahí sube el plato principal y lo que lo acompaña, cada
-  archivo por partes y apenas lo elige, con su dibujo y su barra. Dice qué quiere que salga, guarda
+  archivo por partes y apenas lo elige, con su dibujo y su barra. Dice qué quiere que salga, le
+  escribe al chef su instrucción («Tu instrucción al chef», hasta 1000 caracteres, con contador e
+  ideas para empezar; el chef la recibe como `instruccion`), guarda
   su marca básica (nombre, @, color de acento y llamado final) y ve la fila y la hora estimada antes
   de colgarla. Lo que subió y no pidió se le ofrece de nuevo, y se borra a los tres días.
 
@@ -1603,6 +1617,15 @@ cocinado espera en el mesón del dueño, que es quien lo programa.
 Por eso dos trabajadores no toman la misma comanda, y un cambio que llega tarde no pisa una
 cancelación. Servir y cancelar son del usuario: el chef no lleva a ninguno de los dos.
 
+**El dueño recibe un correo cuando su comanda termina**: lista (con cuántos cortes quedaron en el
+mesón y el enlace a `/admin/ia/meson?comanda=<id>`), rechazada o fallida (con el motivo del chef).
+Sale con el remitente de los avisos, `PUBLISH_ALERT_FROM`, en el modo de la cuenta, y después de
+responderle al chef (`after`). Uno por cambio: la misma condición sobre el estado decide qué
+petición escribió la transición, y solo esa lo pide (`aviso`, en `cambiarEstado`); un reintento o
+dos peticiones iguales a la vez reciben `409` y no mandan nada. Servida no avisa: llega siempre
+después de lista, y la hace el dueño. Si Resend falla, ese correo no se reintenta
+(`docs/deuda-tecnica.md`). El texto está en `src/lib/cocina/correo-de-comanda.ts`.
+
 **Un creativo llega al mesón solo con sus archivos arriba.** Pasa por tres pasos:
 
 1. se anuncia, y a cada archivo le toca su lugar en la carpeta del dueño
@@ -1659,6 +1682,7 @@ src/
     corte.tsx              el corte dibujado de La Parrilla: silueta, carne, marcas, halo y humo
     pieza-sushi.tsx        el mismo corte en el modo día: nigiri, roll, sashimi y temaki
     escena-cocina.tsx      la escena de La Cocina: el parrillero y el asado al palo de noche, el maestro de sushi y el atún de día; el fuego y el farol dicen si la cocina está abierta
+    estacion-comanda.tsx   la estación de cada comanda en su tarjeta: un dibujo que se mueve según en qué va, la parrilla de noche y la barra de sushi de día
     dibujos-insumo.tsx     lo que se le lleva a La Cocina: la res, el cerdo y las verduras de noche; el atún, el salmón y el arroz de día
     boton-tema.tsx         el botón de la barra que cambia entre la noche y el día
     de-noche-y-de-dia.tsx  lo que se dice distinto de día, en sus dos versiones (el modo esconde una), y el nombre de cada pantalla
@@ -1710,7 +1734,7 @@ src/
     cuentas-api.ts         las cuentas de GET /api/schedule/cuentas: los dos ids y cómo está la conexión (sin base)
     media-api.ts           la clave de un archivo que sube un cliente de la API, en la carpeta de su dueño (sin base)
     archivar-api.ts        el cuerpo y las respuestas de archivar y desarchivar lo quemado por API
-    cocina/                La Cocina: los estados de una comanda, la fila del chef, lo que entrega, lo que lee y escribe su API (/api/cocina), las subidas por partes del panel (/api/admin/cocina), colgar una comanda y el mesón
+    cocina/                La Cocina: los estados de una comanda, la fila del chef, lo que entrega, lo que lee y escribe su API (/api/cocina), las subidas por partes del panel (/api/admin/cocina), colgar una comanda, el pulso de las tarjetas vivas, el correo de la comanda que terminó y el mesón
     color-de-red.ts        el color de marca de cada red en La Parrilla, como clases de Tailwind escritas enteras
     piezas.ts              la pieza de una publicación: sus destinos programados unidos a lo publicado
     auth.ts                sesión del panel

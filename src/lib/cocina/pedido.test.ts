@@ -7,9 +7,12 @@ import {
   FORMATO_FALTA,
   MARCA_LARGA,
   MARCA_SIN_NOMBRE,
-  NOTAS_LARGAS,
+  EJEMPLOS_DE_INSTRUCCION,
+  INSTRUCCION_LARGA,
+  MAX_INSTRUCCION,
   PEDIDO_ILEGIBLE,
   PRINCIPAL_FALTA,
+  instruccionDe,
   leerPedido,
   minutosDe,
 } from './pedido'
@@ -64,7 +67,7 @@ describe('leerPedido', () => {
 
   it('cada campo con su frase', () => {
     expect(leerPedido({ ...pedido, cantidad: 'muchos' })).toEqual({ error: CANTIDAD_FALTA })
-    expect(leerPedido({ ...pedido, notas: 'x'.repeat(1001) })).toEqual({ error: NOTAS_LARGAS })
+    expect(leerPedido({ ...pedido, notas: 'x'.repeat(1001) })).toEqual({ error: INSTRUCCION_LARGA })
     expect(leerPedido({ ...pedido, paraCuando: 'mañana' })).toEqual({ error: FECHA_ILEGIBLE })
     expect(leerPedido({ ...pedido, paraCuando: '2026-13-45' })).toEqual({ error: FECHA_ILEGIBLE })
     expect(leerPedido({ ...pedido, marca: { ...pedido.marca, nombre: '  ' } })).toEqual({ error: MARCA_SIN_NOMBRE })
@@ -80,5 +83,25 @@ describe('minutosDe', () => {
     expect(minutosDe(1801)).toBe(31)
     expect(minutosDe(null)).toBe(0)
     expect(minutosDe(0)).toBe(0)
+  })
+})
+
+describe('la instrucción al chef', () => {
+  it('cabe justo en el tope, contada sin los espacios de las puntas', () => {
+    const justa = 'x'.repeat(MAX_INSTRUCCION)
+    expect(leerPedido({ ...pedido, notas: `  ${justa}  ` })).toMatchObject({ notas: justa })
+    expect(leerPedido({ ...pedido, notas: `${justa}x` })).toEqual({ error: INSTRUCCION_LARGA })
+  })
+
+  it('la de una comanda guardada: el texto de `notas`, o null si no dejó ninguna', () => {
+    expect(instruccionDe({ notas: '  Clips de menos de 30 segundos.  ' })).toBe('Clips de menos de 30 segundos.')
+    expect(instruccionDe({ notas: '   ' })).toBeNull()
+    expect(instruccionDe({ notas: 3 })).toBeNull()
+    expect(instruccionDe({})).toBeNull()
+    expect(instruccionDe(null)).toBeNull()
+  })
+
+  it('los ejemplos caben todos juntos', () => {
+    expect(EJEMPLOS_DE_INSTRUCCION.join(' ').length).toBeLessThan(MAX_INSTRUCCION)
   })
 })

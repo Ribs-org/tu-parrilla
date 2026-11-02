@@ -10,6 +10,32 @@ import { prepararBase, URL_PRUEBAS } from '@/lib/pruebas/base-de-pruebas'
 
 vi.mock('server-only', () => ({}))
 
+// Lo que la ruta deja para después de responder (`after`): acá se junta, y la prueba lo corre
+// cuando quiere, como lo haría la plataforma.
+const despues: Array<() => unknown> = []
+vi.mock('next/server', async (importOriginal) => {
+  const real = await importOriginal<typeof import('next/server')>()
+  return { ...real, after: (tarea: () => unknown) => void despues.push(tarea) }
+})
+async function correrLoDeDespues() {
+  while (despues.length > 0) await despues.shift()!()
+}
+
+/** Resend de mentira: cada correo que «sale», con su destinatario, su asunto y su texto. */
+function correosDeMentira() {
+  const enviados: Array<{ to: string; subject: string; text: string; from: string }> = []
+  vi.stubEnv('RESEND_API_KEY', 're_de_prueba')
+  vi.stubEnv('DOMINIO_PRODUCTO', 'tu-parrilla.cl')
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async (_url: string, init: RequestInit) => {
+      enviados.push(JSON.parse(String(init.body)))
+      return new Response('{"id":"x"}', { status: 200 })
+    }),
+  )
+  return enviados
+}
+
 const BASE = 'https://media.ej.cl'
 const subidos = new Map<string, number>()
 vi.mock('@/lib/storage', async (importOriginal) => {
@@ -95,6 +121,8 @@ describe.skipIf(!URL_PRUEBAS)('la API de la cocina, contra una Postgres de verda
     const { comandas } = await esquema()
     await (await db()).delete(comandas)
     subidos.clear()
+    despues.length = 0
+    vi.unstubAllGlobals()
   })
 
   it('sin la credencial de la cocina, nada', async () => {
@@ -108,7 +136,7 @@ describe.skipIf(!URL_PRUEBAS)('la API de la cocina, contra una Postgres de verda
     const t0 = Date.UTC(2026, 9, 22, 12, 0)
     const primera = await comanda(conCocina, {}, new Date(t0))
     const segunda = await comanda(conCocina, {}, new Date(t0 + 60_000))
-    const delOtro = await comanda(otroConCocina, {}, new Date(t0 + 120_000))
+    const delOtro = await comanda(otroConCocina, { pedido: { notas: '   ' } }, new Date(t0 + 120_000))
     const prueba = await comanda(otroConCocina, { tipo: 'prueba' }, new Date(t0 + 180_000))
     await comanda(sinCocina, {}, new Date(t0 - 60_000))
     await insumo(conCocina, primera.id)
@@ -118,6 +146,10 @@ describe.skipIf(!URL_PRUEBAS)('la API de la cocina, contra una Postgres de verda
     const conInsumo = cuerpo.comandas.find((c: { id: string }) => c.id === primera.id)
     expect(conInsumo.dueno).toEqual({ id: conCocina, nombre: 'Con cocina' })
     expect(conInsumo.pedido).toEqual({ notas: 'la parte de ventas' })
+    // La instrucción al chef, arriba y con nombre propio; `pedido.notas` sigue igual.
+    expect(conInsumo.instruccion).toBe('la parte de ventas')
+    const sinInstruccion = cuerpo.comandas.find((c: { id: string }) => c.id === delOtro.id)
+    expect(sinInstruccion.instruccion).toBeNull()
     // Sin la URL: el enlace se pide aparte, y vence.
     expect(conInsumo.insumos).toEqual([
       expect.objectContaining({ tipo: 'principal', subtipo: 'largo', nombre: 'video9.mp4', bytes: 4_000_000_000 }),
@@ -188,6 +220,96 @@ describe.skipIf(!URL_PRUEBAS)('la API de la cocina, contra una Postgres de verda
     expect(plazo).toBeGreaterThan(13.99)
     expect(plazo).toBeLessThan(14.01)
     expect((await cambiar({ estado: 'en_preparacion' })).status).toBe(409)
+  })
+
+  it('lista: un solo correo al dueño, aunque el chef la mande cuatro veces a la vez y la reintente después', async () => {
+    const enviados = correosDeMentira()
+    const { POST } = await import('@/app/api/cocina/comandas/[id]/estado/route')
+    const { creativos } = await esquema()
+    const c = await comanda(conCocina, { estado: 'en_el_horno', tomadaPor: 'servidor' })
+    await insumo(conCocina, c.id)
+    await (await db())
+      .insert(creativos)
+      .values(['a', 'b', 'c'].map((ref) => ({ ownerId: conCocina, comandaId: c.id, ref, tipo: 'video' as const, estado: 'mesa' as const })))
+    const cambiar = (cuerpo: unknown) => POST(pedido(`/api/cocina/comandas/${c.id}/estado`, cuerpo), params(c.id))
+
+    // Las cuatro leen «en_el_horno» antes de que ninguna escriba: otra conexión tiene tomada la
+    // fila, y cada una queda esperando el candado con el estado ya leído. Al soltarla, escribe una;
+    // las otras vuelven a mirar el `where`, ya no calza, y terminan en 409. Sin la fila tomada,
+    // las llamadas «a la vez» se ordenan solas y no prueban la carrera.
+    const otro = postgres(direccion, { max: 1, onnotice: () => {} })
+    const vigia = postgres(direccion, { max: 1, onnotice: () => {} })
+    let aLaVez: Response[]
+    try {
+      let soltar!: () => void
+      const suelto = new Promise<void>((r) => (soltar = r))
+      let tomada!: () => void
+      const filaTomada = new Promise<void>((r) => (tomada = r))
+      const transaccion = otro.begin(async (tx) => {
+        await tx`select id from comandas where id = ${c.id} for update`
+        tomada()
+        await suelto
+      })
+      await filaTomada
+      const llamadas = Promise.all(Array.from({ length: 4 }, () => cambiar({ estado: 'lista' })))
+      let esperando = 0
+      for (let i = 0; i < 100 && esperando < 4; i++) {
+        await new Promise((r) => setTimeout(r, 50))
+        const [fila] = await vigia`select count(*)::int as n from pg_stat_activity where datname = current_database() and wait_event_type = 'Lock'`
+        esperando = fila!.n as number
+      }
+      expect(esperando).toBe(4)
+      soltar()
+      await transaccion
+      aLaVez = await llamadas
+    } finally {
+      await otro.end()
+      await vigia.end()
+    }
+    expect(aLaVez.map((r) => r.status).sort()).toEqual([200, 409, 409, 409])
+    expect((await cambiar({ estado: 'lista' })).status).toBe(409)
+    await correrLoDeDespues()
+
+    expect(enviados).toHaveLength(1)
+    expect(enviados[0]).toMatchObject({ to: 'con@ejemplo.cl', subject: 'Lista en el mesón: «video9.mp4»' })
+    expect(enviados[0]!.text).toContain('te dejó 3 cortes en el mesón, listos para programar')
+    expect(enviados[0]!.text).toContain(`https://tu-parrilla.cl/admin/ia/meson?comanda=${c.id}`)
+  })
+
+  it('fallida y rechazada: un correo cada una, con el motivo; lo que sigue en curso no avisa', async () => {
+    const enviados = correosDeMentira()
+    const { POST } = await import('@/app/api/cocina/comandas/[id]/estado/route')
+    const enCurso = await comanda(conCocina, { estado: 'revisando', tomadaPor: 'servidor' })
+    const rota = await comanda(conCocina, { estado: 'en_el_horno', tomadaPor: 'servidor' })
+    const fuera = await comanda(conCocina, { estado: 'revisando', tomadaPor: 'servidor' })
+    const cambiar = (id: string, cuerpo: unknown) => POST(pedido(`/api/cocina/comandas/${id}/estado`, cuerpo), params(id))
+
+    expect((await cambiar(enCurso.id, { estado: 'en_preparacion' })).status).toBe(200)
+    expect((await cambiar(enCurso.id, { estado: 'en_el_horno' })).status).toBe(200)
+    expect((await cambiar(enCurso.id, { estado: 'sirviendo', tandas: { servidas: 1, total: 2 } })).status).toBe(200)
+
+    const fallida = { estado: 'fallida', motivo: 'Se cortó la luz en la cocina a mitad del render.' }
+    // El reintento del chef, después de que la primera ya escribió: lo terminado no se mueve.
+    expect((await cambiar(rota.id, fallida)).status).toBe(200)
+    expect((await cambiar(rota.id, fallida)).status).toBe(409)
+    expect((await cambiar(fuera.id, { estado: 'rechazada', motivo: 'El video está en inglés.' })).status).toBe(200)
+    expect((await cambiar(fuera.id, { estado: 'rechazada', motivo: 'El video está en inglés.' })).status).toBe(409)
+    await correrLoDeDespues()
+
+    expect(enviados.map((e) => e.subject).sort()).toEqual(['No se pudo terminar: tu comanda', 'No se puede cocinar: tu comanda'])
+    expect(enviados.find((e) => e.subject.startsWith('No se pudo'))!.text).toContain('Se cortó la luz en la cocina a mitad del render.')
+    expect(enviados.find((e) => e.subject.startsWith('No se puede'))!.text).toContain('El video está en inglés.')
+  })
+
+  it('sin Resend no sale nada, y el cambio pasa igual', async () => {
+    const { POST } = await import('@/app/api/cocina/comandas/[id]/estado/route')
+    const fetchEspia = vi.fn()
+    vi.stubGlobal('fetch', fetchEspia)
+    vi.stubEnv('RESEND_API_KEY', '')
+    const c = await comanda(conCocina, { estado: 'en_el_horno', tomadaPor: 'servidor' })
+    expect((await POST(pedido(`/api/cocina/comandas/${c.id}/estado`, { estado: 'lista' }), params(c.id))).status).toBe(200)
+    await correrLoDeDespues()
+    expect(fetchEspia).not.toHaveBeenCalled()
   })
 
   it('el enlace de un insumo: solo con la comanda tomada, y no de lo que ya se borró', async () => {

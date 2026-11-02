@@ -17,7 +17,8 @@ export const NOMBRE_CANTIDAD: Record<CantidadPedida, string> = {
 }
 
 export const MAX_ACOMPANAMIENTOS = 10
-export const MAX_NOTAS = 1000
+/** Lo que cabe en «Tu instrucción al chef». */
+export const MAX_INSTRUCCION = 1000
 const MAX_NOMBRE_MARCA = 80
 const MAX_HANDLE = 60
 const MAX_CTA = 120
@@ -26,7 +27,7 @@ export const PEDIDO_ILEGIBLE = 'No entendimos la comanda: recarga la página y v
 export const PRINCIPAL_FALTA = 'Sube el plato principal: el video que el chef va a cocinar.'
 export const FORMATO_FALTA = 'Elige qué quieres que salga: clips, carruseles o los dos.'
 export const CANTIDAD_FALTA = 'Elige cuántos, más o menos.'
-export const NOTAS_LARGAS = `Lo que hay que destacar o evitar cabe en ${MAX_NOTAS} caracteres.`
+export const INSTRUCCION_LARGA = `Tu instrucción al chef cabe en ${MAX_INSTRUCCION} caracteres: acórtala.`
 export const FECHA_ILEGIBLE = '«Para cuándo» tiene que ser una fecha.'
 export const MARCA_SIN_NOMBRE = 'Ponle nombre a tu marca: es el que el chef usa en los videos.'
 export const MARCA_LARGA = 'El nombre de la marca, el @ y el llamado final son textos cortos: acórtalos.'
@@ -42,6 +43,11 @@ export type PedidoDeComanda = {
   acompanamientos: string[]
   formatos: FormatoPedido[]
   cantidad: CantidadPedida
+  /**
+   * «Tu instrucción al chef», en texto libre: la duración, el tono, qué destacar o qué evitar.
+   * Se guarda en `pedido.notas`, el nombre que ya tenía cuando el campo era «Qué destacar o qué
+   * evitar», y el chef la recibe además como `instruccion` (`docs/cocina-api.md`).
+   */
   notas: string
   /** `AAAA-MM-DD`, informativo: la hora real la estima el chef. */
   paraCuando: string | null
@@ -81,7 +87,7 @@ export function leerPedido(crudo: unknown): PedidoDeComanda | { error: string } 
   if (typeof c.cantidad !== 'string' || !(CANTIDADES as readonly string[]).includes(c.cantidad)) return { error: CANTIDAD_FALTA }
 
   const notas = texto(c.notas)
-  if (notas.length > MAX_NOTAS) return { error: NOTAS_LARGAS }
+  if (notas.length > MAX_INSTRUCCION) return { error: INSTRUCCION_LARGA }
   const paraCuando = texto(c.paraCuando) || null
   if (paraCuando && (!/^\d{4}-\d{2}-\d{2}$/.test(paraCuando) || Number.isNaN(new Date(`${paraCuando}T12:00:00Z`).getTime()))) {
     return { error: FECHA_ILEGIBLE }
@@ -108,6 +114,32 @@ export function leerPedido(crudo: unknown): PedidoDeComanda | { error: string } 
     paraCuando,
     marca: { nombre, handle, acento: acento?.toUpperCase() ?? null, ctaTexto },
   }
+}
+
+/**
+ * Lo que trae el formulario para ayudar a escribir la instrucción: un toque los suma al texto. Son
+ * ejemplos, no opciones: el chef lee lo que quede escrito.
+ */
+export const EJEMPLOS_DE_INSTRUCCION = [
+  'Clips de menos de 30 segundos.',
+  'Destaca la parte de ventas.',
+  'No uses la anécdota del final.',
+  'Empieza cada clip con la pregunta, no con la respuesta.',
+  'Tono cercano, como una conversación.',
+] as const
+
+/**
+ * La instrucción de una comanda ya guardada, o null si no dejó ninguna: la lee la API del chef
+ * (`instruccion`) y la tarjeta del panel. Sale de `pedido.notas`, que es donde vive.
+ */
+export function instruccionDe(pedido: Record<string, unknown> | null | undefined): string | null {
+  const notas = pedido?.notas
+  return typeof notas === 'string' && notas.trim() ? notas.trim() : null
+}
+
+/** Cuántos caracteres cuenta el tope: los del texto sin los espacios de las puntas, como al guardarlo. */
+export function largoDeInstruccion(texto: string): number {
+  return texto.trim().length
 }
 
 /** Los minutos que consume del cupo: los del plato principal, redondeados hacia arriba. Sin duración, cero. */
