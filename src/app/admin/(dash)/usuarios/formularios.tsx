@@ -3,18 +3,22 @@
 import { useActionState, useState, useTransition } from 'react'
 import { cerrarSesionesUsuario, encenderCocina, invitarUsuario, quitarUsuario, traspasarCuentaAccion, type FormState } from '@/app/admin/actions'
 import { useConfirmar } from '@/components/confirmar'
+import { useRevision } from '@/components/revision'
 import { Button, Field, Input, Select, Submit } from '@/components/ui'
 import { networkLabel } from '@/lib/networks'
+import { revisarCorreo } from '@/lib/revisiones'
 import type { CuentaTraspasable } from '@/lib/social/traspasar'
 
 export function FormularioInvitar() {
   const [state, action] = useActionState<FormState, FormData>(invitarUsuario, {})
+  const revision = useRevision(revisarCorreo)
+  const error = revision.error ?? state.error
   return (
-    <form action={action} className="flex flex-wrap items-end gap-3">
-      <Field label="Correo"><Input name="correo" type="email" required className="min-w-[16rem]" /></Field>
+    <form {...revision.formulario} action={action} className="flex flex-wrap items-end gap-3">
+      <Field label="Correo"><Input name="correo" type="email" className="min-w-[16rem]" /></Field>
       <Field label="Nombre (opcional)"><Input name="nombre" className="min-w-[12rem]" /></Field>
       <Submit pendingLabel="Invitando…">Invitar</Submit>
-      {state.error ? <p role="alert" className="text-sm text-negative">{state.error}</p> : null}
+      {error ? <p role="alert" className="text-sm text-negative">{error}</p> : null}
       {state.aviso ? <p role="alert" className="text-sm text-negative">{state.aviso}</p> : null}
       {state.ok && !state.aviso ? <p className="text-sm text-positive">Invitado. Le llegó su primer código.</p> : null}
     </form>

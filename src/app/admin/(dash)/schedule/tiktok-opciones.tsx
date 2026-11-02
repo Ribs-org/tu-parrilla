@@ -113,7 +113,6 @@ export function TikTokOpciones({
           <Field label="Quién puede verlo">
             <Select
               name={`tiktokPrivacidad:${cuenta.id}`}
-              required
               value={privacidad}
               onChange={(e) => setPrivacidad(e.target.value as PrivacidadTikTok | '')}
               className="max-w-[16rem]"
@@ -187,7 +186,7 @@ export function TikTokOpciones({
                     onChange={() => {
                       setTipoComercial('patrocinado')
                       // «Solo yo» y patrocinado no coexisten: se vacía para que el
-                      // select required bloquee el envío en vez de solo avisar.
+                      // envío lo rechace (`TIKTOK_SIN_PRIVACIDAD`) en vez de solo avisar.
                       if (privacidad === 'SELF_ONLY') setPrivacidad('')
                     }}
                   />

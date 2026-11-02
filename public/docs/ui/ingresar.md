@@ -115,13 +115,11 @@ donde venga, y los errores del teléfono suman para el tope del día—. Su pant
 |---|---|---|
 | «Ese correo no se ve bien.» | El campo quedó vacío o lo escrito no tiene forma de correo. | Revisar que tenga @ y dominio, sin espacios en medio. |
 | «Si tu correo está invitado, te llegará un código en un minuto. Vale diez minutos.» | Sale **siempre**, esté o no invitado el correo, y aunque no se haya mandado nada por el tope de pedidos. No confirma nada. | Esperar el correo. Si no llega, ver más abajo, en Si el humano dice…, el caso del código que no llega. |
-| «Ese código no es válido o ya venció.» | El código está mal escrito, pasaron más de diez minutos, ya se usó, se pidió uno más nuevo después, o ese correo no está invitado. | Usar el último código que llegó. Si venció, pedir otro. |
+| «Ese correo no se ve bien.» | El correo está vacío o no tiene forma de correo. | Corregirlo y volver a apretar «Mandarme un código». |
+| «Ese código no es válido o ya venció.» | El código está mal escrito o no son seis dígitos, pasaron más de diez minutos, ya se usó, se pidió uno más nuevo después, o ese correo no está invitado. | Usar el último código que llegó. Si venció, pedir otro. |
 | «Demasiados intentos. Pide un código nuevo.» | Se probaron cinco códigos equivocados contra el mismo código, o hubo muchos intentos seguidos desde la misma conexión. Ese código ya no sirve aunque se escriba bien. | Pedir un código nuevo (ver arriba). Si el mensaje sigue saliendo con el código nuevo, esperar unos diez minutos. |
 | «Demasiados intentos en las últimas 24 horas. Prueba de nuevo más tarde.» | Con ese correo se escribieron diez códigos equivocados en el último día, sumando todos los códigos pedidos. Mientras dure, no entra ni con el código correcto. Una sesión ya abierta, en otro navegador, sigue andando. | Esperar: se libera solo, a más tardar un día después de pedir el código con que empezaron los errores. Si la persona no escribió esos códigos, alguien está probando con su correo: avisarle al admin. |
 | «Algo se rompió» | Falló el servidor, no la persona. | Apretar «Reintentar». Si se repite, avisarle al admin. |
-
-El navegador puede mostrar además su propio aviso, en el idioma del navegador, si el correo no
-tiene forma de correo o el código no son seis dígitos: viene del navegador, no de Tu Parrilla.
 
 ## Si el humano dice…
 

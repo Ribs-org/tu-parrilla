@@ -12,6 +12,7 @@ import {
 import { useConfirmar } from '@/components/confirmar'
 import { DeNocheYDeDia, NombreDe } from '@/components/de-noche-y-de-dia'
 import { Icon } from '@/components/icon'
+import { useRevision } from '@/components/revision'
 import { Button, Field, GroupLabel, Input, Textarea } from '@/components/ui'
 import {
   camposDesdeFormulario,
@@ -27,6 +28,7 @@ import { colorDeRed } from '@/lib/color-de-red'
 import type { CuentaRow } from '@/lib/posts-kpis'
 import { REDES_PROXIMAMENTE, networkLabel } from '@/lib/networks'
 import { calorDelDia, estadoDelFierro, type Calor, type Fierro, type Sello } from '@/lib/parrilla'
+import { FALTA_FECHA } from '@/lib/revisiones'
 import { addDays, dayKey, dayLabelConMes, mondayOfKey } from '@/lib/schedule-week'
 import { subirUno, type MediaSubida } from '@/lib/subida-directa'
 import type { Tema } from '@/lib/tema'
@@ -309,6 +311,7 @@ export function Composer({
   const [cuando, setCuando] = useState(fechaInicial)
   // «Ahora» deja el campo de fecha fuera de juego: la hora la decide el servidor.
   const [ahora, setAhora] = useState(false)
+  const revision = useRevision(() => (ahora || cuando ? null : { campo: 'scheduledAt', mensaje: FALTA_FECHA }))
 
   /* ---- el borrador ---- */
 
@@ -637,7 +640,10 @@ export function Composer({
         // Se envía a mano y no con `action={…}`: con `action`, React vacía los campos del
         // formulario al terminar la acción, también cuando vuelve con un error de validación.
         // Eso borraba lo escrito, y el guardado siguiente pisaba el borrador con el vacío.
+        noValidate
         onSubmit={(event) => {
+          revision.formulario.onSubmit(event)
+          if (event.defaultPrevented) return
           event.preventDefault()
           const datos = new FormData(event.currentTarget)
           startTransition(() => programar(datos))
@@ -796,7 +802,6 @@ export function Composer({
               <Input
                 type="datetime-local"
                 name="scheduledAt"
-                required={!ahora}
                 disabled={ahora}
                 className="max-w-[16rem]"
                 value={ahora ? '' : cuando}
@@ -853,9 +858,9 @@ export function Composer({
         </div>
 
         <div className="sticky bottom-0 space-y-2 border-t border-acero-700 bg-acero-900 px-5 py-3">
-          {state.error ? (
+          {(revision.error ?? state.error) ? (
             <p role="alert" className="text-sm text-negative">
-              {state.error}
+              {revision.error ?? state.error}
             </p>
           ) : null}
           <div className="flex flex-wrap items-center gap-3">

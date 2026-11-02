@@ -513,10 +513,8 @@ Al final de la pantalla, «El manual del parrillero →». Adentro, elegir la p�
 | «Tu llave «<nombre>». Cópiala ahora: no se vuelve a mostrar. Si la pierdes, revócala y genera otra.» | La llave se generó. | Copiarla ahora con uno de los dos botones. |
 | «Copiado» | El texto quedó en el portapapeles. | Pegarlo donde corresponda. |
 | «¿Revocar «<nombre>»?» y «Lo que la use deja de entrar en su próxima petición.» | Ventana antes de revocar. | «Revocar» para revocarla; «Cancelar» para dejarla. |
+| «Ponle un nombre: el del agente que la va a usar.» | Se apretó «Generar llave» con el nombre vacío. | Escribir un nombre. |
 | «Todavía no tienes llaves.» | No hay ninguna llave viva. | Generar una si una IA la necesita. |
-
-Si se aprieta «Generar llave» con el nombre vacío, el navegador muestra su propio aviso de campo
-obligatorio, en su idioma.
 
 ## Si el humano dice…
 

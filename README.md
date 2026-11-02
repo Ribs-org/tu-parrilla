@@ -1616,6 +1616,7 @@ src/
     tema-vivo.ts           el modo que se ve ahora, para lo que el CSS no alcanza: un aria-label, un title, el texto de una pregunta
     ventana.tsx            la ventana del panel: un <dialog> modal con el velo, que comparten las preguntas, los selectores y «Reprogramar»
     confirmar.tsx          las preguntas del panel, en vez del confirm() del navegador: useConfirmar() y la ventana del layout
+    revision.ts            un formulario que se revisa solo, con su mensaje en línea y no el globito del navegador
     icono-maestro.tsx      el dibujo de la pestaña La Cocina: el parrillero de noche, el maestro de sushi de día
     icono-ajustes.tsx      el botón de Ajustes: el trinche y el cuchillo de noche, los palillos de día
     landing.tsx            la portada del producto, armada con las piezas del panel y con los dos modos; landing-demos.tsx, lo que se toca
@@ -1628,6 +1629,8 @@ src/
     tema.ts                el modo de la cuenta (noche o día) y su copia en una cookie; tema-servidor.ts lee la cookie
     networks.ts            las redes que existen y las que están en «Próximamente»; lo leen el panel y el navegador
     ingreso-frases.ts      las frases de la entrada, sin código de servidor: las usan los formularios del navegador
+    forma-del-correo.ts    qué correo vale: lo comparten el servidor y el navegador
+    revisiones.ts          lo que cada formulario revisa antes de enviar, con las frases del servidor
     cron-auth.ts           si una petición trae el CRON_SECRET, comparado en tiempo constante
     limite.ts              la cuenta de intentos por IP, pura; limite-ip.ts la guarda en la memoria de la instancia
     mensaje-firmado.ts     el aviso que viaja en la URL de un redirect, firmado para que nadie escriba uno falso

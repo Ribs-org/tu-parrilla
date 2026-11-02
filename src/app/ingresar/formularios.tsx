@@ -2,8 +2,10 @@
 
 import Link from 'next/link'
 import { useActionState } from 'react'
+import { useRevision } from '@/components/revision'
 import { Submit } from '@/components/ui'
 import { CODIGO_ENVIADO } from '@/lib/ingreso-frases'
+import { revisarCodigo, revisarCorreo } from '@/lib/revisiones'
 import { canjearCodigo, pedirCodigo, type FormState } from './acciones'
 
 const CAMPO =
@@ -11,11 +13,13 @@ const CAMPO =
 
 export function FormularioCorreo() {
   const [state, action] = useActionState<FormState, FormData>(pedirCodigo, {})
+  const revision = useRevision(revisarCorreo)
+  const error = revision.error ?? state.error
   return (
-    <form action={action} className="mt-6 space-y-3">
+    <form {...revision.formulario} action={action} className="mt-6 space-y-3">
       <label htmlFor="correo" className="sr-only">Correo</label>
       <input id="correo" name="correo" type="email" autoFocus autoComplete="email" inputMode="email" placeholder="tu@correo.cl" className={CAMPO} />
-      {state.error ? <p role="alert" className="text-sm text-negative">{state.error}</p> : null}
+      {error ? <p role="alert" className="text-sm text-negative">{error}</p> : null}
       <Submit
         pendingLabel="Enviando…"
         className="w-full px-4 py-2.5"
@@ -28,13 +32,15 @@ export function FormularioCorreo() {
 
 export function FormularioCodigo({ correo }: { correo: string }) {
   const [state, action] = useActionState<FormState, FormData>(canjearCodigo, {})
+  const revision = useRevision(revisarCodigo)
+  const error = revision.error ?? state.error
   return (
-    <form action={action} className="mt-6 space-y-3">
+    <form {...revision.formulario} action={action} className="mt-6 space-y-3">
       <p className="text-sm text-fg-muted">{CODIGO_ENVIADO} Vale diez minutos.</p>
       <input type="hidden" name="correo" value={correo} />
       <label htmlFor="codigo" className="sr-only">Código</label>
-      <input id="codigo" name="codigo" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} autoFocus placeholder="000000" className={`${CAMPO} tracking-[0.4em]`} />
-      {state.error ? <p role="alert" className="text-sm text-negative">{state.error}</p> : null}
+      <input id="codigo" name="codigo" inputMode="numeric" autoComplete="one-time-code" maxLength={6} autoFocus placeholder="000000" className={`${CAMPO} tracking-[0.4em]`} />
+      {error ? <p role="alert" className="text-sm text-negative">{error}</p> : null}
       <Submit
         pendingLabel="Entrando…"
         className="w-full px-4 py-2.5"

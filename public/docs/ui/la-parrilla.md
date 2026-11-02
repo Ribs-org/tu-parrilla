@@ -535,7 +535,7 @@ formulario viene abierto, con el cursor en «Texto». En este orden:
 - Apagado (publicación directa), aparece:
   - **«Quién puede verlo»**, una lista que parte en «Elige quién puede verlo» y ofrece
     «Todos», «Amigos mutuos», «Seguidores» y «Solo yo» (solo las que la cuenta permite). Es
-    obligatoria: sin elegir, el navegador no deja programar.
+    obligatoria: sin elegir, «Programar» dice en rojo «TikTok necesita que elijas la privacidad.».
   - **«Permitir»**, con las casillas «Comentarios», «Dúos» y «Pegar (Stitch)», todas
     desmarcadas al partir (en un borrador, como quedaron). «Dúos» y «Pegar (Stitch)» no
     aparecen cuando todos los archivos son fotos. Una casilla gris es algo que la cuenta tiene
@@ -1250,8 +1250,9 @@ editor.
   [Los Fierros](los-fierros.md). Si no aparece ninguna, no hay cuentas conectadas.
 - **La pantalla dice Conecta tu primera red.** No hay ninguna red conectada. Se conecta en
   Los Fierros, dentro del botón «Ajustes».
-- **El botón Programar no hace nada / el navegador me marca un campo.** Falta «Fecha y
-  hora» (o apretar «Ahora»), o falta «Quién puede verlo» en un bloque de TikTok.
+- **El botón Programar no programa.** El motivo sale en rojo en el pie del panel: «Elige la
+  fecha y la hora.» (falta «Fecha y hora», o apretar «Ahora») o «TikTok necesita que elijas la
+  privacidad.» (falta «Quién puede verlo» en un bloque de TikTok).
 - **No veo lo de trial reel.** Solo aparece con exactamente un archivo, que sea video, y
   una cuenta de Instagram marcada.
 - **No veo Dúos ni Pegar.** No aparecen cuando todos los archivos son fotos, ni cuando

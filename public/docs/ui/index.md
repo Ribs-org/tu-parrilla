@@ -263,6 +263,8 @@ de una de estas.
   («Eliminar», «Descartar», «Revocar»), no «Aceptar», y va en rojo cuando borra o no tiene vuelta. El
   otro es «Cancelar» (en «Cancelar la comanda», «Volver»). Esc o un clic fuera de la ventana es lo
   mismo que «Cancelar»: no pasa nada.
+- **Los formularios.** Un campo que falta no lo avisa el navegador con un globito: el mensaje sale
+  en rojo en el mismo formulario, y el cursor vuelve a ese campo.
 
 ## Lo que no existe (no la mandes a buscarlo)
 
@@ -300,6 +302,7 @@ Sale de:
 - `src/app/admin/(dash)/content/page.tsx`: la dirección de la antigua pestaña Los Cortes lleva a
   «Tus publicaciones», dentro de Los Números.
 - `src/components/confirmar.tsx` y `src/components/ventana.tsx` (las preguntas y la ventana en que salen)
+- `src/components/revision.ts` y `src/lib/revisiones.ts` (lo que un formulario revisa antes de enviar)
 - `src/lib/vocabulario.ts`: los nombres, subtítulos y rutas de cada pantalla, y quién las ve.
 - `src/lib/parrilla.ts`: la cocción, el calor del día, la temperatura del fierro y el aviso del
   botón «Ajustes» (`avisoDeFierros`).

@@ -22,8 +22,10 @@ import { Panel } from '@/components/charts/panel'
 import { useConfirmar } from '@/components/confirmar'
 import { ImageField } from '@/components/image-field'
 import { ProfileView } from '@/components/profile-view'
+import { useRevision } from '@/components/revision'
 import { Button, Field, Input, Select, Textarea, Toggle } from '@/components/ui'
 import type { Profile } from '@/db'
+import { revisarLinkNuevo } from '@/lib/revisiones'
 import { cn } from '@/lib/utils'
 import { nombreDe } from '@/lib/vocabulario'
 import {
@@ -91,6 +93,8 @@ export function ProfileEditor({ profile, initialLinks, origin, publicUrl, soloPe
     createLink.bind(null, profile.id),
     {},
   )
+  const revisionDeLink = useRevision(revisarLinkNuevo)
+  const errorDeLink = revisionDeLink.error ?? linkState.error
 
   useEffect(() => {
     if (linkState.ok) router.refresh()
@@ -354,7 +358,7 @@ export function ProfileEditor({ profile, initialLinks, origin, publicUrl, soloPe
             </p>
           ) : null}
 
-          <form action={addLink} className="mt-4 space-y-3 rounded-xl border border-velo/[0.06] p-3">
+          <form {...revisionDeLink.formulario} action={addLink} className="mt-4 space-y-3 rounded-xl border border-velo/[0.06] p-3">
             <div className="grid gap-3 sm:grid-cols-[10rem_minmax(0,1fr)]">
               <Field label="Tipo">
                 <Select name="kind" defaultValue="standard">
@@ -365,17 +369,17 @@ export function ProfileEditor({ profile, initialLinks, origin, publicUrl, soloPe
                 </Select>
               </Field>
               <Field label="Nombre">
-                <Input name="label" placeholder="Mi proyecto" required />
+                <Input name="label" placeholder="Mi proyecto" />
               </Field>
             </div>
             <Field label="URL">
-              <Input name="url" placeholder="ejemplo.com" inputMode="url" required />
+              <Input name="url" placeholder="ejemplo.com" inputMode="url" />
             </Field>
             <input type="hidden" name="isActive" value="on" />
 
-            {linkState.error ? (
+            {errorDeLink ? (
               <p role="alert" className="text-sm text-negative">
-                {linkState.error}
+                {errorDeLink}
               </p>
             ) : null}
 

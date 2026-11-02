@@ -161,6 +161,7 @@ Para devolverla, se traspasa de vuelta, con estos mismos pasos.
 | «Ese correo no se ve bien.» | Lo escrito en «Correo» no tiene forma de correo. | Corregirlo. |
 | «Ese correo ya está invitado.» | Ya hay alguien con ese correo en «Invitados». | Nada que invitar. Si no le llega el código, que lo pida en `/ingresar`. |
 | «No se pudo invitar: la página del usuario no se pudo crear. Intenta de nuevo.» | Falló la creación de su página; la invitación no quedó hecha. | Volver a apretar «Invitar». |
+| «Ese correo no se ve bien.» | Se apretó «Invitar» con el correo vacío o sin forma de correo. | Corregirlo. |
 | «¿Quitar la invitación?» | Ventana antes de quitar. | «Quitar» para quitarla; «Cancelar» para dejarla. |
 | «Ese usuario ya entró alguna vez; no se puede quitar todavía.» | La persona entró después de que se cargó la lista. | Recargar: su fila ahora dice «entró <fecha>». |
 | «No se pudo quitar al usuario. Intenta de nuevo.» | Falló el borrado. | Volver a intentar. |
@@ -172,9 +173,6 @@ Para devolverla, se traspasa de vuelta, con estos mismos pasos.
 | «Esa cuenta ya no está.» | La quitaron entre que se cargó la lista y se apretó «Traspasar». | Recargar. |
 | «Esa cuenta ya es de esa persona.» | Alguien la traspasó entre que se cargó la lista y se apretó «Traspasar». | Recargar. |
 | «No se pudo traspasar la cuenta. Intenta de nuevo.» | Falló el traspaso y no cambió nada. | Volver a intentar. |
-
-Si se aprieta «Invitar» con el correo vacío o con una forma que el navegador no acepta, el
-navegador muestra su propio aviso, en su idioma.
 
 ## Si el humano dice…
 

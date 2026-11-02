@@ -3,9 +3,12 @@
 // lib/usuarios.ts y en las acciones de /ingresar.
 import { createHash, randomInt, timingSafeEqual } from 'node:crypto'
 import { env } from './env'
+import { normalizarCorreo } from './forma-del-correo'
 
-// Las frases viven en `ingreso-frases.ts`, que el navegador importa sin `node:crypto`.
+// Las frases viven en `ingreso-frases.ts`, y la forma de un correo en `forma-del-correo.ts`: el
+// navegador las importa sin `node:crypto`.
 export * from './ingreso-frases'
+export { normalizarCorreo }
 
 export const VIGENCIA_MS = 10 * 60_000
 export const MAX_INTENTOS = 5
@@ -22,16 +25,6 @@ export const VENTANA_MS = 15 * 60_000
  */
 export const MAX_FALLOS_POR_DIA = 10
 export const VENTANA_FALLOS_MS = 24 * 60 * 60_000
-
-const CORREO = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
-const MAX_CORREO = 254
-
-/** Minúsculas y sin espacios: es la clave por la que se busca al usuario. */
-export function normalizarCorreo(bruto: string): string | null {
-  const limpio = bruto.trim().toLowerCase()
-  if (limpio.length === 0 || limpio.length > MAX_CORREO) return null
-  return CORREO.test(limpio) ? limpio : null
-}
 
 /**
  * Los revisores de Meta y de YouTube tienen que poder entrar sin leer nuestro correo: para un
