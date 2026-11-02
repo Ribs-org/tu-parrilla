@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { AccountCards, AccountSeriesChart } from './accounts'
 import { BajadaDeLosNumeros } from './cabeza'
 import { SeccionCargando } from './cargando'
+import { ParaLlevar } from './para-llevar'
 import { BarList } from '@/components/charts/bar-list'
 import { CampaignTable } from '@/components/charts/campaign-table'
 import { Donut } from '@/components/charts/donut'
@@ -39,6 +40,7 @@ import {
 } from '@/lib/analytics'
 import { parseFilters } from '@/lib/filters'
 import { networkLabel } from '@/lib/networks'
+import { etiquetaDeFechas } from '@/lib/rango'
 import {
   MAX_PUBLICACIONES_LEIDAS,
   getCampaignPosts,
@@ -114,11 +116,23 @@ export default async function NumerosPage({ searchParams }: { searchParams: Prom
   // el pooler de Supabase (`docs/pendientes.md`).
   const cuentas = await getCuentas(ownerId)
   const profiles = await getAllProfiles(ownerId)
+  const cuenta = cuentaElegida(params, cuentas)
+  const pagina = profiles.find((p) => p.id === filters.profileId)
 
   return (
     <>
       <header className="mb-4">
-        <Encabezado ruta="/admin/analytics" />
+        <Encabezado ruta="/admin/analytics">
+          {/* Los filtros, escritos como los dice la pantalla: la planilla sale con los mismos. */}
+          <ParaLlevar
+            periodo={etiquetaDeFechas(filters.periodo, filters.periodo.hoy)}
+            filtros={[
+              ...(cuenta ? [`Cuenta: ${nombreDeCuenta(cuenta)}`] : []),
+              ...(pagina ? [`Página: ${pagina.displayName} · /${pagina.slug}`] : []),
+              ...(filters.includeBots ? ['Con bots'] : []),
+            ]}
+          />
+        </Encabezado>
         <BajadaDeLosNumeros />
       </header>
 

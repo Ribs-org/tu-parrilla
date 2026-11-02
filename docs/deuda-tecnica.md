@@ -528,3 +528,26 @@ las cabeceras y la barra del sistema con la hora, que se oscurece sobre el papel
 Terminarlo cuesta un build nativo: `userInterfaceStyle: "automatic"`, un color de arranque por
 modo, y probar que el arranque —que sale antes de saber el modo— no destelle claro a quien
 usa la noche.
+
+## La planilla de Los Números tiene topes y no se arma en segundo plano (2026-11-02)
+
+«Llevar para la casa» (`src/lib/planilla/`) se arma dentro de la petición, con los cinco minutos
+de una función de Vercel en el plan gratis. Para que una cuenta grande no la tumbe, cada hoja
+larga tiene un tope de filas (`TOPES`, en `hojas.ts`) y a los cuatro minutos deja de leer
+las hojas largas; lo que quedó fuera lo dicen «Léeme» y la ventana, que cuenta antes de armar. Una
+cuenta con más de cien mil visitas en el período no se lleva todas sus visitas una por una —sí
+sus totales, en «Etiquetas y UTM» y «Día a día»—, y la persona tiene que partir el período a
+mano. «Publicaciones» lee como mucho 10.000, como el tablero, y ahí la planilla no puede decir
+cuántas había: dice que se cortó.
+
+El `.xlsx` se escribe a mano (`xlsx.ts`, `zip.ts`) porque las bibliotecas de npm estaban
+abandonadas (`xlsx`) o traían dependencias con avisos abiertos (`exceljs` 4.4: nueve, por
+`archiver` y `uuid`). Cubre lo que la planilla usa —texto, números, fechas, cinco formatos, el
+encabezado fijo y los filtros— y nada más: sin fórmulas, sin gráficos, sin celdas combinadas, sin
+ZIP64. Si algún día hace falta algo de eso, conviene volver a mirar `exceljs` (o lo que lo
+reemplace) antes que crecer el formato a mano.
+
+Terminarlo cuesta un trabajo en segundo plano: armar la planilla en un cron o una cola, por
+partes, guardarla en R2 y avisar con un enlace firmado cuando esté. Con eso se van los topes y
+el límite de tiempo, y aparece lo que hoy no hace falta: dónde se guarda, cuánto vive y quién
+puede bajarla.
