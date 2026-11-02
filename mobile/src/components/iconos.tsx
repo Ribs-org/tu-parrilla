@@ -9,8 +9,9 @@ import { View, type ColorValue } from 'react-native'
  * que esto viaja en una actualización por aire al build que ya está en el teléfono. La
  * segunda es que un set genérico no tiene una parrilla, y es justo la que cuenta acá.
  *
- * Desde el 2026-10-16 la barra tiene tres pestañas, las del panel —La Parrilla, Publicar y
- * Los Números—; el fuego, el corte y la silueta de las cinco de antes se fueron con ellas.
+ * Desde el 2026-10-16 la barra tiene las pestañas del panel —La Parrilla, Publicar y Los
+ * Números, y desde el 2026-11-02 La Cocina—; el fuego, el corte y la silueta de las cinco de
+ * antes se fueron con ellas.
  *
  * `tabBarIcon` recibe `{ color, focused, size }` y devuelve cualquier nodo de React
  * (ver https://docs.expo.dev/router/advanced/tabs/), así que no hace falta más.
@@ -86,8 +87,8 @@ export function IconoPoner({ color }: { color: ColorValue }) {
 }
 
 /**
- * Publicar en la barra: la cruz sobre un círculo de brasa, más grande que los otros dos.
- * Es la acción principal y va al medio; activa o no, el círculo es siempre brasa y la cruz
+ * Publicar en la barra: la cruz sobre un círculo de brasa, más grande que los demás.
+ * Es la acción de todos los días; activa o no, el círculo es siempre brasa y la cruz
  * del color del fondo, para que no dependa del tinte de la pestaña.
  */
 export function BotonPublicar({ fondo, brasa, activo }: { fondo: ColorValue; brasa: ColorValue; activo: boolean }) {
@@ -108,6 +109,26 @@ export function BotonPublicar({ fondo, brasa, activo }: { fondo: ColorValue; bra
     >
       <IconoPoner color={fondo} />
     </View>
+  )
+}
+
+/**
+ * El gorro del chef, para La Cocina: tres bollos arriba y la banda abajo, en silueta. Desde el
+ * 2026-11-02, cuando la app aprendió a grabar y mandarle el material al chef de la casa.
+ */
+export function IconoCocina({ color }: { color: ColorValue }) {
+  const bollo = { position: 'absolute' as const, backgroundColor: color }
+  return (
+    <Caja>
+      <View style={{ width: 20, height: 20 }}>
+        <View style={{ ...bollo, left: 0.5, top: 4.5, width: 8, height: 8, borderRadius: 4 }} />
+        <View style={{ ...bollo, left: 11.5, top: 4.5, width: 8, height: 8, borderRadius: 4 }} />
+        <View style={{ ...bollo, left: 4.5, top: 1, width: 11, height: 11, borderRadius: 5.5 }} />
+        <View style={{ ...bollo, left: 4, top: 9, width: 12, height: 6 }} />
+        {/* La banda, separada del gorro por un hueco: sin él, el dibujo se lee como una nube. */}
+        <View style={{ ...bollo, left: 4, top: 16, width: 12, height: 3.5, borderRadius: 1 }} />
+      </View>
+    </Caja>
   )
 }
 

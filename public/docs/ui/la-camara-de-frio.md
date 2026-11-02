@@ -184,6 +184,10 @@ En La Cocina, «Pedir una comanda»: se elige de acá ([la-cocina.md](la-cocina.
 
 - **«¿Dónde subo mis videos?» / «¿Dónde está la bodega?».** Acá: La Cocina → «La cámara de frío» (de
   día, «La nevera»). También se puede guardar algo nuevo desde «Pedir una comanda».
+- **«¿Puedo guardar desde el teléfono?».** Sí, desde la app (versión 1.2.0): la pestaña «La Cocina»
+  graba un video o saca una foto, o lo elige de la galería, y lo guarda acá con la misma cuota. Lo
+  grabado con la app no queda en la galería del teléfono: queda acá. Renombrar, cambiar el uso y
+  sacar siguen siendo del panel. Ver [La app del teléfono](app-movil.md), «La Cocina».
 - **«¿Cuánto me cabe?».** 20 GB, salvo que el admin le haya dado otra cuota. El bloque «Cuánto cabe»
   dice cuánto lleva.
 - **«Necesito más espacio» / «¿Cómo compro más?».** Comprar todavía no existe. «¿Necesitas más
@@ -210,7 +214,6 @@ En La Cocina, «Pedir una comanda»: se elige de acá ([la-cocina.md](la-cocina.
 - No muestra el contenido de cada archivo (no reproduce el video ni el audio): se reconoce por su
   nombre, su dibujo y su peso.
 - No guarda en Google Drive ni en otro servicio: todo va al almacén de Tu Parrilla.
-- No guarda desde la app del teléfono: solo desde el panel.
 - No deshace un «Sacar».
 - No pide comandas: eso es «Pedir una comanda», que elige de acá.
 

@@ -2,6 +2,7 @@ import { and, asc, eq, inArray, isNotNull, isNull } from 'drizzle-orm'
 import { comandaEventos, comandas, getDb, insumos, marcas, materiales, users, type Usuario } from '@/db'
 import { esChoqueCon } from '@/lib/choque-de-unicidad'
 import { claseDe } from './bodega'
+import { COCINA_APAGADA } from './subidas'
 import { ordenarFila } from './fila'
 import { minutosDe, rolEnLaComanda, type MarcaBasica, type PedidoDeComanda } from './pedido'
 
@@ -39,6 +40,13 @@ class MaterialesCambiaron extends Error {
 }
 
 export type ResultadoPedido = { ok: true; id: string; repetida: boolean } | { falla: 'apagada' | 'principal' | 'acompanamiento' }
+
+/** Lo que se le dice al dueño cuando no se colgó, desde el panel o desde el teléfono. */
+export const NO_SE_PIDIO: Record<Exclude<ResultadoPedido, { ok: true }>['falla'], string> = {
+  apagada: COCINA_APAGADA,
+  principal: PRINCIPAL_NO_SIRVE,
+  acompanamiento: ACOMPANAMIENTO_NO_SIRVE,
+}
 
 /**
  * La cuelga: guarda la marca (la crea la primera vez), congela la receta, crea la comanda con su

@@ -23,7 +23,7 @@ tus números.
 | `/api/cocina/…` | La API de La Cocina, con `COCINA_SECRET`: el servidor del chef toma las comandas, baja sus insumos, informa cada estado y entrega lo cocinado al mesón del dueño (ver «La Cocina» y `docs/cocina-api.md`) |
 | `/api/media` | `POST` con la misma llave: firma la subida de un archivo directo a R2, para nombrarlo después en varias filas del lote sin que se vuelva a bajar (ver «Carga masiva por API») |
 | `/api/admin/…` | Lo que el panel llama desde el navegador, con la cookie de la sesión: la firma de una subida directa (`upload-url`), las subidas por partes a la cámara de frío de La Cocina (`cocina/subidas…`) y el pulso que mantiene al día sus tarjetas (`cocina/pulso`; ver «La Cocina») y la planilla de Excel de Los Números (`planilla`, y `planilla/adelanto` para lo que no cabe; ver «Llevar para la casa») |
-| `/api/mobile/…` | La API de la app del teléfono, con el token de su sesión (ver `mobile/README.md`) |
+| `/api/mobile/…` | La API de la app del teléfono, con el token de su sesión (ver `mobile/README.md`); `cocina…` es La Cocina desde el teléfono: lo que muestra, las subidas por partes a la cámara de frío y «Mandar al chef» (ver «La Cocina») |
 | `/api/cron/…` | Las corridas programadas: la publicación y la sincronización, que también reintenta los mensajes del libro de sugerencias que no salieron a GitHub. Solo con `CRON_SECRET` |
 | `/api/track/…` | Las balizas de visitas y clics de las páginas públicas |
 
@@ -1543,11 +1543,13 @@ El diseño, con sus fases, está en `docs/superpowers/specs/2026-10-22-la-cocina
 La cámara de frío, con su modelo y su cuota, está en
 `docs/superpowers/specs/2026-11-02-la-bodega-design.md`.
 
-**Hoy existen tres piezas:**
+**Hoy existen cuatro piezas:**
 
 - la base: las tablas y la API por la que habla el chef;
 - la subida por partes, por la que el panel le lleva el material;
-- la cámara de frío (la bodega), donde ese material espera.
+- la cámara de frío (la bodega), donde ese material espera;
+- La Cocina en la app del teléfono (desde la 1.2.0, el 2026-11-02): grabar con la cámara del
+  teléfono y mandárselo al chef.
 
 **Lo que ve el usuario:**
 
@@ -1578,6 +1580,18 @@ La cámara de frío, con su modelo y su cuota, está en
   caracteres, con contador e ideas para empezar; el chef la recibe como `instruccion`), guarda su
   marca básica (nombre, @, color de acento y llamado final) y ve la fila y la hora estimada antes de
   colgarla.
+
+**Desde el teléfono**, la pestaña La Cocina de la app hace el camino corto: graba un video (o saca
+una foto, o elige de la galería), lo guarda en la cámara de frío por partes y lo cuelga con la
+instrucción al chef. Lo que el formulario del panel deja elegir y el teléfono no pregunta va como el
+panel lo trae marcado —un video largo, clips verticales, lo que dé el material, la marca guardada o
+el nombre de la cuenta—, y lo demás —el mesón, cancelar, renombrar o sacar de la cámara— sigue en el
+panel. Las rutas son `/api/mobile/cocina` (todo lo que muestra la pestaña, con las últimas 15
+comandas y su estado ya en palabras de noche y de día), `/api/mobile/cocina/subidas…` y
+`/api/mobile/cocina/comandas`, con el token del teléfono (`src/lib/cocina/telefono-api.ts`). No
+duplican nada: las subidas responden con `src/lib/cocina/subidas-http.ts`, el mismo de las del
+panel, y la comanda pasa por `leerPedido` y `pedirComanda`, como la del panel
+(`src/lib/cocina/telefono.ts`). Cómo sube el teléfono un video de varios GB, en `mobile/README.md`.
 
 El admin enciende y apaga la cocina de cada cuenta en Los Maestros (`users.cocina_desde`).
 Apagarla es despedir al chef: deja de ver esas comandas, aunque siguen ahí.
@@ -1663,7 +1677,8 @@ La `ref` de cada creativo lo hace repetible: un reintento del chef nunca lo dupl
 PUT llega hasta 5, así que el navegador lo corta en partes de 64 MB y sube tres a la vez, cada una
 con su enlace firmado. Ninguna parte cruza una función de Vercel. Va por cuatro pasos:
 
-1. `/api/admin/cocina/subidas` abre la subida;
+1. `/api/admin/cocina/subidas` abre la subida (desde el teléfono, `/api/mobile/cocina/subidas`,
+   que responde lo mismo: `src/lib/cocina/subidas-http.ts`);
 2. `…/partes` firma los enlaces de a pocos, justo antes de usarlos;
 3. el navegador sube las partes;
 4. `…/cerrar` junta las partes. Ahí nace el material, en la cámara de frío.
@@ -1676,6 +1691,8 @@ Las partes que llegaron se le preguntan al almacén (`ListParts`), no al navegad
   navegador recuerda qué subida era.
 
 El servidor está en `src/lib/cocina/subidas.ts`, y el navegador en `src/lib/subida-por-partes.ts`.
+El teléfono sube de a una parte, copiando cada tramo del archivo a un temporal que sube el propio
+sistema (`mobile/src/lib/subir-por-partes.ts` y `archivo-local.ts`).
 
 **Lo crudo vive fuera de `scheduled/`.** Va en `cocina/<dueño>/bodega/` (lo de antes de la cámara,
 en `…/insumos/`), con un uuid en la clave, y su URL nunca sale al navegador: el chef lo baja con un
@@ -1768,7 +1785,7 @@ src/
     cuentas-api.ts         las cuentas de GET /api/schedule/cuentas: los dos ids y cómo está la conexión (sin base)
     media-api.ts           la clave de un archivo que sube un cliente de la API, en la carpeta de su dueño (sin base)
     archivar-api.ts        el cuerpo y las respuestas de archivar y desarchivar lo quemado por API
-    cocina/                La Cocina: la cámara de frío (lo que se guarda, su cuota y sus nombres por tamaño en bodega.ts; lo de adentro en materiales.ts), los estados de una comanda, la fila del chef, lo que entrega, lo que lee y escribe su API (/api/cocina), las subidas por partes del panel (/api/admin/cocina), colgar una comanda, el pulso de las tarjetas vivas, el correo de la comanda que terminó y el mesón
+    cocina/                La Cocina: la cámara de frío (lo que se guarda, su cuota y sus nombres por tamaño en bodega.ts; lo de adentro en materiales.ts), los estados de una comanda, la fila del chef, lo que entrega, lo que lee y escribe su API (/api/cocina), las subidas por partes del panel y del teléfono (subidas-http.ts, que sirve a /api/admin/cocina y a /api/mobile/cocina), colgar una comanda, la comanda que pide el teléfono (telefono.ts), el pulso de las tarjetas vivas, el correo de la comanda que terminó y el mesón
     color-de-red.ts        el color de marca de cada red en La Parrilla, como clases de Tailwind escritas enteras
     piezas.ts              la pieza de una publicación: sus destinos programados unidos a lo publicado
     auth.ts                sesión del panel

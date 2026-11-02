@@ -620,8 +620,11 @@ Al final de la pantalla, «El manual del parrillero →». Adentro, elegir la p�
 - **«La animación no se mueve».** Con «Reducir movimiento» activado en el sistema, las estaciones
   quedan quietas a propósito. Una comanda lista, servida o terminada tampoco se mueve: no hay
   nada en marcha.
-- **«¿Puedo pedir desde la app del teléfono?».** No: la app no tiene La Cocina. Desde el navegador
-  del teléfono sí se puede, pero un video de varios GB sube mejor desde el computador.
+- **«¿Puedo pedir desde la app del teléfono?».** Sí, desde la versión 1.2.0: la pestaña «La
+  Cocina» de la app graba un video (o saca una foto), lo guarda en la cámara de frío y lo manda al
+  chef con la instrucción, en su camino corto —un video largo, clips verticales, lo que dé el
+  material—. Lo demás de esta pantalla (el mesón, cancelar, el formulario completo) sigue en el
+  panel. Ver [La app del teléfono](app-movil.md), «La Cocina».
 - **«Algo desapareció del mesón».** Lo que nadie programa en 30 días se borra solo; en su última
   semana, la tarjeta y el resumen del día lo avisan. Lo que se pasó a un borrador no vence: está en
   los borradores de La Parrilla.

@@ -3,14 +3,16 @@
 Esta es la app del teléfono de Tu Parrilla. En el teléfono se llama **Tu Parrilla**, con el
 bife sobre la reja de ícono, desde el build de la Play Store (2026-10-16); el APK de prueba
 de antes se llama «Vicente · Números» y tiene otro identificador, así que las dos pueden
-convivir instaladas hasta que se borre el APK. Desde el 2026-10-16 tiene las mismas tres
-pestañas que el panel web, en versión corta: **La Parrilla** (lo programado día por
+convivir instaladas hasta que se borre el APK. Desde el 2026-10-16 tiene las pestañas del
+panel web, en versión corta: **La Parrilla** (lo programado día por
 día —con un filtro por red, lo que ya salió hundido en un renglón y, hoy, la línea de
-«ahora»—, lo que se quemó, los borradores y cuántos cortes salieron ayer), **Publicar** al
-medio (eliges fotos o un video de la galería, escribes el texto, marcas las cuentas y lo
-programas, o lo mandas a salir ahora) y **Los Números** (las dos mitades del tablero, con «Tus
-publicaciones» un toque adentro y los seguidores de cada red detrás de «⋯ Más»). Arriba a
-la derecha de las tres, el botón de **Ajustes** (un trinche y un cuchillo, lado a lado): tus cuentas con la temperatura de su
+«ahora»—, lo que se quemó, los borradores y cuántos cortes salieron ayer), **Publicar**
+(eliges fotos o un video de la galería, escribes el texto, marcas las cuentas y lo
+programas, o lo mandas a salir ahora), **Los Números** (las dos mitades del tablero, con «Tus
+publicaciones» un toque adentro y los seguidores de cada red detrás de «⋯ Más») y, desde la versión
+1.2.0 (2026-11-02), **La Cocina** (grabar un video o sacar una foto con la cámara del teléfono y
+mandárselo al chef de la casa con una instrucción; ver «La Cocina desde el teléfono», más abajo).
+Arriba a la derecha de todas, el botón de **Ajustes** (un trinche y un cuchillo, lado a lado): tus cuentas con la temperatura de su
 fierro (`/api/mobile/fierros`), con un punto en el botón si alguna se enfría o se apagó,
 el modo —la noche o el día con sushi, el mismo de la cuenta—, «Cerrar sesión» y, al final, el
 libro de sugerencias (de día, la caja) para escribirle al equipo, como en el panel
@@ -202,6 +204,60 @@ Lo que no se puede hacer desde el teléfono, y sigue siendo del panel web: poner
 portada, etiquetar con atributos, programar en TikTok o con una palabra clave, y editar o
 borrar lo ya programado.
 
+## La Cocina desde el teléfono
+
+La cuarta pestaña, desde la versión 1.2.0 (2026-11-02): el camino corto del chef de la casa.
+Se marca la casilla de los derechos, se toca **Grabar video** (o **Sacar foto**, o **Elegir de la
+galería**), y lo grabado se guarda en la cámara de frío —de día, la nevera— y entra a la comanda
+ya elegido; se escribe la instrucción al chef y **Mandar al chef** cuelga la comanda. Más abajo,
+lo que hay en la cámara para sumarlo, con su cuota, y las últimas comandas con su estado, que se
+actualizan solas mientras alguna está en marcha. Lo que el formulario del panel deja elegir y el
+teléfono no pregunta va como el panel lo trae marcado: un video largo, clips verticales, lo que
+dé el material, la marca guardada (o el nombre de la cuenta) y lo que acompaña, para intercalar.
+El mesón, cancelar, renombrar o sacar de la cámara siguen en el panel.
+
+Las rutas son `/api/mobile/cocina` (todo lo que la pantalla muestra), `/api/mobile/cocina/subidas…`
+(las mismas subidas por partes del panel, con el token del teléfono) y
+`/api/mobile/cocina/comandas`. Lo que validan y sus frases son las del panel
+(`src/lib/cocina/subidas-http.ts` y `src/lib/cocina/telefono.ts`, en la raíz): la cuota se mira en
+el servidor igual que desde el panel.
+
+**Cómo sube un video de varios GB sin reventar el teléfono** (`src/lib/subir-por-partes.ts` y
+`src/lib/archivo-local.ts`): el servidor abre la subida y dice el tamaño de cada parte (64 MB); la
+app pide el enlace firmado de una parte justo antes de subirla, copia ese tramo del archivo a un
+temporal de a 4 MB —con el `FileHandle` de `expo-file-system`, que lee desde una posición— y el
+temporal lo sube el propio `File.upload`, que lee del disco y avisa el avance. En la memoria de
+JavaScript nunca hay más que un trozo; en disco, una parte. De a una parte por vez, con cuatro
+intentos cada una. No se mandan los bytes con `fetch` porque React Native pasa un `ArrayBuffer` a
+base64 para cruzarlo a la parte nativa. No hizo falta ninguna dependencia nativa nueva:
+`expo-file-system` ya estaba.
+
+Lo grabado no queda en la galería: la cámara del sistema lo deja en la caché de la app, que el
+teléfono limpia cuando quiere. Por eso la app lo pasa a su carpeta de documentos (`cocina/`) hasta
+que termina de subir, y guarda la cola en AsyncStorage (`cocina-pendientes`): si la app se cierra a
+medias, al abrir La Cocina sigue donde quedó —el servidor dice qué partes llegaron—. Al terminar o
+al quitarlo, la copia se borra; al abrir La Cocina se barre lo que ya nadie espera, y cerrar sesión
+borra la cola. En la web (`archivo-local.web.ts`) el archivo es el del navegador y no se guarda.
+
+### La 1.2.0 necesita un build nativo y pasar por las tiendas
+
+Grabar pide los permisos de cámara y micrófono (`cameraPermission` y `microphonePermission` del
+plugin `expo-image-picker` en `app.json`, que hasta la 1.1.0 estaban en `false`), y eso solo llega
+con un binario nuevo. Como la `runtimeVersion` es la versión de la app (`appVersion`), lo que se
+publique por aire para la 1.2.0 no le llega a un teléfono con la 1.1.0: ese se queda sin la
+pestaña hasta instalar el binario nuevo, que es lo que se quiere, porque sin los permisos la
+cámara no abriría. Lo de la 1.1.0 se sigue publicando por aire desde un commit anterior a este
+cambio. El build y el envío los hace el dueño (ver `docs/pendientes.md`): el flujo «App a la
+tienda» de GitHub, o a mano con la cuenta de Expo, `npx eas-cli build -p android --profile
+production` y `npx eas-cli submit -p android --profile production`; lo mismo con `-p ios` cuando
+exista la cuenta de Apple. En la Play Console, la sección de seguridad de los datos tiene que
+decir que la app usa la cámara y el micrófono para lo que la persona sube.
+
+Lo que no se pudo probar sin un teléfono: la cámara misma, los permisos, la copia a documentos, la
+cola que sigue después de cerrar la app y la subida nativa por partes. En Expo web, contra una API
+falsa, sí se probó el resto: elegir de la galería, subir en dos partes con su avance, la frase de
+la cuota, mandar la comanda con la instrucción y la cocina apagada.
+
 ## El modo día
 
 La app tiene los dos modos del panel: la noche de entrada y el día con sushi. Es el modo de la
@@ -240,8 +296,9 @@ los selectores del sistema, que no siguen el modo y llegan solo con un build nue
   cuadrado y sin transparencia, porque iOS le pone las esquinas solo y el App Store
   rechaza un ícono con canal alfa.
 - Los permisos que iOS exige escribir: el de Face ID (`expo-local-authentication`; sin
-  ese texto, la app se cerraría al pedir la cara) y el de las fotos. Cámara y micrófono
-  quedan fuera: la app no los usa, y Apple rechaza permisos que no se usan.
+  ese texto, la app se cerraría al pedir la cara), el de las fotos y, desde la 1.2.0, los de
+  la cámara y el micrófono, que La Cocina usa para grabar lo que se le manda al chef. Hasta la
+  1.1.0 quedaban fuera porque la app no grababa, y Apple rechaza permisos que no se usan.
 - Lo que en el código era solo de Android: el teclado empuja la pantalla con `padding`, que es lo que
   corresponde en iOS; la cabecera mide 44 puntos; las fotos llegan en JPEG y no en HEIC
   (Instagram y Facebook rechazan HEIC), y no se pide acceso a la galería entera.
@@ -289,6 +346,9 @@ falta volver a autorizar nada de eso, solo se cierra el acceso desde el celular.
 ## Qué no hace todavía
 
 - No pone portada ni atributos, y no edita lo ya programado: eso sigue en el panel.
+- En La Cocina no muestra el mesón, no cancela comandas ni saca nada de la cámara de frío, y no
+  sigue subiendo con la app en segundo plano: lo primero es del panel, y lo segundo retoma al
+  volver a abrir La Cocina.
 - No manda notificaciones (no avisa solo cuando hay un dato nuevo).
 - No hay versión para iPhone que se pueda instalar: el código está listo, falta la
   cuenta de Apple (ver «iPhone (iOS)», arriba).

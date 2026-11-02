@@ -337,6 +337,18 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   textos, en la carpeta «Google Play» del escritorio de Vicente; el porqué, en
   `docs/play-store.md`. La tienda pública es otro trámite: una cuenta personal nueva
   necesita una prueba cerrada con doce probadores durante catorce días.
+- **[dueño] El build 1.2.0 de la app, con la cámara, a las tiendas** (2026-11-02). La 1.2.0 trae
+  La Cocina en el teléfono: grabar un video o sacar una foto y mandárselo al chef. Pide los
+  permisos de cámara y micrófono, que solo llegan con un binario nuevo, y su `runtimeVersion` es
+  otra: nada de la 1.2.0 llega por aire a un teléfono con la 1.1.0. Falta: el build de EAS de
+  producción (el flujo «App a la tienda» de GitHub, o `npx eas-cli build -p android --profile
+  production` en `mobile/`) y subirlo a Google Play (`eas submit`), con la sección de seguridad de
+  los datos de la Play Console al día —la app usa la cámara y el micrófono para lo que la persona
+  sube—; y lo mismo en el App Store cuando exista la cuenta de Apple (ver la entrada de abajo).
+  Probarlo en un teléfono de verdad antes de soltarlo: la cámara, los permisos y la subida por
+  partes de un video de varios GB no se pudieron probar sin uno. Mientras tanto, lo de la 1.1.0
+  se publica por aire desde un commit anterior. Detalle en `mobile/README.md`, «La 1.2.0
+  necesita un build nativo y pasar por las tiendas».
 - **[dueño] La app en iPhone** (2026-10-16). El código ya está listo para iOS; faltan la
   cuenta del Apple Developer Program, confirmar el identificador `cl.tuparrilla.app`
   (queda fijo al registrarlo), la ficha en App Store Connect y el primer build a
@@ -467,8 +479,8 @@ nadie paga: todas las cuentas son iguales y el README dice «Sin suscripción».
   `docs/auditoria-ui-2026-10-16.md`.
 - **El rediseño de la app del teléfono, partes 3 y 4** (2026-10-16). Las partes 1 y 2
   dejaron las tres pestañas del panel, «Reprogramar» en «Se quemó» y los borradores
-  compartidos con el panel. Faltan: (3) La Mesa como cuarta pestaña, para leer y responder
-  comentarios; (4) TikTok desde Publicar —exige mostrar los datos de la cuenta
+  compartidos con el panel. Faltan: (3) La Mesa como otra pestaña (la cuarta es La Cocina
+  desde el 2026-11-02), para leer y responder comentarios; (4) TikTok desde Publicar —exige mostrar los datos de la cuenta
   (`creator_info`) antes de publicar—, y Threads y X cuando salgan de «Próximamente»; y con eso
   la palabra clave: hoy un borrador
   con TikTok o con palabra clave se edita en el teléfono pero se programa en el panel
