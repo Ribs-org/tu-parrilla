@@ -179,13 +179,13 @@ sección.
   «Respaldos»). Sin la llave privada los respaldos no se abren: que siga guardada en más de un
   lugar.
 
-- **[dueño] El token del libro de sugerencias** (2026-11-02). Sin él, lo que la gente escribe en
-  el libro de sugerencias se guarda pero no llega a GitHub. Crear en
-  github.com/settings/personal-access-tokens un token *fine-grained* con dueño `Ribs-org`, acceso
-  solo a `Ribs-org/tu-parrilla` y un único permiso, «Issues: Read and write»; cargarlo en Vercel
-  como `SUGERENCIAS_GITHUB_TOKEN` (production) y redesplegar. Lo que se juntó mientras tanto sale
-  solo en la sincronización diaria siguiente. `SUGERENCIAS_REPO` solo hace falta si los issues
-  deben caer en otro repositorio (README, «El libro de sugerencias»).
+- **[dueño] Renovar el token del libro de sugerencias antes de noviembre de 2027** (anotado el
+  2026-11-02). `SUGERENCIAS_GITHUB_TOKEN` está en Vercel (production) desde el 2026-11-02: un
+  token *fine-grained* de `Ribs-org`, solo para `Ribs-org/tu-parrilla`, con «Issues: Read and
+  write», que vence al año. Vencido, lo que la gente escribe se guarda pero deja de llegar a
+  GitHub, sin aviso. Para renovarlo: «Regenerate token» en github.com/settings/personal-access-tokens,
+  reemplazar el valor en Vercel y redesplegar; lo que se juntó mientras tanto sale solo en la
+  sincronización diaria siguiente (README, «El libro de sugerencias»).
 
 ## Trámites con las plataformas
 
