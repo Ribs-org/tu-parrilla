@@ -1,17 +1,19 @@
 import { Panel } from '@/components/charts/panel'
 import { Encabezado } from '@/components/ui'
 import { requireAdmin } from '@/lib/auth'
+import { listarCuentasTraspasables } from '@/lib/social/traspasar'
 import { listarUsuarios } from '@/lib/usuarios'
-import { FormularioInvitar, BotonQuitar, BotonCerrarSesiones, BotonCocina } from './formularios'
+import { nombreDe } from '@/lib/vocabulario'
+import { FormularioInvitar, FormularioTraspaso, BotonQuitar, BotonCerrarSesiones, BotonCocina } from './formularios'
 
 export const dynamic = 'force-dynamic'
 
 export default async function UsuariosPage() {
-  const { zona } = await requireAdmin()
+  const { tema, zona } = await requireAdmin()
   // En la zona del admin: sin `timeZone`, el formato usaba la del servidor (UTC en Vercel), y
   // una invitación de las nueve de la noche en Chile salía con la fecha del día siguiente.
   const FECHA = new Intl.DateTimeFormat('es-CL', { dateStyle: 'medium', timeZone: zona })
-  const usuarios = await listarUsuarios()
+  const [usuarios, cuentas] = [await listarUsuarios(), await listarCuentasTraspasables()]
   return (
     <>
       <header className="mb-6">
@@ -37,6 +39,13 @@ export default async function UsuariosPage() {
             </li>
           ))}
         </ul>
+      </Panel>
+      <Panel title="Traspasar una cuenta" className="mt-6">
+        <FormularioTraspaso
+          cuentas={cuentas}
+          personas={usuarios.map(({ id, correo }) => ({ id, correo }))}
+          fierros={nombreDe('/admin/accounts', tema)}
+        />
       </Panel>
     </>
   )

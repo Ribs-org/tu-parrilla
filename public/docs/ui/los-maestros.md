@@ -7,7 +7,8 @@ panel, [la-parrilla.md](la-parrilla.md)) sin aviso.
 
 Tu Parrilla es por invitación. Los Maestros es la lista de quién puede entrar: acá el admin
 invita a alguien por su correo, ve quién está invitado y quién ya entró, quita una invitación
-que nunca se usó y corta las sesiones abiertas de una persona.
+que nunca se usó, corta las sesiones abiertas de una persona y traspasa una cuenta conectada de
+una persona a otra.
 
 ## Cómo se llega
 
@@ -21,7 +22,7 @@ O directo: `https://tu-parrilla.cl/admin/usuarios`.
 ## Qué se ve
 
 Arriba, el título «Los Maestros» (se ve en mayúsculas), debajo «quién puede entrar», y la frase
-«Quién puede entrar a Parrilla. Invitar manda el primer código al correo.». Después, dos
+«Quién puede entrar a Parrilla. Invitar manda el primer código al correo.». Después, tres
 bloques.
 
 ### Bloque «Invitar»
@@ -56,6 +57,20 @@ del admin. Cada fila trae:
   apagar la cocina de alguien», abajo.
 
 Las fechas van en números (día-mes-año).
+
+### Bloque «Traspasar una cuenta»
+
+- La frase «Se lleva sus publicaciones, sus números y sus comentarios. No se borra nada, en la red
+  no cambia nada y se puede devolver. Lo programado que sale también a otras cuentas se queda con
+  quien lo programó, y sale igual.».
+- La lista «Cuenta», con «Elige una cuenta» arriba y una opción por cada cuenta de cada persona:
+  la red, el nombre de la cuenta, el correo de quien la tiene, cuántas publicaciones tiene y, si
+  las hay, cuántas están por salir. Por ejemplo, «Instagram · @cuenta · ana@ejemplo.cl · 34
+  publicaciones, 2 por salir».
+- La lista «Pasa a», con «Elige a quién» arriba y un correo por persona, sin quien ya tiene la
+  cuenta. Se activa al elegir la cuenta.
+- El botón «Traspasar» (mientras trabaja, «Traspasando…»), activo con las dos listas elegidas.
+- Debajo, el resultado: en verde lo que pasó, o un error en rojo.
 
 ## Qué se puede hacer
 
@@ -113,6 +128,30 @@ La Cocina es el chef de la casa: el editor que recibe el material crudo y devuel
 
 El admin también la enciende para sí mismo, en su propia fila.
 
+### Para traspasar una cuenta
+
+Cuándo: una cuenta tiene que pasar a otra persona sin perder su historial. Por ejemplo, cuando
+sale «… ya está conectada por otra persona en Tu Parrilla.» y no conviene usar «Quitar», que borra
+todo lo que se bajó de ella ([los-fierros.md](los-fierros.md)).
+
+1. En «Traspasar una cuenta», elegir la cuenta en «Cuenta».
+2. Elegir en «Pasa a» a quién se la lleva.
+3. Apretar «Traspasar».
+4. El navegador pregunta «¿Traspasar <cuenta> de <correo> a <correo>? Se lleva <publicaciones>, sus
+   números y sus comentarios. Se puede devolver desde aquí.». Aceptar.
+5. Con «<cuenta> ya es de <correo>. Falta que esa persona la reconecte en Los Fierros.», la cuenta
+   ya está en el otro usuario.
+6. Quien la recibió aprieta «Reconectar» en Los Fierros, para dejar la conexión a su nombre.
+
+Mientras tanto la cuenta sigue funcionando con la conexión de antes. Pasa una sola cuenta: la
+página de Facebook de un Instagram es otra cuenta y se traspasa aparte.
+
+Qué se mueve: la cuenta, sus publicaciones y sus números, sus comentarios y lo programado que sale
+solo a ella, también lo que está por salir. Lo programado que sale además a otras cuentas se queda
+en La Parrilla de quien lo programó, y sale igual en todas.
+
+Para devolverla, se traspasa de vuelta, con estos mismos pasos.
+
 ## Mensajes que puede ver
 
 | Lo que dice la pantalla | Qué significa | Qué hacer |
@@ -127,7 +166,12 @@ El admin también la enciende para sí mismo, en su propia fila.
 | «No se pudo quitar al usuario. Intenta de nuevo.» | Falló el borrado. | Volver a intentar. |
 | «¿Cerrar las sesiones de esta persona? Tendrá que entrar de nuevo con un código.» | Confirmación antes de cortar sus sesiones. | Aceptar o cancelar. |
 | «¿Apagar la cocina de <correo>? El chef deja de ver sus comandas.» | Confirmación antes de apagarle la cocina. | Aceptar o cancelar. |
-| «Esa persona ya no está en Los Maestros.» | Se quitó entre que se cargó la lista y se apretó el botón de la cocina. | Recargar. |
+| «Esa persona ya no está en Los Maestros.» | Se quitó entre que se cargó la lista y se apretó el botón de la cocina o «Traspasar». | Recargar. |
+| «¿Traspasar <cuenta> de <correo> a <correo>? Se lleva <publicaciones>, sus números y sus comentarios. Se puede devolver desde aquí.» | Confirmación antes de traspasar. | Aceptar o cancelar. |
+| «<cuenta> ya es de <correo>. Falta que esa persona la reconecte en Los Fierros.» | El traspaso salió. | Avisarle a esa persona que apriete «Reconectar». |
+| «Esa cuenta ya no está.» | La quitaron entre que se cargó la lista y se apretó «Traspasar». | Recargar. |
+| «Esa cuenta ya es de esa persona.» | Alguien la traspasó entre que se cargó la lista y se apretó «Traspasar». | Recargar. |
+| «No se pudo traspasar la cuenta. Intenta de nuevo.» | Falló el traspaso y no cambió nada. | Volver a intentar. |
 
 Si se aprieta «Invitar» con el correo vacío o con una forma que el navegador no acepta, el
 navegador muestra su propio aviso, en su idioma.
@@ -153,6 +197,12 @@ navegador muestra su propio aviso, en su idioma.
 - **«¿Cómo le doy el chef de la casa a alguien?».** «Encender la cocina», en su fila.
 - **«Apagué la cocina de alguien: ¿perdió sus comandas?».** No: siguen ahí. El chef deja de verlas
   hasta que se encienda de nuevo.
+- **«Quiero pasarle una cuenta a otra persona» / «una agencia recibe la cuenta de un cliente».**
+  «Traspasar una cuenta», en esta pantalla, sin borrar nada. Después, esa persona aprieta
+  «Reconectar» en Los Fierros.
+- **«Traspasé una cuenta y quiero deshacerlo».** Se traspasa de vuelta, en el mismo bloque.
+- **«Traspasé una cuenta y sigo viendo publicaciones suyas en mi Parrilla».** Son las que salían
+  también a otras cuentas: se quedan con quien las programó.
 
 ## Lo que esta pantalla no hace
 
@@ -162,7 +212,10 @@ navegador muestra su propio aviso, en su idioma.
 - No edita el correo ni el nombre de un invitado (el nombre lo cambia cada uno en Tu Cuenta).
 - No muestra ni revoca las llaves de API de otros, y «Cerrar sesiones» no las toca.
 - No da acceso a los datos de nadie: cada usuario ve solo sus redes, sus publicaciones y sus
-  páginas, también el admin.
+  páginas, también el admin. De las cuentas ajenas, el admin ve aquí solo lo que trae la lista de
+  «Cuenta» para traspasarlas.
+- No traspasa varias cuentas de una vez, ni pide el acuerdo de quien la tiene o de quien la recibe:
+  lo decide el admin.
 
 ## Para quien mantiene esta página
 
@@ -170,10 +223,12 @@ Sale de:
 
 - `src/app/admin/(dash)/usuarios/page.tsx`: la pantalla, la lista y sus etiquetas.
 - `src/app/admin/(dash)/usuarios/formularios.tsx`: «Invitar», «Quitar», «Cerrar sesiones», el
-  botón de La Cocina, sus confirmaciones y sus mensajes.
+  botón de La Cocina, «Traspasar una cuenta», sus confirmaciones y sus mensajes.
 - `src/lib/cocina/panel.ts` (`encenderCocinaDe`): qué hace encender o apagar la cocina.
+- `src/lib/social/traspasar.ts`: qué se mueve en un traspaso, la lista de cuentas y sus frases.
 - `src/app/admin/actions.ts` (`invitarUsuario`, `quitarUsuario`, `cerrarSesionesUsuario`,
-  `encenderCocina`): el aviso del correo que no salió, el error de la página y el de la cocina.
+  `encenderCocina`, `traspasarCuentaAccion`): el aviso del correo que no salió, el error de la
+  página y el de la cocina.
 - `src/lib/usuarios.ts`: invitar, la página que se crea, quitar y cerrar sesiones.
 - `src/lib/ingreso.ts`: «Ese correo no se ve bien.», «Ese correo ya está invitado.» y «Ese
   usuario ya entró alguna vez; no se puede quitar todavía.».

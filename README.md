@@ -347,6 +347,13 @@ segundo recibe un aviso, no la cuenta de otro. Eso es entre dos usuarios distint
 mismo dueño sí puede conectar varias cuentas suyas de la misma red y elegir a cuáles sale
 cada publicación — ver «Varias cuentas de una misma red», más abajo.
 
+**Traspasar una cuenta**, en Los Maestros, es lo único del panel que cruza dueños, y por eso solo
+lo hace el admin (`src/lib/social/traspasar.ts`). Cambia de dueño la cuenta, sus publicaciones y
+los cortes que salen solo a ella; lo demás cuelga de la cuenta y la sigue. Un corte que sale
+además a otras cuentas se queda con quien lo programó, con un destino en una cuenta que ya no es
+suya: sale igual, porque publicar busca la cuenta por su id y no por su dueño. La credencial no
+cambia hasta que quien recibe la cuenta aprieta **Reconectar**.
+
 Las únicas tablas sin dueño son dos:
 
 - **`solicitudes_borrado`**, donde queda constancia de cada borrado que Meta pide: cuando se
@@ -580,9 +587,9 @@ Desconectar borra las credenciales de esa cuenta y conserva su historial. Para v
 **Reconectar** en su tarjeta; para sumar otra cuenta de la misma red, **Agregar
 cuenta** en el bloque de la red. Una tarjeta ya desconectada tiene además **Quitar**, que
 pregunta en una ventana y borra la cuenta con su historial (sus publicaciones, números,
-comentarios y destinos ya publicados); no deja si tiene publicaciones por salir. Es la
-forma de liberar una cuenta para otro usuario: mientras su fila exista, queda atada a
-quien la conectó.
+comentarios y destinos ya publicados); no deja si tiene publicaciones por salir. Liberar
+una cuenta para otro usuario pide eso, porque mientras su fila exista queda atada a quien la
+conectó, o que el admin la traspase en Los Maestros, que no borra nada.
 
 #### Varias cuentas de una misma red
 
@@ -1658,6 +1665,7 @@ src/
       lectura.ts           qué publicaciones se leen cada día: lo nuevo a diario, lo viejo cada vez más espaciado
       politica-youtube.ts  lo que las políticas de YouTube no dejan hacer con sus datos
       retencion-youtube.ts borra lo de YouTube que lleva 30 días sin refrescarse
+      traspasar.ts         le cambia el dueño a una cuenta con lo que se bajó de ella, sin borrar nada
       publish/secuencia.ts las historias de una secuencia salen en orden: cada una espera a la anterior
 public/docs/
   api-llm.md, api-editor.md, api.json   las guías de la API para un LLM
