@@ -178,6 +178,15 @@ export const ROTULO_CALOR: Record<Tema, Record<Calor, string>> = {
 }
 
 /**
+ * El botón de Los Números que se lleva todo en una planilla de Excel: lo que sobra del asado se
+ * lleva para la casa, y el sushi se pide para llevar. Lo pidió un usuario el 2026-11-02.
+ */
+export const PARA_LLEVAR: Record<Tema, string> = { noche: 'Llevar para la casa', dia: 'Para llevar' }
+
+/** Lo que dice esa ventana mientras se arma la planilla: el corte se envuelve, las piezas van a su caja. */
+export const ENVOLVIENDO: Record<Tema, string> = { noche: 'Envolviendo los cortes…', dia: 'Armando la caja…' }
+
+/**
  * Cada palabra que cambia de día, con la de noche: la wiki las cuenta todas en «El modo día»
  * (`public/docs/ui/index.md`), para que un agente que oye una sepa que es la otra.
  */
@@ -189,6 +198,8 @@ export const PALABRAS_DE_DIA: ReadonlyArray<Record<Tema, string>> = [
   LIBRO,
   ECHAR_AL_LIBRO,
   QUEDO_EN_EL_LIBRO,
+  PARA_LLEVAR,
+  ENVOLVIENDO,
   FIERRO_FRIO,
   SE_ENFRIA,
   { noche: fraseDelAviso({ nivel: 'enfriandose', cuantos: 1 }), dia: fraseDelAviso({ nivel: 'enfriandose', cuantos: 1 }, 'dia') },

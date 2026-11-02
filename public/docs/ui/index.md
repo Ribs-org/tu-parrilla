@@ -72,7 +72,7 @@ se ve arriba, grande y en mayúsculas.
 |---|---|---|---|---|
 | La Parrilla | lo que viene y cómo salió lo que ya se fue | `/admin/schedule` | Primera pestaña. Es la entrada: se llega acá al entrar, y `/admin` lleva acá. El calendario: programar, borradores, lo que se quemó, editar, reprogramar | [la-parrilla.md](la-parrilla.md) |
 | La Mesa | lo que te responden y tus respuestas | `/admin/comments` | Pestaña. Los comentarios y sus respuestas | [la-mesa.md](la-mesa.md) |
-| Los Números | cómo te fue en las redes y en tu página | `/admin/analytics` | Pestaña. Un tablero con dos mitades: «En las redes» (views y seguidores ganados) y «En tu página» (visitas y clicks en su página de links). Un clic adentro, «Tus publicaciones» (`/admin/analytics/publicaciones`): cada publicación con sus números y su etiqueta `?s=`; la pieza de cada una, con sus versiones (`/admin/analytics/publicaciones/<id>`); «Comparar por atributo» (`/admin/analytics/comparar`); «Tu mejor 10 %» (`/admin/analytics/mejores`), lo que más rindió —o lo que menos, con «Lo peor»— y qué tiene en común; y «Lado a lado» (`/admin/analytics/lado-a-lado`), dos publicaciones con su portada, el link a la red y cómo crecieron | [los-numeros.md](los-numeros.md) |
+| Los Números | cómo te fue en las redes y en tu página | `/admin/analytics` | Pestaña. Un tablero con dos mitades: «En las redes» (views y seguidores ganados) y «En tu página» (visitas y clicks en su página de links). Un clic adentro, «Tus publicaciones» (`/admin/analytics/publicaciones`): cada publicación con sus números y su etiqueta `?s=`; la pieza de cada una, con sus versiones (`/admin/analytics/publicaciones/<id>`); «Comparar por atributo» (`/admin/analytics/comparar`); «Tu mejor 10 %» (`/admin/analytics/mejores`), lo que más rindió —o lo que menos, con «Lo peor»— y qué tiene en común; y «Lado a lado» (`/admin/analytics/lado-a-lado`), dos publicaciones con su portada, el link a la red y cómo crecieron. Al lado del título, «Llevar para la casa»: todo en una planilla de Excel | [los-numeros.md](los-numeros.md) |
 | La Cocina | el chef de la casa y tu propio chef | `/admin/ia` | Cuarta pestaña, la última. Arriba, el chef de la casa: el editor de videos, que se enciende por cuenta, sus comandas, «Pedir una comanda» (`/admin/ia/pedir`), donde se sube el material, y el mesón (`/admin/ia/meson`), donde espera lo que el chef entregó. Abajo, «Tu propio chef»: generar y revocar las llaves de API de la IA propia, y las guías que tiene que leer. Al final, el manual del parrillero (`/admin/ia/manual`): esta misma wiki, para que la lea la persona. Hasta el 2026-10-22 se llamaba «Tu IA» | [la-cocina.md](la-cocina.md) |
 | Los Fierros | tus redes conectadas | `/admin/accounts` | Botón «Ajustes». Conectar y desconectar redes | [los-fierros.md](los-fierros.md) |
 | La Vitrina | tus páginas públicas | `/admin/profiles` | Botón «Ajustes». Su página de links | [la-vitrina.md](la-vitrina.md) |
@@ -129,6 +129,7 @@ teléfono](app-movil.md).
 | Ver todas las versiones de un post (en otras cuentas, con otro hook, el trial reel) con sus números lado a lado | Los Números, la pieza de esa publicación: se abre desde su fila en «Tus publicaciones» o en «Lo que más creció» ([los-numeros.md](los-numeros.md)) |
 | Juntar dos versiones del mismo video (dos hooks, o el trial reel y el reel normal) | Darles el mismo atributo `pieza` en el editor de cada post, en La Parrilla («Editar atributos» desde la pieza) ([los-numeros.md](los-numeros.md), [la-parrilla.md](la-parrilla.md)) |
 | Comparar qué hook, tema o serie funciona mejor | Los Números → «Comparar por atributo →» ([los-numeros.md](los-numeros.md)); los atributos se anotan en el editor de cada post, en La Parrilla |
+| Exportar o bajar sus números a Excel (una planilla con todo: publicaciones, seguidores, visitas, clicks, lo programado, los comentarios) | Los Números, botón «Llevar para la casa» (de día, «Para llevar»), a la derecha del título ([los-numeros.md](los-numeros.md)) |
 | Responder comentarios; darle instrucciones a la IA que redacta los borradores | La Mesa ([la-mesa.md](la-mesa.md)) |
 | Editar su página de links: foto, bio, colores, links, dirección | La Vitrina ([la-vitrina.md](la-vitrina.md)) |
 | Cambiar su nombre o su zona horaria | Tu Cuenta ([tu-cuenta.md](tu-cuenta.md)) |
@@ -227,6 +228,8 @@ vale para la de día:
 | «El desposte» | «El despiece» | El estado de una comanda |
 | «Al fuego» | «Armando las piezas» | El estado de una comanda |
 | «El mesón» | «La bandeja» | Lo que el chef entregó, en La Cocina. No es La Vitrina, las páginas públicas |
+| «Llevar para la casa» | «Para llevar» | El botón de Los Números que baja la planilla de Excel, y el título de su ventana |
+| «Envolviendo los cortes…» | «Armando la caja…» | Lo que dice esa ventana mientras se arma la planilla |
 | «Lista en el mesón» | «Lista en la bandeja» | El estado de una comanda; el mesón también al servir: «Sirviendo: 3 de 5 tandas en la bandeja» |
 | «No se puede cocinar» | «No se puede preparar» | El estado de una comanda que el chef rechazó |
 
@@ -288,6 +291,9 @@ de una de estas.
 - **Los archivos.** Elegir un archivo abre el selector de archivos del teléfono o del computador:
   ese sí es del sistema, no hay otro. El campo, en cambio, es del panel: un botón («Elegir
   archivos», «Elegir el CSV») y al lado el nombre de lo elegido, o «Ninguno elegido».
+- **Las descargas.** La planilla de «Llevar para la casa», en Los Números, la guarda el navegador
+  en su carpeta de descargas, como cualquier archivo: ese aviso de «descargado» sí es del
+  navegador. Todo lo de antes —qué va, cuánto falta, «Listo»— sale en la ventana del panel.
 - **Los globitos.** Al dejar el mouse quieto sobre algo que lo trae, o al llegar a eso con Tab,
   aparece un recuadro chico con la explicación, en los colores del modo. En un teléfono no
   aparecen: lo que dicen está también en otro lado (el editor, la ficha).

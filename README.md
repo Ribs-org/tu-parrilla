@@ -22,7 +22,7 @@ tus números.
 | `/api/schedule/…`, `/api/metrics/…` | La API para tu agente, con una llave de La Cocina («Tu propio chef»): cargar, ver y sacar lo programado, archivar lo quemado, las cuentas y los números (ver «Carga masiva por API» y las secciones que le siguen) |
 | `/api/cocina/…` | La API de La Cocina, con `COCINA_SECRET`: el servidor del chef toma las comandas, baja sus insumos, informa cada estado y entrega lo cocinado al mesón del dueño (ver «La Cocina» y `docs/cocina-api.md`) |
 | `/api/media` | `POST` con la misma llave: firma la subida de un archivo directo a R2, para nombrarlo después en varias filas del lote sin que se vuelva a bajar (ver «Carga masiva por API») |
-| `/api/admin/…` | Lo que el panel llama desde el navegador, con la cookie de la sesión: la firma de una subida directa (`upload-url`) y las subidas por partes de La Cocina (`cocina/…`; ver «La Cocina») |
+| `/api/admin/…` | Lo que el panel llama desde el navegador, con la cookie de la sesión: la firma de una subida directa (`upload-url`), las subidas por partes de La Cocina (`cocina/…`; ver «La Cocina») y la planilla de Excel de Los Números (`planilla`, y `planilla/adelanto` para lo que no cabe; ver «Llevar para la casa») |
 | `/api/mobile/…` | La API de la app del teléfono, con el token de su sesión (ver `mobile/README.md`) |
 | `/api/cron/…` | Las corridas programadas: la publicación y la sincronización, que también reintenta los mensajes del libro de sugerencias que no salieron a GitHub. Solo con `CRON_SECRET` |
 | `/api/track/…` | Las balizas de visitas y clics de las páginas públicas |
@@ -300,6 +300,22 @@ su portada, el link para ver el video en la red, sus atributos y cómo crecieron
 días desde que salieron; el video no se guarda (`src/lib/lado-a-lado.ts`). El porqué del tablero, en
 `docs/superpowers/specs/2026-10-13-numeros-tablero-design.md`.
 
+**Llevar para la casa** (de día, «Para llevar»), el botón al lado del título de Los Números,
+baja todo a una planilla de Excel: dieciséis hojas —publicaciones con sus números y atributos,
+la comparación por atributo, las lecturas diarias, las cuentas y sus seguidores día a día, las
+visitas y los clicks uno por uno con su etiqueta `?s=` y sus UTM, las etiquetas, los links, la
+audiencia, lo programado, publicado y quemado, y los comentarios de La Mesa— y una primera,
+«Léeme», que explica cada hoja y cada columna, con la fecha y la zona horaria del dueño. Sale con
+el período y los filtros de la pantalla, solo con lo del dueño. El `.xlsx` se escribe a mano
+(`src/lib/planilla/xlsx.ts` y `zip.ts`, sobre `node:zlib`): las bibliotecas de Excel de npm
+estaban abandonadas (`xlsx`) o traían dependencias con avisos abiertos (`exceljs`). Ningún texto
+es una fórmula: van como texto, y uno que empieza con `=`, `+`, `-`, `@`, tabulador o retorno
+lleva un apóstrofo adelante. Para que una cuenta grande no tumbe la función, la planilla sale
+por partes mientras se escribe (sin el tope de 4,5 MB de una respuesta de Vercel), las hojas
+largas se leen por tandas y tienen tope —100.000 visitas, clicks o lecturas, 50.000
+comentarios…—, y a los cuatro minutos deja de leer las hojas largas: lo que no entró lo dice
+«Léeme», y la ventana avisa antes de armar si el período no cabe (`src/lib/planilla/armar.ts`).
+
 **Componer** pasa en un panel que se abre desde la derecha con «+ Nueva publicación», sin
 perder de vista el calendario; ahí mismo están «Subir CSV» y «Borradores». Lo que escribes
 se guarda solo como **borrador** un segundo después de la última tecla, como un correo, y los
@@ -455,7 +471,7 @@ crea una segunda fila de YouTube, sin conectar, que no se sincroniza.
 **Lo que YouTube no deja hacer con sus datos.** Las políticas de los Servicios de API de
 YouTube (§III.E.4) prohíben calcular métricas nuevas con sus datos y guardarlos más de 30
 días sin refrescarlos, y la auditoría de cuota lo revisa. Por eso, en Los Números (el
-tablero y la lista de publicaciones), la API de métricas y la app del teléfono, las filas de YouTube traen sus
+tablero y la lista de publicaciones), la planilla de «Llevar para la casa», la API de métricas y la app del teléfono, las filas de YouTube traen sus
 contadores tal como los da la API, **sin lo ganado, sin arrastre y sin entrar en los
 totales**; sus suscriptores van sin «ganados» y fuera de la suma de seguidores. Las
 visitas, los clicks y el CTR los mide Tu Parrilla y la tabla los marca como propios
@@ -1684,6 +1700,7 @@ src/
     dominios.ts            si un host es el del producto, y adónde va el panel si no lo es
     tracking.ts            contexto de la visita desde headers
     analytics.ts           consultas del dashboard
+    planilla/              «Llevar para la casa»: las hojas y su «Léeme», lo que se lee fila por fila, y el .xlsx escrito a mano
     tablero.ts             las reglas de Los Números sin base: cuenta elegida, «⋯ Más» abiertos, la URL
     pieza.ts               qué junta las versiones de una pieza y las medianas por atributo (sin base)
     mejores.ts             el mejor (o el peor) X % de lo publicado: el corte, las medianas y lo que se repite (sin base)
@@ -1703,7 +1720,7 @@ src/
     borradores.ts          los borradores del compositor: guardar, cargar, listar y borrar, siempre por dueño
     borrador.ts            qué se guarda de un formulario y cómo se restaura, también desde el teléfono (sin base)
     borradores-movil.ts    los mismos borradores en la forma de la app del teléfono
-    pruebas/               la Postgres de las pruebas de integración: una base nueva y migrada por archivo
+    pruebas/               la Postgres de las pruebas de integración: una base nueva y migrada por archivo; y un lector de zip para mirar el XML de una planilla
     empresa.ts             quién presta el servicio: lo leen la portada, privacidad y términos
     avisos/                la caída de una cuenta y el resumen del día: las reglas sin base y lo que lee y manda
     sugerencias/           el libro de sugerencias: qué se acepta y cómo queda el issue (sin base), el cliente de GitHub, y guardar y reintentar

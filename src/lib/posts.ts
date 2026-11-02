@@ -358,9 +358,8 @@ function seriesGranularity(f: Filters): Granularity {
  * that grew and was then revised down inside the same week would come out understated,
  * or negative, because the `greatest(0, …)` would never see the individual days.
  */
-export async function getPostSeries(f: Filters): Promise<PostSeriesPoint[]> {
+export async function getPostSeries(f: Filters, unit: Granularity = seriesGranularity(f)): Promise<PostSeriesPoint[]> {
   const tz = f.zone
-  const unit = seriesGranularity(f)
   const interval = unit === 'day' ? '1 day' : '1 week'
   const from = localDay(f.from, f.zone)
   const to = localDay(f.to, f.zone)

@@ -17,7 +17,10 @@ export default function Loading() {
   return (
     <>
       <header className="mb-4">
-        <Encabezado ruta="/admin/analytics" />
+        <Encabezado ruta="/admin/analytics">
+          {/* «Llevar para la casa», el botón de la planilla. */}
+          <Brasa className="h-[2.125rem] w-[11.5rem] rounded-lg" />
+        </Encabezado>
         <BajadaDeLosNumeros />
       </header>
       {/* El período: «Hoy», «7 días», «30 días», «90 días», «Todo». */}

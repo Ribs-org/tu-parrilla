@@ -134,6 +134,18 @@ const { makeDefault, updateProfile, deleteScheduledPost, guardarCuenta, guardarT
 // `guardarCuenta` son dos funciones distintas con el mismo nombre: la de `admin/actions`
 // guarda la cuenta *del usuario* y la de `social/conectar`, una cuenta *de una red*.
 const { guardarCuenta: guardarCuentaDeRed, tomadasPorOtro } = await import('./social/conectar')
+const {
+  contarFilas,
+  leerClicks,
+  leerComentarios,
+  leerEtiquetas,
+  leerLecturas,
+  leerProgramado,
+  leerSeguidores,
+  leerVisitas,
+  publicacionesDeEtiquetas,
+  youtubeVencido,
+} = await import('./planilla/leer')
 
 beforeEach(() => {
   capturas.length = 0
@@ -852,5 +864,57 @@ describe('aislamiento por dueño, escrituras (SQL generado, sin base)', () => {
     colaRespuestas.push([['@vicente', '1784', true]])
     expect(await quitarCuenta(DUENO, '9692387a-41cc-4a81-9f8f-7b07135d742a')).toEqual({ error: CUENTA_CONECTADA })
     expect(capturas).toHaveLength(1)
+  })
+
+  /**
+   * La planilla de «Llevar para la casa» lee fila por fila lo que Los Números solo cuenta: cada
+   * visita, cada click, cada lectura, cada comentario, cada destino. Cada una de esas consultas
+   * tiene que terminar en el dueño, también la que sigue a un cursor.
+   */
+  describe('planilla: cada lectura de la planilla ata su consulta al dueño', () => {
+    const filtros = {
+      ownerId: DUENO,
+      zone: 'Europe/Madrid',
+      profileId: null,
+      from: new Date('2026-01-01'),
+      to: new Date('2026-01-31'),
+      includeBots: false,
+    }
+    const dias = { desde: '2026-01-01', hasta: '2026-01-31' }
+    const corte = new Date('2026-01-15')
+    const cursor = { en: '2026-01-20T10:00:00.123456Z', id: '9692387a-41cc-4a81-9f8f-7b07135d742a' }
+
+    it.each([
+      ['leerVisitas', () => leerVisitas(filtros, cursor, 10)],
+      ['leerClicks', () => leerClicks(filtros, cursor, 10)],
+      ['leerLecturas', () => leerLecturas(DUENO, dias, null, corte, { en: '2026-01-20', id: cursor.id }, 10)],
+      ['leerSeguidores', () => leerSeguidores(DUENO, dias, 'cuenta-1', corte, 10)],
+      ['leerProgramado', () => leerProgramado(filtros, null, new Date('2026-01-31'), 10)],
+      ['leerComentarios', () => leerComentarios(filtros, 'cuenta-1', corte, cursor, 10)],
+      ['publicacionesDeEtiquetas', () => publicacionesDeEtiquetas(DUENO, ['reel-1'], corte)],
+      ['youtubeVencido', () => youtubeVencido(DUENO, [cursor.id], corte)],
+    ])('%s', async (_, llamada) => {
+      const consultas = await todasLasConsultas(llamada)
+      expect(consultas).toHaveLength(1)
+      for (const c of consultas) esperarFiltradoPorDueno(c)
+    })
+
+    it('leerEtiquetas: las visitas y sus clicks', async () => {
+      const consultas = await consultasEncadenadas(() => leerEtiquetas(filtros, 10), [[]])
+      expect(consultas).toHaveLength(2)
+      for (const c of consultas) esperarFiltradoPorDueno(c)
+    })
+
+    it('contarFilas: los cuatro conteos', async () => {
+      const consultas = await consultasEncadenadas(() => contarFilas(filtros, dias, null, corte), [[[0]], [[0]], [[0]]])
+      expect(consultas).toHaveLength(4)
+      for (const c of consultas) esperarFiltradoPorDueno(c)
+    })
+
+    it('leerClicks: el link y la visita de un click se buscan solo entre los del dueño', async () => {
+      const [consulta] = await todasLasConsultas(() => leerClicks(filtros, null, 10))
+      // Tres veces: el link, la visita (`visit_id` no tiene clave foránea) y el click mismo.
+      expect(consulta!.sql.match(/"profiles"\."owner_id" = \$/g)).toHaveLength(3)
+    })
   })
 })
