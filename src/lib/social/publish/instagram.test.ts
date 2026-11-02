@@ -408,12 +408,37 @@ describe('publish: retomar un contenedor guardado sin publicar dos veces', () =>
       .fn()
       .mockResolvedValueOnce(Response.json({ status_code: 'FINISHED' }))
       .mockResolvedValueOnce(new Response('{"error":{"message":"Invalid parameter","code":100}}', { status: 400 }))
+      .mockResolvedValueOnce(Response.json({ status_code: 'FINISHED' }))
     vi.stubGlobal('fetch', fetchMock)
     expect(await instagramPublisher.publish({ ...foto, cuenta: '@vicente' })).toEqual({
       kind: 'failed',
       reason: 'Instagram rechazó la publicación en @vicente: «Invalid parameter» (código 100).',
       containerId: 'CT_7',
     })
+  })
+
+  it('si Meta rechaza media_publish pero el contenedor ya salió, se anota publicado sin id', async () => {
+    // Lo que pasó el 2026-11-02: la foto salió y media_publish contestó «Se bloqueó la acción».
+    const bloqueo =
+      '{"error":{"message":"Application request limit reached","code":4,"error_subcode":2207051,"error_user_title":"Se bloqueó la acción"}}'
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(Response.json({ status_code: 'FINISHED' }))
+      .mockResolvedValueOnce(new Response(bloqueo, { status: 403 }))
+      .mockResolvedValueOnce(Response.json({ status_code: 'PUBLISHED' }))
+    vi.stubGlobal('fetch', fetchMock)
+    expect(await instagramPublisher.publish(foto)).toEqual({ kind: 'published', externalId: null })
+    expect(String(fetchMock.mock.calls[2]![0])).toContain('/CT_7?fields=status_code')
+  })
+
+  it('si tras el rechazo el estado no contesta, el fallo se lleva el contenedor como siempre', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(Response.json({ status_code: 'FINISHED' }))
+      .mockResolvedValueOnce(new Response('{"error":{"message":"Invalid parameter","code":100}}', { status: 400 }))
+      .mockResolvedValueOnce(new Response('Bad gateway', { status: 502 }))
+    vi.stubGlobal('fetch', fetchMock)
+    expect(await instagramPublisher.publish(foto)).toMatchObject({ kind: 'failed', containerId: 'CT_7' })
   })
 
   it('un contenedor en ERROR dice el porqué que trae su status; sin él, la frase de siempre', async () => {

@@ -119,7 +119,7 @@ const { todosLosCortes, cortesEntre, cortesQuemados, horasPorVenir, servidosAyer
   './social/publish/cortes'
 )
 const { quitarCuenta, CUENTA_CONECTADA } = await import('./social/quitar')
-const { vincularVideosTikTok } = await import('./social/vincular-tiktok')
+const { vincularSinId } = await import('./social/vincular-sin-id')
 const { listarBorradores, cargarBorrador, guardarBorrador, borrarBorrador } = await import('./borradores')
 const { cuentasParaElTelefono } = await import('./borradores-movil')
 const { leerAjuste } = await import('./ajustes')
@@ -876,8 +876,8 @@ describe('aislamiento por dueño, escrituras (SQL generado, sin base)', () => {
    * que decide si se puede tiene que estar atada al dueño, o cualquiera borraría la cuenta de
    * otro sabiendo su id.
    */
-  it('social/vincular-tiktok: lee los destinos y los videos, y escribe el id, todo atado al dueño', async () => {
-    const consultas = await consultasEncadenadas(() => vincularVideosTikTok({ id: 'cuenta-tt', ownerId: DUENO }), [
+  it('social/vincular-sin-id: lee los destinos y los videos, y escribe el id, todo atado al dueño', async () => {
+    const consultas = await consultasEncadenadas(() => vincularSinId({ id: 'cuenta-tt', ownerId: DUENO }), [
       // Un destino publicado sin id…
       [['destino-1', null, 'published', null, null, 'Tres errores que cometí al lanzar mi producto', '2026-10-10T09:00:00.000Z']],
       // …y un video de la cuenta con el mismo texto a esa hora.

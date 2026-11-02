@@ -181,7 +181,7 @@ export function selloDe(
       destino.opciones !== null &&
       (destino.opciones as { modo?: unknown }).modo === 'borrador'
     // Con su id, el borrador ya salió de la bandeja: el dueño lo publicó y la sincronización
-    // encontró su video (`vincularVideosTikTok`).
+    // encontró su video (`vincularSinId`).
     return destino.network === 'tiktok' && borrador && !destino.externalId ? 'bandeja' : 'servido'
   }
   if (destino.status === 'publishing') return 'saliendo'
