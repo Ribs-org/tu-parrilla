@@ -86,6 +86,11 @@ sección.
 
 ## Bugs
 
+- **En el panel a ancho de teléfono, la pieza que se elige en la cámara de frío vuela fuera de
+  la pantalla** (2026-11-02, se vio al probar #296). A ese ancho el riel de la comanda queda
+  debajo de la grilla, y la animación de salida apunta a él aunque no se vea. No rompe nada: la
+  pieza queda elegida. Se podría apuntar el vuelo al borde visible, o mostrar el riel fijo abajo.
+
 - **En la app, la entraña de un video se lee como una longaniza** (2026-10-26, lo vio el dueño
   al publicar un video desde el teléfono). El formato llega bien del servidor (`entrana`);
   el problema es el dibujo. Sin `react-native-svg`, `mobile/src/components/pieza.tsx` arma
@@ -348,7 +353,8 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   Probarlo en un teléfono de verdad antes de soltarlo: la cámara, los permisos y la subida por
   partes de un video de varios GB no se pudieron probar sin uno. Mientras tanto, lo de la 1.1.0
   se publica por aire desde un commit anterior. Detalle en `mobile/README.md`, «La 1.2.0
-  necesita un build nativo y pasar por las tiendas».
+  necesita un build nativo y pasar por las tiendas». Ya que hay build, conviene sumarle antes
+  `react-native-svg`, que también espera uno (el bug de la entraña, en «Bugs»).
 - **[dueño] La app en iPhone** (2026-10-16). El código ya está listo para iOS; faltan la
   cuenta del Apple Developer Program, confirmar el identificador `cl.tuparrilla.app`
   (queda fijo al registrarlo), la ficha en App Store Connect y el primer build a
