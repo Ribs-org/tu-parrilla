@@ -160,6 +160,7 @@ export async function publishDue(
         coverUrl: vigente ? vigente.coverUrl : post.coverUrl,
         opciones: (target.opciones as OpcionesDestino | null) ?? null,
         ownerId: post.ownerId,
+        reintento: target.attemptCount > 0,
       })
     }
 
@@ -298,7 +299,13 @@ async function attempt(
   targetId: string,
   postId: string,
   containerId: string | null,
-  content: { caption: string; coverUrl: string | null; opciones: OpcionesDestino | null; ownerId: string | null },
+  content: {
+    caption: string
+    coverUrl: string | null
+    opciones: OpcionesDestino | null
+    ownerId: string | null
+    reintento: boolean
+  },
 ): Promise<PublishOutcome> {
   const db = getDb()
   const network = target.network
@@ -340,6 +347,7 @@ async function attempt(
       coverUrl: content.coverUrl,
       opciones: content.opciones,
       cuenta: account.handle,
+      reintento: content.reintento,
     })
   } catch (error) {
     // A publisher that throws (network hiccup, DNS, a timeout) is a retryable failure, not
