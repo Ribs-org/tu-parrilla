@@ -48,6 +48,7 @@ import { REARME, contenedorEsBorrador, enVuelo } from '@/lib/social/publish/publ
 import { esUuid } from '@/lib/uuid'
 import { conMensaje } from '@/lib/mensaje-firmado'
 import { quitarCuenta } from '@/lib/social/quitar'
+import { traspasarCuenta } from '@/lib/social/traspasar'
 import { CuentaInvalida, verificarCuentas, type CuentaDestino } from '@/lib/social/cuentas'
 // `guardarCuenta` de `social/conectar` guarda una cuenta *de una red*; la acción de abajo,
 // con el mismo nombre, guarda la cuenta *del usuario*. Se renombra la de la red al
@@ -1509,6 +1510,23 @@ export async function encenderCocina(id: string, encender: boolean): Promise<{ e
   revalidatePath('/admin/usuarios')
   revalidatePath('/admin/ia')
   return {}
+}
+
+/**
+ * Le cambia el dueño a una cuenta, con lo que se bajó de ella, desde Los Maestros. Cruza dueños a
+ * propósito y por eso solo la llama el admin: ver `traspasarCuenta`.
+ */
+export async function traspasarCuentaAccion(
+  cuentaId: string,
+  destinoId: string,
+): Promise<{ error: string } | { nombre: string; correo: string }> {
+  await requireAdmin()
+  const resultado = await traspasarCuenta(cuentaId, destinoId)
+  if ('error' in resultado) return resultado
+  for (const ruta of ['/admin/usuarios', '/admin/accounts', '/admin/schedule', '/admin/comments', '/admin/analytics']) {
+    revalidatePath(ruta)
+  }
+  return resultado
 }
 
 /* ------------------------------------------------------------------ cuenta -- */

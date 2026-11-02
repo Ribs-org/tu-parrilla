@@ -168,7 +168,7 @@ La fila no desaparece. Una cuenta desconectada deja de traer números y comentar
 
 ### Para quitar una cuenta
 
-Saca la cuenta de Tu Parrilla con todo lo que se bajó de ella, y la deja libre para que tú u otro usuario la vuelvan a conectar. Es lo que hace falta, por ejemplo, cuando al conectar sale «… ya está conectada por otra persona en Tu Parrilla.»: quien la tiene la quita desde su usuario.
+Saca la cuenta de Tu Parrilla con todo lo que se bajó de ella, y la deja libre para que tú u otro usuario la vuelvan a conectar. Es lo que hace falta, por ejemplo, cuando al conectar sale «… ya está conectada por otra persona en Tu Parrilla.»: quien la tiene la quita desde su usuario. Para no perder el historial, quien administra Tu Parrilla puede traspasarla en vez de quitarla ([los-maestros.md](los-maestros.md)).
 
 1. Si la cuenta está conectada, primero «Desconectar» (ver arriba). «Quitar» solo aparece en una cuenta con «Sin credencial».
 2. Abre el detalle con la flecha de su fila y aprieta «Quitar».
@@ -270,7 +270,7 @@ Trae los posts y los números de las cuentas de Instagram, TikTok, YouTube y Fac
 - **«Google dice que la app no está verificada»** → No debería pasar: Google verificó la app de Tu Parrilla el 2026-10-14. Si el cartel aparece igual, avisar a quien administra Tu Parrilla.
 - **«Acepté todo lo de Meta y no se conectó Instagram»** → Casi siempre falta la página de Facebook: Tu Parrilla encuentra el Instagram a través de ella, y aceptar los permisos no basta. Los pasos son los de la ventana «Instagram no se conectó», que se abre sola al volver (o con «Cómo arreglarlo» en la franja): (1) que el Instagram sea una cuenta profesional, de creador o de empresa; (2) que esté enlazado a una página de Facebook, desde Instagram, en Editar perfil → «Página» (enlazar las cuentas en el Centro de cuentas de Meta no sirve para esto), y (3) al volver a conectar, entrar con el Facebook que administra esa página y marcar esa página y ese Instagram cuando Meta pregunte qué compartir con Tu Parrilla, o corregirlo en la configuración de Facebook, en «Integraciones comerciales».
 - **«Conecté Instagram y no aparece mi página de Facebook»** → Son conexiones separadas: hay que apretar también «Conectar →» en el bloque «Facebook».
-- **«Me dice que la cuenta ya está conectada por otra persona»** → Mirar qué cuenta nombra: suele ser otra cuenta que la red trajo junto con la que se quería (en Meta, la de otra página que administra la misma persona en Facebook). En la lista para elegir, marcar solo la propia; si el error salió sin lista, volver a conectar y, en la ventana de Facebook, elegir la página de la cuenta que se quiere. Si nombra la cuenta propia, la tiene otro usuario de Tu Parrilla: avisar a quien administra Tu Parrilla.
+- **«Me dice que la cuenta ya está conectada por otra persona»** → Mirar qué cuenta nombra: suele ser otra cuenta que la red trajo junto con la que se quería (en Meta, la de otra página que administra la misma persona en Facebook). En la lista para elegir, marcar solo la propia; si el error salió sin lista, volver a conectar y, en la ventana de Facebook, elegir la página de la cuenta que se quiere. Si nombra la cuenta propia, la tiene otro usuario de Tu Parrilla: avisar a quien administra Tu Parrilla, que puede traspasarla sin borrar nada ([los-maestros.md](los-maestros.md)).
 - **«Apreté "Agregar cuenta" y no apareció otra cuenta»**, **«Agregar cuenta no me lleva a nada»** o **«parece que no se puede tener más de una cuenta por red»** → Sí se puede: la red entró con la cuenta que ya estaba conectada y solo la renovó. Los Fierros lo dice con «<Red> entró con la cuenta que ya estaba conectada: se renovó y no se agregó otra.» (por ejemplo, «TikTok entró con la cuenta que ya estaba conectada: se renovó y no se agregó otra.») y la ventana con los pasos; ver «Para agregar otra cuenta de la misma red». En TikTok, casi siempre es la sesión abierta en el navegador: hay que cerrarla en tiktok.com.
 - **«Reconecté y apareció una cuenta nueva»** → En la ventana de la red se entró con otra cuenta, o la red le dio un identificador nuevo a la misma. Si es la misma cuenta, desconectar la vieja y fusionarla (ver «Para fusionar una cuenta repetida»).
 - **«Tengo dos filas de la misma cuenta»** → «Para fusionar una cuenta repetida».
@@ -289,7 +289,7 @@ Trae los posts y los números de las cuentas de Instagram, TikTok, YouTube y Fac
 ## Lo que esta pantalla no hace
 
 - No quita una cuenta conectada, ni una con publicaciones por salir hacia ella. «Desconectar» deja la fila y sus números; para que la fila desaparezca hay que quitarla (con su historial) o fusionarla en otra (que conserva su historial).
-- No quita una cuenta que está en otro usuario: la quita ese usuario desde su sesión.
+- No quita una cuenta que está en otro usuario: la quita ese usuario desde su sesión. Tampoco la traspasa: eso lo hace quien administra Tu Parrilla, en Los Maestros.
 - No deshace una fusión.
 - No elige a qué cuenta sale cada publicación: eso se marca en el compositor de [La Parrilla](la-parrilla.md).
 - No muestra los números de las cuentas ni de sus publicaciones: están en [Los Números](los-numeros.md).
