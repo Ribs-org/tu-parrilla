@@ -34,6 +34,8 @@ export function Ventana({
   alVelo,
   className,
   onKeyDown,
+  onCancel,
+  onClose,
   ...props
 }: ComponentProps<'dialog'> & { alVelo: () => void }) {
   const velo = useVeloQueCierra(alVelo)
@@ -44,6 +46,17 @@ export function Ventana({
       onKeyDown={(event) => {
         if (event.key === 'Escape') event.stopPropagation()
         onKeyDown?.(event)
+      }}
+      // React hace subir `cancel` y `close` por su árbol, no por el del DOM: la ventana de un
+      // calendario, dibujada en un portal desde adentro de otra ventana, le avisaba su cierre a
+      // esa otra, y el panel lateral se cerraba con el Esc del calendario.
+      onCancel={(event) => {
+        event.stopPropagation()
+        onCancel?.(event)
+      }}
+      onClose={(event) => {
+        event.stopPropagation()
+        onClose?.(event)
       }}
       className={cn(
         'ventana m-auto max-h-[calc(100dvh-2rem)] w-[24rem] max-w-[calc(100vw-2rem)] rounded-xl border border-velo/10 bg-acero-900/95 text-fg shadow-xl backdrop-blur backdrop:bg-acero-950/80',
