@@ -1,14 +1,15 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { DeNocheYDeDia } from '@/components/de-noche-y-de-dia'
 import { IconoAjustes } from '@/components/icono-ajustes'
 import { IconoMaestro } from '@/components/icono-maestro'
+import { IconoLibro, LibroDeSugerencias } from '@/components/libro-de-sugerencias'
 import { useTema } from '@/components/tema-vivo'
 import { fraseDelAviso, type avisoDeFierros } from '@/lib/parrilla'
-import { ajustes, nombreDe, nombreEn, pantallaDe, pestanas } from '@/lib/vocabulario'
+import { LIBRO, LIBRO_SUBTITULO, ajustes, nombreDe, nombreEn, pantallaDe, pestanas } from '@/lib/vocabulario'
 import { cn } from '@/lib/utils'
 
 /** Dónde vive el aviso de los fierros dentro del menú: la entrada de Los Fierros. */
@@ -28,6 +29,9 @@ const RUTA_COCINA = '/admin/ia'
  * enfría, rojo si se apagó (`avisoDeFierros`). Adentro, la entrada de Los Fierros lo dice en
  * palabras. Sin nada que avisar, no hay punto.
  *
+ * Al final del menú, separado, el libro de sugerencias (de día, la caja): no es una pantalla
+ * sino una ventana para escribirle al equipo que hace Tu Parrilla (`libro-de-sugerencias.tsx`).
+ *
  * En un teléfono las cuatro pestañas no caben: la fila se desliza de lado, con el borde derecho
  * desvanecido para que se note que sigue, y al llegar a una pestaña la fila se corre hasta
  * dejarla entera a la vista. Antes, en Los Números, la pestaña activa quedaba debajo del botón
@@ -46,6 +50,7 @@ export function AdminNav({
   // La frase del aviso va a la vista en los dos modos; la del lector de pantalla, en el que se ve.
   const tema = useTema()
   const colorAviso = aviso?.nivel === 'apagado' ? 'bg-negative' : 'bg-caution'
+  const [libroAbierto, setLibroAbierto] = useState(false)
 
   // La pestaña activa, entera a la vista: si queda cortada a la derecha, la fila se corre.
   const tira = useRef<HTMLDivElement>(null)
@@ -159,8 +164,28 @@ export function AdminNav({
               </li>
             )
           })}
+          {/* El libro de sugerencias: discreto, al final y separado, porque no es una pantalla
+              sino una ventana. Cierra el menú y abre la ventana, que vive fuera del menú para
+              no desmontarse con él. */}
+          <li className="mt-1 border-t border-acero-700 pt-1">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.currentTarget.closest('details')?.removeAttribute('open')
+                setLibroAbierto(true)
+              }}
+              className="block w-full rounded-lg px-3 py-2 text-left transition-colors hover:bg-velo/[0.06]"
+            >
+              <span className="flex items-center gap-2 text-sm text-fg-muted">
+                <IconoLibro className="h-3.5 w-3.5" />
+                <DeNocheYDeDia noche={LIBRO.noche} dia={LIBRO.dia} />
+              </span>
+              <span className="block text-[0.72rem] text-fg-faint">{LIBRO_SUBTITULO}</span>
+            </button>
+          </li>
         </ul>
       </details>
+      <LibroDeSugerencias abierto={libroAbierto} alCerrar={() => setLibroAbierto(false)} />
     </nav>
   )
 }

@@ -14,6 +14,7 @@ import {
   uuid,
   type AnyPgColumn,
 } from 'drizzle-orm/pg-core'
+import type { TipoSugerencia } from '../lib/sugerencias/tipos'
 
 export const ROLES = ['admin', 'usuario'] as const
 export type Rol = (typeof ROLES)[number]
@@ -1008,6 +1009,41 @@ export const latidos = pgTable('latidos', {
   datos: jsonb('datos').$type<Record<string, unknown>>(),
 }).enableRLS()
 
+export { TIPOS_SUGERENCIA, type TipoSugerencia } from '../lib/sugerencias/tipos'
+
+/**
+ * Lo que alguien escribió en el libro de sugerencias (de día, la caja de sugerencias): una idea,
+ * algo que no funciona u otra cosa, para el equipo que hace Tu Parrilla. Se guarda antes de
+ * mandarlo como issue a GitHub, para que no se pierda si GitHub falla o no hay token: lo que
+ * queda sin `enviadaEn` lo reintenta el cron diario (`src/lib/sugerencias/guardar.ts`).
+ *
+ * `contexto` son los metadatos del momento en que se escribió —la pantalla, el modo, el
+ * navegador, cuántas cuentas tenía por red—, fijados al guardar: el issue que sale en un
+ * reintento dice lo mismo que habría dicho en el momento. Nunca el correo ni el nombre: el
+ * repositorio es público. `intentadaEn` es el último intento, y sirve de reclamo: dos
+ * corridas a la vez no mandan dos issues.
+ */
+export const sugerencias = pgTable(
+  'sugerencias',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    ownerId: uuid('owner_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    tipo: text('tipo').$type<TipoSugerencia>().notNull(),
+    texto: text('texto').notNull(),
+    contexto: jsonb('contexto').$type<Record<string, unknown>>().notNull(),
+    creadaEn: timestamp('creada_en', { withTimezone: true }).notNull().defaultNow(),
+    intentos: integer('intentos').notNull().default(0),
+    intentadaEn: timestamp('intentada_en', { withTimezone: true }),
+    ultimoError: text('ultimo_error'),
+    issueNumero: integer('issue_numero'),
+    issueUrl: text('issue_url'),
+    enviadaEn: timestamp('enviada_en', { withTimezone: true }),
+  },
+  (t) => [index('sugerencias_owner_idx').on(t.ownerId, t.creadaEn)],
+).enableRLS()
+
 export type Profile = typeof profiles.$inferSelect
 export type Link = typeof links.$inferSelect
 export type Visit = typeof visits.$inferSelect
@@ -1036,3 +1072,4 @@ export type Insumo = typeof insumos.$inferSelect
 export type Subida = typeof subidas.$inferSelect
 export type Creativo = typeof creativos.$inferSelect
 export type CreativoMedia = typeof creativoMedia.$inferSelect
+export type Sugerencia = typeof sugerencias.$inferSelect

@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { enviarResumenes } from '@/lib/avisos/run'
 import { purgarYoutubeViejo } from '@/lib/social/retencion-youtube'
 import { syncAll } from '@/lib/social/sync'
+import { clienteGithub } from '@/lib/sugerencias/github'
+import { reintentarSugerencias } from '@/lib/sugerencias/guardar'
 import { env } from '@/lib/env'
 import { cronAutorizado } from '@/lib/cron-auth'
 
@@ -41,7 +43,16 @@ export async function GET(request: Request) {
       console.error('Falló el resumen del día:', error)
       resumenes = { error: 'El resumen del día falló; ver el log.' }
     }
-    return NextResponse.json({ report, retencion, resumenes })
+    // Las sugerencias que no alcanzaron a salir a GitHub —no había token, o GitHub falló— se
+    // reintentan acá, una vez al día. Mismo trato: si falla, siguen guardadas para mañana.
+    let sugerencias: Awaited<ReturnType<typeof reintentarSugerencias>> | { error: string }
+    try {
+      sugerencias = await reintentarSugerencias(clienteGithub())
+    } catch (error) {
+      console.error('Falló el reintento de las sugerencias:', String(error).slice(0, 300))
+      sugerencias = { error: 'El reintento de las sugerencias falló; ver el log.' }
+    }
+    return NextResponse.json({ report, retencion, resumenes, sugerencias })
   } catch (error) {
     // Reaching here is the other case entirely: syncAll settles every network on its own,
     // so a throw is the orchestrator itself breaking, before any per-network catch could

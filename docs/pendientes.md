@@ -163,6 +163,14 @@ sección.
   «Respaldos»). Sin la llave privada los respaldos no se abren: que siga guardada en más de un
   lugar.
 
+- **[dueño] El token del libro de sugerencias** (2026-11-02). Sin él, lo que la gente escribe en
+  el libro de sugerencias se guarda pero no llega a GitHub. Crear en
+  github.com/settings/personal-access-tokens un token *fine-grained* con dueño `Ribs-org`, acceso
+  solo a `Ribs-org/tu-parrilla` y un único permiso, «Issues: Read and write»; cargarlo en Vercel
+  como `SUGERENCIAS_GITHUB_TOKEN` (production) y redesplegar. Lo que se juntó mientras tanto sale
+  solo en la sincronización diaria siguiente. `SUGERENCIAS_REPO` solo hace falta si los issues
+  deben caer en otro repositorio (README, «El libro de sugerencias»).
+
 ## Trámites con las plataformas
 
 Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataforma.
@@ -541,8 +549,14 @@ nadie paga: todas las cuentas son iguales y el README dice «Sin suscripción».
 - **Por revisar: «las notificaciones de Google»** (2026-10-23). El dueño las nombró al pedir
   los preparativos de YouTube y no quedó claro dónde las ve (¿correos de Google Cloud?, ¿el
   Verification Center?, ¿avisos en la app?). Preguntarle antes de tocar nada.
-- **Revisar los pull requests de Dependabot #241 y #242** (2026-10-21). Siguen abiertos; ver
-  que el CI pase y que no rompan nada antes de fusionarlos.
+- **No urgente: revisar el CI/CD y evaluar las dependencias** (2026-11-02, lo pidió el dueño).
+  - Ver si la reja de pull requests y el despliegue (README, «Cómo entra un cambio») cubren lo
+    que hace falta y cuánto tardan.
+  - Revisar las dependencias del sitio y de la app: cuáles sobran, cuáles traen avisos de
+    seguridad y cuáles se pueden reemplazar. Por ejemplo, `exceljs` se descartó para la planilla
+    por sus avisos.
+  - De paso, los pull requests de Dependabot que siguen abiertos (#241 y #288, que reemplazó a la
+    #242): que el CI pase y que no rompan nada antes de fusionarlos.
 - **[dueño] Borrar el almacén viejo de Vercel Blob** (2026-10-22). La media ya vive en R2 y el
   código no lo usa; no se borró porque borrar es irreversible y pide el sí del dueño. Antes,
   mirar que no quede nada que se quiera guardar.
