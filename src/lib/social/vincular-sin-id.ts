@@ -17,10 +17,15 @@ export const VIDEOS_DESDE_MS = DESPUES_BORRADOR_MS + 2 * DIA_MS
 export const DESTINOS_DESDE_MS = 2 * VIDEOS_DESDE_MS
 
 /**
- * Le pone su id de video a lo que salió a TikTok por Tu Parrilla sin él, cruzándolo con los
- * videos que la sincronización acaba de traer de esa misma cuenta (`emparejarVideos`, en
- * `tiktok-vinculo.ts`, dice por qué falta y cómo se cruza). Corre al final de cada
- * sincronización de una cuenta de TikTok, así que también arregla los que ya estaban.
+ * Le pone su id a lo que salió por Tu Parrilla sin él, cruzándolo con lo que la sincronización
+ * acaba de traer de esa misma cuenta (`emparejarVideos`, en `tiktok-vinculo.ts`, dice cómo se
+ * cruza). Corre al final de cada sincronización de una cuenta de TikTok o de Instagram, así que
+ * también arregla los que ya estaban.
+ *
+ * - TikTok no siempre manda el id del video (`tiktok-vinculo.ts` dice cuándo).
+ * - Instagram, cuando un intento publicó pero no contestó, o contestó con un error igual: el
+ *   contenedor dice PUBLISHED y no trae el id (`publish/instagram.ts`). Sin el id, además de
+ *   sus números, el post pierde su regla de palabra clave, que se busca por él (`reglasPara`).
  *
  * Solo toca destinos publicados y sin id, y solo les escribe el id si siguen sin él: nunca
  * pisa uno que llegó por `status/fetch`. Devuelve cuántos vinculó.
@@ -28,8 +33,9 @@ export const DESTINOS_DESDE_MS = 2 * VIDEOS_DESDE_MS
  * El dueño va en el WHERE de las tres consultas —el destino no tiene `owner_id`, así que se
  * ata por su post—, que es lo que vigila `src/lib/aislamiento.test.ts`.
  */
-export async function vincularVideosTikTok(
+export async function vincularSinId(
   account: Pick<SocialAccount, 'id' | 'ownerId'>,
+  red: 'tiktok' | 'instagram' = 'tiktok',
   now: Date = new Date(),
 ): Promise<number> {
   if (!account.ownerId) return 0
@@ -50,7 +56,7 @@ export async function vincularVideosTikTok(
     .where(
       and(
         eq(scheduledPostTargets.accountId, account.id),
-        eq(scheduledPostTargets.network, 'tiktok'),
+        eq(scheduledPostTargets.network, red),
         gte(scheduledPosts.scheduledAt, new Date(now.getTime() - DESTINOS_DESDE_MS)),
         eq(scheduledPosts.ownerId, account.ownerId),
       ),
@@ -79,6 +85,7 @@ export async function vincularVideosTikTok(
       caption: d.captionOverride ?? d.caption,
       scheduledAt: d.scheduledAt,
       borrador:
+        red === 'tiktok' &&
         typeof d.opciones === 'object' && d.opciones !== null && (d.opciones as { modo?: unknown }).modo === 'borrador',
     })),
     videos,

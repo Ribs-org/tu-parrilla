@@ -14,7 +14,7 @@ import type { Connector, FetchedPost, PostMetricValues } from './connector'
 import { agruparPorRed, primariaDe } from './cuenta'
 import { connectorFor } from './index'
 import { DIAS_DE_LECTURA_DIARIA, porLeerHoy } from './lectura'
-import { vincularVideosTikTok } from './vincular-tiktok'
+import { vincularSinId } from './vincular-sin-id'
 
 export type SyncReport = Array<{ network: string; handle: string | null; ok: boolean; posts: number; error?: string }>
 
@@ -286,15 +286,16 @@ export async function syncAccount(account: SocialAccount, primaria: boolean, pla
         .where(and(eq(socialPosts.accountId, account.id), inArray(socialPosts.externalId, gone)))
     }
 
-    // TikTok no siempre devuelve el id del video al publicar: con los videos recién traídos
-    // se le pone a lo que salió por Tu Parrilla sin él, y así cruza con sus atributos. Un
-    // fallo acá no tumba la sincronización, que ya guardó lo suyo.
-    if (account.network === 'tiktok') {
+    // TikTok no siempre devuelve el id del video al publicar, e Instagram tampoco cuando un
+    // intento publicó sin contestar bien: con lo recién traído se le pone a lo que salió por Tu
+    // Parrilla sin él, y así cruza con sus atributos y con su regla de palabra clave. Un fallo
+    // acá no tumba la sincronización, que ya guardó lo suyo.
+    if (account.network === 'tiktok' || account.network === 'instagram') {
       try {
-        const vinculados = await vincularVideosTikTok(account)
-        if (vinculados > 0) console.log(`[sync] TikTok: ${vinculados} publicaciones recuperaron su id de video`)
+        const vinculados = await vincularSinId(account, account.network)
+        if (vinculados > 0) console.log(`[sync] ${account.network}: ${vinculados} publicaciones recuperaron su id`)
       } catch (error) {
-        console.error('[sync] vincular videos de TikTok:', String(error).slice(0, 300))
+        console.error(`[sync] vincular lo publicado sin id en ${account.network}:`, String(error).slice(0, 300))
       }
     }
 

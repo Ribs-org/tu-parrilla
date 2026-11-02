@@ -46,7 +46,7 @@ export function nombreDestino(destino: { network: string; handle: string | null 
  * TikTok tiene dos formas: el post en el perfil, o el borrador que llegó a la bandeja
  * del dueño para terminarlo desde el teléfono. El segundo no tiene id de video —no
  * existe hasta que el dueño lo publique— y el chip lo dice. Cuando el dueño lo publica, la
- * sincronización siguiente le encuentra su video (`vincularVideosTikTok`) y pasa a decir
+ * sincronización siguiente le encuentra su video (`vincularSinId`) y pasa a decir
  * «Publicado».
  *
  * Un destino que falló y todavía tiene intentos vuelve a `scheduled` con su `lastError`

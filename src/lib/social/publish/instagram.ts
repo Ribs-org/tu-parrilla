@@ -299,6 +299,27 @@ function fromCreate(r: { failed: string; definitivo?: true; sinTrial?: true } | 
     : { kind: 'failed', reason: r.failed, definitivo: true }
 }
 
+/** El veredicto de un contenedor, o null si Meta no contestó: no dice nada de cómo quedó. */
+async function estadoDelContenedor(
+  input: PublishInput,
+  containerId: string,
+): Promise<ReturnType<typeof classifyContainerStatus> | null> {
+  try {
+    const response = await fetch(
+      `${GRAPH}/${containerId}?fields=status_code,status&access_token=${input.token}`,
+      { signal: AbortSignal.timeout(PLAZO_RED_MS) },
+    )
+    if (!response.ok) {
+      console.error('Instagram container status:', response.status, (await response.text()).slice(0, 300))
+      return null
+    }
+    return classifyContainerStatus(await response.json())
+  } catch (error) {
+    console.error('Instagram container status:', String(error).slice(0, 300))
+    return null
+  }
+}
+
 /**
  * Publica el contenedor. Si la publicación no dio un id —Meta la rechazó, o la llamada no
  * contestó—, el fallo se lleva el contenedor: el intento siguiente le pregunta a Meta cómo
@@ -318,6 +339,10 @@ async function publishContainer(input: PublishInput, containerId: string): Promi
   if ('rechazo' in r) {
     if (esTopeDiario(r.rechazo)) return diferidoPorTope(containerId)
     if (esMediaNoLista(r.rechazo)) return { kind: 'processing', containerId }
+    // Meta a veces publica y contesta con un error igual: el 2026-11-02 una foto salió y el
+    // `media_publish` devolvió «Se bloqueó la acción» (2207051). Si el contenedor ya dice
+    // PUBLISHED, salió: sin id, que la sincronización le encuentra (`vincularSinId`).
+    if ((await estadoDelContenedor(input, containerId)) === 'published') return { kind: 'published', externalId: null }
     return { kind: 'failed', reason: rechazoSinReconocer(r.rechazo, input.cuenta, PUBLISH_REJECTED), containerId }
   }
   const id = r.data.id
@@ -352,8 +377,9 @@ export const instagramPublisher: Publisher = {
       const verdict = classifyContainerStatus(payload)
       if (verdict === 'error') return { kind: 'failed', reason: rechazoDelContenedor(payload, input.cuenta) }
       if (verdict === 'in_progress') return { kind: 'processing', containerId: input.containerId }
-      // Ya salió, pero no sabemos con qué id: el contenedor no lo dice. Sin id, sus números no
-      // se cruzan con este destino; publicarlo otra vez sería peor.
+      // Ya salió, pero no sabemos con qué id: el contenedor no lo dice. La sincronización
+      // siguiente se lo encuentra por texto y hora (`vincularSinId`); publicarlo otra vez
+      // sería peor.
       if (verdict === 'published') return { kind: 'published', externalId: null }
       if (verdict === 'finished') return publishContainer(input, input.containerId)
       // Vencido: Meta lo descartó sin publicarlo. Sigue abajo, como si no hubiera habido

@@ -322,7 +322,15 @@ al selector («se publicará a las 19:00 de Europe/Madrid») y deja que el dueñ
 segundo es una tarde; lo primero pide aritmética de zonas en el cliente, que es justo lo
 que `fromZonedInput` ya resuelve en el servidor.
 
-## TikTok: el id del video se recupera por texto y hora (2026-10-16)
+## TikTok e Instagram: el id de lo publicado se recupera por texto y hora (2026-10-16)
+
+Desde el 2026-11-02 vale también para Instagram. Un `media_publish` que no contesta, o que
+contesta con un error aunque publicó, deja el contenedor en PUBLISHED, y el contenedor no
+dice el id de la publicación. Pasó con una foto que salió mientras Meta respondía «Se bloqueó
+la acción» (2207051). `publish/instagram.ts` ahora pregunta por el contenedor tras un rechazo
+y, si ya salió, lo anota publicado sin id en vez de quemarlo. La sincronización siguiente le
+encuentra el id con la misma regla que a TikTok. En Instagram eso importa más: la regla de
+palabra clave se busca por ese id, y sin él no responde a nadie.
 
 TikTok no siempre devuelve el id del video al publicar: `status/fetch` lo trae en
 `publicaly_available_post_id` solo para posts públicos ya moderados, así que un post en «Solo
@@ -330,8 +338,8 @@ yo», un borrador mandado a la bandeja o uno que todavía modera quedaban con `e
 vacío para siempre, y sin el id no cruzaban con sus métricas ni con sus atributos (el
 torneo de ideas y versiones se medía solo en Instagram).
 
-Lo que se hizo: al final de cada sincronización de una cuenta de TikTok,
-`vincularVideosTikTok` (`src/lib/social/vincular-tiktok.ts`) cruza los destinos publicados
+Lo que se hizo: al final de cada sincronización de una cuenta de TikTok (y de Instagram),
+`vincularSinId` (`src/lib/social/vincular-sin-id.ts`) cruza los destinos publicados
 sin id con los videos de esa cuenta que ningún destino tiene, por texto (el más corto es el
 comienzo del otro, con doce caracteres o más) y por hora (de una hora antes a dos días
 después de la programada; un mes para un borrador). Los pares se arman del más cercano en
