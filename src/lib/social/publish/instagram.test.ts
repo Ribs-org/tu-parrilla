@@ -7,6 +7,7 @@ import {
   ESPERA_TOPE_INSTAGRAM_MS,
   esTopeDiario,
   explicacionDeMeta,
+  idDeLoPublicado,
   instagramPublisher,
   leerErrorDeMeta,
   motivoDeRechazo,
@@ -27,6 +28,7 @@ import {
   trialNoDisponible,
   trialSinSeguidores,
 } from './publisher'
+import { normalizarTexto } from '../tiktok-vinculo'
 
 const image = { url: 'https://blob.test/a.jpg', mediaType: 'image' as const, position: 0 }
 const video = { url: 'https://blob.test/b.mp4', mediaType: 'video' as const, position: 0 }
@@ -408,6 +410,7 @@ describe('publish: retomar un contenedor guardado sin publicar dos veces', () =>
       .fn()
       .mockResolvedValueOnce(Response.json({ status_code: 'FINISHED' }))
       .mockResolvedValueOnce(new Response('{"error":{"message":"Invalid parameter","code":100}}', { status: 400 }))
+      .mockResolvedValueOnce(Response.json({ data: [] }))
       .mockResolvedValueOnce(Response.json({ status_code: 'FINISHED' }))
     vi.stubGlobal('fetch', fetchMock)
     expect(await instagramPublisher.publish({ ...foto, cuenta: '@vicente' })).toEqual({
@@ -417,25 +420,43 @@ describe('publish: retomar un contenedor guardado sin publicar dos veces', () =>
     })
   })
 
-  it('si Meta rechaza media_publish pero el contenedor ya salió, se anota publicado sin id', async () => {
-    // Lo que pasó el 2026-11-02: la foto salió y media_publish contestó «Se bloqueó la acción».
-    const bloqueo =
-      '{"error":{"message":"Application request limit reached","code":4,"error_subcode":2207051,"error_user_title":"Se bloqueó la acción"}}'
+  // Lo que pasó el 2026-11-02: el primer media_publish contestó «no está lista» y publicó igual;
+  // el segundo, sobre el mismo contenedor, contestó «Se bloqueó la acción».
+  const bloqueo =
+    '{"error":{"message":"Application request limit reached","code":4,"error_subcode":2207051,"error_user_title":"Se bloqueó la acción"}}'
+
+  it('si Meta rechaza media_publish pero ya salió con el mismo texto, se anota publicado con su id', async () => {
+    const hace5min = new Date(Date.now() - 5 * 60_000).toISOString()
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(Response.json({ status_code: 'FINISHED' }))
       .mockResolvedValueOnce(new Response(bloqueo, { status: 403 }))
+      .mockResolvedValueOnce(
+        Response.json({ data: [{ id: '18000000000000077', caption: 'Hola', timestamp: hace5min }] }),
+      )
+    vi.stubGlobal('fetch', fetchMock)
+    expect(await instagramPublisher.publish(foto)).toEqual({ kind: 'published', externalId: '18000000000000077' })
+    expect(String(fetchMock.mock.calls[2]![0])).toContain('/123/media?fields=id,caption,timestamp')
+  })
+
+  it('si no lo encuentra por texto pero el contenedor dice PUBLISHED, se anota publicado sin id', async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(Response.json({ status_code: 'FINISHED' }))
+      .mockResolvedValueOnce(new Response(bloqueo, { status: 403 }))
+      .mockResolvedValueOnce(Response.json({ data: [] }))
       .mockResolvedValueOnce(Response.json({ status_code: 'PUBLISHED' }))
     vi.stubGlobal('fetch', fetchMock)
     expect(await instagramPublisher.publish(foto)).toEqual({ kind: 'published', externalId: null })
-    expect(String(fetchMock.mock.calls[2]![0])).toContain('/CT_7?fields=status_code')
+    expect(String(fetchMock.mock.calls[3]![0])).toContain('/CT_7?fields=status_code')
   })
 
-  it('si tras el rechazo el estado no contesta, el fallo se lleva el contenedor como siempre', async () => {
+  it('si tras el rechazo ni la búsqueda ni el estado contestan, el fallo se lleva el contenedor como siempre', async () => {
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(Response.json({ status_code: 'FINISHED' }))
       .mockResolvedValueOnce(new Response('{"error":{"message":"Invalid parameter","code":100}}', { status: 400 }))
+      .mockResolvedValueOnce(new Response('Bad gateway', { status: 502 }))
       .mockResolvedValueOnce(new Response('Bad gateway', { status: 502 }))
     vi.stubGlobal('fetch', fetchMock)
     expect(await instagramPublisher.publish(foto)).toMatchObject({ kind: 'failed', containerId: 'CT_7' })
@@ -536,5 +557,29 @@ describe('la foto que Meta todavía no tiene lista', () => {
       cuenta: '@vicente',
     })
     expect(salida).toEqual({ kind: 'processing', containerId: 'CT_9' })
+  })
+})
+
+describe('idDeLoPublicado', () => {
+  const ahora = Date.parse('2026-11-02T21:10:00Z')
+  const media = [
+    { id: 'viejo', caption: 'Comment GUIA and I’ll send you the guide', timestamp: '2026-11-02T18:00:00+0000' },
+    { id: 'otro', caption: 'Otra cosa', timestamp: '2026-11-02T21:05:00+0000' },
+    { id: 'este', caption: "Comment GUIA and I'll send you the guide", timestamp: '2026-11-02T21:03:00+0000' },
+  ]
+
+  it('devuelve el de mismo texto dentro de la ventana, sin importar mayúsculas ni signos', () => {
+    expect(idDeLoPublicado(media, normalizarTexto("comment guia and i'll send you the guide"), ahora)).toBe('este')
+  })
+
+  it('no toma lo que salió antes de la ventana, ni un texto que solo empieza igual', () => {
+    expect(idDeLoPublicado([media[0]], normalizarTexto("Comment GUIA and I'll send you the guide"), ahora)).toBeNull()
+    expect(idDeLoPublicado(media, normalizarTexto('Comment GUIA'), ahora)).toBeNull()
+  })
+
+  it('sin texto, o con una respuesta rara de Meta, no encuentra nada', () => {
+    expect(idDeLoPublicado(media, '', ahora)).toBeNull()
+    expect(idDeLoPublicado(undefined, 'hola', ahora)).toBeNull()
+    expect(idDeLoPublicado([{ id: 1, caption: 'hola', timestamp: 'x' }], 'hola', ahora)).toBeNull()
   })
 })

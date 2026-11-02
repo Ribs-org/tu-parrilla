@@ -324,19 +324,16 @@ que `fromZonedInput` ya resuelve en el servidor.
 
 ## TikTok e Instagram: el id de lo publicado se recupera por texto y hora (2026-10-16)
 
-Desde el 2026-11-02 vale también para Instagram. Un `media_publish` que no contesta, o que
-contesta con un error aunque publicó, deja el contenedor en PUBLISHED, y el contenedor no
-dice el id de la publicación. Pasó con una foto que salió mientras Meta respondía «Se bloqueó
-la acción» (2207051). `publish/instagram.ts` ahora pregunta por el contenedor tras un rechazo
-y, si ya salió, lo anota publicado sin id en vez de quemarlo. La sincronización siguiente le
-encuentra el id con la misma regla que a TikTok. En Instagram eso importa más: la regla de
-palabra clave se busca por ese id, y sin él no responde a nadie.
-
-TikTok no siempre devuelve el id del video al publicar: `status/fetch` lo trae en
-`publicaly_available_post_id` solo para posts públicos ya moderados, así que un post en «Solo
-yo», un borrador mandado a la bandeja o uno que todavía modera quedaban con `externalId`
-vacío para siempre, y sin el id no cruzaban con sus métricas ni con sus atributos (el
-torneo de ideas y versiones se medía solo en Instagram).
+Desde el 2026-11-02 vale también para Instagram. Meta a veces publica aunque conteste un
+error. Ese día, el primer `media_publish` de una foto contestó «no está lista» (2207027) y la
+publicó igual; el segundo, sobre el mismo contenedor, contestó «Se bloqueó la acción»
+(2207051), que era el duplicado. Tras un rechazo, `publish/instagram.ts` busca entre las
+últimas diez publicaciones de la cuenta una con el mismo texto de las dos últimas horas
+(`buscarPublicada`), y si la encuentra la anota publicada con su id. Si no, y el contenedor
+dice PUBLISHED, la anota sin id, y la sincronización siguiente se lo encuentra con la misma
+regla que a TikTok. En Instagram el id importa más que en otras redes: la regla de palabra
+clave se busca por él, y sin el id no responde a nadie. Lo que no cubre: una publicación sin
+texto (no hay cómo reconocerla) y dos con el mismo texto en dos horas (se tomaría la primera).
 
 Lo que se hizo: al final de cada sincronización de una cuenta de TikTok (y de Instagram),
 `vincularSinId` (`src/lib/social/vincular-sin-id.ts`) cruza los destinos publicados

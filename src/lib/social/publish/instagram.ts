@@ -10,6 +10,7 @@ import {
   trialSinSeguidores,
 } from './publisher'
 import { esHistoria, type OpcionesDestino } from './opciones'
+import { normalizarTexto } from '../tiktok-vinculo'
 
 /**
  * Cada cuánto se vuelve a probar un destino que chocó con el tope diario. El tope es una
@@ -299,6 +300,52 @@ function fromCreate(r: { failed: string; definitivo?: true; sinTrial?: true } | 
     : { kind: 'failed', reason: r.failed, definitivo: true }
 }
 
+/** Cuánto atrás se busca lo que ya salió con el mismo texto (`buscarPublicada`). */
+export const VENTANA_YA_PUBLICADA_MS = 2 * 60 * 60_000
+
+/**
+ * El id de lo último de la cuenta que salió con este mismo texto dentro de la ventana, o null.
+ * Puro, para probarlo sin red. El texto tiene que ser igual, no el comienzo: Instagram devuelve
+ * el texto tal como se mandó.
+ */
+export function idDeLoPublicado(media: unknown, texto: string, ahora: number): string | null {
+  if (!texto || !Array.isArray(media)) return null
+  for (const m of media as Array<Record<string, unknown>>) {
+    if (typeof m?.id !== 'string' || typeof m.timestamp !== 'string') continue
+    const cuando = Date.parse(m.timestamp)
+    if (!Number.isFinite(cuando) || ahora - cuando > VENTANA_YA_PUBLICADA_MS) continue
+    if (normalizarTexto(typeof m.caption === 'string' ? m.caption : '') === texto) return m.id
+  }
+  return null
+}
+
+/**
+ * Si lo que se está publicando ya salió: lo busca entre lo último de la cuenta, por texto. Meta
+ * a veces publica aunque conteste un error. El 2026-11-02 el primer `media_publish` de una foto
+ * contestó «no está lista» (2207027) y la publicó igual, y el segundo, sobre el mismo contenedor,
+ * contestó «Se bloqueó la acción» (2207051): era el duplicado. Sin texto no se busca, porque no
+ * hay cómo distinguirla. Null si no la encuentra o si Meta no contesta.
+ */
+async function buscarPublicada(input: PublishInput): Promise<string | null> {
+  const texto = normalizarTexto(input.caption)
+  if (!texto) return null
+  try {
+    const response = await fetch(
+      `${GRAPH}/${input.accountExternalId}/media?fields=id,caption,timestamp&limit=10&access_token=${input.token}`,
+      { signal: AbortSignal.timeout(PLAZO_RED_MS) },
+    )
+    if (!response.ok) {
+      console.error('Instagram buscar lo publicado:', response.status, (await response.text()).slice(0, 300))
+      return null
+    }
+    const cuerpo = (await response.json()) as { data?: unknown }
+    return idDeLoPublicado(cuerpo.data, texto, Date.now())
+  } catch (error) {
+    console.error('Instagram buscar lo publicado:', String(error).slice(0, 300))
+    return null
+  }
+}
+
 /** El veredicto de un contenedor, o null si Meta no contestó: no dice nada de cómo quedó. */
 async function estadoDelContenedor(
   input: PublishInput,
@@ -339,9 +386,11 @@ async function publishContainer(input: PublishInput, containerId: string): Promi
   if ('rechazo' in r) {
     if (esTopeDiario(r.rechazo)) return diferidoPorTope(containerId)
     if (esMediaNoLista(r.rechazo)) return { kind: 'processing', containerId }
-    // Meta a veces publica y contesta con un error igual: el 2026-11-02 una foto salió y el
-    // `media_publish` devolvió «Se bloqueó la acción» (2207051). Si el contenedor ya dice
-    // PUBLISHED, salió: sin id, que la sincronización le encuentra (`vincularSinId`).
+    // Meta a veces publica y contesta con un error igual (`buscarPublicada` cuenta el caso).
+    // Si ya salió, se anota publicado: con su id si se encuentra por texto, y si no, sin id
+    // cuando el contenedor dice PUBLISHED, que la sincronización le encuentra (`vincularSinId`).
+    const yaSalio = await buscarPublicada(input)
+    if (yaSalio) return { kind: 'published', externalId: yaSalio }
     if ((await estadoDelContenedor(input, containerId)) === 'published') return { kind: 'published', externalId: null }
     return { kind: 'failed', reason: rechazoSinReconocer(r.rechazo, input.cuenta, PUBLISH_REJECTED), containerId }
   }
