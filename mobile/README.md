@@ -12,7 +12,9 @@ programas, o lo mandas a salir ahora) y **Los Números** (las dos mitades del ta
 publicaciones» un toque adentro y los seguidores de cada red detrás de «⋯ Más»). Arriba a
 la derecha de las tres, el botón de **Ajustes** (un trinche y un cuchillo, lado a lado): tus cuentas con la temperatura de su
 fierro (`/api/mobile/fierros`), con un punto en el botón si alguna se enfría o se apagó,
-el modo —la noche o el día con sushi, el mismo de la cuenta— y «Cerrar sesión». Antes eran cinco con nombres propios: Resumen, Contenido, Publicar, Cuentas y
+el modo —la noche o el día con sushi, el mismo de la cuenta—, «Cerrar sesión» y, al final, el
+libro de sugerencias (de día, la caja) para escribirle al equipo, como en el panel
+(`/api/mobile/sugerencias`). Antes eran cinco con nombres propios: Resumen, Contenido, Publicar, Cuentas y
 Calendario. Los datos son los mismos que ve el panel web, leídos desde
 `https://tu-parrilla.cl/api/mobile/*`; `/api/mobile/overview` y
 `/api/mobile/schedule/check` ya no los usa la app nueva y siguen solo para las

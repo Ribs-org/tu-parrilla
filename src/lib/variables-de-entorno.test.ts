@@ -12,7 +12,13 @@ import { describe, expect, it } from 'vitest'
 const RAIZ = process.cwd()
 
 /** Las que pone la plataforma —Node, Vercel—: nadie las configura, así que no van en la plantilla. */
-const DE_LA_PLATAFORMA = new Set(['NODE_ENV', 'VERCEL_ENV', 'VERCEL_OIDC_TOKEN', 'VERCEL_PROJECT_PRODUCTION_URL'])
+const DE_LA_PLATAFORMA = new Set([
+  'NODE_ENV',
+  'VERCEL_ENV',
+  'VERCEL_GIT_COMMIT_SHA',
+  'VERCEL_OIDC_TOKEN',
+  'VERCEL_PROJECT_PRODUCTION_URL',
+])
 
 function archivosDeCodigo(dir: string): string[] {
   return readdirSync(dir).flatMap((nombre) => {

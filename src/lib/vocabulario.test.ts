@@ -2,7 +2,12 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { join, relative } from 'node:path'
 import ts from 'typescript'
 import { describe, expect, it } from 'vitest'
+import { SUGERENCIA_VACIA } from './sugerencias/formato'
+import { MAX_TEXTO, TIPOS, TIPOS_SUGERENCIA } from './sugerencias/tipos'
 import {
+  ECHAR_AL_LIBRO,
+  LIBRO,
+  QUEDO_EN_EL_LIBRO,
   PALABRAS_DE_DIA,
   PANTALLAS,
   ROTULO_CALOR,
@@ -34,6 +39,24 @@ describe('«Se quemó» en cada modo', () => {
     for (const tema of ['noche', 'dia'] as const) {
       const { apagada, prendida, llena } = ROTULO_CALOR[tema]
       expect(app).toContain(`${tema}: { apagada: '${apagada}', prendida: '${prendida}', llena: '${llena}' }`)
+    }
+  })
+
+  it('el libro de sugerencias se llama igual en la app, con los mismos tipos y el mismo largo', () => {
+    const app = readFileSync(join(process.cwd(), 'mobile', 'src', 'lib', 'tema.ts'), 'utf8')
+    for (const [constante, palabras] of [
+      ['LIBRO', LIBRO],
+      ['ECHAR_AL_LIBRO', ECHAR_AL_LIBRO],
+      ['QUEDO_EN_EL_LIBRO', QUEDO_EN_EL_LIBRO],
+    ] as const) {
+      expect(app).toContain(`${constante}: Record<Tema, string> = { noche: '${palabras.noche}', dia: '${palabras.dia}' }`)
+    }
+    const tipos = readFileSync(join(process.cwd(), 'mobile', 'src', 'lib', 'sugerencias.ts'), 'utf8')
+    expect(tipos).toContain(`MAX_TEXTO_SUGERENCIA = ${MAX_TEXTO}`)
+    expect(tipos).toContain(`SUGERENCIA_VACIA = '${SUGERENCIA_VACIA}'`)
+    expect(tipos).toContain(`TIPOS_SUGERENCIA: readonly TipoSugerencia[] = [${TIPOS_SUGERENCIA.map((t) => `'${t}'`).join(', ')}]`)
+    for (const t of TIPOS_SUGERENCIA) {
+      for (const texto of [TIPOS[t].nombre, TIPOS[t].ayuda, TIPOS[t].ejemplo]) expect(tipos).toContain(`'${texto}'`)
     }
   })
 })

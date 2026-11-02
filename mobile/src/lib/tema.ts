@@ -47,6 +47,14 @@ export const SE_QUEMO: Record<Tema, string> = { noche: 'Se quemó', dia: 'Se ech
 export const LA_PARRILLA: Record<Tema, string> = { noche: 'La Parrilla', dia: 'La Barra' }
 export const LOS_FIERROS: Record<Tema, string> = { noche: 'Los Fierros', dia: 'Los Cuchillos' }
 
+/**
+ * El libro de sugerencias y reclamos, al final de Ajustes, como en el menú de Ajustes del panel
+ * (`LIBRO`, `ECHAR_AL_LIBRO` y `QUEDO_EN_EL_LIBRO`): de día, la caja de sugerencias.
+ */
+export const LIBRO: Record<Tema, string> = { noche: 'El libro de sugerencias', dia: 'La caja de sugerencias' }
+export const ECHAR_AL_LIBRO: Record<Tema, string> = { noche: 'Dejarlo en el libro', dia: 'Echarlo a la caja' }
+export const QUEDO_EN_EL_LIBRO: Record<Tema, string> = { noche: 'Quedó en el libro.', dia: 'Quedó en la caja.' }
+
 /** El calor de un día de la agenda, como la grilla del panel (`ROTULO_CALOR`). */
 export const ROTULO_CALOR: Record<Tema, Record<'apagada' | 'prendida' | 'llena', string>> = {
   noche: { apagada: 'Apagada', prendida: 'Prendida', llena: 'Parrilla llena' },

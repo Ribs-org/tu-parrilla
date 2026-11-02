@@ -388,6 +388,78 @@
     box-shadow: 0 20px 25px -5px rgb(34 31 28 / 0.14);
   }
 
+  /*
+   * El libro de sugerencias (`src/components/libro-de-sugerencias.tsx`). La hoja aparece sobre
+   * el libro —o sobre la caja— apenas hay algo escrito, flota mientras se manda y, al recibirse,
+   * de noche cae en la página derecha y la página da vuelta (lo escrito queda adentro y la
+   * cinta del marcapáginas baja); de día entra por la ranura y la caja se asienta. Todo en un
+   * segundo y poco, una sola vez. Sin movimiento, cada pieza queda en su último cuadro: la página
+   * vuelta, la hoja adentro.
+   */
+  .libro-dibujo .libro-hoja,
+  .libro-dibujo .caja-hoja {
+    opacity: 0;
+    transform: translateY(-14px);
+    transition:
+      opacity 240ms ease,
+      transform 320ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .libro-dibujo[data-hoja] .libro-hoja,
+  .libro-dibujo[data-hoja] .caja-hoja {
+    opacity: 1;
+    transform: translateY(-6px);
+  }
+
+  .libro-dibujo[data-estado='enviando'] .libro-hoja,
+  .libro-dibujo[data-estado='enviando'] .caja-hoja {
+    animation: hoja-espera 520ms ease-in-out infinite alternate;
+  }
+
+  .libro-dibujo .libro-pagina {
+    transform-box: view-box;
+    transform-origin: 80px 50%;
+  }
+
+  .libro-dibujo .libro-cinta {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  .libro-dibujo[data-estado='recibido'] .libro-hoja {
+    animation: hoja-al-libro 1200ms cubic-bezier(0.4, 0, 0.3, 1) forwards;
+  }
+
+  .libro-dibujo[data-estado='recibido'] .libro-pagina {
+    animation: pagina-da-vuelta 1200ms cubic-bezier(0.5, 0, 0.3, 1) forwards;
+  }
+
+  .libro-dibujo[data-estado='recibido'] .libro-renglones {
+    animation: de-frente 1200ms linear forwards;
+  }
+
+  .libro-dibujo[data-estado='recibido'] .libro-cinta {
+    animation: cinta-baja 380ms cubic-bezier(0.2, 0.8, 0.2, 1) 1150ms forwards;
+  }
+
+  .libro-dibujo[data-estado='recibido'] .caja-hoja {
+    animation: hoja-a-la-caja 900ms cubic-bezier(0.5, 0, 0.75, 0) forwards;
+  }
+
+  .libro-dibujo .caja-cuerpo {
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+  }
+
+  .libro-dibujo[data-estado='recibido'] .caja-cuerpo {
+    animation: caja-recibe 340ms ease-out 820ms;
+  }
+
+  /* Lo que dice la ventana al recibir, después de que el dibujo termina. */
+  .libro-recibido {
+    animation: rise 380ms cubic-bezier(0.2, 0.8, 0.2, 1) 900ms both;
+  }
+
   .chapa-hover {
     transition:
       border-color 180ms ease,
@@ -1079,6 +1151,80 @@
   }
 }
 
+/* El libro de sugerencias: la hoja que espera, la que cae y da vuelta con su página, y la que entra a la caja. */
+@keyframes hoja-espera {
+  to {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes hoja-al-libro {
+  0% {
+    opacity: 1;
+    transform: translateY(-6px);
+  }
+  28% {
+    transform: translateY(0);
+  }
+  64% {
+    opacity: 1;
+  }
+  65%,
+  100% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pagina-da-vuelta {
+  0%,
+  28% {
+    transform: scaleX(1);
+  }
+  100% {
+    transform: scaleX(-1);
+  }
+}
+
+/* Lo escrito en la página que da vuelta se ve hasta que la página queda de canto. */
+@keyframes de-frente {
+  0%,
+  64% {
+    opacity: 1;
+  }
+  65%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes cinta-baja {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hoja-a-la-caja {
+  0% {
+    opacity: 1;
+    transform: translateY(-6px);
+  }
+  18% {
+    transform: translateY(-11px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(40px);
+  }
+}
+
+@keyframes caja-recibe {
+  40% {
+    transform: translateY(1.5px) scaleY(0.97);
+  }
+}
+
 @keyframes spin-slow {
   to {
     transform: rotate(360deg);
@@ -1138,6 +1284,15 @@
   .recien {
     animation: none !important;
     box-shadow: 0 0 0 2px var(--color-brasa);
+  }
+
+  /*
+   * El libro de sugerencias, sin esperas: la regla de arriba acorta la duración pero no el
+   * retraso, y la cinta y lo que dice la ventana al recibir esperarían un segundo para aparecer.
+   */
+  .libro-dibujo .libro-cinta,
+  .libro-recibido {
+    animation-delay: 0s !important;
   }
 
   /* La carga quieta, a media brasa: sigue diciendo que algo viene, sin latir. */

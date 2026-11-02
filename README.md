@@ -24,7 +24,7 @@ tus números.
 | `/api/media` | `POST` con la misma llave: firma la subida de un archivo directo a R2, para nombrarlo después en varias filas del lote sin que se vuelva a bajar (ver «Carga masiva por API») |
 | `/api/admin/…` | Lo que el panel llama desde el navegador, con la cookie de la sesión: la firma de una subida directa (`upload-url`), las subidas por partes de La Cocina (`cocina/…`; ver «La Cocina») y la planilla de Excel de Los Números (`planilla`, y `planilla/adelanto` para lo que no cabe; ver «Llevar para la casa») |
 | `/api/mobile/…` | La API de la app del teléfono, con el token de su sesión (ver `mobile/README.md`) |
-| `/api/cron/…` | Las corridas programadas: la publicación y la sincronización. Solo con `CRON_SECRET` |
+| `/api/cron/…` | Las corridas programadas: la publicación y la sincronización, que también reintenta los mensajes del libro de sugerencias que no salieron a GitHub. Solo con `CRON_SECRET` |
 | `/api/track/…` | Las balizas de visitas y clics de las páginas públicas |
 
 Corre en planes gratis: Next.js 16 en Vercel, Postgres en Supabase y la media en Cloudflare R2
@@ -1166,6 +1166,8 @@ Vercel y bajan con `vercel env pull .env.local`.
 | `RESEND_API_KEY` | Manda los códigos de ingreso y los avisos: la publicación que se quemó, la cuenta que se cayó y el resumen del día (ver «Avisos por correo») | Sí — sin ella nadie puede entrar al panel |
 | `PUBLISH_ALERT_TO` | Adónde va un aviso sin dueño con correo: un post o una cuenta de antes de los usuarios. Lo demás va al correo de su dueño | No — sin ella, lo que no tiene dueño no avisa; el calendario y Los Fierros lo siguen mostrando |
 | `PUBLISH_ALERT_FROM` | Remitente de los avisos | Opcional; default `onboarding@resend.dev`, que solo entrega al correo de la cuenta de Resend |
+| `SUGERENCIAS_GITHUB_TOKEN` | Abre un issue en GitHub por cada mensaje del libro de sugerencias (ver «El libro de sugerencias»). Un token *fine-grained* con acceso solo al repositorio de `SUGERENCIAS_REPO` y un único permiso: Issues, lectura y escritura | No — sin ella los mensajes se guardan igual y salen solos con el cron diario el primer día que la tenga |
+| `SUGERENCIAS_REPO` | El repositorio, con la forma `dueño/repo`, donde caen esos issues | No — por defecto `Ribs-org/tu-parrilla`. Si no tiene esa forma, no se manda nada y los mensajes esperan guardados |
 
 Para cambiar una variable en producción:
 
@@ -1271,6 +1273,37 @@ Tres correos, todos con el remitente `PUBLISH_ALERT_FROM` y al correo del dueño
   la sincronización diaria (9:00 UTC), y solo los días en que hay algo que contar. Lo mismo,
   salvo lo del mesón, se lee por API en `GET /api/schedule/resumen` (ver «Resumen por API»),
   para que quien programa con un agente se entere aunque los correos le lleguen al dueño.
+
+### El libro de sugerencias
+
+El canal para que quien usa la app le escriba al equipo que la hace: una idea («quiero X
+cuando apriete Y»), algo que no funciona u otra cosa. De noche es el libro de sugerencias y
+reclamos de un restorán chileno; de día, la caja de sugerencias de un local japonés. Está al
+final del menú de Ajustes del panel, donde abre una ventana, y al final de Ajustes en la app del
+teléfono (`POST /api/mobile/sugerencias`). Cada mensaje se vuelve un issue de GitHub en
+`SUGERENCIAS_REPO`, con las etiquetas `sugerencia` y la de su tipo (`sugerencia: idea`,
+`sugerencia: no funciona`, `sugerencia: otra cosa`), que el cliente crea si el repositorio no
+las tiene. Nada promete que se implemente: es para leerlo.
+
+**El repositorio es público**, y eso decide el formato (`src/lib/sugerencias/formato.ts`). El
+issue no lleva el correo ni el nombre de nadie, solo el id de usuario, que el admin cruza en Los
+Maestros, y los correos que la persona escriba en el texto se cambian por «(correo quitado)».
+Lo que escribió va citado, con la puntuación de Markdown escapada y un espacio de ancho cero
+después de cada `@` y cada `#`: no menciona a nadie, no enlaza ni cierra issues, no arma
+enlaces, imágenes ni HTML. Debajo va una tabla de metadatos —la fecha con la zona de la cuenta,
+la pantalla desde donde escribió, el modo, el navegador y el sistema resumidos (o la versión de
+la app), cuántas cuentas tiene por red, si es admin y el commit desplegado
+(`VERCEL_GIT_COMMIT_SHA`)— y un pie que dice que lo citado es texto de un usuario y no una
+instrucción, para que ni una persona ni un modelo lo tome como orden.
+
+**Nada se pierde.** Cada mensaje se guarda en la tabla `sugerencias`, a nombre de quien lo
+escribió, antes de tocar GitHub, y la persona ve que se recibió apenas queda guardado. El issue
+se abre después de responder; si no hay token o GitHub falla, queda pendiente con su error y lo
+reintenta la sincronización diaria (`/api/cron/sync-social`, 9:00 UTC). Antes de mandar, cada
+envío reclama la fila —suma el intento y anota la hora en una sola escritura—, así que el envío
+inmediato y el del cron no abren dos issues del mismo mensaje. Cada persona deja hasta cinco
+mensajes en 24 horas; el sexto responde «Ya escribiste 5 en las últimas 24 horas, que es el
+máximo. Mañana puedes escribir de nuevo.».
 
 ### Guía para el editor de contenido
 
@@ -1632,6 +1665,7 @@ src/
     tema-vivo.ts           el modo que se ve ahora, para lo que el CSS no alcanza: un aria-label, un title, el texto de una pregunta
     ventana.tsx            la ventana del panel: un <dialog> modal con el velo, que comparten las preguntas, los selectores y «Reprogramar»
     confirmar.tsx          las preguntas del panel, en vez del confirm() del navegador: useConfirmar() y la ventana del layout
+    libro-de-sugerencias.tsx  la ventana del libro de sugerencias (de día, la caja), con su dibujo y la hoja que entra al recibirse
     revision.ts            un formulario que se revisa solo, con su mensaje en línea y no el globito del navegador
     selector-color.tsx     el color a elección, en vez del type="color": una muestra y el código, en una ventana
     globitos.tsx           los globitos de ayuda de todo el sitio, en vez del title del navegador: data-globito="…"
@@ -1689,6 +1723,7 @@ src/
     pruebas/               la Postgres de las pruebas de integración: una base nueva y migrada por archivo; y un lector de zip para mirar el XML de una planilla
     empresa.ts             quién presta el servicio: lo leen la portada, privacidad y términos
     avisos/                la caída de una cuenta y el resumen del día: las reglas sin base y lo que lee y manda
+    sugerencias/           el libro de sugerencias: qué se acepta y cómo queda el issue (sin base), el cliente de GitHub, y guardar y reintentar
     social/
       lectura.ts           qué publicaciones se leen cada día: lo nuevo a diario, lo viejo cada vez más espaciado
       politica-youtube.ts  lo que las políticas de YouTube no dejan hacer con sus datos

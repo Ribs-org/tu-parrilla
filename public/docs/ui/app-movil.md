@@ -120,6 +120,7 @@ Se abre con el botón de Ajustes de cualquier pestaña. Arriba, la flecha para v
 - Debajo, «Tus redes conectadas. Se conectan y se reconectan en el panel web.» y el botón «Abrir Los Fierros en el panel», que abre [Los Fierros](los-fierros.md) en el navegador del teléfono (ahí puede pedir entrar con el correo, como el panel).
 - **«El modo»**, con la frase «De noche: el acero y los cortes de la parrilla. Se guarda en tu cuenta: vale también en el panel web.» (de día, «De día: el fondo claro y piezas de sushi. Se guarda…») y un botón que dice adónde lleva: «Modo día» de noche, «Modo noche» de día. Cambia en el momento y lo guarda en la cuenta; sin señal, el teléfono lo recuerda y lo manda cuando vuelve la conexión.
 - **«Tu sesión»**, con «Cerrar sesión» en rojo. Pregunta «¿Cerrar sesión en este teléfono?» / «Para volver a entrar te va a llegar un código a tu correo.», con «Cancelar» y «Cerrar sesión» (en rojo). Al confirmar, la app vuelve a la pantalla de entrada y borra del teléfono lo que guardó de la cuenta —lo último que mostró cada pantalla—: quien entre después en ese teléfono no lo ve, y «atrás» ya no vuelve a ninguna pantalla de la cuenta. Las cuentas conectadas, lo programado y los borradores no se tocan: están en la cuenta, no en el teléfono.
+- **«El libro de sugerencias»** (de día, «La caja de sugerencias»), para escribirle al equipo que hace Tu Parrilla: una tarjeta con el dibujo de un libro abierto (de día, una caja de madera con una ranura), los botones «Una idea», «Algo no funciona» y «Otra cosa», un campo para escribir y el botón «Dejarlo en el libro» (de día, «Echarlo a la caja»). Es lo mismo que el libro del panel, con sus mismos textos y mensajes: está contado en [El libro de sugerencias](libro-de-sugerencias.md). En la app, en vez del navegador, el mensaje lleva la versión de la app, y al recibirse dice «Quedó en el libro.» (de día, «Quedó en la caja.») con «Escribir otra».
 - Al pie, la versión de la app: «Versión 1.1.0» y, si llegó una actualización por aire, « · actualización » seguido de ocho letras y números que la identifican. Sirve para saber qué versión tiene alguien que pide ayuda.
 
 Aquí no se conecta ni se desconecta nada: eso es del panel web.
@@ -390,6 +391,7 @@ Lo que describe sale de estos archivos:
 - `mobile/src/components/ui.tsx`
 - `mobile/src/components/corte-programado.tsx`
 - `mobile/src/app/ajustes.tsx` y `mobile/src/components/boton-ajustes.tsx` (Ajustes y su botón en la cabecera)
+- `mobile/src/components/libro-de-sugerencias.tsx` y `mobile/src/lib/sugerencias.ts` (el libro de sugerencias, al final de Ajustes)
 - `src/app/api/mobile/fierros/route.ts` (lo que muestran)
 - `mobile/src/components/pieza.tsx`, `mobile/src/components/pieza-sushi.tsx` y `mobile/src/components/lienzo.tsx` (el corte dibujado, de noche y de día)
 - `mobile/src/components/tema.tsx`, `mobile/src/components/colores.ts` y `mobile/src/lib/tema.ts` (el modo de la cuenta y los colores de cada modo; las palabras de día: «Se echó a perder», La Barra, Los Cuchillos, el aviso de Ajustes y el pie de ayer)

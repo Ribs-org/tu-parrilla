@@ -1,7 +1,8 @@
 # Tu Cuenta — tu nombre y tu hora
 
-`/admin/cuenta`, dentro del botón «Ajustes» de la barra de arriba (es la última entrada del
-menú). La ven todos los usuarios.
+`/admin/cuenta`, dentro del botón «Ajustes» de la barra de arriba (es la última pantalla del
+menú; debajo, separado por una línea, solo queda el libro de sugerencias, que abre una ventana:
+[libro-de-sugerencias.md](libro-de-sugerencias.md)). La ven todos los usuarios.
 
 Tu Cuenta guarda dos datos de la persona: su nombre y su zona horaria. Las llaves de API, que
 estaban acá hasta el 2026-10-19, se mudaron a la cuarta pestaña de la barra, que hoy se llama
