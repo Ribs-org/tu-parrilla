@@ -5,7 +5,7 @@ import { DeNocheYDeDia } from '@/components/de-noche-y-de-dia'
 import { Encabezado } from '@/components/ui'
 import { requireUser } from '@/lib/auth'
 import { cuantosEnElMeson } from '@/lib/cocina/meson'
-import { comandasDelDueno, estadoDeLaCocina } from '@/lib/cocina/panel'
+import { comandasDelDueno, estadoDeLaCocina, pulsoDeLaCocina } from '@/lib/cocina/panel'
 import { listarLlaves } from '@/lib/llaves'
 import { MAX_NOMBRE, PREFIJO } from '@/lib/llaves-api'
 import { MANUAL } from '@/lib/vocabulario'
@@ -63,6 +63,8 @@ export default async function LaCocinaPage() {
   const cocina = usuario.cocinaDesde ? await estadoDeLaCocina(ahora) : null
   const comandas = usuario.cocinaDesde ? await comandasDelDueno(usuario.id) : []
   const enElMeson = usuario.cocinaDesde ? await cuantosEnElMeson(usuario.id) : 0
+  // La firma con que sale la página: la vigía de las tarjetas pregunta por ella (`ia/vigia.tsx`).
+  const pulso = usuario.cocinaDesde ? await pulsoDeLaCocina(usuario.id, ahora) : null
 
   // La base de la API es el dominio donde está abierto el panel: en producción el panel solo
   // se abre en el del producto (`panelEnElProducto`), y en local o en un preview la llave sirve
@@ -87,8 +89,8 @@ export default async function LaCocinaPage() {
         </p>
       </header>
 
-      {cocina ? (
-        <ChefDeLaCasa cocina={cocina} comandas={comandas} enElMeson={enElMeson} zona={usuario.zona} ahora={ahora} />
+      {cocina && pulso ? (
+        <ChefDeLaCasa cocina={cocina} comandas={comandas} enElMeson={enElMeson} pulso={pulso} zona={usuario.zona} ahora={ahora} />
       ) : (
         <ChefDeLaCasaApagado esAdmin={usuario.rol === 'admin'} />
       )}

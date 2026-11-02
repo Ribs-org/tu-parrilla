@@ -779,6 +779,76 @@
   }
 
   /*
+   * La estación de una comanda (`estacion-comanda.tsx`): lo que se mueve en su tarjeta mientras el
+   * chef trabaja, un movimiento por estado —la comanda que se mece, la lupa, el cuchillo, la brasa,
+   * la tanda que viaja a la tabla, el pescado que cae sobre el arroz, el destello de la bandeja—.
+   * Cada uno parte de su cuadro quieto, que es el que deja el movimiento reducido, al final del
+   * archivo: la comanda derecha, la lupa sobre la carne, la pieza ya servida.
+   */
+  .vaiven {
+    transform-box: view-box;
+    transform-origin: 60px 11px;
+    animation: vaiven 2.8s ease-in-out infinite alternate;
+  }
+
+  .lupa {
+    animation: lupa 5.2s ease-in-out infinite;
+  }
+
+  .marcha {
+    animation: marcha 0.9s linear infinite;
+  }
+
+  .cuchillo {
+    animation: cuchillo 1.5s ease-in-out infinite alternate;
+  }
+
+  .brasa-viva {
+    animation: brasa-viva 1.7s ease-in-out infinite alternate;
+  }
+
+  .viaja {
+    animation: viaja 3.6s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+  }
+
+  .cae {
+    animation: cae 3.6s ease-out infinite backwards;
+  }
+
+  .cae-2 {
+    animation-delay: 0.5s;
+  }
+
+  .cae-3 {
+    animation-delay: 1s;
+  }
+
+  .destello {
+    opacity: 0;
+    animation: destello 4.8s ease-in-out infinite;
+  }
+
+  /*
+   * El tramo en curso del recorrido de una comanda (`chef-de-la-casa.tsx`): la brasa con una luz
+   * que lo recorre, para que se note cuál es el que está pasando ahora.
+   */
+  .tramo-vivo {
+    background-image: linear-gradient(
+      90deg,
+      var(--color-brasa) 0%,
+      color-mix(in srgb, var(--color-brasa) 45%, #fff3d6) 50%,
+      var(--color-brasa) 100%
+    );
+    background-size: 200% 100%;
+    animation: tramo 1.8s linear infinite;
+  }
+
+  /* El punto de «Se actualiza sola»: late despacio mientras el panel pregunta. */
+  .en-vivo {
+    animation: late 2.4s ease-in-out infinite;
+  }
+
+  /*
    * El corte recién programado: cae en su día y se enciende una vez, al volver del compositor,
    * para que se vea dónde quedó (`nuevo`, en `schedule/page.tsx`). Una vez y no en bucle: el
    * fuego, solo cuando algo pasa. `backwards` y no `both`: al terminar no se queda con nada, y
@@ -1069,6 +1139,128 @@
   }
 }
 
+@keyframes vaiven {
+  from {
+    transform: rotate(-4deg);
+  }
+  to {
+    transform: rotate(4deg);
+  }
+}
+
+/* La lupa recorre la pieza de arriba abajo y vuelve al centro. */
+@keyframes lupa {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-11px, -10px);
+  }
+  50% {
+    transform: translate(9px, -2px);
+  }
+  75% {
+    transform: translate(-5px, 13px);
+  }
+}
+
+/* Las líneas por donde se corta avanzan: el paso de su punteado (3 y 3). */
+@keyframes marcha {
+  to {
+    stroke-dashoffset: -6;
+  }
+}
+
+@keyframes cuchillo {
+  from {
+    transform: translateX(-9px);
+  }
+  to {
+    transform: translateX(9px);
+  }
+}
+
+@keyframes brasa-viva {
+  from {
+    opacity: 0.7;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* De la parrilla a la tabla, en arco; se queda servida un momento y sale la siguiente. */
+@keyframes viaja {
+  0% {
+    transform: translate(-42px, -12px);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  26% {
+    transform: translate(-21px, -22px);
+  }
+  44%,
+  86% {
+    transform: translate(0, 0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(0, 0);
+    opacity: 0;
+  }
+}
+
+/* El pescado cae sobre el arroz, se queda, y se arma la pieza de nuevo. */
+@keyframes cae {
+  0% {
+    transform: translateY(-16px);
+    opacity: 0;
+  }
+  14% {
+    opacity: 1;
+  }
+  28%,
+  88% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+}
+
+/* Una luz que cruza la bandeja y deja un rato quieto antes de volver. */
+@keyframes destello {
+  0% {
+    transform: translateX(-30px);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.55;
+  }
+  32% {
+    transform: translateX(110px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(110px);
+    opacity: 0;
+  }
+}
+
+@keyframes tramo {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
 @keyframes late {
   0%,
   100% {
@@ -1128,6 +1320,28 @@
   /* La fogata quieta: sigue diciendo, encendida, que la cocina está abierta. */
   .fogata {
     animation: none !important;
+  }
+
+  /*
+   * La estación de una comanda, quieta en su cuadro: la comanda colgada, la lupa sobre la carne,
+   * el cuchillo en el medio, la parrilla prendida, la pieza ya en la tabla. El dibujo sigue
+   * diciendo en qué va; el recorrido de abajo, cuánto le falta.
+   */
+  .vaiven,
+  .lupa,
+  .marcha,
+  .cuchillo,
+  .brasa-viva,
+  .viaja,
+  .cae,
+  .destello,
+  .tramo-vivo,
+  .en-vivo {
+    animation: none !important;
+  }
+
+  .destello {
+    opacity: 0;
   }
 
   /*

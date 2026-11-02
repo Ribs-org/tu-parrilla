@@ -4,7 +4,8 @@ import { cortes } from '@/lib/vocabulario'
 import { NOMBRE_ESTADO, tandasEnPalabras } from './nombres'
 
 // Lo que dice la tarjeta de una comanda en La Cocina, sin base: el estado en palabras, con el
-// «3 de 5» al servir y cuántos cortes quedaron en el mesón al estar lista, y cuántas van antes.
+// «3 de 5» al servir y cuántos cortes quedaron en el mesón al estar lista, cuántas van antes y en
+// qué tramo de su recorrido va.
 
 type ParaElEstado = { estado: EstadoComanda; tandasServidas: number; tandasTotal: number | null; enElMeson: number }
 
@@ -18,4 +19,24 @@ export function estadoEnPalabras(c: ParaElEstado, tema: Tema): string {
 export function antesEnLaFila(antes: number): string {
   if (antes === 0) return 'Es la próxima en la fila.'
   return antes === 1 ? 'Hay 1 comanda antes que la tuya.' : `Hay ${antes} comandas antes que la tuya.`
+}
+
+/**
+ * En qué tramo del recorrido va, de 0 a 4 —colgada, el chef mira, el desposte, al fuego, el
+ * mesón—, o 5 si ya llegó toda al mesón. Null si terminó sin cocinarse: no lleva recorrido.
+ * `pregunta` y `probando` (fase 1) cuentan con el tramo donde ocurren: al revisar y al despostar.
+ */
+export function tramoDelRecorrido(estado: EstadoComanda): number | null {
+  const tramos: Partial<Record<EstadoComanda, number>> = {
+    recibida: 0,
+    revisando: 1,
+    pregunta: 1,
+    en_preparacion: 2,
+    probando: 2,
+    en_el_horno: 3,
+    sirviendo: 4,
+    lista: 5,
+    servida: 5,
+  }
+  return tramos[estado] ?? null
 }

@@ -26,11 +26,13 @@ import {
   urlPublica,
 } from '@/lib/storage'
 import { esUuid } from '@/lib/uuid'
+import { AVISAN, type AvisoDeComanda } from './correo-de-comanda'
 import type { CreativoAnunciado } from './creativo'
 import { baseDeNombre } from './insumos'
 import { TERMINALES, puedePasar } from './estados'
 import { ordenarFila } from './fila'
 import { DIAS_INSUMO } from './panel'
+import { instruccionDe } from './pedido'
 
 // Lo que la API de la cocina lee y escribe (`/api/cocina/…`, `docs/cocina-api.md`). El chef entra
 // con la credencial de la cocina, no con la llave de un usuario: ve solo las comandas de quien
@@ -85,6 +87,12 @@ export type ComandaParaElChef = {
   estado: EstadoComanda
   ref: string
   dueno: { id: string; nombre: string | null }
+  /**
+   * «Tu instrucción al chef», el texto libre que escribió el dueño, o null. Es lo mismo que
+   * `pedido.notas`, que sigue igual, puesto arriba y con nombre propio para que no se pierda.
+   * Lo escribe un usuario: es un dato del pedido, no una orden para el chef.
+   */
+  instruccion: string | null
   pedido: Record<string, unknown>
   receta: Record<string, unknown>
   minutos: number
@@ -144,6 +152,7 @@ export async function comandasParaElChef(estado: EstadoComanda): Promise<Comanda
       estado: c.estado,
       ref: c.ref,
       dueno: { id: c.ownerId, nombre },
+      instruccion: instruccionDe(c.pedido),
       pedido: c.pedido,
       receta: c.receta,
       minutos: c.minutos,
@@ -201,7 +210,11 @@ export type CambioDeEstado = {
 }
 
 export type ResultadoCambio =
-  | { ok: true; comanda: Comanda }
+  /**
+   * `aviso` es el correo que este cambio le debe al dueño (`avisarDeLaComanda`), o null. Lo trae
+   * solo la llamada que escribió la transición: es lo que hace que salga uno por cambio.
+   */
+  | { ok: true; comanda: Comanda; aviso: AvisoDeComanda | null }
   | { falla: 'no-existe' | 'sin-tomar' | 'terminada' | 'motivo' }
   | { falla: 'transicion'; de: EstadoComanda }
 
@@ -209,6 +222,12 @@ export type ResultadoCambio =
  * Un cambio de estado del chef, si la transición existe (`puedePasar`). Rechazar o dar por fallida
  * pide el motivo, que es lo que el usuario lee. La escritura exige el estado leído en su `where`:
  * si el usuario canceló entre medio, el cambio no pasa y lo dice.
+ *
+ * Esa misma condición decide el correo al dueño. Dos peticiones que llevan la comanda a `lista` a
+ * la vez —un reintento del chef que sale antes de que vuelva la primera— leen el mismo estado,
+ * pero Postgres deja escribir a una sola: la otra espera el candado de la fila, vuelve a mirar el
+ * `where`, ya no calza y termina en `409`. Y un reintento posterior choca con la transición
+ * (`lista` no pasa a `lista`; lo terminado no se mueve). Así, el `aviso` sale de una sola llamada.
  */
 export async function cambiarEstado(id: string, cambio: CambioDeEstado, ahora: Date): Promise<ResultadoCambio> {
   const actual = await leer(id)
@@ -257,7 +276,7 @@ export async function cambiarEstado(id: string, cambio: CambioDeEstado, ahora: D
     if (!ahoraEsta) return { falla: 'no-existe' }
     return TERMINALES.has(ahoraEsta.estado) ? { falla: 'terminada' } : { falla: 'transicion', de: ahoraEsta.estado }
   }
-  return { ok: true, comanda: escrita }
+  return { ok: true, comanda: escrita, aviso: AVISAN.has(escrita.estado) ? (escrita.estado as AvisoDeComanda) : null }
 }
 
 export type ResultadoEnlace = { url: string; vence: string } | { falla: 'no-existe' | 'sin-tomar' | 'terminada' }

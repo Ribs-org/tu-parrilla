@@ -551,3 +551,22 @@ Terminarlo cuesta un trabajo en segundo plano: armar la planilla en un cron o un
 partes, guardarla en R2 y avisar con un enlace firmado cuando esté. Con eso se van los topes y
 el límite de tiempo, y aparece lo que hoy no hace falta: dónde se guarda, cuánto vive y quién
 puede bajarla.
+
+## El correo de la comanda no se reintenta (2026-11-02)
+
+Cuando el chef deja una comanda lista, rechazada o fallida, el dueño recibe un correo
+(`src/lib/cocina/avisar.ts`). Que salga uno solo lo garantiza la escritura del cambio: la
+condición sobre el estado anterior deja escribir a una sola petición, y solo esa lo pide. No
+hay nada guardado que diga «este correo salió», y eso tiene un costo: si Resend falla, o la
+función se corta entre que el cambio quedó escrito y el correo salió, ese correo no llega nunca.
+La tarjeta de La Cocina sigue diciendo el estado, y el resumen del día no lo cubre.
+
+Se dejó así porque marcarlo pide una columna, y en este cambio no se podían agregar migraciones.
+
+Terminarlo cuesta una migración y un reintento: una columna `comandas.aviso_enviado_en` (o
+`aviso_estado`, con el estado avisado), tomada antes de mandar con el mismo patrón de
+`social_accounts.caida_avisada_en` (`vigilarConexiones`: se marca con la columna nula en el
+`where`, se suelta si el correo no sale), y una pasada en el cron que mande los que quedaron sin
+marca, solo para comandas que terminaron en las últimas horas, para que el día del despliegue
+no lleguen correos de comandas viejas.
+

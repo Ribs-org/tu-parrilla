@@ -57,12 +57,13 @@ sección.
     - el `reestilo` («Otros estilos con el mismo material»).
 
     El diseño dice qué trae cada una.
-  - **Pedido del dueño: ver que la comanda avanza y saber cuándo terminó** (2026-10-30). Dos cosas
-    que faltan para quien espera:
-    - una animación de «en proceso» en la tarjeta mientras el servidor del chef trabaja; hoy la
-      tarjeta solo cambia de texto, y el estado se ve al recargar;
-    - el correo de «lista», que el diseño ya pide («Avisos») y nadie envía: la cocina no manda
-      correos todavía. `src/lib/correo.ts` ya sirve para eso.
+  - **El correo de la comanda no se reintenta si Resend falla** (2026-11-02). El de lista,
+    rechazada o fallida ya sale, uno por cambio; falta marcarlo enviado para reintentarlo sin
+    arriesgar un segundo. Pide una migración: el detalle, en `docs/deuda-tecnica.md`, «El correo
+    de la comanda no se reintenta».
+  - **Los avisos de la cocina que faltan** (2026-11-02): el correo cuando el chef pregunta llega
+    con las preguntas de la fase 1, y el de un creativo del mesón por borrarse sigue solo en el
+    resumen del día («Avisos», en el diseño).
   - **[dueño] Probar una vez la subida por partes contra el almacén de verdad** (2026-10-22). La
     cocina del dueño ya está encendida: en La Cocina → «Pedir una comanda», subir un video de más
     de 64 MB, para que vaya en varias partes, y colgarla. Después se puede cancelar. Las pruebas corren contra un almacén de

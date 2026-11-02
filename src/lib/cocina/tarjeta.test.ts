@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { PALABRAS_DE_DIA } from '@/lib/vocabulario'
 import { NOMBRE_ESTADO } from './nombres'
-import { antesEnLaFila, estadoEnPalabras } from './tarjeta'
+import { antesEnLaFila, estadoEnPalabras, tramoDelRecorrido } from './tarjeta'
 
 const comanda = (estado: Parameters<typeof estadoEnPalabras>[0]['estado'], extra = {}) => ({
   estado,
@@ -40,5 +40,13 @@ describe('el estado en la tarjeta', () => {
     for (const nombres of Object.values(NOMBRE_ESTADO).filter((n) => n.noche !== n.dia)) {
       expect(PALABRAS_DE_DIA).toContainEqual(nombres)
     }
+  })
+})
+
+describe('el recorrido de la tarjeta', () => {
+  it('cinco tramos en orden, todo hecho al llegar al mesón, y nada si terminó sin cocinarse', () => {
+    expect((['recibida', 'revisando', 'en_preparacion', 'en_el_horno', 'sirviendo', 'lista'] as const).map(tramoDelRecorrido)).toEqual([0, 1, 2, 3, 4, 5])
+    expect(tramoDelRecorrido('servida')).toBe(5)
+    for (const estado of ['rechazada', 'fallida', 'cancelada'] as const) expect(tramoDelRecorrido(estado)).toBeNull()
   })
 })

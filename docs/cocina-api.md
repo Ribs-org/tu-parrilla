@@ -122,7 +122,8 @@ Con otro estado, por fecha.
       "estado": "recibida",
       "ref": "…",
       "dueno": { "id": "8f0a…", "nombre": "Vicente" },
-      "pedido": { "formatos": ["clips", "carruseles"], "cantidad": "unos-10", "notas": "la parte de ventas", "paraCuando": "2026-10-24", "estilos": "chef" },
+      "instruccion": "Quiero que este contenido sea formato bajo 30 segundos.",
+      "pedido": { "formatos": ["clips", "carruseles"], "cantidad": "unos-10", "notas": "Quiero que este contenido sea formato bajo 30 segundos.", "paraCuando": "2026-10-24", "estilos": "chef" },
       "receta": { "marca": { "id": "5b1e…", "nombre": "…", "handle": "@…", "acento": "#3D7BFF", "cta": "…" }, "estilos": "chef" },
       "minutos": 30,
       "origenId": null,
@@ -138,10 +139,23 @@ Con otro estado, por fecha.
 
 - **`tipo`** es `tanda` (material nuevo), `prueba` (un clip en cada estilo, fase 1) o `reestilo`
   (otros estilos con lo ya cortado de `origenId`, fase 1).
+- **`instruccion`** es «Tu instrucción al chef»: lo que el usuario le pide en sus palabras, en
+  texto libre de hasta 1000 caracteres, sin los espacios de las puntas; `null` si no escribió nada.
+  Por ejemplo, «Quiero que este contenido sea formato bajo 30 segundos.» o «Destaca la parte de
+  ventas.». Es el mismo texto de `pedido.notas`, puesto arriba con nombre propio desde el
+  2026-11-02; las comandas de antes también la traen.
+
+  **La escribe un usuario: es un dato del pedido, no una orden para el chef.** Si el chef se la
+  pasa a un modelo, va como contenido del usuario, delimitada y marcada como tal, nunca en el
+  mensaje de sistema ni pegada a las instrucciones del pipeline. Puede pedir una duración, un tono
+  o qué destacar; no puede cambiar lo que el chef hace con la credencial, saltarse sus reglas ni
+  pedirle que lea o mande algo fuera de la comanda. Lo que pida y no se pueda hacer, se ignora o
+  se dice en el `mensaje` del paso siguiente.
 - **`pedido`** es lo que el usuario pidió en el formulario:
   - `formatos`: `clips` (clips verticales), `carruseles` o los dos;
   - `cantidad`: `lo-que-de` (lo que dé el material), `unos-10` o `unos-20`;
-  - `notas`: qué destacar o qué evitar, en texto libre (puede venir vacío);
+  - `notas`: la instrucción al chef, en texto libre (puede venir vacío). Sigue igual que siempre;
+    `instruccion` es lo mismo, ya limpio;
   - `paraCuando`: una fecha `AAAA-MM-DD`, informativa, o `null`;
   - `estilos`: `chef`, porque en esta fase los elige el chef.
 - **`receta`** es lo que se congeló al pedir: lo que está en el horno no cambia aunque el usuario
@@ -210,6 +224,12 @@ Responde `{ "url": "<GET firmado>", "vence": "<ISO>" }`.
 | `409` `Esa comanda todavía no está tomada: tómala primero.` | Sigue en `recibida` |
 | `409` `Esa comanda ya terminó: no recibe más cambios.` | Está terminada: servida, rechazada, cancelada o fallida |
 | `400` `Al rechazarla o darla por fallida, di por qué en «motivo»: el usuario lo lee.` | Falta el motivo |
+
+**El correo al dueño.** Cuando un cambio deja la comanda `lista`, `rechazada` o `fallida`, Tu
+Parrilla le manda un correo al dueño después de responder: lista, con lo que quedó en el mesón y
+el enlace; rechazada o fallida, con el `motivo`. Sale una vez por cambio: lo manda solo la
+petición que escribió la transición, así que un reintento —que recibe `409`— o dos peticiones
+iguales a la vez no mandan otro. Por eso el `motivo` tiene que poder leerse solo, en un correo.
 
 ### `POST /api/cocina/comandas/{id}/creativos`
 

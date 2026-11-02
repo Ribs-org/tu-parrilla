@@ -1,6 +1,7 @@
-import { NextResponse } from 'next/server'
+import { NextResponse, after } from 'next/server'
 import { CUERPO_ILEGIBLE } from '@/lib/mobile-api'
 import { cambioDe, cocinaAutorizada, cuerpoDe, error, noAutorizado } from '@/lib/cocina/api'
+import { avisarDeLaComanda } from '@/lib/cocina/avisar'
 import {
   COMANDA_NO_EXISTE,
   COMANDA_SIN_TOMAR,
@@ -15,6 +16,9 @@ export const dynamic = 'force-dynamic'
 /**
  * Un cambio de estado de una comanda tomada, con su mensaje, su hora estimada y, al servir, sus
  * tandas («3 de 5»). La transición tiene que existir (`src/lib/cocina/estados.ts`).
+ *
+ * Si el cambio la terminó —lista, rechazada o fallida—, el correo al dueño sale después de
+ * responder (`after`): el chef no espera a Resend, y un correo lento no lo hace reintentar.
  */
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   if (!cocinaAutorizada(request)) return noAutorizado()
@@ -31,6 +35,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return error(409, r.falla === 'sin-tomar' ? COMANDA_SIN_TOMAR : COMANDA_TERMINADA)
   }
   const c = r.comanda
+  const aviso = r.aviso
+  if (aviso) after(() => avisarDeLaComanda(c.id, aviso))
   return NextResponse.json({
     ok: true,
     id: c.id,

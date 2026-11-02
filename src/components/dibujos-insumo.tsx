@@ -32,11 +32,14 @@ function Degradado({ id, c }: { id: string; c: { claro: string; medio: string; h
   )
 }
 
-/** La media res, colgada del gancho: ancha arriba, el cuarto trasero; angosta abajo. */
-export function Res({ className, cortada = false }: Dibujo & { cortada?: boolean }) {
-  const id = useId()
+/**
+ * La media res sin su lienzo, en el de 96 × 96: la usa también la estación de una comanda
+ * (`estacion-comanda.tsx`), que la mete en su escena. `claseCorte` le da movimiento a las líneas
+ * por donde se corta.
+ */
+export function FiguraRes({ id, cortada = false, claseCorte }: { id: string; cortada?: boolean; claseCorte?: string }) {
   return (
-    <svg viewBox="0 0 96 96" className={cn('shrink-0', className)} aria-hidden>
+    <>
       <defs>
         <Degradado id={`${id}c`} c={CRUDA} />
       </defs>
@@ -58,6 +61,7 @@ export function Res({ className, cortada = false }: Dibujo & { cortada?: boolean
       />
       {cortada ? (
         <path
+          className={claseCorte}
           d="M26 40H67M28 54H65M32 68H61"
           stroke="#fff6e8"
           strokeWidth="1.6"
@@ -65,6 +69,16 @@ export function Res({ className, cortada = false }: Dibujo & { cortada?: boolean
           strokeLinecap="round"
         />
       ) : null}
+    </>
+  )
+}
+
+/** La media res, colgada del gancho: ancha arriba, el cuarto trasero; angosta abajo. */
+export function Res({ className, cortada = false }: Dibujo & { cortada?: boolean }) {
+  const id = useId()
+  return (
+    <svg viewBox="0 0 96 96" className={cn('shrink-0', className)} aria-hidden>
+      <FiguraRes id={id} cortada={cortada} />
     </svg>
   )
 }
@@ -125,7 +139,23 @@ function Tabla() {
 }
 
 /** Un pescado entero sobre la tabla: el lomo oscuro, el vientre plateado, la cola en horquilla. */
-function Pescado({ id, largo, lomo, vientre, aleta, cortado }: { id: string; largo: number; lomo: string; vientre: string; aleta: string; cortado?: boolean }) {
+function Pescado({
+  id,
+  largo,
+  lomo,
+  vientre,
+  aleta,
+  cortado,
+  claseCorte,
+}: {
+  id: string
+  largo: number
+  lomo: string
+  vientre: string
+  aleta: string
+  cortado?: boolean
+  claseCorte?: string
+}) {
   // El cuerpo va de x=10 a x=10+largo, sobre la tabla; la cola sale del final.
   const fin = 10 + largo
   const mitad = 10 + largo / 2
@@ -152,6 +182,7 @@ function Pescado({ id, largo, lomo, vientre, aleta, cortado }: { id: string; lar
       <circle cx={10 + largo * 0.1} cy={y - alto * 0.18} r="1" fill="#1f2c26" />
       {cortado ? (
         <path
+          className={claseCorte}
           d={`M${mitad - largo * 0.18} ${y - alto}V${y + alto}M${mitad} ${y - alto * 1.05}V${y + alto * 1.05}M${mitad + largo * 0.18} ${y - alto * 0.9}V${y + alto * 0.9}`}
           stroke="#fff6e8"
           strokeWidth="1.4"
@@ -163,13 +194,22 @@ function Pescado({ id, largo, lomo, vientre, aleta, cortado }: { id: string; lar
   )
 }
 
+/** El atún sobre su tabla, sin su lienzo: como `FiguraRes`, para la estación de una comanda. */
+export function FiguraAtun({ id, cortada = false, claseCorte }: { id: string; cortada?: boolean; claseCorte?: string }) {
+  return (
+    <>
+      <Tabla />
+      <Pescado id={`${id}p`} largo={68} lomo="#2f4a6b" vientre="#c9d3dc" aleta="#24394f" cortado={cortada} claseCorte={claseCorte} />
+    </>
+  )
+}
+
 /** El atún entero, sobre la tabla. */
 export function Atun({ className, cortada = false }: Dibujo & { cortada?: boolean }) {
   const id = useId()
   return (
     <svg viewBox="0 0 96 96" className={cn('shrink-0', className)} aria-hidden>
-      <Tabla />
-      <Pescado id={`${id}p`} largo={68} lomo="#2f4a6b" vientre="#c9d3dc" aleta="#24394f" cortado={cortada} />
+      <FiguraAtun id={id} cortada={cortada} />
     </svg>
   )
 }

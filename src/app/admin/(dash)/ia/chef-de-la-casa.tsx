@@ -1,25 +1,22 @@
 import Link from 'next/link'
 import { Panel } from '@/components/charts/panel'
 import { DeNocheYDeDia } from '@/components/de-noche-y-de-dia'
-import { DibujoDeInsumo } from '@/components/dibujos-insumo'
 import { EscenaCocina } from '@/components/escena-cocina'
-import type { EstadoComanda } from '@/db/schema'
+import { EstacionDeLaComanda } from '@/components/estacion-comanda'
 import { TERMINALES } from '@/lib/cocina/estados'
 import { NOMBRE_ESTADO } from '@/lib/cocina/nombres'
-import { etaEnLaFila, type ComandaDelPanel, type EstadoDeLaCocina } from '@/lib/cocina/panel'
-import { antesEnLaFila, estadoEnPalabras } from '@/lib/cocina/tarjeta'
+import { etaEnLaFila, type ComandaDelPanel, type EstadoDeLaCocina, type PulsoDeLaCocina } from '@/lib/cocina/panel'
+import { antesEnLaFila, estadoEnPalabras, tramoDelRecorrido } from '@/lib/cocina/tarjeta'
 import { cn } from '@/lib/utils'
 import { MESON, nombreDe } from '@/lib/vocabulario'
 import { BotonCancelarComanda } from './cancelar'
+import { VigiaDeLaCocina } from './vigia'
 
 // «El chef de la casa», la parte de arriba de La Cocina: el chef de `marca-personal`, que edita
 // los videos del dueño (`docs/superpowers/specs/2026-10-22-la-cocina-design.md`). Con la cocina
-// apagada, qué es y cómo se enciende; encendida, si la cocina está abierta y las comandas.
-
-/** Desde que el chef despieza, la pieza lleva marcado por dónde se corta. */
-const CORTADA: ReadonlySet<EstadoComanda> = new Set(['en_preparacion', 'en_el_horno', 'sirviendo', 'lista', 'servida'])
-/** Lo que terminó sin cocinarse se ve apagado. */
-const APAGADA: ReadonlySet<EstadoComanda> = new Set(['rechazada', 'fallida', 'cancelada'])
+// apagada, qué es y cómo se enciende; encendida, si la cocina está abierta y las comandas. Mientras
+// alguna está en marcha, las tarjetas se actualizan solas (`vigia.tsx`) y su estación se mueve
+// (`estacion-comanda.tsx`).
 
 const QUE_ES =
   'El chef de la casa edita tus videos: le llevas un video largo, un podcast en videollamada o tus tomas sueltas, y te devuelve una tanda de clips y carruseles con sus textos, para que los programes en tus redes. Está en piloto, con pocas cuentas.'
@@ -50,11 +47,14 @@ export function ChefDeLaCasa({
   cocina,
   comandas,
   enElMeson,
+  pulso,
   zona,
   ahora,
 }: {
   cocina: EstadoDeLaCocina
   comandas: ComandaDelPanel[]
+  /** Con qué firma salió esta página: la vigía la compara para saber si quedó vieja. */
+  pulso: PulsoDeLaCocina
   /** Cuántos creativos esperan en el mesón, de todas las comandas. */
   enElMeson: number
   zona: string
@@ -75,7 +75,10 @@ export function ChefDeLaCasa({
       </p>
 
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-        <h3 className="font-titulo text-sm font-semibold uppercase tracking-[0.08em]">Las comandas</h3>
+        <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <h3 className="font-titulo text-sm font-semibold uppercase tracking-[0.08em]">Las comandas</h3>
+          <VigiaDeLaCocina vivas={pulso.vivas} firma={pulso.firma} />
+        </span>
         <span className="flex flex-wrap gap-2">
           {enElMeson > 0 ? (
             <Link
@@ -122,24 +125,27 @@ function Tarjeta({
   const eta = termino ? null : (c.eta ?? (c.antes !== null ? etaEnLaFila(c.antes, cocina, ahora) : null))
   const malo = c.estado === 'rechazada' || c.estado === 'fallida'
   return (
-    <li className={cn('flex gap-4 rounded-lg border p-4', malo ? 'border-negative/40' : 'border-acero-700')}>
-      <DibujoDeInsumo
-        tipo="principal"
-        cortada={CORTADA.has(c.estado)}
-        className={cn('h-12 w-12', APAGADA.has(c.estado) && 'opacity-40 grayscale')}
-      />
+    <li className={cn('flex gap-3 rounded-lg border p-3 sm:gap-4 sm:p-4', malo ? 'border-negative/40' : 'border-acero-700')}>
+      <EstacionDeLaComanda estado={c.estado} tandasServidas={c.tandasServidas} className="h-auto w-[4.5rem] self-start sm:w-28" />
       <div className="min-w-0 flex-1">
       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
         <p className="min-w-0 truncate text-sm font-medium">{c.principal ?? 'Comanda sin plato principal'}</p>
         <span className="text-xs text-fg-faint">pedida {fechaHora.format(c.creadaEn)}</span>
       </div>
-      <p className={cn('mt-1 text-sm', malo ? 'text-negative' : 'text-fg')}>
+      {/* Cambia sola mientras está en marcha: el lector de pantalla lo dice cuando cambia. */}
+      <p className={cn('mt-1 text-sm', malo ? 'text-negative' : 'text-fg')} aria-live="polite">
         <DeNocheYDeDia noche={estadoEnPalabras(c, 'noche')} dia={estadoEnPalabras(c, 'dia')} />
       </p>
-      {c.antes !== null ? <p className="mt-0.5 text-xs text-fg-muted">{antesEnLaFila(c.antes)}</p> : null}
+      <Recorrido comanda={c} />
+      {c.antes !== null ? <p className="mt-1.5 text-xs text-fg-muted">{antesEnLaFila(c.antes)}</p> : null}
       {eta ? <p className="mt-0.5 text-xs text-fg-muted">Hora estimada: {fechaHora.format(eta)}</p> : null}
       {c.mensaje && !malo ? <p className="mt-2 text-sm text-fg-muted">El chef: «{c.mensaje}»</p> : null}
       {malo && c.motivo ? <p className="mt-2 text-sm text-fg-muted">{c.motivo}</p> : null}
+      {c.instruccion ? (
+        <p className="mt-2 line-clamp-3 whitespace-pre-line break-words text-xs text-fg-faint">
+          Tu instrucción al chef: «{c.instruccion}»
+        </p>
+      ) : null}
 
       {c.eventos.length > 0 ? (
         <details className="mt-3">
@@ -171,5 +177,29 @@ function Tarjeta({
       ) : null}
       </div>
     </li>
+  )
+}
+
+/**
+ * El recorrido de una comanda, en cinco tramos: colgada, el chef mira, el desposte, al fuego y el
+ * mesón. Lo hecho en brasa; el tramo de ahora, con una luz que lo cruza; al servir, el último se
+ * llena con las tandas que llegaron. Dice lo mismo que el estado en palabras, de un vistazo: por
+ * eso no se lee en voz alta. Una comanda que terminó mal no lo lleva.
+ */
+function Recorrido({ comanda: c }: { comanda: ComandaDelPanel }) {
+  const tramo = tramoDelRecorrido(c.estado)
+  if (tramo === null) return null
+  const llenado = c.estado === 'sirviendo' && c.tandasTotal ? Math.min(1, c.tandasServidas / c.tandasTotal) : null
+  return (
+    <div aria-hidden className="mt-2 flex max-w-xs gap-1">
+      {Array.from({ length: 5 }, (_, i) => (
+        <span key={i} className="relative h-1 flex-1 overflow-hidden rounded-full bg-acero-700">
+          {i < tramo ? <span className="absolute inset-0 bg-brasa" /> : null}
+          {i === tramo ? (
+            <span className="tramo-vivo absolute inset-y-0 left-0" style={{ width: `${llenado === null ? 100 : Math.max(12, llenado * 100)}%` }} />
+          ) : null}
+        </span>
+      ))}
+    </div>
   )
 }
