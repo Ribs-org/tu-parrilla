@@ -50,7 +50,9 @@ sección.
     - los barridos de 14 días (lo crudo) y de 30 (lo que nadie programó), con su aviso en el
       resumen del día.
 
-    Con eso está la fase 0 entera.
+    Con eso está la fase 0 entera. Y desde el 2026-11-02, la cámara de frío (la bodega): el material
+    en bruto se guarda sin pedir comanda, no vence, tiene una cuota de 20 GB por usuario, y la
+    comanda elige de ahí (`docs/superpowers/specs/2026-11-02-la-bodega-design.md`).
   - **Lo siguiente, la fase 1:**
     - las preguntas del chef con plazo y opción por defecto;
     - el probador («Prueba tus estilos», las comandas de tipo `prueba`);
@@ -65,11 +67,20 @@ sección.
     con las preguntas de la fase 1, y el de un creativo del mesón por borrarse sigue solo en el
     resumen del día («Avisos», en el diseño).
   - **[dueño] Probar una vez la subida por partes contra el almacén de verdad** (2026-10-22). La
-    cocina del dueño ya está encendida: en La Cocina → «Pedir una comanda», subir un video de más
-    de 64 MB, para que vaya en varias partes, y colgarla. Después se puede cancelar. Las pruebas corren contra un almacén de
-    mentira, así que lo que no se pudo ver es si el CORS del bucket deja pasar los PUT de las
-    partes y si R2 contesta `ListParts` como se espera. Si falla, la frase del error lo dice en la
-    fila del archivo.
+    cocina del dueño ya está encendida: en La Cocina → «La cámara de frío», guardar un video de más
+    de 64 MB, para que vaya en varias partes, y después sacarlo. El 2026-11-02 se probó de punta a
+    punta en un navegador contra S3Mock, un almacén compatible con S3 en Docker (`R2_ENDPOINT`), con
+    un archivo de 150 MB en tres partes; lo que no se pudo ver es si el CORS del bucket de R2 deja
+    pasar los PUT de las partes y si R2 contesta `ListParts` igual. Si falla, la frase del error lo
+    dice en la tarjeta del archivo.
+  - **[dueño] Dónde vive el material de la cámara de frío: R2 o tu Google Drive** (2026-11-02). Hoy
+    va a R2, como el resto de la media. 20 GB por usuario pasa los 10 GB gratis de R2 para todo el
+    bucket: cada GB de más cuesta unos US$0,015 al mes (diez usuarios llenos, unos 200 GB, son unos
+    US$3 al mes; R2 no cobra la bajada). Lo que hay que decidir: si se queda en R2 y se cobra en el
+    plan, o si va al Drive del dueño —que pide su API, el OAuth y una cuenta con espacio, y que el
+    chef baje de ahí, cuando Drive era justo el cuello de botella que La Cocina sacó del camino
+    («Todo en el almacén de Tu Parrilla, no en Drive», en el diseño de La Cocina)—. También, cuánto
+    le toca a cada plan: hoy la cuota se cambia a mano en Los Maestros (`users.bodega_bytes`).
   - **Del equipo de contenido:** el cliente del chef en `marca-personal`, contra
     `docs/cocina-api.md`.
 

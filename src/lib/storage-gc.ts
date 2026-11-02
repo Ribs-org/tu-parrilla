@@ -5,6 +5,7 @@ import {
   getDb,
   insumos,
   links,
+  materiales,
   profiles,
   reglasClave,
   scheduledPostMedia,
@@ -96,8 +97,10 @@ export const COLUMNAS_DE_ARCHIVO = [
   // La media de los borradores: el compositor la sube apenas se elige, y el borrador puede
   // esperar días. Sin esta línea el barrido la borraría a la hora.
   { tabla: 'borrador_media', columna: 'blob_url', ref: borradorMedia.blobUrl },
-  // La Cocina: lo que el usuario le lleva al chef y lo que el chef entrega. Los insumos tienen su
-  // propia regla de borrado (`expira_en`); acá solo se cuida que este barrido no se adelante.
+  // La Cocina: la cámara de frío, lo que una comanda lleva y lo que el chef entrega. Cada una tiene
+  // su propia regla de borrado (lo de la cámara no vence; los insumos de antes, `expira_en`); acá
+  // solo se cuida que este barrido no se adelante.
+  { tabla: 'materiales', columna: 'url', ref: materiales.url },
   { tabla: 'insumos', columna: 'url', ref: insumos.url },
   { tabla: 'creativos', columna: 'portada_url', ref: creativos.portadaUrl },
   { tabla: 'creativo_media', columna: 'url', ref: creativoMedia.url },

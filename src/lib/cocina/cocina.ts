@@ -79,6 +79,13 @@ export type InsumoParaElChef = {
   bytes: number
   duracionS: number | null
   tipoArchivo: string
+  /** Para qué es, si el dueño lo dijo en su cámara de frío (`intro`, `musica`…), o null. Desde el 2026-11-02. */
+  uso: string | null
+  /**
+   * El material de la cámara de donde salió: el mismo material en dos comandas trae el mismo, y si
+   * el chef ya lo bajó no hace falta bajarlo de nuevo. Null en lo de antes de la cámara.
+   */
+  materialId: string | null
 }
 
 export type ComandaParaElChef = {
@@ -99,7 +106,13 @@ export type ComandaParaElChef = {
   origenId: string | null
   tomadaPor: string | null
   creadaEn: string
+  /** Lo que el chef cocina: el plato principal y lo que lo acompaña, en los cuatro tipos de siempre. */
   insumos: InsumoParaElChef[]
+  /**
+   * Lo que no es video ni foto (un audio, una tipografía), con `tipo: 'extra'`. Va aparte para que
+   * un cliente escrito antes de la cámara de frío no se encuentre en `insumos` un tipo que no conoce.
+   */
+  extras: InsumoParaElChef[]
 }
 
 /**
@@ -125,7 +138,7 @@ export async function comandasParaElChef(estado: EstadoComanda): Promise<Comanda
     .select()
     .from(insumos)
     .where(and(inArray(insumos.comandaId, ids), isNull(insumos.borradoEn)))
-    .orderBy(asc(insumos.creadoEn))
+    .orderBy(asc(insumos.posicion), asc(insumos.creadoEn))
   const porComanda = new Map<string, InsumoParaElChef[]>()
   for (const i of deInsumos) {
     const lista = porComanda.get(i.comandaId!) ?? []
@@ -137,6 +150,8 @@ export async function comandasParaElChef(estado: EstadoComanda): Promise<Comanda
       bytes: i.bytes,
       duracionS: i.duracionS,
       tipoArchivo: i.tipoArchivo,
+      uso: i.uso,
+      materialId: i.materialId,
     })
     porComanda.set(i.comandaId!, lista)
   }
@@ -159,7 +174,8 @@ export async function comandasParaElChef(estado: EstadoComanda): Promise<Comanda
       origenId: c.origenId,
       tomadaPor: c.tomadaPor,
       creadaEn: c.creadaEn.toISOString(),
-      insumos: porComanda.get(c.id) ?? [],
+      insumos: (porComanda.get(c.id) ?? []).filter((i) => i.tipo !== 'extra'),
+      extras: (porComanda.get(c.id) ?? []).filter((i) => i.tipo === 'extra'),
     } satisfies ComandaParaElChef,
   }))
   const ordenadas = estado === 'recibida' ? ordenarFila(armadas) : armadas
@@ -262,12 +278,13 @@ export async function cambiarEstado(id: string, cambio: CambioDeEstado, ahora: D
       eta: fila.eta,
       creadoEn: ahora,
     })
-    // Rechazada o fallida, lo crudo se guarda `DIAS_INSUMO` más y lo borra el barrido de la cocina.
+    // Rechazada o fallida, lo crudo con archivo propio (lo de antes de la cámara de frío) se guarda
+    // `DIAS_INSUMO` más y lo borra el barrido de la cocina. Lo que vino de la cámara no vence.
     if (terminaMal) {
       await tx
         .update(insumos)
         .set({ expiraEn: new Date(ahora.getTime() + DIAS_INSUMO * 86_400_000) })
-        .where(and(eq(insumos.comandaId, id), isNull(insumos.expiraEn)))
+        .where(and(eq(insumos.comandaId, id), isNull(insumos.expiraEn), isNull(insumos.materialId)))
     }
     return fila
   })

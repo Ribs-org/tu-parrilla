@@ -176,6 +176,13 @@
       "when": 1793627602816,
       "tag": "0024_libro_de_sugerencias",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1793631109202,
+      "tag": "0025_la_bodega",
+      "breakpoints": true
     }
   ]
 }

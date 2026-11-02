@@ -7,10 +7,13 @@ import { servirSiTermino, soltarArchivos } from './meson'
 // Cumple la retención del diseño (`docs/superpowers/specs/2026-10-22-la-cocina-design.md`, «Lo que
 // se guarda»):
 //
-// - lo crudo se borra a los 14 días de terminada su comanda: `insumos.expira_en` lo ponen cancelar,
-//   rechazar, fallar y servir;
+// - lo crudo con archivo propio se borra a los 14 días de terminada su comanda: `insumos.expira_en`
+//   lo ponen cancelar, rechazar, fallar y servir. Desde la cámara de frío (2026-11-02), lo que una
+//   comanda lleva sale de la cámara, nombra su archivo y no vence: esta regla queda para lo de antes,
+//   y nunca toca un insumo con material (`docs/superpowers/specs/2026-11-02-la-bodega-design.md`);
 // - lo que pasa 30 días en el mesón sin que nadie lo programe se borra: `creativos.expira_en` lo
 //   pone el cierre de cada creativo. Lo que espera en un borrador no vence: ya está en La Parrilla.
+//   Esto no cambió con la cámara: lo cocinado no es material en bruto, y no ocupa la cuota.
 
 /** El motivo de lo que se borró por viejo: no es un juicio sobre lo que cocinó el chef. */
 export const MOTIVO_VENCIDO = 'vencido'
@@ -30,7 +33,7 @@ export async function barrerCocina(ahora: Date = new Date()): Promise<BarridoDeL
     const crudosVencidos = await db
       .select({ id: insumos.id, url: insumos.url })
       .from(insumos)
-      .where(and(isNull(insumos.borradoEn), lt(insumos.expiraEn, ahora)))
+      .where(and(isNull(insumos.borradoEn), isNull(insumos.materialId), lt(insumos.expiraEn, ahora)))
     for (const i of crudosVencidos) {
       try {
         await borrar(i.url)

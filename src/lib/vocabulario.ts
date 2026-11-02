@@ -11,6 +11,7 @@
 // rutas, las frases de error y la API no cambian. Cada palabra de día sale de acá, y la wiki las
 // cuenta todas en «El modo día» (`PALABRAS_DE_DIA`, que `docs-ui.test.ts` le exige).
 
+import { NOMBRES_DE_PESO } from './cocina/bodega'
 import { NOMBRE_ESTADO } from './cocina/nombres'
 import { fraseDelAviso, type Calor } from './parrilla'
 import type { Tema } from './tema'
@@ -122,6 +123,33 @@ export const MANUAL: Record<Tema, string> = { noche: 'El manual del parrillero',
 export const MESON: Record<Tema, string> = { noche: 'El mesón', dia: 'La bandeja' }
 
 /**
+ * Donde espera el material en bruto de cada uno, dentro de La Cocina (la bodega,
+ * `docs/superpowers/specs/2026-11-02-la-bodega-design.md`). En una carnicería la carne entera espera
+ * colgada en la cámara de frío hasta que alguien la corta; en una barra de sushi, el pescado entero
+ * espera en la nevera, sobre el hielo. Las dos guardan sin que nada venza. «Bodega» es la palabra
+ * del encargo y queda para adentro: la ruta es `/admin/ia/bodega`. Lo pidió el dueño el 2026-11-02.
+ */
+export const CAMARA: Record<Tema, string> = { noche: 'La cámara de frío', dia: 'La nevera' }
+
+/** El bloque de pedir que elige de ahí. */
+export const DE_LA_CAMARA: Record<Tema, string> = { noche: 'De la cámara de frío', dia: 'De la nevera' }
+
+/** Subir algo: lo que se hace con la carne que llega. */
+export const GUARDAR_EN_LA_CAMARA: Record<Tema, string> = { noche: 'Guardar en la cámara', dia: 'Guardar en la nevera' }
+
+/** Sacar algo, que lo borra. */
+export const SACAR_DE_LA_CAMARA: Record<Tema, string> = { noche: 'Sacar de la cámara', dia: 'Sacar de la nevera' }
+
+/** Lo que dice cuando no hay nada adentro. */
+export const CAMARA_VACIA: Record<Tema, string> = { noche: 'La cámara está vacía.', dia: 'La nevera está vacía.' }
+
+/** Desde el 85 % de la cuota. */
+export const CAMARA_LLENANDOSE: Record<Tema, string> = { noche: 'La cámara se está llenando', dia: 'La nevera se está llenando' }
+
+/** Con la cuota entera ocupada: no deja guardar más. */
+export const CAMARA_LLENA: Record<Tema, string> = { noche: 'La cámara está llena', dia: 'La nevera está llena' }
+
+/**
  * Donde una persona le escribe al equipo que hace Tu Parrilla: una idea, algo que no funciona u
  * otra cosa. De noche es el libro de sugerencias y reclamos que tiene todo restorán en Chile; de
  * día, la caja de sugerencias —el 御意見箱 de los locales japoneses, una caja de madera con una
@@ -195,6 +223,15 @@ export const PALABRAS_DE_DIA: ReadonlyArray<Record<Tema, string>> = [
   SE_QUEMO,
   MANUAL,
   MESON,
+  CAMARA,
+  DE_LA_CAMARA,
+  GUARDAR_EN_LA_CAMARA,
+  SACAR_DE_LA_CAMARA,
+  CAMARA_VACIA,
+  CAMARA_LLENANDOSE,
+  CAMARA_LLENA,
+  // Cómo se llama cada material de la cámara según lo que pesa: de un corte a la vaca entera.
+  ...Object.values(NOMBRES_DE_PESO).flat(),
   LIBRO,
   ECHAR_AL_LIBRO,
   QUEDO_EN_EL_LIBRO,

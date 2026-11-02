@@ -150,7 +150,20 @@ export function IconoLibro({ className }: { className?: string }) {
  * un clic en el velo— llama a `alCerrar`. Lo escrito se queda si se cierra sin mandar, y se
  * borra recién cuando se recibió.
  */
-export function LibroDeSugerencias({ abierto, alCerrar }: { abierto: boolean; alCerrar: () => void }) {
+export function LibroDeSugerencias({
+  abierto,
+  alCerrar,
+  inicial,
+}: {
+  abierto: boolean
+  alCerrar: () => void
+  /**
+   * Lo que ya viene escrito al abrirlo, si lo abre un botón que sabe qué se va a pedir: «¿Necesitas
+   * más espacio?» de la cámara de frío. Se pone solo si la hoja está en blanco: lo que la persona
+   * ya escribió no se pisa.
+   */
+  inicial?: { tipo: TipoSugerencia; texto: string }
+}) {
   const pathname = usePathname()
   const ventana = useRef<HTMLDialogElement>(null)
   const campo = useRef<HTMLTextAreaElement>(null)
@@ -161,6 +174,17 @@ export function LibroDeSugerencias({ abierto, alCerrar }: { abierto: boolean; al
   const [error, setError] = useState<string | null>(null)
   const idTitulo = useId()
   const idAviso = useId()
+
+  // Al abrirse, lo que trae escrito quien lo abrió, si la hoja está en blanco. Durante el render y no
+  // en un efecto: es estado que sigue a una prop, como pide React.
+  const [abiertoAntes, setAbiertoAntes] = useState(abierto)
+  if (abierto !== abiertoAntes) {
+    setAbiertoAntes(abierto)
+    if (abierto && inicial && estado === 'escribiendo' && !texto.trim()) {
+      setTipo(inicial.tipo)
+      setTexto(inicial.texto)
+    }
+  }
 
   useEffect(() => {
     const dialogo = ventana.current

@@ -9,6 +9,12 @@ fase 0 entera:
 - el mesón;
 - los barridos de 14 y 30 días.
 
+**Lo que cambió después:** desde el 2026-11-02 el material en bruto vive en la cámara de frío (la
+bodega), no vence y la comanda elige de ahí; los insumos pasan a ser lo que una comanda lleva, y el
+borrado de 14 días queda solo para lo de antes. Lo que este diseño dice de subir el plato principal
+en el formulario y de la retención de lo crudo está reemplazado por
+`2026-11-02-la-bodega-design.md`.
+
 Lo siguiente es la fase 1. Reemplaza y amplía «El chef de la casa»
 (`2026-10-19-chef-de-la-casa-design.md`), que ya decía para qué sirve el chef y cómo se dibuja;
 esto dice cómo se pide, cómo se sigue y qué se entrega, y fija el contrato entre Tu Parrilla y

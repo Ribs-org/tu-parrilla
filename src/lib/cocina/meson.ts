@@ -220,8 +220,9 @@ export async function descartarCreativo(
 
 /**
  * Si una comanda lista ya no tiene nada por decidir —todo lo que entregó el chef se programó o se
- * descartó—, queda servida: se cierra, y lo crudo que llevaba se guarda `DIAS_INSUMO` más. La
- * escritura exige `lista`: una que sigue sirviendo espera sus tandas.
+ * descartó—, queda servida: se cierra, y lo crudo con archivo propio que llevaba (lo de antes de la
+ * cámara de frío) se guarda `DIAS_INSUMO` más. Lo que vino de la cámara sigue ahí. La escritura
+ * exige `lista`: una que sigue sirviendo espera sus tandas.
  */
 export async function servirSiTermino(comandaId: string, ahora: Date): Promise<boolean> {
   const db = getDb()
@@ -242,7 +243,7 @@ export async function servirSiTermino(comandaId: string, ahora: Date): Promise<b
     await tx
       .update(insumos)
       .set({ expiraEn: new Date(ahora.getTime() + DIAS_INSUMO * 86_400_000) })
-      .where(and(eq(insumos.comandaId, comandaId), isNull(insumos.expiraEn)))
+      .where(and(eq(insumos.comandaId, comandaId), isNull(insumos.expiraEn), isNull(insumos.materialId)))
     return true
   })
 }

@@ -1,16 +1,15 @@
-import type { TipoInsumo } from '@/db/schema'
-import { bytesDeParte, rangoDeParte, type SubtipoPrincipal } from '@/lib/cocina/insumos'
-import type { InsumoSubido } from '@/lib/cocina/subidas'
+import type { UsoMaterial } from '@/lib/cocina/bodega'
+import { bytesDeParte, rangoDeParte } from '@/lib/cocina/insumos'
+import type { MaterialSubido } from '@/lib/cocina/subidas'
 
-// La subida por partes desde el navegador, para los archivos de La Cocina: corta el archivo en
+// La subida por partes desde el navegador, para la cámara de frío de La Cocina: corta el archivo en
 // partes, pide un enlace firmado para cada una y las sube directo al almacén, varias a la vez,
 // avisando cuánto va. Si se corta —se cerró la pestaña, se cayó la red—, elegir el mismo archivo
 // otra vez la retoma: el navegador recuerda qué subida era, y el servidor sabe qué partes
 // llegaron. Lo que hace el servidor está en `src/lib/cocina/subidas.ts`.
 
 export type PedidoDeSubida = {
-  insumo: TipoInsumo
-  subtipo: SubtipoPrincipal | null
+  uso: UsoMaterial | null
   duracionS: number | null
   derechos: true
 }
@@ -44,8 +43,8 @@ const SIN_FRASE = 'No se pudo subir el archivo.'
 export class SubidaFallida extends Error {}
 
 /** Con qué se recuerda una subida para retomarla: el mismo archivo es el mismo nombre, peso y fecha. */
-export function claveDeRecuerdo(archivo: Pick<File, 'name' | 'size' | 'lastModified'>, insumo: TipoInsumo): string {
-  return `tp:subida:${insumo}:${archivo.size}:${archivo.lastModified}:${archivo.name}`
+export function claveDeRecuerdo(archivo: Pick<File, 'name' | 'size' | 'lastModified'>): string {
+  return `tp:subida:bodega:${archivo.size}:${archivo.lastModified}:${archivo.name}`
 }
 
 async function fraseDe(respuesta: Response): Promise<string> {
@@ -56,10 +55,10 @@ async function fraseDe(respuesta: Response): Promise<string> {
 const JSON_POST = { method: 'POST', headers: { 'content-type': 'application/json' } } as const
 
 type Abierta = { id: string; tamanoParte: number; partes: number }
-type Estado = Abierta & { bytes: number; llegaron: number[]; insumo: InsumoSubido | null }
+type Estado = Abierta & { bytes: number; llegaron: number[]; material: MaterialSubido | null }
 
 /**
- * Sube un archivo de la cocina y devuelve su insumo, ya sin partes pendientes. Lanza
+ * Sube un archivo a la cámara de frío y devuelve su material, ya sin partes pendientes. Lanza
  * `SubidaFallida` con la frase para el usuario si no se puede, y deja recordada la subida para
  * retomarla; abortada con `senal`, lanza el `AbortError` y también la deja recordada.
  */
@@ -68,9 +67,9 @@ export async function subirPorPartes(
   pedido: PedidoDeSubida,
   opciones: { alAvanzar?: (avance: Avance) => void; senal?: AbortSignal } = {},
   dependencias: Partial<Dependencias> = {},
-): Promise<InsumoSubido> {
+): Promise<MaterialSubido> {
   const d: Dependencias = { ...predeterminadas(), ...dependencias }
-  const recuerdo = claveDeRecuerdo(archivo, pedido.insumo)
+  const recuerdo = claveDeRecuerdo(archivo)
   const total = archivo.size
 
   // Retomar la que quedó, si el servidor todavía la conoce y es de este mismo archivo.
@@ -81,9 +80,9 @@ export async function subirPorPartes(
     const r = await d.fetch(`/api/admin/cocina/subidas/${encodeURIComponent(guardada)}`, { signal: opciones.senal })
     if (r.ok) {
       const estado = (await r.json()) as Estado
-      if (estado.insumo) {
+      if (estado.material) {
         d.memoria.olvidar(recuerdo)
-        return estado.insumo
+        return estado.material
       }
       if (estado.bytes === total) {
         subida = { id: estado.id, tamanoParte: estado.tamanoParte, partes: estado.partes }
@@ -100,8 +99,7 @@ export async function subirPorPartes(
         nombre: archivo.name,
         tipo: archivo.type,
         bytes: total,
-        insumo: pedido.insumo,
-        subtipo: pedido.subtipo,
+        uso: pedido.uso,
         duracionS: pedido.duracionS,
         derechos: pedido.derechos,
       }),
@@ -161,7 +159,7 @@ export async function subirPorPartes(
     const cierre = await d.fetch(`/api/admin/cocina/subidas/${encodeURIComponent(id)}/cerrar`, { method: 'POST', signal: opciones.senal })
     if (cierre.ok) {
       d.memoria.olvidar(recuerdo)
-      return ((await cierre.json()) as { insumo: InsumoSubido }).insumo
+      return ((await cierre.json()) as { material: MaterialSubido }).material
     }
     if (cierre.status !== 409) throw new SubidaFallida(await fraseDe(cierre))
     const r = await d.fetch(`/api/admin/cocina/subidas/${encodeURIComponent(id)}`, { signal: opciones.senal })
@@ -170,9 +168,9 @@ export async function subirPorPartes(
       throw new SubidaFallida(await fraseDe(cierre))
     }
     const estado = (await r.json()) as Estado
-    if (estado.insumo) {
+    if (estado.material) {
       d.memoria.olvidar(recuerdo)
-      return estado.insumo
+      return estado.material
     }
     llegaron = estado.llegaron
   }
@@ -226,11 +224,10 @@ function firmador(id: string, d: Dependencias, pendientes: () => number[], senal
  */
 export async function cancelarSubida(
   archivo: Pick<File, 'name' | 'size' | 'lastModified'>,
-  insumo: TipoInsumo,
   dependencias: Partial<Dependencias> = {},
 ): Promise<void> {
   const d: Dependencias = { ...predeterminadas(), ...dependencias }
-  const recuerdo = claveDeRecuerdo(archivo, insumo)
+  const recuerdo = claveDeRecuerdo(archivo)
   const id = d.memoria.leer(recuerdo)
   if (!id) return
   await d.fetch(`/api/admin/cocina/subidas/${encodeURIComponent(id)}`, { method: 'DELETE' }).catch(() => null)

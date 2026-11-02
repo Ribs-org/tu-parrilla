@@ -10,7 +10,7 @@ vi.mock('@/lib/social/comentarios/run', () => ({
   sondearComentarios: vi.fn(async () => ({ cuentas: [], sinSondear: 0, redaccion: { redactados: 0, fallidos: 0, sinPasarela: false } })),
 }))
 vi.mock('@/lib/storage-gc', () => ({ barrerHuerfanos: vi.fn(async () => ({ borrados: 2, bytes: 10 })) }))
-vi.mock('@/lib/cocina/subidas', () => ({ barrerSubidas: vi.fn(async () => ({ abortadas: 1, sueltos: 0 })) }))
+vi.mock('@/lib/cocina/subidas', () => ({ barrerSubidas: vi.fn(async () => ({ abortadas: 1 })) }))
 vi.mock('@/lib/cocina/barrido', () => ({ barrerCocina: vi.fn(async () => ({ crudos: 2, vencidos: 1, servidas: 0 })) }))
 
 const { GET } = await import('./route')
@@ -43,7 +43,7 @@ describe('la corrida de publicación', () => {
     expect(barrerHuerfanos).toHaveBeenCalledTimes(1)
     expect(barrerSubidas).toHaveBeenCalledTimes(1)
     expect(barrerCocina).toHaveBeenCalledTimes(1)
-    expect(await r.json()).toMatchObject({ barrido: { borrados: 2 }, subidas: { abortadas: 1, sueltos: 0 }, cocina: { crudos: 2, vencidos: 1 } })
+    expect(await r.json()).toMatchObject({ barrido: { borrados: 2 }, subidas: { abortadas: 1 }, cocina: { crudos: 2, vencidos: 1 } })
   })
 
   it('el resto de la hora no barre ninguno', async () => {

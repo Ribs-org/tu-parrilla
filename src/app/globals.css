@@ -915,6 +915,111 @@
     animation: tramo 1.8s linear infinite;
   }
 
+  /*
+   * La cámara de frío (de día, la nevera): lo que acaba de guardarse entra con la puerta. Sobre la
+   * tarjeta, la puerta de acero —de día, de vidrio esmerilado— se abre hacia la izquierda, y sale el
+   * vaho del frío: tres bocanadas que suben y se deshacen. Una vez, al terminar de subir; después la
+   * tarjeta queda como las demás (`bodega/camara.tsx`).
+   */
+  .camara-recien {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .puerta-de-la-camara {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    border-radius: inherit;
+    pointer-events: none;
+    background:
+      linear-gradient(to right, transparent 0 82%, rgb(0 0 0 / 0.25) 82% 84%, transparent 84%),
+      repeating-linear-gradient(to bottom, rgb(255 255 255 / 0.05) 0 2px, transparent 2px 9px),
+      linear-gradient(to right, #56616b, #8d9aa6 45%, #6b7782);
+    transform-origin: left center;
+    animation: puerta-se-abre 1.15s cubic-bezier(0.55, 0, 0.25, 1) 0.1s both;
+  }
+
+  /* La manilla, al lado que se abre. */
+  .puerta-de-la-camara::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 9%;
+    width: 5px;
+    height: 34%;
+    border-radius: 3px;
+    background: #d6dde3;
+    transform: translateY(-50%);
+  }
+
+  .acerado[data-tema='dia'] .puerta-de-la-camara {
+    background:
+      linear-gradient(115deg, transparent 0 30%, rgb(255 255 255 / 0.7) 30% 36%, transparent 36% 44%, rgb(255 255 255 / 0.5) 44% 47%, transparent 47%),
+      linear-gradient(to bottom, rgb(225 238 246 / 0.96), rgb(201 223 236 / 0.96));
+    border: 2px solid var(--color-acero-600);
+  }
+
+  .acerado[data-tema='dia'] .puerta-de-la-camara::after {
+    background: #b98f5a;
+  }
+
+  .vaho {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    overflow: hidden;
+    border-radius: inherit;
+    pointer-events: none;
+  }
+
+  .vaho > i {
+    position: absolute;
+    bottom: 18%;
+    width: 46%;
+    height: 46%;
+    border-radius: 9999px;
+    background: radial-gradient(circle, rgb(232 242 248 / 0.75), transparent 68%);
+    filter: blur(2px);
+    opacity: 0;
+    animation: vaho 1.9s ease-out both;
+  }
+
+  .vaho > i:nth-child(1) {
+    left: 4%;
+    animation-delay: 0.35s;
+  }
+
+  .vaho > i:nth-child(2) {
+    left: 30%;
+    animation-delay: 0.55s;
+  }
+
+  .vaho > i:nth-child(3) {
+    left: 56%;
+    animation-delay: 0.75s;
+  }
+
+  .acerado[data-tema='dia'] .vaho > i {
+    background: radial-gradient(circle, rgb(173 207 227 / 0.7), transparent 68%);
+  }
+
+  /*
+   * La cuota de la cámara: cada pieza cae a su gancho (de día, al hielo), se mece y queda. Una
+   * detrás de la otra al abrir la cámara, con el retraso que le pone cada una.
+   */
+  .gancho-cae {
+    transform-box: fill-box;
+    transform-origin: 50% 0;
+    animation: gancho-cae 0.9s cubic-bezier(0.3, 0.7, 0.3, 1) both;
+  }
+
+  /* Lo que llega al riel de la comanda: se cuelga y se mece una vez, como una pieza recién puesta en el gancho. */
+  .se-cuelga {
+    transform-origin: 50% 0;
+    animation: se-cuelga 0.85s cubic-bezier(0.3, 0.7, 0.3, 1);
+  }
+
   /* El punto de «Se actualiza sola»: late despacio mientras el panel pregunta. */
   .en-vivo {
     animation: late 2.4s ease-in-out infinite;
@@ -1417,6 +1522,72 @@
   }
 }
 
+/* La cámara de frío: la puerta que se abre sobre lo que entró, el vaho del frío, la pieza que cae al gancho y la que se cuelga en el riel. */
+@keyframes puerta-se-abre {
+  0%,
+  12% {
+    transform: perspective(700px) rotateY(0deg);
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: perspective(700px) rotateY(-100deg);
+    opacity: 0;
+  }
+}
+
+@keyframes vaho {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.6);
+  }
+  30% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-26px) scale(1.7);
+  }
+}
+
+@keyframes gancho-cae {
+  0% {
+    opacity: 0;
+    transform: translateY(-14px) rotate(0deg);
+  }
+  35% {
+    opacity: 1;
+    transform: translateY(0) rotate(-9deg);
+  }
+  65% {
+    transform: rotate(6deg);
+  }
+  85% {
+    transform: rotate(-2deg);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes se-cuelga {
+  0% {
+    transform: rotate(-10deg);
+  }
+  40% {
+    transform: rotate(7deg);
+  }
+  70% {
+    transform: rotate(-3deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
 @keyframes spin-slow {
   to {
     transform: rotate(360deg);
@@ -1507,6 +1678,21 @@
   .libro-dibujo .libro-cinta,
   .libro-recibido {
     animation-delay: 0s !important;
+  }
+
+  /*
+   * La cámara de frío, quieta: lo que entra ya está adentro, sin puerta ni vaho; las piezas de la
+   * cuota ya están en sus ganchos, y lo que se elige para la comanda ya está en el riel (el vuelo
+   * de la cámara al riel lo apaga `formulario.tsx`, que pregunta lo mismo).
+   */
+  .puerta-de-la-camara,
+  .vaho {
+    display: none;
+  }
+
+  .gancho-cae,
+  .se-cuelga {
+    animation: none !important;
   }
 
   /* La carga quieta, a media brasa: sigue diciendo que algo viene, sin latir. */

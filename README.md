@@ -14,7 +14,7 @@ tus números.
 | `/ingresar` | La entrada al panel: el correo y el código de seis dígitos que llega a ese correo. Como el panel, se abre en el dominio del producto |
 | `/privacidad`, `/terminos` | La política de privacidad y los términos, públicos y sin sesión. Google y Meta los revisan para verificar la app |
 | `/<slug>` | La página de un usuario. Cada dominio sirve solo las de su dueño; el del producto las sirve todas |
-| `/admin` | Tu panel: entra a La Parrilla, el calendario con lo que se quemó arriba; adentro, los números, los comentarios, el editor y La Cocina (`/admin/ia`): el chef de la casa y, en «Tu propio chef», las llaves para tu agente, con el manual del parrillero (`/admin/ia/manual`). Se abre en el dominio del producto: en cualquier otro, `/admin` e `/ingresar` redirigen ahí con la misma ruta |
+| `/admin` | Tu panel: entra a La Parrilla, el calendario con lo que se quemó arriba; adentro, los números, los comentarios, el editor y La Cocina (`/admin/ia`): el chef de la casa, con la cámara de frío donde se guarda el material (`/admin/ia/bodega`), y, en «Tu propio chef», las llaves para tu agente, con el manual del parrillero (`/admin/ia/manual`). Se abre en el dominio del producto: en cualquier otro, `/admin` e `/ingresar` redirigen ahí con la misma ruta |
 | `/borrado/<código>` | El estado de un borrado que pidió Meta: cuándo fue y cuántas cuentas. Pública, sin sesión; el código es la llave |
 | `/docs/…` | Las guías para LLMs, públicas y sin sesión: la de la API (`api-llm.md`, `api-editor.md`, `api.json`) y la wiki de la interfaz (`ui/index.md`), para guiar a quien se pierde en el panel |
 | `/api/social/meta/baja` | `POST` de Meta cuando alguien quita la app desde Facebook: deja sin credencial sus cuentas de Instagram y Facebook |
@@ -22,7 +22,7 @@ tus números.
 | `/api/schedule/…`, `/api/metrics/…` | La API para tu agente, con una llave de La Cocina («Tu propio chef»): cargar, ver y sacar lo programado, archivar lo quemado, las cuentas y los números (ver «Carga masiva por API» y las secciones que le siguen) |
 | `/api/cocina/…` | La API de La Cocina, con `COCINA_SECRET`: el servidor del chef toma las comandas, baja sus insumos, informa cada estado y entrega lo cocinado al mesón del dueño (ver «La Cocina» y `docs/cocina-api.md`) |
 | `/api/media` | `POST` con la misma llave: firma la subida de un archivo directo a R2, para nombrarlo después en varias filas del lote sin que se vuelva a bajar (ver «Carga masiva por API») |
-| `/api/admin/…` | Lo que el panel llama desde el navegador, con la cookie de la sesión: la firma de una subida directa (`upload-url`), las subidas por partes de La Cocina (`cocina/…`) y el pulso que mantiene al día sus tarjetas (`cocina/pulso`; ver «La Cocina») y la planilla de Excel de Los Números (`planilla`, y `planilla/adelanto` para lo que no cabe; ver «Llevar para la casa») |
+| `/api/admin/…` | Lo que el panel llama desde el navegador, con la cookie de la sesión: la firma de una subida directa (`upload-url`), las subidas por partes a la cámara de frío de La Cocina (`cocina/subidas…`) y el pulso que mantiene al día sus tarjetas (`cocina/pulso`; ver «La Cocina») y la planilla de Excel de Los Números (`planilla`, y `planilla/adelanto` para lo que no cabe; ver «Llevar para la casa») |
 | `/api/mobile/…` | La API de la app del teléfono, con el token de su sesión (ver `mobile/README.md`) |
 | `/api/cron/…` | Las corridas programadas: la publicación y la sincronización, que también reintenta los mensajes del libro de sugerencias que no salieron a GitHub. Solo con `CRON_SECRET` |
 | `/api/track/…` | Las balizas de visitas y clics de las páginas públicas |
@@ -347,7 +347,8 @@ Los dos perfiles de ejemplo están para que los edites, no para que los borres y
 de cero.
 
 Cada fila de cada tabla (perfiles, cuentas, posts, borradores, comentarios, ajustes, llaves
-de API, y las marcas, comandas, insumos y creativos de La Cocina) tiene dueño: el panel solo te muestra lo tuyo, nunca lo de otro usuario invitado. Lo mismo
+de API, y las marcas, comandas, insumos, materiales de la cámara de frío, subidas y creativos de La
+Cocina) tiene dueño: el panel solo te muestra lo tuyo, nunca lo de otro usuario invitado. Lo mismo
 la API: lo que entra con una llave es del dueño de la llave, y un agente con la tuya no ve
 ni toca lo de nadie más. Tu fila de usuario —el nombre, la zona y el modo del panel— la
 cambias solo tú: Tu Cuenta, el botón del modo y la app del teléfono escriben la fila de la
@@ -355,7 +356,8 @@ sesión o del token, nunca una que llegue en la petición. Los crons (sync,
 publicación, comentarios) siguen recorriendo *todo* el despliegue sin filtrar por
 dueño — un cron por inquilino es otro subproyecto, no esta entrega. La credencial de La
 Cocina (`COCINA_SECRET`) también cruza dueños, pero solo los que tienen la cocina encendida, y
-de ellos solo sus comandas, sus insumos y sus creativos: el servidor del chef no ve posts,
+de ellos solo sus comandas, sus insumos y sus creativos —de la cámara de frío ve solo lo que una
+comanda lleva—: el servidor del chef no ve posts,
 cuentas ni números de nadie (ver «La Cocina»). La llave del despliegue
 (`SCHEDULE_API_KEY`) y la raíz pública (`/`) siguen siendo del admin. Y hasta la entrega
 3, dos usuarios todavía no pueden conectar la misma cuenta de la misma red: quien llega
@@ -1063,6 +1065,13 @@ hasta que el cambio llegue a producción.
 dura el despliegue y ante un rollback instantáneo. Agregar columnas con default o nulables,
 tablas e índices, sí. Borrar o renombrar, solo en un PR posterior al que dejó de usarlas.
 
+Una excepción que conviene saber: `0025_la_bodega.sql` mueve lo crudo de La Cocina a la cámara de
+frío (`materiales`). Volver atrás de ese despliegue es seguro por unos días, pero el código de antes
+le pone 14 días de vencimiento a lo crudo de una comanda que se cancela o termina, y al vencer
+borraría el archivo, que ahora es de la cámara. Si hubiera que quedarse atrás más que eso, hay que
+quitarle ese vencimiento a mano a lo que viene de la cámara, en el editor SQL:
+`update insumos set expira_en = null where material_id is not null`.
+
 Una base que ya tenía el esquema antes de las migraciones (producción el 2026-09-16) se
 registra una sola vez con `npm run db:baseline`; una base nueva se crea entera con
 `db:setup`. Se corre **antes** de fusionar el cambio que trae las migraciones: si
@@ -1134,6 +1143,7 @@ Vercel y bajan con `vercel env pull .env.local`.
 | `R2_SECRET_ACCESS_KEY` | Llave secreta para R2 | No — sin ella no puedes subir media |
 | `R2_BUCKET` | Nombre del bucket de R2 | No — sin ella no puedes subir media |
 | `R2_PUBLIC_BASE` | URL pública del bucket de R2 | No — sin ella no puedes subir media |
+| `R2_ENDPOINT` | Solo en local: el de otro almacén compatible con S3 (un S3Mock o un MinIO en Docker), para probar las subidas sin R2. Sin ella, el de R2 | No — en producción no va |
 | `DOMINIO_PRODUCTO` | El dominio donde vive la landing del producto. Ese dominio sirve las páginas de todos; los demás, solo las de su dueño. Es también el único donde se abre el panel | No — sin ella ningún dominio es el del producto y todos sirven solo lo del dueño |
 | `SITE_TIMEZONE` | Zona por defecto de los usuarios nuevos y del sitio público; cada usuario cambia la suya en Tu Cuenta. Si no es una zona IANA conocida, se avisa por consola y se usa `America/Santiago` | No — por defecto `America/Santiago` |
 | `YOUTUBE_API_KEY` | Lee las estadísticas públicas de los canales conectados | No — sin ella YouTube no trae métricas |
@@ -1523,17 +1533,21 @@ Fierros. Lo puro está en `src/lib/cuentas-api.ts`.
 
 La Cocina es la fábrica de creativos de cada usuario dentro de Tu Parrilla:
 
-1. el usuario sube su material crudo y pide una comanda;
+1. el usuario guarda su material en bruto en la cámara de frío y pide una comanda eligiendo de ahí;
 2. el chef la cocina: es el pipeline de edición de `marca-personal`, que corre en un servidor
    propio;
 3. el chef devuelve los creativos al mesón del usuario, listos para programar.
 
 El diseño, con sus fases, está en `docs/superpowers/specs/2026-10-22-la-cocina-design.md`.
 
-**Hoy existen dos piezas:**
+La cámara de frío, con su modelo y su cuota, está en
+`docs/superpowers/specs/2026-11-02-la-bodega-design.md`.
+
+**Hoy existen tres piezas:**
 
 - la base: las tablas y la API por la que habla el chef;
-- la subida por partes, por la que el panel le va a llevar el material.
+- la subida por partes, por la que el panel le lleva el material;
+- la cámara de frío (la bodega), donde ese material espera.
 
 **Lo que ve el usuario:**
 
@@ -1552,12 +1566,18 @@ El diseño, con sus fases, está en `docs/superpowers/specs/2026-10-22-la-cocina
   consultas chicas, y solo si cambió vuelve a pedir la página (`router.refresh`, sin recargarla).
   Con la pestaña oculta o sin nada en marcha, no pregunta (`ia/vigia.tsx`);
 - «Cancelar la comanda», mientras no esté en el horno;
-- «Pedir una comanda» (`/admin/ia/pedir`). Ahí sube el plato principal y lo que lo acompaña, cada
-  archivo por partes y apenas lo elige, con su dibujo y su barra. Dice qué quiere que salga, le
-  escribe al chef su instrucción («Tu instrucción al chef», hasta 1000 caracteres, con contador e
-  ideas para empezar; el chef la recibe como `instruccion`), guarda
-  su marca básica (nombre, @, color de acento y llamado final) y ve la fila y la hora estimada antes
-  de colgarla. Lo que subió y no pidió se le ofrece de nuevo, y se borra a los tres días.
+- **la cámara de frío** (`/admin/ia/bodega`; de día, la nevera), donde guarda su material en bruto
+  sin pedir comanda: videos, audios, imágenes y otros archivos, cada uno con su nombre y un uso
+  opcional (intro, outro, música, logo…), que se renombra, se le cambia el uso y se saca. Cada
+  material se dibuja según lo que es y lo que pesa, de un corte a la vaca entera
+  (`src/components/dibujos-material.tsx`), y la cuota, como el riel de la cámara que se va llenando;
+- «Pedir una comanda» (`/admin/ia/pedir`). Ahí elige de la cámara cualquier combinación —dos de cuatro
+  videos y cuatro fotos—, que se cuelga en el riel de la comanda: un video es el plato principal y
+  los demás dicen qué son. Desde el mismo formulario puede guardar algo nuevo, que entra elegido.
+  Dice qué quiere que salga, le escribe al chef su instrucción («Tu instrucción al chef», hasta 1000
+  caracteres, con contador e ideas para empezar; el chef la recibe como `instruccion`), guarda su
+  marca básica (nombre, @, color de acento y llamado final) y ve la fila y la hora estimada antes de
+  colgarla.
 
 El admin enciende y apaga la cocina de cada cuenta en Los Maestros (`users.cocina_desde`).
 Apagarla es despedir al chef: deja de ver esas comandas, aunque siguen ahí.
@@ -1565,7 +1585,9 @@ Apagarla es despedir al chef: deja de ver esas comandas, aunque siguen ahí.
 **Colgar una comanda congela su receta.** La marca y lo que se pidió se guardan en la comanda,
 así que lo que está en el horno no cambia aunque el dueño cambie su marca después. La marca queda
 además en `marcas`, para la siguiente. La `ref` que pone el formulario al abrirse hace que mandarla
-dos veces no la duplique, y un archivo solo entra si es del dueño y no está en otra comanda. En esta
+dos veces no la duplique, y un material solo entra si es del dueño y sigue en la cámara.
+La comanda guarda una foto de cada uno (`insumos`: su rol, su nombre, su uso y su peso), que nombra
+el mismo archivo: el mismo material sirve para varias comandas. En esta
 fase no hay catálogo todavía, así que los estilos los elige el chef (`receta.estilos: "chef"`).
 
 **El mesón** (`/admin/ia/meson`; de día, la bandeja) es donde espera lo que el chef entregó, por
@@ -1587,9 +1609,11 @@ comanda y por pieza, para programarlo o descartarlo:
 
 **Lo que vence se borra solo** (`barrerCocina`, una vez por hora con el barrido de huérfanos):
 
-- **Lo crudo**, a los 14 días de terminada la comanda: cancelada, rechazada, fallida o servida.
-  La fila queda con `borrado_en`, para la historia de la comanda. Uno que el almacén no dejó
-  borrar se intenta en la pasada siguiente.
+- **Lo de la cámara de frío no vence**: sale cuando el dueño lo saca, y no puede sacar lo que una
+  comanda en marcha está usando. Lo crudo de antes de la cámara, con archivo propio, se borraba a
+  los 14 días de terminada su comanda; la regla sigue para esos (`insumos` sin `material_id`): la
+  fila queda con `borrado_en`, y uno que el almacén no dejó borrar se intenta en la pasada
+  siguiente. Nunca toca un archivo de la cámara.
 - **Lo que nadie programó en el mesón**, a los 30 días: sale como descartado, con el motivo
   `vencido` para que el chef no lo tome como un juicio, y suelta sus archivos. Lo que espera en un
   borrador no vence: ya está en La Parrilla.
@@ -1642,7 +1666,7 @@ con su enlace firmado. Ninguna parte cruza una función de Vercel. Va por cuatro
 1. `/api/admin/cocina/subidas` abre la subida;
 2. `…/partes` firma los enlaces de a pocos, justo antes de usarlos;
 3. el navegador sube las partes;
-4. `…/cerrar` junta las partes. Ahí nace el insumo, todavía sin comanda.
+4. `…/cerrar` junta las partes. Ahí nace el material, en la cámara de frío.
 
 Las partes que llegaron se le preguntan al almacén (`ListParts`), no al navegador. Por eso:
 
@@ -1653,15 +1677,24 @@ Las partes que llegaron se le preguntan al almacén (`ListParts`), no al navegad
 
 El servidor está en `src/lib/cocina/subidas.ts`, y el navegador en `src/lib/subida-por-partes.ts`.
 
-**Lo crudo vive fuera de `scheduled/`.** Va en `cocina/<dueño>/insumos/`, con un uuid en la clave, y
-su URL nunca sale al navegador: el chef lo baja con un enlace firmado que vence en una hora. Pesa:
-con la cocina encendida, el almacén pasa fácil los 10 GB gratis de R2, y cada GB de más cuesta
-unos US$0,015 al mes.
+**Lo crudo vive fuera de `scheduled/`.** Va en `cocina/<dueño>/bodega/` (lo de antes de la cámara,
+en `…/insumos/`), con un uuid en la clave, y su URL nunca sale al navegador: el chef lo baja con un
+enlace firmado que vence en una hora.
+
+**La cuota de la cámara.** 20 GB por usuario (`CUOTA_BODEGA_POR_DEFECTO`, en
+`src/lib/cocina/bodega.ts`); el que tenga otra la lleva en `users.bodega_bytes`, que el admin cambia
+en Los Maestros y que un plan de pago podrá escribir sin tocar el código. Se mira en el servidor al
+abrir cada subida, antes de firmar nada, contando lo guardado **y lo que está subiendo**, con la
+fila del usuario bloqueada para que dos subidas a la vez no pasen las dos. «¿Necesitas más
+espacio?» abre el libro de sugerencias: comprar espacio todavía no existe. Pesa: 20 GB por usuario
+pasa los 10 GB gratis de R2 para todo el bucket, y cada GB de más cuesta unos US$0,015 al mes
+(diez usuarios llenos, unos US$3). Si el material se queda en R2 o va al Drive del dueño está en
+`docs/pendientes.md`.
 
 **Lo que queda a medias se barre** una vez por hora, con el barrido de huérfanos (`barrerSubidas`):
 
-- una subida abierta hace más de 24 horas se aborta, y el almacén borra sus partes;
-- lo que se subió y lleva tres días sin llegar a una comanda se borra.
+- una subida abierta hace más de 24 horas se aborta, y el almacén borra sus partes y libera su
+  lugar en la cuota. Lo que está en la cámara no se toca.
 
 ## Estructura
 
@@ -1683,7 +1716,8 @@ src/
     pieza-sushi.tsx        el mismo corte en el modo día: nigiri, roll, sashimi y temaki
     escena-cocina.tsx      la escena de La Cocina: el parrillero y el asado al palo de noche, el maestro de sushi y el atún de día; el fuego y el farol dicen si la cocina está abierta
     estacion-comanda.tsx   la estación de cada comanda en su tarjeta: un dibujo que se mueve según en qué va, la parrilla de noche y la barra de sushi de día
-    dibujos-insumo.tsx     lo que se le lleva a La Cocina: la res, el cerdo y las verduras de noche; el atún, el salmón y el arroz de día
+    dibujos-insumo.tsx     las piezas crudas de La Cocina, sin su lienzo: la media res, el atún, el salmón, las verduras, el arroz, la tabla
+    dibujos-material.tsx   lo que hay en la cámara de frío, por lo que es y lo que pesa (de un corte a la vaca entera; de día, de un trozo al atún gigante), y la cuota como el riel que se llena
     boton-tema.tsx         el botón de la barra que cambia entre la noche y el día
     de-noche-y-de-dia.tsx  lo que se dice distinto de día, en sus dos versiones (el modo esconde una), y el nombre de cada pantalla
     tema-vivo.ts           el modo que se ve ahora, para lo que el CSS no alcanza: un aria-label, un title, el texto de una pregunta
@@ -1734,7 +1768,7 @@ src/
     cuentas-api.ts         las cuentas de GET /api/schedule/cuentas: los dos ids y cómo está la conexión (sin base)
     media-api.ts           la clave de un archivo que sube un cliente de la API, en la carpeta de su dueño (sin base)
     archivar-api.ts        el cuerpo y las respuestas de archivar y desarchivar lo quemado por API
-    cocina/                La Cocina: los estados de una comanda, la fila del chef, lo que entrega, lo que lee y escribe su API (/api/cocina), las subidas por partes del panel (/api/admin/cocina), colgar una comanda, el pulso de las tarjetas vivas, el correo de la comanda que terminó y el mesón
+    cocina/                La Cocina: la cámara de frío (lo que se guarda, su cuota y sus nombres por tamaño en bodega.ts; lo de adentro en materiales.ts), los estados de una comanda, la fila del chef, lo que entrega, lo que lee y escribe su API (/api/cocina), las subidas por partes del panel (/api/admin/cocina), colgar una comanda, el pulso de las tarjetas vivas, el correo de la comanda que terminó y el mesón
     color-de-red.ts        el color de marca de cada red en La Parrilla, como clases de Tailwind escritas enteras
     piezas.ts              la pieza de una publicación: sus destinos programados unidos a lo publicado
     auth.ts                sesión del panel

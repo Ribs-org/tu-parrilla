@@ -1,17 +1,17 @@
-import { and, asc, desc, eq, inArray, isNotNull, isNull } from 'drizzle-orm'
-import { comandaEventos, comandas, getDb, insumos, marcas, users, type Usuario } from '@/db'
+import { and, asc, eq, inArray, isNotNull, isNull } from 'drizzle-orm'
+import { comandaEventos, comandas, getDb, insumos, marcas, materiales, users, type Usuario } from '@/db'
 import { esChoqueCon } from '@/lib/choque-de-unicidad'
+import { claseDe } from './bodega'
 import { ordenarFila } from './fila'
-import { minutosDe, type MarcaBasica, type PedidoDeComanda } from './pedido'
-import type { InsumoSubido } from './subidas'
+import { minutosDe, rolEnLaComanda, type MarcaBasica, type PedidoDeComanda } from './pedido'
 
-// Colgar una comanda desde el panel: lo que el dueño subió, lo que pidió y su marca, congelado en la
-// receta (`docs/superpowers/specs/2026-10-22-la-cocina-design.md`, «La comanda nueva»). Todo por
-// dueño: un insumo de otro, o uno que ya está en otra comanda, no entra.
+// Colgar una comanda desde el panel: lo que el dueño eligió de su cámara de frío, lo que pidió y su
+// marca, congelado en la receta (`docs/superpowers/specs/2026-10-22-la-cocina-design.md`, «La comanda
+// nueva», y `2026-11-02-la-bodega-design.md`). Todo por dueño: un material de otro, o uno que ya se
+// sacó de la cámara, no entra.
 
-export const PRINCIPAL_NO_SIRVE = 'El plato principal ya no está, o ya es parte de otra comanda: súbelo de nuevo.'
-export const ACOMPANAMIENTO_NO_SIRVE = 'Uno de los acompañamientos ya no está, o ya es parte de otra comanda: sácalo y súbelo de nuevo.'
-export const ARCHIVOS_CAMBIARON = 'Uno de los archivos pasó a otra comanda mientras pedías: recarga la página y revisa la comanda.'
+export const PRINCIPAL_NO_SIRVE = 'El plato principal ya no está en la cámara, o no es un video: elige otro.'
+export const ACOMPANAMIENTO_NO_SIRVE = 'Uno de los materiales ya no está en la cámara: recarga la página y vuelve a elegir.'
 
 type Dueno = Pick<Usuario, 'id' | 'cocinaDesde'>
 
@@ -19,28 +19,6 @@ type Dueno = Pick<Usuario, 'id' | 'cocinaDesde'>
 export async function marcaDe(ownerId: string): Promise<MarcaBasica | null> {
   const [m] = await getDb().select().from(marcas).where(eq(marcas.ownerId, ownerId)).orderBy(asc(marcas.creadaEn)).limit(1)
   return m ? { nombre: m.nombre, handle: m.handle, acento: m.acento, ctaTexto: m.ctaTexto } : null
-}
-
-/**
- * Lo que subió y todavía no pidió, del más nuevo al más viejo: si la página se recargó después de
- * subir un largo de horas, el formulario lo ofrece en vez de pedirlo de nuevo. Se borra solo a los
- * tres días (`barrerSubidas`).
- */
-export async function insumosSueltos(ownerId: string): Promise<InsumoSubido[]> {
-  const filas = await getDb()
-    .select()
-    .from(insumos)
-    .where(and(eq(insumos.ownerId, ownerId), isNull(insumos.comandaId), isNull(insumos.borradoEn)))
-    .orderBy(desc(insumos.creadoEn))
-  return filas.map((i) => ({
-    id: i.id,
-    tipo: i.tipo,
-    subtipo: i.subtipo,
-    nombre: i.nombre,
-    bytes: i.bytes,
-    duracionS: i.duracionS,
-    tipoArchivo: i.tipoArchivo,
-  }))
 }
 
 /** El lugar que tendría en la fila una comanda que se cuelgue ahora: cuántas irían antes. */
@@ -54,17 +32,20 @@ export async function lugarDeUnaNueva(ownerId: string, ahora: Date): Promise<num
   return ordenarFila([...fila, { id: NUEVA, ownerId, tipo: 'tanda' as const, creadaEn: ahora }]).findIndex((c) => c.id === NUEVA)
 }
 
-class InsumosCambiaron extends Error {}
+class MaterialesCambiaron extends Error {
+  constructor(public falla: 'principal' | 'acompanamiento') {
+    super(falla)
+  }
+}
 
-export type ResultadoPedido =
-  | { ok: true; id: string; repetida: boolean }
-  | { falla: 'apagada' | 'principal' | 'acompanamiento' | 'cambiaron' }
+export type ResultadoPedido = { ok: true; id: string; repetida: boolean } | { falla: 'apagada' | 'principal' | 'acompanamiento' }
 
 /**
  * La cuelga: guarda la marca (la crea la primera vez), congela la receta, crea la comanda con su
- * primer paso y le amarra sus insumos, todo en una transacción. Mandarla otra vez con la misma
- * `ref` devuelve la misma. Si entre que se leyó y se escribió un insumo pasó a otra comanda, no se
- * cuelga nada.
+ * primer paso y una foto de cada material elegido (`insumos`), todo en una transacción. Los
+ * materiales se leen bloqueados: si alguien los saca de la cámara a la vez, uno de los dos espera
+ * al otro, y o la comanda se cuelga con ellos o no se cuelga. Mandarla otra vez con la misma `ref`
+ * devuelve la misma.
  */
 export async function pedirComanda(dueno: Dueno, pedido: PedidoDeComanda, ahora: Date): Promise<ResultadoPedido> {
   if (!dueno.cocinaDesde) return { falla: 'apagada' }
@@ -79,20 +60,22 @@ export async function pedirComanda(dueno: Dueno, pedido: PedidoDeComanda, ahora:
   const ya = await repetida()
   if (ya) return ya
 
-  const ids = [pedido.principal, ...pedido.acompanamientos]
-  const libres = await db
-    .select()
-    .from(insumos)
-    .where(and(inArray(insumos.id, ids), eq(insumos.ownerId, dueno.id), isNull(insumos.comandaId), isNull(insumos.borradoEn)))
-  const principal = libres.find((i) => i.id === pedido.principal)
-  if (!principal || principal.tipo !== 'principal') return { falla: 'principal' }
-  for (const id of pedido.acompanamientos) {
-    const i = libres.find((x) => x.id === id)
-    if (!i || i.tipo === 'principal') return { falla: 'acompanamiento' }
-  }
-
+  const ids = [pedido.principal, ...pedido.acompanamientos.map((a) => a.id)]
   try {
     const id = await db.transaction(async (tx) => {
+      const elegidos = await tx
+        .select()
+        .from(materiales)
+        .where(and(inArray(materiales.id, ids), eq(materiales.ownerId, dueno.id), isNull(materiales.borradoEn)))
+        .for('update')
+      const principal = elegidos.find((m) => m.id === pedido.principal)
+      if (!principal || claseDe(principal.tipoArchivo) !== 'video') throw new MaterialesCambiaron('principal')
+      const acompanamientos = pedido.acompanamientos.map((a) => {
+        const m = elegidos.find((x) => x.id === a.id)
+        if (!m) throw new MaterialesCambiaron('acompanamiento')
+        return { material: m, tipo: rolEnLaComanda(claseDe(m.tipoArchivo), a.rol) }
+      })
+
       const [existente] = await tx.select().from(marcas).where(eq(marcas.ownerId, dueno.id)).orderBy(asc(marcas.creadaEn)).limit(1)
       const [marca] = existente
         ? await tx.update(marcas).set({ ...pedido.marca, actualizadaEn: ahora }).where(eq(marcas.id, existente.id)).returning()
@@ -126,17 +109,32 @@ export async function pedirComanda(dueno: Dueno, pedido: PedidoDeComanda, ahora:
         })
         .returning({ id: comandas.id })
       await tx.insert(comandaEventos).values({ comandaId: comanda!.id, estado: 'recibida', creadoEn: ahora })
-      const amarrados = await tx
-        .update(insumos)
-        .set({ comandaId: comanda!.id })
-        .where(and(inArray(insumos.id, ids), eq(insumos.ownerId, dueno.id), isNull(insumos.comandaId), isNull(insumos.borradoEn)))
-        .returning({ id: insumos.id })
-      if (amarrados.length !== ids.length) throw new InsumosCambiaron()
+      // La foto de cada material: su nombre, su uso y su peso de hoy, y la misma URL. El archivo
+      // sigue siendo de la cámara, así que el insumo no vence.
+      const fotos = [{ material: principal, tipo: 'principal' as const }, ...acompanamientos]
+      await tx.insert(insumos).values(
+        fotos.map(({ material: m, tipo }, posicion) => ({
+          ownerId: dueno.id,
+          comandaId: comanda!.id,
+          materialId: m.id,
+          tipo,
+          subtipo: tipo === 'principal' ? pedido.subtipo : null,
+          uso: m.uso,
+          posicion,
+          nombre: m.nombre,
+          url: m.url,
+          bytes: m.bytes,
+          duracionS: m.duracionS,
+          tipoArchivo: m.tipoArchivo,
+          derechosEn: m.derechosEn,
+          creadoEn: ahora,
+        })),
+      )
       return comanda!.id
     })
     return { ok: true, id, repetida: false }
   } catch (error) {
-    if (error instanceof InsumosCambiaron) return { falla: 'cambiaron' }
+    if (error instanceof MaterialesCambiaron) return { falla: error.falla }
     // Dos envíos a la vez del mismo formulario: el segundo choca con la `ref` y devuelve el primero.
     if (esChoqueCon(error, 'comandas_owner_ref_key')) {
       const otra = await repetida()

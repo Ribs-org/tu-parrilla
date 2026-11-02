@@ -86,9 +86,13 @@ function getCliente(): S3Client {
   const accessKeyId = env('R2_ACCESS_KEY_ID')
   const secretAccessKey = env('R2_SECRET_ACCESS_KEY')
   if (!accountId || !accessKeyId || !secretAccessKey) throw new Error(SIN_ALMACEN)
+  // `R2_ENDPOINT` es solo para probar en local contra un almacén compatible con S3 (un MinIO en
+  // Docker): sin él, el de R2. Esos almacenes nombran el bucket en la ruta, no en el dominio.
+  const otro = env('R2_ENDPOINT')
   cliente = new S3Client({
     region: 'auto',
-    endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
+    endpoint: otro ?? `https://${accountId}.r2.cloudflarestorage.com`,
+    ...(otro ? { forcePathStyle: true } : {}),
     credentials: { accessKeyId, secretAccessKey },
     // R2 no acepta los checksums que el SDK v3 agrega por defecto desde 3.729; sin
     // esto cada PUT vuelve con un error de firma que no menciona el checksum.

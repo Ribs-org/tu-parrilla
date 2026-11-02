@@ -89,10 +89,10 @@ export async function GET(request: Request) {
     // no lanza nunca.
     const toca = tocaBarrer(inicio, Date.now())
     const barrido = toca ? await barrerHuerfanos() : null
-    // Las subidas de la cocina: las abiertas y abandonadas, y lo subido que nunca llegó a una
-    // comanda. Tampoco lanza (`barrerSubidas`).
+    // Las subidas a la cámara de frío que quedaron abiertas y abandonadas. Lo que está en la cámara
+    // no vence. Tampoco lanza (`barrerSubidas`).
     const subidas = toca ? await barrerSubidas() : null
-    // La retención de la cocina: lo crudo a los 14 días de terminada su comanda, y lo que pasó 30
+    // La retención de la cocina: lo crudo de antes de la cámara de frío a los 14 días de terminada su comanda, y lo que pasó 30
     // días en el mesón sin programarse. Tampoco lanza (`barrerCocina`).
     const cocina = toca ? await barrerCocina() : null
     marca('barrido')

@@ -1,13 +1,25 @@
 'use client'
 
-import { useActionState, useState, useTransition } from 'react'
-import { cerrarSesionesUsuario, encenderCocina, invitarUsuario, quitarUsuario, traspasarCuentaAccion, type FormState } from '@/app/admin/actions'
+import { useActionState, useId, useRef, useState, useTransition } from 'react'
+import {
+  cambiarCuotaDeLaCamaraAccion,
+  cerrarSesionesUsuario,
+  encenderCocina,
+  invitarUsuario,
+  quitarUsuario,
+  traspasarCuentaAccion,
+  type FormState,
+} from '@/app/admin/actions'
 import { useConfirmar } from '@/components/confirmar'
+import { Ventana } from '@/components/ventana'
+import { CUOTA_BODEGA_POR_DEFECTO, pesoEnPalabras } from '@/lib/cocina/bodega'
 import { useRevision } from '@/components/revision'
 import { Button, Field, Input, Select, Submit } from '@/components/ui'
 import { networkLabel } from '@/lib/networks'
 import { revisarCorreo } from '@/lib/revisiones'
 import type { CuentaTraspasable } from '@/lib/social/traspasar'
+
+const CUOTA_EN_PALABRAS = pesoEnPalabras(CUOTA_BODEGA_POR_DEFECTO)
 
 export function FormularioInvitar() {
   const [state, action] = useActionState<FormState, FormData>(invitarUsuario, {})
@@ -191,6 +203,71 @@ export function BotonCerrarSesiones({ id }: { id: string }) {
         Cerrar sesiones
       </Button>
       {error ? <span role="alert" className="text-xs text-negative">{error}</span> : null}
+    </>
+  )
+}
+
+/**
+ * La cuota de la cámara de frío de alguien, en GB: «Cambiar la cuota» abre una ventana con el
+ * campo. Vacía, vuelve a la de siempre (20 GB). Lo que ya tiene guardado no se borra aunque baje.
+ */
+export function BotonCuota({ id, correo, gigas }: { id: string; correo: string; gigas: string }) {
+  const ventana = useRef<HTMLDialogElement>(null)
+  const idTitulo = useId()
+  const [valor, setValor] = useState(gigas)
+  const [error, setError] = useState<string | null>(null)
+  const [pending, start] = useTransition()
+
+  function abrir() {
+    setValor(gigas)
+    setError(null)
+    ventana.current?.showModal()
+  }
+
+  function guardar(e: React.FormEvent) {
+    e.preventDefault()
+    start(async () => {
+      const r = await cambiarCuotaDeLaCamaraAccion(id, valor)
+      if (r.error) return setError(r.error)
+      ventana.current?.close()
+    })
+  }
+
+  return (
+    <>
+      <Button variant="ghost" onClick={abrir}>
+        Cambiar la cuota
+      </Button>
+      <Ventana ref={ventana} aria-labelledby={idTitulo} alVelo={() => ventana.current?.close()}>
+        <form onSubmit={guardar} noValidate className="space-y-4 p-5">
+          <h2 id={idTitulo} className="font-titulo text-base font-semibold uppercase tracking-[0.05em]">
+            La cuota de {correo}
+          </h2>
+          <Field label="GB" hint={`Vacía, la de siempre: ${CUOTA_EN_PALABRAS}. Lo que ya tiene guardado no se borra aunque la bajes.`}>
+            <Input
+              value={valor}
+              inputMode="decimal"
+              placeholder="20"
+              onChange={(e) => setValor(e.target.value)}
+              aria-invalid={Boolean(error) || undefined}
+              className="w-32"
+            />
+          </Field>
+          {error ? (
+            <p role="alert" className="text-sm text-negative">
+              {error}
+            </p>
+          ) : null}
+          <div className="flex flex-wrap gap-2">
+            <Button type="submit" variant="primary" disabled={pending}>
+              {pending ? 'Guardando…' : 'Guardar'}
+            </Button>
+            <Button type="button" onClick={() => ventana.current?.close()}>
+              Cancelar
+            </Button>
+          </div>
+        </form>
+      </Ventana>
     </>
   )
 }

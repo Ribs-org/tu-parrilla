@@ -15,7 +15,7 @@ export function Panel({
   className,
   children,
 }: {
-  title: string
+  title: React.ReactNode
   hint?: string
   action?: React.ReactNode
   className?: string

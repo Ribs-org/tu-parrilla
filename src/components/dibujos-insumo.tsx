@@ -1,28 +1,20 @@
-import { useId } from 'react'
-import type { TipoInsumo } from '@/db/schema'
-import { cn } from '@/lib/utils'
-
 /*
- * Lo que se le lleva a la cocina, dibujado: cada insumo tiene su cara, de noche en la parrilla y de
- * día en la barra de sushi (`docs/superpowers/specs/2026-10-22-la-cocina-design.md`, «Los insumos y
- * sus dibujos»). El dibujo es la cara del tipo, no su reemplazo: el nombre va al lado, en palabras.
+ * Las piezas crudas de La Cocina, sin su lienzo: la media res y el atún, las verduras y el arroz, el
+ * pescado entero y la tabla. Las arma la cámara de frío en sus dibujos por tamaño
+ * (`dibujos-material.tsx`) y la estación de cada comanda en su escena (`estacion-comanda.tsx`).
  *
  * Misma gramática que el corte y la pieza de sushi (`corte.tsx`, `pieza-sushi.tsx`): los colores de
- * la carne cruda y del pescado, la grasa y el hueso en crema, la tabla de madera. Los dos modos van
- * en la página y el modo esconde uno (`.solo-noche`, `.solo-dia`). En un lienzo de 96 × 96, probados
- * a 48 px, el tamaño de la fila de un archivo: lo que los separa a esa escala es la silueta.
+ * la carne cruda y del pescado, la grasa y el hueso en crema, la tabla de madera. Cada figura vive en
+ * un lienzo de 96 × 96; quien la usa la mete en su `<svg>` o la mueve con un `transform`.
  */
 
-const CRUDA = { claro: '#f0a08f', medio: '#e8907f', hondo: '#c45a52' }
-const CERDO = { claro: '#f8c6b8', medio: '#efa797', hondo: '#d47b6e' }
-const GRASA = '#f6ead8'
-const HUESO = '#f2e9da'
-const FIERRO = '#8d9aa6'
-const MADERA = { claro: '#e2c497', medio: '#d2ad78', veta: '#b98f5a' }
+export const CRUDA = { claro: '#f0a08f', medio: '#e8907f', hondo: '#c45a52' }
+export const GRASA = '#f6ead8'
+export const HUESO = '#f2e9da'
+export const FIERRO = '#8d9aa6'
+export const MADERA = { claro: '#e2c497', medio: '#d2ad78', veta: '#b98f5a' }
 
-type Dibujo = { className?: string }
-
-function Degradado({ id, c }: { id: string; c: { claro: string; medio: string; hondo: string } }) {
+export function Degradado({ id, c }: { id: string; c: { claro: string; medio: string; hondo: string } }) {
   return (
     <linearGradient id={id} x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stopColor={c.claro} />
@@ -33,9 +25,8 @@ function Degradado({ id, c }: { id: string; c: { claro: string; medio: string; h
 }
 
 /**
- * La media res sin su lienzo, en el de 96 × 96: la usa también la estación de una comanda
- * (`estacion-comanda.tsx`), que la mete en su escena. `claseCorte` le da movimiento a las líneas
- * por donde se corta.
+ * La media res colgada del gancho: ancha arriba, el cuarto trasero; angosta abajo. `claseCorte` le
+ * da movimiento a las líneas por donde se corta (la estación de una comanda, mientras despieza).
  */
 export function FiguraRes({ id, cortada = false, claseCorte }: { id: string; cortada?: boolean; claseCorte?: string }) {
   return (
@@ -73,62 +64,47 @@ export function FiguraRes({ id, cortada = false, claseCorte }: { id: string; cor
   )
 }
 
-/** La media res, colgada del gancho: ancha arriba, el cuarto trasero; angosta abajo. */
-export function Res({ className, cortada = false }: Dibujo & { cortada?: boolean }) {
-  const id = useId()
+/** El pimentón, solo: rojo, con su vena clara y su tallo. */
+export function FiguraPimenton() {
   return (
-    <svg viewBox="0 0 96 96" className={cn('shrink-0', className)} aria-hidden>
-      <FiguraRes id={id} cortada={cortada} />
-    </svg>
+    <>
+      <path d="M58 64C58 56 66 54 72 57C78 54 86 57 85 66C84 77 76 84 71 83C66 84 59 76 58 64Z" fill="#d9473f" />
+      <path d="M64 61C65 70 67 77 70 81" stroke="#f08a7e" strokeOpacity=".7" strokeWidth="2" fill="none" strokeLinecap="round" />
+      <path d="M71.5 57V51.5C71.5 49 73.5 47.5 76 48" stroke="#4f8f3a" strokeWidth="3" fill="none" strokeLinecap="round" />
+    </>
   )
 }
 
-/** El costillar de cerdo: una tira con sus huesos a lo ancho, más chica que la res. */
-export function Cerdo({ className }: Dibujo) {
-  const id = useId()
-  const huesos = [24, 34, 44, 54, 64, 74]
-  return (
-    <svg viewBox="0 0 96 96" className={cn('shrink-0', className)} aria-hidden>
-      <defs>
-        <Degradado id={`${id}c`} c={CERDO} />
-      </defs>
-      <path d="M14 38C26 32 70 31 82 36C85 46 84 56 81 63C68 68 28 69 15 64C11 56 11 46 14 38Z" fill={`url(#${id}c)`} />
-      <path d="M15 38C28 33 69 32 81 36.5" stroke={GRASA} strokeWidth="4" fill="none" strokeLinecap="round" />
-      {huesos.map((x) => (
-        <g key={x}>
-          <path d={`M${x} 41V62`} stroke={HUESO} strokeWidth="3.4" strokeLinecap="round" />
-          <circle cx={x} cy="64.5" r="2.6" fill={HUESO} />
-        </g>
-      ))}
-    </svg>
-  )
-}
-
-/** Las verduras: un choclo con su hoja y un pimentón. */
-export function Verduras({ className }: Dibujo) {
+/** El choclo con su hoja, en diagonal. */
+export function FiguraChoclo() {
   const granos: Array<[number, number]> = []
   for (let fila = 0; fila < 4; fila++) {
     for (let n = 0; n < 6; n++) granos.push([28 + n * 6.4 + (fila % 2) * 3.2, 33 + fila * 5.4])
   }
   return (
-    <svg viewBox="0 0 96 96" className={cn('shrink-0', className)} aria-hidden>
-      <g transform="rotate(-18 46 42)">
-        <path d="M18 42C24 26 66 24 74 36C77 41 77 46 74 50C66 61 24 58 18 42Z" fill="#f2c94c" />
-        {granos.map(([cx, cy]) => (
-          <ellipse key={`${cx}-${cy}`} cx={cx} cy={cy} rx="2.3" ry="1.9" fill="#fbe08a" />
-        ))}
-        <path d="M74 36C82 32 88 34 90 40C84 40 80 43 76 49" fill="#7fbf5f" />
-        <path d="M74 50C82 55 89 53 90 46C85 46 80 44 76 40" fill="#4f8f3a" />
-      </g>
-      <path d="M58 64C58 56 66 54 72 57C78 54 86 57 85 66C84 77 76 84 71 83C66 84 59 76 58 64Z" fill="#d9473f" />
-      <path d="M64 61C65 70 67 77 70 81" stroke="#f08a7e" strokeOpacity=".7" strokeWidth="2" fill="none" strokeLinecap="round" />
-      <path d="M71.5 57V51.5C71.5 49 73.5 47.5 76 48" stroke="#4f8f3a" strokeWidth="3" fill="none" strokeLinecap="round" />
-    </svg>
+    <g transform="rotate(-18 46 42)">
+      <path d="M18 42C24 26 66 24 74 36C77 41 77 46 74 50C66 61 24 58 18 42Z" fill="#f2c94c" />
+      {granos.map(([cx, cy]) => (
+        <ellipse key={`${cx}-${cy}`} cx={cx} cy={cy} rx="2.3" ry="1.9" fill="#fbe08a" />
+      ))}
+      <path d="M74 36C82 32 88 34 90 40C84 40 80 43 76 49" fill="#7fbf5f" />
+      <path d="M74 50C82 55 89 53 90 46C85 46 80 44 76 40" fill="#4f8f3a" />
+    </g>
+  )
+}
+
+/** Las verduras: el choclo y el pimentón. */
+export function FiguraVerduras() {
+  return (
+    <>
+      <FiguraChoclo />
+      <FiguraPimenton />
+    </>
   )
 }
 
 /** La tabla de madera donde el pescado se pone entero. */
-function Tabla() {
+export function Tabla() {
   return (
     <g>
       <rect x="5" y="60" width="86" height="15" rx="3.5" fill={MADERA.medio} />
@@ -139,7 +115,7 @@ function Tabla() {
 }
 
 /** Un pescado entero sobre la tabla: el lomo oscuro, el vientre plateado, la cola en horquilla. */
-function Pescado({
+export function Pescado({
   id,
   largo,
   lomo,
@@ -194,46 +170,39 @@ function Pescado({
   )
 }
 
-/** El atún sobre su tabla, sin su lienzo: como `FiguraRes`, para la estación de una comanda. */
+/** Los colores de cada pescado entero. */
+export const ATUN = { lomo: '#2f4a6b', vientre: '#c9d3dc', aleta: '#24394f' }
+export const SALMON = { lomo: '#e5864a', vientre: '#ffd2c2', aleta: '#c66737' }
+
+/** El atún sobre su tabla: como `FiguraRes`, para la estación de una comanda y la cámara de frío. */
 export function FiguraAtun({ id, cortada = false, claseCorte }: { id: string; cortada?: boolean; claseCorte?: string }) {
   return (
     <>
       <Tabla />
-      <Pescado id={`${id}p`} largo={68} lomo="#2f4a6b" vientre="#c9d3dc" aleta="#24394f" cortado={cortada} claseCorte={claseCorte} />
+      <Pescado id={`${id}p`} largo={68} {...ATUN} cortado={cortada} claseCorte={claseCorte} />
     </>
   )
 }
 
-/** El atún entero, sobre la tabla. */
-export function Atun({ className, cortada = false }: Dibujo & { cortada?: boolean }) {
-  const id = useId()
+/** El salmón entero, más chico que el atún, sobre la misma tabla. */
+export function FiguraSalmon({ id }: { id: string }) {
   return (
-    <svg viewBox="0 0 96 96" className={cn('shrink-0', className)} aria-hidden>
-      <FiguraAtun id={id} cortada={cortada} />
-    </svg>
-  )
-}
-
-/** El salmón entero, más chico que el atún. */
-export function Salmon({ className }: Dibujo) {
-  const id = useId()
-  return (
-    <svg viewBox="0 0 96 96" className={cn('shrink-0', className)} aria-hidden>
+    <>
       <Tabla />
       <g transform="translate(9 3)">
-        <Pescado id={`${id}p`} largo={52} lomo="#e5864a" vientre="#ffd2c2" aleta="#c66737" />
+        <Pescado id={`${id}p`} largo={52} {...SALMON} />
       </g>
-    </svg>
+    </>
   )
 }
 
 /** El arroz: un bol con su cerro de arroz. */
-export function Arroz({ className }: Dibujo) {
+export function FiguraArroz() {
   const granos: Array<[number, number, number]> = [
     [36, 42, -20], [44, 38, 10], [52, 37, -10], [60, 40, 25], [40, 48, 15], [48, 45, -25], [56, 46, 5], [64, 47, -15], [32, 50, 30],
   ]
   return (
-    <svg viewBox="0 0 96 96" className={cn('shrink-0', className)} aria-hidden>
+    <>
       <ellipse cx="48" cy="80" rx="26" ry="3.5" fill="#6b5a44" opacity=".18" />
       {/* Con borde: de día el arroz blanco se perdía contra el papel de arroz del fondo. */}
       <path d="M24 50C24 40 36 32 48 32C60 32 72 40 72 50Z" fill="#ffffff" stroke="#d9ccb6" strokeWidth="1.4" />
@@ -244,39 +213,6 @@ export function Arroz({ className }: Dibujo) {
       <path d="M17 50H79C78 64 66 76 48 76C30 76 18 64 17 50Z" fill="#2b2b2b" />
       <path d="M17 50H79C79 52.5 78.6 54.5 78 56.5H18C17.4 54.5 17 52.5 17 50Z" fill="#b83a3a" />
       <path d="M38 76H58L56 80H40Z" fill="#1d1d1d" />
-    </svg>
-  )
-}
-
-/**
- * El dibujo de un insumo en los dos modos, y el modo esconde uno: el plato principal es la res y el
- * atún; lo que se sincroniza con él (otra cámara, la pantalla), el cerdo y el salmón; las imágenes
- * o el b-roll, las verduras y el arroz. `cortada` marca por dónde se va a cortar el plato principal:
- * la tarjeta de una comanda lo pide desde que el chef despieza.
- */
-export function DibujoDeInsumo({ tipo, cortada = false, className }: { tipo: TipoInsumo; cortada?: boolean; className?: string }) {
-  const noche = cn('solo-noche', className)
-  const dia = cn('solo-dia', className)
-  if (tipo === 'principal') {
-    return (
-      <>
-        <Res cortada={cortada} className={noche} />
-        <Atun cortada={cortada} className={dia} />
-      </>
-    )
-  }
-  if (tipo === 'imagen') {
-    return (
-      <>
-        <Verduras className={noche} />
-        <Arroz className={dia} />
-      </>
-    )
-  }
-  return (
-    <>
-      <Cerdo className={noche} />
-      <Salmon className={dia} />
     </>
   )
 }

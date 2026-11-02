@@ -118,8 +118,10 @@ describe.skipIf(!URL_PRUEBAS)('la API de la cocina, contra una Postgres de verda
   afterAll(() => vi.unstubAllEnvs())
 
   beforeEach(async () => {
-    const { comandas } = await esquema()
+    const { comandas, marcas, materiales } = await esquema()
     await (await db()).delete(comandas)
+    await (await db()).delete(materiales)
+    await (await db()).delete(marcas)
     subidos.clear()
     despues.length = 0
     vi.unstubAllGlobals()
@@ -325,6 +327,86 @@ describe.skipIf(!URL_PRUEBAS)('la API de la cocina, contra una Postgres de verda
 
     const borrado = await insumo(conCocina, c.id, { borradoEn: new Date() })
     expect((await GET(pedido(`/api/cocina/insumos/${borrado.id}/enlace`), params(borrado.id))).status).toBe(404)
+  })
+
+  it('una comanda de la cámara de frío le llega al chef igual que siempre, con el uso y el material de más, y lo que no es video ni foto aparte', async () => {
+    const { GET } = await import('@/app/api/cocina/comandas/route')
+    const tomar = (await import('@/app/api/cocina/comandas/[id]/tomar/route')).POST
+    const enlace = (await import('@/app/api/cocina/insumos/[id]/enlace/route')).GET
+    const { pedirComanda } = await import('./pedir')
+    const { materiales, users } = await esquema()
+    const [duena] = await (await db()).select().from(users).where(eq(users.id, conCocina))
+    const nuevo = (nombre: string, tipoArchivo: string, uso: string | null) =>
+      (async () => {
+        const [m] = await (await db())
+          .insert(materiales)
+          .values({
+            ownerId: conCocina,
+            nombre,
+            uso: uso as 'crudo',
+            url: `${BASE}/cocina/${conCocina}/bodega/${crypto.randomUUID()}-${nombre}`,
+            bytes: 1000,
+            duracionS: tipoArchivo.startsWith('image/') ? null : 61,
+            tipoArchivo,
+            derechosEn: new Date(),
+          })
+          .returning()
+        return m!
+      })()
+    const largo = await nuevo('charla.mp4', 'video/mp4', 'crudo')
+    const intro = await nuevo('intro.mp4', 'video/mp4', 'intro')
+    const logo = await nuevo('logo.png', 'image/png', 'logo')
+    const tema = await nuevo('tema.mp3', 'audio/mpeg', 'musica')
+    const r = await pedirComanda(
+      duena!,
+      {
+        ref: crypto.randomUUID(),
+        principal: largo.id,
+        subtipo: 'largo',
+        acompanamientos: [
+          { id: intro.id, rol: 'imagen' },
+          { id: logo.id, rol: 'imagen' },
+          { id: tema.id, rol: 'imagen' },
+        ],
+        formatos: ['clips'],
+        cantidad: 'unos-10',
+        notas: 'Usa mi intro al principio.',
+        paraCuando: null,
+        marca: { nombre: 'Marca', handle: null, acento: null, ctaTexto: null },
+      },
+      new Date(),
+    )
+    const id = 'id' in r ? r.id : ''
+    // Una de antes de la cámara, al lado, sigue llegando igual: sin uso ni material.
+    const vieja = await comanda(conCocina)
+    await insumo(conCocina, vieja.id)
+
+    const { comandas } = await (await GET(pedido('/api/cocina/comandas'))).json()
+    const deLaCamara = comandas.find((c: { id: string }) => c.id === id)
+    expect(deLaCamara.instruccion).toBe('Usa mi intro al principio.')
+    expect(deLaCamara.minutos).toBe(2)
+    expect(deLaCamara.insumos).toEqual([
+      { id: expect.any(String), tipo: 'principal', subtipo: 'largo', nombre: 'charla.mp4', bytes: 1000, duracionS: 61, tipoArchivo: 'video/mp4', uso: 'crudo', materialId: largo.id },
+      { id: expect.any(String), tipo: 'imagen', subtipo: null, nombre: 'intro.mp4', bytes: 1000, duracionS: 61, tipoArchivo: 'video/mp4', uso: 'intro', materialId: intro.id },
+      { id: expect.any(String), tipo: 'imagen', subtipo: null, nombre: 'logo.png', bytes: 1000, duracionS: null, tipoArchivo: 'image/png', uso: 'logo', materialId: logo.id },
+    ])
+    expect(deLaCamara.extras).toEqual([
+      { id: expect.any(String), tipo: 'extra', subtipo: null, nombre: 'tema.mp3', bytes: 1000, duracionS: 61, tipoArchivo: 'audio/mpeg', uso: 'musica', materialId: tema.id },
+    ])
+    const deAntes = comandas.find((c: { id: string }) => c.id === vieja.id)
+    expect(deAntes.insumos).toEqual([expect.objectContaining({ tipo: 'principal', uso: null, materialId: null })])
+    expect(deAntes.extras).toEqual([])
+
+    // El enlace sirve para lo de la cámara y para el extra, por la misma ruta: nombra el archivo del material.
+    await tomar(pedido(`/api/cocina/comandas/${id}/tomar`, { trabajador: 'servidor' }), params(id))
+    for (const [insumoId, material] of [
+      [deLaCamara.insumos[0].id, largo],
+      [deLaCamara.extras[0].id, tema],
+    ] as const) {
+      const respuesta = await enlace(pedido(`/api/cocina/insumos/${insumoId}/enlace`), params(insumoId))
+      expect(respuesta.status).toBe(200)
+      expect((await respuesta.json()).url).toBe(`https://firmado.ej.cl/${material.url.slice(BASE.length + 1)}?firma=1`)
+    }
   })
 
   it('entregar: se anuncia, se sube, y recién con todo arriba llega al mesón', async () => {
