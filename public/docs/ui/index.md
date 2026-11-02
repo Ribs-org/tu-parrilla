@@ -251,6 +251,19 @@ equivalencia con lo que dicen las páginas:
 | El fierro, la barrita de color de cada cuenta | Un cuchillo chico: el mango oscuro a la izquierda y la hoja a la derecha, en salmón tostado; ámbar si se desafila, gris si perdió el filo | Cómo está la conexión |
 | El trinche y el cuchillo del botón «Ajustes» | Dos palillos en diagonal | El mismo botón |
 
+## Las ventanas del panel
+
+Todo lo que el panel pregunta o pide elegir sale en una ventana propia, con los colores del modo:
+ninguna es del navegador. Si la persona dice «me salió un aviso del navegador», casi seguro habla
+de una de estas.
+
+- **Las preguntas.** Antes de algo que no se deshace, o que no conviene hacer sin querer, se abre
+  una ventana en el centro, con el resto de la pantalla atenuado: la pregunta en mayúsculas, a veces
+  un detalle debajo, y dos botones. El de la izquierda lleva el nombre de lo que va a pasar
+  («Eliminar», «Descartar», «Revocar»), no «Aceptar», y va en rojo cuando borra o no tiene vuelta. El
+  otro es «Cancelar» (en «Cancelar la comanda», «Volver»). Esc o un clic fuera de la ventana es lo
+  mismo que «Cancelar»: no pasa nada.
+
 ## Lo que no existe (no la mandes a buscarlo)
 
 - **Registro abierto.** Solo entra quien invitó el admin, desde Los Maestros.
@@ -286,6 +299,7 @@ Sale de:
 - `src/app/admin/(dash)/page.tsx`: `/admin` lleva a La Parrilla.
 - `src/app/admin/(dash)/content/page.tsx`: la dirección de la antigua pestaña Los Cortes lleva a
   «Tus publicaciones», dentro de Los Números.
+- `src/components/confirmar.tsx` y `src/components/ventana.tsx` (las preguntas y la ventana en que salen)
 - `src/lib/vocabulario.ts`: los nombres, subtítulos y rutas de cada pantalla, y quién las ve.
 - `src/lib/parrilla.ts`: la cocción, el calor del día, la temperatura del fierro y el aviso del
   botón «Ajustes» (`avisoDeFierros`).

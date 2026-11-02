@@ -6,6 +6,7 @@ import { startTransition, useActionState, useState, useTransition, type ReactNod
 import { useRouter } from 'next/navigation'
 import { ArrowDown, ArrowLeft, ArrowUp, Check, Copy, ExternalLink } from 'lucide-react'
 import { deleteScheduledPost, updateScheduledPost, type FormState } from '@/app/admin/actions'
+import { useConfirmar } from '@/components/confirmar'
 import { useTema } from '@/components/tema-vivo'
 import { Button, Field, GroupLabel, Input, Textarea } from '@/components/ui'
 import { REDES_PROXIMAMENTE, networkLabel } from '@/lib/networks'
@@ -53,6 +54,7 @@ export function Editor({
   proximamente?: readonly string[]
 }) {
   const tema = useTema()
+  const confirmar = useConfirmar()
   const publishing = targets.some((t) => t.status === 'publishing')
   const published = new Set(targets.filter((t) => t.status === 'published').map((t) => t.accountId))
   const initialAccountIds = new Set(targets.map((t) => t.accountId))
@@ -308,9 +310,9 @@ export function Editor({
               type="button"
               variant="danger"
               disabled={deleting}
-              onClick={() => {
+              onClick={async () => {
                 // Pregunta antes, como en la lista: borrar no se deshace.
-                if (!confirm(confirmarEliminar(tema))) return
+                if (!(await confirmar(confirmarEliminar(tema)))) return
                 startDelete(async () => {
                   setDeleteError(null)
                   const result = await deleteScheduledPost(postId)

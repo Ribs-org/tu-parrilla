@@ -8,8 +8,8 @@ export function Button({
   variant = 'ghost',
   className,
   ...props
-}: React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: 'primary' | 'ghost' | 'danger'
+}: React.ComponentProps<'button'> & {
+  variant?: 'primary' | 'ghost' | 'danger' | 'peligro'
 }) {
   return (
     <button
@@ -20,6 +20,8 @@ export function Button({
         variant === 'primary' && 'bg-brasa text-acero-950 hover:brightness-110',
         variant === 'ghost' && 'border border-acero-700 text-fg-muted hover:bg-acero-800 hover:text-fg',
         variant === 'danger' && 'border border-negative/40 text-negative hover:bg-negative/10',
+        // Lleno: el botón que ya no pregunta más, el último antes de borrar.
+        variant === 'peligro' && 'bg-negative text-acero-950 hover:brightness-110',
         className,
       )}
     />

@@ -369,6 +369,25 @@
     font-weight: 600;
   }
 
+  /*
+   * La ventana (`src/components/ventana.tsx`): sube un poco al abrir, y el borde de arriba de una
+   * pregunta es un fierro al rojo. De día no hay fuego: queda la línea, como el filo de un
+   * cuchillo. Solo el borde: el resplandor de una pregunta peligrosa sería brasa donde va rojo.
+   */
+  .ventana[open] {
+    animation: ventana-entra 170ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .ventana-candente {
+    box-shadow:
+      0 -6px 22px -10px rgb(232 98 31 / 0.65),
+      0 20px 25px -5px rgb(0 0 0 / 0.35);
+  }
+
+  .acerado[data-tema='dia'] .ventana-candente {
+    box-shadow: 0 20px 25px -5px rgb(34 31 28 / 0.14);
+  }
+
   .chapa-hover {
     transition:
       border-color 180ms ease,
@@ -968,6 +987,13 @@
   }
   to {
     transform: translate3d(16%, -18%, 0) scale(1.22);
+  }
+}
+
+@keyframes ventana-entra {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
   }
 }
 

@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef, useState, useTransition } from 'react'
 import { AlertTriangle, Check, ChevronDown, Copy, RefreshCw } from 'lucide-react'
 import { disconnectAccount, fusionarCuenta, quitarCuentaAccion, syncSocialNow } from '@/app/admin/actions'
+import { useConfirmar } from '@/components/confirmar'
 import { DeNocheYDeDia, NombreDe } from '@/components/de-noche-y-de-dia'
 import { Icon } from '@/components/icon'
 import { Button } from '@/components/ui'
@@ -17,7 +18,7 @@ import { estadoDelFierro, type Fierro } from '@/lib/parrilla'
 import { avisoSinTrial } from '@/lib/social/publish/opciones'
 import { cn } from '@/lib/utils'
 import { seEstaEnfriando } from '@/lib/vocabulario'
-import { useVeloQueCierra } from '@/components/velo'
+import { Ventana } from '@/components/ventana'
 
 const RELATIVE = new Intl.RelativeTimeFormat('es', { numeric: 'auto' })
 
@@ -275,6 +276,7 @@ function Fila({
   const [destino, setDestino] = useState(vivas[0]?.id ?? '')
   const [fusion, setFusion] = useState<{ texto: string; ok: boolean } | null>(null)
   const nombre = nombreDe(row)
+  const confirmar = useConfirmar()
 
   useEffect(() => {
     if (!desconectada) return
@@ -298,10 +300,12 @@ function Fila({
     })
   }
 
-  function desconectar() {
-    const seguir = window.confirm(
-      `Se desconecta «${nombre}» de ${networkLabel(network)}. Sus posts y métricas ya bajados se quedan, pero no se sincroniza nada más hasta que la vuelvas a conectar. ¿Seguir?`,
-    )
+  async function desconectar() {
+    const seguir = await confirmar({
+      titulo: `Se desconecta «${nombre}» de ${networkLabel(network)}.`,
+      detalle: 'Sus posts y métricas ya bajados se quedan, pero no se sincroniza nada más hasta que la vuelvas a conectar. ¿Seguir?',
+      accion: 'Desconectar',
+    })
     if (!seguir) return
     startTransition(async () => {
       await disconnectAccount(row.id)
@@ -309,12 +313,15 @@ function Fila({
     })
   }
 
-  function fusionar() {
+  async function fusionar() {
     const viva = vivas.find((v) => v.id === destino)
     if (!viva) return
-    const seguir = window.confirm(
-      `«${nombre}» se fusiona en «${nombreDe(viva)}»: sus posts, sus métricas y su historial de publicaciones pasan a esa cuenta, y esta desaparece de la lista. No se puede deshacer. ¿Seguir?`,
-    )
+    const seguir = await confirmar({
+      titulo: `«${nombre}» se fusiona en «${nombreDe(viva)}»`,
+      detalle: 'Sus posts, sus métricas y su historial de publicaciones pasan a esa cuenta, y esta desaparece de la lista. No se puede deshacer. ¿Seguir?',
+      accion: 'Fusionar',
+      peligro: true,
+    })
     if (!seguir) return
     startTransition(async () => {
       const resultado = await fusionarCuenta(row.id, viva.id)
@@ -457,7 +464,7 @@ function Fila({
               </select>
               <button
                 type="button"
-                onClick={fusionar}
+                onClick={() => void fusionar()}
                 disabled={pending}
                 className="text-[0.75rem] text-fg-muted transition-colors hover:text-fg disabled:opacity-50"
               >
@@ -470,7 +477,7 @@ function Fila({
           {row.connected ? (
             <button
               type="button"
-              onClick={desconectar}
+              onClick={() => void desconectar()}
               disabled={pending}
               className="text-[0.75rem] text-fg-faint transition-colors hover:text-fg disabled:opacity-50"
             >
@@ -488,18 +495,14 @@ function Fila({
 /**
  * «Quitar», solo en una cuenta desconectada: saca la cuenta de Tu Parrilla con todo lo que
  * se bajó de ella, y la deja libre para que otro usuario la conecte. No tiene vuelta, así que
- * pregunta en una ventana que dice qué se borra —el mismo `<dialog>` modal de «Reprogramar»
- * (`schedule/reprogramar.tsx`), por las mismas razones: Esc lo cierra, el foco no se escapa y
- * el velo se traga los clics—.
+ * pregunta en una ventana que dice qué se borra. Es una `Ventana` suya y no una pregunta de
+ * `useConfirmar` porque la respuesta se queda adentro: dice «Quitando…» y, si falla, el error.
  */
 function Quitar({ id, nombre, red }: { id: string; nombre: string; red: string }) {
   const ventana = useRef<HTMLDialogElement>(null)
   const titulo = useId()
   const [error, setError] = useState<string | null>(null)
   const [quitando, startQuitar] = useTransition()
-  const velo = useVeloQueCierra(() => {
-    if (!quitando) ventana.current?.close()
-  })
 
   function quitar() {
     startQuitar(async () => {
@@ -522,11 +525,13 @@ function Quitar({ id, nombre, red }: { id: string; nombre: string; red: string }
       >
         Quitar
       </button>
-      <dialog
+      <Ventana
         ref={ventana}
         aria-labelledby={titulo}
-        {...velo}
-        className="m-auto w-[24rem] max-w-[calc(100vw-2rem)] rounded-xl border border-velo/10 bg-acero-900/95 text-fg shadow-xl backdrop-blur backdrop:bg-acero-950/80"
+        alVelo={() => {
+          if (!quitando) ventana.current?.close()
+        }}
+        className="border-t-2 border-t-negative"
       >
         <div className="space-y-3 p-4">
           <p id={titulo} className="font-titulo text-sm font-semibold uppercase tracking-[0.03em]">
@@ -545,7 +550,7 @@ function Quitar({ id, nombre, red }: { id: string; nombre: string; red: string }
             </p>
           ) : null}
           <div className="flex flex-wrap items-center gap-2">
-            <Button type="button" variant="danger" disabled={quitando} onClick={quitar}>
+            <Button type="button" variant="peligro" disabled={quitando} onClick={quitar}>
               {quitando ? 'Quitando…' : 'Quitar para siempre'}
             </Button>
             <Button type="button" disabled={quitando} onClick={() => ventana.current?.close()}>
@@ -553,7 +558,7 @@ function Quitar({ id, nombre, red }: { id: string; nombre: string; red: string }
             </Button>
           </div>
         </div>
-      </dialog>
+      </Ventana>
     </>
   )
 }

@@ -4,6 +4,7 @@ import { useActionState, useId, useState, useTransition } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { Check, ChevronDown, GripVertical, Trash2 } from 'lucide-react'
+import { useConfirmar } from '@/components/confirmar'
 import { ICON_NAMES } from '@/components/icon'
 import { ImageField } from '@/components/image-field'
 import { Button, Field, Input, Select, Switch } from '@/components/ui'
@@ -44,6 +45,7 @@ export function LinkRow({
   const [open, setOpen] = useState(false)
   const [pending, startTransition] = useTransition()
   const listId = useId()
+  const confirmar = useConfirmar()
 
   const [state, formAction, saving] = useActionState<FormState, FormData>(
     updateLink.bind(null, link.id, profileId),
@@ -239,10 +241,12 @@ export function LinkRow({
               variant="danger"
               className="ml-auto"
               onClick={() => {
-                if (!confirm(`¿Borrar "${link.label}"?`)) return
-                onRemoved()
-                startTransition(() => {
-                  void deleteLink(link.id, profileId)
+                void confirmar({ titulo: `¿Borrar "${link.label}"?`, accion: 'Borrar', peligro: true }).then((si) => {
+                  if (!si) return
+                  onRemoved()
+                  startTransition(() => {
+                    void deleteLink(link.id, profileId)
+                  })
                 })
               }}
             >

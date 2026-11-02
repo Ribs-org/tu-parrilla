@@ -5,6 +5,7 @@
 import { useId } from 'react'
 import { useFormStatus } from 'react-dom'
 import { cn } from '@/lib/utils'
+import { useConfirmar, type Pregunta } from './confirmar'
 import { Button } from './ui-boton'
 
 /**
@@ -15,8 +16,10 @@ import { Button } from './ui-boton'
  * formulario que está por encima de quien lo llama — dentro del mismo componente que
  * renderiza el `<form>` devolvería siempre `pending: false`.
  *
- * `confirm` pregunta antes de enviar. El diálogo va en el click y no en el `onSubmit`
- * del formulario para que un «cancelar» no llegue nunca a encolar la acción.
+ * `pregunta` pregunta antes de enviar (`confirmar.tsx`). Va en el click y no en el `onSubmit`
+ * del formulario para que un «Cancelar» no llegue nunca a encolar la acción. La ventana responde
+ * después de que el click terminó, así que el envío lo pide `requestSubmit` con este mismo botón:
+ * el formulario sale igual que con un click, y `useFormStatus` lo ve.
  *
  * `icono` va aparte de los hijos porque es lo único que sobrevive al cambio de texto:
  * adentro de `children` desaparecería al llegar `pendingLabel`, y el botón encogería
@@ -26,7 +29,7 @@ export function Submit({
   children,
   icono,
   pendingLabel,
-  confirm: question,
+  pregunta,
   variant = 'primary',
   onClick,
   disabled,
@@ -35,9 +38,10 @@ export function Submit({
   variant?: 'primary' | 'ghost' | 'danger'
   icono?: React.ReactNode
   pendingLabel: string
-  confirm?: string
+  pregunta?: Pregunta
 }) {
   const { pending } = useFormStatus()
+  const confirmar = useConfirmar()
 
   return (
     <Button
@@ -46,11 +50,13 @@ export function Submit({
       variant={variant}
       disabled={pending || disabled}
       onClick={(event) => {
-        if (question && !window.confirm(question)) {
-          event.preventDefault()
-          return
-        }
         onClick?.(event)
+        if (!pregunta) return
+        event.preventDefault()
+        const boton = event.currentTarget
+        void confirmar(pregunta).then((si) => {
+          if (si) boton.form?.requestSubmit(boton)
+        })
       }}
     >
       {icono}

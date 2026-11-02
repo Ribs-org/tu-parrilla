@@ -1613,7 +1613,9 @@ src/
     dibujos-insumo.tsx     lo que se le lleva a La Cocina: la res, el cerdo y las verduras de noche; el atún, el salmón y el arroz de día
     boton-tema.tsx         el botón de la barra que cambia entre la noche y el día
     de-noche-y-de-dia.tsx  lo que se dice distinto de día, en sus dos versiones (el modo esconde una), y el nombre de cada pantalla
-    tema-vivo.ts           el modo que se ve ahora, para lo que el CSS no alcanza: un aria-label, un title, un confirm
+    tema-vivo.ts           el modo que se ve ahora, para lo que el CSS no alcanza: un aria-label, un title, el texto de una pregunta
+    ventana.tsx            la ventana del panel: un <dialog> modal con el velo, que comparten las preguntas, los selectores y «Reprogramar»
+    confirmar.tsx          las preguntas del panel, en vez del confirm() del navegador: useConfirmar() y la ventana del layout
     icono-maestro.tsx      el dibujo de la pestaña La Cocina: el parrillero de noche, el maestro de sushi de día
     icono-ajustes.tsx      el botón de Ajustes: el trinche y el cuchillo de noche, los palillos de día
     landing.tsx            la portada del producto, armada con las piezas del panel y con los dos modos; landing-demos.tsx, lo que se toca

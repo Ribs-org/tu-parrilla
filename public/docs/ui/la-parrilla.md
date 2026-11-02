@@ -397,8 +397,8 @@ Cada publicación es una tarjeta con:
   ejemplo «jue 15 de oct · 13:00».
 - A la derecha (en un teléfono, debajo del texto): **«Editar»** (abre el editor), **«Subir
   ahora»** (solo si a alguna red le falta salir: programada, publicándose o quemada) y
-  **«Eliminar»**, que pregunta antes «¿Eliminar este post? Se borra de La Parrilla y ya no
-  sale en ninguna red.».
+  **«Eliminar»**, que pregunta antes en una ventana «¿Eliminar este post?» y «Se borra de La
+  Parrilla y ya no sale en ninguna red.».
 - Abajo, una píldora por cada destino: el ícono de la red (en su color), el usuario, « · » y
   el estado (ver la tabla de estados, más abajo); la píldora es verde si ya salió. Si hay un motivo de falla, sigue « — <motivo>». Si el
   destino se quemó, la píldora es roja y termina en el botón subrayado **«Reprogramar»**.
@@ -605,8 +605,8 @@ que se guardó con «Ahora» encendido vuelve sin fecha y con «Ahora» apagado.
 - **«Programar»** convierte el borrador en publicación y lo saca de los borradores. Si sale
   bien, el panel se cierra y la pantalla dice «Programado.». Si no, el error sale en rojo en el
   pie, el panel sigue abierto y el borrador se guarda de nuevo, con lo último que se escribió.
-- **«Descartar»** pregunta «¿Descartar este borrador? Lo escrito y los archivos elegidos se
-  pierden.»; al aceptar, borra el borrador y cierra el panel. En un formulario nuevo y vacío no
+- **«Descartar»** abre una ventana con «¿Descartar este borrador?» y «Lo escrito y los archivos
+  elegidos se pierden.»; «Descartar», en la ventana, borra el borrador y cierra el panel. En un formulario nuevo y vacío no
   pregunta: solo lo cierra. Un borrador que vino del mesón devuelve su creativo al mesón: ahí
   sigue, con sus archivos.
 
@@ -813,7 +813,7 @@ Si hay que dejarlo a medias, basta con cerrar el panel: queda como borrador.
 ### Para descartar un borrador
 
 1. Abrirlo, como en la tarea anterior.
-2. Apretar «Descartar» y aceptar la pregunta. Se borra con sus archivos y no se puede
+2. Apretar «Descartar», y otra vez «Descartar» en la ventana. Se borra con sus archivos y no se puede
    deshacer.
 
 ### Para programar un video para TikTok
@@ -849,8 +849,8 @@ post va también a otra red).
   Queda para el minuto siguiente y sale en la pasada siguiente del publicador, en unos
   minutos.
 - Si ya está programado (o se quemó) y tiene que salir en el acto: en «Lista», apretar
-  «Subir ahora» en su tarjeta y aceptar la pregunta «¿Subirlo ahora, sin esperar la hora
-  programada? Se publica en tus redes de inmediato.». Arriba de la lista aparece cómo le
+  «Subir ahora» en su tarjeta y, en la ventana «¿Subirlo ahora, sin esperar la hora programada?»,
+  «Subir ahora» otra vez: «Se publica en tus redes de inmediato.». Arriba de la lista aparece cómo le
   fue, por ejemplo `1 publicado, 1 en proceso.`. Lo que quede en proceso termina solo en
   las pasadas siguientes. Lo ya publicado no se vuelve a publicar.
 
@@ -968,9 +968,9 @@ de un post que ya salió en otras redes.
 
 ### Para borrar un post
 
-Apretar «Eliminar» en su tarjeta de la lista, o «Eliminar» en el editor, y aceptar la
-pregunta «¿Eliminar este post? Se borra de La Parrilla y ya no sale en ninguna red.». No se
-puede deshacer. Solo funciona si no salió ni se está publicando en ninguna red; si ya salió en
+Apretar «Eliminar» en su tarjeta de la lista, o «Eliminar» en el editor, y otra vez «Eliminar»
+en la ventana «¿Eliminar este post?» («Se borra de La Parrilla y ya no sale en ninguna red.»). No
+se puede deshacer. Solo funciona si no salió ni se está publicando en ninguna red; si ya salió en
 alguna, hay que borrarlo en la red misma.
 
 ## Mensajes que puede ver
@@ -1028,7 +1028,7 @@ de esa tanda queda: hay que volver a elegirlos.
 | «Borrador guardado.» | Lo escrito quedó guardado; se puede cerrar el panel sin perderlo | Nada |
 | «No se pudo guardar el borrador.» | El último guardado falló | Hacer cualquier cambio para que lo intente de nuevo; si sigue fallando, copiar el texto antes de cerrar |
 | «Este borrador ya no existe: se programó o se descartó en otra pestaña o en el teléfono. Cierra el panel para ver cómo quedó.» | Ese mismo borrador se programó o se descartó en otra pestaña o ventana, o en la app del teléfono; este panel dejó de guardar y «Programar» quedó apagado | Cerrar el panel y mirar el calendario. Si no estaba programado y se quiere, abrir «Nueva publicación» y escribirlo de nuevo |
-| «¿Descartar este borrador? Lo escrito y los archivos elegidos se pierden.» | La pregunta de «Descartar» | Aceptar para borrarlo; cancelar para seguir escribiendo |
+| «¿Descartar este borrador?» y «Lo escrito y los archivos elegidos se pierden.» | La ventana de «Descartar» | «Descartar» para borrarlo; «Cancelar» para seguir escribiendo |
 | «Ese creativo ya no está en el mesón.» | Al programar un borrador que vino del mesón, su creativo ya no estaba esperando en un borrador | Recargar La Parrilla y mirar el mesón, en La Cocina |
 | «No tienes borradores.» | No hay ningún borrador guardado (o el que se pidió ya no existe y era el último) | Nada |
 
@@ -1115,8 +1115,8 @@ puede decir:
 | Lo que dice la pantalla | Qué significa | Qué hacer |
 |---|---|---|
 | «Nada programado todavía.» | No hay nada programado | Programar algo |
-| «¿Subirlo ahora, sin esperar la hora programada? Se publica en tus redes de inmediato.» | Pregunta de «Subir ahora» | Aceptar para publicar ya; cancelar para dejarlo como estaba |
-| «¿Eliminar este post? Se borra de La Parrilla y ya no sale en ninguna red.» | Pregunta de «Eliminar», en la lista y en el editor | Aceptar para borrarlo; cancelar para dejarlo como estaba |
+| «¿Subirlo ahora, sin esperar la hora programada?» y «Se publica en tus redes de inmediato.» | La ventana de «Subir ahora» | «Subir ahora» para publicar ya; «Cancelar» para dejarlo como estaba |
+| «¿Eliminar este post?» y «Se borra de La Parrilla y ya no sale en ninguna red.» | La ventana de «Eliminar», en la lista y en el editor | «Eliminar» para borrarlo; «Cancelar» para dejarlo como estaba |
 | Una lista con las partes que apliquen, separadas por comas y con punto final: «<N> publicado» (o «publicados»), «<N> en proceso», «<N> en espera de la red», «<N> para reintentar», «<N> con error» | Cómo le fue a «Subir ahora» | Lo que está en proceso o en espera de la red termina solo; para lo que quedó para reintentar o con error, leer el motivo en la píldora |
 | «Este post no tenía destinos pendientes.» | Ya había salido en todas sus redes | Nada |
 | «El post ya no existe.» | Se borró antes | Recargar |
@@ -1358,7 +1358,7 @@ editor.
 - No publica borradores: un borrador no sale nunca solo, aunque tenga fecha y esa fecha pase.
 - No cambia ni borra nada en las redes: editar lo ya publicado no toca la red, y lo publicado
   no se puede eliminar desde aquí.
-- No pregunta antes de «Eliminar», ni deja deshacer un borrado ni un «Descartar».
+- No deja deshacer un borrado ni un «Descartar».
 - No tiene una forma de descartar un destino quemado: se reprograma, se sube, se desmarca en el
   editor o se borra el post entero.
 - No cambia las opciones de TikTok ni el trial reel de algo ya programado, ni agrega TikTok

@@ -3,8 +3,8 @@
 import { useSyncExternalStore } from 'react'
 import { temaDe, type Tema } from '@/lib/tema'
 
-// El modo que se ve ahora, para lo que el CSS no puede cambiar: un `aria-label`, un `title`, la
-// pregunta de un `confirm`. Se lee del `data-tema` del contenedor del panel (`.acerado`) y se
+// El modo que se ve ahora, para lo que el CSS no puede cambiar: un `aria-label`, un `title`, el
+// texto de una pregunta (`confirmar.tsx`). Se lee del `data-tema` del contenedor del panel (`.acerado`) y se
 // sigue cuando el botón del modo lo cambia (`boton-tema.tsx`), sin recargar.
 //
 // En el servidor y al hidratar es la noche: el HTML de un componente del cliente se arma sin saber

@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useState, useTransition, type ReactNode } from 'react'
 import { deleteScheduledPost, subirAhora } from '@/app/admin/actions'
+import { useConfirmar } from '@/components/confirmar'
 import { useTema } from '@/components/tema-vivo'
 import type { ScheduledPost, ScheduledPostTarget } from '@/db/schema'
 import { cn } from '@/lib/utils'
@@ -41,6 +42,7 @@ export function Queue({
   const [pending, start] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const tema = useTema()
+  const confirmar = useConfirmar()
   // Lo que devolvió «Subir ahora»: cuántos destinos salieron y cuántos quedaron en proceso.
   const [aviso, setAviso] = useState<string | null>(null)
   const [expanded, setExpanded] = useState(false)
@@ -98,8 +100,13 @@ export function Queue({
                 <button
                   type="button"
                   disabled={pending}
-                  onClick={() => {
-                    if (!confirm('¿Subirlo ahora, sin esperar la hora programada? Se publica en tus redes de inmediato.')) return
+                  onClick={async () => {
+                    const seguir = await confirmar({
+                      titulo: '¿Subirlo ahora, sin esperar la hora programada?',
+                      detalle: 'Se publica en tus redes de inmediato.',
+                      accion: 'Subir ahora',
+                    })
+                    if (!seguir) return
                     start(async () => {
                       setError(null)
                       setAviso(null)
@@ -119,8 +126,8 @@ export function Queue({
               <button
                 type="button"
                 disabled={pending}
-                onClick={() => {
-                  if (!confirm(confirmarEliminar(tema))) return
+                onClick={async () => {
+                  if (!(await confirmar(confirmarEliminar(tema)))) return
                   start(async () => {
                     setError(null)
                     const result = await deleteScheduledPost(post.id)

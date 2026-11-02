@@ -9,6 +9,7 @@ import {
   guardarBorradorAccion,
   type FormState,
 } from '@/app/admin/actions'
+import { useConfirmar } from '@/components/confirmar'
 import { DeNocheYDeDia, NombreDe } from '@/components/de-noche-y-de-dia'
 import { Icon } from '@/components/icon'
 import { Button, Field, GroupLabel, Input, Textarea } from '@/components/ui'
@@ -241,6 +242,7 @@ export function Composer({
   desde: number
 }) {
   const router = useRouter()
+  const confirmar = useConfirmar()
   const ahoraMs = useAhora(desde)
   const captionId = useId()
   const campos = borrador?.campos ?? null
@@ -419,7 +421,16 @@ export function Composer({
     // Sin borrador y sin nada escrito no hay qué perder: se cierra sin preguntar.
     const foto = formRef.current ? new FormData(formRef.current) : ultimaFoto.current
     const hayAlgo = Boolean(borradorId.current) || (foto ? tieneContenido(camposDesdeFormulario(foto), mediaRef.current.length) : false)
-    if (hayAlgo && !window.confirm('¿Descartar este borrador? Lo escrito y los archivos elegidos se pierden.')) return
+    if (
+      hayAlgo &&
+      !(await confirmar({
+        titulo: '¿Descartar este borrador?',
+        detalle: 'Lo escrito y los archivos elegidos se pierden.',
+        accion: 'Descartar',
+        peligro: true,
+      }))
+    )
+      return
     terminado.current = true
     if (pausa.current) clearTimeout(pausa.current)
     await enCurso.current

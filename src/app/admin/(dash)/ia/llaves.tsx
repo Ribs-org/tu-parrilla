@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useState, useTransition } from 'react'
 import { Check, Copy } from 'lucide-react'
 import { generarLlaveApi, revocarLlaveApi, type LlaveState } from '@/app/admin/actions'
+import { useConfirmar } from '@/components/confirmar'
 import { Button, Field, Input, Submit } from '@/components/ui'
 import { PINTURA } from '@/components/charts/theme'
 import { copiarAlPortapapeles } from '@/lib/copiar'
@@ -99,19 +100,25 @@ export function FormularioLlave({ base, maxNombre }: { base: string; maxNombre: 
 export function BotonRevocar({ id, nombre }: { id: string; nombre: string }) {
   const [pending, start] = useTransition()
   const [error, setError] = useState<string | null>(null)
+  const confirmar = useConfirmar()
+
+  async function revocar() {
+    const seguir = await confirmar({
+      titulo: `¿Revocar «${nombre}»?`,
+      detalle: 'Lo que la use deja de entrar en su próxima petición.',
+      accion: 'Revocar',
+      peligro: true,
+    })
+    if (!seguir) return
+    start(async () => {
+      const r = await revocarLlaveApi(id)
+      setError(r.error ?? null)
+    })
+  }
+
   return (
     <>
-      <Button
-        variant="danger"
-        disabled={pending}
-        onClick={() => {
-          if (!confirm(`¿Revocar «${nombre}»? Lo que la use deja de entrar en su próxima petición.`)) return
-          start(async () => {
-            const r = await revocarLlaveApi(id)
-            setError(r.error ?? null)
-          })
-        }}
-      >
+      <Button variant="danger" disabled={pending} onClick={() => void revocar()}>
         {pending ? 'Revocando…' : 'Revocar'}
       </Button>
       {error ? (

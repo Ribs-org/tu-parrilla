@@ -156,8 +156,8 @@ se corta, y se retoma eligiendo el mismo archivo (ver «Para retomar una subida 
 ninguna comanda (por ejemplo, porque la página se recargó después de subir). Bajo el título: «Lo
 que subiste y no pediste. Se borra solo a los tres días.». Una fila por archivo, con su dibujo,
 su nombre, qué es y cuánto pesa, y dos botones: «Usar», que lo pone en la comanda (un plato
-principal, como plato principal; lo demás, como acompañamiento), y «Sacar», que pregunta «¿Sacar
-«<nombre>»? Se borra de la cocina.» y lo borra.
+principal, como plato principal; lo demás, como acompañamiento), y «Sacar», que abre una ventana con «¿Sacar
+«<nombre>»?» y «Se borra de la cocina.»; «Sacar», en la ventana, lo borra.
 
 **Bloque «2. Los acompañamientos».** Bajo el título: «Opcional: otra cámara, la pantalla, fotos o
 b-roll.». Tres opciones para lo que se va a agregar, cada una con su explicación debajo:
@@ -431,8 +431,8 @@ para ver el último paso.
 Solo mientras no esté en el horno: con «Comanda colgada», «El chef mira la res» o «El desposte».
 
 1. Apretar «Cancelar la comanda» en su tarjeta.
-2. El navegador pregunta «¿Cancelar esta comanda? El chef deja de prepararla, y lo que subiste se
-   borra en 14 días.». Aceptar.
+2. Se abre una ventana con «¿Cancelar esta comanda?» y «El chef deja de prepararla, y lo que subiste
+   se borra en 14 días.». Apretar «Cancelar la comanda», en la ventana («Volver» la deja como está).
 
 La tarjeta queda «Cancelada». Lo que se había subido para ella se guarda 14 días y después se
 borra.
@@ -460,8 +460,8 @@ del panel», para cuando haya que guiar a la persona en su panel.
 
 1. En la lista, encontrar la fila por su nombre y por sus últimos cuatro caracteres.
 2. Apretar «Revocar».
-3. El navegador pregunta «¿Revocar «<nombre>»? Lo que la use deja de entrar en su próxima
-   petición.». Aceptar.
+3. Se abre una ventana con «¿Revocar «<nombre>»?» y «Lo que la use deja de entrar en su próxima
+   petición.». Apretar «Revocar», en la ventana.
 
 La fila desaparece de la lista. La IA que la usaba recibe `401 No autorizado` desde su siguiente
 llamada ([../api-llm.md](../api-llm.md)).
@@ -483,7 +483,7 @@ Al final de la pantalla, «El manual del parrillero →». Adentro, elegir la p�
 | «La cocina está abierta.» | El servidor del chef está conectado. | Nada. |
 | «La cocina está cerrada por ahora: lo que pidas espera su turno.» | El servidor del chef no da señales hace más de diez minutos. | Esperar: las comandas no se pierden, pero la hora estimada se corre. |
 | «Todavía no tienes comandas.» | No hay ninguna comanda en esta cuenta. | Nada. |
-| «¿Cancelar esta comanda? El chef deja de prepararla, y lo que subiste se borra en 14 días.» | Confirmación antes de cancelar. | Aceptar para cancelar; cancelar para dejarla. |
+| «¿Cancelar esta comanda?» y «El chef deja de prepararla, y lo que subiste se borra en 14 días.» | Ventana antes de cancelar. | «Cancelar la comanda» para cancelarla; «Volver» para dejarla. |
 | «Esa comanda ya está en el horno o terminó: no se puede cancelar.» | El chef la metió al horno, o terminó, entre que se cargó la página y se apretó el botón. | Recargar: la tarjeta muestra su estado de ahora. |
 | «Esa comanda no existe.» | La comanda ya no está, o no es de esta cuenta. | Recargar. |
 | ««<archivo>»: acá va un video (MP4, MOV, WebM o MKV).» | Se eligió algo que no es un video para el plato principal, otra cámara o la pantalla. | Elegir el video. Si el video está en otro formato, exportarlo en MP4. |
@@ -501,7 +501,7 @@ Al final de la pantalla, «El manual del parrillero →». Adentro, elegir la p�
 | «El plato principal ya no está, o ya es parte de otra comanda: súbelo de nuevo.» | Entre que se subió y se colgó, el archivo se borró o se usó en otra comanda (por ejemplo, desde otra pestaña). | Recargar «Pedir una comanda» y subirlo de nuevo. |
 | «Uno de los acompañamientos ya no está, o ya es parte de otra comanda: sácalo y súbelo de nuevo.» | Lo mismo, con un acompañamiento. | «Sacar» ese acompañamiento y agregarlo de nuevo. |
 | «Uno de los archivos pasó a otra comanda mientras pedías: recarga la página y revisa la comanda.» | Otra pestaña colgó una comanda con el mismo archivo justo a la vez. | Recargar y mirar La Cocina: la comanda puede estar ya colgada. |
-| «¿Sacar «<archivo>»? Se borra de la cocina.» | Confirmación antes de borrar un archivo de «Ya subiste». | Aceptar para borrarlo; cancelar para dejarlo. |
+| «¿Sacar «<archivo>»?» y «Se borra de la cocina.» | Ventana antes de borrar un archivo de «Ya subiste». | «Sacar» para borrarlo; «Cancelar» para dejarlo. |
 | «Todavía no hay nada en el mesón.» | El chef no ha entregado nada, o todo se programó o se descartó. | Nada. |
 | «Se borra el <fecha> si no lo programas.» | Ese creativo lleva más de tres semanas en el mesón: a los 30 días se borra solo. El resumen del día lo avisa también. | Programarlo o descartarlo antes de esa fecha. |
 | «Ese creativo ya no está en el mesón.» | Se programó o se descartó entre que se cargó la página y se apretó el botón (por ejemplo, en otra pestaña). | Recargar el mesón. Si se programó, está en los borradores de La Parrilla. |
@@ -512,7 +512,7 @@ Al final de la pantalla, «El manual del parrillero →». Adentro, elegir la p�
 | «Ya tienes 10 llaves: revoca una antes de generar otra.» | Se llegó al tope de diez llaves por persona. | Revocar alguna que no se use (las «sin usar», o las de uso más viejo) y generar de nuevo. |
 | «Tu llave «<nombre>». Cópiala ahora: no se vuelve a mostrar. Si la pierdes, revócala y genera otra.» | La llave se generó. | Copiarla ahora con uno de los dos botones. |
 | «Copiado» | El texto quedó en el portapapeles. | Pegarlo donde corresponda. |
-| «¿Revocar «<nombre>»? Lo que la use deja de entrar en su próxima petición.» | Confirmación antes de revocar. | Aceptar para revocar; cancelar para dejarla. |
+| «¿Revocar «<nombre>»?» y «Lo que la use deja de entrar en su próxima petición.» | Ventana antes de revocar. | «Revocar» para revocarla; «Cancelar» para dejarla. |
 | «Todavía no tienes llaves.» | No hay ninguna llave viva. | Generar una si una IA la necesita. |
 
 Si se aprieta «Generar llave» con el nombre vacío, el navegador muestra su propio aviso de campo

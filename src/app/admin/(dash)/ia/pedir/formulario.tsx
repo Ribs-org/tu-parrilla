@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from 'react'
 import { pedirComandaPropia } from '@/app/admin/cocina-actions'
 import { Panel } from '@/components/charts/panel'
+import { useConfirmar } from '@/components/confirmar'
 import { DibujoDeInsumo } from '@/components/dibujos-insumo'
 import { Button, Field, Input, Textarea } from '@/components/ui'
 import type { TipoInsumo } from '@/db/schema'
@@ -138,6 +139,7 @@ export function FormularioComanda({
   const [error, setError] = useState<string | null>(null)
   const [enviando, enviar] = useTransition()
   const controles = useRef(new Map<string, AbortController>())
+  const confirmar = useConfirmar()
 
   const subiendo = [principal, ...acompanamientos].some((r) => r?.estado === 'subiendo')
   // Cerrar la pestaña con algo subiendo lo corta: se retoma eligiendo el mismo archivo, pero mejor avisar.
@@ -233,7 +235,7 @@ export function FormularioComanda({
   }
 
   async function sacarSuelto(i: InsumoSubido) {
-    if (!confirm(`¿Sacar «${i.nombre}»? Se borra de la cocina.`)) return
+    if (!(await confirmar({ titulo: `¿Sacar «${i.nombre}»?`, detalle: 'Se borra de la cocina.', accion: 'Sacar', peligro: true }))) return
     await fetch(`/api/admin/cocina/insumos/${i.id}`, { method: 'DELETE' }).catch(() => null)
     setSueltos((lista) => lista.filter((s) => s.id !== i.id))
   }

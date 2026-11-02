@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { useRef, useState, useTransition } from 'react'
 import { descartarComentario, reintentarBorrador, responderComentario } from '@/app/admin/actions'
 import { Empty } from '@/components/charts/panel'
+import { useConfirmar } from '@/components/confirmar'
 import { Button, Textarea } from '@/components/ui'
 import type { DmState } from '@/db/schema'
 import type { ComentarioFila, EstadoCola } from '@/lib/comentarios-cola'
@@ -127,6 +128,7 @@ function Tarjeta({ fila, mostrarPrivado, ahora }: { fila: ComentarioFila; mostra
   }
   const [error, setError] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
+  const confirmar = useConfirmar()
   // Cuál de los botones trabaja: la flecha gira solo cuando es ella.
   const [regenerando, setRegenerando] = useState(false)
   const cuadro = useRef<HTMLTextAreaElement>(null)
@@ -141,18 +143,18 @@ function Tarjeta({ fila, mostrarPrivado, ahora }: { fila: ComentarioFila; mostra
       if (r.error) setError(r.error)
     })
   }
-  function descartar() {
-    if (!confirm('¿Descartar este comentario? No se va a responder.')) return
+  async function descartar() {
+    if (!(await confirmar({ titulo: '¿Descartar este comentario?', detalle: 'No se va a responder.', accion: 'Descartar', peligro: true }))) return
     setError(null)
     startTransition(async () => {
       const r = await sinRomper(() => descartarComentario(fila.id))
       if (r.error) setError(r.error)
     })
   }
-  function reintentar() {
+  async function reintentar() {
     // Lo que el dueño ya corrigió a mano no se pierde sin preguntar.
     const corregido = texto.trim() !== '' && texto !== (fila.draft ?? '')
-    if (corregido && !confirm('¿Cambiar lo que escribiste por un borrador nuevo?')) return
+    if (corregido && !(await confirmar({ titulo: '¿Cambiar lo que escribiste por un borrador nuevo?', accion: 'Cambiarlo', peligro: true }))) return
     setError(null)
     setRegenerando(true)
     startTransition(async () => {
@@ -181,7 +183,7 @@ function Tarjeta({ fila, mostrarPrivado, ahora }: { fila: ComentarioFila; mostra
         {editable && regenerable ? (
           <button
             type="button"
-            onClick={reintentar}
+            onClick={() => void reintentar()}
             disabled={pending}
             aria-label={fila.draft === null ? 'Reintentar borrador' : 'Escribir otro borrador'}
             title={fila.draft === null ? 'Reintentar borrador' : 'Escribir otro borrador'}
@@ -219,7 +221,7 @@ function Tarjeta({ fila, mostrarPrivado, ahora }: { fila: ComentarioFila; mostra
             <Button variant="primary" onClick={enviar} disabled={pending}>
               {pending ? 'Enviando…' : 'Enviar'}
             </Button>
-            <Button variant="ghost" onClick={descartar} disabled={pending}>Descartar</Button>
+            <Button variant="ghost" onClick={() => void descartar()} disabled={pending}>Descartar</Button>
             {error ? <span role="alert" className="text-sm text-negative">{error}</span> : null}
           </div>
         </>
