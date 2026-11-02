@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import { Alert, Linking, Text, View } from 'react-native'
+import { Linking, Text, View } from 'react-native'
 import Constants from 'expo-constants'
 import * as Updates from 'expo-updates'
 import { useFocusEffect } from 'expo-router'
@@ -7,6 +7,7 @@ import { Boton, BotonTexto, Etiqueta, Pantalla, Sello, Tarjeta } from '../compon
 import type { Colores } from '../components/colores'
 import { useSesion } from '../components/sesion'
 import { useColores, useTema } from '../components/tema'
+import { useVentanas } from '../components/ventana'
 import { useFierros } from '../components/boton-ajustes'
 import { API_BASE } from '../lib/config'
 import { LOS_FIERROS, otroTema, type Tema } from '../lib/tema'
@@ -53,6 +54,7 @@ export default function Ajustes() {
   const colores = useColores()
   const { tema, cambiarTema } = useTema()
   const { salir } = useSesion()
+  const { preguntar } = useVentanas()
   const { data, cargando, error, sello, refrescar, refrescarSiVieja } = useFierros()
 
   useFocusEffect(
@@ -61,17 +63,17 @@ export default function Ajustes() {
     }, [refrescarSiVieja]),
   )
 
-  function cerrarSesion() {
-    Alert.alert('¿Cerrar sesión en este teléfono?', 'Para volver a entrar te va a llegar un código a tu correo.', [
-      { text: 'Cancelar', style: 'cancel' },
-      {
-        text: 'Cerrar sesión',
-        style: 'destructive',
-        // Borra también lo que la app guardó de la cuenta y vuelve a la entrada sin pila
-        // detrás: no queda pantalla de la cuenta a la que volver atrás.
-        onPress: () => void salir(),
-      },
-    ])
+  async function cerrarSesion() {
+    const seguir = await preguntar({
+      titulo: '¿Cerrar sesión en este teléfono?',
+      detalle: 'Para volver a entrar te va a llegar un código a tu correo.',
+      cancelar: 'Cancelar',
+      accion: 'Cerrar sesión',
+      peligro: true,
+    })
+    // Borra también lo que la app guardó de la cuenta y vuelve a la entrada sin pila detrás: no
+    // queda pantalla de la cuenta a la que volver atrás.
+    if (seguir) await salir()
   }
 
   // La versión del build y la de la última actualización por aire: lo primero que hay que
@@ -130,7 +132,7 @@ export default function Ajustes() {
 
       <Etiqueta margenArriba>Tu sesión</Etiqueta>
       <View style={{ alignItems: 'flex-start' }}>
-        <BotonTexto texto="Cerrar sesión" onPress={cerrarSesion} peligro />
+        <BotonTexto texto="Cerrar sesión" onPress={() => void cerrarSesion()} peligro />
       </View>
 
       <Text style={{ color: colores.tenue, fontSize: 11, marginTop: 16 }}>

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
-import { Alert, AppState, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, View } from 'react-native'
+import { AppState, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, View } from 'react-native'
 import * as ImagePicker from 'expo-image-picker'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -8,6 +8,7 @@ import { useSelectorFecha } from '../../components/selector-fecha'
 import { Boton, BotonTexto, Chip, ErrorConReintento, Miniatura } from '../../components/ui'
 import { useSesion } from '../../components/sesion'
 import { useColores, useTema } from '../../components/tema'
+import { useVentanas } from '../../components/ventana'
 import { RechazoApi, SesionCaducada, apiDelete, apiGet, apiPost } from '../../lib/api'
 import {
   BORRADOR_NO_EXISTE,
@@ -114,6 +115,7 @@ export default function Publicar() {
   const [fechaPuesta, setFechaPuesta] = useState(false)
   // Los diálogos de Android o la hoja de iOS: el mismo `abrir` para las dos.
   const { abrir: abrirSelector, selector } = useSelectorFecha()
+  const { preguntar, avisar } = useVentanas()
   const [envio, despachar] = useReducer(reducirEnvio, ENVIO_INICIAL)
   const [aviso, setAviso] = useState<string | null>(null)
   const [abriendo, setAbriendo] = useState(false)
@@ -308,7 +310,7 @@ export default function Publicar() {
    */
   async function soltar(): Promise<boolean> {
     if (hayPendientes(archivosRef.current)) {
-      Alert.alert(
+      void avisar(
         'Hay un archivo que no terminó de subir',
         'Espera a que termine, reinténtalo o quítalo antes de dejar esta publicación.',
       )
@@ -317,17 +319,15 @@ export default function Publicar() {
     if (perdido.current) return true
     await guardarYa()
     if (!sinGuardar.current) return true
-    return new Promise<boolean>((resolve) =>
-      Alert.alert(
-        'No se pudo guardar el borrador',
-        'Si sigues, lo último que cambiaste se pierde.',
-        [
-          { text: 'Quedarme', style: 'cancel', onPress: () => resolve(false) },
-          { text: 'Seguir igual', style: 'destructive', onPress: () => resolve(true) },
-        ],
-        { cancelable: false },
-      ),
-    )
+    // Sin cerrar tocando afuera: hay que elegir, como con la alerta del sistema de antes.
+    return preguntar({
+      titulo: 'No se pudo guardar el borrador',
+      detalle: 'Si sigues, lo último que cambiaste se pierde.',
+      cancelar: 'Quedarme',
+      accion: 'Seguir igual',
+      peligro: true,
+      cerrable: false,
+    })
   }
 
   /** Lo que llegó de un borrador, en pantalla, ya guardado tal como está. */
@@ -553,10 +553,11 @@ export default function Publicar() {
 
   function publicarAhora() {
     const elegidas = disponibles.filter((c) => cuentas.includes(c.id))
-    Alert.alert('Publicar ahora', textoConfirmacion(elegidas), [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Publicar', onPress: () => void enviar(true) },
-    ])
+    void preguntar({ titulo: 'Publicar ahora', detalle: textoConfirmacion(elegidas), cancelar: 'Cancelar', accion: 'Publicar' }).then(
+      (si) => {
+        if (si) void enviar(true)
+      },
+    )
   }
 
   async function nueva() {
@@ -564,10 +565,15 @@ export default function Publicar() {
   }
 
   function descartar() {
-    Alert.alert('Descartar', '¿Descartar este borrador? Lo escrito y los archivos elegidos se pierden.', [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Descartar', style: 'destructive', onPress: () => void descartarYa() },
-    ])
+    void preguntar({
+      titulo: 'Descartar',
+      detalle: '¿Descartar este borrador? Lo escrito y los archivos elegidos se pierden.',
+      cancelar: 'Cancelar',
+      accion: 'Descartar',
+      peligro: true,
+    }).then((si) => {
+      if (si) void descartarYa()
+    })
   }
 
   async function descartarYa() {

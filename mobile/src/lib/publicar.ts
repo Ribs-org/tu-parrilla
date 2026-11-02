@@ -216,7 +216,7 @@ export function etiquetaEnvio(estado: Envio): string | null {
   }
 }
 
-/** El texto del `Alert` de «Publicar ahora»: nombra los handles, no las redes. */
+/** El texto de la ventana de «Publicar ahora»: nombra los handles, no las redes. */
 export function textoConfirmacion(cuentas: CuentaApp[]): string {
   const nombres = cuentas.map((c) => c.handle ?? NOMBRE_RED[c.red] ?? c.red)
   const lista =

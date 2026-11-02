@@ -32,9 +32,15 @@ palabras cambian, como en el panel:
   servida» o «Ayer: N piezas servidas».
 
 Las frases de error que vienen del servidor no cambian: si una dice «Los Fierros», de día es
-Los Cuchillos. Lo que
-dibuja el teléfono mismo —la pantalla de arranque, el selector de fecha y las preguntas de
-«Cerrar sesión» o de borrar— sigue oscuro en los dos modos.
+Los Cuchillos. Lo único
+que dibuja el teléfono mismo es la pantalla de arranque, y sigue oscura en los dos modos.
+
+Las preguntas y los avisos («¿Cerrar sesión en este teléfono?», «Publicar ahora», «Descartar»,
+«No se pudo reprogramar») son de la app y van con el modo: una tarjeta al centro, con el resto
+oscurecido, el título en mayúsculas, el detalle debajo y los botones de la app; el de lo que no
+tiene vuelta, en rojo. Tocar fuera o el botón Atrás es lo mismo que el botón de la izquierda
+(«Cancelar», «Quedarme»), salvo en «No se pudo guardar el borrador», donde hay que elegir. Un
+aviso trae un solo botón, «Entendido».
 
 ### La pantalla de entrada
 
@@ -113,7 +119,7 @@ Se abre con el botón de Ajustes de cualquier pestaña. Arriba, la flecha para v
   Sin cuentas, «Todavía no conectas ninguna cuenta.». Mientras carga, «Cargando tus cuentas…».
 - Debajo, «Tus redes conectadas. Se conectan y se reconectan en el panel web.» y el botón «Abrir Los Fierros en el panel», que abre [Los Fierros](los-fierros.md) en el navegador del teléfono (ahí puede pedir entrar con el correo, como el panel).
 - **«El modo»**, con la frase «De noche: el acero y los cortes de la parrilla. Se guarda en tu cuenta: vale también en el panel web.» (de día, «De día: el fondo claro y piezas de sushi. Se guarda…») y un botón que dice adónde lleva: «Modo día» de noche, «Modo noche» de día. Cambia en el momento y lo guarda en la cuenta; sin señal, el teléfono lo recuerda y lo manda cuando vuelve la conexión.
-- **«Tu sesión»**, con «Cerrar sesión» en rojo. Pregunta «¿Cerrar sesión en este teléfono?» / «Para volver a entrar te va a llegar un código a tu correo.», con «Cancelar» y «Cerrar sesión». Al confirmar, la app vuelve a la pantalla de entrada y borra del teléfono lo que guardó de la cuenta —lo último que mostró cada pantalla—: quien entre después en ese teléfono no lo ve, y «atrás» ya no vuelve a ninguna pantalla de la cuenta. Las cuentas conectadas, lo programado y los borradores no se tocan: están en la cuenta, no en el teléfono.
+- **«Tu sesión»**, con «Cerrar sesión» en rojo. Pregunta «¿Cerrar sesión en este teléfono?» / «Para volver a entrar te va a llegar un código a tu correo.», con «Cancelar» y «Cerrar sesión» (en rojo). Al confirmar, la app vuelve a la pantalla de entrada y borra del teléfono lo que guardó de la cuenta —lo último que mostró cada pantalla—: quien entre después en ese teléfono no lo ve, y «atrás» ya no vuelve a ninguna pantalla de la cuenta. Las cuentas conectadas, lo programado y los borradores no se tocan: están en la cuenta, no en el teléfono.
 - Al pie, la versión de la app: «Versión 1.1.0» y, si llegó una actualización por aire, « · actualización » seguido de ocho letras y números que la identifican. Sirve para saber qué versión tiene alguien que pide ayuda.
 
 Aquí no se conecta ni se desconecta nada: eso es del panel web.
@@ -153,7 +159,7 @@ Si el código no llega, revisa el spam y que el correo esté bien escrito; «Usa
 ### Para reprogramar lo que se quemó
 
 1. En «La Parrilla», en la tarjeta de «Se quemó», toca «Reprogramar».
-2. Elige el día y después la hora (en Android son dos ventanas, una detrás de la otra). De partida trae la próxima hora en punto.
+2. Se abre la hoja «Cuándo sale» (ver «Para programar un post»): elige el día, la hora y los minutos, y toca «Listo». De partida trae la próxima hora en punto.
 3. El post entero pasa a esa hora y el destino que falló vuelve a la cola, sin intentos gastados. La tarjeta sale de «Se quemó» y el post aparece en su día.
 
 Reprogramar no arregla la causa: si falló porque la cuenta se desconectó o el archivo no sirve, va a volver a fallar. Eso se corrige en el panel web —reconectar en [Los Fierros](los-fierros.md), o el post en [La Parrilla](la-parrilla.md)—.
@@ -179,7 +185,7 @@ Reprogramar no arregla la causa: si falló porque la cuenta se desconectó o el 
 2. Escribe el texto en el cuadro «Texto del post…». En YouTube, el primer renglón es el título del video.
 3. Toca «+ Fotos o video», da permiso para ver la galería si lo pide y elige hasta diez archivos en total (un video puede pesar hasta 500 MB). Empiezan a subir solos: cada miniatura dice cuánto lleva. Para sacar uno, toca su «✕».
 4. Toca las cuentas a las que debe salir: quedan marcadas en naranjo.
-5. Toca «Cuándo: …», elige el día y después la hora (en formato de 24 horas). La hora es la del reloj del teléfono.
+5. Toca «Cuándo: …». Sube desde abajo la hoja «Cuándo sale»: el mes, con «‹» y «›» para cambiarlo (hoy con un borde naranjo, el elegido relleno y los días que ya pasaron apagados); debajo, la fila «Hora» (de 00 a 23) y la fila «Minutos» (de cinco en cinco), que se deslizan de lado. Toca el día, la hora y los minutos, y «Listo». Lo que ya pasó no se puede elegir, y «Listo» se apaga si la fecha que traía ya pasó. «Cancelar», o tocar fuera de la hoja, la deja como estaba. La hora es la del reloj del teléfono.
 6. Cuando los archivos terminaron de subir, toca «Programar».
 7. Abajo se ve «Programando…» y después «Listo». Un segundo después el formulario se vacía y la app salta a «La Parrilla», donde ya aparece el post si cae dentro de los próximos treinta días. Si venía de un borrador, el borrador sale de la lista.
 
@@ -189,7 +195,7 @@ Instagram y YouTube necesitan al menos un archivo; Facebook acepta solo texto. Y
 
 1. Arma el post como en los pasos 1 a 4 de arriba.
 2. Toca «Publicar ahora».
-3. Aparece la pregunta «Publicar ahora» con el texto «¿Publicar ahora en nombre_de_cuenta y otra_cuenta? Saldrá en los próximos 5 minutos.».
+3. Aparece la ventana «Publicar ahora» con el texto «¿Publicar ahora en nombre_de_cuenta y otra_cuenta? Saldrá en los próximos 5 minutos.».
 4. Toca «Publicar» (o «Cancelar» para no hacer nada).
 
 ### Para mandar un trial reel a Instagram
@@ -389,7 +395,8 @@ Lo que describe sale de estos archivos:
 - `mobile/src/components/tema.tsx`, `mobile/src/components/colores.ts` y `mobile/src/lib/tema.ts` (el modo de la cuenta y los colores de cada modo; las palabras de día: «Se echó a perder», La Barra, Los Cuchillos, el aviso de Ajustes y el pie de ayer)
 - `src/app/api/mobile/tema/route.ts` (leer y cambiar el modo de la cuenta)
 - `mobile/src/components/tus-cuentas.tsx`
-- `mobile/src/components/selector-fecha.tsx` (elegir día y hora: los dos diálogos de Android, o en iPhone —que todavía no se distribuye— la hoja «Cuándo sale» con «Cancelar» y «Listo»)
+- `mobile/src/components/selector-fecha.tsx` y `mobile/src/lib/calendario.ts` (elegir día y hora: la hoja «Cuándo sale», con «Cancelar» y «Listo»)
+- `mobile/src/components/ventana.tsx` (las preguntas y los avisos)
 - `mobile/src/components/parrilla.tsx` (la parrilla de cada día, su mezcla de redes, su renglón de cuánto salió y la línea de «ahora»)
 - `mobile/src/components/filtro-de-redes.tsx` y `mobile/src/lib/filtro.ts` (el filtro por red)
 - `mobile/src/lib/useAhora.ts` (la hora de la línea de «ahora», que se corre sola)
