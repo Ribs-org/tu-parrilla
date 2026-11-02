@@ -105,11 +105,15 @@ afirmar que se cumplen:
   traen solo los contadores de la API, y las visitas, clicks y CTR —que son de Tu Parrilla—
   van bajo «En tu página · lo mide Tu Parrilla» (hasta el 2026-10-13, «Medido por Tu
   Parrilla»), porque un dato propio al lado de los de YouTube tiene que leerse claro como no
-  suyo.
+  suyo. La planilla de Excel de Los Números («Llevar para la casa», desde el 2026-11-02) sigue
+  la misma regla: de YouTube lleva solo los contadores, los títulos y los comentarios tal como
+  llegaron, ninguna columna calculada, y su hoja «Léeme» lo dice.
 - **Nada guardado más de 30 días sin refrescar** (§III.E.4.b–d). Las estadísticas se leen
   con la API key, y leídas así no pueden pasar de 30 días; el resto de los datos se borra
   o se refresca dentro de ese plazo. La sincronización diaria termina borrando lo que se
   pasó: lecturas diarias, comentarios y los títulos y miniaturas de videos que ya no llegan.
+  La planilla de Los Números, además, deja fuera por su cuenta lo de más de 30 días, para no
+  llevarse lo que la limpieza de ese día todavía no alcanzó a borrar.
 
 La regla vive en `src/lib/social/politica-youtube.ts` y el borrado en
 `retencion-youtube.ts`. Existe un permiso aparte (§III.L) para que un desarrollador de

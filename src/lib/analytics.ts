@@ -39,7 +39,8 @@ export type Filters = {
 
 const int = (fragment: SQL) => sql<number>`${fragment}`.mapWith(Number)
 
-function visitWhere(f: Filters) {
+/** Las visitas del dueño en el período, con los filtros de página y bots. También la usa la planilla. */
+export function visitWhere(f: Filters) {
   const conds: SQL[] = [
     gte(visits.createdAt, f.from),
     lte(visits.createdAt, f.to),
@@ -51,7 +52,7 @@ function visitWhere(f: Filters) {
   return and(...conds)!
 }
 
-function clickWhere(f: Filters) {
+export function clickWhere(f: Filters) {
   const conds: SQL[] = [
     gte(clicks.createdAt, f.from),
     lte(clicks.createdAt, f.to),
@@ -160,8 +161,7 @@ export function describe(
  * quiet days come back as real zeros instead of gaps the chart would bridge with a
  * misleading straight line.
  */
-export async function getTimeSeries(f: Filters): Promise<SeriesPoint[]> {
-  const unit = granularityFor(f)
+export async function getTimeSeries(f: Filters, unit: Granularity = granularityFor(f)): Promise<SeriesPoint[]> {
   const interval = unit === 'hour' ? '1 hour' : unit === 'day' ? '1 day' : '1 week'
   const pattern = unit === 'hour' ? 'YYYY-MM-DD"T"HH24' : 'YYYY-MM-DD'
   const tz = f.zone
@@ -214,7 +214,8 @@ export async function getTimeSeries(f: Filters): Promise<SeriesPoint[]> {
 
 export type Breakdown = { key: string; visits: number; clicks?: number; ctr?: number }
 
-async function breakdownBy(
+/** Las visitas por una columna, de más a menos. La planilla la pide con un tope más alto. */
+export async function breakdownBy(
   f: Filters,
   column: AnyColumn | SQL,
   limit = 12,
@@ -285,7 +286,7 @@ export async function getCampaigns(f: Filters, limit = 50): Promise<CampaignRow[
 
 export type LinkRow = { linkId: string | null; label: string; url: string; clicks: number; ctr: number }
 
-export async function getTopLinks(f: Filters, totalVisits: number): Promise<LinkRow[]> {
+export async function getTopLinks(f: Filters, totalVisits: number, limit = 25): Promise<LinkRow[]> {
   const rows = await getDb()
     .select({
       linkId: clicks.linkId,
@@ -301,7 +302,7 @@ export async function getTopLinks(f: Filters, totalVisits: number): Promise<Link
     .where(clickWhere(f))
     .groupBy(clicks.linkId, links.label, links.url)
     .orderBy(desc(sql`4`))
-    .limit(25)
+    .limit(limit)
 
   return rows.map((r) => ({
     linkId: r.linkId,

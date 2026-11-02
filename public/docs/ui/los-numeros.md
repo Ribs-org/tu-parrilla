@@ -18,7 +18,8 @@ rindió en el período —o lo que menos—, cuánto había que sacar para estar
 común esas publicaciones. Las dos pueden comparar a igual edad: las views a los 7 días de
 publicada, y «Contra su cuenta», que mide a cada publicación contra lo normal de su propia
 cuenta. «Lado a lado» pone dos publicaciones una al lado de la otra —por ejemplo, la mejor y la
-peor—, con su portada, el link para ver el video en la red y cómo crecieron.
+peor—, con su portada, el link para ver el video en la red y cómo crecieron. Y «Llevar para
+la casa» (de día, «Para llevar»), al lado del título, baja todo eso a una planilla de Excel.
 
 Dos palabras que no hay que mezclar: la **etiqueta** es el `?s=` del link de cada publicación,
 que dice por cuál llegó la gente a la página; los **atributos** son lo que se le anota a un post
@@ -65,6 +66,67 @@ en mayúsculas en pantalla; aquí van escritos como están en el código. De arr
 El título «Los Números», debajo en chico «cómo te fue en las redes y en tu página», y una línea
 más: «Dos cosas distintas: lo que hicieron tus publicaciones en las redes, y quién entró a tu
 página de links. El período vale para las dos.»
+
+A la derecha del título (en un teléfono angosto, debajo), un botón con el ícono de una caja
+abierta: **«Llevar para la casa»**; de día, **«Para llevar»**. Abre la ventana de la planilla
+(ver «La planilla: «Llevar para la casa»», abajo). Solo está en el tablero, no en las pantallas
+de adentro.
+
+### La planilla: «Llevar para la casa»
+
+Una ventana en el centro, con el resto atenuado, que arma un archivo de Excel (`.xlsx`) con todo
+lo de Los Números y lo descarga. Arriba, en mayúsculas, «Llevar para la casa» (de día, «Para
+llevar»). Debajo:
+
+- «Una planilla de Excel con todo lo de Los Números de <período>: tus publicaciones con sus
+  números y atributos, los seguidores de cada cuenta día a día, las visitas y los clicks de tus
+  páginas con su etiqueta ?s= y sus UTM, lo programado, lo publicado y lo quemado, y los
+  comentarios de La Mesa. Una hoja por tema, y una primera, «Léeme», que explica cada columna.»
+  El período se escribe como en el botón «Fechas»: «3 oct – 2 nov», por ejemplo.
+- Si en la pantalla hay una cuenta o una página elegida, o «Bots» prendido: «Con los filtros de
+  la pantalla: Cuenta: Instagram · @…; Página: … · /…; Con bots.» (solo los que estén, separados
+  por punto y coma). La planilla sale con esos mismos filtros y el mismo período.
+- Mientras mide cuánto hay, «Midiendo cuánto hay…». Si alguna hoja larga no cabe entera, un
+  recuadro ámbar: «Este período no cabe entero.», una línea por hoja («Visitas: lleva las más
+  recientes, 100.000 de 340.512.») y «Para tenerlo todo, elige un período más corto.»
+- En chico: «De YouTube va solo lo que entrega YouTube, de los últimos 30 días: sus reglas no
+  dejan calcular nada con sus datos.»
+- Dos botones: «Armar la planilla» (naranjo) y «Cancelar».
+
+Al apretar «Armar la planilla», a la izquierda un corte en la parrilla que se va cocinando
+—crudo, sellado, a punto— con humo encima (de día, una pieza de sushi bajo el soplete), y a la
+derecha «Envolviendo los cortes…» (de día, «Armando la caja…»), debajo «Leyendo tus números» y
+después «Llevamos 1,2 MB», con los segundos que lleva, y «Cancelar». Casi siempre dura unos
+segundos; un período largo de una cuenta grande puede tardar más de un minuto.
+
+Al terminar, el navegador descarga el archivo (`tu-parrilla-numeros-<desde>-al-<hasta>.xlsx`) y
+la ventana dice «Listo: se descargó <archivo>. Ábrela en Excel, Numbers o Google Sheets, y
+empieza por la hoja «Léeme».», con el corte a punto y «Cerrar». Si algo falló, en rojo el
+mensaje de abajo (ver «Mensajes que puede ver»), con «Probar de nuevo» y «Cerrar».
+
+«Cancelar» y Esc cierran y cortan lo que se estaba armando. Un clic fuera de la ventana la
+cierra, salvo mientras se arma: ahí no hace nada.
+
+**Lo que trae el archivo.** Dieciséis hojas, en este orden: «Léeme» (la fecha y hora de la
+exportación, la zona horaria de Tu Cuenta —todas las fechas van en esa zona—, el período, los
+filtros, cómo leerla, lo de YouTube, lo que quedó fuera y qué es cada hoja y cada columna),
+«Resumen» (las cifras grandes del tablero, con el período anterior en las de «En tu página»),
+«Publicaciones» (cada publicación con actividad en el período, de cualquier fecha, borradas
+incluidas, con sus contadores, lo ganado, las views a los 7 días, «Contra su cuenta», visitas,
+clicks, CTR, arrastre y una columna «Atributo: …» por cada atributo), «Por atributo» (lo de
+«Comparar por atributo», para todos los atributos a la vez), «Lecturas diarias» (cada lectura
+de cada publicación en el período), «Cuentas» (cada cuenta: su conexión y lo de «Tus cuentas»),
+«Seguidores» (cada cuenta, día por día), «Día a día» (visitas, clicks, views ganadas y visitas
+desde publicaciones, un día por fila), «Visitas» (cada visita, con su página, de dónde llegó, el
+referrer, la etiqueta `?s=`, las cuatro UTM, país, región, ciudad, equipo, idioma y si es bot),
+«Clicks» (cada click, con su link y la etiqueta de su visita), «Etiquetas y UTM» (visitas,
+únicos, clicks y CTR por etiqueta y UTM), «Links», «Audiencia» (por país, ciudad, dispositivo,
+sistema, navegador, idioma y origen), «Cuándo te visitan» (día de la semana por hora),
+«Programado» (cada destino de La Parrilla con hora en el período y todo lo que está por salir:
+«Programado», «Reintentando», «Publicando…», «Publicado», «En tu bandeja de TikTok» o «Se
+quemó», con su motivo) y «Comentarios» (los de La Mesa del período, con su estado y la
+respuesta). Cada hoja de datos tiene el encabezado fijo y filtros en cada columna. Las cuentas
+van por su nombre en la red, sin la @.
 
 ### El período
 
@@ -1037,6 +1099,17 @@ primeras horas; que se aplane antes, que se apagó antes. YouTube no se dibuja, 
 3. En «En tu página», leer «Visitas» y «Clicks en tus links», con su comparación contra el
    período anterior; debajo, «Qué publicación te trajo gente».
 
+### Para llevarse los números a Excel
+
+1. En el tablero de Los Números, elegir el período (y, si se quiere, una cuenta, una página o
+   «Bots»): la planilla sale con lo mismo que se ve.
+2. Apretar «Llevar para la casa» (de día, «Para llevar»), a la derecha del título.
+3. Leer qué va. Si sale «Este período no cabe entero.», elegir un período más corto para tener
+   esas hojas completas, o seguir igual: la planilla lleva lo más reciente y lo dice en «Léeme».
+4. Apretar «Armar la planilla» y esperar «Listo». El archivo queda en las descargas del
+   navegador.
+5. Abrirlo en Excel, Numbers o Google Sheets, y empezar por la hoja «Léeme».
+
 ### Para ver unas fechas exactas
 
 1. Arriba, apretar «Fechas» (el último botón del período, con un calendario).
@@ -1270,6 +1343,9 @@ De día, donde una de estas frases dice «La Parrilla» dice «La Barra», y «L
 | «La primera fecha no puede ser anterior a 2020.» (en el selector de fechas) | «Desde» es de antes del 1 de enero de 2020, donde empieza «Todo». | Elegir una fecha desde 2020, o «Todo». |
 | «La segunda fecha no puede pasar de hoy: lo que viene todavía no tiene números.» (en el selector de fechas) | «Hasta» es de un día que todavía no llega. | Elegir hoy o un día anterior. |
 | «Elige las dos fechas.» (en el selector de fechas) | Uno de los dos campos está vacío o a medio escribir. | Completar el campo. |
+| «Este período no cabe entero.» (en la ventana de «Llevar para la casa») | Alguna hoja larga —«Lecturas diarias», «Visitas», «Clicks» o «Comentarios»— tiene más filas que su tope (100.000, 100.000, 100.000 y 50.000). La línea de abajo dice cuáles lleva y cuántas había. | Elegir un período más corto, o armarla igual: lleva lo más reciente. |
+| «No se pudo armar la planilla. Prueba de nuevo; si el período es muy largo, prueba con uno más corto.» | Algo falló mientras se armaba, o se cortó la conexión. No se descargó nada. | «Probar de nuevo»; si se repite, un período más corto. |
+| «Listo: se descargó <archivo>. …» | La planilla está en las descargas del navegador. | Abrirla y empezar por «Léeme». |
 | «—» en «Views ganadas» | Ninguna publicación tiene lo ganado conocido: todo es de YouTube, no hay lectura de antes del período, o no hay publicaciones sincronizadas. | Esperar la próxima sincronización, o elegir un período más corto que el tiempo que lleva conectada la cuenta. |
 | «—» en «Seguidores ganados» | Ninguna cuenta tiene una lectura de antes del período para comparar, o solo hay YouTube, TikTok, Threads o X. | Igual que arriba. |
 | «Ninguna publicación ganó views en este período. Las métricas llegan con la sincronización diaria, así que lo publicado hoy aparece mañana.» (en «Lo que más creció») | Ninguna publicación ganó más de cero views conocidas en el período. | Ampliar el período, o esperar la próxima sincronización. |
@@ -1330,6 +1406,21 @@ De día, donde una de estas frases dice «La Parrilla» dice «La Barra», y «L
 | «Algo se rompió» y «No fue nada que hicieras. Vuelve a intentarlo; el detalle quedó en la consola del navegador.» (a veces con «Si se repite, este código ayuda a encontrarlo: <código>.») | Algo falló al armar la pantalla. | Apretar «Reintentar»; si sigue, «Ir a La Parrilla». |
 
 ## Si el humano dice…
+
+- **«¿Puedo exportar a Excel?» / «quiero bajar mis datos» / «quiero un CSV»**: en el tablero de
+  Los Números, «Llevar para la casa» (de día, «Para llevar»), a la derecha del título. Es un
+  `.xlsx`, no un CSV; Google Sheets y Numbers lo abren igual. Sale con el período y los filtros
+  que estén puestos.
+- **«En la planilla hay textos con un apóstrofo adelante» (`'=…`, `'@…`, `'-…`)**: es a
+  propósito. Un texto que empieza con =, +, -, @ podría leerse como fórmula si se copia o se
+  guarda como CSV, y los comentarios y los links los escribe cualquiera. El texto es el mismo,
+  con un apóstrofo delante.
+- **«En la planilla YouTube sale vacío en lo ganado» / «faltan datos viejos de YouTube»**: sus
+  reglas no dejan calcular nada con sus datos ni guardar lo que lleva más de 30 días; la hoja
+  «Léeme» lo explica. Las visitas y los clicks que trajo YouTube sí están: los mide Tu Parrilla.
+- **«La planilla no trae todas mis visitas»**: el período pasó el tope de esa hoja y la planilla
+  lleva las más recientes; «Léeme», en «Lo que quedó fuera», dice cuántas había. Con un período
+  más corto sale entera; «Etiquetas y UTM» y «Día a día» las cuentan todas igual.
 
 - **«Quiero ver del 1 al 7 de septiembre» / «quiero ver una semana en particular»**: en Los
   Números, «Fechas» (el último botón del período): elegir «Desde» y «Hasta» y apretar «Ver
@@ -1506,7 +1597,12 @@ De día, donde una de estas frases dice «La Parrilla» dice «La Barra», y «L
   van en «Tus publicaciones»: se ven en la pieza y en «Comparar por atributo».
 - No ordena la lista por views ganadas (la columna «Views» ordena por el acumulado; las que más
   ganaron están en «Lo que más creció»).
-- No exporta a planilla.
+- La planilla de «Llevar para la casa» no es un CSV, no se arma sola cada cierto tiempo ni se
+  manda por correo, no se pide con las llaves de la API y no tiene fórmulas. Tiene topes por
+  hoja (10.000 publicaciones, 100.000 lecturas diarias, visitas o clicks, 50.000 seguidores o
+  comentarios, 20.000 grupos de etiquetas o destinos programados, 1000 links) y, si se le acaba
+  el tiempo, deja lo que falta fuera y lo dice. De YouTube no lleva nada calculado ni nada de
+  más de 30 días. Las visitas van sin IP, sin coordenadas y sin el identificador del visitante.
 - Tiene topes, y no todos avisan cuando se pasan: «En las redes» suma como mucho 10.000
   publicaciones con actividad en el período; «Tus publicaciones» muestra como mucho 1000 (avisa);
   la pieza, 100 versiones; «Comparar por atributo» y «Tu mejor 10 %» leen 10.000 publicaciones
@@ -1523,6 +1619,12 @@ Sale de:
 
 - `src/app/admin/(dash)/analytics/page.tsx` (el tablero: encabezado, las dos mitades, sus
   cifras, paneles, «⋯ Más» y textos)
+- `src/app/admin/(dash)/analytics/para-llevar.tsx` (el botón y la ventana de «Llevar para la
+  casa»: textos, avisos, la animación), `src/app/api/admin/planilla/route.ts` y
+  `src/app/api/admin/planilla/adelanto/route.ts` (el archivo y lo que se mide antes), y
+  `src/lib/planilla/hojas.ts`, `src/lib/planilla/leeme.ts`, `src/lib/planilla/leer.ts`,
+  `src/lib/planilla/armar.ts`, `src/lib/planilla/xlsx.ts` y `src/lib/planilla/zip.ts` (las
+  hojas y sus columnas, «Léeme», lo que se lee, los topes y el orden, y el formato)
 - `src/app/admin/(dash)/analytics/accounts.tsx` (tarjetas de «Tus cuentas» y su gráfico)
 - `src/app/admin/(dash)/analytics/publicaciones/page.tsx` («Tus publicaciones»: controles,
   avisos, estados vacíos, el link que se copia)
