@@ -18,6 +18,11 @@ sugerencias y reclamos de un restorán: lo escrito se lee, pero nada promete que
    cajita) y debajo dice «ideas, reclamos o lo que quieras decirnos». El menú se cierra y se abre
    la ventana, sobre la misma pantalla en la que estaba.
 
+También se abre desde la cámara de frío de La Cocina, con «¿Necesitas más espacio?»
+([la-camara-de-frio.md](la-camara-de-frio.md)): llega con «Idea» marcado y el texto empezado,
+«Necesito más espacio en la cámara de frío: tengo <N> de <cuota>. Lo usaría para », para
+terminarlo. Si ya había algo escrito sin mandar, no lo pisa.
+
 ## Qué se ve
 
 Una ventana en el centro, con el resto de la pantalla atenuado y un borde naranjo arriba. De
@@ -113,6 +118,7 @@ Sale de:
 - `src/components/libro-de-sugerencias.tsx`: la ventana, el dibujo y el ícono del menú; las
   animaciones, en `src/app/globals.css` (`.libro-*`, `.caja-*`).
 - `src/app/admin/(dash)/nav.tsx`: la entrada al final del menú de Ajustes.
+- `src/app/admin/(dash)/ia/bodega/camara.tsx`: «¿Necesitas más espacio?», que lo abre con el texto empezado.
 - `src/lib/vocabulario.ts` (`LIBRO`, `LIBRO_SUBTITULO`, `ECHAR_AL_LIBRO`, `QUEDO_EN_EL_LIBRO`): el
   nombre en cada modo.
 - `src/lib/sugerencias/tipos.ts` y `src/lib/sugerencias/formato.ts`: los tipos, el largo, el tope

@@ -8,11 +8,13 @@ solo. El porqué de cada cosa está en el diseño,
 **Lo que existe hoy son las tablas, estas rutas y la pestaña del panel.** En el panel:
 
 - el admin le enciende la cocina a una cuenta en Los Maestros;
-- el usuario sube su material, pide y sigue su comanda en La Cocina;
+- el usuario guarda su material en bruto en la cámara de frío de La Cocina (la bodega), y pide
+  eligiendo de ahí: el mismo material sirve para varias comandas;
+- sigue su comanda en La Cocina;
 - lo que el chef entrega espera en el mesón, donde el usuario lo programa o lo descarta.
 
-Lo crudo se borra a los 14 días de terminada su comanda, y lo que nadie programa en 30 días en el
-mesón, también.
+Lo que está en la cámara no vence: lo saca el usuario. Lo que nadie programa en 30 días en el mesón
+se borra solo.
 
 ## Cómo se habla
 
@@ -130,7 +132,11 @@ Con otro estado, por fecha.
       "tomadaPor": null,
       "creadaEn": "2026-10-22T15:00:00.000Z",
       "insumos": [
-        { "id": "a1b2…", "tipo": "principal", "subtipo": "largo", "nombre": "video9.mp4", "bytes": 4000000000, "duracionS": 1800, "tipoArchivo": "video/mp4" }
+        { "id": "a1b2…", "tipo": "principal", "subtipo": "largo", "nombre": "video9.mp4", "bytes": 4000000000, "duracionS": 1800, "tipoArchivo": "video/mp4", "uso": "crudo", "materialId": "9c1d…" },
+        { "id": "b3c4…", "tipo": "imagen", "subtipo": null, "nombre": "intro.mp4", "bytes": 31457280, "duracionS": 20, "tipoArchivo": "video/mp4", "uso": "intro", "materialId": "2e7f…" }
+      ],
+      "extras": [
+        { "id": "d5e6…", "tipo": "extra", "subtipo": null, "nombre": "tema.mp3", "bytes": 4194304, "duracionS": 95, "tipoArchivo": "audio/mpeg", "uso": "musica", "materialId": "7a8b…" }
       ]
     }
   ]
@@ -166,10 +172,26 @@ Con otro estado, por fecha.
   - `estilos`: `chef`, igual que en el pedido.
 - **`minutos`** son los del plato principal, redondeados hacia arriba, según la duración que leyó
   el navegador. Cero si no la pudo leer.
-- **`insumos`** no traen URL: cada uno se pide aparte, porque el enlace vence.
+- **`insumos`** no traen URL: cada uno se pide aparte, porque el enlace vence. Vienen en el orden en
+  que el usuario los eligió, con el plato principal primero.
   - `principal`: el plato principal; `subtipo` dice `largo`, `podcast` o `tomas`.
   - `camara` y `pantalla`: se sincronizan con el principal.
-  - `imagen`: fotos o b-roll.
+  - `imagen`: fotos, b-roll o un video para intercalar, como un intro o un outro (`uso` lo dice).
+
+  `tipo` es siempre uno de esos cuatro: lo de antes no cambió.
+- **Desde el 2026-11-02, dos campos más en cada insumo, los dos opcionales:**
+  - `uso`: para qué es, si el usuario lo dijo al guardarlo: `crudo` (material crudo), `intro`,
+    `outro`, `broll`, `musica`, `logo`, `letras` (una tipografía) u `otro`; `null` si no dijo, y en
+    las comandas de antes. Es la foto del momento en que se pidió: si el usuario lo cambia después,
+    esta comanda no cambia.
+  - `materialId`: el material de la cámara de donde salió. Un mismo material en dos comandas trae el
+    mismo `materialId` y la misma URL detrás, con un `id` de insumo distinto en cada una: si el chef
+    ya lo bajó para otra comanda, no hace falta bajarlo de nuevo. `null` en lo de antes de la cámara.
+- **`extras`**, nuevo desde el 2026-11-02 y siempre presente (vacío si no hay): lo que no es video
+  ni foto —un audio, una tipografía, un PDF, unos subtítulos—, con la misma forma que un insumo y
+  `tipo: "extra"`. Va aparte para que un cliente escrito antes de la cámara no se encuentre en
+  `insumos` un tipo que no conoce; quien lo conozca, lo usa según su `uso` y su `tipoArchivo`. Su
+  enlace se pide por la misma ruta que el de un insumo.
 
 ### `POST /api/cocina/comandas/{id}/tomar`
 
@@ -195,8 +217,11 @@ Responde `{ "url": "<GET firmado>", "vence": "<ISO>" }`.
 - Con la comanda terminada: `409`.
 - Un insumo que ya se borró: `404` con `Ese insumo no existe, o ya se borró.`
 
-  Se borran a los 14 días de terminada la comanda: cancelada, rechazada, fallida o servida. Una
-  comanda se sirve cuando todo lo que entregó se programó o se descartó.
+  Sirve igual para un insumo y para uno de `extras`. Lo que viene de la cámara de frío se borra solo
+  cuando el usuario lo saca de la cámara, y no lo puede sacar mientras la comanda está en marcha (de
+  `recibida` a `sirviendo`). Las comandas de antes de la cámara traían archivos propios, que se
+  borraban a los 14 días de terminada la comanda; los que seguían en el almacén el 2026-11-02 pasaron
+  a la cámara.
 
 ### `POST /api/cocina/comandas/{id}/estado`
 

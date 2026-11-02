@@ -42,6 +42,7 @@ const USUARIO = {
   invitadoEn: new Date('2026-01-01'),
   primerIngresoEn: new Date('2026-01-01'),
   cocinaDesde: null,
+  bodegaBytes: null,
   createdAt: new Date('2026-01-01'),
   updatedAt: new Date('2026-01-01'),
 }

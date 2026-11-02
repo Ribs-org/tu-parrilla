@@ -6,6 +6,7 @@ import { Encabezado } from '@/components/ui'
 import { requireUser } from '@/lib/auth'
 import { cuantosEnElMeson } from '@/lib/cocina/meson'
 import { comandasDelDueno, estadoDeLaCocina, pulsoDeLaCocina } from '@/lib/cocina/panel'
+import { usoDeLaCamara } from '@/lib/cocina/subidas'
 import { listarLlaves } from '@/lib/llaves'
 import { MAX_NOMBRE, PREFIJO } from '@/lib/llaves-api'
 import { MANUAL } from '@/lib/vocabulario'
@@ -63,6 +64,7 @@ export default async function LaCocinaPage() {
   const cocina = usuario.cocinaDesde ? await estadoDeLaCocina(ahora) : null
   const comandas = usuario.cocinaDesde ? await comandasDelDueno(usuario.id) : []
   const enElMeson = usuario.cocinaDesde ? await cuantosEnElMeson(usuario.id) : 0
+  const camara = usuario.cocinaDesde ? await usoDeLaCamara(usuario.id) : null
   // La firma con que sale la página: la vigía de las tarjetas pregunta por ella (`ia/vigia.tsx`).
   const pulso = usuario.cocinaDesde ? await pulsoDeLaCocina(usuario.id, ahora) : null
 
@@ -89,8 +91,16 @@ export default async function LaCocinaPage() {
         </p>
       </header>
 
-      {cocina && pulso ? (
-        <ChefDeLaCasa cocina={cocina} comandas={comandas} enElMeson={enElMeson} pulso={pulso} zona={usuario.zona} ahora={ahora} />
+      {cocina && pulso && camara ? (
+        <ChefDeLaCasa
+          cocina={cocina}
+          comandas={comandas}
+          enElMeson={enElMeson}
+          camara={camara}
+          pulso={pulso}
+          zona={usuario.zona}
+          ahora={ahora}
+        />
       ) : (
         <ChefDeLaCasaApagado esAdmin={usuario.rol === 'admin'} />
       )}

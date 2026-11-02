@@ -128,6 +128,9 @@ const { listarLlaves, crearLlave } = await import('./llaves')
 const { leerResumen } = await import('./avisos/run')
 const { archivarQuemados, archivarDestino } = await import('./social/publish/archivar')
 const { recibirSugerencia } = await import('./sugerencias/guardar')
+const { materialesDeLaCamara, editarMaterial, sacarMaterial } = await import('./cocina/materiales')
+const { usoDeLaCamara } = await import('./cocina/subidas')
+const { pedirComanda } = await import('./cocina/pedir')
 const { makeDefault, updateProfile, deleteScheduledPost, guardarCuenta, guardarTema, revocarLlaveApi } = await import(
   '@/app/admin/actions'
 )
@@ -165,6 +168,7 @@ const USUARIO = {
   invitadoEn: new Date('2026-01-01'),
   primerIngresoEn: new Date('2026-01-01'),
   cocinaDesde: null,
+  bodegaBytes: null,
   createdAt: new Date('2026-01-01'),
   updatedAt: new Date('2026-01-01'),
 }
@@ -421,6 +425,21 @@ describe('aislamiento por dueño (SQL generado, sin base)', () => {
     const consultas = await todasLasConsultas(() => leerAjuste(DUENO, 'voz'))
     expect(consultas).toHaveLength(1)
     for (const c of consultas) esperarFiltradoPorDueno(c)
+  })
+
+  it('cocina/materiales: materialesDeLaCamara trae lo del dueño, y cuenta sus comandas en marcha solo entre sus insumos', async () => {
+    const fila = ['m-1', DUENO, 'intro.mp4', 'intro', 'https://x/intro.mp4', 1000, 'video/mp4', 20, new Date(), new Date(), null]
+    const consultas = await consultasEncadenadas(() => materialesDeLaCamara(DUENO), [[fila]])
+    expect(consultas).toHaveLength(2)
+    for (const c of consultas) esperarFiltradoPorDueno(c)
+  })
+
+  it('cocina/subidas: usoDeLaCamara lee la cuota de la fila del dueño, y cuenta solo lo suyo', async () => {
+    const consultas = await consultasEncadenadas(() => usoDeLaCamara(DUENO), [[[null]], [[0]], [[0]], [[0]]])
+    expect(consultas).toHaveLength(4)
+    expect(consultas[0]!.params).toContain(DUENO)
+    expect(consultas[0]!.sql.split(/\bwhere\b/i).pop()).toMatch(/"id"\s*=\s*\$/)
+    for (const c of consultas.slice(1)) esperarFiltradoPorDueno(c)
   })
 
   it('llaves: listarLlaves solo trae las del dueño, y nunca su hash', async () => {
@@ -751,6 +770,46 @@ describe('aislamiento por dueño, escrituras (SQL generado, sin base)', () => {
    * el WHERE del UPDATE, cualquiera con sesión pisaría el borrador de otro sabiendo su id.
    * El UPDATE que no encuentra fila corta ahí (`perdido`) y no toca la media.
    */
+  it('cocina/materiales: editarMaterial ata su UPDATE al dueño', async () => {
+    const consultas = await todasLasConsultas(() =>
+      editarMaterial(DUENO, '00000000-0000-4000-8000-000000000001', { nombre: 'Mi intro', uso: 'intro' }),
+    )
+    expect(consultas).toHaveLength(1)
+    esperarFiltradoPorDueno(consultas[0]!)
+  })
+
+  it('cocina/materiales: sacarMaterial lee el material bloqueado, mira sus comandas y lo borra, todo atado al dueño', async () => {
+    const id = '00000000-0000-4000-8000-000000000001'
+    const consultas = await consultasEncadenadas(() => sacarMaterial(DUENO, id, new Date()), [[[id, 'https://x/intro.mp4']], [], []])
+    expect(consultas).toHaveLength(3)
+    for (const c of consultas) esperarFiltradoPorDueno(c)
+    expect(consultas[0]!.sql).toMatch(/for update/i)
+    expect(consultas[2]!.sql).toMatch(/^delete/i)
+  })
+
+  it('cocina/pedir: pedirComanda mira la ref y bloquea los materiales elegidos solo entre los del dueño', async () => {
+    const id = '00000000-0000-4000-8000-000000000001'
+    const consultas = await consultasEncadenadas(
+      () =>
+        pedirComanda({ id: DUENO, cocinaDesde: new Date() }, {
+          ref: id,
+          principal: id,
+          subtipo: 'largo',
+          acompanamientos: [],
+          formatos: ['clips'],
+          cantidad: 'lo-que-de',
+          notas: '',
+          paraCuando: null,
+          marca: { nombre: 'V', handle: null, acento: null, ctaTexto: null },
+        }, new Date()),
+      [[]],
+    )
+    expect(consultas.length).toBeGreaterThanOrEqual(2)
+    for (const c of consultas.slice(0, 2)) esperarFiltradoPorDueno(c)
+    expect(consultas[1]!.sql).toMatch(/"materiales"/)
+    expect(consultas[1]!.sql).toMatch(/for update/i)
+  })
+
   it('borradores: guardarBorrador con id ata su UPDATE al dueño y, sin fila, no sigue', async () => {
     const consultas = await consultasEncadenadas(
       () => guardarBorrador(DUENO, { id: 'borrador-x', campos: {}, fecha: null, media: [] }),

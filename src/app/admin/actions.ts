@@ -74,6 +74,8 @@ import { ARCHIVO_AJENO, ARCHIVO_FALTANTE, CUERPO_ILEGIBLE, parseMediaMovil, type
 import { esReservado } from '@/lib/slugs'
 import { cerrarSesiones, esChoqueDeUnicidad, invitar, pedir, quitar } from '@/lib/usuarios'
 import { encenderCocinaDe } from '@/lib/cocina/panel'
+import { leerCuotaEnGb } from '@/lib/cocina/bodega'
+import { cambiarCuotaDeLaCamara } from '@/lib/cocina/materiales'
 import { nombreDe } from '@/lib/vocabulario'
 import { fromZonedInput, normalizeUrl, slugify } from '@/lib/utils'
 import { ZONA_INVALIDA, esZonaValida } from '@/lib/zona'
@@ -1510,6 +1512,21 @@ export async function encenderCocina(id: string, encender: boolean): Promise<{ e
   if (!esUuid(id) || !(await encenderCocinaDe(id, encender, new Date()))) return { error: 'Esa persona ya no está en Los Maestros.' }
   revalidatePath('/admin/usuarios')
   revalidatePath('/admin/ia')
+  return {}
+}
+
+/**
+ * Le cambia a alguien la cuota de la cámara de frío de La Cocina, desde Los Maestros: en GB, y
+ * vacía vuelve a la de siempre (20 GB). Solo el admin. Lo que ya está guardado no se borra aunque
+ * la cuota baje: deja de poder guardar más hasta que haga espacio.
+ */
+export async function cambiarCuotaDeLaCamaraAccion(id: string, gigas: string): Promise<{ error?: string }> {
+  await requireAdmin()
+  const bytes = leerCuotaEnGb(gigas)
+  if (bytes !== null && typeof bytes === 'object') return { error: bytes.error }
+  if (!esUuid(id) || !(await cambiarCuotaDeLaCamara(id, bytes))) return { error: 'Esa persona ya no está en Los Maestros.' }
+  revalidatePath('/admin/usuarios')
+  revalidatePath('/admin/ia/bodega')
   return {}
 }
 

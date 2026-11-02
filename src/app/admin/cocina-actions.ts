@@ -5,8 +5,10 @@ import { redirect } from 'next/navigation'
 import { requireUser } from '@/lib/auth'
 import { CREATIVO_NO_ESTA, descartarCreativo, leerDescarte, programarCreativo } from '@/lib/cocina/meson'
 import { COMANDA_AJENA, COMANDA_NO_CANCELABLE, cancelarComanda } from '@/lib/cocina/panel'
+import { MATERIAL_EN_USO, MATERIAL_NO_EXISTE, USO_DESCONOCIDO, esUso, leerNombre } from '@/lib/cocina/bodega'
+import { editarMaterial, sacarMaterial } from '@/lib/cocina/materiales'
 import { leerPedido } from '@/lib/cocina/pedido'
-import { ACOMPANAMIENTO_NO_SIRVE, ARCHIVOS_CAMBIARON, PRINCIPAL_NO_SIRVE, pedirComanda } from '@/lib/cocina/pedir'
+import { ACOMPANAMIENTO_NO_SIRVE, PRINCIPAL_NO_SIRVE, pedirComanda } from '@/lib/cocina/pedir'
 import { COCINA_APAGADA } from '@/lib/cocina/subidas'
 import { esUuid } from '@/lib/uuid'
 
@@ -28,13 +30,12 @@ const NO_SE_PIDIO = {
   apagada: COCINA_APAGADA,
   principal: PRINCIPAL_NO_SIRVE,
   acompanamiento: ACOMPANAMIENTO_NO_SIRVE,
-  cambiaron: ARCHIVOS_CAMBIARON,
 } as const
 
 /**
- * Cuelga una comanda con lo que el formulario subió y pidió, y vuelve a La Cocina, donde aparece
- * arriba. Llega como objeto y no como `FormData`: los archivos ya subieron por partes, y lo que viaja
- * son sus ids. Mandarla dos veces no la duplica (`ref`).
+ * Cuelga una comanda con lo que el formulario eligió de la cámara de frío y lo que pidió, y vuelve a
+ * La Cocina, donde aparece arriba. Llega como objeto y no como `FormData`: los archivos ya están en
+ * la cámara, y lo que viaja son sus ids. Mandarla dos veces no la duplica (`ref`).
  */
 export async function pedirComandaPropia(datos: unknown): Promise<{ error?: string }> {
   const usuario = await requireUser()
@@ -74,4 +75,40 @@ export async function programarCreativoPropio(id: string): Promise<{ error?: str
   revalidatePath('/admin/ia/meson')
   revalidatePath('/admin/schedule')
   redirect(`/admin/schedule?borrador=${r.borradorId}`)
+}
+
+/**
+ * Le cambia el nombre y el uso a un material de la cámara de frío. Lo que ya se pidió con él no
+ * cambia: la comanda guardó su foto. No pide la cocina encendida, como sacar.
+ */
+export async function editarMaterialPropio(id: string, nombre: unknown, uso: unknown): Promise<{ error?: string }> {
+  const usuario = await requireUser()
+  const limpio = leerNombre(nombre)
+  if (typeof limpio !== 'string') return { error: limpio.error }
+  if (uso !== null && !esUso(uso)) return { error: USO_DESCONOCIDO }
+  const r = await editarMaterial(usuario.id, id, { nombre: limpio, uso })
+  revalidatePath('/admin/ia/bodega')
+  return 'falla' in r ? { error: MATERIAL_NO_EXISTE } : {}
+}
+
+const NO_SE_SACO = 'No se pudo sacar: el almacén no respondió. Vuelve a intentarlo en un rato.'
+
+/**
+ * Saca un material de la cámara y lo borra del almacén, si ninguna comanda en marcha lo usa. No
+ * pide la cocina encendida: si el admin la apagó, el dueño igual puede hacer espacio.
+ */
+export async function sacarMaterialPropio(id: string): Promise<{ error?: string }> {
+  const usuario = await requireUser()
+  let r: Awaited<ReturnType<typeof sacarMaterial>>
+  try {
+    r = await sacarMaterial(usuario.id, id, new Date())
+  } catch (e) {
+    // El archivo se borra antes de soltar el material: si el almacén falla, nada cambió.
+    console.error('sacarMaterialPropio:', String(e).slice(0, 300))
+    return { error: NO_SE_SACO }
+  }
+  revalidatePath('/admin/ia/bodega')
+  revalidatePath('/admin/ia')
+  if ('falla' in r) return { error: r.falla === 'en-uso' ? MATERIAL_EN_USO : MATERIAL_NO_EXISTE }
+  return {}
 }

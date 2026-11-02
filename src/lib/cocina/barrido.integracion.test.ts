@@ -86,8 +86,9 @@ describe.skipIf(!URL_PRUEBAS)('el barrido de la cocina, contra una Postgres de v
   afterAll(() => vi.restoreAllMocks())
 
   beforeEach(async () => {
-    const { comandas } = await esquema()
+    const { comandas, materiales } = await esquema()
     await (await db()).delete(comandas)
+    await (await db()).delete(materiales)
     almacen.borradas.length = 0
     almacen.fallan.clear()
   })
@@ -148,6 +149,40 @@ describe.skipIf(!URL_PRUEBAS)('el barrido de la cocina, contra una Postgres de v
     expect(await barrerCocina(AHORA)).toMatchObject({ vencidos: 1, servidas: 1 })
     expect((await (await db()).select().from(comandas).where(eq(comandas.id, c.id)))[0]).toMatchObject({ estado: 'servida', servidaEn: AHORA })
     expect((await (await db()).select().from(insumos).where(eq(insumos.id, crudo.id)))[0]!.expiraEn).toEqual(dias(14))
+  })
+
+  it('lo que vino de la cámara de frío no vence: ni al servir, ni al cancelar, ni aunque alguien le hubiera puesto plazo', async () => {
+    const { barrerCocina } = await import('./barrido')
+    const { cancelarComanda } = await import('./panel')
+    const { comandas, insumos, materiales } = await esquema()
+    const [m] = await (await db())
+      .insert(materiales)
+      .values({ ownerId: duena.id, nombre: 'charla.mp4', url: 'https://media.ej.cl/cocina/charla.mp4', bytes: 1, tipoArchivo: 'video/mp4', derechosEn: AHORA })
+      .returning()
+
+    // Servida sola, por lo que venció en el mesón: lo de antes empieza sus 14 días; lo de la cámara, no.
+    const servida = await comanda()
+    const deLaCamara = await insumo(servida.id, { materialId: m!.id, url: m!.url })
+    const deAntes = await insumo(servida.id)
+    await creativo(servida.id, { expiraEn: dias(-1) })
+    await barrerCocina(AHORA)
+    const filas = await (await db()).select().from(insumos)
+    expect(filas.find((i) => i.id === deLaCamara.id)!.expiraEn).toBeNull()
+    expect(filas.find((i) => i.id === deAntes.id)!.expiraEn).toEqual(dias(14))
+
+    // Cancelada: igual.
+    const cancelable = await comanda({ estado: 'recibida' })
+    const otroDeLaCamara = await insumo(cancelable.id, { materialId: m!.id, url: m!.url })
+    expect(await cancelarComanda(duena.id, cancelable.id, AHORA)).toEqual({ ok: true })
+    expect((await (await db()).select().from(insumos).where(eq(insumos.id, otroDeLaCamara.id)))[0]!.expiraEn).toBeNull()
+
+    // Y aunque un código de antes le hubiera puesto plazo, el barrido no borra el archivo de la cámara.
+    await (await db()).update(insumos).set({ expiraEn: dias(-30) }).where(eq(insumos.id, deLaCamara.id))
+    almacen.borradas.length = 0
+    await barrerCocina(dias(20))
+    expect(almacen.borradas).not.toContain(m!.url)
+    expect((await (await db()).select().from(materiales).where(eq(materiales.id, m!.id)))[0]!.borradoEn).toBeNull()
+    expect((await (await db()).select().from(comandas).where(eq(comandas.id, servida.id)))[0]!.estado).toBe('servida')
   })
 
   it('el resumen del día avisa lo que vence en el mesón en la semana, por comanda', async () => {

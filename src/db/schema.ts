@@ -14,6 +14,7 @@ import {
   uuid,
   type AnyPgColumn,
 } from 'drizzle-orm/pg-core'
+import type { UsoMaterial } from '../lib/cocina/bodega'
 import type { TipoSugerencia } from '../lib/sugerencias/tipos'
 
 export const ROLES = ['admin', 'usuario'] as const
@@ -46,6 +47,13 @@ export const users = pgTable('users', {
    * ve sus comandas y el panel no le ofrece pedir. En el piloto la enciende el admin.
    */
   cocinaDesde: timestamp('cocina_desde', { withTimezone: true }),
+  /**
+   * Cuántos bytes le caben en la cámara de frío de La Cocina (la bodega,
+   * `docs/superpowers/specs/2026-11-02-la-bodega-design.md`). Nula es la de siempre,
+   * `CUOTA_BODEGA_POR_DEFECTO` en `src/lib/cocina/bodega.ts`: un plan de pago escribe esta columna
+   * sin tocar el código. Hoy la cambia el admin en Los Maestros.
+   */
+  bodegaBytes: bigint('bodega_bytes', { mode: 'number' }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 }).enableRLS()
@@ -772,8 +780,12 @@ export type EstadoComanda = (typeof ESTADOS_COMANDA)[number]
 export const TIPOS_COMANDA = ['tanda', 'prueba', 'reestilo'] as const
 export type TipoComanda = (typeof TIPOS_COMANDA)[number]
 
-/** El plato principal y sus acompañamientos: cada tipo entra al chef por un camino distinto. */
-export const TIPOS_INSUMO = ['principal', 'camara', 'pantalla', 'imagen'] as const
+/**
+ * El rol de un archivo en una comanda: el plato principal y sus acompañamientos, que entran al chef
+ * por caminos distintos. `extra` es lo que no es video ni foto (un audio, una tipografía), que
+ * llega con la cámara de frío: el chef lo recibe aparte (`extras`, en `docs/cocina-api.md`).
+ */
+export const TIPOS_INSUMO = ['principal', 'camara', 'pantalla', 'imagen', 'extra'] as const
 export type TipoInsumo = (typeof TIPOS_INSUMO)[number]
 
 /**
@@ -869,12 +881,41 @@ export const comandaEventos = pgTable(
 ).enableRLS()
 
 /**
- * Un archivo que el usuario le lleva al chef: el plato principal o un acompañamiento. Vive en el
- * almacén (`cocina/<dueño>/insumos/…`), y nace al cerrar su subida (`subidas`). La regla es
- * borrarlo a los 14 días de terminada la comanda (`expiraEn`, `borradoEn`); el barrido que la
- * cumple llega con el mesón. `derechosEn` es cuándo el usuario declaró que tiene los derechos de lo
- * que sube. Sin comanda mientras el formulario no se manda: lo que se subió y no se pidió se borra a
- * los tres días (`barrerSubidas`).
+ * La cámara de frío (de día, la nevera): el material en bruto de cada usuario, que se guarda sin
+ * pedir comanda y no vence (`docs/superpowers/specs/2026-11-02-la-bodega-design.md`). Vive en el
+ * almacén (`cocina/<dueño>/bodega/…`) y nace al cerrar su subida (`subidas`). Cada comanda que lo
+ * usa le saca una foto en `insumos`, que nombra el mismo archivo: el dueño del archivo es la
+ * cámara. Sacarlo lo borra del almacén; si alguna comanda lo usó, la fila queda con `borradoEn`
+ * para la historia de esa comanda. `derechosEn` es cuándo el dueño declaró que tiene los derechos.
+ */
+export const materiales = pgTable(
+  'materiales',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    ownerId: uuid('owner_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    nombre: text('nombre').notNull(),
+    uso: text('uso').$type<UsoMaterial>(),
+    url: text('url').notNull(),
+    bytes: bigint('bytes', { mode: 'number' }).notNull(),
+    tipoArchivo: text('tipo_archivo').notNull(),
+    duracionS: real('duracion_s'),
+    derechosEn: timestamp('derechos_en', { withTimezone: true }).notNull(),
+    creadoEn: timestamp('creado_en', { withTimezone: true }).notNull().defaultNow(),
+    borradoEn: timestamp('borrado_en', { withTimezone: true }),
+  },
+  (t) => [index('materiales_owner_idx').on(t.ownerId, t.creadoEn)],
+).enableRLS()
+
+/**
+ * Lo que una comanda lleva: un archivo con su rol en ella (`tipo`). Desde la cámara de frío es la
+ * unión de muchos a muchos entre comandas y materiales: una fila por material en cada comanda, con
+ * una foto de su nombre, su uso y su peso al colgarla, y la misma URL que el material
+ * (`materialId`). Un insumo de la cámara no vence: su archivo es del material. Los de antes de la
+ * cámara (`materialId` nulo) tenían archivo propio, y la regla era borrarlo a los 14 días de
+ * terminada la comanda (`expiraEn`, `borradoEn`, `barrerCocina`). `posicion` es el orden en que el
+ * chef los recibe.
  */
 export const insumos = pgTable(
   'insumos',
@@ -884,9 +925,12 @@ export const insumos = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
     comandaId: uuid('comanda_id').references(() => comandas.id, { onDelete: 'cascade' }),
+    materialId: uuid('material_id').references(() => materiales.id, { onDelete: 'set null' }),
     tipo: text('tipo').$type<TipoInsumo>().notNull(),
     // Del plato principal: un largo, un podcast en videollamada o tomas sueltas.
     subtipo: text('subtipo'),
+    uso: text('uso').$type<UsoMaterial>(),
+    posicion: integer('posicion').notNull().default(0),
     nombre: text('nombre').notNull(),
     url: text('url').notNull(),
     bytes: bigint('bytes', { mode: 'number' }).notNull(),
@@ -897,16 +941,22 @@ export const insumos = pgTable(
     borradoEn: timestamp('borrado_en', { withTimezone: true }),
     creadoEn: timestamp('creado_en', { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [index('insumos_owner_idx').on(t.ownerId), index('insumos_comanda_idx').on(t.comandaId)],
+  (t) => [
+    index('insumos_owner_idx').on(t.ownerId),
+    index('insumos_comanda_idx').on(t.comandaId),
+    index('insumos_material_idx').on(t.materialId),
+  ],
 ).enableRLS()
 
 /**
  * Una subida por partes: el plato principal pesa de 2 a 20 GB, más de lo que acepta un solo PUT,
  * así que el navegador lo sube en partes de 64 MB directo al almacén. Acá queda lo que hace falta
  * para retomarla si se corta —el id de la subida en el almacén, la clave y el tamaño de cada
- * parte— y lo que va a ser el insumo al cerrarla. Las partes que ya llegaron no se guardan: se le
- * preguntan al almacén. Cerrada, nombra su insumo; abierta y abandonada, el barrido la aborta a las
- * 24 horas (`barrerSubidas`). No guarda una URL, sino la clave: el objeto no existe hasta cerrarla.
+ * parte— y lo que va a ser el material de la cámara al cerrarla. Las partes que ya llegaron no se
+ * guardan: se le preguntan al almacén. Cerrada, nombra su material; abierta y abandonada, el barrido
+ * la aborta a las 24 horas (`barrerSubidas`). Abierta, sus `bytes` ya cuentan en la cuota de la
+ * cámara. No guarda una URL, sino la clave: el objeto no existe hasta cerrarla. `tipo` e
+ * `insumoId` son de antes de la cámara, cuando cada subida nacía para una comanda.
  */
 export const subidas = pgTable(
   'subidas',
@@ -921,11 +971,13 @@ export const subidas = pgTable(
     tipoArchivo: text('tipo_archivo').notNull(),
     bytes: bigint('bytes', { mode: 'number' }).notNull(),
     tamanoParte: integer('tamano_parte').notNull(),
-    tipo: text('tipo').$type<TipoInsumo>().notNull(),
+    tipo: text('tipo').$type<TipoInsumo>(),
     subtipo: text('subtipo'),
+    uso: text('uso').$type<UsoMaterial>(),
     duracionS: real('duracion_s'),
     derechosEn: timestamp('derechos_en', { withTimezone: true }).notNull(),
     insumoId: uuid('insumo_id').references(() => insumos.id, { onDelete: 'set null' }),
+    materialId: uuid('material_id').references(() => materiales.id, { onDelete: 'set null' }),
     creadaEn: timestamp('creada_en', { withTimezone: true }).notNull().defaultNow(),
     cerradaEn: timestamp('cerrada_en', { withTimezone: true }),
   },
@@ -1010,6 +1062,7 @@ export const latidos = pgTable('latidos', {
 }).enableRLS()
 
 export { TIPOS_SUGERENCIA, type TipoSugerencia } from '../lib/sugerencias/tipos'
+export { USOS_MATERIAL, type UsoMaterial } from '../lib/cocina/bodega'
 
 /**
  * Lo que alguien escribió en el libro de sugerencias (de día, la caja de sugerencias): una idea,
@@ -1068,6 +1121,7 @@ export type BorradorMedia = typeof borradorMedia.$inferSelect
 export type Marca = typeof marcas.$inferSelect
 export type Comanda = typeof comandas.$inferSelect
 export type ComandaEvento = typeof comandaEventos.$inferSelect
+export type Material = typeof materiales.$inferSelect
 export type Insumo = typeof insumos.$inferSelect
 export type Subida = typeof subidas.$inferSelect
 export type Creativo = typeof creativos.$inferSelect

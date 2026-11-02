@@ -4,11 +4,11 @@ import { eq } from 'drizzle-orm'
 import type { Usuario } from '@/db'
 import { prepararBase, URL_PRUEBAS } from '@/lib/pruebas/base-de-pruebas'
 
-// Las subidas por partes del panel contra una Postgres de verdad, entrando por las rutas. El
-// almacén es de mentira pero se porta como R2: guarda las partes de cada subida, las junta al
-// cerrar y olvida la subida al abortarla. Lo que importa: que nadie toque lo de otro, que una
-// subida no se cierre con partes que faltan o pesan otra cosa, y que el barrido no se lleve lo
-// que todavía sirve.
+// Las subidas por partes a la cámara de frío contra una Postgres de verdad, entrando por las rutas.
+// El almacén es de mentira pero se porta como R2: guarda las partes de cada subida, las junta al
+// cerrar y olvida la subida al abortarla. Lo que importa: que nadie toque lo de otro, que una subida
+// no se cierre con partes que faltan o pesan otra cosa, que la cuota cuente lo que ya está subiendo
+// —también con dos subidas a la vez—, y que el barrido no se lleve lo que está en la cámara.
 
 vi.mock('server-only', () => ({}))
 
@@ -20,6 +20,8 @@ const almacen = {
   borradas: [] as string[],
   pesoFalso: false,
   siguiente: 1,
+  /** Lo que tarda el almacén en abrir una subida: con algo de demora, dos aperturas a la vez de verdad se cruzan. */
+  demora: 0,
 }
 vi.mock('@/lib/storage', async (importOriginal) => {
   const real = await importOriginal<typeof import('@/lib/storage')>()
@@ -28,6 +30,7 @@ vi.mock('@/lib/storage', async (importOriginal) => {
     ...real,
     basePublica: () => BASE,
     abrirPorPartes: vi.fn(async (key: string, tipo: string) => {
+      if (almacen.demora) await new Promise((r) => setTimeout(r, almacen.demora))
       const id = `up-${almacen.siguiente++}`
       almacen.subidas.set(id, { key, tipo, partes: new Map() })
       return id
@@ -70,7 +73,7 @@ let otro: Usuario
 let sinCocina: Usuario
 
 const BYTES = 2 * TAMANO_PARTE + 1000
-const largo = { nombre: 'video9.mp4', tipo: 'video/mp4', bytes: BYTES, insumo: 'principal', subtipo: 'largo', duracionS: 1800, derechos: true }
+const largo = { nombre: 'video9.mp4', tipo: 'video/mp4', bytes: BYTES, uso: 'crudo', duracionS: 1800, derechos: true }
 
 function pedido(ruta: string, metodo = 'GET', cuerpo?: unknown): Request {
   return new Request(`https://tu-parrilla.cl${ruta}`, {
@@ -86,7 +89,6 @@ const rutas = async () => ({
   abortar: (await import('@/app/api/admin/cocina/subidas/[id]/route')).DELETE,
   partes: (await import('@/app/api/admin/cocina/subidas/[id]/partes/route')).POST,
   cerrar: (await import('@/app/api/admin/cocina/subidas/[id]/cerrar/route')).POST,
-  sacar: (await import('@/app/api/admin/cocina/insumos/[id]/route')).DELETE,
 })
 
 /** Abre una subida como `usuario` y devuelve su id. */
@@ -110,7 +112,12 @@ async function subirTodo(id: string) {
   await subirParte(id, 3, 1000)
 }
 
-describe.skipIf(!URL_PRUEBAS)('las subidas por partes de la cocina, contra una Postgres de verdad', () => {
+async function cuota(usuario: Usuario, bytes: number | null) {
+  const { users } = await esquema()
+  await (await db()).update(users).set({ bodegaBytes: bytes }).where(eq(users.id, usuario.id))
+}
+
+describe.skipIf(!URL_PRUEBAS)('las subidas por partes a la cámara de frío, contra una Postgres de verdad', () => {
   beforeAll(async () => {
     await prepararBase('pruebas_subidas')
     const { users } = await esquema()
@@ -128,15 +135,17 @@ describe.skipIf(!URL_PRUEBAS)('las subidas por partes de la cocina, contra una P
   afterAll(() => vi.restoreAllMocks())
 
   beforeEach(async () => {
-    const { insumos, subidas, comandas } = await esquema()
+    const { materiales, subidas, comandas } = await esquema()
     await (await db()).delete(subidas)
-    await (await db()).delete(insumos)
     await (await db()).delete(comandas)
+    await (await db()).delete(materiales)
+    await cuota(conCocina, null)
     almacen.subidas.clear()
     almacen.objetos.clear()
     almacen.abortadas.length = 0
     almacen.borradas.length = 0
     almacen.pesoFalso = false
+    almacen.demora = 0
   })
 
   it('sin sesión, nada; sin la cocina encendida, no se abre', async () => {
@@ -156,14 +165,14 @@ describe.skipIf(!URL_PRUEBAS)('las subidas por partes de la cocina, contra una P
     expect(almacen.subidas.size).toBe(0)
   })
 
-  it('de punta a punta: abrir, firmar, subir, cerrar, y cerrar otra vez da el mismo insumo', async () => {
+  it('de punta a punta: abrir, firmar, subir, cerrar, y cerrar otra vez da el mismo material', async () => {
     const r = await rutas()
     const id = await abrir(conCocina)
     expect(await (await r.estado(pedido(`/api/admin/cocina/subidas/${id}`), params(id))).json()).toMatchObject({
       partes: 3,
       tamanoParte: TAMANO_PARTE,
       llegaron: [],
-      insumo: null,
+      material: null,
     })
 
     const firmadas = await (await r.partes(pedido(`/api/admin/cocina/subidas/${id}/partes`, 'POST', { partes: [1, 2, 3] }), params(id))).json()
@@ -178,26 +187,27 @@ describe.skipIf(!URL_PRUEBAS)('las subidas por partes de la cocina, contra una P
 
     const cerrada = await r.cerrar(pedido(`/api/admin/cocina/subidas/${id}/cerrar`, 'POST'), params(id))
     expect(cerrada.status).toBe(201)
-    const { insumo } = await cerrada.json()
-    expect(insumo).toEqual({
+    const { material } = await cerrada.json()
+    expect(material).toEqual({
       id: expect.any(String),
-      tipo: 'principal',
-      subtipo: 'largo',
       nombre: 'video9.mp4',
+      uso: 'crudo',
       bytes: BYTES,
       duracionS: 1800,
       tipoArchivo: 'video/mp4',
+      clase: 'video',
+      creadoEn: expect.any(String),
     })
-    const { insumos } = await esquema()
-    const [fila] = await (await db()).select().from(insumos).where(eq(insumos.id, insumo.id))
-    expect(fila).toMatchObject({ ownerId: conCocina.id, comandaId: null, bytes: BYTES })
-    expect(fila!.url).toMatch(new RegExp(`^${BASE}/cocina/${conCocina.id}/insumos/[0-9a-f-]{36}-video9\\.mp4$`))
+    const { materiales } = await esquema()
+    const [fila] = await (await db()).select().from(materiales).where(eq(materiales.id, material.id))
+    expect(fila).toMatchObject({ ownerId: conCocina.id, bytes: BYTES, borradoEn: null })
+    expect(fila!.url).toMatch(new RegExp(`^${BASE}/cocina/${conCocina.id}/bodega/[0-9a-f-]{36}-video9\\.mp4$`))
 
     const otraVez = await r.cerrar(pedido(`/api/admin/cocina/subidas/${id}/cerrar`, 'POST'), params(id))
     expect(otraVez.status).toBe(200)
-    expect((await otraVez.json()).insumo.id).toBe(insumo.id)
-    expect((await (await r.estado(pedido(`/api/admin/cocina/subidas/${id}`), params(id))).json()).insumo.id).toBe(insumo.id)
-    expect(await (await db()).select().from(insumos)).toHaveLength(1)
+    expect((await otraVez.json()).material.id).toBe(material.id)
+    expect((await (await r.estado(pedido(`/api/admin/cocina/subidas/${id}`), params(id))).json()).material.id).toBe(material.id)
+    expect(await (await db()).select().from(materiales)).toHaveLength(1)
   })
 
   it('no se cierra con una parte que falta, ni con una que llegó con otro peso', async () => {
@@ -223,8 +233,8 @@ describe.skipIf(!URL_PRUEBAS)('las subidas por partes de la cocina, contra una P
     expect(cierre.status).toBe(409)
     expect(await cierre.json()).toEqual({ error: 'El archivo llegó con otro tamaño: súbelo de nuevo.' })
     expect(almacen.borradas).toHaveLength(1)
-    const { insumos } = await esquema()
-    expect(await (await db()).select().from(insumos)).toHaveLength(0)
+    const { materiales } = await esquema()
+    expect(await (await db()).select().from(materiales)).toHaveLength(0)
     expect((await r.estado(pedido(`/api/admin/cocina/subidas/${id}`), params(id))).status).toBe(404)
   })
 
@@ -247,8 +257,8 @@ describe.skipIf(!URL_PRUEBAS)('las subidas por partes de la cocina, contra una P
     expect((await r.cerrar(pedido(`/api/admin/cocina/subidas/${id}/cerrar`, 'POST'), params(id))).status).toBe(404)
     expect((await r.abortar(pedido(`/api/admin/cocina/subidas/${id}`, 'DELETE'), params(id))).status).toBe(404)
     expect(almacen.abortadas).toHaveLength(0)
-    const { insumos } = await esquema()
-    expect(await (await db()).select().from(insumos)).toHaveLength(0)
+    const { materiales } = await esquema()
+    expect(await (await db()).select().from(materiales)).toHaveLength(0)
   })
 
   it('abortarla le pide al almacén borrar sus partes; una ya cerrada no se aborta', async () => {
@@ -264,41 +274,76 @@ describe.skipIf(!URL_PRUEBAS)('las subidas por partes de la cocina, contra una P
     expect((await r.abortar(pedido(`/api/admin/cocina/subidas/${cerrada}`, 'DELETE'), params(cerrada))).status).toBe(409)
   })
 
-  it('sacar un archivo subido: el propio y suelto sí, y se borra del almacén; el de una comanda o el de otro, no', async () => {
-    const r = await rutas()
-    const { comandas, insumos } = await esquema()
-    const id = await abrir(conCocina)
-    await subirTodo(id)
-    const { insumo } = await (await r.cerrar(pedido(`/api/admin/cocina/subidas/${id}/cerrar`, 'POST'), params(id))).json()
-
-    quien = otro
-    expect((await r.sacar(pedido(`/api/admin/cocina/insumos/${insumo.id}`, 'DELETE'), params(insumo.id))).status).toBe(404)
-
-    quien = conCocina
-    const [c] = await (await db()).insert(comandas).values({ ownerId: conCocina.id, ref: 'r', pedido: {}, receta: {} }).returning()
-    await (await db()).update(insumos).set({ comandaId: c!.id }).where(eq(insumos.id, insumo.id))
-    const enComanda = await r.sacar(pedido(`/api/admin/cocina/insumos/${insumo.id}`, 'DELETE'), params(insumo.id))
-    expect(enComanda.status).toBe(409)
-
-    await (await db()).update(insumos).set({ comandaId: null }).where(eq(insumos.id, insumo.id))
-    expect((await r.sacar(pedido(`/api/admin/cocina/insumos/${insumo.id}`, 'DELETE'), params(insumo.id))).status).toBe(200)
-    expect(almacen.borradas).toHaveLength(1)
-    expect(await (await db()).select().from(insumos)).toHaveLength(0)
-  })
-
   it('si la base falla después de abrirla en el almacén, la aborta: no quedan partes sin dueño', async () => {
     const { abrirSubida } = await import('./subidas')
-    const { leerSubida } = await import('./insumos')
+    const { leerSubida } = await import('./bodega')
     const pedidoLeido = leerSubida(largo)
     if ('error' in pedidoLeido) throw new Error(pedidoLeido.error)
-    // Un dueño que no está en la base: la fila choca con su llave foránea.
+    // Un dueño que no está en la base: no hay fila que bloquear, y no se abre nada en el almacén.
     await expect(abrirSubida({ id: randomUUID(), cocinaDesde: new Date() }, pedidoLeido, new Date())).rejects.toThrow()
-    expect(almacen.abortadas).toHaveLength(1)
+    expect(almacen.subidas.size).toBe(0)
   })
 
-  it('el barrido aborta lo abandonado, borra lo que nunca llegó a una comanda y deja lo demás', async () => {
+  describe('la cuota', () => {
+    it('cuenta lo que ya está subiendo, no solo lo guardado: la segunda no cabe hasta que la primera se aborte', async () => {
+      const r = await rutas()
+      await cuota(conCocina, Math.floor(BYTES * 1.5))
+      const primera = await abrir(conCocina)
+      quien = conCocina
+      const segunda = await r.abrir(pedido('/api/admin/cocina/subidas', 'POST', { ...largo, nombre: 'otro.mp4' }))
+      expect(segunda.status).toBe(409)
+      expect((await segunda.json()).error).toMatch(/^No hay espacio para «otro\.mp4»: pesa 128 MB y te quedan 64 MB libres de 192 MB\./)
+      expect(almacen.subidas.size).toBe(1)
+
+      await r.abortar(pedido(`/api/admin/cocina/subidas/${primera}`, 'DELETE'), params(primera))
+      await abrir(conCocina, { ...largo, nombre: 'otro.mp4' })
+    })
+
+    it('lo guardado cuenta; lo sacado deja de contar, y lo de otro nunca cuenta', async () => {
+      const r = await rutas()
+      const { materiales } = await esquema()
+      await cuota(conCocina, Math.floor(BYTES * 1.5))
+      const id = await abrir(conCocina)
+      await subirTodo(id)
+      const { material } = await (await r.cerrar(pedido(`/api/admin/cocina/subidas/${id}/cerrar`, 'POST'), params(id))).json()
+      quien = conCocina
+      expect((await r.abrir(pedido('/api/admin/cocina/subidas', 'POST', largo))).status).toBe(409)
+
+      // Lo de otro, aunque sea mucho, no le quita espacio.
+      await (await db()).insert(materiales).values({ ownerId: otro.id, nombre: 'x', url: `${BASE}/x`, bytes: 10 * BYTES, tipoArchivo: 'video/mp4', derechosEn: new Date() })
+      await (await db()).update(materiales).set({ borradoEn: new Date() }).where(eq(materiales.id, material.id))
+      await abrir(conCocina)
+    })
+
+    it('dos subidas a la vez que juntas no caben: entra una sola', async () => {
+      const r = await rutas()
+      await cuota(conCocina, Math.floor(BYTES * 1.5))
+      quien = conCocina
+      // El almacén tarda en abrir: sin el candado sobre la fila del dueño, las dos alcanzarían a
+      // contar antes de que la otra guarde la suya, y entrarían las dos.
+      almacen.demora = 300
+      const [a, b] = await Promise.all([
+        r.abrir(pedido('/api/admin/cocina/subidas', 'POST', { ...largo, nombre: 'a.mp4' })),
+        r.abrir(pedido('/api/admin/cocina/subidas', 'POST', { ...largo, nombre: 'b.mp4' })),
+      ])
+      expect([a.status, b.status].sort()).toEqual([201, 409])
+      const { subidas } = await esquema()
+      expect(await (await db()).select().from(subidas)).toHaveLength(1)
+      expect(almacen.subidas.size).toBe(1)
+    })
+
+    it('sin cuota propia, la de siempre: 20 GB', async () => {
+      quien = conCocina
+      const r = await (await rutas()).abrir(pedido('/api/admin/cocina/subidas', 'POST', { ...largo, bytes: 20 * 1024 ** 3 }))
+      expect(r.status).toBe(201)
+      const otra = await (await rutas()).abrir(pedido('/api/admin/cocina/subidas', 'POST', { ...largo, bytes: 1 }))
+      expect(otra.status).toBe(409)
+    })
+  })
+
+  it('el barrido aborta lo abandonado y olvida lo cerrado, pero lo de la cámara no vence', async () => {
     const { barrerSubidas } = await import('./subidas')
-    const { comandas, insumos, subidas } = await esquema()
+    const { materiales, subidas } = await esquema()
     const ahora = new Date('2026-10-23T12:00:00Z')
     const hace = (horas: number) => new Date(ahora.getTime() - horas * 3_600_000)
 
@@ -306,21 +351,19 @@ describe.skipIf(!URL_PRUEBAS)('las subidas por partes de la cocina, contra una P
     const nueva = await abrir(conCocina)
     await (await db()).update(subidas).set({ creadaEn: hace(25) }).where(eq(subidas.id, vieja))
     await (await db()).update(subidas).set({ creadaEn: hace(1) }).where(eq(subidas.id, nueva))
+    await (await db()).insert(materiales).values({
+      ownerId: conCocina.id,
+      nombre: 'guardado hace meses.mp4',
+      url: `${BASE}/cocina/viejo.mp4`,
+      bytes: 1,
+      tipoArchivo: 'video/mp4',
+      derechosEn: hace(24 * 90),
+      creadoEn: hace(24 * 90),
+    })
 
-    const [c] = await (await db()).insert(comandas).values({ ownerId: conCocina.id, ref: 'r', pedido: {}, receta: {} }).returning()
-    const base = { ownerId: conCocina.id, tipo: 'principal' as const, nombre: 'x.mp4', bytes: 1, tipoArchivo: 'video/mp4', derechosEn: ahora }
-    await (await db()).insert(insumos).values([
-      { ...base, url: `${BASE}/cocina/suelto-viejo.mp4`, creadoEn: hace(4 * 24) },
-      { ...base, url: `${BASE}/cocina/suelto-nuevo.mp4`, creadoEn: hace(24) },
-      { ...base, url: `${BASE}/cocina/en-comanda.mp4`, creadoEn: hace(10 * 24), comandaId: c!.id },
-    ])
-
-    expect(await barrerSubidas(ahora)).toEqual({ abortadas: 1, sueltos: 1 })
+    expect(await barrerSubidas(ahora)).toEqual({ abortadas: 1 })
     expect((await (await db()).select().from(subidas)).map((s) => s.id)).toEqual([nueva])
-    expect(almacen.borradas).toEqual([`${BASE}/cocina/suelto-viejo.mp4`])
-    expect((await (await db()).select().from(insumos)).map((i) => i.url).sort()).toEqual([
-      `${BASE}/cocina/en-comanda.mp4`,
-      `${BASE}/cocina/suelto-nuevo.mp4`,
-    ])
+    expect(almacen.borradas).toEqual([])
+    expect(await (await db()).select().from(materiales)).toHaveLength(1)
   })
 })

@@ -73,7 +73,7 @@ se ve arriba, grande y en mayúsculas.
 | La Parrilla | lo que viene y cómo salió lo que ya se fue | `/admin/schedule` | Primera pestaña. Es la entrada: se llega acá al entrar, y `/admin` lleva acá. El calendario: programar, borradores, lo que se quemó, editar, reprogramar | [la-parrilla.md](la-parrilla.md) |
 | La Mesa | lo que te responden y tus respuestas | `/admin/comments` | Pestaña. Los comentarios y sus respuestas | [la-mesa.md](la-mesa.md) |
 | Los Números | cómo te fue en las redes y en tu página | `/admin/analytics` | Pestaña. Un tablero con dos mitades: «En las redes» (views y seguidores ganados) y «En tu página» (visitas y clicks en su página de links). Un clic adentro, «Tus publicaciones» (`/admin/analytics/publicaciones`): cada publicación con sus números y su etiqueta `?s=`; la pieza de cada una, con sus versiones (`/admin/analytics/publicaciones/<id>`); «Comparar por atributo» (`/admin/analytics/comparar`); «Tu mejor 10 %» (`/admin/analytics/mejores`), lo que más rindió —o lo que menos, con «Lo peor»— y qué tiene en común; y «Lado a lado» (`/admin/analytics/lado-a-lado`), dos publicaciones con su portada, el link a la red y cómo crecieron. Al lado del título, «Llevar para la casa»: todo en una planilla de Excel | [los-numeros.md](los-numeros.md) |
-| La Cocina | el chef de la casa y tu propio chef | `/admin/ia` | Cuarta pestaña, la última. Arriba, el chef de la casa: el editor de videos, que se enciende por cuenta, sus comandas, «Pedir una comanda» (`/admin/ia/pedir`), donde se sube el material, y el mesón (`/admin/ia/meson`), donde espera lo que el chef entregó. Abajo, «Tu propio chef»: generar y revocar las llaves de API de la IA propia, y las guías que tiene que leer. Al final, el manual del parrillero (`/admin/ia/manual`): esta misma wiki, para que la lea la persona. Hasta el 2026-10-22 se llamaba «Tu IA» | [la-cocina.md](la-cocina.md) |
+| La Cocina | el chef de la casa y tu propio chef | `/admin/ia` | Cuarta pestaña, la última. Arriba, el chef de la casa: el editor de videos, que se enciende por cuenta, sus comandas, la cámara de frío (`/admin/ia/bodega`; de día, la nevera), donde se guarda el material en bruto, «Pedir una comanda» (`/admin/ia/pedir`), donde se elige de la cámara, y el mesón (`/admin/ia/meson`), donde espera lo que el chef entregó. Abajo, «Tu propio chef»: generar y revocar las llaves de API de la IA propia, y las guías que tiene que leer. Al final, el manual del parrillero (`/admin/ia/manual`): esta misma wiki, para que la lea la persona. Hasta el 2026-10-22 se llamaba «Tu IA» | [la-cocina.md](la-cocina.md) |
 | Los Fierros | tus redes conectadas | `/admin/accounts` | Botón «Ajustes». Conectar y desconectar redes | [los-fierros.md](los-fierros.md) |
 | La Vitrina | tus páginas públicas | `/admin/profiles` | Botón «Ajustes». Su página de links | [la-vitrina.md](la-vitrina.md) |
 | Los Maestros | quién puede entrar | `/admin/usuarios` | Botón «Ajustes», solo el admin. Invitar gente | [los-maestros.md](los-maestros.md) |
@@ -83,7 +83,8 @@ De día, dos se llaman distinto, en la barra, en Ajustes y en su título: La Par
 Barra»** y Los Fierros son **«Los Cuchillos»**. La dirección y lo que se hace en cada una no
 cambian (ver «El modo día»).
 
-Y tres páginas que no son una pantalla del panel: [Entrar al panel](ingresar.md), [El libro de
+Y cuatro páginas que no son una pantalla del vocabulario: [Entrar al panel](ingresar.md), [La
+cámara de frío](la-camara-de-frio.md), dentro de La Cocina, [El libro de
 sugerencias](libro-de-sugerencias.md), una ventana que se abre desde Ajustes, y [La app del
 teléfono](app-movil.md).
 
@@ -134,7 +135,8 @@ teléfono](app-movil.md).
 | Editar su página de links: foto, bio, colores, links, dirección | La Vitrina ([la-vitrina.md](la-vitrina.md)) |
 | Cambiar su nombre o su zona horaria | Tu Cuenta ([tu-cuenta.md](tu-cuenta.md)) |
 | Generar o revocar la llave que te dio a ti, o a otro agente | La Cocina, sección «Tu propio chef», bloque «1. Su llave» ([la-cocina.md](la-cocina.md)). Hasta el 2026-10-19 estaba en Tu Cuenta, y hasta el 2026-10-22 la pestaña se llamaba «Tu IA» |
-| Pedirle videos al chef de la casa: subir el material crudo y decir qué se quiere | La Cocina → «Pedir una comanda» ([la-cocina.md](la-cocina.md)) |
+| Guardar el material en bruto (un video largo, un intro, la música, el logo), ver cuánto espacio queda, renombrar o sacar algo | La Cocina → «La cámara de frío»; de día, «La nevera» ([la-camara-de-frio.md](la-camara-de-frio.md)) |
+| Pedirle videos al chef de la casa: elegir el material de la cámara y decir qué se quiere | La Cocina → «Pedir una comanda» ([la-cocina.md](la-cocina.md)) |
 | Seguir una comanda del chef de la casa, o cancelarla | La Cocina, bloque «El chef de la casa» ([la-cocina.md](la-cocina.md)) |
 | Programar o descartar lo que entregó el chef de la casa | La Cocina → «El mesón (<N>)» ([la-cocina.md](la-cocina.md)) |
 | Leer cómo funciona el panel, pantalla por pantalla | La Cocina → «El manual del parrillero →»: esta misma wiki, en el panel ([la-cocina.md](la-cocina.md)) |
@@ -232,6 +234,27 @@ vale para la de día:
 | «Envolviendo los cortes…» | «Armando la caja…» | Lo que dice esa ventana mientras se arma la planilla |
 | «Lista en el mesón» | «Lista en la bandeja» | El estado de una comanda; el mesón también al servir: «Sirviendo: 3 de 5 tandas en la bandeja» |
 | «No se puede cocinar» | «No se puede preparar» | El estado de una comanda que el chef rechazó |
+| «La cámara de frío» | «La nevera» | Donde se guarda el material en bruto, dentro de La Cocina |
+| «De la cámara de frío» | «De la nevera» | El primer bloque de «Pedir una comanda» |
+| «Guardar en la cámara» | «Guardar en la nevera» | El bloque para subir, en la cámara |
+| «Sacar de la cámara» | «Sacar de la nevera» | El botón de cada material, y su pregunta |
+| «La cámara está vacía.» | «La nevera está vacía.» | La cámara sin nada adentro |
+| «La cámara se está llenando» | «La nevera se está llenando» | Desde el 85 % de la cuota |
+| «La cámara está llena» | «La nevera está llena» | Con la cuota entera ocupada |
+| «un corte» | «un trozo» | El tamaño de un material de la cámara, de lo más chico a lo más grande ([la-camara-de-frio.md](la-camara-de-frio.md)) |
+| «un lomo» | «un filete» | El tamaño de un material de la cámara, de lo más chico a lo más grande ([la-camara-de-frio.md](la-camara-de-frio.md)) |
+| «un cuarto» | «un salmón entero» | El tamaño de un material de la cámara, de lo más chico a lo más grande ([la-camara-de-frio.md](la-camara-de-frio.md)) |
+| «media res» | «un atún» | El tamaño de un material de la cámara, de lo más chico a lo más grande ([la-camara-de-frio.md](la-camara-de-frio.md)) |
+| «la vaca entera» | «un atún gigante» | El tamaño de un material de la cámara, de lo más chico a lo más grande ([la-camara-de-frio.md](la-camara-de-frio.md)) |
+| «una longaniza» | «un tentáculo» | El tamaño de un material de la cámara, de lo más chico a lo más grande ([la-camara-de-frio.md](la-camara-de-frio.md)) |
+| «un par de longanizas» | «medio pulpo» | El tamaño de un material de la cámara, de lo más chico a lo más grande ([la-camara-de-frio.md](la-camara-de-frio.md)) |
+| «una ristra» | «un pulpo» | El tamaño de un material de la cámara, de lo más chico a lo más grande ([la-camara-de-frio.md](la-camara-de-frio.md)) |
+| «la ristra larga» | «un pulpo gigante» | El tamaño de un material de la cámara, de lo más chico a lo más grande ([la-camara-de-frio.md](la-camara-de-frio.md)) |
+| «un pimentón» | «un onigiri» | El tamaño de un material de la cámara, de lo más chico a lo más grande ([la-camara-de-frio.md](la-camara-de-frio.md)) |
+| «el choclo y el pimentón» | «un bol de arroz» | El tamaño de un material de la cámara, de lo más chico a lo más grande ([la-camara-de-frio.md](la-camara-de-frio.md)) |
+| «un cajón de verduras» | «una tina de arroz» | El tamaño de un material de la cámara, de lo más chico a lo más grande ([la-camara-de-frio.md](la-camara-de-frio.md)) |
+| «un paquete» | «un furoshiki» | El tamaño de un material de la cámara, de lo más chico a lo más grande ([la-camara-de-frio.md](la-camara-de-frio.md)) |
+| «un fardo» | «un furoshiki grande» | El tamaño de un material de la cámara, de lo más chico a lo más grande ([la-camara-de-frio.md](la-camara-de-frio.md)) |
 
 Y unas frases enteras: en Los Fierros, «Este fierro se está enfriando: la conexión vence <fecha>.
 Reconéctala antes de que se apague.» es «Este cuchillo se está desafilando: la conexión vence

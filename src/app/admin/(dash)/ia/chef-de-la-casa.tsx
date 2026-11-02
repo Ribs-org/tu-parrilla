@@ -6,9 +6,11 @@ import { EstacionDeLaComanda } from '@/components/estacion-comanda'
 import { TERMINALES } from '@/lib/cocina/estados'
 import { NOMBRE_ESTADO } from '@/lib/cocina/nombres'
 import { etaEnLaFila, type ComandaDelPanel, type EstadoDeLaCocina, type PulsoDeLaCocina } from '@/lib/cocina/panel'
+import { pesoEnPalabras } from '@/lib/cocina/bodega'
+import type { UsoDeLaCamara } from '@/lib/cocina/subidas'
 import { antesEnLaFila, estadoEnPalabras, tramoDelRecorrido } from '@/lib/cocina/tarjeta'
 import { cn } from '@/lib/utils'
-import { MESON, nombreDe } from '@/lib/vocabulario'
+import { CAMARA, MESON, nombreDe } from '@/lib/vocabulario'
 import { BotonCancelarComanda } from './cancelar'
 import { VigiaDeLaCocina } from './vigia'
 
@@ -47,6 +49,7 @@ export function ChefDeLaCasa({
   cocina,
   comandas,
   enElMeson,
+  camara,
   pulso,
   zona,
   ahora,
@@ -57,6 +60,8 @@ export function ChefDeLaCasa({
   pulso: PulsoDeLaCocina
   /** Cuántos creativos esperan en el mesón, de todas las comandas. */
   enElMeson: number
+  /** Lo que hay en la cámara de frío y cuánto le cabe. */
+  camara: UsoDeLaCamara
   zona: string
   ahora: Date
 }) {
@@ -80,6 +85,16 @@ export function ChefDeLaCasa({
           <VigiaDeLaCocina vivas={pulso.vivas} firma={pulso.firma} />
         </span>
         <span className="flex flex-wrap gap-2">
+          <Link
+            href="/admin/ia/bodega"
+            className="flex items-center gap-1.5 rounded-lg border border-acero-700 px-3 py-1.5 text-sm text-fg-muted transition hover:bg-acero-800 hover:text-fg"
+          >
+            <IconoCamara className="h-4 w-4" />
+            <DeNocheYDeDia noche={CAMARA.noche} dia={CAMARA.dia} />
+            <span className="font-mono text-[0.7rem] text-fg-faint">
+              {camara.cuantos > 0 ? `${pesoEnPalabras(camara.guardados)} de ${pesoEnPalabras(camara.cuota)}` : 'vacía'}
+            </span>
+          </Link>
           {enElMeson > 0 ? (
             <Link
               href="/admin/ia/meson"
@@ -201,5 +216,27 @@ function Recorrido({ comanda: c }: { comanda: ComandaDelPanel }) {
         </span>
       ))}
     </div>
+  )
+}
+
+/**
+ * El ícono del botón de la cámara de frío: de noche, la puerta de la cámara con su manilla y el
+ * termómetro; de día, la nevera de vidrio con un pescado adentro. Chico, en el color del texto.
+ */
+function IconoCamara({ className }: { className?: string }) {
+  return (
+    <>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className={cn('solo-noche shrink-0', className)} aria-hidden>
+        <rect x="4" y="3" width="16" height="18" rx="1.5" />
+        <path d="M16 10V14" strokeLinecap="round" strokeWidth="2.2" />
+        <path d="M8 7V12" strokeLinecap="round" />
+        <circle cx="8" cy="14" r="1.6" fill="currentColor" stroke="none" />
+      </svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className={cn('solo-dia shrink-0', className)} aria-hidden>
+        <rect x="3" y="6" width="18" height="13" rx="1.5" />
+        <path d="M3 15H21" />
+        <path d="M7 12.5C9 10.5 13 10.5 15 12L17.5 10.5V14L15 12.6C13 14 9 14 7 12.5Z" fill="currentColor" stroke="none" />
+      </svg>
+    </>
   )
 }

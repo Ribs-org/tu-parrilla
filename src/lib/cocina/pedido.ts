@@ -1,6 +1,12 @@
+import type { TipoInsumo } from '@/db/schema'
+import type { ClaseMaterial } from './bodega'
+import { SUBTIPOS_PRINCIPAL, type SubtipoPrincipal } from './insumos'
+
 // Lo que se pide en una comanda, sin base: lo lee la acción que la cuelga y lo muestra el
-// formulario («La comanda nueva», en `docs/superpowers/specs/2026-10-22-la-cocina-design.md`). En la
-// fase 0 no hay catálogo todavía, así que los estilos los elige el chef; el formulario no los ofrece.
+// formulario («La comanda nueva», en `docs/superpowers/specs/2026-10-22-la-cocina-design.md`). Desde
+// la cámara de frío, una comanda elige materiales de ahí: uno es el plato principal, y cada uno de
+// los demás dice qué es (`docs/superpowers/specs/2026-11-02-la-bodega-design.md`). En la fase 0 no
+// hay catálogo todavía, así que los estilos los elige el chef; el formulario no los ofrece.
 
 /** Qué puede salir: lo que el chef ofrece hoy. */
 export const FORMATOS = ['clips', 'carruseles'] as const
@@ -16,7 +22,44 @@ export const NOMBRE_CANTIDAD: Record<CantidadPedida, string> = {
   'unos-20': 'Unos 20',
 }
 
-export const MAX_ACOMPANAMIENTOS = 10
+/** Qué es el plato principal, en palabras, con lo que lo explica. */
+export const NOMBRE_SUBTIPO: Record<SubtipoPrincipal, string> = {
+  largo: 'Un video largo',
+  podcast: 'Un podcast en videollamada',
+  tomas: 'Tomas sueltas',
+}
+export const AYUDA_SUBTIPO: Record<SubtipoPrincipal, string> = {
+  largo: 'Una persona a cámara: una charla, una clase, un video editado o crudo.',
+  podcast: 'Una videollamada con varias caras en mosaico.',
+  tomas: 'Varias respuestas cortas de una persona.',
+}
+
+/**
+ * Qué es cada video que acompaña al principal: otra cámara o la pantalla, que el chef sincroniza
+ * por el audio, o algo para intercalar (un intro, un outro, b-roll). Una foto siempre es para
+ * intercalar, y lo que no es video ni foto va como extra: eso no se elige.
+ */
+export const ROLES_DE_VIDEO = ['imagen', 'camara', 'pantalla'] as const
+export type RolDeVideo = (typeof ROLES_DE_VIDEO)[number]
+export const NOMBRE_ROL: Record<RolDeVideo, string> = {
+  imagen: 'Para intercalar',
+  camara: 'Otra cámara',
+  pantalla: 'La pantalla',
+}
+export const AYUDA_ROL: Record<RolDeVideo, string> = {
+  imagen: 'Un intro, un outro o b-roll: el chef lo pone donde va.',
+  camara: 'Otro ángulo del mismo momento: el chef lo sincroniza con el principal por el audio.',
+  pantalla: 'La pantalla grabada mientras hablas: también se sincroniza por el audio.',
+}
+
+/** El rol de un material en la comanda: el que se eligió si es video; si no, el que le toca por lo que es. */
+export function rolEnLaComanda(clase: ClaseMaterial, elegido: RolDeVideo): Exclude<TipoInsumo, 'principal'> {
+  if (clase === 'video') return elegido
+  return clase === 'imagen' ? 'imagen' : 'extra'
+}
+
+/** Cuántos materiales acompañan al principal: dos de cuatro videos y cuatro fotos caben de sobra. */
+export const MAX_ACOMPANAMIENTOS = 20
 /** Lo que cabe en «Tu instrucción al chef». */
 export const MAX_INSTRUCCION = 1000
 const MAX_NOMBRE_MARCA = 80
@@ -24,7 +67,8 @@ const MAX_HANDLE = 60
 const MAX_CTA = 120
 
 export const PEDIDO_ILEGIBLE = 'No entendimos la comanda: recarga la página y vuelve a intentarlo.'
-export const PRINCIPAL_FALTA = 'Sube el plato principal: el video que el chef va a cocinar.'
+export const PRINCIPAL_FALTA = 'Elige el plato principal: el video que el chef va a cocinar.'
+export const SUBTIPO_FALTA = 'Di qué es el plato principal: un video largo, un podcast en videollamada o tomas sueltas.'
 export const FORMATO_FALTA = 'Elige qué quieres que salga: clips, carruseles o los dos.'
 export const CANTIDAD_FALTA = 'Elige cuántos, más o menos.'
 export const INSTRUCCION_LARGA = `Tu instrucción al chef cabe en ${MAX_INSTRUCCION} caracteres: acórtala.`
@@ -32,15 +76,18 @@ export const FECHA_ILEGIBLE = '«Para cuándo» tiene que ser una fecha.'
 export const MARCA_SIN_NOMBRE = 'Ponle nombre a tu marca: es el que el chef usa en los videos.'
 export const MARCA_LARGA = 'El nombre de la marca, el @ y el llamado final son textos cortos: acórtalos.'
 export const ACENTO_ILEGIBLE = 'El color de acento tiene que ser un color, como #3D7BFF.'
-export const DEMASIADOS = `Una comanda lleva hasta ${MAX_ACOMPANAMIENTOS} acompañamientos.`
+export const DEMASIADOS = `Una comanda lleva hasta ${MAX_ACOMPANAMIENTOS} materiales además del plato principal.`
 
 export type MarcaBasica = { nombre: string; handle: string | null; acento: string | null; ctaTexto: string | null }
 
 export type PedidoDeComanda = {
   /** El que puso el formulario al abrirse: mandarla dos veces no la duplica. */
   ref: string
+  /** El material de la cámara que el chef cocina: un video. */
   principal: string
-  acompanamientos: string[]
+  subtipo: SubtipoPrincipal
+  /** Los demás materiales elegidos, en orden, con el rol que se eligió si son video. */
+  acompanamientos: Array<{ id: string; rol: RolDeVideo }>
   formatos: FormatoPedido[]
   cantidad: CantidadPedida
   /**
@@ -76,10 +123,18 @@ export function leerPedido(crudo: unknown): PedidoDeComanda | { error: string } 
   if (!UUID.test(ref)) return { error: PEDIDO_ILEGIBLE }
   const principal = texto(c.principal)
   if (!UUID.test(principal)) return { error: PRINCIPAL_FALTA }
-  const acompanamientos = Array.isArray(c.acompanamientos) ? c.acompanamientos : []
-  if (!acompanamientos.every((a) => typeof a === 'string' && UUID.test(a))) return { error: PEDIDO_ILEGIBLE }
+  if (typeof c.subtipo !== 'string' || !(SUBTIPOS_PRINCIPAL as readonly string[]).includes(c.subtipo)) return { error: SUBTIPO_FALTA }
+  const crudos = Array.isArray(c.acompanamientos) ? c.acompanamientos : []
+  const acompanamientos: Array<{ id: string; rol: RolDeVideo }> = []
+  for (const a of crudos) {
+    const fila = (typeof a === 'object' && a !== null ? a : {}) as Record<string, unknown>
+    const id = texto(fila.id)
+    if (!UUID.test(id)) return { error: PEDIDO_ILEGIBLE }
+    // Un rol que no se entiende es para intercalar: es lo que el chef hace con lo que no sincroniza.
+    const rol = (ROLES_DE_VIDEO as readonly string[]).includes(fila.rol as string) ? (fila.rol as RolDeVideo) : 'imagen'
+    if (id !== principal && !acompanamientos.some((x) => x.id === id)) acompanamientos.push({ id, rol })
+  }
   if (acompanamientos.length > MAX_ACOMPANAMIENTOS) return { error: DEMASIADOS }
-  const unicos = [...new Set(acompanamientos as string[])].filter((a) => a !== principal)
 
   const formatos = Array.isArray(c.formatos) ? c.formatos : []
   const conocidos = FORMATOS.filter((f) => formatos.includes(f))
@@ -107,7 +162,8 @@ export function leerPedido(crudo: unknown): PedidoDeComanda | { error: string } 
   return {
     ref,
     principal,
-    acompanamientos: unicos,
+    subtipo: c.subtipo as SubtipoPrincipal,
+    acompanamientos,
     formatos: conocidos,
     cantidad: c.cantidad as CantidadPedida,
     notas,

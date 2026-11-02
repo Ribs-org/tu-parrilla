@@ -17,6 +17,7 @@ export const PAGINAS = [
   'la-mesa',
   'los-numeros',
   'la-cocina',
+  'la-camara-de-frio',
   'los-fierros',
   'la-vitrina',
   'los-maestros',

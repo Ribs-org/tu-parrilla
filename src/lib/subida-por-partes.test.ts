@@ -18,7 +18,7 @@ import {
 
 const TAMANO = 10
 
-type SubidaFalsa = { bytes: number; partes: Map<number, number>; insumo: Record<string, unknown> | null; nombre: string }
+type SubidaFalsa = { bytes: number; partes: Map<number, number>; material: Record<string, unknown> | null; nombre: string }
 
 function json(status: number, cuerpo: unknown): Response {
   return new Response(JSON.stringify(cuerpo), { status, headers: { 'content-type': 'application/json' } })
@@ -35,7 +35,7 @@ function servidorFalso() {
     const partes = Math.ceil(s.bytes / TAMANO)
     const faltan = new Set(partesQueFaltan(s.bytes, TAMANO, [...s.partes].map(([numero, bytes]) => ({ numero, bytes }))))
     const llegaron = Array.from({ length: partes }, (_, n) => n + 1).filter((n) => !faltan.has(n))
-    return { id, nombre: s.nombre, bytes: s.bytes, tamanoParte: TAMANO, partes, llegaron, insumo: s.insumo }
+    return { id, nombre: s.nombre, bytes: s.bytes, tamanoParte: TAMANO, partes, llegaron, material: s.material }
   }
 
   const fetchFalso = async (entrada: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
@@ -45,7 +45,7 @@ function servidorFalso() {
     const cuerpo = typeof init?.body === 'string' ? JSON.parse(init.body) : null
     if (url === '/api/admin/cocina/subidas' && metodo === 'POST') {
       const id = `s${siguiente++}`
-      subidas.set(id, { bytes: cuerpo.bytes, partes: new Map(), insumo: null, nombre: cuerpo.nombre })
+      subidas.set(id, { bytes: cuerpo.bytes, partes: new Map(), material: null, nombre: cuerpo.nombre })
       return json(201, { id, tamanoParte: TAMANO, partes: Math.ceil(cuerpo.bytes / TAMANO) })
     }
     const [, id, accion] = url.match(/^\/api\/admin\/cocina\/subidas\/([^/]+)(?:\/(partes|cerrar))?$/) ?? []
@@ -60,8 +60,8 @@ function servidorFalso() {
       alCerrar = null
       const { llegaron, partes } = estado(id, s)
       if (llegaron.length < partes) return json(409, { error: `Faltan ${partes - llegaron.length} partes por subir.` })
-      s.insumo ??= { id: `insumo-${id}`, nombre: s.nombre, bytes: s.bytes }
-      return json(201, { insumo: s.insumo })
+      s.material ??= { id: `material-${id}`, nombre: s.nombre, bytes: s.bytes }
+      return json(201, { material: s.material })
     }
     if (metodo === 'DELETE') {
       subidas.delete(id)
@@ -103,8 +103,8 @@ function memoriaFalsa(inicial: Record<string, string> = {}) {
 
 // 24 bytes en partes de 10: dos llenas y una de 4.
 const archivo = new File([new Uint8Array(24)], 'video9.mp4', { type: 'video/mp4', lastModified: 1 })
-const pedido = { insumo: 'principal', subtipo: 'largo', duracionS: 1800, derechos: true } as const
-const RECUERDO = claveDeRecuerdo(archivo, 'principal')
+const pedido = { uso: 'crudo', duracionS: 1800, derechos: true } as const
+const RECUERDO = claveDeRecuerdo(archivo)
 const sinEsperar = async () => {}
 
 describe('subirPorPartes', () => {
@@ -114,7 +114,7 @@ describe('subirPorPartes', () => {
     const avances: Avance[] = []
     const insumo = await subirPorPartes(archivo, pedido, { alAvanzar: (a) => avances.push(a) }, { ...servidor, memoria, esperar: sinEsperar })
 
-    expect(insumo).toEqual({ id: 'insumo-s1', nombre: 'video9.mp4', bytes: 24 })
+    expect(insumo).toEqual({ id: 'material-s1', nombre: 'video9.mp4', bytes: 24 })
     expect([...servidor.subidas.get('s1')!.partes].sort()).toEqual([
       [1, 10],
       [2, 10],
@@ -128,7 +128,7 @@ describe('subirPorPartes', () => {
 
   it('retoma lo que quedó: no vuelve a subir las partes que llegaron', async () => {
     const servidor = servidorFalso()
-    servidor.subidas.set('s9', { bytes: 24, nombre: 'video9.mp4', insumo: null, partes: new Map([[1, 10], [2, 10]]) })
+    servidor.subidas.set('s9', { bytes: 24, nombre: 'video9.mp4', material: null, partes: new Map([[1, 10], [2, 10]]) })
     const memoria = memoriaFalsa({ [RECUERDO]: 's9' })
     const avances: Avance[] = []
     await subirPorPartes(archivo, pedido, { alAvanzar: (a) => avances.push(a) }, { ...servidor, memoria, esperar: sinEsperar })
@@ -141,15 +141,15 @@ describe('subirPorPartes', () => {
 
   it('una parte que llegó con otro peso se vuelve a subir', async () => {
     const servidor = servidorFalso()
-    servidor.subidas.set('s9', { bytes: 24, nombre: 'video9.mp4', insumo: null, partes: new Map([[1, 10], [2, 3]]) })
+    servidor.subidas.set('s9', { bytes: 24, nombre: 'video9.mp4', material: null, partes: new Map([[1, 10], [2, 3]]) })
     await subirPorPartes(archivo, pedido, {}, { ...servidor, memoria: memoriaFalsa({ [RECUERDO]: 's9' }), esperar: sinEsperar })
     expect(servidor.firmados.sort()).toEqual([2, 3])
   })
 
-  it('si ya se había cerrado, devuelve su insumo sin subir nada', async () => {
+  it('si ya se había cerrado, devuelve su material sin subir nada', async () => {
     const servidor = servidorFalso()
-    const cerrado = { id: 'insumo-viejo', nombre: 'video9.mp4', bytes: 24 }
-    servidor.subidas.set('s9', { bytes: 24, nombre: 'video9.mp4', insumo: cerrado, partes: new Map() })
+    const cerrado = { id: 'material-viejo', nombre: 'video9.mp4', bytes: 24 }
+    servidor.subidas.set('s9', { bytes: 24, nombre: 'video9.mp4', material: cerrado, partes: new Map() })
     const memoria = memoriaFalsa({ [RECUERDO]: 's9' })
     expect(await subirPorPartes(archivo, pedido, {}, { ...servidor, memoria, esperar: sinEsperar })).toEqual(cerrado)
     expect(servidor.firmados).toEqual([])
@@ -162,7 +162,7 @@ describe('subirPorPartes', () => {
     expect(servidor.llamadas).toContain('POST /api/admin/cocina/subidas')
 
     const otro = servidorFalso()
-    otro.subidas.set('s9', { bytes: 999, nombre: 'video9.mp4', insumo: null, partes: new Map() })
+    otro.subidas.set('s9', { bytes: 999, nombre: 'video9.mp4', material: null, partes: new Map() })
     await subirPorPartes(archivo, pedido, {}, { ...otro, memoria: memoriaFalsa({ [RECUERDO]: 's9' }), esperar: sinEsperar })
     expect(otro.llamadas).toContain('POST /api/admin/cocina/subidas')
   })
@@ -180,7 +180,7 @@ describe('subirPorPartes', () => {
     await subirPorPartes(archivo, pedido, {}, { ...servidor, subirParte, memoria: memoriaFalsa(), esperar: sinEsperar })
     expect(fallas).toBe(2)
     expect(servidor.firmados.filter((n) => n === 2)).toHaveLength(3)
-    expect(servidor.subidas.get('s1')!.insumo).not.toBeNull()
+    expect(servidor.subidas.get('s1')!.material).not.toBeNull()
   })
 
   it('se rinde después de los intentos, y deja la subida recordada para retomarla', async () => {
@@ -215,7 +215,7 @@ describe('subirPorPartes', () => {
     const servidor = servidorFalso()
     servidor.antesDeCerrar((s) => s.partes.delete(3))
     const insumo = await subirPorPartes(archivo, pedido, {}, { ...servidor, memoria: memoriaFalsa(), esperar: sinEsperar })
-    expect(insumo).toMatchObject({ id: 'insumo-s1' })
+    expect(insumo).toMatchObject({ id: 'material-s1' })
     expect(servidor.firmados.filter((n) => n === 3)).toHaveLength(2)
   })
 
@@ -241,14 +241,14 @@ describe('subirPorPartes', () => {
 describe('cancelarSubida', () => {
   it('aborta la recordada en el servidor y la olvida; sin una recordada, no hace nada', async () => {
     const servidor = servidorFalso()
-    servidor.subidas.set('s9', { bytes: 24, nombre: 'video9.mp4', insumo: null, partes: new Map() })
+    servidor.subidas.set('s9', { bytes: 24, nombre: 'video9.mp4', material: null, partes: new Map() })
     const memoria = memoriaFalsa({ [RECUERDO]: 's9' })
-    await cancelarSubida(archivo, 'principal', { ...servidor, memoria })
+    await cancelarSubida(archivo, { ...servidor, memoria })
     expect(servidor.subidas.has('s9')).toBe(false)
     expect(memoria.mapa.size).toBe(0)
 
     const llamadasAntes = servidor.llamadas.length
-    await cancelarSubida(archivo, 'principal', { ...servidor, memoria })
+    await cancelarSubida(archivo, { ...servidor, memoria })
     expect(servidor.llamadas.length).toBe(llamadasAntes)
   })
 })

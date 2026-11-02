@@ -1,16 +1,20 @@
 'use client'
 
-import { useEffect, useId, useRef, useState, useTransition } from 'react'
+import { useCallback, useId, useState, useTransition } from 'react'
+import Link from 'next/link'
 import { pedirComandaPropia } from '@/app/admin/cocina-actions'
 import { Panel } from '@/components/charts/panel'
-import { useConfirmar } from '@/components/confirmar'
-import { DibujoDeInsumo } from '@/components/dibujos-insumo'
+import { DeNocheYDeDia } from '@/components/de-noche-y-de-dia'
+import { DibujoDeMaterial } from '@/components/dibujos-material'
 import { SelectorColor } from '@/components/selector-color'
 import { SelectorFecha } from '@/components/selector-fecha'
 import { Button, Field, Input, Textarea } from '@/components/ui'
-import type { TipoInsumo } from '@/db/schema'
-import { SUBTIPOS_PRINCIPAL, aceptaTipo, maxBytesDe, muyGrande, tipoDeArchivo, tipoNoAceptado, type SubtipoPrincipal } from '@/lib/cocina/insumos'
+import { NOMBRE_USO, type ClaseMaterial } from '@/lib/cocina/bodega'
+import { SUBTIPOS_PRINCIPAL, type SubtipoPrincipal } from '@/lib/cocina/insumos'
+import type { MaterialDeLaCamara } from '@/lib/cocina/materiales'
 import {
+  AYUDA_ROL,
+  AYUDA_SUBTIPO,
   CANTIDADES,
   EJEMPLOS_DE_INSTRUCCION,
   FORMATOS,
@@ -19,111 +23,87 @@ import {
   MAX_INSTRUCCION,
   NOMBRE_CANTIDAD,
   NOMBRE_FORMATO,
+  NOMBRE_ROL,
+  NOMBRE_SUBTIPO,
+  ROLES_DE_VIDEO,
   largoDeInstruccion,
   minutosDe,
   type CantidadPedida,
   type FormatoPedido,
   type MarcaBasica,
+  type RolDeVideo,
 } from '@/lib/cocina/pedido'
-import type { InsumoSubido } from '@/lib/cocina/subidas'
-import { SubidaFallida, cancelarSubida, subirPorPartes } from '@/lib/subida-por-partes'
+import type { MaterialSubido } from '@/lib/cocina/subidas'
 import { cn } from '@/lib/utils'
+import { CAMARA, DE_LA_CAMARA } from '@/lib/vocabulario'
+import { FiltroDeClase, PesoDeMaterial, duracionEnPalabras } from '../bodega/camara'
+import { GuardarEnLaCamara } from '../bodega/guardar'
 
 // El formulario de una comanda (`docs/superpowers/specs/2026-10-22-la-cocina-design.md`, «La comanda
-// nueva»): cada archivo empieza a subir apenas se elige, por partes y directo al almacén, con su
-// dibujo y su barra; lo que ya se subió y no se pidió vuelve a ofrecerse, y elegir otra vez el mismo
-// archivo retoma una subida cortada. Colgar la comanda manda solo los ids. «Tu instrucción al chef»
-// tiene su propio bloque: es lo único que el chef lee en palabras de la persona.
+// nueva», y `2026-11-02-la-bodega-design.md`): se elige de la cámara de frío (de día, la nevera)
+// cualquier combinación —dos de cuatro videos y cuatro fotos—, y cada material elegido sale volando
+// de la cámara al riel de la comanda, donde se cuelga. Uno de los videos es el plato principal; los
+// demás dicen qué son. Desde acá también se guarda algo nuevo, que entra elegido. Colgar la comanda
+// manda solo los ids. «Tu instrucción al chef» tiene su propio bloque: es lo único que el chef lee en
+// palabras de la persona.
 
-const NOMBRE_SUBTIPO: Record<SubtipoPrincipal, string> = {
-  largo: 'Un video largo',
-  podcast: 'Un podcast en videollamada',
-  tomas: 'Tomas sueltas',
-}
-const AYUDA_SUBTIPO: Record<SubtipoPrincipal, string> = {
-  largo: 'Una persona a cámara: una charla, una clase, un video editado o crudo.',
-  podcast: 'Una videollamada con varias caras en mosaico.',
-  tomas: 'Varias respuestas cortas de una persona.',
-}
-type TipoAcompanamiento = Exclude<TipoInsumo, 'principal'>
-const NOMBRE_ACOMPANAMIENTO: Record<TipoAcompanamiento, string> = {
-  camara: 'Otra cámara',
-  pantalla: 'La pantalla',
-  imagen: 'Imágenes o b-roll',
-}
-const AYUDA_ACOMPANAMIENTO: Record<TipoAcompanamiento, string> = {
-  camara: 'Otro ángulo del mismo momento: el chef lo sincroniza con el principal por el audio.',
-  pantalla: 'La pantalla grabada mientras hablas: también se sincroniza por el audio.',
-  imagen: 'Fotos o clips sin voz que el chef puede intercalar.',
-}
-const VIDEOS = 'video/mp4,video/quicktime,video/webm,video/x-matroska,.mp4,.mov,.webm,.mkv,.m4v'
-const FOTOS = 'image/jpeg,image/png,image/webp,image/heic,.jpg,.jpeg,.png,.webp,.heic'
+type Elegido = { id: string; rol: RolDeVideo }
 
-export type Ranura = {
-  clave: string
-  tipo: TipoInsumo
-  nombre: string
-  bytes: number
-  estado: 'subiendo' | 'subido' | 'error'
-  subidos: number
-  insumo: InsumoSubido | null
-  error: string | null
-  archivo: File | null
-  subtipo: SubtipoPrincipal | null
-}
-
-const NUMERO = new Intl.NumberFormat('es-CL', { maximumFractionDigits: 1, minimumFractionDigits: 1 })
-
-/** El peso en palabras: «4,0 GB», «350,2 MB». */
-export function tamano(bytes: number): string {
-  if (bytes >= 1024 ** 3) return `${NUMERO.format(bytes / 1024 ** 3)} GB`
-  return `${NUMERO.format(Math.max(bytes, 1) / 1024 ** 2)} MB`
-}
-
-/** La duración que trae el video en sus metadatos, sin subirlo. Si el navegador no lo puede leer (algunos HEVC), ninguna. */
-function leerDuracion(archivo: File): Promise<number | null> {
-  if (!tipoDeArchivo(archivo.name, archivo.type).startsWith('video/')) return Promise.resolve(null)
-  return new Promise((resolver) => {
-    const video = document.createElement('video')
-    const url = URL.createObjectURL(archivo)
-    const listo = (duracion: number | null) => {
-      clearTimeout(reloj)
-      URL.revokeObjectURL(url)
-      resolver(duracion)
-    }
-    const reloj = setTimeout(() => listo(null), 8000)
-    video.preload = 'metadata'
-    video.onloadedmetadata = () => listo(Number.isFinite(video.duration) ? video.duration : null)
-    video.onerror = () => listo(null)
-    video.src = url
+/**
+ * La pieza sale de su lugar en la cámara y vuela hasta su gancho en el riel, en arco, achicándose:
+ * un clon del dibujo, puesto encima de todo mientras dura. Va dentro del contenedor con el modo
+ * (`data-tema`), para que el clon se dibuje en el modo que se ve. Con movimiento reducido no vuela.
+ */
+function volar(origen: HTMLElement | null, destino: HTMLElement | null, listo: () => void) {
+  if (!origen || !destino || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return listo()
+  const a = origen.getBoundingClientRect()
+  const b = destino.getBoundingClientRect()
+  const clon = origen.cloneNode(true) as HTMLElement
+  Object.assign(clon.style, {
+    position: 'fixed',
+    left: `${a.left}px`,
+    top: `${a.top}px`,
+    width: `${a.width}px`,
+    height: `${a.height}px`,
+    margin: '0',
+    zIndex: '60',
+    pointerEvents: 'none',
   })
-}
-
-function deUnSuelto(i: InsumoSubido): Ranura {
-  return {
-    clave: i.id,
-    tipo: i.tipo as TipoInsumo,
-    nombre: i.nombre,
-    bytes: i.bytes,
-    estado: 'subido',
-    subidos: i.bytes,
-    insumo: i,
-    error: null,
-    archivo: null,
-    subtipo: (i.subtipo as SubtipoPrincipal | null) ?? null,
+  clon.setAttribute('aria-hidden', 'true')
+  ;(origen.closest('[data-tema]') ?? document.body).appendChild(clon)
+  const dx = b.left + b.width / 2 - (a.left + a.width / 2)
+  const dy = b.top + b.height / 2 - (a.top + a.height / 2)
+  const escala = b.width / a.width
+  const vuelo = clon.animate(
+    [
+      { transform: 'translate(0, 0) scale(1) rotate(0deg)' },
+      { transform: `translate(${dx * 0.5}px, ${dy * 0.5 - 70}px) scale(${(1 + escala) / 2}) rotate(-10deg)`, offset: 0.5 },
+      { transform: `translate(${dx}px, ${dy}px) scale(${escala}) rotate(0deg)` },
+    ],
+    { duration: 650, easing: 'cubic-bezier(.3,.7,.3,1)' },
+  )
+  const terminar = () => {
+    clon.remove()
+    listo()
   }
+  vuelo.onfinish = terminar
+  vuelo.oncancel = terminar
 }
 
 export function FormularioComanda({
+  materiales: iniciales,
+  subiendo,
+  cuota,
   marca: marcaInicial,
-  sueltos: sueltosIniciales,
   antes,
   eta,
   cocinaAbierta,
   zona,
 }: {
+  materiales: MaterialDeLaCamara[]
+  subiendo: number
+  cuota: number
   marca: MarcaBasica
-  sueltos: InsumoSubido[]
   antes: number
   eta: string | null
   cocinaAbierta: boolean
@@ -131,145 +111,94 @@ export function FormularioComanda({
 }) {
   // La `ref` nace con el formulario: mandarlo dos veces cuelga una sola comanda.
   const [ref] = useState(() => crypto.randomUUID())
-  const [derechos, setDerechos] = useState(false)
+  const [materiales, setMateriales] = useState(iniciales)
+  const [elegidos, setElegidos] = useState<Elegido[]>([])
+  const [principalId, setPrincipalId] = useState<string | null>(null)
+  const [volando, setVolando] = useState<ReadonlySet<string>>(new Set())
+  const [filtro, setFiltro] = useState<ClaseMaterial | null>(null)
   const [subtipo, setSubtipo] = useState<SubtipoPrincipal>('largo')
-  const [principal, setPrincipal] = useState<Ranura | null>(null)
-  const [acompanamientos, setAcompanamientos] = useState<Ranura[]>([])
-  const [tipoNuevo, setTipoNuevo] = useState<TipoAcompanamiento>('camara')
-  const [sueltos, setSueltos] = useState(sueltosIniciales)
   const [formatos, setFormatos] = useState<FormatoPedido[]>(['clips'])
   const [cantidad, setCantidad] = useState<CantidadPedida>('lo-que-de')
   const [notas, setNotas] = useState('')
   const [paraCuando, setParaCuando] = useState('')
   const [marca, setMarca] = useState<MarcaBasica>(marcaInicial)
+  const [subiendoAca, setSubiendoAca] = useState(0)
   const [error, setError] = useState<string | null>(null)
   const [enviando, enviar] = useTransition()
-  const controles = useRef(new Map<string, AbortController>())
-  const confirmar = useConfirmar()
 
-  const subiendo = [principal, ...acompanamientos].some((r) => r?.estado === 'subiendo')
-  // Cerrar la pestaña con algo subiendo lo corta: se retoma eligiendo el mismo archivo, pero mejor avisar.
-  useEffect(() => {
-    if (!subiendo) return
-    const avisar = (e: BeforeUnloadEvent) => e.preventDefault()
-    window.addEventListener('beforeunload', avisar)
-    return () => window.removeEventListener('beforeunload', avisar)
-  }, [subiendo])
+  const porId = new Map(materiales.map((m) => [m.id, m]))
+  const enLaComanda = elegidos.map((e) => ({ ...e, material: porId.get(e.id)! })).filter((e) => e.material)
+  const principal = principalId ? porId.get(principalId) ?? null : null
+  const acompanamientos = enLaComanda.filter((e) => e.id !== principalId)
+  const visibles = filtro ? materiales.filter((m) => m.clase === filtro) : materiales
+  const guardados = materiales.reduce((suma, m) => suma + m.bytes, 0)
 
-  function actualizar(clave: string, cambio: Partial<Ranura>) {
-    setPrincipal((r) => (r?.clave === clave ? { ...r, ...cambio } : r))
-    setAcompanamientos((lista) => lista.map((r) => (r.clave === clave ? { ...r, ...cambio } : r)))
+  function colgar(id: string, rol: RolDeVideo = 'imagen') {
+    const m = porId.get(id)
+    if (!m || elegidos.some((e) => e.id === id)) return
+    if (elegidos.length >= MAX_ACOMPANAMIENTOS + 1) return
+    setElegidos((lista) => [...lista, { id, rol }])
+    // El primer video que se elige es el plato principal: el chef cocina a partir de uno.
+    if (!principalId && m.clase === 'video') setPrincipalId(id)
   }
 
-  async function subir(ranura: Ranura) {
-    const archivo = ranura.archivo
-    if (!archivo) return
-    const control = new AbortController()
-    controles.current.set(ranura.clave, control)
-    actualizar(ranura.clave, { estado: 'subiendo', error: null })
-    try {
-      const duracionS = await leerDuracion(archivo)
-      const insumo = await subirPorPartes(
-        archivo,
-        { insumo: ranura.tipo, subtipo: ranura.tipo === 'principal' ? ranura.subtipo : null, duracionS, derechos: true },
-        { senal: control.signal, alAvanzar: ({ subidos }) => actualizar(ranura.clave, { subidos }) },
-      )
-      actualizar(ranura.clave, { estado: 'subido', subidos: archivo.size, insumo })
-    } catch (e) {
-      if (control.signal.aborted) return
-      actualizar(ranura.clave, { estado: 'error', error: e instanceof SubidaFallida ? e.message : 'No se pudo subir el archivo.' })
-    } finally {
-      controles.current.delete(ranura.clave)
-    }
+  function elegir(id: string) {
+    const origen = document.querySelector<HTMLElement>(`[data-dibujo-de="${id}"]`)
+    setVolando((v) => new Set(v).add(id))
+    colgar(id)
+    // Dos cuadros: el primero pinta el gancho nuevo en el riel, el segundo ya sabe dónde quedó.
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() =>
+        volar(origen, document.querySelector<HTMLElement>(`[data-en-el-riel="${id}"]`), () =>
+          setVolando((v) => {
+            const sin = new Set(v)
+            sin.delete(id)
+            return sin
+          }),
+        ),
+      ),
+    )
   }
 
-  /** Lo que se dice antes de subir nada: el tipo y el peso se leen del archivo, sin subirlo. */
-  function nueva(archivo: File, tipo: TipoInsumo): Ranura {
-    const tipoArchivo = tipoDeArchivo(archivo.name, archivo.type)
-    const motivo = !aceptaTipo(tipo, tipoArchivo)
-      ? tipoNoAceptado(archivo.name, tipo)
-      : archivo.size > maxBytesDe(tipoArchivo)
-        ? muyGrande(archivo.name, tipoArchivo)
-        : null
-    return {
-      clave: crypto.randomUUID(),
-      tipo,
-      nombre: archivo.name,
-      bytes: archivo.size,
-      estado: motivo ? 'error' : 'subiendo',
-      subidos: 0,
-      insumo: null,
-      error: motivo,
-      archivo: motivo ? null : archivo,
-      subtipo: tipo === 'principal' ? subtipo : null,
-    }
+  function soltar(id: string) {
+    const quedan = elegidos.filter((e) => e.id !== id)
+    setElegidos(quedan)
+    if (principalId === id) setPrincipalId(quedan.find((e) => porId.get(e.id)?.clase === 'video')?.id ?? null)
   }
 
-  function elegirPrincipal(archivo: File) {
-    const ranura = nueva(archivo, 'principal')
-    setPrincipal(ranura)
-    if (ranura.archivo) void subir(ranura)
+  function cambiarRol(id: string, rol: RolDeVideo | 'principal') {
+    if (rol === 'principal') return setPrincipalId(id)
+    setElegidos((lista) => lista.map((e) => (e.id === id ? { ...e, rol } : e)))
+    if (principalId === id) setPrincipalId(elegidos.find((e) => e.id !== id && porId.get(e.id)?.clase === 'video')?.id ?? null)
   }
 
-  function agregarAcompanamiento(archivo: File) {
-    const ranura = nueva(archivo, tipoNuevo)
-    setAcompanamientos((lista) => [...lista, ranura])
-    if (ranura.archivo) void subir(ranura)
-  }
+  const alGuardar = useCallback((m: MaterialSubido) => {
+    setMateriales((lista) => [{ ...m, enMarcha: 0 }, ...lista])
+    setElegidos((lista) => [...lista, { id: m.id, rol: 'imagen' }])
+    setPrincipalId((actual) => actual ?? (m.clase === 'video' ? m.id : null))
+  }, [])
 
-  /** Para la subida en curso (el almacén borra lo que llegó) o saca lo ya subido, y vacía la ranura. */
-  async function sacar(ranura: Ranura) {
-    const control = controles.current.get(ranura.clave)
-    if (control) {
-      control.abort()
-      if (ranura.archivo) await cancelarSubida(ranura.archivo, ranura.tipo)
-    } else if (ranura.insumo) {
-      await fetch(`/api/admin/cocina/insumos/${ranura.insumo.id}`, { method: 'DELETE' }).catch(() => null)
-    }
-    setPrincipal((r) => (r?.clave === ranura.clave ? null : r))
-    setAcompanamientos((lista) => lista.filter((r) => r.clave !== ranura.clave))
-  }
-
-  function usarSuelto(i: InsumoSubido) {
-    setSueltos((lista) => lista.filter((s) => s.id !== i.id))
-    if (i.tipo === 'principal') {
-      if (principal?.insumo) setSueltos((lista) => [principal.insumo!, ...lista])
-      setPrincipal(deUnSuelto(i))
-    } else {
-      setAcompanamientos((lista) => [...lista, deUnSuelto(i)])
-    }
-  }
-
-  async function sacarSuelto(i: InsumoSubido) {
-    if (!(await confirmar({ titulo: `¿Sacar «${i.nombre}»?`, detalle: 'Se borra de la cocina.', accion: 'Sacar', peligro: true }))) return
-    await fetch(`/api/admin/cocina/insumos/${i.id}`, { method: 'DELETE' }).catch(() => null)
-    setSueltos((lista) => lista.filter((s) => s.id !== i.id))
-  }
-
-  const listo = principal?.estado === 'subido' && principal.insumo
-  const minutos = minutosDe(principal?.insumo?.duracionS ?? null)
+  const minutos = minutosDe(principal?.duracionS ?? null)
   const fechaHora = new Intl.DateTimeFormat('es-CL', { dateStyle: 'medium', timeStyle: 'short', timeZone: zona })
-  const falta = !derechos
-    ? 'Marca la casilla de los derechos.'
-    : !principal
-      ? 'Sube el plato principal.'
-      : subiendo
-        ? 'Espera a que termine de subir.'
-        : !listo
-          ? 'El plato principal no subió: reintenta o elige otro.'
-          : formatos.length === 0
-            ? 'Elige qué quieres que salga.'
-            : largoDeInstruccion(notas) > MAX_INSTRUCCION
-              ? 'Acorta tu instrucción al chef.'
-              : null
+  const falta =
+    subiendoAca > 0
+      ? 'Espera a que termine de guardarse lo que sube.'
+      : !principal
+        ? 'Elige un video de la cámara: es el plato principal.'
+        : formatos.length === 0
+          ? 'Elige qué quieres que salga.'
+          : largoDeInstruccion(notas) > MAX_INSTRUCCION
+            ? 'Acorta tu instrucción al chef.'
+            : null
 
-  function colgar() {
+  function mandar() {
     setError(null)
     enviar(async () => {
       const r = await pedirComandaPropia({
         ref,
-        principal: principal?.insumo?.id,
-        acompanamientos: acompanamientos.flatMap((a) => (a.estado === 'subido' && a.insumo ? [a.insumo.id] : [])),
+        principal: principal?.id,
+        subtipo,
+        acompanamientos: acompanamientos.map((e) => ({ id: e.id, rol: e.rol })),
         formatos,
         cantidad,
         notas,
@@ -282,106 +211,97 @@ export function FormularioComanda({
 
   return (
     <div className="space-y-6">
-      <Panel title="1. El plato principal" hint="El video que el chef va a cocinar. Empieza a subir apenas lo eliges.">
-        <label className="mb-4 flex max-w-2xl items-start gap-2 text-sm">
-          <input type="checkbox" className="mt-1" checked={derechos} onChange={(e) => setDerechos(e.target.checked)} />
-          <span>Tengo los derechos de todo lo que subo acá y el permiso de quienes aparecen.</span>
-        </label>
-
-        <fieldset className="mb-4" disabled={Boolean(principal)}>
-          <legend className="mb-2 font-titulo text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-fg-faint">Qué es</legend>
-          <div className="space-y-1.5">
-            {SUBTIPOS_PRINCIPAL.map((s) => (
-              <label key={s} className="flex items-start gap-2 text-sm">
-                <input type="radio" name="subtipo" className="mt-1" checked={subtipo === s} onChange={() => setSubtipo(s)} />
-                <span>
-                  {NOMBRE_SUBTIPO[s]} <span className="text-xs text-fg-faint">{AYUDA_SUBTIPO[s]}</span>
-                </span>
-              </label>
-            ))}
-          </div>
-        </fieldset>
-
-        {principal ? (
-          <FilaDeArchivo ranura={principal} onSacar={() => void sacar(principal)} onReintentar={() => void subir(principal)} />
-        ) : (
-          <ElegirArchivo
-            tipo="principal"
-            accept={VIDEOS}
-            deshabilitado={!derechos}
-            texto="Elegir el video"
-            ayuda={derechos ? 'MP4, MOV, WebM o MKV, hasta 20 GB.' : 'Marca la casilla de arriba para elegir el archivo.'}
-            onElegir={elegirPrincipal}
-          />
-        )}
-      </Panel>
-
-      {sueltos.length > 0 ? (
-        <Panel title="Ya subiste" hint="Lo que subiste y no pediste. Se borra solo a los tres días.">
-          <ul className="divide-y divide-velo/[0.06]">
-            {sueltos.map((i) => (
-              <li key={i.id} className="flex flex-wrap items-center gap-3 py-2 text-sm">
-                <DibujoDeInsumo tipo={i.tipo as TipoInsumo} className="h-10 w-10" />
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate">{i.nombre}</span>
-                  <span className="block text-xs text-fg-faint">
-                    {i.tipo === 'principal' ? 'Plato principal' : NOMBRE_ACOMPANAMIENTO[i.tipo as TipoAcompanamiento]} · {tamano(i.bytes)}
-                  </span>
-                </span>
-                <span className="flex gap-2">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={() => usarSuelto(i)}
-                  // Un plato principal subiendo no se reemplaza: primero se cancela o se espera.
-                  disabled={i.tipo === 'principal' ? principal?.estado === 'subiendo' : acompanamientos.length >= MAX_ACOMPANAMIENTOS}
-                >
-                  Usar
-                </Button>
-                <Button type="button" variant="danger" onClick={() => void sacarSuelto(i)}>
-                  Sacar
-                </Button>
-                </span>
-              </li>
-            ))}
-          </ul>
-        </Panel>
-      ) : null}
-
-      <Panel title="2. Los acompañamientos" hint="Opcional: otra cámara, la pantalla, fotos o b-roll.">
-        {acompanamientos.length > 0 ? (
-          <ul className="mb-4 space-y-3">
-            {acompanamientos.map((a) => (
-              <li key={a.clave}>
-                <FilaDeArchivo ranura={a} onSacar={() => void sacar(a)} onReintentar={() => void subir(a)} />
-              </li>
-            ))}
-          </ul>
-        ) : null}
-        {acompanamientos.length < MAX_ACOMPANAMIENTOS ? (
-          <div className="space-y-3">
-            <div className="flex flex-wrap gap-x-4 gap-y-1.5">
-              {(Object.keys(NOMBRE_ACOMPANAMIENTO) as TipoAcompanamiento[]).map((t) => (
-                <label key={t} className="flex items-center gap-2 text-sm">
-                  <input type="radio" name="acompanamiento" checked={tipoNuevo === t} onChange={() => setTipoNuevo(t)} />
-                  {NOMBRE_ACOMPANAMIENTO[t]}
-                </label>
-              ))}
+      <div className="grid gap-6 lg:grid-cols-5 lg:items-start">
+        <Panel
+          className="lg:col-span-3"
+          title={
+            <>
+              1. <DeNocheYDeDia noche={DE_LA_CAMARA.noche} dia={DE_LA_CAMARA.dia} />
+            </>
+          }
+          hint="Toca lo que va en esta comanda: un video es el plato principal, y lo demás lo acompaña. Lo que elijas sigue guardado después."
+        >
+          {materiales.length === 0 ? (
+            <p className="mb-4 text-sm text-fg-faint">
+              Todavía no tienes nada guardado. Guarda abajo tu video, y entra solo a la comanda.
+            </p>
+          ) : (
+            <>
+              <FiltroDeClase materiales={materiales} valor={filtro} onCambiar={setFiltro} />
+              <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                {visibles.map((m) => {
+                  const elegido = elegidos.some((e) => e.id === m.id)
+                  return (
+                    <li key={m.id}>
+                      <button
+                        type="button"
+                        aria-pressed={elegido}
+                        onClick={() => (elegido ? soltar(m.id) : elegir(m.id))}
+                        disabled={!elegido && elegidos.length >= MAX_ACOMPANAMIENTOS + 1}
+                        className={cn(
+                          'flex h-full w-full flex-col items-center gap-1 rounded-lg border p-2 text-center transition-colors disabled:cursor-not-allowed disabled:opacity-50',
+                          elegido ? 'border-brasa bg-acero-800' : 'border-acero-700 hover:border-acero-600 hover:bg-acero-800',
+                        )}
+                      >
+                        <span data-dibujo-de={m.id} className={cn('relative flex h-16 w-16 transition-opacity', elegido && 'opacity-25')}>
+                          <DibujoDeMaterial clase={m.clase} bytes={m.bytes} className="h-16 w-16" />
+                        </span>
+                        <span className="line-clamp-2 w-full break-words text-xs font-medium">{m.nombre}</span>
+                        <span className="text-[0.68rem] text-fg-faint">
+                          <PesoDeMaterial clase={m.clase} bytes={m.bytes} />
+                        </span>
+                        <span className={cn('text-[0.68rem]', elegido ? 'text-brasa' : 'text-fg-faint')}>
+                          {elegido ? 'En la comanda' : m.uso ? NOMBRE_USO[m.uso] : ' '}
+                        </span>
+                      </button>
+                    </li>
+                  )
+                })}
+              </ul>
+            </>
+          )}
+          <details className="mt-5 rounded-lg border border-acero-700 p-3" open={materiales.length === 0}>
+            <summary className="cursor-pointer text-sm font-medium">Guardar algo nuevo</summary>
+            <div className="mt-3">
+              <GuardarEnLaCamara libres={cuota - guardados - subiendo} cuota={cuota} alGuardar={alGuardar} alCambiarSubiendo={setSubiendoAca} />
             </div>
-            <p className="text-xs text-fg-faint">{AYUDA_ACOMPANAMIENTO[tipoNuevo]}</p>
-            <ElegirArchivo
-              tipo={tipoNuevo}
-              accept={tipoNuevo === 'imagen' ? `${VIDEOS},${FOTOS}` : VIDEOS}
-              deshabilitado={!derechos}
-              texto="Agregar un archivo"
-              ayuda={derechos ? undefined : 'Marca la casilla de los derechos, arriba, para agregar archivos.'}
-              onElegir={agregarAcompanamiento}
-            />
-          </div>
-        ) : (
-          <p className="text-sm text-fg-faint">Una comanda lleva hasta {MAX_ACOMPANAMIENTOS} acompañamientos.</p>
-        )}
-      </Panel>
+          </details>
+          <p className="mt-3 text-xs text-fg-faint">
+            Para renombrar o sacar algo, ve a{' '}
+            <Link href="/admin/ia/bodega" className="text-brasa underline-offset-2 hover:underline">
+              <DeNocheYDeDia noche={CAMARA.noche.toLowerCase()} dia={CAMARA.dia.toLowerCase()} />
+            </Link>
+            .
+          </p>
+        </Panel>
+
+        <Panel className="lg:sticky lg:top-4 lg:col-span-2" title="2. El riel de la comanda" hint="Lo que lleva esta comanda, colgado en orden. El plato principal es el que el chef cocina.">
+          <Riel
+            enLaComanda={enLaComanda}
+            principalId={principalId}
+            volando={volando}
+            onRol={cambiarRol}
+            onSoltar={soltar}
+          />
+          {principal ? (
+            <fieldset className="mt-5">
+              <legend className="mb-2 font-titulo text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-fg-faint">
+                Qué es el plato principal
+              </legend>
+              <div className="space-y-1.5">
+                {SUBTIPOS_PRINCIPAL.map((s) => (
+                  <label key={s} className="flex items-start gap-2 text-sm">
+                    <input type="radio" name="subtipo" className="mt-1" checked={subtipo === s} onChange={() => setSubtipo(s)} />
+                    <span>
+                      {NOMBRE_SUBTIPO[s]} <span className="text-xs text-fg-faint">{AYUDA_SUBTIPO[s]}</span>
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+          ) : null}
+        </Panel>
+      </div>
 
       <Panel title="3. Qué quieres que salga">
         <div className="grid gap-6 sm:grid-cols-2">
@@ -455,18 +375,19 @@ export function FormularioComanda({
       <Panel title="5. Confirmar">
         <ul className="max-w-2xl space-y-1 text-sm text-fg-muted">
           <li>
-            Plato principal:{' '}
-            {principal ? `${principal.nombre} (${NOMBRE_SUBTIPO[principal.subtipo ?? 'largo']})` : 'todavía no'}
+            Plato principal: {principal ? `${principal.nombre} (${NOMBRE_SUBTIPO[subtipo]})` : 'todavía no'}
             {minutos > 0 ? ` · ${minutos} min` : ''}
           </li>
-          {acompanamientos.length > 0 ? <li>Acompañamientos: {acompanamientos.map((a) => a.nombre).join(', ')}</li> : null}
+          {acompanamientos.length > 0 ? (
+            <li className="break-words">
+              Lo acompañan: {acompanamientos.map((e) => `${e.material.nombre} (${rolEnPalabras(e.material.clase, e.rol, e.material.uso)})`).join(', ')}
+            </li>
+          ) : null}
           <li>
             Qué sale: {formatos.map((f) => NOMBRE_FORMATO[f]).join(' y ') || 'nada todavía'} · {NOMBRE_CANTIDAD[cantidad]}
           </li>
           <li>Los estilos: los elige el chef</li>
-          <li className="line-clamp-3 whitespace-pre-line break-words">
-            Tu instrucción al chef: {notas.trim() ? `«${notas.trim()}»` : 'ninguna'}
-          </li>
+          <li className="line-clamp-3 whitespace-pre-line break-words">Tu instrucción al chef: {notas.trim() ? `«${notas.trim()}»` : 'ninguna'}</li>
           <li>
             Tu marca: {marca.nombre || 'sin nombre'}
             {marca.handle ? ` · ${marca.handle}` : ''}
@@ -477,12 +398,10 @@ export function FormularioComanda({
           <p>{antes === 0 ? 'Es la próxima en la fila.' : antes === 1 ? 'Hay 1 comanda antes que la tuya.' : `Hay ${antes} comandas antes que la tuya.`}</p>
           {eta ? <p>Hora estimada: {fechaHora.format(new Date(eta))}</p> : null}
           {!cocinaAbierta ? <p className="text-fg-muted">La cocina está cerrada por ahora: tu comanda espera su turno.</p> : null}
-          {minutos > 0 ? (
-            <p className="text-fg-muted">Consume {minutos} minutos de tu cupo, los del plato principal. Por ahora el cupo no tiene tope.</p>
-          ) : null}
+          {minutos > 0 ? <p className="text-fg-muted">Consume {minutos} minutos de tu cupo, los del plato principal. Por ahora el cupo no tiene tope.</p> : null}
         </div>
         <div className="mt-5 flex flex-wrap items-center gap-3">
-          <Button type="button" variant="primary" disabled={Boolean(falta) || enviando} onClick={colgar}>
+          <Button type="button" variant="primary" disabled={Boolean(falta) || enviando} onClick={mandar}>
             {enviando ? 'Colgando…' : 'Colgar la comanda'}
           </Button>
           {falta ? <span className="text-xs text-fg-faint">{falta}</span> : null}
@@ -493,6 +412,102 @@ export function FormularioComanda({
           ) : null}
         </div>
       </Panel>
+    </div>
+  )
+}
+
+/** Qué es en la comanda, en palabras, para el resumen. */
+function rolEnPalabras(clase: ClaseMaterial, rol: RolDeVideo, uso: MaterialDeLaCamara['uso']): string {
+  if (clase === 'video') return NOMBRE_ROL[rol].toLowerCase()
+  if (clase === 'imagen') return NOMBRE_ROL.imagen.toLowerCase()
+  return uso ? NOMBRE_USO[uso].toLowerCase() : 'aparte'
+}
+
+/**
+ * El riel de la comanda: una barra con un gancho por material, del que cuelga su dibujo, y al lado
+ * su nombre y qué es. Un video elige si es el plato principal, para intercalar, otra cámara o la
+ * pantalla; una foto va para intercalar; lo demás va aparte, con su uso. Lo que llega volando se
+ * esconde hasta que aterriza, y entonces se mece al colgarse.
+ */
+function Riel({
+  enLaComanda,
+  principalId,
+  volando,
+  onRol,
+  onSoltar,
+}: {
+  enLaComanda: Array<Elegido & { material: MaterialDeLaCamara }>
+  principalId: string | null
+  volando: ReadonlySet<string>
+  onRol: (id: string, rol: RolDeVideo | 'principal') => void
+  onSoltar: (id: string) => void
+}) {
+  const id = useId()
+  if (enLaComanda.length === 0) {
+    return (
+      <div className="rounded-lg border border-dashed border-acero-700 p-4">
+        <div aria-hidden className="mb-3 h-1.5 rounded-full bg-acero-600" />
+        <p className="text-sm text-fg-faint">Todavía no hay nada colgado: toca un material para traerlo.</p>
+      </div>
+    )
+  }
+  return (
+    <div>
+      <div aria-hidden className="h-1.5 rounded-full bg-acero-600" />
+      <ul className="space-y-2 pt-1">
+        {enLaComanda.map(({ id: materialId, rol, material: m }) => {
+          const esPrincipal = materialId === principalId
+          return (
+            <li key={materialId} className={cn('relative flex gap-3 rounded-lg border p-2.5 pt-3', esPrincipal ? 'border-brasa' : 'border-acero-700')}>
+              {/* El gancho: del riel al dibujo. */}
+              <span aria-hidden className="absolute -top-2 left-[2.15rem] h-3.5 w-px bg-acero-600" />
+              <span
+                data-en-el-riel={materialId}
+                className={cn('relative flex h-12 w-12 shrink-0', volando.has(materialId) ? 'invisible' : 'se-cuelga')}
+              >
+                <DibujoDeMaterial clase={m.clase} bytes={m.bytes} className="h-12 w-12" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-medium">{m.nombre}</p>
+                <p className="text-[0.7rem] text-fg-faint">
+                  <PesoDeMaterial clase={m.clase} bytes={m.bytes} />
+                  {duracionEnPalabras(m.duracionS) ? ` · ${duracionEnPalabras(m.duracionS)}` : ''}
+                </p>
+                {m.clase === 'video' ? (
+                  <fieldset className="mt-1.5">
+                    <legend className="sr-only">Qué es «{m.nombre}» en la comanda</legend>
+                    <div className="flex flex-wrap gap-1">
+                      {(['principal', ...ROLES_DE_VIDEO] as const).map((r) => {
+                        const marcado = r === 'principal' ? esPrincipal : !esPrincipal && rol === r
+                        return (
+                          <label
+                            key={r}
+                            data-globito={r === 'principal' ? 'El video que el chef cocina.' : AYUDA_ROL[r]}
+                            className={cn(
+                              'cursor-pointer rounded-full border px-2 py-0.5 text-[0.7rem] transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brasa',
+                              marcado ? 'border-brasa bg-brasa text-acero-950' : 'border-acero-700 text-fg-muted hover:text-fg',
+                            )}
+                          >
+                            <input type="radio" name={`${id}${materialId}`} className="sr-only" checked={marcado} onChange={() => onRol(materialId, r)} />
+                            {r === 'principal' ? 'Plato principal' : NOMBRE_ROL[r]}
+                          </label>
+                        )
+                      })}
+                    </div>
+                  </fieldset>
+                ) : (
+                  <p className="mt-1 text-[0.72rem] text-fg-muted">
+                    {m.clase === 'imagen' ? 'Para intercalar' : m.uso ? `Va aparte: ${NOMBRE_USO[m.uso].toLowerCase()}` : 'Va aparte, para que el chef lo use'}
+                  </p>
+                )}
+              </div>
+              <Button type="button" className="self-start" onClick={() => onSoltar(materialId)}>
+                Quitar
+              </Button>
+            </li>
+          )
+        })}
+      </ul>
     </div>
   )
 }
@@ -568,112 +583,5 @@ function InstruccionAlChef({ valor, onCambiar }: { valor: string; onCambiar: (va
         })}
       </ul>
     </Panel>
-  )
-}
-
-function ElegirArchivo({
-  tipo,
-  accept,
-  deshabilitado,
-  texto,
-  ayuda,
-  onElegir,
-}: {
-  tipo: TipoInsumo
-  accept: string
-  deshabilitado: boolean
-  texto: string
-  ayuda?: string
-  onElegir: (archivo: File) => void
-}) {
-  const [encima, setEncima] = useState(false)
-  return (
-    <label
-      className={cn(
-        'flex cursor-pointer flex-wrap items-center gap-4 rounded-lg border border-dashed p-4 transition-colors',
-        encima ? 'border-brasa bg-acero-800' : 'border-acero-700',
-        deshabilitado && 'cursor-not-allowed opacity-60',
-      )}
-      onDragOver={(e) => {
-        if (deshabilitado) return
-        e.preventDefault()
-        setEncima(true)
-      }}
-      onDragLeave={() => setEncima(false)}
-      onDrop={(e) => {
-        e.preventDefault()
-        setEncima(false)
-        const archivo = e.dataTransfer.files[0]
-        if (archivo && !deshabilitado) onElegir(archivo)
-      }}
-    >
-      <DibujoDeInsumo tipo={tipo} className="h-14 w-14" />
-      <span className="min-w-0 flex-1 text-sm">
-        <span className="font-medium text-fg">{texto}</span>
-        <span className="text-fg-muted">, o arrástralo acá.</span>
-        {ayuda ? <span className="mt-0.5 block text-xs text-fg-faint">{ayuda}</span> : null}
-      </span>
-      <input
-        type="file"
-        accept={accept}
-        disabled={deshabilitado}
-        className="sr-only"
-        onChange={(e) => {
-          const archivo = e.target.files?.[0]
-          e.target.value = ''
-          if (archivo) onElegir(archivo)
-        }}
-      />
-    </label>
-  )
-}
-
-/** Un archivo de la comanda: su dibujo, su nombre y su peso, y cómo va: subiendo con su barra, subido o con su error. */
-export function FilaDeArchivo({ ranura, onSacar, onReintentar }: { ranura: Ranura; onSacar: () => void; onReintentar: () => void }) {
-  const avance = ranura.bytes > 0 ? Math.min(1, ranura.subidos / ranura.bytes) : 0
-  const etiqueta = ranura.tipo === 'principal' ? NOMBRE_SUBTIPO[ranura.subtipo ?? 'largo'] : NOMBRE_ACOMPANAMIENTO[ranura.tipo as TipoAcompanamiento]
-  return (
-    <div className={cn('flex flex-wrap items-center gap-4 rounded-lg border p-4', ranura.estado === 'error' ? 'border-negative/40' : 'border-acero-700')}>
-      <DibujoDeInsumo tipo={ranura.tipo} className="h-14 w-14" />
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium">{ranura.nombre}</p>
-        <p className="text-xs text-fg-faint">
-          {etiqueta} · {tamano(ranura.bytes)}
-        </p>
-        {ranura.estado === 'subiendo' ? (
-          <div className="mt-2">
-            <div
-              className="h-1.5 overflow-hidden rounded-full bg-acero-800"
-              role="progressbar"
-              aria-label={`Subiendo ${ranura.nombre}`}
-              aria-valuenow={Math.round(avance * 100)}
-              aria-valuemin={0}
-              aria-valuemax={100}
-            >
-              <div className="h-full rounded-full bg-brasa transition-[width]" style={{ width: `${avance * 100}%` }} />
-            </div>
-            <p className="mt-1 text-xs text-fg-muted">
-              Subiendo: {Math.floor(avance * 100)} % · {tamano(ranura.subidos)} de {tamano(ranura.bytes)}
-            </p>
-          </div>
-        ) : null}
-        {ranura.estado === 'subido' ? <p className="mt-1 text-xs text-positive">Subido.</p> : null}
-        {ranura.estado === 'error' && ranura.error ? (
-          <p role="alert" className="mt-1 text-xs text-negative">
-            {ranura.error}
-          </p>
-        ) : null}
-      </div>
-      <div className="flex flex-wrap gap-2">
-        {ranura.estado === 'error' && ranura.archivo ? (
-          <Button type="button" variant="ghost" onClick={onReintentar}>
-            Reintentar
-          </Button>
-        ) : null}
-        <Button type="button" variant={ranura.estado === 'subiendo' ? 'ghost' : 'danger'} onClick={onSacar}>
-          {ranura.estado === 'subiendo' ? 'Cancelar' : 'Sacar'}
-        </Button>
-      </div>
-    </div>
   )
 }

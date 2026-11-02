@@ -12,16 +12,19 @@ import {
   MAX_INSTRUCCION,
   PEDIDO_ILEGIBLE,
   PRINCIPAL_FALTA,
+  SUBTIPO_FALTA,
   instruccionDe,
   leerPedido,
   minutosDe,
+  rolEnLaComanda,
 } from './pedido'
 
 const id = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`
 const pedido = {
   ref: id(1),
   principal: id(2),
-  acompanamientos: [id(3)],
+  subtipo: 'largo',
+  acompanamientos: [{ id: id(3), rol: 'camara' }],
   formatos: ['clips', 'carruseles'],
   cantidad: 'unos-10',
   notas: '  la parte de ventas  ',
@@ -34,7 +37,8 @@ describe('leerPedido', () => {
     expect(leerPedido(pedido)).toEqual({
       ref: id(1),
       principal: id(2),
-      acompanamientos: [id(3)],
+      subtipo: 'largo',
+      acompanamientos: [{ id: id(3), rol: 'camara' }],
       formatos: ['clips', 'carruseles'],
       cantidad: 'unos-10',
       notas: 'la parte de ventas',
@@ -48,8 +52,24 @@ describe('leerPedido', () => {
     expect(r).toMatchObject({ acompanamientos: [], notas: '', paraCuando: null, marca: { nombre: 'V', handle: null, acento: null, ctaTexto: null } })
   })
 
-  it('un acompañamiento repetido, o el mismo principal, no entra dos veces', () => {
-    expect(leerPedido({ ...pedido, acompanamientos: [id(3), id(3), id(2)] })).toMatchObject({ acompanamientos: [id(3)] })
+  it('un material repetido, o el mismo principal, no entra dos veces', () => {
+    const acompanamientos = [{ id: id(3), rol: 'camara' }, { id: id(3), rol: 'pantalla' }, { id: id(2), rol: 'imagen' }]
+    expect(leerPedido({ ...pedido, acompanamientos })).toMatchObject({ acompanamientos: [{ id: id(3), rol: 'camara' }] })
+  })
+
+  it('un rol que no se entiende es para intercalar', () => {
+    expect(leerPedido({ ...pedido, acompanamientos: [{ id: id(3), rol: 'otro' }, { id: id(4) }] })).toMatchObject({
+      acompanamientos: [
+        { id: id(3), rol: 'imagen' },
+        { id: id(4), rol: 'imagen' },
+      ],
+    })
+  })
+
+  it('el plato principal dice qué es', () => {
+    expect(leerPedido({ ...pedido, subtipo: undefined })).toEqual({ error: SUBTIPO_FALTA })
+    expect(leerPedido({ ...pedido, subtipo: 'otro' })).toEqual({ error: SUBTIPO_FALTA })
+    expect(leerPedido({ ...pedido, subtipo: 'tomas' })).toMatchObject({ subtipo: 'tomas' })
   })
 
   it('los formatos que no existen no cuentan, y sin uno conocido no hay comanda', () => {
@@ -61,7 +81,8 @@ describe('leerPedido', () => {
   it('sin plato principal, o sin la ref del formulario, no hay comanda', () => {
     expect(leerPedido({ ...pedido, principal: undefined })).toEqual({ error: PRINCIPAL_FALTA })
     expect(leerPedido({ ...pedido, ref: 'otra' })).toEqual({ error: PEDIDO_ILEGIBLE })
-    expect(leerPedido({ ...pedido, acompanamientos: ['no-es-un-id'] })).toEqual({ error: PEDIDO_ILEGIBLE })
+    expect(leerPedido({ ...pedido, acompanamientos: [{ id: 'no-es-un-id', rol: 'imagen' }] })).toEqual({ error: PEDIDO_ILEGIBLE })
+    expect(leerPedido({ ...pedido, acompanamientos: [id(3)] })).toEqual({ error: PEDIDO_ILEGIBLE })
     expect(leerPedido(null)).toEqual({ error: PEDIDO_ILEGIBLE })
   })
 
@@ -73,7 +94,18 @@ describe('leerPedido', () => {
     expect(leerPedido({ ...pedido, marca: { ...pedido.marca, nombre: '  ' } })).toEqual({ error: MARCA_SIN_NOMBRE })
     expect(leerPedido({ ...pedido, marca: { ...pedido.marca, ctaTexto: 'x'.repeat(121) } })).toEqual({ error: MARCA_LARGA })
     expect(leerPedido({ ...pedido, marca: { ...pedido.marca, acento: 'azul' } })).toEqual({ error: ACENTO_ILEGIBLE })
-    expect(leerPedido({ ...pedido, acompanamientos: Array.from({ length: 11 }, (_, n) => id(10 + n)) })).toEqual({ error: DEMASIADOS })
+    expect(leerPedido({ ...pedido, acompanamientos: Array.from({ length: 21 }, (_, n) => ({ id: id(10 + n), rol: 'imagen' })) })).toEqual({ error: DEMASIADOS })
+    expect(leerPedido({ ...pedido, acompanamientos: Array.from({ length: 20 }, (_, n) => ({ id: id(10 + n), rol: 'imagen' })) })).not.toHaveProperty('error')
+  })
+})
+
+describe('rolEnLaComanda', () => {
+  it('un video es lo que se eligió; una foto, para intercalar; lo demás, extra', () => {
+    expect(rolEnLaComanda('video', 'pantalla')).toBe('pantalla')
+    expect(rolEnLaComanda('video', 'imagen')).toBe('imagen')
+    expect(rolEnLaComanda('imagen', 'camara')).toBe('imagen')
+    expect(rolEnLaComanda('audio', 'camara')).toBe('extra')
+    expect(rolEnLaComanda('otro', 'imagen')).toBe('extra')
   })
 })
 

@@ -49,6 +49,10 @@ del admin. Cada fila trae:
 | «entró <fecha>» | Ya entró; la fecha es la de su **primer** ingreso, no la del último. | «Cerrar sesiones» |
 
 - con la cocina encendida, «cocina desde <fecha>»;
+- con la cocina encendida, o si le quedó algo guardado de cuando la tuvo, cuánto ocupa en la cámara de
+  frío de La Cocina y cuánto le cabe: «La cámara de frío: 3,2 GB de 20 GB» (de día, «La nevera: …»),
+  con «(a mano)» al final si el admin le cambió la cuota, y el botón «Cambiar la cuota» (ver «Para
+  cambiarle la cuota de la cámara a alguien», abajo);
 - en todas las filas, abajo y en letra chica, «id» y el identificador del usuario, que se puede
   seleccionar y copiar. Es lo que piden las variables que encienden algo solo para una cuenta
   (por ejemplo, el mensaje privado o Threads para la cuenta del revisor de Meta);
@@ -128,6 +132,21 @@ La Cocina es el chef de la casa: el editor que recibe el material crudo y devuel
 
 El admin también la enciende para sí mismo, en su propia fila.
 
+### Para cambiarle la cuota de la cámara a alguien
+
+La cámara de frío es donde cada uno guarda su material en bruto para el chef
+([la-camara-de-frio.md](la-camara-de-frio.md)). A todos les caben 20 GB, salvo que el admin diga otra
+cosa. Comprar espacio todavía no existe: cuando alguien pide más, se le da acá.
+
+1. En su fila, «Cambiar la cuota».
+2. En la ventana «La cuota de <correo>», escribir en «GB» cuántos le caben: un número de 1 a 10.000,
+   como «50» o «7,5». Vacío, vuelve a la de siempre, 20 GB. La ayuda lo dice: «Vacía, la de siempre:
+   20 GB. Lo que ya tiene guardado no se borra aunque la bajes.».
+3. «Guardar» (mientras trabaja, «Guardando…»). «Cancelar» la cierra sin cambiar nada.
+
+Si se le baja por debajo de lo que tiene guardado, no se borra nada: no puede guardar más hasta que
+saque algo.
+
 ### Para traspasar una cuenta
 
 Cuándo: una cuenta tiene que pasar a otra persona sin perder su historial. Por ejemplo, cuando
@@ -156,6 +175,7 @@ Para devolverla, se traspasa de vuelta, con estos mismos pasos.
 
 | Lo que dice la pantalla | Qué significa | Qué hacer |
 |---|---|---|
+| «La cuota es un número de GB, de 1 a 10.000, como 20 o 50. Vacía, vuelve a la de siempre.» | En «Cambiar la cuota», lo escrito no es un número de GB razonable. | Escribir un número, o dejarlo vacío. |
 | «Invitado. Le llegó su primer código.» | Quedó invitado y el correo con el código salió. | Decirle a la persona que entre en `https://tu-parrilla.cl/ingresar` y que el código vale diez minutos. |
 | «Invitado, pero el correo no salió: revisa Resend.» | Quedó invitado, pero el envío del código falló. Resend es el servicio que manda los correos. | Revisar el servicio de correo. Mientras tanto, la persona puede pedir un código en `/ingresar`; si el correo sigue sin salir, tampoco le va a llegar. |
 | «Ese correo no se ve bien.» | Lo escrito en «Correo» no tiene forma de correo. | Corregirlo. |
@@ -212,6 +232,7 @@ Para devolverla, se traspasa de vuelta, con estos mismos pasos.
 - No da acceso a los datos de nadie: cada usuario ve solo sus redes, sus publicaciones y sus
   páginas, también el admin. De las cuentas ajenas, el admin ve aquí solo lo que trae la lista de
   «Cuenta» para traspasarlas.
+- No vende espacio en la cámara ni cobra: la cuota se cambia a mano.
 - No traspasa varias cuentas de una vez, ni pide el acuerdo de quien la tiene o de quien la recibe:
   lo decide el admin.
 
@@ -221,11 +242,12 @@ Sale de:
 
 - `src/app/admin/(dash)/usuarios/page.tsx`: la pantalla, la lista y sus etiquetas.
 - `src/app/admin/(dash)/usuarios/formularios.tsx`: «Invitar», «Quitar», «Cerrar sesiones», el
-  botón de La Cocina, «Traspasar una cuenta», sus confirmaciones y sus mensajes.
+  botón de La Cocina, «Cambiar la cuota», «Traspasar una cuenta», sus confirmaciones y sus mensajes.
+- `src/lib/cocina/materiales.ts` (`ocupadoPorUsuario`, `cambiarCuotaDeLaCamara`) y `src/lib/cocina/bodega.ts`: cuánto ocupa cada uno, la cuota de siempre y la frase de una cuota que no se entiende.
 - `src/lib/cocina/panel.ts` (`encenderCocinaDe`): qué hace encender o apagar la cocina.
 - `src/lib/social/traspasar.ts`: qué se mueve en un traspaso, la lista de cuentas y sus frases.
 - `src/app/admin/actions.ts` (`invitarUsuario`, `quitarUsuario`, `cerrarSesionesUsuario`,
-  `encenderCocina`, `traspasarCuentaAccion`): el aviso del correo que no salió, el error de la
+  `encenderCocina`, `cambiarCuotaDeLaCamaraAccion`, `traspasarCuentaAccion`): el aviso del correo que no salió, el error de la
   página y el de la cocina.
 - `src/lib/usuarios.ts`: invitar, la página que se crea, quitar y cerrar sesiones.
 - `src/lib/ingreso.ts`: «Ese correo no se ve bien.», «Ese correo ya está invitado.» y «Ese

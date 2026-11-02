@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto'
-import { and, asc, count, desc, eq, inArray, isNotNull, max, sql } from 'drizzle-orm'
+import { and, asc, count, desc, eq, inArray, isNotNull, isNull, max, sql } from 'drizzle-orm'
 import { comandaEventos, comandas, creativos, getDb, insumos, latidos, users, type EstadoComanda } from '@/db'
 import { CANCELABLES, EN_MARCHA } from './estados'
 import { ordenarFila } from './fila'
@@ -189,7 +189,8 @@ export async function pulsoDeLaCocina(ownerId: string, ahora: Date): Promise<Pul
 
 /**
  * La cancela, si es suya y no está en el horno. La escritura repite la condición: si el chef la
- * metió al horno entre medio, no se cancela. Lo crudo que llevaba se guarda `DIAS_INSUMO` más.
+ * metió al horno entre medio, no se cancela. Lo que eligió de la cámara de frío sigue en la cámara;
+ * lo crudo con archivo propio, de antes de la cámara, se guarda `DIAS_INSUMO` más.
  */
 export async function cancelarComanda(
   ownerId: string,
@@ -212,10 +213,11 @@ export async function cancelarComanda(
       .returning({ id: comandas.id })
     if (!fila) return false
     await tx.insert(comandaEventos).values({ comandaId: id, estado: 'cancelada', creadoEn: ahora })
+    // Solo lo crudo con archivo propio, el de antes de la cámara de frío: lo que vino de la cámara no vence.
     await tx
       .update(insumos)
       .set({ expiraEn: new Date(ahora.getTime() + DIAS_INSUMO * 86_400_000) })
-      .where(eq(insumos.comandaId, id))
+      .where(and(eq(insumos.comandaId, id), isNull(insumos.materialId)))
     return true
   })
   return cancelada ? { ok: true } : { falla: 'no-cancelable' }

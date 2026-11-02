@@ -58,11 +58,15 @@ para programar.». Después, el dibujo ancho de la escena y una línea con un pu
   Nada se pierde: las comandas esperan.
 
 Debajo, el subtítulo «Las comandas»; al lado, mientras alguna comanda está en marcha (de «Comanda
-colgada» a «Sirviendo»), un punto anaranjado que late y «Se actualiza sola». A la derecha, el botón
-anaranjado «Pedir una comanda»,
-que lleva a pedir una (ver «Pedir una comanda», abajo). Si hay algo esperando en el mesón, antes
-va el botón «El mesón (<N>)» —de día, «La bandeja (<N>)»—, que lleva al mesón (ver «El mesón»,
-abajo). Sin ninguna comanda, «Todavía no tienes
+colgada» a «Sirviendo»), un punto anaranjado que late y «Se actualiza sola». A la derecha, los
+botones:
+
+- «La cámara de frío» —de día, «La nevera»—, con una puerta dibujada (de día, una nevera con un
+  pescado) y, en chico, cuánto ocupa («19,3 GB de 20 GB») o «vacía». Lleva a la cámara, donde se
+  guarda el material en bruto ([la-camara-de-frio.md](la-camara-de-frio.md));
+- «El mesón (<N>)» —de día, «La bandeja (<N>)»—, si hay algo esperando en el mesón. Lleva al mesón
+  (ver «El mesón», abajo);
+- el botón anaranjado «Pedir una comanda», que lleva a pedir una (ver «Pedir una comanda», abajo). Sin ninguna comanda, «Todavía no tienes
 comandas.». Con comandas, una tarjeta por comanda, de la más nueva a la más vieja (las últimas
 50). Cada tarjeta trae:
 
@@ -161,58 +165,59 @@ color.
 `/admin/ia/pedir`, desde «Pedir una comanda». Solo con la cocina encendida: sin ella, la
 dirección lleva de vuelta a La Cocina. Mientras se está acá, la pestaña «La Cocina» queda marcada.
 
-Arriba, el enlace «← La Cocina», el título «Pedir una comanda» y el párrafo «Le llevas al chef de
-la casa tu material crudo y le dices qué quieres que salga. Lo cocina en unas horas, o al día
-siguiente, y te avisa en cada paso.». Después, seis bloques.
+Arriba, el enlace «← La Cocina», el título «Pedir una comanda» y el párrafo «Eliges de tu material
+guardado lo que le llevas al chef de la casa, y le dices qué quieres que salga. Lo cocina en unas
+horas, o al día siguiente, y te avisa en cada paso.». Después, seis bloques. En un computador, los
+dos primeros van lado a lado; en un teléfono, uno debajo del otro.
 
-**Bloque «1. El plato principal».** Bajo el título: «El video que el chef va a cocinar. Empieza a
-subir apenas lo eliges.».
+Desde el 2026-11-02 una comanda se arma con lo que hay en la cámara de frío
+([la-camara-de-frio.md](la-camara-de-frio.md)): ya no se sube el plato principal y los
+acompañamientos uno por uno en este formulario.
 
-- La casilla «Tengo los derechos de todo lo que subo acá y el permiso de quienes aparecen.».
-  Hasta marcarla, no se puede elegir ningún archivo.
-- «Qué es», con tres opciones; viene marcada la primera:
-  - «Un video largo»: «Una persona a cámara: una charla, una clase, un video editado o crudo.»
-  - «Un podcast en videollamada»: «Una videollamada con varias caras en mosaico.»
-  - «Tomas sueltas»: «Varias respuestas cortas de una persona.»
+**Bloque «1. De la cámara de frío».** De día, «1. De la nevera». Bajo el título: «Toca lo que va en
+esta comanda: un video es el plato principal, y lo demás lo acompaña. Lo que elijas sigue guardado
+después.».
 
-  Se elige antes de subir: con el archivo arriba, ya no se cambia (para cambiarla, «Sacar» y
-  elegirlo de nuevo).
-- El recuadro punteado para elegir el archivo, con el dibujo del plato principal (de noche la
-  res, de día el atún): «Elegir el video, o arrástralo acá.», y debajo «MP4, MOV, WebM o MKV,
-  hasta 20 GB.» (sin la casilla marcada: «Marca la casilla de arriba para elegir el archivo.»).
-  Se aprieta para abrir el selector de archivos, o se suelta el archivo encima.
+- Si hay de más de una clase, los filtros «Todo», «Videos», «Audios», «Imágenes», «Otros», con
+  cuántos hay de cada uno.
+- Una tarjeta por material de la cámara, de lo más nuevo a lo más viejo: su dibujo (el mismo de la
+  cámara, que dice qué es y cuánto pesa), el nombre, el nombre de su tamaño y su peso («media res ·
+  5,5 GB») y su uso. Se aprieta para elegirlo: el dibujo sale volando de la tarjeta hasta el riel
+  de la comanda, a la derecha (en el teléfono, abajo), y se mece al colgarse; en la tarjeta queda
+  apagado, con el borde anaranjado y «En la comanda». Apretarla otra vez lo saca de la comanda.
+  Caben hasta 21: el plato principal y 20 más.
+- Sin nada en la cámara: «Todavía no tienes nada guardado. Guarda abajo tu video, y entra solo a la
+  comanda.».
+- «Guardar algo nuevo», un desplegable (abierto si la cámara está vacía) con lo mismo que «Guardar
+  en la cámara» de la cámara: la casilla de los derechos, «Para qué es (opcional)» y el recuadro para
+  elegir o soltar archivos ([la-camara-de-frio.md](la-camara-de-frio.md)). Lo que se guarda desde acá
+  queda en la cámara y entra elegido a la comanda.
+- Al final, «Para renombrar o sacar algo, ve a la cámara de frío.», con el enlace a la cámara.
 
-Apenas se elige, el archivo empieza a subir. El recuadro pasa a ser la fila del archivo:
+**Bloque «2. El riel de la comanda».** Bajo el título: «Lo que lleva esta comanda, colgado en orden.
+El plato principal es el que el chef cocina.». Arriba, una barra gris: el riel. Sin nada elegido:
+«Todavía no hay nada colgado: toca un material para traerlo.». Con algo, una fila por material,
+colgada del riel, con su dibujo, su nombre, su tamaño y su peso, y el botón «Quitar». Debajo del
+nombre, qué es en esta comanda:
 
-- el dibujo, el nombre del archivo y, debajo, qué es y cuánto pesa («Un video largo · 4,2 GB»);
-- mientras sube, una barra anaranjada y «Subiendo: 40 % · 1,7 GB de 4,2 GB», y el botón
-  «Cancelar»;
-- al terminar, «Subido.» en verde y el botón rojo «Sacar»;
-- si algo falla, la frase en rojo, y los botones «Reintentar» y «Sacar».
+- un video: cuatro botones redondeados, «Plato principal», «Para intercalar», «Otra cámara» y «La
+  pantalla». El primer video que se elige es el plato principal, con el borde anaranjado; los demás
+  van «Para intercalar» hasta que se cambie. Al pasar el puntero por cada uno, un globito lo explica:
+  «El video que el chef cocina.»; «Un intro, un outro o b-roll: el chef lo pone donde va.»; «Otro
+  ángulo del mismo momento: el chef lo sincroniza con el principal por el audio.»; «La pantalla
+  grabada mientras hablas: también se sincroniza por el audio.»;
+- una imagen: «Para intercalar»;
+- un audio u otro archivo: «Va aparte: <su uso>» (por ejemplo, «Va aparte: música»), o sin uso «Va
+  aparte, para que el chef lo use».
 
-Mientras algo sube, recargar o cerrar la página hace que el navegador pregunte antes: la subida
-se corta, y se retoma eligiendo el mismo archivo (ver «Para retomar una subida que se cortó»).
+Con un plato principal elegido, debajo, «Qué es el plato principal», con tres opciones; viene
+marcada la primera:
 
-**Bloque «Ya subiste».** Solo aparece si hay archivos que se subieron antes y no llegaron a
-ninguna comanda (por ejemplo, porque la página se recargó después de subir). Bajo el título: «Lo
-que subiste y no pediste. Se borra solo a los tres días.». Una fila por archivo, con su dibujo,
-su nombre, qué es y cuánto pesa, y dos botones: «Usar», que lo pone en la comanda (un plato
-principal, como plato principal; lo demás, como acompañamiento), y «Sacar», que abre una ventana con «¿Sacar
-«<nombre>»?» y «Se borra de la cocina.»; «Sacar», en la ventana, lo borra.
+- «Un video largo»: «Una persona a cámara: una charla, una clase, un video editado o crudo.»
+- «Un podcast en videollamada»: «Una videollamada con varias caras en mosaico.»
+- «Tomas sueltas»: «Varias respuestas cortas de una persona.»
 
-**Bloque «2. Los acompañamientos».** Bajo el título: «Opcional: otra cámara, la pantalla, fotos o
-b-roll.». Tres opciones para lo que se va a agregar, cada una con su explicación debajo:
-
-- «Otra cámara»: «Otro ángulo del mismo momento: el chef lo sincroniza con el principal por el
-  audio.» De noche se dibuja como un costillar de cerdo; de día, como un salmón.
-- «La pantalla»: «La pantalla grabada mientras hablas: también se sincroniza por el audio.» El
-  mismo dibujo.
-- «Imágenes o b-roll»: «Fotos o clips sin voz que el chef puede intercalar.» De noche, un choclo
-  y un pimentón; de día, un bol de arroz. Es el único que acepta fotos (JPG, PNG, WebP o HEIC).
-
-Debajo, el recuadro «Agregar un archivo, o arrástralo acá.». Cada archivo agregado sube con su
-propia fila, como el plato principal. Hasta diez; con diez, dice «Una comanda lleva hasta 10
-acompañamientos.».
+Si se quita el plato principal, pasa a serlo el siguiente video del riel.
 
 **Bloque «3. Qué quieres que salga».**
 
@@ -253,16 +258,17 @@ la cuenta.
   clase».».
 
 **Bloque «5. Confirmar».** Lo que se va a pedir, una línea por cosa: «Plato principal: <nombre>
-(<qué es>) · <minutos> min», los acompañamientos, «Qué sale: …», «Los estilos: los elige el chef»,
+(<qué es>) · <minutos> min», «Lo acompañan: <nombre> (<para intercalar, otra cámara, la pantalla o su
+uso>), …», «Qué sale: …», «Los estilos: los elige el chef»,
 «Tu instrucción al chef: «<texto>»» (o «ninguna») y «Tu marca: …». Debajo, cuántas irían antes («Hay 2 comandas antes que la tuya.»), la «Hora
 estimada» si se puede calcular, «La cocina está cerrada por ahora: tu comanda espera su turno.»
 si lo está, y cuánto cupo consume: «Consume <N> minutos de tu cupo, los del plato principal. Por
 ahora el cupo no tiene tope.».
 
 Al final, el botón anaranjado «Colgar la comanda» (mientras trabaja, «Colgando…»). Mientras no se
-puede, está apagado y al lado dice qué falta: «Marca la casilla de los derechos.», «Sube el plato
-principal.», «Espera a que termine de subir.», «El plato principal no subió: reintenta o elige
-otro.», «Elige qué quieres que salga.» o «Acorta tu instrucción al chef.». Al colgarla, la pantalla vuelve a La Cocina y la comanda
+puede, está apagado y al lado dice qué falta: «Espera a que termine de guardarse lo que sube.»,
+«Elige un video de la cámara: es el plato principal.», «Elige qué quieres que salga.» o «Acorta tu
+instrucción al chef.». Al colgarla, la pantalla vuelve a La Cocina y la comanda
 aparece arriba de todo, «Comanda colgada».
 
 ### El mesón
@@ -419,8 +425,9 @@ pestaña «La Cocina» queda marcada.
   y qué hacer con él. Lo escribimos para que tu IA te guíe sin ver tu pantalla —por eso a ratos le
   habla a ella—, y sirve igual para leerlo tú.».
 - Al lado (en un teléfono, arriba), la lista de páginas: «Para empezar» (la entrada de esta
-  wiki), «Entrar al panel», «La Parrilla», «La Mesa», «Los Números», «La Cocina», «Los Fierros»,
-  «La Vitrina», «Los Maestros», «Tu Cuenta» y «La app del teléfono». La que se está leyendo,
+  wiki), «Entrar al panel», «La Parrilla», «La Mesa», «Los Números», «La Cocina», «La cámara de
+  frío», «Los Fierros», «La Vitrina», «Los Maestros», «Tu Cuenta», «El libro de sugerencias» y «La
+  app del teléfono». La que se está leyendo,
   marcada.
 - La página, con su título arriba. Las tablas anchas se deslizan de lado. Los enlaces a otra
   página llevan a esa página del manual; los de las guías de la API abren aparte. Sin la última
@@ -430,35 +437,39 @@ pestaña «La Cocina» queda marcada.
 
 ### Para pedir una comanda
 
-1. En La Cocina, «Pedir una comanda».
-2. Marcar la casilla de los derechos.
-3. Elegir qué es el plato principal y después el archivo (o arrastrarlo al recuadro). Empieza a
-   subir solo.
-4. Si hay otra cámara, la pantalla o fotos, en «2. Los acompañamientos» elegir qué es y agregar el
-   archivo.
+1. Guardar el material en la cámara de frío, si no está ([la-camara-de-frio.md](la-camara-de-frio.md)),
+   o desde «Guardar algo nuevo», en el mismo formulario.
+2. En La Cocina, «Pedir una comanda».
+3. En «1. De la cámara de frío», tocar lo que va: por ejemplo, dos videos y cuatro fotos. Cada cosa
+   se cuelga en «2. El riel de la comanda».
+4. En el riel, revisar qué es cada video: el plato principal (el primero que se eligió, si no se
+   cambia), para intercalar, otra cámara o la pantalla. Elegir qué es el plato principal: un video
+   largo, un podcast en videollamada o tomas sueltas.
 5. En «3. Qué quieres que salga», elegir los formatos y cuántos y, si se quiere, para cuándo.
 6. Si se quiere, en «4. Tu instrucción al chef», escribirle lo que se le pide: la duración, el
    tono, qué destacar o qué evitar. Las ideas de abajo se suman con un toque.
 7. Revisar «Tu marca».
-8. Esperar a que todo diga «Subido.» y apretar «Colgar la comanda».
+8. Apretar «Colgar la comanda».
 
-Mientras sube, la página tiene que quedar abierta. Un archivo de varios GB tarda lo que tarde la
-conexión: un largo de 4 GB por una conexión doméstica puede ser media hora o más.
+Lo elegido sigue en la cámara: sirve para otra comanda. Mientras algo sube desde «Guardar algo
+nuevo», la página tiene que quedar abierta; un archivo de varios GB tarda lo que tarde la conexión:
+un largo de 4 GB por una conexión doméstica puede ser media hora o más.
 
 ### Para retomar una subida que se cortó
 
 Si se cerró la página, se cayó la red o el archivo quedó en rojo:
 
-- con la página abierta, «Reintentar» en su fila;
-- si se cerró, volver a «Pedir una comanda» y elegir **el mismo archivo** otra vez (el mismo,
-  del mismo lugar): sigue desde la última parte que llegó, sin empezar de cero.
+- con la página abierta, «Reintentar» en su tarjeta;
+- si se cerró, volver a la cámara (o a «Guardar algo nuevo») y elegir **el mismo archivo** otra vez
+  (el mismo, del mismo lugar): sigue desde la última parte que llegó, sin empezar de cero.
 
-Lo que alcanzó a subir entero y no se pidió aparece en «Ya subiste»: «Usar» lo pone en la comanda.
+Lo que alcanzó a subir entero ya está en la cámara.
 
-### Para sacar un archivo
+### Para sacar algo de la comanda, o de la cámara
 
-En su fila, «Sacar» (si está subiendo, «Cancelar»). Se borra de la cocina. En «Ya subiste»,
-«Sacar» pregunta antes.
+De la comanda que se está pidiendo: «Quitar» en su fila del riel, o tocar otra vez su tarjeta. Sigue
+en la cámara. Para borrarlo de verdad, «Sacar de la cámara», en la cámara
+([la-camara-de-frio.md](la-camara-de-frio.md)).
 
 ### Para programar lo que entregó el chef
 
@@ -490,11 +501,10 @@ segundos. Cuando termina, llega un correo.
 Solo mientras no esté en el horno: con «Comanda colgada», «El chef mira la res» o «El desposte».
 
 1. Apretar «Cancelar la comanda» en su tarjeta.
-2. Se abre una ventana con «¿Cancelar esta comanda?» y «El chef deja de prepararla, y lo que subiste
-   se borra en 14 días.». Apretar «Cancelar la comanda», en la ventana («Volver» la deja como está).
+2. Se abre una ventana con «¿Cancelar esta comanda?» y «El chef deja de prepararla. Lo que llevaba
+   sigue en tu cámara de frío.» (de día, «… en tu nevera.»). Apretar «Cancelar la comanda», en la ventana («Volver» la deja como está).
 
-La tarjeta queda «Cancelada». Lo que se había subido para ella se guarda 14 días y después se
-borra.
+La tarjeta queda «Cancelada». Lo que llevaba sigue en la cámara de frío, para otra comanda.
 
 ### Para conectar una IA
 
@@ -545,25 +555,22 @@ Al final de la pantalla, «El manual del parrillero →». Adentro, elegir la p�
 | «Se actualiza sola» | Hay comandas en marcha, y las tarjetas se ponen al día sin recargar. | Nada: dejar la pestaña abierta para verlas avanzar. |
 | «Tu instrucción al chef cabe en 1000 caracteres: acórtala.» | La instrucción al chef pasó el tope. | Acortarla hasta que el contador diga 1000 o menos. |
 | «Acorta tu instrucción al chef.» | Al lado de «Colgar la comanda», apagado: la instrucción pasó el tope. | Acortarla en el bloque 4. |
-| «¿Cancelar esta comanda?» y «El chef deja de prepararla, y lo que subiste se borra en 14 días.» | Ventana antes de cancelar. | «Cancelar la comanda» para cancelarla; «Volver» para dejarla. |
+| «¿Cancelar esta comanda?» y «El chef deja de prepararla. Lo que llevaba sigue en tu cámara de frío.» | Ventana antes de cancelar. | «Cancelar la comanda» para cancelarla; «Volver» para dejarla. |
 | «Esa comanda ya está en el horno o terminó: no se puede cancelar.» | El chef la metió al horno, o terminó, entre que se cargó la página y se apretó el botón. | Recargar: la tarjeta muestra su estado de ahora. |
 | «Esa comanda no existe.» | La comanda ya no está, o no es de esta cuenta. | Recargar. |
-| ««<archivo>»: acá va un video (MP4, MOV, WebM o MKV).» | Se eligió algo que no es un video para el plato principal, otra cámara o la pantalla. | Elegir el video. Si el video está en otro formato, exportarlo en MP4. |
-| ««<archivo>»: acá va una foto (JPG, PNG, WebP o HEIC) o un video (MP4, MOV, WebM o MKV).» | En «Imágenes o b-roll», un archivo que no es foto ni video. | Elegir una foto o un video. |
-| ««<archivo>» pesa más de 20 GB, el tope de un video.» | El video es demasiado grande. | Cortarlo en partes o bajarle la calidad. |
-| ««<archivo>» pesa más de 50 MB, el tope de una foto.» | La foto es demasiado grande. | Achicarla. |
-| «No se pudo terminar la subida: elige el mismo archivo otra vez para retomarla donde quedó.» | Una parte no subió después de varios intentos: la red se cortó. | «Reintentar», o volver a elegir el mismo archivo: sigue donde quedó. |
-| «Falta 1 parte por subir: súbela y vuelve a cerrar.» (o «Faltan N partes…») | Al terminar, el almacén no tenía todas las partes. | «Reintentar»: sube solo lo que falta. |
-| «El archivo llegó con otro tamaño: súbelo de nuevo.» | El archivo que quedó no pesa lo que tenía que pesar. | «Sacar» y elegirlo de nuevo. |
+| «No se pudo terminar la subida: elige el mismo archivo otra vez para retomarla donde quedó.» | En «Guardar algo nuevo», una parte no subió después de varios intentos: la red se cortó. | «Reintentar», o volver a elegir el mismo archivo: sigue donde quedó. |
+| «No hay espacio para «<archivo>»: pesa <N> y te quedan <M> libres de <cuota>. Saca algo que ya no uses, o pide más espacio.» | En «Guardar algo nuevo», ese archivo no cabe en la cámara. | Ver [la-camara-de-frio.md](la-camara-de-frio.md). Los demás mensajes de guardar están ahí. |
 | «La Cocina no está encendida para tu cuenta.» | El admin la apagó mientras se pedía. | Pedírsela de nuevo al admin. |
-| «Sube el plato principal: el video que el chef va a cocinar.» | Se intentó colgar sin plato principal. | Subirlo. |
+| «Elige un video de la cámara: es el plato principal.» | Al lado de «Colgar la comanda», apagado: no hay ningún video en el riel. | Tocar un video de la cámara. |
+| «Espera a que termine de guardarse lo que sube.» | Al lado de «Colgar la comanda», apagado: algo de «Guardar algo nuevo» sigue subiendo. | Esperar a que entre a la cámara. |
+| «Elige el plato principal: el video que el chef va a cocinar.» | Se intentó colgar sin plato principal. | Tocar un video de la cámara. |
+| «Di qué es el plato principal: un video largo, un podcast en videollamada o tomas sueltas.» | Llegó una comanda sin decir qué es el plato principal. | Recargar y elegirlo en «Qué es el plato principal». |
 | «Elige qué quieres que salga: clips, carruseles o los dos.» | No quedó marcado ningún formato. | Marcar al menos uno. |
 | «Ponle nombre a tu marca: es el que el chef usa en los videos.» | «El nombre» de «Tu marca» quedó vacío. | Escribirlo. |
 | «El nombre de la marca, el @ y el llamado final son textos cortos: acórtalos.» | Uno de los tres es demasiado largo. | Acortarlo. |
-| «El plato principal ya no está, o ya es parte de otra comanda: súbelo de nuevo.» | Entre que se subió y se colgó, el archivo se borró o se usó en otra comanda (por ejemplo, desde otra pestaña). | Recargar «Pedir una comanda» y subirlo de nuevo. |
-| «Uno de los acompañamientos ya no está, o ya es parte de otra comanda: sácalo y súbelo de nuevo.» | Lo mismo, con un acompañamiento. | «Sacar» ese acompañamiento y agregarlo de nuevo. |
-| «Uno de los archivos pasó a otra comanda mientras pedías: recarga la página y revisa la comanda.» | Otra pestaña colgó una comanda con el mismo archivo justo a la vez. | Recargar y mirar La Cocina: la comanda puede estar ya colgada. |
-| «¿Sacar «<archivo>»?» y «Se borra de la cocina.» | Ventana antes de borrar un archivo de «Ya subiste». | «Sacar» para borrarlo; «Cancelar» para dejarlo. |
+| «Una comanda lleva hasta 20 materiales además del plato principal.» | Se eligieron demasiados. | Quitar alguno del riel. |
+| «El plato principal ya no está en la cámara, o no es un video: elige otro.» | Entre que se abrió el formulario y se colgó, el video se sacó de la cámara (por ejemplo, desde otra pestaña). | Recargar «Pedir una comanda» y elegir otro. |
+| «Uno de los materiales ya no está en la cámara: recarga la página y vuelve a elegir.» | Lo mismo, con otro de los elegidos. | Recargar y volver a elegir. |
 | «Todavía no hay nada en el mesón.» | El chef no ha entregado nada, o todo se programó o se descartó. | Nada. |
 | «Se borra el <fecha> si no lo programas.» | Ese creativo lleva más de tres semanas en el mesón: a los 30 días se borra solo. El resumen del día lo avisa también. | Programarlo o descartarlo antes de esa fecha. |
 | «Ese creativo ya no está en el mesón.» | Se programó o se descartó entre que se cargó la página y se apretó el botón (por ejemplo, en otra pestaña). | Recargar el mesón. Si se programó, está en los borradores de La Parrilla. |
@@ -590,9 +597,15 @@ Al final de la pantalla, «El manual del parrillero →». Adentro, elegir la p�
   que encender el admin, en Los Maestros.
 - **«¿Cómo pido una comanda?».** En La Cocina, «Pedir una comanda» (ver «Para pedir una
   comanda»). Si el botón no está, su cuenta no tiene la cocina encendida.
-- **«Se cortó la subida» / «Cerré la página sin querer».** Volver a «Pedir una comanda» y elegir el
-  mismo archivo: sigue donde quedó. Si ya había terminado de subir, está en «Ya subiste».
-- **«¿Qué tan grande puede ser el video?».** Hasta 20 GB; las fotos, hasta 50 MB.
+- **«Se cortó la subida» / «Cerré la página sin querer».** Volver a la cámara de frío (o a «Guardar
+  algo nuevo») y elegir el mismo archivo: sigue donde quedó. Si ya había terminado de subir, está en
+  la cámara.
+- **«¿Dónde subo mis videos?» / «¿Dónde está la bodega?».** En la cámara de frío (de día, la
+  nevera): el botón al lado de «Pedir una comanda» ([la-camara-de-frio.md](la-camara-de-frio.md)).
+- **«¿Puedo usar el mismo video en dos comandas?».** Sí: lo de la cámara sirve para todas las que
+  se quiera. Tocarlo de nuevo en «Pedir una comanda».
+- **«¿Qué tan grande puede ser el video?».** Hasta 20 GB; las imágenes, hasta 50 MB; y todo junto
+  cabe en la cuota de la cámara, 20 GB si el admin no le dio otra.
 - **«¿Qué estilos va a usar?».** Por ahora los elige el chef, con lo que mejor le vaya al
   material. Lo que se quiera destacar o evitar va en «4. Tu instrucción al chef».
 - **«Quiero clips cortos» / «¿Cómo le digo al chef lo que quiero?».** En «Pedir una comanda», el
@@ -612,8 +625,8 @@ Al final de la pantalla, «El manual del parrillero →». Adentro, elegir la p�
 - **«Algo desapareció del mesón».** Lo que nadie programa en 30 días se borra solo; en su última
   semana, la tarjeta y el resumen del día lo avisan. Lo que se pasó a un borrador no vence: está en
   los borradores de La Parrilla.
-- **«¿Cuánto se guarda lo que subí?».** Hasta 14 días después de terminada la comanda (cancelada,
-  rechazada, que no se pudo terminar, o servida). Lo que se subió y no se pidió, tres días.
+- **«¿Cuánto se guarda lo que subí?».** Lo que está en la cámara de frío no vence: se queda hasta que
+  la persona lo saca. Lo entregado por el chef en el mesón, 30 días.
 - **«¿Dónde está lo que me cocinó el chef?».** En el mesón: La Cocina → «El mesón (<N>)», o «Ver en
   el mesón →» en la comanda. De día se llama «La bandeja».
 - **«Apreté Programar y no lo programé».** Quedó en un borrador de La Parrilla («Borradores (<N>)»),
@@ -630,7 +643,7 @@ Al final de la pantalla, «El manual del parrillero →». Adentro, elegir la p�
 - **«Dice que la cocina está cerrada».** El servidor del chef no da señales hace más de diez
   minutos. Las comandas esperan y no se pierden; la hora estimada se corre.
 - **«Mi comanda dice No se puede cocinar» / «No se pudo terminar».** El motivo está en la
-  tarjeta, debajo del estado. Lo que se subió para ella se guarda 14 días.
+  tarjeta, debajo del estado. Lo que llevaba sigue en la cámara de frío.
 - **«Quiero cancelar una comanda».** «Cancelar la comanda», en su tarjeta, mientras no esté en el
   horno. Si ya está «Al fuego» o después, no se puede.
 - **«¿Dónde genero una llave?».** Acá: la pestaña «La Cocina» → sección «Tu propio chef» → bloque
@@ -680,7 +693,7 @@ Sale de:
 - `src/app/admin/(dash)/ia/page.tsx`: la pantalla, el párrafo de arriba, «Tu propio chef» con sus
   tres bloques, la lista de llaves y el final con el manual.
 - `src/app/admin/(dash)/ia/chef-de-la-casa.tsx`: «El chef de la casa», apagado y encendido, la
-  línea de la cocina abierta o cerrada y las tarjetas de las comandas.
+  línea de la cocina abierta o cerrada, el botón de la cámara de frío y las tarjetas de las comandas.
 - `src/components/escena-cocina.tsx`: la escena, de noche y de día, con el fuego y el farol.
 - `src/components/estacion-comanda.tsx`: la estación de cada tarjeta, de noche y de día, y lo que
   se mueve en cada estado; sus movimientos y su versión quieta están en `src/app/globals.css`.
@@ -690,11 +703,14 @@ Sale de:
 - `src/app/admin/(dash)/ia/cancelar.tsx` y `src/app/admin/cocina-actions.ts`: «Cancelar la
   comanda», su pregunta y sus mensajes, y lo que hace «Colgar la comanda».
 - `src/app/admin/(dash)/ia/pedir/page.tsx` y `src/app/admin/(dash)/ia/pedir/formulario.tsx`:
-  «Pedir una comanda», sus seis bloques, «Tu instrucción al chef» con su contador y sus ideas, las
-  filas de cada archivo y lo que falta para colgar.
-- `src/components/dibujos-insumo.tsx`: la res, el cerdo y las verduras de noche; el atún, el
-  salmón y el arroz de día.
-- `src/lib/cocina/insumos.ts`: lo que se puede subir, los topes y sus frases.
+  «Pedir una comanda», sus seis bloques, lo que se elige de la cámara y su vuelo al riel, el riel
+  con el rol de cada material, «Tu instrucción al chef» con su contador y sus ideas, y lo que falta
+  para colgar.
+- `src/components/dibujos-material.tsx` y `src/components/dibujos-insumo.tsx`: el dibujo de cada
+  material de la cámara, por lo que es y lo que pesa, de noche y de día.
+- `src/app/admin/(dash)/ia/bodega/guardar.tsx` y `src/app/admin/(dash)/ia/bodega/camara.tsx`:
+  «Guardar algo nuevo», los filtros y el peso de cada material en el formulario.
+- `src/lib/cocina/bodega.ts`: lo que se puede guardar, los topes, la cuota y sus frases.
 - `src/lib/cocina/pedido.ts` y `src/lib/cocina/pedir.ts`: lo que se pide, el tope y las ideas de
   la instrucción al chef, sus frases, la marca que
   se guarda, lo que se congela y lo que entra en una comanda.
