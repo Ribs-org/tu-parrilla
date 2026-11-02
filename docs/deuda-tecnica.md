@@ -570,3 +570,24 @@ Terminarlo cuesta una migración y un reintento: una columna `comandas.aviso_env
 marca, solo para comandas que terminaron en las últimas horas, para que el día del despliegue
 no lleguen correos de comandas viejas.
 
+
+## La subida de La Cocina en el teléfono no sigue con la app en segundo plano (2026-11-02)
+
+La app sube lo grabado a la cámara de frío de a una parte de 64 MB (`mobile/src/lib/subir-por-partes.ts`),
+y quien encadena las partes es el JavaScript de la app. Con la app en segundo plano, el sistema
+lo pausa —y Android puede cerrarla—: la parte que estaba en vuelo puede terminar (en iOS la sube
+una sesión de fondo), pero la siguiente no empieza hasta que la app vuelve al frente. Un video de
+varios GB por datos móviles tarda lo que tarda, y hay que mirarlo con la app abierta. Tampoco se
+mantiene la pantalla encendida mientras sube. No se pierde nada: la cola queda guardada y lo
+grabado copiado en la carpeta de documentos, y al abrir La Cocina sigue donde quedó.
+
+Se dejó así porque subir en segundo plano de verdad pide una dependencia nativa —un servicio en
+primer plano con su notificación en Android, o una tarea de `URLSession` de fondo por cada parte
+en iOS, con las partes ya cortadas en disco antes de irse— y eso es otro build y otra revisión de
+la tienda, más allá de los permisos de cámara de la 1.2.0.
+
+Terminarlo cuesta, lo más barato, `expo-keep-awake` mientras haya algo subiendo (un módulo nativo
+chico: el próximo build), que evita que la pantalla se apague pero no que la persona cambie de
+app. Lo completo, cortar el archivo entero en partes en disco al empezar y entregarle cada parte
+al uploader de fondo del sistema, con el cierre al volver la app: unos tres días, más probarlo en
+los dos sistemas.

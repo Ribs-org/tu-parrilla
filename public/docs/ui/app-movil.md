@@ -1,6 +1,6 @@
 # La app del teléfono
 
-Una app para Android que muestra de un vistazo lo programado y cómo van las redes de quien entra, y le deja publicar desde la galería del teléfono. Tiene las mismas tres pestañas que el panel web —La Parrilla, Publicar en el medio y Los Números— y, como el panel, un botón de Ajustes, pero hace mucho menos: mira lo programado y los números, y programa o publica fotos y videos en Instagram, Facebook y YouTube. También reprograma lo que se quemó, y guarda solo lo que se está escribiendo como borrador: los borradores son los mismos del panel web, así que lo empezado en un lado se sigue en el otro. Todo lo demás —conectar redes, corregir o borrar lo programado, TikTok, comentarios, la página pública— se hace en el panel web.
+Una app para Android que muestra de un vistazo lo programado y cómo van las redes de quien entra, y le deja publicar desde la galería del teléfono. Tiene cuatro pestañas, las del panel web en versión corta —La Parrilla, Publicar, Los Números y La Cocina— y, como el panel, un botón de Ajustes, pero hace mucho menos: mira lo programado y los números, y programa o publica fotos y videos en Instagram, Facebook y YouTube. También reprograma lo que se quemó, y guarda solo lo que se está escribiendo como borrador: los borradores son los mismos del panel web, así que lo empezado en un lado se sigue en el otro. En La Cocina graba un video o saca una foto con la cámara del teléfono y se lo manda al chef de la casa con una instrucción. Todo lo demás —conectar redes, corregir o borrar lo programado, TikTok, comentarios, la página pública, el mesón del chef— se hace en el panel web.
 
 ## Cómo se llega
 
@@ -29,7 +29,12 @@ palabras cambian, como en el panel:
 - el botón de Ajustes lleva dos palillos en diagonal en vez del trinche y el cuchillo, y su aviso
   se lee «Ajustes: 1 se desafila» o «Ajustes: 2 sin filo»;
 - el calor de cada día dice «Vacía», «Con piezas» o «Tabla llena», y el pie, «Ayer: 1 pieza
-  servida» o «Ayer: N piezas servidas».
+  servida» o «Ayer: N piezas servidas»;
+- en La Cocina, «La cámara de frío» es «La nevera» —también en «Lo grabado queda guardado en la
+  nevera.» y en «La nevera está vacía.»—, el mesón es «la bandeja», cada material se llama por su
+  peso como pescado («un trozo», «un salmón entero», «un atún») y los estados de una comanda
+  cambian como en el panel: «El chef mira el atún», «El despiece», «Armando las piezas», «Lista
+  en la bandeja: N piezas».
 
 Las frases de error que vienen del servidor no cambian: si una dice «Los Fierros», de día es
 Los Cuchillos. Lo único
@@ -53,9 +58,9 @@ Si algo falla, el mensaje sale en rojo debajo del campo.
 
 ### La barra de pestañas
 
-Abajo, tres pestañas en este orden: «La Parrilla», «Publicar» y «Los Números». «Publicar» va al medio y se ve como un círculo naranjo con una cruz. La pestaña activa se ve en naranjo y su nombre sale también como título arriba de la pantalla.
+Abajo, cuatro pestañas en este orden: «La Parrilla», «Publicar», «Los Números» y «La Cocina». «Publicar» se ve como un círculo naranjo con una cruz, y «La Cocina», como un gorro de chef. La pestaña activa se ve en naranjo y su nombre sale también como título arriba de la pantalla. La Cocina llegó con la versión 1.2.0 de la app: un teléfono con la 1.1.0 tiene solo las otras tres hasta que se actualice desde la tienda (ver «La Cocina», más abajo).
 
-Arriba a la derecha de las tres, al lado del título, un botón redondo con un trinche y un cuchillo, lado a lado: abre «Ajustes». Si alguna cuenta conectada necesita que la reconecten, el botón lleva un punto: ámbar si su permiso vence esta semana, rojo si ya se apagó (venció o dejó de sincronizar). Sin nada que avisar, no hay punto. Un lector de pantalla lo lee «Ajustes» o, con aviso, «Ajustes: 1 se enfría» (o «2 se apagaron», etc.).
+Arriba a la derecha de las cuatro, al lado del título, un botón redondo con un trinche y un cuchillo, lado a lado: abre «Ajustes». Si alguna cuenta conectada necesita que la reconecten, el botón lleva un punto: ámbar si su permiso vence esta semana, rojo si ya se apagó (venció o dejó de sincronizar). Sin nada que avisar, no hay punto. Un lector de pantalla lo lee «Ajustes» o, con aviso, «Ajustes: 1 se enfría» (o «2 se apagaron», etc.).
 
 En «La Parrilla», «Los Números» y «Tus publicaciones», la app muestra al instante lo último que descargó y lo actualiza por detrás; por eso funciona sin señal, con datos viejos. Arriba dice cuándo se actualizó: «Actualizado recién», «Actualizado hace 5 min», «Actualizado hace 2 h» o «Actualizado hace 1 d». Para actualizar a mano, se arrastra la pantalla hacia abajo.
 
@@ -107,6 +112,29 @@ Las dos mitades del tablero del panel ([Los Números](los-numeros.md)), más cor
 - **Tarjeta «En tu página»**, con la bajada «Quién entró a tu página de links y qué apretó. Lo cuenta Tu Parrilla, sin cookies.» Dos cifras: «Visitas» y «Clicks en tus links», cada una con la comparación con el período anterior debajo: «↑ +12% vs. período anterior» en verde, «↓ -8% …» en rojo, «→ 0% …» si casi no cambió, o «—» si no hay con qué comparar (el período anterior tuvo cero, o es «Todo»). Después **«Qué publicación te trajo gente»**: hasta cinco etiquetas, de más a menos visitas, con su barra, el texto del post y su cuenta (o «?s=etiqueta» si no es de una publicación) y las visitas. Estas filas no se pueden tocar.
 - El botón «⋯ Más: tus cuentas», que abre debajo **una tarjeta por cuenta** del período elegido: la red y el nombre de la cuenta («Instagram · @cuenta»; con dos cuentas de una red, dos tarjetas), el número de seguidores y debajo «seguidores · +12 en el período», «seguidores · sin cambio» o «seguidores · — en el período»; «Visitas al perfil: N · Alcance: N», a veces con el día de la lectura entre paréntesis; y, con más de un día de datos, el gráfico de barras «Visitas al perfil por día». Abierto, el botón dice «Menos». Mientras carga: «Cargando tus cuentas…».
 
+### La Cocina
+
+Para grabar un video (o sacar una foto) con la cámara del teléfono y mandárselo al chef de la casa con una instrucción, sin pasar por el panel. Es la misma Cocina del panel ([La Cocina](la-cocina.md)) en su camino más corto: lo grabado se guarda en la cámara de frío ([La cámara de frío](la-camara-de-frio.md)) y la comanda que sale es la misma que el chef ve llegar desde el panel. Llegó con la versión 1.2.0 de la app.
+
+Si La Cocina no está encendida para la cuenta, la pestaña muestra solo el rótulo «El chef de la casa» y una tarjeta: «El chef de la casa edita tus videos: le llevas un video largo, un podcast en videollamada o tus tomas sueltas, y te devuelve una tanda de clips y carruseles con sus textos, para que los programes en tus redes. Está en piloto, con pocas cuentas.» y «Si quieres probarla, pídesela a quien administra Tu Parrilla.».
+
+Encendida, de arriba abajo:
+
+- «Actualizado …» y un punto con una frase: verde, «La cocina está abierta.»; ámbar, «La cocina está cerrada por ahora: lo que pidas espera su turno.».
+- **«Tu comanda»**, una tarjeta con el borde de arriba naranjo:
+  - «Graba el video, dile al chef qué quieres que salga y mándaselo. Lo grabado queda guardado en la cámara de frío.»
+  - La casilla «Tengo los derechos de lo que guardo y el permiso de quienes aparecen.». Sin marcarla, los tres botones de abajo están apagados y se lee «Marca la casilla de los derechos para grabar o elegir.». Se marca una vez cada vez que se abre la app.
+  - Los botones «Grabar video» (naranjo) y «Sacar foto», y debajo «Elegir de la galería» (fotos y videos, hasta diez de una vez). «Grabar video» y «Sacar foto» abren la cámara del teléfono; la primera vez, el teléfono pide permiso para la cámara y, para el sonido del video, el micrófono.
+  - Lo que va en la comanda, colgado de un riel: una barra gris y, debajo, cada cosa en su tarjeta, colgada de un gancho. Lo que todavía se está guardando dice «Guardando…» o «Guardando… 45 %», con una barra naranja que avanza, y una «✕» para cancelarlo. Al terminar queda colgado con su nombre, sus datos y una «✕» para sacarlo de la comanda (sigue guardado en la cámara). El primer video lleva «PLATO PRINCIPAL»: es el que el chef cocina; lo demás lo acompaña. Lo grabado se llama por su día y su hora, por ejemplo «Video del 2 de nov, 14.05.mp4» o «Foto del 2 de nov, 14.05.jpg»; lo de la galería, con su nombre.
+  - Si algo no se pudo guardar, su tarjeta dice por qué en rojo —la frase de la cuota, «No hay espacio para «…»: pesa … y te quedan … libres de …. Saca algo que ya no uses, o pide más espacio.», o «Se cortó la subida. Toca «Reintentar» para seguir donde quedó.»— con «Reintentar» y «Quitar».
+  - **«Tu instrucción al chef»**: un cuadro de texto con la ayuda «Qué quieres que salga: la duración, el tono, qué destacar o qué evitar.». Debajo, «Si no escribes nada, el chef elige.» y el contador «0 / 1000» (en rojo si se pasa). Después, una fila que se desliza de lado con ejemplos que se suman al texto al tocarlos: «+ Clips de menos de 30 segundos.», «+ Destaca la parte de ventas.», «+ No uses la anécdota del final.», «+ Empieza cada clip con la pregunta, no con la respuesta.» y «+ Tono cercano, como una conversación.».
+  - «El chef firma los videos con tu marca: «…».», con la marca guardada en el panel o, si nunca se pidió una comanda, el nombre de [Tu Cuenta](tu-cuenta.md).
+  - Lo que falta, en gris, mientras el botón esté apagado: «Espera a que termine de guardarse lo que sube.», «Graba un video o elige uno guardado: es el plato principal.», «Acorta tu instrucción al chef.» o «Escribe tu nombre en Tu Cuenta, en el panel web: es con el que el chef firma los videos.».
+  - El botón «Mandar al chef» (mientras manda, «Mandando…»). Al colgarse, un aviso: «Comanda colgada» / «El chef la toma en su turno. La ves avanzar en «Tus comandas», acá abajo, y te avisamos por correo cuando esté lista.», con «Entendido». La comanda sale como «Un video largo», con «Clips verticales» y «Lo que dé el material», lo mismo que el formulario del panel trae marcado; lo que acompaña va «Para intercalar».
+- **«La cámara de frío»**: la cuota como el riel de la cámara, diez ganchos que se llenan en naranjo (en ámbar desde el 85 %, en rojo llena), con «1,5 GB de 20 GB» debajo y « · subiendo …» si algo está subiendo. Desde el 85 %, «La cámara se está llenando.»; llena, «La cámara está llena: saca algo que ya no uses desde el panel web, o pide más espacio.». Después, «Toca lo que quieras sumar a la comanda. El primer video es el plato principal.» y lo guardado, de lo más nuevo a lo más viejo: una tarjeta por cosa con «VIDEO», «FOTO», «AUDIO» o «ARCHIVO» a la izquierda, el nombre, una línea con cómo se llama por su peso, lo que dura y lo que pesa («un cuarto · 30:30 · 1,4 GB»), y un gancho a la derecha: vacío, o naranjo con «✓» si va en la comanda. Tocarla la suma o la saca. Vacía: «La cámara está vacía.».
+- **«Tus comandas»**: las últimas quince, de la más nueva a la más vieja. Cada una es una tarjeta con su estado en palabras, como en el panel —«Comanda colgada», «El chef mira la res», «El desposte», «Al fuego», «Sirviendo: 3 de 5 tandas en el mesón», «Lista en el mesón: 12 cortes», «No se puede cocinar», «Cancelada»…—, en naranjo mientras el chef la tiene, en verde lista y en rojo si no se pudo; la fecha y la hora en que se pidió; cinco rayas con el recorrido (colgada, el chef mira, el desposte, al fuego, el mesón) encendidas hasta donde va; el nombre del plato principal; la instrucción entre «»; mientras espera, «Es la próxima en la fila.» o «Hay N comandas antes que la tuya.», y lo que dijo el chef o por qué no la cocinó. Sin comandas: «Todavía no tienes comandas.». Mientras alguna está en marcha y la pestaña está a la vista, se actualiza sola cada veinte segundos.
+- Al pie: «Lo que el chef cocina espera en el mesón, en el panel web: desde ahí lo programas. Sacar algo de la cámara de frío también se hace en el panel.».
+
 ### Ajustes
 
 Se abre con el botón de Ajustes de cualquier pestaña. Arriba, la flecha para volver y el título «Ajustes». Debajo:
@@ -121,7 +149,7 @@ Se abre con el botón de Ajustes de cualquier pestaña. Arriba, la flecha para v
 - **«El modo»**, con la frase «De noche: el acero y los cortes de la parrilla. Se guarda en tu cuenta: vale también en el panel web.» (de día, «De día: el fondo claro y piezas de sushi. Se guarda…») y un botón que dice adónde lleva: «Modo día» de noche, «Modo noche» de día. Cambia en el momento y lo guarda en la cuenta; sin señal, el teléfono lo recuerda y lo manda cuando vuelve la conexión.
 - **«Tu sesión»**, con «Cerrar sesión» en rojo. Pregunta «¿Cerrar sesión en este teléfono?» / «Para volver a entrar te va a llegar un código a tu correo.», con «Cancelar» y «Cerrar sesión» (en rojo). Al confirmar, la app vuelve a la pantalla de entrada y borra del teléfono lo que guardó de la cuenta —lo último que mostró cada pantalla—: quien entre después en ese teléfono no lo ve, y «atrás» ya no vuelve a ninguna pantalla de la cuenta. Las cuentas conectadas, lo programado y los borradores no se tocan: están en la cuenta, no en el teléfono.
 - **«El libro de sugerencias»** (de día, «La caja de sugerencias»), para escribirle al equipo que hace Tu Parrilla: una tarjeta con el dibujo de un libro abierto (de día, una caja de madera con una ranura), los botones «Una idea», «Algo no funciona» y «Otra cosa», un campo para escribir y el botón «Dejarlo en el libro» (de día, «Echarlo a la caja»). Es lo mismo que el libro del panel, con sus mismos textos y mensajes: está contado en [El libro de sugerencias](libro-de-sugerencias.md). En la app, en vez del navegador, el mensaje lleva la versión de la app, y al recibirse dice «Quedó en el libro.» (de día, «Quedó en la caja.») con «Escribir otra».
-- Al pie, la versión de la app: «Versión 1.1.0» y, si llegó una actualización por aire, « · actualización » seguido de ocho letras y números que la identifican. Sirve para saber qué versión tiene alguien que pide ayuda.
+- Al pie, la versión de la app: «Versión 1.2.0» (o «Versión 1.1.0» en un teléfono que todavía no se actualiza desde la tienda: esa no tiene La Cocina) y, si llegó una actualización por aire, « · actualización » seguido de ocho letras y números que la identifican. Sirve para saber qué versión tiene alguien que pide ayuda.
 
 Aquí no se conecta ni se desconecta nada: eso es del panel web.
 
@@ -245,6 +273,30 @@ El borrador desaparece también del panel web.
 
 1. Toca la «✕» del archivo que está subiendo: se cancela y sale de la lista.
 
+### Para grabar un video y mandárselo al chef
+
+1. Abre la pestaña «La Cocina» (el gorro de chef).
+2. Marca «Tengo los derechos de lo que guardo y el permiso de quienes aparecen.».
+3. Toca «Grabar video» (o «Sacar foto»). La primera vez, dale permiso a la cámara y al micrófono.
+4. Graba y acepta en la cámara del teléfono. Al volver, el video empieza a guardarse en la cámara de frío con su avance, «Guardando… N %», y al terminar queda colgado en la comanda como «PLATO PRINCIPAL».
+5. Escribe en «Tu instrucción al chef» qué quieres que salga, o toca algún ejemplo. Si no escribes nada, el chef elige.
+6. Toca «Mandar al chef». Sale el aviso «Comanda colgada», y la comanda aparece arriba en «Tus comandas».
+
+Mientras sube, conviene dejar la app abierta: en segundo plano el teléfono puede pausarla (ver «Si se corta la subida a La Cocina»). Un video largo pesa varios GB: con Wi-Fi sube mucho más rápido que con datos. Lo grabado con la app no queda en la galería del teléfono: queda guardado en la cámara de frío.
+
+### Para sumar a la comanda algo que ya está guardado
+
+1. En «La Cocina», baja hasta «La cámara de frío».
+2. Toca cada cosa que quieras sumar: su gancho se pone naranjo con «✓» y sube al riel de «Tu comanda». El primer video que elijas es el plato principal.
+3. Para sacar algo de la comanda, tócalo de nuevo, o toca su «✕» en el riel. Sigue guardado.
+
+Lo que se guardó desde el panel también está aquí, y lo que se graba en el teléfono también aparece en la cámara de frío del panel.
+
+### Si se corta la subida a La Cocina
+
+- Su tarjeta queda en rojo con «Se cortó la subida. Toca «Reintentar» para seguir donde quedó.». Con señal, toca «Reintentar»: sigue desde la última parte que llegó, sin subir de nuevo lo que ya estaba. «Quitar» la descarta y libera su lugar en la cuota.
+- Si la app se cerró mientras subía, al volver a abrir «La Cocina» sigue sola donde quedó, si la subida tiene menos de un día. Lo grabado con la app no se pierde aunque se cierre: la app guarda una copia hasta que termina de subir (no queda en la galería del teléfono) y la borra al terminar o al tocar «Quitar». Una subida que quedó a medias más de un día se borra sola y empieza de nuevo desde el principio.
+
 ### Para corregir o borrar algo programado desde el teléfono
 
 No se puede desde la app. Se hace en el panel web, en [La Parrilla](la-parrilla.md).
@@ -322,6 +374,25 @@ No se puede desde la app. Se hace en el panel web, en [La Parrilla](la-parrilla.
 | En «La Parrilla», después de la cuenta: «No se pudo hablar con la red. Se reintentará.» | Falla pasajera de la red. | Esperar: se reintenta solo, a los quince minutos y después a las dos horas. |
 | En «La Parrilla», después de la cuenta: «Instagram llegó a su tope de publicaciones por día: sale apenas se libere un cupo.» | Esa cuenta de Instagram ya publicó por la API lo máximo que Instagram deja en 24 horas. No es un fallo: no gasta intentos. | Esperar: se vuelve a probar cada hora y sale solo. |
 | «Vuelve a la lista y ábrelo de nuevo: este post no está en lo descargado.» | El detalle no encontró el post entre lo descargado. | «Volver», actualizar la lista y tocarlo de nuevo. |
+| «Si quieres probarla, pídesela a quien administra Tu Parrilla.» (en «La Cocina») | La Cocina no está encendida para esta cuenta. | Pedírsela a quien administra el sitio; la enciende en [Los Maestros](los-maestros.md). |
+| «La cocina está cerrada por ahora: lo que pidas espera su turno.» | El chef no está trabajando en este momento. | Se puede mandar igual: la comanda espera en la fila. |
+| «Marca la casilla de los derechos para grabar o elegir.» | Falta marcar «Tengo los derechos de lo que guardo y el permiso de quienes aparecen.». | Marcarla, si es cierto. |
+| «Sin permiso para la cámara» / «Dale permiso a Tu Parrilla para usar la cámara en los ajustes del teléfono, y vuelve a intentarlo.» | El teléfono no le dio permiso a la app para la cámara. | Darlo en los ajustes del teléfono (Aplicaciones → Tu Parrilla → Permisos) y volver a tocar «Grabar video». |
+| «Guardando…», «Guardando… N %» | Lo grabado o elegido está subiendo a la cámara de frío. | Esperar con la app abierta. «Mandar al chef» se enciende al terminar. |
+| «Se cortó la subida. Toca «Reintentar» para seguir donde quedó.» | Se cortó la señal o el almacén no contestó, después de varios intentos. | «Reintentar» con señal: sigue desde donde quedó. |
+| «No hay espacio para «…»: pesa … y te quedan … libres de …. Saca algo que ya no uses, o pide más espacio.» | No cabe en la cuota de la cámara de frío (contando lo que está subiendo). | Sacar algo de la cámara en el panel web ([La cámara de frío](la-camara-de-frio.md)), o pedir más espacio a quien administra el sitio. Después, «Reintentar». |
+| «La Cocina no está encendida para tu cuenta.» | Se la apagaron mientras la pantalla estaba abierta. | Arrastrar hacia abajo para actualizar; pedirla de nuevo a quien administra el sitio. |
+| ««…»: ese tipo de archivo no se guarda. Van videos (MP4, MOV, WebM o MKV), …» | Lo elegido de la galería no es algo que la cámara de frío guarde. | Elegir otro archivo. |
+| ««…» pesa más de 20 GB, el tope de un video.» (o «50 MB, el tope de una imagen») | El archivo es más grande que el tope de su clase. | Elegir uno más liviano. |
+| «La cámara se está llenando.» / «La cámara está llena: saca algo que ya no uses desde el panel web, o pide más espacio.» | Lo guardado pasa del 85 % de la cuota, o la llenó. | Sacar lo que no se use en el panel web, en [La cámara de frío](la-camara-de-frio.md). |
+| «Graba un video o elige uno guardado: es el plato principal.» | La comanda no tiene ningún video: una foto sola no se puede mandar. | Grabar un video o tocar uno de la cámara de frío. |
+| «Espera a que termine de guardarse lo que sube.» | Algo todavía está subiendo. | Esperar. |
+| «Acorta tu instrucción al chef.» | La instrucción pasa los 1000 caracteres. | Acortarla. |
+| «Escribe tu nombre en Tu Cuenta, en el panel web: es con el que el chef firma los videos.» (o, al mandar, «Ponle nombre a tu marca: es el que el chef usa en los videos. Escribe tu nombre en Tu Cuenta, en el panel web, y vuelve a mandarla.») | La cuenta no tiene marca guardada ni nombre. | Escribir el nombre en [Tu Cuenta](tu-cuenta.md) en el panel web, y volver a tocar «Mandar al chef». |
+| «Comanda colgada» / «El chef la toma en su turno. …» | La comanda quedó pedida. | «Entendido». Se ve en «Tus comandas». |
+| «No se pudo mandar: revisa la señal y vuelve a tocar «Mandar al chef». No se va a pedir dos veces.» | Sin conexión al mandar, o el servidor no contestó. | Volver a tocar «Mandar al chef» con señal: si la primera sí llegó, no se pide dos veces. |
+| «El plato principal ya no está en la cámara, o no es un video: elige otro.» o «Uno de los materiales ya no está en la cámara: actualiza La Cocina y vuelve a elegir.» | Algo de lo elegido se sacó de la cámara (por ejemplo, desde el panel). | Arrastrar hacia abajo para actualizar y volver a elegir. |
+| «Comanda colgada», «El chef mira la res», «El desposte», «Al fuego», «Sirviendo: …», «Lista en el mesón: N cortes», «Servida», «No se puede cocinar», «No se pudo terminar», «Cancelada» (en «Tus comandas») | El estado de cada comanda, el mismo del panel. | Lo lista se programa desde el mesón, en el panel web ([La Cocina](la-cocina.md)). |
 
 ## Si el humano dice…
 
@@ -354,6 +425,14 @@ No se puede desde la app. Se hace en el panel web, en [La Parrilla](la-parrilla.
 - «Los números no cambian» → mirar «Actualizado hace…» arriba y arrastrar hacia abajo para actualizar.
 - «Quiero ver los comentarios» → no están en la app; se ven en el panel web, en [La Mesa](la-mesa.md).
 - «Quiero cambiar mi página de links desde el teléfono» → no se puede en la app; se hace en el panel web, en [La Vitrina](la-vitrina.md), que también funciona en el navegador del teléfono.
+- «Quiero grabar un video y mandárselo al chef» → la pestaña «La Cocina» (el gorro de chef) → marcar la casilla de los derechos → «Grabar video» → escribir la instrucción → «Mandar al chef».
+- «No tengo la pestaña La Cocina» → es de la versión 1.2.0 de la app; la 1.1.0 no la tiene. Se actualiza desde la tienda (o con el instalador nuevo que entrega quien administra el sitio). Mirar la versión en «Ajustes», al pie.
+- «Grabar video está gris» → falta marcar «Tengo los derechos de lo que guardo y el permiso de quienes aparecen.».
+- «El video que grabé no está en mi galería» → lo grabado desde la app no se guarda en la galería: queda en la cámara de frío de La Cocina, y desde el panel web se puede ver y sacar ([La cámara de frío](la-camara-de-frio.md)).
+- «¿Dónde están los clips que hizo el chef?» → en el mesón, en el panel web ([La Cocina](la-cocina.md)); desde ahí se programan. La app solo muestra el estado de cada comanda.
+- «Quiero cancelar una comanda» o «cambiar lo que pedí» → desde el teléfono no se puede; se cancela en el panel web, en [La Cocina](la-cocina.md), mientras no esté en el horno.
+- «No me deja mandar una foto sola al chef» → el chef cocina a partir de un video, el plato principal; las fotos lo acompañan.
+- «Se me cerró la app mientras subía» → al abrir «La Cocina» sigue sola donde quedó.
 - «No encuentro la app» → en el teléfono se llama «Tu Parrilla» (o «Vicente · Números», si es el APK de prueba de antes). Si no está instalada, hay que pedirle el instalador a quien administra el sitio. En iPhone no existe.
 
 ## Lo que esta pantalla no hace
@@ -370,6 +449,8 @@ Comparada con el panel web, la app no:
 - muestra la pieza de una publicación con sus versiones, «Comparar por atributo», el «⋯ Más» de «En tu página» (orígenes, links, países, equipos) ni el filtro de página o de bots ([Los Números](los-numeros.md));
 - edita la página pública ([La Vitrina](la-vitrina.md));
 - cambia la zona horaria ([Tu Cuenta](tu-cuenta.md)) ni genera llaves ([La Cocina](la-cocina.md));
+- en La Cocina: muestra ni programa lo del mesón, cancela comandas, elige formatos, cantidad, fecha, marca ni qué es cada video (todo eso es del formulario del panel), ni renombra o saca lo guardado en la cámara de frío ([La cámara de frío](la-camara-de-frio.md));
+- guarda en la galería del teléfono lo que graba;
 - invita usuarios ([Los Maestros](los-maestros.md));
 - manda notificaciones;
 - existe para iPhone.
@@ -378,7 +459,10 @@ Comparada con el panel web, la app no:
 
 Lo que describe sale de estos archivos:
 
-- `mobile/app.json` (el nombre del ícono)
+- `mobile/app.json` (el nombre del ícono, la versión y los textos de los permisos de la cámara y el micrófono)
+- `mobile/src/app/(tabs)/cocina.tsx` y `mobile/src/components/cocina.tsx` (La Cocina)
+- `mobile/src/lib/cocina.ts`, `mobile/src/lib/subir-por-partes.ts` y `mobile/src/lib/archivo-local.ts` (lo que falta para mandar, el nombre de lo grabado, la subida por partes y la copia de lo grabado)
+- `src/lib/cocina/telefono.ts` (la comanda que pide el teléfono y cómo se cuenta cada una), `src/lib/cocina/subidas.ts` y `src/lib/cocina/bodega.ts` (las frases de la subida y de la cuota), `src/lib/cocina/pedido.ts` y `src/lib/cocina/pedir.ts` (las de la comanda), `src/lib/cocina/nombres.ts` y `src/lib/cocina/tarjeta.ts` (los estados)
 - `mobile/src/app/_layout.tsx` (qué pantallas se ven con sesión y sin ella, la pantalla «Algo se rompió» y las cabeceras de «Publicación», «Tus publicaciones» y «Ajustes»)
 - `mobile/src/components/sesion.tsx` (el desbloqueo, entrar y salir)
 - `mobile/src/app/login.tsx`

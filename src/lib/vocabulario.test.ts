@@ -4,7 +4,14 @@ import ts from 'typescript'
 import { describe, expect, it } from 'vitest'
 import { SUGERENCIA_VACIA } from './sugerencias/formato'
 import { MAX_TEXTO, TIPOS, TIPOS_SUGERENCIA } from './sugerencias/tipos'
+import { GANCHOS, UMBRAL_LLENANDOSE } from './cocina/bodega'
+import { EJEMPLOS_DE_INSTRUCCION, MAX_INSTRUCCION } from './cocina/pedido'
 import {
+  CAMARA,
+  CAMARA_LLENA,
+  CAMARA_LLENANDOSE,
+  CAMARA_VACIA,
+  MESON,
   ECHAR_AL_LIBRO,
   LIBRO,
   QUEDO_EN_EL_LIBRO,
@@ -40,6 +47,24 @@ describe('«Se quemó» en cada modo', () => {
       const { apagada, prendida, llena } = ROTULO_CALOR[tema]
       expect(app).toContain(`${tema}: { apagada: '${apagada}', prendida: '${prendida}', llena: '${llena}' }`)
     }
+  })
+
+  it('La Cocina de la app llama igual que el panel a la cámara de frío y al mesón, y pide la instrucción igual', () => {
+    const app = readFileSync(join(process.cwd(), 'mobile', 'src', 'lib', 'tema.ts'), 'utf8')
+    for (const [constante, palabras] of [
+      ['CAMARA', CAMARA],
+      ['CAMARA_VACIA', CAMARA_VACIA],
+      ['CAMARA_LLENANDOSE', CAMARA_LLENANDOSE],
+      ['CAMARA_LLENA', CAMARA_LLENA],
+      ['MESON', MESON],
+    ] as const) {
+      expect(app).toContain(`${constante}: Record<Tema, string> = { noche: '${palabras.noche}', dia: '${palabras.dia}' }`)
+    }
+    const cocina = readFileSync(join(process.cwd(), 'mobile', 'src', 'lib', 'cocina.ts'), 'utf8')
+    expect(cocina).toContain(`MAX_INSTRUCCION = ${MAX_INSTRUCCION}`)
+    expect(cocina).toContain(`GANCHOS = ${GANCHOS}`)
+    expect(cocina).toContain(`UMBRAL_LLENANDOSE = ${UMBRAL_LLENANDOSE}`)
+    for (const ejemplo of EJEMPLOS_DE_INSTRUCCION) expect(cocina).toContain(`'${ejemplo}'`)
   })
 
   it('el libro de sugerencias se llama igual en la app, con los mismos tipos y el mismo largo', () => {

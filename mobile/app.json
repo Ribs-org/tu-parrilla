@@ -2,7 +2,7 @@
   "expo": {
     "name": "Tu Parrilla",
     "slug": "vicente-numeros",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "runtimeVersion": {
       "policy": "appVersion"
     },
@@ -57,9 +57,9 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Para elegir las fotos y videos que vas a publicar.",
-          "cameraPermission": false,
-          "microphonePermission": false
+          "photosPermission": "Para elegir las fotos y videos que vas a publicar o mandarle al chef.",
+          "cameraPermission": "Para grabar el video o sacar la foto que le mandas al chef de La Cocina.",
+          "microphonePermission": "Para que el video que grabas para el chef de La Cocina tenga sonido."
         }
       ],
       "@react-native-community/datetimepicker"

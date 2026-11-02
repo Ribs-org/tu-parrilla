@@ -23,8 +23,9 @@ registro abierto.
   con el correo y un código de seis dígitos que llega por correo, en
   `https://tu-parrilla.cl/ingresar` ([Entrar al panel](ingresar.md)). Si la persona lo abre en
   otro dominio, la manda sola a tu-parrilla.cl.
-- **La app del teléfono** (Android): hace una parte de lo mismo, con las mismas tres pestañas
-  —La Parrilla, Publicar y Los Números— en versión corta ([La app del teléfono](app-movil.md)).
+- **La app del teléfono** (Android): hace una parte de lo mismo, con cuatro pestañas en versión
+  corta —La Parrilla, Publicar, Los Números y La Cocina, donde se graba un video y se le manda al
+  chef— ([La app del teléfono](app-movil.md)).
 - **Su página pública**, la que ve su audiencia: `https://tu-parrilla.cl/<su-dirección>`. Se
   edita en La Vitrina ([la-vitrina.md](la-vitrina.md)).
 
@@ -142,6 +143,7 @@ teléfono](app-movil.md).
 | Leer cómo funciona el panel, pantalla por pantalla | La Cocina → «El manual del parrillero →»: esta misma wiki, en el panel ([la-cocina.md](la-cocina.md)) |
 | Invitar a alguien; cerrar las sesiones de alguien; encenderle la cocina | Los Maestros, solo el admin ([los-maestros.md](los-maestros.md)) |
 | Publicar desde el teléfono | [La app del teléfono](app-movil.md) |
+| Grabar un video con el teléfono y mandárselo al chef de la casa | La app del teléfono → pestaña «La Cocina» ([app-movil.md](app-movil.md)) |
 | Pedir una función, reclamar algo que no funciona o decirle algo a quienes hacen Tu Parrilla | «Ajustes» → «El libro de sugerencias», al final del menú; en el teléfono, al final de «Ajustes» ([libro-de-sugerencias.md](libro-de-sugerencias.md)) |
 
 ## El vocabulario del asado

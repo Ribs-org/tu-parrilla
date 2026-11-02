@@ -8,8 +8,7 @@ import { COMANDA_AJENA, COMANDA_NO_CANCELABLE, cancelarComanda } from '@/lib/coc
 import { MATERIAL_EN_USO, MATERIAL_NO_EXISTE, USO_DESCONOCIDO, esUso, leerNombre } from '@/lib/cocina/bodega'
 import { editarMaterial, sacarMaterial } from '@/lib/cocina/materiales'
 import { leerPedido } from '@/lib/cocina/pedido'
-import { ACOMPANAMIENTO_NO_SIRVE, PRINCIPAL_NO_SIRVE, pedirComanda } from '@/lib/cocina/pedir'
-import { COCINA_APAGADA } from '@/lib/cocina/subidas'
+import { NO_SE_PIDIO, pedirComanda } from '@/lib/cocina/pedir'
 import { esUuid } from '@/lib/uuid'
 
 // Lo que el dueño hace con sus comandas desde La Cocina. Aparte de `actions.ts`, que ya es largo:
@@ -25,12 +24,6 @@ export async function cancelarComandaPropia(id: string): Promise<{ error?: strin
   if ('falla' in r) return { error: r.falla === 'no-existe' ? COMANDA_AJENA : COMANDA_NO_CANCELABLE }
   return {}
 }
-
-const NO_SE_PIDIO = {
-  apagada: COCINA_APAGADA,
-  principal: PRINCIPAL_NO_SIRVE,
-  acompanamiento: ACOMPANAMIENTO_NO_SIRVE,
-} as const
 
 /**
  * Cuelga una comanda con lo que el formulario eligió de la cámara de frío y lo que pidió, y vuelve a
