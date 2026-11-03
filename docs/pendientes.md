@@ -99,12 +99,20 @@ sección.
   `docs/auditoria-ui-2026-10-16.md`: `react-native-svg` en el próximo build nativo, con las
   curvas del panel. Mientras tanto, se puede retocar la silueta por aire (más ancha, con un
   extremo afinado o las vetas más marcadas) para que no se confunda.
-- **Por revisar: Instagram no entrega los comentarios de @vicente_edits2** (2026-10-30). Los cuenta
-  y los muestra en la app, pero `/comments` devuelve vacío, sin error, en el sondeo y en el
-  Explorador, también con comentarios de personas externas y en una foto subida a mano. Con el
-  mismo token, @vicente_pareja_j y @vicente.ingeniero sí los entregan, y la configuración de
-  comentarios y las tareas sobre la página están bien. La causa no está explicada y Meta no la
-  documenta; la cuenta tiene 0 seguidores. Hay que grabar la escena del privado con otra cuenta.
+- **Instagram no entrega por la API el comentario que es solo la palabra clave** (2026-11-03;
+  antes, «no entrega los comentarios de @vicente_edits2», 2026-10-30). En una foto de
+  @vicente.ingeniero que decía «Comment GUIA and I'll send you the guide», `comments_count`
+  contaba los comentarios `GUIA` y `Guia`, de dos cuentas distintas, pero `/comments` no los
+  devolvía, ni en el sondeo ni en el Explorador. Sí devolvía, en la misma foto, «Hola, dame la
+  GUIA??» y «Holaa, aun la necesito». El `GUIA` suelto sí llegó en una publicación que no lo
+  pedía. Lo que calza: Instagram retiene el comentario de una sola palabra que repite la que pide
+  la publicación. Es lo que pasaba en @vicente_edits2, donde todas las pruebas pedían `GUIA`. No
+  es una restricción, ni el filtro de comentarios ocultos, ni el acceso a mensajes: los tres se
+  probaron. Meta no lo documenta. Es justo lo que comenta la mayoría, así que la regla de palabra
+  clave pierde casi todo su uso. Por probar: si los webhooks de comentarios (`comments` en el
+  objeto `instagram`) sí los entregan, y si la publicación que pide la palabra con otras
+  palabras («escribe GUIA») cambia algo. Mientras tanto, la demo de Meta se graba comentando una
+  frase.
 - **Por revisar: en qué orden entrega Instagram los comentarios** (2026-10-30). El comentario de
   `src/lib/social/comentarios/instagram.ts` dice que el borde va del más viejo al más nuevo, y la
   referencia de Meta dice lo contrario: «Returns results in reverse chronological order by
