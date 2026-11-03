@@ -43,6 +43,9 @@ import {
 import { HISTORIA_CON_OPCIONES, HISTORIA_DEMASIADAS } from './social/publish/batch'
 import { LADO_ERROR, METRICA_ERROR, PERCENTIL_ERROR, RECIENTES_ERROR } from './mejores'
 import { RANGO_ERROR, cuentaAmbigua, cuentaDesconocida } from './metrics-api'
+import { DERECHOS_FALTAN, SUBIDA_ILEGIBLE, USO_DESCONOCIDO, USOS_MATERIAL, muyGrande } from './cocina/bodega'
+import { COCINA_APAGADA, PARTES_ILEGIBLES, SUBIDA_CERRADA, SUBIDA_MAL_CERRADA, SUBIDA_NO_EXISTE, faltanPartes } from './cocina/subidas'
+import { SIN_ALMACEN } from './storage'
 
 // `batch.ts` importa `@/lib/usuarios` (la zona del dueño del lote), que trae
 // `server-only` y no resuelve bajo Vitest. Mismo arreglo que en `aislamiento.test.ts`.
@@ -102,6 +105,29 @@ describe('la documentación para LLM no le miente al código', () => {
       for (const motivo of [...MOTIVOS_FIJOS, 'http <status>', 'tipo <content-type>']) {
         expect(guia, `${archivo}: ${motivo}`).toContain(`\`${motivo}\``)
       }
+    }
+  })
+
+  it('las frases y los usos de la cámara de frío (`/api/bodega`) son los del código, en las dos guías', () => {
+    for (const archivo of ['public/docs/api-llm.md', 'public/docs/api-editor.md']) {
+      const guia = readFileSync(archivo, 'utf8')
+      for (const frase of [
+        SUBIDA_ILEGIBLE,
+        DERECHOS_FALTAN,
+        USO_DESCONOCIDO,
+        PARTES_ILEGIBLES,
+        COCINA_APAGADA,
+        SUBIDA_NO_EXISTE,
+        SUBIDA_CERRADA,
+        SUBIDA_MAL_CERRADA,
+        SIN_ALMACEN,
+        CUERPO_ILEGIBLE,
+        faltanPartes(1),
+        muyGrande('<nombre>', 'video'),
+      ]) {
+        expect(guia, `${archivo}: ${frase}`).toContain(frase)
+      }
+      for (const uso of USOS_MATERIAL) expect(guia, `${archivo}: ${uso}`).toContain(`\`${uso}\``)
     }
   })
 
