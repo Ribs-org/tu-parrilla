@@ -70,24 +70,37 @@ async function ensureThreadsCredential(account: SocialAccount): Promise<string |
   return data.access_token
 }
 
+/**
+ * Threads contesta «Media Not Found» (subcódigo 4279009) cuando se publica un contenedor
+ * que todavía está procesando: no es un rechazo, es «todavía no».
+ */
+export function esMediaNoLista(cuerpo: string): boolean {
+  return /"error_subcode"\s*:\s*4279009\b/.test(cuerpo)
+}
+
 async function postForm(
   url: string,
   params: Record<string, string>,
-): Promise<Record<string, unknown> | null> {
+): Promise<{ data: Record<string, unknown> } | { rechazo: string }> {
   const response = await fetch(url, { method: 'POST', body: new URLSearchParams(params) })
   if (!response.ok) {
-    console.error('Threads publish:', response.status, (await response.text()).slice(0, 300))
-    return null
+    const rechazo = (await response.text()).slice(0, 300)
+    console.error('Threads publish:', response.status, rechazo)
+    return { rechazo }
   }
-  return response.json()
+  return { data: await response.json() }
 }
 
 async function publishContainer(input: PublishInput, containerId: string): Promise<PublishOutcome> {
-  const data = await postForm(`${GRAPH}/${input.accountExternalId}/threads_publish`, {
+  const r = await postForm(`${GRAPH}/${input.accountExternalId}/threads_publish`, {
     creation_id: containerId,
     access_token: input.token,
   })
-  const id = data?.id
+  if ('rechazo' in r) {
+    if (esMediaNoLista(r.rechazo)) return { kind: 'processing', containerId }
+    return { kind: 'failed', reason: THREADS_REJECTED }
+  }
+  const id = r.data.id
   if (typeof id !== 'string') return { kind: 'failed', reason: THREADS_REJECTED }
   return { kind: 'published', externalId: id }
 }
@@ -121,12 +134,13 @@ export const threadsPublisher: Publisher = {
       ...threadsContainerParams(input.caption, only),
       access_token: input.token,
     })
-    const containerId = container?.id
+    const containerId = 'data' in container ? container.data.id : undefined
     if (typeof containerId !== 'string') return { kind: 'failed', reason: PUBLISH_NETWORK_ERROR }
 
-    // Text and single images are ready at once; video processes asynchronously and
-    // parks on the container like Instagram's reels.
-    if (only?.mediaType === 'video') return { kind: 'processing', containerId }
+    // Solo el texto está listo al tiro. Threads baja la imagen igual que el video, de
+    // forma asíncrona, y publicarla en el mismo segundo da «Media Not Found»: con archivo,
+    // se espera en el contenedor hasta que diga FINISHED, como los reels de Instagram.
+    if (only) return { kind: 'processing', containerId }
     return publishContainer(input, containerId)
   },
 }
