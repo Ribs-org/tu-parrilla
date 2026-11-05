@@ -249,7 +249,12 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   URL* `https://tu-parrilla.cl/api/social/threads/borrado`. Para abrirla a todos: la aprobación
   de `threads_basic` y `threads_content_publish` (la entrada «Meta, segunda vuelta», más abajo),
   sacarla de `REDES_PROXIMAMENTE` (`src/lib/networks.ts`) y volver a contar su conexión en
-  `public/docs/ui/los-fierros.md`.
+  `public/docs/ui/los-fierros.md`. Después, si se quiere: **las métricas de Threads en Los
+  Números** (`threads_manage_insights`) y **sus respuestas en La Mesa**
+  (`threads_read_replies`, `threads_manage_replies`). Hoy no hay código para ninguna de las dos:
+  `sync.ts` no tiene conector de Threads y La Mesa no tiene `Comentarista` de Threads. El panel de
+  Meta las sumó al borrador de la segunda solicitud el 2026-11-05 y se quitan de ella; cada una
+  pide su función hecha y su video.
 - **Integración con X** (en «Próximamente» desde el 2026-10-19). El código para publicar existe
   (`src/lib/social/publish/x.ts`), pero no publica: lo primero a mirar es el saldo, porque su
   API ya no tiene capa gratuita, y pagarla es decisión del **[dueño]**. Abrirla es lo mismo que
