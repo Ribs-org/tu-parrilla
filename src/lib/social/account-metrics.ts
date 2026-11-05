@@ -58,6 +58,21 @@ export function normalizeInstagramAccount(
 }
 
 /**
+ * Threads (`/{user-id}/threads_insights`) responde con las dos mismas formas que Instagram:
+ * `followers_count` como `total_value`, y `views` como serie diaria con `end_time` (la
+ * documentación también la muestra como `total_value`; se aceptan las dos). Las views van en
+ * `views`, como las del día de Instagram: son de la cuenta, no un acumulado de por vida.
+ */
+export function normalizeThreadsAccount(insights: { data?: InstagramEntry[] }): AccountMetricValues {
+  const entries = insights.data ?? []
+  return {
+    ...NO_ACCOUNT_METRICS,
+    followers: instagramValue(entries, 'followers_count'),
+    views: instagramValue(entries, 'views'),
+  }
+}
+
+/**
  * Las page insights están muertas para esta página (todas responden «metric inválida»
  * o vacío), así que Facebook aporta lo único que su nodo sí entrega: seguidores.
  * `fan_count` es el nombre viejo del mismo número y sirve de respaldo.

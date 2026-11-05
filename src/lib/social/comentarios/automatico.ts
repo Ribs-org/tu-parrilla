@@ -25,6 +25,11 @@ export function hostDelSitio(): string | null {
   }
 }
 
+/** Si la respuesta automática cabe entera en la red, contada por puntos de código como `recortar`. */
+export function cabeEnLaRed(texto: string, limite: number): boolean {
+  return [...texto.trim()].length <= limite
+}
+
 /** Las reglas de los posts de una cuenta, por id de red del post. */
 export async function reglasPara(accountId: string, postExternalIds: string[]): Promise<Map<string, ReglaLimpia>> {
   const mapa = new Map<string, ReglaLimpia>()
@@ -183,6 +188,10 @@ export async function aplicarReglas(
       sitioHost,
     })
     if (plan.accion === 'ignorar') continue
+    // Un mensaje que no cabe en la red no sale solo: recortado perdería el enlace del final.
+    // Pasa en Threads, que acepta 500 caracteres y la regla deja escribir 1000; el comentario
+    // se queda en la cola para responderlo a mano.
+    if (!cabeEnLaRed(plan.publico, comentarista.limiteTexto)) continue
     // Reclamado antes de mandar: dos sondeos encimados, o el dueño respondiendo a mano a la
     // vez, mandarían dos respuestas públicas al mismo comentario.
     if (!(await reclamarEnvio(c.id))) continue

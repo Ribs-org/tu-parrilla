@@ -6,6 +6,8 @@ La Mesa (en llano: los comentarios) es la cola de los comentarios que la gente d
 
 Los comentarios llegan solos: cada cinco minutos Tu Parrilla revisa las publicaciones de los últimos siete días de cada cuenta conectada de Instagram y Facebook; las de YouTube, cada media hora. Para eso la cuenta tiene que estar conectada en [Los Fierros](los-fierros.md). Los comentarios que deja la propia cuenta no entran a la cola.
 
+Threads tiene cola solo en la cuenta que la instalación abrió para la revisión de Meta (la del revisor), y solo cuando la instalación ya pide los permisos de lectura de Threads: ahí sus respuestas llegan cada cinco minutos, como las de Instagram, y se contestan igual (ver «Threads, en la cuenta del revisor», abajo). Para todas las demás cuentas Threads dice «Próximamente» y no trae nada.
+
 Lo que se responde directo en la app de la red (Instagram, Facebook o YouTube) no hay que responderlo de nuevo aquí: en cada revisión Tu Parrilla mira también las respuestas de cada comentario, y si una es de la cuenta conectada, el comentario sale de «Pendientes» y pasa a «Enviados» como «Respondido desde Instagram: …» (con la red que corresponda). Puede tardar hasta la revisión siguiente: cinco minutos, o media hora en YouTube.
 
 ## Cómo se llega
@@ -43,7 +45,7 @@ Una fila de botones redondeados; el elegido se ve resaltado.
   - «Automáticas»: los que tomó la respuesta automática por palabra clave, en cualquier estado.
   - «Descartados»: los que se decidió no responder.
   - «Todos»: todo lo anterior junto.
-- Después de un «·», por red: «Todas» (la que viene elegida), «Instagram», «Facebook», «YouTube».
+- Después de un «·», por red: «Todas» (la que viene elegida), «Instagram», «Facebook», «YouTube» y, solo en la cuenta del revisor con la lectura de Threads encendida, «Threads».
 
 Se ven hasta 200 comentarios por filtro, los más nuevos.
 
@@ -91,7 +93,7 @@ No tiene botones.
 
 ### Lo que hace la respuesta automática por palabra clave
 
-Se configura por publicación al programarla en [La Parrilla](la-parrilla.md), en el bloque «Respuesta automática por palabra clave» del compositor. Solo existe en publicaciones que salieron desde Tu Parrilla, y solo en Instagram, Facebook y YouTube.
+Se configura por publicación al programarla en [La Parrilla](la-parrilla.md), en el bloque «Respuesta automática por palabra clave» del compositor. Solo existe en publicaciones que salieron desde Tu Parrilla, y solo en Instagram, Facebook y YouTube (y en Threads en la cuenta del revisor, ver «Threads, en la cuenta del revisor»).
 
 - Cuando alguien comenta la palabra, Tu Parrilla responde solo en la revisión siguiente (hasta cinco minutos en Instagram y Facebook, hasta media hora en YouTube), sin pasar por «Enviar». Cuenta la palabra entera, sin importar mayúsculas ni tildes: para la palabra «guia», «#GUÍA!» cuenta y «guiar» no.
 - Con los mensajes privados apagados (hoy), la respuesta es el «Mensaje» de la regla, con su enlace, publicado como respuesta pública al comentario; si la regla trae un documento, su enlace va al final. Encendidos, en Instagram y Facebook la respuesta pública es la corta y el «Mensaje» va por privado, una sola vez a cada persona en cada publicación y dentro de siete días; la tarjeta dice «Privado: enviado» o «Privado: no salió». Si el enlace es del sitio propio, sus visitas se cuentan aparte en [Los Números](los-numeros.md).
@@ -99,6 +101,21 @@ Se configura por publicación al programarla en [La Parrilla](la-parrilla.md), e
 - Si salió bien: «Respondido: <el mensaje>» con la etiqueta «Automática».
 - Si la red no la aceptó: se queda en «Pendientes» con «La regla de palabra clave intentó responder y la red no aceptó; «Enviar» lo reintenta.» y el mensaje en el cuadro. Al mandarlo con «Enviar» cuenta como respuesta a mano: pierde la etiqueta «Automática» y sale del filtro «Automáticas».
 - Si el autor borró el comentario: pasa a «Descartados» con «Descartado · El comentario ya no está en la red.».
+
+### Threads, en la cuenta del revisor
+
+Solo donde Threads trae respuestas (ver arriba). En Threads un «comentario» es una respuesta
+directa a la publicación; las respuestas a esa respuesta no entran a la cola, pero sirven
+para ver si la cuenta ya contestó desde la app de Threads, igual que en Instagram. Las que
+Threads ocultó no aparecen. La tarjeta muestra a quien respondió como «@usuario». Lo que se
+manda desde aquí sale en Threads como respuesta a esa respuesta, a nombre de la cuenta
+conectada, con hasta 500 caracteres.
+
+La respuesta automática por palabra clave también funciona en una publicación de Threads que
+salió desde Tu Parrilla: Threads no tiene mensajes privados, así que el «Mensaje» de la regla
+sale siempre como respuesta pública. Si el «Mensaje» (con el enlace del documento, si trae)
+pasa de 500 caracteres, no sale solo —cortado perdería el enlace—: el comentario se queda en
+«Pendientes», sin borrador, para responderlo a mano.
 
 ## Qué se puede hacer
 
@@ -110,7 +127,7 @@ Se configura por publicación al programarla en [La Parrilla](la-parrilla.md), e
 3. Aprieta «Enviar». Mientras sale dice «Enviando…».
 4. La respuesta se publica en la red como respuesta a ese comentario, a nombre de la cuenta conectada. El comentario sale de «Pendientes» y aparece en «Enviados» como «Respondido: …».
 
-Apretar dos veces no manda dos respuestas. El largo máximo depende de la red: 2200 caracteres en Instagram, 8000 en Facebook y 10000 en YouTube.
+Apretar dos veces no manda dos respuestas. El largo máximo depende de la red: 2200 caracteres en Instagram, 8000 en Facebook, 10000 en YouTube y 500 en Threads.
 
 ### Para responder uno que llegó sin borrador
 
@@ -189,7 +206,7 @@ Aprieta el filtro «Automáticas». Ahí están todos los que tomó, también lo
 
 - **«¿Cómo respondo comentarios?»** → Pestaña «La Mesa» → filtro «Pendientes» → corregir el borrador → «Enviar».
 - **«No me aparecen comentarios»** → Revisar, en orden: que sean de Instagram, Facebook o YouTube; que la publicación tenga siete días o menos; que la cuenta esté conectada en [Los Fierros](los-fierros.md) (si se conectó antes de que existieran los comentarios, hay que apretar «Reconectar» una vez para dar ese permiso); que hayan pasado cinco minutos (media hora en YouTube); y que los filtros estén en «Todos» y «Todas». Los comentarios de la propia cuenta no aparecen nunca.
-- **«No veo los comentarios de TikTok, Threads o X»** → Esas redes no tienen cola de comentarios.
+- **«No veo los comentarios de TikTok, Threads o X»** → TikTok y X no tienen cola de comentarios, y Threads tampoco mientras diga «Próximamente» en [Los Fierros](los-fierros.md). En la cuenta del revisor de Meta, Threads sí la tiene cuando la instalación pide sus permisos de lectura; si la cuenta de Threads se conectó antes de eso, hay que apretar «Reconectar» una vez.
 - **«El cuadro de respuesta está vacío»** → La IA todavía no escribió el borrador, la instalación no tiene IA, o el comentario dice la palabra clave de la publicación y está esperando la respuesta automática. Se puede escribir a mano o apretar la flecha de arriba a la derecha de la tarjeta («Reintentar borrador»).
 - **«Cambié las instrucciones y el borrador sigue igual»** → Las instrucciones rigen desde el siguiente borrador. Para rehacer los que ya estaban: «Guardar» y después «Regenerar todos»; o, en una tarjeta sola, la flecha de arriba a la derecha.
 - **«¿Dónde está "Reintentar borrador"?»** → Es la flecha redonda arriba a la derecha de cada tarjeta pendiente.
@@ -207,7 +224,7 @@ Aprieta el filtro «Automáticas». Ahí están todos los que tomó, también lo
 
 ## Lo que esta pantalla no hace
 
-- No trae comentarios de TikTok, Threads ni X, ni de publicaciones de más de siete días.
+- No trae comentarios de TikTok ni de X, ni de Threads fuera de la cuenta del revisor, ni de publicaciones de más de siete días. En Threads no manda privados: la regla de palabra clave responde en público.
 - No da «me gusta», no oculta ni borra comentarios en la red.
 - No edita ni borra una respuesta ya enviada, y no deshace un descarte.
 - No responde sola, salvo la respuesta automática por palabra clave, y esa no se configura aquí sino en [La Parrilla](la-parrilla.md).
@@ -236,7 +253,8 @@ Lo que describe sale de:
 - `src/lib/social/comentarios/ventana.ts` y `src/lib/social/comentarios/run.ts` (cada cuánto, los siete días, los comentarios propios, los respondidos desde la app de la red)
 - `src/lib/social/comentarios/agrupar.ts`
 - `src/lib/social/retencion-youtube.ts` (los comentarios de YouTube se borran a los 30 días)
-- `src/lib/social/comentarios/index.ts`, `src/lib/social/comentarios/instagram.ts`, `src/lib/social/comentarios/facebook.ts` y `src/lib/social/comentarios/youtube.ts` (qué redes, el largo máximo de cada una)
+- `src/lib/social/comentarios/index.ts`, `src/lib/social/comentarios/instagram.ts`, `src/lib/social/comentarios/facebook.ts`, `src/lib/social/comentarios/youtube.ts` y `src/lib/social/comentarios/threads.ts` (qué redes, el largo máximo de cada una)
+- `src/lib/social/threads.ts` (`permisosExtraDeThreads`: cuándo Threads trae respuestas) y `src/lib/redes-abiertas.ts` (para quién está abierto)
 - `src/app/admin/(dash)/schedule/regla-clave.tsx` (el nombre del bloque de la palabra clave)
 - `src/lib/vocabulario.ts`
 

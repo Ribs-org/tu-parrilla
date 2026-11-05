@@ -200,8 +200,9 @@ publicación, en la misma pestaña (el enlace a la red está ahí).
   YouTube, solo el total, porque sus reglas no permiten calcular lo ganado. Visitas al perfil y
   alcance son del último día leído — Instagram es la única que los entrega hoy.»
 
-  Una tarjeta por cuenta con lecturas (hoy pueden ser de Instagram, Facebook y YouTube; TikTok,
-  Threads y X no tienen). Con una cuenta elegida arriba, solo la suya. Cada tarjeta:
+  Una tarjeta por cuenta con lecturas (hoy pueden ser de Instagram, Facebook y YouTube; TikTok
+  y X no tienen, y Threads solo en la cuenta del revisor de Meta, cuando la instalación pide los permisos de lectura de Threads: trae sus seguidores, y «Visitas al
+  perfil» y «Alcance» quedan en «—»). Con una cuenta elegida arriba, solo la suya. Cada tarjeta:
 
   - El nombre, con el patrón «<red> · <nombre de la cuenta>» (o solo la red).
   - Un número grande: los seguidores (en YouTube, los suscriptores), o «—».
@@ -742,7 +743,10 @@ lee todas las cuentas una vez al día (a las 9:00 UTC, las 5 o 6 de la mañana e
 época) y guarda una lectura de cada publicación que le toca; también corre al apretar
 «Sincronizar ahora» en [Los Fierros](los-fierros.md). Por eso una publicación nueva no aparece
 hasta la siguiente sincronización, y los números pueden ir hasta un día atrás de lo que muestra
-la app de la red. Threads y X no se sincronizan: no tienen números aquí.
+la app de la red. X no se sincroniza: no tiene números aquí. Threads tampoco, salvo en
+la cuenta del revisor de Meta, cuando la instalación pide los permisos de lectura de Threads (ver [Los Fierros](los-fierros.md)). Ahí entran sus publicaciones propias —no
+los reposts de publicaciones ajenas— con views, likes, comentarios (sus respuestas) y
+compartidos (sus reposts más sus citas); guardados y alcance, Threads no los da.
 
 **Qué publicación se lee cada día.** Depende de su edad. Lo publicado en los últimos 10 días se
 lee todos los días (y, aunque la cuenta publique poco, siempre sus 200 publicaciones más
@@ -778,7 +782,7 @@ se sabe y no ganaron nada.
 período» de las tarjetas de «Tus cuentas». Sin YouTube. Una baja cuenta como cero: la pantalla
 no muestra seguidores perdidos. Una cuenta sin lectura de antes del período no suma; si
 ninguna la tiene (las cuentas se conectaron después de que empezó el período, el período es
-«Todo», o solo hay TikTok, Threads o X), sale «—».
+«Todo», o solo hay TikTok, Threads o X —salvo Threads en la cuenta del revisor—), sale «—».
 
 **«Lo que más creció».** Las cinco publicaciones que más views ganaron en el período, de
 cualquier fecha, sin YouTube y sin borradas. Solo entran las que ganaron más de cero.
@@ -1063,8 +1067,8 @@ sale menos de uno: «×0,21» es que una típica de abajo sacó una quinta parte
 
 **«Qué tienen en común».** Cada rasgo cuenta una vez por publicación: los atributos (menos
 `pieza`, que junta versiones de un mismo video), la red, el formato («Reel», «Video», «Short»,
-«Foto», «Carrusel», «Enlace»), el día de la semana y la franja de la hora de publicación, en la
-zona de [Tu Cuenta](tu-cuenta.md). Entra si está en al menos dos del grupo y es al menos 1,5
+«Foto», «Carrusel», «Enlace» y, en Threads, «Texto» y «Audio»), el día de la semana y la
+franja de la hora de publicación, en la zona de [Tu Cuenta](tu-cuenta.md). Entra si está en al menos dos del grupo y es al menos 1,5
 veces más frecuente ahí que entre todas las que compiten. Con menos de tres en el grupo, no
 aparece nada. Con «Lo peor» dice qué se repite entre las que peor anduvieron: lo que conviene
 dejar de hacer, o probar de otra forma.
@@ -1347,10 +1351,10 @@ De día, donde una de estas frases dice «La Parrilla» dice «La Barra», y «L
 | «No se pudo armar la planilla. Prueba de nuevo; si el período es muy largo, prueba con uno más corto.» | Algo falló mientras se armaba, o se cortó la conexión. No se descargó nada. | «Probar de nuevo»; si se repite, un período más corto. |
 | «Listo: se descargó <archivo>. …» | La planilla está en las descargas del navegador. | Abrirla y empezar por «Léeme». |
 | «—» en «Views ganadas» | Ninguna publicación tiene lo ganado conocido: todo es de YouTube, no hay lectura de antes del período, o no hay publicaciones sincronizadas. | Esperar la próxima sincronización, o elegir un período más corto que el tiempo que lleva conectada la cuenta. |
-| «—» en «Seguidores ganados» | Ninguna cuenta tiene una lectura de antes del período para comparar, o solo hay YouTube, TikTok, Threads o X. | Igual que arriba. |
+| «—» en «Seguidores ganados» | Ninguna cuenta tiene una lectura de antes del período para comparar, o solo hay YouTube, TikTok, Threads o X (Threads sí suma en la cuenta del revisor de Meta, con sus permisos de lectura). | Igual que arriba. |
 | «Ninguna publicación ganó views en este período. Las métricas llegan con la sincronización diaria, así que lo publicado hoy aparece mañana.» (en «Lo que más creció») | Ninguna publicación ganó más de cero views conocidas en el período. | Ampliar el período, o esperar la próxima sincronización. |
 | «Ninguna visita llegó todavía por el link de una publicación.» (en «Qué publicación te trajo gente») | En el período no llegó ninguna visita con etiqueta. | Ampliar el período; pegar los links con etiqueta (ver «Para copiar el link…»). |
-| «Todavía no hay lecturas de cuenta. La primera llega con la próxima sincronización diaria.» (en «Tus cuentas») | No hay ninguna lectura de cuenta de Instagram, Facebook ni YouTube (o de la cuenta elegida). La sincronización diaria corre a las 9:00 UTC. | Esperar, o apretar «Sincronizar ahora» en [Los Fierros](los-fierros.md). Si solo hay TikTok, Threads o X conectados, o la cuenta elegida es de una de esas, este mensaje se queda. |
+| «Todavía no hay lecturas de cuenta. La primera llega con la próxima sincronización diaria.» (en «Tus cuentas») | No hay ninguna lectura de cuenta de Instagram, Facebook ni YouTube (o de la cuenta elegida). La sincronización diaria corre a las 9:00 UTC. | Esperar, o apretar «Sincronizar ahora» en [Los Fierros](los-fierros.md). Si solo hay TikTok, Threads o X conectados, o la cuenta elegida es de una de esas, este mensaje se queda (Threads sí tiene lecturas en la cuenta del revisor de Meta, con sus permisos de lectura). |
 | «Sin tráfico en este período.» (en «Visitas y clicks en el tiempo») | Ni visitas ni clicks en el período. | Ampliar el período, revisar el selector de página. |
 | «Sin tráfico en este período.» (en «Views ganadas y visitas, día a día») | Ni views ganadas ni visitas por etiqueta en el período. | Ampliar el período, o esperar la sincronización. |
 | «Sin tráfico en este período.» (dentro de «Tus cuentas», bajo las tarjetas) | Hay lecturas de cuenta en el período, pero sin visitas al perfil ni alcance (por ejemplo, solo Facebook conectado). No habla de visitas a la página. | Nada: solo Instagram entrega esas dos cifras. |
@@ -1365,7 +1369,7 @@ De día, donde una de estas frases dice «La Parrilla» dice «La Barra», y «L
 | «1 publicación aún no tiene su link pegado.» / «<N> publicaciones aún no tienen su link pegado.» | Esas publicaciones nunca trajeron una visita con su etiqueta. | Buscar las filas con «—» en «Visitas» y pegar su link. |
 | «1 publicación no tiene métricas de la red en este período (Instagram no las entrega para lo publicado antes de tu cuenta profesional).» / «<N> publicaciones no tienen métricas…» | La red no dio ningún número de esas publicaciones en el período. La causa de la frase es la más común; también pasa con lo recién publicado o con videos de YouTube que ya no llegan. | Nada que arreglar si son posts viejos de Instagram. «Solo con métricas» las esconde. |
 | «No publicaste nada en este período. Amplía el período, o mira «Todas las recientes».» | Hay alguna cuenta conectada, pero ninguna publicación sincronizada (de la cuenta elegida, si hay una) salió en el período. | Elegir un período más largo, «Todas las recientes» o «Todas las cuentas». |
-| «No hay publicaciones sincronizadas todavía.» | Con «Todas las recientes»: hay cuentas conectadas, pero ninguna publicación sincronizada (de la cuenta elegida, si hay una). | Elegir «Todas las cuentas». Si sigue, apretar «Sincronizar ahora» en [Los Fierros](los-fierros.md), o esperar la del día siguiente. Las cuentas de Threads y X nunca tienen publicaciones aquí. |
+| «No hay publicaciones sincronizadas todavía.» | Con «Todas las recientes»: hay cuentas conectadas, pero ninguna publicación sincronizada (de la cuenta elegida, si hay una). | Elegir «Todas las cuentas». Si sigue, apretar «Sincronizar ahora» en [Los Fierros](los-fierros.md), o esperar la del día siguiente. Las cuentas de X nunca tienen publicaciones aquí, y las de Threads solo en la cuenta del revisor de Meta. |
 | «Todavía no hay posts sincronizados.» y «Conecta una red en Los Fierros (Ajustes) y aprieta Sincronizar ahora ahí mismo.» | La lista quedó vacía y no hay ninguna cuenta conectada. | Conectar una red en [Los Fierros](los-fierros.md) y apretar «Sincronizar ahora». |
 | «Nada de <red> · <nombre de la cuenta> con este filtro.» (o «Nada de <red> con este filtro.» si la cuenta no tiene nombre) | Con una cuenta elegida, «Solo con métricas» sacó todas sus filas: ninguna tiene números de la red. | Apretar «Mostrar todas». |
 | «El filtro dejó la lista vacía: ninguna publicación tiene métricas de la red en este período.» | Sin cuenta elegida, «Solo con métricas» sacó todas las filas: ninguna tiene números de la red. | Apretar «Mostrar todas». |
@@ -1463,7 +1467,8 @@ De día, donde una de estas frases dice «La Parrilla» dice «La Barra», y «L
   o en «Tus publicaciones», su fila, columna «Visitas».
 - **«No veo el post que publiqué hoy»**: las publicaciones entran con la sincronización, no al
   publicar. Apretar «Sincronizar ahora» en [Los Fierros](los-fierros.md) o esperar la del día
-  siguiente. Si es de Threads o X, no va a aparecer nunca: esas redes no se sincronizan.
+  siguiente. Si es de X, no va a aparecer nunca: esa red no se sincroniza. Si es de Threads,
+  tampoco, salvo en la cuenta del revisor de Meta, cuando la instalación pide los permisos de lectura de Threads.
 - **«No veo un post viejo» (en «Tus publicaciones»)**: al entrar, la lista es de lo publicado
   en el período. Apretar «Todas las recientes» o elegir un período más largo. Revisar también
   el selector de cuenta, «Solo con métricas» y si fue borrado («Ver borrados», en «⋯ Más»).
@@ -1517,7 +1522,8 @@ De día, donde una de estas frases dice «La Parrilla» dice «La Barra», y «L
 - **«Mis visitas no coinciden con los clics que me muestra Instagram»**: Instagram cuenta toques
   en el link; aquí cuenta solo lo que llegó a abrirse en un navegador, y sin bots.
 - **«No veo TikTok en Tus cuentas»**: Tu Parrilla no lee seguidores de TikTok (tampoco de
-  Threads ni X). Solo hay tarjetas de Instagram, Facebook y YouTube.
+  X, ni de Threads fuera de la cuenta del revisor de Meta). Solo hay tarjetas de Instagram,
+  Facebook y YouTube, y de Threads en esa cuenta.
 - **«Perdí seguidores y dice sin cambio» / «Seguidores ganados dice 0»**: la pantalla no muestra
   bajas; «sin cambio» o «0» puede ser una baja.
 - **«Dice — en el período» / «Seguidores ganados dice —»**: no hay una lectura de antes del
@@ -1583,13 +1589,15 @@ De día, donde una de estas frases dice «La Parrilla» dice «La Barra», y «L
   común» no dice qué causó el resultado: dice qué se repite.
 - No guarda ni reproduce los videos: se ven en la red, con «Ver en <red>». «Lado a lado» no
   dibuja la curva de YouTube ni compara más de dos publicaciones a la vez.
-- No muestra publicaciones de Threads ni de X: esas redes publican, pero no se sincronizan.
+- No muestra publicaciones de X, ni de Threads fuera de la cuenta del revisor de Meta: publican,
+  pero no se sincronizan.
 - No muestra lo programado que todavía no sale: eso está en [La Parrilla](la-parrilla.md).
 - No consulta la red en vivo ni tiene botón para sincronizar: eso está en
   [Los Fierros](los-fierros.md).
 - No identifica personas: no guarda la IP ni usa cookies, y no hay forma de saber quién visitó.
 - No cuenta a quien descarga la página sin ejecutarla, ni con «Bots».
-- No muestra seguidores perdidos, ni lee cuentas de TikTok, Threads o X.
+- No muestra seguidores perdidos, ni lee cuentas de TikTok o X (ni de Threads, salvo en la
+  cuenta del revisor de Meta).
 - No pega el link en la red, ni edita ni borra la publicación allá: lo único que se edita aquí
   es la etiqueta, en «Tus publicaciones».
 - No crea ni edita los links de la página: eso es [La Vitrina](la-vitrina.md).
@@ -1659,6 +1667,8 @@ Sale de:
   ranking, los avisos)
 - `src/lib/account-stats.ts` y `src/lib/social/account-metrics.ts` (seguidores, visitas al
   perfil, alcance, por cuenta)
+- `src/lib/social/index.ts` y `src/lib/social/threads.ts` (qué redes se sincronizan; qué trae
+  Threads y cuándo)
 - `src/lib/social/delta.ts` (lo ganado y «nuevo»)
 - `src/lib/parrilla.ts` (la mediana y «Se pasó») y `src/app/globals.css` (colores de la barra)
 - `src/components/charts/stat-tile.tsx`, `src/components/charts/panel.tsx`,

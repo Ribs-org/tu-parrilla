@@ -443,7 +443,8 @@ privacidad y los términos, y Meta exige que coincida con el negocio que verific
 
 ## Analítica de posts (opcional)
 
-El panel puede traer las métricas de tus posts desde Instagram, TikTok y YouTube y
+El panel puede traer las métricas de tus posts desde Instagram, Facebook, TikTok y YouTube
+(y desde Threads, por ahora solo para la cuenta del revisor de Meta: ver «Threads», abajo) y
 cruzarlas con el tráfico que cada uno te trajo. La columna que importa es **arrastre**:
 qué porcentaje de quienes vieron el post llegó efectivamente a tu página.
 YouTube es la excepción: ver abajo.
@@ -718,10 +719,41 @@ cuenta en privada—, porque reintentar da lo mismo hasta que el dueño cambie s
 la auditoría aprobada, como la de este despliegue, ese rechazo no debería llegar, y el panel
 ya no avisa nada de esto ni al conectar ni al elegir la privacidad.
 
+### Threads
+
+Threads publica desde el caso de uso «API de Threads» de la misma app de Meta
+(`THREADS_APP_ID` y `THREADS_APP_SECRET`) y hoy está en «Próximamente» para todos menos los
+usuarios de `THREADS_ABIERTO_PARA` (ver «Conectar y sincronizar»). Además de publicar, tiene
+escritos sus números y sus respuestas, para la tercera vuelta del App Review:
+
+- **Números** (`threads_manage_insights`, `src/lib/social/threads.ts`): la sincronización
+  diaria lista las publicaciones propias de la cuenta —deja fuera los reposts de publicaciones
+  ajenas— y pide a cada una sus views, likes, respuestas, reposts y citas. Van a las columnas de
+  siempre: las respuestas son los comentarios, y reposts más citas son los compartidos. De la
+  cuenta, los seguidores y las views del último día. Threads no entrega guardados, alcance ni
+  visitas al perfil.
+- **Respuestas en La Mesa** (`threads_read_replies` y `threads_manage_replies`,
+  `src/lib/social/comentarios/threads.ts`): cada cinco minutos, la conversación de cada
+  publicación de los últimos siete días. Los comentarios de la cola son las respuestas
+  directas al post, y las respuestas a ellas dicen si la cuenta ya contestó desde la app.
+  Threads no da el id de quien responde, solo su usuario y si la respuesta es de la propia
+  cuenta (`is_reply_owned_by_me`), que alcanza para reconocer lo del dueño. Responder es
+  publicar un post de texto con `reply_to_id`, de hasta 500 caracteres.
+- **Palabra clave**: la regla funciona igual que en YouTube, siempre en público, porque Threads
+  no tiene mensajes privados. Un «Mensaje» de más de 500 caracteres no sale solo —recortado
+  perdería el enlace— y queda en la cola.
+
+Los tres permisos se piden al conectar solo con `THREADS_PERMISOS_EXTRA=1`: la ventana de
+Threads rechaza el pedido entero si nombra un permiso que el caso de uso no tiene activado.
+Sin la bandera, el conector y la cola de Threads se quedan quietos, como con una cuenta
+desconectada, y publicar sigue igual. Con la bandera, una cuenta de Threads conectada antes
+tiene que reconectarse para concederlos; mientras no lo haga, su sincronización falla y su
+fila en Los Fierros queda en rojo.
+
 ### Responder comentarios
 
 El panel puede traer los comentarios nuevos de tus publicaciones de Instagram, Facebook y
-YouTube, y en la cola te propone una respuesta que apruebas de un toque. El descubrimiento
+YouTube (y de Threads en la cuenta del revisor de Meta, ver «Threads»), y en la cola te propone una respuesta que apruebas de un toque. El descubrimiento
 viaja en la misma corrida que publica, cada cinco minutos, y mira tus publicaciones de los
 últimos siete días. A YouTube lo mira cada media hora, no cada cinco minutos: su cuota
 diaria es la misma que usa la sincronización de métricas, y gastarla acá te dejaría sin
@@ -808,7 +840,7 @@ dos columnas para el estado del privado.
 #### Respuesta automática por palabra clave
 
 Al programar un post puedes ponerle una palabra clave, un mensaje con enlace y una
-respuesta pública. Funciona en Instagram, Facebook y YouTube: cuando alguien comenta esa
+respuesta pública. Funciona en Instagram, Facebook y YouTube (y en Threads, ver «Threads»): cuando alguien comenta esa
 palabra, la corrida siguiente del cron que la sondea (cinco minutos como mucho en Instagram y
 Facebook; en YouTube, media hora) responde sola, sin pasar
 por la cola de aprobación, y la cola lo marca como «Automática». Con el privado encendido para
@@ -883,7 +915,7 @@ en su primer intento, con la misma frase. Abrir una es sacarla de esa lista. Par
 revisión de Threads, `THREADS_ABIERTO_PARA` la abre solo para los usuarios que nombra
 (`proximamentePara`, en `src/lib/redes-abiertas.ts`): para ellos, Los Fierros, el compositor, el
 editor, la API y el publicador la tratan como cualquier otra red. La portada sigue con la lista
-fija.
+fija. Sus números y sus respuestas dependen además de `THREADS_PERMISOS_EXTRA` (ver «Threads»).
 
 **Qué se lee cada día.** La lectura va por edad, no por cantidad (`src/lib/social/lectura.ts`).
 Lo publicado en los últimos 10 días —y, como mínimo, las 200 publicaciones más nuevas de la
@@ -1160,6 +1192,7 @@ Vercel y bajan con `vercel env pull .env.local`.
 | `THREADS_APP_ID` | Conectar Threads para publicar; hoy en «Próximamente» (ver «Conectar y sincronizar») | El Threads App ID del caso de uso «API de Threads» de la app de Meta |
 | `THREADS_APP_SECRET` | El secreto de ese caso de uso; firma también la baja y el borrado que manda Threads (`/api/social/threads/baja` y `/borrado`) | Junto con el anterior |
 | `THREADS_ABIERTO_PARA` | Ids de usuario, separados por comas, para los que Threads no dice «Próximamente»: pueden conectarlo, programarle y publicar en él | No — es para grabar la revisión de Meta de Threads con la cuenta del revisor; aprobada, Threads sale de «Próximamente» para todos y esta variable sobra |
+| `THREADS_PERMISOS_EXTRA` | Con `1`, conectar Threads pide además `threads_manage_insights`, `threads_read_replies` y `threads_manage_replies`, y Tu Parrilla lee sus números y sus respuestas (ver «Threads») | No — encenderla solo después de activarlos en el caso de uso de Threads de la app de Meta: si no, Threads rechaza la ventana entera. Las cuentas conectadas antes se reconectan una vez |
 | `X_CLIENT_ID` | Conectar X para publicar (OAuth 2.0 + PKCE); hoy en «Próximamente» | El Client ID de la app en developer.x.com |
 | `X_CLIENT_SECRET` | El secreto de esa app | Junto con el anterior |
 | `X_BEARER_TOKEN` | Leer los tuits públicos de los creadores del modo Tinder (ver «Modo Tinder») | No — sin ella el modo Tinder no trae nada de X |

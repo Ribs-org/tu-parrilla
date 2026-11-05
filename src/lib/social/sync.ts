@@ -351,8 +351,9 @@ export async function syncAll(ownerId?: string): Promise<SyncReport> {
     .from(socialAccounts)
     .where(ownerId ? eq(socialAccounts.ownerId, ownerId) : undefined)
     .orderBy(asc(socialAccounts.createdAt))
-  // Solo las redes con conector: una fila de threads o x se sincroniza el día que
-  // exista su conector, no antes.
+  // Solo las redes con conector: una fila de x se sincroniza el día que exista su conector,
+  // no antes. La de threads tiene el suyo, pero se queda quieta mientras falten sus permisos
+  // de lectura (`permisosExtraDeThreads`, en `threads.ts`).
   const conConector = cuentas.filter((c) => connectorFor(c.network))
   const porRed = agruparPorRed(conConector)
   // Redes en paralelo, cuentas de la misma red en serie: la casa nunca pega concurrente

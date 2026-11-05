@@ -1,6 +1,7 @@
 import type { Connector } from './connector'
 import { facebookConnector } from './facebook'
 import { instagramConnector } from './instagram'
+import { threadsConnector } from './threads'
 import { tiktokConnector } from './tiktok'
 import { youtubeConnector } from './youtube'
 
@@ -10,6 +11,7 @@ export const CONNECTORS: Connector[] = [
   tiktokConnector,
   youtubeConnector,
   facebookConnector,
+  threadsConnector,
 ]
 
 export function connectorFor(network: string): Connector | undefined {

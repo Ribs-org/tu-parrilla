@@ -257,6 +257,8 @@ const FORMATOS: Record<string, string> = {
   image: 'Foto',
   carousel: 'Carrusel',
   link: 'Enlace',
+  text: 'Texto',
+  audio: 'Audio',
 }
 
 const FRANJAS = [

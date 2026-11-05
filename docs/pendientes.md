@@ -254,6 +254,21 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   (`src/lib/social/publish/x.ts`), pero no publica: lo primero a mirar es el saldo, porque su
   API ya no tiene capa gratuita, y pagarla es decisión del **[dueño]**. Abrirla es lo mismo que
   con Threads: sacarla de `REDES_PROXIMAMENTE` y volver a contar su conexión en la wiki.
+- **Threads: números en Los Números y respuestas en La Mesa, para una tercera vuelta de Meta**
+  (2026-11-05). El código está hecho y apagado: el conector de métricas
+  (`src/lib/social/threads.ts`, `threads_manage_insights`) y el `Comentarista` de La Mesa con la
+  regla de palabra clave en público (`src/lib/social/comentarios/threads.ts`,
+  `threads_read_replies` y `threads_manage_replies`); el README lo cuenta en «Threads». No se
+  probó contra la API real: sin esos permisos no hay token que los tenga. Lo que falta, todo
+  del **[dueño]**: (1) volver a activar los tres permisos en el caso de uso de Threads de la app
+  de Meta (se quitaron el 2026-11-05, porque el panel los había sumado al borrador de la segunda
+  solicitud); (2) poner `THREADS_PERMISOS_EXTRA=1` en Vercel y redesplegar —antes de (1) no,
+  porque la ventana de Threads rechazaría el pedido entero—; (3) reconectar Threads con la
+  cuenta del revisor, correr «Sincronizar ahora» y responder una respuesta desde La Mesa, que
+  además deja la llamada de prueba que Meta exige por permiso; (4) grabar el video; (5) enviar
+  la solicitud después de que contesten la de la segunda vuelta. Si en la prueba los números de
+  un post salen vacíos, lo primero a mirar es el log del sync («threads … sin números»): la
+  documentación marca `views` como «en desarrollo».
 - **Meta: permisos para anuncios pagados** (2026-10-21). Hoy Tu Parrilla lee y publica lo
   orgánico; no ve ni toca anuncios. Para mostrar cómo les fue a los posts promocionados, o
   promocionar uno desde acá, hace falta la Marketing API: `ads_read` para leer resultados,
