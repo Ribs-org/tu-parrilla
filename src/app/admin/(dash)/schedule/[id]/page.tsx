@@ -62,7 +62,15 @@ export default async function EditScheduledPostPage({
     <Editor
       postId={id}
       volver={volver}
-      cabecera={<DestinosDelPost dibujo={dibujo} destinos={destinos} />}
+      cabecera={
+        <DestinosDelPost
+          dibujo={dibujo}
+          destinos={destinos}
+          caption={post.caption}
+          // Un video que ya salió en todas sus redes puede no tener el archivo: cuenta igual.
+          video={media.some((m) => m.mediaType === 'video') || post.videosLiberados > 0}
+        />
+      }
       caption={post.caption}
       scheduledAtLocal={toZonedInput(post.scheduledAt, zona)}
       cuentas={cuentas}

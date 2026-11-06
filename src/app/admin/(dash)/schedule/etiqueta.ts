@@ -61,9 +61,7 @@ export function etiquetaDestino(target: {
   opciones: unknown
   lastError?: string | null
 }): string {
-  if (target.network === 'tiktok' && target.status === 'published' && esBorrador(target.opciones) && !target.externalId) {
-    return 'En tu bandeja de TikTok'
-  }
+  if (enLaBandeja(target)) return 'En tu bandeja de TikTok'
   if (target.status === 'scheduled' && target.lastError) return 'Reintentando'
   return ESTADO[target.status] ?? target.status
 }
@@ -79,6 +77,29 @@ export function etiquetaDestino(target: {
 export function motivoDestino(target: { status: string; lastError: string | null }): string | null {
   if (target.status !== 'scheduled' && target.status !== 'failed') return null
   return target.lastError || null
+}
+
+/**
+ * El borrador que espera en la bandeja de TikTok del dueño: salió como borrador y todavía no
+ * tiene video, porque nadie lo terminó en la app de TikTok.
+ */
+export function enLaBandeja(target: { network: string; status: string; externalId: string | null; opciones: unknown }): boolean {
+  return target.network === 'tiktok' && target.status === 'published' && esBorrador(target.opciones) && !target.externalId
+}
+
+/**
+ * Lo que «Copiar el texto» pone en el portapapeles de un destino en la bandeja: su texto propio
+ * si lo tiene (`captionOverride`) y si no el del post, el mismo que el publicador le habría
+ * mandado (`run.ts`). Es el texto de hoy: si se editó después de mandarlo, se copia el editado,
+ * que es el que se quiere pegar. Null fuera de la bandeja o sin nada que copiar.
+ */
+export function textoParaLaBandeja(
+  target: { network: string; status: string; externalId: string | null; opciones: unknown; captionOverride?: string | null },
+  caption: string,
+): string | null {
+  if (!enLaBandeja(target)) return null
+  const texto = target.captionOverride ?? caption
+  return texto.trim() ? texto : null
 }
 
 function esBorrador(opciones: unknown): boolean {

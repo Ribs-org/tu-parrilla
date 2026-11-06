@@ -8,7 +8,8 @@ import { FIERRO_FRIO, SE_QUEMO } from '@/lib/vocabulario'
 import { Archivar } from '../archivar'
 import { RECONECTAR_EN, arregloDe } from '../arreglo'
 import type { Dibujo } from '../dibujo'
-import { etiquetaDestino, motivoDestino, nombreDestino } from '../etiqueta'
+import { BANDEJA_SIN_TEXTO, CopiarTexto } from '../copiar-texto'
+import { etiquetaDestino, motivoDestino, nombreDestino, textoParaLaBandeja } from '../etiqueta'
 import { Redes } from '../redes'
 import { Reprogramar } from '../reprogramar'
 
@@ -21,6 +22,7 @@ type Destino = {
   lastError: string | null
   opciones: unknown
   externalId: string | null
+  captionOverride: string | null
   archivadoEn: Date | null
 }
 
@@ -45,8 +47,22 @@ const CLASE_ESTADO: Record<string, string> = {
  * se quemó en TikTok contaba lo que salió y callaba lo que falló, y había que volver al
  * calendario para saber por qué. «Cambiar el archivo» lleva a los archivos de este mismo
  * formulario (`#media`): guardar vuelve a poner en la parrilla el destino quemado.
+ *
+ * Lo que espera en la bandeja de TikTok lleva «Copiar el texto»: un video llega a la bandeja sin
+ * su texto (`BANDEJA_SIN_TEXTO`), y es aquí donde se viene a buscarlo. `video` dice si el post es
+ * un video, aunque su archivo ya se haya liberado del almacén.
  */
-export function DestinosDelPost({ dibujo, destinos }: { dibujo: Dibujo; destinos: Destino[] }) {
+export function DestinosDelPost({
+  dibujo,
+  destinos,
+  caption,
+  video,
+}: {
+  dibujo: Dibujo
+  destinos: Destino[]
+  caption: string
+  video: boolean
+}) {
   const enCurso = destinos.some((d) => d.status === 'publishing')
   const algoSalio = destinos.some((d) => d.status === 'published')
   return (
@@ -59,6 +75,7 @@ export function DestinosDelPost({ dibujo, destinos }: { dibujo: Dibujo; destinos
             const sello = dibujo.sellos[i]!
             const motivo = motivoDestino(d)
             const arreglo = d.status === 'failed' ? arregloDe(motivo, '#media') : null
+            const paraCopiar = textoParaLaBandeja(d, caption)
             return (
               <li key={d.id} className="py-2 first:pt-0 last:pb-0">
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
@@ -77,6 +94,12 @@ export function DestinosDelPost({ dibujo, destinos }: { dibujo: Dibujo; destinos
                     Archivado: ya no sale en «<DeNocheYDeDia noche={SE_QUEMO.noche} dia={SE_QUEMO.dia} />» ni en el
                     resumen del día.
                   </p>
+                ) : null}
+                {paraCopiar ? (
+                  <div className="mt-1.5 space-y-1">
+                    <CopiarTexto texto={paraCopiar} className={BOTON_CHICO_SECUNDARIO} />
+                    {video ? <p className="text-[0.8rem] text-fg-muted">{BANDEJA_SIN_TEXTO}</p> : null}
+                  </div>
                 ) : null}
                 {d.status === 'failed' || sello === 'frio' ? (
                   <div className="mt-1.5 flex flex-wrap items-center gap-2">

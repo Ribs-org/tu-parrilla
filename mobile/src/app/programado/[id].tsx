@@ -144,7 +144,11 @@ export default function EditarProgramado() {
       <ScrollView style={{ flex: 1, backgroundColor: colores.fondo }} contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 48 }}>
         <Text style={{ color: colores.ambar, fontSize: 14 }}>{post.bloqueo}</Text>
         <Tarjeta>
-          <Text style={{ color: colores.texto, fontSize: 14 }}>{post.texto || '(sin texto)'}</Text>
+          {/* Seleccionable: un borrador que llegó a la bandeja de TikTok sin su texto se termina
+              allá, y de aquí se copia con un toque largo. */}
+          <Text selectable style={{ color: colores.texto, fontSize: 14 }}>
+            {post.texto || '(sin texto)'}
+          </Text>
         </Tarjeta>
         <View style={{ flexDirection: 'row' }}>
           <Boton texto="Volver" onPress={() => router.back()} />

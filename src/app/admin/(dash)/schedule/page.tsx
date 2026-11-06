@@ -283,6 +283,7 @@ export default async function SchedulePage({
                 ...c,
                 corte: <Corte {...dibujoDe(c.targets, c.media, frias, c.post.videosLiberados)} chico className="w-full" />,
                 cuando: diaYHora(c.post.scheduledAt, zona),
+                video: c.media.some((m) => m.mediaType === 'video') || c.post.videosLiberados > 0,
               }))}
               volver={volver}
               recien={recien}
