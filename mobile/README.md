@@ -15,8 +15,8 @@ mandárselo al chef de la casa con una instrucción; ver «La Cocina desde el te
 Arriba a la derecha de todas, el botón de **Ajustes** (un trinche y un cuchillo, lado a lado): tus cuentas con la temperatura de su
 fierro (`/api/mobile/fierros`), con un punto en el botón si alguna se enfría o se apagó,
 el modo —la noche o el día con sushi, el mismo de la cuenta—, «Cerrar sesión» y, al final, el
-libro de sugerencias (de día, la caja) para escribirle al equipo, como en el panel
-(`/api/mobile/sugerencias`). Antes eran cinco con nombres propios: Resumen, Contenido, Publicar, Cuentas y
+libro de sugerencias (de día, la caja) para escribirle al equipo y leer lo que respondió, como en el panel
+(`/api/mobile/sugerencias`, y `…/{id}/leida` al abrir una respuesta). Antes eran cinco con nombres propios: Resumen, Contenido, Publicar, Cuentas y
 Calendario. Los datos son los mismos que ve el panel web, leídos desde
 `https://tu-parrilla.cl/api/mobile/*`; `/api/mobile/overview` y
 `/api/mobile/schedule/check` ya no los usa la app nueva y siguen solo para las
