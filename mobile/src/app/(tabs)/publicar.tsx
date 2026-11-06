@@ -5,6 +5,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useSelectorFecha } from '../../components/selector-fecha'
+import { fechaLegible } from '../../lib/calendario'
 import { Boton, BotonTexto, Chip, ErrorConReintento, Miniatura } from '../../components/ui'
 import { useSesion } from '../../components/sesion'
 import { useColores, useTema } from '../../components/tema'
@@ -70,14 +71,6 @@ type EstadoCuentas = { paso: 'cargando' } | { paso: 'error' } | { paso: 'listo';
 // cabecera. Es el alto estándar de cada sistema —56 en Android, 44 en iOS— porque
 // expo-router no reexporta `useHeaderHeight`: confirmar en el teléfono la primera vez.
 const ALTO_CABECERA = Platform.OS === 'ios' ? 44 : 56
-
-function fechaLegible(fecha: Date): string {
-  const dd = String(fecha.getDate()).padStart(2, '0')
-  const mm = String(fecha.getMonth() + 1).padStart(2, '0')
-  const hh = String(fecha.getHours()).padStart(2, '0')
-  const mi = String(fecha.getMinutes()).padStart(2, '0')
-  return `${dd}/${mm} a las ${hh}:${mi}`
-}
 
 /**
  * Publicar, el compositor del teléfono. Como el del panel, lo que se escribe se guarda solo

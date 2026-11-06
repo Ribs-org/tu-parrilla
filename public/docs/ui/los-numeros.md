@@ -9,7 +9,9 @@ de [La Vitrina](la-vitrina.md), la que va en la bio) y qué apretó: visitas, cl
 llegó la gente, con qué etiqueta `?s=`, desde dónde, con qué equipo y a qué hora; eso lo mide
 Tu Parrilla, sin cookies. Las une la etiqueta `?s=` de cada publicación: si el link con esa
 etiqueta está pegado en el post, las visitas que llegan por él se le cuentan a ese post. Cada
-mitad muestra dos números y una lista corta; el resto aparece al apretar su «⋯ Más». La lista
+mitad muestra dos números y una lista corta (y «En las redes», además, «Qué te funciona»: qué
+tema, qué estilo y qué formato anduvieron mejor, dicho en una frase); el resto aparece al
+apretar su «⋯ Más». La lista
 completa, una publicación por fila, con su etiqueta editable y el botón para copiar su link,
 está en «Tus publicaciones». Cada publicación abre su **pieza**: cada lugar donde salió (otra
 cuenta, otro hook, el trial reel) con sus números lado a lado. «Comparar por atributo» junta
@@ -59,9 +61,12 @@ API.
   trajo gente» o el texto de una fila de «Todas las etiquetas». Se abre en la misma pestaña, con
   el mismo período.
 - A «Comparar por atributo»: en el tablero, el enlace «Comparar por atributo →», a la derecha
-  del título «Lo que más creció»; o, en una pieza, uno de los atributos de arriba.
+  del título «Lo que más creció»; o, en una pieza, uno de los atributos de arriba; o, en el
+  panel «Qué te funciona», «Comparar por tema →» o «Comparar por estilo →», que llegan con ese
+  atributo elegido.
 - A «Tu mejor 10 %»: en el tablero, el enlace «Tu mejor 10 % →», el primero de los tres a la
-  derecha del título «Lo que más creció». Llega con el mismo período y la misma cuenta.
+  derecha del título «Lo que más creció», o «Tu mejor 10 % →» en la línea «Formato» de «Qué te
+  funciona». Llega con el mismo período y la misma cuenta.
 - A «Lado a lado»: en «Tu mejor 10 %», el enlace «Lado a lado →», a la derecha del título «Las
   publicaciones»; o, en una pieza, «Comparar lado a lado →», debajo del título. Llega con lo
   mismo que estaba elegido.
@@ -199,6 +204,59 @@ texto del post (o su etiqueta, si no tiene texto), en chico la cuenta con el pat
 ganadas. Cada fila abre la pieza de esa
 publicación, en la misma pestaña (el enlace a la red está ahí).
 
+**Panel «Qué te funciona»**, debajo de «Lo que más creció», explicación «Lo publicado en el
+período, cada publicación a los 7 días y contra lo normal de su cuenta: ×2 es el doble de lo
+normal. Dice cuál anda mejor solo si hay dos con al menos 10 publicaciones medidas.» Mientras
+carga, un recuadro tibio del mismo tamaño. Con una cuenta elegida arriba, mira solo esa cuenta.
+Tres líneas, cada una con su rótulo a la izquierda (en el teléfono, arriba), una frase y, a la
+derecha (en el teléfono, debajo), un enlace:
+
+| Rótulo | Qué mira | Enlace |
+|---|---|---|
+| «Tema» | el atributo `tema` de cada post | «Comparar por tema →» |
+| «Estilo» | el atributo `estilo` (tutorial, storytime…) | «Comparar por estilo →» |
+| «Formato» | el tipo de post que da la red: «Reel», «Carrusel», «Foto», «Video»… | «Tu mejor 10 % →» |
+
+Los dos primeros enlaces llevan a «Comparar por atributo» con ese atributo elegido; el de
+«Formato», a «Tu mejor 10 %». Una línea en la que nada lleva ese atributo no tiene enlace. La
+frase es una de estas («<…>» es lo que cambia; «tema» cambia por «estilo» o «formato» según
+la línea):
+
+- Cuando uno anda mejor, resaltada (las demás frases van más tenues): «Lo de tema «<valor>»
+  tuvo ×<N> las views normales de su cuenta a los 7 días (<M> publicaciones). Le sigue
+  «<otro valor>», con ×<N> (<M> publicaciones).» Por ejemplo: «Lo de tema «recetas» tuvo ×2,1
+  las views normales de su cuenta a los 7 días (12 publicaciones). Le sigue «humor», con ×1,0
+  (10 publicaciones).»
+- Cuando hay con qué comparar pero ninguno destaca: «Ningún tema se sale de lo normal: el que
+  mejor anduvo, «<valor>», tuvo ×<N> las views normales de su cuenta (<M> publicaciones), y
+  «<otro valor>», ×<N>.»
+- Cuando no alcanza la muestra: «Todavía no alcanza para decirlo: hacen falta dos temas con al
+  menos 10 publicaciones medidas a los 7 días cada uno. Hoy: «<valor>» <M> y «<valor>» <M>.»
+  (hasta tres valores, y «y <N> más» si hay otros).
+- Cuando hay un solo valor: «Hay un solo tema en el período, «<valor>»: no hay con qué
+  compararlo.»
+- Cuando nada tiene todavía con qué medirse: «Todavía no hay cómo medirlo: cada publicación se
+  mide a los 7 días, contra lo normal de su cuenta, y una cuenta necesita al menos 5
+  publicaciones medidas en el período.»
+- Cuando nada lleva el atributo: «Nada de lo publicado en el período lleva «tema» en sus
+  atributos.» (o «estilo»). En «Formato»: «Las redes no dieron el formato de nada de lo
+  publicado en el período.»
+
+Debajo de las tres líneas, en chico:
+
+- Solo si «Tema» o «Estilo» no tienen nada: «El tema y el estilo se anotan en los atributos de
+  cada post al programarlo —por ejemplo, «tema: recetas» y «estilo: tutorial»—, en el campo
+  «Atributos» del editor de La Parrilla o por la API, siempre escritos igual. El formato lo da
+  la red.» (de día, «La Barra»).
+- Siempre: «Cuántos seguidores trajo cada publicación no se puede saber: TikTok da solo el
+  total de la cuenta, e Instagram no lo da en los reels. Lo que ganó cada cuenta de Instagram y
+  Facebook está en «Tus cuentas», en «⋯ Más».» Si el período tiene 10.000 publicaciones o más,
+  sigue «Se leyeron las 10 mil publicaciones más recientes: acorta el período para verlas
+  todas.»
+
+Sin nada publicado en el período, en vez de las líneas: «No publicaste nada en este período.
+Amplía el período.»
+
 **Con «⋯ Más» abierto**, debajo aparece:
 
 - Tres cifras más:
@@ -213,8 +271,9 @@ publicación, en la misma pestaña (el enlace a la red está ahí).
   YouTube, solo el total, porque sus reglas no permiten calcular lo ganado. Visitas al perfil y
   alcance son del último día leído — Instagram es la única que los entrega hoy.»
 
-  Una tarjeta por cuenta con lecturas (hoy pueden ser de Instagram, Facebook y YouTube; TikTok,
-  Threads y X no tienen). Con una cuenta elegida arriba, solo la suya. Cada tarjeta:
+  Una tarjeta por cuenta con lecturas (hoy pueden ser de Instagram, Facebook y YouTube; TikTok
+  y X no tienen, y Threads solo en la cuenta del revisor de Meta, cuando la instalación pide los permisos de lectura de Threads: trae sus seguidores, y «Visitas al
+  perfil» y «Alcance» quedan en «—»). Con una cuenta elegida arriba, solo la suya. Cada tarjeta:
 
   - El nombre, con el patrón «<red> · <nombre de la cuenta>» (o solo la red).
   - Un número grande: los seguidores (en YouTube, los suscriptores), o «—».
@@ -897,7 +956,10 @@ lee todas las cuentas una vez al día (a las 9:00 UTC, las 5 o 6 de la mañana e
 época) y guarda una lectura de cada publicación que le toca; también corre al apretar
 «Sincronizar ahora» en [Los Fierros](los-fierros.md). Por eso una publicación nueva no aparece
 hasta la siguiente sincronización, y los números pueden ir hasta un día atrás de lo que muestra
-la app de la red. Threads y X no se sincronizan: no tienen números aquí.
+la app de la red. X no se sincroniza: no tiene números aquí. Threads tampoco, salvo en
+la cuenta del revisor de Meta, cuando la instalación pide los permisos de lectura de Threads (ver [Los Fierros](los-fierros.md)). Ahí entran sus publicaciones propias —no
+los reposts de publicaciones ajenas— con views, likes, comentarios (sus respuestas) y
+compartidos (sus reposts más sus citas); guardados y alcance, Threads no los da.
 
 **Qué publicación se lee cada día.** Depende de su edad. Lo publicado en los últimos 10 días se
 lee todos los días (y, aunque la cuenta publique poco, siempre sus 200 publicaciones más
@@ -933,10 +995,35 @@ se sabe y no ganaron nada.
 período» de las tarjetas de «Tus cuentas». Sin YouTube. Una baja cuenta como cero: la pantalla
 no muestra seguidores perdidos. Una cuenta sin lectura de antes del período no suma; si
 ninguna la tiene (las cuentas se conectaron después de que empezó el período, el período es
-«Todo», o solo hay TikTok, Threads o X), sale «—».
+«Todo», o solo hay TikTok, Threads o X —salvo Threads en la cuenta del revisor—), sale «—».
 
 **«Lo que más creció».** Las cinco publicaciones que más views ganaron en el período, de
 cualquier fecha, sin YouTube y sin borradas. Solo entran las que ganaron más de cero.
+
+**«Qué te funciona».** Cuenta lo mismo que «Comparar por atributo», no lo del resto de esta
+mitad: las publicaciones **publicadas** dentro del período (no las que solo tuvieron actividad
+en él), de la cuenta elegida o de todas, sin borradas, hasta las 10.000 más recientes. Cada
+valor se mide por la mediana de «Contra su cuenta» de sus publicaciones —sus views a los 7
+días divididas por la mediana de su cuenta en el período—, así que una cuenta grande no tapa a
+una chica, ni lo viejo a lo nuevo.
+
+- **«(<M> publicaciones)»** son las medidas: las que ya tienen su lectura de los 7 días y cuya
+  cuenta tiene al menos 5 así en el período. Puede ser menos que la columna «Publicaciones» de
+  «Comparar por atributo», que cuenta todas. Sin YouTube (sus reglas no dejan calcular con sus
+  datos) y sin lo de la última semana.
+- **Cuándo dice que uno anduvo mejor**: hacen falta al menos dos valores con 10 publicaciones
+  medidas o más —el mismo número bajo el cual «Comparar por atributo» pone la fila tenue—, y
+  que el mejor saque ×1,2 o más, y más que el segundo. Más cerca de ×1, la diferencia es la que
+  se ve de un mes a otro sin cambiar nada. Un valor con menos de 10 medidas no compite, aunque
+  saque más.
+- **Lo que no lleva el atributo** (también lo subido a mano) no compite: es la vara de cada
+  cuenta, y se ve como «sin tema» en «Comparar por atributo».
+- **Los valores** se agrupan como en «Comparar por atributo»: escritos igual, con las mismas
+  mayúsculas y tildes.
+- **«Formato»** sale de la red: Reel, Carrusel, Foto, Video, Short o Enlace. En TikTok todo es
+  «Video», así que con solo TikTok no hay con qué comparar.
+- **Son views, no seguidores.** Ninguna red entrega los seguidores que trajo cada publicación:
+  TikTok da solo el total de la cuenta, e Instagram no lo da en los reels.
 
 **«Interacciones».** Likes, comentarios y compartidos **ganados** en el período, sumados, sin
 YouTube.
@@ -1241,8 +1328,8 @@ sale menos de uno: «×0,21» es que una típica de abajo sacó una quinta parte
 
 **«Qué tienen en común».** Cada rasgo cuenta una vez por publicación: los atributos (menos
 `pieza`, que junta versiones de un mismo video), la red, el formato («Reel», «Video», «Short»,
-«Foto», «Carrusel», «Enlace»), el día de la semana y la franja de la hora de publicación, en la
-zona de [Tu Cuenta](tu-cuenta.md). Entra si está en al menos dos del grupo y es al menos 1,5
+«Foto», «Carrusel», «Enlace» y, en Threads, «Texto» y «Audio»), el día de la semana y la
+franja de la hora de publicación, en la zona de [Tu Cuenta](tu-cuenta.md). Entra si está en al menos dos del grupo y es al menos 1,5
 veces más frecuente ahí que entre todas las que compiten. Con menos de tres en el grupo, no
 aparece nada. Con «Lo peor» dice qué se repite entre las que peor anduvieron: lo que conviene
 dejar de hacer, o probar de otra forma.
@@ -1486,6 +1573,21 @@ programados distintos: no se ven juntos hasta que comparten el atributo `pieza`.
 Si una de las dos se subió a mano en la red, fuera de La Parrilla, no se puede: no tiene
 atributos. Los atributos también se ponen por la API: ver [la guía de la API](../api-llm.md).
 
+### Para saber qué tema, qué estilo y qué formato te funcionan
+
+1. En el tablero, mitad «En las redes», bajar hasta «Qué te funciona», debajo de «Lo que más
+   creció».
+2. Elegir el período: cuenta lo publicado en él, y lo de la última semana todavía no se mide.
+   Con «30 días» o «90 días» suele alcanzar; con «Hoy» o «7 días», casi nunca.
+3. Leer la frase de cada línea. Para ver todos los valores, «Comparar por tema →» (o por
+   estilo).
+
+Para que diga tema y estilo, los posts tienen que llevar los atributos `tema` y `estilo` al
+programarlos, siempre escritos igual: en el editor de cada post en
+[La Parrilla](la-parrilla.md) (el campo «Atributos»), o por la API (ver
+[la guía de la API](../api-llm.md), sección 2b). La misma respuesta, para un agente, la da
+`GET /api/metrics/que-funciona` (sección 7 de esa guía).
+
 ### Para ver qué hook funciona (o qué tema, o qué serie)
 
 1. En el tablero, mitad «En las redes», apretar «Comparar por atributo →».
@@ -1584,10 +1686,14 @@ De día, donde una de estas frases dice «La Parrilla» dice «La Barra», y «L
 | «No se pudo armar la planilla. Prueba de nuevo; si el período es muy largo, prueba con uno más corto.» | Algo falló mientras se armaba, o se cortó la conexión. No se descargó nada. | «Probar de nuevo»; si se repite, un período más corto. |
 | «Listo: se descargó <archivo>. …» | La planilla está en las descargas del navegador. | Abrirla y empezar por «Léeme». |
 | «—» en «Views ganadas» | Ninguna publicación tiene lo ganado conocido: todo es de YouTube, no hay lectura de antes del período, o no hay publicaciones sincronizadas. | Esperar la próxima sincronización, o elegir un período más corto que el tiempo que lleva conectada la cuenta. |
-| «—» en «Seguidores ganados» | Ninguna cuenta tiene una lectura de antes del período para comparar, o solo hay YouTube, TikTok, Threads o X. | Igual que arriba. |
+| «—» en «Seguidores ganados» | Ninguna cuenta tiene una lectura de antes del período para comparar, o solo hay YouTube, TikTok, Threads o X (Threads sí suma en la cuenta del revisor de Meta, con sus permisos de lectura). | Igual que arriba. |
 | «Ninguna publicación ganó views en este período. Las métricas llegan con la sincronización diaria, así que lo publicado hoy aparece mañana.» (en «Lo que más creció») | Ninguna publicación ganó más de cero views conocidas en el período. | Ampliar el período, o esperar la próxima sincronización. |
+| «No publicaste nada en este período. Amplía el período.» (en «Qué te funciona») | No hay publicaciones publicadas en el período (de la cuenta elegida, si hay una). | Elegir un período más largo, o «Todas las cuentas». |
+| «Todavía no alcanza para decirlo: hacen falta dos temas con al menos 10 publicaciones medidas a los 7 días cada uno. Hoy: …» (o «estilos», «formatos»; en «Qué te funciona») | Hay valores, pero menos de dos con 10 publicaciones medidas. | Ampliar el período («90 días»), o seguir anotando el atributo en lo que se programa. |
+| «Todavía no hay cómo medirlo: cada publicación se mide a los 7 días, contra lo normal de su cuenta, y una cuenta necesita al menos 5 publicaciones medidas en el período.» (en «Qué te funciona») | Nada de lo que lleva ese valor tiene todavía su lectura de los 7 días, o su cuenta tiene menos de 5 así (pasa con «Hoy» o «7 días», y con YouTube). | Elegir «30 días» o más. |
+| «Nada de lo publicado en el período lleva «tema» en sus atributos.» (o «estilo»; en «Qué te funciona») | Ningún post del período se programó con ese atributo. | Anotarlo al programar (ver «Para saber qué tema, qué estilo y qué formato te funcionan»). |
 | «Ninguna visita llegó todavía por el link de una publicación.» (en «Qué publicación te trajo gente») | En el período no llegó ninguna visita con etiqueta. | Ampliar el período; pegar los links con etiqueta (ver «Para copiar el link…»). |
-| «Todavía no hay lecturas de cuenta. La primera llega con la próxima sincronización diaria.» (en «Tus cuentas») | No hay ninguna lectura de cuenta de Instagram, Facebook ni YouTube (o de la cuenta elegida). La sincronización diaria corre a las 9:00 UTC. | Esperar, o apretar «Sincronizar ahora» en [Los Fierros](los-fierros.md). Si solo hay TikTok, Threads o X conectados, o la cuenta elegida es de una de esas, este mensaje se queda. |
+| «Todavía no hay lecturas de cuenta. La primera llega con la próxima sincronización diaria.» (en «Tus cuentas») | No hay ninguna lectura de cuenta de Instagram, Facebook ni YouTube (o de la cuenta elegida). La sincronización diaria corre a las 9:00 UTC. | Esperar, o apretar «Sincronizar ahora» en [Los Fierros](los-fierros.md). Si solo hay TikTok, Threads o X conectados, o la cuenta elegida es de una de esas, este mensaje se queda (Threads sí tiene lecturas en la cuenta del revisor de Meta, con sus permisos de lectura). |
 | «Sin tráfico en este período.» (en «Visitas y clicks en el tiempo») | Ni visitas ni clicks en el período. | Ampliar el período, revisar el selector de página. |
 | «Sin tráfico en este período.» (en «Views ganadas y visitas, día a día») | Ni views ganadas ni visitas por etiqueta en el período. | Ampliar el período, o esperar la sincronización. |
 | «Sin tráfico en este período.» (dentro de «Tus cuentas», bajo las tarjetas) | Hay lecturas de cuenta en el período, pero sin visitas al perfil ni alcance (por ejemplo, solo Facebook conectado). No habla de visitas a la página. | Nada: solo Instagram entrega esas dos cifras. |
@@ -1602,7 +1708,7 @@ De día, donde una de estas frases dice «La Parrilla» dice «La Barra», y «L
 | «1 publicación aún no tiene su link pegado.» / «<N> publicaciones aún no tienen su link pegado.» | Esas publicaciones nunca trajeron una visita con su etiqueta. | Buscar las filas con «—» en «Visitas» y pegar su link. |
 | «1 publicación no tiene métricas de la red en este período (Instagram no las entrega para lo publicado antes de tu cuenta profesional).» / «<N> publicaciones no tienen métricas…» | La red no dio ningún número de esas publicaciones en el período. La causa de la frase es la más común; también pasa con lo recién publicado o con videos de YouTube que ya no llegan. | Nada que arreglar si son posts viejos de Instagram. «Solo con métricas» las esconde. |
 | «No publicaste nada en este período. Amplía el período, o mira «Todas las recientes».» | Hay alguna cuenta conectada, pero ninguna publicación sincronizada (de la cuenta elegida, si hay una) salió en el período. | Elegir un período más largo, «Todas las recientes» o «Todas las cuentas». |
-| «No hay publicaciones sincronizadas todavía.» | Con «Todas las recientes»: hay cuentas conectadas, pero ninguna publicación sincronizada (de la cuenta elegida, si hay una). | Elegir «Todas las cuentas». Si sigue, apretar «Sincronizar ahora» en [Los Fierros](los-fierros.md), o esperar la del día siguiente. Las cuentas de Threads y X nunca tienen publicaciones aquí. |
+| «No hay publicaciones sincronizadas todavía.» | Con «Todas las recientes»: hay cuentas conectadas, pero ninguna publicación sincronizada (de la cuenta elegida, si hay una). | Elegir «Todas las cuentas». Si sigue, apretar «Sincronizar ahora» en [Los Fierros](los-fierros.md), o esperar la del día siguiente. Las cuentas de X nunca tienen publicaciones aquí, y las de Threads solo en la cuenta del revisor de Meta. |
 | «Todavía no hay posts sincronizados.» y «Conecta una red en Los Fierros (Ajustes) y aprieta Sincronizar ahora ahí mismo.» | La lista quedó vacía y no hay ninguna cuenta conectada. | Conectar una red en [Los Fierros](los-fierros.md) y apretar «Sincronizar ahora». |
 | «Nada de <red> · <nombre de la cuenta> con este filtro.» (o «Nada de <red> con este filtro.» si la cuenta no tiene nombre) | Con una cuenta elegida, «Solo con métricas» sacó todas sus filas: ninguna tiene números de la red. | Apretar «Mostrar todas». |
 | «El filtro dejó la lista vacía: ninguna publicación tiene métricas de la red en este período.» | Sin cuenta elegida, «Solo con métricas» sacó todas las filas: ninguna tiene números de la red. | Apretar «Mostrar todas». |
@@ -1727,7 +1833,8 @@ De día, donde una de estas frases dice «La Parrilla» dice «La Barra», y «L
   o en «Tus publicaciones», su fila, columna «Visitas».
 - **«No veo el post que publiqué hoy»**: las publicaciones entran con la sincronización, no al
   publicar. Apretar «Sincronizar ahora» en [Los Fierros](los-fierros.md) o esperar la del día
-  siguiente. Si es de Threads o X, no va a aparecer nunca: esas redes no se sincronizan.
+  siguiente. Si es de X, no va a aparecer nunca: esa red no se sincroniza. Si es de Threads,
+  tampoco, salvo en la cuenta del revisor de Meta, cuando la instalación pide los permisos de lectura de Threads.
 - **«No veo un post viejo» (en «Tus publicaciones»)**: al entrar, la lista es de lo publicado
   en el período. Apretar «Todas las recientes» o elegir un período más largo. Revisar también
   el selector de cuenta, «Solo con métricas» y si fue borrado («Ver borrados», en «⋯ Más»).
@@ -1781,7 +1888,8 @@ De día, donde una de estas frases dice «La Parrilla» dice «La Barra», y «L
 - **«Mis visitas no coinciden con los clics que me muestra Instagram»**: Instagram cuenta toques
   en el link; aquí cuenta solo lo que llegó a abrirse en un navegador, y sin bots.
 - **«No veo TikTok en Tus cuentas»**: Tu Parrilla no lee seguidores de TikTok (tampoco de
-  Threads ni X). Solo hay tarjetas de Instagram, Facebook y YouTube.
+  X, ni de Threads fuera de la cuenta del revisor de Meta). Solo hay tarjetas de Instagram,
+  Facebook y YouTube, y de Threads en esa cuenta.
 - **«Perdí seguidores y dice sin cambio» / «Seguidores ganados dice 0»**: la pantalla no muestra
   bajas; «sin cambio» o «0» puede ser una baja.
 - **«Dice — en el período» / «Seguidores ganados dice —»**: no hay una lectura de antes del
@@ -1805,6 +1913,14 @@ De día, donde una de estas frases dice «La Parrilla» dice «La Barra», y «L
 - **«Antes apretaba un post y se abría Instagram»**: ahora el texto de la fila abre la pieza,
   dentro del panel. La red se abre con la flechita en diagonal al final de la línea de abajo
   («Ver en <red>»), o desde la pieza, con «Ver en <red>».
+- **«¿Qué tema (o qué formato) me funciona mejor?» / «¿qué me trajo más seguidores?»**: «Qué te
+  funciona», en el tablero, debajo de «Lo que más creció». Lo dice en views contra lo normal de
+  cada cuenta, no en seguidores: ninguna red da los seguidores que trajo cada publicación.
+- **«Qué te funciona dice Todavía no alcanza»**: hacen falta dos valores con al menos 10
+  publicaciones medidas cada uno. Ampliar el período, o seguir anotando `tema` y `estilo` en lo
+  que se programa.
+- **«Puse formato en los atributos y no aparece»**: «Formato» lo da la red (Reel, Carrusel…).
+  Para el tipo de video (tutorial, storytime…), el atributo es `estilo`.
 - **«Quiero ver qué hook funciona» / «¿qué tema me trae más gente?»**: «Comparar por atributo
   →», en el tablero, y elegir «Por hook» o «Por tema». Ver «Para ver qué hook funciona».
 - **«No me aparece hook (o tema) en el selector»**: ninguna publicación del período lo tiene.
@@ -1854,13 +1970,17 @@ De día, donde una de estas frases dice «La Parrilla» dice «La Barra», y «L
   común» no dice qué causó el resultado: dice qué se repite.
 - No guarda ni reproduce los videos: se ven en la red, con «Ver en <red>». «Lado a lado» no
   dibuja la curva de YouTube ni compara más de dos publicaciones a la vez.
-- No muestra publicaciones de Threads ni de X: esas redes publican, pero no se sincronizan.
+- No muestra publicaciones de X, ni de Threads fuera de la cuenta del revisor de Meta: publican,
+  pero no se sincronizan.
 - No muestra lo programado que todavía no sale: eso está en [La Parrilla](la-parrilla.md).
 - No consulta la red en vivo ni tiene botón para sincronizar: eso está en
   [Los Fierros](los-fierros.md).
 - No identifica personas: no guarda la IP ni usa cookies, y no hay forma de saber quién visitó.
 - No cuenta a quien descarga la página sin ejecutarla, ni con «Bots».
-- No muestra seguidores perdidos, ni lee cuentas de TikTok, Threads o X.
+- No muestra seguidores perdidos, ni lee cuentas de TikTok o X (ni de Threads, salvo en la
+  cuenta del revisor de Meta).
+- «Qué te funciona» no dice los seguidores que trajo cada publicación (ninguna red los da), ni
+  mira otros atributos que `tema` y `estilo`: para un hook o una serie, «Comparar por atributo».
 - No pega el link en la red, ni edita ni borra la publicación allá: lo único que se edita aquí
   es la etiqueta, en «Tus publicaciones».
 - No crea ni edita los links de la página: eso es [La Vitrina](la-vitrina.md).
@@ -1918,6 +2038,9 @@ Sale de:
 - `src/app/admin/(dash)/analytics/comparar/page.tsx` («Comparar por atributo»)
 - `src/app/admin/(dash)/analytics/mejores/page.tsx` («Tu mejor 10 %») y `src/lib/mejores.ts`
   (quién compite, quién entra, el corte, las medianas, «Rinden» y «Qué tienen en común»)
+- `src/app/admin/(dash)/analytics/que-funciona.tsx` («Qué te funciona»: el panel, sus enlaces y
+  sus notas) y `src/lib/que-funciona.ts` (qué se mira, el mínimo, cuándo uno anduvo mejor y
+  cada frase)
 - `src/lib/igual-edad.ts` (los 7 días, «Contra su cuenta», su mínimo de 5 y qué es reciente);
   la lectura de los 7 días sale de `getPostRows`, en `src/lib/posts.ts`
 - `src/app/admin/(dash)/analytics/lado-a-lado/page.tsx` («Lado a lado»), `src/lib/lado-a-lado.ts`
@@ -1943,6 +2066,8 @@ Sale de:
   ranking, los avisos)
 - `src/lib/account-stats.ts` y `src/lib/social/account-metrics.ts` (seguidores, visitas al
   perfil, alcance, por cuenta)
+- `src/lib/social/index.ts` y `src/lib/social/threads.ts` (qué redes se sincronizan; qué trae
+  Threads y cuándo)
 - `src/lib/social/delta.ts` (lo ganado y «nuevo»)
 - `src/lib/parrilla.ts` (la mediana y «Se pasó») y `src/app/globals.css` (colores de la barra)
 - `src/components/charts/stat-tile.tsx`, `src/components/charts/panel.tsx`,

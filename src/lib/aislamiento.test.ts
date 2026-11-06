@@ -128,6 +128,8 @@ const { leerProgramados } = await import('./schedule-leer')
 const { listarLlaves, crearLlave } = await import('./llaves')
 const { leerResumen } = await import('./avisos/run')
 const { archivarQuemados, archivarDestino } = await import('./social/publish/archivar')
+const { CONSERVAR, editarPostProgramado } = await import('./social/publish/editar')
+const { postParaEditarEnElTelefono } = await import('./editar-movil')
 const { recibirSugerencia } = await import('./sugerencias/guardar')
 const { materialesDeLaCamara, editarMaterial, sacarMaterial } = await import('./cocina/materiales')
 const { usoDeLaCamara } = await import('./cocina/subidas')
@@ -679,6 +681,32 @@ describe('aislamiento por dueño, escrituras (SQL generado, sin base)', () => {
     ])
     expect(consultas).toHaveLength(2)
     for (const c of consultas) esperarFiltradoPorDueno(c)
+  })
+
+  // Las dos puertas de la edición —el panel y el teléfono— y la pantalla del teléfono leen
+  // primero el post atado al dueño: lo demás va por el id que esa lectura ya confirmó.
+  it('social/publish/editar: editarPostProgramado lee el post atado al dueño antes de seguir', async () => {
+    const consultas = await todasLasConsultas(() =>
+      editarPostProgramado(DUENO, '6f1c2a54-9b1e-4c3d-8f00-0123456789ab', {
+        caption: 'Hola',
+        scheduledAt: CONSERVAR,
+        cuentas: { quitar: [] },
+        media: CONSERVAR,
+        portada: CONSERVAR,
+        atributos: CONSERVAR,
+        regla: CONSERVAR,
+      }),
+    )
+    expect(consultas).toHaveLength(1)
+    esperarFiltradoPorDueno(consultas[0]!)
+  })
+
+  it('editar-movil: postParaEditarEnElTelefono lee el post atado al dueño antes de seguir', async () => {
+    const consultas = await todasLasConsultas(() =>
+      postParaEditarEnElTelefono(DUENO, '6f1c2a54-9b1e-4c3d-8f00-0123456789ab', 'America/Santiago'),
+    )
+    expect(consultas).toHaveLength(1)
+    esperarFiltradoPorDueno(consultas[0]!)
   })
 
   /**

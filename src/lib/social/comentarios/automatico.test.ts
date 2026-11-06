@@ -39,7 +39,7 @@ vi.mock('@/db', async (importOriginal) => {
   }
 })
 
-const { reglasPara, reglasDeCuenta } = await import('./automatico')
+const { cabeEnLaRed, reglasPara, reglasDeCuenta } = await import('./automatico')
 
 describe('reglasPara', () => {
   it('el documentoUrl de la fila llega al ReglaLimpia, y una fila sin documento da null', async () => {
@@ -54,5 +54,17 @@ describe('reglasDeCuenta', () => {
     const mapa = await reglasDeCuenta('cuenta-1')
     expect(mapa.get('c1')?.documentoUrl).toBe('https://media.ej.cl/reglas/abc.pdf')
     expect(mapa.get('c2')?.documentoUrl).toBeNull()
+  })
+})
+
+describe('cabeEnLaRed', () => {
+  it('un mensaje más largo que la red no sale solo: recortado perdería el enlace', () => {
+    // Threads acepta 500 y la regla deja escribir 1000.
+    expect(cabeEnLaRed('a'.repeat(500), 500)).toBe(true)
+    expect(cabeEnLaRed(`${'a'.repeat(480)} https://tu-parrilla.cl/guia`, 500)).toBe(false)
+  })
+
+  it('cuenta por puntos de código y sin los espacios de las puntas, como `recortar`', () => {
+    expect(cabeEnLaRed(`  ${'🔥'.repeat(500)}  `, 500)).toBe(true)
   })
 })

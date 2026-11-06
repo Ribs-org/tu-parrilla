@@ -4,6 +4,7 @@ import { usuarioActual } from '@/lib/auth'
 import { env } from '@/lib/env'
 import { fraseProximamente } from '@/lib/networks'
 import { proximamentePara } from '@/lib/redes-abiertas'
+import { SCOPES_THREADS_EXTRA } from '@/lib/social/threads'
 import { COOKIE_AGREGAR } from '@/lib/social/vuelta'
 import { signOAuthState } from '@/lib/social/oauth-state'
 import { conMensaje } from '@/lib/mensaje-firmado'
@@ -82,20 +83,30 @@ const SCOPES_PROMOCIONAR: Record<string, string> = {
   facebook: 'ads_management',
 }
 
-export function scopesDe(
-  network: string,
-  conPrivado: boolean,
-  conAnuncios = false,
-  conPromocionar = false,
-): string | undefined {
+/**
+ * Las banderas que suman permisos: `META_PERMISOS_PRIVADO` (los del privado, arriba),
+ * `THREADS_PERMISOS_EXTRA` (los números y las respuestas de Threads, `SCOPES_THREADS_EXTRA`),
+ * `META_PERMISOS_ANUNCIOS` (leer los anuncios) y `META_PERMISOS_PROMOCIONAR` (promocionar, solo
+ * junto con la de leer). Todas por la misma razón: un permiso que el caso de uso de la app no
+ * tiene activado hace que la ventana rechace el pedido entero.
+ */
+export type PermisosExtra = {
+  privado: boolean
+  threads: boolean
+  anuncios: boolean
+  promocionar: boolean
+}
+
+export function scopesDe(network: string, extra: PermisosExtra): string | undefined {
   const base = SCOPES[network]
   if (!base) return undefined
-  const extras = [
-    conPrivado ? SCOPES_PRIVADO[network] : undefined,
-    conAnuncios ? SCOPES_ANUNCIOS[network] : undefined,
-    conAnuncios && conPromocionar ? SCOPES_PROMOCIONAR[network] : undefined,
-  ]
-  return [base, ...extras.filter(Boolean)].join(',')
+  const sumados = [
+    extra.privado ? SCOPES_PRIVADO[network] : undefined,
+    extra.threads && network === 'threads' ? SCOPES_THREADS_EXTRA : undefined,
+    extra.anuncios ? SCOPES_ANUNCIOS[network] : undefined,
+    extra.anuncios && extra.promocionar ? SCOPES_PROMOCIONAR[network] : undefined,
+  ].filter(Boolean)
+  return [base, ...sumados].join(',')
 }
 
 export async function GET(
@@ -106,12 +117,12 @@ export async function GET(
   if (!usuario) return new NextResponse('No autorizado', { status: 401 })
 
   const { network } = await params
-  const scope = scopesDe(
-    network,
-    env('META_PERMISOS_PRIVADO') === '1',
-    env('META_PERMISOS_ANUNCIOS') === '1',
-    env('META_PERMISOS_PROMOCIONAR') === '1',
-  )
+  const scope = scopesDe(network, {
+    privado: env('META_PERMISOS_PRIVADO') === '1',
+    threads: env('THREADS_PERMISOS_EXTRA') === '1',
+    anuncios: env('META_PERMISOS_ANUNCIOS') === '1',
+    promocionar: env('META_PERMISOS_PROMOCIONAR') === '1',
+  })
   if (!scope) return new NextResponse('Esa red no usa OAuth', { status: 400 })
 
   const origin = new URL(request.url).origin

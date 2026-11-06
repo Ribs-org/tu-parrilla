@@ -1,4 +1,4 @@
-import { Text, View } from 'react-native'
+import { Pressable, Text, View } from 'react-native'
 import { TIPO_TITULO } from './ui'
 import { colorDeRed, type Colores } from './colores'
 import { useColores, useTema } from './tema'
@@ -52,16 +52,23 @@ function lineaDe(sello: Sello, colores: Colores): { color: string; signo: string
  *
  * Un servidor de antes no manda `formato` ni `sello`: queda el bife, y el sello sale del
  * estado (`selloPorEstado`).
+ *
+ * Tocarla abre la pantalla para corregirla (`onAbrir`): el texto, la hora, las cuentas, o
+ * borrarla.
  */
-export function CorteProgramado({ post }: { post: PostProgramado }) {
+export function CorteProgramado({ post, onAbrir }: { post: PostProgramado; onAbrir?: () => void }) {
   const colores = useColores()
   const estados = post.redes.map((r) => r.estado)
   const coccion = coccionDe(estados)
   const sellos = post.redes.map((r) => r.sello ?? selloPorEstado(r.estado, r.error))
   const formato = post.formato ?? 'bife'
   return (
-    <View
-      style={{
+    <Pressable
+      onPress={onAbrir}
+      disabled={!onAbrir}
+      accessibilityRole={onAbrir ? 'button' : undefined}
+      accessibilityHint={onAbrir ? 'Abre la publicación para corregirla o borrarla' : undefined}
+      style={({ pressed }) => ({
         flexDirection: 'row',
         gap: 12,
         backgroundColor: colores.tarjeta,
@@ -69,7 +76,8 @@ export function CorteProgramado({ post }: { post: PostProgramado }) {
         borderWidth: 1,
         borderColor: colorDelBorde(bordeDe(coccion, sellos), colores),
         padding: 12,
-      }}
+        opacity: pressed ? 0.8 : 1,
+      })}
     >
       <Pieza formato={formato} huesos={post.huesos ?? 0} carne={carneDe(estados)} coccion={coccion} sellos={sellos} />
 
@@ -115,7 +123,7 @@ export function CorteProgramado({ post }: { post: PostProgramado }) {
           {NOMBRE_FORMATO[formato]} · {NOMBRE_COCCION[coccion]}
         </Text>
       </View>
-    </View>
+    </Pressable>
   )
 }
 

@@ -5,6 +5,7 @@ import { BajadaDeLosNumeros } from './cabeza'
 import { SeccionCargando } from './cargando'
 import { LoPagado } from './lo-pagado'
 import { ParaLlevar } from './para-llevar'
+import { QueFunciona } from './que-funciona'
 import { BarList } from '@/components/charts/bar-list'
 import { CampaignTable } from '@/components/charts/campaign-table'
 import { Donut } from '@/components/charts/donut'
@@ -320,6 +321,11 @@ async function EnLasRedes({
           emptyLabel="Ninguna publicación ganó views en este período. Las métricas llegan con la sincronización diaria, así que lo publicado hoy aparece mañana."
         />
       </Panel>
+
+      {/* Su propia consulta (lo publicado en el período, a los 7 días): no atrasa lo de arriba. */}
+      <Suspense fallback={<PanelSkeleton className="mt-3" orden={2} />}>
+        <QueFunciona filters={deLasRedes} params={params} cuenta={cuenta} />
+      </Suspense>
 
       {abierta ? (
         <RedesEnDetalle
