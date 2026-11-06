@@ -93,6 +93,8 @@ export type FilaComparada = {
   publicaciones: number
   /** A igual edad y contra su propia cuenta (`igual-edad.ts`): ×1 es lo normal de cada cuenta. */
   contraSuCuenta: number | null
+  /** De cuántas sale `contraSuCuenta`: las que ya tienen su lectura de los 7 días. */
+  medidas: number
   viewsA7Dias: number | null
   viewsGanadas: number | null
   visitas: number | null
@@ -136,10 +138,30 @@ export function compararPorAtributo(
   clave: string,
   relativos: ReadonlyMap<string, number> = new Map(),
 ): FilaComparada[] {
+  return compararPor(
+    entradas,
+    ({ atributos }) => {
+      const texto = textoDeAtributo(atributos?.[clave])
+      return texto === '—' ? null : texto
+    },
+    relativos,
+  )
+}
+
+/**
+ * Lo mismo que `compararPorAtributo`, agrupando por lo que diga `valorDe`: así se compara
+ * también por algo que no es un atributo, como el formato que da la red (`que-funciona.ts`).
+ * Null es «sin valor», y va al final.
+ */
+export function compararPor<E extends { fila: PostRow }>(
+  entradas: readonly E[],
+  valorDe: (entrada: E) => string | null,
+  relativos: ReadonlyMap<string, number> = new Map(),
+): FilaComparada[] {
   const grupos = new Map<string | null, PostRow[]>()
-  for (const { atributos, fila } of entradas) {
-    const texto = textoDeAtributo(atributos?.[clave])
-    const llave = texto === '—' ? null : texto
+  for (const entrada of entradas) {
+    const { fila } = entrada
+    const llave = valorDe(entrada)
     const grupo = grupos.get(llave) ?? []
     grupo.push(fila)
     grupos.set(llave, grupo)
@@ -153,6 +175,7 @@ export function compararPorAtributo(
       valor,
       publicaciones: filas.length,
       contraSuCuenta: medianaDeCampo(filas, (f) => relativos.get(f.id) ?? null),
+      medidas: filas.filter((f) => relativos.has(f.id)).length,
       viewsA7Dias: medianaDeCampo(filas, (f) => f.viewsA7Dias),
       viewsGanadas: medianaDeCampo(filas, (f) => f.viewsChange),
       visitas: medianaDeCampo(filas, (f) => f.visits),

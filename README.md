@@ -12,7 +12,7 @@ tus números.
 | --- | --- |
 | `/` | En el dominio del producto (`DOMINIO_PRODUCTO`), la portada de Tu Parrilla, con los enlaces a privacidad y términos. En cualquier otro, la página principal del dueño del dominio: cada usuario tiene una, pero solo la del admin se sirve en la raíz |
 | `/ingresar` | La entrada al panel: el correo y el código de seis dígitos que llega a ese correo. Como el panel, se abre en el dominio del producto |
-| `/privacidad`, `/terminos` | La política de privacidad y los términos, públicos y sin sesión. Google y Meta los revisan para verificar la app |
+| `/privacidad`, `/terminos` | La política de privacidad y los términos, públicos y sin sesión. Google y Meta los revisan para verificar la app. Además los enlaza, junto con `/`, el *Branding* de `rclone-servidor`, otra app de Google de Infraestructura (#294): si alguna de las tres cambia de ruta o se baja, avisar en `VicentePareja/servidor_propio` |
 | `/<slug>` | La página de un usuario. Cada dominio sirve solo las de su dueño; el del producto las sirve todas |
 | `/admin` | Tu panel: entra a La Parrilla, el calendario con lo que se quemó arriba; adentro, los números, los comentarios, el editor y La Cocina (`/admin/ia`): el chef de la casa, con la cámara de frío donde se guarda el material (`/admin/ia/bodega`), y, en «Tu propio chef», las llaves para tu agente, con el manual del parrillero (`/admin/ia/manual`). Se abre en el dominio del producto: en cualquier otro, `/admin` e `/ingresar` redirigen ahí con la misma ruta |
 | `/borrado/<código>` | El estado de un borrado que pidió Meta: cuándo fue y cuántas cuentas. Pública, sin sesión; el código es la llave |
@@ -22,6 +22,7 @@ tus números.
 | `/api/schedule/…`, `/api/metrics/…` | La API para tu agente, con una llave de La Cocina («Tu propio chef»): cargar, ver y sacar lo programado, archivar lo quemado, las cuentas y los números (ver «Carga masiva por API» y las secciones que le siguen) |
 | `/api/cocina/…` | La API de La Cocina, con `COCINA_SECRET`: el servidor del chef toma las comandas, baja sus insumos, informa cada estado y entrega lo cocinado al mesón del dueño (ver «La Cocina» y `docs/cocina-api.md`) |
 | `/api/media` | `POST` con la misma llave: firma la subida de un archivo directo a R2, para nombrarlo después en varias filas del lote sin que se vuelva a bajar (ver «Carga masiva por API») |
+| `/api/bodega…` | Con la misma llave: lo que hay en la cámara de frío de La Cocina (`GET /api/bodega`) y las subidas por partes para guardar ahí (`/api/bodega/subidas…`), las mismas del panel y del teléfono (ver «La Cocina») |
 | `/api/admin/…` | Lo que el panel llama desde el navegador, con la cookie de la sesión: la firma de una subida directa (`upload-url`), las subidas por partes a la cámara de frío de La Cocina (`cocina/subidas…`) y el pulso que mantiene al día sus tarjetas (`cocina/pulso`; ver «La Cocina») y la planilla de Excel de Los Números (`planilla`, y `planilla/adelanto` para lo que no cabe; ver «Llevar para la casa») |
 | `/api/mobile/…` | La API de la app del teléfono, con el token de su sesión (ver `mobile/README.md`); `cocina…` es La Cocina desde el teléfono: lo que muestra, las subidas por partes a la cámara de frío y «Mandar al chef» (ver «La Cocina») |
 | `/api/cron/…` | Las corridas programadas: la publicación y la sincronización, que también reintenta los mensajes del libro de sugerencias que no salieron a GitHub. Solo con `CRON_SECRET` |
@@ -204,7 +205,7 @@ pie con los archivos de cada una y con los enlaces llevados al manual (`src/lib/
 
 Fuera del panel, «el dueño» no siempre eres tú, así que conviene el detalle:
 
-- La **API con llave** (`/api/schedule/posts`, `/api/schedule/resumen`, `/api/schedule/cuentas`, `/api/metrics/posts`, `/api/metrics/mejores`) habla en la zona del
+- La **API con llave** (`/api/schedule/posts`, `/api/schedule/resumen`, `/api/schedule/cuentas`, `/api/metrics/posts`, `/api/metrics/mejores`, `/api/metrics/que-funciona`) habla en la zona del
   dueño de la llave: la tuya si el agente usa una llave que generaste tú, la del admin si
   usa `SCHEDULE_API_KEY`, la llave del despliegue. Lo que el agente escribe como «19:00»
   son las 19:00 del dueño, y los días de `desde`/`hasta` son sus días.
@@ -274,7 +275,12 @@ que hicieron tus publicaciones donde las publicaste —views y seguidores ganado
 período, y lo que más creció—, filtrable por cuenta. **En tu página**: quién entró a tu
 página de links y qué apretó —visitas y clicks, y qué publicación te trajo gente—,
 filtrable por página. El período vale para las dos. Cada mitad muestra dos números y una
-lista; el resto (interacciones, arrastre, tus cuentas, la audiencia, los links, de dónde
+lista. «En las redes» suma **Qué te funciona**: qué tema, qué estilo (los atributos `tema` y
+`estilo`) y qué formato de la red anduvieron mejor en el período, contra lo normal de cada
+cuenta y dicho en una frase; solo nombra un ganador si hay al menos dos valores con 10
+publicaciones medidas a los 7 días y el mejor saca ×1,2 o más (`src/lib/que-funciona.ts`, con
+las mismas medianas de «Comparar por atributo»). Es en views: ninguna red da los seguidores
+que trajo cada publicación. El resto (interacciones, arrastre, tus cuentas, la audiencia, los links, de dónde
 vienen…) espera detrás de su «⋯ Más», que no se consulta mientras está cerrado. La lista de
 todas las publicaciones, que antes era la pestaña Los Cortes, está un clic adentro («Ver todas
 las publicaciones →», `/admin/analytics/publicaciones`; `/admin/content` redirige ahí), con
@@ -1205,7 +1211,7 @@ Vercel y bajan con `vercel env pull .env.local`.
 | `CRON_SECRET` | Autoriza las corridas programadas: el sync diario y la publicación cada 5 minutos. Vercel la manda sola a su cron; el pinger externo la manda en `Authorization: Bearer …` | Sí — Vercel no la crea: se genera igual que `AUTH_SECRET` y se agrega. Sin ella los crons responden `401` y no corre nada |
 | `MIGRAR_PREVIEWS` | Que los previews migren la base | Solo cuando el preview tenga una base propia; contra la de producción, no |
 | `DATABASE_URL_PRUEBAS` | Solo para las pruebas de integración: una Postgres desechable donde cada archivo crea y migra su propia base (ver «Comandos»). No va en Vercel | No — sin ella esas pruebas se saltan. Nunca la de producción |
-| `SCHEDULE_API_KEY` | La llave del despliegue: abre `POST /api/schedule/batch` (carga masiva), `POST /api/media` (subir un archivo una vez), `GET` y `DELETE /api/schedule/posts/{id}` (un post, o sacarlo), `POST /api/schedule/posts/{id}/archivar` y `…/desarchivar` (archivar lo quemado), `GET /api/schedule/posts` (calendario), `GET /api/schedule/resumen` (el resumen del día), `GET /api/schedule/cuentas` (las cuentas), `GET /api/metrics/posts` (métricas) y `GET /api/metrics/mejores` (el mejor X %) a nombre del admin. Es anterior a las llaves por usuario y sigue para el agente que ya la usa | No — sin ella los once endpoints aceptan solo las llaves que cada usuario genera en La Cocina («Tu propio chef»); si la pones, genérala igual que `CRON_SECRET` |
+| `SCHEDULE_API_KEY` | La llave del despliegue: abre `POST /api/schedule/batch` (carga masiva), `POST /api/media` (subir un archivo una vez), `GET` y `DELETE /api/schedule/posts/{id}` (un post, o sacarlo), `POST /api/schedule/posts/{id}/archivar` y `…/desarchivar` (archivar lo quemado), `GET /api/schedule/posts` (calendario), `GET /api/schedule/resumen` (el resumen del día), `GET /api/schedule/cuentas` (las cuentas), `GET /api/metrics/posts` (métricas), `GET /api/metrics/mejores` (el mejor X %), `GET /api/metrics/que-funciona` (qué tema, estilo y formato funcionan) y `/api/bodega…` (la cámara de frío de La Cocina) a nombre del admin. Es anterior a las llaves por usuario y sigue para el agente que ya la usa | No — sin ella esos endpoints aceptan solo las llaves que cada usuario genera en La Cocina («Tu propio chef»); si la pones, genérala igual que `CRON_SECRET` |
 | `RESEND_API_KEY` | Manda los códigos de ingreso y los avisos: la publicación que se quemó, la cuenta que se cayó, el resumen del día y la comanda de La Cocina que terminó (ver «Avisos por correo») | Sí — sin ella nadie puede entrar al panel |
 | `PUBLISH_ALERT_TO` | Adónde va un aviso sin dueño con correo: un post o una cuenta de antes de los usuarios. Lo demás va al correo de su dueño | No — sin ella, lo que no tiene dueño no avisa; el calendario y Los Fierros lo siguen mostrando |
 | `PUBLISH_ALERT_FROM` | Remitente de los avisos | Opcional; default `onboarding@resend.dev`, que solo entrega al correo de la cuenta de Resend |
@@ -1353,7 +1359,7 @@ máximo. Mañana puedes escribir de nuevo.».
 
 ### Guía para el editor de contenido
 
-`public/docs/api-editor.md` documenta los once endpoints en detalle, escrito para que un
+`public/docs/api-editor.md` documenta cada endpoint de la llave en detalle, escrito para que un
 LLM que crea contenido lo lea entero y no necesite explicaciones: contratos, reglas
 por red, todas las frases de error y qué significa cada métrica. Se sirve tal cual en
 <https://tu-parrilla.cl/docs/api-editor.md>. No contiene secretos — la llave
@@ -1379,7 +1385,7 @@ página cita archivos que ya no existen.
 
 ### La llave de la API
 
-Los once endpoints de abajo piden el header `Authorization: Bearer <llave>`, y lo que
+Los endpoints de abajo, y los de la cámara de frío (`/api/bodega…`), piden el header `Authorization: Bearer <llave>`, y lo que
 hacen lo hacen a nombre del dueño de la llave: sus cuentas, sus posts, su zona. Valen dos
 clases de llave:
 
@@ -1494,6 +1500,13 @@ que se repite más en el grupo. Lee hasta 10.000 publicaciones, como la pantalla
 responde solo el grupo. Las mismas reglas que la pantalla «Tu mejor 10 %», salvo lo que esta
 cambió por defecto (la métrica y las recientes), que en la API sigue como antes para no
 moverle la respuesta a quien ya la usa; la lógica, sin base, está en `src/lib/mejores.ts`.
+
+`GET /api/metrics/que-funciona`, con los mismos `desde`, `hasta`, `red` y `cuenta`, responde lo
+del panel «Qué te funciona»: para `tema`, `estilo` y `formato`, un `estado` (`gana`, `parejo`,
+`faltan` o `sinValor`), la `frase` que muestra el tablero, los dos mejores con muestra
+suficiente y cada valor con sus `publicaciones`, sus `medidas` y la mediana de
+`contraSuCuenta`. Lee hasta 10.000 publicaciones; la lógica, sin base, está en
+`src/lib/que-funciona.ts`.
 
 ### Calendario por API
 
@@ -1711,7 +1724,8 @@ PUT llega hasta 5, así que el navegador lo corta en partes de 64 MB y sube tres
 con su enlace firmado. Ninguna parte cruza una función de Vercel. Va por cuatro pasos:
 
 1. `/api/admin/cocina/subidas` abre la subida (desde el teléfono, `/api/mobile/cocina/subidas`,
-   que responde lo mismo: `src/lib/cocina/subidas-http.ts`);
+   y desde la IA del dueño, con su llave, `/api/bodega/subidas`; las tres responden lo mismo:
+   `src/lib/cocina/subidas-http.ts`);
 2. `…/partes` firma los enlaces de a pocos, justo antes de usarlos;
 3. el navegador sube las partes;
 4. `…/cerrar` junta las partes. Ahí nace el material, en la cámara de frío.
@@ -1812,13 +1826,14 @@ src/
     tablero.ts             las reglas de Los Números sin base: cuenta elegida, «⋯ Más» abiertos, la URL
     pieza.ts               qué junta las versiones de una pieza y las medianas por atributo (sin base)
     mejores.ts             el mejor (o el peor) X % de lo publicado: el corte, las medianas y lo que se repite (sin base)
+    que-funciona.ts        «Qué te funciona»: qué tema, estilo y formato anduvieron mejor, con su mínimo y su frase (sin base)
     igual-edad.ts          comparar a la misma edad y contra la propia cuenta: los 7 días y «contra su cuenta» (sin base)
     lado-a-lado.ts         dos publicaciones lado a lado: la curva por edad y sus atributos (sin base)
     metrics-consulta.ts    lo que comparten las rutas de /api/metrics: la llave, el rango, la red y la cuenta
     cuentas-api.ts         las cuentas de GET /api/schedule/cuentas: los dos ids y cómo está la conexión (sin base)
     media-api.ts           la clave de un archivo que sube un cliente de la API, en la carpeta de su dueño (sin base)
     archivar-api.ts        el cuerpo y las respuestas de archivar y desarchivar lo quemado por API
-    cocina/                La Cocina: la cámara de frío (lo que se guarda, su cuota y sus nombres por tamaño en bodega.ts; lo de adentro en materiales.ts), los estados de una comanda, la fila del chef, lo que entrega, lo que lee y escribe su API (/api/cocina), las subidas por partes del panel y del teléfono (subidas-http.ts, que sirve a /api/admin/cocina y a /api/mobile/cocina), colgar una comanda, la comanda que pide el teléfono (telefono.ts), el pulso de las tarjetas vivas, el correo de la comanda que terminó y el mesón
+    cocina/                La Cocina: la cámara de frío (lo que se guarda, su cuota y sus nombres por tamaño en bodega.ts; lo de adentro en materiales.ts), los estados de una comanda, la fila del chef, lo que entrega, lo que lee y escribe su API (/api/cocina), las subidas por partes del panel, del teléfono y de la API (subidas-http.ts, que sirve a /api/admin/cocina, /api/mobile/cocina y /api/bodega; la puerta de la llave en llave-api.ts), colgar una comanda, la comanda que pide el teléfono (telefono.ts), el pulso de las tarjetas vivas, el correo de la comanda que terminó y el mesón
     color-de-red.ts        el color de marca de cada red en La Parrilla, como clases de Tailwind escritas enteras
     piezas.ts              la pieza de una publicación: sus destinos programados unidos a lo publicado
     auth.ts                sesión del panel
@@ -1828,6 +1843,7 @@ src/
     borradores.ts          los borradores del compositor: guardar, cargar, listar y borrar, siempre por dueño
     borrador.ts            qué se guarda de un formulario y cómo se restaura, también desde el teléfono (sin base)
     borradores-movil.ts    los mismos borradores en la forma de la app del teléfono
+    editar-movil.ts        un post programado abierto para corregirlo en el teléfono: lo que se ve y lo que se guarda sin tocar
     pruebas/               la Postgres de las pruebas de integración: una base nueva y migrada por archivo; y un lector de zip para mirar el XML de una planilla
     empresa.ts             quién presta el servicio: lo leen la portada, privacidad y términos
     avisos/                la caída de una cuenta y el resumen del día: las reglas sin base y lo que lee y manda
@@ -1838,6 +1854,7 @@ src/
       retencion-youtube.ts borra lo de YouTube que lleva 30 días sin refrescarse
       traspasar.ts         le cambia el dueño a una cuenta con lo que se bajó de ella, sin borrar nada
       publish/secuencia.ts las historias de una secuencia salen en orden: cada una espera a la anterior
+      publish/editar.ts    guardar los cambios de un post programado: la regla que comparten el editor del panel y la app del teléfono
 public/docs/
   api-llm.md, api-editor.md, api.json   las guías de la API para un LLM
   ui/                      la wiki de la interfaz: una página por pantalla, para guiar a quien se pierde

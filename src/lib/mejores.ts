@@ -250,6 +250,7 @@ export function pisoDeArrastre(entradas: Entrada[]): number | null {
   return medianaDe(entradas.map((e) => e.fila.viewsChange).filter((v): v is number => v !== null && v > 0))
 }
 
+/** Cómo se llama en pantalla el tipo de post que da la red: «Reel», «Carrusel»… */
 const FORMATOS: Record<string, string> = {
   reel: 'Reel',
   video: 'Video',
@@ -259,6 +260,11 @@ const FORMATOS: Record<string, string> = {
   link: 'Enlace',
   text: 'Texto',
   audio: 'Audio',
+}
+
+/** El formato de una publicación como se lee en pantalla, o null si la red no lo dio. */
+export function formatoDeLaRed(mediaType: string | null): string | null {
+  return mediaType ? (FORMATOS[mediaType] ?? mediaType) : null
 }
 
 const FRANJAS = [
@@ -292,7 +298,8 @@ export function rasgosDe(entrada: Entrada, zona: string): Array<{ rasgo: string;
     if (texto !== '—') rasgos.push({ rasgo: clave, valor: texto })
   }
   rasgos.push({ rasgo: 'red', valor: networkLabel(fila.network) })
-  if (fila.mediaType) rasgos.push({ rasgo: 'formato', valor: FORMATOS[fila.mediaType] ?? fila.mediaType })
+  const formato = formatoDeLaRed(fila.mediaType)
+  if (formato) rasgos.push({ rasgo: 'formato', valor: formato })
   rasgos.push({ rasgo: 'día', valor: formateador(DIA, zona, { weekday: 'long' }).format(fila.publishedAt) })
   const hora = Number(formateador(HORA, zona, { hour: '2-digit', hourCycle: 'h23' }).format(fila.publishedAt))
   rasgos.push({ rasgo: 'hora', valor: FRANJAS.find((f) => hora < f.hasta)!.nombre })

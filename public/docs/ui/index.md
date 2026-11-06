@@ -33,7 +33,7 @@ registro abierto.
 
 Está siempre, fija arriba, en todas las pantallas del panel. De izquierda a derecha:
 
-1. **«Panel»**, en mayúsculas. Es un rótulo, no un botón. En un teléfono no aparece: le deja el lugar a las pestañas.
+1. **«Panel»**, en mayúsculas. Lleva a la entrada, La Parrilla (de día, La Barra), desde cualquier pantalla; al pasarle el mouse se atenúa y dice «Volver al inicio del panel». En un teléfono no aparece: le deja el lugar a las pestañas, y la primera pestaña hace lo mismo.
 2. **Cuatro pestañas**, iguales para todos: «La Parrilla», «La Mesa», «Los Números» y «La Cocina»
    (hasta el 2026-10-22, «Tu IA»).
    De día, la primera se llama «La Barra» (ver «El modo día», abajo).
