@@ -18,6 +18,7 @@ import { Button, Field, GroupLabel, Input, Textarea } from '@/components/ui'
 import {
   camposDesdeFormulario,
   fechaParaDia,
+  instagramMusicaInicial,
   instagramTrialInicial,
   primero,
   reglaInicial,
@@ -302,7 +303,7 @@ export function Composer({
   const idDeLlenado = useId()
   const soloFotos = media.length > 0 && media.every((m) => m.mediaType === 'image')
   // Exactamente un video: la única condición bajo la que se monta el bloque de Instagram,
-  // porque un trial reel no admite fotos ni carrusel.
+  // porque un trial reel no admite fotos ni carrusel, y Meta solo le pone música a un reel.
   const unVideo = media.length === 1 && media[0]!.mediaType === 'video'
   const archivosParaRevisar = useMemo(
     () => media.map((m) => locales[m.url]).filter((f): f is File => Boolean(f)),
@@ -792,6 +793,8 @@ export function Composer({
                   key={cuenta.id}
                   cuenta={cuenta}
                   inicial={campos ? instagramTrialInicial(campos, cuenta.id) : false}
+                  musicaInicial={campos ? instagramMusicaInicial(campos, cuenta.id) : null}
+                  leerTexto={() => String(formRef.current ? (new FormData(formRef.current).get('caption') ?? '') : '')}
                 />
               ))
             : null}

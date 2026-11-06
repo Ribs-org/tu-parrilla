@@ -5,13 +5,15 @@ import {
   PUBLISH_REJECTED,
   TOPE_INSTAGRAM,
   historiaSoloEmpresa,
+  musicaRechazada,
+  musicaSinLoginDeFacebook,
   rechazoDeInstagram,
   trialNoDisponible,
   trialSinSeguidores,
 } from './publisher'
-import { esHistoria, type OpcionesDestino } from './opciones'
+import { esHistoria, musicaDe, nombreDeCancion, type MusicaInstagram, type OpcionesDestino } from './opciones'
 import { normalizarTexto } from '../tiktok-vinculo'
-import { graphDeInstagram } from '../instagram-login'
+import { conLoginDeInstagram, graphDeInstagram } from '../instagram-login'
 
 /**
  * Cada cuánto se vuelve a probar un destino que chocó con el tope diario. El tope es una
@@ -30,10 +32,19 @@ export function photoContainerParams(caption: string, media: PublishMedia): Reco
 // encoded, so it travels as a JSON string.
 const TRIAL_PARAMS = JSON.stringify({ graduation_strategy: 'MANUAL' })
 
+/**
+ * La canción de «Música de Instagram» como la pide Meta en el contenedor del reel: un objeto JSON
+ * que, como `trial_params`, viaja como texto porque /media va en formulario.
+ */
+export function audioConfiguration(musica: MusicaInstagram): string {
+  return JSON.stringify({ audio_id: musica.audioId, audio_volume: musica.volumenMusica, video_volume: musica.volumenVideo })
+}
+
 // REELS rather than VIDEO: since v21 it is the only media_type Graph accepts for
 // standalone feed video.
 // La portada diseñada del reel; el carrusel y la foto no la llevan — Graph solo
-// la acepta en el contenedor REELS.
+// la acepta en el contenedor REELS. La música de Instagram tampoco: Meta la admite solo en
+// reels, así que es el único contenedor que la lleva aunque esté guardada en un carrusel.
 export function reelContainerParams(
   caption: string,
   media: PublishMedia,
@@ -43,6 +54,8 @@ export function reelContainerParams(
   const params: Record<string, string> = { media_type: 'REELS', video_url: media.url, caption }
   if (coverUrl) params.cover_url = coverUrl
   if (opciones && 'trialReel' in opciones) params.trial_params = TRIAL_PARAMS
+  const musica = musicaDe('instagram', opciones)
+  if (musica) params.audio_configuration = audioConfiguration(musica)
   return params
 }
 
@@ -154,6 +167,25 @@ export function motivoDeRechazo(
   if (e?.subcodigo === SUBCODIGO_TRIAL_SIN_SEGUIDORES) return trialSinSeguidores(cuenta)
   if (/trial|reels? de prueba/i.test(cuerpo)) return trialNoDisponible(cuenta, e ? explicacionDeMeta(e) : null)
   return null
+}
+
+/**
+ * Si el rechazo del contenedor de un reel con música habla del audio, la frase con que falla
+ * de una vez; si no, null. Meta no documenta un código para «esa canción ya no está» (la tabla
+ * de errores de la Audio API solo trae los de la búsqueda), así que se lee el texto: `audio`,
+ * `music`, `música`, `canción` o `sound`, en inglés y en español, como el respaldo de los trial
+ * reels. Un rechazo que no los nombra sigue el trato de siempre, con lo que Meta dijo a la vista.
+ */
+export function motivoDeRechazoDeMusica(
+  cuerpo: string,
+  opciones: OpcionesDestino | null,
+  cuenta: string | null = null,
+): string | null {
+  const musica = musicaDe('instagram', opciones)
+  if (!musica) return null
+  if (!/audio|music|música|musica|canci[oó]n|sound|sonido/i.test(cuerpo)) return null
+  const e = leerErrorDeMeta(cuerpo)
+  return musicaRechazada(cuenta, nombreDeCancion(musica), e ? explicacionDeMeta(e) : null)
 }
 
 /** Lo que se le dice al dueño de un rechazo que no se reconoce: con lo que Meta dijo, si dijo algo. */
@@ -284,6 +316,12 @@ async function createContainer(
   })
   if ('rechazo' in r) {
     if (esTopeDiario(r.rechazo)) return { tope: true }
+    // Antes que el trial reel: un reel con música y trial que Meta rechaza por la canción no
+    // dice nada de si la cuenta acepta trial reels.
+    if (params.media_type === 'REELS' && params.audio_configuration) {
+      const deMusica = motivoDeRechazoDeMusica(r.rechazo, input.opciones, input.cuenta)
+      if (deMusica) return { failed: deMusica, definitivo: true }
+    }
     const motivo = motivoDeRechazo(r.rechazo, input.opciones, input.cuenta)
     // Un rechazo de trial reel que se reconoce es de la cuenta: no acepta trial reels. El de
     // una historia también es definitivo, pero no dice nada de los trial reels.
@@ -474,6 +512,10 @@ export const instagramPublisher: Publisher = {
     // Single video: create the container and park — Meta processes it asynchronously
     // and the next cron run polls status_code before publishing.
     if (media.length === 1) {
+      // Con el login de Instagram no hay Audio API: mejor decirlo que publicar sin la canción.
+      if (musicaDe('instagram', input.opciones) && conLoginDeInstagram(input)) {
+        return { kind: 'failed', reason: musicaSinLoginDeFacebook(input.cuenta), definitivo: true }
+      }
       const r = await createContainer(
         input,
         reelContainerParams(input.caption, media[0]!, input.coverUrl, input.opciones),

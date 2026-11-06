@@ -115,6 +115,15 @@ describe('POST /api/mobile/borradores', () => {
     })
   })
 
+  it('con `conMusica`, la canción de Instagram del teléfono queda en el campo que lee el panel', async () => {
+    const musica = { audioId: '587784541076604', titulo: 'Tusa', artista: 'Karol G', volumenMusica: 50, volumenVideo: 100 }
+    const respuesta = await POST(
+      pedir({ texto: 'Hola', cuentas: ['ig-1'], cuando: null, opciones: { 'ig-1': { musica } }, media: [], conMusica: true }),
+    )
+    expect(respuesta.status).toBe(200)
+    expect(guardarBorrador.mock.calls[0]![1].campos['instagramMusica:ig-1']).toEqual([JSON.stringify(musica)])
+  })
+
   it('un archivo sin nombre toma el de su URL', async () => {
     await POST(pedir({ texto: 'Hola', media: [{ url: 'https://cdn.ejemplo.cl/scheduled/x-foto.jpg', mediaType: 'image' }] }))
     expect(guardarBorrador.mock.calls[0]![1].media).toEqual([

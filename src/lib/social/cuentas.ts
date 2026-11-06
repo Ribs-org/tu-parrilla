@@ -22,7 +22,17 @@ export class SinCuenta extends CuentaInvalida {
 }
 
 /** Una cuenta elegida como destino, ya verificada. */
-export type CuentaDestino = { id: string; network: string; handle: string | null }
+export type CuentaDestino = {
+  id: string
+  network: string
+  handle: string | null
+  /**
+   * Con qué login se conectó, en Instagram (`social/instagram-login.ts`); ausente o nulo es el
+   * de Facebook. Lo mira la validación de opciones: la música de Instagram no existe con el
+   * login de Instagram. Solo viaja cuando es `instagram`.
+   */
+  login?: string | null
+}
 
 // Un identificador que no es del dueño y uno que no existe dan la misma frase: si se
 // distinguieran, probando identificadores se podría averiguar cuáles son reales.
@@ -37,8 +47,19 @@ export function RED_AMBIGUA(network: string, handles: Array<string | null>): str
   return `Tienes ${handles.length} cuentas de ${network} (${lista}). Elige cuál con «cuentas».`
 }
 
+/** El login solo cuando es el de Instagram: el de Facebook es lo de siempre, y no se nombra. */
+function conLogin(fila: { login?: string | null }): { login?: 'instagram' } {
+  return fila.login === 'instagram' ? { login: 'instagram' } : {}
+}
+
 /** Fila cruda de `social_accounts`, lo mínimo que necesita una decisión de verificación. */
-type FilaVerificable = { id: string; network: string; handle: string | null; accessToken: string | null }
+type FilaVerificable = {
+  id: string
+  network: string
+  handle: string | null
+  accessToken: string | null
+  login?: string | null
+}
 
 /**
  * La decisión de `verificarCuentas`, ya sin consulta: qué hacer con las filas que la base
@@ -53,7 +74,7 @@ export function decidirVerificacion(accountIds: string[], filas: FilaVerificable
     const fila = porId.get(id)
     if (!fila) throw new CuentaInvalida(CUENTA_AJENA)
     if (!fila.accessToken) throw new CuentaInvalida(CUENTA_DESCONECTADA(fila.handle, fila.network))
-    return { id: fila.id, network: fila.network, handle: fila.handle }
+    return { id: fila.id, network: fila.network, handle: fila.handle, ...conLogin(fila) }
   })
 }
 
@@ -79,6 +100,7 @@ export async function verificarCuentas(ownerId: string, accountIds: string[]): P
       network: socialAccounts.network,
       handle: socialAccounts.handle,
       accessToken: socialAccounts.accessToken,
+      login: socialAccounts.login,
     })
     .from(socialAccounts)
     .where(and(inArray(socialAccounts.id, unicos), eq(socialAccounts.ownerId, ownerId)))
@@ -86,7 +108,7 @@ export async function verificarCuentas(ownerId: string, accountIds: string[]): P
 }
 
 /** Fila cruda de `social_accounts`, lo mínimo que necesita una decisión de red única. */
-type FilaConectada = { id: string; network: string; handle: string | null }
+type FilaConectada = { id: string; network: string; handle: string | null; login?: string | null }
 
 /**
  * La decisión de `cuentaUnicaPorRed`, ya sin consulta: qué hacer con las filas que la base
@@ -102,7 +124,7 @@ export function decidirCuentaUnica(networks: string[], filas: FilaConectada[]): 
     if (cuentas.length === 0) throw new SinCuenta(network)
     if (cuentas.length > 1) throw new CuentaInvalida(RED_AMBIGUA(network, cuentas.map((c) => c.handle)))
     const c = cuentas[0]!
-    resultado.set(network, { id: c.id, network: c.network, handle: c.handle })
+    resultado.set(network, { id: c.id, network: c.network, handle: c.handle, ...conLogin(c) })
   }
   return resultado
 }
@@ -124,7 +146,12 @@ export async function cuentaUnicaPorRed(
   const pedidas = [...new Set(networks)]
   if (pedidas.length === 0) return new Map()
   const filas = await getDb()
-    .select({ id: socialAccounts.id, network: socialAccounts.network, handle: socialAccounts.handle })
+    .select({
+      id: socialAccounts.id,
+      network: socialAccounts.network,
+      handle: socialAccounts.handle,
+      login: socialAccounts.login,
+    })
     .from(socialAccounts)
     .where(
       and(

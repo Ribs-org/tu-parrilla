@@ -160,6 +160,12 @@ En la pestaña **Publicar**:
    en esa cuenta, el destino falla al publicar con su propia frase. El editor no deja
    apagar la opción ni «Reintentar» la cambia —volvería a pedir el trial y a fallar—: la
    forma de mandarlo como reel normal es borrar el post y programar otro sin la opción.
+   Con esa misma condición aparece además **«Música de Instagram · @handle»**: lo que está
+   sonando en Instagram, una búsqueda, **«Sugiéreme una»** con su **«Otra»** (la elige un modelo
+   en el servidor, o el azar sin él; ver «Música de Instagram» en el `README.md` de la raíz),
+   **Escuchar** la muestra y dos volúmenes, canción y video, de a 10 con «−» y «+». Con una cuenta
+   conectada con el login de Instagram el bloque dice que ahí no hay música. La canción viaja en
+   las opciones del destino (`musica`) y se guarda en el borrador; el editor no la cambia.
 5. Toca **Cuándo** para elegir día y hora, y luego **Programar**. O toca
    **Publicar ahora**: confirma, y sale en los próximos cinco minutos.
 
@@ -199,6 +205,25 @@ Dos reglas que protegen a los dos lados:
 El trial reel es puro JavaScript, sin cambio nativo: llega por aire a los dos canales
 con el orden de siempre (web primero), como se explica en
 [«Cómo mandar un cambio sin reinstalar»](#cómo-mandar-un-cambio-sin-reinstalar).
+
+«Música de Instagram» también llega por aire a la 1.1.0, con una diferencia: **Escuchar** usa
+`expo-audio`, que es un módulo nativo y entró en `package.json` para la próxima build. La 1.1.0
+no lo trae, y cargar `expo-audio` en una app sin su módulo revienta al abrir; por eso
+`src/lib/reproductor.ts` pregunta primero si el módulo nativo existe
+(`requireOptionalNativeModule('ExpoAudio')`, que devuelve null en vez de lanzar) y solo entonces
+carga `expo-audio` con un `require` adentro de la función. Sin él, la muestra se abre fuera de la
+app con `Linking.openURL` y el bloque lo dice. Lo cuida `src/lib/reproductor.test.ts`. Dos cosas
+para quien publique la OTA desde `ota-1.1.0`:
+
+- La rama necesita `expo-audio` en su `package.json` igual —solo la parte de JavaScript—, o Metro
+  no arma el paquete. Como `runtimeVersion` es la versión de la app (`appVersion`), sumarlo no
+  cambia a qué teléfonos llega la actualización.
+- **No** se agrega el plugin `expo-audio` a `app.json`: pide el micrófono y el servicio de
+  reproducción en segundo plano, y acá solo se escucha una muestra con la app abierta.
+
+Mientras una app 1.1.0 no tenga la actualización, no sabe de música, y el servidor la cuida: la
+app nueva manda `conMusica: true` al guardar un borrador y al programar, la vieja no, y entonces
+la canción que el borrador traía del panel se conserva al guardar y se suma al programar.
 
 Lo que no se puede hacer desde el teléfono, y sigue siendo del panel web: poner una
 portada, etiquetar con atributos y programar en TikTok o con una palabra clave.

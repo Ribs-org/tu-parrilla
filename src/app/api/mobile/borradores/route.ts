@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { borradorDemasiadoGrande, camposDesdeTelefono, idDeBorrador } from '@/lib/borrador'
+import { borradorDemasiadoGrande, camposDesdeTelefono, idDeBorrador, musicaDelTelefono } from '@/lib/borrador'
 import { cargarBorrador, guardarBorrador, type MediaDeBorrador } from '@/lib/borradores'
 import { cuentasParaElTelefono } from '@/lib/borradores-movil'
 import {
@@ -72,13 +72,16 @@ export async function POST(request: Request) {
   const trial = Object.entries(datos.opciones)
     .filter(([c, o]) => cuentas.includes(c) && (o as { trialReel?: unknown }).trialReel === true)
     .map(([c]) => c)
+  // La «Música de Instagram»: la app que la conoce lo dice con `conMusica`; una vieja no, y se
+  // conserva la que dejó el panel.
+  const musica = musicaDelTelefono(body, datos.opciones, cuentas)
 
   // El teléfono manda el instante ya resuelto; el panel lee la hora de pared en la zona
   // del dueño. Con las dos se guarda: `fecha` para el calendario, el campo para el panel.
   const fecha = resolverCuando(false, datos.cuando, new Date())
   const campos = camposDesdeTelefono(
     anterior?.campos ?? null,
-    { texto: datos.texto, cuentas, scheduledAt: toZonedInput(fecha, usuario.zona), trial },
+    { texto: datos.texto, cuentas, scheduledAt: toZonedInput(fecha, usuario.zona), trial, ...(musica ? { musica } : {}) },
     ajenas,
   )
   if (borradorDemasiadoGrande(campos)) return NextResponse.json({ error: CUERPO_ILEGIBLE }, { status: 400 })

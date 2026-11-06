@@ -171,6 +171,32 @@ sección.
   TikTok con el interruptor encendido y ver que salen con una canción y que se puede cambiar en
   la app; y que el interruptor nace encendido la próxima vez en esa cuenta (#320). Lo que TikTok
   haga con `auto_add_music` solo se ve publicando: los tests miran lo que se le manda.
+- **[dueño] Probar «Música de Instagram» con una cuenta real conectada con Facebook**
+  (2026-11-06, #320). Nada de la Audio API de Meta se pudo probar contra Meta: el código sigue la
+  documentación y los tests miran lo que se le pide y lo que se lee. Hay que comprobar:
+  - que «Elegir canción» muestre lo que está sonando en Chile (sin `search_query`) y que buscar
+    traiga resultados; si sale vacío o con «Instagram no dejó ver su música…», mirar en los logs
+    de Vercel el cuerpo de «Instagram música:» —puede faltar un permiso, o que la lista pida
+    `ig_user_id` en vez de `user_id` (el error 9050 de la tabla de Meta habla de los dos)—;
+  - los nombres de los campos de la respuesta (`audio_id`, `title`, `display_artist`,
+    `duration_in_ms`, `download_url`, la carátula como `cover_artwork_thumbnail_uri` en la búsqueda
+    y `..._url` en una sola): se leen los dos y también `id` y `data` por si acaso
+    (`social/instagram-audio.ts`);
+  - que la muestra (`download_url`) suene en el navegador y, en el teléfono, que en la 1.1.0 se
+    abra afuera y en una build con `expo-audio` suene ahí mismo;
+  - que un reel programado con una canción salga con ella, y que los dos volúmenes se noten (una
+    prueba con la canción al 30 % sobre un video con voz);
+  - qué contesta Meta si la canción ya no está: el publicador lo da por definitivo solo si el
+    rechazo nombra el audio (`motivoDeRechazoDeMusica`, en `publish/instagram.ts`); si Meta
+    contesta otra cosa, ajustar esa lectura;
+  - que la sincronización siga leyendo ese reel: Meta ya no manda `media_url` en un video con
+    música con derechos (2026-07-30); la miniatura sale de `thumbnail_url` y no se usa `media_url`
+    en ningún otro lado, pero hay que verlo con uno de verdad.
+- **«Música de Instagram» no se cambia en lo ya programado** (2026-11-06). Como el trial reel, el
+  editor del panel y el del teléfono no tocan las opciones de un destino: para cambiar o quitar la
+  canción hay que borrar el post y programarlo de nuevo, y si Meta la rechaza, igual. Si se usa
+  mucho, sumar «Quitar la música» al editor (`editarPostProgramado` recibiría las opciones de
+  Instagram de cada destino pendiente).
 - **Ver con fotos reales de TikTok que «Qué te funciona» las cuenta en «Música»** (2026-11-06):
   la línea cruza cada destino con la publicación que trae la sincronización de TikTok, y no se
   ha visto con una cuenta real que `video/list` devuelva las fotos (los tests usan filas

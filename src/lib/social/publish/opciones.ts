@@ -36,7 +36,29 @@ export type OpcionesTikTok =
  * que se quiera que decida Instagram, es un campo opcional acá con `manual` por defecto,
  * y lo ya guardado sigue valiendo.
  */
-export type OpcionesInstagram = { trialReel: true } | { historia: Historia }
+export type OpcionesInstagram = { trialReel?: true; musica?: MusicaInstagram } | { historia: Historia }
+
+/**
+ * «Música de Instagram»: una canción de la biblioteca de Instagram que se le pega al reel al
+ * crear su contenedor (`audio_configuration`, Audio API de Meta, 2026-06-01). Se guarda lo que
+ * hace falta para publicar —el id— y lo que hace falta para nombrarla sin volver a preguntarle a
+ * Meta —título y artista—; el link de la muestra no, porque vence en día y medio.
+ *
+ * Los volúmenes van de 1 a 100, como los pide Meta: `volumenMusica` es el de la canción y
+ * `volumenVideo` el del sonido propio del video, para que la canción no tape la voz.
+ *
+ * Solo viaja en un reel: un video solo, con login de Facebook. Con fotos o carrusel no se manda
+ * aunque esté guardada (como la música de TikTok en un video), y una historia no la lleva.
+ * Otro módulo («Qué te funciona») cuenta como «con música» un destino cuyas opciones tengan un
+ * `musica` verdadero —el `true` de TikTok o este objeto—: la clave no se renombra.
+ */
+export type MusicaInstagram = {
+  audioId: string
+  titulo: string
+  artista: string | null
+  volumenMusica: number
+  volumenVideo: number
+}
 
 /** Facebook solo pide algo cuando el post es una historia de la página. */
 export type OpcionesFacebook = { historia: Historia }
@@ -77,6 +99,15 @@ export const HISTORIA_SIN_PORTADA = 'Una historia no lleva portada.'
 export const HISTORIA_MEDIA = 'Una historia es un solo archivo, foto o video.'
 export const HISTORIA_JPG = 'Instagram recibe la historia en foto solo en JPG.'
 export const HISTORIA_TRIAL = 'Una historia no puede ser trial reel.'
+export const HISTORIA_MUSICA = 'Una historia no lleva música de Instagram.'
+export const MUSICA_LOGIN_INSTAGRAM =
+  'La música de Instagram solo funciona en cuentas conectadas con Facebook, y esta se conectó con el login de Instagram.'
+
+/** El volumen con que nace cada pista: el de Meta por defecto, el máximo. */
+export const VOLUMEN_POR_DEFECTO = 100
+const AUDIO_ID = /^[A-Za-z0-9_-]{1,64}$/
+const MAX_NOMBRE_CANCION = 200
+const CLAVES_MUSICA = ['audioId', 'titulo', 'artista', 'volumenMusica', 'volumenVideo']
 
 /** Cuántas historias como mucho en una secuencia; Instagram no pone tope, esto es cordura. */
 export const MAX_HISTORIAS_SECUENCIA = 30
@@ -151,20 +182,81 @@ function validarTikTok(raw: unknown): { opciones: OpcionesTikTok } | { error: st
  * `trialreel` mal escrito, o una `graduacion` que todavía no existe, tiene que enterarse,
  * no recibir un reel normal creyendo que pidió otra cosa. (TikTok ignora claves de más;
  * acá no, porque esta opción la manda sobre todo un modelo a ciegas.) Lo mismo vale para
- * `historia`, que excluye al trial reel.
+ * `historia`, que excluye al trial reel y a la música. La música (`validarMusica`) sí va con
+ * un trial reel: también es un reel.
  */
 function validarInstagram(raw: unknown): { opciones: OpcionesInstagram | null } | { error: string } {
   if (raw === undefined || raw === null) return { opciones: null }
   if (!esObjeto(raw)) return { error: OPCIONES_ERROR }
   if (JSON.stringify(raw).length > MAX_SERIALIZED) return { error: OPCIONES_ERROR }
-  for (const clave of Object.keys(raw)) if (clave !== 'trialReel' && clave !== 'historia') return { error: OPCIONES_ERROR }
+  for (const clave of Object.keys(raw)) {
+    if (clave !== 'trialReel' && clave !== 'historia' && clave !== 'musica') return { error: OPCIONES_ERROR }
+  }
   const trialReel = casilla(raw.trialReel)
   if (trialReel === null) return { error: OPCIONES_ERROR }
   const check = validarHistoria(raw.historia)
   if ('error' in check) return check
+  const conMusica = validarMusica(raw.musica)
+  if ('error' in conMusica) return conMusica
+  const { musica } = conMusica
   if (check.historia !== null && trialReel) return { error: HISTORIA_TRIAL }
+  if (check.historia !== null && musica) return { error: HISTORIA_MUSICA }
   if (check.historia !== null) return { opciones: { historia: check.historia } }
-  return { opciones: trialReel ? { trialReel: true } : null }
+  if (!trialReel && !musica) return { opciones: null }
+  return { opciones: { ...(trialReel ? { trialReel: true as const } : {}), ...(musica ? { musica } : {}) } }
+}
+
+/**
+ * `musica`: ausente, `null` o `false` es sin música. Un objeto tiene que traer el id de la
+ * canción y su título, que es lo que la nombra en el editor y en el calendario; el artista y
+ * los volúmenes pueden faltar (sin artista, o los dos al máximo, como hace Meta). Un volumen
+ * fuera de 1–100 o con decimales se rechaza, no se redondea: quien manda 0 seguramente quería
+ * silencio, y Meta no lo admite. Una clave de más también, como en el resto de Instagram.
+ */
+function validarMusica(raw: unknown): { musica: MusicaInstagram | null } | { error: string } {
+  if (raw === undefined || raw === null || raw === false) return { musica: null }
+  if (!esObjeto(raw)) return { error: OPCIONES_ERROR }
+  for (const clave of Object.keys(raw)) if (!CLAVES_MUSICA.includes(clave)) return { error: OPCIONES_ERROR }
+  const { audioId, titulo, artista } = raw
+  if (typeof audioId !== 'string' || !AUDIO_ID.test(audioId)) return { error: OPCIONES_ERROR }
+  if (typeof titulo !== 'string' || !titulo.trim() || titulo.length > MAX_NOMBRE_CANCION) return { error: OPCIONES_ERROR }
+  if (artista !== undefined && artista !== null && (typeof artista !== 'string' || artista.length > MAX_NOMBRE_CANCION)) {
+    return { error: OPCIONES_ERROR }
+  }
+  const volumenMusica = volumen(raw.volumenMusica)
+  const volumenVideo = volumen(raw.volumenVideo)
+  if (volumenMusica === null || volumenVideo === null) return { error: OPCIONES_ERROR }
+  return {
+    musica: {
+      audioId,
+      titulo: titulo.trim(),
+      artista: typeof artista === 'string' && artista.trim() ? artista.trim() : null,
+      volumenMusica,
+      volumenVideo,
+    },
+  }
+}
+
+/** Un volumen de Meta: entero de 1 a 100; ausente es el máximo. */
+function volumen(raw: unknown): number | null {
+  if (raw === undefined) return VOLUMEN_POR_DEFECTO
+  return typeof raw === 'number' && Number.isInteger(raw) && raw >= 1 && raw <= 100 ? raw : null
+}
+
+/**
+ * La música de Instagram de un destino tal como quedó guardada, o null si no tiene (o si lo
+ * guardado no se entiende). La leen el publicador, el resumen y la validación por cuenta.
+ */
+export function musicaDe(network: string, opciones: unknown): MusicaInstagram | null {
+  if (network !== 'instagram') return null
+  const check = validarInstagram(opciones)
+  if ('error' in check || !check.opciones || !('musica' in check.opciones)) return null
+  return check.opciones.musica ?? null
+}
+
+/** «Título» de Artista, o el título solo si no tiene artista. */
+export function nombreDeCancion(m: Pick<MusicaInstagram, 'titulo' | 'artista'>): string {
+  return m.artista ? `«${m.titulo}» de ${m.artista}` : `«${m.titulo}»`
 }
 
 /** Facebook: solo `historia`, con la misma forma que en Instagram. */
@@ -327,6 +419,12 @@ export function validarOpcionesPorCuenta(
       const redAmbigua = (cuentasPorRed.get(cuenta.network) ?? 0) > 1
       return redAmbigua ? { error: `«${cuenta.handle ?? cuenta.network}»: ${check.error}` } : check
     }
+    // La Audio API de Meta no existe con el login de Instagram (`instagram-login.ts`): el
+    // compositor ni ofrece el bloque, pero la API y un borrador viejo pueden traerla.
+    if (cuenta.login === 'instagram' && musicaDe(cuenta.network, check.opciones)) {
+      const redAmbigua = (cuentasPorRed.get(cuenta.network) ?? 0) > 1
+      return { error: redAmbigua ? `«${cuenta.handle ?? cuenta.network}»: ${MUSICA_LOGIN_INSTAGRAM}` : MUSICA_LOGIN_INSTAGRAM }
+    }
     if (check.opciones) opciones[cuenta.id] = check.opciones
   }
   const historia = errorDeHistoriaEnDestinos(cuentas, opciones)
@@ -340,7 +438,8 @@ export function validarOpcionesPorCuenta(
  * puede haber dos bloques en el mismo formulario. Con TikTok marcado y sin campos, la
  * privacidad viaja vacía a propósito: así la validación responde con la frase de la
  * privacidad y no con la de la forma. El interruptor de Instagram (`instagramTrial:<id>`)
- * sigue la misma convención de sufijo por cuenta.
+ * y la canción de «Música de Instagram» (`instagramMusica:<id>`, en JSON) siguen la misma
+ * convención de sufijo por cuenta.
  */
 export function opcionesDesdeFormularioPorCuenta(
   formData: FormData,
@@ -350,7 +449,11 @@ export function opcionesDesdeFormularioPorCuenta(
   for (const cuenta of cuentas) {
     if (cuenta.network === 'instagram') {
       // `Toggle` con `name` manda 'on' encendido y '' apagado; apagado no produce entrada.
-      if (formData.get(`instagramTrial:${cuenta.id}`) === 'on') raw[cuenta.id] = { trialReel: true }
+      const trial = formData.get(`instagramTrial:${cuenta.id}`) === 'on'
+      const musica = musicaDesdeCampo(formData.get(`instagramMusica:${cuenta.id}`))
+      if (trial || musica !== undefined) {
+        raw[cuenta.id] = { ...(trial ? { trialReel: true } : {}), ...(musica !== undefined ? { musica } : {}) }
+      }
       continue
     }
     if (cuenta.network !== 'tiktok') continue
@@ -374,6 +477,21 @@ export function opcionesDesdeFormularioPorCuenta(
 }
 
 /**
+ * El campo oculto de «Música de Instagram» (`instagramMusica:<id>`): la canción elegida en JSON,
+ * o vacío sin canción. Vacío o ausente es `undefined` —no hay nada que mandar—; un JSON que no
+ * se entiende viaja como texto, para que la validación lo rechace con su frase en vez de
+ * publicar sin la canción que la persona eligió.
+ */
+export function musicaDesdeCampo(valor: unknown): unknown {
+  if (typeof valor !== 'string' || valor.trim() === '') return undefined
+  try {
+    return JSON.parse(valor) as unknown
+  } catch {
+    return valor
+  }
+}
+
+/**
  * Lo que el compositor recuerda de cada cuenta de TikTok al programar: si sus fotos iban con
  * música (`social_accounts.tiktok_musica`), para que el interruptor nazca así la próxima vez.
  * Solo cuando el interruptor estaba a la vista —todo fotos y publicación directa—: un video o
@@ -392,14 +510,19 @@ export function musicaParaRecordar(
 /**
  * Una línea para el editor y el calendario; null cuando no hay nada legible. `fotos` dice si
  * el post es todo fotos: la música de TikTok solo se nombra entonces, porque en un video no
- * viaja aunque haya quedado guardada.
+ * viaja aunque haya quedado guardada. `unVideo` dice si es un video solo: la música de
+ * Instagram solo se nombra entonces, por lo mismo al revés.
  */
-export function resumenOpciones(network: string, opciones: unknown, fotos = false): string | null {
+export function resumenOpciones(network: string, opciones: unknown, fotos = false, unVideo = false): string | null {
   const historia = historiaDe(network, opciones)
   if (historia !== null) return historia === true ? 'Historia' : `Historia ${historia.orden} de una secuencia`
   if (network === 'instagram') {
     const check = validarInstagram(opciones)
-    return 'error' in check || !check.opciones ? null : 'Trial reel — lo compartes tú desde Instagram'
+    if ('error' in check || !check.opciones || 'historia' in check.opciones) return null
+    const partes: string[] = []
+    if (check.opciones.trialReel) partes.push('Trial reel — lo compartes tú desde Instagram')
+    if (check.opciones.musica && unVideo) partes.push(`Con música de Instagram: ${nombreDeCancion(check.opciones.musica)}`)
+    return partes.length > 0 ? partes.join(' · ') : null
   }
   if (network !== 'tiktok') return null
   const check = validarTikTok(opciones)

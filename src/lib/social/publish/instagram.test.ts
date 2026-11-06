@@ -8,9 +8,11 @@ import {
   esTopeDiario,
   explicacionDeMeta,
   idDeLoPublicado,
+  audioConfiguration,
   instagramPublisher,
   leerErrorDeMeta,
   motivoDeRechazo,
+  motivoDeRechazoDeMusica,
   photoContainerParams,
   rechazoDelContenedor,
   reelContainerParams,
@@ -20,6 +22,8 @@ import {
 import {
   HISTORIA_SOLO_EMPRESA,
   historiaSoloEmpresa,
+  musicaRechazada,
+  musicaSinLoginDeFacebook,
   PUBLISH_NETWORK_ERROR,
   PUBLISH_REJECTED,
   rechazoDeInstagram,
@@ -660,5 +664,81 @@ describe('publish con el login de Instagram', () => {
       await instagramPublisher.publish({ ...foto, login })
       expect(String(fetchMock.mock.calls[0]![0])).toMatch(/^https:\/\/graph\.facebook\.com\/v23\.0\//)
     }
+  })
+})
+
+describe('«Música de Instagram»: audio_configuration solo en el reel', () => {
+  afterEach(() => vi.unstubAllGlobals())
+
+  const musica = { audioId: '587784541076604', titulo: 'Tusa', artista: 'Karol G', volumenMusica: 80, volumenVideo: 50 }
+
+  it('el reel lleva la canción como JSON en texto, con los nombres de Meta', () => {
+    const params = reelContainerParams('Hola', video, null, { musica })
+    expect(JSON.parse(params.audio_configuration!)).toEqual({ audio_id: '587784541076604', audio_volume: 80, video_volume: 50 })
+    expect(audioConfiguration(musica)).toBe('{"audio_id":"587784541076604","audio_volume":80,"video_volume":50}')
+  })
+
+  it('con trial reel van las dos cosas; sin música, el reel no cambia', () => {
+    const conTrial = reelContainerParams('Hola', video, null, { trialReel: true, musica })
+    expect(conTrial.trial_params).toBeDefined()
+    expect(conTrial.audio_configuration).toBeDefined()
+    expect(reelContainerParams('Hola', video, null, { trialReel: true }).audio_configuration).toBeUndefined()
+    expect(reelContainerParams('Hola', video, null, null).audio_configuration).toBeUndefined()
+  })
+
+  it('una foto, un carrusel o una historia no la llevan aunque esté guardada', () => {
+    expect(photoContainerParams('Hola', image)).not.toHaveProperty('audio_configuration')
+    expect(carouselChildParams(video)).not.toHaveProperty('audio_configuration')
+    expect(carouselParentParams('Hola', ['1', '2'])).not.toHaveProperty('audio_configuration')
+    expect(storyContainerParams(video)).not.toHaveProperty('audio_configuration')
+  })
+
+  const input = {
+    caption: 'Hola',
+    containerId: null,
+    token: 't',
+    accountExternalId: '123',
+    coverUrl: null,
+    cuenta: '@vicente',
+    opciones: { musica },
+  }
+
+  it('publicando: el contenedor del reel la manda, el de un carrusel con la música guardada no', async () => {
+    const fetchMock = vi.fn(async () => Response.json({ id: 'c-1' }))
+    vi.stubGlobal('fetch', fetchMock)
+    await instagramPublisher.publish({ ...input, media: [video] })
+    const cuerpo = fetchMock.mock.calls[0] as unknown as [string, RequestInit]
+    expect(new URLSearchParams(String(cuerpo[1].body)).get('audio_configuration')).toBe(audioConfiguration(musica))
+
+    fetchMock.mockClear()
+    await instagramPublisher.publish({ ...input, media: [{ ...image, position: 0 }, { ...video, position: 1 }] })
+    for (const llamada of fetchMock.mock.calls as unknown as Array<[string, RequestInit]>) {
+      expect(new URLSearchParams(String(llamada[1].body)).get('audio_configuration')).toBeNull()
+    }
+  })
+
+  it('con el login de Instagram no llama a Meta: falla al tiro diciendo por qué', async () => {
+    const fetchMock = vi.fn(async () => Response.json({ id: 'c-1' }))
+    vi.stubGlobal('fetch', fetchMock)
+    const salida = await instagramPublisher.publish({ ...input, media: [video], login: 'instagram' })
+    expect(salida).toEqual({ kind: 'failed', reason: musicaSinLoginDeFacebook('@vicente'), definitivo: true })
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  it('un rechazo que habla del audio falla al tiro con la canción, sin decir nada de trial reels', async () => {
+    const cuerpo = '{"error":{"message":"The audio is not available","code":100,"error_user_msg":"El audio ya no está disponible."}}'
+    vi.stubGlobal('fetch', vi.fn(async () => new Response(cuerpo, { status: 400 })))
+    const salida = await instagramPublisher.publish({ ...input, opciones: { trialReel: true, musica }, media: [video] })
+    expect(salida).toEqual({
+      kind: 'failed',
+      reason: musicaRechazada('@vicente', '«Tusa» de Karol G', '«El audio ya no está disponible.» (código 100)'),
+      definitivo: true,
+    })
+    expect(String((salida as { reason: string }).reason)).toContain('prográmala de nuevo con otra canción o sin música')
+  })
+
+  it('un rechazo que no nombra el audio sigue el trato de siempre', () => {
+    expect(motivoDeRechazoDeMusica('{"error":{"message":"Invalid parameter","code":100}}', { musica })).toBeNull()
+    expect(motivoDeRechazoDeMusica('{"error":{"message":"audio"}}', { trialReel: true })).toBeNull()
   })
 })

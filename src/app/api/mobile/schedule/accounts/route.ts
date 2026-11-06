@@ -28,6 +28,7 @@ export async function GET(request: Request) {
       handle: socialAccounts.handle,
       trialReels: socialAccounts.trialReels,
       trialReelsMotivo: socialAccounts.trialReelsMotivo,
+      login: socialAccounts.login,
       // El booleano se calcula en la consulta: seleccionar `accessToken` para
       // descartarlo después igual lo trae a este proceso, y es un secreto que no hace
       // falta materializar solo para preguntarle si es null.
@@ -47,6 +48,8 @@ export async function GET(request: Request) {
       ...(f.network === 'instagram' && f.trialReels
         ? { trialReels: f.trialReels, trialReelsMotivo: f.trialReels === 'no' ? f.trialReelsMotivo : null }
         : {}),
+      // Con el login de Instagram la app no ofrece «Música de Instagram»: Meta no la da ahí.
+      ...(f.network === 'instagram' && f.login === 'instagram' ? { login: 'instagram' } : {}),
     })),
   })
 }

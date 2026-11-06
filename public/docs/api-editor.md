@@ -346,6 +346,36 @@ programar el próximo.
 
 **Después no hay forma de saber por API si se graduó.** Eso se mira en la app de Instagram.
 
+**Instagram — música de la biblioteca (`musica`).** Un reel puede salir con una canción de la
+biblioteca de Instagram encima del sonido del video («Música de Instagram» en el panel):
+
+```json
+"opciones": { "instagram": { "musica": { "audioId": "587784541076604", "titulo": "Tusa", "artista": "Karol G", "volumenMusica": 50, "volumenVideo": 100 } } }
+```
+
+- `audioId` (obligatorio): el id de la canción en Instagram. Por esta API no se busca música: el
+  id sale del panel o del teléfono, donde se elige. Letras, números, `_` y `-`, hasta 64.
+- `titulo` (obligatorio, hasta 200 caracteres) y `artista` (opcional, `null` sin artista): con eso
+  se nombra la canción en el panel y en el `error` si Instagram la rechaza. No se comprueba que
+  calcen con el id.
+- `volumenMusica` y `volumenVideo`: enteros de 1 a 100, el volumen de la canción y el del sonido
+  propio del video. Ausentes valen 100, como en Instagram. Fuera de rango, con decimales o como
+  texto, la fila se rechaza (no se redondea).
+- Va junto a `trialReel` en el mismo objeto (`{ "trialReel": true, "musica": { … } }`), pero no con
+  `historia`. Cualquier otra clave dentro de `musica` se rechaza.
+
+**Solo viaja en un reel**, un video solo: con fotos o carrusel en `media` la fila se acepta, se
+guarda, y la canción no se manda (como `musica` de TikTok en un video). **Solo con cuentas
+conectadas con Facebook**: con una cuenta conectada con el login de Instagram la fila se rechaza
+con `La música de Instagram solo funciona en cuentas conectadas con Facebook, y esta se conectó con el login de Instagram.`
+No hay vista previa del reel con la canción.
+
+**Si Instagram rechaza la canción al publicar** (ya no está disponible, por ejemplo), el destino
+falla al tiro, sin reintentos y sin publicar sin ella, con
+`Instagram no aceptó la canción «<titulo>» de <artista> en <cuenta>. Instagram dice: «…». Borra esta publicación y prográmala de nuevo con otra canción o sin música.`
+Si la cuenta se reconectó con el login de Instagram después de programar, falla con
+`<cuenta> se conectó con el login de Instagram, y así Instagram no deja ponerle música a un reel. Reconéctala con Facebook en Los Fierros, o borra esta publicación y prográmala de nuevo sin música.`
+
 **Instagram y Facebook — historias.** Con destinos de Instagram o de Facebook, `opciones`
 acepta `historia`:
 
@@ -480,6 +510,9 @@ Instagram acepta: 1 foto, 1 video, o 2–10 fotos (carrusel).
 | `Una historia no tiene comentarios: no lleva palabra clave.` | una historia con `regla` |
 | `Una historia no lleva portada.` | una historia con `portada` |
 | `Una historia no puede ser trial reel.` | `opciones.instagram` con `historia` y `trialReel` a la vez |
+| `Una historia no lleva música de Instagram.` | `opciones.instagram` con `historia` y `musica` a la vez |
+| `La música de Instagram solo funciona en cuentas conectadas con Facebook, y esta se conectó con el login de Instagram.` | `opciones.<destino>.musica` para una cuenta de Instagram conectada con el login de Instagram (con dos cuentas de Instagram en la fila, con `«<handle>»: ` delante) |
+| `Las opciones de la red no se entendieron.` (en `musica`) | `musica` sin `audioId` o `titulo`, con un volumen fuera de 1–100 o no entero, o con una clave de más |
 | `Con «historia» la fila no lleva «opciones»: la historia ya dice todo.` | el atajo `"historia": true` con `opciones` en la misma fila |
 | `Una secuencia lleva hasta 30 historias.` | el atajo `"historia": true` con más de 30 archivos en `media` |
 | `Una de las cuentas elegidas no es tuya.` | un identificador en `cuentas` que no es una cuenta del dueño (o no existe) |
@@ -1177,7 +1210,9 @@ Un rango pasado vale (lista lo ya publicado). Formato inválido o rango invertid
   **`opciones`** es lo que se eligió para esa red al programar (sección 1, `opciones`): en
   TikTok `directo`, todas las casillas explícitas —`comentarios`, `duo`, `pegar`, `ia` y
   `musica` en `false` si no se encendieron—, así que una clave que mandaste y no aparece no se guardó; en
-  TikTok `borrador`, `{ "modo": "borrador" }`; en un trial reel, `{ "trialReel": true }`; en una
+  TikTok `borrador`, `{ "modo": "borrador" }`; en un trial reel, `{ "trialReel": true }`; con
+  música de Instagram, `{ "musica": { "audioId": …, "titulo": …, "artista": …, "volumenMusica": …, "volumenVideo": … } }`
+  (con `"trialReel": true` al lado si también lo es), con los volúmenes siempre explícitos; en una
   historia, `{ "historia": true }` o, en una secuencia, `{ "historia": { "secuencia": …, "orden": … } }`;
   `null` en las redes que no piden nada. Es lo que Tu Parrilla le manda a la red, no lo que la red
   aplicó: lo que la cuenta tiene bloqueado (un dúo deshabilitado en TikTok) se manda apagado sin

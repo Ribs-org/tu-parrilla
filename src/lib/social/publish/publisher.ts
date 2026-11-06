@@ -121,6 +121,27 @@ export function trialNoDisponible(cuenta: string | null | undefined, explicacion
 }
 
 /**
+ * Meta rechazó el reel hablando del audio, y el reel llevaba una canción de «Música de
+ * Instagram». Es definitivo: la canción guardada es la misma en cada reintento. Lo que Meta dijo
+ * va al final; lo que se puede hacer, que es programarlo de nuevo, también: el editor no cambia
+ * las opciones de un destino.
+ */
+export function musicaRechazada(cuenta: string | null | undefined, cancion: string, explicacion: string | null): string {
+  const base = `Instagram no aceptó la canción ${cancion} en ${cuenta?.trim() || 'la cuenta'}.`
+  const dijo = explicacion ? ` Instagram dice: ${explicacion}.` : ''
+  return `${base}${dijo} Borra esta publicación y prográmala de nuevo con otra canción o sin música.`
+}
+
+/**
+ * El reel lleva música de Instagram, pero la cuenta se reconectó con el login de Instagram
+ * después de programarlo: con ese login Meta no tiene la Audio API. Se dice antes de llamar a
+ * Meta, en vez de publicar sin la canción que la persona eligió.
+ */
+export function musicaSinLoginDeFacebook(cuenta: string | null | undefined): string {
+  return `${alEmpezar(cuenta)} se conectó con el login de Instagram, y así Instagram no deja ponerle música a un reel. Reconéctala con Facebook en Los Fierros, o borra esta publicación y prográmala de nuevo sin música.`
+}
+
+/**
  * Cualquier otro rechazo de Instagram que traiga su explicación (`explicacionDeMeta`, en
  * instagram.ts). Se reintenta como antes —no sabemos si es pasajero—; lo que cambia es que se
  * lee qué pasó.
