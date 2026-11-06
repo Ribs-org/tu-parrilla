@@ -114,6 +114,7 @@ const { getCuentas, getLecturasDe, getPostRows } = await import('./posts')
 const { contarEnlacesPorPagina, getAllProfiles, getProfileBySlug } = await import('./profiles')
 const { getCola } = await import('./comentarios-cola')
 const { verificarCuentas, cuentaUnicaPorRed } = await import('./social/cuentas')
+const { cuentaDeMusica } = await import('./musica-instagram')
 const { esperaALaAnterior } = await import('./social/publish/secuencia')
 const { todosLosCortes, cortesEntre, cortesQuemados, horasPorVenir, servidosAyer } = await import(
   './social/publish/cortes'
@@ -311,6 +312,12 @@ describe('aislamiento por dueño (SQL generado, sin base)', () => {
 
   it('social/cuentas: verificarCuentas ata la consulta al dueño', async () => {
     const consultas = await todasLasConsultas(() => verificarCuentas(DUENO, ['cuenta-1']))
+    expect(consultas).toHaveLength(1)
+    esperarFiltradoPorDueno(consultas[0]!)
+  })
+
+  it('musica-instagram: cuentaDeMusica solo usa una cuenta del dueño (buscar, escuchar y sugerir pasan por acá)', async () => {
+    const consultas = await todasLasConsultas(() => cuentaDeMusica(DUENO, '6f1c2a54-9b1e-4c3d-8f00-0123456789ab'))
     expect(consultas).toHaveLength(1)
     esperarFiltradoPorDueno(consultas[0]!)
   })

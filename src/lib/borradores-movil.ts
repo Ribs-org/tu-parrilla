@@ -6,6 +6,7 @@ import type { BorradorCargado, BorradorResumido, MediaDeBorrador } from './borra
 import { isoInZone } from './metrics-api'
 import { REDES_MOVIL } from './mobile-api'
 import { networkLabel } from './networks'
+import type { MusicaInstagram } from './social/publish/opciones'
 
 // Los borradores vistos desde la app del teléfono. La base es la misma del compositor
 // (`borradores.ts`): un borrador empezado en un lado se sigue en el otro. Lo que cambia es
@@ -29,6 +30,8 @@ export type BorradorMovilAbierto = {
   cuentas: string[]
   cuando: string | null
   trial: string[]
+  /** La canción de «Música de Instagram» de cada cuenta que la lleva. */
+  musica: Record<string, MusicaInstagram>
   media: MediaDeBorrador[]
   /** Por qué no se programa desde el teléfono, o null si se puede. */
   soloEnElPanel: string | null
@@ -70,12 +73,13 @@ export function resumirParaElTelefono(b: BorradorResumido, zona: string): Borrad
  * guardar se conservan solas (`camposDesdeTelefono`). Que están, lo dice `soloEnElPanel`.
  */
 export function abrirEnElTelefono(b: BorradorCargado, zona: string, ajenas: ReadonlyMap<string, string>): BorradorMovilAbierto {
-  const { texto, cuentas, trial } = telefonoDesdeCampos(b.campos)
+  const { texto, cuentas, trial, musica = {} } = telefonoDesdeCampos(b.campos)
   return {
     id: b.id,
     texto,
     cuentas: cuentas.filter((id) => !ajenas.has(id)),
     trial,
+    musica,
     cuando: b.fecha ? isoInZone(b.fecha, zona) : null,
     media: b.media,
     soloEnElPanel: soloEnElPanel(b.campos, ajenas),

@@ -16,6 +16,13 @@ import {
 import { tipoDesdeNombre, typeFromContentType } from './social/publish/batch'
 import { ARCHIVO_MUY_GRANDE, MAX_BYTES_ARCHIVO } from './social/publish/limites'
 import { SIN_TRIAL_GENERICO, avisoSinTrial } from './social/publish/opciones'
+import {
+  MUSICA_SOLO_LOGIN_DE_FACEBOOK,
+  SIN_MUESTRA,
+  VOLUMEN_CANCION_INICIAL,
+  VOLUMEN_VIDEO_INICIAL,
+} from './social/instagram-audio'
+import { SIN_MAS_CANCIONES } from './social/musica-sugerencia'
 
 // `batch.ts` trae `usuarios.ts`, que es solo de servidor; acá no se habla con la base.
 vi.mock('server-only', () => ({}))
@@ -74,6 +81,15 @@ describe('las frases que la app reconoce por su texto', () => {
     expect(avisos.SIN_TRIAL_GENERICO).toBe(SIN_TRIAL_GENERICO)
     expect(avisos.avisoSinTrial(null)).toBe(avisoSinTrial(null))
     expect(avisos.avisoSinTrial('@a no tiene trial reels.')).toBe(avisoSinTrial('@a no tiene trial reels.'))
+  })
+
+  it('«Música de Instagram» dice lo mismo que el panel, y la canción nace con los mismos volúmenes', () => {
+    const musica = delTelefono<Record<string, unknown>>('musica')
+    expect(musica.MUSICA_SOLO_LOGIN_DE_FACEBOOK).toBe(MUSICA_SOLO_LOGIN_DE_FACEBOOK)
+    expect(musica.SIN_MAS_CANCIONES).toBe(SIN_MAS_CANCIONES)
+    expect(musica.SIN_MUESTRA).toBe(SIN_MUESTRA)
+    expect(musica.VOLUMEN_CANCION_INICIAL).toBe(VOLUMEN_CANCION_INICIAL)
+    expect(musica.VOLUMEN_VIDEO_INICIAL).toBe(VOLUMEN_VIDEO_INICIAL)
   })
 
   it('las de un archivo que no se puede elegir dicen lo mismo que diría el servidor', () => {

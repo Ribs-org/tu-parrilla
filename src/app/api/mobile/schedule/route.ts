@@ -10,7 +10,7 @@ import {
   type ScheduledPostTarget,
 } from '@/db'
 import { localDay } from '@/lib/analytics'
-import { idDeBorrador, soloEnElPanel } from '@/lib/borrador'
+import { idDeBorrador, opcionesConMusicaDelBorrador, soloEnElPanel } from '@/lib/borrador'
 import { cargarBorrador, listarBorradores } from '@/lib/borradores'
 import { cuentasParaElTelefono, resumirParaElTelefono } from '@/lib/borradores-movil'
 import { isoInZone } from '@/lib/metrics-api'
@@ -219,12 +219,15 @@ export async function POST(request: Request) {
 
   const pedido = (body as { borradorId?: unknown }).borradorId
   let borradorId: string | null = null
+  let opcionesPedidas = borrador.opciones
   if (pedido !== undefined && pedido !== null) {
     borradorId = idDeBorrador(pedido)
     const deDonde = borradorId ? await cargarBorrador(usuario.id, borradorId) : null
     if (!deDonde) return NextResponse.json({ error: BORRADOR_NO_EXISTE }, { status: 404 })
     const motivo = soloEnElPanel(deDonde.campos, (await cuentasParaElTelefono(usuario.id)).ajenas)
     if (motivo) return NextResponse.json({ error: motivo }, { status: 400 })
+    // Una app que no sabe de música no la manda: la del borrador se conserva.
+    opcionesPedidas = opcionesConMusicaDelBorrador(body, borrador.opciones, deDonde.campos)
   }
 
   const base = basePublica()
@@ -246,7 +249,7 @@ export async function POST(request: Request) {
     throw fallo
   }
 
-  const opcionesCheck = validarOpcionesPorCuenta(cuentas, borrador.opciones)
+  const opcionesCheck = validarOpcionesPorCuenta(cuentas, opcionesPedidas)
   if ('error' in opcionesCheck) return NextResponse.json({ error: opcionesCheck.error }, { status: 400 })
   const fotos = media.filter((m) => m.mediaType === 'image').length
   const videos = media.filter((m) => m.mediaType === 'video').length

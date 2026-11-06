@@ -3,14 +3,17 @@
 import { useState } from 'react'
 import { GroupLabel, Toggle } from '@/components/ui'
 import type { CuentaDestino } from '@/lib/social/cuentas'
-import { avisoSinTrial } from '@/lib/social/publish/opciones'
+import { conLoginDeInstagram } from '@/lib/social/instagram-login'
+import { avisoSinTrial, type MusicaInstagram } from '@/lib/social/publish/opciones'
+import { MusicaInstagramBloque } from './musica-instagram'
 
 /**
- * Lo único que Instagram deja elegir por destino: si el reel sale como trial reel. Solo se
- * monta con exactamente un video elegido (lo decide el compositor), así que con fotos o
- * carrusel el interruptor ni existe y no manda nada. El campo lleva el id de la cuenta
- * como sufijo, igual que los de TikTok: puede haber dos bloques en el mismo formulario.
- * `inicial` es lo que tenía un borrador.
+ * Lo que Instagram deja elegir por destino: si el reel sale como trial reel, y su «Música de
+ * Instagram». Solo se monta con exactamente un video elegido (lo decide el compositor), así que
+ * con fotos o carrusel el bloque ni existe y no manda nada: un trial reel es un video solo, y
+ * Meta solo le pega música a un reel. Los campos llevan el id de la cuenta como sufijo, igual
+ * que los de TikTok: puede haber dos bloques en el mismo formulario. `inicial` y
+ * `musicaInicial` son lo que tenía un borrador.
  *
  * Si Meta ya rechazó un trial reel de esta cuenta por elegibilidad (`trial-reels.ts`), lo dice
  * debajo, con la frase del rechazo. No apaga el interruptor: una cuenta que crece pasa a
@@ -19,9 +22,13 @@ import { avisoSinTrial } from '@/lib/social/publish/opciones'
 export function InstagramOpciones({
   cuenta,
   inicial = false,
+  musicaInicial = null,
+  leerTexto,
 }: {
   cuenta: CuentaDestino & { trialReels?: 'si' | 'no' | null; trialReelsMotivo?: string | null }
   inicial?: boolean
+  musicaInicial?: MusicaInstagram | null
+  leerTexto: () => string
 }) {
   const [trial, setTrial] = useState(inicial)
   return (
@@ -37,6 +44,12 @@ export function InstagramOpciones({
       {cuenta.trialReels === 'no' ? (
         <p className="text-[0.78rem] text-caution">{avisoSinTrial(cuenta.trialReelsMotivo)}</p>
       ) : null}
+      <MusicaInstagramBloque
+        cuentaId={cuenta.id}
+        loginDeInstagram={conLoginDeInstagram(cuenta)}
+        inicial={musicaInicial}
+        leerTexto={leerTexto}
+      />
     </div>
   )
 }

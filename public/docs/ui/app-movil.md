@@ -108,13 +108,19 @@ De arriba abajo:
 - Los archivos elegidos, como miniaturas (un video se ve como un cuadro que dice «Video»), cada uno con una «✕» para quitarlo, y el botón «+ Fotos o video» mientras queden menos de diez. Cada archivo se sube apenas se elige, uno detrás del otro; mientras tanto la miniatura lleva una franja abajo: «45 %» el que está subiendo, «En cola» los que esperan y, en rojo, «Reintentar» uno cuya subida falló (tocarlo la vuelve a intentar). Quitar uno que está subiendo cancela su subida.
 - Las cuentas a las que se puede publicar, como botones redondos con borde, «Red · nombre_de_cuenta»; la marcada se pinta en naranjo. Solo salen cuentas de Instagram, Facebook y YouTube conectadas en el panel; TikTok no aparece nunca. Con una sola cuenta conectada, viene marcada; con dos o más, ninguna. Un borrador abierto trae marcadas las suyas. Una cuenta que se desconectó sale como «Instagram · nombre_de_cuenta · reconéctala», con «reconéctala» en rojo, y no se puede marcar. Mientras no haya ninguna marcada: «Elige al menos una cuenta.»
 - Solo si hay una cuenta de Instagram marcada y exactamente un video (sin fotos): un botón «Trial reel · nombre_de_cuenta» por cada cuenta de Instagram marcada, y la explicación «Un trial reel solo lo ven quienes no te siguen. Tú decides desde Instagram cuándo compartirlo con todos.» Debajo, en ámbar, una línea por cada una de esas cuentas donde Instagram ya rechazó un trial reel, con la frase del rechazo (o «Instagram ya rechazó un trial reel en esta cuenta: prográmalo como reel normal.»). El botón se puede tocar igual, pero lo más probable es que se queme.
+- Con la misma condición —una cuenta de Instagram marcada y exactamente un video—, un bloque **«Música de Instagram · nombre_de_cuenta»** por cada cuenta de Instagram marcada, con «Una canción de la biblioteca de Instagram encima del sonido del video. Instagram no deja ver el reel con la canción antes de publicarlo: sale tal como lo dejes acá.» Tiene:
+  - **«Sugiéreme una»** («Buscando una…» mientras piensa): propone una canción que le quede al post, leyendo el texto escrito. Sale en un recuadro con ««Título» de Artista», una frase de por qué (o «Es de las que están sonando en Instagram estos días.» / «Salió buscando «…».»), «Escuchar», **«Usar esta»** y **«Otra»** («Buscando otra…»), que trae una distinta sin repetir las ya mostradas. Cuando no quedan: «Ya te mostré todas las que encontré para este post. Busca una por nombre.»
+  - **«Elegir canción»** (o «Cambiar canción» si ya hay una): un buscador «Busca una canción o un artista» con «Buscar», el título «Sonando ahora en Instagram» o «Resultados para «…»», y una fila por canción con su título, su artista, «Escuchar» («Pausar» mientras suena) y «Usar esta» («Elegida» en la puesta). Al final, «Cerrar la lista». Sin resultados: «Instagram no encontró canciones con «…».» o «Instagram no tiene canciones para mostrar ahora.»
+  - Con una canción puesta: «Canción elegida: «Título» de Artista», «Escuchar», «Quitar» (en rojo), y dos filas de volumen, «Canción: 50 %» y «Video: 100 %», cada una con «−» y «+» que suben o bajan de a 10 (de 1 a 100 %), con «Si en el video hablas, bájale a la canción para que no tape tu voz.»
+  - Con la versión 1.1.0 de la app (la que no trae el reproductor de audio), «Escuchar» abre la muestra fuera de la app —en el navegador o el reproductor del teléfono—, y el bloque lo dice: «En esta versión de la app, la muestra se abre fuera de ella.» Desde la 1.2.0 suena ahí mismo.
+  - Con una cuenta conectada con el login de Instagram, en vez de todo eso: «La música de Instagram no está disponible en esta cuenta: se conectó con el login de Instagram, y Meta solo la da a las cuentas conectadas con Facebook.»
 - El botón «Cuándo: 14/10 a las 19:00» (con el día y la hora elegidos). De partida trae la próxima hora en punto; si se llegó desde la cruz de un día de La Parrilla, trae ese día a esa misma hora en punto, y un borrador con fecha trae la suya.
 - Los mensajes: en rojo los problemas; en gris cómo van las subidas («Subiendo el archivo…» o «Subiendo 3 archivos…») y el envío («Programando…» o «Publicando…», y después «Listo»).
 - Abajo, «Programar» y «Publicar ahora». Los dos están apagados mientras no haya texto o algún archivo y al menos una cuenta marcada, mientras algún archivo no haya terminado de subir, mientras se envía, y con el aviso amarillo de arriba.
 - Debajo, en chico, cómo va el borrador: «Lo que escribas se guarda solo como borrador.» (antes de escribir nada), «Abriste un borrador: lo que cambies se guarda solo.», «Guardando borrador…», «Borrador guardado.» o, en rojo, «No se pudo guardar el borrador.» o «Este borrador ya no existe: se programó o se descartó. Mira cómo quedó en La Parrilla.».
 - Si hay algo escrito, algún archivo o un borrador abierto, dos botones de texto: «Nueva publicación» y, en rojo, «Descartar». Con el borrador que ya no existe, solo «Nueva publicación».
 
-Lo que se escribe se guarda solo, como borrador, un momento después del último cambio, y también si la app pasa a segundo plano. Hace falta texto o un archivo ya subido: abrir «Publicar» y salir no deja un borrador vacío. El borrador guarda el texto, los archivos ya subidos, las cuentas marcadas, el trial reel y la fecha, pero la fecha solo si alguien la eligió (la próxima hora en punto con que abre no se guarda). Es el mismo borrador que se ve en el panel web.
+Lo que se escribe se guarda solo, como borrador, un momento después del último cambio, y también si la app pasa a segundo plano. Hace falta texto o un archivo ya subido: abrir «Publicar» y salir no deja un borrador vacío. El borrador guarda el texto, los archivos ya subidos, las cuentas marcadas, el trial reel, la canción de «Música de Instagram» y la fecha, pero la fecha solo si alguien la eligió (la próxima hora en punto con que abre no se guarda). Es el mismo borrador que se ve en el panel web.
 
 Mientras se cargan las cuentas dice «Cargando cuentas…». Si no se pudieron cargar: «No se pudieron cargar las cuentas.» con «Reintentar». Si no hay ninguna que sirva: «No hay ninguna cuenta lista para publicar desde el teléfono. Conéctala en el panel web, en Los Fierros.»
 
@@ -254,6 +260,16 @@ Un trial reel lo ven solo quienes no siguen la cuenta; después, desde la app de
 4. «Programar» o «Publicar ahora».
 
 Si Instagram no tiene la función habilitada para esa cuenta, el destino falla al publicarse y en «La Parrilla» sale, después de la cuenta, «@cuenta no tiene trial reels: Instagram los da solo a cuentas con un mínimo de seguidores, y esta no lo alcanza. Prográmalo como reel normal o en otra cuenta.» (si le faltan seguidores) o «@cuenta no tiene trial reels disponibles, probablemente porque Instagram no le habilitó la función. Prográmalo como reel normal o en otra cuenta.» (por otro motivo, con lo que dijo Instagram al final). Corregirlo se hace en el panel web, en [La Parrilla](la-parrilla.md).
+
+### Para ponerle música de Instagram a un reel
+
+1. En «Publicar», elige un solo video, sin fotos, y marca la cuenta de Instagram. Aparece «Música de Instagram · nombre_de_cuenta».
+2. Escribe el texto primero si quieres una sugerencia que le quede: «Sugiéreme una» lo lee.
+3. Toca «Sugiéreme una» (y «Otra» hasta que te guste), o «Elegir canción» para ver lo que está sonando o buscar. «Escuchar» deja oír la muestra.
+4. Toca «Usar esta». Si en el video hablas, baja «Canción» con «−».
+5. «Programar» o «Publicar ahora». No hay vista previa del reel con la canción: Instagram la pega al publicar.
+
+Si Instagram rechaza la canción al publicar, el destino se quema con «Instagram no aceptó la canción «Título» de Artista en @cuenta. … Borra esta publicación y prográmala de nuevo con otra canción o sin música.»: ni el teléfono ni el panel cambian la canción de algo ya programado.
 
 ### Para dejar algo a medias y seguirlo después
 
@@ -396,6 +412,10 @@ Se puede mientras no haya salido en ninguna cuenta. Lo que ya salió en alguna, 
 | «La hora debe estar en el futuro.» | La hora elegida ya pasó. | Tocar «Cuándo: …» y elegir una hora futura. |
 | «La fecha no se entendió.» | La fecha no llegó bien al servidor. | Volver a elegirla. |
 | «Un trial reel es un solo video, sin fotos.» | El trial reel quedó con más de un archivo o con fotos. | Dejar un solo video. |
+| «Instagram no respondió con su música. Inténtalo de nuevo en un rato.» | En «Música de Instagram», Instagram no contestó. | Volver a tocar en un rato. |
+| «Instagram no dejó ver su música con esta cuenta. Reconéctala en Los Fierros y vuelve a intentarlo.» | El permiso de la cuenta venció o no alcanza. | Reconectarla en el panel web, en Los Fierros. |
+| «Instagram no tiene una muestra de esa canción para escuchar.» | Esa canción no trae muestra, o no se pudo abrir. | Elegirla igual si se conoce, u otra. |
+| «La música de Instagram solo funciona en cuentas conectadas con Facebook, y esta se conectó con el login de Instagram.» | Al programar, la cuenta de Instagram está conectada con el login de Instagram. | Tocar «Quitar» en la canción, o reconectar la cuenta con Facebook en el panel web. |
 | «La cuenta x no está conectada. Vuelve a conectarla en Los Fierros.» (con el nombre de la cuenta en lugar de x) | La cuenta elegida perdió la conexión. Los Fierros está en el panel web, en el botón «Ajustes»: la app no tiene esa pantalla. | Reconectarla en el panel web. |
 | «Una de las cuentas elegidas no es tuya.» | Una cuenta ya no pertenece a quien publica (por ejemplo, se borró). | Cerrar la app del todo y volver a abrirla: la lista de cuentas de «Publicar» se carga al abrir. |
 | «Red desconocida o sin publicación: x.» | Se intentó publicar en una red que el teléfono no maneja (hoy, TikTok). | Publicar en esa red desde el panel web, en [La Parrilla](la-parrilla.md). |
@@ -476,6 +496,8 @@ Se puede mientras no haya salido en ninguna cuenta. Lo que ya salió en alguna, 
 
 Comparada con el panel web, la app no:
 
+- deja oír el reel con la canción de «Música de Instagram» puesta (Instagram no lo permite antes de publicar), ni cambia la canción de algo ya programado;
+
 - conecta, desconecta ni reconecta redes ([Los Fierros](los-fierros.md));
 - publica en TikTok;
 - cambia los archivos, la portada, la palabra clave ni las opciones de lo programado, le suma cuentas, ni edita o borra lo que ya salió en alguna cuenta ([La Parrilla](la-parrilla.md)): corrige el texto, la hora y las cuentas, y borra, solo lo que no ha salido;
@@ -529,6 +551,8 @@ Lo que describe sale de estos archivos:
 - `mobile/src/lib/agenda.ts` (qué días se ven, «Se quemó», los borradores de cada día, el pie de ayer, lo que ya salió y dónde va «ahora»)
 - `mobile/src/lib/borradores.ts` (las frases del borrador, qué se guarda, la línea de cada borrador en la lista)
 - `mobile/src/lib/publicar.ts`
+- `mobile/src/components/musica-instagram.tsx`, `mobile/src/lib/musica.ts` y `mobile/src/lib/reproductor.ts` («Música de Instagram»: el bloque, sus frases y la muestra, que con la 1.1.0 se abre afuera)
+- `src/app/api/mobile/musica/route.ts`, `src/app/api/mobile/musica/[id]/route.ts`, `src/app/api/mobile/musica/sugerencia/route.ts` y `src/lib/musica-instagram.ts` (lo que suena, la búsqueda, la muestra de una canción y «Sugiéreme una»)
 - `mobile/src/lib/subir.ts`
 - `mobile/src/lib/session.ts`
 - `mobile/src/lib/ingreso.ts`

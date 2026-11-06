@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest'
 import {
   HISTORIA_DESTINOS,
   HISTORIA_JPG,
+  HISTORIA_MUSICA,
+  MUSICA_LOGIN_INSTAGRAM,
   HISTORIA_MEDIA,
   HISTORIA_SIN_CLAVE,
   HISTORIA_SIN_TEXTO,
@@ -14,7 +16,10 @@ import {
   errorDeMediaPorOpciones,
   esHistoria,
   historiaDe,
+  musicaDe,
+  musicaDesdeCampo,
   musicaParaRecordar,
+  nombreDeCancion,
   opcionesDesdeFormularioPorCuenta,
   opcionesParaApi,
   resumenOpciones,
@@ -499,5 +504,105 @@ describe('opcionesParaApi', () => {
   it('una fila vieja que ya no valida sale tal cual, no se pierde', () => {
     expect(opcionesParaApi('tiktok', { modo: 'otro' })).toEqual({ modo: 'otro' })
     expect(opcionesParaApi('tiktok', 'basura')).toBeNull()
+  })
+})
+
+describe('«Música de Instagram» en las opciones de Instagram', () => {
+  const musica = { audioId: '587784541076604', titulo: 'Tusa', artista: 'Karol G', volumenMusica: 50, volumenVideo: 100 }
+
+  it('se guarda con la forma exacta; sola o con trial reel', () => {
+    expect(validarOpciones('instagram', { musica })).toEqual({ opciones: { musica } })
+    expect(validarOpciones('instagram', { trialReel: true, musica })).toEqual({ opciones: { trialReel: true, musica } })
+  })
+
+  it('ausente, null o false es sin música; sin trial ni música no se guarda nada', () => {
+    expect(validarOpciones('instagram', { musica: null })).toEqual({ opciones: null })
+    expect(validarOpciones('instagram', { musica: false, trialReel: false })).toEqual({ opciones: null })
+    expect(validarOpciones('instagram', { trialReel: true, musica: undefined })).toEqual({ opciones: { trialReel: true } })
+  })
+
+  it('sin artista ni volúmenes: artista null y los dos al máximo, como Meta', () => {
+    expect(validarOpciones('instagram', { musica: { audioId: '1', titulo: '  Tusa ' } })).toEqual({
+      opciones: { musica: { audioId: '1', titulo: 'Tusa', artista: null, volumenMusica: 100, volumenVideo: 100 } },
+    })
+  })
+
+  it('rechaza lo que no se entiende: id, título, volúmenes fuera de 1–100 o con decimales, claves de más', () => {
+    for (const mala of [
+      { ...musica, audioId: '' },
+      { ...musica, audioId: 'con espacio' },
+      { ...musica, titulo: '' },
+      { ...musica, titulo: 3 },
+      { ...musica, artista: 3 },
+      { ...musica, volumenMusica: 0 },
+      { ...musica, volumenVideo: 101 },
+      { ...musica, volumenMusica: 50.5 },
+      { ...musica, volumenVideo: '80' },
+      { ...musica, downloadUrl: 'https://x' },
+      'Tusa',
+      true,
+    ]) {
+      expect(validarOpciones('instagram', { musica: mala })).toEqual({ error: OPCIONES_ERROR })
+    }
+  })
+
+  it('una historia no lleva música', () => {
+    expect(validarOpciones('instagram', { historia: true, musica })).toEqual({ error: HISTORIA_MUSICA })
+  })
+
+  it('una cuenta con el login de Instagram no la acepta; con dos cuentas, la frase la nombra', () => {
+    const conIg = { id: 'ig-1', network: 'instagram', handle: '@a', login: 'instagram' }
+    expect(validarOpcionesPorCuenta([conIg], { 'ig-1': { musica } })).toEqual({ error: MUSICA_LOGIN_INSTAGRAM })
+    expect(
+      validarOpcionesPorCuenta([conIg, { id: 'ig-2', network: 'instagram', handle: '@b' }], { 'ig-1': { musica } }),
+    ).toEqual({ error: `«@a»: ${MUSICA_LOGIN_INSTAGRAM}` })
+    expect(validarOpcionesPorCuenta([conIg], { 'ig-1': { trialReel: true } })).toEqual({
+      opciones: { 'ig-1': { trialReel: true } },
+    })
+    expect(validarOpcionesPorCuenta([{ id: 'ig-1', network: 'instagram', handle: '@a' }], { 'ig-1': { musica } })).toEqual({
+      opciones: { 'ig-1': { musica } },
+    })
+  })
+
+  it('la música no es regla de media: con fotos se guarda igual y el publicador no la manda', () => {
+    expect(errorDeMediaPorOpciones({ 'ig-1': { musica } }, { videos: 0, fotos: 2, sinTipo: 0 })).toBeNull()
+  })
+
+  it('musicaDe lee la guardada, y null en cualquier otra red o forma', () => {
+    expect(musicaDe('instagram', { trialReel: true, musica })).toEqual(musica)
+    expect(musicaDe('instagram', { trialReel: true })).toBeNull()
+    expect(musicaDe('tiktok', { ...directo, musica: true })).toBeNull()
+    expect(musicaDe('instagram', { musica: { audioId: '1' } })).toBeNull()
+  })
+
+  it('el formulario la manda en JSON por cuenta, junto al trial; un JSON roto se rechaza, no se pierde', () => {
+    const ig = { id: 'ig-1', network: 'instagram', handle: 'vicente' }
+    const datos = new FormData()
+    datos.set('instagramTrial:ig-1', 'on')
+    datos.set('instagramMusica:ig-1', JSON.stringify(musica))
+    expect(opcionesDesdeFormularioPorCuenta(datos, [ig])).toEqual({ 'ig-1': { trialReel: true, musica } })
+
+    const vacio = new FormData()
+    vacio.set('instagramMusica:ig-1', '')
+    expect(opcionesDesdeFormularioPorCuenta(vacio, [ig])).toEqual({})
+
+    const roto = new FormData()
+    roto.set('instagramMusica:ig-1', '{roto')
+    const raw = opcionesDesdeFormularioPorCuenta(roto, [ig])
+    expect(validarOpcionesPorCuenta([ig], raw)).toEqual({ error: OPCIONES_ERROR })
+    expect(musicaDesdeCampo(undefined)).toBeUndefined()
+  })
+
+  it('el resumen la nombra solo en un video solo', () => {
+    expect(resumenOpciones('instagram', { musica }, false, true)).toBe('Con música de Instagram: «Tusa» de Karol G')
+    expect(resumenOpciones('instagram', { musica }, true, false)).toBeNull()
+    expect(resumenOpciones('instagram', { trialReel: true, musica }, false, true)).toBe(
+      'Trial reel — lo compartes tú desde Instagram · Con música de Instagram: «Tusa» de Karol G',
+    )
+    expect(nombreDeCancion({ titulo: 'Tusa', artista: null })).toBe('«Tusa»')
+  })
+
+  it('la API la devuelve tal como quedó', () => {
+    expect(opcionesParaApi('instagram', { musica })).toEqual({ musica })
   })
 })

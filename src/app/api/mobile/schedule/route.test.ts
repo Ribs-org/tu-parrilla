@@ -305,6 +305,24 @@ describe('POST /api/mobile/schedule', () => {
       expect(borrarBorrador).not.toHaveBeenCalled()
     })
 
+    it('una app que no sabe de música programa con la canción que el borrador traía del panel; una que sabe, con la suya', async () => {
+      const musica = { audioId: '587784541076604', titulo: 'Tusa', artista: 'Karol G', volumenMusica: 50, volumenVideo: 100 }
+      const ig: CuentaDestino = { id: 'c-ig', network: 'instagram', handle: '@ig' }
+      const campos = { cuentas: ['c-ig'], 'instagramMusica:c-ig': [JSON.stringify(musica)] }
+      const video = [{ url: 'https://cdn.ejemplo.cl/scheduled/a.mp4', mediaType: 'video' }]
+      cargarBorrador.mockResolvedValue({ id: BORRADOR, campos, fecha: null, media: [] })
+      resolverDestinos.mockResolvedValue({ cuentas: [ig], networks: ['instagram'] })
+      crearPostProgramado.mockResolvedValue('post-1')
+
+      await POST(peticion({ texto: 'Hola', cuentas: ['c-ig'], ahora: true, media: video, borradorId: BORRADOR }))
+      expect(crearPostProgramado).toHaveBeenLastCalledWith('owner-1', expect.objectContaining({ opciones: { 'c-ig': { musica } } }))
+
+      await POST(peticion({ texto: 'Hola', cuentas: ['c-ig'], ahora: true, media: video, borradorId: BORRADOR, conMusica: true }))
+      expect(crearPostProgramado).toHaveBeenLastCalledWith('owner-1', expect.objectContaining({ opciones: {} }))
+      cargarBorrador.mockReset()
+      resolverDestinos.mockReset()
+    })
+
     it('si el borrador ya no existe, no se crea nada: puede ser el mismo envío repetido', async () => {
       cargarBorrador.mockResolvedValueOnce(null)
       for (const borradorId of [BORRADOR, 'no-es-uuid']) {

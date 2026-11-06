@@ -6,7 +6,10 @@ import {
   camposDesdeTelefono,
   fechaParaDia,
   idDeBorrador,
+  instagramMusicaInicial,
   instagramTrialInicial,
+  musicaDelTelefono,
+  opcionesConMusicaDelBorrador,
   reglaInicial,
   soloEnElPanel,
   telefonoDesdeCampos,
@@ -184,6 +187,17 @@ describe('camposDesdeTelefono', () => {
     })
   })
 
+  it('la música del panel se conserva con una app que no la conoce, y la reemplaza la de una que sí', () => {
+    const musica = { audioId: '587784541076604', titulo: 'Tusa', artista: 'Karol G', volumenMusica: 50, volumenVideo: 100 }
+    const anteriores = { cuentas: ['ig-1'], 'instagramMusica:ig-1': [JSON.stringify(musica)] }
+    expect(camposDesdeTelefono(anteriores, telefono, new Map())['instagramMusica:ig-1']).toEqual([JSON.stringify(musica)])
+    expect(camposDesdeTelefono(anteriores, { ...telefono, musica: {} }, new Map())['instagramMusica:ig-1']).toBeUndefined()
+    const otra = { ...musica, audioId: '42', volumenMusica: 20 }
+    expect(camposDesdeTelefono(anteriores, { ...telefono, musica: { 'ig-1': otra } }, new Map())['instagramMusica:ig-1']).toEqual([
+      JSON.stringify(otra),
+    ])
+  })
+
   it('sin fecha, el campo va vacío como lo deja el panel; el trial de una cuenta no elegida no viaja', () => {
     const campos = camposDesdeTelefono(null, { texto: '', cuentas: [], scheduledAt: '', trial: ['ig-1'] }, new Map())
     expect(campos).toEqual({ caption: [''], cuentas: [], scheduledAt: [''] })
@@ -194,11 +208,69 @@ describe('telefonoDesdeCampos', () => {
   it('devuelve el texto, las cuentas y los trial reels encendidos', () => {
     expect(
       telefonoDesdeCampos({ caption: ['Hola'], cuentas: ['ig-1', 'ig-2'], 'instagramTrial:ig-2': ['on'] }),
-    ).toEqual({ texto: 'Hola', cuentas: ['ig-1', 'ig-2'], trial: ['ig-2'] })
+    ).toEqual({ texto: 'Hola', cuentas: ['ig-1', 'ig-2'], trial: ['ig-2'], musica: {} })
   })
 
   it('de un borrador vacío, todo vacío', () => {
-    expect(telefonoDesdeCampos({})).toEqual({ texto: '', cuentas: [], trial: [] })
+    expect(telefonoDesdeCampos({})).toEqual({ texto: '', cuentas: [], trial: [], musica: {} })
+  })
+
+  it('devuelve la música de Instagram de las cuentas elegidas, y no la que ya no se entiende', () => {
+    const musica = { audioId: '587784541076604', titulo: 'Tusa', artista: 'Karol G', volumenMusica: 50, volumenVideo: 100 }
+    expect(
+      telefonoDesdeCampos({
+        cuentas: ['ig-1', 'ig-2'],
+        'instagramMusica:ig-1': [JSON.stringify(musica)],
+        'instagramMusica:ig-2': ['{roto'],
+        'instagramMusica:ig-3': [JSON.stringify(musica)],
+      }).musica,
+    ).toEqual({ 'ig-1': musica })
+  })
+})
+
+describe('instagramMusicaInicial', () => {
+  it('lee la canción guardada; vacío, roto o con forma ajena es sin canción', () => {
+    const musica = { audioId: '587784541076604', titulo: 'Tusa', artista: 'Karol G', volumenMusica: 50, volumenVideo: 100 }
+    expect(instagramMusicaInicial({ 'instagramMusica:ig-1': [JSON.stringify(musica)] }, 'ig-1')).toEqual(musica)
+    expect(instagramMusicaInicial({ 'instagramMusica:ig-1': [''] }, 'ig-1')).toBeNull()
+    expect(instagramMusicaInicial({ 'instagramMusica:ig-1': ['{roto'] }, 'ig-1')).toBeNull()
+    expect(instagramMusicaInicial({ 'instagramMusica:ig-1': ['{"audioId":"1"}'] }, 'ig-1')).toBeNull()
+    expect(instagramMusicaInicial({}, 'ig-1')).toBeNull()
+  })
+})
+
+describe('opcionesConMusicaDelBorrador', () => {
+  const musica = { audioId: '587784541076604', titulo: 'Tusa', artista: 'Karol G', volumenMusica: 50, volumenVideo: 100 }
+  const campos = { cuentas: ['ig-1', 'ig-2'], 'instagramMusica:ig-1': [JSON.stringify(musica)] }
+
+  it('sin `conMusica`, suma la canción del borrador a lo que mandó la app, sin pisar el trial', () => {
+    expect(opcionesConMusicaDelBorrador({}, { 'ig-1': { trialReel: true } }, campos)).toEqual({
+      'ig-1': { trialReel: true, musica },
+    })
+  })
+
+  it('con `conMusica`, o sin borrador, queda lo que mandó la app', () => {
+    expect(opcionesConMusicaDelBorrador({ conMusica: true }, {}, campos)).toEqual({})
+    expect(opcionesConMusicaDelBorrador({}, { 'ig-1': { trialReel: true } }, null)).toEqual({ 'ig-1': { trialReel: true } })
+  })
+})
+
+describe('musicaDelTelefono', () => {
+  const musica = { audioId: '587784541076604', titulo: 'Tusa', artista: 'Karol G', volumenMusica: 50, volumenVideo: 100 }
+
+  it('una app sin `conMusica` no dice nada: se conserva la del panel', () => {
+    expect(musicaDelTelefono({ opciones: {} }, { 'ig-1': { musica } }, ['ig-1'])).toBeUndefined()
+  })
+
+  it('una app que sabe de música manda la suya, solo de cuentas elegidas y válida', () => {
+    expect(
+      musicaDelTelefono(
+        { conMusica: true },
+        { 'ig-1': { musica }, 'ig-2': { musica: { audioId: 'x' } }, 'ig-3': { musica } },
+        ['ig-1', 'ig-2'],
+      ),
+    ).toEqual({ 'ig-1': musica })
+    expect(musicaDelTelefono({ conMusica: true }, {}, ['ig-1'])).toEqual({})
   })
 })
 

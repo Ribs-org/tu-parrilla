@@ -491,7 +491,7 @@ formulario viene abierto, con el cursor en «Texto». En este orden:
    Los Fierros (tus redes conectadas).
 6. **Un bloque «TikTok · <usuario>»** por cada cuenta de TikTok marcada (ver abajo).
 7. **Un bloque «Instagram · <usuario>»** por cada cuenta de Instagram marcada, solo cuando
-   hay exactamente un archivo y es un video (ver abajo).
+   hay exactamente un archivo y es un video (ver abajo): el trial reel y «Música de Instagram».
 8. **«Respuesta automática por palabra clave»**, plegado (ver abajo); viene abierto y lleno si
    el borrador tenía una palabra.
 9. **«Fecha y hora»**, el campo de día y hora («Elegir día y hora» mientras está vacío), que
@@ -574,6 +574,34 @@ con todos.» Si Instagram ya rechazó un trial reel de esa cuenta, debajo va, en
 del rechazo («@cuenta no tiene trial reels: Instagram los da solo a cuentas con un mínimo de
 seguidores…», o «Instagram ya rechazó un trial reel en esta cuenta: prográmalo como reel normal.»). El interruptor se puede encender igual, porque una cuenta que crece pasa
 a aceptarlos, pero lo más probable es que se queme: conviene programarlo como reel normal.
+
+Debajo, **«Música de Instagram»**, con «Una canción de la biblioteca de Instagram encima del
+sonido del video. Instagram no deja ver el reel con la canción antes de publicarlo: sale tal
+como lo dejes acá.» No hay forma de oír el reel ya mezclado: solo la muestra de la canción sola.
+
+- **«Sugiéreme una»** («Buscando una…» mientras piensa): Parrilla propone **una** canción que le
+  quede al post, leyendo el texto escrito hasta ese momento. Aparece en un recuadro con su nombre
+  (««Título» de Artista»), debajo una frase de por qué le queda (sin el modelo de IA configurado
+  en el sitio, «Es de las que están sonando en Instagram estos días.» o «Salió buscando «…».»),
+  un botón redondo para escucharla, **«Usar esta»** y **«Otra»** («Buscando otra…»), que trae
+  una distinta sin repetir ninguna de las ya mostradas. Cuando ya no quedan: «Ya te mostré todas
+  las que encontré para este post. Busca una por nombre.»
+- **«Elegir canción»** (o **«Cambiar canción»** si ya hay una) abre la lista: arriba un buscador
+  («Busca una canción o un artista», con **«Buscar»**; Enter también busca, no programa), y
+  debajo «Sonando ahora en Instagram» —lo que está sonando— o «Resultados para «…»». Cada fila
+  tiene el botón redondo para escuchar (el título dice «Escuchar», «Pausar» o «Sin muestra»), el
+  título, el artista y **«Usar esta»** («Elegida» en la que ya está puesta). Sin resultados:
+  «Instagram no encontró canciones con «…».» o «Instagram no tiene canciones para mostrar
+  ahora.». Al pie, **«Cerrar la lista»**.
+- Con una canción puesta, un recuadro con «Canción elegida: «Título» de Artista», el botón para
+  escucharla, **«Quitar»**, y dos barras: **«Volumen de la canción»** y **«Volumen del video»**,
+  de 1 a 100 % (la canción nace en 50 % y el video en 100 %), con «Si en el video hablas, bájale a
+  la canción para que no tape tu voz.»
+
+Con una cuenta conectada con el login de Instagram, en vez de todo eso dice: «La música de
+Instagram no está disponible en esta cuenta: se conectó con el login de Instagram, y Meta solo la
+da a las cuentas conectadas con Facebook.» Con fotos o más de un archivo el bloque de Instagram
+no aparece, y la música tampoco: Instagram solo le pone música a un reel.
 
 #### «Respuesta automática por palabra clave»
 
@@ -737,7 +765,9 @@ El formulario, en orden:
    comentarios · sin dúo · sin pegar · sin comercial», con « · hecho con IA» al final si
    lleva la etiqueta de IA y « · con música de TikTok» si son fotos con «Música de TikTok»
    encendida; o «Trial reel — lo compartes tú desde
-   Instagram». Esas opciones no se pueden cambiar aquí.
+   Instagram», y « · Con música de Instagram: «Título» de Artista» (o solo «Con música de
+   Instagram: …») si el reel lleva canción. Esas opciones no se pueden cambiar aquí: para
+   cambiar o quitar la canción, se borra el post y se programa de nuevo.
 4. **«Media»**: una fila por archivo, con su miniatura (los videos se pueden reproducir ahí
    mismo), su dirección, un ícono para abrirlo en otra pestaña («Abrir en una pestaña
    nueva»), un ícono para copiar la dirección («Copiar la URL»; muestra «Copiada» o «No se
@@ -857,6 +887,18 @@ Queda recordado para la próxima vez en esa cuenta.
 2. Marcar la cuenta de Instagram en «Cuentas». Aparece «Instagram · <usuario>».
 3. Encender «Publicar como trial reel».
 4. Fecha y hora, y «Programar». Después, se comparte con todos desde la app de Instagram.
+
+### Para ponerle música de Instagram a un reel
+
+1. En «Nueva publicación», elegir en «Archivos» un solo video, nada más.
+2. Marcar la cuenta de Instagram en «Cuentas». Aparece «Instagram · <usuario>», con «Música de
+   Instagram» abajo.
+3. Escribir el texto primero si se quiere una sugerencia que le quede: «Sugiéreme una» lo lee.
+4. «Sugiéreme una» (y «Otra» hasta que guste), o «Elegir canción» para ver lo que está sonando
+   o buscar por nombre. El botón redondo deja escuchar la muestra antes.
+5. «Usar esta». Si en el video se habla, bajar «Volumen de la canción».
+6. Fecha y hora, y «Programar». Instagram la pega al publicar; no hay vista previa del reel con
+   la canción.
 
 ### Para que salga ya
 
@@ -1056,6 +1098,20 @@ de esa tanda queda: hay que volver a elegirlos.
 | «El texto es demasiado largo para Instagram.» | Más de 2200 caracteres, vaya a la red que vaya (pasa en el editor o el CSV) | Acortarlo |
 | «TikTok recibe un video, o hasta 35 fotos JPG o WebP.» | Con TikTok marcado: dos videos, video con fotos, más de 35 fotos, o un formato que no acepta (por ejemplo PNG) | Dejar un video MP4, MOV o WebM, o fotos JPG o WebP |
 | «Un trial reel es un solo video, sin fotos.» | En el editor se cambiaron los archivos de un trial reel | Dejar exactamente un video |
+| «La música de Instagram solo funciona en cuentas conectadas con Facebook, y esta se conectó con el login de Instagram.» | Un borrador o un pedido traía música para una cuenta conectada con el login de Instagram | Quitar la canción, o reconectar la cuenta con Facebook en Los Fierros |
+| «Una historia no lleva música de Instagram.» | Una historia con canción (pasa por la API) | Quitar la canción |
+
+### «Música de Instagram»
+
+| Lo que dice la pantalla | Qué significa | Qué hacer |
+|---|---|---|
+| «Instagram no respondió con su música. Inténtalo de nuevo en un rato.» | Instagram no contestó o contestó con un error | Volver a apretar el botón en un rato |
+| «Instagram no dejó ver su música con esta cuenta. Reconéctala en Los Fierros y vuelve a intentarlo.» | El permiso de la cuenta venció o no alcanza | Reconectar la cuenta en Los Fierros |
+| «Esa cuenta no es una cuenta de Instagram tuya conectada.» | La cuenta se desconectó mientras el compositor estaba abierto | Reconectarla en Los Fierros |
+| «No se pudo traer la música de Instagram. Revisa tu conexión y vuelve a intentarlo.» / «No se pudo pedir una sugerencia. Revisa tu conexión y vuelve a intentarlo.» | El navegador no llegó al servidor | Revisar la conexión y reintentar |
+| «Instagram no tiene una muestra de esa canción para escuchar.» | Esa canción no trae muestra | Elegirla igual si se conoce, u otra |
+| «El navegador no pudo tocar la muestra.» | El navegador bloqueó el audio | Probar de nuevo, o en otro navegador |
+| «Ya te mostré todas las que encontré para este post. Busca una por nombre.» | «Otra» ya mostró todas las candidatas | Buscar una por nombre en «Elegir canción» |
 
 YouTube publica exactamente un video y nada más, y Facebook no mezcla video con fotos. La
 pantalla no frena esos casos al programar: fallan al publicar (ver la tabla de motivos, al
@@ -1182,6 +1238,8 @@ editor.
 | «Instagram rechazó la publicación en @cuenta: «…» (código …).» | Instagram dijo que no, y entre comillas va lo que dijo Meta, en sus palabras; se reintenta como cualquier fallo | Leer lo que dijo Meta: si es algo de la cuenta, reintentar no lo cambia; si es el archivo o el texto, corregirlo en el editor |
 | «@cuenta no tiene trial reels: Instagram los da solo a cuentas con un mínimo de seguidores, y esta no lo alcanza. Prográmalo como reel normal o en otra cuenta.» | La cuenta no tiene los seguidores que Instagram pide para los trial reels; se quema al primer intento, y los demás trial reels de esa cuenta van a fallar igual | El editor no apaga el trial reel: si nada salió, «Eliminar» y programarlo de nuevo sin trial reel; si otras redes ya salieron, desmarcar Instagram en el editor y programarlo aparte |
 | «@cuenta no tiene trial reels disponibles, probablemente porque Instagram no le habilitó la función. Prográmalo como reel normal o en otra cuenta. Instagram dice: «…».» | Instagram rechazó el trial reel por otro motivo, que va al final en sus palabras; se quema al primer intento | Lo mismo que la fila de arriba |
+| «Instagram no aceptó la canción «Título» de Artista en @cuenta. Instagram dice: «…». Borra esta publicación y prográmala de nuevo con otra canción o sin música.» | Instagram rechazó el reel por la canción de «Música de Instagram» (ya no está disponible, por ejemplo); se quema al primer intento, sin publicar sin la canción | El editor no cambia la canción: si nada salió, «Eliminar» y programarlo de nuevo con otra o sin música; si otras redes ya salieron, desmarcar Instagram y programarlo aparte |
+| «@cuenta se conectó con el login de Instagram, y así Instagram no deja ponerle música a un reel. Reconéctala con Facebook en Los Fierros, o borra esta publicación y prográmala de nuevo sin música.» | La cuenta se reconectó con el login de Instagram después de programar un reel con canción; se quema al primer intento | Reconectarla con Facebook y «Reprogramar», o programarlo de nuevo sin música |
 | «Facebook rechazó la publicación.» | Facebook dijo que no | «Subir ahora» o «Reprogramar»; si vuelve a fallar, revisar el archivo y el texto |
 | «Facebook no admite mezclar video y fotos en un post.» | Hay video y fotos | En el editor, quitar las fotos o el video; o desmarcar Facebook y programarlo aparte |
 | «Threads rechazó la publicación.» | Threads dijo que no | «Subir ahora» o «Reprogramar»; si vuelve a fallar, revisar el archivo y el texto |
@@ -1369,6 +1427,11 @@ editor.
 
 ## Lo que esta pantalla no hace
 
+- No muestra ni deja oír el reel con la canción de «Música de Instagram» puesta: Instagram no lo
+  permite antes de publicar. Solo se escucha la muestra de la canción sola.
+- No cambia ni quita la canción de un post ya programado: el editor no toca las opciones de un
+  destino.
+
 - No publica en el segundo exacto: lo programado, incluso con «Ahora», sale en la pasada
   siguiente del publicador. Solo «Subir ahora» publica en el acto.
 - No publica borradores: un borrador no sale nunca solo, aunque tenga fecha y esa fecha pase.
@@ -1429,6 +1492,8 @@ Lo que describe esta página sale de:
   - `src/app/admin/(dash)/schedule/regla-clave.tsx`
   - `src/app/admin/(dash)/schedule/tiktok-opciones.tsx`
   - `src/app/admin/(dash)/schedule/instagram-opciones.tsx`
+  - `src/app/admin/(dash)/schedule/musica-instagram.tsx` («Música de Instagram»)
+  - `src/app/admin/musica-actions.ts`, `src/lib/musica-instagram.ts`, `src/lib/social/instagram-audio.ts` y `src/lib/social/musica-sugerencia.ts` (buscar, escuchar y «Sugiéreme una», con sus frases)
   - `src/app/admin/(dash)/schedule/etiqueta.ts`
   - `src/app/admin/(dash)/schedule/orden.ts`
   - `src/app/admin/(dash)/schedule/enlace.ts`

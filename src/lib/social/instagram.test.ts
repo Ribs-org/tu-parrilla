@@ -54,6 +54,18 @@ describe('normalizeInstagramMedia', () => {
     expect(post.mediaType).toBe('image')
   })
 
+  it('un reel con música de la biblioteca llega sin media_url (Meta, 2026-07-30): la miniatura sale de thumbnail_url', () => {
+    const conMusica: InstagramMedia = { ...media }
+    delete conMusica.media_url
+    const post = normalizeInstagramMedia(conMusica, insights)
+    expect(post.thumbnailUrl).toBe('https://scontent.cdninstagram.com/v/thumb.jpg')
+    expect(post.permalink).toBe('https://www.instagram.com/reel/C8xK2Lp/')
+    // Sin ninguna de las dos, sin miniatura: no rompe la lectura.
+    const sinNada: InstagramMedia = { ...conMusica }
+    delete sinNada.thumbnail_url
+    expect(normalizeInstagramMedia(sinNada, insights).thumbnailUrl).toBeNull()
+  })
+
   it('tolera un post sin caption', () => {
     expect(normalizeInstagramMedia(imageMedia, imageInsights).caption).toBeNull()
   })

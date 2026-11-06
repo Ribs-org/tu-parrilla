@@ -3,6 +3,7 @@
 // llenar el formulario. Sin base ni `server-only`: lo usan el compositor (navegador), la
 // acción que guarda y los tests.
 import { addDays, dayKey } from './schedule-week'
+import { musicaDe, musicaDesdeCampo, type MusicaInstagram } from './social/publish/opciones'
 import { esUuid } from './uuid'
 
 /** Los valores de un formulario, nombre por nombre, tal como los entrega `FormData.getAll`. */
@@ -97,6 +98,14 @@ export function instagramTrialInicial(campos: Campos, cuentaId: string): boolean
   return primero(campos, `instagramTrial:${cuentaId}`) === 'on'
 }
 
+/**
+ * La canción de «Música de Instagram» de esa cuenta, o null si no tenía (o si lo guardado ya
+ * no se entiende: entonces el bloque nace sin canción, en vez de mandar algo que se rechazaría).
+ */
+export function instagramMusicaInicial(campos: Campos, cuentaId: string): MusicaInstagram | null {
+  return musicaDe('instagram', { musica: musicaDesdeCampo(primero(campos, `${MUSICA}${cuentaId}`)) })
+}
+
 /** La regla de palabra clave guardada, o null si no tenía palabra. */
 export function reglaInicial(campos: Campos): { palabra: string; mensaje: string; respuestaPublica: string } | null {
   const palabra = primero(campos, 'reglaPalabra')
@@ -144,11 +153,18 @@ export type BorradorDelTelefono = {
   scheduledAt: string
   /** Las cuentas de Instagram que van como trial reel. */
   trial: string[]
+  /**
+   * La canción de «Música de Instagram» de cada cuenta que la lleva. Ausente en una app que
+   * todavía no conoce la música (la 1.1.0 antes de su actualización por aire): entonces se
+   * conserva la que dejó el panel, porque esa app no pudo haberla quitado.
+   */
+  musica?: Record<string, MusicaInstagram>
 }
 
 /** Los campos que el teléfono escribe enteros cada vez que guarda. */
 const DEL_TELEFONO = new Set(['caption', 'cuentas', 'scheduledAt', 'cuandoAhora'])
 const TRIAL = 'instagramTrial:'
+const MUSICA = 'instagramMusica:'
 
 /**
  * Los campos de un borrador después de que el teléfono lo guarda. El teléfono escribe lo
@@ -166,7 +182,9 @@ export function camposDesdeTelefono(
 ): Campos {
   const campos: Campos = {}
   for (const [nombre, valores] of Object.entries(anteriores ?? {})) {
-    if (!DEL_TELEFONO.has(nombre) && !nombre.startsWith(TRIAL)) campos[nombre] = valores
+    if (DEL_TELEFONO.has(nombre) || nombre.startsWith(TRIAL)) continue
+    if (telefono.musica !== undefined && nombre.startsWith(MUSICA)) continue
+    campos[nombre] = valores
   }
   const conservadas = (anteriores?.cuentas ?? []).filter((id) => ajenas.has(id))
   const cuentas = [...new Set([...telefono.cuentas, ...conservadas])]
@@ -174,7 +192,54 @@ export function camposDesdeTelefono(
   campos.cuentas = cuentas
   campos.scheduledAt = [telefono.scheduledAt]
   for (const id of telefono.trial) if (cuentas.includes(id)) campos[`${TRIAL}${id}`] = ['on']
+  for (const [id, musica] of Object.entries(telefono.musica ?? {})) {
+    if (cuentas.includes(id)) campos[`${MUSICA}${id}`] = [JSON.stringify(musica)]
+  }
   return campos
+}
+
+/**
+ * La «Música de Instagram» que manda el teléfono al guardar un borrador, o undefined si la app
+ * no sabe de música. Una app que sí sabe manda `conMusica: true` aunque no lleve ninguna —así
+ * quitar la canción en el teléfono la quita—; la 1.1.0 antes de su actualización por aire no lo
+ * manda, y entonces se conserva la que dejó el panel (`camposDesdeTelefono`). Solo cuentas
+ * elegidas y canciones que pasan la validación de Instagram.
+ */
+export function musicaDelTelefono(
+  body: unknown,
+  opciones: Record<string, unknown>,
+  cuentas: readonly string[],
+): Record<string, MusicaInstagram> | undefined {
+  if ((body as { conMusica?: unknown } | null)?.conMusica !== true) return undefined
+  const salida: Record<string, MusicaInstagram> = {}
+  for (const [id, o] of Object.entries(opciones)) {
+    const musica = cuentas.includes(id) ? musicaDe('instagram', o) : null
+    if (musica) salida[id] = musica
+  }
+  return salida
+}
+
+/**
+ * Las `opciones` con que el teléfono programa un borrador, con la «Música de Instagram» que el
+ * borrador guardaba si la app no sabe de música (sin `conMusica`, la 1.1.0 antes de su
+ * actualización por aire): esa app no la ve, así que no pudo haberla quitado, y sin esto el post
+ * salía sin la canción que se eligió en el panel. Una app que sabe de música manda las suyas tal
+ * cual, también cuando la quitó.
+ */
+export function opcionesConMusicaDelBorrador(
+  body: unknown,
+  opciones: Record<string, unknown>,
+  campos: Campos | null,
+): Record<string, unknown> {
+  if (!campos || (body as { conMusica?: unknown } | null)?.conMusica === true) return opciones
+  const salida: Record<string, unknown> = { ...opciones }
+  for (const id of campos.cuentas ?? []) {
+    const musica = instagramMusicaInicial(campos, id)
+    if (!musica) continue
+    const propias = salida[id]
+    salida[id] = { ...(typeof propias === 'object' && propias !== null ? propias : {}), musica }
+  }
+  return salida
 }
 
 /** Lo que el teléfono necesita de los campos de un borrador para volver a llenar Publicar. */
@@ -184,6 +249,12 @@ export function telefonoDesdeCampos(campos: Campos): Omit<BorradorDelTelefono, '
     texto: primero(campos, 'caption'),
     cuentas,
     trial: cuentas.filter((id) => instagramTrialInicial(campos, id)),
+    musica: Object.fromEntries(
+      cuentas.flatMap((id) => {
+        const musica = instagramMusicaInicial(campos, id)
+        return musica ? [[id, musica] as const] : []
+      }),
+    ),
   }
 }
 

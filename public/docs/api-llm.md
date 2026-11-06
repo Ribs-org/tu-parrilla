@@ -156,6 +156,8 @@ no por subcadena parcial ni regex:
 | `Una historia no tiene comentarios: no lleva palabra clave.` | una historia con `regla` |
 | `Una historia no lleva portada.` | una historia con `portada` |
 | `Una historia no puede ser trial reel.` | `opciones.instagram` con `historia` y `trialReel` a la vez |
+| `Una historia no lleva música de Instagram.` | `opciones.instagram` con `historia` y `musica` a la vez |
+| `La música de Instagram solo funciona en cuentas conectadas con Facebook, y esta se conectó con el login de Instagram.` | `opciones.<destino>.musica` para una cuenta de Instagram conectada con el login de Instagram (sección 5c) |
 | `Con «historia» la fila no lleva «opciones»: la historia ya dice todo.` | el atajo `"historia": true` con `opciones` en la misma fila |
 | `Una secuencia lleva hasta 30 historias.` | el atajo `"historia": true` con más de 30 archivos en `media` |
 | `Una de las cuentas elegidas no es tuya.` | `cuentas` con un identificador que no es del dueño |
@@ -335,7 +337,8 @@ después de programar, en vez de decirle a la persona que lo revise en la red:
   un video por su API. Una clave que
   mandaste y no está ahí no se guardó (TikTok ignora claves desconocidas).
 - TikTok en `borrador` trae `{ "modo": "borrador" }`; un trial reel, `{ "trialReel": true }`;
-  una red que no pide nada, `null`.
+  un reel con música de Instagram, `{ "musica": { "audioId", "titulo", "artista", "volumenMusica", "volumenVideo" } }`
+  (más `"trialReel": true` si también lo es); una red que no pide nada, `null`.
 
 Son las opciones que **Tu Parrilla le manda** a la red. Lo que la cuenta no permite (un dúo
 deshabilitado en TikTok, por ejemplo) se manda apagado sin fallar, y eso solo se ve en la red.
@@ -454,6 +457,23 @@ Tres cosas, en orden:
    `trialReels: "no"` en esa cuenta (sección 3d): no le propongas trial reels mientras diga eso.
 3. **No se sabe si se graduó, por API.** El dueño lo comparte con todos desde la app de
    Instagram cuando quiera; no hay endpoint que lo dispare ni que lo consulte.
+
+## 5c. Música de Instagram en un reel
+
+```json
+"opciones": { "instagram": { "musica": { "audioId": "587784541076604", "titulo": "Tusa", "artista": "Karol G", "volumenMusica": 50, "volumenVideo": 100 } } }
+```
+
+- **El `audioId` no se busca por esta API**: sale de una canción ya elegida en el panel o el
+  teléfono («Música de Instagram»). No inventes uno: Instagram rechazaría el reel.
+- `titulo` es obligatorio; `artista` puede ser `null`. Los volúmenes son enteros de 1 a 100
+  (canción y sonido propio del video); ausentes valen 100. Con voz en el video, una canción a 30–50
+  no la tapa. Puede ir junto a `trialReel`, no con `historia`.
+- **Solo viaja en un reel** (un video solo): con fotos o carrusel se guarda y no se manda.
+- **Solo con cuentas conectadas con Facebook**: con el login de Instagram la fila se rechaza con
+  `La música de Instagram solo funciona en cuentas conectadas con Facebook, y esta se conectó con el login de Instagram.`
+- **No hay vista previa** del reel con la canción. Si Instagram la rechaza al publicar, el destino
+  falla al tiro con `Instagram no aceptó la canción «<titulo>» de <artista> en <cuenta>. Instagram dice: «…». Borra esta publicación y prográmala de nuevo con otra canción o sin música.`
 
 ## 5b. Historias de Instagram y Facebook
 

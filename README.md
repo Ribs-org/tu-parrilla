@@ -511,7 +511,10 @@ https://TU-DOMINIO/api/social/instagram/callback
 Los permisos que pide la app son `instagram_basic`, `instagram_manage_insights`,
 `pages_show_list`, `pages_read_engagement` e `instagram_content_publish`. El último es el
 que usa la publicación (reels, fotos, carruseles y trial reels); se pide junto con los demás
-porque los permisos se conceden una sola vez, al autorizar.
+porque los permisos se conceden una sola vez, al autorizar. Con `instagram_basic` y ese mismo,
+sin nada más que pedir, funciona también la **Audio API** de Meta (2026-06-01): la música de la
+biblioteca de Instagram que «Música de Instagram» le pega a un reel. Solo existe con este login,
+el de Facebook; con el login de Instagram, Meta no la tiene (ver abajo).
 
 Copia el app id y el secret. Mientras la app esté en **modo desarrollo** y tú seas su
 dueño, no necesitas App Review.
@@ -592,6 +595,10 @@ de verdad cambia:
 - **Sin anuncios.** Su token es de `graph.instagram.com`, que no tiene Marketing API: «Lo pagado»
   no lo usa para leer (`ordenDeTokens`, en `anuncios-sync.ts`), y «Promocionar» una publicación
   suya responde que falta la página de Facebook, que Meta pide para promocionar.
+- **Sin «Música de Instagram».** La Audio API de Meta existe solo con el login de Facebook (y el
+  unificado): el bloque del compositor y del teléfono lo dice en vez de ofrecer canciones, la API
+  rechaza `musica` para esta cuenta, y si una cuenta se reconecta con este login con un reel con
+  música ya programado, ese destino falla diciendo por qué en vez de publicar sin la canción.
 
 Se conecta con el caso de uso de **Instagram** de la app de Meta, en su parte «API setup with
 Instagram login», que tiene su propio **Instagram app ID** y su propio secreto, distintos del id y
@@ -741,7 +748,31 @@ con fotos, carrusel o sin archivo no aparece, y sin marcarlo no se manda nada. U
 es exactamente un video, sin fotos: si eliges otra cosa con la opción marcada, el lote lo
 rechaza antes de subir nada; el compositor y el teléfono no, porque los dos suben cada
 archivo apenas se elige —el bloque y el chip no se ofrecen sin un video único, y la regla
-del servidor queda como reja de fondo, no como el primer filtro. La app
+del servidor queda como reja de fondo, no como el primer filtro.
+
+Con ese mismo video solo, el bloque de Instagram ofrece además **«Música de Instagram»** (en el
+teléfono también, debajo del chip del trial reel): una canción de la biblioteca de Instagram
+encima del sonido del video, con un volumen para la canción y otro para el video —para que la
+canción no tape la voz—. Muestra lo que está sonando, busca por nombre y deja escuchar la muestra
+antes de elegir. **«Sugiéreme una»** propone una sola que le quede al post, y **«Otra»** saca una
+distinta sin repetir las ya mostradas: un modelo por la pasarela de IA (`MUSICA_MODELO`, el mismo
+barato de los comentarios por defecto) lee el texto del post, propone una o dos búsquedas y elige
+por id entre lo que está sonando y lo que esas búsquedas encontraron, con una frase de por qué.
+No puede inventar una canción: lo que conteste que no sea una de esas candidatas se descarta.
+Sin la pasarela, o si el modelo no contesta algo usable, elige el azar entre lo que está sonando:
+el botón funciona igual. La canción viaja en las opciones del destino (`musica`, con su id, título,
+artista y los dos volúmenes), así que la guardan el post, el borrador y la API sin columnas
+nuevas, y el publicador la manda como `audio_configuration` al crear el contenedor del reel. Meta
+solo la acepta en un reel: con fotos o carrusel no se manda aunque esté guardada, y una historia
+no la lleva. No se puede ver el reel con la canción antes de publicarlo. Si Meta rechaza la
+canción al crear el contenedor (ya no está disponible, por ejemplo), el destino falla al tiro con
+el nombre de la canción y lo que dijo Meta, en vez de publicar sin la música que se eligió: como
+el trial reel, el editor no cambia las opciones de un destino, así que se borra y se programa de
+nuevo. Con el login de Instagram la música no existe: el bloque lo dice y no ofrece nada, y la API
+lo rechaza. Lo que está sonando y cada búsqueda se guardan diez minutos en la memoria del
+servidor, por cuenta (`social/instagram-audio.ts`).
+
+La app
 del teléfono todavía no ofrece TikTok como destino: el bloque de TikTok necesita consultar
 la cuenta del creador (`creator_info`) y sus interacciones, y eso el teléfono todavía no lo
 tiene.
@@ -1323,6 +1354,7 @@ Vercel y bajan con `vercel env pull .env.local`.
 | `X_BEARER_TOKEN` | Leer los tuits públicos de los creadores del modo Tinder (ver «Modo Tinder») | No — sin ella el modo Tinder no trae nada de X |
 | `AI_GATEWAY_API_KEY` | Redactar con un modelo los borradores de respuesta a comentarios (ver «Responder comentarios») | No — en Vercel puede omitirse si el proyecto usa OIDC; sin ninguna de las dos, los comentarios entran a la cola sin borrador |
 | `COMENTARIOS_MODELO` | El modelo de esos borradores, con la forma `proveedor/modelo` | No — tiene uno por defecto |
+| `MUSICA_MODELO` | El modelo de «Sugiéreme una» en «Música de Instagram», con la forma `proveedor/modelo`; usa la misma pasarela (`AI_GATEWAY_API_KEY` u OIDC) | No — tiene uno por defecto (`anthropic/claude-haiku-4.5`); sin pasarela, o con un nombre que no existe, la sugerencia la elige el azar entre lo que está sonando |
 | `COMENTARIOS_DM` | El privado a quien comentó en Instagram o Facebook, tras responderle a mano y en la regla de palabra clave. `1` lo enciende para todos; una lista de ids de usuario separados por comas, solo para esos (la cuenta del revisor de Meta mientras revisa) | No — apagada por defecto; exige `instagram_manage_messages` y `pages_messaging` (sin acceso avanzado, solo llega a quien tiene un rol en la app de Meta) |
 | `META_PERMISOS_PRIVADO` | Con `1`, conectar Instagram y Facebook pide además los permisos del privado | No — encenderla solo después de activarlos en los casos de uso de la app de Meta: si no, Meta rechaza la ventana entera |
 | `META_PERMISOS_ANUNCIOS` | Con `1`, conectar Instagram y Facebook pide además `ads_read`, para leer los resultados de los anuncios («Lo pagado») | No — encenderla solo después de activar `ads_read` en los casos de uso de la app de Meta: si no, Meta rechaza la ventana entera |
@@ -1577,7 +1609,8 @@ permite corregirlo.
 Y `opciones`, obligatorio cuando algún destino de la fila es una cuenta de TikTok (el
 modo, la privacidad y las casillas que TikTok exige elegir por publicación) y opcional
 para Instagram (`trialReel`, para que el reel salga como trial reel — solo lo ven quienes
-no siguen la cuenta, hasta que el dueño lo comparte desde la app) y para Instagram y
+no siguen la cuenta, hasta que el dueño lo comparte desde la app —, y `musica`, la canción de
+«Música de Instagram» con su `audioId`) y para Instagram y
 Facebook (`historia`, para que salga como historia). Una fila con `"historia": true` y varios
 archivos es el atajo de una secuencia: se expande en una historia por archivo y vuelve con
 `postIds`. Se llavea por destino:
@@ -1968,12 +2001,15 @@ src/
     borrador.ts            qué se guarda de un formulario y cómo se restaura, también desde el teléfono (sin base)
     borradores-movil.ts    los mismos borradores en la forma de la app del teléfono
     editar-movil.ts        un post programado abierto para corregirlo en el teléfono: lo que se ve y lo que se guarda sin tocar
+    musica-instagram.ts    «Música de Instagram» del panel y del teléfono: la cuenta del dueño con su token, la memoria de lo que suena y la sugerencia con el modelo
     pruebas/               la Postgres de las pruebas de integración: una base nueva y migrada por archivo; y un lector de zip para mirar el XML de una planilla
     empresa.ts             quién presta el servicio: lo leen la portada, privacidad y términos
     avisos/                la caída de una cuenta y el resumen del día: las reglas sin base y lo que lee y manda
     sugerencias/           el libro de sugerencias: qué se acepta y cómo queda el issue (sin base), el cliente de GitHub, y guardar y reintentar
     social/
       instagram-login.ts   el login de Instagram, sin página de Facebook: el host, los permisos y cómo leer su token
+      instagram-audio.ts   la biblioteca de música de Instagram (Audio API de Meta): lo que suena, la búsqueda y una canción, leídos sin base
+      musica-sugerencia.ts «Sugiéreme una»: el modelo elige por id entre canciones reales, y sin él el azar (sin base)
       lectura.ts           qué publicaciones se leen cada día: lo nuevo a diario, lo viejo cada vez más espaciado
       politica-youtube.ts  lo que las políticas de YouTube no dejan hacer con sus datos
       retencion-youtube.ts borra lo de YouTube que lleva 30 días sin refrescarse

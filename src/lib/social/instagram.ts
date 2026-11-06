@@ -45,6 +45,12 @@ export type InstagramMedia = {
   caption?: string | null
   media_type?: string
   media_product_type?: string
+  /**
+   * Opcional de verdad: desde el 2026-07-30 Meta lo omite en un video con audio con derechos
+   * —la música de la biblioteca de Instagram incluida, que es lo que pega «Música de Instagram»—,
+   * aunque el video sea nuestro. Solo se usa como respaldo de la miniatura de una foto; en un
+   * video manda `thumbnail_url`.
+   */
   media_url?: string
   thumbnail_url?: string
   permalink?: string
