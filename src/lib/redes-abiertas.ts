@@ -35,3 +35,12 @@ export function anunciosAbiertosPara(ownerId: string | null | undefined): boolea
   if (!ownerId) return false
   return bandera.split(',').some((id) => id.trim() === ownerId)
 }
+
+/**
+ * Si el dueño puede promocionar desde Tu Parrilla: a quien ve «Lo pagado», y solo con las dos
+ * banderas del conectar puestas (`META_PERMISOS_ANUNCIOS` y `META_PERMISOS_PROMOCIONAR`), que son
+ * las que piden `ads_management`. Sin ellas el botón llevaría a un formulario que Meta rechaza.
+ */
+export function promocionarAbiertoPara(ownerId: string | null | undefined): boolean {
+  return anunciosAbiertosPara(ownerId) && env('META_PERMISOS_ANUNCIOS') === '1' && env('META_PERMISOS_PROMOCIONAR') === '1'
+}

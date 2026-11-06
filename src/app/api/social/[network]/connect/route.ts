@@ -64,23 +64,37 @@ const SCOPES_PRIVADO: Record<string, string> = {
 /**
  * Leer los resultados de los anuncios (`social/anuncios.ts`), solo con `META_PERMISOS_ANUNCIOS=1`,
  * por la misma razón que el privado: `ads_read` tiene que estar activado en los casos de uso de
- * la app de Meta antes de pedirlo. Solo leer: Tu Parrilla no crea ni promociona anuncios, así
- * que `ads_management` no se pide. Va en las dos porque cada red es su propio consentimiento;
- * el que se lee es el token de usuario que guarda Instagram.
+ * la app de Meta antes de pedirlo. Va en las dos porque cada red es su propio consentimiento; el
+ * que se usa es el token de usuario que guarda Instagram.
  */
 const SCOPES_ANUNCIOS: Record<string, string> = {
   instagram: 'ads_read',
   facebook: 'ads_read',
 }
 
+/**
+ * Promocionar una publicación desde Tu Parrilla (`social/promocionar.ts`): `ads_management`, con
+ * su propia bandera, `META_PERMISOS_PROMOCIONAR=1`, y solo junto a la de leer: promocionar sin ver
+ * después cómo le fue no tiene sentido, y cada permiso se activa aparte en el caso de uso.
+ */
+const SCOPES_PROMOCIONAR: Record<string, string> = {
+  instagram: 'ads_management',
+  facebook: 'ads_management',
+}
+
 export function scopesDe(
   network: string,
   conPrivado: boolean,
   conAnuncios = false,
+  conPromocionar = false,
 ): string | undefined {
   const base = SCOPES[network]
   if (!base) return undefined
-  const extras = [conPrivado ? SCOPES_PRIVADO[network] : undefined, conAnuncios ? SCOPES_ANUNCIOS[network] : undefined]
+  const extras = [
+    conPrivado ? SCOPES_PRIVADO[network] : undefined,
+    conAnuncios ? SCOPES_ANUNCIOS[network] : undefined,
+    conAnuncios && conPromocionar ? SCOPES_PROMOCIONAR[network] : undefined,
+  ]
   return [base, ...extras.filter(Boolean)].join(',')
 }
 
@@ -92,7 +106,12 @@ export async function GET(
   if (!usuario) return new NextResponse('No autorizado', { status: 401 })
 
   const { network } = await params
-  const scope = scopesDe(network, env('META_PERMISOS_PRIVADO') === '1', env('META_PERMISOS_ANUNCIOS') === '1')
+  const scope = scopesDe(
+    network,
+    env('META_PERMISOS_PRIVADO') === '1',
+    env('META_PERMISOS_ANUNCIOS') === '1',
+    env('META_PERMISOS_PROMOCIONAR') === '1',
+  )
   if (!scope) return new NextResponse('Esa red no usa OAuth', { status: 400 })
 
   const origin = new URL(request.url).origin

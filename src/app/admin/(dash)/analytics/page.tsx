@@ -42,7 +42,7 @@ import {
 import { parseFilters } from '@/lib/filters'
 import { networkLabel } from '@/lib/networks'
 import { etiquetaDeFechas } from '@/lib/rango'
-import { anunciosAbiertosPara } from '@/lib/redes-abiertas'
+import { anunciosAbiertosPara, promocionarAbiertoPara } from '@/lib/redes-abiertas'
 import {
   MAX_PUBLICACIONES_LEIDAS,
   getCampaignPosts,
@@ -150,6 +150,8 @@ export default async function NumerosPage({ searchParams }: { searchParams: Prom
           <Suspense fallback={<SeccionCargando orden={2} />}>
             <LoPagado
               ownerId={ownerId}
+              zona={zona}
+              promocionar={promocionarAbiertoPara(ownerId)}
               periodo={filters.periodo}
               params={params}
               nombres={Object.fromEntries(cuentas.map((c) => [c.id, nombreDeCuenta(c)]))}

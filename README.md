@@ -347,7 +347,7 @@ Los dos perfiles de ejemplo están para que los edites, no para que los borres y
 de cero.
 
 Cada fila de cada tabla (perfiles, cuentas, posts, borradores, comentarios, ajustes, llaves
-de API, anuncios —por la cuenta conectada que los leyó—, y las marcas, comandas, insumos, materiales de la cámara de frío, subidas y creativos de La
+de API, anuncios y promociones —por la cuenta conectada de la que cuelgan—, y las marcas, comandas, insumos, materiales de la cámara de frío, subidas y creativos de La
 Cocina) tiene dueño: el panel solo te muestra lo tuyo, nunca lo de otro usuario invitado. Lo mismo
 la API: lo que entra con una llave es del dueño de la llave, y un agente con la tuya no ve
 ni toca lo de nadie más. Tu fila de usuario —el nombre, la zona y el modo del panel— la
@@ -368,7 +368,7 @@ cada publicación — ver «Varias cuentas de una misma red», más abajo.
 **Traspasar una cuenta**, en Los Maestros, es lo único del panel que cruza dueños, y por eso solo
 lo hace el admin (`src/lib/social/traspasar.ts`). Cambia de dueño la cuenta, sus publicaciones y
 los cortes que salen solo a ella; lo demás —métricas, comentarios, los anuncios que se leyeron
-con su token— cuelga de la cuenta y la sigue. Un corte que sale
+con su token, las promociones de sus publicaciones— cuelga de la cuenta y la sigue. Un corte que sale
 además a otras cuentas se queda con quien lo programó, con un destino en una cuenta que ya no es
 suya: sale igual, porque publicar busca la cuenta por su id y no por su dueño. La credencial no
 cambia hasta que quien recibe la cuenta aprieta **Reconectar**.
@@ -540,7 +540,7 @@ nada. La **baja** deja sin credencial tus cuentas de Instagram y Facebook, igual
 cuenta.» —el motivo, «Quitaste la app desde Facebook: vuelve a conectar.», sale solo al
 pasar el mouse—; el historial de métricas se conserva. El **borrado** sí borra lo que
 vino de esas dos redes —posts, comentarios, métricas y los destinos programados de esas
-cuentas, y los anuncios que se leyeron con ellas— y devuelve a Meta un código y la dirección `https://TU-DOMINIO/borrado/<código>`,
+cuentas, los anuncios que se leyeron con ellas y las promociones armadas desde Tu Parrilla, que siguen en la cuenta publicitaria de la persona— y devuelve a Meta un código y la dirección `https://TU-DOMINIO/borrado/<código>`,
 una página pública donde ese código confirma cuándo fue y cuántas cuentas se borraron. Lo
 que escribiste tú —el texto y la media de una publicación programada— no es de Meta y no
 se toca mientras el corte conserve algún destino: uno que todavía salga en otra red sigue
@@ -904,7 +904,7 @@ Una publicación que ya no responde cuando se la pide por id (borrada, casi siem
 y nada más: no se archiva, porque la misma respuesta de Meta cubre «sin permiso». Solo se
 archiva lo que falta dentro de lo que el listado alcanzó a ver, como siempre.
 
-**Lo pagado: los anuncios de Meta, solo para leer.** Al final de cada sincronización, para
+**Lo pagado: leer los anuncios de Meta.** Al final de cada sincronización, para
 cada dueño que nombra `ANUNCIOS_ABIERTO_PARA`, Tu Parrilla lee con la Marketing API sus cuentas
 publicitarias (`me/adaccounts`) y los anuncios de cada una, con sus totales de principio a fin
 —gasto, alcance, impresiones, clics y fechas— y el creativo, que dice qué publicación se
@@ -916,10 +916,32 @@ Una promoción hecha desde la app de Instagram o desde la página es un anuncio 
 publicitaria, así que entra igual. Se lee una vez por dueño, no por cuenta, y primero con el
 token de Instagram: es el de usuario, el que la Marketing API acepta; el de Facebook es de
 página y se prueba solo si no hay otro. Un error acá —lo normal mientras falte el permiso— no
-pinta ninguna cuenta de rojo: queda en el registro del cron. Tu Parrilla no crea ni promociona
-anuncios, así que pide `ads_read` y no `ads_management`, y solo al conectar con
-`META_PERMISOS_ANUNCIOS=1`. Las dos variables esperan la revisión de Meta (ver
-`docs/pendientes.md`).
+pinta ninguna cuenta de rojo: queda en el registro del cron. Leer pide `ads_read`, y solo al
+conectar con `META_PERMISOS_ANUNCIOS=1`.
+
+**Promocionar desde Tu Parrilla.** En la pieza de una publicación ya publicada de Instagram o
+Facebook, «Promocionar» arma lo mismo que el botón de la app, en la cuenta publicitaria del
+creador (`src/lib/social/promocionar.ts`, puro, y `promocionar-meta.ts`): una campaña con el
+objetivo elegido —alcance, interacción o visitas a su página— y `special_ad_categories: []`, que
+el creador confirma que no es vivienda, empleo, crédito ni política; un conjunto con el
+presupuesto (por día o total, en la moneda de la cuenta y en su unidad mínima: pesos chilenos
+enteros, centavos de dólar), las fechas, los países, las edades y el público Advantage+ si se
+pide; un creativo que apunta a la publicación que ya existe (`object_story_id` en Facebook;
+`source_instagram_media_id`, la cuenta y su página en Instagram), y el anuncio. Antes de crear
+nada, el formulario muestra lo máximo que se puede gastar (el total, o el diario por los días) y
+la acción solo sigue si el gasto que el creador confirmó es el que calcula el servidor. La
+campaña nace siempre en pausa y se enciende al final, solo si el creador eligió activarla; si
+Meta rechaza un paso, la campaña se borra y no queda nada. Antes de intentar se mira la cuenta
+publicitaria —deshabilitada, con un pago pendiente, sin medio de pago, sin permiso para anunciar—
+y el mínimo diario de Meta (`minimum_budgets`); los errores de Meta se piden en castellano
+(`locale=es_LA`) y se muestran tal cual. Pausar, reanudar y detener (archivar: los resultados
+quedan) le cambian el estado a la campaña. Cada promoción queda en la tabla `promociones`, que
+cuelga de la cuenta de la publicación; cómo va se lee en vivo, y lo que logra llega a «Lo pagado»
+por la lectura de arriba. Quitar la cuenta, o el borrado de Meta, borra la fila pero no toca la
+campaña en Meta: es de la cuenta publicitaria del creador, que la maneja en el Administrador de
+anuncios. Promocionar pide `ads_management`, solo con `META_PERMISOS_PROMOCIONAR=1` y junto a la
+de leer, y se ofrece a quien nombra `ANUNCIOS_ABIERTO_PARA` con las dos banderas puestas
+(`promocionarAbiertoPara`). Todo espera la revisión de Meta (ver `docs/pendientes.md`).
 
 **Si una cuenta aparece dos veces —una «Sin credencial» y otra viva—, no es un error tuyo.**
 TikTok, Instagram y Facebook le dan a la misma persona un identificador distinto por cada
@@ -1186,7 +1208,8 @@ Vercel y bajan con `vercel env pull .env.local`.
 | `COMENTARIOS_DM` | El privado a quien comentó en Instagram o Facebook, tras responderle a mano y en la regla de palabra clave. `1` lo enciende para todos; una lista de ids de usuario separados por comas, solo para esos (la cuenta del revisor de Meta mientras revisa) | No — apagada por defecto; exige `instagram_manage_messages` y `pages_messaging` (sin acceso avanzado, solo llega a quien tiene un rol en la app de Meta) |
 | `META_PERMISOS_PRIVADO` | Con `1`, conectar Instagram y Facebook pide además los permisos del privado | No — encenderla solo después de activarlos en los casos de uso de la app de Meta: si no, Meta rechaza la ventana entera |
 | `META_PERMISOS_ANUNCIOS` | Con `1`, conectar Instagram y Facebook pide además `ads_read`, para leer los resultados de los anuncios («Lo pagado») | No — encenderla solo después de activar `ads_read` en los casos de uso de la app de Meta: si no, Meta rechaza la ventana entera |
-| `ANUNCIOS_ABIERTO_PARA` | Para quién se leen los anuncios de Meta y se ve «Lo pagado» en Los Números. `1`, para todos; una lista de ids de usuario separados por comas, solo para esos (la cuenta del revisor de Meta mientras revisa) | No — apagada por defecto; sin `ads_read` concedido la lectura falla cada noche, así que se abre para todos solo con el permiso aprobado |
+| `META_PERMISOS_PROMOCIONAR` | Con `1`, y solo junto a `META_PERMISOS_ANUNCIOS=1`, conectar Instagram y Facebook pide además `ads_management`, para promocionar una publicación desde Tu Parrilla | No — encenderla solo después de activar `ads_management` en los casos de uso de la app de Meta: si no, Meta rechaza la ventana entera. Sin ella no se ofrece «Promocionar» |
+| `ANUNCIOS_ABIERTO_PARA` | Para quién se leen los anuncios de Meta y se ve «Lo pagado» en Los Números; con las dos banderas de arriba, también «Promocionar». `1`, para todos; una lista de ids de usuario separados por comas, solo para esos (la cuenta del revisor de Meta mientras revisa) | No — apagada por defecto; sin `ads_read` concedido la lectura falla cada noche, así que se abre para todos solo con los permisos aprobados |
 | `SITE_URL` | Tu dominio, para etiquetar los enlaces del mensaje automático | No — sin ella se usa el dominio de producción de Vercel |
 | `COCINA_SECRET` | La credencial de La Cocina: la que el servidor del chef manda en `Authorization: Bearer …` a `/api/cocina/…` para tomar comandas, bajar insumos, informar estados y entregar creativos (ver «La Cocina» y `docs/cocina-api.md`). La conocen solo este despliegue y el servidor del chef | No — sin ella esas rutas responden `401` y la cocina queda cerrada; si la pones, genérala igual que `CRON_SECRET` y dásela al servidor del chef |
 | `CRON_SECRET` | Autoriza las corridas programadas: el sync diario y la publicación cada 5 minutos. Vercel la manda sola a su cron; el pinger externo la manda en `Authorization: Bearer …` | Sí — Vercel no la crea: se genera igual que `AUTH_SECRET` y se agrega. Sin ella los crons responden `401` y no corre nada |
@@ -1796,6 +1819,7 @@ src/
     tracking.ts            contexto de la visita desde headers
     analytics.ts           consultas del dashboard
     lo-pagado.ts           los anuncios del dueño que corrieron en el período, para «Lo pagado» en Los Números
+    enlace-de-la-pagina.ts la dirección pública de la página principal del dueño: el link con ?s= de cada publicación
     planilla/              «Llevar para la casa»: las hojas y su «Léeme», lo que se lee fila por fila, y el .xlsx escrito a mano
     tablero.ts             las reglas de Los Números sin base: cuenta elegida, «⋯ Más» abiertos, la URL
     pieza.ts               qué junta las versiones de una pieza y las medianas por atributo (sin base)
@@ -1825,7 +1849,8 @@ src/
       politica-youtube.ts  lo que las políticas de YouTube no dejan hacer con sus datos
       retencion-youtube.ts borra lo de YouTube que lleva 30 días sin refrescarse
       traspasar.ts         le cambia el dueño a una cuenta con lo que se bajó de ella, sin borrar nada
-      anuncios.ts          los anuncios de Meta, solo para leer: qué se le pide a la Marketing API, el cruce con las publicaciones y el resumen de «Lo pagado» (sin base); anuncios-sync.ts los guarda
+      anuncios.ts          leer los anuncios de Meta: qué se le pide a la Marketing API, el cruce con las publicaciones y el resumen de «Lo pagado» (sin base); anuncios-sync.ts los guarda
+      promocionar.ts       promocionar una publicación: qué se acepta, el gasto máximo, lo que se le manda a Meta y sus errores en castellano (sin base); promocionar-meta.ts crea, pausa y detiene
       publish/secuencia.ts las historias de una secuencia salen en orden: cada una espera a la anterior
 public/docs/
   api-llm.md, api-editor.md, api.json   las guías de la API para un LLM

@@ -75,17 +75,25 @@ describe('los permisos del privado', () => {
 })
 
 describe('el permiso de los anuncios', () => {
-  it('solo con su bandera, solo leer, y solo en Instagram y Facebook', () => {
+  it('solo con su bandera, y solo en Instagram y Facebook', () => {
     expect(scopesDe('instagram', false)).not.toContain('ads_read')
     expect(scopesDe('instagram', false, true)).toMatch(/,ads_read$/)
     expect(scopesDe('facebook', false, true)).toMatch(/,ads_read$/)
-    // Tu Parrilla no crea ni promociona anuncios: pedir `ads_management` sería pedir de más.
+    // Leer no es promocionar: `ads_management` tiene su propia bandera.
     expect(scopesDe('instagram', true, true)).not.toContain('ads_management')
     expect(scopesDe('tiktok', false, true)).toBe(scopesDe('tiktok', false))
   })
 
   it('se suma al privado sin pisarlo', () => {
     expect(scopesDe('instagram', true, true)).toMatch(/,instagram_manage_messages,pages_messaging,ads_read$/)
+  })
+
+  it('promocionar pide ads_management solo junto con leer', () => {
+    expect(scopesDe('instagram', false, true, true)).toMatch(/,ads_read,ads_management$/)
+    expect(scopesDe('facebook', false, true, true)).toMatch(/,ads_read,ads_management$/)
+    // La bandera de promocionar sola no pide nada.
+    expect(scopesDe('instagram', false, false, true)).toBe(scopesDe('instagram', false))
+    expect(scopesDe('youtube', false, true, true)).toBe(scopesDe('youtube', false))
   })
 
   it('la ventana de Meta lo pide con la bandera puesta', async () => {

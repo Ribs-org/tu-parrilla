@@ -1,5 +1,5 @@
-// Los anuncios de Meta del dueño, solo para leer cómo les fue (`ads_read`, Marketing API). Tu
-// Parrilla no crea ni promociona anuncios. Lo de este archivo es puro —qué se le pide a Meta y
+// Los anuncios de Meta del dueño: leer cómo les fue (`ads_read`, Marketing API). Crearlos y
+// pausarlos es `promocionar.ts`. Lo de este archivo es puro —qué se le pide a Meta y
 // cómo se lee lo que contesta, y cómo se resume para Los Números—; lo que escribe en la base
 // está en `anuncios-sync.ts` y lo que lee para la pantalla en `lib/lo-pagado.ts`.
 //

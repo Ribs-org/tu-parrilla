@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { REDES_PROXIMAMENTE } from './networks'
-import { anunciosAbiertosPara, proximamentePara } from './redes-abiertas'
+import { anunciosAbiertosPara, promocionarAbiertoPara, proximamentePara } from './redes-abiertas'
 
 describe('proximamentePara', () => {
   afterEach(() => vi.unstubAllEnvs())
@@ -36,5 +36,23 @@ describe('anunciosAbiertosPara', () => {
     expect(anunciosAbiertosPara('revisor')).toBe(true)
     expect(anunciosAbiertosPara('nadie')).toBe(false)
     expect(anunciosAbiertosPara(null)).toBe(false)
+  })
+})
+
+describe('promocionarAbiertoPara', () => {
+  afterEach(() => vi.unstubAllEnvs())
+
+  it('pide quien ve «Lo pagado» y las dos banderas del conectar', () => {
+    vi.stubEnv('ANUNCIOS_ABIERTO_PARA', 'revisor')
+    vi.stubEnv('META_PERMISOS_ANUNCIOS', '1')
+    vi.stubEnv('META_PERMISOS_PROMOCIONAR', '1')
+    expect(promocionarAbiertoPara('revisor')).toBe(true)
+    expect(promocionarAbiertoPara('otro')).toBe(false)
+    // Sin la de leer, la de promocionar sola no pide nada al conectar.
+    vi.stubEnv('META_PERMISOS_ANUNCIOS', '')
+    expect(promocionarAbiertoPara('revisor')).toBe(false)
+    vi.stubEnv('META_PERMISOS_ANUNCIOS', '1')
+    vi.stubEnv('META_PERMISOS_PROMOCIONAR', '')
+    expect(promocionarAbiertoPara('revisor')).toBe(false)
   })
 })

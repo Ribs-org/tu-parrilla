@@ -11,6 +11,7 @@ import { etiquetaDeFechas } from '@/lib/rango'
 import { formatearGasto, resumirLoPagado, type PublicacionPagada } from '@/lib/social/anuncios'
 import { numerosHref, type Params } from '@/lib/tablero'
 import { formatNumber } from '@/lib/utils'
+import { Promociones } from './promociones'
 
 const RUTA = '/admin/analytics'
 
@@ -26,17 +27,22 @@ function fechas(p: PublicacionPagada, hoy: string): string {
 
 /**
  * «Lo pagado»: cómo les fue a los anuncios de Meta del dueño y, sobre todo, a sus publicaciones
- * promocionadas. Solo leer: Tu Parrilla no crea ni promociona anuncios. La abre
+ * promocionadas, con las promociones armadas desde acá (`promociones.tsx`). La abre
  * `anunciosAbiertosPara` (la página decide si se muestra); los números los guarda la
  * sincronización diaria (`social/anuncios-sync.ts`).
  */
 export async function LoPagado({
   ownerId,
+  zona,
   periodo,
   params,
   nombres,
+  promocionar,
 }: {
   ownerId: string
+  zona: string
+  /** Si además se puede promocionar desde acá (`promocionarAbiertoPara`): suma la lista de promociones. */
+  promocionar: boolean
   periodo: Periodo
   params: Params
   /** «Red · cuenta» por id de cuenta, el mismo patrón del resto del tablero. */
@@ -157,6 +163,16 @@ export async function LoPagado({
           </Panel>
         </>
       )}
+
+      {promocionar ? (
+        <>
+          <Promociones ownerId={ownerId} zona={zona} conEnlace />
+          <p className="mt-3 text-[0.78rem] text-fg-faint">
+            Para promocionar una publicación, ábrela —en «Ver todas las publicaciones →» o en «Lo que más creció»— y
+            busca «Promocionar», debajo de sus versiones.
+          </p>
+        </>
+      ) : null}
     </section>
   )
 }

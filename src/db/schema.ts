@@ -409,6 +409,52 @@ export const anuncios = pgTable(
   ],
 ).enableRLS()
 
+/**
+ * Una promoción que el dueño armó desde Tu Parrilla (`lib/social/promocionar.ts`): la campaña,
+ * el conjunto, el creativo y el anuncio que se crearon en su cuenta publicitaria para una de sus
+ * publicaciones. Los resultados no viven acá: llegan por la lectura de siempre, a `anuncios`, por
+ * el id del anuncio.
+ *
+ * Cuelga de la cuenta conectada de la publicación, como `anuncios`. Borrarla no toca nada en
+ * Meta: la campaña sigue en la cuenta publicitaria, y se maneja desde el Administrador de
+ * anuncios. Los montos van en la unidad mínima de la moneda, como los pide Meta (centavos de
+ * dólar, pesos chilenos enteros: `OFFSET_1`).
+ */
+export const promociones = pgTable(
+  'promociones',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    accountId: uuid('account_id')
+      .notNull()
+      .references(() => socialAccounts.id, { onDelete: 'cascade' }),
+    postId: uuid('post_id')
+      .notNull()
+      .references(() => socialPosts.id, { onDelete: 'cascade' }),
+    cuentaPublicitariaId: text('cuenta_publicitaria_id').notNull(),
+    moneda: text('moneda').notNull(),
+    campanaId: text('campana_id').notNull(),
+    conjuntoId: text('conjunto_id').notNull(),
+    creativoId: text('creativo_id').notNull(),
+    anuncioId: text('anuncio_id').notNull(),
+    objetivo: text('objetivo').$type<'alcance' | 'interaccion' | 'trafico'>().notNull(),
+    tipoPresupuesto: text('tipo_presupuesto').$type<'diario' | 'total'>().notNull(),
+    presupuesto: bigint('presupuesto', { mode: 'number' }).notNull(),
+    gastoMaximo: bigint('gasto_maximo', { mode: 'number' }).notNull(),
+    desde: timestamp('desde', { withTimezone: true }).notNull(),
+    hasta: timestamp('hasta', { withTimezone: true }).notNull(),
+    paises: jsonb('paises').$type<string[]>().notNull(),
+    edadMin: integer('edad_min').notNull(),
+    edadMax: integer('edad_max'),
+    advantage: boolean('advantage').notNull().default(false),
+    // Lo que el dueño pidió por última vez; lo que Meta dice de verdad (en revisión, rechazado)
+    // se lee aparte, en vivo.
+    estado: text('estado').$type<'activa' | 'pausada' | 'detenida'>().notNull(),
+    creadaEn: timestamp('creada_en', { withTimezone: true }).notNull().defaultNow(),
+    actualizadaEn: timestamp('actualizada_en', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('promociones_post_idx').on(t.postId), index('promociones_account_idx').on(t.accountId)],
+).enableRLS()
+
 export const TARGET_STATUSES = ['scheduled', 'publishing', 'published', 'failed'] as const
 export type TargetStatus = (typeof TARGET_STATUSES)[number]
 
@@ -1151,6 +1197,7 @@ export type SocialAccount = typeof socialAccounts.$inferSelect
 export type SocialPost = typeof socialPosts.$inferSelect
 export type PostMetric = typeof postMetrics.$inferSelect
 export type Anuncio = typeof anuncios.$inferSelect
+export type Promocion = typeof promociones.$inferSelect
 export type ScheduledPost = typeof scheduledPosts.$inferSelect
 export type ScheduledPostTarget = typeof scheduledPostTargets.$inferSelect
 export type ScheduledPostMedia = typeof scheduledPostMedia.$inferSelect
