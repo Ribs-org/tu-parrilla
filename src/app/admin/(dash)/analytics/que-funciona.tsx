@@ -4,16 +4,27 @@ import { NombreDe } from '@/components/de-noche-y-de-dia'
 import type { Filters } from '@/lib/analytics'
 import { DIAS_A_IGUAL_EDAD, contraSuCuenta } from '@/lib/igual-edad'
 import { POCAS_PUBLICACIONES } from '@/lib/pieza'
-import { attributesFor } from '@/lib/post-attributes'
+import { publicadosDesdeTuParrilla } from '@/lib/post-attributes'
 import { MAX_PUBLICACIONES_LEIDAS, getPostRows } from '@/lib/posts'
 import type { CuentaRow } from '@/lib/posts-kpis'
-import { fraseDe, queFunciona, type ClaveDimension, type Veredicto } from '@/lib/que-funciona'
+import {
+  fraseDe,
+  fraseDeGrupo,
+  fraseDeMusica,
+  queFunciona,
+  queFuncionaLaMusica,
+  type ClaveDimension,
+  type Veredicto,
+  type VeredictoMusica,
+} from '@/lib/que-funciona'
 import { numerosHref, type Params } from '@/lib/tablero'
 import { cn, formatNumber } from '@/lib/utils'
 
 const RUTA = '/admin/analytics'
 
 const ROTULOS: Record<ClaveDimension, string> = { tema: 'Tema', estilo: 'Estilo', formato: 'Formato' }
+
+const ROTULO = 'w-20 shrink-0 font-mono text-[0.65rem] uppercase tracking-[0.14em] text-fg-faint'
 
 /** A dónde mirar el detalle: «Comparar por atributo» en lo anotado; el formato no es un atributo. */
 function detalle(v: Veredicto, params: Params): { href: string; texto: string } | null {
@@ -27,7 +38,8 @@ function detalle(v: Veredicto, params: Params): { href: string; texto: string } 
 
 /**
  * «Qué te funciona», en la mitad «En las redes»: qué tema, qué estilo y qué formato anduvieron
- * mejor en el período, dicho en una frase (`src/lib/que-funciona.ts`). Lee lo mismo que
+ * mejor en el período, y si la música hizo diferencia, dicho en una frase
+ * (`src/lib/que-funciona.ts`). Lee lo mismo que
  * «Comparar por atributo» —lo publicado en el período, con su lectura de los 7 días—, que no
  * es lo que lee el resto del tablero (lo que tuvo actividad en el período): por eso hace su
  * propia consulta, y va en su propio `Suspense` para no atrasar las cifras de arriba.
@@ -48,11 +60,16 @@ export async function QueFunciona({
     aLos7Dias: true,
     ...(cuenta ? { accountId: cuenta.id } : {}),
   })
-  const atributosDe = await attributesFor(filters.ownerId, filas)
-  const entradas = filas.map((fila) => ({ fila, atributos: atributosDe.get(`${fila.network}:${fila.externalId}`) ?? null }))
+  const publicados = await publicadosDesdeTuParrilla(filters.ownerId, filas)
+  const entradas = filas.map((fila) => {
+    const desdeTuParrilla = publicados.get(`${fila.network}:${fila.externalId}`)
+    return { fila, atributos: desdeTuParrilla?.atributos ?? null, publicado: desdeTuParrilla?.publicado ?? null }
+  })
+  const relativos = contraSuCuenta(filas)
   return (
     <QueFuncionaVista
-      veredictos={queFunciona(entradas, contraSuCuenta(filas))}
+      veredictos={queFunciona(entradas, relativos)}
+      musica={queFuncionaLaMusica(entradas, relativos)}
       publicaciones={filas.length}
       params={params}
     />
@@ -62,10 +79,12 @@ export async function QueFunciona({
 /** Lo que se ve, aparte de la consulta: así se puede mirar sin la base. */
 export function QueFuncionaVista({
   veredictos,
+  musica,
   publicaciones,
   params,
 }: {
   veredictos: Veredicto[]
+  musica: VeredictoMusica
   publicaciones: number
   params: Params
 }) {
@@ -86,9 +105,7 @@ export function QueFuncionaVista({
               const link = detalle(v, params)
               return (
                 <li key={v.clave} className="flex flex-col gap-1 py-3 sm:flex-row sm:items-baseline sm:gap-4">
-                  <span className="w-20 shrink-0 font-mono text-[0.65rem] uppercase tracking-[0.14em] text-fg-faint">
-                    {ROTULOS[v.clave]}
-                  </span>
+                  <span className={ROTULO}>{ROTULOS[v.clave]}</span>
                   <p
                     className={cn(
                       'min-w-0 grow text-[0.85rem] leading-relaxed',
@@ -108,6 +125,20 @@ export function QueFuncionaVista({
                 </li>
               )
             })}
+            <li className="flex flex-col gap-1 py-3 sm:flex-row sm:items-baseline sm:gap-4">
+              <span className={ROTULO}>Música</span>
+              <div className="min-w-0 grow space-y-1 text-[0.85rem] leading-relaxed">
+                {musica.grupos.length === 0 ? (
+                  <p className="text-fg-muted">{fraseDeMusica(musica)}</p>
+                ) : (
+                  musica.grupos.map((g) => (
+                    <p key={`${g.red}:${g.formato}`} className={g.estado === 'gana' ? 'text-fg' : 'text-fg-muted'}>
+                      {fraseDeGrupo(g)}
+                    </p>
+                  ))
+                )}
+              </div>
+            </li>
           </ul>
           <div className="mt-3 max-w-2xl space-y-2 text-[0.78rem] leading-relaxed text-fg-faint">
             {sinAnotar ? (
@@ -118,6 +149,15 @@ export function QueFuncionaVista({
                 da la red.
               </p>
             ) : null}
+            <p>
+              En «Música» cuenta la música que Tu Parrilla le pidió a la red al publicar —como «Música de
+              TikTok» en las fotos—, no la que ya trae el video, y se compara dentro de cada red y formato.
+              Lo subido directo en la red no entra, porque de eso no se sabe
+              {musica.sinSaber > 0
+                ? ` (${musica.sinSaber === 1 ? '1 publicación' : `${formatNumber(musica.sinSaber)} publicaciones`} en este período)`
+                : ''}
+              .
+            </p>
             <p>
               Cuántos seguidores trajo cada publicación no se puede saber: TikTok da solo el total de
               la cuenta, e Instagram no lo da en los reels. Lo que ganó cada cuenta de Instagram y

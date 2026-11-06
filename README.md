@@ -280,7 +280,10 @@ lista. «En las redes» suma **Qué te funciona**: qué tema, qué estilo (los a
 `estilo`) y qué formato de la red anduvieron mejor en el período, contra lo normal de cada
 cuenta y dicho en una frase; solo nombra un ganador si hay al menos dos valores con 10
 publicaciones medidas a los 7 días y el mejor saca ×1,2 o más (`src/lib/que-funciona.ts`, con
-las mismas medianas de «Comparar por atributo»). Es en views: ninguna red da los seguidores
+las mismas medianas de «Comparar por atributo»). Su línea «Música» compara lo publicado desde
+Tu Parrilla con la música de la red —«Música de TikTok» en las fotos— contra lo publicado sin
+ella, dentro de cada red y formato, y gana un lado si saca ×1,2 lo del otro; lo subido directo
+en la red no entra, porque no se sabe. Es en views: ninguna red da los seguidores
 que trajo cada publicación. El resto (interacciones, arrastre, tus cuentas, la audiencia, los links, de dónde
 vienen…) espera detrás de su «⋯ Más», que no se consulta mientras está cerrado. La lista de
 todas las publicaciones, que antes era la pestaña Los Cortes, está un clic adentro («Ver todas
@@ -1333,7 +1336,7 @@ Vercel y bajan con `vercel env pull .env.local`.
 | `CRON_SECRET` | Autoriza las corridas programadas: el sync diario y la publicación cada 5 minutos. Vercel la manda sola a su cron; el pinger externo la manda en `Authorization: Bearer …` | Sí — Vercel no la crea: se genera igual que `AUTH_SECRET` y se agrega. Sin ella los crons responden `401` y no corre nada |
 | `MIGRAR_PREVIEWS` | Que los previews migren la base | Solo cuando el preview tenga una base propia; contra la de producción, no |
 | `DATABASE_URL_PRUEBAS` | Solo para las pruebas de integración: una Postgres desechable donde cada archivo crea y migra su propia base (ver «Comandos»). No va en Vercel | No — sin ella esas pruebas se saltan. Nunca la de producción |
-| `SCHEDULE_API_KEY` | La llave del despliegue: abre `POST /api/schedule/batch` (carga masiva), `POST /api/media` (subir un archivo una vez), `GET` y `DELETE /api/schedule/posts/{id}` (un post, o sacarlo), `POST /api/schedule/posts/{id}/archivar` y `…/desarchivar` (archivar lo quemado), `GET /api/schedule/posts` (calendario), `GET /api/schedule/resumen` (el resumen del día), `GET /api/schedule/cuentas` (las cuentas), `GET /api/metrics/posts` (métricas), `GET /api/metrics/mejores` (el mejor X %), `GET /api/metrics/que-funciona` (qué tema, estilo y formato funcionan) y `/api/bodega…` (la cámara de frío de La Cocina) a nombre del admin. Es anterior a las llaves por usuario y sigue para el agente que ya la usa | No — sin ella esos endpoints aceptan solo las llaves que cada usuario genera en La Cocina («Tu propio chef»); si la pones, genérala igual que `CRON_SECRET` |
+| `SCHEDULE_API_KEY` | La llave del despliegue: abre `POST /api/schedule/batch` (carga masiva), `POST /api/media` (subir un archivo una vez), `GET` y `DELETE /api/schedule/posts/{id}` (un post, o sacarlo), `POST /api/schedule/posts/{id}/archivar` y `…/desarchivar` (archivar lo quemado), `GET /api/schedule/posts` (calendario), `GET /api/schedule/resumen` (el resumen del día), `GET /api/schedule/cuentas` (las cuentas), `GET /api/metrics/posts` (métricas), `GET /api/metrics/mejores` (el mejor X %), `GET /api/metrics/que-funciona` (qué tema, estilo y formato funcionan, y si la música ayuda) y `/api/bodega…` (la cámara de frío de La Cocina) a nombre del admin. Es anterior a las llaves por usuario y sigue para el agente que ya la usa | No — sin ella esos endpoints aceptan solo las llaves que cada usuario genera en La Cocina («Tu propio chef»); si la pones, genérala igual que `CRON_SECRET` |
 | `RESEND_API_KEY` | Manda los códigos de ingreso y los avisos: la publicación que se quemó, la cuenta que se cayó, el resumen del día y la comanda de La Cocina que terminó (ver «Avisos por correo») | Sí — sin ella nadie puede entrar al panel |
 | `PUBLISH_ALERT_TO` | Adónde va un aviso sin dueño con correo: un post o una cuenta de antes de los usuarios. Lo demás va al correo de su dueño | No — sin ella, lo que no tiene dueño no avisa; el calendario y Los Fierros lo siguen mostrando |
 | `PUBLISH_ALERT_FROM` | Remitente de los avisos | Opcional; default `onboarding@resend.dev`, que solo entrega al correo de la cuenta de Resend |
@@ -1627,7 +1630,12 @@ moverle la respuesta a quien ya la usa; la lógica, sin base, está en `src/lib/
 del panel «Qué te funciona»: para `tema`, `estilo` y `formato`, un `estado` (`gana`, `parejo`,
 `faltan` o `sinValor`), la `frase` que muestra el tablero, los dos mejores con muestra
 suficiente y cada valor con sus `publicaciones`, sus `medidas` y la mediana de
-`contraSuCuenta`. Lee hasta 10.000 publicaciones; la lógica, sin base, está en
+`contraSuCuenta`. Trae además `musica`: con música contra sin música, un grupo por red y
+formato donde algo la llevó, con la misma forma. La música es la clave `musica` de las
+`opciones` guardadas del destino —hoy, «Música de TikTok» en las fotos—, así que lo subido
+directo en la red no tiene cómo saberse y no entra (`sinSaber` lo cuenta); las fotos de TikTok
+se reconocen por el post, porque TikTok da todo como video (`publicadosDesdeTuParrilla`, en
+`src/lib/post-attributes.ts`). Lee hasta 10.000 publicaciones; la lógica, sin base, está en
 `src/lib/que-funciona.ts`.
 
 ### Calendario por API
@@ -1950,7 +1958,7 @@ src/
     tablero.ts             las reglas de Los Números sin base: cuenta elegida, «⋯ Más» abiertos, la URL
     pieza.ts               qué junta las versiones de una pieza y las medianas por atributo (sin base)
     mejores.ts             el mejor (o el peor) X % de lo publicado: el corte, las medianas y lo que se repite (sin base)
-    que-funciona.ts        «Qué te funciona»: qué tema, estilo y formato anduvieron mejor, con su mínimo y su frase (sin base)
+    que-funciona.ts        «Qué te funciona»: qué tema, estilo y formato anduvieron mejor, y si la música ayudó, con su mínimo y su frase (sin base)
     igual-edad.ts          comparar a la misma edad y contra la propia cuenta: los 7 días y «contra su cuenta» (sin base)
     lado-a-lado.ts         dos publicaciones lado a lado: la curva por edad y sus atributos (sin base)
     metrics-consulta.ts    lo que comparten las rutas de /api/metrics: la llave, el rango, la red y la cuenta

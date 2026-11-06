@@ -10,7 +10,8 @@ llegó la gente, con qué etiqueta `?s=`, desde dónde, con qué equipo y a qué
 Tu Parrilla, sin cookies. Las une la etiqueta `?s=` de cada publicación: si el link con esa
 etiqueta está pegado en el post, las visitas que llegan por él se le cuentan a ese post. Cada
 mitad muestra dos números y una lista corta (y «En las redes», además, «Qué te funciona»: qué
-tema, qué estilo y qué formato anduvieron mejor, dicho en una frase); el resto aparece al
+tema, qué estilo y qué formato anduvieron mejor, y si la música hizo diferencia, dicho en una
+frase); el resto aparece al
 apretar su «⋯ Más». La lista
 completa, una publicación por fila, con su etiqueta editable y el botón para copiar su link,
 está en «Tus publicaciones». Cada publicación abre su **pieza**: cada lugar donde salió (otra
@@ -208,14 +209,15 @@ publicación, en la misma pestaña (el enlace a la red está ahí).
 período, cada publicación a los 7 días y contra lo normal de su cuenta: ×2 es el doble de lo
 normal. Dice cuál anda mejor solo si hay dos con al menos 10 publicaciones medidas.» Mientras
 carga, un recuadro tibio del mismo tamaño. Con una cuenta elegida arriba, mira solo esa cuenta.
-Tres líneas, cada una con su rótulo a la izquierda (en el teléfono, arriba), una frase y, a la
-derecha (en el teléfono, debajo), un enlace:
+Cuatro líneas, cada una con su rótulo a la izquierda (en el teléfono, arriba), una frase y, en
+las tres primeras, a la derecha (en el teléfono, debajo), un enlace:
 
 | Rótulo | Qué mira | Enlace |
 |---|---|---|
 | «Tema» | el atributo `tema` de cada post | «Comparar por tema →» |
 | «Estilo» | el atributo `estilo` (tutorial, storytime…) | «Comparar por estilo →» |
 | «Formato» | el tipo de post que da la red: «Reel», «Carrusel», «Foto», «Video»… | «Tu mejor 10 % →» |
+| «Música» | si se publicó desde Tu Parrilla con música de la red (como «Música de TikTok» en las fotos) o sin ella | ninguno |
 
 Los dos primeros enlaces llevan a «Comparar por atributo» con ese atributo elegido; el de
 «Formato», a «Tu mejor 10 %». Una línea en la que nada lleva ese atributo no tiene enlace. La
@@ -242,12 +244,41 @@ la línea):
   atributos.» (o «estilo»). En «Formato»: «Las redes no dieron el formato de nada de lo
   publicado en el período.»
 
-Debajo de las tres líneas, en chico:
+La línea «Música» compara con música contra sin música **dentro de cada red y formato** donde
+algo del período salió con música: las fotos de TikTok con las fotos de TikTok, no con los
+videos. Dice una frase por cada uno («<grupo>» es, por ejemplo, «las fotos de TikTok» o «los
+reels de Instagram»), resaltada la del grupo en que un lado anduvo mejor:
+
+- Cuando un lado anda mejor: «<Grupo> anduvieron mejor con música: ×<N> las views normales de
+  su cuenta a los 7 días (<M> publicaciones), contra ×<N> sin música (<M> publicaciones).» (o
+  «mejor sin música», «contra ×<N> con música»). Por ejemplo: «Las fotos de TikTok anduvieron
+  mejor con música: ×1,4 las views normales de su cuenta a los 7 días (12 publicaciones), contra
+  ×0,8 sin música (10 publicaciones).»
+- Cuando hay con qué comparar pero no se nota: «En <grupo> la música no marca diferencia: con
+  música tuvieron ×<N> las views normales de su cuenta a los 7 días (<M> publicaciones), y sin
+  música, ×<N> (<M> publicaciones).» (el lado que más sacó va primero).
+- Cuando no alcanza la muestra: «En <grupo> todavía no alcanza para decirlo: hacen falta al
+  menos 10 publicaciones medidas a los 7 días con música y 10 sin música. Hoy: con música <M> y
+  sin música <M>.»
+- Cuando todo llevó música: «En <grupo>, todo lo publicado desde Tu Parrilla llevó música: no
+  hay con qué compararlo.»
+- Cuando nada tiene todavía con qué medirse: «En <grupo> todavía no hay cómo medirlo: cada
+  publicación se mide a los 7 días, contra lo normal de su cuenta, y una cuenta necesita al
+  menos 5 publicaciones medidas en el período.»
+- Cuando nada salió con música: «Nada de lo publicado desde Tu Parrilla en el período llevó
+  música de la red (como «Música de TikTok» en las fotos).»
+
+Debajo de las cuatro líneas, en chico:
 
 - Solo si «Tema» o «Estilo» no tienen nada: «El tema y el estilo se anotan en los atributos de
   cada post al programarlo —por ejemplo, «tema: recetas» y «estilo: tutorial»—, en el campo
   «Atributos» del editor de La Parrilla o por la API, siempre escritos igual. El formato lo da
   la red.» (de día, «La Barra»).
+- Siempre: «En «Música» cuenta la música que Tu Parrilla le pidió a la red al publicar —como
+  «Música de TikTok» en las fotos—, no la que ya trae el video, y se compara dentro de cada red
+  y formato. Lo subido directo en la red no entra, porque de eso no se sabe.» Si en el período
+  hay publicaciones de las que no se sabe, antes del punto va cuántas: « (<N> publicaciones en
+  este período)».
 - Siempre: «Cuántos seguidores trajo cada publicación no se puede saber: TikTok da solo el
   total de la cuenta, e Instagram no lo da en los reels. Lo que ganó cada cuenta de Instagram y
   Facebook está en «Tus cuentas», en «⋯ Más».» Si el período tiene 10.000 publicaciones o más,
@@ -1022,6 +1053,17 @@ una chica, ni lo viejo a lo nuevo.
   mayúsculas y tildes.
 - **«Formato»** sale de la red: Reel, Carrusel, Foto, Video, Short o Enlace. En TikTok todo es
   «Video», así que con solo TikTok no hay con qué comparar.
+- **«Música»** es la que Tu Parrilla le pidió a la red al publicar: hoy, el interruptor «Música
+  de TikTok» de las fotos publicadas directo (ver [La Parrilla](la-parrilla.md)). La que ya
+  suena en el video no se ve, y no cuenta. Se compara dentro de cada red y formato —las fotos
+  de TikTok, aunque TikTok las dé como «Video», se reconocen por el post—, porque un video de
+  TikTok no puede llevar esa música y compararlo sería comparar formatos. Lo subido directo en
+  la red y lo mandado a la bandeja de TikTok («Borrador») **no entran**: no se sabe si llevaron
+  música (en la bandeja, la persona pudo ponérsela en la app), y no son «sin música». La vara
+  es la misma, lo normal de cada cuenta; la muestra mínima también, 10 medidas por lado. Como
+  son solo dos lados, uno anda mejor si saca ×1,2 o más de lo que sacó el otro, aunque los dos
+  estén bajo lo normal de la cuenta: las fotos pueden andar menos que los videos y la música
+  igual hacerles diferencia.
 - **Son views, no seguidores.** Ninguna red entrega los seguidores que trajo cada publicación:
   TikTok da solo el total de la cuenta, e Instagram no lo da en los reels.
 
@@ -1573,7 +1615,7 @@ programados distintos: no se ven juntos hasta que comparten el atributo `pieza`.
 Si una de las dos se subió a mano en la red, fuera de La Parrilla, no se puede: no tiene
 atributos. Los atributos también se ponen por la API: ver [la guía de la API](../api-llm.md).
 
-### Para saber qué tema, qué estilo y qué formato te funcionan
+### Para saber qué tema, qué estilo y qué formato te funcionan (y si la música ayuda)
 
 1. En el tablero, mitad «En las redes», bajar hasta «Qué te funciona», debajo de «Lo que más
    creció».
@@ -1581,6 +1623,9 @@ atributos. Los atributos también se ponen por la API: ver [la guía de la API](
    Con «30 días» o «90 días» suele alcanzar; con «Hoy» o «7 días», casi nunca.
 3. Leer la frase de cada línea. Para ver todos los valores, «Comparar por tema →» (o por
    estilo).
+4. Para la música, la línea «Música». Para que tenga con qué comparar, hacen falta fotos de
+   TikTok publicadas desde Tu Parrilla con «Música de TikTok» encendido y otras con el
+   interruptor apagado, al menos 10 medidas de cada lado.
 
 Para que diga tema y estilo, los posts tienen que llevar los atributos `tema` y `estilo` al
 programarlos, siempre escritos igual: en el editor de cada post en
@@ -1692,6 +1737,9 @@ De día, donde una de estas frases dice «La Parrilla» dice «La Barra», y «L
 | «Todavía no alcanza para decirlo: hacen falta dos temas con al menos 10 publicaciones medidas a los 7 días cada uno. Hoy: …» (o «estilos», «formatos»; en «Qué te funciona») | Hay valores, pero menos de dos con 10 publicaciones medidas. | Ampliar el período («90 días»), o seguir anotando el atributo en lo que se programa. |
 | «Todavía no hay cómo medirlo: cada publicación se mide a los 7 días, contra lo normal de su cuenta, y una cuenta necesita al menos 5 publicaciones medidas en el período.» (en «Qué te funciona») | Nada de lo que lleva ese valor tiene todavía su lectura de los 7 días, o su cuenta tiene menos de 5 así (pasa con «Hoy» o «7 días», y con YouTube). | Elegir «30 días» o más. |
 | «Nada de lo publicado en el período lleva «tema» en sus atributos.» (o «estilo»; en «Qué te funciona») | Ningún post del período se programó con ese atributo. | Anotarlo al programar (ver «Para saber qué tema, qué estilo y qué formato te funcionan»). |
+| «Nada de lo publicado desde Tu Parrilla en el período llevó música de la red (como «Música de TikTok» en las fotos).» (en «Qué te funciona») | Nada del período salió desde Tu Parrilla con la música de la red encendida. Lo subido directo en la red no cuenta. | Para medirlo, publicar fotos de TikTok desde [La Parrilla](la-parrilla.md), unas con «Música de TikTok» y otras sin. |
+| «En las fotos de TikTok todavía no alcanza para decirlo: hacen falta al menos 10 publicaciones medidas a los 7 días con música y 10 sin música. Hoy: …» (en «Qué te funciona») | Hay de los dos lados, o de uno, pero menos de 10 medidas en alguno. | Ampliar el período, o seguir alternando con y sin música. |
+| «En las fotos de TikTok, todo lo publicado desde Tu Parrilla llevó música: no hay con qué compararlo.» (en «Qué te funciona») | Todas las fotos del período salieron con «Música de TikTok». | Publicar algunas con el interruptor apagado para tener con qué comparar. |
 | «Ninguna visita llegó todavía por el link de una publicación.» (en «Qué publicación te trajo gente») | En el período no llegó ninguna visita con etiqueta. | Ampliar el período; pegar los links con etiqueta (ver «Para copiar el link…»). |
 | «Todavía no hay lecturas de cuenta. La primera llega con la próxima sincronización diaria.» (en «Tus cuentas») | No hay ninguna lectura de cuenta de Instagram, Facebook ni YouTube (o de la cuenta elegida). La sincronización diaria corre a las 9:00 UTC. | Esperar, o apretar «Sincronizar ahora» en [Los Fierros](los-fierros.md). Si solo hay TikTok, Threads o X conectados, o la cuenta elegida es de una de esas, este mensaje se queda (Threads sí tiene lecturas en la cuenta del revisor de Meta, con sus permisos de lectura). |
 | «Sin tráfico en este período.» (en «Visitas y clicks en el tiempo») | Ni visitas ni clicks en el período. | Ampliar el período, revisar el selector de página. |
@@ -1921,6 +1969,13 @@ De día, donde una de estas frases dice «La Parrilla» dice «La Barra», y «L
   que se programa.
 - **«Puse formato en los atributos y no aparece»**: «Formato» lo da la red (Reel, Carrusel…).
   Para el tipo de video (tutorial, storytime…), el atributo es `estilo`.
+- **«¿Me conviene ponerle música?» / «¿la música me ayuda?»**: la línea «Música» de «Qué te
+  funciona». Solo mira lo publicado desde Tu Parrilla con la música de la red —hoy, «Música de
+  TikTok» en las fotos—; lo subido directo en la red no cuenta. El atributo `musica` que se
+  anote al programar (`tendencia`, `original`…) es otra cosa: se compara en «Comparar por
+  atributo», «Por musica».
+- **«Mis videos tienen música y dice que nada llevó música»**: la línea mira la música que la
+  red le pone al publicar, no la que ya trae el video.
 - **«Quiero ver qué hook funciona» / «¿qué tema me trae más gente?»**: «Comparar por atributo
   →», en el tablero, y elegir «Por hook» o «Por tema». Ver «Para ver qué hook funciona».
 - **«No me aparece hook (o tema) en el selector»**: ninguna publicación del período lo tiene.
@@ -1981,6 +2036,7 @@ De día, donde una de estas frases dice «La Parrilla» dice «La Barra», y «L
   cuenta del revisor de Meta).
 - «Qué te funciona» no dice los seguidores que trajo cada publicación (ninguna red los da), ni
   mira otros atributos que `tema` y `estilo`: para un hook o una serie, «Comparar por atributo».
+  En «Música» no dice qué canción anduvo mejor, ni sabe nada de lo subido directo en la red.
 - No pega el link en la red, ni edita ni borra la publicación allá: lo único que se edita aquí
   es la etiqueta, en «Tus publicaciones».
 - No crea ni edita los links de la página: eso es [La Vitrina](la-vitrina.md).
@@ -2040,7 +2096,8 @@ Sale de:
   (quién compite, quién entra, el corte, las medianas, «Rinden» y «Qué tienen en común»)
 - `src/app/admin/(dash)/analytics/que-funciona.tsx` («Qué te funciona»: el panel, sus enlaces y
   sus notas) y `src/lib/que-funciona.ts` (qué se mira, el mínimo, cuándo uno anduvo mejor y
-  cada frase)
+  cada frase; la música, en `musicaDe` y `queFuncionaLaMusica`); lo que se sabe de cómo salió
+  cada publicación, en `publicadosDesdeTuParrilla`, `src/lib/post-attributes.ts`
 - `src/lib/igual-edad.ts` (los 7 días, «Contra su cuenta», su mínimo de 5 y qué es reciente);
   la lectura de los 7 días sale de `getPostRows`, en `src/lib/posts.ts`
 - `src/app/admin/(dash)/analytics/lado-a-lado/page.tsx` («Lado a lado»), `src/lib/lado-a-lado.ts`

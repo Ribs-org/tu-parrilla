@@ -302,7 +302,8 @@ el JSON.
   recomendada, que el dueño puede cambiar después en la app de TikTok. **Solo en fotos**: la API
   de TikTok no deja ponerle música a un video, así que en un video se guarda pero no se manda (no
   falla, porque el editor del panel deja cambiar los archivos de un post ya programado). Lo que
-  mandes por acá no cambia lo que el compositor del panel recuerda para esa cuenta.
+  mandes por acá no cambia lo que el compositor del panel recuerda para esa cuenta. Si con
+  música les fue mejor a las fotos lo dice `musica` en `/api/metrics/que-funciona` (sección 2c).
 
 Media de TikTok: **un solo video** (mp4, mov, webm) **o de 1 a 35 fotos** (jpg, webp),
 nunca mezcla.
@@ -969,11 +970,12 @@ GET /api/metrics/que-funciona?desde=2026-09-01&hasta=2026-09-30
 Authorization: Bearer <tu llave>
 ```
 
-Qué tema, qué estilo y qué formato anduvieron mejor en el rango, ya decidido y dicho en una
-frase: lo mismo que el panel «Qué te funciona» de Los Números. Mira el atributo `tema`, el
-atributo `estilo` (sección 1, «El vocabulario recomendado») y el `formato` que da la red
-(Reel, Carrusel, Foto, Video, Short, Enlace). Para cualquier otro atributo, agrupa tú las
-filas de `/api/metrics/posts`.
+Qué tema, qué estilo y qué formato anduvieron mejor en el rango, y si la música hizo
+diferencia, ya decidido y dicho en una frase: lo mismo que el panel «Qué te funciona» de Los
+Números. Mira el atributo `tema`, el atributo `estilo` (sección 1, «El vocabulario
+recomendado»), el `formato` que da la red (Reel, Carrusel, Foto, Video, Short, Enlace) y la
+`musica` que se le pidió a la red al publicar (abajo, «La música»). Para cualquier otro
+atributo, agrupa tú las filas de `/api/metrics/posts`.
 
 Parámetros, todos opcionales: `desde`, `hasta`, `red`, `cuenta`, igual que en
 `/api/metrics/posts`, con las mismas frases de error. El rango filtra por **fecha de
@@ -1009,6 +1011,26 @@ publicación**.
   "formato": {
     "estado": "sinValor",
     …
+  },
+  "musica": {
+    "estado": "gana",
+    "frase": "Las fotos de TikTok anduvieron mejor con música: ×1,4 las views normales de su cuenta a los 7 días (12 publicaciones), contra ×0,8 sin música (10 publicaciones).",
+    "sinSaber": 18,
+    "grupos": [
+      {
+        "red": "tiktok",
+        "formato": "Foto",
+        "estado": "gana",
+        "frase": "Las fotos de TikTok anduvieron mejor con música: ×1,4 las views normales de su cuenta a los 7 días (12 publicaciones), contra ×0,8 sin música (10 publicaciones).",
+        "primero": { "valor": "con música", "publicaciones": 13, "medidas": 12, "contraSuCuenta": 1.4 },
+        "segundo": { "valor": "sin música", "publicaciones": 10, "medidas": 10, "contraSuCuenta": 0.8 },
+        "valores": [
+          { "valor": "con música", "publicaciones": 13, "medidas": 12, "contraSuCuenta": 1.4 },
+          { "valor": "sin música", "publicaciones": 10, "medidas": 10, "contraSuCuenta": 0.8 }
+        ],
+        "canciones": []
+      }
+    ]
   }
 }
 ```
@@ -1033,6 +1055,41 @@ Una clave por dimensión —`tema`, `estilo`, `formato`—, cada una con:
 Lo que no lleva el atributo no compite, y YouTube no se mide (sus políticas no permiten
 calcular métricas con sus datos). Son views, no seguidores: ninguna red da los seguidores que
 trajo cada publicación. `truncado` y el tope de 10.000, como en `/api/metrics/mejores`.
+
+## La música
+
+**`musica`** dice si a lo publicado desde Tu Parrilla le fue mejor con la música que se le
+pidió a la red al publicar o sin ella. Hoy esa música es `opciones.musica: true` en las fotos de
+TikTok publicadas en `directo` (sección 1, `opciones`). No es el atributo `musica` del
+vocabulario (`tendencia`, `original`…), que se compara agrupando `/api/metrics/posts`, y no ve
+la música que ya trae el video.
+
+- Cuenta como **con música** el destino con la clave `musica` encendida en sus opciones; como
+  **sin música**, el que salió desde Tu Parrilla sin ella. Un TikTok en video con `musica: true`
+  es sin música: TikTok no la manda en un video.
+- **No entra** lo subido directo en la red (no tiene opciones) ni lo mandado a la bandeja de
+  TikTok (`modo: "borrador"`, donde el dueño pudo ponerle música en la app): de eso no se sabe.
+  **`sinSaber`** cuenta cuántas publicaciones del rango quedaron fuera por eso.
+- Se compara **dentro de cada red y formato** donde algo llevó música: un elemento de
+  **`grupos`** por cada uno, del que tiene más publicaciones al que menos. `red` es la red y
+  `formato`, como en `formato` (las fotos de TikTok salen `"Foto"`, aunque TikTok las dé como
+  video). Sin ningún grupo, `estado` es `sinValor` y `grupos`, `[]`.
+- Cada grupo trae `estado`, `frase`, `primero`, `segundo` y `valores` como las dimensiones de
+  arriba, con dos valores posibles: `"con música"` y `"sin música"`. Las reglas: cada lado con
+  `minimo` (10) medidas o más, y `gana` el que saca `paraDestacar` (×1,2) **o más de lo que
+  sacó el otro** —no de lo normal de la cuenta: las fotos pueden andar todas bajo lo normal y la
+  música igual hacerles diferencia—. Puede ganar `"sin música"`. `faltan` si un lado no llega
+  al mínimo o no hay sin música con qué comparar.
+- **`canciones`**: lo que llevó música agrupado por el título de la canción, con
+  `publicaciones`, `medidas` y `contraSuCuenta`, del que tiene más publicaciones al que menos, y
+  sin veredicto. Vacío cuando la red no guarda el título, como en las fotos de TikTok (TikTok
+  elige la canción).
+- El **`estado`** de arriba es `gana` si gana un lado en algún grupo; si no, `parejo` si alguno
+  lo está; si no, `faltan`. La **`frase`** de arriba son las de los grupos, una tras otra.
+
+Para recomendar música: solo con `gana` en el grupo de ese formato, y en la dirección que diga
+`primero.valor`. Con `faltan` o `parejo`, no la recomiendes ni la desaconsejes por los números;
+si el dueño quiere saberlo, alterna con y sin música hasta llegar a 10 medidas por lado.
 
 ---
 
@@ -1320,7 +1377,8 @@ para reportar un fallo.
 4. La sincronización diaria trae **métricas reales**.
 5. **Lee** `/api/metrics/posts` sobre un rango con suficiente historia, o pide directo
    `/api/metrics/mejores` para ver lo mejor de cada cuenta y qué lo distingue, o
-   `/api/metrics/que-funciona` para saber qué tema, qué estilo y qué formato anduvieron mejor.
+   `/api/metrics/que-funciona` para saber qué tema, qué estilo y qué formato anduvieron mejor,
+   y si la música les sirvió.
 6. **Correlaciona** `atributos` contra `viewsGanadas` y `arrastre`, y decide la
    próxima parrilla. Ejemplos de preguntas que el dato responde:
    - ¿qué `hook` gana en views, y cuál gana en visitas al sitio? (rara vez es el mismo)
@@ -1356,7 +1414,7 @@ patrones. Con menos de ~10 posts por valor de atributo, desconfía de la diferen
   aún no salieron.
 - **Entrega dos agregados**: `/api/metrics/mejores`, el mejor (o el peor) X % con sus
   medianas y lo que se repite, y `/api/metrics/que-funciona`, qué tema, estilo y formato
-  anduvieron mejor. Todo lo demás —promedios por red, tendencias, cruces de atributos— sale de
+  anduvieron mejor, y si la música hizo diferencia. Todo lo demás —promedios por red, tendencias, cruces de atributos— sale de
   las filas crudas de `/api/metrics/posts`, y el análisis es tuyo, a propósito.
 
 # 6. Ejemplos ejecutables
