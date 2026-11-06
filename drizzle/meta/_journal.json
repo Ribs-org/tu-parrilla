@@ -183,13 +183,6 @@
       "when": 1793631109202,
       "tag": "0025_la_bodega",
       "breakpoints": true
-    },
-    {
-      "idx": 26,
-      "version": "7",
-      "when": 1793921204467,
-      "tag": "0026_login_de_la_cuenta",
-      "breakpoints": true
     }
   ]
 }
