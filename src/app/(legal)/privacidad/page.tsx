@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: 'Qué datos guarda este sitio y qué no.',
 }
 
-const ACTUALIZADO = '10 de octubre de 2026'
+const ACTUALIZADO = '6 de noviembre de 2026'
 
 export default function PrivacidadPage() {
   return (
@@ -124,10 +124,18 @@ export default function PrivacidadPage() {
             una regla de palabra clave que él mismo configuró.
           </li>
           <li>
-            Para proponer un borrador de respuesta, el texto del comentario, el nombre de quien
-            lo dejó y el texto de la publicación se envían a un modelo de lenguaje a través de la
-            pasarela de IA de Vercel. No se le envían métricas, otros comentarios ni ningún otro
-            dato. Ningún borrador se publica sin que el dueño de la cuenta lo mande.
+            Un modelo de lenguaje, a través de la pasarela de IA de Vercel, se usa para dos cosas,
+            y recibe solo lo que cada una necesita. Para proponer un borrador de respuesta: el
+            texto del comentario, el nombre de quien lo dejó y el texto de la publicación;
+            ningún borrador se publica sin que el dueño de la cuenta lo mande. Para sugerir una
+            canción de Instagram («Sugiéreme una»): el texto de la publicación que se está
+            escribiendo y la lista de canciones que ofrece Instagram. No se le envían métricas,
+            otros comentarios ni ningún otro dato.
+          </li>
+          <li>
+            Para ponerle música a un reel, se le pide a Instagram, con la conexión de esa cuenta,
+            la lista de canciones de su biblioteca. De esa lista solo se guarda la canción que el
+            dueño elige para una publicación: su identificador, su título y su artista.
           </li>
           <li>
             <span className="text-fg">Solo de las cuentas que cada usuario conectó.</span> No se
@@ -186,6 +194,38 @@ export default function PrivacidadPage() {
 
       <section className="space-y-3">
         <h2 className="font-titulo text-lg font-semibold uppercase tracking-[0.03em]">
+          El libro de sugerencias
+        </h2>
+        <p className="leading-relaxed text-fg-muted">
+          Desde el panel o desde el teléfono se le puede escribir al equipo. Se guarda lo que
+          escribes, tu nombre y tu correo, el tipo de mensaje, desde dónde lo mandaste (el panel
+          o la aplicación, con su versión y el navegador o el sistema), cuántas cuentas tienes
+          conectadas por red y la fecha.{' '}
+          <span className="text-fg">El texto se publica además en GitHub</span>, en el
+          repositorio público del proyecto, como un pedido para el equipo: sin tu nombre ni tu
+          correo, con un identificador de usuario que solo el equipo puede cruzar contigo y con
+          los demás datos de arriba. Lo que el equipo te responde lo lees en el libro, te llega
+          por correo la primera vez y queda también como comentario en ese pedido, sin tu nombre
+          ni tu correo. No escribas en el libro nada que no quieras ver publicado.
+        </p>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="font-titulo text-lg font-semibold uppercase tracking-[0.03em]">La Cocina</h2>
+        <p className="leading-relaxed text-fg-muted">
+          Si le pides a la cocina que te edite un video, el material que subes y lo que escribes
+          en la comanda (tus instrucciones y tus respuestas a sus preguntas) los recibe{' '}
+          <span className="text-fg">el chef de la casa</span>: el sistema de edición que opera{' '}
+          {RESPONSABLE} en sus propios servidores. El chef baja una copia del material para
+          editarlo, transcribe el audio ahí mismo y te devuelve lo cocinado. Quien edita, una
+          persona del equipo o un asistente de IA que trabaja por encargo del equipo, usa ese
+          material solo para tu comanda. Lo que guardas en la cámara de frío se queda hasta que
+          lo sacas tú, y lo cocinado que nadie programa se borra a los 30 días.
+        </p>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="font-titulo text-lg font-semibold uppercase tracking-[0.03em]">
           La aplicación del teléfono
         </h2>
         <p className="leading-relaxed text-fg-muted">
@@ -197,12 +237,18 @@ export default function PrivacidadPage() {
           <li>
             <span className="text-fg">No recoge datos de terceros.</span> Lo único que maneja es
             lo que el dueño de la cuenta escribe o elige: el texto de una publicación, las fotos
-            o videos que le adjunta, y la fecha en que quiere que salga.
+            o videos que le adjunta, la fecha en que quiere que salga, lo que escribe en el libro
+            de sugerencias y lo que le manda a La Cocina.
           </li>
           <li>
             <span className="text-fg">Pide acceso a fotos y videos</span> por una sola razón:
             para que puedas elegir los archivos que vas a publicar. No los recorre, no los
             indexa y no sube ninguno que no hayas seleccionado.
+          </li>
+          <li>
+            <span className="text-fg">Desde su versión 1.2.0, pide la cámara y el micrófono</span>{' '}
+            para que grabes un video o saques una foto y se lo mandes a La Cocina. Solo graba
+            mientras tú lo haces, y solo sube lo que tú mandas.
           </li>
           <li>
             <span className="text-fg">La sesión vive en el almacenamiento seguro del teléfono</span>
@@ -213,12 +259,15 @@ export default function PrivacidadPage() {
             , y nada de lo que escribes o eliges en ella se comparte con nadie.
           </li>
           <li>
-            <span className="text-fg">Habla con dos servidores, y con ninguno más.</span> El de
-            este sitio, al que manda lo que publicas y del que lee tus números. Y el de Expo, el
-            servicio con el que está construida: cada vez que se abre, la aplicación le pregunta
-            si hay una versión nueva de sí misma, y así se actualiza sin pasar por la tienda. En
-            esa pregunta Expo ve la dirección IP del teléfono, su sistema operativo y qué versión
-            de la aplicación tiene instalada. No recibe nada de tu contenido ni de tu sesión.
+            <span className="text-fg">Habla con dos servidores, y con uno más solo si tú lo pides.</span>{' '}
+            El de este sitio, al que manda lo que publicas y del que lee tus números. Y el de
+            Expo, el servicio con el que está construida: cada vez que se abre, la aplicación le
+            pregunta si hay una versión nueva de sí misma, y así se actualiza sin pasar por la
+            tienda. En esa pregunta Expo ve la dirección IP del teléfono, su sistema operativo y
+            qué versión de la aplicación tiene instalada. No recibe nada de tu contenido ni de tu
+            sesión. El tercero es Meta: si escuchas la muestra de una canción de Instagram, el
+            audio llega directo de sus servidores, que ven la dirección IP del teléfono (antes de
+            la versión 1.2.0, la muestra se abre en el navegador).
           </li>
           <li>
             <span className="text-fg">Todo viaja cifrado</span>, por HTTPS.
@@ -233,9 +282,11 @@ export default function PrivacidadPage() {
           Supabase. Los archivos que cada usuario sube —fotos, videos y los documentos que
           adjunta a una regla de comentarios— se almacenan en Cloudflare R2. Los códigos de
           ingreso y los avisos se mandan por correo con Resend, que recibe la dirección de
-          destino, y los borradores de respuesta los redacta un modelo de lenguaje a través de
-          la pasarela de IA de Vercel, con lo descrito arriba. Ninguno de esos proveedores
-          recibe los datos para usarlos por su cuenta: los procesan por encargo.
+          destino, y los borradores de respuesta y las sugerencias de canciones los redacta un
+          modelo de lenguaje a través de la pasarela de IA de Vercel, con lo descrito arriba.
+          Ninguno de esos proveedores recibe los datos para usarlos por su cuenta: los procesan
+          por encargo. Lo que se escribe en el libro de sugerencias se publica en GitHub como se
+          explica arriba, y lo que va a La Cocina se edita en los servidores de {RESPONSABLE}.
         </p>
       </section>
 
