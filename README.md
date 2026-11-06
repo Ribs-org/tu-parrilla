@@ -667,6 +667,12 @@ acceso a nuestro correo). Para dejarla entrar:
    (`MAX_FALLOS_POR_DIA` en `src/lib/ingreso.ts`): es lo que impide adivinarlo, y también
    quiere decir que quien pruebe códigos con ese correo deja al revisor fuera hasta el día
    siguiente.
+4. Las cuentas de prueba del revisor no tienen por qué quedar paradas ese año. Si son
+   cuentas reales del dueño, se publica en ellas con una llave del propio revisor: entrando
+   como el revisor, La Cocina → «Tu propio chef» → «Generar llave», y esa llave se le da a la
+   IA que programa (por ejemplo, la del editor). Programa a nombre del revisor, así que sus
+   cuentas siguen donde Meta las revisa. Lo que no se hace mientras Meta revisa es
+   traspasarlas ni desconectarlas: el revisor puede entrar cualquier día de la revisión.
 
 El guion completo del video y de los pasos que el revisor sigue en el panel está en
 `docs/meta-revision-guion.md`.
