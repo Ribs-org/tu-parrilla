@@ -1,4 +1,5 @@
 import { NOMBRE_RED, type CuentaApp } from './tipos'
+import { musicaDelEnvio, musicaParaGuardar, type MusicaInstagram } from './musica'
 
 export const MAX_BYTES = 500 * 1024 * 1024
 export const MAX_ARCHIVOS = 10
@@ -282,7 +283,8 @@ export function puedeEnviar(texto: string, archivos: number, cuentas: number): b
   return (texto.trim().length > 0 || archivos > 0) && cuentas > 0
 }
 
-export type OpcionesApp = Record<string, { trialReel: true }>
+/** Lo que viaja en `opciones` por cuenta de Instagram: el trial reel y la canción, si las hay. */
+export type OpcionesApp = Record<string, { trialReel?: true; musica?: MusicaInstagram }>
 
 /** Un solo video, sin fotos: la única media con la que un trial reel es posible. */
 function esUnVideo(archivos: Pick<Elegido, 'mediaType'>[]): boolean {
@@ -321,10 +323,14 @@ export function opcionesDelBorrador(
   marcadas: string[],
   trial: string[],
   archivos: Pick<Elegido, 'mediaType'>[],
+  musica: Record<string, MusicaInstagram> = {},
 ): OpcionesApp {
   const salida: OpcionesApp = {}
   for (const c of cuentasConTrial(disponibles, marcadas, archivos)) {
     if (trial.includes(c.id)) salida[c.id] = { trialReel: true }
+  }
+  for (const [id, m] of Object.entries(musicaDelEnvio(disponibles, marcadas, archivos, musica))) {
+    salida[id] = { ...salida[id], musica: m }
   }
   return salida
 }
@@ -338,9 +344,13 @@ export function opcionesParaGuardar(
   marcadas: string[],
   trial: string[],
   archivos: Pick<Elegido, 'mediaType'>[],
+  musica: Record<string, MusicaInstagram> = {},
 ): OpcionesApp {
   if (!esUnVideo(archivos)) return {}
   const salida: OpcionesApp = {}
   for (const id of trial) if (marcadas.includes(id)) salida[id] = { trialReel: true }
+  for (const [id, m] of Object.entries(musicaParaGuardar(marcadas, archivos, musica))) {
+    salida[id] = { ...salida[id], musica: m }
+  }
   return salida
 }

@@ -53,6 +53,19 @@ describe('cuerpoDelBorrador', () => {
     expect(cuerpoDelBorrador(conVideo).opciones).toEqual({ 'ig-1': { trialReel: true } })
     expect(cuerpoDelBorrador(formulario({ trial: ['ig-1'] })).opciones).toEqual({})
   })
+
+  it('la música de Instagram viaja con el trial, con un solo video y la cuenta marcada; y dice que la app sabe de música', () => {
+    const musica = { audioId: '1', titulo: 'Tusa', artista: 'Karol G', volumenMusica: 50, volumenVideo: 100 }
+    const conVideo = formulario({
+      trial: ['ig-1'],
+      musica: { 'ig-1': musica, 'ig-2': musica },
+      archivos: [archivoElegido(VIDEO)],
+    })
+    expect(cuerpoDelBorrador(conVideo).opciones).toEqual({ 'ig-1': { trialReel: true, musica } })
+    expect(cuerpoDelBorrador(formulario({ musica: { 'ig-1': musica } })).opciones).toEqual({})
+    // Sin canción igual lo dice: así quitarla en el teléfono la quita del borrador.
+    expect(cuerpoDelBorrador(formulario()).conMusica).toBe(true)
+  })
 })
 
 describe('cuentasDelBorrador', () => {

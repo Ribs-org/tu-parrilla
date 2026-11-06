@@ -4,6 +4,7 @@ import * as ImagePicker from 'expo-image-picker'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { MusicaInstagramBloque } from '../../components/musica-instagram'
 import { useSelectorFecha } from '../../components/selector-fecha'
 import { fechaLegible } from '../../lib/calendario'
 import { Boton, BotonTexto, Chip, ErrorConReintento, Miniatura } from '../../components/ui'
@@ -54,6 +55,7 @@ import {
   volverASubir,
   type Archivo,
 } from '../../lib/publicar'
+import { cuentasConMusica, type MusicaInstagram } from '../../lib/musica'
 import { subirUno } from '../../lib/subir'
 import type { BorradorAbierto, CuentaApp } from '../../lib/tipos'
 
@@ -94,6 +96,9 @@ export default function Publicar() {
   // partir de este estado y del resto, así que un id que ya no aplica no se dibuja ni
   // se manda solo.
   const [trial, setTrial] = useState<string[]>([])
+  // La canción de «Música de Instagram» por cuenta. Como el trial: lo que se ve y lo que viaja
+  // se deriva (`cuentasConMusica`, `opcionesDelBorrador`), así que no se limpia al quitar el video.
+  const [musica, setMusica] = useState<Record<string, MusicaInstagram>>({})
   const [cuentasEstado, setCuentasEstado] = useState<EstadoCuentas>({ paso: 'cargando' })
   // Solo cuando ya se supo qué cuentas hay: mientras carga o si falló, no hay ninguna
   // que ofrecer — el estado de arriba es el que distingue esos dos casos de «ninguna».
@@ -132,10 +137,10 @@ export default function Publicar() {
   // El guardado corre un rato después del último cambio, y la cola de subida entre awaits:
   // los dos leen lo de ahora y no lo del render en que empezaron. Se copia después de
   // pintar, porque escribir un ref durante el render no está permitido.
-  const formRef = useRef<Formulario>({ texto, cuentas, trial, fecha, fechaPuesta, archivos })
+  const formRef = useRef<Formulario>({ texto, cuentas, trial, musica, fecha, fechaPuesta, archivos })
   const disponiblesRef = useRef<CuentaApp[]>([])
   useEffect(() => {
-    formRef.current = { texto, cuentas, trial, fecha, fechaPuesta, archivos: archivosRef.current }
+    formRef.current = { texto, cuentas, trial, musica, fecha, fechaPuesta, archivos: archivosRef.current }
     disponiblesRef.current = disponibles
   })
 
@@ -254,7 +259,7 @@ export default function Publicar() {
       pausa.current = null
       void guardar()
     }, PAUSA_MS)
-  }, [texto, cuentas, trial, fecha, fechaPuesta, firmaMedia, guardar])
+  }, [texto, cuentas, trial, musica, fecha, fechaPuesta, firmaMedia, guardar])
 
   // Si la app pasa a segundo plano, el sistema puede cerrarla sin avisar: lo pendiente se
   // manda antes. Igual al desmontar, si quedó algo esperando la pausa.
@@ -282,6 +287,7 @@ export default function Publicar() {
     setTexto('')
     setCuentas(marcadas)
     setTrial([])
+    setMusica({})
     setFecha(ahora)
     setFechaPuesta(false)
     setAviso(null)
@@ -293,7 +299,7 @@ export default function Publicar() {
     sinGuardar.current = false
     perdido.current = false
     quieto.current = false
-    formRef.current = { texto: '', cuentas: marcadas, trial: [], fecha: ahora, fechaPuesta: false, archivos: [] }
+    formRef.current = { texto: '', cuentas: marcadas, trial: [], musica: {}, fecha: ahora, fechaPuesta: false, archivos: [] }
   }, [cambiarArchivos])
 
   /**
@@ -331,6 +337,7 @@ export default function Publicar() {
       texto: b.texto,
       cuentas: cuentasDelBorrador(b.cuentas, listas),
       trial: b.trial,
+      musica: b.musica ?? {},
       fecha: b.cuando ? new Date(b.cuando) : proximaHoraEnPunto(new Date()),
       fechaPuesta: Boolean(b.cuando),
       archivos: lista,
@@ -339,6 +346,7 @@ export default function Publicar() {
     setTexto(form.texto)
     setCuentas(form.cuentas)
     setTrial(form.trial)
+    setMusica(form.musica ?? {})
     setFecha(form.fecha)
     setFechaPuesta(form.fechaPuesta)
     setSoloEnElPanel(b.soloEnElPanel)
@@ -474,6 +482,13 @@ export default function Publicar() {
     setCuentas(cuentas.includes(id) ? cuentas.filter((c) => c !== id) : [...cuentas, id])
   }
 
+  function elegirMusica(id: string, elegida: MusicaInstagram | null) {
+    setMusica((antes) => {
+      const { [id]: _quitada, ...resto } = antes
+      return elegida ? { ...resto, [id]: elegida } : resto
+    })
+  }
+
   function alternarTrial(id: string) {
     setTrial(trial.includes(id) ? trial.filter((c) => c !== id) : [...trial, id])
   }
@@ -510,9 +525,11 @@ export default function Publicar() {
         cuentas,
         cuando: ahora ? null : fecha.toISOString(),
         ahora,
-        opciones: opcionesDelBorrador(disponibles, cuentas, trial, archivos),
+        opciones: opcionesDelBorrador(disponibles, cuentas, trial, archivos, musica),
         media: subidos(archivos).map(({ url, mediaType }) => ({ url, mediaType })),
         borradorId: borradorId.current,
+        // Que esta app sabe de música: sin esto el servidor le suma la que guardaba el borrador.
+        conMusica: true,
       })
       despachar({ tipo: 'hecho' })
     } catch (e) {
@@ -747,6 +764,16 @@ export default function Publicar() {
                   ))}
               </>
             ) : null}
+            {cuentasConMusica(disponibles, cuentas, archivos).map((c) => (
+              <MusicaInstagramBloque
+                key={`musica:${c.id}`}
+                cuenta={c}
+                elegida={musica[c.id] ?? null}
+                onElegir={(m) => elegirMusica(c.id, m)}
+                texto={texto}
+                deshabilitado={ocupado}
+              />
+            ))}
           </>
         )}
 

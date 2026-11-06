@@ -1,4 +1,5 @@
 import type { Formato, Sello } from './parrilla'
+import type { MusicaInstagram } from './musica'
 
 export type PostProgramado = {
   id: string
@@ -43,6 +44,8 @@ export type CuentaApp = {
   /** Si acepta trial reels, como lo dijo Meta al publicar; falta mientras no se sepa. Solo Instagram. */
   trialReels?: 'si' | 'no'
   trialReelsMotivo?: string | null
+  /** «instagram» si se conectó con el login de Instagram: ahí no hay música de Instagram. */
+  login?: 'instagram'
 }
 
 export type PostMetrica = {
@@ -102,6 +105,8 @@ export type BorradorAbierto = {
   cuentas: string[]
   cuando: string | null
   trial: string[]
+  /** La canción de «Música de Instagram» por cuenta; falta si el sitio todavía no la manda. */
+  musica?: Record<string, MusicaInstagram>
   media: { url: string; mediaType: 'image' | 'video'; nombre: string }[]
   /** Por qué este borrador se programa solo en el panel web, o null si se puede desde acá. */
   soloEnElPanel: string | null

@@ -1,4 +1,5 @@
 import { opcionesParaGuardar, subidos, type Archivo, type MediaSubida, type OpcionesApp } from './publicar'
+import type { MusicaInstagram } from './musica'
 import { LA_PARRILLA, type Tema } from './tema'
 import type { BorradorResumido, CuentaApp } from './tipos'
 
@@ -55,6 +56,8 @@ export type Formulario = {
   texto: string
   cuentas: string[]
   trial: string[]
+  /** La canción de «Música de Instagram» por cuenta; falta en lo armado antes de que existiera. */
+  musica?: Record<string, MusicaInstagram>
   fecha: Date
   /** Si la fecha la eligió alguien —o vino de un «+» o de un borrador— y no es la de partida. */
   fechaPuesta: boolean
@@ -67,6 +70,11 @@ export type CuerpoBorrador = {
   cuando: string | null
   opciones: OpcionesApp
   media: MediaSubida[]
+  /**
+   * Que esta app sabe de música: sin esto el servidor conserva la canción que dejó el panel,
+   * porque una app que no la muestra no pudo haberla quitado (`musicaDelTelefono`).
+   */
+  conMusica: true
 }
 
 /**
@@ -79,8 +87,9 @@ export function cuerpoDelBorrador(form: Formulario): CuerpoBorrador {
     texto: form.texto,
     cuentas: form.cuentas,
     cuando: form.fechaPuesta ? form.fecha.toISOString() : null,
-    opciones: opcionesParaGuardar(form.cuentas, form.trial, form.archivos),
+    opciones: opcionesParaGuardar(form.cuentas, form.trial, form.archivos, form.musica ?? {}),
     media: subidos(form.archivos),
+    conMusica: true,
   }
 }
 
