@@ -159,6 +159,12 @@ sección.
   TikTok con el interruptor encendido y ver que salen con una canción y que se puede cambiar en
   la app; y que el interruptor nace encendido la próxima vez en esa cuenta (#320). Lo que TikTok
   haga con `auto_add_music` solo se ve publicando: los tests miran lo que se le manda.
+- **Ver con fotos reales de TikTok que «Qué te funciona» las cuenta en «Música»** (2026-11-06):
+  la línea cruza cada destino con la publicación que trae la sincronización de TikTok, y no se
+  ha visto con una cuenta real que `video/list` devuelva las fotos (los tests usan filas
+  armadas). Si a las dos semanas de publicar fotos con y sin «Música de TikTok» la línea sigue
+  diciendo «Nada de lo publicado desde Tu Parrilla… llevó música», es eso: mirar si las fotos
+  aparecen en «Tus publicaciones». Detalle en `src/lib/que-funciona.ts` (`queFuncionaLaMusica`).
 - **La cola de #234 (copiar los videos del lote en segundo plano) no se hace por ahora**
   (2026-10-21). Los otros issues de ese envío ya están: bajar en paralelo (#235), cuánto tardó
   y por qué falló cada fila (#238), una sola descarga por URL en un lote (#236) y

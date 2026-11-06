@@ -856,7 +856,8 @@ Si hay que dejarlo a medias, basta con cerrar el panel: queda como borrador.
 Para fotos en TikTok es igual, con hasta 35 fotos JPG o WebP y sin video (hasta diez si el
 post va también a otra red). Con fotos, publicando directo, aparece además «Música de TikTok»:
 encendido, TikTok les pone una canción recomendada, que se cambia después en la app de TikTok.
-Queda recordado para la próxima vez en esa cuenta.
+Queda recordado para la próxima vez en esa cuenta. Si con música les va mejor o peor lo dice
+«Qué te funciona», en [Los Números](los-numeros.md), en su línea «Música».
 
 ### Para terminar en TikTok lo que llegó a la bandeja
 
