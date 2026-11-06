@@ -11,7 +11,7 @@ import { useVentanas } from '../components/ventana'
 import { useFierros } from '../components/boton-ajustes'
 import { API_BASE } from '../lib/config'
 import { LibroDeSugerencias } from '../components/libro-de-sugerencias'
-import { LIBRO, LOS_FIERROS, otroTema, type Tema } from '../lib/tema'
+import { LOS_FIERROS, otroTema, type Tema } from '../lib/tema'
 import { NOMBRE_RED, type Fierros } from '../lib/tipos'
 
 /**
@@ -137,8 +137,8 @@ export default function Ajustes() {
       </View>
 
       {/* Al final, como en el menú de Ajustes del panel: el libro de sugerencias (de día, la caja)
-          para escribirle al equipo que hace Tu Parrilla. */}
-      <Etiqueta margenArriba>{LIBRO[tema]}</Etiqueta>
+          para escribirle al equipo que hace Tu Parrilla y leer lo que respondió. Trae su propio
+          rótulo, que lleva el punto de las respuestas sin leer. */}
       <LibroDeSugerencias />
 
       <Text style={{ color: colores.tenue, fontSize: 11, marginTop: 16 }}>
