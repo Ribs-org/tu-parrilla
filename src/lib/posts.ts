@@ -468,6 +468,7 @@ export const getCuentas = cache(async (ownerId: string): Promise<CuentaRow[]> =>
     trialReels: a.trialReels ?? null,
     trialReelsMotivo: a.trialReelsMotivo,
     login: a.login ?? null,
+    tiktokMusica: a.tiktokMusica ?? null,
   }))
 })
 

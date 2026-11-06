@@ -24,6 +24,7 @@ import { scheduleBatch, MAX_BATCH_ITEMS } from '@/lib/social/publish/batch'
 import {
   errorDeHistoria,
   errorDeMediaPorOpciones,
+  musicaParaRecordar,
   opcionesDesdeFormularioPorCuenta,
   validarOpcionesPorCuenta,
 } from '@/lib/social/publish/opciones'
@@ -802,6 +803,24 @@ export async function createScheduledPost(_prev: FormState, formData: FormData):
     if (error instanceof BorradorConsumido) return { error: BORRADOR_NO_EXISTE }
     if (error instanceof CreativoNoEsta) return { error: CREATIVO_NO_ESTA }
     throw error
+  }
+
+  // «Música de TikTok» queda recordada por cuenta: el interruptor nace así la próxima vez que
+  // se programen fotos ahí. Después de crear y fuera de la transacción a propósito: si esto
+  // falla, el post ya quedó programado y solo se pierde el recuerdo, así que no se le dice a
+  // la persona que algo salió mal.
+  try {
+    for (const { cuentaId, musica } of musicaParaRecordar(opcionesCheck.opciones, {
+      videos: videoCount,
+      fotos: uploaded.length - videoCount,
+    })) {
+      await getDb()
+        .update(socialAccounts)
+        .set({ tiktokMusica: musica })
+        .where(and(eq(socialAccounts.id, cuentaId), eq(socialAccounts.ownerId, ownerId)))
+    }
+  } catch (error) {
+    console.error('Recordar la música de TikTok:', String(error).slice(0, 300))
   }
 
   revalidatePath('/admin/schedule')

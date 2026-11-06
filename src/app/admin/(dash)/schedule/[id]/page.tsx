@@ -55,6 +55,8 @@ export default async function EditScheduledPostPage({
   const handles = new Map(cuentas.map((c) => [c.id, c.handle]))
   const destinos = targets.map((t) => ({ ...t, handle: handles.get(t.accountId) ?? null }))
   const dibujo = dibujoDe(destinos, media, cuentasFrias(cuentas, new Date()), post.videosLiberados)
+  // La música de TikTok solo viaja con fotos: con un video, el resumen no la nombra.
+  const soloFotos = media.length > 0 && media.every((m) => m.mediaType !== 'video')
 
   return (
     <Editor
@@ -69,7 +71,7 @@ export default async function EditScheduledPostPage({
         accountId: t.accountId,
         network: t.network,
         status: t.status,
-        opciones: resumenOpciones(t.network, t.opciones),
+        opciones: resumenOpciones(t.network, t.opciones, soloFotos),
       }))}
       media={media.map((m) => ({ id: m.id, blobUrl: m.blobUrl, mediaType: m.mediaType }))}
       coverUrl={post.coverUrl}

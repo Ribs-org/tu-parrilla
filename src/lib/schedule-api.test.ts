@@ -130,7 +130,7 @@ describe('armarProgramados', () => {
       ZONE,
     )
     expect(post!.redes.map((r) => r.opciones)).toEqual([
-      { modo: 'directo', privacidad: 'PUBLIC_TO_EVERYONE', comentarios: true, duo: true, pegar: true, comercial: 'no', ia: false },
+      { modo: 'directo', privacidad: 'PUBLIC_TO_EVERYONE', comentarios: true, duo: true, pegar: true, comercial: 'no', ia: false, musica: false },
       { trialReel: true },
       null,
     ])

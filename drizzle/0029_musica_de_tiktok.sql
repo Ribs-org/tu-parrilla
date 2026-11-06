@@ -1,0 +1,1 @@
+ALTER TABLE "social_accounts" ADD COLUMN "tiktok_musica" boolean;
