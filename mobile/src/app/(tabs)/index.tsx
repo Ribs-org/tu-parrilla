@@ -155,6 +155,10 @@ export default function LaParrilla() {
     router.navigate({ pathname: '/(tabs)/publicar', params: { dia, borrador: '', n: marcaDeToque() } })
   }
 
+  function abrirProgramado(id: string) {
+    router.push({ pathname: '/programado/[id]', params: { id } })
+  }
+
   function abrirBorrador(id: string) {
     router.navigate({ pathname: '/(tabs)/publicar', params: { dia: '', borrador: id, n: marcaDeToque() } })
   }
@@ -268,7 +272,14 @@ export default function LaParrilla() {
       {diasDeLaAgenda(recortar(data.posts, filtroVigente), hoy, filtroVigente ? [] : borradores).map(({ dia, posts, borradores: delDia }) => {
         const rotulo = rotuloDelDia(dia, hoy)
         // Lo que ya salió en todas sus redes va hundido, en un renglón; lo demás, en su tarjeta.
-        const filas = posts.map((post) => (servidoEnTodas(post) ? <CorteServido key={post.id} post={post} /> : <CorteProgramado key={post.id} post={post} />))
+        // Una tarjeta se toca para corregirla; la pantalla dice si ya salió y no se puede.
+        const filas = posts.map((post) =>
+          servidoEnTodas(post) ? (
+            <CorteServido key={post.id} post={post} />
+          ) : (
+            <CorteProgramado key={post.id} post={post} onAbrir={() => abrirProgramado(post.id)} />
+          ),
+        )
         // Hoy, la línea de «ahora» entre lo que ya tuvo su hora y lo que viene.
         if (dia === hoy && posts.length > 0) {
           filas.splice(dondeVaAhora(posts, ahora), 0, <LineaDeAhora key="ahora" hora={horaDeAhora(ahora, posts[0]!.cuando)} />)

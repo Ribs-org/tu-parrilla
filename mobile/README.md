@@ -201,8 +201,29 @@ con el orden de siempre (web primero), como se explica en
 [«Cómo mandar un cambio sin reinstalar»](#cómo-mandar-un-cambio-sin-reinstalar).
 
 Lo que no se puede hacer desde el teléfono, y sigue siendo del panel web: poner una
-portada, etiquetar con atributos, programar en TikTok o con una palabra clave, y editar o
-borrar lo ya programado.
+portada, etiquetar con atributos y programar en TikTok o con una palabra clave.
+
+### Corregir o borrar lo programado
+
+Tocar la tarjeta de un post en La Parrilla abre **Editar publicación**: el texto, la hora
+(«Cuándo: …», con la misma hoja de «Reprogramar»), las cuentas con un **Quitar** cada una
+—menos la última: para eso está borrar—, **Guardar** y **Borrar publicación**, con su
+pregunta. Llama a `GET`, `PATCH` y `DELETE /api/mobile/schedule/posts/{id}`.
+
+Las reglas son las del editor del panel, y no hay una copia: el panel y el teléfono llaman a
+la misma función (`editarPostProgramado`, en `src/lib/social/publish/editar.ts`; borrar, a
+`borrarPostProgramado`), así que los límites de cada red, la hora en el futuro y lo que pasa
+con un intento en curso se deciden en un solo lugar, y el teléfono muestra las mismas frases.
+Lo que el teléfono no edita —los archivos, la portada, los atributos, la palabra clave y las
+opciones de cada red— lo manda como «conservar» y queda tal como está guardado; la pantalla
+lo dice en una nota amarilla, como el aviso de los borradores, para que nadie crea que se
+perdió. Sin hora nueva, la hora no se toca aunque ya haya pasado: corregir el texto de lo
+que falló no obliga a moverla, igual que en el panel.
+
+Una reja que el panel no tiene: un post que ya salió en alguna cuenta (o que está saliendo)
+se abre, pero solo para decir que eso se corrige en el panel web. El editor del panel deja
+corregir lo que falta de un post a medio publicar mostrando qué cuenta ya salió; en el
+teléfono, sin esa vista, era fácil creer que se estaba corrigiendo también lo publicado.
 
 ## La Cocina desde el teléfono
 
@@ -345,7 +366,8 @@ falta volver a autorizar nada de eso, solo se cierra el acceso desde el celular.
 
 ## Qué no hace todavía
 
-- No pone portada ni atributos, y no edita lo ya programado: eso sigue en el panel.
+- No pone portada ni atributos, y de lo ya programado no cambia los archivos, ni suma
+  cuentas, ni toca lo que ya salió en alguna: eso sigue en el panel.
 - En La Cocina no muestra el mesón, no cancela comandas ni saca nada de la cámara de frío, y no
   sigue subiendo con la app en segundo plano: lo primero es del panel, y lo segundo retoma al
   volver a abrir La Cocina.

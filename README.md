@@ -1810,6 +1810,7 @@ src/
     borradores.ts          los borradores del compositor: guardar, cargar, listar y borrar, siempre por dueño
     borrador.ts            qué se guarda de un formulario y cómo se restaura, también desde el teléfono (sin base)
     borradores-movil.ts    los mismos borradores en la forma de la app del teléfono
+    editar-movil.ts        un post programado abierto para corregirlo en el teléfono: lo que se ve y lo que se guarda sin tocar
     pruebas/               la Postgres de las pruebas de integración: una base nueva y migrada por archivo; y un lector de zip para mirar el XML de una planilla
     empresa.ts             quién presta el servicio: lo leen la portada, privacidad y términos
     avisos/                la caída de una cuenta y el resumen del día: las reglas sin base y lo que lee y manda
@@ -1820,6 +1821,7 @@ src/
       retencion-youtube.ts borra lo de YouTube que lleva 30 días sin refrescarse
       traspasar.ts         le cambia el dueño a una cuenta con lo que se bajó de ella, sin borrar nada
       publish/secuencia.ts las historias de una secuencia salen en orden: cada una espera a la anterior
+      publish/editar.ts    guardar los cambios de un post programado: la regla que comparten el editor del panel y la app del teléfono
 public/docs/
   api-llm.md, api-editor.md, api.json   las guías de la API para un LLM
   ui/                      la wiki de la interfaz: una página por pantalla, para guiar a quien se pierde

@@ -6,13 +6,13 @@ import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
 import { basePublica, keyDesdeUrl, tamanoEnAlmacen } from '@/lib/storage'
 import { ARCHIVO_MUY_GRANDE, MAX_BYTES_ARCHIVO } from '@/lib/social/publish/limites'
-import { and, asc, eq, inArray, max, ne, sql } from 'drizzle-orm'
-import { getDb, links, profiles, socialAccounts, socialPosts, scheduledPosts, scheduledPostTargets, scheduledPostMedia, reglasClave, users } from '@/db'
+import { and, eq, inArray, max, ne, sql } from 'drizzle-orm'
+import { getDb, links, profiles, socialAccounts, socialPosts, scheduledPosts, scheduledPostTargets, users } from '@/db'
 import { LINK_KINDS, type LinkKind } from '@/db/schema'
 import { destroySession, requireAdmin, requireUser } from '@/lib/auth'
 import { normalizeCampaignTag } from '@/lib/social/campaign'
 import { volverDelEditor } from './(dash)/schedule/enlace'
-import { columnasEditablesDeRegla, validarRegla } from '@/lib/social/comentarios/reglas'
+import { validarRegla } from '@/lib/social/comentarios/reglas'
 import { FUSION_FALLO, FUSION_NO_ES_TUYA, decidirFusion, pasosDeFusion } from '@/lib/social/fusion'
 import { LINK_SIN_NOMBRE, LINK_SIN_URL } from '@/lib/revisiones'
 import { BORRADO_YA_PUBLICADO } from '@/lib/schedule-api'
@@ -20,32 +20,20 @@ import { borrarPostProgramado } from '@/lib/social/publish/borrar'
 import { DESTINO_NO_EXISTE, REPROGRAMAR_PASADO, reprogramarDestino } from '@/lib/social/publish/reprogramar'
 import { FRASE_DE_FALLA, archivarDestino } from '@/lib/social/publish/archivar'
 import { csvToBatchItems } from '@/lib/social/publish/csv'
+import { scheduleBatch, MAX_BATCH_ITEMS } from '@/lib/social/publish/batch'
 import {
-  scheduleBatch,
-  MAX_BATCH_ITEMS,
-  mediaToBlob,
-  mediaTypeFromUrl,
-  portadaExtensionError,
-  portadaTypeError,
-  PORTADA_NEEDS_VIDEO,
-} from '@/lib/social/publish/batch'
-import {
-  HISTORIA_DESTINOS,
   errorDeHistoria,
   errorDeMediaPorOpciones,
-  esHistoria,
   opcionesDesdeFormularioPorCuenta,
-  validarOpciones,
   validarOpcionesPorCuenta,
-  type OpcionesDestino,
 } from '@/lib/social/publish/opciones'
 import { extensionDe, validateScheduleDraft } from '@/lib/social/publish/validate'
 import { validateAtributos, ATRIBUTOS_ERROR, type Atributos } from '@/lib/social/publish/atributos'
-import { diffMedia, diffTargets } from '@/lib/social/publish/edit'
+import { POST_NO_EXISTE, editarPostProgramado } from '@/lib/social/publish/editar'
 import { BorradorConsumido, CreativoNoEsta, crearPostProgramado } from '@/lib/social/publish/crear'
 import { CREATIVO_NO_ESTA } from '@/lib/cocina/meson-motivos'
 import { BORRADOR_NO_EXISTE } from '@/lib/mobile-api'
-import { REARME, contenedorEsBorrador, enVuelo } from '@/lib/social/publish/publisher'
+import { REARME } from '@/lib/social/publish/publisher'
 import { esUuid } from '@/lib/uuid'
 import { conMensaje } from '@/lib/mensaje-firmado'
 import { quitarCuenta } from '@/lib/social/quitar'
@@ -877,84 +865,19 @@ export async function descartarBorrador(id: string): Promise<{ error?: string }>
   return {}
 }
 
-/** Lo que el editor dice cuando algún destino está saliendo: «Publicando…» o reclamado ahora. */
-const EN_CURSO = 'Hay una publicación en curso. Vuelve en un minuto.'
-
 export async function updateScheduledPost(
   postId: string,
   _prev: FormState,
   formData: FormData,
 ): Promise<FormState> {
   const { id: ownerId, zona } = await requireUser()
-  const db = getDb()
 
-  const [post] = await db
-    .select()
-    .from(scheduledPosts)
-    .where(and(eq(scheduledPosts.id, postId), eq(scheduledPosts.ownerId, ownerId)))
-  if (!post) return { error: 'El post ya no existe.' }
-
-  const targets = await db
-    .select()
-    .from(scheduledPostTargets)
-    .where(eq(scheduledPostTargets.postId, postId))
-  // En curso es `publishing`, o un destino que una corrida tiene reclamado ahora mismo
-  // (`enVuelo`): durante su intento sigue diciendo `scheduled`.
-  const ahora = new Date()
-  if (targets.some((t) => t.status === 'publishing' || enVuelo(t, ahora))) {
-    return { error: EN_CURSO }
-  }
-  // Un reclamo que ocurra entre esta lectura y los writes de abajo también bumpa updatedAt:
-  // este mapa es lo que lo hace visible ahí —si el cron reclamó, el write no-opea y el target
-  // conserva su historia en vez de que la pisemos—.
-  const readTargets = new Map(targets.map((t) => [t.id, t]))
-
-  const existingMedia = await db
-    .select()
-    .from(scheduledPostMedia)
-    .where(eq(scheduledPostMedia.postId, postId))
-    .orderBy(asc(scheduledPostMedia.position))
-
-  const caption = String(formData.get('caption') ?? '').trim()
-  const idsElegidos = formData.getAll('cuentas').map(String)
-  const publicadas = new Set(targets.filter((t) => t.status === 'published').map((t) => t.accountId))
-  // Las publicadas no se verifican: no se va a escribir ni publicar nada nuevo con
-  // ellas, y verificarlas es lo que convertía una cuenta desconectada *después* de
-  // publicar en un post que ya no se puede volver a tocar (ni el texto, ni la fecha,
-  // ni la media) — el gemelo oculto del checkbox las manda igual, pero su pertenencia
-  // ya la probó ser destino de este post, que ya se acotó al dueño arriba.
-  let cuentasPendientes: CuentaDestino[]
-  try {
-    cuentasPendientes = await verificarCuentas(
-      ownerId,
-      idsElegidos.filter((id) => !publicadas.has(id)),
-    )
-  } catch (error) {
-    if (error instanceof CuentaInvalida) return { error: error.message }
-    throw error
-  }
-  const idsElegidosSet = new Set(idsElegidos)
-  // Su red sale del target, no de una consulta: no hace falta verificarlas de nuevo
-  // para saber a qué red pertenecen.
-  const cuentasPublicadasElegidas: CuentaDestino[] = targets
-    .filter((t) => t.status === 'published' && idsElegidosSet.has(t.accountId))
-    .map((t) => ({ id: t.accountId, network: t.network, handle: null }))
-  const cuentas = [...cuentasPendientes, ...cuentasPublicadasElegidas]
-  const scheduledAt = fromZonedInput(String(formData.get('scheduledAt') ?? ''), zona)
-  const keptIds = formData.getAll('keptMedia').map(String)
   // Los archivos nuevos ya subieron directo al almacén desde el navegador; acá llegan sus
   // direcciones (`mediaSubida`), que se revisan como al programar: del almacén, bajo
   // `scheduled/`, y con lo que de verdad pesan (`mediaYaSubida`). Antes el archivo viajaba
   // dentro del formulario, y Vercel corta los cuerpos en ~4,5 MB.
   const subida = await mediaYaSubida(formData.get('mediaSubida'))
   if ('error' in subida) return { error: subida.error }
-  const nuevos = subida.lista
-  const urls = String(formData.get('mediaUrls') ?? '')
-    .split(/\r?\n/)
-    .map((u) => u.trim())
-    .filter(Boolean)
-  const keepPortada = String(formData.get('keepPortada') ?? '').trim()
-  const portadaUrl = String(formData.get('portadaUrl') ?? '').trim()
 
   const atributosRaw = String(formData.get('atributos') ?? '').trim()
   let atributos: Atributos | null = null
@@ -970,296 +893,28 @@ export async function updateScheduledPost(
     atributos = check.atributos
   }
 
-  // Editar un post cuya hora ya pasó (p.ej. corregir el texto que X rechazó) no debe
-  // exigir mover la fecha: si la fecha no cambió, se permite guardar en el pasado — el
-  // re-arm lo manda al próximo cron, el "reintenta ahora" natural.
-  const dateUnchanged = scheduledAt !== null && scheduledAt.getTime() === post.scheduledAt.getTime()
-
-  // Una cuenta ya publicada no debe imponer sus límites a lo que aún queda por salir:
-  // `cuentasPendientes` ya las excluye, al no haber pasado por la verificación de arriba.
-  const pendingNetworks = [...new Set(cuentasPendientes.map((c) => c.network))]
-
-  const targetsPlan = diffTargets(targets, cuentas)
-  if ('error' in targetsPlan) return { error: targetsPlan.error }
-
-  // Una red que exige opciones no se puede agregar desde el editor, que no las pide:
-  // el compositor y el lote sí; aquí la creación se rechaza con la misma frase.
-  for (const cuenta of targetsPlan.create) {
-    const check = validarOpciones(cuenta.network, null)
-    if ('error' in check) return { error: check.error }
-  }
-  // Por lo mismo, a una historia no se le suma una cuenta: saldría como post normal.
-  if (targetsPlan.create.length > 0 && targets.some((t) => esHistoria(t.opciones))) {
-    return { error: HISTORIA_DESTINOS }
-  }
-
-  const reglaCheck = validarRegla(reglaDesdeFormulario(formData))
-  if ('error' in reglaCheck) return { error: reglaCheck.error }
-
-  // Pre-validation before downloading anything: kept media with their stored types, the new
-  // uploads with the type the upload signed, URLs counted as images — the batch's
-  // deferred-type rule (image is the guess that never falsely rejects; the re-check below
-  // settles it).
-  const typeById = new Map(existingMedia.map((m) => [m.id, m.mediaType]))
-  const urlById = new Map(existingMedia.map((m) => [m.id, m.blobUrl]))
-  const keptTypes = keptIds
-    .map((id) => typeById.get(id))
-    .filter((t): t is 'image' | 'video' => t === 'image' || t === 'video')
-  const fileVideo = nuevos.filter((m) => m.mediaType === 'video').length
-  const preImages =
-    keptTypes.filter((t) => t === 'image').length + (nuevos.length - fileVideo) + urls.length
-  const preVideos = keptTypes.filter((t) => t === 'video').length + fileVideo
-  // Igual que arriba con los tipos: la extensión conocida de cada media pendiente,
-  // para que TikTok rechace un formato ajeno antes de tocar el almacén.
-  const preFormats = [
-    ...keptIds
-      .map((id) => urlById.get(id))
-      .filter((url): url is string => Boolean(url))
-      .map(extensionDe),
-    ...nuevos.map((m) => extensionDe(m.url)),
-    ...urls.map(extensionDe),
-  ]
-  if (pendingNetworks.length === 0) {
-    // Sin pendientes hay dos casos: todo publicado (válido — solo se corrige texto o
-    // media) o un form que desmarcó todas las redes de un post nunca publicado, lo
-    // que dejaría un post huérfano sin destinos. El validador saltado habría dicho
-    // exactamente esto:
-    if (publicadas.size === 0) return { error: 'Elige al menos una cuenta.' }
-    // Igual exige una fecha legible antes de persistir.
-    if (!scheduledAt) return { error: 'La fecha no se entendió.' }
-  } else {
-    const preError = validateScheduleDraft(
-      {
-        caption,
-        imageCount: preImages,
-        videoCount: preVideos,
-        networks: pendingNetworks,
-        scheduledAt,
-        formats: preFormats,
-      },
-      new Date(),
-      { allowPast: dateUnchanged, proximamente: proximamentePara(ownerId) },
-    )
-    if (preError) return { error: preError }
-  }
-
-  if (portadaUrl) {
-    const extensionError = portadaExtensionError(portadaUrl)
-    if (extensionError) return { error: extensionError }
-  }
-
-  // Las URLs se resuelven primero: mediaToBlob es la falla más probable (enlace roto,
-  // host que no responde). Si falla acá, no quedan archivos huérfanos en el almacén
-  // — el loop de guardar() de archivos corre después, solo si las URLs ya resolvieron.
-  const urlMedia: Array<{ url: string; mediaType: 'image' | 'video' }> = []
-  for (const url of urls) {
-    const stored = await mediaToBlob(url, mediaTypeFromUrl(url))
-    if (!stored) return { error: 'No se pudo leer una media por URL.' }
-    urlMedia.push(stored)
-  }
-  const added = [...nuevos, ...urlMedia]
-
-  const mediaPlan = diffMedia(existingMedia.map((m) => m.id), keptIds, added)
-
-  // Re-check with the real types now that every URL resolved (a Drive link that
-  // turned out to be a video where only images fit fails here, nothing saved).
-  const finalTypes = mediaPlan.order.map((entry) =>
-    entry.kind === 'kept' ? typeById.get(entry.id)! : entry.mediaType,
-  )
-  const finalFormats = mediaPlan.order.map((entry) =>
-    extensionDe(entry.kind === 'kept' ? urlById.get(entry.id)! : entry.url),
-  )
-  if (pendingNetworks.length > 0) {
-    const error = validateScheduleDraft(
-      {
-        caption,
-        imageCount: finalTypes.filter((t) => t === 'image').length,
-        videoCount: finalTypes.filter((t) => t === 'video').length,
-        networks: pendingNetworks,
-        scheduledAt,
-        formats: finalFormats,
-      },
-      new Date(),
-      { allowPast: dateUnchanged, proximamente: proximamentePara(ownerId) },
-    )
-    if (error) return { error }
-
-    // El editor no deja tocar `opciones` (spec §9), pero sí la media: un trial reel
-    // programado con un video puede terminar aquí con dos fotos si nadie repite la
-    // regla. Las opciones vienen de los targets ya existentes que siguen elegidos y
-    // todavía no publicaron — los que de verdad van a usar esta media al publicar —,
-    // tipadas con `validarOpciones` porque en la base son `unknown`/`jsonb`.
-    const opcionesDeTargets: Record<string, OpcionesDestino> = {}
-    for (const target of targets) {
-      if (target.status === 'published' || !idsElegidosSet.has(target.accountId)) continue
-      const check = validarOpciones(target.network, target.opciones)
-      if ('opciones' in check && check.opciones) opcionesDeTargets[target.id] = check.opciones
-    }
-    const mediaPorOpciones = errorDeMediaPorOpciones(opcionesDeTargets, {
-      videos: finalTypes.filter((t) => t === 'video').length,
-      fotos: finalTypes.filter((t) => t === 'image').length,
-      sinTipo: 0,
-    })
-    if (mediaPorOpciones) return { error: mediaPorOpciones }
-
-    const historia = errorDeHistoria(opcionesDeTargets, {
-      caption,
-      conPalabraClave: reglaCheck.regla !== null,
-      conPortada: Boolean(portadaUrl) || (Boolean(keepPortada) && keepPortada === post.coverUrl),
-      aInstagram: pendingNetworks.includes('instagram'),
-      fotos: finalTypes.flatMap((t, i) => (t === 'image' ? [finalFormats[i]!] : [])),
-    })
-    if (historia) return { error: historia }
-  }
-
-  // Conservar solo coteja contra lo guardado — el mismo trato que keptMedia con sus
-  // ids: el form dice «mantén lo que hay», nunca dicta una URL cruda.
-  const portadaKept = Boolean(keepPortada) && keepPortada === post.coverUrl
-
-  // El chequeo de video corre ANTES de descargar/subir la portada nueva — igual que en
-  // el lote (batch.ts): si el resultado ya es una portada sin video, no vale la pena
-  // pagar esa descarga. El video de un post que ya salió en todas sus redes cuenta aunque
-  // ya no esté en el almacén (`videosLiberados`): sin eso, el editor de cualquier post
-  // publicado con portada rechazaba guardar, con la portada que el mismo editor conservó.
-  if ((portadaUrl || portadaKept) && !finalTypes.includes('video') && post.videosLiberados === 0) {
-    return { error: PORTADA_NEEDS_VIDEO }
-  }
-
-  // La URL nueva gana sobre la conservada; ninguna de las dos = quitarla (null).
-  let coverUrl: string | null = portadaKept ? keepPortada : null
-  if (portadaUrl) {
-    const stored = await mediaToBlob(portadaUrl, null)
-    if (!stored) return { error: 'No se pudo leer una media por URL.' }
-    const typeError = portadaTypeError(stored)
-    if (typeError) return { error: typeError }
-    coverUrl = stored.url
-  }
-
-  // Qué pasa con un contenedor guardado (el de un intento anterior), que lleva lo de antes. Si
-  // cambiaron los archivos —cuáles o en qué orden—, ya no es este post en ninguna red: se tira.
-  // Si cambió solo el texto o la portada, se tira en Instagram, donde el contenedor es un
-  // borrador que todavía no salió (`contenedorEsBorrador`); en las demás la red ya tiene el
-  // video, y subirlo otra vez por un texto dejaría dos.
-  const mediaCambio =
-    mediaPlan.deleteIds.length > 0 ||
-    mediaPlan.order.some((entry, i) => entry.kind === 'new' || entry.id !== existingMedia[i]?.id)
-  const textoCambio = caption !== post.caption || coverUrl !== post.coverUrl
-  const tiraContenedor = (network: string) => mediaCambio || (textoCambio && contenedorEsBorrador(network))
-
-  // Las escrituras van en una transacción: un corte a la mitad —la base que no contesta, la
-  // función que se cae— ya no deja la media nueva con los destinos de antes, ni el texto nuevo
-  // sin su regla. Adentro, lo primero es bloquear los destinos del post (`FOR UPDATE`) y volver
-  // a mirar que nada esté saliendo: una corrida que reclamó uno entre la lectura de arriba y acá
-  // se ve ahora, y una que quiera reclamarlo espera a que esto termine —y relee el texto después
-  // de reclamar (`publishDue`)—. Cada escritura de un destino sigue llevando su reja de estado y
-  // el `updatedAt` leído arriba (`readTargets`), así que un reclamo que ya pasó la deja sin
-  // efecto en vez de pisar el intento.
-  const bloqueo = await db.transaction(async (tx) => {
-    const bloqueados = await tx
-      .select({ status: scheduledPostTargets.status, reclamadoHasta: scheduledPostTargets.reclamadoHasta })
-      .from(scheduledPostTargets)
-      .where(eq(scheduledPostTargets.postId, postId))
-      .for('update')
-    if (bloqueados.some((t) => t.status === 'publishing' || enVuelo(t, new Date()))) return EN_CURSO
-
-    await tx
-      .update(scheduledPosts)
-      .set({ caption, scheduledAt: scheduledAt!, coverUrl, atributos, updatedAt: new Date() })
-      .where(eq(scheduledPosts.id, postId))
-
-    if (mediaPlan.deleteIds.length > 0) {
-      await tx.delete(scheduledPostMedia).where(inArray(scheduledPostMedia.id, mediaPlan.deleteIds))
-    }
-    for (const [position, entry] of mediaPlan.order.entries()) {
-      if (entry.kind === 'kept') {
-        await tx.update(scheduledPostMedia).set({ position }).where(eq(scheduledPostMedia.id, entry.id))
-      } else {
-        await tx.insert(scheduledPostMedia).values({
-          postId,
-          blobUrl: entry.url,
-          mediaType: entry.mediaType,
-          position,
-        })
-      }
-    }
-
-    if (targetsPlan.create.length > 0) {
-      await tx.insert(scheduledPostTargets).values(
-        targetsPlan.create.map((cuenta) => ({
-          postId,
-          network: cuenta.network,
-          accountId: cuenta.id,
-        })),
-      )
-    }
-    for (const id of targetsPlan.deleteIds) {
-      await tx.delete(scheduledPostTargets).where(
-        and(
-          eq(scheduledPostTargets.id, id),
-          inArray(scheduledPostTargets.status, ['scheduled', 'failed']),
-          eq(scheduledPostTargets.updatedAt, readTargets.get(id)!.updatedAt),
-        ),
-      )
-    }
-    for (const id of targetsPlan.rearmIds) {
-      // El rearme conserva el contenedor (`REARME`): el intento siguiente le pregunta a la red
-      // cómo terminó el anterior antes de subir nada. Salvo que lo de antes ya no sirva
-      // (`tiraContenedor`, arriba).
-      const tirar = tiraContenedor(readTargets.get(id)!.network)
-      await tx
-        .update(scheduledPostTargets)
-        .set({ ...REARME, ...(tirar ? { containerId: null } : {}), updatedAt: new Date() })
-        .where(
-          and(
-            eq(scheduledPostTargets.id, id),
-            eq(scheduledPostTargets.status, 'failed'),
-            eq(scheduledPostTargets.updatedAt, readTargets.get(id)!.updatedAt),
-          ),
-        )
-    }
-    // Lo mismo para un destino que espera su reintento con su contenedor guardado (el tope
-    // diario de Instagram, una publicación que no contestó): con lo de antes inservible, se tira y
-    // el intento siguiente arma otro con lo de ahora. Si la publicación que no contestó sí había
-    // salido, sale otra con lo nuevo: pasa solo si se edita en el rato entre dos intentos, y lo
-    // contrario —publicar lo viejo— sería peor.
-    if (mediaCambio || textoCambio) {
-      for (const target of targets) {
-        if (target.status !== 'scheduled' || !target.containerId) continue
-        if (!idsElegidosSet.has(target.accountId) || !tiraContenedor(target.network)) continue
-        await tx
-          .update(scheduledPostTargets)
-          .set({ containerId: null, publicandoDesde: null, updatedAt: new Date() })
-          .where(
-            and(
-              eq(scheduledPostTargets.id, target.id),
-              eq(scheduledPostTargets.status, 'scheduled'),
-              eq(scheduledPostTargets.updatedAt, readTargets.get(target.id)!.updatedAt),
-            ),
-          )
-      }
-    }
-
-    // La regla se edita siempre, incluso publicado el post: rige para los comentarios que
-    // lleguen desde ahora. Palabra vacía la borra.
-    if (reglaCheck.regla) {
-      await tx
-        .insert(reglasClave)
-        .values({ postId, ...reglaCheck.regla })
-        .onConflictDoUpdate({
-          target: reglasClave.postId,
-          // Solo las columnas que este editor administra (palabra, mensaje, respuesta
-          // pública): un `set` con la regla entera pisaría `documentoUrl` con `null` en
-          // cada guardado, aunque la regla se haya creado por API con su PDF. Ver
-          // `columnasEditablesDeRegla`.
-          set: { ...columnasEditablesDeRegla(reglaCheck.regla), updatedAt: new Date() },
-        })
-    } else {
-      await tx.delete(reglasClave).where(eq(reglasClave.postId, postId))
-    }
-
-    return null
+  // La regla —qué se puede cambiar, cuándo, y cómo se escribe sin pisar un intento en curso—
+  // vive en `editarPostProgramado`, compartida con la app del teléfono.
+  const resultado = await editarPostProgramado(ownerId, postId, {
+    caption: String(formData.get('caption') ?? '').trim(),
+    scheduledAt: fromZonedInput(String(formData.get('scheduledAt') ?? ''), zona),
+    cuentas: formData.getAll('cuentas').map(String),
+    media: {
+      kept: formData.getAll('keptMedia').map(String),
+      nuevos: subida.lista,
+      urls: String(formData.get('mediaUrls') ?? '')
+        .split(/\r?\n/)
+        .map((u) => u.trim())
+        .filter(Boolean),
+    },
+    portada: {
+      conservar: String(formData.get('keepPortada') ?? '').trim(),
+      nueva: String(formData.get('portadaUrl') ?? '').trim(),
+    },
+    atributos,
+    regla: { cruda: reglaDesdeFormulario(formData) },
   })
-  if (bloqueo) return { error: bloqueo }
+  if ('error' in resultado) return { error: resultado.error }
 
   revalidatePath('/admin/schedule')
 
@@ -1319,7 +974,7 @@ export async function deleteScheduledPost(postId: string): Promise<FormState> {
   // `DELETE /api/schedule/posts/{id}` para que el panel y la API no puedan divergir.
   const resultado = await borrarPostProgramado(ownerId, postId)
   if (resultado === 'publicado') return { error: BORRADO_YA_PUBLICADO }
-  if (resultado === 'no-existe') return { error: 'El post ya no existe.' }
+  if (resultado === 'no-existe') return { error: POST_NO_EXISTE }
   revalidatePath('/admin/schedule')
   return { ok: true }
 }
