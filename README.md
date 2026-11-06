@@ -727,7 +727,13 @@ de la misma red en el mismo corte.
 TikTok pide sus propias opciones por destino —privacidad, comentarios, dúo, comercial—, así
 que con dos cuentas de TikTok marcadas verás dos bloques, uno por cuenta. No se comparten a
 propósito: TikTok consulta los permisos por creador, y lo que una cuenta admite la otra
-puede no admitirlo. Instagram también puede pedir una opción por destino —si el reel sale
+puede no admitirlo. Con fotos publicadas directo, el bloque ofrece además «Música de TikTok»
+(`musica`, que viaja como `auto_add_music`): TikTok les pone una canción recomendada. Su API no
+la ofrece para videos ni para lo que va a la bandeja, así que ahí no se manda. Es la única
+opción de TikTok que se recuerda: al programar fotos desde el compositor queda en
+`social_accounts.tiktok_musica` y el interruptor de esa cuenta nace así la próxima vez —quien
+tiene tres cuentas la elige una vez por cuenta—; la privacidad y las casillas nacen siempre sin
+elegir, porque la guía de TikTok prohíbe dejarlas puestas. Instagram también puede pedir una opción por destino —si el reel sale
 como trial reel—, y tanto el compositor del panel como Publicar en el teléfono la ofrecen:
 un bloque (panel) o un chip (teléfono) por cuenta de Instagram marcada —«Publicar como
 trial reel» / «Trial reel · @handle»—, pero solo cuando hay exactamente un video elegido:

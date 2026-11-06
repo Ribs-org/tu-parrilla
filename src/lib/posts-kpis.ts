@@ -32,6 +32,11 @@ export type CuentaRow = {
    * filas de prueba.
    */
   login?: 'facebook' | 'instagram' | null
+  /**
+   * Si las fotos de esta cuenta de TikTok iban con «Música de TikTok» la última vez que se
+   * programaron (`social_accounts.tiktok_musica`); nulo o ausente es apagado. Solo TikTok.
+   */
+  tiktokMusica?: boolean | null
 }
 
 export type PostRow = {

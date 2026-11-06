@@ -330,7 +330,9 @@ elemento de `posts` en `GET /api/schedule/posts`: texto, `fecha`, media, `atribu
 después de programar, en vez de decirle a la persona que lo revise en la red:
 
 - TikTok en `directo` trae todas sus casillas explícitas —`privacidad`, `comentarios`, `duo`,
-  `pegar`, `comercial` e `ia`—, con `false` en las que no se encendieron. Una clave que
+  `pegar`, `comercial`, `ia` y `musica`—, con `false` en las que no se encendieron. `musica` se
+  guarda aunque el post sea un video, pero solo viaja con fotos: TikTok no deja ponerle música a
+  un video por su API. Una clave que
   mandaste y no está ahí no se guardó (TikTok ignora claves desconocidas).
 - TikTok en `borrador` trae `{ "modo": "borrador" }`; un trial reel, `{ "trialReel": true }`;
   una red que no pide nada, `null`.
