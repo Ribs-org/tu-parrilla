@@ -281,12 +281,14 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   más información llega a la campana de developers.facebook.com y a pyxis.latam@gmail.com.
 
   Lo que se queda aunque la app esté en Live: el revisor (`revision@tu-parrilla.cl`) con sus
-  cuentas conectadas, @vicente_edits2 y la página Tu-Parrilla, y `REVISION_CORREO` y
+  cuentas conectadas —desde el 2026-11-03, @vicente.ingeniero (Instagram y Threads) y la página
+  Tu-Parrilla—, y `REVISION_CORREO` y
   `REVISION_CODIGO` en Vercel. Meta vuelve a revisar las apps aprobadas y pide que las
   credenciales de prueba sigan activas un año (README, «Dejar entrar al revisor de Meta»).
-  Una cuenta de Instagram la tiene una sola persona en Tu Parrilla: para usar @vicente_edits2 en
+  Una cuenta de Instagram la tiene una sola persona en Tu Parrilla: para usar @vicente.ingeniero en
   otra cuenta, primero hay que dejarle al revisor otro Instagram de prueba, conectándolo o
-  traspasándolo en Los Maestros. El video y los textos de esta vuelta (`meta-app-review-demo.mp4`,
+  traspasándolo en Los Maestros. Para no tenerla parada mientras tanto, se programa en ella con
+  una llave del revisor (README, «Dejar entrar al revisor de Meta», paso 4), sin traspasarla. El video y los textos de esta vuelta (`meta-app-review-demo.mp4`,
   `TEXTOS-FORMULARIO.txt`) están en la carpeta «Meta - Verification» del escritorio de
   Vicente, y sirven de molde para la segunda.
 - **[dueño] Política interna ante solicitudes de autoridades** (2026-10-06). En el App
@@ -367,7 +369,7 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   3. **[dueño]** Con la cuenta del revisor, que tiene un rol en la app y administra la cuenta
      publicitaria (con el acceso de desarrollo de la Marketing API, Meta solo deja eso: su error
      270): que la cuenta publicitaria tenga un medio de pago; reconectar Instagram aceptando los
-     permisos nuevos; en Los Números → una publicación de @vicente_edits2 → «Promocionar», con el
+     permisos nuevos; en Los Números → una publicación de @vicente.ingeniero → «Promocionar», con el
      presupuesto mínimo y un solo día, crearla en pausa y mirar que aparezca en «Tus promociones
      desde Tu Parrilla». Si algo falla, la frase de Meta sale en la pantalla, y lo de la lectura,
      en el registro del cron (`[sync] anuncios del dueño …`).
@@ -439,7 +441,7 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
     `INSTAGRAM_LOGIN_ABIERTO_PARA=<id del usuario revisor>`, y que `COMENTARIOS_DM` lo incluya para
     mostrar el privado. Redesplegar.
   - **[dueño]** Grabar el video y mandar la solicitud. Conviene un Instagram profesional **sin**
-    página de Facebook, para que se vea que no la pide; @vicente_edits2 tiene página, y conectarlo
+    página de Facebook, para que se vea que no la pide; @vicente.ingeniero tiene página, y conectarlo
     por este login pasa su fila al login de Instagram. Si la ventana de Instagram dice que la app no
     está disponible o que falta un rol, agregar esa cuenta como tester de Instagram en los roles de
     la app y aceptar la invitación desde Instagram.
