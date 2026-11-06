@@ -19,3 +19,19 @@ export function proximamentePara(ownerId: string | null | undefined): ReadonlySe
   if (!ownerId || !abierto.includes(ownerId)) return REDES_PROXIMAMENTE
   return new Set([...REDES_PROXIMAMENTE].filter((red) => red !== 'threads'))
 }
+
+/**
+ * Si el dueño ve «Lo pagado» en Los Números y la sincronización lee sus anuncios de Meta.
+ * `ANUNCIOS_ABIERTO_PARA=1` lo abre para todos; una lista de ids de usuario separados por comas,
+ * solo para esos —así se graba la revisión de `ads_read` con la cuenta del revisor sin
+ * mostrárselo a nadie más—; vacía, para nadie. Mientras `ads_read` no esté aprobado, solo quien
+ * tiene un rol en la app de Meta puede concederlo: a los demás la lectura les fallaría cada noche
+ * y verían una sección siempre vacía.
+ */
+export function anunciosAbiertosPara(ownerId: string | null | undefined): boolean {
+  const bandera = env('ANUNCIOS_ABIERTO_PARA')
+  if (!bandera) return false
+  if (bandera === '1') return true
+  if (!ownerId) return false
+  return bandera.split(',').some((id) => id.trim() === ownerId)
+}

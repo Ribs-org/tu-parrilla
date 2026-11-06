@@ -8,6 +8,7 @@ import { esChoqueCon } from '../choque-de-unicidad'
 import { env } from '../env'
 import { adminId, buscarPorId } from '../usuarios'
 import { ZONA_POR_DEFECTO } from '../zona'
+import { sincronizarAnuncios } from './anuncios-sync'
 import { postsToArchive } from './archive'
 import { campaignTagFor, type CuentaTag } from './campaign'
 import type { Connector, FetchedPost, PostMetricValues } from './connector'
@@ -377,5 +378,13 @@ export async function syncAll(ownerId?: string): Promise<SyncReport> {
       return filas
     }),
   )
+  // Los anuncios, al final y por su cuenta: con los tokens recién usados, después de que lo
+  // orgánico quedó guardado, y sin tocar el informe de cada cuenta (`anuncios-sync.ts`).
+  try {
+    const anuncios = await sincronizarAnuncios(ownerId)
+    if (anuncios > 0) console.log(`[sync] anuncios: ${anuncios} leídos`)
+  } catch (error) {
+    console.error('[sync] anuncios:', String(error).slice(0, 300))
+  }
   return porRedResuelto.flat()
 }

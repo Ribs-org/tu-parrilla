@@ -68,6 +68,7 @@ Cada permiso se pide en el review con una explicación de para qué se usa y un 
 | `pages_manage_posts` | Publicar en la página de Facebook (`publish_video` no se pide mientras la app no lo incluya al conectar) | Programar un corte a Facebook |
 | `business_management` | Que aparezcan páginas administradas desde un Business Manager | Conectar con una cuenta que administra por Business |
 | `instagram_manage_messages`, `pages_messaging` | **Todavía no se piden.** Son los del privado (mandar el PDF por DM), que hoy está apagado a la espera de este mismo trámite | Solo si se incluye el privado en esta vuelta |
+| `ads_read` | **Tercera vuelta; solo se pide con `META_PERMISOS_ANUNCIOS=1`.** Leer cómo les fue a los anuncios del creador —lo gastado, el alcance, las impresiones y los clics de cada publicación promocionada— en «Lo pagado», en Los Números. Solo leer: `ads_management` no se pide | Reconectar Instagram aceptando el permiso, «Sincronizar ahora» y «Lo pagado» con una publicación promocionada (ver `docs/pendientes.md`, «Meta: leer los anuncios») |
 
 Cuanto más se pide, más largo el review y más riesgo de rechazo por un permiso cuyo uso
 no quedó claro en el video. Lo razonable es pedir en una primera vuelta lo que ya funciona

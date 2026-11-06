@@ -21,6 +21,13 @@ cuenta. «Lado a lado» pone dos publicaciones una al lado de la otra —por eje
 peor—, con su portada, el link para ver el video en la red y cómo crecieron. Y «Llevar para
 la casa» (de día, «Para llevar»), al lado del título, baja todo eso a una planilla de Excel.
 
+Para algunas cuentas, entre las dos mitades aparece una sección más, **«Lo pagado»**: cómo les
+fue a los anuncios de Instagram y Facebook de la persona, y sobre todo a las publicaciones que
+promocionó —lo gastado, a cuántas cuentas llegaron, cuántas veces se mostraron y cuántos clics
+tuvieron—. Lo cuenta Meta. Es solo para mirar: desde aquí no se crea ni se promociona nada.
+Mientras Meta revisa el permiso para leer anuncios, la sección se ve solo en las cuentas que el
+equipo de Tu Parrilla habilitó; en las demás no existe.
+
 Dos palabras que no hay que mezclar: la **etiqueta** es el `?s=` del link de cada publicación,
 que dice por cuál llegó la gente a la página; los **atributos** son lo que se le anota a un post
 programado —el hook, el tema, la serie— en su editor de [La Parrilla](la-parrilla.md) o por la
@@ -224,6 +231,58 @@ publicación, en la misma pestaña (el enlace a la red está ahí).
   las mismas fechas, cada uno rotulado arriba: «Views ganadas» y «Visitas» (separados por lo
   mismo: las views van en miles y las visitas en decenas). Cada punto es un día (también con
   «Hoy»); con «Todo», una semana. Al pasar el mouse aparece la fecha completa y el valor.
+
+### Sección «Lo pagado» (solo en algunas cuentas)
+
+Entre «En las redes» y «En tu página», **solo en las cuentas habilitadas mientras Meta revisa el
+permiso para leer anuncios** (en las demás no aparece nada, ni siquiera el título).
+
+**La cabeza.** El título «Lo pagado» y debajo «Lo que hicieron tus anuncios de Instagram y
+Facebook, y las publicaciones que promocionaste. Lo cuenta Meta.» No tiene «⋯ Más» ni selector
+de cuenta: muestra los anuncios de todas las cuentas publicitarias de la persona.
+
+**Sin anuncios en el período**, en vez de cifras, una de dos frases:
+
+- «Todavía no hay anuncios leídos. Si promocionaste una publicación, vuelve a conectar Instagram
+  en Los Fierros y acepta el permiso para ver tus anuncios: los números llegan con la
+  sincronización diaria.» (de día, «Los Cuchillos» en vez de «Los Fierros») — cuando nunca se
+  leyó ningún anuncio de la persona.
+- «Ningún anuncio tuyo corrió en este período.» — cuando hay anuncios leídos, pero ninguno
+  estuvo corriendo en las fechas elegidas.
+
+**Con anuncios**, cuatro cifras, cada una con su aclaración debajo:
+
+| Rótulo | Aclaración debajo |
+|---|---|
+| «Gastado» | «En <N> anuncios, de principio a fin» («En 1 anuncio, …» si es uno) |
+| «Alcance pagado» | «Cuentas a las que llegaron» |
+| «Impresiones» | «Veces que se mostraron» |
+| «Clics» | «En cualquier parte del anuncio» |
+
+«Gastado» va en la moneda de la cuenta publicitaria, con su código: «15.000 CLP». Si la persona
+tiene cuentas publicitarias en monedas distintas, cada moneda va aparte, separadas por « · »
+(«15.000 CLP · 10,50 USD»): no se suman.
+
+**Panel «Tus publicaciones promocionadas»**, explicación «Cada una con lo de todos sus anuncios,
+de principio a fin, aunque hayan empezado antes del período. Con dos anuncios, el alcance se
+suma y puede contar dos veces a la misma cuenta.» Una tabla, de más a menos impresiones, con las
+columnas «Publicación», «Anuncios», «Gastado», «Alcance», «Impresiones», «Clics» y «Fechas»
+(no se ordena al apretarlas). Cada fila:
+
+- La miniatura, el texto de la publicación (o su etiqueta, o «Publicación sin texto») y debajo,
+  en chico, el ícono de la red y la cuenta con el patrón «<red> · <nombre de la cuenta>». El
+  texto abre la pieza de esa publicación, en la misma pestaña.
+- Cuántos anuncios la promocionaron, y la suma de lo gastado, el alcance, las impresiones y los
+  clics de todos ellos.
+- «Fechas»: del primer día en que corrió alguno de sus anuncios al último, con el mismo formato
+  del botón del período («1 oct – 8 oct»).
+
+Si ninguno de los anuncios del período promociona una publicación de las cuentas conectadas, en
+vez de la tabla: «Ninguno de estos anuncios promociona una publicación de tus cuentas
+conectadas.» Y si algunos no lo hacen (un anuncio armado aparte en el Administrador de anuncios
+de Meta, por ejemplo), debajo de la tabla: «Además, <N> anuncios que no salen de una publicación
+de tus cuentas conectadas: suman arriba, pero no tienen fila.» (con uno, «Además, 1 anuncio que
+no sale de una publicación de tus cuentas conectadas: suma arriba, pero no tiene fila.»).
 
 ### Mitad «En tu página»
 
@@ -818,6 +877,29 @@ cada publicación no suma (no hay lectura anterior con qué restar). Una publica
 lo que creció en ese tiempo cae entero en el día en que se leyó: los saltos de un día puntual
 pueden ser eso. Por eso no tiene por qué sumar lo mismo que la cifra «Views ganadas».
 
+### En «Lo pagado»
+
+**De dónde salen.** De Meta, con la misma sincronización diaria que lee las cuentas: lee las
+cuentas publicitarias a las que la persona tiene acceso (también las de un portafolio comercial
+donde tiene un rol) y cada anuncio que tuvo resultados, con sus totales. Una publicación
+promocionada con el botón «Promocionar» de Instagram o de Facebook es un anuncio más, así que
+entra igual. Un anuncio de hoy aparece mañana, o al apretar «Sincronizar ahora» en
+[Los Fierros](los-fierros.md). Hace falta que la persona haya dado el permiso para ver sus
+anuncios al conectar Instagram; si lo conectó antes, tiene que volver a conectarlo.
+
+**Qué filtra el período.** Qué anuncios aparecen —los que estuvieron corriendo algún día de las
+fechas elegidas—, pero no sus números: cada anuncio trae sus totales de principio a fin, aunque
+haya empezado antes del período o siga después. No hay «lo ganado en el período» como en las
+redes. El selector de cuenta, el de página y «Bots» no le aplican.
+
+**Qué publicación es.** La que el anuncio promocionó, si es de una cuenta de Instagram o de
+Facebook conectada en Tu Parrilla. Un anuncio armado desde cero en el Administrador de anuncios,
+o de una cuenta que no está conectada, no tiene fila: solo suma a las cuatro cifras de arriba.
+
+**El alcance.** Es de cada anuncio; con dos anuncios de la misma publicación, o en la cifra de
+arriba, se suman, y una misma cuenta que vio los dos se cuenta dos veces. Meta no da el alcance
+sin repetir entre anuncios distintos. Un «—» es que Meta no lo dio.
+
 ### En tu página
 
 **Qué filtros le aplican.** El período, el selector de página y «Bots», a toda la mitad (las
@@ -1099,6 +1181,18 @@ primeras horas; que se aplane antes, que se apagó antes. YouTube no se dibuja, 
 3. En «En tu página», leer «Visitas» y «Clicks en tus links», con su comparación contra el
    período anterior; debajo, «Qué publicación te trajo gente».
 
+### Para ver cómo les fue a tus publicaciones promocionadas
+
+Solo en las cuentas donde aparece «Lo pagado» (ver «Sección «Lo pagado»», arriba).
+
+1. Si nunca se leyó ningún anuncio, primero el permiso: en [Los Fierros](los-fierros.md), volver
+   a conectar Instagram y, en la ventana de Meta, aceptar todos los permisos que pide (uno es para
+   ver los anuncios). Al día siguiente, o después de «Sincronizar ahora», llegan los números.
+2. Elegir el período en que corrieron los anuncios (o «Todo»).
+3. En «Lo pagado», leer las cuatro cifras y, en «Tus publicaciones promocionadas», cada
+   publicación con lo que gastó y lo que logró. Su texto abre la pieza, con sus números
+   orgánicos.
+
 ### Para llevarse los números a Excel
 
 1. En el tablero de Los Números, elegir el período (y, si se quiere, una cuenta, una página o
@@ -1343,6 +1437,9 @@ De día, donde una de estas frases dice «La Parrilla» dice «La Barra», y «L
 | «La primera fecha no puede ser anterior a 2020.» (en el selector de fechas) | «Desde» es de antes del 1 de enero de 2020, donde empieza «Todo». | Elegir una fecha desde 2020, o «Todo». |
 | «La segunda fecha no puede pasar de hoy: lo que viene todavía no tiene números.» (en el selector de fechas) | «Hasta» es de un día que todavía no llega. | Elegir hoy o un día anterior. |
 | «Elige las dos fechas.» (en el selector de fechas) | Uno de los dos campos está vacío o a medio escribir. | Completar el campo. |
+| «Todavía no hay anuncios leídos. Si promocionaste una publicación, vuelve a conectar Instagram en Los Fierros y acepta el permiso para ver tus anuncios: los números llegan con la sincronización diaria.» (en «Lo pagado») | Nunca se leyó un anuncio de la persona: no dio el permiso para ver sus anuncios, no tiene una cuenta publicitaria, o sus anuncios nunca llegaron a mostrarse. | Volver a conectar Instagram en Los Fierros aceptando todos los permisos, y esperar la sincronización o apretar «Sincronizar ahora». |
+| «Ningún anuncio tuyo corrió en este período.» (en «Lo pagado») | Hay anuncios leídos, pero ninguno estuvo corriendo en las fechas elegidas. | Ampliar el período, o «Todo». |
+| «Ninguno de estos anuncios promociona una publicación de tus cuentas conectadas.» (en «Tus publicaciones promocionadas») | Los anuncios del período no salen de una publicación de Instagram o Facebook conectada en Tu Parrilla. | Nada: sus números ya están en las cuatro cifras. Si la publicación es de otra cuenta, conectarla en Los Fierros. |
 | «Este período no cabe entero.» (en la ventana de «Llevar para la casa») | Alguna hoja larga —«Lecturas diarias», «Visitas», «Clicks» o «Comentarios»— tiene más filas que su tope (100.000, 100.000, 100.000 y 50.000). La línea de abajo dice cuáles lleva y cuántas había. | Elegir un período más corto, o armarla igual: lleva lo más reciente. |
 | «No se pudo armar la planilla. Prueba de nuevo; si el período es muy largo, prueba con uno más corto.» | Algo falló mientras se armaba, o se cortó la conexión. No se descargó nada. | «Probar de nuevo»; si se repite, un período más corto. |
 | «Listo: se descargó <archivo>. …» | La planilla está en las descargas del navegador. | Abrirla y empezar por «Léeme». |
@@ -1406,6 +1503,22 @@ De día, donde una de estas frases dice «La Parrilla» dice «La Barra», y «L
 | «Algo se rompió» y «No fue nada que hicieras. Vuelve a intentarlo; el detalle quedó en la consola del navegador.» (a veces con «Si se repite, este código ayuda a encontrarlo: <código>.») | Algo falló al armar la pantalla. | Apretar «Reintentar»; si sigue, «Ir a La Parrilla». |
 
 ## Si el humano dice…
+
+- **«¿Dónde veo cómo le fue a lo que promocioné?» / «mis anuncios» / «lo que pagué en Meta»**: en
+  el tablero, la sección «Lo pagado», entre «En las redes» y «En tu página». Si no aparece, la
+  cuenta todavía no está habilitada: mientras Meta revisa el permiso para leer anuncios, solo la
+  ven algunas cuentas. No hay otra pantalla que lo muestre.
+- **«Promocioné un post y no aparece en «Lo pagado»»**: en orden: que el período cubra los días
+  en que corrió; que hayan pasado una sincronización (al día siguiente, o «Sincronizar ahora» en
+  Los Fierros); que la persona haya vuelto a conectar Instagram aceptando el permiso de los
+  anuncios; y que la publicación sea de una cuenta conectada (si no, el anuncio suma a las cifras
+  de arriba pero no tiene fila). Un anuncio que nunca llegó a mostrarse no aparece.
+- **«El gasto no calza con el de Meta»**: «Lo pagado» muestra los totales de cada anuncio de
+  principio a fin, leídos una vez al día; el Administrador de anuncios puede estar mostrando otro
+  rango de fechas o lo de hoy. El alcance, además, se suma entre anuncios.
+- **«Quiero promocionar una publicación desde aquí»**: Tu Parrilla no crea ni promociona anuncios;
+  eso se hace en Instagram, Facebook o el Administrador de anuncios de Meta. Aquí solo se ve cómo
+  les fue.
 
 - **«¿Puedo exportar a Excel?» / «quiero bajar mis datos» / «quiero un CSV»**: en el tablero de
   Los Números, «Llevar para la casa» (de día, «Para llevar»), a la derecha del título. Es un
@@ -1572,6 +1685,9 @@ De día, donde una de estas frases dice «La Parrilla» dice «La Barra», y «L
 ## Lo que esta pantalla no hace
 
 - No filtra por red: filtra por cuenta.
+- No crea, promociona, pausa ni edita anuncios: «Lo pagado» solo los lee. Tampoco muestra el
+  costo por resultado, la segmentación, los anuncios de TikTok o YouTube, ni lo gastado día a
+  día; y la planilla de «Llevar para la casa» no lo lleva.
 - No adivina versiones: dos posts programados se ven juntos solo si comparten el atributo
   `pieza`. Una publicación subida a mano en la red no se junta con nada.
 - No edita los atributos aquí: «Editar atributos» lleva al editor del post, en
@@ -1626,6 +1742,10 @@ Sale de:
   `src/lib/planilla/armar.ts`, `src/lib/planilla/xlsx.ts` y `src/lib/planilla/zip.ts` (las
   hojas y sus columnas, «Léeme», lo que se lee, los topes y el orden, y el formato)
 - `src/app/admin/(dash)/analytics/accounts.tsx` (tarjetas de «Tus cuentas» y su gráfico)
+- `src/app/admin/(dash)/analytics/lo-pagado.tsx` («Lo pagado»: cifras, tabla y frases),
+  `src/lib/lo-pagado.ts` (qué anuncios entran por el período), `src/lib/social/anuncios.ts`
+  (cómo se suma y cómo se escribe el gasto; qué se le pide a Meta) y
+  `src/lib/redes-abiertas.ts` (`anunciosAbiertosPara`: quién la ve)
 - `src/app/admin/(dash)/analytics/publicaciones/page.tsx` («Tus publicaciones»: controles,
   avisos, estados vacíos, el link que se copia)
 - `src/app/admin/(dash)/analytics/publicaciones/post-table.tsx` (la tabla, la etiqueta, copiar)

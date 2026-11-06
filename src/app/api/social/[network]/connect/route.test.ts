@@ -73,3 +73,30 @@ describe('los permisos del privado', () => {
     expect(scopesDe('linkedin', true)).toBeUndefined()
   })
 })
+
+describe('el permiso de los anuncios', () => {
+  it('solo con su bandera, solo leer, y solo en Instagram y Facebook', () => {
+    expect(scopesDe('instagram', false)).not.toContain('ads_read')
+    expect(scopesDe('instagram', false, true)).toMatch(/,ads_read$/)
+    expect(scopesDe('facebook', false, true)).toMatch(/,ads_read$/)
+    // Tu Parrilla no crea ni promociona anuncios: pedir `ads_management` sería pedir de más.
+    expect(scopesDe('instagram', true, true)).not.toContain('ads_management')
+    expect(scopesDe('tiktok', false, true)).toBe(scopesDe('tiktok', false))
+  })
+
+  it('se suma al privado sin pisarlo', () => {
+    expect(scopesDe('instagram', true, true)).toMatch(/,instagram_manage_messages,pages_messaging,ads_read$/)
+  })
+
+  it('la ventana de Meta lo pide con la bandera puesta', async () => {
+    process.env.INSTAGRAM_APP_ID = 'app'
+    process.env.META_PERMISOS_ANUNCIOS = '1'
+    try {
+      const destino = new URL((await conectar('instagram')).headers.get('location') ?? '')
+      expect(destino.searchParams.get('scope')?.split(',')).toContain('ads_read')
+    } finally {
+      delete process.env.INSTAGRAM_APP_ID
+      delete process.env.META_PERMISOS_ANUNCIOS
+    }
+  })
+})

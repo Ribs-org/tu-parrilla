@@ -208,8 +208,8 @@ Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataf
 
 Lo que falta para abrir cada plataforma, de un vistazo (el detalle está en cada entrada, más
 abajo): el **login con Instagram** sin página de Facebook y los **mensajes privados de
-Instagram** (las dos en «Meta, segunda vuelta»), los permisos de Meta para **anuncios
-pagados**, la **Play Store** (la pista interna ya existe; la tienda pública es otro trámite) y
+Instagram** (las dos en «Meta, segunda vuelta»), el permiso de Meta para **leer los anuncios**
+(construido, espera la tercera vuelta), la **Play Store** (la pista interna ya existe; la tienda pública es otro trámite) y
 el **App Store** de iPhone, las integraciones con **Threads** y con **X**, y **revisar qué
 otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
 
@@ -254,14 +254,41 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   (`src/lib/social/publish/x.ts`), pero no publica: lo primero a mirar es el saldo, porque su
   API ya no tiene capa gratuita, y pagarla es decisión del **[dueño]**. Abrirla es lo mismo que
   con Threads: sacarla de `REDES_PROXIMAMENTE` y volver a contar su conexión en la wiki.
-- **Meta: permisos para anuncios pagados** (2026-10-21). Hoy Tu Parrilla lee y publica lo
-  orgánico; no ve ni toca anuncios. Para mostrar cómo les fue a los posts promocionados, o
-  promocionar uno desde acá, hace falta la Marketing API: `ads_read` para leer resultados,
-  `ads_management` si además se crean o se promocionan anuncios, y probablemente
-  `business_management` para llegar a las cuentas publicitarias de un negocio. Cada permiso pide
-  su video en un App Review, y el acceso estándar a la Marketing API se apoya en la verificación
-  del negocio (la de Pyxis, en curso, más arriba). Antes del guion hay que decidir el alcance
-  —solo leer, o también promocionar— y qué vería el creador.
+- **Meta: leer los anuncios (`ads_read`), tercera vuelta del App Review** (2026-10-21; construido
+  el 2026-11-05). El dueño eligió **solo leer**: Tu Parrilla no crea ni promociona anuncios, así
+  que no se pide `ads_management`. Lo hecho: la sincronización diaria lee con la Marketing API las
+  cuentas publicitarias del creador y sus anuncios, los cruza con sus publicaciones de Instagram y
+  Facebook y los guarda en `anuncios`; Los Números los muestra en «Lo pagado» (README, «Conectar y
+  sincronizar»; wiki, `los-numeros.md`). Está todo detrás de dos variables, apagadas: con
+  `META_PERMISOS_ANUNCIOS=1` el conectar pide `ads_read`, y `ANUNCIOS_ABIERTO_PARA` dice para
+  quién se lee y se ve. **No se probó contra una cuenta publicitaria de verdad**: los campos y la
+  forma de las respuestas salen de la documentación de la Marketing API y están en los tests, pero
+  falta ver en vivo que `insights.date_preset(maximum)` venga dentro del listado de anuncios, que
+  el filtro de estados no lo rechace (si lo rechaza, se repite sin él y se pierde lo archivado) y
+  que un post promocionado desde la app traiga `effective_instagram_media_id`. Tampoco se sabe si
+  el token de página que guarda Facebook sirve para la Marketing API: se prueba solo si no hay un
+  Instagram conectado, así que un creador con solo Facebook podría quedarse sin «Lo pagado».
+
+  Lo que falta, en orden:
+  1. **[dueño]** Volver a agregar `ads_read` al caso de uso de la app de Meta (se quitó el
+     2026-11-05, para que no frenara la segunda vuelta).
+  2. **[dueño]** En Vercel, `META_PERMISOS_ANUNCIOS=1` (solo después del paso 1: si no, Meta
+     rechaza la ventana entera y nadie conecta) y `ANUNCIOS_ABIERTO_PARA=<id del revisor>`;
+     redesplegar.
+  3. **[dueño]** Con la cuenta del revisor, que tiene un rol en la app: promocionar una
+     publicación de @vicente_edits2 (aunque sea con el mínimo), reconectar Instagram aceptando el
+     permiso nuevo, «Sincronizar ahora» y mirar «Lo pagado». Si algo no llega, el motivo queda en
+     el registro del cron (`[sync] anuncios del dueño …`). Con el acceso de desarrollo de la
+     Marketing API, Meta solo deja leer cuentas publicitarias de quien es administrador de la app
+     y de la cuenta publicitaria (su error 270).
+  4. **[dueño]** Grabar el video: Los Fierros → reconectar Instagram mostrando el permiso en la
+     ventana de Meta → «Sincronizar ahora» → Los Números → «Lo pagado» con la publicación
+     promocionada, y su pieza.
+  5. **[dueño]** Mandarlo cuando Meta conteste la solicitud de la segunda vuelta que está en curso,
+     no antes. El acceso estándar a la Marketing API se apoya en la verificación del negocio (la
+     de Pyxis, más arriba): sin ella, Meta puede aprobar `ads_read` solo con acceso de desarrollo.
+  6. Aprobado: `ANUNCIOS_ABIERTO_PARA=1` para todos, y sacar de la wiki (`los-numeros.md`,
+     `los-fierros.md`, `index.md`) que «Lo pagado» se ve solo en algunas cuentas.
 - **Revisar qué otros permisos hacen falta** (2026-10-21). Una pasada red por red de lo que el
   producto necesita y todavía no pidió, antes de la próxima vuelta de cada revisión, para
   pedirlo todo de una vez y no volver a grabar. Lo que ya se sabe que falta: el login con

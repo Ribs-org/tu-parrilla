@@ -30,6 +30,8 @@ describe('pasosDeBorrado', () => {
     expect(tablas).toEqual([
       'post_metrics',
       'post_comments',
+      // Los anuncios leídos con el token de esa persona: los dio Meta, se van con el resto.
+      'anuncios',
       'social_posts',
       'account_metrics',
       'scheduled_post_targets',
