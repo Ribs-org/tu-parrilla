@@ -364,12 +364,10 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
 
   Video grabado el 2026-11-05 (`meta-app-review-demo-2.mp4`, en la carpeta «Meta -
   Verification» con sus textos en `2026-10-27-SEGUNDA-VUELTA.txt`); la solicitud va con esos
-  cuatro permisos y nada más. **[dueño]** La solicitud quedó llena y guardada el 2026-11-05
-  sin enviar: Meta exige una llamada de prueba a la API por permiso y las del día de la
-  grabación tardan hasta 24 horas en contarse («0 de 1» en `threads_content_publish`). Desde el
-  2026-11-06 en la tarde: abrirla en Revisión de la app → Solicitudes, ver «1 de 1» en
-  `threads_basic`, `threads_content_publish` y `pages_messaging`, y enviar; si sigue en 0, el
-  enlace «Testing» del mismo aviso.
+  cuatro permisos y nada más. **Enviada el 2026-11-06**; el PDF de lo enviado está en la misma
+  carpeta. **[dueño]** Esperar la respuesta de Meta sin desconectar las cuentas del revisor ni
+  tocar `COMENTARIOS_DM`, `THREADS_ABIERTO_PARA` ni `META_PERMISOS_PRIVADO`; lo que se hace al
+  aprobarse está al final de `2026-10-27-SEGUNDA-VUELTA.txt`.
 - **Instagram sin página de Facebook: tercera vuelta de Meta** (2026-10-19; el código, el
   2026-11-05). La conexión de siempre es Instagram con login de Facebook, que encuentra el
   Instagram solo a través de una página que la persona administre: sin página enlazada, Meta no
