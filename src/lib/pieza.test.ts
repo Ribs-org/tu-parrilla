@@ -14,7 +14,7 @@ import type { PostRow } from './posts-kpis'
 import type { Atributos } from './social/publish/atributos'
 
 /** Sin lecturas de los 7 días, las dos columnas a igual edad no se saben. */
-const sinIgualEdad = { contraSuCuenta: null, viewsA7Dias: null }
+const sinIgualEdad = { contraSuCuenta: null, medidas: 0, viewsA7Dias: null }
 
 function fila(overrides: Partial<PostRow>): PostRow {
   return {
@@ -196,5 +196,8 @@ describe('compararPorAtributo', () => {
     expect(de('listado').contraSuCuenta).toBe(0.5)
     expect(de(null).contraSuCuenta).toBe(1)
     expect(de('pregunta').viewsA7Dias).toBe(10_100)
+    // De cuántas sale la mediana: las que tienen con qué compararse.
+    expect(de('pregunta').medidas).toBe(2)
+    expect(de(null).medidas).toBe(6)
   })
 })
