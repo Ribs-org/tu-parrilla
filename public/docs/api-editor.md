@@ -623,6 +623,108 @@ suya, y el lote de otro dueño la trataría como cualquier URL pública (la baja
 
 ---
 
+# 1c. Guardar en la cámara de frío — `/api/bodega`
+
+La cámara de frío (de día, la nevera) es donde el dueño guarda su material en bruto para el chef
+de la casa de La Cocina: un video largo, su intro y su outro, música, su logo, fotos, una
+tipografía. No vence, y de ahí elige el dueño lo que lleva cada comanda. Con la llave puedes
+dejar ahí lo que hiciste en su computador, sin que él lo suba a mano. No es lo mismo que
+`POST /api/media` (sección 1b): lo de la cámara no se programa, y lo de `/api/media` no sirve
+para una comanda.
+
+Solo si el dueño tiene La Cocina encendida; si no, todo responde `403` con
+`La Cocina no está encendida para tu cuenta.`
+
+**Lo que hay adentro:** `GET /api/bodega` devuelve
+`{ "camara": { cuantos, guardados, subiendo, cuota }, "materiales": [ … ] }`. `guardados`,
+`subiendo` y `cuota` van en bytes: lo que te cabe es `cuota - guardados - subiendo` (20 GB salvo
+que el admin le haya dado otra). Cada material trae `id`, `nombre`, `uso` (o `null`), `bytes`,
+`duracionS` (o `null`), `tipoArchivo`, `clase` (`video`, `audio`, `imagen` u `otro`),
+`creadoEn` y `enMarcha` (cuántas comandas en marcha lo usan). No trae su URL: lo baja el chef.
+Míralo antes de subir, para no guardar dos veces lo mismo.
+
+**Subir es por partes**, porque un largo crudo pesa hasta 20 GB. Son cuatro pasos:
+
+**1. Abre la subida:**
+
+```bash
+curl -X POST https://tu-parrilla.cl/api/bodega/subidas \
+  -H "Authorization: Bearer $LLAVE_PARRILLA" \
+  -H "Content-Type: application/json" \
+  -d '{ "nombre": "Intro de marca.mp4", "tipo": "video/mp4", "bytes": 83886080, "uso": "intro", "duracionS": 6.5, "derechos": true }'
+```
+
+- `nombre`: como lo va a ver el dueño en la cámara, hasta 200 caracteres.
+- `tipo`: el content-type. Si no lo sabes o no lo conocemos, vale la extensión del `nombre`.
+  Videos (MP4, MOV, WebM o MKV, hasta 20 GB), audios (MP3, M4A, WAV, AAC, OGG o FLAC, hasta
+  2 GB), imágenes (JPG, PNG, WebP, HEIC o GIF, hasta 50 MB) y, hasta 500 MB, tipografías (TTF,
+  OTF, WOFF), PDF, subtítulos (SRT, VTT), texto o ZIP.
+- `bytes`: lo que pesa, exacto. Al cerrar se compara.
+- `uso` (opcional): para qué es, y lo recibe el chef: `crudo`, `intro`, `outro`, `broll`,
+  `musica`, `logo`, `letras` (una tipografía) u `otro`. Sin él, o con `null`, queda sin uso.
+- `duracionS` (opcional): los segundos de un video o un audio. Si no se entiende, queda vacía.
+- `derechos`: `true`, siempre. Es la casilla del panel: el dueño tiene los derechos de este
+  material y el permiso de quienes aparecen. Mándalo solo si el dueño te lo confirmó.
+
+Responde `201` con `{ "id": "…", "tamanoParte": 67108864, "partes": 2 }`: el archivo va en
+`partes` tramos de `tamanoParte` bytes (64 MB), y el último con lo que sobra. Desde aquí lo que
+pesa ya cuenta en la cuota.
+
+**2. Pide los enlaces de las partes**, hasta 50 por pedido:
+
+```bash
+curl -X POST https://tu-parrilla.cl/api/bodega/subidas/$ID/partes \
+  -H "Authorization: Bearer $LLAVE_PARRILLA" \
+  -H "Content-Type: application/json" -d '{ "partes": [1, 2] }'
+```
+
+Devuelve `{ "partes": [{ "numero": 1, "url": "https://…", "bytes": 67108864 }, …], "vence": "…" }`.
+Cada enlace vence en una hora: pídelos de a pocos, justo antes de usarlos.
+
+**3. Sube cada parte** con un `PUT` a su `url`: solo los bytes de ese tramo (la parte `n` empieza
+en `(n - 1) * tamanoParte`) y **sin cabeceras**, porque ninguna va en la firma:
+
+```bash
+curl -X PUT "$URL_PARTE_1" --data-binary @parte-1.bin
+```
+
+**4. Ciérrala:**
+
+```bash
+curl -X POST https://tu-parrilla.cl/api/bodega/subidas/$ID/cerrar -H "Authorization: Bearer $LLAVE_PARRILLA"
+```
+
+`201` con `{ "material": { … } }`: ya está en la cámara. Cerrarla otra vez devuelve el mismo
+material con `200`. Si faltan partes, `409` dice cuántas.
+
+**Si se corta a la mitad:** `GET /api/bodega/subidas/$ID` dice cuáles llegaron
+(`{ id, nombre, bytes, tamanoParte, partes, llegaron: [1, 3], material }`). Sube las que faltan
+y vuelve a cerrar. `DELETE /api/bodega/subidas/$ID` la aborta y libera su lugar en la cuota. Una
+subida que pasa un día abierta se aborta sola.
+
+Renombrar, cambiarle el uso, sacar algo de la cámara y pedir una comanda siguen siendo del dueño,
+en su panel (La Cocina → «La cámara de frío»).
+
+| Respuesta | Cuándo |
+|---|---|
+| `400` `{ "error": "No entendimos el archivo: falta su nombre, su tipo o su tamaño." }` | falta `nombre` (o pasa de 200 caracteres), o `bytes` no es un entero mayor que 0 |
+| `400` `{ "error": "Marca que tienes los derechos de este material y el permiso de quienes aparecen." }` | falta `"derechos": true` |
+| `400` `{ "error": "Ese uso no existe: elige uno de la lista, o ninguno." }` | `uso` no es uno de los de arriba |
+| `400` `{ "error": "«<nombre>»: ese tipo de archivo no se guarda. …" }` | ni `tipo` ni la extensión del `nombre` son de algo que se guarde |
+| `400` `{ "error": "«<nombre>» pesa más de 20 GB, el tope de un video." }` | pasa el tope de su clase |
+| `400` `{ "error": "«partes» es una lista de 1 a 50 números de parte de este archivo." }` | `…/partes` con una lista vacía, de más de 50, repetida o con números fuera del archivo |
+| `400` `{ "error": "El cuerpo no se entendió." }` | el cuerpo no es un objeto JSON |
+| `401` `No autorizado` | sin llave, o con una que no sirve |
+| `403` `{ "error": "La Cocina no está encendida para tu cuenta." }` | el admin no le encendió La Cocina al dueño (mirar y abortar una subida igual se puede) |
+| `404` `{ "error": "Esa subida no existe, o ya se abortó." }` | el `id` no es de una subida del dueño, se abortó, o pasó más de un día abierta |
+| `409` `{ "error": "No hay espacio para «…»: pesa … y te quedan … libres de …. Saca algo que ya no uses, o pide más espacio." }` | no cabe en la cuota, contando lo que ya está subiendo |
+| `409` `{ "error": "Faltan 3 partes por subir: súbelas y vuelve a cerrar." }` | `…/cerrar` antes de que lleguen todas (con una: `Falta 1 parte por subir: súbela y vuelve a cerrar.`) |
+| `409` `{ "error": "El archivo llegó con otro tamaño: súbelo de nuevo." }` | al juntar las partes, el archivo no pesó lo anunciado: la subida se borra |
+| `409` `{ "error": "Esa subida ya se cerró: el archivo está arriba." }` | pedir partes o abortar una subida ya cerrada |
+| `500` `{ "error": "Falta configurar Cloudflare R2 (R2_*)." }` | el almacenamiento no está configurado en este despliegue, o no contestó |
+
+---
+
 # 2. Leer métricas — `GET /api/metrics/posts`
 
 ```http
@@ -1156,6 +1258,9 @@ patrones. Con menos de ~10 posts por valor de atributo, desconfía de la diferen
   `ref`, lo que ya entró vuelve como repetido (sección 1).
 - **No programa en el pasado** ni acepta media que no esté en una URL pública o subida con
   `POST /api/media` (sección 1b).
+- **No pide comandas ni toca lo que ya está en la cámara de frío.** Por API se lee la cámara y
+  se guarda en ella (sección 1c); renombrar, sacar y pedir una comanda los hace el dueño en su
+  panel.
 - **No edita por API**: para corregir un post ya programado, o lo borras con
   `DELETE /api/schedule/posts/{id}` y lo programas de nuevo, o el dueño lo cambia en su
   panel (`/admin/schedule`), donde puede tocar texto, hora, redes, media, portada y

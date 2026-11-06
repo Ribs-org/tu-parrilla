@@ -188,6 +188,11 @@ En La Cocina, «Pedir una comanda»: se elige de acá ([la-cocina.md](la-cocina.
   graba un video o saca una foto, o lo elige de la galería, y lo guarda acá con la misma cuota. Lo
   grabado con la app no queda en la galería del teléfono: queda acá. Renombrar, cambiar el uso y
   sacar siguen siendo del panel. Ver [La app del teléfono](app-movil.md), «La Cocina».
+- **«¿Mi IA puede guardar acá?».** Sí, con una llave de «Tu propio chef» (La Cocina → «Tu propio
+  chef»), la misma con que programa: lo que guarda aparece acá como lo subido a mano, con la misma
+  cuota. Cada vez tiene que afirmar lo mismo que la casilla de los derechos, así que conviene que
+  la persona se lo confirme. Renombrar, cambiar el uso y sacar siguen siendo del panel. Cómo se
+  hace está en la guía de la API ([../api-llm.md](../api-llm.md), sección 3h).
 - **«¿Cuánto me cabe?».** 20 GB, salvo que el admin le haya dado otra cuota. El bloque «Cuánto cabe»
   dice cuánto lleva.
 - **«Necesito más espacio» / «¿Cómo compro más?».** Comprar todavía no existe. «¿Necesitas más

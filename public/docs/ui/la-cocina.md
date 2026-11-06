@@ -8,8 +8,8 @@ La Cocina junta a los dos chefs que pueden cocinar para la persona:
 - **El chef de la casa**, arriba, edita sus videos: le lleva el material crudo y le devuelve
   los creativos listos para programar. Está en piloto, y se enciende por cuenta.
 - **Tu propio chef**, abajo, es su propia IA —el agente que le edita los videos, un asistente
-  con herramientas, un script—, que programa publicaciones, las saca y lee el calendario y los
-  números a su nombre, sin entrar al panel. Son dos pasos: generar una llave y darle la guía. Lo
+  con herramientas, un script—, que programa publicaciones, las saca, lee el calendario y los
+  números y guarda material en la cámara de frío a su nombre, sin entrar al panel. Son dos pasos: generar una llave y darle la guía. Lo
   que la IA hace con la llave está en la guía de la API ([../api-llm.md](../api-llm.md); la
   versión para personas, [../api-editor.md](../api-editor.md)).
 

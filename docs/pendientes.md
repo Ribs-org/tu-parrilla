@@ -81,6 +81,12 @@ sección.
     chef baje de ahí, cuando Drive era justo el cuello de botella que La Cocina sacó del camino
     («Todo en el almacén de Tu Parrilla, no en Drive», en el diseño de La Cocina)—. También, cuánto
     le toca a cada plan: hoy la cuota se cambia a mano en Los Maestros (`users.bodega_bytes`).
+  - **[dueño] Decidir juntas la aprobación de lo que propone el chef (#283) y el aviso de la
+    entrega (#284)** (2026-11-03). #283 pide que el chef proponga estados y entregas y que una
+    persona del equipo los apruebe desde Tu Parrilla: una tabla de propuestas, sus endpoints y una
+    vista en el panel. De #284 ya sale el correo de lista (#295); faltan el de la primera vez que
+    pasa a `sirviendo`, la animación de entrega (una vez por entrega), un asunto opcional y poder
+    apagarlo. Van juntas porque, con aprobación, el aviso sale al aprobar y no al proponer.
   - **Del equipo de contenido:** el cliente del chef en `marca-personal`, contra
     `docs/cocina-api.md`.
 
@@ -207,9 +213,9 @@ sección.
 Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataforma.
 
 Lo que falta para abrir cada plataforma, de un vistazo (el detalle está en cada entrada, más
-abajo): el **login con Instagram** sin página de Facebook (hecho y cerrado, espera su vuelta de
-Meta) y los **mensajes privados de Instagram** (en «Meta, segunda vuelta»), los permisos de Meta para **anuncios
-pagados**, la **Play Store** (la pista interna ya existe; la tienda pública es otro trámite) y
+abajo): los **mensajes privados de Instagram** (en «Meta, segunda vuelta»), el **login con
+Instagram** sin página de Facebook (hecho y cerrado, espera una tercera vuelta), los permisos de Meta para
+**anuncios pagados**, la **Play Store** (la pista interna ya existe; la tienda pública es otro trámite) y
 el **App Store** de iPhone, las integraciones con **Threads** y con **X**, y **revisar qué
 otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
 
@@ -249,7 +255,12 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   URL* `https://tu-parrilla.cl/api/social/threads/borrado`. Para abrirla a todos: la aprobación
   de `threads_basic` y `threads_content_publish` (la entrada «Meta, segunda vuelta», más abajo),
   sacarla de `REDES_PROXIMAMENTE` (`src/lib/networks.ts`) y volver a contar su conexión en
-  `public/docs/ui/los-fierros.md`.
+  `public/docs/ui/los-fierros.md`. Después, si se quiere: **las métricas de Threads en Los
+  Números** (`threads_manage_insights`) y **sus respuestas en La Mesa**
+  (`threads_read_replies`, `threads_manage_replies`). Hoy no hay código para ninguna de las dos:
+  `sync.ts` no tiene conector de Threads y La Mesa no tiene `Comentarista` de Threads. El panel de
+  Meta las sumó al borrador de la segunda solicitud el 2026-11-05 y se quitan de ella; cada una
+  pide su función hecha y su video.
 - **Integración con X** (en «Próximamente» desde el 2026-10-19). El código para publicar existe
   (`src/lib/social/publish/x.ts`), pero no publica: lo primero a mirar es el saldo, porque su
   API ya no tiene capa gratuita, y pagarla es decisión del **[dueño]**. Abrirla es lo mismo que
@@ -261,7 +272,9 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   `business_management` para llegar a las cuentas publicitarias de un negocio. Cada permiso pide
   su video en un App Review, y el acceso estándar a la Marketing API se apoya en la verificación
   del negocio (la de Pyxis, en curso, más arriba). Antes del guion hay que decidir el alcance
-  —solo leer, o también promocionar— y qué vería el creador.
+  —solo leer, o también promocionar— y qué vería el creador. El 2026-11-05 `ads_read` y
+  `ads_management` aparecieron en el borrador de la segunda solicitud (los trajo un caso de uso
+  de la app de Meta) y se quitan de ella: sin la función hecha no hay qué mostrar en el video.
 - **Revisar qué otros permisos hacen falta** (2026-10-21). Una pasada red por red de lo que el
   producto necesita y todavía no pidió, antes de la próxima vuelta de cada revisión, para
   pedirlo todo de una vez y no volver a grabar. Lo que ya se sabe que falta: los mensajes
@@ -287,6 +300,14 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   revisar la app, cuenta que el uso aprobado describa lo que hace: nombrarlas en la descripción
   de esos dos permisos y mostrar una en el video.
 
+  Video grabado el 2026-11-05 (`meta-app-review-demo-2.mp4`, en la carpeta «Meta -
+  Verification» con sus textos en `2026-10-27-SEGUNDA-VUELTA.txt`); la solicitud va con esos
+  cuatro permisos y nada más. **[dueño]** La solicitud quedó llena y guardada el 2026-11-05
+  sin enviar: Meta exige una llamada de prueba a la API por permiso y las del día de la
+  grabación tardan hasta 24 horas en contarse («0 de 1» en `threads_content_publish`). Desde el
+  2026-11-06 en la tarde: abrirla en Revisión de la app → Solicitudes, ver «1 de 1» en
+  `threads_basic`, `threads_content_publish` y `pages_messaging`, y enviar; si sigue en 0, el
+  enlace «Testing» del mismo aviso.
 - **Instagram sin página de Facebook: tercera vuelta de Meta** (2026-10-19; el código, el
   2026-11-05). La conexión de siempre es Instagram con login de Facebook, que encuentra el
   Instagram solo a través de una página que la persona administre: sin página enlazada, Meta no
@@ -469,6 +490,13 @@ nadie paga: todas las cuentas son iguales y el README dice «Sin suscripción».
   que debe seguir describiendo la app y enlazando Privacidad y Términos.
 
 ## Features y trabajo de código
+
+- **[dueño] Que Los Números digan solos qué tema y qué formato funcionan** (2026-11-03, #300, lo
+  pidió una usuaria). «Comparar por atributo» ya lo responde si cada post lleva `tema` y `formato`
+  en sus atributos, pero hay que entrar a buscarlo. La idea es que el tablero lo diga, con lo
+  mejor del período contra lo normal de cada cuenta. Los seguidores que trajo cada publicación no
+  se pueden dar: TikTok solo entrega el total de la cuenta, e Instagram no lo da en los reels.
+  Falta decidir si se hace.
 
 - **El correo del código, con un enlace para entrar** (2026-11-02, lo pidió el dueño). Hoy dice
   «NNNNNN es tu código para entrar a Parrilla» y nada más (`pedir` en `src/lib/usuarios.ts`):
