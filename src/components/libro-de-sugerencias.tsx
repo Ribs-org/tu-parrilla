@@ -2,22 +2,136 @@
 
 import { useEffect, useId, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
-import { escribirEnElLibro } from '@/app/admin/sugerencias-actions'
+import { escribirEnElLibro, leerMiLibro, marcarRespuestaLeidaAccion } from '@/app/admin/sugerencias-actions'
 import { SUGERENCIA_VACIA } from '@/lib/sugerencias/formato'
+import { fechaCorta, type SugerenciaDelLibro } from '@/lib/sugerencias/respuestas'
 import { MAX_TEXTO, TIPOS, TIPOS_SUGERENCIA, type TipoSugerencia } from '@/lib/sugerencias/tipos'
 import { cn } from '@/lib/utils'
-import { ECHAR_AL_LIBRO, LIBRO, LIBRO_SUBTITULO, QUEDO_EN_EL_LIBRO } from '@/lib/vocabulario'
+import {
+  ECHAR_AL_LIBRO,
+  LIBRO,
+  LIBRO_ESCRIBIR,
+  LIBRO_SUBTITULO,
+  LO_QUE_NOS_ESCRIBISTE,
+  QUEDO_EN_EL_LIBRO,
+} from '@/lib/vocabulario'
 import { DeNocheYDeDia } from './de-noche-y-de-dia'
 import { Textarea } from './ui'
 import { Button } from './ui-boton'
 import { Ventana } from './ventana'
 
 // El libro de sugerencias y reclamos del panel (de día, la caja de sugerencias): una ventana
-// donde la persona le escribe al equipo que hace Tu Parrilla. Lo que escribe se guarda y sale
-// como issue a GitHub (`src/lib/sugerencias/`). Se abre desde la última entrada del menú de
+// donde la persona le escribe al equipo que hace Tu Parrilla, y lee lo que ya escribió con lo que
+// le respondimos. Lo que escribe se guarda y sale como issue a GitHub (`src/lib/sugerencias/`); la
+// respuesta la escribe el equipo en Las Sugerencias. Se abre desde la última entrada del menú de
 // Ajustes (`nav.tsx`).
 
 type Estado = 'escribiendo' | 'enviando' | 'recibido'
+
+/** Las dos pestañas de la ventana. */
+type Vista = 'escribir' | 'leer'
+
+const SIN_CONEXION_AL_LEER = 'No se pudo cargar lo que nos escribiste: revisa tu conexión y vuelve a abrirlo.'
+
+/**
+ * «Lo que nos escribiste»: cada cosa que la persona dejó en el libro, de lo más nuevo a lo más
+ * viejo, cerrada en un renglón. Al abrir una, se ve entera con la respuesta del equipo, y si la
+ * respuesta era nueva queda leída (el punto del botón de Ajustes se apaga al refrescar el layout).
+ * Se carga cada vez que se abre la pestaña: es corta, y así trae la respuesta que llegó recién.
+ */
+function LoQueNosEscribiste() {
+  const [libro, setLibro] = useState<{ zona: string; sugerencias: SugerenciaDelLibro[] } | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let vivo = true
+    leerMiLibro()
+      .then((r) => {
+        if (vivo) setLibro(r)
+      })
+      .catch(() => {
+        if (vivo) setError(SIN_CONEXION_AL_LEER)
+      })
+    return () => {
+      vivo = false
+    }
+  }, [])
+
+  function abrir(s: SugerenciaDelLibro) {
+    if (!s.nueva) return
+    setLibro((antes) =>
+      antes ? { ...antes, sugerencias: antes.sugerencias.map((x) => (x.id === s.id ? { ...x, nueva: false } : x)) } : antes,
+    )
+    // Si no llega, la próxima vez que la abra vuelve a intentarlo: la lista se lee de nuevo.
+    void marcarRespuestaLeidaAccion(s.id).catch(() => undefined)
+  }
+
+  if (error) {
+    return (
+      <p role="alert" className="text-sm text-negative">
+        {error}
+      </p>
+    )
+  }
+  if (!libro) return <p className="text-sm text-fg-faint">Abriendo…</p>
+  if (libro.sugerencias.length === 0) {
+    return (
+      <p className="text-sm text-fg-muted">
+        Todavía no nos escribes nada. Lo que escribas aparece acá, con lo que te respondamos.
+      </p>
+    )
+  }
+  return (
+    <ul className="max-h-[50vh] space-y-2 overflow-y-auto pr-1">
+      {libro.sugerencias.map((s) => (
+        <li key={s.id}>
+          <details
+            className="group rounded-lg border border-acero-700 open:border-acero-600"
+            onToggle={(e) => {
+              if (e.currentTarget.open) abrir(s)
+            }}
+          >
+            <summary className="cursor-pointer list-none rounded-lg px-3 py-2 transition-colors hover:bg-velo/[0.04] [&::-webkit-details-marker]:hidden">
+              <span className="flex flex-wrap items-center gap-x-2 text-[0.72rem] text-fg-faint">
+                <span>{TIPOS[s.tipo].nombre}</span>
+                <span aria-hidden>·</span>
+                <span>{fechaCorta(s.creadaEn, libro.zona)}</span>
+                <span className="ml-auto">
+                  {s.nueva ? (
+                    <span className="flex items-center gap-1 font-medium text-brasa">
+                      <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-brasa" />
+                      Respuesta nueva
+                    </span>
+                  ) : s.respuesta ? (
+                    'Respondida'
+                  ) : (
+                    'Sin respuesta todavía'
+                  )}
+                </span>
+              </span>
+              <span className="mt-0.5 block truncate text-sm text-fg-muted group-open:hidden">{s.texto}</span>
+            </summary>
+            <div className="space-y-2.5 px-3 pb-3">
+              <p className="whitespace-pre-wrap text-sm text-fg-muted">{s.texto}</p>
+              {s.respuesta ? (
+                <div className="rounded-md border-l-2 border-brasa bg-velo/[0.04] px-3 py-2">
+                  <p className="font-titulo text-[0.7rem] font-semibold uppercase tracking-[0.06em] text-brasa">
+                    Te respondió el equipo{s.respondidaEn ? ` · ${fechaCorta(s.respondidaEn, libro.zona)}` : ''}
+                  </p>
+                  <p className="mt-1 whitespace-pre-wrap text-sm">{s.respuesta}</p>
+                </div>
+              ) : (
+                <p className="text-[0.75rem] text-fg-faint">
+                  Todavía no te respondemos. Cuando lo hagamos, aparece acá y te llega un correo.
+                </p>
+              )}
+            </div>
+          </details>
+        </li>
+      ))}
+    </ul>
+  )
+}
 
 /**
  * El dibujo de arriba de la ventana. De noche, el libro abierto con su lápiz atado, como el que
@@ -149,11 +263,16 @@ export function IconoLibro({ className }: { className?: string }) {
  * La ventana. `abierto` la abre con `showModal()`; cualquier salida —«Cancelar», «Cerrar», Esc o
  * un clic en el velo— llama a `alCerrar`. Lo escrito se queda si se cierra sin mandar, y se
  * borra recién cuando se recibió.
+ *
+ * Arriba, dos pestañas: «Escribir» y «Lo que nos escribiste». Con respuestas sin leer
+ * (`sinLeer`), la segunda lleva el punto y la ventana se abre en ella, salvo que la abra alguien
+ * que trae algo escrito (`inicial`).
  */
 export function LibroDeSugerencias({
   abierto,
   alCerrar,
   inicial,
+  sinLeer = 0,
 }: {
   abierto: boolean
   alCerrar: () => void
@@ -163,6 +282,8 @@ export function LibroDeSugerencias({
    * ya escribió no se pisa.
    */
   inicial?: { tipo: TipoSugerencia; texto: string }
+  /** Cuántas respuestas del equipo no abrió todavía. */
+  sinLeer?: number
 }) {
   const pathname = usePathname()
   const ventana = useRef<HTMLDialogElement>(null)
@@ -172,18 +293,24 @@ export function LibroDeSugerencias({
   const [texto, setTexto] = useState('')
   const [estado, setEstado] = useState<Estado>('escribiendo')
   const [error, setError] = useState<string | null>(null)
+  const [vista, setVista] = useState<Vista>('escribir')
   const idTitulo = useId()
   const idAviso = useId()
+  const idPestanas = useId()
 
-  // Al abrirse, lo que trae escrito quien lo abrió, si la hoja está en blanco. Durante el render y no
-  // en un efecto: es estado que sigue a una prop, como pide React.
+  // Al abrirse, lo que trae escrito quien lo abrió, si la hoja está en blanco; si no trae nada y hay
+  // respuestas sin leer, la pestaña de leer. Durante el render y no en un efecto: es estado que
+  // sigue a una prop, como pide React.
   const [abiertoAntes, setAbiertoAntes] = useState(abierto)
   if (abierto !== abiertoAntes) {
     setAbiertoAntes(abierto)
-    if (abierto && inicial && estado === 'escribiendo' && !texto.trim()) {
-      setTipo(inicial.tipo)
-      setTexto(inicial.texto)
-    }
+    if (abierto && inicial) {
+      setVista('escribir')
+      if (estado === 'escribiendo' && !texto.trim()) {
+        setTipo(inicial.tipo)
+        setTexto(inicial.texto)
+      }
+    } else if (abierto && sinLeer > 0) setVista('leer')
   }
 
   useEffect(() => {
@@ -256,102 +383,154 @@ export function LibroDeSugerencias({
           <p className="text-[0.78rem] text-fg-faint">{LIBRO_SUBTITULO}</p>
         </div>
 
-        {estado === 'recibido' ? (
-          <div className="libro-recibido space-y-3 text-center" role="status">
-            <p className="font-titulo text-sm font-semibold uppercase tracking-[0.04em] text-brasa">
-              <DeNocheYDeDia noche={QUEDO_EN_EL_LIBRO.noche} dia={QUEDO_EN_EL_LIBRO.dia} />
-            </p>
-            <p className="text-sm text-fg-muted">
-              Gracias. Lo lee el equipo que hace Tu Parrilla: si es una idea, la pensamos; si algo no funciona, lo
-              buscamos.
-            </p>
-            <div className="flex flex-wrap justify-center gap-2 pt-1">
-              <Button ref={cerrar} type="button" variant="primary" onClick={salir}>
-                Cerrar
-              </Button>
-              <Button type="button" onClick={otra}>
-                Escribir otra
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <form onSubmit={mandar} noValidate className="space-y-3">
-            <p className="text-sm text-fg-muted">
-              Lo lee el equipo que hace Tu Parrilla. No te prometemos hacerlo todo, pero lo leemos todo.
-            </p>
-            <fieldset>
-              <legend className="mb-1.5 text-[0.72rem] font-medium uppercase tracking-[0.08em] text-fg-faint">
-                Qué es
-              </legend>
-              <div className="flex flex-wrap gap-1.5">
-                {TIPOS_SUGERENCIA.map((t) => (
-                  <label
-                    key={t}
-                    className={cn(
-                      'cursor-pointer rounded-full border px-3 py-1 text-[0.8rem] transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brasa',
-                      tipo === t
-                        ? 'border-brasa bg-brasa text-acero-950'
-                        : 'border-acero-700 text-fg-muted hover:border-acero-600 hover:text-fg',
-                    )}
-                  >
-                    <input
-                      type="radio"
-                      name="tipo"
-                      value={t}
-                      checked={tipo === t}
-                      onChange={() => setTipo(t)}
-                      className="sr-only"
-                    />
-                    {TIPOS[t].nombre}
-                  </label>
-                ))}
+        <div role="tablist" aria-label="Qué hacer en el libro" className="flex justify-center gap-1.5">
+          {(
+            [
+              ['escribir', LIBRO_ESCRIBIR],
+              ['leer', LO_QUE_NOS_ESCRIBISTE],
+            ] as const
+          ).map(([v, nombre]) => (
+            <button
+              key={v}
+              type="button"
+              role="tab"
+              id={`${idPestanas}-${v}`}
+              aria-selected={vista === v}
+              aria-controls={`${idPestanas}-panel`}
+              onClick={() => {
+                setVista(v)
+                if (v === 'escribir') requestAnimationFrame(() => campo.current?.focus())
+              }}
+              className={cn(
+                'relative rounded-full border px-3 py-1 text-[0.8rem] transition-colors focus-visible:ring-2 focus-visible:ring-brasa',
+                vista === v
+                  ? 'border-acero-600 bg-velo/[0.08] text-fg'
+                  : 'border-transparent text-fg-faint hover:text-fg-muted',
+              )}
+            >
+              {nombre}
+              {v === 'leer' && sinLeer > 0 ? (
+                <>
+                  <span
+                    aria-hidden
+                    className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-brasa ring-2 ring-acero-900"
+                  />
+                  <span className="sr-only">
+                    {sinLeer === 1 ? ', 1 respuesta nueva' : `, ${sinLeer} respuestas nuevas`}
+                  </span>
+                </>
+              ) : null}
+            </button>
+          ))}
+        </div>
+
+        <div role="tabpanel" id={`${idPestanas}-panel`} aria-labelledby={`${idPestanas}-${vista}`}>
+          {vista === 'leer' ? (
+            <LoQueNosEscribiste />
+          ) : estado === 'recibido' ? (
+            <div className="libro-recibido space-y-3 text-center" role="status">
+              <p className="font-titulo text-sm font-semibold uppercase tracking-[0.04em] text-brasa">
+                <DeNocheYDeDia noche={QUEDO_EN_EL_LIBRO.noche} dia={QUEDO_EN_EL_LIBRO.dia} />
+              </p>
+              <p className="text-sm text-fg-muted">
+                Gracias. Lo lee el equipo que hace Tu Parrilla: si es una idea, la pensamos; si algo no funciona, lo
+                buscamos.
+              </p>
+              <div className="flex flex-wrap justify-center gap-2 pt-1">
+                <Button ref={cerrar} type="button" variant="primary" onClick={salir}>
+                  Cerrar
+                </Button>
+                <Button type="button" onClick={otra}>
+                  Escribir otra
+                </Button>
               </div>
-              <p className="mt-1.5 text-[0.75rem] text-fg-faint">{TIPOS[tipo].ayuda}</p>
-            </fieldset>
-            <div>
-              <Textarea
-                ref={campo}
-                name="texto"
-                rows={5}
-                maxLength={MAX_TEXTO}
-                value={texto}
-                onChange={(e) => {
-                  setTexto(e.target.value)
-                  if (error) setError(null)
-                }}
-                placeholder={TIPOS[tipo].ejemplo}
-                aria-label="Lo que nos quieres decir"
-                aria-describedby={idAviso}
-                aria-invalid={error === SUGERENCIA_VACIA || undefined}
-              />
-              <p className="mt-1 text-right font-mono text-[0.68rem] text-fg-faint">
-                {texto.length} / {MAX_TEXTO}
-              </p>
             </div>
-            <p id={idAviso} className="text-[0.72rem] leading-relaxed text-fg-faint">
-              Se publica en el repositorio público de Tu Parrilla en GitHub, sin tu nombre ni tu correo. Va con la pantalla
-              donde estás, el modo, tu navegador y cuántas cuentas tienes conectadas. No escribas contraseñas ni datos
-              personales.
-            </p>
-            {error ? (
-              <p role="alert" className="text-sm text-negative">
-                {error}
+          ) : (
+            <form onSubmit={mandar} noValidate className="space-y-3">
+              <p className="text-sm text-fg-muted">
+                Lo lee el equipo que hace Tu Parrilla. No te prometemos hacerlo todo, pero lo leemos todo.
               </p>
-            ) : null}
-            <div className="flex flex-wrap items-center gap-2 pt-1">
-              <Button type="submit" variant="primary" disabled={estado === 'enviando'}>
-                {estado === 'enviando' ? (
-                  'Mandando…'
-                ) : (
-                  <DeNocheYDeDia noche={ECHAR_AL_LIBRO.noche} dia={ECHAR_AL_LIBRO.dia} />
-                )}
-              </Button>
-              <Button type="button" onClick={salir}>
-                Cancelar
-              </Button>
-            </div>
-          </form>
-        )}
+              <fieldset>
+                <legend className="mb-1.5 text-[0.72rem] font-medium uppercase tracking-[0.08em] text-fg-faint">
+                  Qué es
+                </legend>
+                <div className="flex flex-wrap gap-1.5">
+                  {TIPOS_SUGERENCIA.map((t) => (
+                    <label
+                      key={t}
+                      className={cn(
+                        'cursor-pointer rounded-full border px-3 py-1 text-[0.8rem] transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brasa',
+                        tipo === t
+                          ? 'border-brasa bg-brasa text-acero-950'
+                          : 'border-acero-700 text-fg-muted hover:border-acero-600 hover:text-fg',
+                      )}
+                    >
+                      <input
+                        type="radio"
+                        name="tipo"
+                        value={t}
+                        checked={tipo === t}
+                        onChange={() => setTipo(t)}
+                        className="sr-only"
+                      />
+                      {TIPOS[t].nombre}
+                    </label>
+                  ))}
+                </div>
+                <p className="mt-1.5 text-[0.75rem] text-fg-faint">{TIPOS[tipo].ayuda}</p>
+              </fieldset>
+              <div>
+                <Textarea
+                  ref={campo}
+                  name="texto"
+                  rows={5}
+                  maxLength={MAX_TEXTO}
+                  value={texto}
+                  onChange={(e) => {
+                    setTexto(e.target.value)
+                    if (error) setError(null)
+                  }}
+                  placeholder={TIPOS[tipo].ejemplo}
+                  aria-label="Lo que nos quieres decir"
+                  aria-describedby={idAviso}
+                  aria-invalid={error === SUGERENCIA_VACIA || undefined}
+                />
+                <p className="mt-1 text-right font-mono text-[0.68rem] text-fg-faint">
+                  {texto.length} / {MAX_TEXTO}
+                </p>
+              </div>
+              <p id={idAviso} className="text-[0.72rem] leading-relaxed text-fg-faint">
+                Se publica en el repositorio público de Tu Parrilla en GitHub, sin tu nombre ni tu correo. Va con la pantalla
+                donde estás, el modo, tu navegador y cuántas cuentas tienes conectadas. No escribas contraseñas ni datos
+                personales.
+              </p>
+              {error ? (
+                <p role="alert" className="text-sm text-negative">
+                  {error}
+                </p>
+              ) : null}
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                <Button type="submit" variant="primary" disabled={estado === 'enviando'}>
+                  {estado === 'enviando' ? (
+                    'Mandando…'
+                  ) : (
+                    <DeNocheYDeDia noche={ECHAR_AL_LIBRO.noche} dia={ECHAR_AL_LIBRO.dia} />
+                  )}
+                </Button>
+                <Button type="button" onClick={salir}>
+                  Cancelar
+                </Button>
+              </div>
+            </form>
+          )}
+        </div>
+        {vista === 'leer' ? (
+          <div className="flex justify-end">
+            <Button type="button" onClick={salir}>
+              Cerrar
+            </Button>
+          </div>
+        ) : null}
       </div>
     </Ventana>
   )

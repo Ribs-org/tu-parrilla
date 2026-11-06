@@ -46,6 +46,13 @@ import { RANGO_ERROR, cuentaAmbigua, cuentaDesconocida } from './metrics-api'
 import { DERECHOS_FALTAN, SUBIDA_ILEGIBLE, USO_DESCONOCIDO, USOS_MATERIAL, muyGrande } from './cocina/bodega'
 import { COCINA_APAGADA, PARTES_ILEGIBLES, SUBIDA_CERRADA, SUBIDA_MAL_CERRADA, SUBIDA_NO_EXISTE, faltanPartes } from './cocina/subidas'
 import { SIN_ALMACEN } from './storage'
+import {
+  RESPUESTA_LARGA,
+  RESPUESTA_SIN_CUAL,
+  RESPUESTA_VACIA,
+  SOLO_EL_ADMIN,
+  SUGERENCIA_NO_EXISTE,
+} from './sugerencias/respuestas'
 
 // `batch.ts` importa `@/lib/usuarios` (la zona del dueño del lote), que trae
 // `server-only` y no resuelve bajo Vitest. Mismo arreglo que en `aislamiento.test.ts`.
@@ -155,6 +162,16 @@ describe('la documentación para LLM no le miente al código', () => {
         expect(guia, `${archivo}: ${frase}`).toContain(frase)
       }
     }
+  })
+
+  it('las frases de responder una sugerencia (solo el admin) son las del código', () => {
+    const editor = readFileSync('public/docs/api-editor.md', 'utf8')
+    for (const frase of [RESPUESTA_VACIA, RESPUESTA_LARGA, SUGERENCIA_NO_EXISTE, SOLO_EL_ADMIN]) {
+      expect(editor, frase).toContain(frase)
+    }
+    // En la tabla va dentro de un JSON, con las comillas escapadas.
+    expect(editor).toContain(RESPUESTA_SIN_CUAL.replace(/"/g, '\\"'))
+    expect(readFileSync('public/docs/api-llm.md', 'utf8')).toContain(SOLO_EL_ADMIN)
   })
 
   it('las dos guías recomiendan el mismo vocabulario de atributos', () => {

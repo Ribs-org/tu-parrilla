@@ -404,6 +404,11 @@ dueño en su panel.
 
 - **No edita un post programado.** Para cambiar texto, hora, destinos o media hay que
   borrarlo (sección 3b) y programarlo de nuevo, o corregirlo a mano en `/admin/schedule`.
+- **No es para responder sugerencias, salvo que seas el equipo de Tu Parrilla.**
+  `POST /api/sugerencias/respuesta` (`{ "issue": 321, "respuesta": "…" }`) responde lo que alguien
+  escribió en el libro de sugerencias, y solo con una llave del admin: con cualquier otra, `403`
+  `Solo el admin responde sugerencias: esta llave es de otra cuenta.`. Si editas para un creador,
+  no lo uses. Los detalles, en la sección 3e de `api-editor.md`.
 - **No pide comandas a La Cocina.** Guarda en la cámara de frío (sección 3h), pero pedir una
   comanda, renombrar o sacar lo de la cámara lo hace el dueño en su panel.
 - **No conecta cuentas.** Conectar, reconectar o quitar una cuenta lo hace el dueño en Los

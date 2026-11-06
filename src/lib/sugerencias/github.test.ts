@@ -68,6 +68,18 @@ describe('el cliente de GitHub', () => {
     expect((error as Error).message).not.toContain('tok-secreto')
   })
 
+  it('comenta en el issue con el cuerpo tal cual, y lanza si GitHub no lo crea', async () => {
+    const { pedidos, pedir } = falso([() => new Response('{}', { status: 201 }), () => new Response('nope', { status: 404 })])
+    const cliente = clienteDeGithub({ token: 'tok-secreto', repo: 'Ribs-org/tu-parrilla', pedir })
+    await cliente.comentarIssue(321, 'La respuesta')
+    expect(pedidos[0]!.url).toBe('https://api.github.com/repos/Ribs-org/tu-parrilla/issues/321/comments')
+    expect(pedidos[0]!.cuerpo).toEqual({ body: 'La respuesta' })
+    await expect(cliente.comentarIssue(322, 'x')).rejects.toThrow('GitHub respondió 404 al comentar el issue 322')
+    // Un número que no es un entero positivo no arma ninguna dirección.
+    await expect(cliente.comentarIssue(-1, 'x')).rejects.toThrow('inválido')
+    expect(pedidos).toHaveLength(2)
+  })
+
   it('sin token no hay cliente; con un repositorio mal escrito, tampoco', () => {
     vi.stubEnv('SUGERENCIAS_GITHUB_TOKEN', '')
     expect(clienteGithub()).toBeNull()
