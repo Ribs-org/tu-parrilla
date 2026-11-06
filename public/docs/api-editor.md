@@ -1304,6 +1304,39 @@ para reportar un fallo.
 
 ---
 
+# 3e. Solo el admin: responder una sugerencia — `POST /api/sugerencias/respuesta`
+
+**No es para el editor de contenido.** Es del equipo que hace Tu Parrilla: responde lo que alguien
+escribió en el libro de sugerencias, cuyo issue cae en GitHub. Con la llave de cualquier otra cuenta
+responde `403`; si eres el editor de un creador, no la necesitas.
+
+```http
+POST /api/sugerencias/respuesta
+Authorization: Bearer <una llave del admin>
+Content-Type: application/json
+
+{ "issue": 321, "respuesta": "Buena idea: ya está en el panel." }
+```
+
+En vez de `issue` (el número del issue en GitHub; también vale como texto, `"#321"`) se puede
+mandar `id`, el de la sugerencia, que está en la tabla del issue. Con los dos, manda `id`. Hace lo
+mismo que responder en Las Sugerencias del panel: la persona la lee en el libro, en «Lo que nos
+escribiste»; la primera vez le llega un correo, y en el issue queda un comentario con la respuesta,
+sin su nombre ni su correo. Hay una sola respuesta por sugerencia: mandar otra la reemplaza y le
+vuelve a aparecer sin leer, sin otro correo. La respuesta puede tener hasta 4000 caracteres.
+
+| Respuesta | Cuándo |
+|---|---|
+| `200` `{ "ok": true, "sugerencia": { "id", "issue", "primera", "cambio" } }` | Se guardó. `primera` es que no tenía respuesta (sale el correo); `cambio: false`, que era la misma que ya tenía y no se tocó nada. |
+| `400` `{ "error": "Falta cuál sugerencia: manda \"issue\" (el número del issue en GitHub) o \"id\" (el de la sugerencia)." }` | Sin `issue` ni `id` que sirvan. |
+| `400` `{ "error": "Escribe la respuesta antes de guardarla." }` | `respuesta` vacía. |
+| `400` `{ "error": "La respuesta es muy larga: el máximo son 4000 caracteres." }` | Se pasó del largo. |
+| `401` `No autorizado` | Sin una llave que sirva. |
+| `403` `{ "error": "Solo el admin responde sugerencias: esta llave es de otra cuenta." }` | La llave no es del admin. |
+| `404` `{ "error": "No hay ninguna sugerencia con ese issue o ese id." }` | Ninguna sugerencia tiene ese issue o ese id. |
+
+---
+
 # 4. El ciclo completo
 
 1. **Mira** `/api/schedule/cuentas` para saber a qué cuentas puedes programar,

@@ -44,19 +44,22 @@ Está siempre, fija arriba, en todas las pantallas del panel. De izquierda a der
    borde. La pestaña en la que está se ve siempre entera; si no ve otra, que deslice la barra.
 3. **El botón «Ajustes»**, a la derecha, con el ícono de un trinche y un cuchillo, lado a lado (antes era un engranaje:
    si alguien dice «el engranaje», es este); de día, dos palillos en diagonal. En pantallas angostas se ve solo el ícono, sin la
-   palabra. Abre un menú con cuatro pantallas, cada una con su subtítulo debajo: «Los Fierros»
+   palabra. Abre un menú con las pantallas de Ajustes, cada una con su subtítulo debajo: «Los Fierros»
    (tus redes conectadas; de día, «Los Cuchillos»), «La Vitrina» (tus páginas públicas), «Los Maestros» (quién puede
-   entrar; **solo lo ve el admin**) y «Tu Cuenta» (tu nombre y tu hora). Al final, separada por una
+   entrar; **solo lo ve el admin**), «Las Sugerencias» (lo que escriben al equipo y sus respuestas;
+   **solo lo ve el admin**) y «Tu Cuenta» (tu nombre y tu hora). Al final, separada por una
    línea, «El libro de sugerencias» (ideas, reclamos o lo que quieras decirnos; de día, «La caja de
    sugerencias»): no lleva a una pantalla, abre una ventana para escribirle al equipo que hace Tu
-   Parrilla ([libro-de-sugerencias.md](libro-de-sugerencias.md)). Cuando la
+   Parrilla y leer lo que le respondió ([libro-de-sugerencias.md](libro-de-sugerencias.md)). Si
+   el equipo le respondió algo que no abrió, el botón lleva un punto naranjo y la entrada del libro
+   dice «1 respuesta nueva» (o «<N> respuestas nuevas»). Cuando la
    persona está en una de esas pantallas, el botón queda pintado de naranjo. Si el permiso
    de alguna cuenta conectada vence en la semana, el botón lleva un punto ámbar; si alguna
    ya se apagó (venció o dejó de sincronizar), un punto rojo. Adentro, la entrada «Los Fierros»
    lo dice al lado del nombre: «1 se enfría», «2 se enfrían», «1 se apagó» o «2 se apagaron»;
    de día, «1 se desafila», «2 se desafilan», «1 sin filo» o «2 sin filo»
    (un lector de pantalla lee el botón «Ajustes: en Los Fierros, 1 se enfría», o de día «Ajustes: en Los Cuchillos, 1 se
-   desafila»). Sin nada que avisar no hay punto. El menú se cierra con Escape, al elegir una entrada o volviendo a
+   desafila»). Si hay las dos cosas, el punto es el de los fierros. Sin nada que avisar no hay punto. El menú se cierra con Escape, al elegir una entrada o volviendo a
    apretar el botón; un clic afuera no lo cierra.
 4. **El botón del modo**, a la derecha de Ajustes. De noche lleva un sol y dice «Modo día»; de
    día, una luna y «Modo noche»: muestra el modo al que lleva, no el que está puesto. En
@@ -78,6 +81,7 @@ se ve arriba, grande y en mayúsculas.
 | Los Fierros | tus redes conectadas | `/admin/accounts` | Botón «Ajustes». Conectar y desconectar redes | [los-fierros.md](los-fierros.md) |
 | La Vitrina | tus páginas públicas | `/admin/profiles` | Botón «Ajustes». Su página de links | [la-vitrina.md](la-vitrina.md) |
 | Los Maestros | quién puede entrar | `/admin/usuarios` | Botón «Ajustes», solo el admin. Invitar gente | [los-maestros.md](los-maestros.md) |
+| Las Sugerencias | lo que escriben al equipo y sus respuestas | `/admin/sugerencias` | Botón «Ajustes», solo el admin. Leer lo que dejan en el libro de sugerencias y responderlo | [las-sugerencias.md](las-sugerencias.md) |
 | Tu Cuenta | tu nombre y tu hora | `/admin/cuenta` | Botón «Ajustes». Nombre y zona horaria | [tu-cuenta.md](tu-cuenta.md) |
 
 De día, dos se llaman distinto, en la barra, en Ajustes y en su título: La Parrilla es **«La
@@ -147,6 +151,8 @@ teléfono](app-movil.md).
 | Publicar desde el teléfono | [La app del teléfono](app-movil.md) |
 | Grabar un video con el teléfono y mandárselo al chef de la casa | La app del teléfono → pestaña «La Cocina» ([app-movil.md](app-movil.md)) |
 | Pedir una función, reclamar algo que no funciona o decirle algo a quienes hacen Tu Parrilla | «Ajustes» → «El libro de sugerencias», al final del menú; en el teléfono, al final de «Ajustes» ([libro-de-sugerencias.md](libro-de-sugerencias.md)) |
+| Leer lo que el equipo le respondió a algo que escribió | «Ajustes» → «El libro de sugerencias» → «Lo que nos escribiste»; en el teléfono, al final de «Ajustes» ([libro-de-sugerencias.md](libro-de-sugerencias.md)) |
+| Responder lo que alguien escribió en el libro de sugerencias | Las Sugerencias, solo el admin ([las-sugerencias.md](las-sugerencias.md)) |
 
 ## El vocabulario del asado
 

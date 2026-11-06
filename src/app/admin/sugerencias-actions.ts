@@ -1,11 +1,15 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
 import { after } from 'next/server'
-import { requireUser } from '@/lib/auth'
+import { requireAdmin, requireUser } from '@/lib/auth'
 import { limpiarPantalla, resumirNavegador } from '@/lib/sugerencias/formato'
 import { clienteGithub } from '@/lib/sugerencias/github'
 import { mandarSugerencia, recibirSugerencia } from '@/lib/sugerencias/guardar'
+import { avisarDeLaRespuesta, marcarRespuestaLeida, misSugerencias, responderSugerencia } from '@/lib/sugerencias/responder'
+import { paraElLibro, validarRespuesta, type SugerenciaDelLibro } from '@/lib/sugerencias/respuestas'
+import { esUuid } from '@/lib/uuid'
 
 export type SugerenciaState = { ok?: true; error?: string }
 
@@ -32,4 +36,49 @@ export async function escribirEnElLibro(entrada: { tipo: string; texto: string; 
     }
   })
   return { ok: true }
+}
+
+/** «Lo que nos escribiste», en la ventana del libro: solo lo de quien pregunta, con la zona para las fechas. */
+export async function leerMiLibro(): Promise<{ zona: string; sugerencias: SugerenciaDelLibro[] }> {
+  const usuario = await requireUser()
+  return { zona: usuario.zona, sugerencias: (await misSugerencias(usuario.id)).map(paraElLibro) }
+}
+
+/**
+ * La persona abrió una respuesta en el libro: deja de estar sin leer. Atada a su dueño, porque el
+ * id viene del navegador. Revalida el layout para que el punto del botón de Ajustes se apague.
+ */
+export async function marcarRespuestaLeidaAccion(id: string): Promise<{ ok: boolean }> {
+  const usuario = await requireUser()
+  if (!esUuid(id)) return { ok: false }
+  const cambio = await marcarRespuestaLeida(usuario.id, id)
+  if (cambio) revalidatePath('/admin', 'layout')
+  return { ok: true }
+}
+
+export type RespuestaState = { ok?: true; aviso?: string; error?: string }
+
+/**
+ * La respuesta del equipo desde Las Sugerencias: solo el admin. La guarda y responde; el correo a
+ * la persona (la primera vez) y el comentario del issue salen después (`after`), y si fallan la
+ * respuesta ya quedó.
+ */
+export async function responderSugerenciaAccion(id: string, texto: string): Promise<RespuestaState> {
+  const admin = await requireAdmin()
+  if (!esUuid(id)) return { error: 'No se encontró esa sugerencia.' }
+  const valida = validarRespuesta(texto)
+  if ('error' in valida) return { error: valida.error }
+  const r = await responderSugerencia(admin, { id }, valida.texto)
+  if ('error' in r) return { error: r.error }
+  if (!r.cambio) return { ok: true, aviso: 'Es la misma respuesta que ya tenía: no se cambió nada.' }
+  after(async () => {
+    await avisarDeLaRespuesta(r.id, r.primera, clienteGithub())
+  })
+  revalidatePath('/admin/sugerencias')
+  return {
+    ok: true,
+    aviso: r.primera
+      ? 'Respondida. Le llega un correo y la lee en el libro.'
+      : 'Respuesta cambiada. Le aparece sin leer en el libro, sin otro correo.',
+  }
 }

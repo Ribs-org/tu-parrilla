@@ -1,14 +1,26 @@
 import { useEffect, useState } from 'react'
-import { Animated, Platform, Text, TextInput, View } from 'react-native'
+import { Animated, Platform, Pressable, Text, TextInput, View } from 'react-native'
 import Constants from 'expo-constants'
 import * as Updates from 'expo-updates'
-import { Boton, BotonTexto, Chip, Tarjeta } from './ui'
+import { Boton, BotonTexto, Chip, Etiqueta, Tarjeta } from './ui'
 import type { Colores } from './colores'
 import { useSesion } from './sesion'
 import { useColores, useTema } from './tema'
 import { RechazoApi, SesionCaducada, apiPost } from '../lib/api'
-import { MAX_TEXTO_SUGERENCIA, SUGERENCIA_VACIA, TIPOS, TIPOS_SUGERENCIA, type TipoSugerencia } from '../lib/sugerencias'
-import { ECHAR_AL_LIBRO, QUEDO_EN_EL_LIBRO, type Tema } from '../lib/tema'
+import {
+  LIBRO_ESCRIBIR,
+  LO_QUE_NOS_ESCRIBISTE,
+  MAX_TEXTO_SUGERENCIA,
+  SUGERENCIA_VACIA,
+  TIPOS,
+  TIPOS_SUGERENCIA,
+  conLeidas,
+  respuestasNuevas,
+  type LibroLeido,
+  type TipoSugerencia,
+} from '../lib/sugerencias'
+import { ECHAR_AL_LIBRO, LIBRO, QUEDO_EN_EL_LIBRO, type Tema } from '../lib/tema'
+import { useScreenData } from '../lib/useScreenData'
 
 const SIN_SENAL = 'No se pudo mandar. Revisa tu señal: lo que escribiste sigue acá.'
 
@@ -120,13 +132,166 @@ function Dibujo({ tema, colores, recibido }: { tema: Tema; colores: Colores; rec
   )
 }
 
+/** El punto de brasa de «sin leer», el mismo del panel. */
+function Punto({ colores }: { colores: Colores }) {
+  return <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colores.brasa }} />
+}
+
 /**
- * El libro de sugerencias de la app, al final de Ajustes: lo mismo que la ventana del panel. Lo
- * escrito va a `POST /api/mobile/sugerencias`, con la versión de la app y de la actualización.
+ * El libro de sugerencias de la app, al final de Ajustes: lo mismo que la ventana del panel. Su
+ * rótulo, con el punto y «1 respuesta nueva» si el equipo respondió algo que la persona no abrió,
+ * y dos pestañas: «Escribir» y «Lo que nos escribiste». Lo escrito va a
+ * `POST /api/mobile/sugerencias`; lo ya escrito, con las respuestas, sale de `GET` en la misma
+ * ruta, y abrir una respuesta nueva la marca leída (`POST /api/mobile/sugerencias/{id}/leida`).
  */
 export function LibroDeSugerencias() {
   const colores = useColores()
   const { tema } = useTema()
+  const { token, salir } = useSesion()
+  const { data, error, refrescar } = useScreenData<LibroLeido>('sugerencias', '/api/mobile/sugerencias', token, salir)
+  const [leidas, setLeidas] = useState<ReadonlySet<string>>(() => new Set())
+  // Hasta que la persona elige, se abre en «Lo que nos escribiste» si hay algo sin leer.
+  const [elegida, setElegida] = useState<'escribir' | 'leer' | null>(null)
+  const libro = data ? conLeidas(data, leidas) : null
+  const vista = elegida ?? (libro && libro.sinLeer > 0 ? 'leer' : 'escribir')
+
+  function leer(id: string) {
+    setLeidas((antes) => new Set(antes).add(id))
+    if (!token) return
+    // Si no llega, la respuesta vuelve a aparecer nueva la próxima vez: no se pierde nada.
+    void apiPost(`/api/mobile/sugerencias/${id}/leida`, token, {})
+      .then(() => refrescar())
+      .catch(() => undefined)
+  }
+
+  return (
+    <>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 8 }}>
+        <Etiqueta>{LIBRO[tema]}</Etiqueta>
+        {libro && libro.sinLeer > 0 ? (
+          <View
+            style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
+            accessible
+            accessibilityLabel={respuestasNuevas(libro.sinLeer)}
+          >
+            <Punto colores={colores} />
+            <Text style={{ color: colores.brasa, fontSize: 11, fontWeight: '600' }}>{respuestasNuevas(libro.sinLeer)}</Text>
+          </View>
+        ) : null}
+      </View>
+      <Tarjeta>
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 4 }}>
+          <Chip texto={LIBRO_ESCRIBIR} activo={vista === 'escribir'} onPress={() => setElegida('escribir')} />
+          <View>
+            <Chip texto={LO_QUE_NOS_ESCRIBISTE} activo={vista === 'leer'} onPress={() => setElegida('leer')} />
+            {libro && libro.sinLeer > 0 ? (
+              <View style={{ position: 'absolute', top: 2, right: 2 }}>
+                <Punto colores={colores} />
+              </View>
+            ) : null}
+          </View>
+        </View>
+        {vista === 'leer' ? <LoQueNosEscribiste libro={libro} error={error} alAbrir={leer} /> : null}
+        {/* Escondida y no desmontada: lo que se estaba escribiendo sigue ahí al volver. */}
+        <View style={{ display: vista === 'escribir' ? 'flex' : 'none', gap: 6 }}>
+          <Escribir tema={tema} alRecibir={() => void refrescar()} />
+        </View>
+      </Tarjeta>
+    </>
+  )
+}
+
+/**
+ * Cada cosa que la persona escribió, cerrada en un renglón con su tipo, su fecha y si tiene
+ * respuesta. Al tocarla se abre entera, con lo que le respondió el equipo.
+ */
+function LoQueNosEscribiste({
+  libro,
+  error,
+  alAbrir,
+}: {
+  libro: LibroLeido | null
+  error: string | null
+  alAbrir: (id: string) => void
+}) {
+  const colores = useColores()
+  const [abiertas, setAbiertas] = useState<ReadonlySet<string>>(() => new Set())
+
+  if (!libro) {
+    return <Text style={{ color: colores.suave, fontSize: 13 }}>{error ?? 'Abriendo…'}</Text>
+  }
+  if (libro.sugerencias.length === 0) {
+    return (
+      <Text style={{ color: colores.suave, fontSize: 13 }}>
+        Todavía no nos escribes nada. Lo que escribas aparece acá, con lo que te respondamos.
+      </Text>
+    )
+  }
+  return (
+    <View style={{ gap: 8 }}>
+      {libro.sugerencias.map((s) => {
+        const abierta = abiertas.has(s.id)
+        const estado = s.nueva ? 'Respuesta nueva' : s.respuesta ? 'Respondida' : 'Sin respuesta todavía'
+        return (
+          <Pressable
+            key={s.id}
+            onPress={() => {
+              setAbiertas((antes) => {
+                const nuevas = new Set(antes)
+                if (nuevas.has(s.id)) nuevas.delete(s.id)
+                else nuevas.add(s.id)
+                return nuevas
+              })
+              if (!abierta && s.nueva) alAbrir(s.id)
+            }}
+            accessibilityRole="button"
+            accessibilityState={{ expanded: abierta }}
+            style={({ pressed }) => ({
+              borderWidth: 1,
+              borderColor: colores.acero,
+              borderRadius: 12,
+              padding: 10,
+              gap: 6,
+              opacity: pressed ? 0.8 : 1,
+            })}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Text style={{ color: colores.tenue, fontSize: 11, flex: 1 }}>
+                {TIPOS[s.tipo]?.nombre ?? s.tipo}
+                {s.creadaEnTexto ? ` · ${s.creadaEnTexto}` : ''}
+              </Text>
+              {s.nueva ? <Punto colores={colores} /> : null}
+              <Text style={{ color: s.nueva ? colores.brasa : colores.tenue, fontSize: 11, fontWeight: s.nueva ? '600' : '400' }}>
+                {estado}
+              </Text>
+            </View>
+            <Text style={{ color: colores.suave, fontSize: 13 }} numberOfLines={abierta ? undefined : 1}>
+              {s.texto}
+            </Text>
+            {abierta ? (
+              s.respuesta ? (
+                <View style={{ borderLeftWidth: 2, borderLeftColor: colores.brasa, paddingLeft: 10, gap: 4 }}>
+                  <Text style={{ color: colores.brasa, fontSize: 11, fontWeight: '700', textTransform: 'uppercase' }}>
+                    Te respondió el equipo{s.respondidaEnTexto ? ` · ${s.respondidaEnTexto}` : ''}
+                  </Text>
+                  <Text style={{ color: colores.texto, fontSize: 13 }}>{s.respuesta}</Text>
+                </View>
+              ) : (
+                <Text style={{ color: colores.tenue, fontSize: 12 }}>
+                  Todavía no te respondemos. Cuando lo hagamos, aparece acá y te llega un correo.
+                </Text>
+              )
+            ) : null}
+          </Pressable>
+        )
+      })}
+    </View>
+  )
+}
+
+/** La pestaña de escribir: lo que era el libro entero antes de las respuestas. */
+function Escribir({ tema, alRecibir }: { tema: Tema; alRecibir: () => void }) {
+  const colores = useColores()
   const { token, salir } = useSesion()
   const [tipo, setTipo] = useState<TipoSugerencia>('idea')
   const [texto, setTexto] = useState('')
@@ -153,6 +318,7 @@ export function LibroDeSugerencias() {
         },
       })
       setRecibido(true)
+      alRecibir()
     } catch (e) {
       if (e instanceof SesionCaducada) {
         await salir()
@@ -170,7 +336,7 @@ export function LibroDeSugerencias() {
   }
 
   return (
-    <Tarjeta>
+    <>
       <Dibujo tema={tema} colores={colores} recibido={recibido} />
       {recibido ? (
         <View style={{ gap: 8, alignItems: 'center' }}>
@@ -236,6 +402,6 @@ export function LibroDeSugerencias() {
           </View>
         </View>
       )}
-    </Tarjeta>
+    </>
   )
 }

@@ -61,6 +61,16 @@ export const PANTALLAS: readonly Pantalla[] = [
   },
   { ruta: '/admin/profiles', nombre: 'La Vitrina', subtitulo: 'tus páginas públicas', grupo: 'ajustes' },
   { ruta: '/admin/usuarios', nombre: 'Los Maestros', subtitulo: 'quién puede entrar', grupo: 'ajustes', soloAdmin: true },
+  // Lo que la gente escribe en el libro de sugerencias, para que el equipo lo responda adentro de
+  // Tu Parrilla (lo eligió el dueño el 2026-11-06). Se llama igual de día: «sugerencias» sirve con
+  // el libro y con la caja.
+  {
+    ruta: '/admin/sugerencias',
+    nombre: 'Las Sugerencias',
+    subtitulo: 'lo que escriben al equipo y sus respuestas',
+    grupo: 'ajustes',
+    soloAdmin: true,
+  },
   { ruta: '/admin/cuenta', nombre: 'Tu Cuenta', subtitulo: 'tu nombre y tu hora', grupo: 'ajustes' },
 ]
 
@@ -167,6 +177,13 @@ export const ECHAR_AL_LIBRO: Record<Tema, string> = { noche: 'Dejarlo en el libr
 
 /** Lo que dice la ventana cuando ya se recibió. */
 export const QUEDO_EN_EL_LIBRO: Record<Tema, string> = { noche: 'Quedó en el libro.', dia: 'Quedó en la caja.' }
+
+/**
+ * Las dos pestañas de la ventana del libro: escribir, y leer lo que ya se escribió con lo que le
+ * respondió el equipo. Iguales en los dos modos.
+ */
+export const LIBRO_ESCRIBIR = 'Escribir'
+export const LO_QUE_NOS_ESCRIBISTE = 'Lo que nos escribiste'
 
 /** Lo que dice el destino de una cuenta con el fierro frío: de día, el cuchillo perdió el filo. */
 export const FIERRO_FRIO: Record<Tema, string> = {
