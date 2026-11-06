@@ -468,13 +468,6 @@ nadie paga: todas las cuentas son iguales y el README dice «Sin suscripción».
 
 ## Features y trabajo de código
 
-- **[dueño] Que Los Números digan solos qué tema y qué formato funcionan** (2026-11-03, #300, lo
-  pidió una usuaria). «Comparar por atributo» ya lo responde si cada post lleva `tema` y `formato`
-  en sus atributos, pero hay que entrar a buscarlo. La idea es que el tablero lo diga, con lo
-  mejor del período contra lo normal de cada cuenta. Los seguidores que trajo cada publicación no
-  se pueden dar: TikTok solo entrega el total de la cuenta, e Instagram no lo da en los reels.
-  Falta decidir si se hace.
-
 - **El correo del código, con un enlace para entrar** (2026-11-02, lo pidió el dueño). Hoy dice
   «NNNNNN es tu código para entrar a Parrilla» y nada más (`pedir` en `src/lib/usuarios.ts`):
   hay que copiar el código a mano. Sumar un botón que entre directo, sin sacar el código, que

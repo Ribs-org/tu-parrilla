@@ -957,6 +957,80 @@ publicación compite contra lo normal de su propia cuenta.
 
 ---
 
+# 2c. Qué te funciona — `GET /api/metrics/que-funciona`
+
+```http
+GET /api/metrics/que-funciona?desde=2026-09-01&hasta=2026-09-30
+Authorization: Bearer <tu llave>
+```
+
+Qué tema, qué estilo y qué formato anduvieron mejor en el rango, ya decidido y dicho en una
+frase: lo mismo que el panel «Qué te funciona» de Los Números. Mira el atributo `tema`, el
+atributo `estilo` (sección 1, «El vocabulario recomendado») y el `formato` que da la red
+(Reel, Carrusel, Foto, Video, Short, Enlace). Para cualquier otro atributo, agrupa tú las
+filas de `/api/metrics/posts`.
+
+Parámetros, todos opcionales: `desde`, `hasta`, `red`, `cuenta`, igual que en
+`/api/metrics/posts`, con las mismas frases de error. El rango filtra por **fecha de
+publicación**.
+
+## Respuesta
+
+```json
+{
+  "cuenta": null,
+  "publicaciones": 64,
+  "truncado": false,
+  "minimo": 10,
+  "paraDestacar": 1.2,
+  "tema": {
+    "estado": "gana",
+    "frase": "Lo de tema «recetas» tuvo ×2,1 las views normales de su cuenta a los 7 días (12 publicaciones). Le sigue «humor», con ×1,0 (10 publicaciones).",
+    "primero": { "valor": "recetas", "publicaciones": 14, "medidas": 12, "contraSuCuenta": 2.1 },
+    "segundo": { "valor": "humor", "publicaciones": 11, "medidas": 10, "contraSuCuenta": 1.0 },
+    "valores": [
+      { "valor": "recetas", "publicaciones": 14, "medidas": 12, "contraSuCuenta": 2.1 },
+      { "valor": "humor", "publicaciones": 11, "medidas": 10, "contraSuCuenta": 1.0 },
+      { "valor": "viajes", "publicaciones": 4, "medidas": 4, "contraSuCuenta": 0.8 }
+    ]
+  },
+  "estilo": {
+    "estado": "faltan",
+    "frase": "Todavía no alcanza para decirlo: hacen falta dos estilos con al menos 10 publicaciones medidas a los 7 días cada uno. Hoy: «tutorial» 22 y «storytime» 4.",
+    "primero": null,
+    "segundo": null,
+    "valores": [ … ]
+  },
+  "formato": {
+    "estado": "sinValor",
+    …
+  }
+}
+```
+
+Una clave por dimensión —`tema`, `estilo`, `formato`—, cada una con:
+
+- **`estado`**:
+  - `gana`: al menos dos valores tienen `minimo` (10) publicaciones medidas o más, y el mejor
+    saca `paraDestacar` (×1,2) o más, y más que el segundo.
+  - `parejo`: hay con qué comparar, pero ninguno se sale de lo normal.
+  - `faltan`: hay valores, pero no dos con la muestra mínima (o hay uno solo).
+  - `sinValor`: nada de lo publicado en el rango lo lleva.
+- **`frase`**: lo mismo que dice el tablero. Úsala tal cual si se lo vas a contar al dueño.
+- **`primero`** y **`segundo`**: los dos valores con muestra suficiente que más sacaron
+  contra su cuenta, en `gana` y `parejo`; `null` en los demás.
+- **`valores`**: cada valor del rango (sin «sin tema»), del que tiene más publicaciones al que
+  menos. `publicaciones` las cuenta todas; **`medidas`**, solo las que tienen `contraSuCuenta`
+  (su lectura de los 7 días, en una cuenta con al menos 5 así en el rango), que son de las que
+  sale la mediana y las que cuentan para el mínimo. `contraSuCuenta` es esa mediana: `2.1` es
+  que una publicación típica con ese valor saca 2,1 veces lo normal de su cuenta.
+
+Lo que no lleva el atributo no compite, y YouTube no se mide (sus políticas no permiten
+calcular métricas con sus datos). Son views, no seguidores: ninguna red da los seguidores que
+trajo cada publicación. `truncado` y el tope de 10.000, como en `/api/metrics/mejores`.
+
+---
+
 # 3. Leer el calendario — `GET /api/schedule/posts`
 
 ```http
@@ -1240,7 +1314,8 @@ para reportar un fallo.
    resumen sea justo lo que pide una decisión.
 4. La sincronización diaria trae **métricas reales**.
 5. **Lee** `/api/metrics/posts` sobre un rango con suficiente historia, o pide directo
-   `/api/metrics/mejores` para ver lo mejor de cada cuenta y qué lo distingue.
+   `/api/metrics/mejores` para ver lo mejor de cada cuenta y qué lo distingue, o
+   `/api/metrics/que-funciona` para saber qué tema, qué estilo y qué formato anduvieron mejor.
 6. **Correlaciona** `atributos` contra `viewsGanadas` y `arrastre`, y decide la
    próxima parrilla. Ejemplos de preguntas que el dato responde:
    - ¿qué `hook` gana en views, y cuál gana en visitas al sitio? (rara vez es el mismo)
@@ -1274,8 +1349,9 @@ patrones. Con menos de ~10 posts por valor de atributo, desconfía de la diferen
   `{ "ok": true, "id" }`.
 - **No republica lo ya publicado**: corregir un post afecta solo a los destinos que
   aún no salieron.
-- **Entrega un solo agregado**: `/api/metrics/mejores`, el mejor (o el peor) X % con sus
-  medianas y lo que se repite. Todo lo demás —promedios por red, tendencias, cruces de atributos— sale de
+- **Entrega dos agregados**: `/api/metrics/mejores`, el mejor (o el peor) X % con sus
+  medianas y lo que se repite, y `/api/metrics/que-funciona`, qué tema, estilo y formato
+  anduvieron mejor. Todo lo demás —promedios por red, tendencias, cruces de atributos— sale de
   las filas crudas de `/api/metrics/posts`, y el análisis es tuyo, a propósito.
 
 # 6. Ejemplos ejecutables
