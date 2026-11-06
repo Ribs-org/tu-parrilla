@@ -9,11 +9,12 @@ import { MATERIAL_EN_USO, MATERIAL_NO_EXISTE, USO_DESCONOCIDO, esUso, leerNombre
 import { editarMaterial, sacarMaterial } from '@/lib/cocina/materiales'
 import { leerPedido } from '@/lib/cocina/pedido'
 import { NO_SE_PIDIO, pedirComanda } from '@/lib/cocina/pedir'
+import { responderPregunta } from '@/lib/cocina/preguntar'
 import { esUuid } from '@/lib/uuid'
 
 // Lo que el dueño hace con sus comandas desde La Cocina. Aparte de `actions.ts`, que ya es largo:
-// la cocina va a sumar pedir, responder y programar desde el mesón. El id del dueño sale siempre de
-// la sesión, nunca de lo que llega.
+// pedir, cancelar, contestarle al chef, programar y descartar desde el mesón, y la cámara de frío.
+// El id del dueño sale siempre de la sesión, nunca de lo que llega.
 
 /** Cancela una comanda propia que todavía no está en el horno. No pide la cocina encendida: si el admin la apagó, igual se puede cancelar. */
 export async function cancelarComandaPropia(id: string): Promise<{ error?: string }> {
@@ -23,6 +24,18 @@ export async function cancelarComandaPropia(id: string): Promise<{ error?: strin
   revalidatePath('/admin/ia')
   if ('falla' in r) return { error: r.falla === 'no-existe' ? COMANDA_AJENA : COMANDA_NO_CANCELABLE }
   return {}
+}
+
+/**
+ * Le contesta al chef una pregunta propia que sigue esperando: una de sus opciones, o el texto
+ * libre. La comanda vuelve a donde estaba, y el chef lo lee en su próxima vuelta. No pide la cocina
+ * encendida, como cancelar.
+ */
+export async function responderPreguntaPropia(preguntaId: string, respuesta: unknown): Promise<{ error?: string }> {
+  const usuario = await requireUser()
+  const r = await responderPregunta(usuario.id, preguntaId, respuesta, new Date())
+  revalidatePath('/admin/ia')
+  return 'error' in r ? { error: r.error } : {}
 }
 
 /**

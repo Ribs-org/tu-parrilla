@@ -97,7 +97,7 @@ export function FormularioComanda({
   marca: marcaInicial,
   antes,
   eta,
-  cocinaAbierta,
+  avisoDeLaCocina,
   zona,
 }: {
   materiales: MaterialDeLaCamara[]
@@ -106,7 +106,8 @@ export function FormularioComanda({
   marca: MarcaBasica
   antes: number
   eta: string | null
-  cocinaAbierta: boolean
+  /** Si la cocina no atiende sola, por qué la comanda puede tardar: cerrada, o a mano. Null si atiende sola. */
+  avisoDeLaCocina: string | null
   zona: string
 }) {
   // La `ref` nace con el formulario: mandarlo dos veces cuelga una sola comanda.
@@ -397,7 +398,7 @@ export function FormularioComanda({
         <div className="mt-4 max-w-2xl space-y-1 text-sm">
           <p>{antes === 0 ? 'Es la próxima en la fila.' : antes === 1 ? 'Hay 1 comanda antes que la tuya.' : `Hay ${antes} comandas antes que la tuya.`}</p>
           {eta ? <p>Hora estimada: {fechaHora.format(new Date(eta))}</p> : null}
-          {!cocinaAbierta ? <p className="text-fg-muted">La cocina está cerrada por ahora: tu comanda espera su turno.</p> : null}
+          {avisoDeLaCocina ? <p className="text-fg-muted">{avisoDeLaCocina}</p> : null}
           {minutos > 0 ? <p className="text-fg-muted">Consume {minutos} minutos de tu cupo, los del plato principal. Por ahora el cupo no tiene tope.</p> : null}
         </div>
         <div className="mt-5 flex flex-wrap items-center gap-3">

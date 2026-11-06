@@ -6,9 +6,9 @@ import { latir } from '@/lib/cocina/cocina'
 export const dynamic = 'force-dynamic'
 
 /**
- * El chef dice que está vivo, con lo que cuenta de sí (`datos`: cuántos trabajos tiene, cuánto
- * tarda una comanda en promedio, su versión). Si pasan diez minutos sin latido, el panel dice que
- * la cocina está cerrada por ahora.
+ * El chef dice que está vivo, con lo que cuenta de sí (`datos`: si toma las comandas solo
+ * —`automatico: true`—, cuántos trabajos tiene, cuánto tarda una comanda en promedio, su versión).
+ * La Cocina lo lee para decir si atiende sola, a mano o está cerrada (`src/lib/cocina/latido.ts`).
  */
 export async function POST(request: Request) {
   if (!cocinaAutorizada(request)) return noAutorizado()

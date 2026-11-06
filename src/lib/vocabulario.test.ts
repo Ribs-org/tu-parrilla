@@ -6,6 +6,8 @@ import { SUGERENCIA_VACIA } from './sugerencias/formato'
 import { MAX_TEXTO, TIPOS, TIPOS_SUGERENCIA } from './sugerencias/tipos'
 import { GANCHOS, UMBRAL_LLENANDOSE } from './cocina/bodega'
 import { EJEMPLOS_DE_INSTRUCCION, MAX_INSTRUCCION } from './cocina/pedido'
+import { COCINA_CERRADA } from './cocina/latido'
+import { MAX_RESPUESTA, RESPUESTA_FALTA } from './cocina/pregunta'
 import {
   CAMARA,
   CAMARA_LLENA,
@@ -65,6 +67,10 @@ describe('«Se quemó» en cada modo', () => {
     expect(cocina).toContain(`GANCHOS = ${GANCHOS}`)
     expect(cocina).toContain(`UMBRAL_LLENANDOSE = ${UMBRAL_LLENANDOSE}`)
     for (const ejemplo of EJEMPLOS_DE_INSTRUCCION) expect(cocina).toContain(`'${ejemplo}'`)
+    // Lo de las preguntas y la línea de la cocina, que la app repite para cuando no llega del servidor.
+    expect(cocina).toContain(`MAX_RESPUESTA = ${MAX_RESPUESTA}`)
+    expect(cocina).toContain(`'${RESPUESTA_FALTA}'`)
+    expect(cocina).toContain(`'${COCINA_CERRADA}'`)
   })
 
   it('el libro de sugerencias se llama igual en la app, con los mismos tipos y el mismo largo', () => {

@@ -18,6 +18,8 @@ import {
   principalDe,
   sumarEjemplo,
   type Material,
+  faltaParaResponder,
+  lineaDeLaCocina,
 } from './cocina'
 
 const material = (id: string, clase: Material['clase']): Material => ({
@@ -133,5 +135,26 @@ describe('lo que quedó subiendo', () => {
     expect(leerPendientes(null)).toEqual([])
     expect(leerPendientes('{roto')).toEqual([])
     expect(leerPendientes('{}')).toEqual([])
+  })
+})
+
+describe('cómo atiende la cocina', () => {
+  it('la frase la manda el servidor; el punto es verde solo si atiende sola', () => {
+    const aMano = 'La cocina atiende a mano: una persona toma las comandas, así que la tuya puede tardar hasta el próximo día hábil.'
+    expect(lineaDeLaCocina({ abierta: true, atiende: 'a-mano', cocina: aMano })).toEqual({ texto: aMano, tono: 'ambar' })
+    expect(lineaDeLaCocina({ abierta: true, atiende: 'sola', cocina: 'La cocina está abierta: x' })).toEqual({ texto: 'La cocina está abierta: x', tono: 'verde' })
+  })
+
+  it('un servidor de antes solo decía si latía', () => {
+    expect(lineaDeLaCocina({ abierta: true })).toEqual({ texto: 'La cocina está abierta.', tono: 'verde' })
+    expect(lineaDeLaCocina({ abierta: false })).toEqual({ texto: 'La cocina está cerrada por ahora: lo que pidas espera su turno.', tono: 'ambar' })
+  })
+})
+
+describe('contestarle al chef', () => {
+  it('una respuesta libre: no vacía, y hasta 500 caracteres', () => {
+    expect(faltaParaResponder('   ')).toBe('Escribe tu respuesta al chef.')
+    expect(faltaParaResponder('a'.repeat(501))).toBe('Tu respuesta llega hasta 500 caracteres.')
+    expect(faltaParaResponder('Destaca los precios.')).toBeNull()
   })
 })

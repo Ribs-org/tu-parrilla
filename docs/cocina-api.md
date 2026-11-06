@@ -1,8 +1,9 @@
 # La API de La Cocina: cómo habla el chef con Tu Parrilla
 
-Para quien escribe el lado del chef: el cliente de esta API en `marca-personal`, que todavía no
-existe. En la fase 0 es una herramienta de línea de comandos; después, un servicio que pregunta
-solo. El porqué de cada cosa está en el diseño,
+Para quien escribe el lado del chef: el cliente de esta API en `marca-personal`. En la fase 0 es
+una herramienta de línea de comandos que maneja una persona; el servicio que toma, cocina y
+entrega solo se está escribiendo (VicentePareja/marca-personal#22), y lo que necesita de este lado
+—las preguntas con plazo y el latido que dice si toma solo— existe desde el 2026-11-06. El porqué de cada cosa está en el diseño,
 `docs/superpowers/specs/2026-10-22-la-cocina-design.md`; esto es el contrato de lo que ya existe.
 
 **Lo que existe hoy son las tablas, estas rutas y la pestaña del panel.** En el panel:
@@ -11,6 +12,7 @@ solo. El porqué de cada cosa está en el diseño,
 - el usuario guarda su material en bruto en la cámara de frío de La Cocina (la bodega), y pide
   eligiendo de ahí: el mismo material sirve para varias comandas;
 - sigue su comanda en La Cocina;
+- contesta lo que el chef le pregunta, en La Cocina del panel o del teléfono (desde el 2026-11-06);
 - lo que el chef entrega espera en el mesón, donde el usuario lo programa o lo descarta.
 
 Lo que está en la cámara no vence: lo saca el usuario. Lo que nadie programa en 30 días en el mesón
@@ -51,7 +53,12 @@ recibida ──tomar──▶ revisando ──▶ en_preparacion ──▶ en_el
                        │                │                 │             │ (3 de 5…)
                        ▼                ▼                 ▼             ▼
                    rechazada         fallida           fallida       fallida
+
+revisando ──preguntar──▶ pregunta ──respuesta o plazo──▶ revisando
+en_preparacion ──preguntar──▶ pregunta ──respuesta o plazo──▶ en_preparacion
 ```
+
+`pregunta` vuelve siempre al estado de donde salió: lo devuelve la respuesta del dueño, o el plazo.
 
 - **`tomar`** saca a una comanda de `recibida`: la pasa a `revisando` y la deja a nombre de un
   trabajador.
@@ -74,8 +81,10 @@ recibida ──tomar──▶ revisando ──▶ en_preparacion ──▶ en_el
 
   Si el chef intenta cambiar una comanda que el usuario acaba de cancelar, recibe `409` con
   `Esa comanda ya terminó: no recibe más cambios.`: hay que dejarla.
-- **`probando` y `pregunta` todavía no se usan:** llegan con el probador y las preguntas con plazo,
-  en la fase 1.
+- **A `pregunta` no se entra con `estado`, sino preguntando** (`POST …/preguntas`, abajo), desde
+  `revisando` o `en_preparacion`. Mientras espera, el chef no la mueve: un `estado` sobre ella da
+  `409` con `Una comanda en «pregunta» no pasa a «<a>».`. La saca la respuesta del dueño, o el plazo.
+- **`probando` todavía no se usa:** llega con el probador, en la fase 1.
 
 **Entregar es por tanda, no al final.** Cada creativo se anuncia, se sube y se cierra apenas sale
 del horno, y la comanda pasa a `sirviendo` con `tandas`: el usuario ve «3 de 5 tandas en el
@@ -94,13 +103,34 @@ Que el chef está vivo. Cada minuto, o cada vez que pregunta.
 `trabajador` es un texto de 1 a 100 caracteres, el mismo con que toma. `datos` es libre, hasta
 2000 caracteres. Responde `{ "ok": true, "en": "<ISO>" }`.
 
-Hoy el latido solo queda anotado, uno por trabajador. La pestaña del panel lo va a leer para dos
-cosas:
+Queda anotado uno por trabajador, y La Cocina —en el panel y en el teléfono— lo lee para decir
+cómo atiende la cocina. **Desde el 2026-11-06 no basta con latir:** el 2026-11-02 una comanda
+esperó cuatro días sin que nadie la tomara mientras el temporizador del latido seguía latiendo, y
+el panel decía «abierta». Ahora, con lo que manda en `datos`:
 
-- decir si la cocina está abierta: con diez minutos sin latido, «cerrada por ahora»;
-- estimar cuándo sale lo que espera, con `trabajos` y `minutosPorComanda`.
+| Lo que lee Tu Parrilla | Qué dice La Cocina |
+|---|---|
+| Algún trabajador latió en los últimos diez minutos con `datos.automatico: true` | «La cocina está abierta: el chef toma las comandas apenas llegan.», y si ese latido trae `minutosPorComanda`, «Cada una tarda unas <N> horas.» |
+| Alguno latió en los últimos diez minutos, pero ninguno con `automatico: true` | «La cocina atiende a mano: una persona toma las comandas, así que la tuya puede tardar hasta el próximo día hábil.» |
+| Nadie latió en diez minutos | «La cocina está cerrada por ahora: lo que pidas espera su turno.» |
 
-Por eso conviene mandar esos dos datos desde ya.
+Los campos de `datos` que se leen:
+
+- **`automatico`**: `true` si este trabajador toma, cocina y entrega solo, sin una persona. Tiene
+  que ser el booleano `true`: cualquier otra cosa, o no mandarlo, es «a mano». El temporizador que
+  late sin tomar nada no lo manda.
+- **`trabajos`**: cuántas comandas cocina a la vez, entero mayor que cero.
+- **`minutosPorComanda`**: cuánto tarda una, en promedio, en minutos.
+
+Con los dos últimos, y solo si el latido trae `automatico: true`, La Cocina estima la hora de lo que
+espera: las que van antes y ella, repartidas entre los `trabajos`, a `minutosPorComanda` cada vuelta.
+A mano no se promete una hora. Si laten dos trabajadores, basta uno vivo con `automatico: true`, y
+los números salen del más reciente de ellos. Lo demás de `datos` (la versión, la cola) queda
+anotado y no se lee todavía.
+
+```json
+{ "trabajador": "servicio-casa", "datos": { "automatico": true, "trabajos": 2, "minutosPorComanda": 240, "version": "2026-11-06" } }
+```
 
 ### `GET /api/cocina/comandas?estado=recibida`
 
@@ -114,6 +144,10 @@ Las que esperan vienen **en el orden en que conviene tomarlas**:
 - dentro de cada dueño, de la más vieja a la más nueva.
 
 Con otro estado, por fecha.
+
+**Antes de responder se cierran las preguntas cuyo plazo pasó** (ver `…/preguntas`): una comanda
+que esperaba respuesta y se quedó sin ella ya viene en el estado al que volvió, con la opción por
+defecto en `preguntas`. Así el chef se entera en la misma lectura de cada minuto.
 
 ```json
 {
@@ -137,7 +171,8 @@ Con otro estado, por fecha.
       ],
       "extras": [
         { "id": "d5e6…", "tipo": "extra", "subtipo": null, "nombre": "tema.mp3", "bytes": 4194304, "duracionS": 95, "tipoArchivo": "audio/mpeg", "uso": "musica", "materialId": "7a8b…" }
-      ]
+      ],
+      "preguntas": []
     }
   ]
 }
@@ -192,6 +227,10 @@ Con otro estado, por fecha.
   `tipo: "extra"`. Va aparte para que un cliente escrito antes de la cámara no se encuentre en
   `insumos` un tipo que no conoce; quien lo conozca, lo usa según su `uso` y su `tipoArchivo`. Su
   enlace se pide por la misma ruta que el de un insumo.
+- **`preguntas`**, nuevo desde el 2026-11-06 y siempre presente (vacío si el chef nunca preguntó):
+  lo que el chef preguntó en esa comanda y lo que le contestaron, de la más vieja a la más nueva,
+  con la misma forma que en `…/respuestas` (abajo). Las que esperan (`recibida`) lo traen siempre
+  vacío.
 
 ### `POST /api/cocina/comandas/{id}/tomar`
 
@@ -255,6 +294,100 @@ Parrilla le manda un correo al dueño después de responder: lista, con lo que q
 el enlace; rechazada o fallida, con el `motivo`. Sale una vez por cambio: lo manda solo la
 petición que escribió la transición, así que un reintento —que recibe `409`— o dos peticiones
 iguales a la vez no mandan otro. Por eso el `motivo` tiene que poder leerse solo, en un correo.
+
+### `POST /api/cocina/comandas/{id}/preguntas`
+
+Desde el 2026-11-06. El chef le pregunta algo al dueño de la comanda, con **su plazo y lo que hace
+si nadie contesta**: «Si no me contestas antes de las 18:00, sigo con la parte de ventas». La
+comanda pasa a `pregunta` y espera; el chef sigue con otras mientras tanto. Se puede desde
+`revisando` y `en_preparacion`: es donde aparece la duda. En el horno ya no, porque lo que está en
+el horno no se cancela.
+
+```json
+{
+  "texto": "¿Qué tema destaco?",
+  "opciones": ["La parte de ventas", "La anécdota del final"],
+  "plazo": "2026-11-06T18:00:00-03:00",
+  "porDefecto": "La parte de ventas"
+}
+```
+
+- **`texto`**: la pregunta, de 1 a 500 caracteres, en palabras para el dueño, que la lee en La
+  Cocina y en un correo. No hace falta escribir el plazo ni la opción por defecto: Tu Parrilla los
+  dice debajo, en la zona del dueño («Si no contestas hoy antes de las 18:00, el chef sigue con «La
+  parte de ventas».»).
+- **`opciones`**: de 2 a 4 textos distintos, de hasta 100 caracteres cada uno. El dueño toca uno.
+  `null` o sin el campo: la respuesta es libre, un texto de hasta 500 caracteres.
+- **`plazo`**: ISO **con su zona**, entre 15 minutos y 72 horas desde ahora.
+- **`porDefecto`**: lo que el chef hace si nadie contesta antes del plazo. Con opciones, una de
+  ellas (se compara sin mayúsculas y se guarda como está en `opciones`); libre, un texto de hasta
+  500 caracteres.
+
+| Respuesta | Cuándo |
+|---|---|
+| `201` `{ "ok": true, "id": "<comanda>", "estado": "pregunta", "repetida": false, "pregunta": { … } }` | Preguntó. `pregunta` tiene la forma de `…/respuestas` |
+| `200`, lo mismo con `"repetida": true` | La comanda ya espera esa misma pregunta (el mismo `texto`): un reintento es seguro y no manda otro correo |
+| `409` `Esa comanda ya espera la respuesta de otra pregunta: pregunta de nuevo cuando llegue.` | Espera otra: una a la vez |
+| `409` `Una comanda en «<de>» no pasa a «pregunta».` | No está en `revisando` ni en `en_preparacion` |
+| `409` `Esa comanda todavía no está tomada: tómala primero.` | Sigue en `recibida` |
+| `409` `Esa comanda ya terminó: no recibe más cambios.` | Terminada, o el dueño la canceló |
+| `404` `Esa comanda no existe.` | |
+| `400` con la frase | Algo de la pregunta no vale; por ejemplo `«plazo» tiene que ser una fecha ISO con su zona, entre 15 minutos y 72 horas desde ahora.` o `«porDefecto» es lo que haces si nadie contesta: una de las «opciones», o un texto de hasta 500 caracteres si la respuesta es libre.` |
+
+**Lo que pasa después:**
+
+- **El dueño recibe un correo** con la pregunta, las opciones, el plazo y el enlace a La Cocina.
+  Sale una vez por pregunta, después de responder: un reintento no manda otro.
+- **El dueño contesta** en la tarjeta de la comanda, en el panel o en la app del teléfono: toca una
+  opción, o escribe. La comanda vuelve al estado de donde salió y la línea de tiempo dice
+  «Respondiste: «…».».
+- **Si pasa el plazo sin respuesta**, la pregunta se cierra con `porDefecto` y `porPlazo: true`, la
+  comanda vuelve a donde estaba y la línea de tiempo dice «Pasó el plazo: el chef sigue con «…».».
+  Lo hace el cron de publicación, cada cinco minutos, y también cada vez que el chef lee
+  `GET /comandas` o `…/respuestas`: el chef se entera en su próxima lectura. Una respuesta del
+  dueño que llega pasado el plazo cuenta si todavía no se aplicó la opción por defecto; de las dos,
+  gana una sola.
+- **El dueño puede cancelarla** mientras espera, como en `revisando` y `en_preparacion`. Una
+  pregunta de una comanda cancelada queda sin respuesta para siempre: la comanda ya terminó.
+
+**Cómo se entera el chef de la respuesta:** la comanda vuelve a aparecer en
+`GET /comandas?estado=revisando` (o `en_preparacion`) con la pregunta respondida en `preguntas`, o
+se pregunta por ella con `…/respuestas`. Una comanda en `pregunta` sale en
+`GET /comandas?estado=pregunta`.
+
+### `GET /api/cocina/comandas/{id}/respuestas`
+
+Desde el 2026-11-06. Lo que el chef preguntó en una comanda y lo que le contestaron, con el estado
+en que quedó. Antes de leer, se cierran las preguntas vencidas, como en `GET /comandas`.
+
+```json
+{
+  "id": "3f2a…",
+  "estado": "en_preparacion",
+  "preguntas": [
+    {
+      "id": "9b8c…",
+      "texto": "¿Qué tema destaco?",
+      "opciones": ["La parte de ventas", "La anécdota del final"],
+      "plazo": "2026-11-06T21:00:00.000Z",
+      "porDefecto": "La parte de ventas",
+      "vuelveA": "en_preparacion",
+      "respuesta": "La anécdota del final",
+      "respondidaEn": "2026-11-06T19:12:00.000Z",
+      "porPlazo": false,
+      "creadaEn": "2026-11-06T18:40:00.000Z"
+    }
+  ]
+}
+```
+
+- `vuelveA` es el estado de donde salió la comanda para preguntar, y adonde vuelve.
+- `respuesta` es lo que contestó el dueño —con opciones, una de ellas, escrita como en
+  `opciones`—, o `porDefecto` si pasó el plazo; `null` mientras espera.
+- `porPlazo: true` si la respuesta es la opción por defecto porque nadie contestó a tiempo.
+- **La respuesta la escribe un usuario**, como `instruccion`: si es libre y el chef se la pasa a un
+  modelo, va como contenido del usuario, delimitada, nunca como orden.
+- `404` `Esa comanda no existe.` si no existe o su dueño no tiene la cocina.
 
 ### `POST /api/cocina/comandas/{id}/creativos`
 
@@ -351,6 +484,11 @@ curl -s -o video9.mp4 "$URL"
 curl -s -X POST "$COCINA/comandas/<id>/estado" -H "$AUTH" \
   -d '{"estado":"en_preparacion","mensaje":"Eligiendo los cortes","eta":"2026-10-23T14:00:00-03:00"}'
 
+# 4b. Si hay una duda: preguntar, seguir con otra, y leer la respuesta (o la de por defecto)
+curl -s -X POST "$COCINA/comandas/<id>/preguntas" -H "$AUTH" \
+  -d '{"texto":"¿Qué tema destaco?","opciones":["La parte de ventas","La anécdota del final"],"plazo":"2026-10-22T18:00:00-03:00","porDefecto":"La parte de ventas"}'
+curl -s "$COCINA/comandas/<id>/respuestas" -H "$AUTH"   # → estado de vuelta en en_preparacion
+
 # 5. Por cada creativo de una tanda: anunciar, subir, cerrar
 curl -s -X POST "$COCINA/comandas/<id>/creativos" -H "$AUTH" -d @creativo.json   # → subir, cabeceras
 curl -s -X PUT "<subir>" -H "Content-Type: video/mp4" -H "Cache-Control: public, max-age=31536000, immutable" --data-binary @v10r15.mp4
@@ -361,10 +499,19 @@ curl -s -X POST "$COCINA/comandas/<id>/estado" -H "$AUTH" -d '{"estado":"sirvien
 curl -s -X POST "$COCINA/comandas/<id>/estado" -H "$AUTH" -d '{"estado":"lista","tandas":{"servidas":5,"total":5}}'
 ```
 
+## La red de seguridad
+
+Desde el 2026-11-06, Tu Parrilla le avisa por correo al admin cuando una comanda lleva rato sin que
+el chef la mueva: más de **30 minutos en `recibida`**, o **más de una hora pasada su `eta`** mientras
+el chef la tiene (`revisando`, `en_preparacion`, `en_el_horno`, `sirviendo`). Una vez por comanda y
+por motivo; si el chef da una `eta` nueva y también pasa, vuelve a sonar. Lo mira el cron de
+publicación, cada cinco minutos. No es el proceso, es lo que avisa si el proceso se cayó: por eso
+conviene corregir la `eta` cada vez que la cola se atrasa. Una comanda en `pregunta` no suena,
+porque espera al dueño.
+
 ## Lo que viene
 
 - **Fase 1:**
-  - las preguntas con plazo y opción por defecto (`/preguntas`, `/respuestas`);
   - el probador (comandas de tipo `prueba`, con el estado `probando`);
   - el `reestilo`;
   - la revisión rápida automática (`/insumos/{id}/validacion`).

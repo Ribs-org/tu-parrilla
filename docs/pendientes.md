@@ -52,20 +52,32 @@ sección.
 
     Con eso está la fase 0 entera. Y desde el 2026-11-02, la cámara de frío (la bodega): el material
     en bruto se guarda sin pedir comanda, no vence, tiene una cuota de 20 GB por usuario, y la
-    comanda elige de ahí (`docs/superpowers/specs/2026-11-02-la-bodega-design.md`).
+    comanda elige de ahí (`docs/superpowers/specs/2026-11-02-la-bodega-design.md`). Desde el
+    2026-11-06, de la fase 1, las preguntas del chef con plazo y opción por defecto, con el latido
+    que dice si la cocina toma sola y la alarma al admin (VicentePareja/marca-personal#22).
   - **Lo siguiente, la fase 1:**
-    - las preguntas del chef con plazo y opción por defecto;
     - el probador («Prueba tus estilos», las comandas de tipo `prueba`);
     - el `reestilo` («Otros estilos con el mismo material»).
 
     El diseño dice qué trae cada una.
-  - **El correo de la comanda no se reintenta si Resend falla** (2026-11-02). El de lista,
-    rechazada o fallida ya sale, uno por cambio; falta marcarlo enviado para reintentarlo sin
-    arriesgar un segundo. Pide una migración: el detalle, en `docs/deuda-tecnica.md`, «El correo
-    de la comanda no se reintenta».
-  - **Los avisos de la cocina que faltan** (2026-11-02): el correo cuando el chef pregunta llega
-    con las preguntas de la fase 1, y el de un creativo del mesón por borrarse sigue solo en el
-    resumen del día («Avisos», en el diseño).
+  - **El correo de la comanda, y el de la pregunta, no se reintentan si Resend falla**
+    (2026-11-02; la pregunta, 2026-11-06). Salen uno por cambio y uno por pregunta; falta
+    marcarlos enviados para reintentarlos sin arriesgar un segundo. Pide una migración: el detalle,
+    en `docs/deuda-tecnica.md`, «El correo de la comanda no se reintenta».
+  - **Los avisos de la cocina que faltan** (2026-11-02): el de un creativo del mesón por borrarse
+    sigue solo en el resumen del día («Avisos», en el diseño). Y desde el 2026-11-06, que el chef
+    pregunta: el diseño pide además un aviso en la pestaña de la barra del panel (como el de «Se
+    quemó») y una línea en el resumen del día si hay preguntas sin responder; hoy hay correo y la
+    tarjeta de color, nada en la barra ni en el resumen.
+  - **Que el chef pregunte por el teléfono con una notificación** (2026-11-06). La app muestra la
+    pregunta en «Tus comandas» y se contesta ahí, pero no avisa sola: no hay notificaciones push en
+    la app. El correo es el aviso.
+  - **Por revisar: la alarma de la cocina no ve una comanda tomada sin hora estimada** (2026-11-06).
+    Suena si lleva media hora sin tomar o si pasó su `eta`; una que el chef tomó y dejó en
+    `revisando` sin `eta` —el camino «la revisa una persona del equipo» del issue
+    VicentePareja/marca-personal#22— no suena nunca. Si el servicio del chef no siempre da `eta`,
+    sumar un tercer motivo (tomada y sin cambios en N horas), con su columna. Detalle en
+    `src/lib/cocina/alarma.ts`.
   - **[dueño] Probar una vez la subida por partes contra el almacén de verdad** (2026-10-22). La
     cocina del dueño ya está encendida: en La Cocina → «La cámara de frío», guardar un video de más
     de 64 MB, para que vaya en varias partes, y después sacarlo. El 2026-11-02 se probó de punta a

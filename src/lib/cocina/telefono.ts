@@ -3,6 +3,7 @@ import { EN_MARCHA } from './estados'
 import type { ComandaDelPanel } from './panel'
 import { ACOMPANAMIENTO_NO_SIRVE } from './pedir'
 import { MARCA_SIN_NOMBRE, PEDIDO_ILEGIBLE, leerPedido, type MarcaBasica, type PedidoDeComanda } from './pedido'
+import { siNoContestas } from './pregunta'
 import { antesEnLaFila, estadoEnPalabras, tramoDelRecorrido } from './tarjeta'
 
 // La Cocina desde la app del teléfono, sin base: cómo llega una comanda que se pide desde ahí y
@@ -81,21 +82,45 @@ export type ComandaDelTelefono = {
   fila: string | null
   /** Lo que dijo el chef, o por qué no la cocinó. */
   mensaje: string | null
+  /**
+   * Lo que el chef pregunta, mientras espera respuesta; null si no pregunta nada. `siNoContestas`
+   * ya viene en palabras, en la zona de la cuenta. Desde el 2026-11-06: una app de antes no lo lee.
+   */
+  pregunta: {
+    id: string
+    texto: string
+    /** Null: la respuesta es libre. */
+    opciones: string[] | null
+    porDefecto: string
+    plazo: string
+    siNoContestas: string
+  } | null
 }
 
-export function comandaParaElTelefono(c: ComandaDelPanel): ComandaDelTelefono {
+/** `ahora` y `zona` dicen el plazo de la pregunta en palabras: «hoy antes de las 18:00». */
+export function comandaParaElTelefono(c: ComandaDelPanel, ahora: Date, zona: string): ComandaDelTelefono {
   return {
     id: c.id,
     estado: c.estado,
     palabras: { noche: estadoEnPalabras(c, 'noche'), dia: estadoEnPalabras(c, 'dia') },
     enMarcha: EN_MARCHA.has(c.estado),
-    tramo: tramoDelRecorrido(c.estado),
+    tramo: tramoDelRecorrido(c.estado, c.pregunta?.vuelveA),
     creadaEn: c.creadaEn.toISOString(),
     eta: c.eta ? c.eta.toISOString() : null,
     principal: c.principal,
     instruccion: c.instruccion,
     fila: c.antes === null ? null : antesEnLaFila(c.antes),
     mensaje: c.motivo ?? c.mensaje,
+    pregunta: c.pregunta
+      ? {
+          id: c.pregunta.id,
+          texto: c.pregunta.texto,
+          opciones: c.pregunta.opciones,
+          porDefecto: c.pregunta.porDefecto,
+          plazo: c.pregunta.plazo.toISOString(),
+          siNoContestas: siNoContestas(c.pregunta.plazo, c.pregunta.porDefecto, ahora, zona),
+        }
+      : null,
   }
 }
 

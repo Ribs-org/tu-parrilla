@@ -114,20 +114,28 @@ describe.skipIf(!URL_PRUEBAS)('la pestaña La Cocina, contra una Postgres de ver
     expect(vista).toMatchObject({ id: mia.id, antes: 2 })
   })
 
-  it('la cocina está abierta con un latido de hace menos de diez minutos, y no se adivina la hora sin datos', async () => {
+  it('la cocina está abierta con un latido de hace menos de diez minutos; sola si el que late toma solo, y a mano si no', async () => {
     const { estadoDeLaCocina, etaEnLaFila } = await import('./panel')
     const { latidos } = await esquema()
     const ahora = new Date('2026-10-22T12:00:00Z')
-    expect(await estadoDeLaCocina(ahora)).toEqual({ abierta: false, ultimoLatido: null, trabajos: null, minutosPorComanda: null })
+    expect(await estadoDeLaCocina(ahora)).toEqual({ abierta: false, atiende: 'cerrada', ultimoLatido: null, trabajos: null, minutosPorComanda: null })
 
-    await (await db()).insert(latidos).values({ trabajador: 'casa', en: new Date('2026-10-22T11:55:00Z'), datos: { trabajos: 2, minutosPorComanda: 240 } })
-    const abierta = await estadoDeLaCocina(ahora)
-    expect(abierta).toMatchObject({ abierta: true, trabajos: 2, minutosPorComanda: 240 })
+    // El temporizador de siempre: late, pero nadie toma solo. Abierta, a mano, y sin hora estimada.
+    await (await db()).insert(latidos).values({ trabajador: 'casa', en: new Date('2026-10-22T11:58:00Z'), datos: { trabajos: 2, minutosPorComanda: 240 } })
+    const aMano = await estadoDeLaCocina(ahora)
+    expect(aMano).toMatchObject({ abierta: true, atiende: 'a-mano' })
+    expect(etaEnLaFila(2, aMano, ahora)).toBeNull()
+
+    // Y el servicio que toma solo, en otra fila: manda él.
+    await (await db()).insert(latidos).values({ trabajador: 'servicio', en: new Date('2026-10-22T11:55:00Z'), datos: { automatico: true, trabajos: 2, minutosPorComanda: 240 } })
+    const sola = await estadoDeLaCocina(ahora)
+    expect(sola).toMatchObject({ abierta: true, atiende: 'sola', trabajos: 2, minutosPorComanda: 240 })
     // Dos antes y ella: tres comandas en dos trabajos son dos vueltas de cuatro horas.
-    expect(etaEnLaFila(2, abierta, ahora)).toEqual(new Date('2026-10-22T20:00:00Z'))
+    expect(etaEnLaFila(2, sola, ahora)).toEqual(new Date('2026-10-22T20:00:00Z'))
 
-    expect((await estadoDeLaCocina(new Date('2026-10-22T12:06:00Z'))).abierta).toBe(false)
-    expect(etaEnLaFila(0, { ...abierta, minutosPorComanda: null }, ahora)).toBeNull()
+    // A las 12:06 el servicio lleva once minutos callado: queda el temporizador, a mano.
+    expect((await estadoDeLaCocina(new Date('2026-10-22T12:06:00Z'))).atiende).toBe('a-mano')
+    expect((await estadoDeLaCocina(new Date('2026-10-22T12:09:00Z'))).abierta).toBe(false)
   })
 
   it('cancelar: la propia mientras no está en el horno; lo crudo queda con catorce días', async () => {
@@ -208,7 +216,11 @@ describe.skipIf(!URL_PRUEBAS)('la pestaña La Cocina, contra una Postgres de ver
 
     // Se abre la cocina: cambia.
     await (await db()).insert(latidos).values({ trabajador: 'casa', en: new Date('2026-10-22T11:58:00Z') })
-    expect((await pulso()).firma).not.toBe(conMeson.firma)
+    const aMano = await pulso()
+    expect(aMano.firma).not.toBe(conMeson.firma)
+    // Pasa a tomar sola: cambia, aunque ya estaba abierta, porque la línea de arriba dice otra cosa.
+    await (await db()).update(latidos).set({ datos: { automatico: true } }).where(eq(latidos.trabajador, 'casa'))
+    expect((await pulso()).firma).not.toBe(aMano.firma)
 
     // Lista, ya no está en marcha: el panel deja de preguntar.
     await (await db()).update(comandas).set({ estado: 'lista' }).where(eq(comandas.id, mia.id))

@@ -4,19 +4,23 @@ import { DeNocheYDeDia } from '@/components/de-noche-y-de-dia'
 import { EscenaCocina } from '@/components/escena-cocina'
 import { EstacionDeLaComanda } from '@/components/estacion-comanda'
 import { TERMINALES } from '@/lib/cocina/estados'
+import { cocinaEnPalabras } from '@/lib/cocina/latido'
 import { NOMBRE_ESTADO } from '@/lib/cocina/nombres'
 import { etaEnLaFila, type ComandaDelPanel, type EstadoDeLaCocina, type PulsoDeLaCocina } from '@/lib/cocina/panel'
 import { pesoEnPalabras } from '@/lib/cocina/bodega'
+import { siNoContestas } from '@/lib/cocina/pregunta'
 import type { UsoDeLaCamara } from '@/lib/cocina/subidas'
 import { antesEnLaFila, estadoEnPalabras, tramoDelRecorrido } from '@/lib/cocina/tarjeta'
 import { cn } from '@/lib/utils'
 import { CAMARA, MESON, nombreDe } from '@/lib/vocabulario'
 import { BotonCancelarComanda } from './cancelar'
+import { ResponderAlChef } from './responder'
 import { VigiaDeLaCocina } from './vigia'
 
 // «El chef de la casa», la parte de arriba de La Cocina: el chef de `marca-personal`, que edita
 // los videos del dueño (`docs/superpowers/specs/2026-10-22-la-cocina-design.md`). Con la cocina
-// apagada, qué es y cómo se enciende; encendida, si la cocina está abierta y las comandas. Mientras
+// apagada, qué es y cómo se enciende; encendida, si la cocina está abierta y cómo atiende —sola, a
+// mano o nadie (`latido.ts`)— y las comandas, con lo que el chef pregunta y su respuesta. Mientras
 // alguna está en marcha, las tarjetas se actualizan solas (`vigia.tsx`) y su estación se mueve
 // (`estacion-comanda.tsx`).
 
@@ -72,11 +76,11 @@ export function ChefDeLaCasa({
       hint="Le llevas el material crudo y te devuelve los creativos, listos para programar."
       className="mb-8"
     >
-      {/* La escena dice lo mismo que la línea de abajo, sin palabras: el fuego arde si la cocina está abierta. */}
+      {/* La escena dice lo mismo que la línea de abajo, sin palabras: el fuego arde si alguien atiende, solo o a mano. */}
       <EscenaCocina encendida={cocina.abierta} className="mb-5" />
       <p className="flex items-start gap-2 text-sm">
-        <span aria-hidden className={cn('mt-1.5 h-2 w-2 shrink-0 rounded-full', cocina.abierta ? 'bg-positive' : 'bg-caution')} />
-        {cocina.abierta ? 'La cocina está abierta.' : 'La cocina está cerrada por ahora: lo que pidas espera su turno.'}
+        <span aria-hidden className={cn('mt-1.5 h-2 w-2 shrink-0 rounded-full', cocina.atiende === 'sola' ? 'bg-positive' : 'bg-caution')} />
+        {cocinaEnPalabras(cocina)}
       </p>
 
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
@@ -116,7 +120,7 @@ export function ChefDeLaCasa({
       ) : (
         <ul className="mt-3 space-y-3">
           {comandas.map((c) => (
-            <Tarjeta key={c.id} comanda={c} cocina={cocina} fechaHora={fechaHora} ahora={ahora} />
+            <Tarjeta key={c.id} comanda={c} cocina={cocina} fechaHora={fechaHora} zona={zona} ahora={ahora} />
           ))}
         </ul>
       )}
@@ -128,19 +132,28 @@ function Tarjeta({
   comanda: c,
   cocina,
   fechaHora,
+  zona,
   ahora,
 }: {
   comanda: ComandaDelPanel
   cocina: EstadoDeLaCocina
   fechaHora: Intl.DateTimeFormat
+  zona: string
   ahora: Date
 }) {
   const termino = TERMINALES.has(c.estado)
   // La hora del chef si ya la dio; mientras espera, la que sale de la fila y del último latido.
   const eta = termino ? null : (c.eta ?? (c.antes !== null ? etaEnLaFila(c.antes, cocina, ahora) : null))
   const malo = c.estado === 'rechazada' || c.estado === 'fallida'
+  // Cuando el chef pregunta, la tarjeta se pone de color: es lo único que espera al dueño.
+  const pregunta = c.estado === 'pregunta' ? c.pregunta : null
   return (
-    <li className={cn('flex gap-3 rounded-lg border p-3 sm:gap-4 sm:p-4', malo ? 'border-negative/40' : 'border-acero-700')}>
+    <li
+      className={cn(
+        'flex gap-3 rounded-lg border p-3 sm:gap-4 sm:p-4',
+        malo ? 'border-negative/40' : pregunta ? 'border-brasa/60 bg-brasa/[0.06]' : 'border-acero-700',
+      )}
+    >
       <EstacionDeLaComanda estado={c.estado} tandasServidas={c.tandasServidas} className="h-auto w-[4.5rem] self-start sm:w-28" />
       <div className="min-w-0 flex-1">
       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
@@ -156,6 +169,13 @@ function Tarjeta({
       {eta ? <p className="mt-0.5 text-xs text-fg-muted">Hora estimada: {fechaHora.format(eta)}</p> : null}
       {c.mensaje && !malo ? <p className="mt-2 text-sm text-fg-muted">El chef: «{c.mensaje}»</p> : null}
       {malo && c.motivo ? <p className="mt-2 text-sm text-fg-muted">{c.motivo}</p> : null}
+      {pregunta ? (
+        <div className="mt-3 rounded-lg border border-brasa/40 p-3">
+          <p className="whitespace-pre-line break-words text-sm font-medium text-fg">{pregunta.texto}</p>
+          <ResponderAlChef id={pregunta.id} opciones={pregunta.opciones} porDefecto={pregunta.porDefecto} />
+          <p className="mt-2 text-xs text-fg-muted">{siNoContestas(pregunta.plazo, pregunta.porDefecto, ahora, zona)}</p>
+        </div>
+      ) : null}
       {c.instruccion ? (
         <p className="mt-2 line-clamp-3 whitespace-pre-line break-words text-xs text-fg-faint">
           Tu instrucción al chef: «{c.instruccion}»
@@ -202,7 +222,7 @@ function Tarjeta({
  * eso no se lee en voz alta. Una comanda que terminó mal no lo lleva.
  */
 function Recorrido({ comanda: c }: { comanda: ComandaDelPanel }) {
-  const tramo = tramoDelRecorrido(c.estado)
+  const tramo = tramoDelRecorrido(c.estado, c.pregunta?.vuelveA)
   if (tramo === null) return null
   const llenado = c.estado === 'sirviendo' && c.tandasTotal ? Math.min(1, c.tandasServidas / c.tandasTotal) : null
   return (

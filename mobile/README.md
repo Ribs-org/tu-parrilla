@@ -232,14 +232,17 @@ Se marca la casilla de los derechos, se toca **Grabar video** (o **Sacar foto**,
 galería**), y lo grabado se guarda en la cámara de frío —de día, la nevera— y entra a la comanda
 ya elegido; se escribe la instrucción al chef y **Mandar al chef** cuelga la comanda. Más abajo,
 lo que hay en la cámara para sumarlo, con su cuota, y las últimas comandas con su estado, que se
-actualizan solas mientras alguna está en marcha. Lo que el formulario del panel deja elegir y el
+actualizan solas mientras alguna está en marcha. Cuando el chef pregunta algo, la tarjeta de esa
+comanda trae la pregunta con sus opciones (o un campo libre) y el plazo, y se contesta ahí mismo
+(desde el 2026-11-06). La línea de arriba dice cómo atiende la cocina —sola, a mano o cerrada—
+con la frase que manda el servidor; contra un servidor de antes, que no la manda, dice lo de siempre. Lo que el formulario del panel deja elegir y el
 teléfono no pregunta va como el panel lo trae marcado: un video largo, clips verticales, lo que
 dé el material, la marca guardada (o el nombre de la cuenta) y lo que acompaña, para intercalar.
 El mesón, cancelar, renombrar o sacar de la cámara siguen en el panel.
 
 Las rutas son `/api/mobile/cocina` (todo lo que la pantalla muestra), `/api/mobile/cocina/subidas…`
 (las mismas subidas por partes del panel, con el token del teléfono) y
-`/api/mobile/cocina/comandas`. Lo que validan y sus frases son las del panel
+`/api/mobile/cocina/comandas`, y contestarle al chef, `/api/mobile/cocina/preguntas/{id}/respuesta`. Lo que validan y sus frases son las del panel
 (`src/lib/cocina/subidas-http.ts` y `src/lib/cocina/telefono.ts`, en la raíz): la cuota se mira en
 el servidor igual que desde el panel.
 
