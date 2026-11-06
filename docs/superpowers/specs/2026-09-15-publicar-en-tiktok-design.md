@@ -41,7 +41,8 @@ revisión de TikTok for Developers de una vez, con los cuatro scopes demostrados
 - **Subida por trozos (`FILE_UPLOAD`).** TikTok descarga desde la URL pública de R2;
   las fotos solo aceptan ese modo, así que el video usa el mismo camino.
 - **Etiqueta de contenido generado por IA (`is_aigc`), música automática
-  (`auto_add_music`).** Quedan en `false`.
+  (`auto_add_music`).** Quedan en `false`. (Después llegaron las dos: «Hecho con IA», #272, y
+  «Música de TikTok» para fotos, #320.)
 - **Editar las opciones de TikTok desde el editor de posts ya programados.** Se fijan en
   el compositor y en el lote; el editor las muestra pero no las cambia.
 - **Privado (DM) para TikTok.** El módulo `privado.ts` sigue apagado y sin red nueva.

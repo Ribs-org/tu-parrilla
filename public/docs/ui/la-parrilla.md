@@ -555,6 +555,15 @@ formulario viene abierto, con el cursor en «Texto». En este orden:
     realista.»; encendido, «TikTok lo etiquetará como contenido generado con IA.». TikTok le
     pone al post la etiqueta de contenido generado con IA. Vale para videos y fotos; en el
     camino del borrador no está, y la etiqueta se pone en la app de TikTok al terminarlo.
+  - El interruptor **«Música de TikTok»**, con «TikTok le pone a las fotos una canción
+    recomendada; la puedes cambiar después en la app de TikTok. Esta cuenta lo recuerda para
+    la próxima vez.». Solo aparece cuando todos los archivos son fotos: a un video TikTok no
+    deja ponerle música desde Tu Parrilla, y en el camino del borrador tampoco está (la música
+    se elige en la app de TikTok al terminarlo). Nace como quedó la última vez que se
+    programaron fotos en esa cuenta —apagado si nunca—, y en un borrador de Tu Parrilla, como
+    quedó en el borrador. Es lo único del bloque que se recuerda por cuenta: la privacidad y
+    las casillas parten siempre sin elegir, porque así lo pide TikTok. Encendido, TikTok elige
+    la canción al publicar; Tu Parrilla no sabe cuál ni la muestra.
   - Al pie, «Al publicar aceptas la Music Usage Confirmation de TikTok.» (con contenido
     patrocinado, también la «Branded Content Policy»), seguido de «Después de publicar,
     TikTok puede tardar unos minutos en mostrarlo en tu perfil.»
@@ -733,7 +742,8 @@ El formulario, en orden:
    con opciones va, tras un punto medio, un resumen: «Borrador a tu bandeja de TikTok»;
    «Directo» seguido de la privacidad y de lo permitido, por ejemplo «Directo · Solo yo · sin
    comentarios · sin dúo · sin pegar · sin comercial», con « · hecho con IA» al final si
-   lleva la etiqueta de IA; o «Trial reel — lo compartes tú desde
+   lleva la etiqueta de IA y « · con música de TikTok» si son fotos con «Música de TikTok»
+   encendida; o «Trial reel — lo compartes tú desde
    Instagram». Esas opciones no se pueden cambiar aquí.
 4. **«Media»**: una fila por archivo, con su miniatura (los videos se pueden reproducir ahí
    mismo), su dirección, un ícono para abrirlo en otra pestaña («Abrir en una pestaña
@@ -844,7 +854,9 @@ Si hay que dejarlo a medias, basta con cerrar el panel: queda como borrador.
 7. Elegir «Fecha y hora» (o «Ahora») y apretar «Programar».
 
 Para fotos en TikTok es igual, con hasta 35 fotos JPG o WebP y sin video (hasta diez si el
-post va también a otra red).
+post va también a otra red). Con fotos, publicando directo, aparece además «Música de TikTok»:
+encendido, TikTok les pone una canción recomendada, que se cambia después en la app de TikTok.
+Queda recordado para la próxima vez en esa cuenta.
 
 ### Para terminar en TikTok lo que llegó a la bandeja
 

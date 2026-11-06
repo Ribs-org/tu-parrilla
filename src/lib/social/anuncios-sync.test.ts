@@ -63,6 +63,7 @@ function cuenta(id: string, network: string, ownerId: string, creada: string): S
     trialReels: null,
     trialReelsMotivo: null,
     trialReelsEn: null,
+    tiktokMusica: null,
     createdAt: new Date(creada),
   }
 }

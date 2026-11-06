@@ -26,17 +26,24 @@ const creadorPromesas = new Map<string, ReturnType<typeof leerCreadorTikTok>>()
  * lee, con el identificador de la cuenta como sufijo — puede haber dos bloques en el
  * mismo formulario.
  *
- * `soloFotos` esconde dúo y pegar: TikTok no los ofrece en carruseles.
+ * `soloFotos` esconde dúo y pegar: TikTok no los ofrece en carruseles. Y muestra «Música de
+ * TikTok», que es al revés: TikTok solo le pone música por la API a las fotos publicadas
+ * directo, no a un video ni a lo que va a la bandeja.
  *
  * `inicial` es lo que tenía elegido un borrador del compositor. Sin él todo nace como la guía
  * de TikTok exige; con él vuelve lo que la persona ya había elegido ella misma.
+ *
+ * La música es lo único que nace de lo que la cuenta recuerda (`cuenta.tiktokMusica`, lo que
+ * se eligió al programar fotos ahí la última vez): la guía de TikTok prohíbe dejar puestas la
+ * privacidad y las demás casillas, no esto, y quien tiene tres cuentas la elige una vez por
+ * cuenta y no en cada post.
  */
 export function TikTokOpciones({
   cuenta,
   soloFotos,
   inicial,
 }: {
-  cuenta: CuentaDestino
+  cuenta: CuentaDestino & { tiktokMusica?: boolean | null }
   soloFotos: boolean
   inicial?: TikTokInicial | null
 }) {
@@ -53,6 +60,7 @@ export function TikTokOpciones({
     inicial?.comercial === 'patrocinado' ? 'patrocinado' : 'marca_propia',
   )
   const [ia, setIa] = useState(inicial?.ia ?? false)
+  const [musica, setMusica] = useState(inicial?.musica ?? Boolean(cuenta.tiktokMusica))
 
   useEffect(() => {
     let vivo = true
@@ -213,6 +221,16 @@ export function TikTokOpciones({
             checked={ia}
             onChange={setIa}
           />
+
+          {soloFotos ? (
+            <Toggle
+              name={`tiktokMusica:${cuenta.id}`}
+              label="Música de TikTok"
+              hint="TikTok le pone a las fotos una canción recomendada; la puedes cambiar después en la app de TikTok. Esta cuenta lo recuerda para la próxima vez."
+              checked={musica}
+              onChange={setMusica}
+            />
+          ) : null}
 
           <p className="text-[0.72rem] text-fg-faint">
             {patrocinado ? (

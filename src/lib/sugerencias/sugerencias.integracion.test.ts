@@ -22,9 +22,10 @@ async function usuario(rol: 'admin' | 'usuario' = 'usuario') {
   return u!
 }
 
-/** Un GitHub de mentira: anota cada issue, o falla mientras `falla` sea verdad. */
+/** Un GitHub de mentira: anota cada issue y cada comentario, o falla mientras `falla` sea verdad. */
 function githubDoble(opciones: { falla?: boolean; demora?: number } = {}) {
   const issues: IssueNuevo[] = []
+  const comentarios: Array<{ numero: number; cuerpo: string }> = []
   const cliente: ClienteGithub = {
     async crearIssue(issue) {
       if (opciones.demora) await new Promise((r) => setTimeout(r, opciones.demora))
@@ -32,8 +33,12 @@ function githubDoble(opciones: { falla?: boolean; demora?: number } = {}) {
       issues.push(issue)
       return { numero: 100 + issues.length, url: `https://github.com/Ribs-org/tu-parrilla/issues/${100 + issues.length}` }
     },
+    async comentarIssue(numero, cuerpo) {
+      if (opciones.falla) throw new Error(`GitHub respondió 502 al comentar el issue ${numero}: Bad Gateway`)
+      comentarios.push({ numero, cuerpo })
+    },
   }
-  return { cliente, issues, opciones }
+  return { cliente, issues, comentarios, opciones }
 }
 
 const ORIGEN = { origen: 'panel' as const, pantalla: '/admin/schedule', navegador: 'Chrome 131 en Windows' }
@@ -149,6 +154,59 @@ describe.skipIf(!URL_PRUEBAS)('el libro de sugerencias contra una Postgres de ve
     // Al día siguiente, de nuevo.
     const manana = new Date(ahora.getTime() + 24 * 60 * MINUTO + MINUTO)
     expect(await recibirSugerencia(a, { tipo: 'idea', texto: 'otra' }, ORIGEN, manana)).toHaveProperty('id')
+  })
+
+  it('la respuesta del equipo: la guarda el admin, la persona la ve nueva y al abrirla queda leída', async () => {
+    const { sugerencias } = await esquema()
+    const { recibirSugerencia, mandarSugerencia } = await import('./guardar')
+    const {
+      avisarDeLaRespuesta,
+      marcarRespuestaLeida,
+      misSugerencias,
+      responderSugerencia,
+      respuestasSinLeer: sinLeerDe,
+    } = await import('./responder')
+    const { SOLO_EL_ADMIN, SUGERENCIA_NO_EXISTE } = await import('./respuestas')
+    const admin = await usuario('admin')
+    const persona = await usuario()
+    const otra = await usuario()
+    const ahora = new Date('2033-01-01T12:00:00Z')
+    const { id } = (await recibirSugerencia(persona, { tipo: 'idea', texto: 'Quiero Z' }, ORIGEN, ahora)) as { id: string }
+    const github = githubDoble()
+    await mandarSugerencia(id, github.cliente, ahora)
+    const [enviada] = await (await db()).select().from(sugerencias).where(eq(sugerencias.id, id))
+    const issueNumero = enviada!.issueNumero!
+
+    // Alguien que no es el admin no responde, y lo que no existe es 404.
+    expect(await responderSugerencia(persona, { id }, 'Hola')).toEqual({ error: SOLO_EL_ADMIN, status: 403 })
+    expect(await responderSugerencia(admin, { issue: 999_999 }, 'Hola')).toEqual({ error: SUGERENCIA_NO_EXISTE, status: 404 })
+
+    // Por el número del issue, la primera vez.
+    const r = await responderSugerencia(admin, { issue: issueNumero }, 'Buena idea: la hacemos.', ahora)
+    expect(r).toEqual({ id, issue: issueNumero, primera: true, cambio: true })
+    expect(await sinLeerDe(persona.id)).toBe(1)
+    // A otra persona no le aparece nada.
+    expect(await sinLeerDe(otra.id)).toBe(0)
+    expect(await misSugerencias(otra.id)).toEqual([])
+    expect((await misSugerencias(persona.id))[0]).toMatchObject({ id, respuesta: 'Buena idea: la hacemos.', respuestaLeidaEn: null })
+
+    // El aviso: sin RESEND_API_KEY el correo no sale, pero el comentario sí, sin el correo de nadie.
+    expect(await avisarDeLaRespuesta(id, true, github.cliente)).toEqual({ correo: false, comentario: true })
+    expect(github.comentarios).toHaveLength(1)
+    expect(github.comentarios[0]!.numero).toBe(issueNumero)
+    expect(github.comentarios[0]!.cuerpo).not.toContain(persona.correo)
+
+    // Otra persona no la marca leída; la dueña sí.
+    expect(await marcarRespuestaLeida(otra.id, id)).toBe(false)
+    expect(await marcarRespuestaLeida(persona.id, id)).toBe(true)
+    expect(await sinLeerDe(persona.id)).toBe(0)
+
+    // La misma respuesta no cambia nada; una distinta la deja sin leer otra vez.
+    expect(await responderSugerencia(admin, { id }, 'Buena idea: la hacemos.')).toMatchObject({ cambio: false })
+    expect(await responderSugerencia(admin, { id }, 'Ya está en el panel.')).toMatchObject({ primera: false, cambio: true })
+    expect(await sinLeerDe(persona.id)).toBe(1)
+    const [fila] = await (await db()).select().from(sugerencias).where(eq(sugerencias.id, id))
+    expect(fila).toMatchObject({ respuesta: 'Ya está en el panel.', respondidaPor: admin.id })
   })
 
   it('lo que no pasa la revisión no se guarda', async () => {

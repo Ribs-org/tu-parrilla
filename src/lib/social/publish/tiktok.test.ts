@@ -126,6 +126,25 @@ describe('cuerpoInit', () => {
     })
   })
 
+  it('fotos directo con «Música de TikTok» piden la música recomendada', () => {
+    const { body } = cuerpoInit({ ...directo, musica: true }, 'Hola', { kind: 'fotos', urls: [foto(0).url] }, null)
+    expect(body.post_mode).toBe('DIRECT_POST')
+    expect((body.post_info as Record<string, unknown>).auto_add_music).toBe(true)
+  })
+
+  it('un video o un borrador nunca llevan música, aunque la opción venga encendida', () => {
+    // La API de TikTok solo ofrece `auto_add_music` en fotos publicadas directo.
+    const video_ = cuerpoInit({ ...directo, musica: true }, 'Hola', { kind: 'video', url: video.url }, null)
+    expect(JSON.stringify(video_.body)).not.toContain('auto_add_music')
+    for (const media of [
+      { kind: 'video' as const, url: video.url },
+      { kind: 'fotos' as const, urls: [foto(0).url] },
+    ]) {
+      const borrador = cuerpoInit({ modo: 'borrador' }, 'Hola', media, null)
+      expect(JSON.stringify(borrador.body)).not.toContain('auto_add_music')
+    }
+  })
+
   it('video borrador solo lleva la fuente; fotos borrador llevan título y descripción', () => {
     expect(cuerpoInit({ modo: 'borrador' }, 'Hola', { kind: 'video', url: video.url }, null)).toEqual({
       path: '/post/publish/inbox/video/init/',

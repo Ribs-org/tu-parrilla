@@ -27,10 +27,13 @@ const RUTA_COCINA = '/admin/ia'
  *
  * El botón de Ajustes lleva un punto cuando algo adentro necesita al dueño: ámbar si un fierro se
  * enfría, rojo si se apagó (`avisoDeFierros`). Adentro, la entrada de Los Fierros lo dice en
- * palabras. Sin nada que avisar, no hay punto.
+ * palabras. Sin nada que avisar, no hay punto. Lleva también un punto, de brasa, si el equipo
+ * respondió algo del libro de sugerencias que la persona no abrió; si hay los dos, manda el de
+ * los fierros.
  *
  * Al final del menú, separado, el libro de sugerencias (de día, la caja): no es una pantalla
- * sino una ventana para escribirle al equipo que hace Tu Parrilla (`libro-de-sugerencias.tsx`).
+ * sino una ventana para escribirle al equipo que hace Tu Parrilla y leer lo que le respondió
+ * (`libro-de-sugerencias.tsx`). Con respuestas sin leer, la entrada dice cuántas.
  *
  * En un teléfono las cuatro pestañas no caben: la fila se desliza de lado, con el borde derecho
  * desvanecido para que se note que sigue, y al llegar a una pestaña la fila se corre hasta
@@ -40,16 +43,26 @@ const RUTA_COCINA = '/admin/ia'
 export function AdminNav({
   esAdmin,
   aviso = null,
+  respuestas = 0,
 }: {
   esAdmin?: boolean
   aviso?: ReturnType<typeof avisoDeFierros>
+  /** Cuántas respuestas del equipo, en el libro de sugerencias, no abrió todavía. */
+  respuestas?: number
 }) {
   const pathname = usePathname()
   const actual = pantallaDe(pathname)
   const enAjustes = actual?.grupo === 'ajustes'
   // La frase del aviso va a la vista en los dos modos; la del lector de pantalla, en el que se ve.
   const tema = useTema()
-  const colorAviso = aviso?.nivel === 'apagado' ? 'bg-negative' : 'bg-caution'
+  // El punto de los fierros manda sobre el de las respuestas: es el que pide algo con apuro.
+  const colorAviso = aviso ? (aviso.nivel === 'apagado' ? 'bg-negative' : 'bg-caution') : 'bg-brasa'
+  const conPunto = Boolean(aviso) || respuestas > 0
+  const fraseRespuestas = respuestas === 1 ? '1 respuesta nueva' : `${respuestas} respuestas nuevas`
+  const etiquetaAjustes = [
+    aviso ? `en ${nombreDe(RUTA_FIERROS, tema)}, ${fraseDelAviso(aviso, tema)}` : null,
+    respuestas > 0 ? `en ${LIBRO[tema].toLowerCase()}, ${fraseRespuestas}` : null,
+  ].filter(Boolean)
   const [libroAbierto, setLibroAbierto] = useState(false)
 
   // La pestaña activa, entera a la vista: si queda cortada a la derecha, la fila se corre.
@@ -114,11 +127,11 @@ export function AdminNav({
             'relative flex cursor-pointer list-none items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm transition-colors [&::-webkit-details-marker]:hidden',
             enAjustes ? 'bg-brasa text-acero-950' : 'text-fg-muted hover:text-fg',
           )}
-          aria-label={aviso ? `Ajustes: en ${nombreDe(RUTA_FIERROS, tema)}, ${fraseDelAviso(aviso, tema)}` : 'Ajustes'}
+          aria-label={etiquetaAjustes.length ? `Ajustes: ${etiquetaAjustes.join('; ')}` : 'Ajustes'}
         >
           <IconoAjustes className="h-4 w-4" />
           <span className="hidden sm:inline">Ajustes</span>
-          {aviso ? (
+          {conPunto ? (
             <span
               aria-hidden
               className={cn('absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full ring-2 ring-acero-950', colorAviso)}
@@ -179,13 +192,19 @@ export function AdminNav({
               <span className="flex items-center gap-2 text-sm text-fg-muted">
                 <IconoLibro className="h-3.5 w-3.5" />
                 <DeNocheYDeDia noche={LIBRO.noche} dia={LIBRO.dia} />
+                {respuestas > 0 ? (
+                  <span className="ml-auto flex shrink-0 items-center gap-1 rounded-full border border-brasa/60 px-1.5 py-px font-mono text-[0.62rem] text-brasa">
+                    <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-brasa" />
+                    {fraseRespuestas}
+                  </span>
+                ) : null}
               </span>
               <span className="block text-[0.72rem] text-fg-faint">{LIBRO_SUBTITULO}</span>
             </button>
           </li>
         </ul>
       </details>
-      <LibroDeSugerencias abierto={libroAbierto} alCerrar={() => setLibroAbierto(false)} />
+      <LibroDeSugerencias abierto={libroAbierto} alCerrar={() => setLibroAbierto(false)} sinLeer={respuestas} />
     </nav>
   )
 }

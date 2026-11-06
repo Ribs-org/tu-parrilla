@@ -298,6 +298,11 @@ el JSON.
   (etiqueta «Colaboración pagada»; no puede ir con `SELF_ONLY`).
 - `ia`: booleano, ausente vale `false`. En `true`, TikTok etiqueta el post como contenido
   generado con IA. Para videos y fotos.
+- `musica`: booleano, ausente vale `false`. En `true`, TikTok le pone a las fotos una canción
+  recomendada, que el dueño puede cambiar después en la app de TikTok. **Solo en fotos**: la API
+  de TikTok no deja ponerle música a un video, así que en un video se guarda pero no se manda (no
+  falla, porque el editor del panel deja cambiar los archivos de un post ya programado). Lo que
+  mandes por acá no cambia lo que el compositor del panel recuerda para esa cuenta.
 
 Media de TikTok: **un solo video** (mp4, mov, webm) **o de 1 a 35 fotos** (jpg, webp),
 nunca mezcla.
@@ -1072,7 +1077,7 @@ Un rango pasado vale (lista lo ya publicado). Formato inválido o rango invertid
       "redes": [
         { "red": "instagram", "estado": "published", "error": null, "externalId": "18114074218999893", "intentos": 1, "proximoIntento": null, "cuentaId": "8f0a…", "handle": "@vicente", "archivado": false, "opciones": null },
         { "red": "youtube", "estado": "scheduled", "error": "No se pudo hablar con la red. Se reintentará.", "externalId": null, "intentos": 1, "proximoIntento": "2026-09-10T09:15:00-03:00", "cuentaId": "b21c…", "handle": null, "archivado": false, "opciones": null },
-        { "red": "tiktok", "estado": "failed", "error": "TikTok no acepta el archivo: revisa formato, tamaño o duración.", "externalId": null, "intentos": 3, "proximoIntento": null, "cuentaId": "9d4e…", "handle": "@vicente", "archivado": false, "opciones": { "modo": "directo", "privacidad": "PUBLIC_TO_EVERYONE", "comentarios": true, "duo": true, "pegar": true, "comercial": "no", "ia": true } }
+        { "red": "tiktok", "estado": "failed", "error": "TikTok no acepta el archivo: revisa formato, tamaño o duración.", "externalId": null, "intentos": 3, "proximoIntento": null, "cuentaId": "9d4e…", "handle": "@vicente", "archivado": false, "opciones": { "modo": "directo", "privacidad": "PUBLIC_TO_EVERYONE", "comentarios": true, "duo": true, "pegar": true, "comercial": "no", "ia": true, "musica": false } }
       ]
     }
   ]
@@ -1113,8 +1118,8 @@ Un rango pasado vale (lista lo ya publicado). Formato inválido o rango invertid
   archivó (sección 3d): sigue `failed` y con su `error`, pero ya no cuenta en el resumen ni en
   «Se quemó». `false` en todo lo demás.
   **`opciones`** es lo que se eligió para esa red al programar (sección 1, `opciones`): en
-  TikTok `directo`, todas las casillas explícitas —`comentarios`, `duo`, `pegar`, `ia` en
-  `false` si no se encendieron—, así que una clave que mandaste y no aparece no se guardó; en
+  TikTok `directo`, todas las casillas explícitas —`comentarios`, `duo`, `pegar`, `ia` y
+  `musica` en `false` si no se encendieron—, así que una clave que mandaste y no aparece no se guardó; en
   TikTok `borrador`, `{ "modo": "borrador" }`; en un trial reel, `{ "trialReel": true }`; en una
   historia, `{ "historia": true }` o, en una secuencia, `{ "historia": { "secuencia": …, "orden": … } }`;
   `null` en las redes que no piden nada. Es lo que Tu Parrilla le manda a la red, no lo que la red
@@ -1296,6 +1301,39 @@ para reportar un fallo.
 | `404` `{ "error": "Ese post no tiene un destino en esa cuenta." }` | Ese `cuentaId` no es destino de ese post. |
 | `409` `{ "error": "Ese post no tiene nada quemado." }` | Sin `cuentaId`, y ningún destino del post está quemado. |
 | `409` `{ "error": "Ese destino no está quemado: solo lo quemado se archiva o se desarchiva." }` | El destino de ese `cuentaId` está programado, publicando o publicado. |
+
+---
+
+# 3e. Solo el admin: responder una sugerencia — `POST /api/sugerencias/respuesta`
+
+**No es para el editor de contenido.** Es del equipo que hace Tu Parrilla: responde lo que alguien
+escribió en el libro de sugerencias, cuyo issue cae en GitHub. Con la llave de cualquier otra cuenta
+responde `403`; si eres el editor de un creador, no la necesitas.
+
+```http
+POST /api/sugerencias/respuesta
+Authorization: Bearer <una llave del admin>
+Content-Type: application/json
+
+{ "issue": 321, "respuesta": "Buena idea: ya está en el panel." }
+```
+
+En vez de `issue` (el número del issue en GitHub; también vale como texto, `"#321"`) se puede
+mandar `id`, el de la sugerencia, que está en la tabla del issue. Con los dos, manda `id`. Hace lo
+mismo que responder en Las Sugerencias del panel: la persona la lee en el libro, en «Lo que nos
+escribiste»; la primera vez le llega un correo, y en el issue queda un comentario con la respuesta,
+sin su nombre ni su correo. Hay una sola respuesta por sugerencia: mandar otra la reemplaza y le
+vuelve a aparecer sin leer, sin otro correo. La respuesta puede tener hasta 4000 caracteres.
+
+| Respuesta | Cuándo |
+|---|---|
+| `200` `{ "ok": true, "sugerencia": { "id", "issue", "primera", "cambio" } }` | Se guardó. `primera` es que no tenía respuesta (sale el correo); `cambio: false`, que era la misma que ya tenía y no se tocó nada. |
+| `400` `{ "error": "Falta cuál sugerencia: manda \"issue\" (el número del issue en GitHub) o \"id\" (el de la sugerencia)." }` | Sin `issue` ni `id` que sirvan. |
+| `400` `{ "error": "Escribe la respuesta antes de guardarla." }` | `respuesta` vacía. |
+| `400` `{ "error": "La respuesta es muy larga: el máximo son 4000 caracteres." }` | Se pasó del largo. |
+| `401` `No autorizado` | Sin una llave que sirva. |
+| `403` `{ "error": "Solo el admin responde sugerencias: esta llave es de otra cuenta." }` | La llave no es del admin. |
+| `404` `{ "error": "No hay ninguna sugerencia con ese issue o ese id." }` | Ninguna sugerencia tiene ese issue o ese id. |
 
 ---
 

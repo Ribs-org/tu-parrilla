@@ -330,7 +330,9 @@ elemento de `posts` en `GET /api/schedule/posts`: texto, `fecha`, media, `atribu
 después de programar, en vez de decirle a la persona que lo revise en la red:
 
 - TikTok en `directo` trae todas sus casillas explícitas —`privacidad`, `comentarios`, `duo`,
-  `pegar`, `comercial` e `ia`—, con `false` en las que no se encendieron. Una clave que
+  `pegar`, `comercial`, `ia` y `musica`—, con `false` en las que no se encendieron. `musica` se
+  guarda aunque el post sea un video, pero solo viaja con fotos: TikTok no deja ponerle música a
+  un video por su API. Una clave que
   mandaste y no está ahí no se guardó (TikTok ignora claves desconocidas).
 - TikTok en `borrador` trae `{ "modo": "borrador" }`; un trial reel, `{ "trialReel": true }`;
   una red que no pide nada, `null`.
@@ -401,6 +403,11 @@ dueño en su panel.
 
 - **No edita un post programado.** Para cambiar texto, hora, destinos o media hay que
   borrarlo (sección 3b) y programarlo de nuevo, o corregirlo a mano en `/admin/schedule`.
+- **No es para responder sugerencias, salvo que seas el equipo de Tu Parrilla.**
+  `POST /api/sugerencias/respuesta` (`{ "issue": 321, "respuesta": "…" }`) responde lo que alguien
+  escribió en el libro de sugerencias, y solo con una llave del admin: con cualquier otra, `403`
+  `Solo el admin responde sugerencias: esta llave es de otra cuenta.`. Si editas para un creador,
+  no lo uses. Los detalles, en la sección 3e de `api-editor.md`.
 - **No pide comandas a La Cocina.** Guarda en la cámara de frío (sección 3h), pero pedir una
   comanda, renombrar o sacar lo de la cámara lo hace el dueño en su panel.
 - **No conecta cuentas.** Conectar, reconectar o quitar una cuenta lo hace el dueño en Los

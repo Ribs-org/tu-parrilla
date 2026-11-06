@@ -23,6 +23,7 @@ tus números.
 | `/api/schedule/…`, `/api/metrics/…` | La API para tu agente, con una llave de La Cocina («Tu propio chef»): cargar, ver y sacar lo programado, archivar lo quemado, las cuentas y los números (ver «Carga masiva por API» y las secciones que le siguen) |
 | `/api/cocina/…` | La API de La Cocina, con `COCINA_SECRET`: el servidor del chef toma las comandas, baja sus insumos, informa cada estado y entrega lo cocinado al mesón del dueño (ver «La Cocina» y `docs/cocina-api.md`) |
 | `/api/media` | `POST` con la misma llave: firma la subida de un archivo directo a R2, para nombrarlo después en varias filas del lote sin que se vuelva a bajar (ver «Carga masiva por API») |
+| `/api/sugerencias/respuesta` | `POST` con una llave **del admin** (o `SCHEDULE_API_KEY`): la respuesta del equipo a lo que alguien escribió en el libro de sugerencias, por el número de su issue o por su id, para responder sin el navegador. Con la llave de otra cuenta, `403` (ver «El libro de sugerencias») |
 | `/api/bodega…` | Con la misma llave: lo que hay en la cámara de frío de La Cocina (`GET /api/bodega`) y las subidas por partes para guardar ahí (`/api/bodega/subidas…`), las mismas del panel y del teléfono (ver «La Cocina») |
 | `/api/admin/…` | Lo que el panel llama desde el navegador, con la cookie de la sesión: la firma de una subida directa (`upload-url`), las subidas por partes a la cámara de frío de La Cocina (`cocina/subidas…`) y el pulso que mantiene al día sus tarjetas (`cocina/pulso`; ver «La Cocina») y la planilla de Excel de Los Números (`planilla`, y `planilla/adelanto` para lo que no cabe; ver «Llevar para la casa») |
 | `/api/mobile/…` | La API de la app del teléfono, con el token de su sesión (ver `mobile/README.md`); `cocina…` es La Cocina desde el teléfono: lo que muestra, las subidas por partes a la cámara de frío y «Mandar al chef» (ver «La Cocina») |
@@ -354,7 +355,7 @@ Los dos perfiles de ejemplo están para que los edites, no para que los borres y
 de cero.
 
 Cada fila de cada tabla (perfiles, cuentas, posts, borradores, comentarios, ajustes, llaves
-de API, anuncios y promociones —por la cuenta conectada de la que cuelgan—, y las marcas, comandas, insumos, materiales de la cámara de frío, subidas y creativos de La
+de API, anuncios y promociones —por la cuenta conectada de la que cuelgan—, lo escrito en el libro de sugerencias con su respuesta, y las marcas, comandas, insumos, materiales de la cámara de frío, subidas y creativos de La
 Cocina) tiene dueño: el panel solo te muestra lo tuyo, nunca lo de otro usuario invitado. Lo mismo
 la API: lo que entra con una llave es del dueño de la llave, y un agente con la tuya no ve
 ni toca lo de nadie más. Tu fila de usuario —el nombre, la zona y el modo del panel— la
@@ -379,6 +380,11 @@ con su token, las promociones de sus publicaciones— cuelga de la cuenta y la s
 además a otras cuentas se queda con quien lo programó, con un destino en una cuenta que ya no es
 suya: sale igual, porque publicar busca la cuenta por su id y no por su dueño. La credencial no
 cambia hasta que quien recibe la cuenta aprieta **Reconectar**.
+
+**Responder una sugerencia**, en Las Sugerencias, es lo otro que cruza dueños, y también solo lo
+hace el admin (`src/lib/sugerencias/responder.ts`): ve lo que escribió cada persona, con su correo,
+y escribe la respuesta en esa fila. Lo que la persona ve en el libro —lo suyo, el punto de las
+respuestas sin leer y marcarlas leídas— va atado a ella, como todo lo demás.
 
 Las únicas tablas sin dueño son dos:
 
@@ -727,7 +733,13 @@ de la misma red en el mismo corte.
 TikTok pide sus propias opciones por destino —privacidad, comentarios, dúo, comercial—, así
 que con dos cuentas de TikTok marcadas verás dos bloques, uno por cuenta. No se comparten a
 propósito: TikTok consulta los permisos por creador, y lo que una cuenta admite la otra
-puede no admitirlo. Instagram también puede pedir una opción por destino —si el reel sale
+puede no admitirlo. Con fotos publicadas directo, el bloque ofrece además «Música de TikTok»
+(`musica`, que viaja como `auto_add_music`): TikTok les pone una canción recomendada. Su API no
+la ofrece para videos ni para lo que va a la bandeja, así que ahí no se manda. Es la única
+opción de TikTok que se recuerda: al programar fotos desde el compositor queda en
+`social_accounts.tiktok_musica` y el interruptor de esa cuenta nace así la próxima vez —quien
+tiene tres cuentas la elige una vez por cuenta—; la privacidad y las casillas nacen siempre sin
+elegir, porque la guía de TikTok prohíbe dejarlas puestas. Instagram también puede pedir una opción por destino —si el reel sale
 como trial reel—, y tanto el compositor del panel como Publicar en el teléfono la ofrecen:
 un bloque (panel) o un chip (teléfono) por cuenta de Instagram marcada —«Publicar como
 trial reel» / «Trial reel · @handle»—, pero solo cuando hay exactamente un video elegido:
@@ -1331,7 +1343,7 @@ Vercel y bajan con `vercel env pull .env.local`.
 | `RESEND_API_KEY` | Manda los códigos de ingreso y los avisos: la publicación que se quemó, la cuenta que se cayó, el resumen del día y la comanda de La Cocina que terminó (ver «Avisos por correo») | Sí — sin ella nadie puede entrar al panel |
 | `PUBLISH_ALERT_TO` | Adónde va un aviso sin dueño con correo: un post o una cuenta de antes de los usuarios. Lo demás va al correo de su dueño | No — sin ella, lo que no tiene dueño no avisa; el calendario y Los Fierros lo siguen mostrando |
 | `PUBLISH_ALERT_FROM` | Remitente de los avisos | Opcional; default `onboarding@resend.dev`, que solo entrega al correo de la cuenta de Resend |
-| `SUGERENCIAS_GITHUB_TOKEN` | Abre un issue en GitHub por cada mensaje del libro de sugerencias (ver «El libro de sugerencias»). Un token *fine-grained* con acceso solo al repositorio de `SUGERENCIAS_REPO` y un único permiso: Issues, lectura y escritura | No — sin ella los mensajes se guardan igual y salen solos con el cron diario el primer día que la tenga |
+| `SUGERENCIAS_GITHUB_TOKEN` | Abre un issue en GitHub por cada mensaje del libro de sugerencias, y comenta en él la respuesta del equipo (ver «El libro de sugerencias»). Un token *fine-grained* con acceso solo al repositorio de `SUGERENCIAS_REPO` y un único permiso: Issues, lectura y escritura | No — sin ella los mensajes se guardan igual y salen solos con el cron diario el primer día que la tenga |
 | `SUGERENCIAS_REPO` | El repositorio, con la forma `dueño/repo`, donde caen esos issues | No — por defecto `Ribs-org/tu-parrilla`. Si no tiene esa forma, no se manda nada y los mensajes esperan guardados |
 
 Para cambiar una variable en producción:
@@ -1451,7 +1463,23 @@ final del menú de Ajustes del panel, donde abre una ventana, y al final de Ajus
 teléfono (`POST /api/mobile/sugerencias`). Cada mensaje se vuelve un issue de GitHub en
 `SUGERENCIAS_REPO`, con las etiquetas `sugerencia` y la de su tipo (`sugerencia: idea`,
 `sugerencia: no funciona`, `sugerencia: otra cosa`), que el cliente crea si el repositorio no
-las tiene. Nada promete que se implemente: es para leerlo.
+las tiene. Nada promete que se implemente: es para leerlo, y para responderlo.
+
+**La respuesta vive adentro de Tu Parrilla**, no en GitHub. El admin la escribe en Las
+Sugerencias (`/admin/sugerencias`, en Ajustes), donde ve lo que escribió cada persona con su
+nombre, su correo y el enlace al issue; o, sin el navegador, el equipo de desarrollo la manda con
+una llave del admin, `POST /api/sugerencias/respuesta` con `{ "issue": <número>, "respuesta": "…" }`
+(o `"id"`, el de la sugerencia; ver la sección 3e de `public/docs/api-editor.md`). Hay una por
+sugerencia, en la misma fila (`respuesta`, `respondida_en`, `respondida_por`,
+`respuesta_leida_en`), y cambiarla la reemplaza. La persona la lee en el libro, en «Lo que nos
+escribiste»; mientras no la abre, el botón de Ajustes del panel lleva un punto de brasa y la
+entrada del libro dice cuántas son nuevas (en la app, el rótulo del libro). Después de guardar,
+sin hacer esperar a nadie (`after`), salen dos cosas, y ninguna deshace la respuesta si falla: un
+correo a la persona, solo la primera vez, con la respuesta y dónde leerla (`enviarCorreo`); y un
+comentario en el issue, cada vez que cambia, con la respuesta citada como lo que escribió la
+persona —sin su nombre ni su correo, sin menciones— y la firma del equipo. El comentario usa el
+mismo `SUGERENCIAS_GITHUB_TOKEN`: el permiso de Issues alcanza. Una sugerencia que todavía no tenía
+issue al responderla no recibe ese comentario después (ver `docs/deuda-tecnica.md`).
 
 **El repositorio es público**, y eso decide el formato (`src/lib/sugerencias/formato.ts`). El
 issue no lleva el correo ni el nombre de nadie, solo el id de usuario, que el admin cruza en Los
@@ -1965,7 +1993,7 @@ src/
     pruebas/               la Postgres de las pruebas de integración: una base nueva y migrada por archivo; y un lector de zip para mirar el XML de una planilla
     empresa.ts             quién presta el servicio: lo leen la portada, privacidad y términos
     avisos/                la caída de una cuenta y el resumen del día: las reglas sin base y lo que lee y manda
-    sugerencias/           el libro de sugerencias: qué se acepta y cómo queda el issue (sin base), el cliente de GitHub, y guardar y reintentar
+    sugerencias/           el libro de sugerencias: qué se acepta y cómo queda el issue (sin base), el cliente de GitHub, guardar y reintentar, y la respuesta del equipo (lo que se acepta, el correo y el comentario sin base en respuestas.ts; guardarla, leerla y avisar en responder.ts)
     social/
       instagram-login.ts   el login de Instagram, sin página de Facebook: el host, los permisos y cómo leer su token
       lectura.ts           qué publicaciones se leen cada día: lo nuevo a diario, lo viejo cada vez más espaciado

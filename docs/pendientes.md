@@ -155,6 +155,10 @@ sección.
   responder un comentario directo en la app de Instagram y ver que, a los cinco minutos, sale
   de «Pendientes» y queda en «Enviados» como «Respondido desde Instagram: …» (#273); y publicar
   un video en TikTok con «Hecho con IA» encendido y ver que TikTok le pone la etiqueta (#272).
+- **[dueño] Probar «Música de TikTok» con una cuenta real** (2026-11-06): programar fotos a
+  TikTok con el interruptor encendido y ver que salen con una canción y que se puede cambiar en
+  la app; y que el interruptor nace encendido la próxima vez en esa cuenta (#320). Lo que TikTok
+  haga con `auto_add_music` solo se ve publicando: los tests miran lo que se le manda.
 - **La cola de #234 (copiar los videos del lote en segundo plano) no se hace por ahora**
   (2026-10-21). Los otros issues de ese envío ya están: bajar en paralelo (#235), cuánto tardó
   y por qué falló cada fila (#238), una sola descarga por URL en un lote (#236) y
