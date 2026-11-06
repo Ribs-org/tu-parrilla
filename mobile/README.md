@@ -267,8 +267,11 @@ plugin `expo-image-picker` en `app.json`, que hasta la 1.1.0 estaban en `false`)
 con un binario nuevo. Como la `runtimeVersion` es la versión de la app (`appVersion`), lo que se
 publique por aire para la 1.2.0 no le llega a un teléfono con la 1.1.0: ese se queda sin la
 pestaña hasta instalar el binario nuevo, que es lo que se quiere, porque sin los permisos la
-cámara no abriría. Lo de la 1.1.0 se sigue publicando por aire desde un commit anterior a este
-cambio. El build y el envío los hace el dueño (ver `docs/pendientes.md`): el flujo «App a la
+cámara no abriría. Lo de la 1.1.0 se sigue publicando por aire desde la rama `ota-1.1.0`
+(en GitHub): un commit anterior a este cambio con lo que se le fue agregando después, hoy la
+edición de lo programado (#319, publicada el 2026-11-05). La próxima actualización de la 1.1.0
+sale de esa rama, con el cambio nuevo encima; sacarla de `main` no llega a ningún teléfono, y
+sacarla de un commit más viejo que la punta de la rama le quita a la gente lo que ya tenía. El build y el envío los hace el dueño (ver `docs/pendientes.md`): el flujo «App a la
 tienda» de GitHub, o a mano con la cuenta de Expo, `npx eas-cli build -p android --profile
 production` y `npx eas-cli submit -p android --profile production`; lo mismo con `-p ios` cuando
 exista la cuenta de Apple. En la Play Console, la sección de seguridad de los datos tiene que
