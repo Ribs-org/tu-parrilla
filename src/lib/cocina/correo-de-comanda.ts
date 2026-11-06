@@ -4,8 +4,8 @@ import { MESON, cortes } from '@/lib/vocabulario'
 import { NOMBRE_ESTADO } from './nombres'
 import { DIAS_INSUMO } from './panel'
 
-// El correo que le llega al dueño cuando su comanda termina: lista en el mesón, rechazada al
-// revisarla o fallida a medio camino («Avisos», en
+// Los correos que le llegan al dueño de una comanda: cuando termina —lista en el mesón, rechazada
+// al revisarla o fallida a medio camino— y cuando el chef le pregunta algo («Avisos», en
 // `docs/superpowers/specs/2026-10-22-la-cocina-design.md`). Sin consultas: lo arma
 // `avisarDeLaComanda` (`avisar.ts`) con lo que lee, y las pruebas lo leen tal cual. En el modo de
 // la cuenta, como el resto de los avisos: de día el mesón es la bandeja.
@@ -87,6 +87,40 @@ export function correoDeComanda(c: ComandaQueAvisa, sitio: string, tema: Tema = 
       `La comanda, en La Cocina: ${cocina}`,
       '',
       pie,
+    ].join('\n'),
+  }
+}
+
+export type PreguntaQueAvisa = {
+  /** El nombre del archivo del plato principal, para reconocer la comanda; null si no lo tiene. */
+  principal: string | null
+  texto: string
+  opciones: string[] | null
+  /** «Si no contestas hoy antes de las 18:00, el chef sigue con «…».», ya en la zona del dueño (`siNoContestas`). */
+  siNoContestas: string
+}
+
+/**
+ * El correo de cuando el chef pregunta: la pregunta tal cual, sus opciones, el plazo con lo que
+ * pasa si nadie contesta, y dónde se responde. Sale uno por pregunta: lo pide solo la llamada que
+ * la hizo (`/api/cocina/comandas/{id}/preguntas`).
+ */
+export function correoDePregunta(p: PreguntaQueAvisa, sitio: string): { subject: string; text: string } {
+  return {
+    subject: `El chef te pregunta: ${p.principal ? `«${p.principal}»` : 'tu comanda'}`,
+    text: [
+      `El chef tiene una duda sobre ${cual(p.principal)}:`,
+      '',
+      p.texto,
+      '',
+      ...(p.opciones ? [`Las opciones: ${p.opciones.map((o) => `«${o}»`).join(', ')}.`, ''] : []),
+      p.siNoContestas,
+      '',
+      `Respóndele en La Cocina: ${sitio}/admin/ia`,
+      '',
+      'Mientras espera tu respuesta, la comanda no avanza. Si ya no la quieres, también la puedes cancelar desde ahí.',
+      '',
+      'Este correo llega una vez por pregunta.',
     ].join('\n'),
   }
 }

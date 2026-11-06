@@ -211,6 +211,20 @@
       "when": 1793968625998,
       "tag": "0029_musica_de_tiktok",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1793968685998,
+      "tag": "0030_respuestas_del_libro",
+      "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1793973499843,
+      "tag": "0031_preguntas_y_alarma",
+      "breakpoints": true
     }
   ]
 }

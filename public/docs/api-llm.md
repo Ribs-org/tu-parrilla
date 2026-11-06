@@ -334,7 +334,8 @@ después de programar, en vez de decirle a la persona que lo revise en la red:
 - TikTok en `directo` trae todas sus casillas explícitas —`privacidad`, `comentarios`, `duo`,
   `pegar`, `comercial`, `ia` y `musica`—, con `false` en las que no se encendieron. `musica` se
   guarda aunque el post sea un video, pero solo viaja con fotos: TikTok no deja ponerle música a
-  un video por su API. Una clave que
+  un video por su API. Si con música les va mejor, lo dice `musica` en
+  `/api/metrics/que-funciona` (sección 7). Una clave que
   mandaste y no está ahí no se guardó (TikTok ignora claves desconocidas).
 - TikTok en `borrador` trae `{ "modo": "borrador" }`; un trial reel, `{ "trialReel": true }`;
   un reel con música de Instagram, `{ "musica": { "audioId", "titulo", "artista", "volumenMusica", "volumenVideo" } }`
@@ -406,6 +407,11 @@ dueño en su panel.
 
 - **No edita un post programado.** Para cambiar texto, hora, destinos o media hay que
   borrarlo (sección 3b) y programarlo de nuevo, o corregirlo a mano en `/admin/schedule`.
+- **No es para responder sugerencias, salvo que seas el equipo de Tu Parrilla.**
+  `POST /api/sugerencias/respuesta` (`{ "issue": 321, "respuesta": "…" }`) responde lo que alguien
+  escribió en el libro de sugerencias, y solo con una llave del admin: con cualquier otra, `403`
+  `Solo el admin responde sugerencias: esta llave es de otra cuenta.`. Si editas para un creador,
+  no lo uses. Los detalles, en la sección 3e de `api-editor.md`.
 - **No pide comandas a La Cocina.** Guarda en la cámara de frío (sección 3h), pero pedir una
   comanda, renombrar o sacar lo de la cámara lo hace el dueño en su panel.
 - **No conecta cuentas.** Conectar, reconectar o quitar una cuenta lo hace el dueño en Los
@@ -592,11 +598,31 @@ Tres endpoints de lectura, con la misma llave. El detalle de cada número está 
   peor a la menos mala, y `corte` es lo más que sacó una de las que entraron.
 - `GET /api/metrics/que-funciona?desde=…&hasta=…` — qué `tema`, qué `estilo` y qué `formato`
   (el de la red: Reel, Carrusel, Foto, Video…) anduvieron mejor en lo publicado en el rango,
-  contra lo normal de cada cuenta. Una clave por cada uno, con `estado` (`gana`, `parejo`,
+  contra lo normal de cada cuenta, y si la `musica` hizo diferencia. Una clave por cada uno, con `estado` (`gana`, `parejo`,
   `faltan` o `sinValor`), la `frase` que muestra el panel —úsala tal cual para contárselo al
   dueño—, `primero` y `segundo`, y `valores` con `publicaciones`, `medidas` (de cuántas sale
   la mediana) y `contraSuCuenta`. Solo hay `gana` con al menos dos valores de 10 publicaciones
   medidas y el mejor en ×1,2 o más: con `faltan`, no declares un ganador por tu cuenta.
+  Trae además **`musica`**: con música contra sin música, para decidir si recomendarla. Cuenta
+  la música que Tu Parrilla le pidió a la red al publicar —hoy, `opciones.musica: true` en las
+  fotos de TikTok en `directo`—, no el atributo `musica` ni la que ya trae el video. Forma:
+  `{ estado, frase, sinSaber, grupos: [{ red, formato, estado, frase, primero, segundo,
+  valores, canciones }] }`, un grupo por red y formato donde algo llevó música (las fotos de
+  TikTok: `red: "tiktok"`, `formato: "Foto"`), con `valores` `"con música"` y `"sin música"`
+  y la forma de las demás. Lo subido directo en la red y lo mandado a la bandeja de TikTok no
+  entran —no se sabe si llevaron música—: `sinSaber` los cuenta. Un lado gana con 10 medidas
+  por lado y ×1,2 **o más de lo que sacó el otro**, y puede ganar `"sin música"`. `canciones`
+  agrupa lo que llevó música por título, sin veredicto, cuando la red da el título (TikTok no:
+  ahí va vacío). Recomienda música solo con `gana` en el grupo del formato que vas a publicar.
+  Ejemplo: `"musica": { "estado": "gana", "frase": "Las fotos de TikTok anduvieron mejor con
+  música: ×1,4 las views normales de su cuenta a los 7 días (12 publicaciones), contra ×0,8 sin
+  música (10 publicaciones).", "sinSaber": 18, "grupos": [{ "red": "tiktok", "formato": "Foto",
+  "estado": "gana", "frase": "…", "primero": { "valor": "con música", "publicaciones": 13,
+  "medidas": 12, "contraSuCuenta": 1.4 }, "segundo": { "valor": "sin música", "publicaciones":
+  10, "medidas": 10, "contraSuCuenta": 0.8 }, "valores": [ … ], "canciones": [] }] }`. Sin
+  ningún grupo: `{ "estado": "sinValor", "frase": "Nada de lo publicado desde Tu Parrilla en el
+  período llevó música de la red (como «Música de TikTok» en las fotos).", "sinSaber": …,
+  "grupos": [] }`. El detalle, en `api-editor.md`, sección 2c, «La música».
 
 Filtros que valen en los tres: `red`, y `cuenta` —su `id` (el de la sección 3d) o su nombre en
 la red, con o sin «@»—. Para «el mejor 10 % de esta cuenta», pasa `cuenta`: sin ella, la cuenta más grande
@@ -631,7 +657,7 @@ Cuatro reglas que cambian la lectura:
   lo que salió al principio del rango, y entre cuentas, a la más grande; `contraSuCuenta`
   mide a todas a los 7 días y contra lo normal de su propia cuenta. Una cuenta con menos de 5
   publicaciones del rango con `viewsA7Dias` no la tiene. Para «qué tema, estilo o formato
-  funciona», `/api/metrics/que-funciona` ya lo responde; para otro atributo (el `hook`, la
+  funciona» y «¿le pongo música?», `/api/metrics/que-funciona` ya lo responde; para otro atributo (el `hook`, la
   `serie`), agrupa por atributo las filas de `/api/metrics/posts` y compara las medianas de
   `contraSuCuenta`.
 - **YouTube no entra en `viewsGanadas`, `viewsA7Dias`, `contraSuCuenta`, `interacciones` ni

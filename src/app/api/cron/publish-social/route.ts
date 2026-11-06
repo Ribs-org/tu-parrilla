@@ -2,7 +2,9 @@ import { NextResponse } from 'next/server'
 import { vigilarConexiones } from '@/lib/avisos/run'
 import { sondearComentarios } from '@/lib/social/comentarios/run'
 import { publishDue } from '@/lib/social/publish/run'
+import { vigilarLaCocina } from '@/lib/cocina/alarma'
 import { barrerCocina } from '@/lib/cocina/barrido'
+import { vencerPreguntas } from '@/lib/cocina/preguntar'
 import { barrerSubidas } from '@/lib/cocina/subidas'
 import { barrerHuerfanos } from '@/lib/storage-gc'
 import { env } from '@/lib/env'
@@ -70,6 +72,13 @@ export async function GET(request: Request) {
       conexiones = { error: 'La vigilancia de conexiones falló; ver el log.' }
     }
     marca('conexiones')
+    // La cocina, en cada pasada y no una vez por hora, porque las dos cosas son de minutos: las
+    // preguntas del chef cuyo plazo pasó se cierran con su opción por defecto, y la comanda sigue;
+    // y la alarma al admin, si una comanda lleva media hora sin tomar o pasó su hora estimada. Son
+    // consultas chicas sobre lo que está en marcha. Ninguna de las dos lanza.
+    const preguntas = await vencerPreguntas()
+    const alarma = await vigilarLaCocina()
+    marca('cocina')
     // Después de publicar y antes de barrer: publicar a tiempo manda sobre responder a
     // tiempo, y el sondeo no debe quitarle segundos a la publicación de esta pasada.
     // Su fallo no puede tumbar la corrida, que ya publicó.
@@ -96,7 +105,7 @@ export async function GET(request: Request) {
     // días en el mesón sin programarse. Tampoco lanza (`barrerCocina`).
     const cocina = toca ? await barrerCocina() : null
     marca('barrido')
-    return NextResponse.json({ report, conexiones, comentarios, barrido, subidas, cocina })
+    return NextResponse.json({ report, conexiones, preguntas, alarma, comentarios, barrido, subidas, cocina })
   } catch (error) {
     console.error('Falló la corrida de publicación:', error)
     return NextResponse.json({ error: 'La publicación falló por completo.' }, { status: 500 })

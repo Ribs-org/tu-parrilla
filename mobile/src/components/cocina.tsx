@@ -1,16 +1,20 @@
-import { Pressable, Text, View } from 'react-native'
+import { useState } from 'react'
+import { Pressable, Text, TextInput, View } from 'react-native'
 import { Image } from 'expo-image'
-import { TIPO_TITULO } from './ui'
+import { Boton, Chip, TIPO_TITULO } from './ui'
 import { useColores, useTema } from './tema'
 import {
   GANCHOS,
+  MAX_RESPUESTA,
   duracionEnPalabras,
   estadoDeLaCuota,
+  faltaParaResponder,
   ganchosOcupados,
   pesoEnPalabras,
   type ClaseMaterial,
   type ComandaDelTelefono,
   type Material,
+  type PreguntaDelChef,
   type UsoDeLaCamara,
 } from '../lib/cocina'
 import { CAMARA_LLENA, CAMARA_LLENANDOSE } from '../lib/tema'
@@ -357,18 +361,100 @@ export function CuotaDeLaCamara({ camara }: { camara: UsoDeLaCamara }) {
 
 const FECHA = new Intl.DateTimeFormat('es-CL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
 
+/** Lo que hace «Responder»: devuelve la frase del error, o null si salió. */
+export type Responder = (preguntaId: string, respuesta: string) => Promise<string | null>
+
+/**
+ * Lo que el chef pregunta, en la tarjeta de su comanda: la pregunta, una opción por chip —un toque
+ * responde; la de por defecto va marcada— o, si es libre, el campo y «Responder», y lo que pasa si
+ * nadie contesta antes del plazo.
+ */
+export function PreguntaDelChefEnLaTarjeta({ pregunta, onResponder }: { pregunta: PreguntaDelChef; onResponder: Responder }) {
+  const colores = useColores()
+  const [texto, setTexto] = useState('')
+  const [enviando, setEnviando] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  async function responder(respuesta: string) {
+    setEnviando(respuesta)
+    setError(null)
+    const fallo = await onResponder(pregunta.id, respuesta)
+    setError(fallo)
+    setEnviando(null)
+  }
+
+  const falta = faltaParaResponder(texto)
+  const largo = texto.trim().length
+  return (
+    <View style={{ borderWidth: 1, borderColor: colores.brasa, borderRadius: 12, padding: 12, gap: 10 }}>
+      <Text style={{ color: colores.texto, fontSize: 14, fontWeight: '600', lineHeight: 20 }}>{pregunta.texto}</Text>
+      {pregunta.opciones ? (
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+          {pregunta.opciones.map((o) => (
+            <Chip
+              key={o}
+              texto={enviando === o ? 'Respondiendo…' : o}
+              activo={o === pregunta.porDefecto}
+              onPress={() => void responder(o)}
+              deshabilitado={enviando !== null}
+            />
+          ))}
+        </View>
+      ) : (
+        <>
+          <TextInput
+            value={texto}
+            onChangeText={setTexto}
+            multiline
+            editable={enviando === null}
+            placeholder="Tu respuesta al chef"
+            placeholderTextColor={colores.tenue}
+            accessibilityLabel="Tu respuesta al chef"
+            style={{ backgroundColor: colores.fondo, color: colores.texto, borderRadius: 12, padding: 12, minHeight: 72, textAlignVertical: 'top', fontSize: 14 }}
+          />
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+            <Boton
+              texto={enviando !== null ? 'Respondiendo…' : 'Responder'}
+              onPress={() => void responder(texto.trim())}
+              deshabilitado={Boolean(falta) || enviando !== null}
+              destacado
+            />
+            <Text style={{ color: largo > MAX_RESPUESTA ? colores.rojo : colores.tenue, fontSize: 11 }}>
+              {largo} / {MAX_RESPUESTA}
+            </Text>
+          </View>
+        </>
+      )}
+      <Text style={{ color: colores.suave, fontSize: 12, lineHeight: 17 }}>{pregunta.siNoContestas}</Text>
+      {error ? <Text style={{ color: colores.rojo, fontSize: 12 }}>{error}</Text> : null}
+    </View>
+  )
+}
+
 /**
  * Una comanda en la lista: su estado en palabras —en brasa mientras el chef la tiene, en verde
  * lista, en rojo si no se pudo—, los cinco tramos del recorrido con lo andado encendido, el plato
- * principal, la instrucción y lo que dijo el chef.
+ * principal, la instrucción, lo que dijo el chef y, si pregunta algo, la pregunta para contestarla.
  */
-export function TarjetaDeComanda({ comanda }: { comanda: ComandaDelTelefono }) {
+export function TarjetaDeComanda({ comanda, onResponder }: { comanda: ComandaDelTelefono; onResponder: Responder }) {
   const colores = useColores()
   const { tema } = useTema()
   const termino = comanda.tramo === null
   const color = termino ? colores.rojo : comanda.estado === 'lista' || comanda.estado === 'servida' ? colores.verde : colores.brasa
+  const pregunta = comanda.estado === 'pregunta' ? comanda.pregunta : null
   return (
-    <View style={{ backgroundColor: colores.tarjeta, borderRadius: 16, padding: 14, gap: 8, borderLeftWidth: 3, borderLeftColor: color }}>
+    <View
+      style={{
+        backgroundColor: colores.tarjeta,
+        borderRadius: 16,
+        padding: 14,
+        gap: 8,
+        borderLeftWidth: 3,
+        borderLeftColor: color,
+        // Cuando el chef pregunta, la tarjeta se pone de color: es lo único que espera a la persona.
+        ...(pregunta ? { borderWidth: 1, borderColor: colores.brasa } : {}),
+      }}
+    >
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8 }}>
         <Text style={{ color, fontFamily: TIPO_TITULO, fontSize: 14, letterSpacing: 0.6, flexShrink: 1 }}>{comanda.palabras[tema]}</Text>
         <Text style={{ color: colores.tenue, fontSize: 11 }}>{FECHA.format(new Date(comanda.creadaEn))}</Text>
@@ -394,6 +480,7 @@ export function TarjetaDeComanda({ comanda }: { comanda: ComandaDelTelefono }) {
       ) : null}
       {comanda.fila ? <Text style={{ color: colores.tenue, fontSize: 12 }}>{comanda.fila}</Text> : null}
       {comanda.mensaje ? <Text style={{ color: termino ? colores.rojo : colores.suave, fontSize: 12 }}>{comanda.mensaje}</Text> : null}
+      {pregunta ? <PreguntaDelChefEnLaTarjeta pregunta={pregunta} onResponder={onResponder} /> : null}
     </View>
   )
 }

@@ -1,5 +1,15 @@
 import { describe, expect, it } from 'vitest'
-import { CANCELABLES, ESTADOS_COMANDA, NOMBRE_ESTADO, TERMINALES, esEstado, puedePasar, tandasEnPalabras } from './estados'
+import {
+  CANCELABLES,
+  ESTADOS_COMANDA,
+  NOMBRE_ESTADO,
+  PREGUNTAN_DESDE,
+  TERMINALES,
+  esEstado,
+  puedePasar,
+  puedePreguntar,
+  tandasEnPalabras,
+} from './estados'
 
 describe('puedePasar', () => {
   it('el camino de siempre, de la revisión al mesón, con las tandas que llegan de a una', () => {
@@ -41,11 +51,33 @@ describe('puedePasar', () => {
     }
   })
 
-  it('la pregunta y la prueba esperan su fase: hoy no se entra a ellas', () => {
+  it('a la pregunta no se entra con un cambio de estado, y la prueba espera su fase', () => {
     for (const de of ESTADOS_COMANDA) {
       expect(puedePasar(de, 'pregunta'), de).toBe(false)
       expect(puedePasar(de, 'probando'), de).toBe(false)
     }
+  })
+
+  it('de la pregunta no la saca el chef: la saca la respuesta, o el plazo', () => {
+    for (const a of ESTADOS_COMANDA) expect(puedePasar('pregunta', a), a).toBe(false)
+  })
+})
+
+describe('puedePreguntar', () => {
+  it('se pregunta al revisar y mientras se eligen los cortes', () => {
+    expect(puedePreguntar('revisando')).toBe(true)
+    expect(puedePreguntar('en_preparacion')).toBe(true)
+  })
+
+  it('no antes de tomarla, no en el horno, no dos veces seguidas y no en lo terminado', () => {
+    for (const de of ['recibida', 'pregunta', 'probando', 'en_el_horno', 'sirviendo', 'lista', ...TERMINALES] as const) {
+      expect(puedePreguntar(de), de).toBe(false)
+    }
+  })
+
+  it('todo lo que pregunta se puede cancelar mientras espera', () => {
+    expect(CANCELABLES.has('pregunta')).toBe(true)
+    for (const de of PREGUNTAN_DESDE) expect(CANCELABLES.has(de), de).toBe(true)
   })
 })
 

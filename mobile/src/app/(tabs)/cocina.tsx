@@ -21,6 +21,7 @@ import {
   faltaParaMandar,
   hayEnMarcha,
   leerPendientes,
+  lineaDeLaCocina,
   nuevaRef,
   paraLaCamara,
   principalDe,
@@ -76,6 +77,7 @@ const ALTO_CABECERA = Platform.OS === 'ios' ? 44 : 56
 const CADA_MS = 20_000
 
 const SE_CORTO = 'Se cortó la subida. Toca «Reintentar» para seguir donde quedó.'
+const NO_SE_RESPONDIO = 'No se pudo mandar tu respuesta: revisa la señal y vuelve a intentarlo.'
 const NO_SE_MANDO = 'No se pudo mandar: revisa la señal y vuelve a tocar «Mandar al chef». No se va a pedir dos veces.'
 const QUE_ES =
   'El chef de la casa edita tus videos: le llevas un video largo, un podcast en videollamada o tus tomas sueltas, y te devuelve una tanda de clips y carruseles con sus textos, para que los programes en tus redes. Está en piloto, con pocas cuentas.'
@@ -363,6 +365,32 @@ export default function LaCocina() {
     }
   }
 
+  /* ---- contestarle al chef ---- */
+
+  /** La respuesta a una pregunta del chef. Devuelve la frase del error, o null si salió y la lista se vuelve a leer. */
+  const responder = useCallback(
+    async (preguntaId: string, respuesta: string): Promise<string | null> => {
+      if (!token) return null
+      try {
+        await apiPost(`/api/mobile/cocina/preguntas/${encodeURIComponent(preguntaId)}/respuesta`, token, { respuesta })
+        void refrescar()
+        return null
+      } catch (e) {
+        if (e instanceof SesionCaducada) {
+          await salir()
+          return null
+        }
+        // Una que ya no espera (se contestó desde el panel, pasó el plazo): la lista se vuelve a leer.
+        if (e instanceof RechazoApi) {
+          void refrescar()
+          return e.message
+        }
+        return NO_SE_RESPONDIO
+      }
+    },
+    [token, salir, refrescar],
+  )
+
   /* ---- lo que se ve ---- */
 
   if (!data) {
@@ -391,6 +419,7 @@ export default function LaCocina() {
   }
 
   const ocupado = mandando
+  const linea = lineaDeLaCocina(data)
   const largo = instruccion.trim().length
 
   return (
@@ -407,10 +436,8 @@ export default function LaCocina() {
       >
         <Sello texto={sello} />
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-          <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: data.abierta ? colores.verde : colores.ambar }} />
-          <Text style={{ color: colores.suave, fontSize: 13, flex: 1 }}>
-            {data.abierta ? 'La cocina está abierta.' : 'La cocina está cerrada por ahora: lo que pidas espera su turno.'}
-          </Text>
+          <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: linea.tono === 'verde' ? colores.verde : colores.ambar }} />
+          <Text style={{ color: colores.suave, fontSize: 13, flex: 1 }}>{linea.texto}</Text>
         </View>
 
         {/* La comanda: el camino corto. Grabar, decirle al chef qué quieres, mandar. */}
@@ -523,7 +550,7 @@ export default function LaCocina() {
         {data.comandas.length === 0 ? (
           <Text style={{ color: colores.tenue, fontSize: 13 }}>Todavía no tienes comandas.</Text>
         ) : (
-          data.comandas.map((c) => <TarjetaDeComanda key={c.id} comanda={c} />)
+          data.comandas.map((c) => <TarjetaDeComanda key={c.id} comanda={c} onResponder={responder} />)
         )}
         <Text style={{ color: colores.tenue, fontSize: 11, lineHeight: 16 }}>
           Lo que el chef cocina espera en {MESON[tema].toLowerCase()}, en el panel web: desde ahí lo programas. Sacar algo de{' '}

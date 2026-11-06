@@ -2,15 +2,16 @@ import { NextResponse } from 'next/server'
 import { contraSuCuenta } from '@/lib/igual-edad'
 import { leerConsultaDeMetricas } from '@/lib/metrics-consulta'
 import { POCAS_PUBLICACIONES } from '@/lib/pieza'
-import { attributesFor } from '@/lib/post-attributes'
+import { publicadosDesdeTuParrilla } from '@/lib/post-attributes'
 import { MAX_PUBLICACIONES_LEIDAS, getPostRows } from '@/lib/posts'
 import { PARA_DESTACAR, queFuncionaApi } from '@/lib/que-funciona'
 
 export const dynamic = 'force-dynamic'
 
 /**
- * Qué tema, qué estilo y qué formato anduvieron mejor en el rango, contra lo normal de cada
- * cuenta: lo mismo que el panel «Qué te funciona» de Los Números, con su frase. El rango
+ * Qué tema, qué estilo y qué formato anduvieron mejor en el rango, y si la música hizo
+ * diferencia, contra lo normal de cada cuenta: lo mismo que el panel «Qué te funciona» de Los
+ * Números, con su frase. El rango
  * filtra por fecha de publicación, como `/api/metrics/posts`, y se lee tanto como la pantalla
  * (`MAX_PUBLICACIONES_LEIDAS`): la respuesta trae solo las medianas por valor.
  */
@@ -31,8 +32,11 @@ export async function GET(request: Request) {
     },
   )
   const filas = red === null ? all : all.filter((row) => row.network === red)
-  const atributosDe = await attributesFor(ownerId, filas)
-  const entradas = filas.map((fila) => ({ fila, atributos: atributosDe.get(`${fila.network}:${fila.externalId}`) ?? null }))
+  const publicados = await publicadosDesdeTuParrilla(ownerId, filas)
+  const entradas = filas.map((fila) => {
+    const desdeTuParrilla = publicados.get(`${fila.network}:${fila.externalId}`)
+    return { fila, atributos: desdeTuParrilla?.atributos ?? null, publicado: desdeTuParrilla?.publicado ?? null }
+  })
 
   return NextResponse.json({
     cuenta: cuenta ? (cuentasPorId.get(cuenta.id) ?? null) : null,

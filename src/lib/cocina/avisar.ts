@@ -1,14 +1,17 @@
 import { and, count, eq } from 'drizzle-orm'
-import { comandas, creativos, getDb, insumos, users } from '@/db'
+import { comandas, creativos, getDb, insumos, preguntas, users } from '@/db'
 import { dominioProducto } from '@/lib/dominios'
 import { destinatario, enviarAviso } from '@/lib/social/publish/alert'
 import { temaDe } from '@/lib/tema'
-import { correoDeComanda, type AvisoDeComanda } from './correo-de-comanda'
+import { correoDeComanda, correoDePregunta, type AvisoDeComanda } from './correo-de-comanda'
+import { siNoContestas } from './pregunta'
 
-// El correo al dueño cuando su comanda termina. Lo pide la ruta del chef
+// Los correos al dueño de una comanda. El de cuando termina lo pide la ruta del chef
 // (`/api/cocina/comandas/{id}/estado`) después de responder, y solo cuando `cambiarEstado` dice
 // que ese cambio lo debe (`aviso`): la que escribió la transición es una sola petición, así que el
-// correo sale una vez por cambio aunque el chef reintente o mande dos a la vez.
+// correo sale una vez por cambio aunque el chef reintente o mande dos a la vez. El de cuando el
+// chef pregunta, igual: lo pide `/api/cocina/comandas/{id}/preguntas` solo si esa llamada hizo la
+// pregunta, y no un reintento.
 //
 // Sale con el remitente de los avisos (`enviarAviso`, `PUBLISH_ALERT_FROM`), como la publicación
 // que se quemó y la cuenta que se cayó. Si Resend falla, no se reintenta: la tarjeta de La Cocina
@@ -54,6 +57,43 @@ export async function avisarDeLaComanda(comandaId: string, estado: AvisoDeComand
     return await enviarAviso(para, correo)
   } catch (error) {
     console.error('No se pudo mandar el correo de la comanda:', String(error).slice(0, 300))
+    return false
+  }
+}
+
+/**
+ * Le manda al dueño el correo de una pregunta del chef, con el plazo dicho en su zona. Devuelve si
+ * salió. Nunca lanza, como el de arriba: el chef ya tuvo su respuesta.
+ */
+export async function avisarDeLaPregunta(preguntaId: string, ahora: Date = new Date()): Promise<boolean> {
+  try {
+    const db = getDb()
+    const [fila] = await db
+      .select({ pregunta: preguntas, correo: users.correo, zona: users.zona })
+      .from(preguntas)
+      .innerJoin(users, eq(users.id, preguntas.ownerId))
+      .where(eq(preguntas.id, preguntaId))
+    if (!fila) return false
+    const para = destinatario(fila.correo ?? undefined)
+    if (!para) return false
+    const p = fila.pregunta
+    const [principal] = await db
+      .select({ nombre: insumos.nombre })
+      .from(insumos)
+      .where(and(eq(insumos.comandaId, p.comandaId), eq(insumos.tipo, 'principal')))
+      .limit(1)
+    const correo = correoDePregunta(
+      {
+        principal: principal?.nombre ?? null,
+        texto: p.texto,
+        opciones: p.opciones ?? null,
+        siNoContestas: siNoContestas(p.plazo, p.porDefecto, ahora, fila.zona),
+      },
+      sitio(),
+    )
+    return await enviarAviso(para, correo)
+  } catch (error) {
+    console.error('No se pudo mandar el correo de la pregunta:', String(error).slice(0, 300))
     return false
   }
 }

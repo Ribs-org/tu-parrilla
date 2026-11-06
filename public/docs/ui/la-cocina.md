@@ -52,13 +52,18 @@ para que los programes en tus redes. Está en piloto, con pocas cuentas.», y de
 Bajo el título, en letra chica: «Le llevas el material crudo y te devuelve los creativos, listos
 para programar.». Después, el dibujo ancho de la escena y una línea con un punto de color:
 
-- punto verde y «La cocina está abierta.»: el servidor del chef está conectado;
+- punto verde y «La cocina está abierta: el chef toma las comandas apenas llegan.»: el chef toma
+  solo lo que llega. Si contó cuánto tarda una, sigue «Cada una tarda unas <N> horas.» (o «una
+  hora», o «unos <N> minutos»);
+- punto ámbar y «La cocina atiende a mano: una persona toma las comandas, así que la tuya puede
+  tardar hasta el próximo día hábil.»: el servidor del chef está conectado, pero nadie toma las
+  comandas solo; las toma una persona del equipo cuando las ve;
 - punto ámbar y «La cocina está cerrada por ahora: lo que pidas espera su turno.»: el servidor
   del chef no da señales hace más de diez minutos (un corte de luz o de internet donde está).
   Nada se pierde: las comandas esperan.
 
 Debajo, el subtítulo «Las comandas»; al lado, mientras alguna comanda está en marcha (de «Comanda
-colgada» a «Sirviendo»), un punto anaranjado que late y «Se actualiza sola». A la derecha, los
+colgada» a «Sirviendo», con «El chef te pregunta»), un punto anaranjado que late y «Se actualiza sola». A la derecha, los
 botones:
 
 - «La cámara de frío» —de día, «La nevera»—, con una puerta dibujada (de día, una nevera con un
@@ -76,31 +81,48 @@ comandas.». Con comandas, una tarjeta por comanda, de la más nueva a la más v
 - arriba, el nombre del archivo del plato principal (por ejemplo, «video9.mp4»), o «Comanda sin
   plato principal», y a la derecha «pedida <fecha y hora>»;
 - el estado, en palabras (la tabla de abajo). Una comanda rechazada o que no se pudo terminar
-  lleva el borde y el estado en rojo;
+  lleva el borde y el estado en rojo; una en «El chef te pregunta», el borde y el fondo en
+  anaranjado;
 - debajo del estado, el recorrido: cinco rayitas, una por tramo —colgada, el chef mira, el
   desposte, al fuego y el mesón—. Las hechas van en anaranjado; la de ahora, con una luz que la
   cruza; al servir, la última se llena con las tandas que llegaron. Llena entera, la comanda llegó
-  toda al mesón. Una rechazada, que no se pudo terminar o cancelada no lo lleva;
+  toda al mesón. Una rechazada, que no se pudo terminar o cancelada no lo lleva. Mientras el chef
+  pregunta, queda en el tramo donde estaba (el chef mira, o el desposte);
 - mientras espera su turno, cuántas van antes: «Es la próxima en la fila.», «Hay 1 comanda antes
   que la tuya.» o «Hay N comandas antes que la tuya.»;
 - «Hora estimada: <fecha y hora>», si se sabe: la da el chef al tomarla y la corrige en cada
-  paso; mientras espera, sale de la fila y de lo que tarda una comanda en promedio;
+  paso; mientras espera, sale de la fila y de lo que tarda una comanda en promedio, y solo si la
+  cocina toma las comandas sola (a mano no se promete una hora);
 - «El chef: «<mensaje>»», si el chef dejó un mensaje en el último paso;
 - «Ver en el mesón →» —de día, «Ver en la bandeja →»—, si algo de esa comanda espera en el mesón:
   lleva al mesón con solo lo de esa comanda;
 - en una rechazada o que no se pudo terminar, el motivo que escribió el chef, en palabras;
+- en «El chef te pregunta», un recuadro con la pregunta del chef y, debajo:
+  - si el chef dio opciones (de dos a cuatro), un botón por opción, con el texto de la opción; la
+    que el chef usa si nadie contesta va en anaranjado. Apretar una responde de una vez (mientras
+    trabaja, ese botón dice «Respondiendo…»);
+  - si la respuesta es libre, un campo con «Tu respuesta al chef. Si no contestas, sigue con
+    «<la opción por defecto>».», el botón anaranjado «Responder» (apagado mientras el campo esté
+    vacío o pase de 500 caracteres; mientras trabaja, «Respondiendo…») y el contador «<N> / 500»;
+  - en letra chica, el plazo y lo que pasa si nadie contesta: «Si no contestas hoy antes de las
+    18:00, el chef sigue con «<la opción por defecto>».» («mañana antes de las …», o «el <día> <N>
+    de <mes> antes de las …»);
 - «Tu instrucción al chef: «<texto>»», en letra chica, si se la escribió al pedirla (hasta tres
   líneas; lo que sigue se corta con «…»);
 - «Lo que pasó», un desplegable con cada paso: la fecha y hora, el estado y, si lo hubo, el
-  mensaje del chef;
+  mensaje del chef. La pregunta queda como un paso «El chef te pregunta — <la pregunta>», y la
+  respuesta, en el paso siguiente: «Respondiste: «<respuesta>».», o «Pasó el plazo: el chef sigue
+  con «<la opción por defecto>».»;
 - «Cancelar la comanda», el botón rojo, mientras no esté en el horno (mientras está «Comanda
-  colgada», «El chef mira la res» o «El desposte»). Mientras trabaja dice «Cancelando…».
+  colgada», «El chef mira la res», «El desposte» o «El chef te pregunta»). Mientras trabaja dice
+  «Cancelando…».
 
 | Estado en la tarjeta | Qué pasa | Quién la mueve |
 |---|---|---|
 | «Comanda colgada» | Espera que el chef la tome. | — |
 | «El chef mira la res» | El chef bajó el material y lo revisa: duración, idioma, persona a cámara. Son minutos. | El chef |
 | «El desposte» | El chef elige los cortes y escribe titulares y textos. Son horas. | El chef |
+| «El chef te pregunta» | El chef tiene una duda y espera la respuesta, hasta el plazo que dice la tarjeta. Al responder —o al pasar el plazo, con la opción por defecto— vuelve a donde estaba. | El chef, y la persona al responder |
 | «Al fuego» | Se arman las piezas en cada estilo. Son horas. | El chef |
 | «Sirviendo: 3 de 5 tandas en el mesón» | Llegaron algunas tandas al mesón y otras siguen en el horno. «Sirviendo: 2 tandas en el mesón» si el chef no sabe cuántas van a ser. | El chef, con cada tanda |
 | «Lista en el mesón: N cortes» | Todo llegó al mesón. | El chef |
@@ -126,6 +148,10 @@ se pudo terminar», uno con el motivo del chef. Llega uno por comanda, al correo
 panel, en su modo (de día, «Lista en la bandeja»). «Servida» y «Cancelada» no mandan correo: las
 hace la persona.
 
+**Y uno cuando el chef pregunta.** Con el asunto «El chef te pregunta: «<plato principal>»» (o «…:
+tu comanda»): la pregunta, «Las opciones: «…», «…».» si las hay, el plazo con lo que pasa si nadie
+contesta, y «Respóndele en La Cocina: <enlace>». Uno por pregunta.
+
 ### La estación de cada comanda
 
 El cuadro a la izquierda de cada tarjeta. De noche es la parrilla, sobre fondo oscuro; de día, la
@@ -135,6 +161,7 @@ barra de sushi, sobre papel claro.
 |---|---|---|
 | «Comanda colgada» | La comanda de papel, colgada de un riel, se mece; abajo, el pase con su campanilla. | Lo mismo, con el riel de madera. |
 | «El chef mira la res» | Una lupa recorre la media res colgada. | Una lupa recorre el atún sobre la tabla. |
+| «El chef te pregunta» | La media res colgada, quieta, sin lupa ni cuchillo: el chef espera. | El atún sobre la tabla, quieto. |
 | «El desposte» | La res con las líneas por donde se corta, que avanzan, y un cuchillo que va y viene. | Lo mismo, con el atún y un cuchillo largo. |
 | «Al fuego» | La parrilla prendida: tres cortes sobre la rejilla, las llamas y las brasas debajo, y el humo que sube. | Tres piezas de arroz sobre una tabla con patas; el pescado cae sobre cada una, y un soplete azul arde encima. |
 | «Sirviendo» | La parrilla chica a la izquierda; un corte viaja de ella a la tabla de la derecha, donde esperan los que ya salieron (uno por tanda, hasta tres). | Lo mismo, con una pieza que viaja a la bandeja. |
@@ -156,7 +183,7 @@ Arriba del bloque «El chef de la casa», un dibujo ancho. Es solo un dibujo: no
 - **De día:** un maestro de sushi, de gorrito alto y chaqueta de cuello cruzado, con el cuchillo
   largo levantado sobre un atún entero, sobre el mesón de madera, y un farol de papel colgando.
 
-Con la cocina abierta, el fuego arde con sus llamas y el farol está prendido. Cerrada o apagada,
+Con la cocina abierta —sola o a mano—, el fuego arde con sus llamas y el farol está prendido. Cerrada o apagada,
 quedan las brasas con un hilo de humo, y el farol apagado. Dice lo mismo que la línea del punto de
 color.
 
@@ -261,8 +288,10 @@ la cuenta.
 (<qué es>) · <minutos> min», «Lo acompañan: <nombre> (<para intercalar, otra cámara, la pantalla o su
 uso>), …», «Qué sale: …», «Los estilos: los elige el chef»,
 «Tu instrucción al chef: «<texto>»» (o «ninguna») y «Tu marca: …». Debajo, cuántas irían antes («Hay 2 comandas antes que la tuya.»), la «Hora
-estimada» si se puede calcular, «La cocina está cerrada por ahora: tu comanda espera su turno.»
-si lo está, y cuánto cupo consume: «Consume <N> minutos de tu cupo, los del plato principal. Por
+estimada» si se puede calcular (solo si la cocina toma las comandas sola), «La cocina está cerrada
+por ahora: tu comanda espera su turno.» si lo está, «La cocina atiende a mano: una persona toma las
+comandas, así que la tuya puede tardar hasta el próximo día hábil.» si atiende a mano, y cuánto
+cupo consume: «Consume <N> minutos de tu cupo, los del plato principal. Por
 ahora el cupo no tiene tope.».
 
 Al final, el botón anaranjado «Colgar la comanda» (mientras trabaja, «Colgando…»). Mientras no se
@@ -496,9 +525,23 @@ qué va, la estación y el recorrido lo muestran, y «Lo que pasó» cuenta cada
 hace falta recargar: mientras la pestaña esté a la vista, la tarjeta se pone al día sola en unos
 segundos. Cuando termina, llega un correo.
 
+### Para contestarle al chef
+
+Cuando el chef pregunta, la tarjeta dice «El chef te pregunta», se pone anaranjada y llega un
+correo.
+
+1. En La Cocina, buscar la tarjeta anaranjada y leer la pregunta.
+2. Si trae botones, apretar el de la respuesta. Si trae un campo, escribir la respuesta y apretar
+   «Responder».
+
+La tarjeta vuelve al paso en que estaba, y en «Lo que pasó» queda «Respondiste: «…».». Si no se
+contesta antes del plazo que dice la tarjeta, el chef sigue con la opción por defecto. También se
+contesta desde la app del teléfono ([app-movil.md](app-movil.md), «La Cocina»).
+
 ### Para cancelar una comanda
 
-Solo mientras no esté en el horno: con «Comanda colgada», «El chef mira la res» o «El desposte».
+Solo mientras no esté en el horno: con «Comanda colgada», «El chef mira la res», «El desposte» o
+«El chef te pregunta».
 
 1. Apretar «Cancelar la comanda» en su tarjeta.
 2. Se abre una ventana con «¿Cancelar esta comanda?» y «El chef deja de prepararla. Lo que llevaba
@@ -549,8 +592,14 @@ Al final de la pantalla, «El manual del parrillero →». Adentro, elegir la p�
 | Lo que dice la pantalla | Qué significa | Qué hacer |
 |---|---|---|
 | «Si quieres probarla, pídesela a quien administra Tu Parrilla.» | La cocina no está encendida para esta cuenta. | Pedírsela al admin, que la enciende en Los Maestros. |
-| «La cocina está abierta.» | El servidor del chef está conectado. | Nada. |
+| «La cocina está abierta: el chef toma las comandas apenas llegan.» | El chef toma solo lo que llega. A veces sigue «Cada una tarda unas <N> horas.». | Nada. |
+| «La cocina atiende a mano: una persona toma las comandas, así que la tuya puede tardar hasta el próximo día hábil.» | El servidor del chef está conectado, pero las comandas las toma una persona del equipo. | Pedir igual: la comanda espera su turno y no se pierde. |
 | «La cocina está cerrada por ahora: lo que pidas espera su turno.» | El servidor del chef no da señales hace más de diez minutos. | Esperar: las comandas no se pierden, pero la hora estimada se corre. |
+| «Si no contestas hoy antes de las <hora>, el chef sigue con «<opción>».» | Bajo una pregunta del chef: el plazo, y lo que hace el chef si nadie contesta. | Contestar antes, si se quiere otra cosa. |
+| «Esa pregunta ya no espera respuesta: se respondió, pasó su plazo o la comanda se canceló.» | Se contestó en otra pestaña o en el teléfono, pasó el plazo y el chef siguió con la opción por defecto, o la comanda se canceló. | Recargar: «Lo que pasó» dice cuál fue. |
+| «Escribe tu respuesta al chef.» | Se intentó responder una pregunta libre con el campo vacío. | Escribir la respuesta. |
+| «Tu respuesta llega hasta 500 caracteres.» | La respuesta libre es demasiado larga. | Acortarla. |
+| «Elige una de las opciones del chef.» | La respuesta no es ninguna de las opciones (la pregunta cambió entre medio). | Recargar y apretar una de las opciones. |
 | «Todavía no tienes comandas.» | No hay ninguna comanda en esta cuenta. | Nada. |
 | «Se actualiza sola» | Hay comandas en marcha, y las tarjetas se ponen al día sin recargar. | Nada: dejar la pestaña abierta para verlas avanzar. |
 | «Tu instrucción al chef cabe en 1000 caracteres: acórtala.» | La instrucción al chef pasó el tope. | Acortarla hasta que el contador diga 1000 o menos. |
@@ -645,6 +694,15 @@ Al final de la pantalla, «El manual del parrillero →». Adentro, elegir la p�
   todavía no la estimó.
 - **«Dice que la cocina está cerrada».** El servidor del chef no da señales hace más de diez
   minutos. Las comandas esperan y no se pierden; la hora estimada se corre.
+- **«Dice que atiende a mano» / «¿Por qué no me da hora estimada?».** El servidor del chef está
+  conectado, pero hoy las comandas las toma una persona, no el servicio automático: puede tardar
+  hasta el próximo día hábil, y por eso no se promete una hora hasta que el chef la tome.
+- **«El chef me preguntó algo» / «Me llegó un correo de que el chef pregunta».** En La Cocina, la
+  tarjeta anaranjada «El chef te pregunta»: apretar una opción, o escribir y «Responder» (ver
+  «Para contestarle al chef»). Si no contesta, el chef sigue con la opción por defecto al pasar el
+  plazo, que dice la tarjeta.
+- **«Me equivoqué de respuesta».** Ya no se cambia desde el panel: la comanda siguió con esa. Si
+  todavía se puede cancelar, cancelarla y pedirla de nuevo.
 - **«Mi comanda dice No se puede cocinar» / «No se pudo terminar».** El motivo está en la
   tarjeta, debajo del estado. Lo que llevaba sigue en la cámara de frío.
 - **«Quiero cancelar una comanda».** «Cancelar la comanda», en su tarjeta, mientras no esté en el
@@ -676,9 +734,11 @@ Al final de la pantalla, «El manual del parrillero →». Adentro, elegir la p�
 - No programa solo: cada creativo se programa a mano, desde el compositor.
 - No deshace un descarte.
 - No elige estilos: en esta fase los elige el chef.
-- No pide desde la app del teléfono: solo desde el panel.
+- El formulario completo de «Pedir una comanda» es del panel: la app del teléfono pide por su
+  camino corto ([app-movil.md](app-movil.md)).
 - No avisa por correo cada paso: solo cuando la comanda termina (lista, rechazada o que no se
-  pudo terminar).
+  pudo terminar) y cuando el chef pregunta.
+- No cambia una respuesta ya mandada al chef, ni deja preguntarle algo al chef: pregunta él.
 - No cambia la instrucción al chef de una comanda ya colgada.
 - No vuelve a mostrar una llave ya generada, no permite renombrarla y no limita lo que puede
   hacer: todas las llaves pueden lo mismo.
@@ -696,13 +756,20 @@ Sale de:
 - `src/app/admin/(dash)/ia/page.tsx`: la pantalla, el párrafo de arriba, «Tu propio chef» con sus
   tres bloques, la lista de llaves y el final con el manual.
 - `src/app/admin/(dash)/ia/chef-de-la-casa.tsx`: «El chef de la casa», apagado y encendido, la
-  línea de la cocina abierta o cerrada, el botón de la cámara de frío y las tarjetas de las comandas.
+  línea de cómo atiende la cocina, el botón de la cámara de frío y las tarjetas de las comandas,
+  con el recuadro de la pregunta.
+- `src/app/admin/(dash)/ia/responder.tsx`: los botones de las opciones, el campo libre y
+  «Responder».
+- `src/lib/cocina/latido.ts`: sola, a mano o cerrada, sus tres frases y cuándo hay hora estimada.
+- `src/lib/cocina/pregunta.ts` y `src/lib/cocina/preguntar.ts`: el plazo en palabras, lo que pasa
+  si nadie contesta, las frases al responder y lo que queda en «Lo que pasó».
 - `src/components/escena-cocina.tsx`: la escena, de noche y de día, con el fuego y el farol.
 - `src/components/estacion-comanda.tsx`: la estación de cada tarjeta, de noche y de día, y lo que
   se mueve en cada estado; sus movimientos y su versión quieta están en `src/app/globals.css`.
 - `src/app/admin/(dash)/ia/vigia.tsx` y `src/app/api/admin/cocina/pulso/route.ts`: «Se actualiza
   sola», cada cuánto mira y cuándo deja de mirar.
-- `src/lib/cocina/correo-de-comanda.ts`: el correo cuando la comanda termina, su asunto y su texto.
+- `src/lib/cocina/correo-de-comanda.ts`: el correo cuando la comanda termina y cuando el chef
+  pregunta, su asunto y su texto.
 - `src/app/admin/(dash)/ia/cancelar.tsx` y `src/app/admin/cocina-actions.ts`: «Cancelar la
   comanda», su pregunta y sus mensajes, y lo que hace «Colgar la comanda».
 - `src/app/admin/(dash)/ia/pedir/page.tsx` y `src/app/admin/(dash)/ia/pedir/formulario.tsx`:

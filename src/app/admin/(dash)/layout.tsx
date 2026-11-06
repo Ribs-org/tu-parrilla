@@ -6,6 +6,7 @@ import { PiezaDefs } from '@/components/pieza-sushi'
 import { requireUser } from '@/lib/auth'
 import { avisoDeFierros } from '@/lib/parrilla'
 import { getCuentas } from '@/lib/posts'
+import { respuestasSinLeer } from '@/lib/sugerencias/responder'
 import { COLOR_DE_BARRA } from '@/lib/tema'
 import { PANTALLAS } from '@/lib/vocabulario'
 import { temaPedido } from '@/lib/tema-servidor'
@@ -30,6 +31,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
   // El botón de Ajustes avisa si un fierro se enfría o se apagó: Los Fierros vive adentro de
   // Ajustes, y un aviso que solo se ve ahí no lo ve nadie.
   const aviso = avisoDeFierros(await getCuentas(usuario.id), new Date())
+  // Y si el equipo le respondió algo del libro de sugerencias que todavía no abre. Un punto que no
+  // se pudo contar no tumba el panel entero: queda sin punto (un preview contra una base sin la
+  // migración 0029, por ejemplo).
+  const respuestas = await respuestasSinLeer(usuario.id).catch((error: unknown) => {
+    console.error('No se pudieron contar las respuestas sin leer:', String(error).slice(0, 300))
+    return 0
+  })
   // El modo es de la cuenta: el mismo en el teléfono y en cualquier equipo donde se entre.
   const tema = usuario.tema
 
@@ -51,7 +59,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
             >
               Panel
             </Link>
-            <AdminNav esAdmin={usuario.rol === 'admin'} aviso={aviso} />
+            <AdminNav esAdmin={usuario.rol === 'admin'} aviso={aviso} respuestas={respuestas} />
             <BotonTema key={tema} inicial={tema} guardar={guardarTema} />
             <form action={logout}>
               <button

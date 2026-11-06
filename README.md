@@ -21,8 +21,9 @@ tus números.
 | `/api/social/meta/borrado` | `POST` de Meta cuando alguien pide borrar sus datos: borra lo que vino de esas dos redes y devuelve el código de estado |
 | `/api/social/instagram/baja`, `/api/social/instagram/borrado` | Lo mismo, del caso de uso de Instagram de la app de Meta: solo para las cuentas de Instagram conectadas con el login de Instagram (ver «Instagram sin página de Facebook: el login de Instagram») |
 | `/api/schedule/…`, `/api/metrics/…` | La API para tu agente, con una llave de La Cocina («Tu propio chef»): cargar, ver y sacar lo programado, archivar lo quemado, las cuentas y los números (ver «Carga masiva por API» y las secciones que le siguen) |
-| `/api/cocina/…` | La API de La Cocina, con `COCINA_SECRET`: el servidor del chef toma las comandas, baja sus insumos, informa cada estado y entrega lo cocinado al mesón del dueño (ver «La Cocina» y `docs/cocina-api.md`) |
+| `/api/cocina/…` | La API de La Cocina, con `COCINA_SECRET`: el servidor del chef toma las comandas, baja sus insumos, informa cada estado, le pregunta al dueño y lee lo que contestó, y entrega lo cocinado al mesón del dueño (ver «La Cocina» y `docs/cocina-api.md`) |
 | `/api/media` | `POST` con la misma llave: firma la subida de un archivo directo a R2, para nombrarlo después en varias filas del lote sin que se vuelva a bajar (ver «Carga masiva por API») |
+| `/api/sugerencias/respuesta` | `POST` con una llave **del admin** (o `SCHEDULE_API_KEY`): la respuesta del equipo a lo que alguien escribió en el libro de sugerencias, por el número de su issue o por su id, para responder sin el navegador. Con la llave de otra cuenta, `403` (ver «El libro de sugerencias») |
 | `/api/bodega…` | Con la misma llave: lo que hay en la cámara de frío de La Cocina (`GET /api/bodega`) y las subidas por partes para guardar ahí (`/api/bodega/subidas…`), las mismas del panel y del teléfono (ver «La Cocina») |
 | `/api/admin/…` | Lo que el panel llama desde el navegador, con la cookie de la sesión: la firma de una subida directa (`upload-url`), las subidas por partes a la cámara de frío de La Cocina (`cocina/subidas…`) y el pulso que mantiene al día sus tarjetas (`cocina/pulso`; ver «La Cocina») y la planilla de Excel de Los Números (`planilla`, y `planilla/adelanto` para lo que no cabe; ver «Llevar para la casa») |
 | `/api/mobile/…` | La API de la app del teléfono, con el token de su sesión (ver `mobile/README.md`); `cocina…` es La Cocina desde el teléfono: lo que muestra, las subidas por partes a la cámara de frío y «Mandar al chef» (ver «La Cocina») |
@@ -280,7 +281,10 @@ lista. «En las redes» suma **Qué te funciona**: qué tema, qué estilo (los a
 `estilo`) y qué formato de la red anduvieron mejor en el período, contra lo normal de cada
 cuenta y dicho en una frase; solo nombra un ganador si hay al menos dos valores con 10
 publicaciones medidas a los 7 días y el mejor saca ×1,2 o más (`src/lib/que-funciona.ts`, con
-las mismas medianas de «Comparar por atributo»). Es en views: ninguna red da los seguidores
+las mismas medianas de «Comparar por atributo»). Su línea «Música» compara lo publicado desde
+Tu Parrilla con la música de la red —«Música de TikTok» en las fotos— contra lo publicado sin
+ella, dentro de cada red y formato, y gana un lado si saca ×1,2 lo del otro; lo subido directo
+en la red no entra, porque no se sabe. Es en views: ninguna red da los seguidores
 que trajo cada publicación. El resto (interacciones, arrastre, tus cuentas, la audiencia, los links, de dónde
 vienen…) espera detrás de su «⋯ Más», que no se consulta mientras está cerrado. La lista de
 todas las publicaciones, que antes era la pestaña Los Cortes, está un clic adentro («Ver todas
@@ -354,8 +358,8 @@ Los dos perfiles de ejemplo están para que los edites, no para que los borres y
 de cero.
 
 Cada fila de cada tabla (perfiles, cuentas, posts, borradores, comentarios, ajustes, llaves
-de API, anuncios y promociones —por la cuenta conectada de la que cuelgan—, y las marcas, comandas, insumos, materiales de la cámara de frío, subidas y creativos de La
-Cocina) tiene dueño: el panel solo te muestra lo tuyo, nunca lo de otro usuario invitado. Lo mismo
+de API, anuncios y promociones —por la cuenta conectada de la que cuelgan—, lo escrito en el libro de sugerencias con su respuesta, y las marcas, comandas, insumos, materiales de la cámara de frío, subidas y creativos de La
+Cocina, con las preguntas del chef) tiene dueño: el panel solo te muestra lo tuyo, nunca lo de otro usuario invitado. Lo mismo
 la API: lo que entra con una llave es del dueño de la llave, y un agente con la tuya no ve
 ni toca lo de nadie más. Tu fila de usuario —el nombre, la zona y el modo del panel— la
 cambias solo tú: Tu Cuenta, el botón del modo y la app del teléfono escriben la fila de la
@@ -365,7 +369,9 @@ dueño — un cron por inquilino es otro subproyecto, no esta entrega. La creden
 Cocina (`COCINA_SECRET`) también cruza dueños, pero solo los que tienen la cocina encendida, y
 de ellos solo sus comandas, sus insumos y sus creativos —de la cámara de frío ve solo lo que una
 comanda lleva—: el servidor del chef no ve posts,
-cuentas ni números de nadie (ver «La Cocina»). La llave del despliegue
+cuentas ni números de nadie (ver «La Cocina»). La alarma de La Cocina, que corre con el cron de
+publicación, lee las comandas en marcha de todos los dueños con la cocina encendida y le escribe
+solo al admin: el nombre y el correo del cliente, la comanda y lo que pidió. La llave del despliegue
 (`SCHEDULE_API_KEY`) y la raíz pública (`/`) siguen siendo del admin. Y hasta la entrega
 3, dos usuarios todavía no pueden conectar la misma cuenta de la misma red: quien llega
 segundo recibe un aviso, no la cuenta de otro. Eso es entre dos usuarios distintos: un
@@ -379,6 +385,11 @@ con su token, las promociones de sus publicaciones— cuelga de la cuenta y la s
 además a otras cuentas se queda con quien lo programó, con un destino en una cuenta que ya no es
 suya: sale igual, porque publicar busca la cuenta por su id y no por su dueño. La credencial no
 cambia hasta que quien recibe la cuenta aprieta **Reconectar**.
+
+**Responder una sugerencia**, en Las Sugerencias, es lo otro que cruza dueños, y también solo lo
+hace el admin (`src/lib/sugerencias/responder.ts`): ve lo que escribió cada persona, con su correo,
+y escribe la respuesta en esa fila. Lo que la persona ve en el libro —lo suyo, el punto de las
+respuestas sin leer y marcarlas leídas— va atado a ella, como todo lo demás.
 
 Las únicas tablas sin dueño son dos:
 
@@ -1318,7 +1329,7 @@ Vercel y bajan con `vercel env pull .env.local`.
 | --- | --- | --- |
 | `DATABASE_URL` | Supabase Postgres, por el *pooler* | Sí — la pone la integración |
 | `DATABASE_URL_UNPOOLED` | La misma base por el *session pooler* (puerto 5432): la usan las migraciones al desplegar y el respaldo diario, que necesitan una conexión de verdad | Sí — sin ella el migrador prueba con `DATABASE_URL` y lo más probable es que falle; el respaldo la lee de los secretos del repositorio |
-| `ADMIN_EMAIL` | El correo del primer usuario | Sí |
+| `ADMIN_EMAIL` | El correo del primer usuario, el admin. También es adonde llega la alarma de La Cocina: las comandas que llevan media hora sin tomar o pasaron su hora estimada (ver «La Cocina») | Sí |
 | `AUTH_SECRET` | Firma las sesiones —la cookie del panel y el token del teléfono— y los mensajes de los redirects, y de ella sale la llave que cifra los tokens de las redes guardados en la base | Sí — cambiarla cierra todas las sesiones y deja ilegibles los tokens guardados: hay que reconectar cada cuenta |
 | `MOBILE_TOKEN_VERSION` | La versión de las sesiones de la app del teléfono: subirla en 1 cierra la de todos los teléfonos a la vez (ver `mobile/README.md`, «Si se pierde el teléfono») | No — por defecto `1` |
 | `FINGERPRINT_SALT` | Sal del hash de visitante | Conviene — sin ella se usa una derivada de `AUTH_SECRET`; ponerla o cambiarla después cambia los visitantes únicos de ese día |
@@ -1365,11 +1376,11 @@ Vercel y bajan con `vercel env pull .env.local`.
 | `CRON_SECRET` | Autoriza las corridas programadas: el sync diario y la publicación cada 5 minutos. Vercel la manda sola a su cron; el pinger externo la manda en `Authorization: Bearer …` | Sí — Vercel no la crea: se genera igual que `AUTH_SECRET` y se agrega. Sin ella los crons responden `401` y no corre nada |
 | `MIGRAR_PREVIEWS` | Que los previews migren la base | Solo cuando el preview tenga una base propia; contra la de producción, no |
 | `DATABASE_URL_PRUEBAS` | Solo para las pruebas de integración: una Postgres desechable donde cada archivo crea y migra su propia base (ver «Comandos»). No va en Vercel | No — sin ella esas pruebas se saltan. Nunca la de producción |
-| `SCHEDULE_API_KEY` | La llave del despliegue: abre `POST /api/schedule/batch` (carga masiva), `POST /api/media` (subir un archivo una vez), `GET` y `DELETE /api/schedule/posts/{id}` (un post, o sacarlo), `POST /api/schedule/posts/{id}/archivar` y `…/desarchivar` (archivar lo quemado), `GET /api/schedule/posts` (calendario), `GET /api/schedule/resumen` (el resumen del día), `GET /api/schedule/cuentas` (las cuentas), `GET /api/metrics/posts` (métricas), `GET /api/metrics/mejores` (el mejor X %), `GET /api/metrics/que-funciona` (qué tema, estilo y formato funcionan) y `/api/bodega…` (la cámara de frío de La Cocina) a nombre del admin. Es anterior a las llaves por usuario y sigue para el agente que ya la usa | No — sin ella esos endpoints aceptan solo las llaves que cada usuario genera en La Cocina («Tu propio chef»); si la pones, genérala igual que `CRON_SECRET` |
+| `SCHEDULE_API_KEY` | La llave del despliegue: abre `POST /api/schedule/batch` (carga masiva), `POST /api/media` (subir un archivo una vez), `GET` y `DELETE /api/schedule/posts/{id}` (un post, o sacarlo), `POST /api/schedule/posts/{id}/archivar` y `…/desarchivar` (archivar lo quemado), `GET /api/schedule/posts` (calendario), `GET /api/schedule/resumen` (el resumen del día), `GET /api/schedule/cuentas` (las cuentas), `GET /api/metrics/posts` (métricas), `GET /api/metrics/mejores` (el mejor X %), `GET /api/metrics/que-funciona` (qué tema, estilo y formato funcionan, y si la música ayuda) y `/api/bodega…` (la cámara de frío de La Cocina) a nombre del admin. Es anterior a las llaves por usuario y sigue para el agente que ya la usa | No — sin ella esos endpoints aceptan solo las llaves que cada usuario genera en La Cocina («Tu propio chef»); si la pones, genérala igual que `CRON_SECRET` |
 | `RESEND_API_KEY` | Manda los códigos de ingreso y los avisos: la publicación que se quemó, la cuenta que se cayó, el resumen del día y la comanda de La Cocina que terminó (ver «Avisos por correo») | Sí — sin ella nadie puede entrar al panel |
-| `PUBLISH_ALERT_TO` | Adónde va un aviso sin dueño con correo: un post o una cuenta de antes de los usuarios. Lo demás va al correo de su dueño | No — sin ella, lo que no tiene dueño no avisa; el calendario y Los Fierros lo siguen mostrando |
+| `PUBLISH_ALERT_TO` | Adónde va un aviso sin dueño con correo: un post o una cuenta de antes de los usuarios, y la alarma de La Cocina si falta `ADMIN_EMAIL`. Lo demás va al correo de su dueño | No — sin ella, lo que no tiene dueño no avisa; el calendario y Los Fierros lo siguen mostrando |
 | `PUBLISH_ALERT_FROM` | Remitente de los avisos | Opcional; default `onboarding@resend.dev`, que solo entrega al correo de la cuenta de Resend |
-| `SUGERENCIAS_GITHUB_TOKEN` | Abre un issue en GitHub por cada mensaje del libro de sugerencias (ver «El libro de sugerencias»). Un token *fine-grained* con acceso solo al repositorio de `SUGERENCIAS_REPO` y un único permiso: Issues, lectura y escritura | No — sin ella los mensajes se guardan igual y salen solos con el cron diario el primer día que la tenga |
+| `SUGERENCIAS_GITHUB_TOKEN` | Abre un issue en GitHub por cada mensaje del libro de sugerencias, y comenta en él la respuesta del equipo (ver «El libro de sugerencias»). Un token *fine-grained* con acceso solo al repositorio de `SUGERENCIAS_REPO` y un único permiso: Issues, lectura y escritura | No — sin ella los mensajes se guardan igual y salen solos con el cron diario el primer día que la tenga |
 | `SUGERENCIAS_REPO` | El repositorio, con la forma `dueño/repo`, donde caen esos issues | No — por defecto `Ribs-org/tu-parrilla`. Si no tiene esa forma, no se manda nada y los mensajes esperan guardados |
 
 Para cambiar una variable en producción:
@@ -1394,9 +1405,11 @@ diarios, así que `vercel.json` declara apenas una corrida diaria de respaldo. E
 Pro puedes cambiar ese schedule a `*/5 * * * *` y prescindir del pinger: el endpoint
 es el mismo en los dos casos, cambia solo quién lo dispara.
 
-Cada corrida hace cuatro cosas, en orden: publica lo vencido, vigila las conexiones de las
-cuentas (manda el correo de las que se cayeron; ver «Avisos por correo»), sondea comentarios
-(hasta los 120 segundos de la corrida) y, una vez por hora, barre los archivos huérfanos de
+Cada corrida hace cinco cosas, en orden: publica lo vencido, vigila las conexiones de las
+cuentas (manda el correo de las que se cayeron; ver «Avisos por correo»), mira La Cocina —cierra
+con su opción por defecto las preguntas del chef cuyo plazo pasó, y le avisa al admin de las
+comandas que llevan media hora sin tomar o pasaron su hora estimada (ver «La Cocina»)—, sondea
+comentarios (hasta los 120 segundos de la corrida) y, una vez por hora, barre los archivos huérfanos de
 R2, las subidas de La Cocina que quedaron a medias y lo que en La Cocina ya venció (ver «La
 Cocina»): le toca a la corrida que
 empieza en los primeros cinco minutos de la hora, si no viene atrasada. Al terminar cada fase escribe `[cron] <fase> listo a los N ms` en el log, y el
@@ -1453,8 +1466,9 @@ publica cuando termine (`esMediaNoLista`, en `social/publish/instagram.ts`).
 
 ### Avisos por correo
 
-Cuatro correos, todos con el remitente `PUBLISH_ALERT_FROM` y al correo del dueño (o a
-`PUBLISH_ALERT_TO` si lo que avisa no tiene dueño con correo). Las reglas viven en
+Seis correos, todos con el remitente `PUBLISH_ALERT_FROM` y al correo del dueño (o a
+`PUBLISH_ALERT_TO` si lo que avisa no tiene dueño con correo), salvo la alarma de La Cocina, que va
+al admin. Las reglas viven en
 `src/lib/avisos/reglas.ts`, sin base; lo que lee y manda, en `src/lib/avisos/run.ts`.
 
 - **Una publicación que se quemó**: «No se pudo publicar en <Red>», con el motivo. Sale al
@@ -1479,6 +1493,12 @@ Cuatro correos, todos con el remitente `PUBLISH_ALERT_FROM` y al correo del due�
 - **Una comanda de La Cocina que terminó**: «Lista en el mesón: «<archivo>»», «No se puede
   cocinar: …» o «No se pudo terminar: …» (de día, con las palabras del día). Sale una vez por
   comanda, cuando el chef la deja lista, la rechaza o la da por fallida (ver «La Cocina»).
+- **Una pregunta del chef**: «El chef te pregunta: «<archivo>»», con la pregunta, sus opciones,
+  el plazo en la zona del dueño y lo que hace el chef si nadie contesta. Una por pregunta.
+- **La alarma de La Cocina, al admin** (`ADMIN_EMAIL`, o `PUBLISH_ALERT_TO` si falta): «La Cocina:
+  una comanda sin tomar y …», con las comandas que llevan más de media hora en «Comanda colgada» o
+  pasaron su hora estimada hace más de una hora. Va todo junto en un correo por pasada, y cada
+  comanda suena una vez por motivo (ver «La Cocina»).
 
 ### El libro de sugerencias
 
@@ -1489,7 +1509,23 @@ final del menú de Ajustes del panel, donde abre una ventana, y al final de Ajus
 teléfono (`POST /api/mobile/sugerencias`). Cada mensaje se vuelve un issue de GitHub en
 `SUGERENCIAS_REPO`, con las etiquetas `sugerencia` y la de su tipo (`sugerencia: idea`,
 `sugerencia: no funciona`, `sugerencia: otra cosa`), que el cliente crea si el repositorio no
-las tiene. Nada promete que se implemente: es para leerlo.
+las tiene. Nada promete que se implemente: es para leerlo, y para responderlo.
+
+**La respuesta vive adentro de Tu Parrilla**, no en GitHub. El admin la escribe en Las
+Sugerencias (`/admin/sugerencias`, en Ajustes), donde ve lo que escribió cada persona con su
+nombre, su correo y el enlace al issue; o, sin el navegador, el equipo de desarrollo la manda con
+una llave del admin, `POST /api/sugerencias/respuesta` con `{ "issue": <número>, "respuesta": "…" }`
+(o `"id"`, el de la sugerencia; ver la sección 3e de `public/docs/api-editor.md`). Hay una por
+sugerencia, en la misma fila (`respuesta`, `respondida_en`, `respondida_por`,
+`respuesta_leida_en`), y cambiarla la reemplaza. La persona la lee en el libro, en «Lo que nos
+escribiste»; mientras no la abre, el botón de Ajustes del panel lleva un punto de brasa y la
+entrada del libro dice cuántas son nuevas (en la app, el rótulo del libro). Después de guardar,
+sin hacer esperar a nadie (`after`), salen dos cosas, y ninguna deshace la respuesta si falla: un
+correo a la persona, solo la primera vez, con la respuesta y dónde leerla (`enviarCorreo`); y un
+comentario en el issue, cada vez que cambia, con la respuesta citada como lo que escribió la
+persona —sin su nombre ni su correo, sin menciones— y la firma del equipo. El comentario usa el
+mismo `SUGERENCIAS_GITHUB_TOKEN`: el permiso de Issues alcanza. Una sugerencia que todavía no tenía
+issue al responderla no recibe ese comentario después (ver `docs/deuda-tecnica.md`).
 
 **El repositorio es público**, y eso decide el formato (`src/lib/sugerencias/formato.ts`). El
 issue no lleva el correo ni el nombre de nadie, solo el id de usuario, que el admin cruza en Los
@@ -1660,7 +1696,12 @@ moverle la respuesta a quien ya la usa; la lógica, sin base, está en `src/lib/
 del panel «Qué te funciona»: para `tema`, `estilo` y `formato`, un `estado` (`gana`, `parejo`,
 `faltan` o `sinValor`), la `frase` que muestra el tablero, los dos mejores con muestra
 suficiente y cada valor con sus `publicaciones`, sus `medidas` y la mediana de
-`contraSuCuenta`. Lee hasta 10.000 publicaciones; la lógica, sin base, está en
+`contraSuCuenta`. Trae además `musica`: con música contra sin música, un grupo por red y
+formato donde algo la llevó, con la misma forma. La música es la clave `musica` de las
+`opciones` guardadas del destino —hoy, «Música de TikTok» en las fotos—, así que lo subido
+directo en la red no tiene cómo saberse y no entra (`sinSaber` lo cuenta); las fotos de TikTok
+se reconocen por el post, porque TikTok da todo como video (`publicadosDesdeTuParrilla`, en
+`src/lib/post-attributes.ts`). Lee hasta 10.000 publicaciones; la lógica, sin base, está en
 `src/lib/que-funciona.ts`.
 
 ### Calendario por API
@@ -1756,7 +1797,13 @@ La cámara de frío, con su modelo y su cuota, está en
 
 - la pestaña La Cocina (`/admin/ia`), que reemplazó a Tu IA el 2026-10-22: arriba «El chef de la
   casa» y abajo «Tu propio chef», con las llaves de siempre;
-- si la cocina está abierta (algún latido del chef en los últimos diez minutos);
+- cómo atiende la cocina, según el latido del chef (`src/lib/cocina/latido.ts`): **sola** si algún
+  trabajador latió en los últimos diez minutos con `datos.automatico: true` —«La cocina está
+  abierta: el chef toma las comandas apenas llegan.», con cuánto tarda una si lo contó—; **a mano**
+  si late pero nadie toma solo —«La cocina atiende a mano: una persona toma las comandas, así que la
+  tuya puede tardar hasta el próximo día hábil.», y sin hora estimada para lo que espera—; y
+  **cerrada** si nadie latió. Nació el 2026-11-06: una comanda de un cliente esperó cuatro días
+  mientras el temporizador del latido hacía decir «abierta» al panel;
 - sus comandas, cada una con su estación —un dibujo que se mueve según en qué va: la comanda
   que se mece en el riel, la lupa, el cuchillo, la parrilla con fuego y humo, la tanda que viaja a
   la tabla; de día, la barra de sushi con el soplete—, su estado, el recorrido en cinco tramos,
@@ -1768,7 +1815,13 @@ La cámara de frío, con su modelo y su cuota, está en
   `/api/admin/cocina/pulso`, que devuelve una firma de lo que la tarjeta muestra en cuatro
   consultas chicas, y solo si cambió vuelve a pedir la página (`router.refresh`, sin recargarla).
   Con la pestaña oculta o sin nada en marcha, no pregunta (`ia/vigia.tsx`);
-- «Cancelar la comanda», mientras no esté en el horno;
+- **las preguntas del chef** (desde el 2026-11-06): cuando el chef tiene una duda, la comanda pasa
+  a «El chef te pregunta», la tarjeta se pone de color con la pregunta, sus opciones (o un campo
+  libre) y el plazo con lo que hace si nadie contesta, y llega un correo. Contestar —en el panel o
+  en el teléfono— la devuelve a donde estaba; si pasa el plazo, el chef sigue con la opción por
+  defecto. Cada pregunta es una fila de `preguntas`, con su dueño; las reglas, en
+  `src/lib/cocina/pregunta.ts`, y quién las escribe, en `src/lib/cocina/preguntar.ts`;
+- «Cancelar la comanda», mientras no esté en el horno (también mientras el chef pregunta);
 - **la cámara de frío** (`/admin/ia/bodega`; de día, la nevera), donde guarda su material en bruto
   sin pedir comanda: videos, audios, imágenes y otros archivos, cada uno con su nombre y un uso
   opcional (intro, outro, música, logo…), que se renombra, se le cambia el uso y se saca. Cada
@@ -1788,8 +1841,9 @@ instrucción al chef. Lo que el formulario del panel deja elegir y el teléfono 
 panel lo trae marcado —un video largo, clips verticales, lo que dé el material, la marca guardada o
 el nombre de la cuenta—, y lo demás —el mesón, cancelar, renombrar o sacar de la cámara— sigue en el
 panel. Las rutas son `/api/mobile/cocina` (todo lo que muestra la pestaña, con las últimas 15
-comandas y su estado ya en palabras de noche y de día), `/api/mobile/cocina/subidas…` y
-`/api/mobile/cocina/comandas`, con el token del teléfono (`src/lib/cocina/telefono-api.ts`). No
+comandas y su estado ya en palabras de noche y de día, cómo atiende la cocina y lo que pregunta el
+chef), `/api/mobile/cocina/subidas…`, `/api/mobile/cocina/comandas` y
+`/api/mobile/cocina/preguntas/{id}/respuesta` (contestarle al chef), con el token del teléfono (`src/lib/cocina/telefono-api.ts`). No
 duplican nada: las subidas responden con `src/lib/cocina/subidas-http.ts`, el mismo de las del
 panel, y la comanda pasa por `leerPedido` y `pedirComanda`, como la del panel
 (`src/lib/cocina/telefono.ts`). Cómo sube el teléfono un video de varios GB, en `mobile/README.md`.
@@ -1841,7 +1895,21 @@ mesón dice cuándo se borra, y el resumen del día lo avisa.
 - toma las comandas que esperan;
 - baja sus insumos con un enlace firmado que vence en una hora;
 - informa cada estado;
+- le pregunta al dueño lo que no sabe, con un plazo y una opción por defecto, y lee la respuesta
+  en su vuelta siguiente;
 - entrega cada creativo apenas sale, por tanda.
+
+**Las preguntas vencidas se cierran solas** (`vencerPreguntas`): en cada pasada del cron de
+publicación y cada vez que el chef lee sus comandas o sus respuestas. Una comanda nunca queda
+esperando al dueño para siempre.
+
+**La red de seguridad** (`src/lib/cocina/alarma.ts`, en cada pasada del cron de publicación): si una
+comanda lleva más de 30 minutos en `recibida`, o pasó su hora estimada hace más de una hora sin que
+el chef dé otra, el admin recibe un correo con el cliente, la comanda, lo que pidió y cuánto lleva.
+No es el proceso: es lo que avisa si el proceso se cayó. Suena una vez por comanda y por motivo
+—`comandas.alarma_recibida_en` y `comandas.alarma_eta` guardan lo que ya sonó—, y otra vez si el
+chef da una hora nueva y también pasa. Si el correo no sale, la marca se suelta y lo intenta la
+pasada siguiente. Sin `ADMIN_EMAIL` (ni `PUBLISH_ALERT_TO`) o sin `RESEND_API_KEY`, no marca nada.
 
 Habla con `/api/cocina/…` y la credencial `COCINA_SECRET`, comparada en tiempo constante como
 `CRON_SECRET`. Sin la variable, esas rutas responden `401`. El contrato entero, con cada respuesta,
@@ -1856,7 +1924,8 @@ cocinado espera en el mesón del dueño, que es quien lo programa.
 Por eso dos trabajadores no toman la misma comanda, y un cambio que llega tarde no pisa una
 cancelación. Servir y cancelar son del usuario: el chef no lleva a ninguno de los dos.
 
-**El dueño recibe un correo cuando su comanda termina**: lista (con cuántos cortes quedaron en el
+**El dueño recibe un correo cuando el chef le pregunta algo**, uno por pregunta: lo pide solo la
+llamada que la hizo, no un reintento. Y **cuando su comanda termina**: lista (con cuántos cortes quedaron en el
 mesón y el enlace a `/admin/ia/meson?comanda=<id>`), rechazada o fallida (con el motivo del chef).
 Sale con el remitente de los avisos, `PUBLISH_ALERT_FROM`, en el modo de la cuenta, y después de
 responderle al chef (`after`). Uno por cambio: la misma condición sobre el estado decide qué
@@ -1983,14 +2052,14 @@ src/
     tablero.ts             las reglas de Los Números sin base: cuenta elegida, «⋯ Más» abiertos, la URL
     pieza.ts               qué junta las versiones de una pieza y las medianas por atributo (sin base)
     mejores.ts             el mejor (o el peor) X % de lo publicado: el corte, las medianas y lo que se repite (sin base)
-    que-funciona.ts        «Qué te funciona»: qué tema, estilo y formato anduvieron mejor, con su mínimo y su frase (sin base)
+    que-funciona.ts        «Qué te funciona»: qué tema, estilo y formato anduvieron mejor, y si la música ayudó, con su mínimo y su frase (sin base)
     igual-edad.ts          comparar a la misma edad y contra la propia cuenta: los 7 días y «contra su cuenta» (sin base)
     lado-a-lado.ts         dos publicaciones lado a lado: la curva por edad y sus atributos (sin base)
     metrics-consulta.ts    lo que comparten las rutas de /api/metrics: la llave, el rango, la red y la cuenta
     cuentas-api.ts         las cuentas de GET /api/schedule/cuentas: los dos ids y cómo está la conexión (sin base)
     media-api.ts           la clave de un archivo que sube un cliente de la API, en la carpeta de su dueño (sin base)
     archivar-api.ts        el cuerpo y las respuestas de archivar y desarchivar lo quemado por API
-    cocina/                La Cocina: la cámara de frío (lo que se guarda, su cuota y sus nombres por tamaño en bodega.ts; lo de adentro en materiales.ts), los estados de una comanda, la fila del chef, lo que entrega, lo que lee y escribe su API (/api/cocina), las subidas por partes del panel, del teléfono y de la API (subidas-http.ts, que sirve a /api/admin/cocina, /api/mobile/cocina y /api/bodega; la puerta de la llave en llave-api.ts), colgar una comanda, la comanda que pide el teléfono (telefono.ts), el pulso de las tarjetas vivas, el correo de la comanda que terminó y el mesón
+    cocina/                La Cocina: la cámara de frío (lo que se guarda, su cuota y sus nombres por tamaño en bodega.ts; lo de adentro en materiales.ts), los estados de una comanda, la fila del chef, lo que entrega, lo que lee y escribe su API (/api/cocina), las subidas por partes del panel, del teléfono y de la API (subidas-http.ts, que sirve a /api/admin/cocina, /api/mobile/cocina y /api/bodega; la puerta de la llave en llave-api.ts), colgar una comanda, la comanda que pide el teléfono (telefono.ts), el pulso de las tarjetas vivas, cómo atiende la cocina según el latido (latido.ts), las preguntas del chef con su plazo (pregunta.ts y preguntar.ts), la alarma al admin (alarma.ts), los correos de la comanda que terminó y de la pregunta, y el mesón
     color-de-red.ts        el color de marca de cada red en La Parrilla, como clases de Tailwind escritas enteras
     piezas.ts              la pieza de una publicación: sus destinos programados unidos a lo publicado
     auth.ts                sesión del panel
@@ -2005,7 +2074,7 @@ src/
     pruebas/               la Postgres de las pruebas de integración: una base nueva y migrada por archivo; y un lector de zip para mirar el XML de una planilla
     empresa.ts             quién presta el servicio: lo leen la portada, privacidad y términos
     avisos/                la caída de una cuenta y el resumen del día: las reglas sin base y lo que lee y manda
-    sugerencias/           el libro de sugerencias: qué se acepta y cómo queda el issue (sin base), el cliente de GitHub, y guardar y reintentar
+    sugerencias/           el libro de sugerencias: qué se acepta y cómo queda el issue (sin base), el cliente de GitHub, guardar y reintentar, y la respuesta del equipo (lo que se acepta, el correo y el comentario sin base en respuestas.ts; guardarla, leerla y avisar en responder.ts)
     social/
       instagram-login.ts   el login de Instagram, sin página de Facebook: el host, los permisos y cómo leer su token
       instagram-audio.ts   la biblioteca de música de Instagram (Audio API de Meta): lo que suena, la búsqueda y una canción, leídos sin base

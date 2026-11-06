@@ -4,6 +4,25 @@ Lo que se dejó a medias a propósito, con el porqué y lo que costaría termina
 lista de deseos: cada entrada nació de un problema real que se parcheó para seguir.
 
 ---
+## La respuesta a una sugerencia sin issue no llega después al issue, y el correo no se reintenta
+
+**Abierto desde 2026-11-06.**
+
+Cuando el equipo responde una sugerencia (`src/lib/sugerencias/responder.ts`), el correo y el
+comentario del issue salen una vez, después de responder, y nada los reintenta. Dos casos quedan
+cortos:
+
+- Si la sugerencia todavía no tenía issue —no había token, o GitHub estaba caído y la abre el cron
+  al día siguiente—, el comentario no se manda nunca: el issue sale sin la respuesta. La persona sí
+  la lee en el libro, que es donde vive. Hoy casi no pasa: el admin responde desde Las Sugerencias,
+  donde ve «sin issue todavía», o desde el issue mismo, que ya existe.
+- Si Resend falla la primera vez, la persona no recibe el correo; se entera por el punto del panel.
+
+Terminarlo pide anotar en la fila qué se avisó (`comentada_en`, `avisada_en`) y que el cron
+diario que ya reintenta los issues (`reintentarSugerencias`) mande también lo que falta, con el
+mismo reclamo para no duplicar. Una tarde, con su migración.
+
+---
 ## La página de un usuario se crea al invitarlo, pero nadie rellena hacia atrás
 
 **Abierto desde 2026-09-24.**
@@ -577,6 +596,14 @@ Terminarlo cuesta una migración y un reintento: una columna `comandas.aviso_env
 `where`, se suelta si el correo no sale), y una pasada en el cron que mande los que quedaron sin
 marca, solo para comandas que terminaron en las últimas horas, para que el día del despliegue
 no lleguen correos de comandas viejas.
+
+**Lo mismo vale, desde el 2026-11-06, para el correo de una pregunta del chef** (`avisarDeLaPregunta`):
+sale una vez, de la llamada que hizo la pregunta, y si Resend falla no se reintenta. Pesa más que el
+de una comanda lista, porque el plazo corre: si el dueño no se entera, el chef sigue con la opción
+por defecto. La tarjeta de La Cocina la muestra igual, y la vigía del panel la trae sola si está
+abierta. Se dejó sin marca para no doblar el trabajo antes de decidir cómo se marca el de la
+comanda; terminarlo es la misma columna en `preguntas` (`aviso_enviado_en`), con el mismo reintento
+en el cron, limitado a las preguntas que siguen esperando.
 
 
 ## La subida de La Cocina en el teléfono no sigue con la app en segundo plano (2026-11-02)

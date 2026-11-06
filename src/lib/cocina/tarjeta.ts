@@ -24,9 +24,11 @@ export function antesEnLaFila(antes: number): string {
 /**
  * En qué tramo del recorrido va, de 0 a 4 —colgada, el chef mira, el desposte, al fuego, el
  * mesón—, o 5 si ya llegó toda al mesón. Null si terminó sin cocinarse: no lleva recorrido.
- * `pregunta` y `probando` (fase 1) cuentan con el tramo donde ocurren: al revisar y al despostar.
+ * `pregunta` y `probando` cuentan con el tramo donde ocurren: la pregunta, el del estado de donde
+ * salió (`vuelveA`: al revisar o al despostar), y la prueba, al despostar.
  */
-export function tramoDelRecorrido(estado: EstadoComanda): number | null {
+export function tramoDelRecorrido(estado: EstadoComanda, vuelveA?: EstadoComanda | null): number | null {
+  if (estado === 'pregunta' && vuelveA && vuelveA !== 'pregunta') return tramoDelRecorrido(vuelveA)
   const tramos: Partial<Record<EstadoComanda, number>> = {
     recibida: 0,
     revisando: 1,

@@ -52,20 +52,32 @@ sección.
 
     Con eso está la fase 0 entera. Y desde el 2026-11-02, la cámara de frío (la bodega): el material
     en bruto se guarda sin pedir comanda, no vence, tiene una cuota de 20 GB por usuario, y la
-    comanda elige de ahí (`docs/superpowers/specs/2026-11-02-la-bodega-design.md`).
+    comanda elige de ahí (`docs/superpowers/specs/2026-11-02-la-bodega-design.md`). Desde el
+    2026-11-06, de la fase 1, las preguntas del chef con plazo y opción por defecto, con el latido
+    que dice si la cocina toma sola y la alarma al admin (VicentePareja/marca-personal#22).
   - **Lo siguiente, la fase 1:**
-    - las preguntas del chef con plazo y opción por defecto;
     - el probador («Prueba tus estilos», las comandas de tipo `prueba`);
     - el `reestilo` («Otros estilos con el mismo material»).
 
     El diseño dice qué trae cada una.
-  - **El correo de la comanda no se reintenta si Resend falla** (2026-11-02). El de lista,
-    rechazada o fallida ya sale, uno por cambio; falta marcarlo enviado para reintentarlo sin
-    arriesgar un segundo. Pide una migración: el detalle, en `docs/deuda-tecnica.md`, «El correo
-    de la comanda no se reintenta».
-  - **Los avisos de la cocina que faltan** (2026-11-02): el correo cuando el chef pregunta llega
-    con las preguntas de la fase 1, y el de un creativo del mesón por borrarse sigue solo en el
-    resumen del día («Avisos», en el diseño).
+  - **El correo de la comanda, y el de la pregunta, no se reintentan si Resend falla**
+    (2026-11-02; la pregunta, 2026-11-06). Salen uno por cambio y uno por pregunta; falta
+    marcarlos enviados para reintentarlos sin arriesgar un segundo. Pide una migración: el detalle,
+    en `docs/deuda-tecnica.md`, «El correo de la comanda no se reintenta».
+  - **Los avisos de la cocina que faltan** (2026-11-02): el de un creativo del mesón por borrarse
+    sigue solo en el resumen del día («Avisos», en el diseño). Y desde el 2026-11-06, que el chef
+    pregunta: el diseño pide además un aviso en la pestaña de la barra del panel (como el de «Se
+    quemó») y una línea en el resumen del día si hay preguntas sin responder; hoy hay correo y la
+    tarjeta de color, nada en la barra ni en el resumen.
+  - **Que el chef pregunte por el teléfono con una notificación** (2026-11-06). La app muestra la
+    pregunta en «Tus comandas» y se contesta ahí, pero no avisa sola: no hay notificaciones push en
+    la app. El correo es el aviso.
+  - **Por revisar: la alarma de la cocina no ve una comanda tomada sin hora estimada** (2026-11-06).
+    Suena si lleva media hora sin tomar o si pasó su `eta`; una que el chef tomó y dejó en
+    `revisando` sin `eta` —el camino «la revisa una persona del equipo» del issue
+    VicentePareja/marca-personal#22— no suena nunca. Si el servicio del chef no siempre da `eta`,
+    sumar un tercer motivo (tomada y sin cambios en N horas), con su columna. Detalle en
+    `src/lib/cocina/alarma.ts`.
   - **[dueño] Probar una vez la subida por partes contra el almacén de verdad** (2026-10-22). La
     cocina del dueño ya está encendida: en La Cocina → «La cámara de frío», guardar un video de más
     de 64 MB, para que vaya en varias partes, y después sacarlo. El 2026-11-02 se probó de punta a
@@ -185,6 +197,12 @@ sección.
   canción hay que borrar el post y programarlo de nuevo, y si Meta la rechaza, igual. Si se usa
   mucho, sumar «Quitar la música» al editor (`editarPostProgramado` recibiría las opciones de
   Instagram de cada destino pendiente).
+- **Ver con fotos reales de TikTok que «Qué te funciona» las cuenta en «Música»** (2026-11-06):
+  la línea cruza cada destino con la publicación que trae la sincronización de TikTok, y no se
+  ha visto con una cuenta real que `video/list` devuelva las fotos (los tests usan filas
+  armadas). Si a las dos semanas de publicar fotos con y sin «Música de TikTok» la línea sigue
+  diciendo «Nada de lo publicado desde Tu Parrilla… llevó música», es eso: mirar si las fotos
+  aparecen en «Tus publicaciones». Detalle en `src/lib/que-funciona.ts` (`queFuncionaLaMusica`).
 - **La cola de #234 (copiar los videos del lote en segundo plano) no se hace por ahora**
   (2026-10-21). Los otros issues de ese envío ya están: bajar en paralelo (#235), cuánto tardó
   y por qué falló cada fila (#238), una sola descarga por URL en un lote (#236) y
@@ -503,7 +521,9 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   partes de un video de varios GB no se pudieron probar sin uno. Mientras tanto, lo de la 1.1.0
   se publica por aire desde un commit anterior. Detalle en `mobile/README.md`, «La 1.2.0
   necesita un build nativo y pasar por las tiendas». Ya que hay build, conviene sumarle antes
-  `react-native-svg`, que también espera uno (el bug de la entraña, en «Bugs»).
+  `react-native-svg`, que también espera uno (el bug de la entraña, en «Bugs»). El build ya
+  lleva `expo-clipboard` (2026-11-06): sin él, «Copiar el texto» abre la lista de compartir
+  (`mobile/README.md`, «El portapapeles, con y sin su módulo nativo»).
 - **[dueño] La app en iPhone** (2026-10-16). El código ya está listo para iOS; faltan la
   cuenta del Apple Developer Program, confirmar el identificador `cl.tuparrilla.app`
   (queda fijo al registrarlo), la ficha en App Store Connect y el primer build a
@@ -576,6 +596,25 @@ nadie paga: todas las cuentas son iguales y el README dice «Sin suscripción».
   que debe seguir describiendo la app y enlazando Privacidad y Términos.
 
 ## Features y trabajo de código
+
+- **«Copiar el texto» de la bandeja de TikTok, por aire a la 1.1.0** (2026-11-06). Está en `main`;
+  a los teléfonos con la 1.1.0 llega solo cuando se publique por aire desde la rama `ota-1.1.0`,
+  con el cambio encima y sin `expo-clipboard` (ahí el botón dice «Pasar el texto…» y abre la lista
+  de compartir). Cómo se publica esa rama, en `mobile/README.md`, «La 1.2.0 necesita un build
+  nativo y pasar por las tiendas»; lo que cambia sin el módulo, en «El portapapeles, con y sin su
+  módulo nativo».
+
+- **Música en videos con bibliotecas con licencia** (2026-11-06; el dueño lo pospuso: caro y no lo
+  bastante bueno por ahora). Las API de Instagram, TikTok y YouTube no dejan ponerle a un video su
+  propia música; la excepción es la Audio API de Instagram para reels, con Facebook Login, que es
+  el camino aparte y el preferido. Bibliotecas con licencia y API para apps: la Partner API de
+  Epidemic Sound (la licencia es de la app, con sublicencia y safelisting en YouTube, Instagram,
+  Facebook y TikTok; el precio, por ventas; <https://developers.epidemicsound.com/docs/>) y la API
+  de Soundraw (hecha con IA, US$29,99 al mes por 100 canciones; sin confirmar qué cubre la licencia
+  para los usuarios finales; <https://soundraw.io/api>). Es música de producción, no éxitos, y
+  mezclarla con el video pide un servidor con ffmpeg: Vercel no sirve para eso. Descartadas:
+  Pixabay (su API no trae música), la biblioteca de audio de YouTube (sin API), Uppbeat (sin API) y
+  Mubert (la sublicencia, desde US$499 al mes).
 
 - **El correo del código, con un enlace para entrar** (2026-11-02, lo pidió el dueño). Hoy dice
   «NNNNNN es tu código para entrar a Parrilla» y nada más (`pedir` en `src/lib/usuarios.ts`):

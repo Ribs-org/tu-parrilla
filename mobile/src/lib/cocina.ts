@@ -1,6 +1,6 @@
 /**
- * La Cocina en el teléfono, sin pantalla: lo que responde `/api/mobile/cocina`, cómo se nombra y se
- * describe lo que se graba o se elige, la cuota de la cámara de frío en palabras y qué falta para
+ * La Cocina en el teléfono, sin pantalla: lo que responde `/api/mobile/cocina`, cómo atiende la
+ * cocina, lo que falta para contestarle al chef, cómo se nombra y se describe lo que se graba o se elige, la cuota de la cámara de frío en palabras y qué falta para
  * mandarle la comanda al chef. Lo que copia del panel —la instrucción y sus ejemplos, los ganchos
  * de la cuota— lo compara `src/lib/vocabulario.test.ts` en la raíz. Lo dibuja `app/(tabs)/cocina.tsx`.
  */
@@ -49,6 +49,19 @@ export type ComandaDelTelefono = {
   instruccion: string | null
   fila: string | null
   mensaje: string | null
+  /** Lo que el chef pregunta mientras espera respuesta. Un servidor de antes del 2026-11-06 no lo manda. */
+  pregunta?: PreguntaDelChef | null
+}
+
+/** Una pregunta del chef, como la manda el servidor: `siNoContestas` ya viene en palabras. */
+export type PreguntaDelChef = {
+  id: string
+  texto: string
+  /** Null: la respuesta es libre. */
+  opciones: string[] | null
+  porDefecto: string
+  plazo: string
+  siNoContestas: string
 }
 
 export type UsoDeLaCamara = { cuantos: number; guardados: number; subiendo: number; cuota: number }
@@ -57,11 +70,42 @@ export type UsoDeLaCamara = { cuantos: number; guardados: number; subiendo: numb
 export type Cocina = {
   encendida: boolean
   abierta: boolean
+  /** Cómo atiende: sola, a mano o nadie. Un servidor de antes del 2026-11-06 no lo manda. */
+  atiende?: AtiendeLaCocina
+  /** La línea que lo dice, la misma del panel (`src/lib/cocina/latido.ts`); null con la cocina apagada. */
+  cocina?: string | null
   /** Con qué nombre firma el chef; null si la cuenta no tiene ni marca ni nombre. */
   marca: string | null
   camara: UsoDeLaCamara | null
   materiales: Material[]
   comandas: ComandaDelTelefono[]
+}
+
+export type AtiendeLaCocina = 'sola' | 'a-mano' | 'cerrada'
+
+/* ---- cómo atiende la cocina ---- */
+
+const COCINA_CERRADA = 'La cocina está cerrada por ahora: lo que pidas espera su turno.'
+
+/**
+ * La línea de arriba de La Cocina y cómo se pinta su punto: en verde si atiende sola, en ámbar a
+ * mano o cerrada. La frase la manda el servidor; uno de antes solo decía si latía.
+ */
+export function lineaDeLaCocina(c: Pick<Cocina, 'abierta' | 'atiende' | 'cocina'>): { texto: string; tono: 'verde' | 'ambar' } {
+  const atiende: AtiendeLaCocina = c.atiende ?? (c.abierta ? 'sola' : 'cerrada')
+  const texto = c.cocina ?? (c.abierta ? 'La cocina está abierta.' : COCINA_CERRADA)
+  return { texto, tono: atiende === 'sola' ? 'verde' : 'ambar' }
+}
+
+/* ---- las preguntas del chef, como en el panel (`src/lib/cocina/pregunta.ts`) ---- */
+
+export const MAX_RESPUESTA = 500
+
+/** Lo que falta para «Responder» una pregunta libre, o null si ya se puede. */
+export function faltaParaResponder(texto: string): string | null {
+  const largo = texto.trim().length
+  if (largo === 0) return 'Escribe tu respuesta al chef.'
+  return largo > MAX_RESPUESTA ? `Tu respuesta llega hasta ${MAX_RESPUESTA} caracteres.` : null
 }
 
 /* ---- la instrucción, como en el panel (`src/lib/cocina/pedido.ts`) ---- */

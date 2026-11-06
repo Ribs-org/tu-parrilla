@@ -1,6 +1,7 @@
 // El cliente de GitHub del libro de sugerencias: abre un issue en el repositorio y, la primera
-// vez, crea las etiquetas que le faltan. Solo eso: el token (`SUGERENCIAS_GITHUB_TOKEN`) es uno
-// fine-grained con permiso de Issues sobre ese repositorio y nada más.
+// vez, crea las etiquetas que le faltan; y comenta en él la respuesta del equipo. Solo eso: el
+// token (`SUGERENCIAS_GITHUB_TOKEN`) es uno fine-grained con permiso de Issues sobre ese
+// repositorio y nada más, que alcanza para los comentarios.
 //
 // Es una interfaz para que las pruebas pongan un doble: ninguna prueba abre un issue de verdad.
 
@@ -10,7 +11,11 @@ import { ETIQUETAS } from './formato'
 export type IssueNuevo = { titulo: string; cuerpo: string; etiquetas: string[] }
 export type IssueCreado = { numero: number; url: string }
 
-export type ClienteGithub = { crearIssue(issue: IssueNuevo): Promise<IssueCreado> }
+export type ClienteGithub = {
+  crearIssue(issue: IssueNuevo): Promise<IssueCreado>
+  /** Deja un comentario en un issue: la respuesta del equipo (`respuestas.ts`). Lanza si GitHub no lo crea. */
+  comentarIssue(numero: number, cuerpo: string): Promise<void>
+}
 
 /** Adónde van si nadie dice otra cosa: el repositorio de Tu Parrilla. */
 export const REPO_POR_DEFECTO = 'Ribs-org/tu-parrilla'
@@ -94,6 +99,16 @@ export function clienteDeGithub({
         throw new Error('GitHub abrió el issue pero no devolvió su número')
       }
       return { numero: issue.number, url: issue.html_url }
+    },
+
+    async comentarIssue(numero, cuerpo) {
+      // El número arma la dirección: solo un entero positivo, nunca un texto que llegó de afuera.
+      if (!Number.isSafeInteger(numero) || numero <= 0) throw new Error(`Número de issue inválido: ${numero}`)
+      const r = await post(`/issues/${numero}/comments`, { body: cuerpo })
+      if (r.status !== 201) {
+        const detalle = (await r.text().catch(() => '')).slice(0, 200)
+        throw new Error(`GitHub respondió ${r.status} al comentar el issue ${numero}: ${detalle}`)
+      }
     },
   }
 }

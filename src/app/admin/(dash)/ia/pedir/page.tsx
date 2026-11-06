@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { requireUser } from '@/lib/auth'
 import { materialesDeLaCamara } from '@/lib/cocina/materiales'
+import { COCINA_A_MANO } from '@/lib/cocina/latido'
 import { estadoDeLaCocina, etaEnLaFila } from '@/lib/cocina/panel'
 import { lugarDeUnaNueva, marcaDe } from '@/lib/cocina/pedir'
 import { usoDeLaCamara } from '@/lib/cocina/subidas'
@@ -47,7 +48,9 @@ export default async function PedirComandaPage() {
         marca={marca ?? { nombre: usuario.nombre ?? '', handle: null, acento: null, ctaTexto: null }}
         antes={antes}
         eta={eta ? eta.toISOString() : null}
-        cocinaAbierta={cocina.abierta}
+        avisoDeLaCocina={
+          cocina.atiende === 'sola' ? null : cocina.atiende === 'a-mano' ? COCINA_A_MANO : 'La cocina está cerrada por ahora: tu comanda espera su turno.'
+        }
         zona={usuario.zona}
       />
     </>

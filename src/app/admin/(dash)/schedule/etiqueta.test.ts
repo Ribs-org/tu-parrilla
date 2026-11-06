@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { networkLabel } from '@/lib/networks'
-import { etiquetaDestino, motivoDestino, nombreDestino } from './etiqueta'
+import { etiquetaDestino, motivoDestino, nombreDestino, textoParaLaBandeja } from './etiqueta'
 
 describe('nombreDestino', () => {
   it('nombra la red y el handle, para que dos destinos de la misma red se distingan', () => {
@@ -55,5 +55,22 @@ describe('motivoDestino', () => {
     expect(motivoDestino({ status: 'failed', lastError: null })).toBeNull()
     expect(motivoDestino({ status: 'published', lastError: 'viejo' })).toBeNull()
     expect(motivoDestino({ status: 'publishing', lastError: 'viejo' })).toBeNull()
+  })
+})
+
+describe('textoParaLaBandeja', () => {
+  const bandeja = { network: 'tiktok', status: 'published', externalId: null, opciones: { modo: 'borrador' } }
+
+  it('lo que espera en la bandeja copia el texto del post, o el propio del destino si lo tiene', () => {
+    expect(textoParaLaBandeja(bandeja, 'Chimichurri en 30 segundos')).toBe('Chimichurri en 30 segundos')
+    expect(textoParaLaBandeja({ ...bandeja, captionOverride: 'Otro texto' }, 'Chimichurri')).toBe('Otro texto')
+  })
+
+  it('fuera de la bandeja, o sin texto, no hay nada que copiar', () => {
+    // Ya lo terminó en TikTok: la sincronización le encontró su video.
+    expect(textoParaLaBandeja({ ...bandeja, externalId: '7300' }, 'Hola')).toBeNull()
+    expect(textoParaLaBandeja({ ...bandeja, status: 'scheduled' }, 'Hola')).toBeNull()
+    expect(textoParaLaBandeja({ ...bandeja, opciones: { modo: 'directo', privacidad: 'SELF_ONLY' } }, 'Hola')).toBeNull()
+    expect(textoParaLaBandeja(bandeja, '   ')).toBeNull()
   })
 })

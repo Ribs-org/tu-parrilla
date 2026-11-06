@@ -15,7 +15,7 @@ una persona a otra.
 1. En la barra de arriba, apretar el botón «Ajustes» (en una pantalla angosta se ve solo el
    ícono, un trinche y un cuchillo, lado a lado —de día, dos palillos—, sin la palabra).
 2. En el menú, apretar «Los Maestros», la que tiene debajo «quién puede entrar». Está entre La
-   Vitrina y Tu Cuenta.
+   Vitrina y Las Sugerencias ([las-sugerencias.md](las-sugerencias.md)).
 
 O directo: `https://tu-parrilla.cl/admin/usuarios`.
 
