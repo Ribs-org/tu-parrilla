@@ -483,7 +483,9 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   partes de un video de varios GB no se pudieron probar sin uno. Mientras tanto, lo de la 1.1.0
   se publica por aire desde un commit anterior. Detalle en `mobile/README.md`, «La 1.2.0
   necesita un build nativo y pasar por las tiendas». Ya que hay build, conviene sumarle antes
-  `react-native-svg`, que también espera uno (el bug de la entraña, en «Bugs»).
+  `react-native-svg`, que también espera uno (el bug de la entraña, en «Bugs»). El build ya
+  lleva `expo-clipboard` (2026-11-06): sin él, «Copiar el texto» abre la lista de compartir
+  (`mobile/README.md`, «El portapapeles, con y sin su módulo nativo»).
 - **[dueño] La app en iPhone** (2026-10-16). El código ya está listo para iOS; faltan la
   cuenta del Apple Developer Program, confirmar el identificador `cl.tuparrilla.app`
   (queda fijo al registrarlo), la ficha en App Store Connect y el primer build a
@@ -556,6 +558,25 @@ nadie paga: todas las cuentas son iguales y el README dice «Sin suscripción».
   que debe seguir describiendo la app y enlazando Privacidad y Términos.
 
 ## Features y trabajo de código
+
+- **«Copiar el texto» de la bandeja de TikTok, por aire a la 1.1.0** (2026-11-06). Está en `main`;
+  a los teléfonos con la 1.1.0 llega solo cuando se publique por aire desde la rama `ota-1.1.0`,
+  con el cambio encima y sin `expo-clipboard` (ahí el botón dice «Pasar el texto…» y abre la lista
+  de compartir). Cómo se publica esa rama, en `mobile/README.md`, «La 1.2.0 necesita un build
+  nativo y pasar por las tiendas»; lo que cambia sin el módulo, en «El portapapeles, con y sin su
+  módulo nativo».
+
+- **Música en videos con bibliotecas con licencia** (2026-11-06; el dueño lo pospuso: caro y no lo
+  bastante bueno por ahora). Las API de Instagram, TikTok y YouTube no dejan ponerle a un video su
+  propia música; la excepción es la Audio API de Instagram para reels, con Facebook Login, que es
+  el camino aparte y el preferido. Bibliotecas con licencia y API para apps: la Partner API de
+  Epidemic Sound (la licencia es de la app, con sublicencia y safelisting en YouTube, Instagram,
+  Facebook y TikTok; el precio, por ventas; <https://developers.epidemicsound.com/docs/>) y la API
+  de Soundraw (hecha con IA, US$29,99 al mes por 100 canciones; sin confirmar qué cubre la licencia
+  para los usuarios finales; <https://soundraw.io/api>). Es música de producción, no éxitos, y
+  mezclarla con el video pide un servidor con ffmpeg: Vercel no sirve para eso. Descartadas:
+  Pixabay (su API no trae música), la biblioteca de audio de YouTube (sin API), Uppbeat (sin API) y
+  Mubert (la sublicencia, desde US$499 al mes).
 
 - **El correo del código, con un enlace para entrar** (2026-11-02, lo pidió el dueño). Hoy dice
   «NNNNNN es tu código para entrar a Parrilla» y nada más (`pedir` en `src/lib/usuarios.ts`):

@@ -7,7 +7,8 @@ import { useConfirmar } from '@/components/confirmar'
 import { useTema } from '@/components/tema-vivo'
 import type { ScheduledPost, ScheduledPostTarget } from '@/db/schema'
 import { cn } from '@/lib/utils'
-import { confirmarEliminar, motivoDestino, nombreDestino } from './etiqueta'
+import { BANDEJA_SIN_TEXTO, CopiarTexto } from './copiar-texto'
+import { confirmarEliminar, motivoDestino, nombreDestino, textoParaLaBandeja } from './etiqueta'
 import { cortarCola } from './orden'
 import { Redes } from './redes'
 import { Reprogramar } from './reprogramar'
@@ -32,6 +33,8 @@ export function Queue({
     targets: Array<ScheduledPostTarget & { handle: string | null }>
     corte: ReactNode
     cuando: string
+    /** Si el post es un video: lo que va a la bandeja de TikTok sin su texto. */
+    video: boolean
   }>
   volver: string
   /** El post recién programado: su fila se enciende una vez, y la lista la trae a la vista. */
@@ -64,7 +67,7 @@ export function Queue({
       {error && <p className="mb-3 text-sm text-negative">{error}</p>}
       {aviso && <p className="mb-3 text-sm text-positive">{aviso}</p>}
       <ul className="space-y-3">
-      {mostrados.map(({ post, targets, corte, cuando }) => (
+      {mostrados.map(({ post, targets, corte, cuando, video }) => (
         <li
           key={post.id}
           data-recien={post.id === recien ? '' : undefined}
@@ -141,7 +144,9 @@ export function Queue({
             </div>
           </div>
           <div className="mt-3 flex flex-wrap gap-2">
-            {targets.map((target) => (
+            {targets.map((target) => {
+              const paraCopiar = textoParaLaBandeja(target, post.caption)
+              return (
               <span
                 key={target.id}
                 className={cn(
@@ -157,8 +162,11 @@ export function Queue({
                     lo único que dice qué hacer. */}
                 {motivoDestino(target) && ` — ${motivoDestino(target)}`}
                 {target.status === 'failed' && <Reprogramar targetId={target.id} titulo={nombreDestino(target)} />}
+                {/* Lo que espera en la bandeja de TikTok: el texto, para pegarlo al terminarlo allá. */}
+                {paraCopiar ? <CopiarTexto texto={paraCopiar} pista={video ? BANDEJA_SIN_TEXTO : undefined} /> : null}
               </span>
-            ))}
+              )
+            })}
           </div>
           </div>
         </li>
