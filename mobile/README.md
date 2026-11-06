@@ -282,6 +282,19 @@ cola que sigue después de cerrar la app y la subida nativa por partes. En Expo 
 falsa, sí se probó el resto: elegir de la galería, subir en dos partes con su avance, la frase de
 la cuota, mandar la comanda con la instrucción y la cocina apagada.
 
+### El portapapeles, con y sin su módulo nativo
+
+«Copiar el texto», en la tarjeta de lo que espera en la bandeja de TikTok, usa `expo-clipboard`,
+que es un módulo nativo: está en `package.json` desde la 1.2.0 y entra con el próximo build, pero
+no llega por aire a un binario que no lo trae. Por eso `src/lib/portapapeles.ts` no importa
+`expo-clipboard` —su JavaScript lanza al cargarse si el nativo no está, y la app se caería al
+abrir—: le pide el nativo por su nombre (`requireOptionalNativeModule('ExpoClipboard')`, de
+`expo`), que sin él devuelve null. Sin el nativo, el botón dice «Pasar el texto…» y abre la lista
+de compartir del sistema (`Share`, de React Native), que en Android 10 en adelante y en iOS trae
+«Copiar», pero no en todos los teléfonos: por eso no promete copiar. El mismo archivo sirve tal
+cual en la rama `ota-1.1.0`, que no tiene `expo-clipboard` en `package.json`: ahí siempre es la
+lista de compartir.
+
 ## El modo día
 
 La app tiene los dos modos del panel: la noche de entrada y el día con sushi. Es el modo de la

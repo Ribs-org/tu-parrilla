@@ -2,6 +2,7 @@ import { Pressable, Text, View } from 'react-native'
 import { TIPO_TITULO } from './ui'
 import { colorDeRed, type Colores } from './colores'
 import { useColores, useTema } from './tema'
+import { CopiarTexto } from './copiar-texto'
 import { Pieza } from './pieza'
 import {
   bordeDe,
@@ -13,6 +14,7 @@ import {
   type Borde,
   type Sello,
 } from '../lib/parrilla'
+import { BANDEJA_SIN_TEXTO, copiaDeLaBandeja } from '../lib/bandeja'
 import { etiquetaCuenta } from '../lib/publicar'
 import type { PostProgramado } from '../lib/tipos'
 
@@ -55,6 +57,9 @@ function lineaDe(sello: Sello, colores: Colores): { color: string; signo: string
  *
  * Tocarla abre la pantalla para corregirla (`onAbrir`): el texto, la hora, las cuentas, o
  * borrarla.
+ *
+ * Si algo espera en la bandeja de TikTok, lleva «Copiar el texto» (`copiaDeLaBandeja`): aquí es
+ * donde está la persona cuando le llega el aviso de TikTok, y un video llega allá sin su texto.
  */
 export function CorteProgramado({ post, onAbrir }: { post: PostProgramado; onAbrir?: () => void }) {
   const colores = useColores()
@@ -62,6 +67,7 @@ export function CorteProgramado({ post, onAbrir }: { post: PostProgramado; onAbr
   const coccion = coccionDe(estados)
   const sellos = post.redes.map((r) => r.sello ?? selloPorEstado(r.estado, r.error))
   const formato = post.formato ?? 'bife'
+  const copia = copiaDeLaBandeja(post)
   return (
     <Pressable
       onPress={onAbrir}
@@ -109,6 +115,13 @@ export function CorteProgramado({ post, onAbrir }: { post: PostProgramado; onAbr
             )
           })}
         </View>
+
+        {copia ? (
+          <View style={{ gap: 4, marginTop: 4 }}>
+            <CopiarTexto texto={copia.texto} />
+            {copia.video ? <Text style={{ color: colores.suave, fontSize: 11 }}>{BANDEJA_SIN_TEXTO}</Text> : null}
+          </View>
+        ) : null}
 
         {/* Lo que el dibujo dice, en palabras: el color nunca es la única señal. */}
         <Text

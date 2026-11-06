@@ -401,7 +401,11 @@ Cada publicación es una tarjeta con:
   Parrilla y ya no sale en ninguna red.».
 - Abajo, una píldora por cada destino: el ícono de la red (en su color), el usuario, « · » y
   el estado (ver la tabla de estados, más abajo); la píldora es verde si ya salió. Si hay un motivo de falla, sigue « — <motivo>». Si el
-  destino se quemó, la píldora es roja y termina en el botón subrayado **«Reprogramar»**.
+  destino se quemó, la píldora es roja y termina en el botón subrayado **«Reprogramar»**. Si
+  dice «En tu bandeja de TikTok» y el post tiene texto, termina en el botón subrayado **«Copiar
+  el texto»** (ver «Para terminar en TikTok lo que llegó a la bandeja»); si el post es un video,
+  al dejar el mouse encima dice «TikTok no recibe el texto de un video que va a la bandeja:
+  cópialo y pégalo al terminarlo en TikTok.».
 
 El resultado de «Subir ahora» y los errores de «Eliminar» aparecen arriba de la lista, en
 verde o en rojo; un post eliminado simplemente desaparece. Mientras una de esas acciones
@@ -673,7 +677,7 @@ Cada publicación tiene un destino por cuenta, y cada destino va por su lado.
 | «Reintentando» | Píldora gris con « — <motivo>»; en el corte, marca punteada en ámbar y chip «↻»; en el calendario, en «Por hora» y en «Día», el borde ámbar y «↻» | Falló un intento y se volverá a probar solo: quince minutos después del primer fallo y dos horas después del segundo. Son tres intentos en total; algunos rechazos se queman al primero. También dice «Reintentando», sin gastar intentos, un destino de Instagram que espera a que la cuenta recupere cupo (ver «Motivos de un destino que no salió») |
 | «Publicando…» | Píldora gris; humo sobre el corte y chip «…»; en el calendario, en «Por hora» y en «Día», el borde naranjo y «…» | La red recibió el archivo y lo está procesando. Si pasan 24 horas así, cuenta como un intento fallido |
 | «Publicado» | Píldora verde; marca llena en el corte y chip verde «✓»; en el calendario, en «Por hora» y en «Día», cuando salió en todas sus redes, hundida y sin chapa, con un solo «✓» | Ya salió en esa red |
-| «En tu bandeja de TikTok» | Píldora verde; marca quemada hasta la mitad con un punto ámbar, chip «◐» y la tarjeta (o la fila) con borde ámbar | Se mandó como borrador de TikTok: hay que terminarlo en la app de TikTok. Cuando se publica desde allá, la sincronización siguiente (la diaria, o «Sincronizar ahora» en [Los Fierros](los-fierros.md)) encuentra el video y pasa a «Publicado» |
+| «En tu bandeja de TikTok» | Píldora verde; marca quemada hasta la mitad con un punto ámbar, chip «◐» y la tarjeta (o la fila) con borde ámbar | Se mandó como borrador de TikTok: hay que terminarlo en la app de TikTok. Un video llega allá sin su texto: «Copiar el texto», en la lista y en el editor, lo deja listo para pegar. Cuando se publica desde allá, la sincronización siguiente (la diaria, o «Sincronizar ahora» en [Los Fierros](los-fierros.md)) encuentra el video y pasa a «Publicado» |
 | «Falló» | Píldora roja con « — <motivo>» y «Reprogramar»; marca carbonizada, chip rojo «✕», el corte con halo rojo y banderita, y la tarjeta con borde rojo (en el calendario, en «Por hora» y en «Día», con borde rojo y teñida de rojo) | Se quemó: no se volverá a intentar sola. Aparece también en «Se quemó», arriba del calendario, y puede llegar un correo con el asunto «No se pudo publicar en <Red>» (no llega si el motivo es la conexión de la cuenta: de eso avisa un solo correo por cuenta, ver [Los Fierros](los-fierros.md)). También sale en el resumen del día, el correo de la mañana |
 
 Un destino programado en una cuenta con el fierro frío (desconectada, vencida o que no
@@ -704,7 +708,10 @@ Los Fierros, o **«Cambiar el archivo»**, que baja a «Media» en este mismo ed
 «Archivado: ya no sale en «Se quemó» ni en el resumen del día.» (de día, «Se echó a perder»), y
 en vez de «Archivar» va **«Desarchivar»** («Desarchivando…» mientras se guarda), que lo
 devuelve a «Se quemó». Es el único lugar del panel donde se ve lo archivado. Si el fierro de
-su cuenta está frío, **«Reconectar»**. Al pie del
+su cuenta está frío, **«Reconectar»**. Si el destino dice «En tu bandeja de TikTok» y el post
+tiene texto, debajo va **«Copiar el texto»**, y si el post es un video, la explicación «TikTok
+no recibe el texto de un video que va a la bandeja: cópialo y pégalo al terminarlo en
+TikTok.» (las fotos sí llevan su texto a TikTok, y ahí no se explica). Al pie del
 recuadro, según el caso:
 
 - «Hay una publicación en curso. Vuelve en un minuto.», en amarillo, si algún destino está
@@ -838,6 +845,24 @@ Si hay que dejarlo a medias, basta con cerrar el panel: queda como borrador.
 
 Para fotos en TikTok es igual, con hasta 35 fotos JPG o WebP y sin video (hasta diez si el
 post va también a otra red).
+
+### Para terminar en TikTok lo que llegó a la bandeja
+
+Un video mandado con «Enviar como borrador a mi bandeja de TikTok» llega a la app de TikTok sin
+su texto: la bandeja de TikTok recibe solo el archivo. Las fotos sí llevan su texto.
+
+1. Buscar el post en la «Lista», o abrirlo en el editor: el destino de TikTok dice «En tu
+   bandeja de TikTok».
+2. Apretar **«Copiar el texto»**. Dice «Copiado» un momento. Se copia el texto como está ahora
+   en el post, también si se cambió después de mandarlo.
+3. En la app de TikTok, abrir el aviso del borrador, pegar el texto en la descripción y
+   publicar.
+4. Al publicarse, la sincronización siguiente lo encuentra y el destino pasa a «Publicado».
+
+Si el navegador no deja copiar, se abre una ventana «No se pudo copiar solo. Ya está
+seleccionado: cópialo desde aquí.» con el texto seleccionado y el botón «Cerrar». En la app
+del teléfono, la tarjeta del post tiene el mismo botón (ver [La app del
+teléfono](app-movil.md)).
 
 ### Para publicar un reel como trial reel de Instagram
 
@@ -1317,6 +1342,9 @@ editor.
   a quien administra el sitio. Sin candado, se puede cambiar a mano en YouTube Studio.
 - **En TikTok no aparece en mi perfil.** TikTok puede tardar unos minutos. Si se mandó como
   borrador de TikTok, dice «En tu bandeja de TikTok»: hay que terminarlo en la app.
+- **El video llegó a TikTok sin el texto.** Es así: la bandeja de TikTok no recibe el texto de
+  un video. «Copiar el texto», en la lista o en el editor del post, lo deja listo para pegarlo
+  en la descripción al terminarlo en TikTok.
 - **No veo el video en el editor de un post que ya salió.** Cuando un post sale en todas sus
   redes, el video se borra del almacenamiento del sitio; las fotos y la portada se quedan. El
   corte no cambia: sigue siendo una entraña, o la tira con todos sus huesos.
@@ -1411,6 +1439,7 @@ Lo que describe esta página sale de:
   - `src/app/admin/(dash)/schedule/se-quemo.tsx`, `src/app/admin/(dash)/schedule/lista-quemados.tsx` y `src/app/admin/(dash)/schedule/filtro-quemados.ts` («Se quemó»)
   - `src/app/admin/(dash)/schedule/queue.tsx`
   - `src/app/admin/(dash)/schedule/reprogramar.tsx`
+  - `src/app/admin/(dash)/schedule/copiar-texto.tsx` («Copiar el texto» de lo que espera en la bandeja de TikTok)
   - `src/app/admin/(dash)/schedule/archivar.tsx` (el botón «Archivar» / «Desarchivar»)
   - `src/app/admin/(dash)/schedule/revision-media.tsx`
   - `src/app/admin/(dash)/schedule/redes.tsx`
