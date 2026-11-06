@@ -531,6 +531,10 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   organización a nombre de Pyxis con su dirección comercial y la app traspasada a ella (lo mismo
   que «TikTok y Google con la misma entidad»), o cambiar antes la dirección del perfil de pagos por
   una comercial. Tu Parrilla es un producto comercial de Pyxis: la respuesta honesta es «trader».
+  Otra razón para la cuenta de Pyxis: en una cuenta personal nueva, Google exige una prueba
+  cerrada de 12 probadores durante 14 días antes de pedir producción, como lo pide el Dashboard de
+  la app. Una cuenta de organización no tiene esa exigencia. Verificarlo en la ayuda de Google al
+  crearla.
 - **[dueño] El build 1.2.0 de la app, con la cámara, a las tiendas** (2026-11-02). La 1.2.0 trae
   La Cocina en el teléfono: grabar un video o sacar una foto y mandárselo al chef. Pide los
   permisos de cámara y micrófono, que solo llegan con un binario nuevo, y su `runtimeVersion` es
