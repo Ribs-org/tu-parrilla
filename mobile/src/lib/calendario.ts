@@ -74,3 +74,8 @@ export function minutosOfrecidos(actual: number): number[] {
 export function dosCifras(n: number): string {
   return dos(n)
 }
+
+/** «06/11 a las 19:00», en el reloj del teléfono: lo que dice «Cuándo: …» en Publicar y al editar. */
+export function fechaLegible(fecha: Date): string {
+  return `${dos(fecha.getDate())}/${dos(fecha.getMonth() + 1)} a las ${dos(fecha.getHours())}:${dos(fecha.getMinutes())}`
+}

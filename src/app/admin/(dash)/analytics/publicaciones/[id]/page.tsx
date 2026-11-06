@@ -12,6 +12,8 @@ import { networkLabel } from '@/lib/networks'
 import { CLAVE_PIEZA, ordenarVersiones, repartirAtributos, textoDeAtributo } from '@/lib/pieza'
 import { getPieza, type VersionDePieza } from '@/lib/piezas'
 import { getPostRows } from '@/lib/posts'
+import { promocionarAbiertoPara } from '@/lib/redes-abiertas'
+import { Promociones } from '../../promociones'
 import type { PostRow } from '@/lib/posts-kpis'
 import { numerosHref, type Params } from '@/lib/tablero'
 import { cn, formatNumber } from '@/lib/utils'
@@ -60,6 +62,11 @@ export default async function PiezaPage({
   const { comunes, queCambian } = repartirAtributos(versiones)
   const organica = versiones.length === 1 && versiones[0]!.scheduledPostId === null
   const programados = new Set(versiones.map((v) => v.scheduledPostId).filter(Boolean)).size
+  // Lo que se puede promocionar: lo publicado en Instagram o Facebook que la red ya entregó.
+  const promocionar = promocionarAbiertoPara(ownerId)
+  const promocionables = versiones.filter(
+    (v) => v.socialPostId && v.fila && !v.fila.archived && (v.network === 'instagram' || v.network === 'facebook'),
+  )
 
   // Vuelve a donde se entró: el tablero marca sus enlaces con `de=numeros`, «Tu mejor 10 %»
   // con `de=mejores` (y su lado, si era «Lo peor») y «Lado a lado» con `de=lado`; sin marca, a
@@ -249,6 +256,37 @@ export default async function PiezaPage({
           )}
         </p>
       </Panel>
+
+      {promocionar ? (
+        <section id="promociones" aria-label="Promocionar" className="mt-3 scroll-mt-4">
+          <Panel
+            title="Promocionar"
+            hint="Un anuncio de una versión ya publicada, pagado con tu cuenta publicitaria de Meta. Antes de crear nada te mostramos lo máximo que puedes gastar."
+          >
+            {promocionables.length === 0 ? (
+              <p className="text-[0.8rem] text-fg-faint">
+                Ninguna versión de esta pieza se puede promocionar: hace falta una publicada en Instagram o Facebook, que
+                no esté borrada.
+              </p>
+            ) : (
+              <ul className="flex flex-wrap gap-3">
+                {promocionables.map((v) => (
+                  <li key={v.clave}>
+                    <Link
+                      prefetch={false}
+                      href={`/admin/analytics/publicaciones/${v.socialPostId}/promocionar`}
+                      className="chapa inline-block rounded-xl px-3 py-2 text-[0.8rem] text-fg transition-colors hover:bg-acero-800"
+                    >
+                      Promocionar en {nombreDestino(v)} →
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Panel>
+          <Promociones ownerId={ownerId} zona={zona} postIds={ids} />
+        </section>
+      ) : null}
     </>
   )
 }

@@ -247,6 +247,8 @@ const {
 const { ZONA_INVALIDA } = await import('@/lib/zona')
 const { TRIAL_REEL_MEDIA } = await import('@/lib/social/publish/opciones')
 const { FUSION_DISTINTA_RED, FUSION_NO_ES_TUYA, FUSION_FALLO } = await import('@/lib/social/fusion')
+// La regla del editor vive aquí desde que la comparte con el teléfono: se prueba con el mismo doble.
+const { CONSERVAR, YA_SALIO_EN_ALGUNA, editarPostProgramado } = await import('@/lib/social/publish/editar')
 
 beforeEach(() => {
   db.updateCalls.length = 0
@@ -906,5 +908,91 @@ describe('guardarCuenta: el nombre y la zona horaria de quien está en la sesió
 
     expect(await guardarCuenta({}, formData)).toEqual({ ok: true })
     expect(db.updateCalls).toEqual([{ nombre: null, zona: 'America/Santiago' }])
+  })
+})
+
+describe('editarPostProgramado desde el teléfono: la regla del editor, con lo que el teléfono no toca conservado', () => {
+  /** Lo que manda `PATCH /api/mobile/schedule/posts/{id}`: el texto, la hora o no, y qué quitar. */
+  function delTelefono(caption: string, quitar: string[]) {
+    return {
+      caption,
+      scheduledAt: CONSERVAR,
+      cuentas: { quitar },
+      media: CONSERVAR,
+      portada: CONSERVAR,
+      atributos: CONSERVAR,
+      regla: CONSERVAR,
+    }
+  }
+
+  /**
+   * Un post que ya tuvo su hora —corregir el texto de lo que falló no debe pedir otra— con
+   * portada, atributos y un video, a Instagram y YouTube. Las filas, en el orden en que la
+   * función las lee: post, destinos, media, las cuentas que siguen (que `verificarCuentas`
+   * confirma) y la regla, que solo se mira para saber si hay.
+   */
+  function programarFilas(estadoYoutube = 'scheduled') {
+    db.scheduledSelectQueue.push(
+      [
+        {
+          id: 'post-1',
+          ownerId: 'owner-1',
+          caption: 'Texto de antes',
+          scheduledAt: new Date('2026-01-01T13:00:00Z'),
+          coverUrl: 'https://cdn.ejemplo.cl/scheduled/portada.jpg',
+          atributos: { gancho: 'pregunta' },
+          videosLiberados: 0,
+        },
+      ],
+      [
+        { id: 'target-ig', status: 'failed', accountId: 'acc-ig', network: 'instagram', updatedAt: new Date() },
+        { id: 'target-yt', status: estadoYoutube, accountId: 'acc-yt', network: 'youtube', updatedAt: new Date() },
+      ],
+      [{ id: 'media-video', blobUrl: 'https://cdn.ejemplo.cl/scheduled/v.mp4', mediaType: 'video', position: 0 }],
+      [{ id: 'acc-ig', network: 'instagram', handle: '@vicente', accessToken: 'token-vivo' }],
+      [{ postId: 'post-1' }],
+    )
+  }
+
+  it('quita el destino pedido y guarda el texto sin tocar la hora, los archivos, la portada, los atributos ni la regla', async () => {
+    programarFilas()
+
+    expect(
+      await editarPostProgramado('owner-1', 'post-1', delTelefono('Texto editado', ['target-yt']), { soloSinPublicar: true }),
+    ).toEqual({ ok: true })
+
+    expect(db.updateCalls[0]).toMatchObject({
+      caption: 'Texto editado',
+      scheduledAt: new Date('2026-01-01T13:00:00Z'),
+      coverUrl: 'https://cdn.ejemplo.cl/scheduled/portada.jpg',
+      atributos: { gancho: 'pregunta' },
+    })
+    // Un solo DELETE, el del destino: ni la media ni la regla.
+    expect(db.deleteCalls).toHaveLength(1)
+    expect(db.insertCalls).toHaveLength(0)
+    expect(db.onConflictDoUpdateCalls).toHaveLength(0)
+  })
+
+  it('un post que ya salió en alguna cuenta se rechaza con la frase del teléfono, sin escribir nada', async () => {
+    programarFilas('published')
+
+    expect(
+      await editarPostProgramado('owner-1', 'post-1', delTelefono('Texto editado', []), { soloSinPublicar: true }),
+    ).toEqual({ error: YA_SALIO_EN_ALGUNA })
+    expect(db.updateCalls).toHaveLength(0)
+    expect(db.deleteCalls).toHaveLength(0)
+  })
+
+  it('quitar todas las cuentas es la frase del panel: para eso está borrar', async () => {
+    db.scheduledSelectQueue.push(
+      [{ id: 'post-1', ownerId: 'owner-1', caption: '', scheduledAt: new Date('2030-01-01T13:00:00Z'), coverUrl: null }],
+      [{ id: 'target-ig', status: 'scheduled', accountId: 'acc-ig', network: 'instagram', updatedAt: new Date() }],
+      [],
+    )
+
+    expect(
+      await editarPostProgramado('owner-1', 'post-1', delTelefono('Hola', ['target-ig']), { soloSinPublicar: true }),
+    ).toEqual({ error: 'Elige al menos una cuenta.' })
+    expect(db.updateCalls).toHaveLength(0)
   })
 })

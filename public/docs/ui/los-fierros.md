@@ -2,7 +2,7 @@
 
 `/admin/accounts`, dentro del botón «Ajustes» de la barra del panel (no es una pestaña). La lista para elegir cuentas, que aparece sola cuando una red devuelve varias, vive en `/admin/accounts/elegir`.
 
-Los Fierros (en llano: las cuentas conectadas) es donde se conectan a Tu Parrilla las cuentas de Instagram, TikTok, YouTube y Facebook, donde se renuevan cuando su permiso vence y donde se desconectan. Threads y X / Twitter también están en la lista, pero dicen «Próximamente»: todavía no se pueden conectar. Cada cuenta es una fila con su «fierro», una barra corta de color que dice si la conexión está viva; lo que se usa poco se abre con la flecha de la fila. Sin una cuenta conectada aquí, el panel no puede publicar en esa red. Las cuatro redes que se conectan sirven para publicar y traen los números de sus posts; los comentarios (en [La Mesa](la-mesa.md)) llegan de Instagram, Facebook y YouTube.
+Los Fierros (en llano: las cuentas conectadas) es donde se conectan a Tu Parrilla las cuentas de Instagram, TikTok, YouTube y Facebook, donde se renuevan cuando su permiso vence y donde se desconectan. Threads y X / Twitter también están en la lista, pero dicen «Próximamente»: todavía no se pueden conectar. Cada cuenta es una fila con su «fierro», una barra corta de color que dice si la conexión está viva; lo que se usa poco se abre con la flecha de la fila. Sin una cuenta conectada aquí, el panel no puede publicar en esa red. Las cuatro redes que se conectan sirven para publicar y traen los números de sus posts; los comentarios (en [La Mesa](la-mesa.md)) llegan de Instagram, Facebook y YouTube (y de Threads solo en la cuenta del revisor de Meta, ver «Threads y X / Twitter: «Próximamente»»).
 
 **De día** esta pantalla se llama «Los Cuchillos», en el menú de Ajustes y en su título, y el fierro de cada cuenta es un cuchillo chico: el mango oscuro y la hoja en salmón tostado (con filo, viva), en ámbar (se desafila: vence en la semana) o gris (sin filo: hay que reconectar). La línea de una cuenta que vence dice «Este cuchillo se está desafilando: la conexión vence <fecha>. Reconéctala antes de que pierda el filo.», el aviso de Ajustes dice «1 se desafila» o «1 sin filo», y el botón Ajustes lleva dos palillos en vez del trinche y el cuchillo. Lo demás, igual: ver «El modo día», en [index.md](index.md).
 
@@ -50,7 +50,7 @@ Cada cuenta es una fila de una o dos líneas. De izquierda a derecha:
 3. **Debajo del nombre, una línea que dice cómo está**, una sola de estas, en este orden:
    - en rojo, si la última sincronización falló o si la red rechazó la conexión al publicar: «La conexión falló; reconecta la cuenta.» Al pasar el mouse aparece el error original de la red, a veces en inglés;
    - en ámbar, si se está enfriando: «Este fierro se está enfriando: la conexión vence hoy. Reconéctala antes de que se apague.» En lugar de «hoy» puede decir «mañana», «pasado mañana» o «dentro de 5 días»;
-   - si no: cuándo se trajeron sus números por última vez —«Sincronizado recién», «Sincronizado hace 3 horas», «Sincronizado ayer», «Sincronizado hace 4 días»…— o «Sin sincronizar» si nunca se trajeron, con «Sin credencial · » delante si la cuenta no está conectada. Threads y X / Twitter dicen siempre «Sin sincronizar», porque de ellas no se traen números.
+   - si no: cuándo se trajeron sus números por última vez —«Sincronizado recién», «Sincronizado hace 3 horas», «Sincronizado ayer», «Sincronizado hace 4 días»…— o «Sin sincronizar» si nunca se trajeron, con «Sin credencial · » delante si la cuenta no está conectada. X / Twitter dice siempre «Sin sincronizar», porque de ella no se traen números; Threads también, salvo en la cuenta del revisor cuando la instalación ya pide sus permisos de lectura.
 4. A la derecha, «Reconectar» si la cuenta está conectada, o «Conectar →» si no. En Threads y X / Twitter no aparece ninguno de los dos. En una cuenta de Instagram conectada con el login de Instagram, los dos vuelven a abrir la ventana de Instagram; si quien la tiene ya no ve ese login, abren la de Facebook.
 5. Una **flecha** hacia abajo, que abre el detalle de la cuenta (un lector de pantalla la lee «Más de <nombre>»). Abierta, la flecha mira hacia arriba y otro clic lo cierra.
 
@@ -154,6 +154,8 @@ Todavía no se pueden conectar, y no hay nada que hacer de este lado: en vez de 
 
 Mientras Meta revisa Threads, la cuenta que la instalación tenga habilitada para esa revisión (la del revisor) ve Threads como cualquier otra red: con «Conectar →», y puede programarle. Para las demás sigue en «Próximamente».
 
+Si además la instalación pide los permisos de lectura de Threads (los números y las respuestas), la ventana de Threads los pide al conectar, y esa cuenta trae sus publicaciones con sus números a [Los Números](los-numeros.md) y sus respuestas a [La Mesa](la-mesa.md). Una cuenta de Threads conectada antes de eso no los concedió: hay que apretar «Reconectar» una vez; mientras tanto la sincronización de Threads falla y la fila lo marca con el triángulo rojo.
+
 Una cuenta de Threads o de X conectada antes sigue en su bloque, sin «Reconectar»: se puede desconectar y quitar como cualquier otra (ver «Para quitar una cuenta»).
 
 ### Para agregar otra cuenta de la misma red
@@ -221,7 +223,7 @@ No se puede deshacer. Si las dos están conectadas, la opción no aparece: prime
 1. Aprieta «Sincronizar ahora», abajo de todo.
 2. Espera «Listo.» o un error.
 
-Trae los posts y los números de las cuentas de Instagram, TikTok, YouTube y Facebook; no toca Threads, X ni los comentarios. Se puede apretar una vez cada cinco minutos. Los números también se traen solos una vez al día.
+Trae los posts y los números de las cuentas de Instagram, TikTok, YouTube y Facebook, y de Threads solo en la cuenta del revisor cuando la instalación pide sus permisos de lectura; no toca X ni los comentarios. Se puede apretar una vez cada cinco minutos. Los números también se traen solos una vez al día.
 
 ## Mensajes que puede ver
 
@@ -299,10 +301,11 @@ Trae los posts y los números de las cuentas de Instagram, TikTok, YouTube y Fac
 - **«¿Tengo que poner mi TikTok en privada?»** → No, ni para conectar ni para publicar: la publicación directa está aprobada y sale con la privacidad que se elija en el compositor de [La Parrilla](la-parrilla.md).
 - **«El botón "Ajustes" (o "el engranaje") tiene un punto ámbar (o rojo)»** → Una cuenta se está enfriando (o se apagó). Abrir el botón: la entrada «Los Fierros» dice cuántas, por ejemplo «1 se enfría». Aquí, la fila con el fierro ámbar o gris → «Reconectar». Una cuenta desconectada a propósito no enciende el punto.
 - **«¿Cómo conecto Threads?»** o **«no puedo conectar X»** → Todavía no se puede: las dos dicen «Próximamente». Hoy se conectan Instagram, Facebook, TikTok y YouTube.
-- **«Threads o X dicen "Sin sincronizar"»** → Es lo normal, en una cuenta conectada antes de que esas redes quedaran en «Próximamente»: de ellas no se traen números.
-- **«Sincronizar ahora no hace nada» o «me dice que espere»** → Se puede apretar una vez cada cinco minutos. Los números de Threads y X no se traen nunca.
+- **«Threads o X dicen "Sin sincronizar"»** → Es lo normal, en una cuenta conectada antes de que esas redes quedaran en «Próximamente»: de ellas no se traen números. La excepción es Threads en la cuenta del revisor de Meta, cuando la instalación pide sus permisos de lectura.
+- **«Sincronizar ahora no hace nada» o «me dice que espere»** → Se puede apretar una vez cada cinco minutos. Los números de X no se traen nunca, y los de Threads solo en la cuenta del revisor de Meta.
 - **«¿Dónde saco el id de la cuenta para la API o la carga masiva?»** → En el detalle de la cuenta (la flecha de su fila): el de «En Tu Parrilla: », con el ícono de copiar. Si lo pide para ti y ya tienes su llave, no hace falta: léelo en `GET /api/schedule/cuentas`.
 - **«No me llegan los comentarios de Instagram, Facebook o YouTube»** → Si la cuenta se conectó antes de que existieran los comentarios, hay que apretar «Reconectar» una vez para dar ese permiso. Más en [La Mesa](la-mesa.md).
+- **«La ventana de Facebook me pide ver mis anuncios»** (o «acceder a tus anuncios», según cómo lo diga Meta) → Es para «Lo pagado», en [Los Números](los-numeros.md): mostrar cómo les fue a las publicaciones que la persona promocionó. Si además pide **administrar** los anuncios, es para «Promocionar», en la pieza de cada publicación: armar un anuncio de una publicación ya publicada. Tu Parrilla nunca crea ni gasta nada sola: cada promoción la confirma la persona, viendo lo máximo que se puede gastar. Por ahora solo lo piden algunas instalaciones, mientras Meta lo revisa. Si se aceptó la conexión antes de que se pidiera, «Lo pagado» dice que no hay anuncios leídos, y «Promocionar» pide volver a conectar, hasta que se reconecta Instagram.
 - **«Hay una cuenta de YouTube con un código que empieza con UC y dice "Sin credencial"»** → Solo le pasa a quien administra la instalación: es el canal configurado en ella, esperando que lo conecten. «Conectar →» con la cuenta de Google de ese canal la activa.
 - **«Quiero borrar una cuenta del todo»** o **«quiero sacar una cuenta»** → «Desconectar» y después «Quitar», en el detalle de la cuenta (la flecha de su fila). Ver «Para quitar una cuenta».
 - **«No me aparece Quitar»** → Está en el detalle de la cuenta (la flecha de su fila), y solo en una desconectada («Sin credencial»): primero «Desconectar».
@@ -313,10 +316,10 @@ Trae los posts y los números de las cuentas de Instagram, TikTok, YouTube y Fac
 - No quita una cuenta que está en otro usuario: la quita ese usuario desde su sesión. Tampoco la traspasa: eso lo hace quien administra Tu Parrilla, en Los Maestros.
 - No deshace una fusión.
 - No elige a qué cuenta sale cada publicación: eso se marca en el compositor de [La Parrilla](la-parrilla.md).
-- No muestra los números de las cuentas ni de sus publicaciones: están en [Los Números](los-numeros.md).
+- No muestra los números de las cuentas ni de sus publicaciones: están en [Los Números](los-numeros.md). Tampoco los de los anuncios, ni conecta una cuenta publicitaria aparte: los anuncios se leen y se crean con la misma conexión de Instagram, y salen en «Lo pagado», en Los Números. Desconectar o quitar una cuenta no detiene una promoción que ya está en Meta: eso se hace antes, en la pieza, o en el Administrador de anuncios.
 - No muestra ni responde comentarios: eso es [La Mesa](la-mesa.md).
 - No conecta Threads ni X / Twitter, que dicen «Próximamente», ni otras redes que las de la lista (ni LinkedIn, ni WhatsApp, ni otras).
-- No trae números de Threads ni de X / Twitter, ni comentarios de TikTok, Threads o X.
+- No trae números de X / Twitter, ni comentarios de TikTok o X. De Threads, números y respuestas solo en la cuenta del revisor de Meta.
 - No elige con qué cuenta se entra en la ventana de la red: eso lo decide la red, y «Reconectar» no está atado a la fila.
 - Desmarcar una cuenta ya conectada en la lista no la desconecta: solo no la renueva.
 - No genera llaves de API: eso es [La Cocina](la-cocina.md), en «Tu propio chef».
@@ -347,7 +350,7 @@ Lo que describe sale de:
 - `src/lib/social/vuelta.ts` (la frase de «Agregar cuenta →» cuando solo se renovó la de antes)
 - `src/lib/social/meta-bajas.ts` (las frases de la baja desde Facebook y desde Instagram)
 - `src/lib/social/quitar.ts` (las reglas y las frases de «Quitar»)
-- `src/lib/social/sync.ts` y `src/lib/social/index.ts` (qué redes traen números)
+- `src/lib/social/sync.ts` y `src/lib/social/index.ts` (qué redes traen números) y `src/lib/social/threads.ts` (los números de Threads y la bandera de sus permisos de lectura)
 - `src/lib/social/publish/x.ts` y `src/lib/social/publish/threads.ts` (la renovación al publicar)
 - `src/lib/social/publish/publisher.ts`, `src/lib/social/publish/tiktok-creador.ts` y `src/app/admin/(dash)/schedule/composer.tsx` (las frases de otras pantallas que mandan a reconectar)
 - `src/db/schema.ts` (`SOCIAL_NETWORKS`, el orden de los bloques)

@@ -234,7 +234,7 @@ export const socialAccounts = pgTable(
     // habla con graph.facebook.com; «instagram» es el login de Instagram, sin página, que habla
     // con graph.instagram.com y con otro token (`social/instagram-login.ts`). Nulo en las demás
     // redes; en Instagram, nulo se lee como «facebook», que es lo que eran todas antes de que
-    // existiera la columna (`0026_login_de_la_cuenta.sql` las marcó).
+    // existiera la columna (`0028_login_de_la_cuenta.sql` las marcó).
     login: text('login').$type<'facebook' | 'instagram'>(),
     accessToken: text('access_token'),
     refreshToken: text('refresh_token'),
@@ -368,6 +368,98 @@ export const accountMetrics = pgTable(
     unique('account_metrics_account_day_key').on(t.day, t.accountId),
     index('account_metrics_day_idx').on(t.day),
   ],
+).enableRLS()
+
+/**
+ * Un anuncio de Meta de alguna cuenta publicitaria del dueño, con sus totales de principio a
+ * fin (`lib/social/anuncios.ts`). Se reescribe entero en cada sincronización: Meta da el total
+ * acumulado, así que no hace falta una lectura por día como en `post_metrics`.
+ *
+ * Cuelga de la cuenta conectada cuyo token lo leyó, no del dueño: así un traspaso o una
+ * fusión lo llevan con la cuenta, y quitarla —o el borrado que pide Meta— lo borra en cascada.
+ * `post_id` es la publicación promocionada, si es una de las que Tu Parrilla conoce; un anuncio
+ * armado aparte en el Administrador de anuncios queda sin ella y solo suma al total.
+ *
+ * Solo se lee con `ads_read`, que hoy espera su revisión de Meta (`ANUNCIOS_ABIERTO_PARA`).
+ */
+export const anuncios = pgTable(
+  'anuncios',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    accountId: uuid('account_id')
+      .notNull()
+      .references(() => socialAccounts.id, { onDelete: 'cascade' }),
+    postId: uuid('post_id').references(() => socialPosts.id, { onDelete: 'set null' }),
+    // El id del anuncio en Meta.
+    externalId: text('external_id').notNull(),
+    nombre: text('nombre'),
+    estado: text('estado'),
+    // `act_<id>`, su nombre y la moneda en que se cobra: el gasto viene en esa moneda.
+    cuentaPublicitariaId: text('cuenta_publicitaria_id').notNull(),
+    cuentaPublicitariaNombre: text('cuenta_publicitaria_nombre'),
+    moneda: text('moneda'),
+    // Lo que se promocionó: el post de la página (`páginaID_postID`, el mismo formato de los
+    // `external_id` de Facebook) y, si salió en Instagram, el id de esa publicación.
+    storyId: text('story_id'),
+    instagramMediaId: text('instagram_media_id'),
+    gasto: doublePrecision('gasto').notNull().default(0),
+    alcance: integer('alcance'),
+    impresiones: integer('impresiones'),
+    clics: integer('clics'),
+    desde: date('desde'),
+    hasta: date('hasta'),
+    leidoEn: timestamp('leido_en', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    unique('anuncios_account_external_key').on(t.accountId, t.externalId),
+    index('anuncios_post_idx').on(t.postId),
+  ],
+).enableRLS()
+
+/**
+ * Una promoción que el dueño armó desde Tu Parrilla (`lib/social/promocionar.ts`): la campaña,
+ * el conjunto, el creativo y el anuncio que se crearon en su cuenta publicitaria para una de sus
+ * publicaciones. Los resultados no viven acá: llegan por la lectura de siempre, a `anuncios`, por
+ * el id del anuncio.
+ *
+ * Cuelga de la cuenta conectada de la publicación, como `anuncios`. Borrarla no toca nada en
+ * Meta: la campaña sigue en la cuenta publicitaria, y se maneja desde el Administrador de
+ * anuncios. Los montos van en la unidad mínima de la moneda, como los pide Meta (centavos de
+ * dólar, pesos chilenos enteros: `OFFSET_1`).
+ */
+export const promociones = pgTable(
+  'promociones',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    accountId: uuid('account_id')
+      .notNull()
+      .references(() => socialAccounts.id, { onDelete: 'cascade' }),
+    postId: uuid('post_id')
+      .notNull()
+      .references(() => socialPosts.id, { onDelete: 'cascade' }),
+    cuentaPublicitariaId: text('cuenta_publicitaria_id').notNull(),
+    moneda: text('moneda').notNull(),
+    campanaId: text('campana_id').notNull(),
+    conjuntoId: text('conjunto_id').notNull(),
+    creativoId: text('creativo_id').notNull(),
+    anuncioId: text('anuncio_id').notNull(),
+    objetivo: text('objetivo').$type<'alcance' | 'interaccion' | 'trafico'>().notNull(),
+    tipoPresupuesto: text('tipo_presupuesto').$type<'diario' | 'total'>().notNull(),
+    presupuesto: bigint('presupuesto', { mode: 'number' }).notNull(),
+    gastoMaximo: bigint('gasto_maximo', { mode: 'number' }).notNull(),
+    desde: timestamp('desde', { withTimezone: true }).notNull(),
+    hasta: timestamp('hasta', { withTimezone: true }).notNull(),
+    paises: jsonb('paises').$type<string[]>().notNull(),
+    edadMin: integer('edad_min').notNull(),
+    edadMax: integer('edad_max'),
+    advantage: boolean('advantage').notNull().default(false),
+    // Lo que el dueño pidió por última vez; lo que Meta dice de verdad (en revisión, rechazado)
+    // se lee aparte, en vivo.
+    estado: text('estado').$type<'activa' | 'pausada' | 'detenida'>().notNull(),
+    creadaEn: timestamp('creada_en', { withTimezone: true }).notNull().defaultNow(),
+    actualizadaEn: timestamp('actualizada_en', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('promociones_post_idx').on(t.postId), index('promociones_account_idx').on(t.accountId)],
 ).enableRLS()
 
 export const TARGET_STATUSES = ['scheduled', 'publishing', 'published', 'failed'] as const
@@ -1111,6 +1203,8 @@ export type Click = typeof clicks.$inferSelect
 export type SocialAccount = typeof socialAccounts.$inferSelect
 export type SocialPost = typeof socialPosts.$inferSelect
 export type PostMetric = typeof postMetrics.$inferSelect
+export type Anuncio = typeof anuncios.$inferSelect
+export type Promocion = typeof promociones.$inferSelect
 export type ScheduledPost = typeof scheduledPosts.$inferSelect
 export type ScheduledPostTarget = typeof scheduledPostTargets.$inferSelect
 export type ScheduledPostMedia = typeof scheduledPostMedia.$inferSelect

@@ -123,10 +123,13 @@ const { vincularSinId } = await import('./social/vincular-sin-id')
 const { listarBorradores, cargarBorrador, guardarBorrador, borrarBorrador } = await import('./borradores')
 const { cuentasParaElTelefono } = await import('./borradores-movil')
 const { leerAjuste } = await import('./ajustes')
+const { leerLoPagado, tieneAnuncios } = await import('./lo-pagado')
 const { leerProgramados } = await import('./schedule-leer')
 const { listarLlaves, crearLlave } = await import('./llaves')
 const { leerResumen } = await import('./avisos/run')
 const { archivarQuemados, archivarDestino } = await import('./social/publish/archivar')
+const { CONSERVAR, editarPostProgramado } = await import('./social/publish/editar')
+const { postParaEditarEnElTelefono } = await import('./editar-movil')
 const { recibirSugerencia } = await import('./sugerencias/guardar')
 const { materialesDeLaCamara, editarMaterial, sacarMaterial } = await import('./cocina/materiales')
 const { usoDeLaCamara } = await import('./cocina/subidas')
@@ -421,6 +424,22 @@ describe('aislamiento por dueño (SQL generado, sin base)', () => {
     expect(consultas[1]!.params).toContain('post-1')
   })
 
+  it('lo-pagado: leerLoPagado ata los anuncios al dueño por la cuenta que los leyó, y la publicación también', async () => {
+    const consultas = await todasLasConsultas(() => leerLoPagado(DUENO, '2026-10-01', '2026-10-31'))
+    expect(consultas).toHaveLength(1)
+    esperarFiltradoPorDueno(consultas[0]!)
+    // La publicación se suma por un leftJoin: tiene que ser del mismo dueño, o un anuncio que
+    // apuntara a otra mostraría su texto y su miniatura.
+    const on = consultas[0]!.sql.split(/\bwhere\b/i)[0]!
+    expect(on).toMatch(/left join "social_posts" on \([^)]*"social_posts"\."owner_id" = \$/i)
+  })
+
+  it('lo-pagado: tieneAnuncios mira solo los del dueño', async () => {
+    const consultas = await todasLasConsultas(() => tieneAnuncios(DUENO))
+    expect(consultas).toHaveLength(1)
+    esperarFiltradoPorDueno(consultas[0]!)
+  })
+
   it('ajustes: leerAjuste filtra por dueño', async () => {
     const consultas = await todasLasConsultas(() => leerAjuste(DUENO, 'voz'))
     expect(consultas).toHaveLength(1)
@@ -662,6 +681,32 @@ describe('aislamiento por dueño, escrituras (SQL generado, sin base)', () => {
     ])
     expect(consultas).toHaveLength(2)
     for (const c of consultas) esperarFiltradoPorDueno(c)
+  })
+
+  // Las dos puertas de la edición —el panel y el teléfono— y la pantalla del teléfono leen
+  // primero el post atado al dueño: lo demás va por el id que esa lectura ya confirmó.
+  it('social/publish/editar: editarPostProgramado lee el post atado al dueño antes de seguir', async () => {
+    const consultas = await todasLasConsultas(() =>
+      editarPostProgramado(DUENO, '6f1c2a54-9b1e-4c3d-8f00-0123456789ab', {
+        caption: 'Hola',
+        scheduledAt: CONSERVAR,
+        cuentas: { quitar: [] },
+        media: CONSERVAR,
+        portada: CONSERVAR,
+        atributos: CONSERVAR,
+        regla: CONSERVAR,
+      }),
+    )
+    expect(consultas).toHaveLength(1)
+    esperarFiltradoPorDueno(consultas[0]!)
+  })
+
+  it('editar-movil: postParaEditarEnElTelefono lee el post atado al dueño antes de seguir', async () => {
+    const consultas = await todasLasConsultas(() =>
+      postParaEditarEnElTelefono(DUENO, '6f1c2a54-9b1e-4c3d-8f00-0123456789ab', 'America/Santiago'),
+    )
+    expect(consultas).toHaveLength(1)
+    esperarFiltradoPorDueno(consultas[0]!)
   })
 
   /**

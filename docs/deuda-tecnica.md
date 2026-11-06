@@ -156,8 +156,9 @@ sí solo: cada camino decidió distinto, y dos de las tres decisiones estaban ma
 - **`scheduleBatch`** (`src/lib/social/publish/batch.ts`) es el que lo hace bien: llama a
   `documentoToBlob`, copia el PDF a R2 y guarda **nuestra** URL; si no puede traerlo, rechaza la
   fila ahí mismo.
-- **`updateScheduledPost`** (`src/app/admin/actions.ts`) lo hacía mal y **se arregló en esta
-  misma rama**: su `onConflictDoUpdate` esparcía la regla entera, así que cada guardado del
+- **`updateScheduledPost`** (`src/app/admin/actions.ts`; desde el 2026-11-05 su regla vive en
+  `editarPostProgramado`, en `src/lib/social/publish/editar.ts`, que comparte con la app del
+  teléfono) lo hacía mal y **se arregló en esta misma rama**: su `onConflictDoUpdate` esparcía la regla entera, así que cada guardado del
   editor escribía `documento_url = NULL` —el formulario no tiene ese campo, y el validador
   siempre devuelve la clave puesta—. Un post programado por API con su PDF perdía el documento en
   cuanto el dueño cambiaba la hora, y al día siguiente el barrido de R2 borraba el archivo. Ahora

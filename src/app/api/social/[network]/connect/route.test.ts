@@ -105,12 +105,65 @@ describe('GET /api/social/instagram/connect?login=instagram', () => {
   })
 })
 
+const SIN = { privado: false, threads: false, anuncios: false, promocionar: false }
+const TODO = { privado: true, threads: true, anuncios: true, promocionar: true }
+
 describe('los permisos del privado', () => {
   it('solo con la bandera, y solo en Instagram y Facebook', () => {
-    expect(scopesDe('instagram', false)).not.toContain('instagram_manage_messages')
-    expect(scopesDe('instagram', true)).toMatch(/,instagram_manage_messages,pages_messaging$/)
-    expect(scopesDe('facebook', true)).toMatch(/,pages_messaging$/)
-    expect(scopesDe('tiktok', true)).toBe(scopesDe('tiktok', false))
-    expect(scopesDe('linkedin', true)).toBeUndefined()
+    expect(scopesDe('instagram', SIN)).not.toContain('instagram_manage_messages')
+    expect(scopesDe('instagram', { ...SIN, privado: true })).toMatch(/,instagram_manage_messages,pages_messaging$/)
+    expect(scopesDe('facebook', { ...SIN, privado: true })).toMatch(/,pages_messaging$/)
+    expect(scopesDe('tiktok', TODO)).toBe(scopesDe('tiktok', SIN))
+    expect(scopesDe('linkedin', TODO)).toBeUndefined()
+  })
+})
+
+describe('los permisos extra de Threads', () => {
+  it('sin la bandera, Threads pide solo lo de publicar', () => {
+    expect(scopesDe('threads', SIN)).toBe('threads_basic,threads_content_publish')
+    // La del privado no le suma nada: es de Instagram y Facebook.
+    expect(scopesDe('threads', { ...SIN, privado: true })).toBe('threads_basic,threads_content_publish')
+  })
+
+  it('con la bandera suma los números y las respuestas, y solo en Threads', () => {
+    expect(scopesDe('threads', { ...SIN, threads: true })).toBe(
+      'threads_basic,threads_content_publish,threads_manage_insights,threads_read_replies,threads_manage_replies',
+    )
+    expect(scopesDe('instagram', { ...SIN, threads: true })).toBe(scopesDe('instagram', SIN))
+  })
+})
+
+describe('el permiso de los anuncios', () => {
+  it('solo con su bandera, y solo en Instagram y Facebook', () => {
+    expect(scopesDe('instagram', SIN)).not.toContain('ads_read')
+    expect(scopesDe('instagram', { ...SIN, anuncios: true })).toMatch(/,ads_read$/)
+    expect(scopesDe('facebook', { ...SIN, anuncios: true })).toMatch(/,ads_read$/)
+    // Leer no es promocionar: `ads_management` tiene su propia bandera.
+    expect(scopesDe('instagram', { ...SIN, privado: true, anuncios: true })).not.toContain('ads_management')
+    expect(scopesDe('tiktok', TODO)).toBe(scopesDe('tiktok', SIN))
+  })
+
+  it('se suma al privado sin pisarlo', () => {
+    expect(scopesDe('instagram', { ...SIN, privado: true, anuncios: true })).toMatch(/,instagram_manage_messages,pages_messaging,ads_read$/)
+  })
+
+  it('promocionar pide ads_management solo junto con leer', () => {
+    expect(scopesDe('instagram', { ...SIN, anuncios: true, promocionar: true })).toMatch(/,ads_read,ads_management$/)
+    expect(scopesDe('facebook', { ...SIN, anuncios: true, promocionar: true })).toMatch(/,ads_read,ads_management$/)
+    // La bandera de promocionar sola no pide nada.
+    expect(scopesDe('instagram', { ...SIN, promocionar: true })).toBe(scopesDe('instagram', SIN))
+    expect(scopesDe('youtube', { ...SIN, anuncios: true, promocionar: true })).toBe(scopesDe('youtube', SIN))
+  })
+
+  it('la ventana de Meta lo pide con la bandera puesta', async () => {
+    process.env.INSTAGRAM_APP_ID = 'app'
+    process.env.META_PERMISOS_ANUNCIOS = '1'
+    try {
+      const destino = new URL((await conectar('instagram')).headers.get('location') ?? '')
+      expect(destino.searchParams.get('scope')?.split(',')).toContain('ads_read')
+    } finally {
+      delete process.env.INSTAGRAM_APP_ID
+      delete process.env.META_PERMISOS_ANUNCIOS
+    }
   })
 })

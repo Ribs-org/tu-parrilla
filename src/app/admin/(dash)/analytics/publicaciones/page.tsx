@@ -1,18 +1,15 @@
-import { headers } from 'next/headers'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { Empty, Panel } from '@/components/charts/panel'
 import { RangoBar, SelectorEnUrl } from '@/components/filter-bar'
 import { requireUser } from '@/lib/auth'
-import { dominioProducto, esDominioDelProducto } from '@/lib/dominios'
+import { enlaceDeLaPaginaPrincipal } from '@/lib/enlace-de-la-pagina'
 import { parseFilters } from '@/lib/filters'
 import { networkLabel } from '@/lib/networks'
 import { getCuentas, getPostRows } from '@/lib/posts'
 import { activeRows, unpastedCount, withPlatformMetrics, withoutPlatformMetricsCount } from '@/lib/posts-kpis'
-import { getAllProfiles } from '@/lib/profiles'
 import { cuentaElegida, numerosHref, type Params } from '@/lib/tablero'
-import { adminId } from '@/lib/usuarios'
-import { cn, formatNumber, urlPublicaDe } from '@/lib/utils'
+import { cn, formatNumber } from '@/lib/utils'
 import { nombreDe } from '@/lib/vocabulario'
 import { PostTable } from './post-table'
 
@@ -207,25 +204,5 @@ export default async function PublicacionesPage({ searchParams }: { searchParams
         )}
       </Panel>
     </>
-  )
-}
-
-/**
- * La dirección pública de la página principal del dueño, ya resuelta contra el host: es a
- * la que tiene que llevar el link con `?s=` que se copia de cada fila (ver `urlPublicaDe`).
- */
-async function enlaceDeLaPaginaPrincipal(ownerId: string): Promise<string> {
-  const cabeceras = await headers()
-  const host = cabeceras.get('host') ?? 'localhost:3000'
-  const protocolo = cabeceras.get('x-forwarded-proto') ?? (host.startsWith('localhost') ? 'http' : 'https')
-  const perfiles = await getAllProfiles(ownerId)
-  const principal = perfiles.find((p) => p.isDefault) ?? perfiles[0]
-  if (!principal) return `${protocolo}://${host}/`
-  const admin = await adminId()
-  return urlPublicaDe(
-    principal,
-    admin,
-    { enElProducto: esDominioDelProducto(host), dominioProducto: dominioProducto() },
-    `${protocolo}://${host}`,
   )
 }

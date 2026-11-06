@@ -206,7 +206,7 @@ pie con los archivos de cada una y con los enlaces llevados al manual (`src/lib/
 
 Fuera del panel, «el dueño» no siempre eres tú, así que conviene el detalle:
 
-- La **API con llave** (`/api/schedule/posts`, `/api/schedule/resumen`, `/api/schedule/cuentas`, `/api/metrics/posts`, `/api/metrics/mejores`) habla en la zona del
+- La **API con llave** (`/api/schedule/posts`, `/api/schedule/resumen`, `/api/schedule/cuentas`, `/api/metrics/posts`, `/api/metrics/mejores`, `/api/metrics/que-funciona`) habla en la zona del
   dueño de la llave: la tuya si el agente usa una llave que generaste tú, la del admin si
   usa `SCHEDULE_API_KEY`, la llave del despliegue. Lo que el agente escribe como «19:00»
   son las 19:00 del dueño, y los días de `desde`/`hasta` son sus días.
@@ -276,7 +276,12 @@ que hicieron tus publicaciones donde las publicaste —views y seguidores ganado
 período, y lo que más creció—, filtrable por cuenta. **En tu página**: quién entró a tu
 página de links y qué apretó —visitas y clicks, y qué publicación te trajo gente—,
 filtrable por página. El período vale para las dos. Cada mitad muestra dos números y una
-lista; el resto (interacciones, arrastre, tus cuentas, la audiencia, los links, de dónde
+lista. «En las redes» suma **Qué te funciona**: qué tema, qué estilo (los atributos `tema` y
+`estilo`) y qué formato de la red anduvieron mejor en el período, contra lo normal de cada
+cuenta y dicho en una frase; solo nombra un ganador si hay al menos dos valores con 10
+publicaciones medidas a los 7 días y el mejor saca ×1,2 o más (`src/lib/que-funciona.ts`, con
+las mismas medianas de «Comparar por atributo»). Es en views: ninguna red da los seguidores
+que trajo cada publicación. El resto (interacciones, arrastre, tus cuentas, la audiencia, los links, de dónde
 vienen…) espera detrás de su «⋯ Más», que no se consulta mientras está cerrado. La lista de
 todas las publicaciones, que antes era la pestaña Los Cortes, está un clic adentro («Ver todas
 las publicaciones →», `/admin/analytics/publicaciones`; `/admin/content` redirige ahí), con
@@ -349,7 +354,7 @@ Los dos perfiles de ejemplo están para que los edites, no para que los borres y
 de cero.
 
 Cada fila de cada tabla (perfiles, cuentas, posts, borradores, comentarios, ajustes, llaves
-de API, y las marcas, comandas, insumos, materiales de la cámara de frío, subidas y creativos de La
+de API, anuncios y promociones —por la cuenta conectada de la que cuelgan—, y las marcas, comandas, insumos, materiales de la cámara de frío, subidas y creativos de La
 Cocina) tiene dueño: el panel solo te muestra lo tuyo, nunca lo de otro usuario invitado. Lo mismo
 la API: lo que entra con una llave es del dueño de la llave, y un agente con la tuya no ve
 ni toca lo de nadie más. Tu fila de usuario —el nombre, la zona y el modo del panel— la
@@ -369,7 +374,8 @@ cada publicación — ver «Varias cuentas de una misma red», más abajo.
 
 **Traspasar una cuenta**, en Los Maestros, es lo único del panel que cruza dueños, y por eso solo
 lo hace el admin (`src/lib/social/traspasar.ts`). Cambia de dueño la cuenta, sus publicaciones y
-los cortes que salen solo a ella; lo demás cuelga de la cuenta y la sigue. Un corte que sale
+los cortes que salen solo a ella; lo demás —métricas, comentarios, los anuncios que se leyeron
+con su token, las promociones de sus publicaciones— cuelga de la cuenta y la sigue. Un corte que sale
 además a otras cuentas se queda con quien lo programó, con un destino en una cuenta que ya no es
 suya: sale igual, porque publicar busca la cuenta por su id y no por su dueño. La credencial no
 cambia hasta que quien recibe la cuenta aprieta **Reconectar**.
@@ -445,7 +451,8 @@ privacidad y los términos, y Meta exige que coincida con el negocio que verific
 
 ## Analítica de posts (opcional)
 
-El panel puede traer las métricas de tus posts desde Instagram, TikTok y YouTube y
+El panel puede traer las métricas de tus posts desde Instagram, Facebook, TikTok y YouTube
+(y desde Threads, por ahora solo para la cuenta del revisor de Meta: ver «Threads», abajo) y
 cruzarlas con el tráfico que cada uno te trajo. La columna que importa es **arrastre**:
 qué porcentaje de quienes vieron el post llegó efectivamente a tu página.
 YouTube es la excepción: ver abajo.
@@ -543,7 +550,7 @@ nada. La **baja** deja sin credencial tus cuentas de Instagram y Facebook, igual
 cuenta.» —el motivo, «Quitaste la app desde Facebook: vuelve a conectar.», sale solo al
 pasar el mouse—; el historial de métricas se conserva. El **borrado** sí borra lo que
 vino de esas dos redes —posts, comentarios, métricas y los destinos programados de esas
-cuentas— y devuelve a Meta un código y la dirección `https://TU-DOMINIO/borrado/<código>`,
+cuentas, los anuncios que se leyeron con ellas y las promociones armadas desde Tu Parrilla, que siguen en la cuenta publicitaria de la persona— y devuelve a Meta un código y la dirección `https://TU-DOMINIO/borrado/<código>`,
 una página pública donde ese código confirma cuándo fue y cuántas cuentas se borraron. Lo
 que escribiste tú —el texto y la media de una publicación programada— no es de Meta y no
 se toca mientras el corte conserve algún destino: uno que todavía salga en otra red sigue
@@ -582,6 +589,9 @@ de verdad cambia:
   no hay lista para elegir. La fila se identifica por el id de la cuenta profesional (`user_id`
   de `/me`), el mismo que el login de Facebook encuentra en la página: si la misma cuenta se
   conecta por el otro login, se renueva la fila que ya estaba y cambia de login, con su historial.
+- **Sin anuncios.** Su token es de `graph.instagram.com`, que no tiene Marketing API: «Lo pagado»
+  no lo usa para leer (`ordenDeTokens`, en `anuncios-sync.ts`), y «Promocionar» una publicación
+  suya responde que falta la página de Facebook, que Meta pide para promocionar.
 
 Se conecta con el caso de uso de **Instagram** de la app de Meta, en su parte «API setup with
 Instagram login», que tiene su propio **Instagram app ID** y su propio secreto, distintos del id y
@@ -782,10 +792,41 @@ cuenta en privada—, porque reintentar da lo mismo hasta que el dueño cambie s
 la auditoría aprobada, como la de este despliegue, ese rechazo no debería llegar, y el panel
 ya no avisa nada de esto ni al conectar ni al elegir la privacidad.
 
+### Threads
+
+Threads publica desde el caso de uso «API de Threads» de la misma app de Meta
+(`THREADS_APP_ID` y `THREADS_APP_SECRET`) y hoy está en «Próximamente» para todos menos los
+usuarios de `THREADS_ABIERTO_PARA` (ver «Conectar y sincronizar»). Además de publicar, tiene
+escritos sus números y sus respuestas, para la tercera vuelta del App Review:
+
+- **Números** (`threads_manage_insights`, `src/lib/social/threads.ts`): la sincronización
+  diaria lista las publicaciones propias de la cuenta —deja fuera los reposts de publicaciones
+  ajenas— y pide a cada una sus views, likes, respuestas, reposts y citas. Van a las columnas de
+  siempre: las respuestas son los comentarios, y reposts más citas son los compartidos. De la
+  cuenta, los seguidores y las views del último día. Threads no entrega guardados, alcance ni
+  visitas al perfil.
+- **Respuestas en La Mesa** (`threads_read_replies` y `threads_manage_replies`,
+  `src/lib/social/comentarios/threads.ts`): cada cinco minutos, la conversación de cada
+  publicación de los últimos siete días. Los comentarios de la cola son las respuestas
+  directas al post, y las respuestas a ellas dicen si la cuenta ya contestó desde la app.
+  Threads no da el id de quien responde, solo su usuario y si la respuesta es de la propia
+  cuenta (`is_reply_owned_by_me`), que alcanza para reconocer lo del dueño. Responder es
+  publicar un post de texto con `reply_to_id`, de hasta 500 caracteres.
+- **Palabra clave**: la regla funciona igual que en YouTube, siempre en público, porque Threads
+  no tiene mensajes privados. Un «Mensaje» de más de 500 caracteres no sale solo —recortado
+  perdería el enlace— y queda en la cola.
+
+Los tres permisos se piden al conectar solo con `THREADS_PERMISOS_EXTRA=1`: la ventana de
+Threads rechaza el pedido entero si nombra un permiso que el caso de uso no tiene activado.
+Sin la bandera, el conector y la cola de Threads se quedan quietos, como con una cuenta
+desconectada, y publicar sigue igual. Con la bandera, una cuenta de Threads conectada antes
+tiene que reconectarse para concederlos; mientras no lo haga, su sincronización falla y su
+fila en Los Fierros queda en rojo.
+
 ### Responder comentarios
 
 El panel puede traer los comentarios nuevos de tus publicaciones de Instagram, Facebook y
-YouTube, y en la cola te propone una respuesta que apruebas de un toque. El descubrimiento
+YouTube (y de Threads en la cuenta del revisor de Meta, ver «Threads»), y en la cola te propone una respuesta que apruebas de un toque. El descubrimiento
 viaja en la misma corrida que publica, cada cinco minutos, y mira tus publicaciones de los
 últimos siete días. A YouTube lo mira cada media hora, no cada cinco minutos: su cuota
 diaria es la misma que usa la sincronización de métricas, y gastarla acá te dejaría sin
@@ -875,7 +916,7 @@ dos columnas para el estado del privado.
 #### Respuesta automática por palabra clave
 
 Al programar un post puedes ponerle una palabra clave, un mensaje con enlace y una
-respuesta pública. Funciona en Instagram, Facebook y YouTube: cuando alguien comenta esa
+respuesta pública. Funciona en Instagram, Facebook y YouTube (y en Threads, ver «Threads»): cuando alguien comenta esa
 palabra, la corrida siguiente del cron que la sondea (cinco minutos como mucho en Instagram y
 Facebook; en YouTube, media hora) responde sola, sin pasar
 por la cola de aprobación, y la cola lo marca como «Automática». Con el privado encendido para
@@ -950,7 +991,7 @@ en su primer intento, con la misma frase. Abrir una es sacarla de esa lista. Par
 revisión de Threads, `THREADS_ABIERTO_PARA` la abre solo para los usuarios que nombra
 (`proximamentePara`, en `src/lib/redes-abiertas.ts`): para ellos, Los Fierros, el compositor, el
 editor, la API y el publicador la tratan como cualquier otra red. La portada sigue con la lista
-fija.
+fija. Sus números y sus respuestas dependen además de `THREADS_PERMISOS_EXTRA` (ver «Threads»).
 
 **Qué se lee cada día.** La lectura va por edad, no por cantidad (`src/lib/social/lectura.ts`).
 Lo publicado en los últimos 10 días —y, como mínimo, las 200 publicaciones más nuevas de la
@@ -969,6 +1010,46 @@ partir la corrida.
 Una publicación que ya no responde cuando se la pide por id (borrada, casi siempre) se salta
 y nada más: no se archiva, porque la misma respuesta de Meta cubre «sin permiso». Solo se
 archiva lo que falta dentro de lo que el listado alcanzó a ver, como siempre.
+
+**Lo pagado: leer los anuncios de Meta.** Al final de cada sincronización, para
+cada dueño que nombra `ANUNCIOS_ABIERTO_PARA`, Tu Parrilla lee con la Marketing API sus cuentas
+publicitarias (`me/adaccounts`) y los anuncios de cada una, con sus totales de principio a fin
+—gasto, alcance, impresiones, clics y fechas— y el creativo, que dice qué publicación se
+promocionó. Lo cruza contra sus publicaciones de Instagram (`effective_instagram_media_id`) y
+de Facebook (`effective_object_story_id`, el mismo `páginaID_postID` con que se guardan) y lo
+guarda en la tabla `anuncios`, que cuelga de la cuenta conectada cuyo token lo leyó
+(`src/lib/social/anuncios.ts` y `anuncios-sync.ts`). Los Números lo muestran en «Lo pagado».
+Una promoción hecha desde la app de Instagram o desde la página es un anuncio más de la cuenta
+publicitaria, así que entra igual. Se lee una vez por dueño, no por cuenta, y primero con el
+token de Instagram: es el de usuario, el que la Marketing API acepta; el de Facebook es de
+página y se prueba solo si no hay otro. Un Instagram conectado con el login de Instagram no se
+prueba: su token no es de `graph.facebook.com`. Un error acá —lo normal mientras falte el permiso— no
+pinta ninguna cuenta de rojo: queda en el registro del cron. Leer pide `ads_read`, y solo al
+conectar con `META_PERMISOS_ANUNCIOS=1`.
+
+**Promocionar desde Tu Parrilla.** En la pieza de una publicación ya publicada de Instagram o
+Facebook, «Promocionar» arma lo mismo que el botón de la app, en la cuenta publicitaria del
+creador (`src/lib/social/promocionar.ts`, puro, y `promocionar-meta.ts`): una campaña con el
+objetivo elegido —alcance, interacción o visitas a su página— y `special_ad_categories: []`, que
+el creador confirma que no es vivienda, empleo, crédito ni política; un conjunto con el
+presupuesto (por día o total, en la moneda de la cuenta y en su unidad mínima: pesos chilenos
+enteros, centavos de dólar), las fechas, los países, las edades y el público Advantage+ si se
+pide; un creativo que apunta a la publicación que ya existe (`object_story_id` en Facebook;
+`source_instagram_media_id`, la cuenta y su página en Instagram), y el anuncio. Antes de crear
+nada, el formulario muestra lo máximo que se puede gastar (el total, o el diario por los días) y
+la acción solo sigue si el gasto que el creador confirmó es el que calcula el servidor. La
+campaña nace siempre en pausa y se enciende al final, solo si el creador eligió activarla; si
+Meta rechaza un paso, la campaña se borra y no queda nada. Antes de intentar se mira la cuenta
+publicitaria —deshabilitada, con un pago pendiente, sin medio de pago, sin permiso para anunciar—
+y el mínimo diario de Meta (`minimum_budgets`); los errores de Meta se piden en castellano
+(`locale=es_LA`) y se muestran tal cual. Pausar, reanudar y detener (archivar: los resultados
+quedan) le cambian el estado a la campaña. Cada promoción queda en la tabla `promociones`, que
+cuelga de la cuenta de la publicación; cómo va se lee en vivo, y lo que logra llega a «Lo pagado»
+por la lectura de arriba. Quitar la cuenta, o el borrado de Meta, borra la fila pero no toca la
+campaña en Meta: es de la cuenta publicitaria del creador, que la maneja en el Administrador de
+anuncios. Promocionar pide `ads_management`, solo con `META_PERMISOS_PROMOCIONAR=1` y junto a la
+de leer, y se ofrece a quien nombra `ANUNCIOS_ABIERTO_PARA` con las dos banderas puestas
+(`promocionarAbiertoPara`). Todo espera la revisión de Meta (ver `docs/pendientes.md`).
 
 **Si una cuenta aparece dos veces —una «Sin credencial» y otra viva—, no es un error tuyo.**
 TikTok, Instagram y Facebook le dan a la misma persona un identificador distinto por cada
@@ -1230,6 +1311,7 @@ Vercel y bajan con `vercel env pull .env.local`.
 | `THREADS_APP_ID` | Conectar Threads para publicar; hoy en «Próximamente» (ver «Conectar y sincronizar») | El Threads App ID del caso de uso «API de Threads» de la app de Meta |
 | `THREADS_APP_SECRET` | El secreto de ese caso de uso; firma también la baja y el borrado que manda Threads (`/api/social/threads/baja` y `/borrado`) | Junto con el anterior |
 | `THREADS_ABIERTO_PARA` | Ids de usuario, separados por comas, para los que Threads no dice «Próximamente»: pueden conectarlo, programarle y publicar en él | No — es para grabar la revisión de Meta de Threads con la cuenta del revisor; aprobada, Threads sale de «Próximamente» para todos y esta variable sobra |
+| `THREADS_PERMISOS_EXTRA` | Con `1`, conectar Threads pide además `threads_manage_insights`, `threads_read_replies` y `threads_manage_replies`, y Tu Parrilla lee sus números y sus respuestas (ver «Threads») | No — encenderla solo después de activarlos en el caso de uso de Threads de la app de Meta: si no, Threads rechaza la ventana entera. Las cuentas conectadas antes se reconectan una vez |
 | `X_CLIENT_ID` | Conectar X para publicar (OAuth 2.0 + PKCE); hoy en «Próximamente» | El Client ID de la app en developer.x.com |
 | `X_CLIENT_SECRET` | El secreto de esa app | Junto con el anterior |
 | `X_BEARER_TOKEN` | Leer los tuits públicos de los creadores del modo Tinder (ver «Modo Tinder») | No — sin ella el modo Tinder no trae nada de X |
@@ -1237,12 +1319,15 @@ Vercel y bajan con `vercel env pull .env.local`.
 | `COMENTARIOS_MODELO` | El modelo de esos borradores, con la forma `proveedor/modelo` | No — tiene uno por defecto |
 | `COMENTARIOS_DM` | El privado a quien comentó en Instagram o Facebook, tras responderle a mano y en la regla de palabra clave. `1` lo enciende para todos; una lista de ids de usuario separados por comas, solo para esos (la cuenta del revisor de Meta mientras revisa) | No — apagada por defecto; exige `instagram_manage_messages` y `pages_messaging` (sin acceso avanzado, solo llega a quien tiene un rol en la app de Meta) |
 | `META_PERMISOS_PRIVADO` | Con `1`, conectar Instagram y Facebook pide además los permisos del privado | No — encenderla solo después de activarlos en los casos de uso de la app de Meta: si no, Meta rechaza la ventana entera |
+| `META_PERMISOS_ANUNCIOS` | Con `1`, conectar Instagram y Facebook pide además `ads_read`, para leer los resultados de los anuncios («Lo pagado») | No — encenderla solo después de activar `ads_read` en los casos de uso de la app de Meta: si no, Meta rechaza la ventana entera |
+| `META_PERMISOS_PROMOCIONAR` | Con `1`, y solo junto a `META_PERMISOS_ANUNCIOS=1`, conectar Instagram y Facebook pide además `ads_management`, para promocionar una publicación desde Tu Parrilla | No — encenderla solo después de activar `ads_management` en los casos de uso de la app de Meta: si no, Meta rechaza la ventana entera. Sin ella no se ofrece «Promocionar» |
+| `ANUNCIOS_ABIERTO_PARA` | Para quién se leen los anuncios de Meta y se ve «Lo pagado» en Los Números; con las dos banderas de arriba, también «Promocionar». `1`, para todos; una lista de ids de usuario separados por comas, solo para esos (la cuenta del revisor de Meta mientras revisa) | No — apagada por defecto; sin `ads_read` concedido la lectura falla cada noche, así que se abre para todos solo con los permisos aprobados |
 | `SITE_URL` | Tu dominio, para etiquetar los enlaces del mensaje automático | No — sin ella se usa el dominio de producción de Vercel |
 | `COCINA_SECRET` | La credencial de La Cocina: la que el servidor del chef manda en `Authorization: Bearer …` a `/api/cocina/…` para tomar comandas, bajar insumos, informar estados y entregar creativos (ver «La Cocina» y `docs/cocina-api.md`). La conocen solo este despliegue y el servidor del chef | No — sin ella esas rutas responden `401` y la cocina queda cerrada; si la pones, genérala igual que `CRON_SECRET` y dásela al servidor del chef |
 | `CRON_SECRET` | Autoriza las corridas programadas: el sync diario y la publicación cada 5 minutos. Vercel la manda sola a su cron; el pinger externo la manda en `Authorization: Bearer …` | Sí — Vercel no la crea: se genera igual que `AUTH_SECRET` y se agrega. Sin ella los crons responden `401` y no corre nada |
 | `MIGRAR_PREVIEWS` | Que los previews migren la base | Solo cuando el preview tenga una base propia; contra la de producción, no |
 | `DATABASE_URL_PRUEBAS` | Solo para las pruebas de integración: una Postgres desechable donde cada archivo crea y migra su propia base (ver «Comandos»). No va en Vercel | No — sin ella esas pruebas se saltan. Nunca la de producción |
-| `SCHEDULE_API_KEY` | La llave del despliegue: abre `POST /api/schedule/batch` (carga masiva), `POST /api/media` (subir un archivo una vez), `GET` y `DELETE /api/schedule/posts/{id}` (un post, o sacarlo), `POST /api/schedule/posts/{id}/archivar` y `…/desarchivar` (archivar lo quemado), `GET /api/schedule/posts` (calendario), `GET /api/schedule/resumen` (el resumen del día), `GET /api/schedule/cuentas` (las cuentas), `GET /api/metrics/posts` (métricas), `GET /api/metrics/mejores` (el mejor X %) y `/api/bodega…` (la cámara de frío de La Cocina) a nombre del admin. Es anterior a las llaves por usuario y sigue para el agente que ya la usa | No — sin ella esos endpoints aceptan solo las llaves que cada usuario genera en La Cocina («Tu propio chef»); si la pones, genérala igual que `CRON_SECRET` |
+| `SCHEDULE_API_KEY` | La llave del despliegue: abre `POST /api/schedule/batch` (carga masiva), `POST /api/media` (subir un archivo una vez), `GET` y `DELETE /api/schedule/posts/{id}` (un post, o sacarlo), `POST /api/schedule/posts/{id}/archivar` y `…/desarchivar` (archivar lo quemado), `GET /api/schedule/posts` (calendario), `GET /api/schedule/resumen` (el resumen del día), `GET /api/schedule/cuentas` (las cuentas), `GET /api/metrics/posts` (métricas), `GET /api/metrics/mejores` (el mejor X %), `GET /api/metrics/que-funciona` (qué tema, estilo y formato funcionan) y `/api/bodega…` (la cámara de frío de La Cocina) a nombre del admin. Es anterior a las llaves por usuario y sigue para el agente que ya la usa | No — sin ella esos endpoints aceptan solo las llaves que cada usuario genera en La Cocina («Tu propio chef»); si la pones, genérala igual que `CRON_SECRET` |
 | `RESEND_API_KEY` | Manda los códigos de ingreso y los avisos: la publicación que se quemó, la cuenta que se cayó, el resumen del día y la comanda de La Cocina que terminó (ver «Avisos por correo») | Sí — sin ella nadie puede entrar al panel |
 | `PUBLISH_ALERT_TO` | Adónde va un aviso sin dueño con correo: un post o una cuenta de antes de los usuarios. Lo demás va al correo de su dueño | No — sin ella, lo que no tiene dueño no avisa; el calendario y Los Fierros lo siguen mostrando |
 | `PUBLISH_ALERT_FROM` | Remitente de los avisos | Opcional; default `onboarding@resend.dev`, que solo entrega al correo de la cuenta de Resend |
@@ -1531,6 +1616,13 @@ que se repite más en el grupo. Lee hasta 10.000 publicaciones, como la pantalla
 responde solo el grupo. Las mismas reglas que la pantalla «Tu mejor 10 %», salvo lo que esta
 cambió por defecto (la métrica y las recientes), que en la API sigue como antes para no
 moverle la respuesta a quien ya la usa; la lógica, sin base, está en `src/lib/mejores.ts`.
+
+`GET /api/metrics/que-funciona`, con los mismos `desde`, `hasta`, `red` y `cuenta`, responde lo
+del panel «Qué te funciona»: para `tema`, `estilo` y `formato`, un `estado` (`gana`, `parejo`,
+`faltan` o `sinValor`), la `frase` que muestra el tablero, los dos mejores con muestra
+suficiente y cada valor con sus `publicaciones`, sus `medidas` y la mediana de
+`contraSuCuenta`. Lee hasta 10.000 publicaciones; la lógica, sin base, está en
+`src/lib/que-funciona.ts`.
 
 ### Calendario por API
 
@@ -1846,10 +1938,13 @@ src/
     dominios.ts            si un host es el del producto, y adónde va el panel si no lo es
     tracking.ts            contexto de la visita desde headers
     analytics.ts           consultas del dashboard
+    lo-pagado.ts           los anuncios del dueño que corrieron en el período, para «Lo pagado» en Los Números
+    enlace-de-la-pagina.ts la dirección pública de la página principal del dueño: el link con ?s= de cada publicación
     planilla/              «Llevar para la casa»: las hojas y su «Léeme», lo que se lee fila por fila, y el .xlsx escrito a mano
     tablero.ts             las reglas de Los Números sin base: cuenta elegida, «⋯ Más» abiertos, la URL
     pieza.ts               qué junta las versiones de una pieza y las medianas por atributo (sin base)
     mejores.ts             el mejor (o el peor) X % de lo publicado: el corte, las medianas y lo que se repite (sin base)
+    que-funciona.ts        «Qué te funciona»: qué tema, estilo y formato anduvieron mejor, con su mínimo y su frase (sin base)
     igual-edad.ts          comparar a la misma edad y contra la propia cuenta: los 7 días y «contra su cuenta» (sin base)
     lado-a-lado.ts         dos publicaciones lado a lado: la curva por edad y sus atributos (sin base)
     metrics-consulta.ts    lo que comparten las rutas de /api/metrics: la llave, el rango, la red y la cuenta
@@ -1866,6 +1961,7 @@ src/
     borradores.ts          los borradores del compositor: guardar, cargar, listar y borrar, siempre por dueño
     borrador.ts            qué se guarda de un formulario y cómo se restaura, también desde el teléfono (sin base)
     borradores-movil.ts    los mismos borradores en la forma de la app del teléfono
+    editar-movil.ts        un post programado abierto para corregirlo en el teléfono: lo que se ve y lo que se guarda sin tocar
     pruebas/               la Postgres de las pruebas de integración: una base nueva y migrada por archivo; y un lector de zip para mirar el XML de una planilla
     empresa.ts             quién presta el servicio: lo leen la portada, privacidad y términos
     avisos/                la caída de una cuenta y el resumen del día: las reglas sin base y lo que lee y manda
@@ -1876,7 +1972,10 @@ src/
       politica-youtube.ts  lo que las políticas de YouTube no dejan hacer con sus datos
       retencion-youtube.ts borra lo de YouTube que lleva 30 días sin refrescarse
       traspasar.ts         le cambia el dueño a una cuenta con lo que se bajó de ella, sin borrar nada
+      anuncios.ts          leer los anuncios de Meta: qué se le pide a la Marketing API, el cruce con las publicaciones y el resumen de «Lo pagado» (sin base); anuncios-sync.ts los guarda
+      promocionar.ts       promocionar una publicación: qué se acepta, el gasto máximo, lo que se le manda a Meta y sus errores en castellano (sin base); promocionar-meta.ts crea, pausa y detiene
       publish/secuencia.ts las historias de una secuencia salen en orden: cada una espera a la anterior
+      publish/editar.ts    guardar los cambios de un post programado: la regla que comparten el editor del panel y la app del teléfono
 public/docs/
   api-llm.md, api-editor.md, api.json   las guías de la API para un LLM
   ui/                      la wiki de la interfaz: una página por pantalla, para guiar a quien se pierde

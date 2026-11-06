@@ -25,15 +25,15 @@ export type ComentarioLeido = {
 /** Una respuesta que un comentario ya tiene en la red. */
 export type RespuestaLeida = {
   externalId: string
-  /** Como `author` en `ComentarioLeido`: el usuario con @ en Instagram, el nombre en las demás. */
+  /** Como `author` en `ComentarioLeido`: el usuario con @ en Instagram y Threads, el nombre en las demás. */
   author: string | null
   authorExternalId: string | null
   text: string
 }
 
 /**
- * Lo único que el orquestador sabe de una red. Agregar Threads o X el día que se quiera
- * es un archivo y una línea en el índice, igual que `Connector` y `Publisher`.
+ * Lo único que el orquestador sabe de una red. Agregar X el día que se quiera es un
+ * archivo y una línea en el índice, igual que `Connector` y `Publisher`.
  */
 export type Comentarista = {
   network: string

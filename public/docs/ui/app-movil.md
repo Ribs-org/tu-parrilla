@@ -1,6 +1,6 @@
 # La app del teléfono
 
-Una app para Android que muestra de un vistazo lo programado y cómo van las redes de quien entra, y le deja publicar desde la galería del teléfono. Tiene cuatro pestañas, las del panel web en versión corta —La Parrilla, Publicar, Los Números y La Cocina— y, como el panel, un botón de Ajustes, pero hace mucho menos: mira lo programado y los números, y programa o publica fotos y videos en Instagram, Facebook y YouTube. También reprograma lo que se quemó, y guarda solo lo que se está escribiendo como borrador: los borradores son los mismos del panel web, así que lo empezado en un lado se sigue en el otro. En La Cocina graba un video o saca una foto con la cámara del teléfono y se lo manda al chef de la casa con una instrucción. Todo lo demás —conectar redes, corregir o borrar lo programado, TikTok, comentarios, la página pública, el mesón del chef— se hace en el panel web.
+Una app para Android que muestra de un vistazo lo programado y cómo van las redes de quien entra, y le deja publicar desde la galería del teléfono. Tiene cuatro pestañas, las del panel web en versión corta —La Parrilla, Publicar, Los Números y La Cocina— y, como el panel, un botón de Ajustes, pero hace mucho menos: mira lo programado y los números, y programa o publica fotos y videos en Instagram, Facebook y YouTube. También reprograma lo que se quemó, corrige el texto, la hora y las cuentas de lo programado o lo borra, y guarda solo lo que se está escribiendo como borrador: los borradores son los mismos del panel web, así que lo empezado en un lado se sigue en el otro. En La Cocina graba un video o saca una foto con la cámara del teléfono y se lo manda al chef de la casa con una instrucción. Todo lo demás —conectar redes, cambiar los archivos de lo programado, TikTok, comentarios, la página pública, el mesón del chef— se hace en el panel web.
 
 ## Cómo se llega
 
@@ -73,13 +73,30 @@ Lo programado, de hoy en adelante, y lo que se quemó. De arriba abajo:
 - **«▸ Borradores (N)»**, solo si hay al menos un borrador guardado, del teléfono o del panel web. Al tocarlo se abre la lista (el triángulo pasa a «▾») y al tocarlo de nuevo se cierra. Cada borrador es una tarjeta con su texto en dos líneas (o «(sin texto)») y debajo, en chico, «para el vie 16 de oct a las 19:00» o «sin fecha», « · 1 archivo» o « · N archivos» si tiene, y « · guardado el mar 13 de oct a las 14:05». Van del guardado más recientemente al más viejo. Tocar uno lo abre en «Publicar».
 - **El filtro por red**, debajo de «Se quemó» y de los borradores, como el del panel (ver «El filtro por red» en [La Parrilla](la-parrilla.md)): un renglón que se desliza de lado con «Todas» y un botón por red —cada uno con un punto en el color de la red: Instagram rosado, TikTok gris, YouTube rojo, Facebook azul— y cuántos posts tiene de hoy en adelante. Un post que sale a dos redes cuenta en las dos. Tocar una red deja solo lo que sale a ella, cada post con solo sus cuentas de esa red; tocarla de nuevo, o «Todas», vuelve a mostrar todo. Si la red elegida tiene dos cuentas o más, aparece debajo otro renglón con «Todas las de <Red>» y cada cuenta, con lo suyo. Con un filtro puesto, los borradores no aparecen en sus días (siguen en «▸ Borradores (N)»), y «Se quemó» muestra todo igual. El filtro no se guarda: al cerrar la app vuelve a «Todas». Con una sola cuenta no aparece.
 - **Los días**, uno debajo del otro: siempre hoy y los seis siguientes, aunque estén vacíos, y después solo los que tienen algo, hasta treinta días adelante. Cada día lleva su rótulo —«Hoy · jue 15», «Mañana · vie 16», «sáb 17»—, a la derecha cuánto fuego tiene —«Apagada» (nada), «Prendida» (uno o dos posts) o «Parrilla llena» (tres o más)— y un botón redondo con una cruz, que abre «Publicar» con ese día puesto (un lector de pantalla lo lee «Programar el jue 15»). Debajo del rótulo, una barra fina con la mezcla de redes del día —un tramo por red, en su color, del largo de lo que sale a ella— y un renglón con cuánto salió, cuánto se quemó y cuánto falta, con los signos de los chips: «5 ✓ · 1 ✕ · 6 por salir» (un lector de pantalla lo oye en palabras: «5 cortes servidos, 1 falló, 6 por salir»; de día, «piezas servidas»). Un día sin posts ni borradores dice «No hay nada puesto. Préndela.», en naranjo, y hace lo mismo que la cruz.
-- Cada post es una tarjeta con el mismo corte dibujado que el panel a la izquierda (ver «El corte» en [La Parrilla](la-parrilla.md)): la forma es el formato —entraña video, tira de asado carrusel con un hueso por archivo, bife foto, chori solo texto—, el color de la carne cómo va —rosada programada, naranja saliendo, dorada publicada, casi negra falló en todas—, una diagonal por cuenta —punteada todavía no sale, llena ya salió, carbonizada se quemó—, y un halo rojo con banderita si algo se quemó. Mientras algo se está publicando, sube humo encima (con «Quitar animaciones» del teléfono, dos volutas quietas). Al lado del dibujo: la hora, el texto (o «(sin texto)»), una línea por cuenta «Red · nombre_de_cuenta» con un punto en el color de la red, un signo y el color de su estado —«✓» en verde si salió, «…» y «· saliendo» en naranjo, «✕» en rojo si falló, «◐» y «· en tu bandeja de TikTok» en ámbar, «↻» y «· reintentando» en ámbar, «!» y «· reconéctala en el panel» en ámbar si su cuenta tiene el fierro frío— y, si esa cuenta falló o reintenta, « — » seguido del error. Al final, el formato y el estado en palabras, por ejemplo «Video · Programada» o «Carrusel · Falló en parte» (los estados: «Programada», «Saliendo ahora», «Publicada», «Falló en parte» o «Falló»). La tarjeta lleva el borde ámbar si algo pide atención y rojo si se quemó. Ya no lleva la miniatura de la foto. Las tarjetas de los posts no se pueden tocar ni editar.
-- **Lo que ya salió en todas sus redes** deja la tarjeta y se hunde, como en el calendario del panel: un renglón sin borde, sobre un fondo más hondo (de día, tostado), con el corte en chico y apagado, la hora, un punto por red, un «✓» verde y el texto en una línea. Lo que llegó a la bandeja de TikTok, lo quemado y lo que reintenta siguen en su tarjeta, aunque su hora haya pasado.
+- Cada post es una tarjeta con el mismo corte dibujado que el panel a la izquierda (ver «El corte» en [La Parrilla](la-parrilla.md)): la forma es el formato —entraña video, tira de asado carrusel con un hueso por archivo, bife foto, chori solo texto—, el color de la carne cómo va —rosada programada, naranja saliendo, dorada publicada, casi negra falló en todas—, una diagonal por cuenta —punteada todavía no sale, llena ya salió, carbonizada se quemó—, y un halo rojo con banderita si algo se quemó. Mientras algo se está publicando, sube humo encima (con «Quitar animaciones» del teléfono, dos volutas quietas). Al lado del dibujo: la hora, el texto (o «(sin texto)»), una línea por cuenta «Red · nombre_de_cuenta» con un punto en el color de la red, un signo y el color de su estado —«✓» en verde si salió, «…» y «· saliendo» en naranjo, «✕» en rojo si falló, «◐» y «· en tu bandeja de TikTok» en ámbar, «↻» y «· reintentando» en ámbar, «!» y «· reconéctala en el panel» en ámbar si su cuenta tiene el fierro frío— y, si esa cuenta falló o reintenta, « — » seguido del error. Al final, el formato y el estado en palabras, por ejemplo «Video · Programada» o «Carrusel · Falló en parte» (los estados: «Programada», «Saliendo ahora», «Publicada», «Falló en parte» o «Falló»). La tarjeta lleva el borde ámbar si algo pide atención y rojo si se quemó. Ya no lleva la miniatura de la foto. Tocar la tarjeta abre «Editar publicación» (ver más abajo); un lector de pantalla la anuncia como botón, con la pista «Abre la publicación para corregirla o borrarla».
+- **Lo que ya salió en todas sus redes** deja la tarjeta y se hunde (ese renglón no se toca), como en el calendario del panel: un renglón sin borde, sobre un fondo más hondo (de día, tostado), con el corte en chico y apagado, la hora, un punto por red, un «✓» verde y el texto en una línea. Lo que llegó a la bandeja de TikTok, lo quemado y lo que reintenta siguen en su tarjeta, aunque su hora haya pasado.
 - **Hoy**, una línea naranja con «ahora · 14:20» separa lo que ya tuvo su hora de lo que viene, y se corre sola mientras la app está abierta (un lector de pantalla la lee «Ahora, 14:20»). La hora es la de la zona de tu cuenta. Lo que salió mientras la app estaba abierta se ve al arrastrar hacia abajo para actualizar.
 - Un borrador con fecha aparece también en su día, debajo de los posts, como una tarjeta con borde punteado: arriba «BORRADOR · 19:00» y debajo su texto (o «(sin texto)»). Tocarla lo abre en «Publicar». Un borrador no está programado y no cuenta para el fuego del día: un día que solo tiene borradores sigue diciendo «Apagada».
 - Al pie: «Ayer no salió nada.», «Ayer: 1 corte servido» o «Ayer: N cortes servidos». Cuenta cortes y no redes: uno que salió en tres redes es un corte.
 
 Las horas y los días están en la zona horaria de [Tu Cuenta](tu-cuenta.md).
+
+### Editar publicación
+
+Se abre al tocar la tarjeta de un post en «La Parrilla». Arriba, la barra con el título «Editar publicación» y la flecha para volver. Mientras carga, la ruedita.
+
+Si el post ya salió en alguna de sus cuentas, la pantalla solo dice en ámbar «Ya salió en alguna cuenta: lo que queda se corrige en el panel web.», muestra el texto del post y el botón «Volver». Si alguna cuenta lo está publicando en ese momento, lo mismo con «Hay una publicación en curso. Vuelve en un minuto.».
+
+Si se puede editar, de arriba abajo:
+
+- **«Texto»**: el texto del post, en un recuadro que se puede cambiar, con «Texto del post…» si está vacío. Debajo, a la derecha, cuántos caracteres lleva y el máximo, por ejemplo «30 / 280»: el máximo es el de la red más estricta entre las cuentas que siguen —280 si va a X, 500 a Threads, 2200 en las demás—, y pasado el máximo la cifra se pone roja.
+- **«Cuándo sale»**: una ficha naranja «Cuándo: 07/11 a las 19:00» (día/mes y hora, en el reloj del teléfono). Tocarla abre la hoja «Cuándo sale» (ver «Para programar un post»). Si no se toca, la hora no cambia, aunque ya haya pasado.
+- **«Cuentas»**: una línea por cuenta, «Red · nombre_de_cuenta» con el punto en el color de la red, y a la derecha «Quitar». Una cuenta quitada queda tachada, con « · se quita al guardar» y el botón «Devolver»; no se quita de verdad hasta tocar «Guardar». La última cuenta que queda no se puede quitar («Quitar» apagado), y debajo dice «Para sacarla de la última cuenta, borra la publicación.». No se pueden sumar cuentas.
+- Una nota en ámbar, si el post tiene algo que el teléfono no cambia: «Desde el teléfono no se cambia y queda como está: …. Eso se cambia en el panel web.», con la lista de lo que tenga —«el archivo» o «los N archivos», «la portada», «los atributos», «la palabra clave «…»», «las opciones de TikTok» (o de Instagram o Facebook, si es un trial reel o una historia)—. Todo eso se guarda tal cual.
+- El botón naranjo **«Guardar»** (mientras trabaja, «Guardando…»). Si sale bien, vuelve a «La Parrilla», que se actualiza sola.
+- Debajo, en rojo, **«Borrar publicación»** (mientras trabaja, «Borrando…»). Pregunta antes: «Borrar publicación», «¿Borrar esta publicación? Sale de La Parrilla y no se publica en ninguna cuenta.», con «Cancelar» y «Borrar» en rojo. Si sale bien, vuelve a «La Parrilla» y el post ya no está.
+
+Mientras guarda o borra, el texto, la ficha y los botones esperan.
 
 ### Publicar
 
@@ -158,7 +175,7 @@ Aquí no se conecta ni se desconecta nada: eso es del panel web.
 Se abre con «Ver todas las publicaciones →» en Los Números. Arriba, la barra con el título «Tus publicaciones» y la flecha para volver.
 
 - Los cinco botones de período, deslizables: «Hoy», «7 días», «30 días» (el que viene marcado), «90 días» y «Todo».
-- Botones de red: «Todas», «Instagram», «TikTok», «YouTube» y «Facebook». Se pueden marcar varios; «Todas» quita el filtro. Threads y X no tienen botón: Tu Parrilla no trae sus publicaciones, y hoy están en «Próximamente».
+- Botones de red: «Todas», «Instagram», «TikTok», «YouTube» y «Facebook». Se pueden marcar varios; «Todas» quita el filtro. Threads y X no tienen botón: hoy están en «Próximamente». (En la cuenta del revisor de Meta, las publicaciones de Threads pueden aparecer con «Todas».)
 - La lista de lo publicado en el período, ordenada de más a menos views ganadas. Cada fila: la miniatura, el texto, «Red · fecha», la marca «Se pasó» cuando el post sacó al menos el doble de views ganadas que la mediana (el valor del medio) de los posts que se están mirando, y abajo «N views» y «P% arrastre».
 - Si no hay nada: «No publicaste nada en este período.»
 - Tocar una fila abre su detalle.
@@ -299,7 +316,13 @@ Lo que se guardó desde el panel también está aquí, y lo que se graba en el t
 
 ### Para corregir o borrar algo programado desde el teléfono
 
-No se puede desde la app. Se hace en el panel web, en [La Parrilla](la-parrilla.md).
+1. En «La Parrilla», toca la tarjeta del post. Se abre «Editar publicación».
+2. Cambia el texto, toca «Cuándo: …» para elegir otra hora y toca «Listo», o toca «Quitar» en la cuenta donde ya no debe salir.
+3. Toca «Guardar». Vuelve a «La Parrilla» con el cambio puesto.
+
+Para sacarlo entero, en la misma pantalla toca «Borrar publicación» y confirma con «Borrar».
+
+Se puede mientras no haya salido en ninguna cuenta. Lo que ya salió en alguna, los archivos, la portada, la palabra clave, las opciones de TikTok y sumar cuentas se cambian en el panel web, en [La Parrilla](la-parrilla.md). Las reglas son las mismas del panel: el texto que cabe en cada red y una hora nueva en el futuro.
 
 ## Mensajes que puede ver
 
@@ -319,6 +342,17 @@ No se puede desde la app. Se hace en el panel web, en [La Parrilla](la-parrilla.
 | «No se pudo reprogramar» con «La hora debe estar en el futuro.» | La hora elegida ya pasó. | Volver a tocar «Reprogramar» y elegir una hora futura. |
 | «No se pudo reprogramar» con «Ese destino ya no existe.» | El post se borró (por ejemplo, desde el panel web). | Arrastrar hacia abajo para actualizar. |
 | «No se pudo reprogramar» con «No se pudo conectar. Revisa tu señal.» | Sin conexión. | Volver a intentarlo cuando haya señal. |
+| «Ya salió en alguna cuenta: lo que queda se corrige en el panel web.» (en «Editar publicación») | El post ya se publicó en al menos una de sus cuentas: desde el teléfono no se edita ni se borra. | Corregirlo en el panel web, en [La Parrilla](la-parrilla.md); lo publicado se cambia en la red. |
+| «Hay una publicación en curso. Vuelve en un minuto.» (en «Editar publicación», o con «No se pudo guardar») | Alguna cuenta está publicando ese post en este momento. | Esperar un minuto y volver a abrirlo. |
+| «Desde el teléfono no se cambia y queda como está: … Eso se cambia en el panel web.» | El post tiene archivos, portada, atributos, palabra clave u opciones de una red: al guardar se conservan tal cual. | Nada, si solo hay que corregir el texto, la hora o las cuentas; lo demás, en el panel web. |
+| «No se pudo abrir la publicación. Revisa tu señal.» | Sin conexión al abrir «Editar publicación». | «Reintentar» cuando haya señal, o «Volver». |
+| «El post ya no existe.» (al abrirlo, o con «No se pudo guardar» o «No se pudo borrar») | Se borró en el panel web o en otro teléfono. | «Volver» y arrastrar «La Parrilla» hacia abajo para actualizar. |
+| «No se pudo guardar» con «El texto excede los 280 caracteres de X.» (o «… 500 caracteres de Threads.», o «El texto es demasiado largo para Instagram.») | El texto no cabe en una de las redes que siguen. | Acortarlo (la cifra de abajo a la derecha dice cuánto cabe) o quitar esa cuenta. |
+| «No se pudo guardar» con «La hora debe estar en el futuro.» | La hora elegida ya pasó. | Tocar «Cuándo: …» y elegir una hora futura. |
+| «No se pudo guardar» con «Escribe un texto o adjunta un archivo.» | Se borró todo el texto de un post sin archivos. | Escribir algo, o borrar la publicación. |
+| «No se pudo guardar» con otra frase (por ejemplo, de una cuenta que se desconectó) | La misma regla que rechazaría el cambio en el panel web. | Seguir lo que dice; si es la conexión, reconectar en [Los Fierros](los-fierros.md). |
+| «No se pudo borrar» con «Ya se publicó (o está publicando): elimínalo en la red.» | Mientras estaba abierta la pantalla, el post salió en alguna cuenta. | Borrarlo en la red; en el panel web se ve qué salió. |
+| «No se pudo guardar» o «No se pudo borrar» con «No se pudo conectar. Revisa tu señal.» | Sin conexión. | Volver a tocar cuando haya señal. |
 | «No hay nada puesto. Préndela.» | Ese día no tiene nada programado ni ningún borrador. | Tocarlo (o la cruz) para programar algo ese día. |
 | «▸ Borradores (N)» | Hay N borradores guardados, del teléfono o del panel web. | Tocarlo para ver la lista. |
 | «BORRADOR · 19:00» (tarjeta punteada en un día) | Un borrador con esa fecha. Todavía no está programado: no va a salir solo. | Tocarlo para abrirlo y programarlo. |
@@ -415,7 +449,10 @@ No se puede desde la app. Se hace en el panel web, en [La Parrilla](la-parrilla.
 - «Me dice que el borrador va también a TikTok» o «que tiene la palabra clave» → eso no se programa desde el teléfono; se programa en el panel web, en [La Parrilla](la-parrilla.md). Se puede seguir editando el texto en el teléfono sin perderlo.
 - «Toqué la cruz de un día y desapareció lo que estaba escribiendo» → la cruz empieza otra publicación; lo anterior quedó en «▸ Borradores (N)».
 - «No me sale el botón de trial reel» → hace falta una cuenta de Instagram marcada y exactamente un video, sin fotos.
-- «Programé algo mal desde el teléfono» → se corrige o se borra en el panel web, en [La Parrilla](la-parrilla.md).
+- «Programé algo mal» (desde el teléfono o el panel) → en «La Parrilla», tocar la tarjeta del post: «Editar publicación» corrige el texto, la hora y las cuentas, o «Borrar publicación». Los archivos se cambian en el panel web, en [La Parrilla](la-parrilla.md).
+- «Toqué un post y dice que ya salió en alguna cuenta» → desde el teléfono solo se edita lo que no ha salido en ninguna; se corrige en el panel web, en [La Parrilla](la-parrilla.md), y lo publicado, en la red.
+- «No puedo quitar la última cuenta» → para que no salga en ninguna, «Borrar publicación».
+- «Quiero cambiar el video (o la portada, o la palabra clave) de algo programado» → no se puede desde el teléfono; en el panel web, en [La Parrilla](la-parrilla.md). Al guardar desde el teléfono eso queda como estaba.
 - «El borrador apareció hoy en La Parrilla y no le puse fecha» → no debería: solo guarda la fecha si se eligió con «Cuándo: …», o si se llegó desde la cruz de un día.
 - «No veo el post que acabo de programar» → abre «La Parrilla» (la app salta sola ahí al terminar); si hay un filtro puesto (un botón de red con borde naranjo), toca «Todas». Si no aparece, arrastra la pantalla hacia abajo para actualizar.
 - «Quiero ver solo Facebook» (o solo una red, o una cuenta) → el filtro de La Parrilla, debajo de los borradores: el botón de esa red y, para una cuenta, el renglón que aparece debajo.
@@ -441,7 +478,7 @@ Comparada con el panel web, la app no:
 
 - conecta, desconecta ni reconecta redes ([Los Fierros](los-fierros.md));
 - publica en TikTok;
-- edita, mueve ni borra lo programado ([La Parrilla](la-parrilla.md)); solo reprograma lo quemado;
+- cambia los archivos, la portada, la palabra clave ni las opciones de lo programado, le suma cuentas, ni edita o borra lo que ya salió en alguna cuenta ([La Parrilla](la-parrilla.md)): corrige el texto, la hora y las cuentas, y borra, solo lo que no ha salido;
 - programa un borrador que va también a TikTok o tiene una palabra clave (se edita, pero se programa en el panel web);
 - pone portada a un video, atributos a un post ni reglas de respuesta a comentarios con palabra clave;
 - carga posts por lote;
@@ -463,7 +500,9 @@ Lo que describe sale de estos archivos:
 - `mobile/src/app/(tabs)/cocina.tsx` y `mobile/src/components/cocina.tsx` (La Cocina)
 - `mobile/src/lib/cocina.ts`, `mobile/src/lib/subir-por-partes.ts` y `mobile/src/lib/archivo-local.ts` (lo que falta para mandar, el nombre de lo grabado, la subida por partes y la copia de lo grabado)
 - `src/lib/cocina/telefono.ts` (la comanda que pide el teléfono y cómo se cuenta cada una), `src/lib/cocina/subidas.ts` y `src/lib/cocina/bodega.ts` (las frases de la subida y de la cuota), `src/lib/cocina/pedido.ts` y `src/lib/cocina/pedir.ts` (las de la comanda), `src/lib/cocina/nombres.ts` y `src/lib/cocina/tarjeta.ts` (los estados)
-- `mobile/src/app/_layout.tsx` (qué pantallas se ven con sesión y sin ella, la pantalla «Algo se rompió» y las cabeceras de «Publicación», «Tus publicaciones» y «Ajustes»)
+- `mobile/src/app/_layout.tsx` (qué pantallas se ven con sesión y sin ella, la pantalla «Algo se rompió» y las cabeceras de «Publicación», «Editar publicación», «Tus publicaciones» y «Ajustes»)
+- `mobile/src/app/programado/[id].tsx` y `mobile/src/lib/editar.ts` (Editar publicación)
+- `src/lib/editar-movil.ts` (lo que muestra Editar publicación: la nota de lo que queda como está, por qué no se edita y el máximo de cada red) y `src/lib/social/publish/editar.ts` (lo que se guarda y sus frases, las mismas del editor del panel)
 - `mobile/src/components/sesion.tsx` (el desbloqueo, entrar y salir)
 - `mobile/src/app/login.tsx`
 - `mobile/src/app/(tabs)/_layout.tsx` (la barra de pestañas)

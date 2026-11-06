@@ -108,6 +108,20 @@ export type BorradorAbierto = {
 }
 
 /**
+ * Un post programado abierto para corregirlo (`GET /api/mobile/schedule/posts/:id`). `limite` es
+ * el largo máximo del texto en la red de cada destino; `seConserva`, lo que el teléfono no cambia
+ * y se guarda como está; `bloqueo`, por qué no se edita desde acá (o null si se puede).
+ */
+export type PostEditable = {
+  id: string
+  texto: string
+  cuando: string
+  destinos: { id: string; red: string; handle: string | null; estado: string; limite: number }[]
+  seConserva: string | null
+  bloqueo: string | null
+}
+
+/**
  * `hoy` es el día en la zona del dueño; falta en lo guardado antes del 2026-10-16.
  * `borradores` falta en lo guardado antes de que la app los mostrara.
  */

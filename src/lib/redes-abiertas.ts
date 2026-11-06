@@ -38,3 +38,28 @@ export function loginDeInstagramAbiertoPara(ownerId: string | null | undefined):
   if (!ownerId) return false
   return valor.split(',').some((id) => id.trim() === ownerId)
 }
+
+/**
+ * Si el dueño ve «Lo pagado» en Los Números y la sincronización lee sus anuncios de Meta.
+ * `ANUNCIOS_ABIERTO_PARA=1` lo abre para todos; una lista de ids de usuario separados por comas,
+ * solo para esos —así se graba la revisión de `ads_read` con la cuenta del revisor sin
+ * mostrárselo a nadie más—; vacía, para nadie. Mientras `ads_read` no esté aprobado, solo quien
+ * tiene un rol en la app de Meta puede concederlo: a los demás la lectura les fallaría cada noche
+ * y verían una sección siempre vacía.
+ */
+export function anunciosAbiertosPara(ownerId: string | null | undefined): boolean {
+  const bandera = env('ANUNCIOS_ABIERTO_PARA')
+  if (!bandera) return false
+  if (bandera === '1') return true
+  if (!ownerId) return false
+  return bandera.split(',').some((id) => id.trim() === ownerId)
+}
+
+/**
+ * Si el dueño puede promocionar desde Tu Parrilla: a quien ve «Lo pagado», y solo con las dos
+ * banderas del conectar puestas (`META_PERMISOS_ANUNCIOS` y `META_PERMISOS_PROMOCIONAR`), que son
+ * las que piden `ads_management`. Sin ellas el botón llevaría a un formulario que Meta rechaza.
+ */
+export function promocionarAbiertoPara(ownerId: string | null | undefined): boolean {
+  return anunciosAbiertosPara(ownerId) && env('META_PERMISOS_ANUNCIOS') === '1' && env('META_PERMISOS_PROMOCIONAR') === '1'
+}

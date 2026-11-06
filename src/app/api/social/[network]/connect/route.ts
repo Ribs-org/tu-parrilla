@@ -9,6 +9,7 @@ import {
   LOGIN_DE_INSTAGRAM_CERRADO,
   SCOPES_LOGIN_DE_INSTAGRAM,
 } from '@/lib/social/instagram-login'
+import { SCOPES_THREADS_EXTRA } from '@/lib/social/threads'
 import { COOKIE_AGREGAR } from '@/lib/social/vuelta'
 import { signOAuthState } from '@/lib/social/oauth-state'
 import { conMensaje } from '@/lib/mensaje-firmado'
@@ -66,10 +67,51 @@ const SCOPES_PRIVADO: Record<string, string> = {
   facebook: 'pages_messaging',
 }
 
-export function scopesDe(network: string, conPrivado: boolean): string | undefined {
+/**
+ * Leer los resultados de los anuncios (`social/anuncios.ts`), solo con `META_PERMISOS_ANUNCIOS=1`,
+ * por la misma razón que el privado: `ads_read` tiene que estar activado en los casos de uso de
+ * la app de Meta antes de pedirlo. Va en las dos porque cada red es su propio consentimiento; el
+ * que se usa es el token de usuario que guarda Instagram.
+ */
+const SCOPES_ANUNCIOS: Record<string, string> = {
+  instagram: 'ads_read',
+  facebook: 'ads_read',
+}
+
+/**
+ * Promocionar una publicación desde Tu Parrilla (`social/promocionar.ts`): `ads_management`, con
+ * su propia bandera, `META_PERMISOS_PROMOCIONAR=1`, y solo junto a la de leer: promocionar sin ver
+ * después cómo le fue no tiene sentido, y cada permiso se activa aparte en el caso de uso.
+ */
+const SCOPES_PROMOCIONAR: Record<string, string> = {
+  instagram: 'ads_management',
+  facebook: 'ads_management',
+}
+
+/**
+ * Las banderas que suman permisos: `META_PERMISOS_PRIVADO` (los del privado, arriba),
+ * `THREADS_PERMISOS_EXTRA` (los números y las respuestas de Threads, `SCOPES_THREADS_EXTRA`),
+ * `META_PERMISOS_ANUNCIOS` (leer los anuncios) y `META_PERMISOS_PROMOCIONAR` (promocionar, solo
+ * junto con la de leer). Todas por la misma razón: un permiso que el caso de uso de la app no
+ * tiene activado hace que la ventana rechace el pedido entero.
+ */
+export type PermisosExtra = {
+  privado: boolean
+  threads: boolean
+  anuncios: boolean
+  promocionar: boolean
+}
+
+export function scopesDe(network: string, extra: PermisosExtra): string | undefined {
   const base = SCOPES[network]
-  const privado = conPrivado ? SCOPES_PRIVADO[network] : undefined
-  return base && privado ? `${base},${privado}` : base
+  if (!base) return undefined
+  const sumados = [
+    extra.privado ? SCOPES_PRIVADO[network] : undefined,
+    extra.threads && network === 'threads' ? SCOPES_THREADS_EXTRA : undefined,
+    extra.anuncios ? SCOPES_ANUNCIOS[network] : undefined,
+    extra.anuncios && extra.promocionar ? SCOPES_PROMOCIONAR[network] : undefined,
+  ].filter(Boolean)
+  return [base, ...sumados].join(',')
 }
 
 export async function GET(
@@ -80,7 +122,12 @@ export async function GET(
   if (!usuario) return new NextResponse('No autorizado', { status: 401 })
 
   const { network } = await params
-  const scope = scopesDe(network, env('META_PERMISOS_PRIVADO') === '1')
+  const scope = scopesDe(network, {
+    privado: env('META_PERMISOS_PRIVADO') === '1',
+    threads: env('THREADS_PERMISOS_EXTRA') === '1',
+    anuncios: env('META_PERMISOS_ANUNCIOS') === '1',
+    promocionar: env('META_PERMISOS_PROMOCIONAR') === '1',
+  })
   if (!scope) return new NextResponse('Esa red no usa OAuth', { status: 400 })
 
   const origin = new URL(request.url).origin

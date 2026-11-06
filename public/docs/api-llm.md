@@ -543,10 +543,10 @@ de acceso ni caducidad: quien consiga el enlace —lo intercepte, lo reenvíe, l
 abrirlo, sin sesión ni credencial. Es una decisión de producto para este caso de uso (una
 guía que se regala a cambio de un comentario), no un descuido ni algo pendiente de arreglar.
 
-## 7. Leer cómo le fue: métricas y el mejor X %
+## 7. Leer cómo le fue: métricas, el mejor X % y qué funciona
 
-Dos endpoints de lectura, con la misma llave. El detalle de cada número está en
-`api-editor.md`, secciones 2 y 2b; esto es lo que hace falta para pedirlos bien.
+Tres endpoints de lectura, con la misma llave. El detalle de cada número está en
+`api-editor.md`, secciones 2, 2b y 2c; esto es lo que hace falta para pedirlos bien.
 
 - `GET /api/metrics/posts?desde=YYYY-MM-DD&hasta=YYYY-MM-DD` — una fila por publicación
   **publicada** en el rango (no por actividad en él), con sus métricas. Cada fila trae
@@ -568,8 +568,15 @@ Dos endpoints de lectura, con la misma llave. El detalle de cada número está e
   horaria, con `veces`). Con `lado=peor`, el peor X %: las mismas claves con «peores» en vez
   de «mejores» (`peores`, `medianas.peores`, y `enPeores` y `peores` en `enComun`), de la
   peor a la menos mala, y `corte` es lo más que sacó una de las que entraron.
+- `GET /api/metrics/que-funciona?desde=…&hasta=…` — qué `tema`, qué `estilo` y qué `formato`
+  (el de la red: Reel, Carrusel, Foto, Video…) anduvieron mejor en lo publicado en el rango,
+  contra lo normal de cada cuenta. Una clave por cada uno, con `estado` (`gana`, `parejo`,
+  `faltan` o `sinValor`), la `frase` que muestra el panel —úsala tal cual para contárselo al
+  dueño—, `primero` y `segundo`, y `valores` con `publicaciones`, `medidas` (de cuántas sale
+  la mediana) y `contraSuCuenta`. Solo hay `gana` con al menos dos valores de 10 publicaciones
+  medidas y el mejor en ×1,2 o más: con `faltan`, no declares un ganador por tu cuenta.
 
-Filtros que valen en los dos: `red`, y `cuenta` —su `id` (el de la sección 3d) o su nombre en
+Filtros que valen en los tres: `red`, y `cuenta` —su `id` (el de la sección 3d) o su nombre en
 la red, con o sin «@»—. Para «el mejor 10 % de esta cuenta», pasa `cuenta`: sin ella, la cuenta más grande
 llena la tajada de arriba, salvo con `metrica=contraSuCuenta`, que mide a cada una contra lo
 suyo. Solo de `mejores`:
@@ -601,8 +608,10 @@ Cuatro reglas que cambian la lectura:
 - **Para comparar publicaciones entre sí, `contraSuCuenta`.** `viewsGanadas` le da ventaja a
   lo que salió al principio del rango, y entre cuentas, a la más grande; `contraSuCuenta`
   mide a todas a los 7 días y contra lo normal de su propia cuenta. Una cuenta con menos de 5
-  publicaciones del rango con `viewsA7Dias` no la tiene. Para «qué hook funciona», agrupa
-  por atributo las filas de `/api/metrics/posts` y compara las medianas de `contraSuCuenta`.
+  publicaciones del rango con `viewsA7Dias` no la tiene. Para «qué tema, estilo o formato
+  funciona», `/api/metrics/que-funciona` ya lo responde; para otro atributo (el `hook`, la
+  `serie`), agrupa por atributo las filas de `/api/metrics/posts` y compara las medianas de
+  `contraSuCuenta`.
 - **YouTube no entra en `viewsGanadas`, `viewsA7Dias`, `contraSuCuenta`, `interacciones` ni
   `arrastre`**: sus políticas no permiten calcular métricas con sus datos. Sí entra en
   `visitas` y `clicks`, que mide Tu Parrilla.

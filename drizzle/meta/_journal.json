@@ -183,6 +183,27 @@
       "when": 1793631109202,
       "tag": "0025_la_bodega",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1793921144281,
+      "tag": "0026_anuncios",
+      "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1793927523197,
+      "tag": "0027_promociones",
+      "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1793930598734,
+      "tag": "0028_login_de_la_cuenta",
+      "breakpoints": true
     }
   ]
 }

@@ -76,8 +76,10 @@ export async function darDeBaja(userId: string, origen: Origen = 'meta'): Promis
  * `scheduled_post_targets` referencian `social_accounts` **sin** cascada, así que la fila
  * de la cuenta no se puede borrar mientras alguna de las tres siga en pie; y
  * `post_metrics` cuelga de los posts, no de la cuenta, así que va antes que ellos.
- * `post_comments` sí tiene cascada, pero se borra explícito para que el orden completo se
- * vea de una lectura.
+ * `post_comments`, `anuncios` y `promociones` sí tienen cascada, pero se borran explícito para
+ * que el orden completo se vea de una lectura. Borrar una promoción de acá no la para en Meta: la
+ * campaña es de la cuenta publicitaria de la persona, que la maneja en el Administrador de
+ * anuncios.
  *
  * Los `scheduled_posts` que conservan algún destino no se tocan: el texto y la media son
  * del dueño, no de Meta. Los que esta operación deja sin ningún destino se borran con
@@ -100,6 +102,8 @@ export function pasosDeBorrado(userId: string, origen: Origen = 'meta'): SQL[] {
   return [
     sql`delete from post_metrics where post_id in (select id from social_posts where account_id in (${cuentas}))`,
     sql`delete from post_comments where account_id in (${cuentas})`,
+    sql`delete from anuncios where account_id in (${cuentas})`,
+    sql`delete from promociones where account_id in (${cuentas})`,
     sql`delete from social_posts where account_id in (${cuentas})`,
     sql`delete from account_metrics where account_id in (${cuentas})`,
     sql`delete from scheduled_post_targets where account_id in (${cuentas})`,
@@ -108,10 +112,10 @@ export function pasosDeBorrado(userId: string, origen: Origen = 'meta'): SQL[] {
 }
 
 /**
- * El séptimo paso: los cortes que se quedaron sin ningún destino, del texto a la media.
+ * El noveno paso: los cortes que se quedaron sin ningún destino, del texto a la media.
  *
  * Va aparte de `pasosDeBorrado` porque necesita algo que solo se sabe leyendo antes de
- * borrar —qué cortes tocaban esas cuentas— y porque los seis primeros comparten dos
+ * borrar —qué cortes tocaban esas cuentas— y porque los ocho primeros comparten dos
  * invariantes que este no: llevar el `meta_user_id` como parámetro y acotarse a las dos
  * redes de Meta. Sigue siendo pura, así que su SQL se prueba sin base.
  *
@@ -147,7 +151,7 @@ export function codigoDeBorrado(): string {
  * respuesta a Meta lleva y que la página de estado sabe leer.
  *
  * Las cuentas se cuentan antes de borrarlas: después ya no existen. Y los cortes que
- * tocaban esas cuentas se leen antes también, por la misma razón: el quinto paso borra
+ * tocaban esas cuentas se leen antes también, por la misma razón: el séptimo paso borra
  * sus destinos, que es el único camino que llevaba hasta ellos.
  */
 export async function borrarDatosDe(userId: string, origen: Origen = 'meta'): Promise<{ codigo: string; cuentas: number }> {
