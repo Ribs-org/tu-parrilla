@@ -4,6 +4,7 @@ import { usuarioActual } from '@/lib/auth'
 import { env } from '@/lib/env'
 import { fraseProximamente } from '@/lib/networks'
 import { proximamentePara } from '@/lib/redes-abiertas'
+import { SCOPES_THREADS_EXTRA } from '@/lib/social/threads'
 import { COOKIE_AGREGAR } from '@/lib/social/vuelta'
 import { signOAuthState } from '@/lib/social/oauth-state'
 import { conMensaje } from '@/lib/mensaje-firmado'
@@ -61,10 +62,22 @@ const SCOPES_PRIVADO: Record<string, string> = {
   facebook: 'pages_messaging',
 }
 
-export function scopesDe(network: string, conPrivado: boolean): string | undefined {
+/**
+ * Las banderas que suman permisos: `META_PERMISOS_PRIVADO` (los del privado, arriba) y
+ * `THREADS_PERMISOS_EXTRA` (los números y las respuestas de Threads, `SCOPES_THREADS_EXTRA`).
+ * Las dos por la misma razón: un permiso que el caso de uso de la app no tiene activado hace
+ * que la ventana rechace el pedido entero.
+ */
+export type PermisosExtra = { privado: boolean; threads: boolean }
+
+export function scopesDe(network: string, extra: PermisosExtra): string | undefined {
   const base = SCOPES[network]
-  const privado = conPrivado ? SCOPES_PRIVADO[network] : undefined
-  return base && privado ? `${base},${privado}` : base
+  if (!base) return undefined
+  const sumados = [
+    extra.privado ? SCOPES_PRIVADO[network] : undefined,
+    extra.threads && network === 'threads' ? SCOPES_THREADS_EXTRA : undefined,
+  ].filter(Boolean)
+  return [base, ...sumados].join(',')
 }
 
 export async function GET(
@@ -75,7 +88,10 @@ export async function GET(
   if (!usuario) return new NextResponse('No autorizado', { status: 401 })
 
   const { network } = await params
-  const scope = scopesDe(network, env('META_PERMISOS_PRIVADO') === '1')
+  const scope = scopesDe(network, {
+    privado: env('META_PERMISOS_PRIVADO') === '1',
+    threads: env('THREADS_PERMISOS_EXTRA') === '1',
+  })
   if (!scope) return new NextResponse('Esa red no usa OAuth', { status: 400 })
 
   const origin = new URL(request.url).origin

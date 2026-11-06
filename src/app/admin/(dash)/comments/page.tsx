@@ -10,6 +10,8 @@ import {
 } from '@/lib/social/comentarios/instrucciones'
 import { privadoActivo } from '@/lib/social/comentarios/privado'
 import { networkLabel } from '@/lib/networks'
+import { proximamentePara } from '@/lib/redes-abiertas'
+import { permisosExtraDeThreads } from '@/lib/social/threads'
 import { cn } from '@/lib/utils'
 import { Encabezado } from '@/components/ui'
 import { Cola } from './cola'
@@ -18,6 +20,17 @@ import { Instrucciones } from './instrucciones'
 export const dynamic = 'force-dynamic'
 
 const REDES = ['instagram', 'facebook', 'youtube'] as const
+
+/**
+ * Los botones de red de este dueño. Threads solo aparece donde ya trae respuestas: abierta para
+ * él (`proximamentePara`, la cuenta del revisor de Meta) y con sus permisos de lectura pedidos
+ * (`permisosExtraDeThreads`). Para los demás está en «Próximamente» y su botón no filtraría nada.
+ */
+function redesDe(ownerId: string): readonly string[] {
+  const conThreads = permisosExtraDeThreads() && !proximamentePara(ownerId).has('threads')
+  return conThreads ? [...REDES, 'threads'] : REDES
+}
+
 const ETIQUETA_ESTADO: Record<EstadoCola, string> = {
   pendientes: 'Pendientes',
   enviados: 'Enviados',
@@ -45,9 +58,9 @@ export default async function CommentsPage({
   const estado = (ESTADOS_COLA as readonly string[]).includes(String(params.estado))
     ? (params.estado as EstadoCola)
     : 'pendientes'
-  const red = (REDES as readonly string[]).includes(String(params.red)) ? String(params.red) : null
-
   const { id: ownerId } = await requireUser()
+  const redes = redesDe(ownerId)
+  const red = redes.includes(String(params.red)) ? String(params.red) : null
   const [filas, pendientes, instrucciones] = await Promise.all([
     getCola(ownerId, { estado, red }),
     contarPendientes(ownerId, red),
@@ -89,7 +102,7 @@ export default async function CommentsPage({
         ))}
         <span className="mx-1 text-fg-faint">·</span>
         <Link href={href(estado, null)} className={chip(red === null)}>Todas</Link>
-        {REDES.map((r) => (
+        {redes.map((r) => (
           <Link key={r} href={href(estado, r)} className={chip(red === r)}>
             {networkLabel(r)}
           </Link>

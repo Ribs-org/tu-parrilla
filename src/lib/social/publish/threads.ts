@@ -41,7 +41,7 @@ const REFRESH_WINDOW_MS = 7 * 24 * 60 * 60 * 1000
  * involved) — but only while it is still alive and older than a day, so the window
  * is a generous week before expiry.
  */
-async function ensureThreadsCredential(account: SocialAccount): Promise<string | null> {
+export async function ensureThreadsCredential(account: SocialAccount): Promise<string | null> {
   if (!account.accessToken) return null
   const token = decryptToken(account.accessToken)
 

@@ -258,6 +258,8 @@ const FORMATOS: Record<string, string> = {
   image: 'Foto',
   carousel: 'Carrusel',
   link: 'Enlace',
+  text: 'Texto',
+  audio: 'Audio',
 }
 
 /** El formato de una publicación como se lee en pantalla, o null si la red no lo dio. */

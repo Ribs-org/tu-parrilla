@@ -64,12 +64,30 @@ describe('GET /api/social/<red>/connect', () => {
   })
 })
 
+const SIN = { privado: false, threads: false }
+const TODO = { privado: true, threads: true }
+
 describe('los permisos del privado', () => {
   it('solo con la bandera, y solo en Instagram y Facebook', () => {
-    expect(scopesDe('instagram', false)).not.toContain('instagram_manage_messages')
-    expect(scopesDe('instagram', true)).toMatch(/,instagram_manage_messages,pages_messaging$/)
-    expect(scopesDe('facebook', true)).toMatch(/,pages_messaging$/)
-    expect(scopesDe('tiktok', true)).toBe(scopesDe('tiktok', false))
-    expect(scopesDe('linkedin', true)).toBeUndefined()
+    expect(scopesDe('instagram', SIN)).not.toContain('instagram_manage_messages')
+    expect(scopesDe('instagram', { ...SIN, privado: true })).toMatch(/,instagram_manage_messages,pages_messaging$/)
+    expect(scopesDe('facebook', { ...SIN, privado: true })).toMatch(/,pages_messaging$/)
+    expect(scopesDe('tiktok', TODO)).toBe(scopesDe('tiktok', SIN))
+    expect(scopesDe('linkedin', TODO)).toBeUndefined()
+  })
+})
+
+describe('los permisos extra de Threads', () => {
+  it('sin la bandera, Threads pide solo lo de publicar', () => {
+    expect(scopesDe('threads', SIN)).toBe('threads_basic,threads_content_publish')
+    // La del privado no le suma nada: es de Instagram y Facebook.
+    expect(scopesDe('threads', { ...SIN, privado: true })).toBe('threads_basic,threads_content_publish')
+  })
+
+  it('con la bandera suma los números y las respuestas, y solo en Threads', () => {
+    expect(scopesDe('threads', { ...SIN, threads: true })).toBe(
+      'threads_basic,threads_content_publish,threads_manage_insights,threads_read_replies,threads_manage_replies',
+    )
+    expect(scopesDe('instagram', { ...SIN, threads: true })).toBe(scopesDe('instagram', SIN))
   })
 })
