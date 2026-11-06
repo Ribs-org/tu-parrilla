@@ -1,6 +1,6 @@
 # Los Números — cómo te fue en las redes y en tu página
 
-`/admin/analytics` — pestaña «Los Números» de la barra de arriba del panel, la tercera y última (en el README y en documentos viejos se llama «Analítica»). Un clic adentro están `/admin/analytics/publicaciones`, «Tus publicaciones»: la lista de cada publicación, que hasta el 2026-10-13 era la pestaña «Los Cortes» (`/admin/content`, que ahora lleva ahí); `/admin/analytics/publicaciones/<id>`, la pieza de una publicación con sus versiones; `/admin/analytics/comparar`, «Comparar por atributo»; `/admin/analytics/mejores`, «Tu mejor 10 %» (o «Tu peor 10 %»); y `/admin/analytics/lado-a-lado`, «Lado a lado».
+`/admin/analytics` — pestaña «Los Números» de la barra de arriba del panel, la tercera y última (en el README y en documentos viejos se llama «Analítica»). Un clic adentro están `/admin/analytics/publicaciones`, «Tus publicaciones»: la lista de cada publicación, que hasta el 2026-10-13 era la pestaña «Los Cortes» (`/admin/content`, que ahora lleva ahí); `/admin/analytics/publicaciones/<id>`, la pieza de una publicación con sus versiones; `/admin/analytics/comparar`, «Comparar por atributo»; `/admin/analytics/mejores`, «Tu mejor 10 %» (o «Tu peor 10 %»); y `/admin/analytics/lado-a-lado`, «Lado a lado». En algunas cuentas, además, `/admin/analytics/publicaciones/<id>/promocionar`, «Promocionar», para convertir una publicación en un anuncio de Meta.
 
 Un tablero con dos mitades que miden cosas distintas y lo dicen. «En las redes» es lo que
 hicieron las publicaciones de la persona donde se publicaron —views ganadas, seguidores,
@@ -22,6 +22,16 @@ publicada, y «Contra su cuenta», que mide a cada publicación contra lo normal
 cuenta. «Lado a lado» pone dos publicaciones una al lado de la otra —por ejemplo, la mejor y la
 peor—, con su portada, el link para ver el video en la red y cómo crecieron. Y «Llevar para
 la casa» (de día, «Para llevar»), al lado del título, baja todo eso a una planilla de Excel.
+
+Para algunas cuentas, entre las dos mitades aparece una sección más, **«Lo pagado»**: cómo les
+fue a los anuncios de Instagram y Facebook de la persona, y sobre todo a las publicaciones que
+promocionó —lo gastado, a cuántas cuentas llegaron, cuántas veces se mostraron y cuántos clics
+tuvieron—. Lo cuenta Meta. Y en la pieza de una publicación de Instagram o Facebook,
+**«Promocionar»** la convierte en un anuncio pagado con la cuenta publicitaria de la persona:
+elige qué quiere conseguir, cuánto gastar, entre qué fechas y a quién mostrarlo; antes de crear
+nada, la pantalla dice lo máximo que puede gastar y pregunta. Después se pausa, se reanuda o se
+detiene desde la misma pieza o desde «Lo pagado». Mientras Meta revisa estos permisos, las dos
+cosas se ven solo en las cuentas que el equipo de Tu Parrilla habilitó; en las demás no existen.
 
 Dos palabras que no hay que mezclar: la **etiqueta** es el `?s=` del link de cada publicación,
 que dice por cuál llegó la gente a la página; los **atributos** son lo que se le anota a un post
@@ -60,6 +70,9 @@ API.
 - A «Lado a lado»: en «Tu mejor 10 %», el enlace «Lado a lado →», a la derecha del título «Las
   publicaciones»; o, en una pieza, «Comparar lado a lado →», debajo del título. Llega con lo
   mismo que estaba elegido.
+- A «Promocionar» (solo en las cuentas habilitadas): en la pieza de una publicación, el panel
+  «Promocionar», debajo de las versiones, y su botón «Promocionar en <red> · <cuenta> →». Para
+  volver, arriba a la izquierda, «La pieza».
 
 ## Qué se ve
 
@@ -283,6 +296,66 @@ Amplía el período.»
   las mismas fechas, cada uno rotulado arriba: «Views ganadas» y «Visitas» (separados por lo
   mismo: las views van en miles y las visitas en decenas). Cada punto es un día (también con
   «Hoy»); con «Todo», una semana. Al pasar el mouse aparece la fecha completa y el valor.
+
+### Sección «Lo pagado» (solo en algunas cuentas)
+
+Entre «En las redes» y «En tu página», **solo en las cuentas habilitadas mientras Meta revisa el
+permiso para leer anuncios** (en las demás no aparece nada, ni siquiera el título).
+
+**La cabeza.** El título «Lo pagado» y debajo «Lo que hicieron tus anuncios de Instagram y
+Facebook, y las publicaciones que promocionaste. Lo cuenta Meta.» No tiene «⋯ Más» ni selector
+de cuenta: muestra los anuncios de todas las cuentas publicitarias de la persona.
+
+**Sin anuncios en el período**, en vez de cifras, una de dos frases:
+
+- «Todavía no hay anuncios leídos. Si promocionaste una publicación, vuelve a conectar Instagram
+  en Los Fierros y acepta el permiso para ver tus anuncios: los números llegan con la
+  sincronización diaria.» (de día, «Los Cuchillos» en vez de «Los Fierros») — cuando nunca se
+  leyó ningún anuncio de la persona.
+- «Ningún anuncio tuyo corrió en este período.» — cuando hay anuncios leídos, pero ninguno
+  estuvo corriendo en las fechas elegidas.
+
+**Con anuncios**, cuatro cifras, cada una con su aclaración debajo:
+
+| Rótulo | Aclaración debajo |
+|---|---|
+| «Gastado» | «En <N> anuncios, de principio a fin» («En 1 anuncio, …» si es uno) |
+| «Alcance pagado» | «Cuentas a las que llegaron» |
+| «Impresiones» | «Veces que se mostraron» |
+| «Clics» | «En cualquier parte del anuncio» |
+
+«Gastado» va en la moneda de la cuenta publicitaria, con su código: «15.000 CLP». Si la persona
+tiene cuentas publicitarias en monedas distintas, cada moneda va aparte, separadas por « · »
+(«15.000 CLP · 10,50 USD»): no se suman.
+
+**Panel «Tus publicaciones promocionadas»**, explicación «Cada una con lo de todos sus anuncios,
+de principio a fin, aunque hayan empezado antes del período. Con dos anuncios, el alcance se
+suma y puede contar dos veces a la misma cuenta.» Una tabla, de más a menos impresiones, con las
+columnas «Publicación», «Anuncios», «Gastado», «Alcance», «Impresiones», «Clics» y «Fechas»
+(no se ordena al apretarlas). Cada fila:
+
+- La miniatura, el texto de la publicación (o su etiqueta, o «Publicación sin texto») y debajo,
+  en chico, el ícono de la red y la cuenta con el patrón «<red> · <nombre de la cuenta>». El
+  texto abre la pieza de esa publicación, en la misma pestaña.
+- Cuántos anuncios la promocionaron, y la suma de lo gastado, el alcance, las impresiones y los
+  clics de todos ellos.
+- «Fechas»: del primer día en que corrió alguno de sus anuncios al último, con el mismo formato
+  del botón del período («1 oct – 8 oct»).
+
+Si ninguno de los anuncios del período promociona una publicación de las cuentas conectadas, en
+vez de la tabla: «Ninguno de estos anuncios promociona una publicación de tus cuentas
+conectadas.» Y si algunos no lo hacen (un anuncio armado aparte en el Administrador de anuncios
+de Meta, por ejemplo), debajo de la tabla: «Además, <N> anuncios que no salen de una publicación
+de tus cuentas conectadas: suman arriba, pero no tienen fila.» (con uno, «Además, 1 anuncio que
+no sale de una publicación de tus cuentas conectadas: suma arriba, pero no tiene fila.»).
+
+**Solo donde además se puede promocionar**, al final de la sección:
+
+- El panel **«Tus promociones desde Tu Parrilla»** (si hay alguna), el mismo que en la pieza (ver
+  «La pieza», abajo), con todas las promociones de la persona; aquí el texto de cada una abre su
+  pieza.
+- La frase «Para promocionar una publicación, ábrela —en «Ver todas las publicaciones →» o en
+  «Lo que más creció»— y busca «Promocionar», debajo de sus versiones.»
 
 ### Mitad «En tu página»
 
@@ -562,6 +635,88 @@ salieron o no trajeron nada, por fecha. Una versión borrada en la red se ve sem
 - Si no: «¿Otra versión con otro hook, o el trial reel en la misma cuenta? Son otro post
   programado: dales a los dos el mismo atributo pieza —por ejemplo {"pieza":
   "chimichurri-30s"}— en «Editar atributos» o por la API, y aparecen juntos acá.»
+
+**Panel «Promocionar»** (solo en las cuentas habilitadas; ver «Promocionar», abajo), debajo de
+las versiones, con la explicación «Un anuncio de una versión ya publicada, pagado con tu cuenta
+publicitaria de Meta. Antes de crear nada te mostramos lo máximo que puedes gastar.» Un botón por
+cada versión publicada en Instagram o Facebook que la red ya entregó y no está borrada:
+«Promocionar en <red> · <cuenta> →» (por ejemplo «Promocionar en Instagram · @juan →»). Si no hay
+ninguna: «Ninguna versión de esta pieza se puede promocionar: hace falta una publicada en
+Instagram o Facebook, que no esté borrada.»
+
+Debajo, si alguna versión ya se promocionó desde Tu Parrilla, el panel **«Tus promociones desde
+Tu Parrilla»**, explicación «Cómo va cada una, según Meta. Pausar la deja de mostrar sin gastar;
+detenerla es para siempre. Lo que logran llega a «Lo pagado» con la sincronización diaria.» Una
+fila por promoción, la más nueva arriba (hasta 50): el ícono y el nombre de la red, y debajo, en
+una línea, cómo va, qué se quería conseguir, el presupuesto («5000 CLP al día» o «35.000 CLP en
+total»), «hasta <lo máximo que puede gastar>» y las fechas («5 nov – 11 nov»). Cómo va es una de:
+«Activa», «En pausa», «En revisión de Meta», «Rechazada por Meta», «Con problemas en Meta», «Falta
+el medio de pago», «Aprobada, por empezar», «Terminó» o «Detenida». A la derecha, los botones que
+correspondan: «Pausar» y «Detener» si está activa; «Reanudar» y «Detener» si está en pausa; solo
+«Detener» si ya terminó; ninguno si está detenida. «Reanudar» pregunta «¿Reanudar la
+promoción?» («Vuelve a circular y a gastar, hasta <monto> en total.»); «Detener» pregunta
+«¿Detener la promoción?» («Deja de circular para siempre: no se puede reanudar. Lo que ya logró
+sigue en «Lo pagado».»). Mientras trabaja, el botón dice «Pausando…», «Reanudando…» o
+«Deteniendo…».
+
+### Promocionar (`/admin/analytics/publicaciones/<id>/promocionar`)
+
+Solo en las cuentas habilitadas mientras Meta revisa el permiso; en las demás la dirección
+responde que no existe. Arriba: una flecha y «La pieza», que vuelve; en chico «Promocionar en
+<red>»; el texto de la publicación como título, y debajo «Un anuncio de esta publicación, tal como
+está, pagado con tu cuenta publicitaria de Meta. Antes de crear nada te mostramos lo máximo que
+puedes gastar y te preguntamos. Cómo le va lo ves en Los Números, en «Lo pagado».»
+
+**En vez del formulario**, uno de tres paneles cuando no se puede:
+
+- «No se puede promocionar todavía», con la frase de Meta en rojo: casi siempre que hay que
+  volver a conectar Instagram aceptando todos los permisos.
+- «No tienes una cuenta publicitaria», que explica crearla en el Administrador de anuncios
+  (adsmanager.facebook.com) con el mismo Facebook, agregarle un medio de pago y volver.
+- «Esta publicación no se puede promocionar», cuando Instagram no la deja: «Instagram no deja
+  promocionar esta publicación (<motivo de Meta>). Pasa, por ejemplo, con la música con derechos
+  o los filtros interactivos.»
+
+**El formulario, panel «Tu promoción»** («Lo mismo que el botón «Promocionar» de la app, desde
+acá.»):
+
+- «Cuenta publicitaria»: una opción por cuenta, «<nombre> · <moneda>», con «(no se puede usar)»
+  si tiene un problema; debajo, «Se paga en <moneda>.». Si la elegida tiene un problema, al lado
+  va en rojo por qué (ver «Mensajes que puede ver»).
+- «Qué quieres conseguir»: «Que la vea más gente», «Más me gusta, comentarios y compartidos» y,
+  solo en una publicación de Instagram con página de links, «Más visitas a tu página» (con esa
+  elegida: «Con un botón «Más información» que lleva a <el link de la publicación con su ?s=>.»).
+- «Presupuesto»: «Total, por toda la promoción» (lo que viene elegido) o «Por día»; y «Monto en
+  <moneda>», un campo para escribir la cifra (acepta «5.000» o «12,50»), con debajo «Meta pide al
+  menos <monto> por cada día.» cuando Meta lo dijo.
+- «Empieza» y «Termina»: dos selectores de día; vienen hoy y seis días después.
+- «Países»: una casilla por país —Chile, Argentina, Perú, Colombia, México, Uruguay, Paraguay,
+  Bolivia, Ecuador, Venezuela, Costa Rica, Panamá, Guatemala, República Dominicana, España,
+  Estados Unidos y Brasil—; viene marcado Chile.
+- «Edad mínima» y «Edad máxima», de 18 a 65 («65 o más»).
+- La casilla «Público Advantage+: que Meta busque a quién mostrarlo más allá de estas edades. La
+  edad mínima puede ser como mucho 25.» Marcada, la edad máxima se apaga y dice «Con Advantage+,
+  Meta decide hasta qué edad.».
+- El botón «Revisar». No crea nada: revisa y, si falta algo, lo dice en rojo debajo.
+
+**El resumen, panel «Revisa antes de crear»** («Todavía no se creó nada. Nada se gasta hasta que
+confirmes.»): en un recuadro, lo máximo que se puede gastar —«Vas a gastar como máximo <total>,
+repartido en <N> días.» con presupuesto total, o «Vas a gastar como máximo <total>: <diario> al
+día durante <N> días. Meta puede gastar más un día y menos otro, pero nunca más que eso en
+total.»—; debajo, «Cuenta publicitaria», «Qué quieres conseguir», «Presupuesto», «Fechas»,
+«Países», «Edades» y, si se piden visitas, «Lleva a». Después:
+
+- La casilla «Confirmo que no es un anuncio de vivienda, empleo, crédito, ni de temas sociales,
+  electorales o políticos.» Sin marcarla, el botón de crear está apagado.
+- «Cuando Meta la cree:», con dos opciones: «Dejarla en pausa: no gasta nada hasta que la actives
+  desde la pieza.» (la que viene elegida) y «Activarla: empieza a circular en la fecha de inicio,
+  cuando Meta la apruebe.».
+- El botón, con lo máximo escrito: «Crear en pausa: hasta <total>» o «Crear y activar: hasta
+  <total>» (mientras trabaja, «Creando en Meta…»), y «Cambiar algo», que vuelve al formulario con
+  todo lo escrito.
+
+Creada, vuelve a la pieza, al panel «Tus promociones desde Tu Parrilla», con la nueva arriba. Si
+Meta la rechaza, la frase sale en rojo sobre el botón y no queda nada creado.
 
 ### Comparar por atributo (`/admin/analytics/comparar`)
 
@@ -905,6 +1060,29 @@ cada publicación no suma (no hay lectura anterior con qué restar). Una publica
 lo que creció en ese tiempo cae entero en el día en que se leyó: los saltos de un día puntual
 pueden ser eso. Por eso no tiene por qué sumar lo mismo que la cifra «Views ganadas».
 
+### En «Lo pagado»
+
+**De dónde salen.** De Meta, con la misma sincronización diaria que lee las cuentas: lee las
+cuentas publicitarias a las que la persona tiene acceso (también las de un portafolio comercial
+donde tiene un rol) y cada anuncio que tuvo resultados, con sus totales. Una publicación
+promocionada con el botón «Promocionar» de Instagram o de Facebook, o con el de la pieza en Tu
+Parrilla, es un anuncio más, así que entra igual. Un anuncio de hoy aparece mañana, o al apretar «Sincronizar ahora» en
+[Los Fierros](los-fierros.md). Hace falta que la persona haya dado el permiso para ver sus
+anuncios al conectar Instagram; si lo conectó antes, tiene que volver a conectarlo.
+
+**Qué filtra el período.** Qué anuncios aparecen —los que estuvieron corriendo algún día de las
+fechas elegidas—, pero no sus números: cada anuncio trae sus totales de principio a fin, aunque
+haya empezado antes del período o siga después. No hay «lo ganado en el período» como en las
+redes. El selector de cuenta, el de página y «Bots» no le aplican.
+
+**Qué publicación es.** La que el anuncio promocionó, si es de una cuenta de Instagram o de
+Facebook conectada en Tu Parrilla. Un anuncio armado desde cero en el Administrador de anuncios,
+o de una cuenta que no está conectada, no tiene fila: solo suma a las cuatro cifras de arriba.
+
+**El alcance.** Es de cada anuncio; con dos anuncios de la misma publicación, o en la cifra de
+arriba, se suman, y una misma cuenta que vio los dos se cuenta dos veces. Meta no da el alcance
+sin repetir entre anuncios distintos. Un «—» es que Meta no lo dio.
+
 ### En tu página
 
 **Qué filtros le aplican.** El período, el selector de página y «Bots», a toda la mitad (las
@@ -1186,6 +1364,43 @@ primeras horas; que se aplane antes, que se apagó antes. YouTube no se dibuja, 
 3. En «En tu página», leer «Visitas» y «Clicks en tus links», con su comparación contra el
    período anterior; debajo, «Qué publicación te trajo gente».
 
+### Para ver cómo les fue a tus publicaciones promocionadas
+
+Solo en las cuentas donde aparece «Lo pagado» (ver «Sección «Lo pagado»», arriba).
+
+1. Si nunca se leyó ningún anuncio, primero el permiso: en [Los Fierros](los-fierros.md), volver
+   a conectar Instagram y, en la ventana de Meta, aceptar todos los permisos que pide (uno es para
+   ver los anuncios). Al día siguiente, o después de «Sincronizar ahora», llegan los números.
+2. Elegir el período en que corrieron los anuncios (o «Todo»).
+3. En «Lo pagado», leer las cuatro cifras y, en «Tus publicaciones promocionadas», cada
+   publicación con lo que gastó y lo que logró. Su texto abre la pieza, con sus números
+   orgánicos.
+
+### Para promocionar una publicación
+
+Solo en las cuentas donde aparece el panel «Promocionar» en la pieza. Hace falta una cuenta
+publicitaria de Meta con medio de pago, y haber conectado Instagram aceptando todos los permisos.
+
+1. Abrir la pieza de la publicación: en el tablero, «Ver todas las publicaciones →» y su texto, o
+   una fila de «Lo que más creció».
+2. Debajo de las versiones, en «Promocionar», apretar «Promocionar en <red> · <cuenta> →».
+3. Elegir la cuenta publicitaria, qué se quiere conseguir, si el presupuesto es total o por día,
+   el monto, los días, los países y las edades (y, si se quiere, el público Advantage+).
+4. Apretar «Revisar» y leer el recuadro: es lo máximo que se puede gastar.
+5. Marcar «Confirmo que no es un anuncio de vivienda, empleo, crédito, ni de temas sociales,
+   electorales o políticos.», elegir si queda en pausa o se activa, y apretar «Crear en pausa:
+   hasta <total>» o «Crear y activar: hasta <total>».
+6. Vuelve a la pieza con la promoción en «Tus promociones desde Tu Parrilla». Meta la revisa
+   antes de mostrarla («En revisión de Meta»). Lo que logra aparece en «Lo pagado» desde la
+   sincronización siguiente.
+
+### Para pausar, reanudar o detener una promoción
+
+1. En la pieza de la publicación, o en «Lo pagado» del tablero, buscar la promoción en «Tus
+   promociones desde Tu Parrilla».
+2. Apretar «Pausar» (deja de mostrarse sin gastar), «Reanudar» (pregunta antes, porque vuelve a
+   gastar) o «Detener» (pregunta antes: no tiene vuelta; lo logrado se queda).
+
 ### Para llevarse los números a Excel
 
 1. En el tablero de Los Números, elegir el período (y, si se quiere, una cuenta, una página o
@@ -1445,6 +1660,28 @@ De día, donde una de estas frases dice «La Parrilla» dice «La Barra», y «L
 | «La primera fecha no puede ser anterior a 2020.» (en el selector de fechas) | «Desde» es de antes del 1 de enero de 2020, donde empieza «Todo». | Elegir una fecha desde 2020, o «Todo». |
 | «La segunda fecha no puede pasar de hoy: lo que viene todavía no tiene números.» (en el selector de fechas) | «Hasta» es de un día que todavía no llega. | Elegir hoy o un día anterior. |
 | «Elige las dos fechas.» (en el selector de fechas) | Uno de los dos campos está vacío o a medio escribir. | Completar el campo. |
+| «Todavía no hay anuncios leídos. Si promocionaste una publicación, vuelve a conectar Instagram en Los Fierros y acepta el permiso para ver tus anuncios: los números llegan con la sincronización diaria.» (en «Lo pagado») | Nunca se leyó un anuncio de la persona: no dio el permiso para ver sus anuncios, no tiene una cuenta publicitaria, o sus anuncios nunca llegaron a mostrarse. | Volver a conectar Instagram en Los Fierros aceptando todos los permisos, y esperar la sincronización o apretar «Sincronizar ahora». |
+| «Ningún anuncio tuyo corrió en este período.» (en «Lo pagado») | Hay anuncios leídos, pero ninguno estuvo corriendo en las fechas elegidas. | Ampliar el período, o «Todo». |
+| «Ninguno de estos anuncios promociona una publicación de tus cuentas conectadas.» (en «Tus publicaciones promocionadas») | Los anuncios del período no salen de una publicación de Instagram o Facebook conectada en Tu Parrilla. | Nada: sus números ya están en las cuatro cifras. Si la publicación es de otra cuenta, conectarla en Los Fierros. |
+| «Meta deshabilitó esta cuenta publicitaria. El motivo está en el Administrador de anuncios, en la Calidad de la cuenta.» (en «Promocionar») | Meta no deja anunciar con esa cuenta publicitaria. | Elegir otra cuenta, o resolverlo en el Administrador de anuncios. |
+| «Esta cuenta publicitaria tiene un pago pendiente: págalo en el Administrador de anuncios (Facturación) y vuelve.», «Esta cuenta publicitaria está en período de gracia por un pago: regularízalo en el Administrador de anuncios antes de gastar más.» (en «Promocionar») | Hay una deuda con Meta en esa cuenta. | Pagarla en el Administrador de anuncios y volver. |
+| «Esta cuenta publicitaria no tiene un medio de pago. Agrégalo en el Administrador de anuncios, en Configuración de pagos, y vuelve.» (en «Promocionar») | Meta no tiene con qué cobrar. | Agregar una tarjeta u otro medio en el Administrador de anuncios y volver a abrir «Promocionar». |
+| «Meta está revisando esta cuenta publicitaria: espera a que termine para promocionar con ella.», «Esta cuenta publicitaria está cerrada.» (en «Promocionar») | La cuenta no se puede usar por ahora, o ya no. | Esperar, o elegir otra. |
+| «Tu usuario de Facebook puede ver esta cuenta publicitaria, pero no anunciar con ella: pídele a quien la administra el permiso para anunciar.» (en «Promocionar») | En esa cuenta publicitaria la persona solo puede mirar. | Pedir el permiso de anunciante a quien administra la cuenta, o elegir otra. |
+| «Elige la cuenta publicitaria con que se paga.», «Elige qué quieres conseguir.», «Elige si el presupuesto es por día o total.», «Escribe el presupuesto en <moneda>, solo con números.», «El presupuesto tiene que ser más que cero.» (al apretar «Revisar») | Falta un dato o no se entiende. | Completarlo. |
+| «Meta pide al menos <monto> al día en esta cuenta.», «Para <N> días, Meta pide al menos <monto> en total en esta cuenta.» (al apretar «Revisar») | El presupuesto está bajo el mínimo de Meta para esa cuenta. | Subir el monto, o acortar los días si es un total. |
+| «Elige el día en que empieza.», «Elige el día en que termina: sin fin no se puede saber cuánto es lo máximo que gastas.», «El día en que empieza ya pasó.», «El día en que termina tiene que ir después del día en que empieza.», «Se puede programar hasta 90 días desde hoy.» (al apretar «Revisar») | Las fechas no sirven. | Corregirlas. |
+| «Con presupuesto por día, Meta pide que dure más de un día. Para un solo día, usa un presupuesto total.» (al apretar «Revisar») | Se eligió un solo día con presupuesto diario. | Cambiar a «Total, por toda la promoción», o alargarla. |
+| «Elige al menos un país.», «La edad mínima va de 18 a 65.», «La edad máxima va de la mínima a 65.», «Con el público Advantage+, la edad mínima puede ser como mucho 25.» (al apretar «Revisar») | El público no sirve así. | Corregirlo. |
+| «Las visitas a tu página solo se pueden pedir para una publicación de Instagram con su link de Tu Parrilla.» (al apretar «Revisar») | Ese objetivo no se puede con esta publicación. | Elegir otro objetivo. |
+| «Confirma que no es un anuncio de vivienda, empleo, crédito, ni de temas sociales, electorales o políticos: esos Meta los revisa aparte y Tu Parrilla no los arma.» (al crear) | No se marcó la casilla del resumen. | Marcarla si es cierto; si el anuncio es de una de esas categorías, armarlo en el Administrador de anuncios. |
+| «El gasto máximo cambió desde que lo revisaste: revísalo de nuevo antes de confirmar.» (al crear) | Algo cambió entre el resumen y el botón (por ejemplo, la cuenta publicitaria). No se creó nada. | «Cambiar algo» y «Revisar» otra vez. |
+| «Meta no lo aceptó: <la explicación de Meta>» (al crear, o en una promoción) | Meta rechazó la promoción o el cambio, y dice por qué (casi siempre en castellano). Al crear, no quedó nada. | Hacer lo que dice Meta y volver a intentarlo. |
+| «La conexión con Meta venció o se quitó: vuelve a conectar Instagram, en Ajustes → Cuentas.», «Meta no le dio a Tu Parrilla permiso para anunciar en esa cuenta: vuelve a conectar Instagram, en Ajustes → Cuentas, y acepta todos los permisos.», «Conecta Instagram, en Ajustes → Cuentas, aceptando todos los permisos, para promocionar desde Tu Parrilla.» | Falta el permiso para anunciar, o la conexión se cayó. | Reconectar Instagram en Los Fierros aceptando todo lo que pida Meta. |
+| «Mientras la app de Tu Parrilla espera la aprobación de Meta, solo pueden promocionar los administradores de la app que también administran la cuenta publicitaria.» | Meta todavía no aprobó el permiso para todos. | Esperar la aprobación. |
+| «Meta pide esperar un poco antes de seguir: vuelve a intentarlo en unos minutos.» | Se hicieron muchas llamadas seguidas. | Esperar unos minutos. |
+| «No se encontró la página de Facebook enlazada a esta cuenta de Instagram: Meta la pide para promocionar.» (al crear) | El Instagram no está enlazado a una página que administre la persona. | Enlazarlo desde Instagram (Editar perfil → «Página») y volver a conectar. |
+| «Esa promoción ya está detenida.», «Esa promoción no está entre las tuyas.» (en un botón de una promoción) | No hay nada que cambiar en ella. | Recargar la página. |
 | «Este período no cabe entero.» (en la ventana de «Llevar para la casa») | Alguna hoja larga —«Lecturas diarias», «Visitas», «Clicks» o «Comentarios»— tiene más filas que su tope (100.000, 100.000, 100.000 y 50.000). La línea de abajo dice cuáles lleva y cuántas había. | Elegir un período más corto, o armarla igual: lleva lo más reciente. |
 | «No se pudo armar la planilla. Prueba de nuevo; si el período es muy largo, prueba con uno más corto.» | Algo falló mientras se armaba, o se cortó la conexión. No se descargó nada. | «Probar de nuevo»; si se repite, un período más corto. |
 | «Listo: se descargó <archivo>. …» | La planilla está en las descargas del navegador. | Abrirla y empezar por «Léeme». |
@@ -1512,6 +1749,33 @@ De día, donde una de estas frases dice «La Parrilla» dice «La Barra», y «L
 | «Algo se rompió» y «No fue nada que hicieras. Vuelve a intentarlo; el detalle quedó en la consola del navegador.» (a veces con «Si se repite, este código ayuda a encontrarlo: <código>.») | Algo falló al armar la pantalla. | Apretar «Reintentar»; si sigue, «Ir a La Parrilla». |
 
 ## Si el humano dice…
+
+- **«¿Dónde veo cómo le fue a lo que promocioné?» / «mis anuncios» / «lo que pagué en Meta»**: en
+  el tablero, la sección «Lo pagado», entre «En las redes» y «En tu página». Si no aparece, la
+  cuenta todavía no está habilitada: mientras Meta revisa el permiso para leer anuncios, solo la
+  ven algunas cuentas. No hay otra pantalla que lo muestre.
+- **«Promocioné un post y no aparece en «Lo pagado»»**: en orden: que el período cubra los días
+  en que corrió; que hayan pasado una sincronización (al día siguiente, o «Sincronizar ahora» en
+  Los Fierros); que la persona haya vuelto a conectar Instagram aceptando el permiso de los
+  anuncios; y que la publicación sea de una cuenta conectada (si no, el anuncio suma a las cifras
+  de arriba pero no tiene fila). Un anuncio que nunca llegó a mostrarse no aparece.
+- **«El gasto no calza con el de Meta»**: «Lo pagado» muestra los totales de cada anuncio de
+  principio a fin, leídos una vez al día; el Administrador de anuncios puede estar mostrando otro
+  rango de fechas o lo de hoy. El alcance, además, se suma entre anuncios.
+- **«Quiero promocionar una publicación desde aquí»**: en la pieza de esa publicación, el panel
+  «Promocionar», debajo de las versiones (ver «Para promocionar una publicación»). Si no aparece,
+  la cuenta todavía no está habilitada mientras Meta revisa el permiso: se promociona desde
+  Instagram, Facebook o el Administrador de anuncios, y el resultado igual llega a «Lo pagado».
+- **«¿Cuánto me va a cobrar?»**: lo máximo está escrito en el recuadro del resumen y en el botón
+  de crear: con presupuesto total, ese total; por día, el diario por la cantidad de días. Meta
+  cobra en la cuenta publicitaria, con su medio de pago; Tu Parrilla no cobra nada.
+- **«Creé una promoción y no se muestra»**: mirar cómo va en «Tus promociones desde Tu Parrilla».
+  «En pausa»: falta «Reanudar» (o se creó en pausa). «En revisión de Meta»: esperar. «Rechazada
+  por Meta» o «Con problemas en Meta»: el motivo está en el Administrador de anuncios. «Falta el
+  medio de pago»: agregarlo en la configuración de pagos de la cuenta publicitaria.
+- **«Quité la cuenta y la promoción sigue»**: quitar o desconectar una cuenta en Tu Parrilla no
+  detiene lo que ya está en Meta: hay que detenerla antes, o hacerlo en el Administrador de
+  anuncios.
 
 - **«¿Puedo exportar a Excel?» / «quiero bajar mis datos» / «quiero un CSV»**: en el tablero de
   Los Números, «Llevar para la casa» (de día, «Para llevar»), a la derecha del título. Es un
@@ -1688,6 +1952,13 @@ De día, donde una de estas frases dice «La Parrilla» dice «La Barra», y «L
 ## Lo que esta pantalla no hace
 
 - No filtra por red: filtra por cuenta.
+- No crea anuncios solo, ni sin la confirmación de la persona. «Promocionar» parte siempre de una
+  publicación ya publicada de Instagram o Facebook: no arma un anuncio con otra imagen u otro
+  texto, ni promociona en TikTok o YouTube, ni lo programado que todavía no sale. No edita una
+  promoción ya creada (para cambiar el presupuesto o las fechas, se detiene y se arma otra), no
+  elige intereses ni públicos guardados, ni un objetivo distinto de los tres; no pausa ni detiene
+  lo que se promocionó fuera de Tu Parrilla. «Lo pagado» no muestra el costo por resultado, la
+  segmentación ni lo gastado día a día; y la planilla de «Llevar para la casa» no lo lleva.
 - No adivina versiones: dos posts programados se ven juntos solo si comparten el atributo
   `pieza`. Una publicación subida a mano en la red no se junta con nada.
 - No edita los atributos aquí: «Editar atributos» lleva al editor del post, en
@@ -1746,6 +2017,19 @@ Sale de:
   `src/lib/planilla/armar.ts`, `src/lib/planilla/xlsx.ts` y `src/lib/planilla/zip.ts` (las
   hojas y sus columnas, «Léeme», lo que se lee, los topes y el orden, y el formato)
 - `src/app/admin/(dash)/analytics/accounts.tsx` (tarjetas de «Tus cuentas» y su gráfico)
+- `src/app/admin/(dash)/analytics/lo-pagado.tsx` («Lo pagado»: cifras, tabla y frases),
+  `src/lib/lo-pagado.ts` (qué anuncios entran por el período), `src/lib/social/anuncios.ts`
+  (cómo se suma y cómo se escribe el gasto; qué se le pide a Meta) y
+  `src/lib/redes-abiertas.ts` (`anunciosAbiertosPara` y `promocionarAbiertoPara`: quién la ve y
+  quién promociona)
+- `src/app/admin/(dash)/analytics/publicaciones/[id]/promocionar/page.tsx`,
+  `src/app/admin/(dash)/analytics/publicaciones/[id]/promocionar/formulario.tsx` y
+  `src/app/admin/(dash)/analytics/publicaciones/[id]/promocionar/acciones.ts` («Promocionar»: los
+  paneles, el formulario, el resumen y sus frases), `src/app/admin/(dash)/analytics/promociones.tsx`
+  y `src/app/admin/(dash)/analytics/botones-promocion.tsx` («Tus promociones desde Tu Parrilla» y
+  sus botones), `src/lib/social/promocionar.ts` (lo que se revisa, el gasto máximo, los estados y
+  las frases de Meta) y `src/lib/social/promocionar-meta.ts` (las frases de la cuenta y de la
+  página)
 - `src/app/admin/(dash)/analytics/publicaciones/page.tsx` («Tus publicaciones»: controles,
   avisos, estados vacíos, el link que se copia)
 - `src/app/admin/(dash)/analytics/publicaciones/post-table.tsx` (la tabla, la etiqueta, copiar)

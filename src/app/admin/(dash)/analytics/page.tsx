@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { AccountCards, AccountSeriesChart } from './accounts'
 import { BajadaDeLosNumeros } from './cabeza'
 import { SeccionCargando } from './cargando'
+import { LoPagado } from './lo-pagado'
 import { ParaLlevar } from './para-llevar'
 import { QueFunciona } from './que-funciona'
 import { BarList } from '@/components/charts/bar-list'
@@ -42,6 +43,7 @@ import {
 import { parseFilters } from '@/lib/filters'
 import { networkLabel } from '@/lib/networks'
 import { etiquetaDeFechas } from '@/lib/rango'
+import { anunciosAbiertosPara, promocionarAbiertoPara } from '@/lib/redes-abiertas'
 import {
   MAX_PUBLICACIONES_LEIDAS,
   getCampaignPosts,
@@ -104,6 +106,7 @@ function nombreDeCuenta(cuenta: Pick<CuentaRow, 'network' | 'handle'>): string {
  * «En tu página» es quién entró a tu página de links y qué apretó, y lo cuenta Tu Parrilla.
  * Cada mitad muestra dos números y una lista; el resto espera detrás de su «⋯ Más», que la
  * URL abre (`?mas=redes`, `?mas=pagina`) para que no se consulte lo que no se va a ver.
+ * Entre las dos, solo para quien `anunciosAbiertosPara` deja, «Lo pagado» (`lo-pagado.tsx`).
  *
  * Reemplaza a dos pantallas que compartían barra de filtros y no se explicaban entre sí (ver
  * `docs/superpowers/specs/2026-10-13-numeros-tablero-design.md`).
@@ -143,6 +146,19 @@ export default async function NumerosPage({ searchParams }: { searchParams: Prom
         <Suspense fallback={<SeccionCargando />}>
           <EnLasRedes filters={filters} params={params} cuentas={cuentas} abierta={abiertas.has('redes')} />
         </Suspense>
+        {/* Solo para quien `ANUNCIOS_ABIERTO_PARA` nombra, mientras `ads_read` espera su revisión. */}
+        {anunciosAbiertosPara(ownerId) ? (
+          <Suspense fallback={<SeccionCargando orden={2} />}>
+            <LoPagado
+              ownerId={ownerId}
+              zona={zona}
+              promocionar={promocionarAbiertoPara(ownerId)}
+              periodo={filters.periodo}
+              params={params}
+              nombres={Object.fromEntries(cuentas.map((c) => [c.id, nombreDeCuenta(c)]))}
+            />
+          </Suspense>
+        ) : null}
         <Suspense fallback={<SeccionCargando orden={4} />}>
           <EnTuPagina
             filters={filters}

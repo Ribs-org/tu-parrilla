@@ -63,12 +63,39 @@ const SCOPES_PRIVADO: Record<string, string> = {
 }
 
 /**
- * Las banderas que suman permisos: `META_PERMISOS_PRIVADO` (los del privado, arriba) y
- * `THREADS_PERMISOS_EXTRA` (los números y las respuestas de Threads, `SCOPES_THREADS_EXTRA`).
- * Las dos por la misma razón: un permiso que el caso de uso de la app no tiene activado hace
- * que la ventana rechace el pedido entero.
+ * Leer los resultados de los anuncios (`social/anuncios.ts`), solo con `META_PERMISOS_ANUNCIOS=1`,
+ * por la misma razón que el privado: `ads_read` tiene que estar activado en los casos de uso de
+ * la app de Meta antes de pedirlo. Va en las dos porque cada red es su propio consentimiento; el
+ * que se usa es el token de usuario que guarda Instagram.
  */
-export type PermisosExtra = { privado: boolean; threads: boolean }
+const SCOPES_ANUNCIOS: Record<string, string> = {
+  instagram: 'ads_read',
+  facebook: 'ads_read',
+}
+
+/**
+ * Promocionar una publicación desde Tu Parrilla (`social/promocionar.ts`): `ads_management`, con
+ * su propia bandera, `META_PERMISOS_PROMOCIONAR=1`, y solo junto a la de leer: promocionar sin ver
+ * después cómo le fue no tiene sentido, y cada permiso se activa aparte en el caso de uso.
+ */
+const SCOPES_PROMOCIONAR: Record<string, string> = {
+  instagram: 'ads_management',
+  facebook: 'ads_management',
+}
+
+/**
+ * Las banderas que suman permisos: `META_PERMISOS_PRIVADO` (los del privado, arriba),
+ * `THREADS_PERMISOS_EXTRA` (los números y las respuestas de Threads, `SCOPES_THREADS_EXTRA`),
+ * `META_PERMISOS_ANUNCIOS` (leer los anuncios) y `META_PERMISOS_PROMOCIONAR` (promocionar, solo
+ * junto con la de leer). Todas por la misma razón: un permiso que el caso de uso de la app no
+ * tiene activado hace que la ventana rechace el pedido entero.
+ */
+export type PermisosExtra = {
+  privado: boolean
+  threads: boolean
+  anuncios: boolean
+  promocionar: boolean
+}
 
 export function scopesDe(network: string, extra: PermisosExtra): string | undefined {
   const base = SCOPES[network]
@@ -76,6 +103,8 @@ export function scopesDe(network: string, extra: PermisosExtra): string | undefi
   const sumados = [
     extra.privado ? SCOPES_PRIVADO[network] : undefined,
     extra.threads && network === 'threads' ? SCOPES_THREADS_EXTRA : undefined,
+    extra.anuncios ? SCOPES_ANUNCIOS[network] : undefined,
+    extra.anuncios && extra.promocionar ? SCOPES_PROMOCIONAR[network] : undefined,
   ].filter(Boolean)
   return [base, ...sumados].join(',')
 }
@@ -91,6 +120,8 @@ export async function GET(
   const scope = scopesDe(network, {
     privado: env('META_PERMISOS_PRIVADO') === '1',
     threads: env('THREADS_PERMISOS_EXTRA') === '1',
+    anuncios: env('META_PERMISOS_ANUNCIOS') === '1',
+    promocionar: env('META_PERMISOS_PROMOCIONAR') === '1',
   })
   if (!scope) return new NextResponse('Esa red no usa OAuth', { status: 400 })
 

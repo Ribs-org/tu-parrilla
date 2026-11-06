@@ -123,6 +123,7 @@ const { vincularSinId } = await import('./social/vincular-sin-id')
 const { listarBorradores, cargarBorrador, guardarBorrador, borrarBorrador } = await import('./borradores')
 const { cuentasParaElTelefono } = await import('./borradores-movil')
 const { leerAjuste } = await import('./ajustes')
+const { leerLoPagado, tieneAnuncios } = await import('./lo-pagado')
 const { leerProgramados } = await import('./schedule-leer')
 const { listarLlaves, crearLlave } = await import('./llaves')
 const { leerResumen } = await import('./avisos/run')
@@ -421,6 +422,22 @@ describe('aislamiento por dueño (SQL generado, sin base)', () => {
     expect(consultas).toHaveLength(2)
     esperarFiltradoPorDueno(consultas[0]!)
     expect(consultas[1]!.params).toContain('post-1')
+  })
+
+  it('lo-pagado: leerLoPagado ata los anuncios al dueño por la cuenta que los leyó, y la publicación también', async () => {
+    const consultas = await todasLasConsultas(() => leerLoPagado(DUENO, '2026-10-01', '2026-10-31'))
+    expect(consultas).toHaveLength(1)
+    esperarFiltradoPorDueno(consultas[0]!)
+    // La publicación se suma por un leftJoin: tiene que ser del mismo dueño, o un anuncio que
+    // apuntara a otra mostraría su texto y su miniatura.
+    const on = consultas[0]!.sql.split(/\bwhere\b/i)[0]!
+    expect(on).toMatch(/left join "social_posts" on \([^)]*"social_posts"\."owner_id" = \$/i)
+  })
+
+  it('lo-pagado: tieneAnuncios mira solo los del dueño', async () => {
+    const consultas = await todasLasConsultas(() => tieneAnuncios(DUENO))
+    expect(consultas).toHaveLength(1)
+    esperarFiltradoPorDueno(consultas[0]!)
   })
 
   it('ajustes: leerAjuste filtra por dueño', async () => {
