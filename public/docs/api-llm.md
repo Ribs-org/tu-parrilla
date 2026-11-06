@@ -14,7 +14,7 @@ la llave, qué significa un error que le salió—, la wiki de la interfaz está
 Esta guía nombra las pantallas como se ven de noche; en el modo día, La Parrilla es «La Barra»
 y Los Fierros, «Los Cuchillos» (la wiki las da todas, en «El modo día»).
 
-Cinco endpoints de escritura: `POST /api/schedule/batch` programa, `DELETE /api/schedule/posts/{id}` saca lo programado (sección 3b), `POST /api/schedule/posts/{id}/archivar` y `…/desarchivar` archivan lo quemado sin borrarlo (sección 3f), y `POST /api/media` sube un archivo una vez para nombrarlo en varias filas (sección 3e). Autenticación en todos los
+Cinco endpoints de escritura: `POST /api/schedule/batch` programa, `DELETE /api/schedule/posts/{id}` saca lo programado (sección 3b), `POST /api/schedule/posts/{id}/archivar` y `…/desarchivar` archivan lo quemado sin borrarlo (sección 3f), y `POST /api/media` sube un archivo una vez para nombrarlo en varias filas (sección 3e). Aparte del calendario, `POST /api/bodega/subidas` guarda material en bruto en la cámara de frío de La Cocina (sección 3h). Autenticación en todos los
 endpoints:
 
 ```
@@ -345,10 +345,64 @@ deshabilitado en TikTok, por ejemplo) se manda apagado sin fallar, y eso solo se
 
 `GET /api/schedule/posts` (por fechas o por `estado`) trae las mismas `opciones` en cada destino.
 
+## 3h. Guardar en la cámara de frío de La Cocina
+
+La cámara de frío (de día, la nevera) guarda el material en bruto del dueño para el chef de la
+casa: largos crudos, intros, outros, música, logos, fotos, tipografías. No vence y no se
+programa: es lo que el dueño elige al pedir una comanda. Para programar un archivo, la sección
+3e; para dejarlo en la cámara, esta. Si el dueño no tiene La Cocina encendida, todo es `403` con
+`La Cocina no está encendida para tu cuenta.`
+
+`GET /api/bodega` devuelve `{ camara: { cuantos, guardados, subiendo, cuota }, materiales }`
+(bytes; libre es `cuota - guardados - subiendo`). Cada material trae `id`, `nombre`, `uso`, `bytes`,
+`duracionS`, `tipoArchivo`, `clase`, `creadoEn` y `enMarcha`, sin URL. Léelo antes de subir.
+
+Subir va por partes, en cuatro llamadas:
+
+1. `POST /api/bodega/subidas` con
+   `{ "nombre": "Intro de marca.mp4", "tipo": "video/mp4", "bytes": 83886080, "uso": "intro", "duracionS": 6.5, "derechos": true }`
+   → `201` `{ id, tamanoParte, partes }`. `bytes` es el peso exacto. `uso` es opcional, uno de
+   `crudo`, `intro`, `outro`, `broll`, `musica`, `logo`, `letras` u `otro`. `derechos: true` es
+   obligatorio y afirma que el dueño tiene los derechos y el permiso de quienes aparecen: no lo
+   mandes sin que el dueño te lo haya confirmado. Si `tipo` falta, vale la extensión del nombre.
+   Topes: video 20 GB, audio 2 GB, imagen 50 MB, lo demás (tipografía, PDF, SRT, VTT, TXT, ZIP)
+   500 MB.
+2. `POST /api/bodega/subidas/{id}/partes` con `{ "partes": [1, 2] }` (hasta 50 por pedido) →
+   `{ partes: [{ numero, url, bytes }], vence }`. Cada enlace vence en una hora.
+3. `PUT` de cada tramo a su `url`: los bytes de la parte `n` van desde `(n - 1) * tamanoParte`,
+   **sin cabeceras**.
+4. `POST /api/bodega/subidas/{id}/cerrar` → `201` `{ material }`, o `200` con el mismo si ya se
+   cerró.
+
+Si se corta, `GET /api/bodega/subidas/{id}` trae `llegaron` (las partes que están): sube las que
+faltan y cierra. `DELETE /api/bodega/subidas/{id}` la aborta. Una abierta más de un día se aborta
+sola.
+
+Frases literales (`{ error }`):
+- `400`: `No entendimos el archivo: falta su nombre, su tipo o su tamaño.`,
+  `Marca que tienes los derechos de este material y el permiso de quienes aparecen.`,
+  `Ese uso no existe: elige uno de la lista, o ninguno.`,
+  `«partes» es una lista de 1 a 50 números de parte de este archivo.`,
+  `El cuerpo no se entendió.`, y las que nombran el archivo:
+  `«<nombre>»: ese tipo de archivo no se guarda. …` o
+  `«<nombre>» pesa más de 20 GB, el tope de un video.` (con el tope de su clase);
+- `404`: `Esa subida no existe, o ya se abortó.`;
+- `409`: `No hay espacio para «<nombre>»: …` (no cabe en la cuota; no reintentes, díselo al
+  dueño), `Faltan <n> partes por subir: súbelas y vuelve a cerrar.` (o
+  `Falta 1 parte por subir: súbela y vuelve a cerrar.`),
+  `El archivo llegó con otro tamaño: súbelo de nuevo.` (la subida se borró: empieza otra) y
+  `Esa subida ya se cerró: el archivo está arriba.`;
+- `500`: `Falta configurar Cloudflare R2 (R2_*).`
+
+Por API no se renombra, no se saca nada de la cámara y no se pide una comanda: eso lo hace el
+dueño en su panel.
+
 ## 4. Lo que esta API no hace
 
 - **No edita un post programado.** Para cambiar texto, hora, destinos o media hay que
   borrarlo (sección 3b) y programarlo de nuevo, o corregirlo a mano en `/admin/schedule`.
+- **No pide comandas a La Cocina.** Guarda en la cámara de frío (sección 3h), pero pedir una
+  comanda, renombrar o sacar lo de la cámara lo hace el dueño en su panel.
 - **No conecta cuentas.** Conectar, reconectar o quitar una cuenta lo hace el dueño en Los
   Fierros (`/admin/accounts`); la API solo las lee (sección 3d).
 - **No manda nada de inmediato.** Todo lo que entra por `POST /api/schedule/batch` espera a su
@@ -489,10 +543,10 @@ de acceso ni caducidad: quien consiga el enlace —lo intercepte, lo reenvíe, l
 abrirlo, sin sesión ni credencial. Es una decisión de producto para este caso de uso (una
 guía que se regala a cambio de un comentario), no un descuido ni algo pendiente de arreglar.
 
-## 7. Leer cómo le fue: métricas y el mejor X %
+## 7. Leer cómo le fue: métricas, el mejor X % y qué funciona
 
-Dos endpoints de lectura, con la misma llave. El detalle de cada número está en
-`api-editor.md`, secciones 2 y 2b; esto es lo que hace falta para pedirlos bien.
+Tres endpoints de lectura, con la misma llave. El detalle de cada número está en
+`api-editor.md`, secciones 2, 2b y 2c; esto es lo que hace falta para pedirlos bien.
 
 - `GET /api/metrics/posts?desde=YYYY-MM-DD&hasta=YYYY-MM-DD` — una fila por publicación
   **publicada** en el rango (no por actividad en él), con sus métricas. Cada fila trae
@@ -514,8 +568,15 @@ Dos endpoints de lectura, con la misma llave. El detalle de cada número está e
   horaria, con `veces`). Con `lado=peor`, el peor X %: las mismas claves con «peores» en vez
   de «mejores» (`peores`, `medianas.peores`, y `enPeores` y `peores` en `enComun`), de la
   peor a la menos mala, y `corte` es lo más que sacó una de las que entraron.
+- `GET /api/metrics/que-funciona?desde=…&hasta=…` — qué `tema`, qué `estilo` y qué `formato`
+  (el de la red: Reel, Carrusel, Foto, Video…) anduvieron mejor en lo publicado en el rango,
+  contra lo normal de cada cuenta. Una clave por cada uno, con `estado` (`gana`, `parejo`,
+  `faltan` o `sinValor`), la `frase` que muestra el panel —úsala tal cual para contárselo al
+  dueño—, `primero` y `segundo`, y `valores` con `publicaciones`, `medidas` (de cuántas sale
+  la mediana) y `contraSuCuenta`. Solo hay `gana` con al menos dos valores de 10 publicaciones
+  medidas y el mejor en ×1,2 o más: con `faltan`, no declares un ganador por tu cuenta.
 
-Filtros que valen en los dos: `red`, y `cuenta` —su `id` (el de la sección 3d) o su nombre en
+Filtros que valen en los tres: `red`, y `cuenta` —su `id` (el de la sección 3d) o su nombre en
 la red, con o sin «@»—. Para «el mejor 10 % de esta cuenta», pasa `cuenta`: sin ella, la cuenta más grande
 llena la tajada de arriba, salvo con `metrica=contraSuCuenta`, que mide a cada una contra lo
 suyo. Solo de `mejores`:
@@ -547,8 +608,10 @@ Cuatro reglas que cambian la lectura:
 - **Para comparar publicaciones entre sí, `contraSuCuenta`.** `viewsGanadas` le da ventaja a
   lo que salió al principio del rango, y entre cuentas, a la más grande; `contraSuCuenta`
   mide a todas a los 7 días y contra lo normal de su propia cuenta. Una cuenta con menos de 5
-  publicaciones del rango con `viewsA7Dias` no la tiene. Para «qué hook funciona», agrupa
-  por atributo las filas de `/api/metrics/posts` y compara las medianas de `contraSuCuenta`.
+  publicaciones del rango con `viewsA7Dias` no la tiene. Para «qué tema, estilo o formato
+  funciona», `/api/metrics/que-funciona` ya lo responde; para otro atributo (el `hook`, la
+  `serie`), agrupa por atributo las filas de `/api/metrics/posts` y compara las medianas de
+  `contraSuCuenta`.
 - **YouTube no entra en `viewsGanadas`, `viewsA7Dias`, `contraSuCuenta`, `interacciones` ni
   `arrastre`**: sus políticas no permiten calcular métricas con sus datos. Sí entra en
   `visitas` y `clicks`, que mide Tu Parrilla.

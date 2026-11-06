@@ -81,6 +81,12 @@ sección.
     chef baje de ahí, cuando Drive era justo el cuello de botella que La Cocina sacó del camino
     («Todo en el almacén de Tu Parrilla, no en Drive», en el diseño de La Cocina)—. También, cuánto
     le toca a cada plan: hoy la cuota se cambia a mano en Los Maestros (`users.bodega_bytes`).
+  - **[dueño] Decidir juntas la aprobación de lo que propone el chef (#283) y el aviso de la
+    entrega (#284)** (2026-11-03). #283 pide que el chef proponga estados y entregas y que una
+    persona del equipo los apruebe desde Tu Parrilla: una tabla de propuestas, sus endpoints y una
+    vista en el panel. De #284 ya sale el correo de lista (#295); faltan el de la primera vez que
+    pasa a `sirviendo`, la animación de entrega (una vez por entrega), un asunto opcional y poder
+    apagarlo. Van juntas porque, con aprobación, el aviso sale al aprobar y no al proponer.
   - **Del equipo de contenido:** el cliente del chef en `marca-personal`, contra
     `docs/cocina-api.md`.
 
@@ -207,9 +213,9 @@ sección.
 Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataforma.
 
 Lo que falta para abrir cada plataforma, de un vistazo (el detalle está en cada entrada, más
-abajo): el **login con Instagram** sin página de Facebook y los **mensajes privados de
-Instagram** (las dos en «Meta, segunda vuelta»), los permisos de Meta para **anuncios
-pagados**, la **Play Store** (la pista interna ya existe; la tienda pública es otro trámite) y
+abajo): los **mensajes privados de Instagram** (en «Meta, segunda vuelta»), el **login con
+Instagram** sin página de Facebook (para una tercera vuelta), los permisos de Meta para
+**anuncios pagados**, la **Play Store** (la pista interna ya existe; la tienda pública es otro trámite) y
 el **App Store** de iPhone, las integraciones con **Threads** y con **X**, y **revisar qué
 otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
 
@@ -249,7 +255,12 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   URL* `https://tu-parrilla.cl/api/social/threads/borrado`. Para abrirla a todos: la aprobación
   de `threads_basic` y `threads_content_publish` (la entrada «Meta, segunda vuelta», más abajo),
   sacarla de `REDES_PROXIMAMENTE` (`src/lib/networks.ts`) y volver a contar su conexión en
-  `public/docs/ui/los-fierros.md`.
+  `public/docs/ui/los-fierros.md`. Después, si se quiere: **las métricas de Threads en Los
+  Números** (`threads_manage_insights`) y **sus respuestas en La Mesa**
+  (`threads_read_replies`, `threads_manage_replies`). Hoy no hay código para ninguna de las dos:
+  `sync.ts` no tiene conector de Threads y La Mesa no tiene `Comentarista` de Threads. El panel de
+  Meta las sumó al borrador de la segunda solicitud el 2026-11-05 y se quitan de ella; cada una
+  pide su función hecha y su video.
 - **Integración con X** (en «Próximamente» desde el 2026-10-19). El código para publicar existe
   (`src/lib/social/publish/x.ts`), pero no publica: lo primero a mirar es el saldo, porque su
   API ya no tiene capa gratuita, y pagarla es decisión del **[dueño]**. Abrirla es lo mismo que
@@ -261,11 +272,13 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   `business_management` para llegar a las cuentas publicitarias de un negocio. Cada permiso pide
   su video en un App Review, y el acceso estándar a la Marketing API se apoya en la verificación
   del negocio (la de Pyxis, en curso, más arriba). Antes del guion hay que decidir el alcance
-  —solo leer, o también promocionar— y qué vería el creador.
+  —solo leer, o también promocionar— y qué vería el creador. El 2026-11-05 `ads_read` y
+  `ads_management` aparecieron en el borrador de la segunda solicitud (los trajo un caso de uso
+  de la app de Meta) y se quitan de ella: sin la función hecha no hay qué mostrar en el video.
 - **Revisar qué otros permisos hacen falta** (2026-10-21). Una pasada red por red de lo que el
   producto necesita y todavía no pidió, antes de la próxima vuelta de cada revisión, para
-  pedirlo todo de una vez y no volver a grabar. Lo que ya se sabe que falta: el login con
-  Instagram y los mensajes privados (Meta, segunda vuelta), los anuncios (la entrada de arriba)
+  pedirlo todo de una vez y no volver a grabar. Lo que ya se sabe que falta: los mensajes
+  privados (Meta, segunda vuelta), el login con Instagram (su entrada, abajo), los anuncios (la entrada de arriba)
   y Threads. Por decidir si hacen falta: más métricas de las que se leen hoy (las historias de
   Instagram, las estadísticas del perfil de TikTok) y otro alcance de YouTube. Los comentarios
   de TikTok ya se decidió quererlos, en la entrada de abajo.
@@ -287,17 +300,29 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   revisar la app, cuenta que el uso aprobado describa lo que hace: nombrarlas en la descripción
   de esos dos permisos y mostrar una en el video.
 
-  En la misma vuelta, **Instagram sin página de Facebook** (2026-10-19). La conexión de hoy es
+  Video grabado el 2026-11-05 (`meta-app-review-demo-2.mp4`, en la carpeta «Meta -
+  Verification» con sus textos en `2026-10-27-SEGUNDA-VUELTA.txt`); la solicitud va con esos
+  cuatro permisos y nada más. **[dueño]** La solicitud quedó llena y guardada el 2026-11-05
+  sin enviar: Meta exige una llamada de prueba a la API por permiso y las del día de la
+  grabación tardan hasta 24 horas en contarse («0 de 1» en `threads_content_publish`). Desde el
+  2026-11-06 en la tarde: abrirla en Revisión de la app → Solicitudes, ver «1 de 1» en
+  `threads_basic`, `threads_content_publish` y `pages_messaging`, y enviar; si sigue en 0, el
+  enlace «Testing» del mismo aviso.
+- **Instagram sin página de Facebook: tercera vuelta de Meta** (2026-10-19; se sacó de la
+  segunda el 2026-11-05 porque no está hecho y no había qué grabar). La conexión de hoy es
   Instagram con login de Facebook, que encuentra el Instagram solo a través de una página que la
   persona administre: sin página enlazada, Meta no entrega ninguno, aunque se acepten todos los
   permisos. Probablemente es lo que trabó a la primera usuaria invitada, que conectó TikTok y no
   Instagram. Meta tiene otra vía, Instagram con login de Instagram (*Business Login for
-  Instagram*: `instagram_business_basic`, `instagram_business_content_publish` y compañía, en
-  `graph.instagram.com`), que no pide página; la cuenta profesional, sí. Cuesta un video más en
-  esta vuelta y una conexión nueva en el código: otro token, que según Meta se renueva desde el
-  servidor, y adaptar a él la publicación, la sincronización y los comentarios de Instagram. Los
-  trial reels por esa vía, por confirmar. La idea: «Conectar con Instagram» como camino
-  principal en Los Fierros, y el login de Facebook para quien además maneja páginas.
+  Instagram*, en `graph.instagram.com`), que no pide página; la cuenta profesional, sí. Usa su
+  propio juego de permisos: `instagram_business_basic`, `instagram_business_content_publish`,
+  `instagram_business_manage_comments`, `instagram_business_manage_messages` e
+  `instagram_business_manage_insights`. Dos de ellos aparecieron en el borrador de la segunda
+  solicitud (los trae el caso de uso de Instagram del panel) y se quitan de ella. Cuesta una conexión
+  nueva en el código: otro token, que según Meta se renueva desde el servidor, y adaptar a él la
+  publicación, la sincronización, los comentarios y el privado de Instagram; después, su video y
+  su solicitud. Los trial reels por esa vía, por confirmar. La idea: «Conectar con Instagram»
+  como camino principal en Los Fierros, y el login de Facebook para quien además maneja páginas.
 - **[dueño] Google — auditoría de cuota de YouTube (trámite B): se contestó el 2026-10-26;
   queda esperar.** El 2026-10-22 YouTube pidió dos cosas (el correo está en
   `2026-10-22-pedido-de-informacion.txt`, en la carpeta del trámite): si la API se usa en
