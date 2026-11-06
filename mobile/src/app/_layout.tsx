@@ -122,6 +122,18 @@ function Raiz() {
                 contentStyle: { backgroundColor: colores.fondo },
               }}
             />
+            {/* Corregir un post programado: se abre al tocar su tarjeta en La Parrilla y vuelve ahí. */}
+            <Stack.Screen
+              name="programado/[id]"
+              options={{
+                headerShown: true,
+                title: 'Editar publicación',
+                headerTitleStyle: { color: colores.texto, fontFamily: TIPO_TITULO },
+                headerTintColor: colores.brasa,
+                headerStyle: { backgroundColor: colores.tarjeta },
+                contentStyle: { backgroundColor: colores.fondo },
+              }}
+            />
             {/* Ajustes se abre desde el botón de Ajustes de cualquier pestaña y vuelve ahí. */}
             <Stack.Screen
               name="ajustes"

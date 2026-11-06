@@ -70,6 +70,14 @@ export function apiPut<T>(path: string, token: string, body: unknown): Promise<T
   })
 }
 
+export function apiPatch<T>(path: string, token: string, body: unknown): Promise<T> {
+  return pedir<T>(path, token, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+}
+
 export function apiDelete<T>(path: string, token: string): Promise<T> {
   return pedir<T>(path, token, { method: 'DELETE' })
 }
