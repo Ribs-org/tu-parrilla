@@ -523,6 +523,14 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   textos, en la carpeta «Google Play» del escritorio de Vicente; el porqué, en
   `docs/play-store.md`. La tienda pública es otro trámite: una cuenta personal nueva
   necesita una prueba cerrada con doce probadores durante catorce días.
+- **[dueño] Play Console: declarar el estado de comerciante antes de febrero de 2027**
+  (2026-11-06). Google lo exige a todos los desarrolladores. Si no se hace, borra el perfil y las
+  apps de Google Play en todo el mundo. No frena la revisión de hoy. **No declararlo en la cuenta
+  personal tal como está:** como comerciante, Google publica en la Unión Europea el nombre legal y la
+  dirección del perfil de pagos, que hoy es la de la casa del dueño. Dos caminos: una cuenta de
+  organización a nombre de Pyxis con su dirección comercial y la app traspasada a ella (lo mismo
+  que «TikTok y Google con la misma entidad»), o cambiar antes la dirección del perfil de pagos por
+  una comercial. Tu Parrilla es un producto comercial de Pyxis: la respuesta honesta es «trader».
 - **[dueño] El build 1.2.0 de la app, con la cámara, a las tiendas** (2026-11-02). La 1.2.0 trae
   La Cocina en el teléfono: grabar un video o sacar una foto y mandárselo al chef. Pide los
   permisos de cámara y micrófono, que solo llegan con un binario nuevo, y su `runtimeVersion` es
