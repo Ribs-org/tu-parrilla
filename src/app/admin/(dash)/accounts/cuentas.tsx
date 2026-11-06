@@ -13,7 +13,14 @@ import { copiarAlPortapapeles } from '@/lib/copiar'
 import { useAhora } from '@/lib/use-ahora'
 import type { CuentaRow } from '@/lib/posts-kpis'
 import { CONEXION_FALLO } from '@/lib/avisos/reglas'
-import { PROXIMAMENTE, avisosDe, networkLabel } from '@/lib/networks'
+import {
+  AGREGAR_CON_INSTAGRAM,
+  CONECTADA_CON_INSTAGRAM,
+  CONECTAR_CON_INSTAGRAM,
+  PROXIMAMENTE,
+  avisosDe,
+  networkLabel,
+} from '@/lib/networks'
 import { estadoDelFierro, type Fierro } from '@/lib/parrilla'
 import { avisoSinTrial } from '@/lib/social/publish/opciones'
 import { cn } from '@/lib/utils'
@@ -66,6 +73,9 @@ function Proximamente() {
   return <span className="ml-auto text-[0.75rem] text-fg-faint">{PROXIMAMENTE}</span>
 }
 
+/** Adónde va la conexión de Instagram con el login de Instagram (`social/instagram-login.ts`). */
+const CONECTAR_LOGIN_DE_INSTAGRAM = '/api/social/instagram/connect?login=instagram'
+
 /**
  * Las redes con cuentas, una debajo de otra en una sola chapa, con una fila corta por
  * cuenta; las redes sin ninguna, juntas al final en una lista de una línea cada una.
@@ -85,20 +95,27 @@ function Proximamente() {
 /**
  * `proximamente`: las redes que para este dueño dicen «Próximamente» (`proximamentePara`, en el
  * servidor): una lista y no la constante, porque Threads puede estar abierta solo para el revisor.
+ *
+ * `loginDeInstagram`: si este dueño ve el login de Instagram (`loginDeInstagramAbiertoPara`, en el
+ * servidor). Con él, Instagram ofrece «Conectar con Instagram →» al lado del «Conectar →» de
+ * siempre, que es el login de Facebook; sin él, Los Fierros se ve igual que antes.
  */
 export function Cuentas({
   rows,
   metaEnRevision,
   desde,
   proximamente,
+  loginDeInstagram = false,
 }: {
   rows: CuentaRow[]
   metaEnRevision: boolean
   desde: number
   proximamente: readonly string[]
+  loginDeInstagram?: boolean
 }) {
   const ahora = useAhora(desde)
   const esProxima = (red: string) => proximamente.includes(red)
+  const conLoginDeInstagram = (red: string) => loginDeInstagram && red === 'instagram'
   const [pending, startTransition] = useTransition()
   const [aviso, setAviso] = useState<{ texto: string; ok: boolean } | null>(null)
 
@@ -126,10 +143,11 @@ export function Cuentas({
         <div className="chapa divide-y divide-acero-700 rounded-xl">
           {conCuentas.map((network) => {
             const cuentas = rows.filter((r) => r.network === network)
-            const avisos = avisosDe(network, metaEnRevision)
+            const avisos = avisosDe(network, metaEnRevision, conLoginDeInstagram(network))
             // El enlace describe sus avisos: quien llega tabulando a «Agregar cuenta →» los
             // oye antes de pulsar, aunque en el DOM vayan después.
             const idsDeAvisos = avisos.map((_, i) => `aviso-${network}-${i}`)
+            const describe = idsDeAvisos.length > 0 ? idsDeAvisos.join(' ') : undefined
             return (
               <div key={network} className="px-4 py-3">
                 <div className="flex items-center gap-2">
@@ -138,15 +156,29 @@ export function Cuentas({
                   {esProxima(network) ? (
                     <Proximamente />
                   ) : (
-                    // `agregar=1`: si la red vuelve con la cuenta de antes, Los Fierros lo dice en vez
-                    // de «conectado» (`connect/route.ts`).
-                    <a
-                      href={`/api/social/${network}/connect?agregar=1`}
-                      aria-describedby={idsDeAvisos.length > 0 ? idsDeAvisos.join(' ') : undefined}
-                      className="ml-auto text-[0.75rem] text-fg-muted transition-colors hover:text-fg"
-                    >
-                      Agregar cuenta →
-                    </a>
+                    <>
+                      {conLoginDeInstagram(network) ? (
+                        <a
+                          href={`${CONECTAR_LOGIN_DE_INSTAGRAM}&agregar=1`}
+                          aria-describedby={describe}
+                          className="ml-auto text-[0.75rem] text-fg-muted transition-colors hover:text-fg"
+                        >
+                          {AGREGAR_CON_INSTAGRAM}
+                        </a>
+                      ) : null}
+                      {/* `agregar=1`: si la red vuelve con la cuenta de antes, Los Fierros lo dice
+                          en vez de «conectado» (`connect/route.ts`). */}
+                      <a
+                        href={`/api/social/${network}/connect?agregar=1`}
+                        aria-describedby={describe}
+                        className={cn(
+                          'text-[0.75rem] text-fg-muted transition-colors hover:text-fg',
+                          conLoginDeInstagram(network) ? 'ml-3' : 'ml-auto',
+                        )}
+                      >
+                        Agregar cuenta →
+                      </a>
+                    </>
                   )}
                 </div>
                 {/* Los avisos sirven antes de conectar: con la red ya conectada, a un clic. */}
@@ -171,6 +203,7 @@ export function Cuentas({
                       vivas={cuentas.filter((c) => c.connected && c.id !== row.id)}
                       ahora={ahora}
                       proxima={esProxima(network)}
+                      loginDeInstagram={conLoginDeInstagram(network)}
                     />
                   ))}
                 </ul>
@@ -185,8 +218,9 @@ export function Cuentas({
           <h2 className="font-titulo text-[0.72rem] font-semibold uppercase tracking-[0.06em] text-fg-muted">Sin conectar</h2>
           <ul className="mt-2 space-y-2">
             {sinCuentas.map((network) => {
-              const avisos = avisosDe(network, metaEnRevision)
+              const avisos = avisosDe(network, metaEnRevision, conLoginDeInstagram(network))
               const idsDeAvisos = avisos.map((_, i) => `aviso-${network}-${i}`)
+              const describe = idsDeAvisos.length > 0 ? idsDeAvisos.join(' ') : undefined
               return (
                 <li key={network}>
                   <div className="flex items-center gap-2">
@@ -199,10 +233,22 @@ export function Cuentas({
                     ) : (
                       <>
                         <span className="text-sm">{networkLabel(network)}</span>
+                        {conLoginDeInstagram(network) ? (
+                          <a
+                            href={CONECTAR_LOGIN_DE_INSTAGRAM}
+                            aria-describedby={describe}
+                            className="ml-auto text-[0.75rem] text-fg-muted transition-colors hover:text-fg"
+                          >
+                            {CONECTAR_CON_INSTAGRAM}
+                          </a>
+                        ) : null}
                         <a
                           href={`/api/social/${network}/connect`}
-                          aria-describedby={idsDeAvisos.length > 0 ? idsDeAvisos.join(' ') : undefined}
-                          className="ml-auto text-[0.75rem] text-fg-muted transition-colors hover:text-fg"
+                          aria-describedby={describe}
+                          className={cn(
+                            'text-[0.75rem] text-fg-muted transition-colors hover:text-fg',
+                            conLoginDeInstagram(network) ? 'ml-3' : 'ml-auto',
+                          )}
                         >
                           Conectar →
                         </a>
@@ -261,12 +307,15 @@ function Fila({
   vivas,
   ahora,
   proxima,
+  loginDeInstagram = false,
 }: {
   row: CuentaRow
   network: string
   vivas: CuentaRow[]
   ahora: number
   proxima: boolean
+  /** Si el dueño tiene abierto el login de Instagram: solo entonces «Reconectar» vuelve por él. */
+  loginDeInstagram?: boolean
 }) {
   const [pending, startTransition] = useTransition()
   const [abierta, setAbierta] = useState(false)
@@ -377,9 +426,11 @@ function Fila({
         </div>
         {/* En una red en «Próximamente» el bloque ya lo dice arriba; la fila se queda con su
             detalle, para poder desconectarla o quitarla. */}
+        {/* Una cuenta conectada con el login de Instagram se reconecta por el mismo login; si ya
+            no lo tiene abierto, por el de Facebook, que reconoce la misma cuenta. */}
         {proxima ? null : (
           <a
-            href={`/api/social/${network}/connect`}
+            href={row.login === 'instagram' && loginDeInstagram ? CONECTAR_LOGIN_DE_INSTAGRAM : `/api/social/${network}/connect`}
             className="shrink-0 text-[0.75rem] text-fg-muted transition-colors hover:text-fg"
           >
             {row.connected ? 'Reconectar' : 'Conectar →'}
@@ -405,6 +456,9 @@ function Fila({
       </div>
 
       <div id={detalle} hidden={!abierta} className="space-y-1.5 pb-2.5 pl-10 pr-1">
+        {network === 'instagram' && row.login === 'instagram' ? (
+          <p className="text-[0.72rem] text-fg-muted">{CONECTADA_CON_INSTAGRAM}</p>
+        ) : null}
         {/* Si acepta trial reels, como lo dijo Meta al publicar uno (`trial-reels.ts`). */}
         {network === 'instagram' && row.trialReels ? (
           <p className={cn('text-[0.72rem]', row.trialReels === 'no' ? 'text-caution' : 'text-fg-muted')}>

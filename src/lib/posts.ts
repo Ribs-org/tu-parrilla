@@ -467,6 +467,7 @@ export const getCuentas = cache(async (ownerId: string): Promise<CuentaRow[]> =>
     expiresAt: a.expiresAt?.toISOString() ?? null,
     trialReels: a.trialReels ?? null,
     trialReelsMotivo: a.trialReelsMotivo,
+    login: a.login ?? null,
   }))
 })
 

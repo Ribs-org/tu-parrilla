@@ -619,3 +619,46 @@ describe('idDeLoPublicado', () => {
     expect(idDeLoPublicado([{ id: 1, caption: 'hola', timestamp: 'x' }], 'hola', ahora)).toBeNull()
   })
 })
+
+describe('publish con el login de Instagram', () => {
+  afterEach(() => vi.unstubAllGlobals())
+
+  const foto = {
+    caption: 'Hola',
+    media: [image],
+    containerId: null,
+    token: 't-cuenta',
+    accountExternalId: '17841400000000001',
+    coverUrl: null,
+    opciones: null,
+  }
+
+  it('crea el contenedor y lo publica en graph.instagram.com, con el mismo cuerpo', async () => {
+    const fetchMock = vi
+      .fn<(url: string, init?: RequestInit) => Promise<Response>>()
+      .mockResolvedValueOnce(Response.json({ id: 'CT_1' }))
+      .mockResolvedValueOnce(Response.json({ id: '18000000000000001' }))
+    vi.stubGlobal('fetch', fetchMock)
+    expect(await instagramPublisher.publish({ ...foto, login: 'instagram' })).toEqual({
+      kind: 'published',
+      externalId: '18000000000000001',
+    })
+    expect(String(fetchMock.mock.calls[0]![0])).toBe('https://graph.instagram.com/v23.0/17841400000000001/media')
+    expect(String(fetchMock.mock.calls[1]![0])).toBe('https://graph.instagram.com/v23.0/17841400000000001/media_publish')
+    const cuerpo = new URLSearchParams(String(fetchMock.mock.calls[0]![1]!.body))
+    expect(cuerpo.get('image_url')).toBe(image.url)
+    expect(cuerpo.get('access_token')).toBe('t-cuenta')
+  })
+
+  it('con el login de Facebook, o sin login guardado, sigue en graph.facebook.com', async () => {
+    for (const login of ['facebook', null, undefined]) {
+      const fetchMock = vi
+        .fn<(url: string, init?: RequestInit) => Promise<Response>>()
+        .mockResolvedValueOnce(Response.json({ id: 'CT_1' }))
+        .mockResolvedValueOnce(Response.json({ id: '18000000000000001' }))
+      vi.stubGlobal('fetch', fetchMock)
+      await instagramPublisher.publish({ ...foto, login })
+      expect(String(fetchMock.mock.calls[0]![0])).toMatch(/^https:\/\/graph\.facebook\.com\/v23\.0\//)
+    }
+  })
+})

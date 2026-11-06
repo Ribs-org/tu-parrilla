@@ -3,7 +3,12 @@ import { createHash, randomBytes } from 'node:crypto'
 import { usuarioActual } from '@/lib/auth'
 import { env } from '@/lib/env'
 import { fraseProximamente } from '@/lib/networks'
-import { proximamentePara } from '@/lib/redes-abiertas'
+import { loginDeInstagramAbiertoPara, proximamentePara } from '@/lib/redes-abiertas'
+import {
+  AUTORIZAR_LOGIN_DE_INSTAGRAM,
+  LOGIN_DE_INSTAGRAM_CERRADO,
+  SCOPES_LOGIN_DE_INSTAGRAM,
+} from '@/lib/social/instagram-login'
 import { COOKIE_AGREGAR } from '@/lib/social/vuelta'
 import { signOAuthState } from '@/lib/social/oauth-state'
 import { conMensaje } from '@/lib/mensaje-firmado'
@@ -87,9 +92,18 @@ export async function GET(
   }
   const redirectUri = `${origin}/api/social/${network}/callback`
 
+  // `?login=instagram`: Instagram con el login de Instagram, sin página de Facebook
+  // (`social/instagram-login.ts`). Vuelve al mismo callback que el de Facebook, y el state
+  // firmado es lo que le dice cuál fue. Mientras Meta no apruebe sus permisos, solo para quien
+  // lo tiene abierto (`loginDeInstagramAbiertoPara`).
+  const loginDeInstagram = network === 'instagram' && new URL(request.url).searchParams.get('login') === 'instagram'
+  if (loginDeInstagram && !loginDeInstagramAbiertoPara(usuario.id)) {
+    return NextResponse.redirect(`${origin}${conMensaje('/admin/accounts', LOGIN_DE_INSTAGRAM_CERRADO)}`)
+  }
+
   // A signed, short-lived state is what stops a stranger's callback from writing
   // their tokens into this dashboard.
-  const state = await signOAuthState(network, usuario.id)
+  const state = await signOAuthState(network, usuario.id, loginDeInstagram ? 'instagram' : undefined)
 
   // «Agregar cuenta →» llega con `?agregar=1`: la vuelta tiene que saber que se quería una
   // cuenta más, para no decir «conectado» si la red solo renovó la de antes. Va en una cookie
@@ -104,6 +118,24 @@ export async function GET(
       response.cookies.delete({ name: COOKIE_AGREGAR, path: ruta })
     }
     return response
+  }
+
+  if (loginDeInstagram) {
+    // El «Instagram app ID» del caso de uso de Instagram, que no es el id de la app de Meta.
+    const appId = env('INSTAGRAM_LOGIN_APP_ID')
+    if (!appId) return new NextResponse('Falta INSTAGRAM_LOGIN_APP_ID', { status: 400 })
+
+    const url = new URL(AUTORIZAR_LOGIN_DE_INSTAGRAM)
+    url.searchParams.set('client_id', appId)
+    url.searchParams.set('redirect_uri', redirectUri)
+    url.searchParams.set('scope', SCOPES_LOGIN_DE_INSTAGRAM)
+    url.searchParams.set('response_type', 'code')
+    url.searchParams.set('state', state)
+    // Con una sesión de Instagram abierta en el navegador, la ventana autorizaría con esa cuenta
+    // sin preguntar, y «Agregar con Instagram →» volvería con la de antes: así pide entrar
+    // siempre, como TikTok con `disable_auto_auth`.
+    url.searchParams.set('force_reauth', 'true')
+    return ir(url)
   }
 
   if (network === 'instagram' || network === 'facebook') {

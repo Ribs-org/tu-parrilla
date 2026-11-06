@@ -8,8 +8,10 @@ import { soloSeRenovo } from './vuelta'
  *
  * - **Le falta la página de Facebook** («Ninguna página de Facebook…»). Quien acaba de aceptar
  *   todos los permisos de Meta cree que ya hizo su parte. La página la exige la vía de Meta que
- *   usa Tu Parrilla, Instagram con login de Facebook; la otra vía, que no la pide, espera la
- *   segunda vuelta del App Review (`docs/pendientes.md`).
+ *   usa Tu Parrilla, Instagram con login de Facebook; la otra vía, el login de Instagram, que no
+ *   la pide, está hecha pero cerrada hasta que Meta apruebe sus permisos
+ *   (`social/instagram-login.ts`, `docs/pendientes.md`). Estas frases siguen hablando del login
+ *   de Facebook, que es el único que ve casi todo el mundo.
  * - **«Agregar cuenta →» volvió con la de antes** (`soloSeRenovo`): la red entró sola con la
  *   cuenta ya conectada, y parecía que no se podía tener más de una por red.
  *

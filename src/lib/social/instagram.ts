@@ -13,12 +13,18 @@ import {
 import { normalizeInstagramAccount } from './account-metrics'
 import { decryptToken } from './crypto'
 import { laMasVieja, sigueListando } from './lectura'
+import { GRAPH_FACEBOOK, RENOVAR_LOGIN_DE_INSTAGRAM, conLoginDeInstagram, graphDeInstagram } from './instagram-login'
 
-// Instagram API with Facebook Login, not Instagram Login: the owner's app lives in a
-// Meta business portfolio, and instagram.com/oauth/authorize only ever answered
-// "rol de desarrollador insuficiente" for it. Everything — token exchange, account
-// discovery, media, insights — goes through the Facebook Graph host instead.
-const GRAPH = 'https://graph.facebook.com/v23.0'
+// Dos logins, un conector (`instagram-login.ts`). El de siempre es Instagram con login de
+// Facebook: el token es de la persona, la cuenta se encontró por su página, y todo va a
+// graph.facebook.com. Con el login de Instagram el token es de la cuenta y todo va a
+// graph.instagram.com, con las mismas rutas y los mismos campos: cada llamada pide su host a
+// `graphDeInstagram(account)`. Lo que de verdad cambia es cómo se renueva el token.
+//
+// El login de Instagram se probó primero, antes del 2026-09, y la ventana contestaba «rol de
+// desarrollador insuficiente»: la app se pedía con el id de la app de Meta. Lleva el «Instagram
+// app ID» de su caso de uso (`INSTAGRAM_LOGIN_APP_ID`), que es otro.
+const GRAPH = GRAPH_FACEBOOK
 const PAGE_SIZE = 50
 // Bounds page fetches independently of how many items a page actually yields: the Graph
 // API can return an empty `data: []` while still handing back a `paging.next` cursor,
@@ -26,6 +32,13 @@ const PAGE_SIZE = 50
 const MAX_MEDIA_PAGES = 50
 const INSIGHTS_CHUNK_SIZE = 5
 const REFRESH_WINDOW_MS = 7 * 864e5
+/**
+ * Cuándo se renueva un token del login de Instagram: con menos de treinta días por delante. Meta
+ * lo documenta (`refresh_access_token`, sesenta días más desde el día que se renueva), pide que
+ * el token tenga al menos un día y no esté vencido, y no lo cobra; empezar a la mitad deja un
+ * mes de noches para que una sola salga bien.
+ */
+export const VENTANA_RENOVAR_LOGIN_DE_INSTAGRAM_MS = 30 * 864e5
 
 export type InstagramMedia = {
   id: string
@@ -201,9 +214,9 @@ const INSIGHT_METRICS = 'views,reach,likes,comments,saved,shares'
  * vuelve vacío y la publicación queda con todo en null, como siempre; cualquier otro error
  * sube.
  */
-async function insightsOf(id: string, token: string): Promise<InstagramInsights> {
+async function insightsOf(id: string, token: string, graph: string = GRAPH): Promise<InstagramInsights> {
   try {
-    return (await getJson(`${GRAPH}/${id}/insights?metric=${INSIGHT_METRICS}&access_token=${token}`)) as InstagramInsights
+    return (await getJson(`${graph}/${id}/insights?metric=${INSIGHT_METRICS}&access_token=${token}`)) as InstagramInsights
   } catch (error) {
     // Two answers mean "this one post has no insights, permanently": a 404, and a
     // 400 whose subcode says the post predates the account's conversion to a
@@ -214,6 +227,46 @@ async function insightsOf(id: string, token: string): Promise<InstagramInsights>
     if (isMediaWithoutInsights(error)) return {}
     throw error
   }
+}
+
+/** Guarda el token que dio una renovación, con su nueva caducidad. La base se importa acá, tarde,
+ * para que el conector siga cargando en los tests sin ella. */
+async function guardarTokenRenovado(accountId: string, token: string, expiresIn: number | undefined): Promise<void> {
+  const { getDb, socialAccounts } = await import('@/db')
+  const { eq } = await import('drizzle-orm')
+  const { encryptToken } = await import('./crypto')
+
+  await getDb()
+    .update(socialAccounts)
+    .set({ accessToken: encryptToken(token), expiresAt: instagramTokenExpiry(expiresIn) })
+    .where(eq(socialAccounts.id, accountId))
+}
+
+/**
+ * La renovación del login de Instagram: `refresh_access_token` con el mismo token, sin el secreto
+ * de la app, cuando le quedan menos de `VENTANA_RENOVAR_LOGIN_DE_INSTAGRAM_MS`. Como en el login de
+ * Facebook, cualquier tropiezo devuelve el token de siempre, que todavía sirve: un token de menos
+ * de un día, uno que Meta no quiso renovar o una caída de la red se reintentan la noche siguiente.
+ * Vencido, el token ya no se renueva; la llamada que lo use falla con un 190 y la tarjeta se pone
+ * roja, que es el aviso para reconectar.
+ */
+async function renovarLoginDeInstagram(account: SocialAccount, token: string): Promise<string> {
+  const quedaPoco =
+    !account.expiresAt || account.expiresAt.getTime() - Date.now() < VENTANA_RENOVAR_LOGIN_DE_INSTAGRAM_MS
+  if (!quedaPoco) return token
+
+  const url = new URL(RENOVAR_LOGIN_DE_INSTAGRAM)
+  url.searchParams.set('grant_type', 'ig_refresh_token')
+  url.searchParams.set('access_token', token)
+  let renovado: { access_token?: string; expires_in?: number }
+  try {
+    renovado = (await getJson(url.toString())) as { access_token?: string; expires_in?: number }
+  } catch {
+    return token
+  }
+  if (!renovado.access_token) return token
+  await guardarTokenRenovado(account.id, renovado.access_token, renovado.expires_in)
+  return renovado.access_token
 }
 
 export const instagramConnector: Connector = {
@@ -234,6 +287,7 @@ export const instagramConnector: Connector = {
   async ensureCredential(account: SocialAccount): Promise<string | null> {
     if (!account.accessToken) return null
     const token = decryptToken(account.accessToken)
+    if (conLoginDeInstagram(account)) return renovarLoginDeInstagram(account, token)
 
     // A null `expiresAt` still means "try": either the row predates a known expiry, or
     // `instagramTokenExpiry` read an `expires_in: 0` as "never expires". Attempting an
@@ -272,19 +326,7 @@ export const instagramConnector: Connector = {
     }
 
     if (!refreshed.access_token) return token
-
-    const { getDb, socialAccounts } = await import('@/db')
-    const { eq } = await import('drizzle-orm')
-    const { encryptToken } = await import('./crypto')
-
-    await getDb()
-      .update(socialAccounts)
-      .set({
-        accessToken: encryptToken(refreshed.access_token),
-        expiresAt: instagramTokenExpiry(refreshed.expires_in),
-      })
-      .where(eq(socialAccounts.id, account.id))
-
+    await guardarTokenRenovado(account.id, refreshed.access_token, refreshed.expires_in)
     return refreshed.access_token
   },
 
@@ -294,10 +336,11 @@ export const instagramConnector: Connector = {
     // stored there is nothing to ask about.
     const igUserId = account.externalId
     if (!token || !igUserId) return { posts: [], windowWasCapped: false }
+    const graph = graphDeInstagram(account)
 
     const fields = 'id,caption,media_type,media_product_type,media_url,thumbnail_url,permalink,timestamp'
     const media: InstagramMedia[] = []
-    let next = `${GRAPH}/${igUserId}/media?fields=${fields}&limit=${PAGE_SIZE}&access_token=${token}`
+    let next = `${graph}/${igUserId}/media?fields=${fields}&limit=${PAGE_SIZE}&access_token=${token}`
     let pagesFetched = 0
     let masVieja: Date | null = null
 
@@ -323,7 +366,7 @@ export const instagramConnector: Connector = {
     for (let i = 0; i < media.length; i += INSIGHTS_CHUNK_SIZE) {
       const chunk = media.slice(i, i + INSIGHTS_CHUNK_SIZE)
       const chunkPosts = await Promise.all(
-        chunk.map(async (item) => normalizeInstagramMedia(item, await insightsOf(item.id, token))),
+        chunk.map(async (item) => normalizeInstagramMedia(item, await insightsOf(item.id, token, graph))),
       )
       posts.push(...chunkPosts)
     }
@@ -334,14 +377,15 @@ export const instagramConnector: Connector = {
     return { posts, windowWasCapped: next !== '' }
   },
 
-  async fetchMetricsById(_account: SocialAccount, token: string | null, externalIds: string[]) {
+  async fetchMetricsById(account: SocialAccount, token: string | null, externalIds: string[]) {
     const metricas = new Map<string, PostMetricValues>()
     if (!token) return metricas
+    const graph = graphDeInstagram(account)
     for (let i = 0; i < externalIds.length; i += INSIGHTS_CHUNK_SIZE) {
       await Promise.all(
         externalIds.slice(i, i + INSIGHTS_CHUNK_SIZE).map(async (id) => {
           try {
-            metricas.set(id, normalizeInstagramMedia({ id }, await insightsOf(id, token)).metrics)
+            metricas.set(id, normalizeInstagramMedia({ id }, await insightsOf(id, token, graph)).metrics)
           } catch (error) {
             if (!isMediaGone(error)) throw error
           }
@@ -355,6 +399,10 @@ export const instagramConnector: Connector = {
    * Two calls because they're two different shapes: the new metrics demand
    * metric_type=total_value and the classic ones reject it. Each piece stands on its
    * own — Instagram dropping one must not erase the others.
+   *
+   * Con el login de Instagram, `profile_views` va en una llamada aparte: la tabla de métricas de
+   * cuenta de ese host ya no lo nombra, y una métrica que Graph no reconoce tumba la llamada
+   * entera, con `views` y `accounts_engaged` adentro.
    */
   async fetchAccountMetrics(
     account: SocialAccount,
@@ -362,20 +410,19 @@ export const instagramConnector: Connector = {
   ): Promise<AccountMetricValues> {
     const id = account.externalId
     if (!id) return NO_ACCOUNT_METRICS
+    const graph = graphDeInstagram(account)
 
-    const nuevas = `${GRAPH}/${id}/insights?metric=profile_views,views,accounts_engaged&metric_type=total_value&period=day&access_token=${token}`
-    const clasicas = `${GRAPH}/${id}/insights?metric=reach&period=day&access_token=${token}`
-    const perfil = `${GRAPH}/${id}?fields=followers_count&access_token=${token}`
+    const totales = (metricas: string) =>
+      `${graph}/${id}/insights?metric=${metricas}&metric_type=total_value&period=day&access_token=${token}`
+    const insights = conLoginDeInstagram(account)
+      ? [totales('views,accounts_engaged'), totales('profile_views')]
+      : [totales('profile_views,views,accounts_engaged')]
+    insights.push(`${graph}/${id}/insights?metric=reach&period=day&access_token=${token}`)
+    const perfil = `${graph}/${id}?fields=followers_count&access_token=${token}`
 
-    const [a, b, c] = await Promise.all([
-      getJson(nuevas).catch(() => ({})),
-      getJson(clasicas).catch(() => ({})),
-      getJson(perfil).catch(() => ({})),
-    ])
-    const data = [
-      ...((a as { data?: unknown[] }).data ?? []),
-      ...((b as { data?: unknown[] }).data ?? []),
-    ]
+    const leidas = await Promise.all([...insights, perfil].map((url) => getJson(url).catch(() => ({}))))
+    const c = leidas.pop()
+    const data = leidas.flatMap((r) => (r as { data?: unknown[] }).data ?? [])
     return normalizeInstagramAccount({ data } as never, c as never)
   },
 }

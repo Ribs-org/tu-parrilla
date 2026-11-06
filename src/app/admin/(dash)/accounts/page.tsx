@@ -6,7 +6,7 @@ import { Encabezado } from '@/components/ui'
 import { mensajeDeLaUrl } from '@/lib/mensaje-firmado'
 import { AvisoDeConexion } from './aviso-de-conexion'
 import { Cuentas } from './cuentas'
-import { proximamentePara } from '@/lib/redes-abiertas'
+import { loginDeInstagramAbiertoPara, proximamentePara } from '@/lib/redes-abiertas'
 
 export const dynamic = 'force-dynamic'
 
@@ -37,6 +37,7 @@ export default async function AccountsPage({
         metaEnRevision={metaEnRevision}
         desde={ahora.getTime()}
         proximamente={[...proximamentePara(ownerId)]}
+        loginDeInstagram={loginDeInstagramAbiertoPara(ownerId)}
       />
     </>
   )

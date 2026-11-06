@@ -86,8 +86,10 @@ en pantalla y dejar los del privado para una segunda, salvo que el privado sea p
   usuario reconecta. Con el *deauthorize callback* nos enteraríamos al instante.
 - **Cuentas personales de Instagram** (no Business ni Creator, o sin página de Facebook
   enlazada) **no pueden conectar por este camino**. Hay que decirlo en pantalla antes del
-  botón, no después del error. Alternativa a evaluar en otra vuelta: el «Instagram API con
-  Instagram Login», que no exige página de Facebook, pero es otra app y otro review.
+  botón, no después del error. La alternativa, el «Instagram API con Instagram Login», que no
+  exige página de Facebook, está hecha desde el 2026-11-05 y cerrada hasta su review: es el caso
+  de uso de Instagram de la misma app, con su propio id y su propio secreto (README, «Instagram
+  sin página de Facebook: el login de Instagram»). Una cuenta personal tampoco conecta por ahí.
 
 ### 2.4 Tiempo
 

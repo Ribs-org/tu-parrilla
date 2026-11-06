@@ -1,13 +1,17 @@
 import 'server-only'
 import { randomBytes } from 'node:crypto'
-import { and, eq, inArray, sql, type SQL } from 'drizzle-orm'
+import { and, eq, inArray, or, sql, type SQL } from 'drizzle-orm'
 import { getDb, scheduledPostTargets, socialAccounts, solicitudesBorrado } from '@/db'
 
 // Las dos cosas que Meta puede pedirnos por un usuario que quitó la app: la baja
 // (deauthorize) y el borrado (data deletion request). Vienen de dos casos de uso de la misma
 // app, cada uno con sus propios callbacks: el de Instagram y Facebook, que identifica a la
 // persona por su `meta_user_id`, y el de Threads, que la identifica por su id de Threads, el
-// mismo que su cuenta guarda en `external_id`.
+// mismo que su cuenta guarda en `external_id`. Y un tercero, el del login de Instagram
+// (`instagram-login.ts`), con los suyos y firmados con su propio secreto: toca solo las cuentas
+// conectadas por ese login, y como Meta no documenta cuál de los dos ids de la cuenta manda en
+// su `user_id`, las busca por cualquiera de los dos (`meta_user_id` o `external_id`). El del
+// caso de uso de Instagram y Facebook, por su lado, ya no toca esas cuentas.
 //
 // Buscan por ese id y no por dueño **a propósito**: Meta no sabe quién es nuestro
 // dueño, y la petición no llega con una sesión sino firmada con el app secret. Es la única
@@ -17,18 +21,35 @@ import { getDb, scheduledPostTargets, socialAccounts, solicitudesBorrado } from 
 
 export const BAJA_DESDE_FACEBOOK = 'Quitaste la app desde Facebook: vuelve a conectar.'
 export const BAJA_DESDE_THREADS = 'Quitaste la app desde Threads: vuelve a conectar.'
+export const BAJA_DESDE_INSTAGRAM = 'Quitaste la app desde Instagram: vuelve a conectar.'
 
 /** De qué caso de uso llegó el callback: decide qué cuentas toca y cómo se las busca. */
-export type Origen = 'meta' | 'threads'
+export type Origen = 'meta' | 'threads' | 'instagram'
 
 /** Las dos redes que salen del caso de uso de Instagram y Facebook; nada más se toca por un callback suyo. */
 const REDES_META = ['instagram', 'facebook'] as const
 
 /** Las cuentas de esa persona, acotadas a las redes de ese origen. */
 function suyas(origen: Origen, userId: string) {
-  return origen === 'threads'
-    ? and(eq(socialAccounts.externalId, userId), eq(socialAccounts.network, 'threads'))
-    : and(eq(socialAccounts.metaUserId, userId), inArray(socialAccounts.network, [...REDES_META]))
+  if (origen === 'threads') return and(eq(socialAccounts.externalId, userId), eq(socialAccounts.network, 'threads'))
+  if (origen === 'instagram') {
+    return and(
+      eq(socialAccounts.network, 'instagram'),
+      eq(socialAccounts.login, 'instagram'),
+      or(eq(socialAccounts.metaUserId, userId), eq(socialAccounts.externalId, userId)),
+    )
+  }
+  return and(
+    eq(socialAccounts.metaUserId, userId),
+    inArray(socialAccounts.network, [...REDES_META]),
+    sql`${socialAccounts.login} is distinct from 'instagram'`,
+  )
+}
+
+const MOTIVO: Record<Origen, string> = {
+  meta: BAJA_DESDE_FACEBOOK,
+  threads: BAJA_DESDE_THREADS,
+  instagram: BAJA_DESDE_INSTAGRAM,
 }
 
 /**
@@ -39,7 +60,7 @@ function suyas(origen: Origen, userId: string) {
  * se borre lo que ya pasó.
  */
 export async function darDeBaja(userId: string, origen: Origen = 'meta'): Promise<number> {
-  const motivo = origen === 'threads' ? BAJA_DESDE_THREADS : BAJA_DESDE_FACEBOOK
+  const motivo = MOTIVO[origen]
   const filas = await getDb()
     .update(socialAccounts)
     .set({ accessToken: null, refreshToken: null, expiresAt: null, lastSyncError: motivo })
@@ -73,7 +94,9 @@ export function pasosDeBorrado(userId: string, origen: Origen = 'meta'): SQL[] {
   const cuentas =
     origen === 'threads'
       ? sql`select id from social_accounts where external_id = ${userId} and network = 'threads'`
-      : sql`select id from social_accounts where meta_user_id = ${userId} and network in ('instagram', 'facebook')`
+      : origen === 'instagram'
+        ? sql`select id from social_accounts where network = 'instagram' and login = 'instagram' and (meta_user_id = ${userId} or external_id = ${userId})`
+        : sql`select id from social_accounts where meta_user_id = ${userId} and network in ('instagram', 'facebook') and login is distinct from 'instagram'`
   return [
     sql`delete from post_metrics where post_id in (select id from social_posts where account_id in (${cuentas}))`,
     sql`delete from post_comments where account_id in (${cuentas})`,

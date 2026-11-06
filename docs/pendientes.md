@@ -207,8 +207,8 @@ sección.
 Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataforma.
 
 Lo que falta para abrir cada plataforma, de un vistazo (el detalle está en cada entrada, más
-abajo): el **login con Instagram** sin página de Facebook y los **mensajes privados de
-Instagram** (las dos en «Meta, segunda vuelta»), los permisos de Meta para **anuncios
+abajo): el **login con Instagram** sin página de Facebook (hecho y cerrado, espera su vuelta de
+Meta) y los **mensajes privados de Instagram** (en «Meta, segunda vuelta»), los permisos de Meta para **anuncios
 pagados**, la **Play Store** (la pista interna ya existe; la tienda pública es otro trámite) y
 el **App Store** de iPhone, las integraciones con **Threads** y con **X**, y **revisar qué
 otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
@@ -264,8 +264,8 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   —solo leer, o también promocionar— y qué vería el creador.
 - **Revisar qué otros permisos hacen falta** (2026-10-21). Una pasada red por red de lo que el
   producto necesita y todavía no pidió, antes de la próxima vuelta de cada revisión, para
-  pedirlo todo de una vez y no volver a grabar. Lo que ya se sabe que falta: el login con
-  Instagram y los mensajes privados (Meta, segunda vuelta), los anuncios (la entrada de arriba)
+  pedirlo todo de una vez y no volver a grabar. Lo que ya se sabe que falta: los mensajes
+  privados (Meta, segunda vuelta), el login con Instagram (su entrada, abajo), los anuncios (la entrada de arriba)
   y Threads. Por decidir si hacen falta: más métricas de las que se leen hoy (las historias de
   Instagram, las estadísticas del perfil de TikTok) y otro alcance de YouTube. Los comentarios
   de TikTok ya se decidió quererlos, en la entrada de abajo.
@@ -287,17 +287,44 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   revisar la app, cuenta que el uso aprobado describa lo que hace: nombrarlas en la descripción
   de esos dos permisos y mostrar una en el video.
 
-  En la misma vuelta, **Instagram sin página de Facebook** (2026-10-19). La conexión de hoy es
-  Instagram con login de Facebook, que encuentra el Instagram solo a través de una página que la
-  persona administre: sin página enlazada, Meta no entrega ninguno, aunque se acepten todos los
-  permisos. Probablemente es lo que trabó a la primera usuaria invitada, que conectó TikTok y no
-  Instagram. Meta tiene otra vía, Instagram con login de Instagram (*Business Login for
-  Instagram*: `instagram_business_basic`, `instagram_business_content_publish` y compañía, en
-  `graph.instagram.com`), que no pide página; la cuenta profesional, sí. Cuesta un video más en
-  esta vuelta y una conexión nueva en el código: otro token, que según Meta se renueva desde el
-  servidor, y adaptar a él la publicación, la sincronización y los comentarios de Instagram. Los
-  trial reels por esa vía, por confirmar. La idea: «Conectar con Instagram» como camino
-  principal en Los Fierros, y el login de Facebook para quien además maneja páginas.
+- **Instagram sin página de Facebook: tercera vuelta de Meta** (2026-10-19; el código, el
+  2026-11-05). La conexión de siempre es Instagram con login de Facebook, que encuentra el
+  Instagram solo a través de una página que la persona administre: sin página enlazada, Meta no
+  entrega ninguno, aunque se acepten todos los permisos. Probablemente es lo que trabó a la primera
+  usuaria invitada, que conectó TikTok y no Instagram. La otra vía es el login de Instagram
+  (*Business Login for Instagram*, en `graph.instagram.com`), que no pide página; la cuenta
+  profesional, sí. Usa su propio juego de permisos: `instagram_business_basic`,
+  `instagram_business_content_publish`, `instagram_business_manage_comments`,
+  `instagram_business_manage_messages` e `instagram_business_manage_insights`.
+
+  **Ya está hecho**, cerrado para todos salvo quien diga `INSTAGRAM_LOGIN_ABIERTO_PARA`:
+  «Conectar con Instagram →» en Los Fierros, el canje y la renovación sola del token, y la
+  publicación (fotos, reels, carruseles, historias y trial reels), la sincronización, los
+  comentarios y el privado por ese login, con su baja y su borrado. El detalle, en el README,
+  «Instagram sin página de Facebook: el login de Instagram». Lo que queda:
+
+  - **[dueño]** En el caso de uso de Instagram de la app de Meta («API setup with Instagram
+    login»): volver a agregar los cinco permisos `instagram_business_*`, que se quitaron el
+    2026-11-05 del borrador de la segunda solicitud; copiar el *Instagram app ID* y su secreto, y en
+    *Business login settings* poner *OAuth redirect URIs*
+    `https://tu-parrilla.cl/api/social/instagram/callback`, *Deauthorize callback URL*
+    `https://tu-parrilla.cl/api/social/instagram/baja` y *Data deletion request URL*
+    `https://tu-parrilla.cl/api/social/instagram/borrado`.
+  - **[dueño]** En Vercel (production): `INSTAGRAM_LOGIN_APP_ID`, `INSTAGRAM_LOGIN_APP_SECRET` e
+    `INSTAGRAM_LOGIN_ABIERTO_PARA=<id del usuario revisor>`, y que `COMENTARIOS_DM` lo incluya para
+    mostrar el privado. Redesplegar.
+  - **[dueño]** Grabar el video y mandar la solicitud. Conviene un Instagram profesional **sin**
+    página de Facebook, para que se vea que no la pide; @vicente_edits2 tiene página, y conectarlo
+    por este login pasa su fila al login de Instagram. Si la ventana de Instagram dice que la app no
+    está disponible o que falta un rol, agregar esa cuenta como tester de Instagram en los roles de
+    la app y aceptar la invitación desde Instagram.
+  - Al grabar, mirar lo que no se pudo probar sin la app real (la lista está al final de esa
+    sección del README): si algo falla, el registro de Vercel dice qué contestó Instagram.
+  - Aprobada: `INSTAGRAM_LOGIN_ABIERTO_PARA=1`, y decidir si «Conectar con Instagram» pasa a ser el
+    camino principal en Los Fierros, con el login de Facebook para quien además maneja páginas.
+    Antes de abrirlo a todos, las ventanas de ayuda de la vuelta (`ayuda-conexion.ts`) hablan solo
+    del login de Facebook: la de «No se agregó otra cuenta de Instagram» dice que se edite el acceso
+    en la ventana de Facebook aunque se haya entrado por la de Instagram.
 - **[dueño] Google — auditoría de cuota de YouTube (trámite B): se contestó el 2026-10-26;
   queda esperar.** El 2026-10-22 YouTube pidió dos cosas (el correo está en
   `2026-10-22-pedido-de-informacion.txt`, en la carpeta del trámite): si la API se usa en

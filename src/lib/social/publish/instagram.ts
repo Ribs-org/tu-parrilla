@@ -11,6 +11,7 @@ import {
 } from './publisher'
 import { esHistoria, type OpcionesDestino } from './opciones'
 import { normalizarTexto } from '../tiktok-vinculo'
+import { graphDeInstagram } from '../instagram-login'
 
 /**
  * Cada cuánto se vuelve a probar un destino que chocó con el tope diario. El tope es una
@@ -235,7 +236,12 @@ export function rechazoDelContenedor(payload: Record<string, unknown>, cuenta: s
   return rechazoDeInstagram(cuenta, explicacionDeMeta({ codigo: null, subcodigo: null, titulo: null, mensaje: null, tecnico: status }))
 }
 
-const GRAPH = 'https://graph.facebook.com/v23.0'
+/**
+ * El host de Graph de la cuenta: graph.facebook.com con el login de Facebook, graph.instagram.com
+ * con el de Instagram (`instagram-login.ts`). `/media`, `/media_publish` y el estado del
+ * contenedor se llaman igual en los dos, con los mismos parámetros.
+ */
+const graphDe = (input: PublishInput) => graphDeInstagram(input)
 
 // POST with form params, never JSON: it is what /media and /media_publish expect.
 // Upstream error bodies go to the log as always, and now also come back to the caller
@@ -272,7 +278,7 @@ async function createContainer(
   input: PublishInput,
   params: Record<string, string>,
 ): Promise<{ id: string } | { failed: string; definitivo?: true; sinTrial?: true } | { tope: true }> {
-  const r = await postForm(`${GRAPH}/${input.accountExternalId}/media`, {
+  const r = await postForm(`${graphDe(input)}/${input.accountExternalId}/media`, {
     ...params,
     access_token: input.token,
   })
@@ -331,7 +337,7 @@ async function buscarPublicada(input: PublishInput): Promise<string | null> {
   if (!texto) return null
   try {
     const response = await fetch(
-      `${GRAPH}/${input.accountExternalId}/media?fields=id,caption,timestamp&limit=10&access_token=${input.token}`,
+      `${graphDe(input)}/${input.accountExternalId}/media?fields=id,caption,timestamp&limit=10&access_token=${input.token}`,
       { signal: AbortSignal.timeout(PLAZO_RED_MS) },
     )
     if (!response.ok) {
@@ -353,7 +359,7 @@ async function estadoDelContenedor(
 ): Promise<ReturnType<typeof classifyContainerStatus> | null> {
   try {
     const response = await fetch(
-      `${GRAPH}/${containerId}?fields=status_code,status&access_token=${input.token}`,
+      `${graphDe(input)}/${containerId}?fields=status_code,status&access_token=${input.token}`,
       { signal: AbortSignal.timeout(PLAZO_RED_MS) },
     )
     if (!response.ok) {
@@ -375,7 +381,7 @@ async function estadoDelContenedor(
 async function publishContainer(input: PublishInput, containerId: string): Promise<PublishOutcome> {
   let r: Awaited<ReturnType<typeof postForm>>
   try {
-    r = await postForm(`${GRAPH}/${input.accountExternalId}/media_publish`, {
+    r = await postForm(`${graphDe(input)}/${input.accountExternalId}/media_publish`, {
       creation_id: containerId,
       access_token: input.token,
     })
@@ -414,7 +420,7 @@ export const instagramPublisher: Publisher = {
       let payload: Record<string, unknown>
       try {
         const response = await fetch(
-          `${GRAPH}/${input.containerId}?fields=status_code,status&access_token=${input.token}`,
+          `${graphDe(input)}/${input.containerId}?fields=status_code,status&access_token=${input.token}`,
           { signal: AbortSignal.timeout(PLAZO_RED_MS) },
         )
         if (!response.ok) {

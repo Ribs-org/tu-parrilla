@@ -12,6 +12,11 @@ export type CuentaAConectar = {
   expiresAt: Date | null
   /** El id de usuario de la app de Meta; solo lo traen `instagram` y `facebook`. */
   metaUserId?: string | null
+  /**
+   * Con qué login se conectó, en Instagram (`social/instagram-login.ts`). Sin él, una cuenta de
+   * Instagram se guarda como de login de Facebook: la selección de varias cuentas solo existe ahí.
+   */
+  login?: 'facebook' | 'instagram'
 }
 
 /**
@@ -29,10 +34,10 @@ export function fraseCuentaDeOtro(nombres: string[]): string {
 /**
  * Lo que se le agrega a la frase cuando el login trajo una sola cuenta y es la de otro: la
  * persona casi siempre quería otra, y en Meta la cuenta sale de la página que se elige en la
- * ventana de Facebook.
+ * ventana de Facebook. Con el login de Instagram no hay página que elegir: se entra con la otra.
  */
-export function siQueriasOtra(network: string): string {
-  return network === 'instagram' || network === 'facebook'
+export function siQueriasOtra(network: string, login?: string | null): string {
+  return (network === 'instagram' && login !== 'instagram') || network === 'facebook'
     ? 'Si querías conectar otra, vuelve a conectar y, en la ventana de Facebook, elige la página de esa cuenta.'
     : 'Si querías conectar otra, vuelve a conectar entrando con esa cuenta.'
 }
@@ -99,6 +104,9 @@ export async function guardarCuenta(
     refreshToken: cuenta.refreshToken ? encryptToken(cuenta.refreshToken) : null,
     expiresAt: cuenta.expiresAt,
     lastSyncError: null,
+    // Se escribe siempre en Instagram: la misma cuenta puede reconectarse por el otro login, y
+    // entonces cambian el token y el host con que se le habla. Nulo en las demás redes.
+    login: network === 'instagram' ? (cuenta.login ?? 'facebook') : null,
   }
   // El id de usuario de Meta va aparte porque al reconectar solo se escribe cuando lo hay:
   // así una cuenta de antes de que existiera la columna rellena su nulo, y un `/me` que

@@ -120,11 +120,26 @@ export const AVISO_ANTES_DE_CONECTAR: Partial<Record<SocialNetwork, string>> = {
 export const AVISO_META_EN_REVISION =
   'Mientras Meta revisa la app, solo pueden conectar las cuentas que invitamos como testers. Si Facebook dice que la función no está disponible, escríbenos.'
 
-export function avisosDe(network: SocialNetwork, metaEnRevision: boolean): string[] {
+/**
+ * Lo que exige el login de Instagram (`social/instagram-login.ts`), dicho solo a quien lo ve
+ * (`loginDeInstagramAbiertoPara`). Va después del aviso de Instagram, que es el del login de
+ * Facebook: así se leen los dos caminos uno al lado del otro.
+ */
+export const AVISO_LOGIN_DE_INSTAGRAM =
+  'Con «Conectar con Instagram» entras con tu usuario de Instagram: basta una cuenta Business o Creator, sin página de Facebook.'
+
+/** El enlace que abre el login de Instagram, en Los Fierros: sin cuentas, y para sumar otra. */
+export const CONECTAR_CON_INSTAGRAM = 'Conectar con Instagram →'
+export const AGREGAR_CON_INSTAGRAM = 'Agregar con Instagram →'
+/** Lo que dice el detalle de una cuenta de Instagram conectada por el login de Instagram. */
+export const CONECTADA_CON_INSTAGRAM = 'Conectada con Instagram, sin página de Facebook.'
+
+export function avisosDe(network: SocialNetwork, metaEnRevision: boolean, loginDeInstagram = false): string[] {
   const avisos: string[] = []
   const fijo = AVISO_ANTES_DE_CONECTAR[network]
   if (fijo) avisos.push(fijo)
   if (metaEnRevision && (network === 'instagram' || network === 'facebook')) avisos.push(AVISO_META_EN_REVISION)
+  if (loginDeInstagram && network === 'instagram') avisos.push(AVISO_LOGIN_DE_INSTAGRAM)
   return avisos
 }
 

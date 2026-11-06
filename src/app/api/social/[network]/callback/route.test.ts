@@ -7,6 +7,7 @@ vi.mock('server-only', () => ({}))
 vi.mock('@/lib/auth', () => ({ usuarioActual: async () => ({ id: 'owner-1' }) }))
 
 const { GET, fetchCredential } = await import('./route')
+const { signOAuthState } = await import('@/lib/social/oauth-state')
 
 /**
  * Las respuestas del Graph que un login de Instagram recorre, en orden: token corto,
@@ -68,6 +69,87 @@ describe('fetchCredential (Meta)', () => {
     expect(credential.metaUserId).toBeUndefined()
     expect(credential.accessToken).toBe('LARGO')
     expect(credential.candidatas).toHaveLength(1)
+  })
+})
+
+describe('fetchCredential (login de Instagram)', () => {
+  beforeEach(() => {
+    process.env.INSTAGRAM_LOGIN_APP_ID = 'ig-app'
+    process.env.INSTAGRAM_LOGIN_APP_SECRET = 'ig-secreto'
+  })
+  afterEach(() => {
+    delete process.env.INSTAGRAM_LOGIN_APP_ID
+    delete process.env.INSTAGRAM_LOGIN_APP_SECRET
+  })
+
+  it('canjea en api.instagram.com, alarga en graph.instagram.com y se queda con la cuenta de /me', async () => {
+    const llamadas: Array<{ url: string; init?: RequestInit }> = []
+    const cola = [
+      Response.json({ data: [{ access_token: 'CORTO', user_id: '1020', permissions: 'instagram_business_basic' }] }),
+      Response.json({ access_token: 'LARGO', token_type: 'bearer', expires_in: 5184000 }),
+      Response.json({ id: '2002', user_id: '17841400000000001', username: 'ribs' }),
+    ]
+    vi.stubGlobal('fetch', async (url: URL | string, init?: RequestInit) => {
+      llamadas.push({ url: String(url), init })
+      return cola.shift() ?? new Response('sin respuesta', { status: 500 })
+    })
+
+    const credential = await fetchCredential('instagram', 'CODE', 'https://ejemplo.cl/cb', undefined, 'instagram')
+
+    expect(llamadas[0]!.url).toBe('https://api.instagram.com/oauth/access_token')
+    const canje = new URLSearchParams(String(llamadas[0]!.init?.body))
+    expect(Object.fromEntries(canje)).toEqual({
+      client_id: 'ig-app',
+      client_secret: 'ig-secreto',
+      grant_type: 'authorization_code',
+      redirect_uri: 'https://ejemplo.cl/cb',
+      code: 'CODE',
+    })
+    expect(llamadas[1]!.url).toContain('https://graph.instagram.com/access_token?grant_type=ig_exchange_token')
+    expect(llamadas[1]!.url).toContain('access_token=CORTO')
+    expect(llamadas[2]!.url).toBe('https://graph.instagram.com/v23.0/me?fields=id,user_id,username&access_token=LARGO')
+    expect(credential).toMatchObject({
+      accessToken: 'LARGO',
+      refreshToken: null,
+      candidatas: [{ externalId: '17841400000000001', handle: '@ribs' }],
+      metaUserId: '2002',
+      login: 'instagram',
+    })
+    expect(credential.expiresAt!.getTime()).toBeGreaterThan(Date.now() + 59 * 864e5)
+  })
+
+  it('sin las credenciales del caso de uso de Instagram no llama a nadie y lo dice', async () => {
+    delete process.env.INSTAGRAM_LOGIN_APP_SECRET
+    const pedidas = doblarFetch([])
+    await expect(fetchCredential('instagram', 'CODE', 'https://ejemplo.cl/cb', undefined, 'instagram')).rejects.toThrow(
+      'Faltan las credenciales del login de Instagram (INSTAGRAM_LOGIN_APP_ID / INSTAGRAM_LOGIN_APP_SECRET).',
+    )
+    expect(pedidas).toEqual([])
+  })
+
+  it('el login de Facebook marca su credencial como tal', async () => {
+    doblarFetch(respuestasDeInstagram({ ok: true, body: { id: '10201234567890' } }))
+    expect((await fetchCredential('instagram', 'CODE', 'https://ejemplo.cl/cb')).login).toBe('facebook')
+  })
+})
+
+describe('GET del login de Instagram cerrado', () => {
+  it('no canjea el código: vuelve a Los Fierros con la frase', async () => {
+    process.env.AUTH_SECRET = 'secreto-de-prueba-secreto-de-prueba'
+    vi.stubEnv('INSTAGRAM_LOGIN_ABIERTO_PARA', 'otro')
+    const state = await signOAuthState('instagram', 'owner-1', 'instagram')
+    const pedidas = doblarFetch([])
+    const res = await GET(
+      new Request(`https://tu-parrilla.cl/api/social/instagram/callback?code=CODE&state=${encodeURIComponent(state)}`),
+      { params: Promise.resolve({ network: 'instagram' }) },
+    )
+    const destino = new URL(res.headers.get('location') ?? '')
+    expect(destino.searchParams.get('mensaje')).toBe(
+      'Conectar con Instagram, sin página de Facebook, todavía no está disponible en Tu Parrilla: próximamente.',
+    )
+    expect(pedidas).toEqual([])
+    vi.unstubAllEnvs()
+    delete process.env.AUTH_SECRET
   })
 })
 

@@ -54,7 +54,12 @@ export default async function BorradoPage({ params }: { params: Promise<{ codigo
               )}
             </span>
             : {solicitud.cuentas} {solicitud.cuentas === 1 ? 'cuenta' : 'cuentas'}{' '}
-            {solicitud.red === 'threads' ? 'de Threads' : 'de Instagram y Facebook'}.
+            {solicitud.red === 'threads'
+              ? 'de Threads'
+              : solicitud.red === 'instagram'
+                ? 'de Instagram'
+                : 'de Instagram y Facebook'}
+            .
           </>
         ) : (
           SIN_CODIGO

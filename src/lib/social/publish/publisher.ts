@@ -21,6 +21,11 @@ export type PublishInput = {
    * dijera, y un publicador que sabe buscarlo lo mira antes de subir otra copia (Instagram).
    */
   reintento?: boolean
+  /**
+   * Con qué login se conectó la cuenta (`social_accounts.login`). Solo lo mira Instagram, que con
+   * el login de Instagram publica por graph.instagram.com (`social/instagram-login.ts`).
+   */
+  login?: string | null
 }
 
 export type PublishOutcome =

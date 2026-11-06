@@ -105,3 +105,25 @@ describe('pasosDeBorrado desde Threads', () => {
     }
   })
 })
+
+describe('pasosDeBorrado y el login de Instagram', () => {
+  const dialecto = new PgDialect()
+
+  it('desde el login de Instagram, solo cuentas de Instagram conectadas por ese login, por cualquiera de sus dos ids', () => {
+    for (const p of pasosDeBorrado('IG_1', 'instagram').map((x) => dialecto.sqlToQuery(x))) {
+      expect(p.params).toContain('IG_1')
+      expect(p.sql).not.toContain('IG_1')
+      expect(p.sql).toMatch(/network = 'instagram' and login = 'instagram'/)
+      expect(p.sql).toMatch(/\(meta_user_id = \$\d+ or external_id = \$\d+\)/)
+      expect(p.sql).not.toMatch(/'facebook'|'threads'/)
+    }
+  })
+
+  it('desde el caso de uso de Instagram y Facebook ya no toca las cuentas del login de Instagram', () => {
+    // Su `meta_user_id` es el id de la persona en el login de Instagram, no en Facebook: un
+    // borrado de Facebook no tiene por qué llevárselas.
+    for (const p of pasosDeBorrado(META_USER).map((x) => dialecto.sqlToQuery(x))) {
+      expect(p.sql).toMatch(/login is distinct from 'instagram'/)
+    }
+  })
+})

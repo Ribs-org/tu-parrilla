@@ -2,7 +2,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { COMENTARIO_AUSENTE } from './comentarista'
 import { instagramComentarista, normalizeInstagramComment } from './instagram'
 
-// `listar` y `responder` no miran la cuenta: leen y escriben con el token que reciben.
+// `listar` y `responder` leen y escriben con el token que reciben; de la cuenta solo miran con
+// qué login se conectó, que decide el host. Sin `login` es la de login de Facebook.
 const CUENTA = {} as Parameters<typeof instagramComentarista.listar>[0]
 
 /** Una respuesta distinta por llamada, y las urls pedidas en orden. */
@@ -116,6 +117,22 @@ describe('instagramComentarista.listar', () => {
 
     expect(urls).toHaveLength(5)
     expect(leidos.map((c) => c.externalId)).toEqual(['c0', 'c1', 'c2', 'c3', 'c4'])
+  })
+})
+
+describe('con el login de Instagram', () => {
+  const CON_LOGIN = { login: 'instagram' } as Parameters<typeof instagramComentarista.listar>[0]
+
+  it('lee los comentarios en graph.instagram.com', async () => {
+    const urls = stubGraph(() => ({ data: [{ id: '1', text: 'hola', timestamp: '2026-11-05T12:00:00+0000' }] }))
+    await instagramComentarista.listar(CON_LOGIN, 'TOKEN', 'post-1')
+    expect(urls[0]).toMatch(/^https:\/\/graph\.instagram\.com\/v23\.0\/post-1\/comments\?/)
+  })
+
+  it('responde en graph.instagram.com', async () => {
+    const urls = stubGraph(() => ({ id: 'r-1' }))
+    expect(await instagramComentarista.responder(CON_LOGIN, 'TOKEN', 'c1', 'hola')).toBe('r-1')
+    expect(urls[0]).toBe('https://graph.instagram.com/v23.0/c1/replies')
   })
 })
 

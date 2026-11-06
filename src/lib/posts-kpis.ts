@@ -26,6 +26,12 @@ export type CuentaRow = {
    */
   trialReels?: 'si' | 'no' | null
   trialReelsMotivo?: string | null
+  /**
+   * Con qué login se conectó, en Instagram: «instagram» es el login de Instagram, sin página de
+   * Facebook (`social/instagram-login.ts`); «facebook» o nulo, el de siempre. Opcional para las
+   * filas de prueba.
+   */
+  login?: 'facebook' | 'instagram' | null
 }
 
 export type PostRow = {
