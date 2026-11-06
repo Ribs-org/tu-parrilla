@@ -492,6 +492,12 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   comentario pendiente en La Mesa (los de
   YouTube se borran a los 30 días). Contestar siempre en el mismo hilo del correo. Al
   aprobarse, ver «Después de aprobar» en el guion.
+- **Por revisar: cuánto guarda el chef la copia del material de una comanda** (2026-11-06).
+  `/privacidad`, «La Cocina», dice que el chef baja una copia del material a los servidores de
+  Pyxis para editarlo, pero no cuánto dura: Tu Parrilla borra lo suyo (la cámara de frío, cuando
+  el usuario lo saca; lo cocinado sin programar, a los 30 días), y la carpeta
+  `material/cocina/<comanda>/` del chef no tiene plazo escrito. Pedirle al chef (marca-personal)
+  un plazo y, cuando lo tenga, sumarlo a `/privacidad`.
 - **Por revisar: qué se borra al desconectar YouTube** (2026-10-06). Desconectar borra las
   credenciales y el canal deja de leerse; lo guardado se borra solo a los 30 días
   (`retencion-youtube`). Si la auditoría de cuota pide borrarlo en el acto, hay que cambiar
@@ -604,13 +610,6 @@ nadie paga: todas las cuentas son iguales y el README dice «Sin suscripción».
   que debe seguir describiendo la app y enlazando Privacidad y Términos.
 
 ## Features y trabajo de código
-
-- **«Copiar el texto» de la bandeja de TikTok, por aire a la 1.1.0** (2026-11-06). Está en `main`;
-  a los teléfonos con la 1.1.0 llega solo cuando se publique por aire desde la rama `ota-1.1.0`,
-  con el cambio encima y sin `expo-clipboard` (ahí el botón dice «Pasar el texto…» y abre la lista
-  de compartir). Cómo se publica esa rama, en `mobile/README.md`, «La 1.2.0 necesita un build
-  nativo y pasar por las tiendas»; lo que cambia sin el módulo, en «El portapapeles, con y sin su
-  módulo nativo».
 
 - **Música en videos con bibliotecas con licencia** (2026-11-06; el dueño lo pospuso: caro y no lo
   bastante bueno por ahora). Las API de Instagram, TikTok y YouTube no dejan ponerle a un video su

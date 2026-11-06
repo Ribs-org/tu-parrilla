@@ -88,15 +88,28 @@ con lo que dice esa URL.
 
 Un cuestionario sobre qué recoge la app y si lo comparte. Para esta app:
 
-- **¿Recoge o comparte datos de usuarios?** Sí, pero solo los que tú mismo produces.
-- **Tipos de datos:** archivos y documentos, por las fotos y videos que eliges para publicar.
-- **¿Se comparten con terceros?** Tu contenido no: va solo a tu propio servidor. Lo que sí sale
-  hacia un tercero es el **identificador del dispositivo y su IP**, hacia Expo, en la consulta de
-  actualizaciones que la app hace al abrirse. Google tiene una categoría para eso
-  («identificadores del dispositivo», con la finalidad «funcionalidad de la app»): márcala.
+- **¿Recoge o comparte datos de usuarios?** Sí, pero solo los que la persona misma produce.
+- **Tipos de datos** (las respuestas para pegar, tarjeta por tarjeta, están en
+  `TEXTOS-FORMULARIO.txt` de la carpeta «Google Play» del escritorio de Vicente):
+  - el correo, para la cuenta;
+  - las fotos y los videos que la persona elige para publicar o manda a La Cocina;
+  - el texto de las publicaciones, de los borradores, del libro de sugerencias y de las
+    comandas, como «otro contenido generado por el usuario»;
+  - desde la 1.2.0, la cámara y el micrófono: lo que se graba es un video o una foto, y entra
+    en «fotos y videos»; como el video lleva el sonido del micrófono, se declara también «audio →
+    grabaciones de voz o sonido». Sobra un poco, pero declarar de menos es lo que Google castiga;
+  - el identificador del dispositivo y su IP, que ve Expo en la consulta de actualizaciones que
+    la app hace al abrirse («identificadores del dispositivo», finalidad «funcionalidad de la
+    app»).
+- **¿Se comparten con terceros?** El contenido no se vende ni se usa para publicidad. Lo que sale
+  hacia otros es lo que cuenta `/privacidad`: Expo (lo de arriba), Meta al escuchar la muestra de
+  una canción de Instagram, y GitHub con el texto del libro de sugerencias, sin nombre ni correo.
+  Google llama «compartir» a mandar datos a un tercero que no procesa por encargo: el libro de
+  sugerencias publicado en GitHub cuenta como compartido.
 - **¿Se cifran en tránsito?** Sí, todo va por HTTPS.
-- **¿Puede el usuario pedir que se borren?** Sí, tú controlas la base.
+- **¿Puede el usuario pedir que se borren?** Sí, escribiendo al contacto de `/privacidad`.
 
+El cuestionario tiene que decir lo mismo que `/privacidad`: si cambia una, se cambia la otra.
 Responde según lo que la app realmente hace. Si aquí mientes y Google lo detecta, la
 suspensión es de la cuenta, no de la app.
 
@@ -114,7 +127,7 @@ pueden llegar a menores.
 ### App de acceso restringido
 
 Hay una sección donde declaras si la app requiere credenciales para funcionar. Marca que sí,
-y explica en una línea que es una herramienta privada de una sola persona. Si Google pidiera
+y explica en una línea que es una herramienta privada, por invitación. Si Google pidiera
 credenciales de prueba para revisarla, dale una cuenta de prueba, **nunca la tuya**.
 
 ---
