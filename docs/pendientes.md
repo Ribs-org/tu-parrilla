@@ -288,7 +288,13 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   Una cuenta de Instagram la tiene una sola persona en Tu Parrilla: para usar @vicente.ingeniero en
   otra cuenta, primero hay que dejarle al revisor otro Instagram de prueba, conectándolo o
   traspasándolo en Los Maestros. Para no tenerla parada mientras tanto, se programa en ella con
-  una llave del revisor (README, «Dejar entrar al revisor de Meta», paso 4), sin traspasarla. El video y los textos de esta vuelta (`meta-app-review-demo.mp4`,
+  una llave del revisor (README, «Dejar entrar al revisor de Meta», paso 4), sin traspasarla.
+  Al 2026-11-06 el revisor tiene cinco cuentas, cada una por un trámite: @vicente.ingeniero en
+  Instagram y Threads y la página Tu-Parrilla (las vueltas de Meta; se quedan el año), «Pyxis
+  oficial» en YouTube (la auditoría de cuota de Google, más abajo: hasta que la aprueben) y
+  @vicente_edits2 (la primera vuelta de Meta). @vicente_edits2 se le devuelve al dueño, con un
+  traspaso en Los Maestros, cuando Meta conteste la segunda vuelta: las instrucciones al revisor
+  ya nombran @vicente.ingeniero, y la tercera se graba con una cuenta de prueba nueva. El video y los textos de esta vuelta (`meta-app-review-demo.mp4`,
   `TEXTOS-FORMULARIO.txt`) están en la carpeta «Meta - Verification» del escritorio de
   Vicente, y sirven de molde para la segunda.
 - **[dueño] Política interna ante solicitudes de autoridades** (2026-10-06). En el App
