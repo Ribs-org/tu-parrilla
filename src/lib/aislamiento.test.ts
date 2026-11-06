@@ -131,6 +131,7 @@ const { archivarQuemados, archivarDestino } = await import('./social/publish/arc
 const { CONSERVAR, editarPostProgramado } = await import('./social/publish/editar')
 const { postParaEditarEnElTelefono } = await import('./editar-movil')
 const { recibirSugerencia } = await import('./sugerencias/guardar')
+const { misSugerencias, respuestasSinLeer, marcarRespuestaLeida } = await import('./sugerencias/responder')
 const { materialesDeLaCamara, editarMaterial, sacarMaterial } = await import('./cocina/materiales')
 const { usoDeLaCamara } = await import('./cocina/subidas')
 const { pedirComanda } = await import('./cocina/pedir')
@@ -962,6 +963,32 @@ describe('aislamiento por dueño, escrituras (SQL generado, sin base)', () => {
     expect(insercion.sql).not.toContain(DUENO)
     // El correo no viaja a la fila que se vuelve issue.
     expect(JSON.stringify(insercion.params)).not.toContain(USUARIO.correo)
+  })
+
+  /**
+   * Lo que el libro le muestra a la persona —lo que escribió, con la respuesta del equipo, y el
+   * punto de las respuestas sin leer— y marcar una como leída, con un id que llega del navegador o
+   * del teléfono: todo atado a su dueño. Sin eso, una persona leería las sugerencias de otra.
+   */
+  it('sugerencias/responder: el libro, el punto y marcar leída van atados al dueño', async () => {
+    for (const llamada of [
+      () => misSugerencias(DUENO),
+      () => respuestasSinLeer(DUENO),
+      () => marcarRespuestaLeida(DUENO, '9692387a-41cc-4a81-9f8f-7b07135d742a'),
+    ]) {
+      capturas.length = 0
+      const consultas = await todasLasConsultas(llamada)
+      expect(consultas).toHaveLength(1)
+      expect(consultas[0]!.sql).toMatch(/"sugerencias"/)
+      esperarFiltradoPorDueno(consultas[0]!)
+    }
+  })
+
+  it('api/mobile/sugerencias: GET lee solo lo de quien pregunta', async () => {
+    const { GET } = await import('../app/api/mobile/sugerencias/route')
+    const consultas = await todasLasConsultas(() => GET(peticionMovil()))
+    expect(consultas).toHaveLength(1)
+    esperarFiltradoPorDueno(consultas[0]!)
   })
 
   it('social/quitar: una cuenta conectada no se quita, y no se borra nada', async () => {

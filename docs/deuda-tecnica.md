@@ -4,6 +4,25 @@ Lo que se dejó a medias a propósito, con el porqué y lo que costaría termina
 lista de deseos: cada entrada nació de un problema real que se parcheó para seguir.
 
 ---
+## La respuesta a una sugerencia sin issue no llega después al issue, y el correo no se reintenta
+
+**Abierto desde 2026-11-06.**
+
+Cuando el equipo responde una sugerencia (`src/lib/sugerencias/responder.ts`), el correo y el
+comentario del issue salen una vez, después de responder, y nada los reintenta. Dos casos quedan
+cortos:
+
+- Si la sugerencia todavía no tenía issue —no había token, o GitHub estaba caído y la abre el cron
+  al día siguiente—, el comentario no se manda nunca: el issue sale sin la respuesta. La persona sí
+  la lee en el libro, que es donde vive. Hoy casi no pasa: el admin responde desde Las Sugerencias,
+  donde ve «sin issue todavía», o desde el issue mismo, que ya existe.
+- Si Resend falla la primera vez, la persona no recibe el correo; se entera por el punto del panel.
+
+Terminarlo pide anotar en la fila qué se avisó (`comentada_en`, `avisada_en`) y que el cron
+diario que ya reintenta los issues (`reintentarSugerencias`) mande también lo que falta, con el
+mismo reclamo para no duplicar. Una tarde, con su migración.
+
+---
 ## La página de un usuario se crea al invitarlo, pero nadie rellena hacia atrás
 
 **Abierto desde 2026-09-24.**

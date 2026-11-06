@@ -1174,6 +1174,9 @@ export { USOS_MATERIAL, type UsoMaterial } from '../lib/cocina/bodega'
  * reintento dice lo mismo que habría dicho en el momento. Nunca el correo ni el nombre: el
  * repositorio es público. `intentadaEn` es el último intento, y sirve de reclamo: dos
  * corridas a la vez no mandan dos issues.
+ *
+ * La respuesta del equipo vive en la misma fila: hay una sola por sugerencia, y así lo que la
+ * persona ve en el libro es una lectura de su propia tabla, sin cruces.
  */
 export const sugerencias = pgTable(
   'sugerencias',
@@ -1192,6 +1195,17 @@ export const sugerencias = pgTable(
     issueNumero: integer('issue_numero'),
     issueUrl: text('issue_url'),
     enviadaEn: timestamp('enviada_en', { withTimezone: true }),
+    /**
+     * La respuesta del equipo: la escribe el admin en Las Sugerencias, o un agente con una llave
+     * del admin (`POST /api/sugerencias/respuesta`), y la persona la lee en el libro. Se puede
+     * cambiar, y si cambia vuelve a quedar sin leer. `respondidaPor` es el admin que la escribió;
+     * queda nulo si esa cuenta se quita.
+     */
+    respuesta: text('respuesta'),
+    respondidaEn: timestamp('respondida_en', { withTimezone: true }),
+    respondidaPor: uuid('respondida_por').references(() => users.id, { onDelete: 'set null' }),
+    /** Cuándo la persona abrió la respuesta en el libro: nulo, con respuesta, es el punto de «sin leer». */
+    respuestaLeidaEn: timestamp('respuesta_leida_en', { withTimezone: true }),
   },
   (t) => [index('sugerencias_owner_idx').on(t.ownerId, t.creadaEn)],
 ).enableRLS()

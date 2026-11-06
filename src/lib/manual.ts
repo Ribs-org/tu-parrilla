@@ -21,6 +21,7 @@ export const PAGINAS = [
   'los-fierros',
   'la-vitrina',
   'los-maestros',
+  'las-sugerencias',
   'tu-cuenta',
   'libro-de-sugerencias',
   'app-movil',
