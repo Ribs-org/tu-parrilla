@@ -252,6 +252,13 @@ export const socialAccounts = pgTable(
     trialReels: text('trial_reels').$type<'si' | 'no'>(),
     trialReelsMotivo: text('trial_reels_motivo'),
     trialReelsEn: timestamp('trial_reels_en', { withTimezone: true }),
+    // Si las fotos de esta cuenta iban con «Música de TikTok» la última vez que se programaron
+    // desde el compositor: el interruptor nace así la próxima vez, para que quien tiene tres
+    // cuentas lo elija una vez por cuenta. Nulo mientras nunca se haya programado fotos ahí, y
+    // nulo se lee como apagado. Solo TikTok; lo escribe `createScheduledPost`
+    // (`musicaParaRecordar`). Es lo único de TikTok que se recuerda: la privacidad y las demás
+    // casillas nacen siempre sin elegir, como pide la guía de TikTok.
+    tiktokMusica: boolean('tiktok_musica'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [

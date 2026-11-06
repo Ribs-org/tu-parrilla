@@ -14,6 +14,7 @@ import {
   errorDeMediaPorOpciones,
   esHistoria,
   historiaDe,
+  musicaParaRecordar,
   opcionesDesdeFormularioPorCuenta,
   opcionesParaApi,
   resumenOpciones,
@@ -223,6 +224,7 @@ describe('opcionesDesdeFormularioPorCuenta', () => {
       pegar: false,
       comercial: 'no',
       ia: false,
+      musica: false,
     })
     expect(validarOpcionesPorCuenta(cuentas, raw)).toEqual({ error: TIKTOK_SIN_PRIVACIDAD })
   })
@@ -340,6 +342,56 @@ describe('la etiqueta de IA de TikTok', () => {
   })
 })
 
+describe('la música de TikTok', () => {
+  it('encendida se guarda; apagada o ausente no deja rastro', () => {
+    expect(validarOpciones('tiktok', { ...directo, musica: true })).toEqual({ opciones: { ...directo, musica: true } })
+    expect(validarOpciones('tiktok', { ...directo, musica: false })).toEqual({ opciones: directo })
+    expect(validarOpciones('tiktok', directo)).toEqual({ opciones: directo })
+  })
+
+  it('algo que no es booleano es un error de forma; en la bandeja no se guarda', () => {
+    expect(validarOpciones('tiktok', { ...directo, musica: 'si' })).toEqual({ error: OPCIONES_ERROR })
+    expect(validarOpciones('tiktok', { modo: 'borrador', musica: true })).toEqual({ opciones: { modo: 'borrador' } })
+  })
+
+  it('el formulario la lee de tiktokMusica:<id>; sin el interruptor vale apagada', () => {
+    const fd = new FormData()
+    fd.set('tiktokModo:t1', 'directo')
+    fd.set('tiktokPrivacidad:t1', 'SELF_ONLY')
+    fd.set('tiktokMusica:t1', 'on')
+    fd.set('tiktokModo:t2', 'directo')
+    fd.set('tiktokPrivacidad:t2', 'SELF_ONLY')
+    const raw = opcionesDesdeFormularioPorCuenta(fd, [{ id: 't1', network: 'tiktok' } as never, { id: 't2', network: 'tiktok' } as never])
+    expect(raw.t1).toMatchObject({ musica: true })
+    expect(raw.t2).toMatchObject({ musica: false })
+  })
+
+  it('el resumen la nombra solo cuando el post es todo fotos', () => {
+    expect(resumenOpciones('tiktok', { ...directo, musica: true }, true)).toBe(
+      'Directo · Solo yo · con comentarios · sin dúo · sin pegar · sin comercial · con música de TikTok',
+    )
+    expect(resumenOpciones('tiktok', { ...directo, musica: true }, false)).toBe(
+      'Directo · Solo yo · con comentarios · sin dúo · sin pegar · sin comercial',
+    )
+    expect(resumenOpciones('tiktok', { ...directo, musica: true })).not.toContain('música')
+  })
+
+  it('se recuerda por cuenta solo cuando el interruptor estaba a la vista: fotos y directo', () => {
+    const opciones = {
+      t1: { ...directo, musica: true } as never,
+      t2: directo as never,
+      t3: { modo: 'borrador' } as never,
+      ig: { trialReel: true } as never,
+    }
+    expect(musicaParaRecordar(opciones, { videos: 0, fotos: 3 })).toEqual([
+      { cuentaId: 't1', musica: true },
+      { cuentaId: 't2', musica: false },
+    ])
+    expect(musicaParaRecordar(opciones, { videos: 1, fotos: 0 })).toEqual([])
+    expect(musicaParaRecordar(opciones, { videos: 0, fotos: 0 })).toEqual([])
+  })
+})
+
 describe('historias', () => {
   const secuencia = { secuencia: 'abc-123', orden: 2 }
 
@@ -432,9 +484,10 @@ describe('historias', () => {
 describe('opcionesParaApi', () => {
   const directo = { modo: 'directo', privacidad: 'SELF_ONLY', comentarios: true, duo: false, pegar: false, comercial: 'no' }
 
-  it('TikTok directo sale con la casilla de IA explícita, encendida o apagada', () => {
-    expect(opcionesParaApi('tiktok', directo)).toEqual({ ...directo, ia: false })
-    expect(opcionesParaApi('tiktok', { ...directo, ia: true })).toEqual({ ...directo, ia: true })
+  it('TikTok directo sale con las casillas de IA y de música explícitas, encendidas o apagadas', () => {
+    expect(opcionesParaApi('tiktok', directo)).toEqual({ ...directo, ia: false, musica: false })
+    expect(opcionesParaApi('tiktok', { ...directo, ia: true })).toEqual({ ...directo, ia: true, musica: false })
+    expect(opcionesParaApi('tiktok', { ...directo, musica: true })).toEqual({ ...directo, ia: false, musica: true })
   })
 
   it('un borrador, un trial reel y una red sin opciones salen como se guardaron', () => {

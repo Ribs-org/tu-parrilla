@@ -20,6 +20,13 @@ export type OpcionesTikTok =
        * Opcional y solo cuando está encendido, para que lo guardado antes siga igual.
        */
       ia?: true
+      /**
+       * Música de TikTok: TikTok le pone a las fotos una canción recomendada, que la persona
+       * puede cambiar después en la app (`auto_add_music`). Solo existe en fotos publicadas
+       * directo: en un video o en la bandeja no se manda aunque esté guardada. Opcional y solo
+       * cuando está encendida, como `ia`.
+       */
+      musica?: true
     }
 
 /**
@@ -114,7 +121,10 @@ function validarTikTok(raw: unknown): { opciones: OpcionesTikTok } | { error: st
   const duo = casilla(raw.duo)
   const pegar = casilla(raw.pegar)
   const ia = casilla(raw.ia)
-  if (comentarios === null || duo === null || pegar === null || ia === null) return { error: OPCIONES_ERROR }
+  const musica = casilla(raw.musica)
+  if (comentarios === null || duo === null || pegar === null || ia === null || musica === null) {
+    return { error: OPCIONES_ERROR }
+  }
   const comercial = raw.comercial === undefined ? 'no' : raw.comercial
   if (!(COMERCIALES as readonly unknown[]).includes(comercial)) return { error: OPCIONES_ERROR }
   if (comercial === 'patrocinado' && raw.privacidad === 'SELF_ONLY') {
@@ -130,6 +140,7 @@ function validarTikTok(raw: unknown): { opciones: OpcionesTikTok } | { error: st
       pegar,
       comercial: comercial as ComercialTikTok,
       ...(ia ? { ia: true as const } : {}),
+      ...(musica ? { musica: true as const } : {}),
     },
   }
 }
@@ -230,7 +241,7 @@ function errorDeHistoriaEnDestinos(cuentas: CuentaDestino[], opciones: Record<st
 
 /**
  * Las opciones guardadas de un destino como las devuelve `GET /api/schedule/posts`: la forma
- * que se aceptó, con cada casilla de TikTok explícita —`ia: false` incluida— para que quien
+ * que se aceptó, con cada casilla de TikTok explícita —`ia` y `musica` en false incluidas— para que quien
  * programó a ciegas pueda comprobar qué quedó sin adivinar qué significa una clave ausente.
  * Lo guardado ya pasó por `validarOpciones`; si una fila vieja no la pasara, sale tal cual.
  */
@@ -239,7 +250,7 @@ export function opcionesParaApi(network: string, guardadas: unknown): Record<str
   const check = validarOpciones(network, guardadas)
   if ('error' in check) return esObjeto(guardadas) ? guardadas : null
   const o = check.opciones
-  if (o && 'modo' in o && o.modo === 'directo') return { ...o, ia: Boolean(o.ia) }
+  if (o && 'modo' in o && o.modo === 'directo') return { ...o, ia: Boolean(o.ia), musica: Boolean(o.musica) }
   return o
 }
 
@@ -355,13 +366,35 @@ export function opcionesDesdeFormularioPorCuenta(
             pegar: formData.get(`tiktokPegar:${cuenta.id}`) === 'on',
             comercial: String(formData.get(`tiktokComercial:${cuenta.id}`) ?? 'no'),
             ia: formData.get(`tiktokIA:${cuenta.id}`) === 'on',
+            // El interruptor solo se dibuja con fotos: con un video no llega y vale apagado.
+            musica: formData.get(`tiktokMusica:${cuenta.id}`) === 'on',
           }
   }
   return raw
 }
 
-/** Una línea para el editor y el calendario; null cuando no hay nada legible. */
-export function resumenOpciones(network: string, opciones: unknown): string | null {
+/**
+ * Lo que el compositor recuerda de cada cuenta de TikTok al programar: si sus fotos iban con
+ * música (`social_accounts.tiktok_musica`), para que el interruptor nazca así la próxima vez.
+ * Solo cuando el interruptor estaba a la vista —todo fotos y publicación directa—: un video o
+ * un envío a la bandeja no dicen nada de lo que la persona quiere para sus fotos.
+ */
+export function musicaParaRecordar(
+  opciones: Record<string, OpcionesDestino>,
+  conteos: { videos: number; fotos: number },
+): Array<{ cuentaId: string; musica: boolean }> {
+  if (conteos.videos > 0 || conteos.fotos === 0) return []
+  return Object.entries(opciones).flatMap(([cuentaId, o]) =>
+    'modo' in o && o.modo === 'directo' ? [{ cuentaId, musica: Boolean(o.musica) }] : [],
+  )
+}
+
+/**
+ * Una línea para el editor y el calendario; null cuando no hay nada legible. `fotos` dice si
+ * el post es todo fotos: la música de TikTok solo se nombra entonces, porque en un video no
+ * viaja aunque haya quedado guardada.
+ */
+export function resumenOpciones(network: string, opciones: unknown, fotos = false): string | null {
   const historia = historiaDe(network, opciones)
   if (historia !== null) return historia === true ? 'Historia' : `Historia ${historia.orden} de una secuencia`
   if (network === 'instagram') {
@@ -383,5 +416,6 @@ export function resumenOpciones(network: string, opciones: unknown): string | nu
     o.pegar ? 'con pegar' : 'sin pegar',
     comercial,
     ...(o.ia ? ['hecho con IA'] : []),
+    ...(o.musica && fotos ? ['con música de TikTok'] : []),
   ].join(' · ')
 }

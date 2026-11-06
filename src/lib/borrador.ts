@@ -70,6 +70,11 @@ export type TikTokInicial = {
   pegar: boolean
   comercial: 'no' | 'marca_propia' | 'patrocinado'
   ia: boolean
+  /**
+   * «Música de TikTok» como quedó, o undefined si el interruptor no estaba a la vista (un video,
+   * o sin archivos todavía): entonces manda lo que la cuenta recuerda.
+   */
+  musica?: boolean
 }
 
 export function tiktokInicial(campos: Campos, cuentaId: string): TikTokInicial | null {
@@ -83,6 +88,7 @@ export function tiktokInicial(campos: Campos, cuentaId: string): TikTokInicial |
     pegar: primero(campos, `tiktokPegar:${cuentaId}`) === 'on',
     comercial: comercial === 'marca_propia' || comercial === 'patrocinado' ? comercial : 'no',
     ia: primero(campos, `tiktokIA:${cuentaId}`) === 'on',
+    ...(`tiktokMusica:${cuentaId}` in campos ? { musica: primero(campos, `tiktokMusica:${cuentaId}`) === 'on' } : {}),
   }
 }
 

@@ -73,6 +73,7 @@ describe('lo que se restaura de un borrador', () => {
     'tiktokComercial:t1': ['patrocinado'],
     'tiktokModo:t2': ['borrador'],
     'tiktokComercial:t2': ['no'],
+    'tiktokMusica:t1': ['on'],
     'instagramTrial:i1': ['on'],
     'instagramTrial:i2': [''],
     reglaPalabra: ['GUIA'],
@@ -89,8 +90,12 @@ describe('lo que se restaura de un borrador', () => {
       pegar: false,
       comercial: 'patrocinado',
       ia: false,
+      musica: true,
     })
     expect(tiktokInicial(campos, 't2')).toMatchObject({ borrador: true, comercial: 'no' })
+    // Sin el interruptor a la vista (un video, o la bandeja) no dice nada: manda lo que la
+    // cuenta recuerda.
+    expect(tiktokInicial(campos, 't2')).not.toHaveProperty('musica')
     // Una cuenta que no tenía bloque en el borrador nace como la guía de TikTok exige.
     expect(tiktokInicial(campos, 'otra')).toBeNull()
   })

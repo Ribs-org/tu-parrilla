@@ -120,7 +120,8 @@ export function cuerpoInit(
         description: caption,
         privacy_level: opciones.privacidad,
         disable_comment: interacciones.disable_comment,
-        auto_add_music: false,
+        // La música de TikTok solo existe acá, en fotos publicadas directo.
+        auto_add_music: Boolean(opciones.musica),
         ...comercial,
       },
       source_info: fuente(media),
