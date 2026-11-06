@@ -597,6 +597,14 @@ Terminarlo cuesta una migración y un reintento: una columna `comandas.aviso_env
 marca, solo para comandas que terminaron en las últimas horas, para que el día del despliegue
 no lleguen correos de comandas viejas.
 
+**Lo mismo vale, desde el 2026-11-06, para el correo de una pregunta del chef** (`avisarDeLaPregunta`):
+sale una vez, de la llamada que hizo la pregunta, y si Resend falla no se reintenta. Pesa más que el
+de una comanda lista, porque el plazo corre: si el dueño no se entera, el chef sigue con la opción
+por defecto. La tarjeta de La Cocina la muestra igual, y la vigía del panel la trae sola si está
+abierta. Se dejó sin marca para no doblar el trabajo antes de decidir cómo se marca el de la
+comanda; terminarlo es la misma columna en `preguntas` (`aviso_enviado_en`), con el mismo reintento
+en el cron, limitado a las preguntas que siguen esperando.
+
 
 ## La subida de La Cocina en el teléfono no sigue con la app en segundo plano (2026-11-02)
 

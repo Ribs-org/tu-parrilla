@@ -45,8 +45,14 @@ describe('el estado en la tarjeta', () => {
 
 describe('el recorrido de la tarjeta', () => {
   it('cinco tramos en orden, todo hecho al llegar al mesón, y nada si terminó sin cocinarse', () => {
-    expect((['recibida', 'revisando', 'en_preparacion', 'en_el_horno', 'sirviendo', 'lista'] as const).map(tramoDelRecorrido)).toEqual([0, 1, 2, 3, 4, 5])
+    expect((['recibida', 'revisando', 'en_preparacion', 'en_el_horno', 'sirviendo', 'lista'] as const).map((e) => tramoDelRecorrido(e))).toEqual([0, 1, 2, 3, 4, 5])
     expect(tramoDelRecorrido('servida')).toBe(5)
     for (const estado of ['rechazada', 'fallida', 'cancelada'] as const) expect(tramoDelRecorrido(estado)).toBeNull()
+  })
+
+  it('la pregunta va en el tramo de donde salió: al revisar o al despostar', () => {
+    expect(tramoDelRecorrido('pregunta', 'revisando')).toBe(1)
+    expect(tramoDelRecorrido('pregunta', 'en_preparacion')).toBe(2)
+    expect(tramoDelRecorrido('pregunta')).toBe(1)
   })
 })

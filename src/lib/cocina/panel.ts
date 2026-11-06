@@ -1,8 +1,9 @@
 import { createHash } from 'node:crypto'
 import { and, asc, count, desc, eq, inArray, isNotNull, isNull, max, sql } from 'drizzle-orm'
-import { comandaEventos, comandas, creativos, getDb, insumos, latidos, users, type EstadoComanda } from '@/db'
+import { comandaEventos, comandas, creativos, getDb, insumos, latidos, preguntas, users, type EstadoComanda } from '@/db'
 import { CANCELABLES, EN_MARCHA } from './estados'
 import { ordenarFila } from './fila'
+import { clasificarCocina, type EstadoDeLaCocina } from './latido'
 import { instruccionDe } from './pedido'
 
 // Lo que la pestaña La Cocina lee y escribe para su dueño: sus comandas con su línea de tiempo, si
@@ -10,8 +11,10 @@ import { instruccionDe } from './pedido'
 // —cuántas comandas hay antes en la fila—, nunca como filas. Las consultas van en serie: son
 // chicas, y varias en paralelo contra el pooler ya colgaron una corrida (`docs/pendientes.md`).
 
-/** Sin latido por más de esto, la cocina está cerrada por ahora. */
-export const MINUTOS_SIN_LATIDO = 10
+// Si la cocina está abierta y cómo atiende, sin base: en `latido.ts`. Se reexporta para los que ya
+// lo leían de acá.
+export { MINUTOS_SIN_LATIDO, etaEnLaFila, type EstadoDeLaCocina } from './latido'
+
 /** Lo que se guarda lo crudo de una comanda después de terminada. */
 export const DIAS_INSUMO = 14
 /** Cuántas comandas muestra la pestaña, las más nuevas. */
@@ -20,41 +23,14 @@ export const LIMITE_COMANDAS_PANEL = 50
 export const COMANDA_NO_CANCELABLE = 'Esa comanda ya está en el horno o terminó: no se puede cancelar.'
 export const COMANDA_AJENA = 'Esa comanda no existe.'
 
-export type EstadoDeLaCocina = {
-  abierta: boolean
-  /** Cuándo latió por última vez, si alguna vez latió. */
-  ultimoLatido: Date | null
-  /** Lo que el chef contó en su último latido, si lo contó: lo usa la hora estimada. */
-  trabajos: number | null
-  minutosPorComanda: number | null
-}
-
-function numero(valor: unknown): number | null {
-  return typeof valor === 'number' && Number.isFinite(valor) && valor > 0 ? valor : null
-}
-
-/** Si la cocina está abierta: algún trabajador latió en los últimos `MINUTOS_SIN_LATIDO`. */
-export async function estadoDeLaCocina(ahora: Date): Promise<EstadoDeLaCocina> {
-  const [ultimo] = await getDb().select().from(latidos).orderBy(desc(latidos.en)).limit(1)
-  if (!ultimo) return { abierta: false, ultimoLatido: null, trabajos: null, minutosPorComanda: null }
-  const datos = (ultimo.datos ?? {}) as Record<string, unknown>
-  return {
-    abierta: ahora.getTime() - ultimo.en.getTime() <= MINUTOS_SIN_LATIDO * 60_000,
-    ultimoLatido: ultimo.en,
-    trabajos: numero(datos.trabajos),
-    minutosPorComanda: numero(datos.minutosPorComanda),
-  }
-}
-
 /**
- * La hora estimada de una que espera, antes de que el chef dé la suya: las que van antes más ella,
- * repartidas entre los trabajos que hace a la vez, a lo que tarda una en promedio. Sin esos datos
- * en el último latido, no se adivina.
+ * Si la cocina está abierta y cómo atiende —sola, a mano o cerrada—, según los latidos de todos sus
+ * trabajadores (`clasificarCocina`, en `latido.ts`). Son uno o dos: la tabla tiene una fila por
+ * trabajador.
  */
-export function etaEnLaFila(antes: number, cocina: EstadoDeLaCocina, ahora: Date): Date | null {
-  if (!cocina.minutosPorComanda) return null
-  const tandas = Math.ceil((antes + 1) / (cocina.trabajos ?? 1))
-  return new Date(ahora.getTime() + tandas * cocina.minutosPorComanda * 60_000)
+export async function estadoDeLaCocina(ahora: Date): Promise<EstadoDeLaCocina> {
+  const filas = await getDb().select().from(latidos).orderBy(desc(latidos.en)).limit(20)
+  return clasificarCocina(filas, ahora)
 }
 
 export type EventoDelPanel = { estado: EstadoComanda; mensaje: string | null; eta: Date | null; creadoEn: Date }
@@ -78,6 +54,19 @@ export type ComandaDelPanel = {
   antes: number | null
   cancelable: boolean
   eventos: EventoDelPanel[]
+  /** Lo que el chef pregunta y espera respuesta; solo mientras la comanda está en `pregunta`. */
+  pregunta: PreguntaDelPanel | null
+}
+
+export type PreguntaDelPanel = {
+  id: string
+  texto: string
+  /** Null: la respuesta es libre. */
+  opciones: string[] | null
+  plazo: Date
+  porDefecto: string
+  /** De dónde salió la comanda para preguntar, y adonde vuelve: dice el tramo del recorrido. */
+  vuelveA: EstadoComanda
 }
 
 /** Las comandas del dueño, de la más nueva a la más vieja, con lo que la tarjeta muestra. */
@@ -106,6 +95,13 @@ export async function comandasDelDueno(ownerId: string): Promise<ComandaDelPanel
     .from(creativos)
     .where(and(inArray(creativos.comandaId, ids), eq(creativos.estado, 'mesa')))
     .groupBy(creativos.comandaId)
+  // Las preguntas que esperan, de estas comandas y de este dueño: a lo más una por comanda.
+  const abiertas = propias.some((c) => c.estado === 'pregunta')
+    ? await db
+        .select()
+        .from(preguntas)
+        .where(and(inArray(preguntas.comandaId, ids), eq(preguntas.ownerId, ownerId), isNull(preguntas.respondidaEn)))
+    : []
 
   // La fila entera, como la ve el chef: sin ella no se sabe cuántas van antes. De las ajenas solo
   // se lee lo que ordena —dueño, tipo y hora—, y lo único que sale de acá es una cuenta.
@@ -121,6 +117,7 @@ export async function comandasDelDueno(ownerId: string): Promise<ComandaDelPanel
 
   return propias.map((c) => {
     const lugar = orden.indexOf(c.id)
+    const abierta = c.estado === 'pregunta' ? abiertas.find((p) => p.comandaId === c.id) : undefined
     return {
       id: c.id,
       estado: c.estado,
@@ -138,6 +135,16 @@ export async function comandasDelDueno(ownerId: string): Promise<ComandaDelPanel
       eventos: eventos
         .filter((e) => e.comandaId === c.id)
         .map((e) => ({ estado: e.estado, mensaje: e.mensaje, eta: e.eta, creadoEn: e.creadoEn })),
+      pregunta: abierta
+        ? {
+            id: abierta.id,
+            texto: abierta.texto,
+            opciones: abierta.opciones ?? null,
+            plazo: abierta.plazo,
+            porDefecto: abierta.porDefecto,
+            vuelveA: abierta.estadoPrevio,
+          }
+        : null,
     }
   })
 }
@@ -153,7 +160,7 @@ export type PulsoDeLaCocina = {
  * Lo mínimo para saber si la tarjeta de La Cocina quedó vieja, sin armarla: lo pregunta el panel
  * cada pocos segundos mientras hay comandas en marcha (`/api/admin/cocina/pulso`), y solo si la
  * firma cambió vuelve a pedir la página. Entran en la firma las comandas del dueño (cuántas y la
- * última vez que alguna cambió), lo que tiene en el mesón, si la cocina está abierta y, mientras
+ * última vez que alguna cambió), lo que tiene en el mesón, cómo atiende la cocina y, mientras
  * alguna suya espera, cuántas esperan en total: cuando el chef toma la de otro, la suya avanza en
  * la fila. Va hecha un resumen para no contar afuera cuántas comandas hay de los demás.
  */
@@ -179,8 +186,9 @@ export async function pulsoDeLaCocina(ownerId: string, ahora: Date): Promise<Pul
         .innerJoin(users, eq(users.id, comandas.ownerId))
         .where(and(eq(comandas.estado, 'recibida'), isNotNull(users.cocinaDesde)))
     : []
-  const { abierta } = await estadoDeLaCocina(ahora)
-  const partes = [propias?.n ?? 0, propias?.ultima?.toISOString() ?? '', mesa, fila, abierta ? 1 : 0]
+  // Cómo atiende —sola, a mano o cerrada—, no solo si late: la línea de arriba cambia con eso.
+  const { atiende } = await estadoDeLaCocina(ahora)
+  const partes = [propias?.n ?? 0, propias?.ultima?.toISOString() ?? '', mesa, fila, atiende]
   return {
     vivas: propias?.vivas ?? 0,
     firma: createHash('sha256').update(partes.join('|')).digest('hex').slice(0, 16),

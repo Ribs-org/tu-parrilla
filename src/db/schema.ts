@@ -11,9 +11,11 @@ import {
   text,
   timestamp,
   unique,
+  uniqueIndex,
   uuid,
   type AnyPgColumn,
 } from 'drizzle-orm/pg-core'
+import { sql } from 'drizzle-orm'
 import type { UsoMaterial } from '../lib/cocina/bodega'
 import type { TipoSugerencia } from '../lib/sugerencias/tipos'
 
@@ -960,6 +962,11 @@ export const comandas = pgTable(
     tomadaEn: timestamp('tomada_en', { withTimezone: true }),
     listaEn: timestamp('lista_en', { withTimezone: true }),
     servidaEn: timestamp('servida_en', { withTimezone: true }),
+    // La red de seguridad del admin (`src/lib/cocina/alarma.ts`): cuándo se le avisó que esta
+    // comanda llevaba más de media hora sin tomar, y la hora estimada que ya se le avisó como
+    // pasada. Con eso sale una vez por comanda y por motivo, y no en cada corrida del cron.
+    alarmaRecibidaEn: timestamp('alarma_recibida_en', { withTimezone: true }),
+    alarmaEta: timestamp('alarma_eta', { withTimezone: true }),
     creadaEn: timestamp('creada_en', { withTimezone: true }).notNull().defaultNow(),
     actualizadaEn: timestamp('actualizada_en', { withTimezone: true }).notNull().defaultNow(),
   },
@@ -984,6 +991,40 @@ export const comandaEventos = pgTable(
     creadoEn: timestamp('creado_en', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index('comanda_eventos_comanda_idx').on(t.comandaId, t.creadoEn)],
+).enableRLS()
+
+/**
+ * Una pregunta del chef al dueño de la comanda: el texto, las opciones (o null si la respuesta es
+ * libre), el plazo y lo que el chef hace si nadie contesta (`porDefecto`). Mientras espera, la
+ * comanda está en `pregunta`; responder —o que pase el plazo— la devuelve a `estadoPrevio`. Una
+ * abierta por comanda a la vez: lo asegura el índice parcial. Las reglas, en
+ * `src/lib/cocina/pregunta.ts`; quién la escribe, en `preguntar.ts`.
+ */
+export const preguntas = pgTable(
+  'preguntas',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    comandaId: uuid('comanda_id')
+      .notNull()
+      .references(() => comandas.id, { onDelete: 'cascade' }),
+    ownerId: uuid('owner_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    texto: text('texto').notNull(),
+    opciones: jsonb('opciones').$type<string[]>(),
+    plazo: timestamp('plazo', { withTimezone: true }).notNull(),
+    porDefecto: text('por_defecto').notNull(),
+    estadoPrevio: text('estado_previo').$type<EstadoComanda>().notNull(),
+    respuesta: text('respuesta'),
+    respondidaEn: timestamp('respondida_en', { withTimezone: true }),
+    porPlazo: boolean('por_plazo').notNull().default(false),
+    creadaEn: timestamp('creada_en', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('preguntas_comanda_idx').on(t.comandaId, t.creadaEn),
+    uniqueIndex('preguntas_abierta_key').on(t.comandaId).where(sql`respondida_en is null`),
+    index('preguntas_plazo_idx').on(t.plazo).where(sql`respondida_en is null`),
+  ],
 ).enableRLS()
 
 /**
@@ -1158,8 +1199,9 @@ export const creativoMedia = pgTable(
 
 /**
  * El último latido de cada trabajador del chef: si pasan diez minutos sin uno, el panel dice que
- * la cocina está cerrada por ahora. `datos` es lo que el chef cuenta de sí (cuántos trabajos
- * tiene, cuánto tarda una comanda en promedio, su versión).
+ * la cocina está cerrada por ahora. `datos` es lo que el chef cuenta de sí: si toma las comandas
+ * solo (`automatico: true`; sin eso, la cocina atiende «a mano»), cuántos trabajos tiene, cuánto
+ * tarda una comanda en promedio, su versión (`src/lib/cocina/latido.ts`).
  */
 export const latidos = pgTable('latidos', {
   trabajador: text('trabajador').primaryKey(),
@@ -1243,6 +1285,7 @@ export type BorradorMedia = typeof borradorMedia.$inferSelect
 export type Marca = typeof marcas.$inferSelect
 export type Comanda = typeof comandas.$inferSelect
 export type ComandaEvento = typeof comandaEventos.$inferSelect
+export type Pregunta = typeof preguntas.$inferSelect
 export type Material = typeof materiales.$inferSelect
 export type Insumo = typeof insumos.$inferSelect
 export type Subida = typeof subidas.$inferSelect

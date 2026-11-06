@@ -9,6 +9,14 @@ fase 0 entera:
 - el mesón;
 - los barridos de 14 y 30 días.
 
+De la fase 1, desde el 2026-11-06: **las preguntas del chef con su plazo y su opción por defecto**
+(`POST …/preguntas` y `GET …/respuestas`, con su correo y la respuesta en el panel y en el
+teléfono). Se pregunta desde `revisando` y `en_preparacion`, no desde el horno: lo que está en el
+horno no se cancela. Con ellas llegaron, adelantados de la fase 2, el latido que dice si la cocina
+toma las comandas sola (`datos.automatico`) y una alarma al admin cuando una comanda espera de más.
+Los adelantó la comanda de un cliente que pasó cuatro días sin tomar mientras el panel decía
+«abierta» (VicentePareja/marca-personal#22).
+
 **Lo que cambió después:** desde el 2026-11-02 el material en bruto vive en la cámara de frío (la
 bodega), no vence y la comanda elige de ahí; los insumos pasan a ser lo que una comanda lleva, y el
 borrado de 14 días queda solo para lo de antes. Lo que este diseño dice de subir el plato principal

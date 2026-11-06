@@ -149,7 +149,16 @@ describe.skipIf(!URL_PRUEBAS)('La Cocina desde el teléfono, contra una Postgres
     const r = await rutas()
     quien = sinCocina
     const cocina = await r.cocina(pedido('/api/mobile/cocina'))
-    expect(await cocina.json()).toEqual({ encendida: false, abierta: false, marca: null, camara: null, materiales: [], comandas: [] })
+    expect(await cocina.json()).toEqual({
+      encendida: false,
+      abierta: false,
+      atiende: 'cerrada',
+      cocina: null,
+      marca: null,
+      camara: null,
+      materiales: [],
+      comandas: [],
+    })
     const abierta = await r.abrir(pedido('/api/mobile/cocina/subidas', 'POST', grabado))
     expect(abierta.status).toBe(403)
     expect(await abierta.json()).toEqual({ error: 'La Cocina no está encendida para tu cuenta.' })
@@ -186,6 +195,8 @@ describe.skipIf(!URL_PRUEBAS)('La Cocina desde el teléfono, contra una Postgres
     expect(cocina).toMatchObject({
       encendida: true,
       abierta: false,
+      atiende: 'cerrada',
+      cocina: 'La cocina está cerrada por ahora: lo que pidas espera su turno.',
       marca: 'Dueña',
       camara: { cuantos: 1, guardados: BYTES, subiendo: 0 },
       materiales: [{ id: material.id, enMarcha: 1, pieza: { noche: 'un corte', dia: 'un trozo' } }],
@@ -198,6 +209,7 @@ describe.skipIf(!URL_PRUEBAS)('La Cocina desde el teléfono, contra una Postgres
           principal: 'Video del 2 de nov, 14.05.mp4',
           instruccion: 'Clips de menos de 30 segundos.',
           fila: 'Es la próxima en la fila.',
+          pregunta: null,
         },
       ],
     })

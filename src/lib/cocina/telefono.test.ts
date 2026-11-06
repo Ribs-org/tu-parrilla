@@ -93,10 +93,14 @@ describe('una comanda como la lista el teléfono', () => {
     antes: 2,
     cancelable: true,
     eventos: [],
+    pregunta: null,
   }
+  const AHORA = new Date('2026-11-06T15:00:00Z')
+  const ZONA = 'America/Santiago'
+  const enElTelefono = (c: ComandaDelPanel) => comandaParaElTelefono(c, AHORA, ZONA)
 
   it('esperando: en palabras de noche y de día, en marcha y con su lugar en la fila', () => {
-    expect(comandaParaElTelefono(base)).toEqual({
+    expect(enElTelefono(base)).toEqual({
       id: 'c-1',
       estado: 'recibida',
       palabras: { noche: 'Comanda colgada', dia: 'Comanda colgada' },
@@ -108,13 +112,37 @@ describe('una comanda como la lista el teléfono', () => {
       instruccion: 'Clips cortos.',
       fila: 'Hay 2 comandas antes que la tuya.',
       mensaje: null,
+      pregunta: null,
     })
   })
 
   it('lista: cuántos cortes esperan, ya no en marcha; rechazada: el motivo y sin recorrido', () => {
-    const lista = comandaParaElTelefono({ ...base, estado: 'lista', enElMeson: 3, antes: null })
+    const lista = enElTelefono({ ...base, estado: 'lista', enElMeson: 3, antes: null })
     expect(lista).toMatchObject({ palabras: { noche: 'Lista en el mesón: 3 cortes', dia: 'Lista en la bandeja: 3 piezas' }, enMarcha: false, tramo: 5, fila: null })
-    const rechazada = comandaParaElTelefono({ ...base, estado: 'rechazada', motivo: 'No tiene audio.', antes: null })
+    const rechazada = enElTelefono({ ...base, estado: 'rechazada', motivo: 'No tiene audio.', antes: null })
     expect(rechazada).toMatchObject({ tramo: null, mensaje: 'No tiene audio.', enMarcha: false })
+  })
+
+  it('pregunta: la pregunta con sus opciones y el plazo en palabras, en marcha y en el tramo de donde salió', () => {
+    const plazo = new Date('2026-11-06T21:00:00Z')
+    const c = enElTelefono({
+      ...base,
+      estado: 'pregunta',
+      antes: null,
+      pregunta: { id: 'p-1', texto: '¿Qué tema destaco?', opciones: ['Ventas', 'La anécdota'], plazo, porDefecto: 'Ventas', vuelveA: 'en_preparacion' },
+    })
+    expect(c).toMatchObject({
+      palabras: { noche: 'El chef te pregunta', dia: 'El chef te pregunta' },
+      enMarcha: true,
+      tramo: 2,
+      pregunta: {
+        id: 'p-1',
+        texto: '¿Qué tema destaco?',
+        opciones: ['Ventas', 'La anécdota'],
+        porDefecto: 'Ventas',
+        plazo: '2026-11-06T21:00:00.000Z',
+        siNoContestas: 'Si no contestas hoy antes de las 18:00, el chef sigue con «Ventas».',
+      },
+    })
   })
 })

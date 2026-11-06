@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { AVISAN, correoDeComanda, type ComandaQueAvisa } from './correo-de-comanda'
+import { AVISAN, correoDeComanda, correoDePregunta, type ComandaQueAvisa } from './correo-de-comanda'
 
 const SITIO = 'https://tu-parrilla.cl'
 const base: ComandaQueAvisa = { id: 'c0ffee', estado: 'lista', principal: 'video9.mp4', motivo: null, enElMeson: 12 }
@@ -49,5 +49,31 @@ describe('el correo de una comanda que terminó', () => {
 
   it('sin dominio del producto, los enlaces quedan como ruta', () => {
     expect(correoDeComanda(base, '').text).toContain('Míralo en el mesón: /admin/ia/meson?comanda=c0ffee')
+  })
+})
+
+describe('el correo de cuando el chef pregunta', () => {
+  const pregunta = {
+    principal: 'video9.mp4',
+    texto: '¿Qué tema destaco?',
+    opciones: ['La parte de ventas', 'La anécdota del final'],
+    siNoContestas: 'Si no contestas hoy antes de las 18:00, el chef sigue con «La parte de ventas».',
+  }
+
+  it('la pregunta tal cual, sus opciones, el plazo con lo que pasa y dónde se responde', () => {
+    const { subject, text } = correoDePregunta(pregunta, SITIO)
+    expect(subject).toBe('El chef te pregunta: «video9.mp4»')
+    expect(text).toContain('El chef tiene una duda sobre «video9.mp4»:\n\n¿Qué tema destaco?')
+    expect(text).toContain('Las opciones: «La parte de ventas», «La anécdota del final».')
+    expect(text).toContain('Si no contestas hoy antes de las 18:00, el chef sigue con «La parte de ventas».')
+    expect(text).toContain('Respóndele en La Cocina: https://tu-parrilla.cl/admin/ia')
+    expect(text).toContain('Este correo llega una vez por pregunta.')
+  })
+
+  it('libre y sin nombre de archivo: sin la línea de las opciones', () => {
+    const { subject, text } = correoDePregunta({ ...pregunta, principal: null, opciones: null }, SITIO)
+    expect(subject).toBe('El chef te pregunta: tu comanda')
+    expect(text).toContain('El chef tiene una duda sobre tu comanda:')
+    expect(text).not.toContain('Las opciones')
   })
 })

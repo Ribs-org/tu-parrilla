@@ -1,8 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 // La corrida de publicación, sin red y sin base: cada fase es de mentira. Lo que se prueba es lo
-// que decide la ruta: quién entra, y que los barridos —el de huérfanos y el de las subidas de la
-// cocina— vayan una vez por hora, en la corrida de los primeros cinco minutos.
+// que decide la ruta: quién entra, que los barridos —el de huérfanos y el de las subidas de la
+// cocina— vayan una vez por hora, en la corrida de los primeros cinco minutos, y que las preguntas
+// vencidas y la alarma de la cocina vayan en todas.
 
 vi.mock('@/lib/social/publish/run', () => ({ publishDue: vi.fn(async () => ({ publicados: 0 })) }))
 vi.mock('@/lib/avisos/run', () => ({ vigilarConexiones: vi.fn(async () => ({ avisadas: 0 })) }))
@@ -12,11 +13,15 @@ vi.mock('@/lib/social/comentarios/run', () => ({
 vi.mock('@/lib/storage-gc', () => ({ barrerHuerfanos: vi.fn(async () => ({ borrados: 2, bytes: 10 })) }))
 vi.mock('@/lib/cocina/subidas', () => ({ barrerSubidas: vi.fn(async () => ({ abortadas: 1 })) }))
 vi.mock('@/lib/cocina/barrido', () => ({ barrerCocina: vi.fn(async () => ({ crudos: 2, vencidos: 1, servidas: 0 })) }))
+vi.mock('@/lib/cocina/preguntar', () => ({ vencerPreguntas: vi.fn(async () => 1) }))
+vi.mock('@/lib/cocina/alarma', () => ({ vigilarLaCocina: vi.fn(async () => ({ avisadas: 2 })) }))
 
 const { GET } = await import('./route')
 const { barrerHuerfanos } = await import('@/lib/storage-gc')
 const { barrerSubidas } = await import('@/lib/cocina/subidas')
 const { barrerCocina } = await import('@/lib/cocina/barrido')
+const { vencerPreguntas } = await import('@/lib/cocina/preguntar')
+const { vigilarLaCocina } = await import('@/lib/cocina/alarma')
 
 const corrida = (authorization?: string) =>
   GET(new Request('https://tu-parrilla.cl/api/cron/publish-social', authorization ? { headers: { authorization } } : {}))
@@ -53,5 +58,13 @@ describe('la corrida de publicación', () => {
     expect(barrerSubidas).not.toHaveBeenCalled()
     expect(barrerCocina).not.toHaveBeenCalled()
     expect(await r.json()).toMatchObject({ barrido: null, subidas: null, cocina: null })
+  })
+
+  it('las preguntas vencidas y la alarma de la cocina van en cada corrida, no una vez por hora', async () => {
+    vi.setSystemTime(new Date('2026-10-23T12:35:00Z'))
+    const r = await corrida('Bearer secreto-del-cron')
+    expect(vencerPreguntas).toHaveBeenCalledTimes(1)
+    expect(vigilarLaCocina).toHaveBeenCalledTimes(1)
+    expect(await r.json()).toMatchObject({ preguntas: 1, alarma: { avisadas: 2 } })
   })
 })

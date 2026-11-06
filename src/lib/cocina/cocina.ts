@@ -8,6 +8,7 @@ import {
   getDb,
   insumos,
   latidos,
+  preguntas,
   users,
   type Comanda,
   type EstadoComanda,
@@ -33,6 +34,7 @@ import { TERMINALES, puedePasar } from './estados'
 import { ordenarFila } from './fila'
 import { DIAS_INSUMO } from './panel'
 import { instruccionDe } from './pedido'
+import { preguntaParaElChef, type PreguntaParaElChef } from './pregunta'
 
 // Lo que la API de la cocina lee y escribe (`/api/cocina/…`, `docs/cocina-api.md`). El chef entra
 // con la credencial de la cocina, no con la llave de un usuario: ve solo las comandas de quien
@@ -113,11 +115,29 @@ export type ComandaParaElChef = {
    * un cliente escrito antes de la cámara de frío no se encuentre en `insumos` un tipo que no conoce.
    */
   extras: InsumoParaElChef[]
+  /**
+   * Lo que el chef preguntó y lo que le contestaron, de la más vieja a la más nueva. Vacío si nunca
+   * preguntó. Desde el 2026-11-06.
+   */
+  preguntas: PreguntaParaElChef[]
+}
+
+/** Las preguntas de esas comandas, de la más vieja a la más nueva, por comanda. */
+export async function preguntasDeComandas(ids: string[]): Promise<Map<string, PreguntaParaElChef[]>> {
+  const porComanda = new Map<string, PreguntaParaElChef[]>()
+  if (ids.length === 0) return porComanda
+  const filas = await getDb()
+    .select()
+    .from(preguntas)
+    .where(inArray(preguntas.comandaId, ids))
+    .orderBy(asc(preguntas.creadaEn))
+  for (const p of filas) porComanda.set(p.comandaId, [...(porComanda.get(p.comandaId) ?? []), preguntaParaElChef(p)])
+  return porComanda
 }
 
 /**
  * Las comandas en un estado, con lo que el chef necesita para cocinarlas: la receta congelada, lo
- * que se pidió y los insumos (sin enlaces: cada uno se pide aparte, y vence). Hasta
+ * que se pidió, los insumos (sin enlaces: cada uno se pide aparte, y vence) y lo que preguntó. Hasta
  * `LIMITE_COMANDAS`, las más viejas. Las que esperan (`recibida`) vienen en el orden en que
  * conviene tomarlas (`ordenarFila`): las pruebas primero, y nunca dos seguidas del mismo dueño si
  * otro espera.
@@ -155,6 +175,8 @@ export async function comandasParaElChef(estado: EstadoComanda): Promise<Comanda
     })
     porComanda.set(i.comandaId!, lista)
   }
+  // Una que espera nunca preguntó: se pregunta después de tomarla.
+  const deLasPreguntas = estado === 'recibida' ? new Map<string, PreguntaParaElChef[]>() : await preguntasDeComandas(ids)
 
   const armadas = filas.map(({ comanda: c, nombre }) => ({
     id: c.id,
@@ -176,6 +198,7 @@ export async function comandasParaElChef(estado: EstadoComanda): Promise<Comanda
       creadaEn: c.creadaEn.toISOString(),
       insumos: (porComanda.get(c.id) ?? []).filter((i) => i.tipo !== 'extra'),
       extras: (porComanda.get(c.id) ?? []).filter((i) => i.tipo === 'extra'),
+      preguntas: deLasPreguntas.get(c.id) ?? [],
     } satisfies ComandaParaElChef,
   }))
   const ordenadas = estado === 'recibida' ? ordenarFila(armadas) : armadas
@@ -183,6 +206,10 @@ export async function comandasParaElChef(estado: EstadoComanda): Promise<Comanda
 }
 
 /** La comanda, si es de alguien con La Cocina encendida. */
+export async function comandaDelChef(id: string): Promise<Comanda | null> {
+  return leer(id)
+}
+
 async function leer(id: string): Promise<Comanda | null> {
   if (!esUuid(id)) return null
   const [c] = await getDb()
