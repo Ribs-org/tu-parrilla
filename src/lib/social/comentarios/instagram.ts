@@ -1,9 +1,9 @@
 import { instagramConnector } from '../instagram'
+import { graphDeInstagram } from '../instagram-login'
 import { COMENTARIO_AUSENTE, type Comentarista, type ComentarioLeido } from './comentarista'
 import { GRAPH_OBJETO_AUSENTE, codigoGraph, pedirGraph } from './graph'
 import { recortar } from './ventana'
 
-const GRAPH = 'https://graph.facebook.com/v23.0'
 /** El mismo tope que un caption: Graph rechaza más. */
 const LIMITE = 2200
 // Salvaguarda de cuota y de tiempo, no promesa de completitud: lo de la página seis se ve en la pasada siguiente.
@@ -57,12 +57,14 @@ export const instagramComentarista: Comentarista = {
   ensureCredential: (account) => instagramConnector.ensureCredential(account),
   limiteTexto: LIMITE,
 
-  async listar(_account, token, postExternalId) {
+  // El host es el del login de la cuenta (`instagram-login.ts`): las dos rutas y sus campos se
+  // llaman igual en graph.facebook.com y en graph.instagram.com.
+  async listar(account, token, postExternalId) {
     // Las respuestas vienen en la misma llamada: así se ve lo que el dueño ya respondió desde la app.
     const fields = 'id,text,timestamp,username,from,replies{id,text,username,from}'
     // El borde de comentarios va del más viejo al más nuevo: con una sola página, una
     // publicación de más de cincuenta comentarios nunca dejaría ver los nuevos.
-    let url = `${GRAPH}/${postExternalId}/comments?fields=${fields}&limit=50&access_token=${token}`
+    let url = `${graphDeInstagram(account)}/${postExternalId}/comments?fields=${fields}&limit=50&access_token=${token}`
     const leidos: ComentarioLeido[] = []
     for (let pagina = 0; pagina < MAX_PAGINAS; pagina++) {
       const data = (await pedirGraph('Instagram', url)) as {
@@ -81,8 +83,8 @@ export const instagramComentarista: Comentarista = {
     return leidos
   },
 
-  async responder(_account, token, comentarioExternalId, texto) {
-    const response = await fetch(`${GRAPH}/${comentarioExternalId}/replies`, {
+  async responder(account, token, comentarioExternalId, texto) {
+    const response = await fetch(`${graphDeInstagram(account)}/${comentarioExternalId}/replies`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({ message: recortar(texto, LIMITE), access_token: token }),

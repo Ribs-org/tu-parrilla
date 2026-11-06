@@ -348,6 +348,7 @@ async function attempt(
       opciones: content.opciones,
       cuenta: account.handle,
       reintento: content.reintento,
+      login: account.login,
     })
   } catch (error) {
     // A publisher that throws (network hiccup, DNS, a timeout) is a retryable failure, not

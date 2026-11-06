@@ -70,6 +70,21 @@ describe('el privado sale de la página', () => {
     expect(cuerpo).toEqual({ recipient: { comment_id: 'C_1' }, message: { text: 'Hola' }, access_token: 't-p1' })
   })
 
+  it('con el login de Instagram sale de la cuenta misma, por graph.instagram.com y con su token', async () => {
+    const fetchMock = vi
+      .fn<(url: string, init?: RequestInit) => Promise<Response>>()
+      .mockResolvedValueOnce(Response.json({ recipient_id: 'r', message_id: 'm-2' }))
+    vi.stubGlobal('fetch', fetchMock)
+    const conLogin = { network: 'instagram', externalId: 'IG_1', login: 'instagram' } as unknown as SocialAccount
+    expect(await mandarPrivado(conLogin, 't-cuenta', 'C_1', 'Hola')).toBe('m-2')
+    // Una sola llamada: no hay página que buscar.
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    expect(String(fetchMock.mock.calls[0]![0])).toBe('https://graph.instagram.com/v23.0/IG_1/messages')
+    const init = fetchMock.mock.calls[0]![1]!
+    expect((init.headers as Record<string, string>).Authorization).toBe('Bearer t-cuenta')
+    expect(JSON.parse(String(init.body))).toEqual({ recipient: { comment_id: 'C_1' }, message: { text: 'Hola' } })
+  })
+
   it('sin la página enlazada no manda nada', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => Response.json({ data: [] })))
     await expect(mandarPrivado(cuenta('instagram'), 't', 'C_1', 'Hola')).rejects.toThrow(/página/)

@@ -19,6 +19,7 @@ tus números.
 | `/docs/…` | Las guías para LLMs, públicas y sin sesión: la de la API (`api-llm.md`, `api-editor.md`, `api.json`) y la wiki de la interfaz (`ui/index.md`), para guiar a quien se pierde en el panel |
 | `/api/social/meta/baja` | `POST` de Meta cuando alguien quita la app desde Facebook: deja sin credencial sus cuentas de Instagram y Facebook |
 | `/api/social/meta/borrado` | `POST` de Meta cuando alguien pide borrar sus datos: borra lo que vino de esas dos redes y devuelve el código de estado |
+| `/api/social/instagram/baja`, `/api/social/instagram/borrado` | Lo mismo, del caso de uso de Instagram de la app de Meta: solo para las cuentas de Instagram conectadas con el login de Instagram (ver «Instagram sin página de Facebook: el login de Instagram») |
 | `/api/schedule/…`, `/api/metrics/…` | La API para tu agente, con una llave de La Cocina («Tu propio chef»): cargar, ver y sacar lo programado, archivar lo quemado, las cuentas y los números (ver «Carga masiva por API» y las secciones que le siguen) |
 | `/api/cocina/…` | La API de La Cocina, con `COCINA_SECRET`: el servidor del chef toma las comandas, baja sus insumos, informa cada estado y entrega lo cocinado al mesón del dueño (ver «La Cocina» y `docs/cocina-api.md`) |
 | `/api/media` | `POST` con la misma llave: firma la subida de un archivo directo a R2, para nombrarlo después en varias filas del lote sin que se vuelva a bajar (ver «Carga masiva por API») |
@@ -382,9 +383,9 @@ cambia hasta que quien recibe la cuenta aprieta **Reconectar**.
 Las únicas tablas sin dueño son dos:
 
 - **`solicitudes_borrado`**, donde queda constancia de cada borrado que Meta pide: cuando se
-  escribe una fila, ese dueño ya no tiene cuentas de Meta y Meta no sabe quién es. La escribe
-  `/api/social/meta/borrado`, y `/borrado/<código>` la lee por el código —tampoco por dueño,
-  por la misma razón—.
+  escribe una fila, ese dueño ya no tiene cuentas de Meta y Meta no sabe quién es. La escriben
+  `/api/social/meta/borrado`, `/api/social/threads/borrado` y `/api/social/instagram/borrado`, y
+  `/borrado/<código>` la lee por el código —tampoco por dueño, por la misma razón—.
 - **`latidos`**, donde el servidor del chef anota que está vivo: es de la cocina, no de un
   usuario.
 
@@ -496,7 +497,9 @@ se pide y se obtiene el permiso de analítica de §III.L, es ahí donde se afloj
 
 Necesitas una cuenta Business o Creator **ligada a una página de Facebook**. La conexión
 usa *Instagram API with Facebook Login*: el id de la cuenta de Instagram se descubre a
-través de las páginas que administras, así que sin esa página no hay nada que leer.
+través de las páginas que administras, así que sin esa página no hay nada que leer. Hay una
+segunda vía, sin página, que hoy solo ven los usuarios que se le habilitan: más abajo, «Instagram
+sin página de Facebook: el login de Instagram».
 
 En [developers.facebook.com](https://developers.facebook.com), crea una app, agrega el
 producto **Facebook Login**, y configura como redirect URI válida:
@@ -566,6 +569,66 @@ de uso «API de Threads» de la misma app, que tiene su propio par de campos, fi
 cuentas de Threads de esa persona, que se buscan por su id de Threads (`external_id`), y la
 página de estado del borrado dice que eran de Threads.
 
+#### Instagram sin página de Facebook: el login de Instagram
+
+La otra vía de Meta es *Instagram API with Instagram Login* (*Business Login for Instagram*):
+la persona entra con su usuario de Instagram, sin página ni cuenta de Facebook, y todo va a
+`graph.instagram.com` con un token de la cuenta. Sigue pidiendo una cuenta profesional,
+Business o Creator. En Tu Parrilla es la misma red, `instagram`, y la cuenta guarda con qué login
+se conectó (`social_accounts.login`, `facebook` o `instagram`): el conector, el publicador y los
+comentarios son los mismos y solo cambian de host (`src/lib/social/instagram-login.ts`). Lo que
+de verdad cambia:
+
+- **El token se renueva solo.** Dura 60 días y la sincronización lo renueva con
+  `refresh_access_token` cuando le queda menos de un mes, sin el secreto; no hay que reconectar
+  cada dos meses, como con el de Facebook.
+- **El privado sale de la cuenta**, no de una página: `POST /<id>/messages` en
+  `graph.instagram.com`, con el token de la cuenta. Sigue apagado salvo para quien diga
+  `COMENTARIOS_DM`.
+- **Una cuenta por login.** El login de Instagram autoriza la cuenta con que se entra, así que
+  no hay lista para elegir. La fila se identifica por el id de la cuenta profesional (`user_id`
+  de `/me`), el mismo que el login de Facebook encuentra en la página: si la misma cuenta se
+  conecta por el otro login, se renueva la fila que ya estaba y cambia de login, con su historial.
+- **Sin anuncios.** Su token es de `graph.instagram.com`, que no tiene Marketing API: «Lo pagado»
+  no lo usa para leer (`ordenDeTokens`, en `anuncios-sync.ts`), y «Promocionar» una publicación
+  suya responde que falta la página de Facebook, que Meta pide para promocionar.
+
+Se conecta con el caso de uso de **Instagram** de la app de Meta, en su parte «API setup with
+Instagram login», que tiene su propio **Instagram app ID** y su propio secreto, distintos del id y
+el secreto de la app que usa el login de Facebook:
+
+```
+INSTAGRAM_LOGIN_APP_ID=
+INSTAGRAM_LOGIN_APP_SECRET=
+INSTAGRAM_LOGIN_ABIERTO_PARA=
+```
+
+En ese caso de uso, en *Business login settings*: *OAuth redirect URIs*
+`https://TU-DOMINIO/api/social/instagram/callback` (la misma vuelta que el login de Facebook: el
+`state` firmado dice cuál fue), *Deauthorize callback URL*
+`https://TU-DOMINIO/api/social/instagram/baja` y *Data deletion request URL*
+`https://TU-DOMINIO/api/social/instagram/borrado`. Las dos últimas hacen lo de `meta/baja` y
+`meta/borrado`, firmadas con `INSTAGRAM_LOGIN_APP_SECRET`, solo con las cuentas conectadas por este
+login; como Meta no documenta cuál de los dos ids de la cuenta manda, se buscan por cualquiera. Las
+de `meta/…`, por su lado, ya no tocan esas cuentas. Los permisos que pide la ventana son
+`instagram_business_basic`, `instagram_business_content_publish`,
+`instagram_business_manage_comments`, `instagram_business_manage_messages` e
+`instagram_business_manage_insights`, los cinco juntos: si el caso de uso no tiene activado alguno,
+Meta rechaza la ventana entera.
+
+**Está cerrado para casi todos** mientras Meta no apruebe esos permisos: sin la aprobación, solo
+autoriza quien tiene un rol en la app. `INSTAGRAM_LOGIN_ABIERTO_PARA` lleva los ids de usuario que
+ven «Conectar con Instagram →» en Los Fierros (la cuenta del revisor, para grabar la revisión), o
+`1` para todos cuando se apruebe (`loginDeInstagramAbiertoPara`, en `src/lib/redes-abiertas.ts`).
+Para los demás, Los Fierros se ve como siempre y la conexión no arranca ni termina aunque se
+escriba la dirección a mano (`/api/social/instagram/connect?login=instagram`). Una cuenta que ya se
+conectó así sigue publicando y leyendo aunque se cierre; su «Reconectar» vuelve por Facebook.
+
+Lo que no se pudo probar sin la app real, y hay que mirar al grabar: la forma exacta de la
+respuesta del canje del código (la documentación la muestra envuelta en `data` y la referencia
+plana: se aceptan las dos), si `/me` devuelve `user_id`, las historias y los trial reels por
+`graph.instagram.com`, y qué id llega en la baja y el borrado.
+
 #### Dejar entrar al revisor de Meta
 
 El App Review de Meta lo hace una persona que entra al panel por su cuenta, y el ingreso es
@@ -599,6 +662,9 @@ su tarjeta de seguidores y sus «ganados» muestran los números de una sola cue
 fueran los de la red entera —eso se arregla en la próxima entrega—.
 
 #### Renovar la conexión, cada ~60 días
+
+Esto es del login de Facebook; una cuenta de Instagram conectada con el login de Instagram se
+renueva sola (ver «Instagram sin página de Facebook: el login de Instagram»).
 
 El token de Facebook dura unos 60 días. El cron intenta extenderlo una semana antes de que
 venza, pero **no está garantizado que eso funcione** sobre un token que ya es de larga
@@ -838,7 +904,10 @@ todos, en Instagram y Facebook, dentro de los siete días que Meta permite. Los 
 al conectar solo con `META_PERMISOS_PRIVADO=1`, que se enciende después de activarlos en los
 casos de uso de la app de Meta, y la cuenta tiene que reconectarse para concederlos. En
 Instagram el privado sale de la página de Facebook enlazada, con su token, que se busca al
-mandarlo (`paginaParaPrivado`, en `comentarios/privado.ts`). Con el privado apagado, la cola no
+mandarlo (`paginaParaPrivado`, en `comentarios/privado.ts`). Una cuenta conectada con el login de
+Instagram no tiene página: el privado sale de la cuenta misma, por `graph.instagram.com`, y su
+permiso (`instagram_business_manage_messages`) se pide siempre al conectar, sin
+`META_PERMISOS_PRIVADO`. Con el privado apagado, la cola no
 muestra nada de él.
 
 Después de fusionar, la migración se aplica sola al desplegar: la tabla de comentarios gana
@@ -953,7 +1022,8 @@ guarda en la tabla `anuncios`, que cuelga de la cuenta conectada cuyo token lo l
 Una promoción hecha desde la app de Instagram o desde la página es un anuncio más de la cuenta
 publicitaria, así que entra igual. Se lee una vez por dueño, no por cuenta, y primero con el
 token de Instagram: es el de usuario, el que la Marketing API acepta; el de Facebook es de
-página y se prueba solo si no hay otro. Un error acá —lo normal mientras falte el permiso— no
+página y se prueba solo si no hay otro. Un Instagram conectado con el login de Instagram no se
+prueba: su token no es de `graph.facebook.com`. Un error acá —lo normal mientras falte el permiso— no
 pinta ninguna cuenta de rojo: queda en el registro del cron. Leer pide `ads_read`, y solo al
 conectar con `META_PERMISOS_ANUNCIOS=1`.
 
@@ -1230,6 +1300,9 @@ Vercel y bajan con `vercel env pull .env.local`.
 | `GOOGLE_CLIENT_SECRET` | El secreto de ese OAuth Client | Junto con el anterior; el sync de solo lectura sigue usando `YOUTUBE_API_KEY` |
 | `INSTAGRAM_APP_ID` | Conectar Instagram | No — sin ella esa red aparece como no conectada |
 | `INSTAGRAM_APP_SECRET` | Conectar Instagram, y verificar la firma de los callbacks de baja y borrado de Meta | No — sin ella esa red aparece como no conectada y esos dos callbacks responden `400` |
+| `INSTAGRAM_LOGIN_APP_ID` | Conectar Instagram con el login de Instagram, sin página de Facebook (ver «Instagram sin página de Facebook: el login de Instagram») | No — el «Instagram app ID» del caso de uso de Instagram de la app de Meta, que no es `INSTAGRAM_APP_ID`; sin ella, «Conectar con Instagram →» responde «Falta INSTAGRAM_LOGIN_APP_ID» |
+| `INSTAGRAM_LOGIN_APP_SECRET` | El secreto de ese caso de uso: canjea el código y firma la baja y el borrado de ese login (`/api/social/instagram/baja` y `/borrado`) | Junto con el anterior; sin ella esos dos callbacks responden `400` |
+| `INSTAGRAM_LOGIN_ABIERTO_PARA` | Ids de usuario, separados por comas, que ven «Conectar con Instagram →» en Los Fierros y pueden conectar por ese login; `1`, todos | No — vacía, el login de Instagram está cerrado para todos. Es para grabar la revisión de Meta de los permisos `instagram_business_*` con la cuenta del revisor; aprobados, va en `1` |
 | `TIKTOK_CLIENT_KEY` | Conectar TikTok | No — sin ella esa red aparece como no conectada |
 | `TIKTOK_CLIENT_SECRET` | Conectar TikTok | No — sin ella esa red aparece como no conectada |
 | `META_EN_REVISION` | Enciende en Los Fierros el aviso de que, mientras la app de Meta esté en revisión, solo conectan las cuentas invitadas como testers | No — solo mientras la app de Meta esté en modo desarrollo |
@@ -1894,6 +1967,7 @@ src/
     avisos/                la caída de una cuenta y el resumen del día: las reglas sin base y lo que lee y manda
     sugerencias/           el libro de sugerencias: qué se acepta y cómo queda el issue (sin base), el cliente de GitHub, y guardar y reintentar
     social/
+      instagram-login.ts   el login de Instagram, sin página de Facebook: el host, los permisos y cómo leer su token
       lectura.ts           qué publicaciones se leen cada día: lo nuevo a diario, lo viejo cada vez más espaciado
       politica-youtube.ts  lo que las políticas de YouTube no dejan hacer con sus datos
       retencion-youtube.ts borra lo de YouTube que lleva 30 días sin refrescarse

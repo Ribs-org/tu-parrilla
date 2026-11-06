@@ -229,6 +229,13 @@ export const socialAccounts = pgTable(
     // Instagram: es el que Meta manda en los callbacks de baja y borrado. Nulo en las
     // cuentas conectadas antes del 2026-09-30, hasta que su dueño reconecte.
     metaUserId: text('meta_user_id'),
+    // De qué login salió la credencial, en las redes que tienen más de uno. Solo Instagram:
+    // «facebook» es Instagram con login de Facebook, que llega a la cuenta por su página y
+    // habla con graph.facebook.com; «instagram» es el login de Instagram, sin página, que habla
+    // con graph.instagram.com y con otro token (`social/instagram-login.ts`). Nulo en las demás
+    // redes; en Instagram, nulo se lee como «facebook», que es lo que eran todas antes de que
+    // existiera la columna (`0028_login_de_la_cuenta.sql` las marcó).
+    login: text('login').$type<'facebook' | 'instagram'>(),
     accessToken: text('access_token'),
     refreshToken: text('refresh_token'),
     expiresAt: timestamp('expires_at', { withTimezone: true }),

@@ -32,7 +32,7 @@ Mientras carga se ve el título «Los Fierros» y, en vez de las redes, bloques 
 
 Arriba, en un solo recuadro, un bloque por cada red que tiene al menos una cuenta, en este orden: Instagram, TikTok, YouTube, Facebook, Threads, X / Twitter. Cada bloque tiene:
 
-- El ícono y el nombre de la red y, a la derecha, «Agregar cuenta →», que abre la ventana de la red para conectar otra (ver «Para agregar otra cuenta de la misma red»). En Threads y X / Twitter dice «Próximamente», sin enlace: esas redes solo tienen bloque si una cuenta se conectó antes de que quedaran así.
+- El ícono y el nombre de la red y, a la derecha, «Agregar cuenta →», que abre la ventana de la red para conectar otra (ver «Para agregar otra cuenta de la misma red»). En Threads y X / Twitter dice «Próximamente», sin enlace: esas redes solo tienen bloque si una cuenta se conectó antes de que quedaran así. En Instagram, solo para quien tiene abierto el login de Instagram (ver «Para conectar Instagram sin página de Facebook»), antes de «Agregar cuenta →» va también «Agregar con Instagram →».
 - Solo en las redes que tienen avisos, debajo, «Requisitos para agregar otra»: un clic los muestra (ver «Las redes sin conectar», abajo, para el texto de cada uno).
 - Una fila por cuenta (ver «La fila de una cuenta»).
 
@@ -51,13 +51,14 @@ Cada cuenta es una fila de una o dos líneas. De izquierda a derecha:
    - en rojo, si la última sincronización falló o si la red rechazó la conexión al publicar: «La conexión falló; reconecta la cuenta.» Al pasar el mouse aparece el error original de la red, a veces en inglés;
    - en ámbar, si se está enfriando: «Este fierro se está enfriando: la conexión vence hoy. Reconéctala antes de que se apague.» En lugar de «hoy» puede decir «mañana», «pasado mañana» o «dentro de 5 días»;
    - si no: cuándo se trajeron sus números por última vez —«Sincronizado recién», «Sincronizado hace 3 horas», «Sincronizado ayer», «Sincronizado hace 4 días»…— o «Sin sincronizar» si nunca se trajeron, con «Sin credencial · » delante si la cuenta no está conectada. X / Twitter dice siempre «Sin sincronizar», porque de ella no se traen números; Threads también, salvo en la cuenta del revisor cuando la instalación ya pide sus permisos de lectura.
-4. A la derecha, «Reconectar» si la cuenta está conectada, o «Conectar →» si no. En Threads y X / Twitter no aparece ninguno de los dos.
+4. A la derecha, «Reconectar» si la cuenta está conectada, o «Conectar →» si no. En Threads y X / Twitter no aparece ninguno de los dos. En una cuenta de Instagram conectada con el login de Instagram, los dos vuelven a abrir la ventana de Instagram; si quien la tiene ya no ve ese login, abren la de Facebook.
 5. Una **flecha** hacia abajo, que abre el detalle de la cuenta (un lector de pantalla la lee «Más de <nombre>»). Abierta, la flecha mira hacia arriba y otro clic lo cierra.
 
 Avisos de un momento, debajo de la fila: «Desconectada.» después de desconectar (se va sola), y el resultado de fusionar.
 
 **El detalle**, al abrir la flecha:
 
+- En una cuenta de Instagram conectada con el login de Instagram, primero: «Conectada con Instagram, sin página de Facebook.» Las conectadas con el login de Facebook no dicen nada.
 - En una cuenta de Instagram, si acepta trial reels, cuando ya se sabe: «Acepta trial reels.», en gris, o en ámbar la frase con que Instagram rechazó el último, por ejemplo «@cuenta no tiene trial reels: Instagram los da solo a cuentas con un mínimo de seguidores, y esta no lo alcanza. Prográmalo como reel normal o en otra cuenta.» (o «Instagram ya rechazó un trial reel en esta cuenta: prográmalo como reel normal.», si no quedó la frase). Se aprende al publicar: no sale nada mientras la cuenta no haya intentado un trial reel.
 - «En la red: » y el identificador que la red le da a la cuenta. Es solo informativo.
 - «En Tu Parrilla: » y el **id de la cuenta en Tu Parrilla**, con un ícono de copiar. Es un botón: al apretarlo copia el id y el ícono pasa a un visto durante dos segundos. Al pasar el mouse dice «Id de cuenta — para «cuentas» en el CSV o la API».
@@ -69,6 +70,7 @@ Avisos de un momento, debajo de la fila: «Desconectada.» después de desconect
 Debajo, en otro recuadro, «Sin conectar» y una línea por cada red que no tiene ninguna cuenta: su ícono, su nombre y «Conectar →» a la derecha. Threads y X / Twitter van al final, con el nombre más tenue y «Próximamente» en vez de «Conectar →», sin enlace. Debajo del nombre, en letra chica, los avisos de esa red, si tiene:
 
 - Instagram: «Cuenta Business o Creator, enlazada a una página de Facebook. Una cuenta personal no puede conectar.»
+- Instagram, además, solo para quien tiene abierto el login de Instagram: «Con «Conectar con Instagram» entras con tu usuario de Instagram: basta una cuenta Business o Creator, sin página de Facebook.» Para esa persona, la línea de Instagram tiene dos enlaces: «Conectar con Instagram →» y, a su derecha, «Conectar →», que es el de siempre, por Facebook.
 - Facebook: «Una página, no un perfil personal.»
 - Instagram y Facebook, además, solo mientras la instalación tenga marcada la revisión de Meta: «Mientras Meta revisa la app, solo pueden conectar las cuentas que invitamos como testers. Si Facebook dice que la función no está disponible, escríbenos.» En `tu-parrilla.cl` ya no aparece: la app de Meta está en Live desde el 2026-10-19.
 - TikTok y YouTube no tienen aviso.
@@ -105,6 +107,22 @@ Hace falta una cuenta de Instagram Business o Creator enlazada a una página de 
 4. Si vuelve con «Ninguna página de Facebook tiene una cuenta de Instagram asociada.», la cuenta de Instagram no es Business o Creator, o no está enlazada a ninguna página que administre esa cuenta de Facebook, o en la ventana de Meta no se marcó la página. Aceptar todos los permisos no basta: Tu Parrilla encuentra el Instagram a través de la página. Se abre sola la ventana «Instagram no se conectó», con los tres pasos: (1) que el Instagram sea una cuenta profesional, de creador o de empresa; (2) que esté enlazado a una página de Facebook, desde Instagram, en Editar perfil → «Página» (enlazar las cuentas en el Centro de cuentas de Meta no sirve para esto), y (3) al volver a conectar, entrar con el Facebook que administra esa página y marcar esa página y ese Instagram cuando Meta pregunte qué compartir con Tu Parrilla, o corregirlo en la configuración de Facebook, en «Integraciones comerciales». Después, su botón «Volver a conectar Instagram».
 
 La conexión de Instagram dura unos 60 días; la semana anterior su fierro se pone en ámbar y hay que apretar «Reconectar». Conectar Instagram no conecta la página de Facebook, ni al revés: son dos bloques y dos conexiones.
+
+### Para conectar Instagram sin página de Facebook
+
+Solo lo ve quien la instalación tiene habilitado para el login de Instagram: mientras Meta no apruebe sus permisos, es la cuenta del revisor de Meta. Para los demás, Los Fierros no muestra estos enlaces, y abrir a mano su dirección vuelve con «Conectar con Instagram, sin página de Facebook, todavía no está disponible en Tu Parrilla: próximamente.».
+
+Hace falta una cuenta de Instagram Business o Creator; no hace falta página de Facebook ni cuenta de Facebook.
+
+1. En la línea de Instagram, aprieta «Conectar con Instagram →» (o, si ya hay una cuenta, «Agregar con Instagram →» en su bloque).
+2. Se abre la ventana de Instagram, que pide entrar siempre, aunque haya una sesión abierta en el navegador. Entra con el usuario y la contraseña de la cuenta que quieres conectar y acepta los permisos que pida: se piden todos juntos.
+3. Vuelve solo a Los Fierros con «Instagram conectado.» y la fila de esa cuenta. No hay lista para elegir: el login de Instagram trae una sola cuenta, la que entró. En el detalle de la fila se lee «Conectada con Instagram, sin página de Facebook.».
+
+Si esa misma cuenta ya estaba conectada con el login de Facebook, no aparece otra fila: la que estaba pasa a usar el login de Instagram, con su historial. Y al revés: reconectarla por Facebook la devuelve al login de Facebook.
+
+La conexión dura unos 60 días, pero se renueva sola cada noche, cuando le queda menos de un mes, así que no debería ponerse en ámbar. Si se pone, o queda gris, «Reconectar» en su fila.
+
+Lo demás es igual que con el login de Facebook: se publica, se traen los números y se leen y responden los comentarios en [La Mesa](la-mesa.md). El privado de la regla de palabra clave sale de la cuenta misma, no de una página.
 
 ### Para conectar Facebook
 
@@ -226,19 +244,21 @@ Trae los posts y los números de las cuentas de Instagram, TikTok, YouTube y Fac
 | «Facebook no entregó el token de la página. Inténtalo de nuevo.» | Facebook no dio el permiso de la página. | Volver a conectar. |
 | «No se pudieron leer las páginas de Facebook: <número>» | Facebook no dejó leer las páginas. | Volver a conectar; si se repite, avisar a quien administra Tu Parrilla. |
 | «Instagram rechazó el código: <número>», «Instagram no devolvió token», «Instagram no canjeó el token largo: <número>», «Instagram no devolvió el token largo» (y las mismas con «Facebook») | Meta no terminó de entregar el permiso. | Volver a conectar; si se repite, avisar a quien administra Tu Parrilla. |
+| «Instagram rechazó el código. Inténtalo de nuevo.», «Instagram no devolvió token.», «Instagram no canjeó el token largo. Inténtalo de nuevo.», «Instagram no devolvió el token largo.», «No se pudo leer la cuenta de Instagram.», «Instagram no devolvió la cuenta.» (con un punto al final: las del login de Instagram) | Instagram no terminó de entregar el permiso, o no dejó leer la cuenta que entró. | Volver a apretar «Conectar con Instagram →»; si se repite, avisar a quien administra Tu Parrilla. |
+| «Conectar con Instagram, sin página de Facebook, todavía no está disponible en Tu Parrilla: próximamente.» | Se abrió la conexión del login de Instagram sin tenerlo habilitado (ver «Para conectar Instagram sin página de Facebook»). No se conectó nada. | Conectar Instagram con «Conectar →», por Facebook. |
 | «Esta cuenta de Google no tiene canal de YouTube.» | La cuenta de Google elegida no tiene canal. | Repetir eligiendo la cuenta de Google del canal. |
 | «Google no entregó el token de refresco. Reintenta la conexión.» | Google no dio el permiso para renovar la conexión sola. | Volver a conectar. |
 | «Google rechazó el código. Inténtalo de nuevo.», «Google no devolvió token.», «No se pudo leer el canal de YouTube.» | Google no terminó de entregar el permiso o no dejó leer el canal. | Volver a conectar. |
 | «TikTok rechazó el código: <número>», «TikTok no devolvió token», «TikTok no devolvió el id de la cuenta. Vuelve a conectar.» | TikTok no terminó de entregar el permiso. | Volver a conectar. |
 | «Threads todavía no está disponible en Tu Parrilla: próximamente.» (o «X / Twitter todavía no está disponible en Tu Parrilla: próximamente.») | Se abrió a mano la dirección de conexión de Threads o de X, que están en «Próximamente». No se conectó nada. | Nada: esas redes todavía no se pueden conectar. |
-| «Faltan las credenciales de la app de Meta (INSTAGRAM_APP_ID / INSTAGRAM_APP_SECRET).», «Faltan las credenciales de Google (GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET).», «Faltan las credenciales de TikTok» | La instalación de Tu Parrilla no tiene configurada esa red. | Avisar a quien administra Tu Parrilla. |
-| Una página en blanco que dice «Falta INSTAGRAM_APP_ID» (o «Falta GOOGLE_CLIENT_ID», «Falta TIKTOK_CLIENT_KEY») | Lo mismo, detectado antes de abrir la ventana de la red. | Avisar a quien administra Tu Parrilla. |
+| «Faltan las credenciales de la app de Meta (INSTAGRAM_APP_ID / INSTAGRAM_APP_SECRET).», «Faltan las credenciales del login de Instagram (INSTAGRAM_LOGIN_APP_ID / INSTAGRAM_LOGIN_APP_SECRET).», «Faltan las credenciales de Google (GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET).», «Faltan las credenciales de TikTok» | La instalación de Tu Parrilla no tiene configurada esa red. | Avisar a quien administra Tu Parrilla. |
+| Una página en blanco que dice «Falta INSTAGRAM_APP_ID» (o «Falta INSTAGRAM_LOGIN_APP_ID», «Falta GOOGLE_CLIENT_ID», «Falta TIKTOK_CLIENT_KEY») | Lo mismo, detectado antes de abrir la ventana de la red. | Avisar a quien administra Tu Parrilla. |
 | Una página en blanco que dice «No autorizado» | La sesión del panel se cerró. | Entrar de nuevo ([Ingresar](ingresar.md)) y repetir. |
 | «Esa red no usa OAuth» o «Esa red no usa OAuth.» | Se abrió una dirección de conexión de una red que no existe. | Volver a Los Fierros y usar los enlaces de cada bloque. |
 | «No se pudo conectar. Inténtalo de nuevo.» | Falló algo inesperado al guardar la conexión. | Volver a conectar; si se repite, avisar a quien administra Tu Parrilla. |
 | «No se pudo guardar la cuenta. Inténtalo de nuevo.» | Falló guardar las cuentas elegidas en la lista. | Volver a conectar. |
 | «Este fierro se está enfriando: la conexión vence <hoy / mañana / pasado mañana / dentro de N días>. Reconéctala antes de que se apague.» | El permiso de esa cuenta vence pronto. Mientras tanto, el botón «Ajustes» lleva un punto ámbar. | «Reconectar» en esa fila, con la misma cuenta. |
-| «La conexión falló; reconecta la cuenta.» | La última vez que se trajeron sus números, o al publicar, la red rechazó la conexión (permiso vencido o quitado desde la red). Si fue al publicar, al pasar el mouse aparece el motivo de esa publicación, por ejemplo «Reconecta TikTok para autorizar la publicación.»; vuelve a la normalidad con la próxima sincronización que funcione, o al reconectar. Si al pasar el mouse dice «Quitaste la app desde Facebook: vuelve a conectar.», alguien quitó Tu Parrilla desde la configuración de Facebook. | «Reconectar» (o «Conectar →») en esa fila. |
+| «La conexión falló; reconecta la cuenta.» | La última vez que se trajeron sus números, o al publicar, la red rechazó la conexión (permiso vencido o quitado desde la red). Si fue al publicar, al pasar el mouse aparece el motivo de esa publicación, por ejemplo «Reconecta TikTok para autorizar la publicación.»; vuelve a la normalidad con la próxima sincronización que funcione, o al reconectar. Si al pasar el mouse dice «Quitaste la app desde Facebook: vuelve a conectar.», alguien quitó Tu Parrilla desde la configuración de Facebook; si dice «Quitaste la app desde Instagram: vuelve a conectar.», la quitó desde la de Instagram, en una cuenta conectada con el login de Instagram. | «Reconectar» (o «Conectar →») en esa fila. |
 | «Sin credencial» | La cuenta no está conectada; su historial se conserva. | «Conectar →» en la fila, o fusionarla si es una repetida (en su detalle). |
 | «Se desconecta «<nombre>» de <red>.» y «Sus posts y métricas ya bajados se quedan, pero no se sincroniza nada más hasta que la vuelvas a conectar. ¿Seguir?» | Ventana antes de desconectar. | «Desconectar» para desconectarla, «Cancelar» para dejarla. |
 | «Desconectada.» | Se desconectó. | Nada. |
@@ -272,6 +292,7 @@ Trae los posts y los números de las cuentas de Instagram, TikTok, YouTube y Fac
 - **«Google dice que la app no está verificada»** → No debería pasar: Google verificó la app de Tu Parrilla el 2026-10-14. Si el cartel aparece igual, avisar a quien administra Tu Parrilla.
 - **«Acepté todo lo de Meta y no se conectó Instagram»** → Casi siempre falta la página de Facebook: Tu Parrilla encuentra el Instagram a través de ella, y aceptar los permisos no basta. Los pasos son los de la ventana «Instagram no se conectó», que se abre sola al volver (o con «Cómo arreglarlo» en la franja): (1) que el Instagram sea una cuenta profesional, de creador o de empresa; (2) que esté enlazado a una página de Facebook, desde Instagram, en Editar perfil → «Página» (enlazar las cuentas en el Centro de cuentas de Meta no sirve para esto), y (3) al volver a conectar, entrar con el Facebook que administra esa página y marcar esa página y ese Instagram cuando Meta pregunte qué compartir con Tu Parrilla, o corregirlo en la configuración de Facebook, en «Integraciones comerciales».
 - **«Conecté Instagram y no aparece mi página de Facebook»** → Son conexiones separadas: hay que apretar también «Conectar →» en el bloque «Facebook».
+- **«No tengo página de Facebook, ¿puedo conectar mi Instagram igual?»** → Si en la línea de Instagram aparece «Conectar con Instagram →», sí: ese camino entra con el usuario de Instagram, sin página (ver «Para conectar Instagram sin página de Facebook»). Si no aparece, todavía no está abierto para esa cuenta: hoy hace falta la página.
 - **«Me dice que la cuenta ya está conectada por otra persona»** → Mirar qué cuenta nombra: suele ser otra cuenta que la red trajo junto con la que se quería (en Meta, la de otra página que administra la misma persona en Facebook). En la lista para elegir, marcar solo la propia; si el error salió sin lista, volver a conectar y, en la ventana de Facebook, elegir la página de la cuenta que se quiere. Si nombra la cuenta propia, la tiene otro usuario de Tu Parrilla: avisar a quien administra Tu Parrilla, que puede traspasarla sin borrar nada ([los-maestros.md](los-maestros.md)).
 - **«Apreté "Agregar cuenta" y no apareció otra cuenta»**, **«Agregar cuenta no me lleva a nada»** o **«parece que no se puede tener más de una cuenta por red»** → Sí se puede: la red entró con la cuenta que ya estaba conectada y solo la renovó. Los Fierros lo dice con «<Red> entró con la cuenta que ya estaba conectada: se renovó y no se agregó otra.» (por ejemplo, «TikTok entró con la cuenta que ya estaba conectada: se renovó y no se agregó otra.») y la ventana con los pasos; ver «Para agregar otra cuenta de la misma red». En TikTok, casi siempre es la sesión abierta en el navegador: hay que cerrarla en tiktok.com.
 - **«Reconecté y apareció una cuenta nueva»** → En la ventana de la red se entró con otra cuenta, o la red le dio un identificador nuevo a la misma. Si es la misma cuenta, desconectar la vieja y fusionarla (ver «Para fusionar una cuenta repetida»).
@@ -315,7 +336,8 @@ Lo que describe sale de:
 - `src/app/admin/actions.ts` (`syncSocialNow`, `disconnectAccount`, `quitarCuentaAccion`, `fusionarCuenta`, `conectarElegidas`)
 - `src/app/api/social/[network]/connect/route.ts`
 - `src/app/api/social/[network]/callback/route.ts`
-- `src/lib/networks.ts` (nombres de las redes, avisos, `META_EN_REVISION` y las redes en «Próximamente») y `src/lib/redes-abiertas.ts` (Threads abierto para el revisor)
+- `src/lib/networks.ts` (nombres de las redes, avisos, `META_EN_REVISION`, las redes en «Próximamente» y los textos del login de Instagram) y `src/lib/redes-abiertas.ts` (Threads y el login de Instagram abiertos para el revisor)
+- `src/lib/social/instagram-login.ts` (el login de Instagram: la frase de cuando está cerrado) y `src/lib/social/instagram.ts` (su renovación sola)
 - `src/lib/parrilla.ts` (`estadoDelFierro`, los siete días del aviso)
 - `src/lib/avisos/reglas.ts` (la frase «La conexión falló; reconecta la cuenta.», qué es una caída y los correos de la caída y del resumen) y `src/lib/avisos/run.ts` (cuándo salen)
 - `src/app/globals.css` (los colores del fierro)
@@ -326,7 +348,7 @@ Lo que describe sale de:
 - `src/lib/social/facebook.ts` y `src/lib/social/instagram.ts` (frases de la conexión de Meta)
 - `src/app/admin/(dash)/accounts/aviso-de-conexion.tsx` y `src/lib/social/ayuda-conexion.ts` (la franja de la vuelta y la ventana con los pasos)
 - `src/lib/social/vuelta.ts` (la frase de «Agregar cuenta →» cuando solo se renovó la de antes)
-- `src/lib/social/meta-bajas.ts` (la frase de la baja desde Facebook)
+- `src/lib/social/meta-bajas.ts` (las frases de la baja desde Facebook y desde Instagram)
 - `src/lib/social/quitar.ts` (las reglas y las frases de «Quitar»)
 - `src/lib/social/sync.ts` y `src/lib/social/index.ts` (qué redes traen números) y `src/lib/social/threads.ts` (los números de Threads y la bandera de sus permisos de lectura)
 - `src/lib/social/publish/x.ts` y `src/lib/social/publish/threads.ts` (la renovación al publicar)

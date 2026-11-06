@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it } from 'vitest'
-import { oauthStateMatches, signOAuthState } from './oauth-state'
+import { leerOAuthState, oauthStateMatches, signOAuthState } from './oauth-state'
 
 beforeAll(() => {
   process.env.AUTH_SECRET = 'secreto-de-prueba-largo-para-hkdf'
@@ -17,5 +17,13 @@ describe('state de OAuth', () => {
     // Lo que impide que alguien termine tu conexión a medias con su propia sesión.
     expect(await oauthStateMatches(state, 'instagram', 'u2')).toBe(false)
     expect(await oauthStateMatches('', 'instagram', 'u1')).toBe(false)
+  })
+
+  it('lleva firmado el login con que salió, y nada si no se le dio', async () => {
+    expect(await leerOAuthState(await signOAuthState('instagram', 'u1', 'instagram'), 'instagram', 'u1')).toEqual({
+      login: 'instagram',
+    })
+    expect(await leerOAuthState(await signOAuthState('instagram', 'u1'), 'instagram', 'u1')).toEqual({ login: null })
+    expect(await leerOAuthState(await signOAuthState('instagram', 'u1', 'instagram'), 'instagram', 'u2')).toBeNull()
   })
 })

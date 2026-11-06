@@ -6,6 +6,7 @@ vi.mock('server-only', () => ({}))
 vi.mock('@/lib/auth', () => ({ usuarioActual: async () => ({ id: 'owner-1' }) }))
 
 const { GET, scopesDe } = await import('./route')
+const { leerOAuthState } = await import('@/lib/social/oauth-state')
 
 function conectar(red: string, consulta = '') {
   return GET(new Request(`https://tu-parrilla.cl/api/social/${red}/connect${consulta}`), {
@@ -61,6 +62,46 @@ describe('GET /api/social/<red>/connect', () => {
     const sinMarca = await conectar('tiktok')
     // Borrar una cookie es mandarla vacía y ya vencida.
     expect(sinMarca.headers.get('set-cookie')).toMatch(/agregar_cuenta=;.*Path=\/api\/social\/tiktok/i)
+  })
+})
+
+describe('GET /api/social/instagram/connect?login=instagram', () => {
+  afterEach(() => vi.unstubAllEnvs())
+
+  it('cerrado para este dueño, vuelve a Los Fierros con la frase, sin abrir la ventana', async () => {
+    vi.stubEnv('INSTAGRAM_LOGIN_ABIERTO_PARA', 'otro')
+    vi.stubEnv('INSTAGRAM_LOGIN_APP_ID', 'ig-app')
+    const destino = new URL((await conectar('instagram', '?login=instagram')).headers.get('location') ?? '')
+    expect(destino.pathname).toBe('/admin/accounts')
+    expect(destino.searchParams.get('mensaje')).toBe(
+      'Conectar con Instagram, sin página de Facebook, todavía no está disponible en Tu Parrilla: próximamente.',
+    )
+  })
+
+  it('abierto, va a la ventana de Instagram con el Instagram app ID, los cinco permisos y el login firmado en el state', async () => {
+    vi.stubEnv('INSTAGRAM_LOGIN_ABIERTO_PARA', 'owner-1')
+    vi.stubEnv('INSTAGRAM_LOGIN_APP_ID', 'ig-app')
+    vi.stubEnv('INSTAGRAM_APP_ID', 'meta-app')
+    const destino = new URL((await conectar('instagram', '?login=instagram&agregar=1')).headers.get('location') ?? '')
+    expect(destino.origin + destino.pathname).toBe('https://www.instagram.com/oauth/authorize')
+    expect(destino.searchParams.get('client_id')).toBe('ig-app')
+    expect(destino.searchParams.get('redirect_uri')).toBe('https://tu-parrilla.cl/api/social/instagram/callback')
+    expect(destino.searchParams.get('scope')).toBe(
+      'instagram_business_basic,instagram_business_content_publish,instagram_business_manage_comments,instagram_business_manage_messages,instagram_business_manage_insights',
+    )
+    expect(destino.searchParams.get('force_reauth')).toBe('true')
+    expect(await leerOAuthState(destino.searchParams.get('state') ?? '', 'instagram', 'owner-1')).toEqual({
+      login: 'instagram',
+    })
+  })
+
+  it('sin ?login=instagram sigue siendo el login de Facebook, aunque esté abierto', async () => {
+    vi.stubEnv('INSTAGRAM_LOGIN_ABIERTO_PARA', 'owner-1')
+    vi.stubEnv('INSTAGRAM_APP_ID', 'meta-app')
+    const destino = new URL((await conectar('instagram')).headers.get('location') ?? '')
+    expect(destino.origin + destino.pathname).toBe('https://www.facebook.com/v23.0/dialog/oauth')
+    expect(destino.searchParams.get('client_id')).toBe('meta-app')
+    expect(await leerOAuthState(destino.searchParams.get('state') ?? '', 'instagram', 'owner-1')).toEqual({ login: null })
   })
 })
 

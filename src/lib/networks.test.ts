@@ -1,5 +1,15 @@
 import { describe, expect, it } from 'vitest'
-import { AVISO_META_EN_REVISION, PROXIMAMENTE, REDES_PROXIMAMENTE, avisosDe, fraseProximamente } from './networks'
+import {
+  AGREGAR_CON_INSTAGRAM,
+  AVISO_LOGIN_DE_INSTAGRAM,
+  AVISO_META_EN_REVISION,
+  CONECTADA_CON_INSTAGRAM,
+  CONECTAR_CON_INSTAGRAM,
+  PROXIMAMENTE,
+  REDES_PROXIMAMENTE,
+  avisosDe,
+  fraseProximamente,
+} from './networks'
 
 describe('las redes en «Próximamente»', () => {
   it('son Threads y X, y lo dicen letra por letra', () => {
@@ -29,6 +39,20 @@ describe('avisosDe', () => {
     expect(avisosDe('instagram', true)[1]).toBe(AVISO_META_EN_REVISION)
     expect(avisosDe('facebook', true)).toHaveLength(2)
     expect(avisosDe('youtube', true)).toHaveLength(0)
+  })
+
+  it('con el login de Instagram abierto, Instagram suma su línea al final; las demás redes no', () => {
+    expect(AVISO_LOGIN_DE_INSTAGRAM).toBe(
+      'Con «Conectar con Instagram» entras con tu usuario de Instagram: basta una cuenta Business o Creator, sin página de Facebook.',
+    )
+    expect(avisosDe('instagram', false, true)).toEqual([
+      'Cuenta Business o Creator, enlazada a una página de Facebook. Una cuenta personal no puede conectar.',
+      AVISO_LOGIN_DE_INSTAGRAM,
+    ])
+    expect(avisosDe('facebook', false, true)).toEqual(['Una página, no un perfil personal.'])
+    expect(CONECTAR_CON_INSTAGRAM).toBe('Conectar con Instagram →')
+    expect(AGREGAR_CON_INSTAGRAM).toBe('Agregar con Instagram →')
+    expect(CONECTADA_CON_INSTAGRAM).toBe('Conectada con Instagram, sin página de Facebook.')
   })
 
   it('una red sin aviso fijo —threads, tiktok— no dice nada, revise o no revise Meta', () => {

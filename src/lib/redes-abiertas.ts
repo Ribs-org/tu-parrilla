@@ -21,6 +21,25 @@ export function proximamentePara(ownerId: string | null | undefined): ReadonlySe
 }
 
 /**
+ * Si este dueño ve «Conectar con Instagram», el login de Instagram sin página de Facebook
+ * (`social/instagram-login.ts`). `INSTAGRAM_LOGIN_ABIERTO_PARA` es una lista de ids de usuario
+ * separados por comas, o `1` para todos. Existe para grabar la revisión de Meta de los permisos
+ * `instagram_business_*` con la cuenta del revisor sin ofrecerlo a nadie más: sin esa aprobación,
+ * solo autoriza quien tiene un rol en la app. Aprobado, se pone en `1` y la reja sobra.
+ *
+ * Cerrado, no se ofrece en Los Fierros, y la conexión ni arranca ni termina aunque alguien
+ * escriba la dirección a mano. Una cuenta que ya se conectó así sigue publicando y leyendo; su
+ * «Reconectar» va por el login de Facebook.
+ */
+export function loginDeInstagramAbiertoPara(ownerId: string | null | undefined): boolean {
+  const valor = env('INSTAGRAM_LOGIN_ABIERTO_PARA')
+  if (!valor) return false
+  if (valor === '1') return true
+  if (!ownerId) return false
+  return valor.split(',').some((id) => id.trim() === ownerId)
+}
+
+/**
  * Si el dueño ve «Lo pagado» en Los Números y la sincronización lee sus anuncios de Meta.
  * `ANUNCIOS_ABIERTO_PARA=1` lo abre para todos; una lista de ids de usuario separados por comas,
  * solo para esos —así se graba la revisión de `ads_read` con la cuenta del revisor sin

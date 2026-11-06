@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server'
 import { usuarioActual } from '@/lib/auth'
 import { env } from '@/lib/env'
 import { fraseProximamente } from '@/lib/networks'
-import { proximamentePara } from '@/lib/redes-abiertas'
 import { CuentaDeOtro, guardarCuenta, siQueriasOtra } from '@/lib/social/conectar'
 import { COOKIE_AGREGAR, fraseDeVuelta, pidioAgregar } from '@/lib/social/vuelta'
 import {
@@ -17,7 +16,17 @@ import {
   listInstagramAccounts,
   type FacebookPages,
 } from '@/lib/social/instagram'
-import { oauthStateMatches } from '@/lib/social/oauth-state'
+import {
+  GRAPH_INSTAGRAM,
+  LOGIN_DE_INSTAGRAM_CERRADO,
+  TOKEN_CORTO_LOGIN_DE_INSTAGRAM,
+  TOKEN_LARGO_LOGIN_DE_INSTAGRAM,
+  leerPerfil,
+  leerTokenCorto,
+  type LoginDeInstagram,
+} from '@/lib/social/instagram-login'
+import { loginDeInstagramAbiertoPara, proximamentePara } from '@/lib/redes-abiertas'
+import { leerOAuthState } from '@/lib/social/oauth-state'
 import { conMensaje } from '@/lib/mensaje-firmado'
 import { COOKIE_PENDIENTE, PENDIENTE_MAX_AGE, serializarPendiente } from '@/lib/social/pendiente'
 
@@ -37,6 +46,8 @@ export type Credential = {
   candidatas: CandidataConToken[]
   /** El id de usuario de la app de Meta; solo en `instagram` y `facebook`, y sin valor si /me falló. */
   metaUserId?: string
+  /** Con qué login se conectó una cuenta de Instagram (`social/instagram-login.ts`). */
+  login?: LoginDeInstagram
 }
 
 /**
@@ -128,6 +139,73 @@ async function instagramCredential(code: string, redirectUri: string): Promise<C
     expiresAt: instagramTokenExpiry(exchanged.expiresIn),
     candidatas: cuentas.map((c) => ({ externalId: c.id, handle: c.username ? `@${c.username}` : null })),
     metaUserId: await metaUserId(token),
+    login: 'facebook',
+  }
+}
+
+/**
+ * Instagram con el login de Instagram (`social/instagram-login.ts`): el código se canjea por un
+ * token de una hora en api.instagram.com, ese por el de sesenta días en graph.instagram.com, y
+ * `/me` dice qué cuenta autorizó. A diferencia del login de Facebook, autoriza una sola cuenta,
+ * así que nunca hay que elegir. Las credenciales son las del caso de uso de Instagram, no las
+ * de la app de Meta.
+ */
+async function instagramLoginCredential(code: string, redirectUri: string): Promise<Credential> {
+  const appId = env('INSTAGRAM_LOGIN_APP_ID')
+  const appSecret = env('INSTAGRAM_LOGIN_APP_SECRET')
+  if (!appId || !appSecret) {
+    throw new OAuthError(
+      'Faltan las credenciales del login de Instagram (INSTAGRAM_LOGIN_APP_ID / INSTAGRAM_LOGIN_APP_SECRET).',
+    )
+  }
+
+  const short = await fetch(TOKEN_CORTO_LOGIN_DE_INSTAGRAM, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      client_id: appId,
+      client_secret: appSecret,
+      grant_type: 'authorization_code',
+      redirect_uri: redirectUri,
+      code,
+    }),
+  })
+  if (!short.ok) {
+    console.error('Instagram rechazó el código:', short.status, (await short.text()).slice(0, 300))
+    throw new OAuthError('Instagram rechazó el código. Inténtalo de nuevo.')
+  }
+  const corto = leerTokenCorto(await short.text())
+  if (!corto) throw new OAuthError('Instagram no devolvió token.')
+
+  // El corto dura una hora; `ig_exchange_token` da el de sesenta días, que es el que se guarda y
+  // el que se renueva después (`instagramConnector.ensureCredential`).
+  const longUrl = new URL(TOKEN_LARGO_LOGIN_DE_INSTAGRAM)
+  longUrl.searchParams.set('grant_type', 'ig_exchange_token')
+  longUrl.searchParams.set('client_secret', appSecret)
+  longUrl.searchParams.set('access_token', corto.accessToken)
+  const long = await fetch(longUrl)
+  if (!long.ok) {
+    console.error('Instagram no canjeó el token largo:', long.status, (await long.text()).slice(0, 300))
+    throw new OAuthError('Instagram no canjeó el token largo. Inténtalo de nuevo.')
+  }
+  const longData = (await long.json()) as { access_token?: string; expires_in?: number }
+  if (!longData.access_token) throw new OAuthError('Instagram no devolvió el token largo.')
+
+  const me = await fetch(`${GRAPH_INSTAGRAM}/me?fields=id,user_id,username&access_token=${longData.access_token}`)
+  if (!me.ok) {
+    console.error('No se pudo leer la cuenta de Instagram:', me.status, (await me.text()).slice(0, 300))
+    throw new OAuthError('No se pudo leer la cuenta de Instagram.')
+  }
+  const perfil = leerPerfil(await me.text(), corto.userId)
+  if (!perfil) throw new OAuthError('Instagram no devolvió la cuenta.')
+
+  return {
+    accessToken: longData.access_token,
+    refreshToken: null,
+    expiresAt: instagramTokenExpiry(longData.expires_in),
+    candidatas: [{ externalId: perfil.externalId, handle: perfil.handle }],
+    metaUserId: perfil.appUserId ?? undefined,
+    login: 'instagram',
   }
 }
 
@@ -390,7 +468,10 @@ export async function fetchCredential(
   code: string,
   redirectUri: string,
   pkceVerifier?: string,
+  /** El login que firmó el state (`leerOAuthState`); solo Instagram tiene más de uno. */
+  login?: string | null,
 ): Promise<Credential> {
+  if (network === 'instagram' && login === 'instagram') return instagramLoginCredential(code, redirectUri)
   if (network === 'instagram') return instagramCredential(code, redirectUri)
   if (network === 'facebook') return facebookCredential(code, redirectUri)
   if (network === 'youtube') return youtubeCredential(code, redirectUri)
@@ -448,15 +529,19 @@ export async function GET(
     return back('La red no devolvió el código de autorización.', dijo || undefined)
   }
 
+  let login: string | null
   try {
     // Verifies, but as something other than a state we minted for this network — a
     // session cookie replayed here would land exactly there.
-    if (!(await oauthStateMatches(state, network, usuario.id))) {
-      return back('El estado no corresponde a esa red.')
-    }
+    const leido = await leerOAuthState(state, network, usuario.id)
+    if (!leido) return back('El estado no corresponde a esa red.')
+    login = leido.login
   } catch {
     return back('El enlace de conexión expiró. Inténtalo de nuevo.')
   }
+
+  // El login de Instagram tampoco termina una conexión para quien ya no lo tiene abierto.
+  if (login === 'instagram' && !loginDeInstagramAbiertoPara(usuario.id)) return back(LOGIN_DE_INSTAGRAM_CERRADO)
 
   const redirectUri = `${url.origin}/api/social/${network}/callback`
 
@@ -464,7 +549,7 @@ export async function GET(
     const pkceVerifier = request.headers
       .get('cookie')
       ?.match(/(?:^|;\s*)x_pkce_verifier=([^;]+)/)?.[1]
-    const credential = await fetchCredential(network, code, redirectUri, pkceVerifier)
+    const credential = await fetchCredential(network, code, redirectUri, pkceVerifier, login)
 
     if (credential.candidatas.length === 1) {
       const [unica] = credential.candidatas
@@ -477,6 +562,7 @@ export async function GET(
         refreshToken: credential.refreshToken,
         expiresAt: credential.expiresAt,
         metaUserId: credential.metaUserId,
+        login: credential.login,
       })
       // Una conexión que terminó no puede dejar otra a medias detrás: la cookie de una
       // elección anterior abandonada seguiría viva diez minutos y confundiría al panel. Si se
@@ -514,7 +600,7 @@ export async function GET(
     // message, in the redirect.
     // Con una sola cuenta en el login, la de otro era lo único que la red entregó: la
     // persona casi siempre quería otra, así que se le dice cómo pedirla.
-    if (error instanceof CuentaDeOtro) return back(`${error.message} ${siQueriasOtra(network)}`)
+    if (error instanceof CuentaDeOtro) return back(`${error.message} ${siQueriasOtra(network, login)}`)
     if (error instanceof OAuthError) return back(error.message)
     console.error('Error conectando red social:', error)
     return back('No se pudo conectar. Inténtalo de nuevo.')

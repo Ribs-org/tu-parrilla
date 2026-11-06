@@ -25,9 +25,16 @@ function secret(): Uint8Array {
   return new TextEncoder().encode(value)
 }
 
-/** Short-lived by design: it only has to outlive the owner's trip through a consent screen. */
-export function signOAuthState(network: string, ownerId: string): Promise<string> {
-  return new SignJWT({ purpose: PURPOSE, network })
+/**
+ * Short-lived by design: it only has to outlive the owner's trip through a consent screen.
+ *
+ * `login` es el login con que salió una red que tiene más de uno (Instagram: `instagram` es el
+ * login de Instagram). Viaja firmado y no en la dirección de vuelta: las dos vueltas llegan al
+ * mismo callback, y lo que decide con qué host y qué secreto se canjea el código no puede
+ * elegirlo quien arma el enlace.
+ */
+export function signOAuthState(network: string, ownerId: string, login?: string): Promise<string> {
+  return new SignJWT({ purpose: PURPOSE, network, ...(login ? { login } : {}) })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime('10m')
@@ -35,12 +42,25 @@ export function signOAuthState(network: string, ownerId: string): Promise<string
     .sign(secret())
 }
 
-/** True only for a state this app minted, for this same network and this same owner. */
-export async function oauthStateMatches(state: string, network: string, ownerId: string): Promise<boolean> {
+/**
+ * Lo que el state dice, solo si esta app lo firmó para esta misma red y este mismo dueño: el
+ * login con que salió, o null si no llevaba ninguno. Null entero si no calza.
+ */
+export async function leerOAuthState(
+  state: string,
+  network: string,
+  ownerId: string,
+): Promise<{ login: string | null } | null> {
   try {
     const { payload } = await jwtVerify(state, secret())
-    return payload.purpose === PURPOSE && payload.network === network && payload.sub === ownerId
+    if (payload.purpose !== PURPOSE || payload.network !== network || payload.sub !== ownerId) return null
+    return { login: typeof payload.login === 'string' ? payload.login : null }
   } catch {
-    return false
+    return null
   }
+}
+
+/** True only for a state this app minted, for this same network and this same owner. */
+export async function oauthStateMatches(state: string, network: string, ownerId: string): Promise<boolean> {
+  return (await leerOAuthState(state, network, ownerId)) !== null
 }

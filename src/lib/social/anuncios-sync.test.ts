@@ -53,6 +53,7 @@ function cuenta(id: string, network: string, ownerId: string, creada: string): S
     handle: id,
     externalId: `ext-${id}`,
     metaUserId: null,
+    login: null,
     accessToken: `tok-${id}`,
     refreshToken: null,
     expiresAt: null,
@@ -115,6 +116,15 @@ describe('ordenDeTokens', () => {
       cuenta('ig-viejo', 'instagram', 'd', '2026-02-01'),
     ])
     expect(orden.map((c) => c.id)).toEqual(['ig-viejo', 'ig-nuevo', 'fb-viejo'])
+  })
+
+  it('deja fuera el Instagram del login de Instagram: su token no sirve para la Marketing API', () => {
+    const orden = ordenDeTokens([
+      { ...cuenta('ig-sin-pagina', 'instagram', 'd', '2026-01-01'), login: 'instagram' as const },
+      cuenta('ig-de-facebook', 'instagram', 'd', '2026-02-01'),
+      cuenta('fb', 'facebook', 'd', '2026-03-01'),
+    ])
+    expect(orden.map((c) => c.id)).toEqual(['ig-de-facebook', 'fb'])
   })
 })
 

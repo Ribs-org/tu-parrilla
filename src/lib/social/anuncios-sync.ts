@@ -23,11 +23,14 @@ const pedirGraph: PedirGraph = async (url) => {
  * En qué orden se prueban los tokens de un dueño: primero los de Instagram, que son de usuario
  * —el que la Marketing API acepta—; después los de Facebook, que son de página y puede que no
  * sirvan. Dentro de cada red, la cuenta más antigua primero, para que la fila que guarda cada
- * anuncio sea siempre la misma.
+ * anuncio sea siempre la misma. Un Instagram conectado con el login de Instagram
+ * (`login: 'instagram'`) no entra: su token es de graph.instagram.com, que no tiene Marketing API.
  */
-export function ordenDeTokens<T extends Pick<SocialAccount, 'network' | 'createdAt'>>(cuentas: readonly T[]): T[] {
+export function ordenDeTokens<T extends Pick<SocialAccount, 'network' | 'createdAt' | 'login'>>(cuentas: readonly T[]): T[] {
   const peso = (c: T) => (c.network === 'instagram' ? 0 : 1)
-  return [...cuentas].sort((a, b) => peso(a) - peso(b) || a.createdAt.getTime() - b.createdAt.getTime())
+  return cuentas
+    .filter((c) => !(c.network === 'instagram' && c.login === 'instagram'))
+    .sort((a, b) => peso(a) - peso(b) || a.createdAt.getTime() - b.createdAt.getTime())
 }
 
 /**
