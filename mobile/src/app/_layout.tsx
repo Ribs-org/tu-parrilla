@@ -146,6 +146,18 @@ function Raiz() {
                 contentStyle: { backgroundColor: colores.fondo },
               }}
             />
+            {/* La Mesa se abre desde La Parrilla y vuelve ahí: la misma cabecera. */}
+            <Stack.Screen
+              name="mesa"
+              options={{
+                headerShown: true,
+                title: 'La Mesa',
+                headerTitleStyle: { color: colores.texto, fontFamily: TIPO_TITULO },
+                headerTintColor: colores.brasa,
+                headerStyle: { backgroundColor: colores.tarjeta },
+                contentStyle: { backgroundColor: colores.fondo },
+              }}
+            />
             {/* «Tus publicaciones» se abre desde Los Números y vuelve ahí: la misma cabecera. */}
             <Stack.Screen
               name="publicaciones"

@@ -12,7 +12,9 @@ programas, o lo mandas a salir ahora), **Los Números** (las dos mitades del tab
 publicaciones» un toque adentro y los seguidores de cada red detrás de «⋯ Más») y, desde la versión
 1.2.0 (2026-11-02), **La Cocina** (grabar un video o sacar una foto con la cámara del teléfono,
 ordenar la cámara de frío y pedirle una comanda al chef de la casa con las opciones del panel; ver
-«La Cocina desde el teléfono», más abajo).
+«La Cocina desde el teléfono», más abajo). Desde el 2026-11-07, La Parrilla tiene arriba una tarjeta
+**La Mesa**, con cuántos comentarios esperan respuesta, que abre los comentarios con su borrador
+para corregir y mandar (ver «La Mesa desde el teléfono»).
 Arriba a la derecha de todas, el botón de **Ajustes** (un trinche y un cuchillo, lado a lado): tus cuentas con la temperatura de su
 fierro (`/api/mobile/fierros`), con un punto en el botón si alguna se enfría o se apagó,
 el modo —la noche o el día con sushi, el mismo de la cuenta—, «Cerrar sesión» y, al final, el
@@ -383,6 +385,60 @@ de compartir del sistema (`Share`, de React Native), que en Android 10 en adelan
 cual en la rama `ota-1.1.0`, que no tiene `expo-clipboard` en `package.json`: ahí siempre es la
 lista de compartir.
 
+## La Mesa desde el teléfono
+
+Desde el 2026-11-07. No es una pestaña: cinco no caben cómodas en la barra, y una tarjeta con el
+número en la entrada avisa sin pedir un toque. Es una pantalla de la pila, como «Tus publicaciones», que se
+abre con la tarjeta «La Mesa» de La Parrilla (`AccesoALaMesa`, en `src/components/mesa.tsx`); la
+tarjeta dice cuántos esperan respuesta, con `GET /api/mobile/comentarios/pendientes`.
+
+La pantalla (`src/app/mesa.tsx`) trae lo esencial de La Mesa del panel: «Pendientes», «Enviados» y
+«Automáticas», el filtro por red, y en cada comentario el borrador editable, «Enviar», «Descartar»
+y el botón para pedir otro borrador, con las preguntas del panel antes de descartar y antes de
+pisar lo corregido a mano. Las instrucciones para el modelo, «Regenerar todos», «Descartados»,
+«Todos» y la fila de emojis se quedan en el panel: lo primero es para una sentada frente al
+computador, y el teclado del teléfono ya trae emojis. Las rutas y lo que responden, en el
+`README.md` de la raíz, «Responder comentarios»: son las funciones del panel, con el dueño del
+token, así que las reglas y las frases son las mismas. Lo que la app copia del panel —cuántos
+esperan, la cola vacía y «hace 3 horas»— está en `src/lib/mesa.ts`, y un test de la raíz lo
+compara con el panel (`telefono-copias.test.ts`). «Hace cuánto» está escrito a mano, no con
+`Intl.RelativeTimeFormat`, que Hermes no trae completo.
+
+Un comentario que llega con el texto vacío (la investigación de Instagram en `docs/pendientes.md`)
+dice «(sin texto)»; la pantalla no hace nada más con él.
+
+**Contra un servidor de antes**, que no tiene estas rutas, la API contesta `404` sin frase:
+`useScreenData` lo avisa (`sinRuta`), y La Mesa dice «Tu Parrilla todavía no responde comentarios
+desde el teléfono. Mientras, respóndelos en La Mesa del panel web.» en vez de «No se pudo
+actualizar.»; la tarjeta de La Parrilla se queda con el subtítulo, sin número. Así da lo mismo qué
+sale primero, la web o la actualización por aire.
+
+### La Mesa por aire a la 1.1.0 (preparada el 2026-11-07, sin publicar)
+
+No pide nada nativo: `TextInput`, `Linking`, `KeyboardAvoidingView` y `Modal` son de React Native,
+y `expo-image`, `expo-router` y `react-native-safe-area-context` ya están en la 1.1.0. Ni permisos
+nuevos. Para publicarla, sobre la punta de `ota-1.1.0`, se copian de `main` (con esta rama
+fusionada) estos archivos de `mobile/`, tal cual:
+
+- `src/app/mesa.tsx`, `src/components/mesa.tsx`, `src/lib/mesa.ts` y su test, `src/lib/mesa.test.ts`
+  (nuevos);
+- `src/app/_layout.tsx` (la pantalla «La Mesa» en la pila, detrás de la sesión);
+- `src/app/(tabs)/index.tsx` (la tarjeta en La Parrilla);
+- `src/lib/useScreenData.ts` (`sinRuta`).
+
+El 2026-11-07, `mobile/src` de `ota-1.1.0` era igual al de `main`, así que los siete caen sin
+choques. Si antes entra a `main` otro cambio a `_layout.tsx` o a `(tabs)/index.tsx` que no vaya a la
+1.1.0, hay que copiar solo la parte de La Mesa. **No** se tocan `app.json` ni `package.json`. Se
+publica después de que el servidor esté en producción, aunque la app aguanta el orden contrario.
+Publicarla es decisión del dueño: está en `docs/pendientes.md`.
+
+Lo que se probó el 2026-11-07, en Expo web contra una API falsa: la tarjeta con el número, los tres
+filtros y el de red, «(sin texto)», «Alguien», el borrador que falló y la automática que falló,
+«Enviar» con sus errores («Escribe una respuesta.», «Esa cuenta ya no está conectada.»), pedir otro
+borrador sobre lo corregido, «Descartar» con su pregunta, el número que baja al enviar, y el mensaje
+contra un servidor sin La Mesa. Lo que no: un teléfono de verdad (el teclado encima del cuadro) y
+el servidor real contra la red (lo cubren las pruebas del panel y las de aislamiento).
+
 ## El modo día
 
 La app tiene los dos modos del panel: la noche de entrada y el día con sushi. Es el modo de la
@@ -475,6 +531,8 @@ falta volver a autorizar nada de eso, solo se cierra el acceso desde el celular.
 - En La Cocina no muestra el mesón (ver `docs/pendientes.md`), no elige el color de acento de la
   marca ni dibuja la estación de cada comanda, y no sigue subiendo con la app en segundo plano: lo
   primero es del panel, y lo último retoma al volver a abrir La Cocina.
-- No manda notificaciones (no avisa solo cuando hay un dato nuevo).
+- En La Mesa no cambia las instrucciones para el modelo, no regenera todos los borradores, no muestra
+  los descartados ni «Todos» y no trae la fila de emojis: eso sigue en el panel.
+- No manda notificaciones (no avisa solo cuando hay un dato nuevo, ni cuando llega un comentario).
 - No hay versión para iPhone que se pueda instalar: el código está listo, falta la
   cuenta de Apple (ver «iPhone (iOS)», arriba).

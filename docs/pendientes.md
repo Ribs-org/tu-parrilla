@@ -561,6 +561,11 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   `react-native-svg`, que también espera uno (el bug de la entraña, en «Bugs»). El build ya
   lleva `expo-clipboard` (2026-11-06): sin él, «Copiar el texto» abre la lista de compartir
   (`mobile/README.md`, «El portapapeles, con y sin su módulo nativo»).
+- **[dueño] Publicar La Mesa por aire a la 1.1.0** (2026-11-07). Está preparada: responder
+  comentarios desde el teléfono, sin nada nativo nuevo. Se publica desde `ota-1.1.0` copiando los
+  siete archivos que lista `mobile/README.md`, «La Mesa por aire a la 1.1.0», después de que el
+  servidor esté en producción, con el comando de siempre en los dos canales. Probada en Expo web
+  contra una API falsa; en un teléfono, no.
 - **[dueño] La app en iPhone** (2026-10-16). El código ya está listo para iOS; faltan la
   cuenta del Apple Developer Program, confirmar el identificador `cl.tuparrilla.app`
   (queda fijo al registrarlo), la ficha en App Store Connect y el primer build a

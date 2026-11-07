@@ -2,11 +2,26 @@ import 'server-only'
 import { and, desc, eq, inArray, sql, type SQL } from 'drizzle-orm'
 import { getDb, postComments, reglasClave, scheduledPostTargets, socialAccounts, socialPosts } from '@/db'
 import type { CommentState, DmState } from '@/db/schema'
+import { proximamentePara } from '@/lib/redes-abiertas'
+import { permisosExtraDeThreads } from '@/lib/social/threads'
 
 const int = (fragment: SQL) => sql<number>`${fragment}`.mapWith(Number)
 
 export const ESTADOS_COLA = ['pendientes', 'enviados', 'automaticas', 'descartados', 'todos'] as const
 export type EstadoCola = (typeof ESTADOS_COLA)[number]
+
+const REDES = ['instagram', 'facebook', 'youtube'] as const
+
+/**
+ * Los botones de red de La Mesa para este dueño, en el panel y en el teléfono. Threads solo
+ * aparece donde ya trae respuestas: abierta para él (`proximamentePara`, la cuenta del revisor de
+ * Meta) y con sus permisos de lectura pedidos (`permisosExtraDeThreads`). Para los demás está en
+ * «Próximamente» y su botón no filtraría nada.
+ */
+export function redesDeLaMesa(ownerId: string): readonly string[] {
+  const conThreads = permisosExtraDeThreads() && !proximamentePara(ownerId).has('threads')
+  return conThreads ? [...REDES, 'threads'] : REDES
+}
 
 /** Lo pendiente incluye lo fallido: las dos cosas esperan un toque del dueño. */
 const POR_ESTADO: Record<EstadoCola, CommentState[]> = {
