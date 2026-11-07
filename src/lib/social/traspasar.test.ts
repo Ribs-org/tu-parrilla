@@ -16,7 +16,7 @@ describe('pasosDeTraspaso', () => {
 
   it('solo actualiza: un traspaso no borra nada', () => {
     const tablas = pasos.map((p) => /update\s+"?([a-z_]+)"?/i.exec(p.sql)?.[1])
-    expect(tablas).toEqual(['social_posts', 'scheduled_posts', 'social_accounts'])
+    expect(tablas).toEqual(['social_posts', 'scheduled_posts', 'social_accounts', 'ajustes'])
     expect(pasos.some((p) => /\bdelete\b/i.test(p.sql))).toBe(false)
   })
 

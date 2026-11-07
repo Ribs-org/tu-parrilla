@@ -274,8 +274,9 @@ Lo que falta para abrir cada plataforma, de un vistazo (el detalle está en cada
 abajo): los **mensajes privados de Instagram** (en «Meta, segunda vuelta»), el **login con
 Instagram** sin página de Facebook (hecho y cerrado, espera una tercera vuelta), los permisos de Meta para
 **leer y promocionar anuncios** (construido, espera la tercera vuelta), la **Play Store** (la pista interna ya existe; la tienda pública es otro trámite) y
-el **App Store** de iPhone, las integraciones con **Threads** y con **X**, y **revisar qué
-otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
+el **App Store** de iPhone, las integraciones con **Threads** y con **X**, los **comentarios de
+TikTok** (hechos y cerrados, esperan una app nueva de TikTok for Business), y **decidir los
+permisos «por decidir»** de la tabla red por red, para pedirlos todos en una misma vuelta.
 
 - **[dueño] TikTok: la cuenta `vicente.pareja` puede volver a ser pública** (2026-10-13). Se
   puso en privada para grabar la revisión de Direct Post, que ya está aprobada, y los avisos
@@ -399,20 +400,52 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
      de Pyxis, más arriba): sin ella, Meta puede aprobar los permisos solo con acceso de desarrollo.
   6. Aprobado: `ANUNCIOS_ABIERTO_PARA=1` para todos, y sacar de la wiki (`los-numeros.md`,
      `los-fierros.md`, `index.md`) que «Lo pagado» y «Promocionar» se ven solo en algunas cuentas.
-- **Revisar qué otros permisos hacen falta** (2026-10-21). Una pasada red por red de lo que el
-  producto necesita y todavía no pidió, antes de la próxima vuelta de cada revisión, para
-  pedirlo todo de una vez y no volver a grabar. Lo que ya se sabe que falta: los mensajes
-  privados (Meta, segunda vuelta), el login con Instagram (su entrada, abajo), los anuncios (la entrada de arriba)
-  y Threads. Por decidir si hacen falta: más métricas de las que se leen hoy (las historias de
-  Instagram, las estadísticas del perfil de TikTok) y otro alcance de YouTube. Los comentarios
-  de TikTok ya se decidió quererlos, en la entrada de abajo.
-- **Comentarios de TikTok en La Mesa** (2026-10-23, lo pidió el dueño). La API que usa Tu
-  Parrilla (Login Kit, Display y Content Posting de developers.tiktok.com) no lee ni responde
-  comentarios: solo da el número. La vía parece ser la API for Business de TikTok (sus API
-  «Organic», para cuentas de empresa), que es otra app, otro portal y otra revisión. Falta
-  confirmarlo en business-api.tiktok.com y ver si sirve para cuentas de creador. Con eso, es un
-  `Comentarista` más en `src/lib/social/comentarios/`. Lo que ya se pidió, permiso por permiso, está en
-  `docs/levantamiento-terceros.md` (§2.2 para Meta).
+- **[dueño] Decidir los permisos «por decidir»** (2026-10-21; la pasada, el 2026-11-07). La
+  tabla red por red —lo pedido, lo aprobado, lo que falta y en qué vuelta va— está en
+  `docs/levantamiento-terceros.md`, §8. Lo que ya está escrito y espera su vuelta no hay que
+  decidirlo (la tercera de Meta tiene sus diez permisos). Quedan tres decisiones: (1) las
+  **métricas de las historias de Instagram**, que no piden permiso nuevo pero sí código que las
+  lea antes de las 24 horas, y una escena en el video de la tercera vuelta si se hacen antes;
+  (2) **`user.info.stats`** (y `user.info.profile`) **de TikTok** —hoy no se piden—: o una
+  revisión de la app de siempre más reconectar cada cuenta, o pedirlos en la app nueva de los
+  comentarios (la entrada de abajo), que es lo recomendado; (3) **`yt-analytics.readonly`**, que
+  pide volver a verificar la pantalla de Google y reconectar los canales, mejor junto con la
+  auditoría de cuota.
+- **Comentarios de TikTok en La Mesa** (2026-10-23, lo pidió el dueño; escrito el 2026-11-07).
+  La API de siempre (developers.tiktok.com) no los lee ni los responde. La que sí es la
+  *Accounts API* de TikTok API for Business: otra app, en business-api.tiktok.com, con su propia
+  revisión, y según su documentación sirve también para cuentas personales de creador (el
+  detalle y las direcciones, en `docs/levantamiento-terceros.md`, §3.5). El comentarista, la
+  segunda autorización desde Los Fierros («Activar comentarios en La Mesa →») y la cola en La
+  Mesa están hechos y **cerrados** detrás de `TIKTOK_COMENTARIOS_ABIERTO_PARA` (README,
+  «Comentarios de TikTok: la API for Business»). En orden:
+
+  1. **[dueño]** En <https://business-api.tiktok.com>: crear la cuenta de TikTok For Business (si
+     no existe, con la misma entidad que las otras apps) y registrarse como desarrollador.
+  2. **[dueño]** Llenar el *Accounts API Access Application Form* (TikTok lo exige desde el
+     2026-03-20 antes de mandar una app con «TikTok Accounts»; el enlace está en
+     <https://business-api.tiktok.com/portal/docs?id=1738855242728450>). Uso: un programador de
+     publicaciones donde cada creador modera y responde los comentarios de sus propios videos,
+     aprobando cada respuesta.
+  3. **[dueño]** *My Apps* → *Create an App*: nombre Tu Parrilla, el logo (sin logo, la
+     autorización da error), la descripción de uso de arriba, y en *Scope of permission* «TikTok
+     Accounts» con los comentarios (`comment.list`, `comment.list.manage`; y `user.info.stats` si
+     se decide arriba). *TikTok account holder redirect URL*:
+     `https://tu-parrilla.cl/api/social/tiktok/comentarios/vuelta/`, con la barra final. Mandar a
+     revisión (dos a tres días hábiles).
+  4. **[dueño]** Con la app aprobada, en Vercel (production): `TIKTOK_BUSINESS_APP_ID`,
+     `TIKTOK_BUSINESS_SECRET`, `TIKTOK_BUSINESS_AUTORIZACION` (la *TikTok account holder
+     authorization URL* de *App Detail → Basic Information*) y
+     `TIKTOK_COMENTARIOS_ABIERTO_PARA=<id del dueño>`. Redesplegar.
+  5. **[dueño]** Probar con una cuenta real, mejor una personal: Los Fierros → detalle de la
+     cuenta de TikTok → «Activar comentarios en La Mesa →», y ver en La Mesa que llegan y que se
+     responden. Lo que no se pudo probar sin la app está al final de esa sección del README; si
+     algo falla, el registro de Vercel dice qué contestó TikTok.
+  6. Si la revisión pide un video: Los Fierros → activar → La Mesa con un comentario de TikTok →
+     responderlo → la respuesta en la app de TikTok. Sin guion escrito todavía; se arma con
+     `docs/tiktok-revision-guion.md` como molde.
+  7. Funcionando: `TIKTOK_COMENTARIOS_ABIERTO_PARA=1`, y pasar la credencial de `ajustes` a la
+     cuenta (`docs/deuda-tecnica.md`).
 - **Meta, segunda vuelta: mensajes privados** (el privado con el enlace de la regla de
   palabra clave, `instagram_manage_messages` y `pages_messaging`) y, aparte, **Threads**
   (`threads_basic`, `threads_content_publish`). Se sacaron de la primera solicitud porque

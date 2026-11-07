@@ -418,10 +418,11 @@ dueño en su panel.
   Fierros (`/admin/accounts`); la API solo las lee (sección 3d).
 - **No manda nada de inmediato.** Todo lo que entra por `POST /api/schedule/batch` espera a su
   `fecha`; no existe una forma de publicar ahora mismo por esta vía.
-- **Solo tres redes leen comentarios: Instagram, Facebook y YouTube.** Una `regla` en un post que
-  va únicamente a TikTok **no hace nada** —no falla, no avisa: nunca se dispara,
-  porque nadie lee esos comentarios—. La regla vale la pena solo si el post sale a alguna de esas
-  tres.
+- **Leen comentarios Instagram, Facebook y YouTube; Threads y TikTok, solo en las cuentas donde la
+  instalación los abrió** (y, en TikTok, donde el dueño los activó en Los Fierros). Una `regla` en
+  un post que va únicamente a una cuenta de TikTok sin comentarios **no hace nada** —no falla, no
+  avisa: nunca se dispara, porque nadie lee esos comentarios—. Ante la duda, la regla vale la pena
+  si el post sale a Instagram, Facebook o YouTube.
 - **No dice qué hizo la red con las opciones.** `GET /api/schedule/posts/{id}` (sección 3g)
   muestra lo que quedó guardado y lo que se le va a mandar a la red, no lo que la red aplicó
   después: si TikTok le negó el dúo a esa cuenta o si un trial reel ya se graduó se ve en la red.

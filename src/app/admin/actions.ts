@@ -53,6 +53,7 @@ import {
 } from '@/lib/social/conectar'
 import { SIN_TOKEN_DE_PAGINA } from '@/lib/social/facebook'
 import { tiktokConnector } from '@/lib/social/tiktok'
+import { borrarCredencialDeComentarios } from '@/lib/social/tiktok-business'
 import { TIKTOK_SIN_CUENTA, consultarCreador, type CreadorTikTok } from '@/lib/social/publish/tiktok-creador'
 import { COOKIE_PENDIENTE, LOGIN_VENCIDO, elegidas, leerPendiente } from '@/lib/social/pendiente'
 import { networkLabel } from '@/lib/networks'
@@ -474,6 +475,9 @@ export async function disconnectAccount(accountId: string): Promise<void> {
     .update(socialAccounts)
     .set({ accessToken: null, refreshToken: null, expiresAt: null, lastSyncError: null })
     .where(and(eq(socialAccounts.id, accountId), eq(socialAccounts.ownerId, usuario.id)))
+  // Con la cuenta se apagan sus comentarios de TikTok, que tienen credencial propia
+  // (`social/tiktok-business.ts`): reconectar no los vuelve a activar solo.
+  await borrarCredencialDeComentarios(usuario.id, accountId)
   revalidatePath('/admin/accounts')
 }
 

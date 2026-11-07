@@ -63,7 +63,7 @@ export async function responderComentario(ownerId: string, id: string, texto: st
 
   let replyId: string
   try {
-    replyId = await comentarista.responder(account, token, fila.externalId, validado.texto)
+    replyId = await comentarista.responder(account, token, fila.externalId, validado.texto, fila.postExternalId)
   } catch (error) {
     console.error(`[comentarios] responder ${fila.network}:`, String(error).slice(0, 300))
     // Un comentario que su autor borró no va a aparecer por reintentar: se descarta con su

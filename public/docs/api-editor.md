@@ -415,8 +415,8 @@ enlaces, stickers ni encuestas.
 
 Cuando alguien comente esa palabra (completa, sin importar mayúsculas ni tildes), el
 sistema responde solo en la corrida siguiente del cron, en Instagram, Facebook y YouTube
-(TikTok todavía no tiene cola de comentarios, así que una regla en un post que solo va a
-TikTok no hace nada). Mientras el privado esté apagado para la cuenta, `mensaje`, con su
+(TikTok tiene cola de comentarios solo en las cuentas donde la instalación los abrió y el dueño
+los activó en Los Fierros; en las demás, una regla en un post que solo va a TikTok no hace nada). Mientras el privado esté apagado para la cuenta, `mensaje`, con su
 enlace, se publica como la respuesta pública. Encendido, en Instagram y Facebook
 `respuestaPublica` va en público y `mensaje` por DM, una vez por persona en cada post y
 dentro de los 7 días que Meta permite; en YouTube, o pasado ese plazo, sigue en público. Hoy

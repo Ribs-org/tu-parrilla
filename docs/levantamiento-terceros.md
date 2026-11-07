@@ -7,6 +7,9 @@ y del estado real de cada app de plataforma; lo que es papeleo del dueño va sep
 que es código. Al final, el orden propuesto y lo que se puede hacer **hoy** mientras los
 trámites avanzan.
 
+El 2026-11-07 se sumaron los comentarios de TikTok (§3.5) y la pasada de permisos red por red
+(§8), que es la lista para armar cada vuelta de revisión.
+
 Las cifras de límites y cuotas son las publicadas por cada plataforma a la fecha; cada una
 las cambia sin avisar, así que antes de prometer un número a un usuario, comprobarlo en el
 panel de la plataforma correspondiente.
@@ -17,7 +20,7 @@ panel de la plataforma correspondiente.
 |---|---|---|---|
 | **Instagram** | `instagram_basic`, `instagram_manage_insights`, `pages_show_list`, `pages_read_engagement`, `instagram_content_publish`, `business_management`, `instagram_manage_comments` | App de Meta en **modo desarrollo** | El diálogo de Facebook le dice que la función no está disponible; no puede conectar (es lo que le pasó a una usuaria el 2026-09-29). Solo entran cuentas con un rol en la app. |
 | **Facebook** | `pages_show_list`, `pages_read_engagement`, `pages_read_user_content`, `pages_manage_posts`, `business_management`, `pages_manage_engagement` (+ `publish_video` al confirmar) | La misma app de Meta, mismo modo | Igual que Instagram. |
-| **TikTok** | `user.info.basic`, `video.list`, `video.upload`, `video.publish` | App **aprobada y en producción** desde el 2026-09-28 (Login Kit + Content Posting API); **auditoría de Direct Post aprobada** (aviso del 2026-10-06) | Puede conectar y publicar con la privacidad que elija, desde una cuenta pública o privada, sin cupo de usuarios por día. |
+| **TikTok** | `user.info.basic`, `video.list`, `video.upload`, `video.publish` (los comentarios, aparte y cerrados: §3.5) | App **aprobada y en producción** desde el 2026-09-28 (Login Kit + Content Posting API); **auditoría de Direct Post aprobada** (aviso del 2026-10-06) | Puede conectar y publicar con la privacidad que elija, desde una cuenta pública o privada, sin cupo de usuarios por día. |
 | **YouTube** | `youtube.upload`, `youtube.force-ssl` (OAuth), más una API key para métricas | Proyecto de Google Cloud *In production* y **verificado** (2026-10-14) | Entra sin cartel ni tope de usuarios; falta la auditoría de cuota, que sube los cupos. Según la documentación, sin ella los videos quedan privados, pero a este proyecto no se le aplica: lo subido el 2026-10-09 y el 2026-10-16 salió público. |
 
 Lo que ya está resuelto del lado del producto y no hay que rehacer: usuarios invitados por
@@ -138,6 +141,69 @@ usan y el cálculo del uso diario estimado.
 
 Una a dos semanas por vuelta de auditoría. Se puede mandar **esta semana**: no depende de
 nada más.
+
+### 3.5 Los comentarios: la Accounts API de TikTok for Business
+
+Levantado el 2026-11-07, leyendo la documentación oficial. Lo que se concluyó: **sí hay una API
+que lee y responde los comentarios de los videos propios, pero no es la que usa Tu Parrilla**.
+
+- **Lo de hoy no alcanza.** Los permisos de developers.tiktok.com (Login Kit, Display, Content
+  Posting) no tienen ninguno de comentarios: la lista completa
+  (<https://developers.tiktok.com/doc/tiktok-api-scopes>) llega a `video.list` y
+  `video.manage`, y de cada video da solo `comment_count`. La Research API sí lee comentarios
+  públicos, pero es para investigación académica y no responde.
+- **La que sirve es la Accounts API** (antes «Organic API») de *TikTok API for Business*, en
+  business-api.tiktok.com. Su resumen
+  (<https://business-api.tiktok.com/portal/docs?id=1737944384433218>) la parte en tres:
+  métricas, **moderación de comentarios** y publicación, y entre los usos autorizados nombra
+  «manejar la presencia orgánica de las cuentas propias de marcas o creadores», con moderar
+  comentarios. Los endpoints
+  (<https://business-api.tiktok.com/portal/docs?id=1776065099288577>):
+  `GET /v1.3/business/comment/list/` (los comentarios de un video propio, públicos y ocultos, de
+  a 30 por página, con hasta tres respuestas cada uno; <https://business-api.tiktok.com/portal/docs?id=1760232109619202>),
+  `/business/comment/reply/list/`, `POST /business/comment/reply/create/` (responder, hasta
+  1.200 caracteres; <https://business-api.tiktok.com/portal/docs?id=1762228448779266>), y
+  además crear, dar «me gusta», ocultar y borrar. Hay un webhook `comment.update` que avisa en
+  menos de cinco minutos, que Tu Parrilla no usa: sondea, como en las demás redes.
+- **Los permisos** son `comment.list` («Get Business Comment») y `comment.list.manage`
+  («Manage Account Comment»), dentro del grupo «TikTok Accounts»
+  (<https://business-api.tiktok.com/portal/docs?id=1735713875563521>). El token de ejemplo del
+  canje trae también `user.info.basic`, `user.info.stats`, `video.list`, `video.insights`,
+  `user.insights` y otros.
+- **Cuentas personales.** La documentación define tres niveles de cuenta: la general o personal,
+  la «con acceso avanzado» (enlazada a TikTok for Business) y la de empresa verificada. Solo
+  algunas **métricas** se reservan a las dos últimas (lo dice campo por campo en
+  `/business/get/` y `/business/video/list/`); los comentarios no tienen esa restricción, y la
+  autorización se describe como «de una cuenta orgánica de TikTok». Así que, según lo escrito,
+  sirve para creadores con cuenta personal. Falta confirmarlo con una cuenta real: es la primera
+  prueba al tener la app.
+- **Es otra app, otro portal y otra revisión.** Hay que tener una cuenta de TikTok for Business,
+  registrarse como desarrollador, crear una app nueva con el permiso «TikTok Accounts» y
+  mandarla a revisión (dos a tres días hábiles, según
+  <https://business-api.tiktok.com/portal/docs?id=1738855242728450>). **Desde el 2026-03-20**,
+  antes de mandar una app nueva con «TikTok Accounts» hay que llenar el *Accounts API Access
+  Application Form* (enlazado desde esa misma página). Cada desarrollador tiene hasta cinco
+  apps.
+- **Su autorización es aparte.** El dueño sigue conectando TikTok como hoy para publicar, y
+  autoriza la cuenta una segunda vez en la app nueva: TikTok da un `open_id` distinto por app, y
+  ese es el `business_id` de cada llamada. El enlace lo da el portal («TikTok account holder
+  authorization URL», que es `https://www.tiktok.com/v2/auth/authorize?...`); la vuelta tiene
+  que terminar en `/`, sin parámetros; el código dura diez minutos y se canjea en
+  `/tt_user/oauth2/token/`; el token dura un día y el de renovación un año
+  (<https://business-api.tiktok.com/portal/docs?id=1738083939371009> y
+  <https://business-api.tiktok.com/portal/docs?id=1738084387220481>).
+- **Límites:** 40 llamadas por minuto por cuenta y endpoint, más un tope por app según su nivel
+  (<https://business-api.tiktok.com/portal/docs?id=1738084416214017>). Con el sondeo de cinco
+  minutos y cinco páginas por video, no aprieta.
+
+Lo que se hizo con esto: el comentarista de TikTok está escrito y cerrado detrás de
+`TIKTOK_COMENTARIOS_ABIERTO_PARA` (README, «Comentarios de TikTok: la API for Business»). Lo que
+queda —la app, el formulario, la revisión y el video— está en `docs/pendientes.md`, «Comentarios
+de TikTok en La Mesa».
+
+Las páginas del portal se dibujan con JavaScript y un lector sin navegador las ve vacías; el
+texto se leyó por la misma API con que las arma el portal
+(`/gateway/api/doc/client/node/get/v2/`, con el `doc_id` de cada página).
 
 ## 4. YouTube
 
@@ -271,3 +337,45 @@ y la apertura de verdad al mes para Meta y TikTok, y al mes o dos para YouTube.
    esperar sin frenar nada.
 4. **¿Hasta cuántos usuarios en la beta?** Por debajo de diez, nada de §5.4 hace falta;
    por encima, sí, y conviene saberlo antes de invitar.
+
+## 8. Permisos red por red: lo pedido, lo que falta y en qué vuelta
+
+Pasada del 2026-11-07, comparando lo que el producto hace o tiene escrito (README,
+`docs/pendientes.md`, `src/lib/social/**`) con lo que el código pide al conectar
+(`src/app/api/social/[network]/connect/route.ts`, `SCOPES_LOGIN_DE_INSTAGRAM` en
+`instagram-login.ts`, `SCOPES_THREADS_EXTRA` en `threads.ts`). Sirve para armar cada vuelta de
+una vez y no volver a grabar. Ningún permiso nuevo entra al pedido de siempre: los que esperan
+revisión van detrás de su bandera, apagada, porque la ventana de la red rechaza el pedido entero
+si nombra uno que la app no tiene activado.
+
+| Permiso | Red | Qué lo usa | Estado | Vuelta |
+|---|---|---|---|---|
+| `instagram_basic`, `pages_show_list`, `pages_read_engagement`, `business_management` | Instagram y Facebook (Meta) | Conectar, encontrar la cuenta por su página, leer los posts | Aprobados, acceso avanzado (2026-10-19) | 1.ª, hecha |
+| `instagram_manage_insights` | Instagram | Los Números | Aprobado | 1.ª, hecha |
+| `instagram_content_publish` | Instagram | Publicar reels, fotos, carruseles, trial reels **e historias** | Aprobado | 1.ª, hecha. Nombrar las historias en el uso si Meta vuelve a revisar (`pendientes.md`) |
+| `instagram_manage_comments` | Instagram | La Mesa y la palabra clave | Aprobado | 1.ª, hecha |
+| `pages_read_user_content`, `pages_manage_engagement` | Facebook | La Mesa y la palabra clave | Aprobados | 1.ª, hecha |
+| `pages_manage_posts` | Facebook | Publicar en la página, historias incluidas | Aprobado | 1.ª, hecha |
+| `instagram_manage_messages`, `pages_messaging` | Instagram y Facebook | El privado de la palabra clave | Pedidos; código detrás de `META_PERMISOS_PRIVADO` y `COMENTARIOS_DM` | 2.ª, enviada el 2026-11-06 |
+| `threads_basic`, `threads_content_publish` | Threads | Conectar y publicar | Pedidos; Threads en «Próximamente» salvo `THREADS_ABIERTO_PARA` | 2.ª, enviada el 2026-11-06 |
+| `threads_manage_insights`, `threads_read_replies`, `threads_manage_replies` | Threads | Los Números y La Mesa | Escritos, sin pedir; detrás de `THREADS_PERMISOS_EXTRA` | 3.ª |
+| `instagram_business_basic`, `…_content_publish`, `…_manage_comments`, `…_manage_messages`, `…_manage_insights` | Instagram (login de Instagram) | Conectar sin página de Facebook, con todo lo de arriba | Escritos, sin pedir; detrás de `INSTAGRAM_LOGIN_ABIERTO_PARA` | 3.ª |
+| `ads_read` | Instagram y Facebook | «Lo pagado» en Los Números | Escrito, sin pedir; `META_PERMISOS_ANUNCIOS` | 3.ª |
+| `ads_management` | Instagram y Facebook | «Promocionar» | Escrito, sin pedir; `META_PERMISOS_PROMOCIONAR` | 3.ª |
+| Métricas de las historias de Instagram | Instagram | **Por decidir.** El alcance, las respuestas, la navegación y los clics de cada historia | No pide permiso nuevo: `instagram_manage_insights` (aprobado) o `instagram_business_manage_insights` (3.ª). Es código: Meta las da solo 24 horas, así que hay que leerlas antes de que venzan, o suscribir el webhook `story_insights`, que no existe para el login de Instagram (<https://developers.facebook.com/docs/instagram-platform/reference/instagram-media/insights/>) | Ninguna; si se hace antes de la 3.ª, mostrarlas en su video |
+| `publish_video`, `read_insights` | Facebook | — | No se piden: Facebook publica hoy con `pages_manage_posts`, y `publish_video` espera a confirmar que la ventana lo acepta (un permiso rechazado anula el pedido entero, ver `connect/route.ts`); Meta retiró `read_insights` como permiso de login (las métricas de página no responden para esta página; solo se leen seguidores) | — |
+| `user.info.basic`, `video.list` | TikTok | Conectar (el id y el nombre visible) y Los Números | Aprobados (app en producción, 2026-09-28) | Hecha |
+| `video.upload`, `video.publish` | TikTok | Publicar en borrador y directo | Aprobados; auditoría de Direct Post aprobada (2026-10-06) | Hecha |
+| `user.info.stats` | TikTok | **Por decidir.** Seguidores, «me gusta» totales y número de videos: la serie de la cuenta en Los Números, que TikTok hoy no tiene | **No se pide** (el código pide solo los cuatro de arriba). Pedirlo es sumarlo en el producto «Scopes» del portal y mandar la app a revisión; después, cada cuenta reconecta una vez, porque TikTok no suma permisos a un token (<https://developers.tiktok.com/doc/scopes-overview/>) | Una revisión de la app de developers.tiktok.com, con `user.info.profile` |
+| `user.info.profile` | TikTok | **Por decidir.** El @usuario: hoy la fila muestra el nombre visible, porque `user.info.basic` no trae el usuario (<https://developers.tiktok.com/bulletin/user-info-scope-migration>) | No se pide | La misma que `user.info.stats` |
+| `comment.list`, `comment.list.manage` | TikTok (app de TikTok for Business) | La Mesa y la palabra clave en TikTok (§3.5) | Escrito y cerrado (`TIKTOK_COMENTARIOS_ABIERTO_PARA`); falta crear la app | La revisión de la app nueva, con el formulario de acceso. Si se quieren los números de la cuenta por esta vía, marcar ahí también `user.info.stats`: su `/business/get/` los da sin tocar la app de publicar |
+| `youtube.upload`, `youtube.force-ssl` | YouTube | Publicar, leer el canal y los videos, comentar | Verificados (2026-10-14) | Hecha |
+| `yt-analytics.readonly` | YouTube | **Por decidir.** Suscriptores ganados por día, y lo ganado y el arrastre que hoy la política de 30 días borra (`pendientes.md`, «YouTube: la historia y el arrastre») | **No se pide.** En septiembre se descartó reconectar por él (`docs/superpowers/specs/2026-09-03-metricas-de-cuenta-design.md`). Pedirlo cambia la pantalla de consentimiento, y Google pide verificar de nuevo; después, cada canal reconecta | Con la auditoría de cuota (§4.2), o después de ella, como dice la entrada de `pendientes.md` |
+| `youtube.readonly` | YouTube | — | No hace falta: `youtube.force-ssl` lo cubre | — |
+
+Lo que sale de la tabla: la **tercera vuelta de Meta** ya tiene todo lo escrito (diez permisos);
+si se deciden las métricas de las historias, no suman permisos pero sí una escena al video. En
+**TikTok** hay dos revisiones posibles e independientes —la de la app de siempre, por
+`user.info.stats` y `user.info.profile`, y la de la app nueva de TikTok for Business, por los
+comentarios—, y si se hace la segunda conviene pedir ahí también las estadísticas y dejar la
+primera quieta. En **YouTube** no falta nada para lo que el producto hace hoy.

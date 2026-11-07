@@ -17,6 +17,12 @@ export async function leerAjuste(ownerId: string, clave: string): Promise<string
   return fila?.valor ?? null
 }
 
+export async function borrarAjuste(ownerId: string, clave: string): Promise<void> {
+  await getDb()
+    .delete(ajustes)
+    .where(and(eq(ajustes.ownerId, ownerId), eq(ajustes.clave, clave)))
+}
+
 export async function guardarAjuste(ownerId: string, clave: string, valor: string): Promise<void> {
   // La única es del par (owner_id, clave): cada dueño tiene su propia fila para la misma
   // clave, así que el upsert no necesita ningún rodeo.
