@@ -4,7 +4,17 @@ import { freshness, readCache, writeCache } from './cache'
 import { huboCambioDesde } from './cambios'
 
 /** Lo que la pantalla muestra, con la clave a la que pertenece: un dato de otra clave no se muestra. */
-type Lectura<T> = { key: string; data: T | null; sello: string | null; error: string | null }
+type Lectura<T> = {
+  key: string
+  data: T | null
+  sello: string | null
+  error: string | null
+  /**
+   * El servidor contestó `404` sin frase: no tiene esa ruta todavía (la app salió por aire antes
+   * que la web). La pantalla puede decirlo con sus palabras en vez de «No se pudo actualizar.».
+   */
+  sinRuta?: boolean
+}
 
 /** Cuándo se guardó lo que está en pantalla, y de qué clave. */
 export type Guardado = { key: string; en: number }
@@ -68,9 +78,11 @@ export function useScreenData<T>(
       if (este !== ultimo.current) return
       // Con datos viejos en pantalla el error es una nota al pie; sin ellos, la
       // pantalla entera.
+      const sinRuta = e instanceof Error && e.message === 'HTTP 404'
       setLectura((antes) => ({
         ...(antes.key === key ? antes : { key, data: null, sello: null }),
         error: 'No se pudo actualizar.',
+        sinRuta,
       }))
     } finally {
       if (este === ultimo.current) setCargando(false)
@@ -124,6 +136,7 @@ export function useScreenData<T>(
     data: actual?.data ?? null,
     cargando: cargando || actual === null,
     error: actual?.error ?? null,
+    sinRuta: actual?.sinRuta === true,
     sello: actual?.sello ?? null,
     refrescar,
     refrescarSiVieja,
