@@ -4,6 +4,28 @@ Lo que se dejó a medias a propósito, con el porqué y lo que costaría termina
 lista de deseos: cada entrada nació de un problema real que se parcheó para seguir.
 
 ---
+## Los avisos al teléfono no leen los recibos de Expo, ni se reintentan uno por uno (2026-11-07)
+
+**Abierto desde 2026-11-07.**
+
+`src/lib/push/` manda cada aviso al servicio de push de Expo y lee solo el ticket que Expo devuelve
+en el acto: «ok» es que lo recibió, y `DeviceNotRegistered` borra el token. Expo da además un
+recibo, unos quince minutos después (`/push/getReceipts`), que es el que dice si el aviso de verdad
+salió hacia Google o Apple, y donde también puede aparecer `DeviceNotRegistered` o un problema de
+credenciales (`InvalidCredentials`, `MismatchSenderId`). Hoy eso no se lee: un token muerto que Expo
+solo marca en el recibo se borra recién cuando un ticket posterior lo diga, y unas credenciales de
+FCM mal puestas no se ven en ningún lado salvo en que no llega nada.
+
+Tampoco hay reintento de un aviso suelto: los que tienen una marca (el fierro, `push_fierro`, y el
+resumen de La Mesa, `push_comentarios_hasta`) se reintentan en la pasada siguiente si Expo no aceptó
+ninguno, pero el de un post quemado, el de una comanda, el de una pregunta y el de una respuesta del
+equipo salen una vez, como su correo.
+
+Terminarlo pide guardar los ids de los tickets (una tabla `push_recibos` con el token y la hora), y
+que la corrida de la hora del cron pida los recibos de los que tengan más de quince minutos, borre
+los tokens muertos y deje en el log lo de las credenciales. Una tarde, con su migración.
+
+---
 ## La respuesta a una sugerencia sin issue no llega después al issue, y el correo no se reintenta
 
 **Abierto desde 2026-11-06.**

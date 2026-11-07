@@ -21,6 +21,7 @@ const USUARIO: Usuario = {
   primerIngresoEn: new Date('2026-01-01'),
   cocinaDesde: null,
   bodegaBytes: null,
+  pushComentariosHasta: null,
   createdAt: new Date('2026-01-01'),
   updatedAt: new Date('2026-01-01'),
 }

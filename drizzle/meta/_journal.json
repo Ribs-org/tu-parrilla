@@ -225,6 +225,13 @@
       "when": 1793973499843,
       "tag": "0031_preguntas_y_alarma",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1794023767460,
+      "tag": "0032_push_al_telefono",
+      "breakpoints": true
     }
   ]
 }

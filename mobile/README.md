@@ -15,7 +15,8 @@ ordenar la cámara de frío y pedirle una comanda al chef de la casa con las opc
 «La Cocina desde el teléfono», más abajo).
 Arriba a la derecha de todas, el botón de **Ajustes** (un trinche y un cuchillo, lado a lado): tus cuentas con la temperatura de su
 fierro (`/api/mobile/fierros`), con un punto en el botón si alguna se enfría o se apagó,
-el modo —la noche o el día con sushi, el mismo de la cuenta—, «Cerrar sesión» y, al final, el
+el modo —la noche o el día con sushi, el mismo de la cuenta—, desde la 1.2.0 «Los avisos» (encender o
+apagar los avisos al teléfono; ver «Los avisos al teléfono», más abajo), «Cerrar sesión» y, al final, el
 libro de sugerencias (de día, la caja) para escribirle al equipo y leer lo que respondió, como en el panel
 (`/api/mobile/sugerencias`, y `…/{id}/leida` al abrir una respuesta). Antes eran cinco con nombres propios: Resumen, Contenido, Publicar, Cuentas y
 Calendario. Los datos son los mismos que ve el panel web, leídos desde
@@ -327,7 +328,9 @@ sacarla de un commit más viejo que la punta de la rama le quita a la gente lo q
 tienda» de GitHub, o a mano con la cuenta de Expo, `npx eas-cli build -p android --profile
 production` y `npx eas-cli submit -p android --profile production`; lo mismo con `-p ios` cuando
 exista la cuenta de Apple. En la Play Console, la sección de seguridad de los datos tiene que
-decir que la app usa la cámara y el micrófono para lo que la persona sube.
+decir que la app usa la cámara y el micrófono para lo que la persona sube, y desde el 2026-11-07 que
+guarda el token de los avisos (`docs/play-store.md`). El build lleva también `expo-notifications`, y
+antes de armarlo van las credenciales de FCM (ver «Los avisos al teléfono», abajo).
 
 Lo que no se pudo probar sin un teléfono: la cámara misma, los permisos, la copia a documentos, la
 cola que sigue después de cerrar la app y la subida nativa por partes. El 2026-11-06 se probó en Expo
@@ -381,6 +384,54 @@ de compartir del sistema (`Share`, de React Native), que en Android 10 en adelan
 «Copiar», pero no en todos los teléfonos: por eso no promete copiar. El mismo archivo sirve tal
 cual en la rama `ota-1.1.0`, que no tiene `expo-clipboard` en `package.json`: ahí siempre es la
 lista de compartir.
+
+## Los avisos al teléfono
+
+Desde la 1.2.0 (2026-11-07), la app avisa en el teléfono lo mismo que el correo: lo que se quemó, una
+cuenta que se enfría o se apaga, una pregunta del chef, una comanda que terminó y la respuesta del
+equipo en el libro de sugerencias; y, sin correo, un resumen de los comentarios nuevos de La Mesa, uno
+por hora como mucho. Los manda el servidor (`src/lib/push/` en la raíz; ver «Avisos al teléfono» en el
+`README.md` de la raíz). Acá, `src/lib/avisos.ts` y `src/components/avisos.tsx`:
+
+- **Cuándo pregunta.** No al abrir: unos ocho segundos después de entrar, la primera vez, con la
+  ventana de la app «¿Te avisamos al teléfono?», «Ahora no» y «Avisarme». Recién con «Avisarme» se
+  pide el permiso del sistema —en Android 13 en adelante, `POST_NOTIFICATIONS`, que declara el propio
+  `expo-notifications`—. Antes se crea el canal de Android `avisos`: sin un canal, Android 13 no
+  pregunta, y un aviso a un canal que no existe no se muestra. «Ahora no», o un permiso negado, no
+  vuelve a preguntar: quedan en Ajustes → «Los avisos». La respuesta se guarda en el teléfono
+  (`avisos-telefono` en AsyncStorage), y cerrar sesión la borra, para que quien entre después elija.
+- **El token.** Con el permiso, `getExpoPushTokenAsync` (con el `projectId` de EAS) da el token de
+  Expo, que va a `POST /api/mobile/push`. Se vuelve a mandar cada vez que la app abre con los avisos
+  encendidos, porque Expo lo puede cambiar. «Apagar los avisos» y «Cerrar sesión» lo borran con
+  `DELETE /api/mobile/push/{token}`; si al salir no hay señal, queda anotado en el almacén seguro y se
+  borra al abrir la app la vez siguiente. El servidor, además, deja de mandarle a un token cuya sesión
+  se revocó (`MOBILE_TOKEN_VERSION`, «Si se pierde el teléfono»).
+- **Tocar un aviso** abre su pantalla (`rutaDelAviso`): el fierro y la respuesta del equipo, Ajustes;
+  la pregunta del chef y la comanda, «Tus comandas» de La Cocina (`/cocina?vista=comandas`); lo
+  quemado y los comentarios, La Parrilla. También si el aviso abrió la app cerrada
+  (`getLastNotificationResponse`). Con la app abierta, el aviso se muestra igual, arriba.
+
+**Con y sin el módulo nativo**, como el portapapeles y el audio: `expo-notifications` es nativo y
+entra con el build 1.2.0; un binario que no lo trae revienta al cargarlo, porque pide sus módulos
+nativos con `requireNativeModule` apenas se importa. Por eso `src/lib/avisos.ts` no lo importa:
+pregunta por `ExpoPushTokenManager` y `ExpoNotificationPermissionsModule` con
+`requireOptionalNativeModule` y solo entonces lo carga con un `require`. Sin el módulo, la app no
+pregunta nada y Ajustes dice que los avisos llegan con la versión nueva. Lo cuida
+`src/lib/avisos.test.ts`. La rama `ota-1.1.0` no lleva esto; si algún día se porta, el archivo sirve
+tal cual, con `expo-notifications` en su `package.json` (solo el JavaScript) y **sin** tocar su
+`app.json`.
+
+**Lo que pide el build.** `app.json` trae el plugin de `expo-notifications` con el ícono de la
+notificación (la silueta blanca de `android-icon-monochrome.png`) y el color de la brasa. En Android,
+los avisos salen por Firebase Cloud Messaging, que pide dos cosas antes del build: el
+`google-services.json` en esta carpeta, nombrado en `app.json` (`android.googleServicesFile`), y la
+clave de la cuenta de servicio de FCM subida a EAS. Las hace el dueño; los pasos, en
+`docs/pendientes.md`. Sin ellas el build sale igual, pero «Avisarme» dice «No se pudieron encender los
+avisos…». En iPhone, el build de iOS crea la llave de push de Apple.
+
+Lo que no se pudo probar: sin un build nativo no se recibe un aviso de verdad, ni se ve la pregunta
+del sistema. Los tests cubren que sin el módulo no se carga nada, adónde lleva cada aviso y que el
+token se borra al apagar y al salir; el servidor, contra una Postgres de verdad, con Expo de mentira.
 
 ## El modo día
 
@@ -462,7 +513,8 @@ más:
    súbela a `2`).
 3. Eso invalida de inmediato todas las sesiones de la app ya abiertas en
    cualquier teléfono — van a pedir el correo y el código de nuevo la próxima vez
-   que se abran.
+   que se abran. También corta los avisos al teléfono: el servidor deja de mandarlos a
+   los teléfonos que se registraron con la sesión anterior.
 
 Este paso **no afecta** las conexiones con Instagram, Facebook o YouTube: no hace
 falta volver a autorizar nada de eso, solo se cierra el acceso desde el celular.
@@ -474,6 +526,6 @@ falta volver a autorizar nada de eso, solo se cierra el acceso desde el celular.
 - En La Cocina no muestra el mesón (ver `docs/pendientes.md`), no elige el color de acento de la
   marca ni dibuja la estación de cada comanda, y no sigue subiendo con la app en segundo plano: lo
   primero es del panel, y lo último retoma al volver a abrir La Cocina.
-- No manda notificaciones (no avisa solo cuando hay un dato nuevo).
+- No muestra La Mesa: el aviso de comentarios nuevos abre La Parrilla (ver `docs/pendientes.md`).
 - No hay versión para iPhone que se pueda instalar: el código está listo, falta la
   cuenta de Apple (ver «iPhone (iOS)», arriba).

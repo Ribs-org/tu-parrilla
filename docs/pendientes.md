@@ -69,9 +69,6 @@ sección.
     pregunta: el diseño pide además un aviso en la pestaña de la barra del panel (como el de «Se
     quemó») y una línea en el resumen del día si hay preguntas sin responder; hoy hay correo y la
     tarjeta de color, nada en la barra ni en el resumen.
-  - **Que el chef pregunte por el teléfono con una notificación** (2026-11-06). La app muestra la
-    pregunta en «Tus comandas» y se contesta ahí, pero no avisa sola: no hay notificaciones push en
-    la app. El correo es el aviso.
   - **El mesón en el teléfono** (2026-11-06). La app ya hace lo del panel en la cámara de frío y en
     las comandas (pedir con todas las opciones, cambiar, sacar, cancelar, «Lo que pasó»), pero no el
     mesón: programar o descartar lo que entregó el chef. Quedó fuera por dos cosas: ver un creativo
@@ -548,7 +545,37 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   necesita un build nativo y pasar por las tiendas». Ya que hay build, conviene sumarle antes
   `react-native-svg`, que también espera uno (el bug de la entraña, en «Bugs»). El build ya
   lleva `expo-clipboard` (2026-11-06): sin él, «Copiar el texto» abre la lista de compartir
-  (`mobile/README.md`, «El portapapeles, con y sin su módulo nativo»).
+  (`mobile/README.md`, «El portapapeles, con y sin su módulo nativo»). Y `expo-notifications`
+  (2026-11-07), los avisos al teléfono: antes de armarlo van las credenciales de la entrada
+  siguiente, o el build sale sin avisos en Android.
+- **[dueño] Las credenciales de los avisos al teléfono (FCM), antes del build 1.2.0**
+  (2026-11-07). El código está (`src/lib/push/`, `mobile/src/lib/avisos.ts`); sin esto, en Android
+  «Avisarme» dice que no se pudieron encender. Lo pide la documentación de Expo SDK 57, «Add Android
+  FCM V1 credentials». Ningún paso pide pegar un secreto en un chat:
+  1. En [console.firebase.google.com](https://console.firebase.google.com), crea un proyecto (o
+     agrégale Firebase al proyecto de Google Cloud que ya existe).
+  2. En ese proyecto, **Agregar app → Android**, con el paquete `cl.tuparrilla.app`. Descarga el
+     `google-services.json` que entrega.
+  3. Déjalo en `mobile/google-services.json` y, en `mobile/app.json`, dentro de `"android"`, agrega
+     `"googleServicesFile": "./google-services.json"`. Ese archivo **sí** va al repositorio: según
+     Expo, trae identificadores públicos, y EAS lo necesita en el build.
+  4. En Firebase, **Configuración del proyecto → Cuentas de servicio → Generar nueva clave
+     privada → Generar clave**. Baja un JSON: **ese es secreto**, no va al repositorio ni a un chat
+     (`mobile/.gitignore` ya ignora los `*-firebase-adminsdk-*.json`).
+  5. Súbelo a Expo. En una terminal dentro de `mobile/`: `npx eas-cli credentials` → `Android` →
+     `production` → `Google Service Account` → `Manage your Google Service Account Key for Push
+     Notifications (FCM V1)` → `Set up a Google Service Account Key for Push Notifications (FCM V1)`
+     → `Upload a new service account key`, y elige el JSON. O en expo.dev → el proyecto →
+     **Credentials** → Android → `cl.tuparrilla.app` → **FCM V1 service account key → Add a service
+     account key**. Va por identificador de app, así que sirve para los dos perfiles.
+  6. Borra el JSON del paso 4 de la carpeta de descargas cuando esté subido.
+  7. Arma el build 1.2.0 (la entrada de arriba). Para probar: entra en la app, toca «Avisarme» y
+     contéstale algo desde Las Sugerencias a una sugerencia tuya; tiene que llegar «Te respondimos
+     en el libro de sugerencias».
+  8. Solo si un día enciendes la seguridad extra de push de Expo (expo.dev/settings/access-tokens),
+     crea ahí un access token y ponlo en Vercel como `EXPO_ACCESS_TOKEN`; si no, Expo rechaza cada
+     aviso. En iPhone, el build de iOS ofrece crear la llave de push de Apple cuando exista la
+     cuenta.
 - **[dueño] Publicar La Cocina por aire a la 1.1.0** (2026-11-06). Está preparada: la pestaña
   entera —la cámara de frío y las comandas— sin «Grabar video» ni «Sacar foto», que la 1.1.0 no
   puede (no trae el permiso de la cámara), con «Elegir de la galería». Se publica desde la rama
@@ -629,6 +656,10 @@ nadie paga: todas las cuentas son iguales y el README dice «Sin suscripción».
 
 ## Features y trabajo de código
 
+- **El aviso de La Mesa abre La Parrilla** (2026-11-07). El resumen de comentarios nuevos que llega
+  al teléfono abre La Parrilla, porque La Mesa todavía no está en la app. Cuando llegue, cambiar
+  `rutaDelAviso` (`mobile/src/lib/avisos.ts`) para que abra la pantalla nueva; el servidor ya manda
+  `tipo: 'comentarios'`.
 - **Música en videos con bibliotecas con licencia** (2026-11-06; el dueño lo pospuso: caro y no lo
   bastante bueno por ahora). Las API de Instagram, TikTok y YouTube no dejan ponerle a un video su
   propia música; la excepción es la Audio API de Instagram para reels, con Facebook Login, que es
@@ -737,9 +768,10 @@ nadie paga: todas las cuentas son iguales y el README dice «Sin suscripción».
   cuál es el juego (puntos, rachas, logros, en qué pantalla). Hasta donde se sabe, ninguna de las
   APIs que se usan entrega la bandeja de notificaciones de la red, así que el juego se arma con lo
   que ya se lee: los comentarios de La Mesa, las métricas de cada post y los seguidores de cada
-  cuenta (`src/lib/social/account-metrics.ts`). La app del teléfono no manda notificaciones:
-  avisar allí pide `expo-notifications`, que es nativo, y un build nuevo. Se cruza con «Mientras
-  no mirabas», de la entrada de arriba, que también necesita guardar la última visita por usuario.
+  cuenta (`src/lib/social/account-metrics.ts`). Desde la 1.2.0 la app tiene avisos al teléfono
+  (`src/lib/push/`, ver «Avisos al teléfono» en el `README.md`): un juego que avise usa ese mismo
+  camino. Se cruza con «Mientras no mirabas», de la entrada de arriba, que también necesita guardar
+  la última visita por usuario.
 - **Cupos y reparto de los crons por usuario** (`docs/levantamiento-terceros.md` §5.4). Hace
   falta cuando la beta pase de unos diez usuarios.
 - **[dueño] El privado de Meta (DM con el PDF): construido, falta la aprobación** (2026-10-27).

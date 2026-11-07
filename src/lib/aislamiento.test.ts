@@ -853,6 +853,30 @@ describe('aislamiento por dueño, escrituras (SQL generado, sin base)', () => {
     esperarFiltradoPorDueno(consultas[0]!)
   })
 
+  /**
+   * El token de los avisos viaja desde el teléfono en la ruta: sin el dueño en el WHERE, cualquiera
+   * con sesión apagaría los avisos de otro sabiendo su token.
+   */
+  it('api/mobile/push/[token]: DELETE borra el token solo si es del dueño del token de la sesión', async () => {
+    const { DELETE } = await import('../app/api/mobile/push/[token]/route')
+    const token = 'ExponentPushToken[abcdefgh12345678]'
+    const consultas = await todasLasConsultas(() => DELETE(peticionMovil(), { params: Promise.resolve({ token }) }))
+    expect(consultas).toHaveLength(1)
+    expect(consultas[0]!.sql).toMatch(/^delete from "push_tokens"/i)
+    esperarFiltradoPorDueno(consultas[0]!)
+    expect(consultas[0]!.params).toContain(token)
+  })
+
+  it('push/enviar: avisarAlTelefono lee solo los teléfonos del dueño', async () => {
+    const { avisarAlTelefono } = await import('./push/enviar')
+    const consultas = await consultasEncadenadas(
+      () => avisarAlTelefono(DUENO, () => ({ titulo: 't', cuerpo: 'c', tipo: 'fierro' })),
+      [[]],
+    )
+    expect(consultas).toHaveLength(1)
+    esperarFiltradoPorDueno(consultas[0]!)
+  })
+
   it('api/mobile/cocina/materiales/[id]: DELETE («Sacar» desde el teléfono) lee, mira y borra solo lo del dueño del token', async () => {
     const { DELETE } = await import('../app/api/mobile/cocina/materiales/[id]/route')
     const id = '00000000-0000-4000-8000-000000000001'

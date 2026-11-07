@@ -56,6 +56,13 @@ export const users = pgTable('users', {
    * sin tocar el código. Hoy la cambia el admin en Los Maestros.
    */
   bodegaBytes: bigint('bodega_bytes', { mode: 'number' }),
+  /**
+   * Hasta cuándo se le contaron al teléfono los comentarios nuevos de La Mesa: el resumen siguiente
+   * cuenta los que entraron después. Nula mientras no haya salido ninguno. La escribe
+   * `resumirComentarios` (`src/lib/push/comentarios.ts`), que deja pasar al menos una hora entre
+   * dos resúmenes.
+   */
+  pushComentariosHasta: timestamp('push_comentarios_hasta', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 }).enableRLS()
@@ -247,6 +254,10 @@ export const socialAccounts = pgTable(
     // escribe `vigilarConexiones` (`lib/avisos/run.ts`) al avisar y la borra cuando el fierro
     // vuelve a calentarse: así llega un correo por caída, no uno por cada post que no sale.
     caidaAvisadaEn: timestamp('caida_avisada_en', { withTimezone: true }),
+    // Qué estado del fierro ya se avisó al teléfono: «enfriandose» o «frio»; nulo con el fierro al
+    // rojo. Va aparte de `caidaAvisadaEn` para que el aviso al teléfono no cambie cuándo se
+    // reintenta el correo. La escribe y la borra `vigilarConexiones` (`lib/avisos/run.ts`).
+    pushFierro: text('push_fierro').$type<'enfriandose' | 'frio'>(),
     // Si la cuenta acepta trial reels, aprendido de Meta al publicar (`trial-reels.ts`): «no»
     // cuando rechazó uno por elegibilidad (pocos seguidores, el subcódigo 2207081), «si» cuando
     // uno salió. Nulo mientras no se sepa. Solo Instagram. El motivo es la frase del rechazo,
@@ -1259,6 +1270,37 @@ export const sugerencias = pgTable(
   (t) => [index('sugerencias_owner_idx').on(t.ownerId, t.creadaEn)],
 ).enableRLS()
 
+/**
+ * Los teléfonos que reciben los avisos de una cuenta: uno por instalación de la app, con el token de
+ * Expo que esa instalación sacó al encender los avisos (`POST /api/mobile/push`). El token es único:
+ * si en el mismo teléfono entra otra cuenta, la fila pasa a ella, y el teléfono deja de recibir lo
+ * de la anterior. Se borra al cerrar sesión o al apagar los avisos en Ajustes
+ * (`DELETE /api/mobile/push/{token}`), y cuando Expo dice que el teléfono ya no lo usa
+ * (`DeviceNotRegistered`, en `src/lib/push/enviar.ts`).
+ */
+export const pushTokens = pgTable(
+  'push_tokens',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    ownerId: uuid('owner_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    token: text('token').notNull(),
+    plataforma: text('plataforma').$type<'android' | 'ios'>().notNull(),
+    /**
+     * La sesión del teléfono que lo registró: `MOBILE_TOKEN_VERSION` y la versión de sesión de la
+     * cuenta, como `1:3` (`sesionDelTelefono`, en `src/lib/mobile-token.ts`). Si cualquiera de las
+     * dos sube —un teléfono perdido—, el token deja de recibir y se borra al próximo aviso: un
+     * teléfono sin sesión no sigue mostrando los avisos de la cuenta en su pantalla bloqueada.
+     */
+    sesion: text('sesion').notNull(),
+    creadoEn: timestamp('creado_en', { withTimezone: true }).notNull().defaultNow(),
+    /** La última vez que el teléfono lo registró: lo hace cada vez que la app abre con los avisos encendidos. */
+    actualizadoEn: timestamp('actualizado_en', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex('push_tokens_token_key').on(t.token), index('push_tokens_owner_idx').on(t.ownerId)],
+).enableRLS()
+
 export type Profile = typeof profiles.$inferSelect
 export type Link = typeof links.$inferSelect
 export type Visit = typeof visits.$inferSelect
@@ -1292,3 +1334,4 @@ export type Subida = typeof subidas.$inferSelect
 export type Creativo = typeof creativos.$inferSelect
 export type CreativoMedia = typeof creativoMedia.$inferSelect
 export type Sugerencia = typeof sugerencias.$inferSelect
+export type PushToken = typeof pushTokens.$inferSelect

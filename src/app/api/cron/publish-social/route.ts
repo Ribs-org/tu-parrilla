@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { vigilarConexiones } from '@/lib/avisos/run'
 import { sondearComentarios } from '@/lib/social/comentarios/run'
+import { resumirComentarios } from '@/lib/push/comentarios'
 import { publishDue } from '@/lib/social/publish/run'
 import { vigilarLaCocina } from '@/lib/cocina/alarma'
 import { barrerCocina } from '@/lib/cocina/barrido'
@@ -93,6 +94,9 @@ export async function GET(request: Request) {
       console.error('Falló el sondeo de comentarios:', String(error).slice(0, 300))
     }
     marca('comentarios')
+    // El resumen de La Mesa al teléfono, con lo que el sondeo acaba de traer: uno por hora como
+    // mucho, a quien tenga los avisos encendidos. No lanza.
+    const alTelefono = await resumirComentarios()
     // Después de publicar, no antes: `limpiarMedia` acaba de liberar los videos, y el
     // barrido los ve en su pasada de la hora. No hace falta envolverlo: `barrerHuerfanos`
     // no lanza nunca.
@@ -105,7 +109,7 @@ export async function GET(request: Request) {
     // días en el mesón sin programarse. Tampoco lanza (`barrerCocina`).
     const cocina = toca ? await barrerCocina() : null
     marca('barrido')
-    return NextResponse.json({ report, conexiones, preguntas, alarma, comentarios, barrido, subidas, cocina })
+    return NextResponse.json({ report, conexiones, preguntas, alarma, comentarios, alTelefono, barrido, subidas, cocina })
   } catch (error) {
     console.error('Falló la corrida de publicación:', error)
     return NextResponse.json({ error: 'La publicación falló por completo.' }, { status: 500 })
