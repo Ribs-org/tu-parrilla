@@ -381,7 +381,7 @@ web, contra una API falsa, lo de la cámara de frío y las comandas: elegir y ca
 video, las opciones con «Para cuándo», el cuerpo que sale al mandar, «Cambiar», «Sacar de la cámara»,
 «Lo que pasó», «Cancelar la comanda», y el camino corto contra un servidor de antes.
 
-### La Cocina por aire a la 1.1.0 (preparada el 2026-11-06, sin publicar)
+### La Cocina por aire a la 1.1.0 (publicada el 2026-11-07)
 
 Se puede, y el código ya está hecho para eso. Lo único nativo que la pestaña necesita y la 1.1.0 no
 trae es el permiso de la cámara y el del micrófono: sin ellos, Android contesta que no al pedirlos,
@@ -411,11 +411,11 @@ llegue a esos teléfonos, ni los permisos, que no llegan por aire— ni `package
 necesita `expo-clipboard` para esto. Se probó el 2026-11-06 en una copia de la rama con esos archivos:
 `tsc`, los tests y `npx expo export --platform android` pasan. Y se publica después de que el
 servidor de esta rama esté en producción, aunque la app aguanta el orden contrario (ver «Las opciones
-viajan desde el servidor», arriba). Publicarla es decisión del dueño: está en `docs/pendientes.md`. En Expo web, contra una API
+viajan desde el servidor», arriba). En Expo web, contra una API
 falsa, sí se probó el resto: elegir de la galería, subir en dos partes con su avance, la frase de
 la cuota, mandar la comanda con la instrucción y la cocina apagada.
 
-### Las historias por aire a la 1.1.0 (preparadas el 2026-11-07, sin publicar)
+### Las historias por aire a la 1.1.0 (publicadas el 2026-11-07)
 
 No piden nada nativo, así que se copian tal cual, sobre la punta de `ota-1.1.0`, de `main` con la
 rama de las historias fusionada (archivos de `mobile/`):
@@ -430,6 +430,8 @@ El 2026-11-07 esos archivos eran iguales en `main` y en `ota-1.1.0` antes de est
 se tocan `app.json` ni `package.json`. Y se publica **después** de que el servidor de esta rama esté
 en producción: con un servidor de antes, una sola historia sale bien, pero una secuencia se
 rechaza («Una historia es un solo archivo, foto o video.») y el borrador no recuerda el modo.
+Salieron el 2026-11-07 junto con La Mesa, en el commit `9968a71` de `ota-1.1.0`, a los dos canales,
+con el servidor ya en producción.
 
 ### El portapapeles, con y sin su módulo nativo
 
@@ -520,7 +522,7 @@ desde el teléfono. Mientras, respóndelos en La Mesa del panel web.» en vez de
 actualizar.»; la tarjeta de La Parrilla se queda con el subtítulo, sin número. Así da lo mismo qué
 sale primero, la web o la actualización por aire.
 
-### La Mesa por aire a la 1.1.0 (preparada el 2026-11-07, sin publicar)
+### La Mesa por aire a la 1.1.0 (publicada el 2026-11-07)
 
 No pide nada nativo: `TextInput`, `Linking`, `KeyboardAvoidingView` y `Modal` son de React Native,
 y `expo-image`, `expo-router` y `react-native-safe-area-context` ya están en la 1.1.0. Ni permisos
@@ -537,7 +539,7 @@ El 2026-11-07, `mobile/src` de `ota-1.1.0` era igual al de `main`, así que los 
 choques. Si antes entra a `main` otro cambio a `_layout.tsx` o a `(tabs)/index.tsx` que no vaya a la
 1.1.0, hay que copiar solo la parte de La Mesa. **No** se tocan `app.json` ni `package.json`. Se
 publica después de que el servidor esté en producción, aunque la app aguanta el orden contrario.
-Publicarla es decisión del dueño: está en `docs/pendientes.md`.
+Salió el 2026-11-07 junto con las historias, en el commit `9968a71` de `ota-1.1.0`, a los dos canales.
 
 Lo que se probó el 2026-11-07, en Expo web contra una API falsa: la tarjeta con el número, los tres
 filtros y el de red, «(sin texto)», «Alguien», el borrador que falló y la automática que falló,

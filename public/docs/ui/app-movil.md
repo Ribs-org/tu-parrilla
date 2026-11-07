@@ -59,7 +59,7 @@ Si algo falla, el mensaje sale en rojo debajo del campo.
 
 ### La barra de pestañas
 
-Abajo, cuatro pestañas en este orden: «La Parrilla», «Publicar», «Los Números» y «La Cocina». «Publicar» se ve como un círculo naranjo con una cruz, y «La Cocina», como un gorro de chef. La pestaña activa se ve en naranjo y su nombre sale también como título arriba de la pantalla. La Cocina llegó con la versión 1.2.0 de la app: un teléfono con la 1.1.0 tiene solo las otras tres hasta que se actualice desde la tienda (ver «La Cocina», más abajo).
+Abajo, cuatro pestañas en este orden: «La Parrilla», «Publicar», «Los Números» y «La Cocina». «Publicar» se ve como un círculo naranjo con una cruz, y «La Cocina», como un gorro de chef. La pestaña activa se ve en naranjo y su nombre sale también como título arriba de la pantalla. La Cocina llegó con la versión 1.2.0 de la app y, desde el 2026-11-07, también a la 1.1.0 por aire, sin grabar con la cámara (ver «La Cocina», más abajo).
 
 Arriba a la derecha de las cuatro, al lado del título, un botón redondo con un trinche y un cuchillo, lado a lado: abre «Ajustes». Si alguna cuenta conectada necesita que la reconecten, el botón lleva un punto: ámbar si su permiso vence esta semana, rojo si ya se apagó (venció o dejó de sincronizar). Sin nada que avisar, no hay punto. Un lector de pantalla lo lee «Ajustes» o, con aviso, «Ajustes: 1 se enfría» (o «2 se apagaron», etc.).
 
@@ -701,7 +701,7 @@ En La Mesa, toca «Enviados»: lo respondido desde Tu Parrilla, por la respuesta
 - «Quiero pedir carruseles» / «cambiar cuántos clips» / «decir para cuándo» → en «Tu comanda», «Qué quieres que salga», antes de «Mandar al chef».
 - «¿Dónde está la bodega?» / «quiero ver lo que subí» → «La Cocina» → la burbuja «La cámara de frío».
 - «Quiero borrar un video que subí» → «La cámara de frío» → «Sacar de la cámara» en su tarjeta. Si está apagado, lo usa una comanda en marcha.
-- «No tengo la pestaña La Cocina» → es de la versión 1.2.0 de la app; la 1.1.0 no la tiene. Se actualiza desde la tienda (o con el instalador nuevo que entrega quien administra el sitio). Mirar la versión en «Ajustes», al pie.
+- «No tengo la pestaña La Cocina» (o la tarjeta «La Mesa», o «Post · Historia» en Publicar) → a la app le falta la actualización por aire del 2026-11-07: se aplica al abrirla por segunda vez, así que hay que cerrarla del todo y abrirla dos veces, con señal. Mirar en «Ajustes», al pie, que diga « · actualización …». Si sigue sin aparecer, se instala la versión nueva desde la tienda.
 - «Grabar video está gris» → falta marcar «Tengo los derechos de lo que guardo y el permiso de quienes aparecen.».
 - «El video que grabé no está en mi galería» → lo grabado desde la app no se guarda en la galería: queda en la cámara de frío de La Cocina, y desde el panel web se puede ver y sacar ([La cámara de frío](la-camara-de-frio.md)).
 - «¿Dónde están los clips que hizo el chef?» → en el mesón, en el panel web ([La Cocina](la-cocina.md)); desde ahí se programan. La app solo muestra el estado de cada comanda.
