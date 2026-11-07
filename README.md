@@ -992,6 +992,18 @@ documento nunca se manda como adjunto, siempre como enlace al final del mismo me
 que, igual que el resto de la regla, sale en la respuesta pública mientras el privado esté
 apagado.
 
+Instagram esconde a veces el comentario que es **solo** la palabra: lo suma en su cuenta de
+comentarios, pero no se lo muestra a la dueña ni a la API, así que la regla nunca lo ve (el
+caso está en `docs/pendientes.md`). La ayuda de «Palabra clave» pide la palabra dentro de una
+frase o una distinta por post, y La Mesa avisa con «Comentarios que Instagram no entrega»
+cuando, en una publicación de Instagram de los últimos siete días, la última lectura del sync
+cuenta al menos dos comentarios más de los que llegaron (los guardados más las respuestas de la
+dueña que se conocen). Se calcula al abrir La Mesa, sin columna propia
+(`src/lib/social/comentarios/faltantes.ts` y `getComentariosQueFaltan`, en
+`src/lib/comentarios-cola.ts`). Las respuestas que otras personas se dan entre ellas también
+suman en Instagram y no se guardan, y por eso el aviso dice que parte de la diferencia puede ser
+eso.
+
 ### Modo Tinder
 
 El panel puede leer los tuits nuevos de una lista de creadores que tú curas y —en las

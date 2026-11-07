@@ -8,6 +8,12 @@ import { recortar } from './ventana'
 const LIMITE = 2200
 // Salvaguarda de cuota y de tiempo, no promesa de completitud: lo de la página seis se ve en la pasada siguiente.
 const MAX_PAGINAS = 5
+const POR_PAGINA = 50
+/**
+ * Lo más que una pasada alcanza a leer de una publicación. Más allá, la diferencia con lo que
+ * Instagram cuenta es nuestra y no de Instagram: `faltantes.ts` no avisa por encima de esto.
+ */
+export const TOPE_COMENTARIOS_POR_PASADA = MAX_PAGINAS * POR_PAGINA
 
 type InstagramReplyPayload = {
   id?: string
@@ -64,7 +70,7 @@ export const instagramComentarista: Comentarista = {
     const fields = 'id,text,timestamp,username,from,replies{id,text,username,from}'
     // El borde de comentarios va del más viejo al más nuevo: con una sola página, una
     // publicación de más de cincuenta comentarios nunca dejaría ver los nuevos.
-    let url = `${graphDeInstagram(account)}/${postExternalId}/comments?fields=${fields}&limit=50&access_token=${token}`
+    let url = `${graphDeInstagram(account)}/${postExternalId}/comments?fields=${fields}&limit=${POR_PAGINA}&access_token=${token}`
     const leidos: ComentarioLeido[] = []
     for (let pagina = 0; pagina < MAX_PAGINAS; pagina++) {
       const data = (await pedirGraph('Instagram', url)) as {

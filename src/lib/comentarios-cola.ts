@@ -1,7 +1,9 @@
 import 'server-only'
-import { and, desc, eq, inArray, sql, type SQL } from 'drizzle-orm'
+import { and, desc, eq, gte, inArray, isNotNull, isNull, sql, type SQL } from 'drizzle-orm'
 import { getDb, postComments, reglasClave, scheduledPostTargets, socialAccounts, socialPosts } from '@/db'
 import type { CommentState, DmState } from '@/db/schema'
+import { comentariosQueFaltan } from '@/lib/social/comentarios/faltantes'
+import { DIAS_VENTANA } from '@/lib/social/comentarios/ventana'
 
 const int = (fragment: SQL) => sql<number>`${fragment}`.mapWith(Number)
 
@@ -103,4 +105,78 @@ export async function contarPendientes(ownerId: string, red: string | null): Pro
     .from(postComments)
     .where(and(...condiciones))
   return fila?.total ?? 0
+}
+
+/** Una publicación de Instagram del aviso de La Mesa: Instagram cuenta comentarios que no entregó. */
+export type PublicacionConFaltantes = {
+  id: string
+  accountHandle: string | null
+  caption: string | null
+  thumbnailUrl: string | null
+  permalink: string | null
+  /** Lo que Instagram cuenta, contando las respuestas. */
+  contados: number
+  /** Lo que llegó: los comentarios guardados más las respuestas de la dueña que Tu Parrilla conoce. */
+  entregados: number
+}
+
+/** Más que esto no se lee de una vez; son las más nuevas. */
+const MAX_AVISOS = 5
+/**
+ * La lectura del sync tiene que ser más vieja que esto: una publicación que el sync acaba de
+ * traer todavía no pasó por el sondeo, que corre cada cinco minutos, y le faltaría todo.
+ */
+const MARGEN_DEL_SONDEO_MS = 15 * 60_000
+
+/**
+ * Las publicaciones de Instagram del dueño en las que Instagram cuenta más comentarios de los
+ * que entregó (`faltantes.ts`). Solo las que el sondeo de verdad lee: de una cuenta conectada,
+ * sin archivar y dentro de la ventana del sondeo (después nadie la vuelve a leer, y lo nuevo
+ * faltaría por eso). Y de una cuenta de la que alguna vez llegó un comentario: a una cuenta
+ * sin el permiso de leerlos le faltarían todos, en todas.
+ */
+export async function getComentariosQueFaltan(
+  ownerId: string,
+  ahora: Date = new Date(),
+): Promise<PublicacionConFaltantes[]> {
+  const desde = new Date(ahora.getTime() - DIAS_VENTANA * 864e5)
+  // Como texto ISO: el driver no serializa un `Date` interpolado en SQL crudo.
+  const leidaAntesDe = new Date(ahora.getTime() - MARGEN_DEL_SONDEO_MS).toISOString()
+  const filas = await getDb()
+    .select({
+      id: socialPosts.id,
+      accountHandle: socialAccounts.handle,
+      caption: socialPosts.caption,
+      thumbnailUrl: socialPosts.thumbnailUrl,
+      permalink: socialPosts.permalink,
+      contados: sql<number | null>`(select m.comments from post_metrics m where m.post_id = ${socialPosts.id} and m.captured_at < ${leidaAntesDe} order by m.day desc limit 1)`,
+      llegaron: int(
+        sql`(select count(*) from post_comments c where c.account_id = ${socialPosts.accountId} and c.post_external_id = ${socialPosts.externalId})`,
+      ),
+      respuestasPropias: int(
+        sql`(select count(*) from post_comments c where c.account_id = ${socialPosts.accountId} and c.post_external_id = ${socialPosts.externalId} and c.reply_external_id is not null)`,
+      ),
+    })
+    .from(socialPosts)
+    .innerJoin(socialAccounts, eq(socialAccounts.id, socialPosts.accountId))
+    .where(
+      and(
+        eq(socialAccounts.ownerId, ownerId),
+        eq(socialPosts.network, 'instagram'),
+        isNotNull(socialAccounts.accessToken),
+        isNull(socialPosts.archivedAt),
+        gte(socialPosts.publishedAt, desde),
+        sql`exists (select 1 from post_comments c where c.account_id = ${socialAccounts.id})`,
+      ),
+    )
+    .orderBy(desc(socialPosts.publishedAt))
+  return filas
+    .flatMap((f) => {
+      const contados = f.contados === null ? null : Number(f.contados)
+      const faltan = comentariosQueFaltan({ contados, llegaron: f.llegaron, respuestasPropias: f.respuestasPropias })
+      if (faltan === null || contados === null) return []
+      const { llegaron, respuestasPropias, ...publicacion } = f
+      return [{ ...publicacion, contados, entregados: llegaron + respuestasPropias }]
+    })
+    .slice(0, MAX_AVISOS)
 }

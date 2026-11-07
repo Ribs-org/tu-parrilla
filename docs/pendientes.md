@@ -138,14 +138,17 @@ sección.
   dueña. Los usuarios de ManyChat reportan lo mismo desde 2024 («video», «ebooks», «YES»), y ni
   Meta ni los proveedores lo explican. El informe completo, con fuentes, está en la carpeta de
   Meta del escritorio del dueño, «reports/Comentarios de palabra clave en Instagram.md».
-  Pendiente:
-  - una prueba de dos minutos: apagar «Hide comments» y «Advanced comment filtering» en Hidden
-    Words y comentar `GUIA` solo desde una cuenta nueva en la publicación. Si la dueña lo ve, es
-    el filtro de spam, que se apaga, y el panel debería decírselo al creador. Si no, es un filtro
-    de Instagram que nadie controla;
-  - en el producto: que la ayuda de la regla le pida al creador que pida la palabra dentro de una
-    frase o una palabra distinta por publicación, y que La Mesa avise cuando Instagram cuenta
-    comentarios que no entrega;
+  Desde el 2026-11-07 el producto lo cuenta: la ayuda de «Palabra clave» pide la palabra dentro de
+  una frase o una distinta por post, y La Mesa muestra «Comentarios que Instagram no entrega»
+  cuando Instagram cuenta dos o más que no llegaron (`src/lib/social/comentarios/faltantes.ts`).
+  Ese aviso no distingue las respuestas que otras personas se dan entre ellas, que Instagram
+  también cuenta y Tu Parrilla no guarda, y por eso lo dice en vez de afirmar que todo lo que falta
+  lo escondió Instagram. Pendiente:
+  - **[dueño]** una prueba de dos minutos: apagar «Hide comments» y «Advanced comment filtering»
+    en Hidden Words y comentar `GUIA` solo desde una cuenta nueva en la publicación. Si la dueña
+    lo ve, es el filtro de spam, que se apaga, y el aviso de La Mesa puede decirlo con certeza
+    (hoy dice «puedes probar»). Si no, es un filtro de Instagram que nadie controla, y la frase
+    del filtro sale del aviso;
   - los webhooks de comentarios, por velocidad y cupo, no por esto: piden `pages_manage_metadata`,
     que hoy no se pide.
 - **Por revisar: en qué orden entrega Instagram los comentarios** (2026-10-30). El comentario de

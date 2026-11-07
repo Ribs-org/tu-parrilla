@@ -2,7 +2,13 @@ import Link from 'next/link'
 import { Panel } from '@/components/charts/panel'
 import { requireUser } from '@/lib/auth'
 import { leerAjuste } from '@/lib/ajustes'
-import { contarPendientes, ESTADOS_COLA, getCola, type EstadoCola } from '@/lib/comentarios-cola'
+import {
+  contarPendientes,
+  ESTADOS_COLA,
+  getCola,
+  getComentariosQueFaltan,
+  type EstadoCola,
+} from '@/lib/comentarios-cola'
 import {
   CLAVE_INSTRUCCIONES,
   INSTRUCCIONES_POR_DEFECTO,
@@ -15,6 +21,7 @@ import { permisosExtraDeThreads } from '@/lib/social/threads'
 import { cn } from '@/lib/utils'
 import { Encabezado } from '@/components/ui'
 import { Cola } from './cola'
+import { Faltantes } from './faltantes'
 import { Instrucciones } from './instrucciones'
 
 export const dynamic = 'force-dynamic'
@@ -61,10 +68,12 @@ export default async function CommentsPage({
   const { id: ownerId } = await requireUser()
   const redes = redesDe(ownerId)
   const red = redes.includes(String(params.red)) ? String(params.red) : null
-  const [filas, pendientes, instrucciones] = await Promise.all([
+  const [filas, pendientes, instrucciones, faltantes] = await Promise.all([
     getCola(ownerId, { estado, red }),
     contarPendientes(ownerId, red),
     leerAjuste(ownerId, CLAVE_INSTRUCCIONES),
+    // Solo Instagram cuenta comentarios que no entrega: con otra red elegida, no se pregunta.
+    red === null || red === 'instagram' ? getComentariosQueFaltan(ownerId, ahora) : Promise.resolve([]),
   ])
 
   const chip = (activo: boolean) =>
@@ -108,6 +117,8 @@ export default async function CommentsPage({
           </Link>
         ))}
       </div>
+
+      <Faltantes publicaciones={faltantes} />
 
       <Cola filas={filas} mostrarPrivado={privadoActivo(ownerId)} estado={estado} desde={ahora.getTime()} />
     </>

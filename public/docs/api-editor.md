@@ -425,6 +425,11 @@ agrega `?s=dm-<palabra>` y aparece como fila propia en Analítica. `palabra`: un
 palabra, hasta 30 letras. `mensaje`: 1 a 1000 caracteres. `respuestaPublica`: opcional, 1 a
 300. En el CSV es la séptima columna, después de `opciones`.
 
+Instagram a veces esconde el comentario que es **solo** la palabra: lo cuenta, pero no se lo
+muestra a la dueña ni a la API, así que la regla nunca lo ve. En el texto del post, pide la
+palabra dentro de una frase («comenta "quiero la GUIA"») o usa una palabra distinta en cada
+post; la regla la reconoce igual dentro de la frase.
+
 `documentoUrl` (opcional): un enlace absoluto (`http://` o `https://`) a un PDF de hasta
 25 MB. Se descarga al programar el post — no tres días después, cuando alguien ya comentó
 — y se copia al almacenamiento propio, porque el enlace que mandaste puede morir antes de
