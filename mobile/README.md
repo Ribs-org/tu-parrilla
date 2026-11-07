@@ -10,8 +10,9 @@ día —con un filtro por red, lo que ya salió hundido en un renglón y, hoy, l
 (eliges fotos o un video de la galería, escribes el texto, marcas las cuentas y lo
 programas, o lo mandas a salir ahora), **Los Números** (las dos mitades del tablero, con «Tus
 publicaciones» un toque adentro y los seguidores de cada red detrás de «⋯ Más») y, desde la versión
-1.2.0 (2026-11-02), **La Cocina** (grabar un video o sacar una foto con la cámara del teléfono y
-mandárselo al chef de la casa con una instrucción; ver «La Cocina desde el teléfono», más abajo).
+1.2.0 (2026-11-02), **La Cocina** (grabar un video o sacar una foto con la cámara del teléfono,
+ordenar la cámara de frío y pedirle una comanda al chef de la casa con las opciones del panel; ver
+«La Cocina desde el teléfono», más abajo).
 Arriba a la derecha de todas, el botón de **Ajustes** (un trinche y un cuchillo, lado a lado): tus cuentas con la temperatura de su
 fierro (`/api/mobile/fierros`), con un punto en el botón si alguna se enfría o se apagó,
 el modo —la noche o el día con sushi, el mismo de la cuenta—, «Cerrar sesión» y, al final, el
@@ -252,24 +253,46 @@ teléfono, sin esa vista, era fácil creer que se estaba corrigiendo también lo
 
 ## La Cocina desde el teléfono
 
-La cuarta pestaña, desde la versión 1.2.0 (2026-11-02): el camino corto del chef de la casa.
-Se marca la casilla de los derechos, se toca **Grabar video** (o **Sacar foto**, o **Elegir de la
-galería**), y lo grabado se guarda en la cámara de frío —de día, la nevera— y entra a la comanda
-ya elegido; se escribe la instrucción al chef y **Mandar al chef** cuelga la comanda. Más abajo,
-lo que hay en la cámara para sumarlo, con su cuota, y las últimas comandas con su estado, que se
-actualizan solas mientras alguna está en marcha. Cuando el chef pregunta algo, la tarjeta de esa
-comanda trae la pregunta con sus opciones (o un campo libre) y el plazo, y se contesta ahí mismo
-(desde el 2026-11-06). La línea de arriba dice cómo atiende la cocina —sola, a mano o cerrada—
-con la frase que manda el servidor; contra un servidor de antes, que no la manda, dice lo de siempre. Lo que el formulario del panel deja elegir y el
-teléfono no pregunta va como el panel lo trae marcado: un video largo, clips verticales, lo que
-dé el material, la marca guardada (o el nombre de la cuenta) y lo que acompaña, para intercalar.
-El mesón, cancelar, renombrar o sacar de la cámara siguen en el panel.
+La cuarta pestaña, desde la versión 1.2.0 (2026-11-02), y desde el 2026-11-06 con lo mismo que el
+panel en la cámara de frío —de día, la nevera— y en las comandas. Tiene tres partes, que se eligen
+con unas burbujas arriba:
+
+- **Tu comanda.** Se marca la casilla de los derechos, se toca **Grabar video** (o **Sacar foto**, o
+  **Elegir de la galería**) y lo grabado se guarda en la cámara de frío y entra al riel de la
+  comanda; también se elige de lo guardado. En el riel cada video dice qué es, como en el panel
+  (plato principal, para intercalar, otra cámara, la pantalla), y debajo van las opciones del
+  formulario «Pedir una comanda»: qué es el plato principal, los formatos, cuántos, para cuándo (la
+  hoja de fecha de la app, en modo solo día), la instrucción y la marca —el nombre, el @ y el
+  llamado final; el color de acento se queda el guardado, porque elegir un color en el teléfono pide
+  un selector que la app no tiene—, con «Confirmar», la fila y la hora estimada. **Mandar al chef**
+  la cuelga.
+- **La cámara de frío.** La cuota, **Guardar en la cámara** sin pedir comanda (con «Para qué es»), y
+  lo que hay adentro con **Cambiar** (nombre y uso) y **Sacar de la cámara**, con su pregunta.
+- **Tus comandas.** Las últimas quince con su estado, que se actualizan solas mientras alguna está en
+  marcha; la pregunta del chef con sus opciones y su plazo, para contestarla ahí; «Lo que pasó» paso
+  a paso, la hora estimada, cuántos creativos esperan en el mesón y **Cancelar la comanda** mientras
+  no esté en el horno.
+
+La línea de arriba dice cómo atiende la cocina —sola, a mano o cerrada— con la frase que manda el
+servidor. El mesón (programar o descartar lo que entregó el chef) sigue en el panel: ver
+`docs/pendientes.md`. La estación dibujada de cada comanda también: el teléfono dice lo mismo con el
+estado y las cinco rayas del recorrido, sin `react-native-svg`.
+
+**Las opciones viajan desde el servidor.** Los nombres de los formatos, las cantidades, los tipos de
+plato principal, los roles de un video y los usos no están copiados en la app: `GET
+/api/mobile/cocina` los manda en `opciones`, con los textos del panel (`OPCIONES_DEL_PEDIDO`, en
+`src/lib/cocina/telefono.ts` de la raíz). Eso sirve además de señal: **contra un servidor de antes,
+que no manda `opciones`, la app vuelve al camino corto de la 1.2.0** —el riel y la instrucción, sin
+cambiar, sacar ni cancelar, y la comanda con el cuerpo de antes—, así que da lo mismo qué sale
+primero, la web o la actualización por aire. Al revés también: una app de antes manda la comanda
+corta y el servidor la completa como el panel la trae marcada.
 
 Las rutas son `/api/mobile/cocina` (todo lo que la pantalla muestra), `/api/mobile/cocina/subidas…`
-(las mismas subidas por partes del panel, con el token del teléfono) y
-`/api/mobile/cocina/comandas`, y contestarle al chef, `/api/mobile/cocina/preguntas/{id}/respuesta`. Lo que validan y sus frases son las del panel
-(`src/lib/cocina/subidas-http.ts` y `src/lib/cocina/telefono.ts`, en la raíz): la cuota se mira en
-el servidor igual que desde el panel.
+(las mismas subidas por partes del panel, con el token del teléfono), `/api/mobile/cocina/comandas`,
+`/api/mobile/cocina/comandas/{id}/cancelar`, `/api/mobile/cocina/materiales/{id}` (`PATCH` cambia,
+`DELETE` saca) y contestarle al chef, `/api/mobile/cocina/preguntas/{id}/respuesta`. Lo que validan y
+sus frases son las del panel (`src/lib/cocina/subidas-http.ts`, `src/lib/cocina/telefono.ts` y
+`src/lib/cocina/del-dueno.ts`, en la raíz): la cuota se mira en el servidor igual que desde el panel.
 
 **Cómo sube un video de varios GB sin reventar el teléfono** (`src/lib/subir-por-partes.ts` y
 `src/lib/archivo-local.ts`): el servidor abre la subida y dice el tamaño de cada parte (64 MB); la
@@ -294,10 +317,12 @@ Grabar pide los permisos de cámara y micrófono (`cameraPermission` y `micropho
 plugin `expo-image-picker` en `app.json`, que hasta la 1.1.0 estaban en `false`), y eso solo llega
 con un binario nuevo. Como la `runtimeVersion` es la versión de la app (`appVersion`), lo que se
 publique por aire para la 1.2.0 no le llega a un teléfono con la 1.1.0: ese se queda sin la
-pestaña hasta instalar el binario nuevo, que es lo que se quiere, porque sin los permisos la
-cámara no abriría. Lo de la 1.1.0 se sigue publicando por aire desde la rama `ota-1.1.0`
-(en GitHub): un commit anterior a este cambio con lo que se le fue agregando después, hoy la
-edición de lo programado (#319, publicada el 2026-11-05). La próxima actualización de la 1.1.0
+pestaña de grabar: desde el 2026-11-07 la 1.1.0 tiene La Cocina por aire, sin «Grabar video» ni
+«Sacar foto» (ver «La Cocina por aire a la 1.1.0», abajo). Lo de la 1.1.0 se sigue
+publicando por aire desde la rama `ota-1.1.0` (en GitHub): un commit anterior a este cambio con lo
+que se le fue agregando después —la edición de lo programado (#319), las respuestas del libro de
+sugerencias y «Pasar el texto» (#325, #326), la música de Instagram (#328) y La Cocina sin grabar
+(#333, publicada el 2026-11-07 en los dos canales)—. La próxima actualización de la 1.1.0
 sale de esa rama, con el cambio nuevo encima; sacarla de `main` no llega a ningún teléfono, y
 sacarla de un commit más viejo que la punta de la rama le quita a la gente lo que ya tenía. El build y el envío los hace el dueño (ver `docs/pendientes.md`): el flujo «App a la
 tienda» de GitHub, o a mano con la cuenta de Expo, `npx eas-cli build -p android --profile
@@ -306,7 +331,42 @@ exista la cuenta de Apple. En la Play Console, la sección de seguridad de los d
 decir que la app usa la cámara y el micrófono para lo que la persona sube.
 
 Lo que no se pudo probar sin un teléfono: la cámara misma, los permisos, la copia a documentos, la
-cola que sigue después de cerrar la app y la subida nativa por partes. En Expo web, contra una API
+cola que sigue después de cerrar la app y la subida nativa por partes. El 2026-11-06 se probó en Expo
+web, contra una API falsa, lo de la cámara de frío y las comandas: elegir y cambiar el rol de cada
+video, las opciones con «Para cuándo», el cuerpo que sale al mandar, «Cambiar», «Sacar de la cámara»,
+«Lo que pasó», «Cancelar la comanda», y el camino corto contra un servidor de antes.
+
+### La Cocina por aire a la 1.1.0 (preparada el 2026-11-06, sin publicar)
+
+Se puede, y el código ya está hecho para eso. Lo único nativo que la pestaña necesita y la 1.1.0 no
+trae es el permiso de la cámara y el del micrófono: sin ellos, Android contesta que no al pedirlos,
+sin preguntar, y «Grabar video» diría «Sin permiso para la cámara». Por eso `src/lib/grabar.ts` mira
+la versión del binario (`Updates.runtimeVersion`, que con `appVersion` es la de `app.json` el día del
+build) y, antes de la 1.2.0, la pantalla no muestra «Grabar video» ni «Sacar foto»: queda «Elegir de
+la galería», que la 1.1.0 sí trae (`expo-image-picker` con `photosPermission`). No se le puede
+preguntar al sistema por el permiso: sin declararlo, Android responde lo mismo que cuando la persona
+lo negó para siempre. Lo cuida `src/lib/grabar.test.ts`. Todo lo demás es JavaScript o módulos que la
+1.1.0 ya tiene: `expo-file-system` (la misma versión, con `FileHandle` y `File.upload`), AsyncStorage,
+`expo-image`, `expo-updates`.
+
+Se publicó el 2026-11-07 (`3ac1c80` en `ota-1.1.0`, canales `production` y `preview`). Lo que se
+copió de `main` a la rama, tal cual, por si hay que repetirlo con un cambio de La Cocina:
+
+- `src/app/(tabs)/_layout.tsx` (la cuarta pestaña) y `src/components/iconos.tsx` (el gorro);
+- `src/app/(tabs)/cocina.tsx` y `src/components/cocina.tsx`;
+- `src/components/selector-fecha.tsx` («Para cuándo», solo el día);
+- `src/lib/cocina.ts`, `src/lib/grabar.ts`, `src/lib/subir-por-partes.ts`, `src/lib/archivo-local.ts` y
+  `src/lib/archivo-local.web.ts`, con sus tests (`cocina.test.ts`, `grabar.test.ts`,
+  `subir-por-partes.test.ts`);
+- `src/lib/session.ts` (cerrar sesión borra la cola de La Cocina) y `src/lib/tema.ts` (las palabras de
+  la cámara de frío y el mesón).
+
+**No** se tocan `app.json` —ni la versión, que tiene que seguir en 1.1.0 para que la actualización le
+llegue a esos teléfonos, ni los permisos, que no llegan por aire— ni `package.json`: la rama no
+necesita `expo-clipboard` para esto. Se probó el 2026-11-06 en una copia de la rama con esos archivos:
+`tsc`, los tests y `npx expo export --platform android` pasan. Y se publica después de que el
+servidor de esta rama esté en producción, aunque la app aguanta el orden contrario (ver «Las opciones
+viajan desde el servidor», arriba). Publicarla es decisión del dueño: está en `docs/pendientes.md`. En Expo web, contra una API
 falsa, sí se probó el resto: elegir de la galería, subir en dos partes con su avance, la frase de
 la cuota, mandar la comanda con la instrucción y la cocina apagada.
 
@@ -412,9 +472,9 @@ falta volver a autorizar nada de eso, solo se cierra el acceso desde el celular.
 
 - No pone portada ni atributos, y de lo ya programado no cambia los archivos, ni suma
   cuentas, ni toca lo que ya salió en alguna: eso sigue en el panel.
-- En La Cocina no muestra el mesón, no cancela comandas ni saca nada de la cámara de frío, y no
-  sigue subiendo con la app en segundo plano: lo primero es del panel, y lo segundo retoma al
-  volver a abrir La Cocina.
+- En La Cocina no muestra el mesón (ver `docs/pendientes.md`), no elige el color de acento de la
+  marca ni dibuja la estación de cada comanda, y no sigue subiendo con la app en segundo plano: lo
+  primero es del panel, y lo último retoma al volver a abrir La Cocina.
 - No manda notificaciones (no avisa solo cuando hay un dato nuevo).
 - No hay versión para iPhone que se pueda instalar: el código está listo, falta la
   cuenta de Apple (ver «iPhone (iOS)», arriba).

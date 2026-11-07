@@ -8,9 +8,12 @@ import { CUERPO_ILEGIBLE } from '@/lib/mobile-api'
 export const dynamic = 'force-dynamic'
 
 /**
- * «Mandar al chef» desde el teléfono: cuelga una comanda con lo elegido de la cámara de frío y la
- * instrucción al chef. `{ "ref": "<uuid>", "principal": "<id de un video>", "acompanamientos":
- * ["<id>", …], "instruccion": "…" }`. Lo que el teléfono no pregunta va como lo trae marcado el
+ * «Mandar al chef» desde el teléfono: cuelga una comanda con lo elegido de la cámara de frío. Con
+ * las opciones del formulario del panel (desde el 2026-11-06): `{ "ref": "<uuid>", "principal":
+ * "<id de un video>", "subtipo": "largo", "acompanamientos": [{ "id": "<id>", "rol": "imagen" }, …],
+ * "formatos": ["clips"], "cantidad": "lo-que-de", "paraCuando": "AAAA-MM-DD" | null, "instruccion":
+ * "…", "marca": { "nombre", "handle", "acento", "ctaTexto" } }`. Una app de antes manda solo `ref`,
+ * `principal`, `acompanamientos` como ids e `instruccion`, y lo demás va como lo trae marcado el
  * panel (`src/lib/cocina/telefono.ts`). `201` con el id; mandarla otra vez con la misma `ref`
  * devuelve la misma, con `200`.
  */

@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest'
 import { SUGERENCIA_VACIA } from './sugerencias/formato'
 import { MAX_TEXTO, TIPOS, TIPOS_SUGERENCIA } from './sugerencias/tipos'
 import { GANCHOS, UMBRAL_LLENANDOSE } from './cocina/bodega'
-import { EJEMPLOS_DE_INSTRUCCION, MAX_INSTRUCCION } from './cocina/pedido'
+import { EJEMPLOS_DE_INSTRUCCION, MARCA_SIN_NOMBRE, MAX_ACOMPANAMIENTOS, MAX_INSTRUCCION } from './cocina/pedido'
 import { COCINA_CERRADA } from './cocina/latido'
 import { MAX_RESPUESTA, RESPUESTA_FALTA } from './cocina/pregunta'
 import {
@@ -13,7 +13,10 @@ import {
   CAMARA_LLENA,
   CAMARA_LLENANDOSE,
   CAMARA_VACIA,
+  DE_LA_CAMARA,
+  GUARDAR_EN_LA_CAMARA,
   MESON,
+  SACAR_DE_LA_CAMARA,
   ECHAR_AL_LIBRO,
   LIBRO,
   QUEDO_EN_EL_LIBRO,
@@ -59,6 +62,9 @@ describe('«Se quemó» en cada modo', () => {
       ['CAMARA_LLENANDOSE', CAMARA_LLENANDOSE],
       ['CAMARA_LLENA', CAMARA_LLENA],
       ['MESON', MESON],
+      ['DE_LA_CAMARA', DE_LA_CAMARA],
+      ['GUARDAR_EN_LA_CAMARA', GUARDAR_EN_LA_CAMARA],
+      ['SACAR_DE_LA_CAMARA', SACAR_DE_LA_CAMARA],
     ] as const) {
       expect(app).toContain(`${constante}: Record<Tema, string> = { noche: '${palabras.noche}', dia: '${palabras.dia}' }`)
     }
@@ -71,6 +77,9 @@ describe('«Se quemó» en cada modo', () => {
     expect(cocina).toContain(`MAX_RESPUESTA = ${MAX_RESPUESTA}`)
     expect(cocina).toContain(`'${RESPUESTA_FALTA}'`)
     expect(cocina).toContain(`'${COCINA_CERRADA}'`)
+    // La cámara por dentro y lo que falta para mandarla, con las palabras del panel.
+    expect(cocina).toContain(`MAX_ACOMPANAMIENTOS = ${MAX_ACOMPANAMIENTOS}`)
+    expect(cocina).toContain(`'${MARCA_SIN_NOMBRE}'`)
   })
 
   it('el libro de sugerencias se llama igual en la app, con los mismos tipos y el mismo largo', () => {

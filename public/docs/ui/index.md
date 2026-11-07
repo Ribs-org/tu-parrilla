@@ -24,8 +24,8 @@ registro abierto.
   `https://tu-parrilla.cl/ingresar` ([Entrar al panel](ingresar.md)). Si la persona lo abre en
   otro dominio, la manda sola a tu-parrilla.cl.
 - **La app del teléfono** (Android): hace una parte de lo mismo, con cuatro pestañas en versión
-  corta —La Parrilla, Publicar, Los Números y La Cocina, donde se graba un video y se le manda al
-  chef— ([La app del teléfono](app-movil.md)).
+  corta —La Parrilla, Publicar, Los Números y La Cocina, donde se graba un video, se ordena la
+  cámara de frío y se le pide una comanda al chef— ([La app del teléfono](app-movil.md)).
 - **Su página pública**, la que ve su audiencia: `https://tu-parrilla.cl/<su-dirección>`. Se
   edita en La Vitrina ([la-vitrina.md](la-vitrina.md)).
 
@@ -150,6 +150,7 @@ teléfono](app-movil.md).
 | Invitar a alguien; cerrar las sesiones de alguien; encenderle la cocina | Los Maestros, solo el admin ([los-maestros.md](los-maestros.md)) |
 | Publicar desde el teléfono | [La app del teléfono](app-movil.md) |
 | Grabar un video con el teléfono y mandárselo al chef de la casa | La app del teléfono → pestaña «La Cocina» ([app-movil.md](app-movil.md)) |
+| Ver, renombrar o sacar lo de la cámara de frío desde el teléfono, o cancelar una comanda | La app del teléfono → «La Cocina» → «La cámara de frío» o «Tus comandas» ([app-movil.md](app-movil.md)) |
 | Pedir una función, reclamar algo que no funciona o decirle algo a quienes hacen Tu Parrilla | «Ajustes» → «El libro de sugerencias», al final del menú; en el teléfono, al final de «Ajustes» ([libro-de-sugerencias.md](libro-de-sugerencias.md)) |
 | Leer lo que el equipo le respondió a algo que escribió | «Ajustes» → «El libro de sugerencias» → «Lo que nos escribiste»; en el teléfono, al final de «Ajustes» ([libro-de-sugerencias.md](libro-de-sugerencias.md)) |
 | Responder lo que alguien escribió en el libro de sugerencias | Las Sugerencias, solo el admin ([las-sugerencias.md](las-sugerencias.md)) |

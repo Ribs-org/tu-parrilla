@@ -57,7 +57,8 @@ export const QUEDO_EN_EL_LIBRO: Record<Tema, string> = { noche: 'Quedó en el li
 
 /*
  * La Cocina, como en el panel (`CAMARA`, `CAMARA_VACIA`, `CAMARA_LLENANDOSE`, `CAMARA_LLENA` y
- * `MESON` de `src/lib/vocabulario.ts`, que un test compara con estas): el material en bruto espera
+ * `MESON` de `src/lib/vocabulario.ts`, y desde el 2026-11-06 `DE_LA_CAMARA`, `GUARDAR_EN_LA_CAMARA` y
+ * `SACAR_DE_LA_CAMARA`, que un test compara con estas): el material en bruto espera
  * en la cámara de frío —de día, en la nevera— y lo que el chef entrega, en el mesón —la bandeja—.
  */
 export const CAMARA: Record<Tema, string> = { noche: 'La cámara de frío', dia: 'La nevera' }
@@ -65,6 +66,9 @@ export const CAMARA_VACIA: Record<Tema, string> = { noche: 'La cámara está vac
 export const CAMARA_LLENANDOSE: Record<Tema, string> = { noche: 'La cámara se está llenando', dia: 'La nevera se está llenando' }
 export const CAMARA_LLENA: Record<Tema, string> = { noche: 'La cámara está llena', dia: 'La nevera está llena' }
 export const MESON: Record<Tema, string> = { noche: 'El mesón', dia: 'La bandeja' }
+export const DE_LA_CAMARA: Record<Tema, string> = { noche: 'De la cámara de frío', dia: 'De la nevera' }
+export const GUARDAR_EN_LA_CAMARA: Record<Tema, string> = { noche: 'Guardar en la cámara', dia: 'Guardar en la nevera' }
+export const SACAR_DE_LA_CAMARA: Record<Tema, string> = { noche: 'Sacar de la cámara', dia: 'Sacar de la nevera' }
 
 /** El calor de un día de la agenda, como la grilla del panel (`ROTULO_CALOR`). */
 export const ROTULO_CALOR: Record<Tema, Record<'apagada' | 'prendida' | 'llena', string>> = {

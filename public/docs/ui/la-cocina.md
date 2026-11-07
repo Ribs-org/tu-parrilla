@@ -547,7 +547,8 @@ Solo mientras no esté en el horno: con «Comanda colgada», «El chef mira la r
 2. Se abre una ventana con «¿Cancelar esta comanda?» y «El chef deja de prepararla. Lo que llevaba
    sigue en tu cámara de frío.» (de día, «… en tu nevera.»). Apretar «Cancelar la comanda», en la ventana («Volver» la deja como está).
 
-La tarjeta queda «Cancelada». Lo que llevaba sigue en la cámara de frío, para otra comanda.
+La tarjeta queda «Cancelada». Lo que llevaba sigue en la cámara de frío, para otra comanda. También
+se cancela desde la app del teléfono, con la misma pregunta ([app-movil.md](app-movil.md), «La Cocina»).
 
 ### Para conectar una IA
 
@@ -670,10 +671,12 @@ Al final de la pantalla, «El manual del parrillero →». Adentro, elegir la p�
   quedan quietas a propósito. Una comanda lista, servida o terminada tampoco se mueve: no hay
   nada en marcha.
 - **«¿Puedo pedir desde la app del teléfono?».** Sí, desde la versión 1.2.0: la pestaña «La
-  Cocina» de la app graba un video (o saca una foto), lo guarda en la cámara de frío y lo manda al
-  chef con la instrucción, en su camino corto —un video largo, clips verticales, lo que dé el
-  material—. Lo demás de esta pantalla (el mesón, cancelar, el formulario completo) sigue en el
-  panel. Ver [La app del teléfono](app-movil.md), «La Cocina».
+  Cocina» de la app graba un video (o saca una foto, o elige de la galería), lo guarda en la cámara
+  de frío y pide la comanda con las mismas opciones que «Pedir una comanda» —qué es el plato
+  principal y cada video, los formatos, cuántos, para cuándo, la instrucción y la marca, salvo el
+  color de acento—. También sigue las comandas con «Lo que pasó», le contesta al chef y las
+  cancela. El mesón y la estación dibujada siguen en el panel. Ver [La app del teléfono](app-movil.md),
+  «La Cocina».
 - **«Algo desapareció del mesón».** Lo que nadie programa en 30 días se borra solo; en su última
   semana, la tarjeta y el resumen del día lo avisan. Lo que se pasó a un borrador no vence: está en
   los borradores de La Parrilla.
@@ -734,8 +737,8 @@ Al final de la pantalla, «El manual del parrillero →». Adentro, elegir la p�
 - No programa solo: cada creativo se programa a mano, desde el compositor.
 - No deshace un descarte.
 - No elige estilos: en esta fase los elige el chef.
-- El formulario completo de «Pedir una comanda» es del panel: la app del teléfono pide por su
-  camino corto ([app-movil.md](app-movil.md)).
+- El mesón es del panel: la app del teléfono pide, sigue, contesta y cancela, pero no programa ni
+  descarta lo que entregó el chef ([app-movil.md](app-movil.md)).
 - No avisa por correo cada paso: solo cuando la comanda termina (lista, rechazada o que no se
   pudo terminar) y cuando el chef pregunta.
 - No cambia una respuesta ya mandada al chef, ni deja preguntarle algo al chef: pregunta él.
@@ -770,7 +773,7 @@ Sale de:
   sola», cada cuánto mira y cuándo deja de mirar.
 - `src/lib/cocina/correo-de-comanda.ts`: el correo cuando la comanda termina y cuando el chef
   pregunta, su asunto y su texto.
-- `src/app/admin/(dash)/ia/cancelar.tsx` y `src/app/admin/cocina-actions.ts`: «Cancelar la
+- `src/app/admin/(dash)/ia/cancelar.tsx`, `src/app/admin/cocina-actions.ts` y `src/lib/cocina/del-dueno.ts`: «Cancelar la
   comanda», su pregunta y sus mensajes, y lo que hace «Colgar la comanda».
 - `src/app/admin/(dash)/ia/pedir/page.tsx` y `src/app/admin/(dash)/ia/pedir/formulario.tsx`:
   «Pedir una comanda», sus seis bloques, lo que se elige de la cámara y su vuelo al riel, el riel
