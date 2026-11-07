@@ -319,11 +319,12 @@ Grabar pide los permisos de cámara y micrófono (`cameraPermission` y `micropho
 plugin `expo-image-picker` en `app.json`, que hasta la 1.1.0 estaban en `false`), y eso solo llega
 con un binario nuevo. Como la `runtimeVersion` es la versión de la app (`appVersion`), lo que se
 publique por aire para la 1.2.0 no le llega a un teléfono con la 1.1.0: ese se queda sin la
-pestaña hasta instalar el binario nuevo, o hasta que se le publique desde `ota-1.1.0` La Cocina sin
-grabar, que ya está preparada (ver «La Cocina por aire a la 1.1.0», abajo). Lo de la 1.1.0 se sigue
+pestaña de grabar: desde el 2026-11-07 la 1.1.0 tiene La Cocina por aire, sin «Grabar video» ni
+«Sacar foto» (ver «La Cocina por aire a la 1.1.0», abajo). Lo de la 1.1.0 se sigue
 publicando por aire desde la rama `ota-1.1.0` (en GitHub): un commit anterior a este cambio con lo
 que se le fue agregando después —la edición de lo programado (#319), las respuestas del libro de
-sugerencias y «Pasar el texto» (#325, #326) y la música de Instagram (#328)—. La próxima actualización de la 1.1.0
+sugerencias y «Pasar el texto» (#325, #326), la música de Instagram (#328) y La Cocina sin grabar
+(#333, publicada el 2026-11-07 en los dos canales)—. La próxima actualización de la 1.1.0
 sale de esa rama, con el cambio nuevo encima; sacarla de `main` no llega a ningún teléfono, y
 sacarla de un commit más viejo que la punta de la rama le quita a la gente lo que ya tenía. El build y el envío los hace el dueño (ver `docs/pendientes.md`): el flujo «App a la
 tienda» de GitHub, o a mano con la cuenta de Expo, `npx eas-cli build -p android --profile
@@ -350,8 +351,8 @@ lo negó para siempre. Lo cuida `src/lib/grabar.test.ts`. Todo lo demás es Java
 1.1.0 ya tiene: `expo-file-system` (la misma versión, con `FileHandle` y `File.upload`), AsyncStorage,
 `expo-image`, `expo-updates`.
 
-Para publicarla, sobre la punta de `ota-1.1.0`, se copian de `main` (con esta rama fusionada) estos
-archivos de `mobile/`, tal cual:
+Se publicó el 2026-11-07 (`3ac1c80` en `ota-1.1.0`, canales `production` y `preview`). Lo que se
+copió de `main` a la rama, tal cual, por si hay que repetirlo con un cambio de La Cocina:
 
 - `src/app/(tabs)/_layout.tsx` (la cuarta pestaña) y `src/components/iconos.tsx` (el gorro);
 - `src/app/(tabs)/cocina.tsx` y `src/components/cocina.tsx`;

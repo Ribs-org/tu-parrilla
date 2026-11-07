@@ -533,6 +533,18 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   textos, en la carpeta «Google Play» del escritorio de Vicente; el porqué, en
   `docs/play-store.md`. La tienda pública es otro trámite: una cuenta personal nueva
   necesita una prueba cerrada con doce probadores durante catorce días.
+- **[dueño] Play Console: declarar el estado de comerciante antes de febrero de 2027**
+  (2026-11-06). Google lo exige a todos los desarrolladores. Si no se hace, borra el perfil y las
+  apps de Google Play en todo el mundo. No frena la revisión de hoy. **No declararlo en la cuenta
+  personal tal como está:** como comerciante, Google publica en la Unión Europea el nombre legal y la
+  dirección del perfil de pagos, que hoy es la de la casa del dueño. Dos caminos: una cuenta de
+  organización a nombre de Pyxis con su dirección comercial y la app traspasada a ella (lo mismo
+  que «TikTok y Google con la misma entidad»), o cambiar antes la dirección del perfil de pagos por
+  una comercial. Tu Parrilla es un producto comercial de Pyxis: la respuesta honesta es «trader».
+  Otra razón para la cuenta de Pyxis: en una cuenta personal nueva, Google exige una prueba
+  cerrada de 12 probadores durante 14 días antes de pedir producción, como lo pide el Dashboard de
+  la app. Una cuenta de organización no tiene esa exigencia. Verificarlo en la ayuda de Google al
+  crearla.
 - **[dueño] El build 1.2.0 de la app, con la cámara, a las tiendas** (2026-11-02). La 1.2.0 trae
   La Cocina en el teléfono: grabar un video o sacar una foto y mandárselo al chef. Pide los
   permisos de cámara y micrófono, que solo llegan con un binario nuevo, y su `runtimeVersion` es
@@ -549,13 +561,6 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   `react-native-svg`, que también espera uno (el bug de la entraña, en «Bugs»). El build ya
   lleva `expo-clipboard` (2026-11-06): sin él, «Copiar el texto» abre la lista de compartir
   (`mobile/README.md`, «El portapapeles, con y sin su módulo nativo»).
-- **[dueño] Publicar La Cocina por aire a la 1.1.0** (2026-11-06). Está preparada: la pestaña
-  entera —la cámara de frío y las comandas— sin «Grabar video» ni «Sacar foto», que la 1.1.0 no
-  puede (no trae el permiso de la cámara), con «Elegir de la galería». Se publica desde la rama
-  `ota-1.1.0` copiando los archivos que lista `mobile/README.md`, «La Cocina por aire a la 1.1.0»,
-  después de que el servidor esté en producción, con el comando de siempre en los dos canales.
-  Probado en una copia de la rama (tipos, tests y el paquete de Android); en un teléfono con la 1.1.0,
-  no.
 - **[dueño] Publicar La Mesa por aire a la 1.1.0** (2026-11-07). Está preparada: responder
   comentarios desde el teléfono, sin nada nativo nuevo. Se publica desde `ota-1.1.0` copiando los
   siete archivos que lista `mobile/README.md`, «La Mesa por aire a la 1.1.0», después de que el
