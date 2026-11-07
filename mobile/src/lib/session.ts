@@ -6,6 +6,7 @@ import { borrarCaches } from './cache'
 import { API_BASE } from './config'
 import { SERVIDOR_FALLO, SIN_SENAL, fraseDeRechazo } from './ingreso'
 import { CLAVE_TEMA_SIN_SUBIR } from './tema'
+import { CLAVE_PENDIENTES } from './cocina'
 
 // El almacén seguro está respaldado por el llavero del sistema; la caché de datos
 // vive en AsyncStorage, que es texto plano. El token nunca cruza esa frontera.
@@ -24,14 +25,19 @@ export function clearToken(): Promise<void> {
 }
 
 /**
- * Lo que la app guardó de una cuenta en este teléfono: lo último que mostró cada pantalla, y un
- * cambio de modo que no alcanzó a subir. Se borra al salir y también al entrar —quien canceló el
- * candado puede entrar con otro correo—, para que nadie vea en este teléfono nada de la cuenta de
+ * Lo que la app guardó de una cuenta en este teléfono: lo último que mostró cada pantalla, un
+ * cambio de modo que no alcanzó a subir y lo que La Cocina dejó subiendo a medias (sus copias de
+ * lo grabado las barre La Cocina al abrirse). Se borra al salir y también al entrar —quien canceló
+ * el candado puede entrar con otro correo—, para que nadie vea en este teléfono nada de la cuenta de
  * antes ni le suba su modo. La copia del modo (`CLAVE_TEMA`) se queda: es del teléfono, y la
  * pantalla de entrada se dibuja con ella. Lo que falle al borrar no detiene el resto.
  */
 async function borrarLoDeLaCuenta(): Promise<void> {
-  await Promise.allSettled([borrarCaches(), AsyncStorage.removeItem(CLAVE_TEMA_SIN_SUBIR)])
+  await Promise.allSettled([
+    borrarCaches(),
+    AsyncStorage.removeItem(CLAVE_TEMA_SIN_SUBIR),
+    AsyncStorage.removeItem(CLAVE_PENDIENTES),
+  ])
 }
 
 /** Salir en este teléfono: el token y lo guardado de la cuenta. Termina aunque algo no se borre. */

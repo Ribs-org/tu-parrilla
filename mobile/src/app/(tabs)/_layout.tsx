@@ -2,16 +2,17 @@ import { useEffect } from 'react'
 import { Tabs } from 'expo-router'
 import { TIPO_TITULO } from '../../components/ui'
 import { useColores, useTema } from '../../components/tema'
-import { BotonPublicar, IconoNumeros, IconoParrilla } from '../../components/iconos'
+import { BotonPublicar, IconoCocina, IconoNumeros, IconoParrilla } from '../../components/iconos'
 import { BotonAjustes } from '../../components/boton-ajustes'
 import { LA_PARRILLA } from '../../lib/tema'
 
 /**
- * Las tres pestañas del panel web, en el mismo orden de importancia: La Parrilla es la
- * entrada, Publicar va al medio porque es la acción principal, y Los Números cierra. Hasta
- * el 2026-10-16 eran cinco con nombres propios (Resumen, Contenido, Publicar, Cuentas,
- * Calendario); lo que mostraban vive ahora en estas tres, con el vocabulario del panel. De día,
- * como en el panel, la primera se llama La Barra.
+ * Las pestañas del panel web, en el mismo orden de importancia: La Parrilla es la entrada,
+ * Publicar va segunda porque es la acción de todos los días, después Los Números y al final La
+ * Cocina, como en el panel. Hasta el 2026-10-16 eran cinco con nombres propios (Resumen,
+ * Contenido, Publicar, Cuentas, Calendario); lo que mostraban vive ahora en estas, con el
+ * vocabulario del panel. La Cocina llegó el 2026-11-02, para grabar desde el teléfono y mandarle
+ * el material al chef. De día, como en el panel, la primera se llama La Barra.
  *
  * Arriba a la derecha de cada una, el botón de Ajustes, como en el panel.
  */
@@ -61,6 +62,10 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="numeros"
         options={{ title: 'Los Números', tabBarIcon: ({ color }) => <IconoNumeros color={color} /> }}
+      />
+      <Tabs.Screen
+        name="cocina"
+        options={{ title: 'La Cocina', tabBarIcon: ({ color }) => <IconoCocina color={color} /> }}
       />
     </Tabs>
   )

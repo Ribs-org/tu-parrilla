@@ -32,17 +32,25 @@ const HORAS = Array.from({ length: 24 }, (_, h) => h)
  *
  * Quien la usa la monta al abrirla y la desmonta al cerrarla, así que arranca siempre en la fecha
  * vigente sin un efecto que la sincronice.
+ *
+ * Con `soloDia` (el «Para cuándo» de La Cocina, desde el 2026-11-06) es solo el mes: sin la hora ni
+ * los minutos, y hoy se puede elegir. Lo que devuelve es ese día a mediodía; quien la usa se queda
+ * con el día. `titulo` cambia «Cuándo sale».
  */
 export function SelectorFecha({
   valor,
   minimo,
   onListo,
   onCancelar,
+  soloDia = false,
+  titulo = 'Cuándo sale',
 }: {
   valor: Date
   minimo: Date
   onListo: (fecha: Date) => void
   onCancelar: () => void
+  soloDia?: boolean
+  titulo?: string
 }) {
   const colores = useColores()
   const insets = useSafeAreaInsets()
@@ -51,8 +59,8 @@ export function SelectorFecha({
   const [mes, setMes] = useState(mesDe(dia))
   const [hora, setHora] = useState(valor.getHours())
   const [minuto, setMinuto] = useState(valor.getMinutes())
-  const elegida = armar(dia, hora, minuto)
-  const valida = elegida.getTime() > minimo.getTime()
+  const elegida = soloDia ? armar(dia, 12, 0) : armar(dia, hora, minuto)
+  const valida = soloDia ? dia >= hoy : elegida.getTime() > minimo.getTime()
   const yaPaso = (h: number, m: number) => armar(dia, h, m).getTime() <= minimo.getTime()
 
   return (
@@ -80,7 +88,7 @@ export function SelectorFecha({
           accessibilityRole="header"
           style={{ color: colores.texto, fontFamily: TIPO_TITULO, fontSize: 16, letterSpacing: 1, textTransform: 'uppercase' }}
         >
-          Cuándo sale
+          {titulo}
         </Text>
 
         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -151,6 +159,8 @@ export function SelectorFecha({
           ))}
         </View>
 
+        {soloDia ? null : (
+          <>
         <Fila titulo="Hora" cantidad={HORAS.length} indice={hora}>
           {HORAS.map((h) => (
             <Chip
@@ -171,6 +181,8 @@ export function SelectorFecha({
             <Chip key={m} texto={`:${dosCifras(m)}`} activo={m === minuto} deshabilitado={yaPaso(hora, m)} onPress={() => setMinuto(m)} />
           ))}
         </Fila>
+          </>
+        )}
 
         <View style={{ flexDirection: 'row', gap: 10 }}>
           <Boton texto="Cancelar" onPress={onCancelar} />
@@ -225,23 +237,26 @@ function Fila({ titulo, cantidad, indice, children }: { titulo: string; cantidad
   )
 }
 
-type Pedido = { valor: Date; alElegir: (fecha: Date) => void }
+type Como = { soloDia?: boolean; titulo?: string }
+type Pedido = { valor: Date; alElegir: (fecha: Date) => void; como: Como }
 
 /**
  * Elegir día y hora: `abrir(valor, alElegir)` y montar `selector` en algún lado de la pantalla.
- * Cancelar no llama a nada.
+ * Cancelar no llama a nada. `como` pide solo el día, o otro título.
  */
-export function useSelectorFecha(): { abrir: (valor: Date, alElegir: (fecha: Date) => void) => void; selector: ReactNode } {
+export function useSelectorFecha(): { abrir: (valor: Date, alElegir: (fecha: Date) => void, como?: Como) => void; selector: ReactNode } {
   const [pedido, setPedido] = useState<Pedido | null>(null)
 
-  function abrir(valor: Date, alElegir: (fecha: Date) => void) {
-    setPedido({ valor, alElegir })
+  function abrir(valor: Date, alElegir: (fecha: Date) => void, como: Como = {}) {
+    setPedido({ valor, alElegir, como })
   }
 
   const selector = pedido ? (
     <SelectorFecha
       valor={pedido.valor}
       minimo={new Date()}
+      soloDia={pedido.como.soloDia}
+      titulo={pedido.como.titulo}
       onListo={(fecha) => {
         pedido.alElegir(fecha)
         setPedido(null)
