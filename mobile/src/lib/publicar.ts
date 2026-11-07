@@ -1,5 +1,6 @@
 import { NOMBRE_RED, type CuentaApp } from './tipos'
 import { musicaDelEnvio, musicaParaGuardar, type MusicaInstagram } from './musica'
+import type { Medidas } from './historias'
 
 export const MAX_BYTES = 500 * 1024 * 1024
 export const MAX_ARCHIVOS = 10
@@ -96,6 +97,8 @@ export type Archivo = {
   estado: 'subiendo' | 'listo' | 'fallo'
   progreso: number
   error: string | null
+  /** Ancho, alto y duración, si el selector los dio: el visor de historias avisa con ellos. */
+  medidas?: Medidas | null
 }
 
 let claves = 0
@@ -106,8 +109,9 @@ function nuevaClave(): string {
 }
 
 /** Un archivo recién elegido: entra a la cola de subida. */
-export function archivoElegido(elegido: Elegido): Archivo {
+export function archivoElegido(elegido: Elegido, medidas: Medidas | null = null): Archivo {
   return {
+    medidas,
     clave: nuevaClave(),
     nombre: elegido.nombre,
     mediaType: elegido.mediaType,

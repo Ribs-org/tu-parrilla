@@ -124,6 +124,17 @@ describe('POST /api/mobile/borradores', () => {
     expect(guardarBorrador.mock.calls[0]![1].campos['instagramMusica:ig-1']).toEqual([JSON.stringify(musica)])
   })
 
+  it('con `modo: historia`, el borrador queda como historia, con los archivos en su orden', async () => {
+    const media = [
+      { url: 'https://cdn.ejemplo.cl/scheduled/2.jpg', mediaType: 'image', nombre: '2.jpg' },
+      { url: 'https://cdn.ejemplo.cl/scheduled/1.mp4', mediaType: 'video', nombre: '1.mp4' },
+    ]
+    const respuesta = await POST(pedir({ texto: '', cuentas: ['ig-1'], cuando: null, media, modo: 'historia', conMusica: true }))
+    expect(respuesta.status).toBe(200)
+    expect(guardarBorrador.mock.calls[0]![1].campos.modo).toEqual(['historia'])
+    expect(guardarBorrador.mock.calls[0]![1].media).toEqual(media)
+  })
+
   it('un archivo sin nombre toma el de su URL', async () => {
     await POST(pedir({ texto: 'Hola', media: [{ url: 'https://cdn.ejemplo.cl/scheduled/x-foto.jpg', mediaType: 'image' }] }))
     expect(guardarBorrador.mock.calls[0]![1].media).toEqual([

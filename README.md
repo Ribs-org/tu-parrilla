@@ -802,9 +802,14 @@ uno por archivo, que comparten `{ secuencia, orden }`: el publicador no publica 
 orden aunque tengan la misma hora (`secuencia.ts`). Instagram la publica con un contenedor
 `STORIES`; Facebook, con `/photo_stories` o, el video, con `/video_stories` en tres pasos. En La
 Parrilla una historia es el **choripán al paso**, y en el modo día un onigiri. Hoy se
-programan por la API y el CSV; el compositor del panel y el teléfono las ofrecen en las
-entregas siguientes (`docs/superpowers/specs/2026-10-24-historias-design.md`). Las historias no
-entran al sondeo de comentarios ni a las métricas.
+programan por la API, el CSV y el teléfono («Post · Historia» en Publicar, con su visor 9:16; ver
+`mobile/README.md`); el compositor del panel las ofrece en una entrega siguiente
+(`docs/superpowers/specs/2026-10-24-historias-design.md`). Una secuencia armada en el teléfono
+entra entera o no entra: `POST /api/mobile/schedule` con `secuencia: true` crea una historia por
+archivo en una sola transacción (`crearVariosProgramados`), y el borrador del que sale se consume
+una vez para todas. El borrador recuerda si es una historia en el campo `modo`; el compositor del
+panel todavía no lo lee, y abre ese borrador como un post. Las historias no entran al sondeo de
+comentarios ni a las métricas.
 
 ### TikTok
 

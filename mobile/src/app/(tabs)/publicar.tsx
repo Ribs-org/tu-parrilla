@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react'
-import { AppState, KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, View } from 'react-native'
+import { AppState, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native'
 import * as ImagePicker from 'expo-image-picker'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { MusicaInstagramBloque } from '../../components/musica-instagram'
+import { TiraDeHistorias, VisorDeHistorias } from '../../components/visor-historias'
 import { useSelectorFecha } from '../../components/selector-fecha'
 import { fechaLegible } from '../../lib/calendario'
 import { Boton, BotonTexto, Chip, ErrorConReintento, Miniatura } from '../../components/ui'
@@ -56,6 +57,20 @@ import {
   type Archivo,
 } from '../../lib/publicar'
 import { cuentasConMusica, type MusicaInstagram } from '../../lib/musica'
+import {
+  HISTORIA_SIN_TEXTO_AQUI,
+  SIN_CUENTAS_DE_HISTORIA,
+  avisosDeHistoria,
+  cuentasDeHistoria,
+  cuentasQueVan,
+  detalleDeHistorias,
+  etiquetaProgramar,
+  medidasDe,
+  moverArchivo,
+  opcionesDeHistoria,
+  puedeEnviarHistoria,
+  type Modo,
+} from '../../lib/historias'
 import { subirUno } from '../../lib/subir'
 import type { BorradorAbierto, CuentaApp } from '../../lib/tipos'
 
@@ -119,6 +134,13 @@ export default function Publicar() {
   const [abriendo, setAbriendo] = useState(false)
   const [soloEnElPanel, setSoloEnElPanel] = useState<string | null>(null)
   const [estadoBorrador, setEstadoBorrador] = useState<EstadoBorrador>('nada')
+  // «Post · Historia». En Historia cada archivo es una historia, en el orden de la lista; el
+  // texto, el trial reel y la canción quedan guardados pero no viajan (`historias.ts`).
+  const [modo, setModo] = useState<Modo>('post')
+  // La historia que se ve en el visor.
+  const [actual, setActual] = useState(0)
+  // Las cuentas marcadas que van: en Historia, solo las de Instagram y Facebook.
+  const van = cuentasQueVan(modo, cuentas, disponibles)
 
   /* ---- los archivos: se suben apenas se eligen ---- */
 
@@ -137,10 +159,19 @@ export default function Publicar() {
   // El guardado corre un rato después del último cambio, y la cola de subida entre awaits:
   // los dos leen lo de ahora y no lo del render en que empezaron. Se copia después de
   // pintar, porque escribir un ref durante el render no está permitido.
-  const formRef = useRef<Formulario>({ texto, cuentas, trial, musica, fecha, fechaPuesta, archivos })
+  const formRef = useRef<Formulario>({ texto, cuentas, trial, musica, fecha, fechaPuesta, archivos, historia: false })
   const disponiblesRef = useRef<CuentaApp[]>([])
   useEffect(() => {
-    formRef.current = { texto, cuentas, trial, musica, fecha, fechaPuesta, archivos: archivosRef.current }
+    formRef.current = {
+      texto,
+      cuentas,
+      trial,
+      musica,
+      fecha,
+      fechaPuesta,
+      archivos: archivosRef.current,
+      historia: modo === 'historia',
+    }
     disponiblesRef.current = disponibles
   })
 
@@ -259,7 +290,7 @@ export default function Publicar() {
       pausa.current = null
       void guardar()
     }, PAUSA_MS)
-  }, [texto, cuentas, trial, musica, fecha, fechaPuesta, firmaMedia, guardar])
+  }, [texto, cuentas, trial, musica, fecha, fechaPuesta, firmaMedia, modo, guardar])
 
   // Si la app pasa a segundo plano, el sistema puede cerrarla sin avisar: lo pendiente se
   // manda antes. Igual al desmontar, si quedó algo esperando la pausa.
@@ -290,6 +321,8 @@ export default function Publicar() {
     setMusica({})
     setFecha(ahora)
     setFechaPuesta(false)
+    setModo('post')
+    setActual(0)
     setAviso(null)
     setSoloEnElPanel(null)
     setEstadoBorrador('nada')
@@ -299,7 +332,16 @@ export default function Publicar() {
     sinGuardar.current = false
     perdido.current = false
     quieto.current = false
-    formRef.current = { texto: '', cuentas: marcadas, trial: [], musica: {}, fecha: ahora, fechaPuesta: false, archivos: [] }
+    formRef.current = {
+      texto: '',
+      cuentas: marcadas,
+      trial: [],
+      musica: {},
+      fecha: ahora,
+      fechaPuesta: false,
+      archivos: [],
+      historia: false,
+    }
   }, [cambiarArchivos])
 
   /**
@@ -341,8 +383,11 @@ export default function Publicar() {
       fecha: b.cuando ? new Date(b.cuando) : proximaHoraEnPunto(new Date()),
       fechaPuesta: Boolean(b.cuando),
       archivos: lista,
+      historia: b.historia === true,
     }
     cambiarArchivos(() => lista)
+    setModo(form.historia ? 'historia' : 'post')
+    setActual(0)
     setTexto(form.texto)
     setCuentas(form.cuentas)
     setTrial(form.trial)
@@ -459,7 +504,7 @@ export default function Publicar() {
         setAviso(descrito.error)
         return
       }
-      nuevos.push(archivoElegido(descrito))
+      nuevos.push(archivoElegido(descrito, medidasDe(asset)))
     }
     setAviso(null)
     cambiarArchivos((lista) => [...lista, ...nuevos].slice(0, MAX_ARCHIVOS))
@@ -469,6 +514,15 @@ export default function Publicar() {
   function quitar(clave: string) {
     if (enSubida.current?.clave === clave) enSubida.current.control.abort()
     cambiarArchivos((lista) => lista.filter((a) => a.clave !== clave))
+    setActual((i) => Math.max(0, Math.min(i, archivosRef.current.length - 1)))
+  }
+
+  /** «Antes» y «Después» en la tira: la historia que se ve cambia de lugar, y el visor la sigue. */
+  function mover(delta: -1 | 1) {
+    const clave = archivosRef.current[actual]?.clave
+    if (!clave) return
+    cambiarArchivos((lista) => moverArchivo(lista, clave, delta))
+    setActual(archivosRef.current.findIndex((a) => a.clave === clave))
   }
 
   function reintentarSubida(clave: string) {
@@ -519,18 +573,36 @@ export default function Publicar() {
       return
     }
     quieto.current = true
+    const media = subidos(archivos).map(({ url, mediaType }) => ({ url, mediaType }))
+    const cuando = ahora ? null : fecha.toISOString()
+    // Que esta app sabe de música: sin esto el servidor le suma la que guardaba el borrador.
+    const cuerpo =
+      modo === 'historia'
+        ? {
+            // Sin texto ni opciones de post: una historia no los lleva. Con varios archivos, el
+            // servidor arma una historia por archivo, en este orden y en una sola transacción.
+            texto: '',
+            cuentas: van,
+            cuando,
+            ahora,
+            opciones: opcionesDeHistoria(van),
+            media,
+            secuencia: true,
+            borradorId: borradorId.current,
+            conMusica: true,
+          }
+        : {
+            texto: texto.trim(),
+            cuentas,
+            cuando,
+            ahora,
+            opciones: opcionesDelBorrador(disponibles, cuentas, trial, archivos, musica),
+            media,
+            borradorId: borradorId.current,
+            conMusica: true,
+          }
     try {
-      await apiPost('/api/mobile/schedule', token, {
-        texto: texto.trim(),
-        cuentas,
-        cuando: ahora ? null : fecha.toISOString(),
-        ahora,
-        opciones: opcionesDelBorrador(disponibles, cuentas, trial, archivos, musica),
-        media: subidos(archivos).map(({ url, mediaType }) => ({ url, mediaType })),
-        borradorId: borradorId.current,
-        // Que esta app sabe de música: sin esto el servidor le suma la que guardaba el borrador.
-        conMusica: true,
-      })
+      await apiPost('/api/mobile/schedule', token, cuerpo)
       despachar({ tipo: 'hecho' })
     } catch (e) {
       quieto.current = false
@@ -562,8 +634,12 @@ export default function Publicar() {
   }
 
   function publicarAhora() {
-    const elegidas = disponibles.filter((c) => cuentas.includes(c.id))
-    void preguntar({ titulo: 'Publicar ahora', detalle: textoConfirmacion(elegidas), cancelar: 'Cancelar', accion: 'Publicar' }).then(
+    const elegidas = disponibles.filter((c) => van.includes(c.id))
+    const detalle =
+      modo === 'historia'
+        ? `${textoConfirmacion(elegidas)} ${detalleDeHistorias(archivos.length)}`
+        : textoConfirmacion(elegidas)
+    void preguntar({ titulo: 'Publicar ahora', detalle, cancelar: 'Cancelar', accion: 'Publicar' }).then(
       (si) => {
         if (si) void enviar(true)
       },
@@ -629,12 +705,23 @@ export default function Publicar() {
   const etiqueta = etiquetaEnvio(envio)
   const error = envio.paso === 'listo' ? envio.error : null
   const subidas = estadoSubidas(archivos)
+  const esHistoria = modo === 'historia'
+  // Lo que se avisa de cada historia, según adónde va: la foto que no es JPG solo importa en Instagram.
+  const redesQueVan = new Set(disponibles.filter((c) => van.includes(c.id)).map((c) => c.red))
+  const avisos = esHistoria
+    ? archivos.map((a) => avisosDeHistoria(a, redesQueVan.has('instagram'), redesQueVan.has('facebook')))
+    : []
+  const bloqueada = avisos.some((lista) => lista.some((a) => a.bloquea))
   const sePuedeEnviar =
-    puedeEnviar(texto, archivos.length, cuentas.length) &&
+    (esHistoria
+      ? puedeEnviarHistoria(archivos.length, van.length, bloqueada)
+      : puedeEnviar(texto, archivos.length, cuentas.length)) &&
     !hayPendientes(archivos) &&
     soloEnElPanel === null &&
     estadoBorrador !== 'perdido'
   const hayAlgo = texto.trim() !== '' || archivos.length > 0 || estadoBorrador !== 'nada'
+  const mostradas = esHistoria ? cuentasDeHistoria(disponibles) : disponibles
+  const enVisor = Math.min(actual, Math.max(0, archivos.length - 1))
 
   return (
     // `height` es el `behavior` de Android: la app dibuja de borde a borde, así que la
@@ -653,45 +740,99 @@ export default function Publicar() {
         {abriendo ? <Text style={{ color: colores.suave, fontSize: 12 }}>Abriendo borrador…</Text> : null}
         {soloEnElPanel ? <Text style={{ color: colores.ambar, fontSize: 13 }}>{soloEnElPanel}</Text> : null}
 
-        <TextInput
-          value={texto}
-          onChangeText={setTexto}
-          multiline
-          maxLength={MAX_TEXTO}
-          editable={!ocupado}
-          placeholder="Texto del post…"
-          placeholderTextColor={colores.tenue}
-          style={{
-            backgroundColor: colores.tarjeta,
-            color: colores.texto,
-            borderRadius: 12,
-            padding: 14,
-            minHeight: 120,
-            textAlignVertical: 'top',
-          }}
-        />
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-          <Text style={{ color: colores.tenue, fontSize: 11 }}>En YouTube el primer renglón es el título</Text>
-          <Text style={{ color: colores.tenue, fontSize: 11 }}>
-            {texto.length} / {MAX_TEXTO}
-          </Text>
-        </View>
+        <SelectorDeModo modo={modo} onCambiar={setModo} deshabilitado={ocupado} />
 
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
-          {archivos.map((a, i) => (
-            <Miniatura
-              key={a.clave}
-              uri={a.vista}
-              esVideo={a.mediaType === 'video'}
-              nota={notaDeArchivo(archivos, i)}
-              onTocar={a.estado === 'fallo' && !ocupado ? () => reintentarSubida(a.clave) : undefined}
-              onQuitar={ocupado ? undefined : () => quitar(a.clave)}
+        {esHistoria ? (
+          <>
+            {archivos.length > 0 ? (
+              <>
+                <VisorDeHistorias
+                  archivos={archivos}
+                  indice={enVisor}
+                  onIndice={setActual}
+                  avisos={avisos}
+                  notas={archivos.map((_, i) => notaDeArchivo(archivos, i))}
+                  onTocar={(i) => {
+                    const a = archivos[i]
+                    return a?.estado === 'fallo' && !ocupado ? () => reintentarSubida(a.clave) : undefined
+                  }}
+                />
+                <TiraDeHistorias
+                  archivos={archivos}
+                  indice={enVisor}
+                  onElegir={setActual}
+                  onQuitar={ocupado ? undefined : quitar}
+                  hayAvisos={avisos.map((lista) => lista.length > 0)}
+                />
+                {archivos.length > 1 ? (
+                  <View style={{ flexDirection: 'row', gap: 20, alignItems: 'center' }}>
+                    <Text style={{ color: colores.tenue, fontSize: 12 }}>
+                      La {enVisor + 1} sale {enVisor === 0 ? 'primero' : `después de la ${enVisor}`}.
+                    </Text>
+                    <BotonTexto texto="← Antes" onPress={() => mover(-1)} deshabilitado={ocupado || enVisor === 0} />
+                    <BotonTexto
+                      texto="Después →"
+                      onPress={() => mover(1)}
+                      deshabilitado={ocupado || enVisor === archivos.length - 1}
+                    />
+                  </View>
+                ) : null}
+              </>
+            ) : (
+              <Text style={{ color: colores.tenue, fontSize: 12 }}>
+                Cada foto o video es una historia, en 9:16. Con varios, salen una detrás de otra, en el orden de la tira.
+              </Text>
+            )}
+            {archivos.length < MAX_ARCHIVOS && !ocupado ? (
+              <View style={{ flexDirection: 'row' }}>
+                <Chip texto="+ Fotos o video" activo={false} onPress={() => void elegir()} />
+              </View>
+            ) : null}
+            {texto.trim() !== '' ? <Text style={{ color: colores.tenue, fontSize: 11 }}>{HISTORIA_SIN_TEXTO_AQUI}</Text> : null}
+          </>
+        ) : (
+          <>
+            <TextInput
+              value={texto}
+              onChangeText={setTexto}
+              multiline
+              maxLength={MAX_TEXTO}
+              editable={!ocupado}
+              placeholder="Texto del post…"
+              placeholderTextColor={colores.tenue}
+              style={{
+                backgroundColor: colores.tarjeta,
+                color: colores.texto,
+                borderRadius: 12,
+                padding: 14,
+                minHeight: 120,
+                textAlignVertical: 'top',
+              }}
             />
-          ))}
-          {archivos.length < MAX_ARCHIVOS && !ocupado ? (
-            <Chip texto="+ Fotos o video" activo={false} onPress={() => void elegir()} />
-          ) : null}
-        </View>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <Text style={{ color: colores.tenue, fontSize: 11 }}>En YouTube el primer renglón es el título</Text>
+              <Text style={{ color: colores.tenue, fontSize: 11 }}>
+                {texto.length} / {MAX_TEXTO}
+              </Text>
+            </View>
+
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
+              {archivos.map((a, i) => (
+                <Miniatura
+                  key={a.clave}
+                  uri={a.vista}
+                  esVideo={a.mediaType === 'video'}
+                  nota={notaDeArchivo(archivos, i)}
+                  onTocar={a.estado === 'fallo' && !ocupado ? () => reintentarSubida(a.clave) : undefined}
+                  onQuitar={ocupado ? undefined : () => quitar(a.clave)}
+                />
+              ))}
+              {archivos.length < MAX_ARCHIVOS && !ocupado ? (
+                <Chip texto="+ Fotos o video" activo={false} onPress={() => void elegir()} />
+              ) : null}
+            </View>
+          </>
+        )}
 
         {cuentasEstado.paso === 'cargando' ? (
           <Text style={{ color: colores.tenue, fontSize: 12 }}>Cargando cuentas…</Text>
@@ -705,10 +846,14 @@ export default function Publicar() {
             No hay ninguna cuenta lista para publicar desde el teléfono. Conéctala en el panel
             web, en {LOS_FIERROS[tema]}.
           </Text>
+        ) : esHistoria && mostradas.length === 0 ? (
+          <Text style={{ color: colores.tenue, fontSize: 12 }}>
+            {SIN_CUENTAS_DE_HISTORIA} Conéctala en el panel web, en {LOS_FIERROS[tema]}.
+          </Text>
         ) : (
           <>
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
-              {disponibles.map((c) =>
+              {mostradas.map((c) =>
                 c.conectada ? (
                   <Chip
                     key={c.id}
@@ -734,10 +879,12 @@ export default function Publicar() {
                 ),
               )}
             </View>
-            {cuentas.length === 0 ? (
-              <Text style={{ color: colores.tenue, fontSize: 11 }}>Elige al menos una cuenta.</Text>
+            {van.length === 0 ? (
+              <Text style={{ color: colores.tenue, fontSize: 11 }}>
+                {esHistoria ? 'Elige al menos una cuenta de Instagram o Facebook.' : 'Elige al menos una cuenta.'}
+              </Text>
             ) : null}
-            {cuentasConTrial(disponibles, cuentas, archivos).length > 0 ? (
+            {!esHistoria && cuentasConTrial(disponibles, cuentas, archivos).length > 0 ? (
               <>
                 <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
                   {cuentasConTrial(disponibles, cuentas, archivos).map((c) => (
@@ -764,7 +911,7 @@ export default function Publicar() {
                   ))}
               </>
             ) : null}
-            {cuentasConMusica(disponibles, cuentas, archivos).map((c) => (
+            {(esHistoria ? [] : cuentasConMusica(disponibles, cuentas, archivos)).map((c) => (
               <MusicaInstagramBloque
                 key={`musica:${c.id}`}
                 cuenta={c}
@@ -780,13 +927,23 @@ export default function Publicar() {
         <Chip texto={`Cuándo: ${fechaLegible(fecha)}`} activo onPress={elegirFecha} deshabilitado={ocupado} />
 
         {aviso ? <Text style={{ color: colores.rojo }}>{aviso}</Text> : null}
+        {/* Lo que apaga «Programar» en una historia, dicho acá también: puede estar en otra del visor. */}
+        {avisos.flatMap((lista, i) =>
+          lista
+            .filter((a) => a.bloquea)
+            .map((a) => (
+              <Text key={`bloquea:${i}:${a.texto}`} style={{ color: colores.rojo }}>
+                {archivos.length > 1 ? `La ${i + 1}: ${a.texto}` : a.texto}
+              </Text>
+            )),
+        )}
         {error ? <Text style={{ color: colores.rojo }}>{error}</Text> : null}
         {subidas ? <Text style={{ color: subidas.error ? colores.rojo : colores.suave }}>{subidas.texto}</Text> : null}
         {etiqueta ? <Text style={{ color: colores.suave }}>{etiqueta}</Text> : null}
 
         <View style={{ flexDirection: 'row', gap: 10 }}>
           <Boton
-            texto="Programar"
+            texto={etiquetaProgramar(modo, archivos.length)}
             onPress={programar}
             deshabilitado={ocupado || !sePuedeEnviar}
           />
@@ -817,5 +974,56 @@ export default function Publicar() {
       </ScrollView>
       {selector}
     </KeyboardAvoidingView>
+  )
+}
+
+/**
+ * «Post · Historia», arriba de todo: dos botones grandes, el elegido lleno de brasa. Cambiar no
+ * borra nada: el texto, el trial reel y la canción quedan para cuando se vuelva a Post.
+ */
+function SelectorDeModo({
+  modo,
+  onCambiar,
+  deshabilitado,
+}: {
+  modo: Modo
+  onCambiar: (m: Modo) => void
+  deshabilitado: boolean
+}) {
+  const colores = useColores()
+  const opciones: { valor: Modo; texto: string }[] = [
+    { valor: 'post', texto: 'Post' },
+    { valor: 'historia', texto: 'Historia' },
+  ]
+  return (
+    <View style={{ flexDirection: 'row', gap: 8 }} accessibilityRole="radiogroup">
+      {opciones.map((o) => {
+        const elegido = modo === o.valor
+        return (
+          <Pressable
+            key={o.valor}
+            onPress={() => onCambiar(o.valor)}
+            disabled={deshabilitado}
+            accessibilityRole="radio"
+            accessibilityState={{ checked: elegido, disabled: deshabilitado }}
+            style={({ pressed }) => ({
+              flex: 1,
+              minHeight: 48,
+              borderRadius: 12,
+              borderWidth: 1,
+              borderColor: elegido ? colores.brasa : colores.velo + '29',
+              backgroundColor: elegido ? colores.brasa : 'transparent',
+              alignItems: 'center',
+              justifyContent: 'center',
+              opacity: deshabilitado ? 0.5 : pressed ? 0.7 : 1,
+            })}
+          >
+            <Text style={{ color: elegido ? colores.fondo : colores.texto, fontSize: 15, fontWeight: '600' }}>
+              {o.texto}
+            </Text>
+          </Pressable>
+        )
+      })}
+    </View>
   )
 }

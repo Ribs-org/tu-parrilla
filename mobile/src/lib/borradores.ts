@@ -1,4 +1,5 @@
 import { opcionesParaGuardar, subidos, type Archivo, type MediaSubida, type OpcionesApp } from './publicar'
+import type { Modo } from './historias'
 import type { MusicaInstagram } from './musica'
 import { LA_PARRILLA, type Tema } from './tema'
 import type { BorradorResumido, CuentaApp } from './tipos'
@@ -62,6 +63,8 @@ export type Formulario = {
   /** Si la fecha la eligió alguien —o vino de un «+» o de un borrador— y no es la de partida. */
   fechaPuesta: boolean
   archivos: Archivo[]
+  /** Si es una historia (el selector «Post · Historia»); falta en lo armado antes de que existiera. */
+  historia?: boolean
 }
 
 export type CuerpoBorrador = {
@@ -75,12 +78,21 @@ export type CuerpoBorrador = {
    * porque una app que no la muestra no pudo haberla quitado (`musicaDelTelefono`).
    */
   conMusica: true
+  /**
+   * Post o historia. Sin esto el servidor conserva el modo que tenía el borrador, porque una app
+   * que no sabe de historias no pudo haberlo cambiado (`historiaDelTelefono`).
+   */
+  modo: Modo
 }
 
 /**
  * El cuerpo de `POST /api/mobile/borradores`, sin el id. La fecha viaja solo si alguien la
  * puso: la próxima hora en punto con que abre Publicar no es una decisión, y sin esto cada
  * borrador nuevo aparecería en el día de hoy en La Parrilla.
+ *
+ * En una historia viaja todo igual —el texto, el trial reel, la canción—: el borrador guarda lo
+ * de los dos modos y el modo dice cuál vale, así cambiar a Historia y volver a Post no pierde
+ * nada. Lo que sale al programar una historia lo arma `historias.ts`, sin texto ni opciones de post.
  */
 export function cuerpoDelBorrador(form: Formulario): CuerpoBorrador {
   return {
@@ -90,6 +102,7 @@ export function cuerpoDelBorrador(form: Formulario): CuerpoBorrador {
     opciones: opcionesParaGuardar(form.cuentas, form.trial, form.archivos, form.musica ?? {}),
     media: subidos(form.archivos),
     conMusica: true,
+    modo: form.historia ? 'historia' : 'post',
   }
 }
 

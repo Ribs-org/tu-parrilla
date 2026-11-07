@@ -11,7 +11,14 @@ import { colorDeRed } from '../../components/colores'
 import { RechazoApi, SesionCaducada, apiDelete, apiGet, apiPatch } from '../../lib/api'
 import { fechaLegible } from '../../lib/calendario'
 import { anotarCambio } from '../../lib/cambios'
-import { NO_SE_ABRIO_POST, cuerpoDeLaEdicion, destinosQueSiguen, limiteDelTexto, sePuedeQuitar } from '../../lib/editar'
+import {
+  HISTORIA_EN_EL_EDITOR,
+  NO_SE_ABRIO_POST,
+  cuerpoDeLaEdicion,
+  destinosQueSiguen,
+  limiteDelTexto,
+  sePuedeQuitar,
+} from '../../lib/editar'
 import { SIN_SENAL, etiquetaCuenta } from '../../lib/publicar'
 import type { PostEditable } from '../../lib/tipos'
 
@@ -169,27 +176,34 @@ export default function EditarProgramado() {
         contentContainerStyle={{ padding: 16, paddingBottom: 48, gap: 14 }}
         keyboardShouldPersistTaps="handled"
       >
-        <Etiqueta>Texto</Etiqueta>
-        <TextInput
-          value={texto}
-          onChangeText={setTexto}
-          multiline
-          editable={ocupado === null}
-          placeholder="Texto del post…"
-          placeholderTextColor={colores.tenue}
-          style={{
-            backgroundColor: colores.tarjeta,
-            color: colores.texto,
-            borderRadius: 12,
-            padding: 14,
-            minHeight: 120,
-            textAlignVertical: 'top',
-          }}
-        />
-        {/* El tope es el de la red más estricta que sigue (X, 280): pasado, se pone rojo. */}
-        <Text style={{ color: largo > limite ? colores.rojo : colores.tenue, fontSize: 11, textAlign: 'right' }}>
-          {largo} / {limite}
-        </Text>
+        {post.historia ? (
+          // Una historia no lleva texto: el servidor rechazaría guardarlo (`HISTORIA_SIN_TEXTO`).
+          <Text style={{ color: colores.suave, fontSize: 13 }}>{HISTORIA_EN_EL_EDITOR}</Text>
+        ) : (
+          <>
+            <Etiqueta>Texto</Etiqueta>
+            <TextInput
+              value={texto}
+              onChangeText={setTexto}
+              multiline
+              editable={ocupado === null}
+              placeholder="Texto del post…"
+              placeholderTextColor={colores.tenue}
+              style={{
+                backgroundColor: colores.tarjeta,
+                color: colores.texto,
+                borderRadius: 12,
+                padding: 14,
+                minHeight: 120,
+                textAlignVertical: 'top',
+              }}
+            />
+            {/* El tope es el de la red más estricta que sigue (X, 280): pasado, se pone rojo. */}
+            <Text style={{ color: largo > limite ? colores.rojo : colores.tenue, fontSize: 11, textAlign: 'right' }}>
+              {largo} / {limite}
+            </Text>
+          </>
+        )}
 
         <Etiqueta>Cuándo sale</Etiqueta>
         <View style={{ flexDirection: 'row' }}>

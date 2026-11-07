@@ -566,6 +566,11 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   siete archivos que lista `mobile/README.md`, «La Mesa por aire a la 1.1.0», después de que el
   servidor esté en producción, con el comando de siempre en los dos canales. Probada en Expo web
   contra una API falsa; en un teléfono, no.
+- **[dueño] Publicar las historias de Publicar por aire** (2026-11-07). Puro JavaScript, sin
+  permisos nuevos: a la 1.2.0 sale de `main`, y a la 1.1.0 desde `ota-1.1.0` copiando los archivos
+  que lista `mobile/README.md`, «Las historias por aire a la 1.1.0». Siempre después de que el
+  servidor esté en producción (sin él, una secuencia se rechaza). Probado en Expo web contra una API
+  falsa; en un teléfono, no.
 - **[dueño] La app en iPhone** (2026-10-16). El código ya está listo para iOS; faltan la
   cuenta del Apple Developer Program, confirmar el identificador `cl.tuparrilla.app`
   (queda fijo al registrarlo), la ficha en App Store Connect y el primer build a
@@ -684,8 +689,13 @@ nadie paga: todas las cuentas son iguales y el README dice «Sin suscripción».
   el diseño entero está en `docs/superpowers/specs/2026-10-24-historias-design.md`. Falta:
   - el compositor del panel, con el selector «Post · Historia» y las tarjetas verticales
     (parte 2), y en La Parrilla el número de la secuencia («1/3») junto al corte y, en el
-    detalle del post, «Historia en Instagram · @cuenta»;
-  - Publicar en el teléfono, con el visor 9:16 (parte 3), por OTA;
+    detalle del post, «Historia en Instagram · @cuenta». El teléfono ya las arma (parte 3,
+    2026-11-07): el compositor tiene que leer y escribir el campo `modo` del borrador
+    (`esBorradorDeHistoria`, en `src/lib/borrador.ts`). Hasta entonces abre un borrador de historia
+    del teléfono como un post, y al guardarlo deja de ser historia;
+  - en el teléfono, ver el primer cuadro de un video en el visor (hoy, «▶» y la duración: sacarlo
+    sin `expo-video` pide una miniatura del servidor) y cambiar el orden de una secuencia ya
+    programada (hoy se borra y se programa de nuevo);
   - **[dueño] la primera historia real**, con una cuenta de prueba: si Instagram la rechaza
     desde una cuenta de creador (@vicente_edits2, si es Creator), y un video a la página de
     Facebook, cuya guía se contradice entre 60 y 90 segundos. Si Instagram ya no rechaza las de

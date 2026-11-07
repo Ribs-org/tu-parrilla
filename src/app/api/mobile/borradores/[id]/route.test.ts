@@ -73,6 +73,7 @@ describe('GET /api/mobile/borradores/[id]', () => {
       cuentas: ['ig-1'],
       trial: ['ig-1'],
       musica: {},
+      historia: false,
       cuando: '2026-10-20T19:00:00-03:00',
       media: [{ url: 'https://cdn.ejemplo.cl/scheduled/a.mp4', mediaType: 'video', nombre: 'a.mp4' }],
       soloEnElPanel: 'Este borrador va también a TikTok y tiene la palabra clave «GUIA»: eso se programa en el panel web.',

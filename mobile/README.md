@@ -8,7 +8,8 @@ panel web, en versión corta: **La Parrilla** (lo programado día por
 día —con un filtro por red, lo que ya salió hundido en un renglón y, hoy, la línea de
 «ahora»—, lo que se quemó, los borradores y cuántos cortes salieron ayer), **Publicar**
 (eliges fotos o un video de la galería, escribes el texto, marcas las cuentas y lo
-programas, o lo mandas a salir ahora), **Los Números** (las dos mitades del tablero, con «Tus
+programas, o lo mandas a salir ahora; o, con «Historia», una historia o una secuencia de
+historias para Instagram y Facebook), **Los Números** (las dos mitades del tablero, con «Tus
 publicaciones» un toque adentro y los seguidores de cada red detrás de «⋯ Más») y, desde la versión
 1.2.0 (2026-11-02), **La Cocina** (grabar un video o sacar una foto con la cámara del teléfono,
 ordenar la cámara de frío y pedirle una comanda al chef de la casa con las opciones del panel; ver
@@ -231,6 +232,45 @@ la canción que el borrador traía del panel se conserva al guardar y se suma al
 Lo que no se puede hacer desde el teléfono, y sigue siendo del panel web: poner una
 portada, etiquetar con atributos y programar en TikTok o con una palabra clave.
 
+### Las historias (2026-11-07)
+
+Arriba de Publicar, **«Post · Historia»**. En Historia, cada foto o video es una historia de
+Instagram o Facebook: sin texto, sin trial reel, sin canción y solo con las cuentas de esas dos
+redes. Lo primero es el **visor**: la historia en 9:16, recortada como se va a ver, con una raya
+por historia arriba y deslizando de lado para pasar de una a otra; debajo, la tira con el orden en
+que salen, «← Antes» y «Después →» para cambiarlo y la «✕» de cada una. El botón dice
+**«Programar historia»** o **«Programar N historias»**. El diseño entero, y lo que se decidió al
+construir esta parte, está en `docs/superpowers/specs/2026-10-24-historias-design.md`.
+
+- **Una secuencia entra entera.** La app manda un solo pedido con `secuencia: true`, las cuentas en
+  `{ historia: true }` y los archivos en su orden; el servidor crea una historia por archivo, con
+  la misma hora y su lugar (`{ secuencia, orden }`), en una sola transacción, y consume el borrador
+  una vez para todas. Así una secuencia no queda a medias por una señal que se corta, y un envío
+  repetido no la duplica: el borrador ya no está. Contra un servidor de antes, varios archivos se
+  rechazan con «Una historia es un solo archivo, foto o video.»; una sola historia funciona igual.
+- **Lo que se avisa antes**, sobre el visor y con las frases del servidor: una foto que no es JPG
+  hacia Instagram apaga «Programar» (`HISTORIA_JPG`, que el servidor rechazaría igual); un video de
+  más de 60 s y lo que no es 9:16 se avisan en ámbar y se programa igual, porque el servidor no
+  mide. El ancho, el alto y la duración los da el selector de imágenes (`medidasDe`); un archivo
+  que vuelve de un borrador no los trae, y no se avisa.
+- **El borrador recuerda el modo** (`modo: 'historia'`, en `src/lib/borrador.ts` de la raíz) y
+  guarda igual el texto, el trial reel y la canción: cambiar a Historia y volver a Post no pierde
+  nada. Una app sin actualizar no manda `modo`, y el servidor conserva el que había; si esa app
+  intenta programar como post un borrador de historia, se rechaza (`BORRADOR_ES_HISTORIA`) en vez
+  de publicar un carrusel. El compositor del panel todavía no tiene «Historia»: abre ese borrador
+  como un post (ver `docs/pendientes.md`).
+- **Un video no se reproduce en el visor**: pediría `expo-video`, que es nativo. Se ve «▶» con su
+  duración. El orden se cambia con flechas y no arrastrando: arrastrar pedía armar el gesto con
+  `react-native-gesture-handler` sobre una tira que también se desliza, y las flechas dicen lo
+  mismo con un toque y se leen con el lector de pantalla.
+- **Editar publicación** abre una historia sin el cuadro del texto («Es una historia: no lleva
+  texto…»): el servidor rechazaría guardarlo. Lo dice el campo `historia` de
+  `GET /api/mobile/schedule/posts/{id}`; uno de antes no lo manda y la pantalla muestra el texto.
+
+Todo es JavaScript y lo que la app ya trae (`expo-image`, `expo-image-picker`, el `ScrollView` de
+React Native): sin módulos ni permisos nuevos, llega por aire también a la 1.1.0 (ver «Las
+historias por aire a la 1.1.0», abajo).
+
 ### Corregir o borrar lo programado
 
 Tocar la tarjeta de un post en La Parrilla abre **Editar publicación**: el texto, la hora
@@ -371,6 +411,22 @@ servidor de esta rama esté en producción, aunque la app aguanta el orden contr
 viajan desde el servidor», arriba). Publicarla es decisión del dueño: está en `docs/pendientes.md`. En Expo web, contra una API
 falsa, sí se probó el resto: elegir de la galería, subir en dos partes con su avance, la frase de
 la cuota, mandar la comanda con la instrucción y la cocina apagada.
+
+### Las historias por aire a la 1.1.0 (preparadas el 2026-11-07, sin publicar)
+
+No piden nada nativo, así que se copian tal cual, sobre la punta de `ota-1.1.0`, de `main` con la
+rama de las historias fusionada (archivos de `mobile/`):
+
+- `src/app/(tabs)/publicar.tsx` y `src/app/programado/[id].tsx`;
+- `src/components/visor-historias.tsx`;
+- `src/lib/historias.ts` (con `historias.test.ts`), `src/lib/publicar.ts`, `src/lib/borradores.ts`
+  (con `borradores.test.ts`), `src/lib/editar.ts` y `src/lib/tipos.ts`.
+
+El 2026-11-07 esos archivos eran iguales en `main` y en `ota-1.1.0` antes de este cambio
+(`publicar.tsx` ya traía ahí la música de #328), así que copiarlos no pisa nada de la rama. **No**
+se tocan `app.json` ni `package.json`. Y se publica **después** de que el servidor de esta rama esté
+en producción: con un servidor de antes, una sola historia sale bien, pero una secuencia se
+rechaza («Una historia es un solo archivo, foto o video.») y el borrador no recuerda el modo.
 
 ### El portapapeles, con y sin su módulo nativo
 
@@ -527,7 +583,8 @@ falta volver a autorizar nada de eso, solo se cierra el acceso desde el celular.
 ## Qué no hace todavía
 
 - No pone portada ni atributos, y de lo ya programado no cambia los archivos, ni suma
-  cuentas, ni toca lo que ya salió en alguna: eso sigue en el panel.
+  cuentas, ni toca lo que ya salió en alguna: eso sigue en el panel. Tampoco cambia el orden de
+  una secuencia de historias ya programada, ni reproduce un video en el visor.
 - En La Cocina no muestra el mesón (ver `docs/pendientes.md`), no elige el color de acento de la
   marca ni dibuja la estación de cada comanda, y no sigue subiendo con la app en segundo plano: lo
   primero es del panel, y lo último retoma al volver a abrir La Cocina.
