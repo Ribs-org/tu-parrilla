@@ -37,12 +37,24 @@ export type PublicacionDeLaMesa = {
   comentarios: ComentarioDeLaMesa[]
 }
 
+/** Una publicación de Instagram del aviso «Comentarios que Instagram no entrega», con su frase ya escrita. */
+export type FaltanteDeLaMesa = {
+  id: string
+  cuenta: string | null
+  texto: string | null
+  miniatura: string | null
+  enlace: string | null
+  frase: string
+}
+
 export type LaMesa = {
   estado: EstadoDeLaMesa
   red: string | null
   redes: string[]
   pendientes: number
   publicaciones: PublicacionDeLaMesa[]
+  /** Opcional: un servidor de antes del aviso no lo manda, y entonces no se muestra. */
+  faltantes?: FaltanteDeLaMesa[]
 }
 
 /** Los filtros por estado del teléfono, con los nombres del panel. «Descartados» y «Todos», allá. */
@@ -53,6 +65,13 @@ export const ESTADOS_DE_LA_MESA: readonly { estado: EstadoDeLaMesa; texto: strin
 ]
 
 export const SUBTITULO_DE_LA_MESA = 'lo que te responden y tus respuestas'
+
+/** Copia de `TITULO_FALTANTES` del panel (`src/lib/social/comentarios/faltantes.ts`). */
+export const TITULO_FALTANTES = 'Comentarios que Instagram no entrega'
+
+/** Copia de `EXPLICACION_FALTANTES` del panel: el pie del aviso. */
+export const EXPLICACION_FALTANTES =
+  'Instagram a veces esconde el comentario que es solo una palabra, como «GUIA», y no se lo muestra ni a ti ni a Tu Parrilla: solo lo ve quien lo escribió. Si pediste una palabra clave, pide que la escriban dentro de una frase, o usa otra palabra en el próximo post. También puedes probar a apagar, en la app de Instagram, «Palabras ocultas» → «Ocultar comentarios» y el filtro avanzado de comentarios (en inglés, Hidden Words → «Hide comments» y «Advanced comment filtering»). Las respuestas que otras personas se dan entre ellas también suman en la cuenta de Instagram y aquí no aparecen: parte de la diferencia puede ser eso.'
 
 /** Lo que pide la pantalla para un filtro, y la clave con que lo guarda. */
 export function pedidoDeLaMesa(estado: EstadoDeLaMesa, red: string | null): { clave: string; ruta: string } {

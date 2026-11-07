@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { ActivityIndicator, KeyboardAvoidingView, Platform, RefreshControl, ScrollView, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { GrupoDeLaMesa } from '../components/mesa'
+import { AvisoDeFaltantes, GrupoDeLaMesa } from '../components/mesa'
 import { useSesion } from '../components/sesion'
 import { useColores } from '../components/tema'
 import { Chip, ErrorConReintento, Sello, Vacio } from '../components/ui'
@@ -84,6 +84,7 @@ export default function PantallaDeLaMesa() {
         ) : (
           <>
             {error ? <Text style={{ color: colores.tenue, fontSize: 12 }}>{error}</Text> : null}
+            <AvisoDeFaltantes faltantes={data.faltantes ?? []} />
             {data.publicaciones.length === 0 ? (
               <Vacio texto={fraseColaVacia(estado === 'pendientes')} />
             ) : (

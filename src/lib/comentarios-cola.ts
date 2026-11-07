@@ -176,12 +176,13 @@ export async function getComentariosQueFaltan(
     .innerJoin(socialAccounts, eq(socialAccounts.id, socialPosts.accountId))
     .where(
       and(
-        eq(socialAccounts.ownerId, ownerId),
         eq(socialPosts.network, 'instagram'),
         isNotNull(socialAccounts.accessToken),
         isNull(socialPosts.archivedAt),
         gte(socialPosts.publishedAt, desde),
         sql`exists (select 1 from post_comments c where c.account_id = ${socialAccounts.id})`,
+        // El dueño al final: la guardia de `aislamiento.test.ts` lo busca después del último WHERE.
+        eq(socialAccounts.ownerId, ownerId),
       ),
     )
     .orderBy(desc(socialPosts.publishedAt))

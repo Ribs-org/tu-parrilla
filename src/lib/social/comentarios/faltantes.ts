@@ -37,6 +37,13 @@ export function comentariosQueFaltan(c: ConteoDePublicacion): number | null {
   return faltan >= MIN_FALTANTES ? faltan : null
 }
 
+/** El título del aviso, en el panel y en el teléfono (`mobile/src/lib/mesa.ts` lo copia). */
+export const TITULO_FALTANTES = 'Comentarios que Instagram no entrega'
+
+/** El pie del aviso, igual en los dos lados; la copia del teléfono la vigila `telefono-copias.test.ts`. */
+export const EXPLICACION_FALTANTES =
+  'Instagram a veces esconde el comentario que es solo una palabra, como «GUIA», y no se lo muestra ni a ti ni a Tu Parrilla: solo lo ve quien lo escribió. Si pediste una palabra clave, pide que la escriban dentro de una frase, o usa otra palabra en el próximo post. También puedes probar a apagar, en la app de Instagram, «Palabras ocultas» → «Ocultar comentarios» y el filtro avanzado de comentarios (en inglés, Hidden Words → «Hide comments» y «Advanced comment filtering»). Las respuestas que otras personas se dan entre ellas también suman en la cuenta de Instagram y aquí no aparecen: parte de la diferencia puede ser eso.'
+
 /** La frase de cada publicación en el aviso de La Mesa. */
 export function fraseDeFaltantes(contados: number, entregados: number): string {
   const entrego = entregados === 0 ? 'no nos entregó ninguno' : `solo nos entregó ${entregados}`

@@ -140,7 +140,10 @@ sección.
   cuando Instagram cuenta dos o más que no llegaron (`src/lib/social/comentarios/faltantes.ts`).
   Ese aviso no distingue las respuestas que otras personas se dan entre ellas, que Instagram
   también cuenta y Tu Parrilla no guarda, y por eso lo dice en vez de afirmar que todo lo que falta
-  lo escondió Instagram. Pendiente:
+  lo escondió Instagram. El teléfono también lo muestra en su La Mesa, pero recién cuando le llegue
+  por aire. Pendiente:
+  - **[dueño]** publicar el aviso por aire a la 1.1.0: son tres archivos de `mobile/` (en
+    `mobile/README.md`, «La Mesa desde el teléfono»);
   - **[dueño]** una prueba de dos minutos: apagar «Hide comments» y «Advanced comment filtering»
     en Hidden Words y comentar `GUIA` solo desde una cuenta nueva en la publicación. Si la dueña
     lo ve, es el filtro de spam, que se apaga, y el aviso de La Mesa puede decirlo con certeza

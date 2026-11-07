@@ -954,7 +954,7 @@ mismas reglas y las mismas frases— y no tienen reglas propias:
 
 | Ruta | Qué hace |
 |---|---|
-| `GET /api/mobile/comentarios?estado=&red=` | La cola de `getCola` agrupada por publicación (`src/lib/comentarios-movil.ts`), con cuántos esperan en esa red (`contarPendientes`) y las redes de los botones (`redesDeLaMesa`, la misma lista del panel). |
+| `GET /api/mobile/comentarios?estado=&red=` | La cola de `getCola` agrupada por publicación (`src/lib/comentarios-movil.ts`), con cuántos esperan en esa red (`contarPendientes`), las redes de los botones (`redesDeLaMesa`, la misma lista del panel) y, en `faltantes`, el aviso «Comentarios que Instagram no entrega» (`getComentariosQueFaltan`, con la frase ya escrita; vacío con otra red elegida). |
 | `GET /api/mobile/comentarios/pendientes` | Solo el número, para la tarjeta de La Parrilla. |
 | `POST /api/mobile/comentarios/{id}/respuesta` | «Enviar», con `{ texto }`: `responderComentario`. |
 | `POST /api/mobile/comentarios/{id}/descartar` | «Descartar»: `descartarComentario`. |

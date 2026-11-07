@@ -53,7 +53,7 @@ Se ven hasta 200 comentarios por filtro, los más nuevos.
 
 ### Comentarios que Instagram no entrega
 
-Un recuadro ámbar entre los filtros y la cola, que aparece solo cuando Instagram cuenta en una publicación más comentarios de los que le entregó a Tu Parrilla. Se ve con el filtro de red en «Todas» o «Instagram», con cualquier estado.
+Un recuadro ámbar entre los filtros y la cola, que aparece solo cuando Instagram cuenta en una publicación más comentarios de los que le entregó a Tu Parrilla. Se ve con el filtro de red en «Todas» o «Instagram», con cualquier estado. La app del teléfono lo muestra igual, arriba de sus comentarios.
 
 - El título «Comentarios que Instagram no entrega».
 - Una línea por publicación (hasta cinco, las más nuevas): la miniatura si la hay, la cuenta y el comienzo del texto de la publicación (al apretarlo se abre en Instagram), y en ámbar «Instagram cuenta 6 comentarios en esta publicación y solo nos entregó 4.» (con los números de esa publicación), o «… y no nos entregó ninguno.».
