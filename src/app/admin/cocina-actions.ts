@@ -4,9 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { requireUser } from '@/lib/auth'
 import { CREATIVO_NO_ESTA, descartarCreativo, leerDescarte, programarCreativo } from '@/lib/cocina/meson'
-import { COMANDA_AJENA, COMANDA_NO_CANCELABLE, cancelarComanda } from '@/lib/cocina/panel'
-import { MATERIAL_EN_USO, MATERIAL_NO_EXISTE, USO_DESCONOCIDO, esUso, leerNombre } from '@/lib/cocina/bodega'
-import { editarMaterial, sacarMaterial } from '@/lib/cocina/materiales'
+import { cambiarElMaterial, cancelarLaComanda, sacarDeLaCamara } from '@/lib/cocina/del-dueno'
 import { leerPedido } from '@/lib/cocina/pedido'
 import { NO_SE_PIDIO, pedirComanda } from '@/lib/cocina/pedir'
 import { responderPregunta } from '@/lib/cocina/preguntar'
@@ -14,16 +12,15 @@ import { esUuid } from '@/lib/uuid'
 
 // Lo que el dueño hace con sus comandas desde La Cocina. Aparte de `actions.ts`, que ya es largo:
 // pedir, cancelar, contestarle al chef, programar y descartar desde el mesón, y la cámara de frío.
-// El id del dueño sale siempre de la sesión, nunca de lo que llega.
+// El id del dueño sale siempre de la sesión, nunca de lo que llega. Cancelar, cambiar y sacar son
+// los mismos que hace la app del teléfono (`src/lib/cocina/del-dueno.ts`).
 
 /** Cancela una comanda propia que todavía no está en el horno. No pide la cocina encendida: si el admin la apagó, igual se puede cancelar. */
 export async function cancelarComandaPropia(id: string): Promise<{ error?: string }> {
   const usuario = await requireUser()
-  if (!esUuid(id)) return { error: COMANDA_AJENA }
-  const r = await cancelarComanda(usuario.id, id, new Date())
+  const r = await cancelarLaComanda(usuario.id, id, new Date())
   revalidatePath('/admin/ia')
-  if ('falla' in r) return { error: r.falla === 'no-existe' ? COMANDA_AJENA : COMANDA_NO_CANCELABLE }
-  return {}
+  return 'error' in r ? { error: r.error } : {}
 }
 
 /**
@@ -89,15 +86,10 @@ export async function programarCreativoPropio(id: string): Promise<{ error?: str
  */
 export async function editarMaterialPropio(id: string, nombre: unknown, uso: unknown): Promise<{ error?: string }> {
   const usuario = await requireUser()
-  const limpio = leerNombre(nombre)
-  if (typeof limpio !== 'string') return { error: limpio.error }
-  if (uso !== null && !esUso(uso)) return { error: USO_DESCONOCIDO }
-  const r = await editarMaterial(usuario.id, id, { nombre: limpio, uso })
+  const r = await cambiarElMaterial(usuario.id, id, nombre, uso)
   revalidatePath('/admin/ia/bodega')
-  return 'falla' in r ? { error: MATERIAL_NO_EXISTE } : {}
+  return 'error' in r ? { error: r.error } : {}
 }
-
-const NO_SE_SACO = 'No se pudo sacar: el almacén no respondió. Vuelve a intentarlo en un rato.'
 
 /**
  * Saca un material de la cámara y lo borra del almacén, si ninguna comanda en marcha lo usa. No
@@ -105,16 +97,8 @@ const NO_SE_SACO = 'No se pudo sacar: el almacén no respondió. Vuelve a intent
  */
 export async function sacarMaterialPropio(id: string): Promise<{ error?: string }> {
   const usuario = await requireUser()
-  let r: Awaited<ReturnType<typeof sacarMaterial>>
-  try {
-    r = await sacarMaterial(usuario.id, id, new Date())
-  } catch (e) {
-    // El archivo se borra antes de soltar el material: si el almacén falla, nada cambió.
-    console.error('sacarMaterialPropio:', String(e).slice(0, 300))
-    return { error: NO_SE_SACO }
-  }
+  const r = await sacarDeLaCamara(usuario.id, id, new Date())
   revalidatePath('/admin/ia/bodega')
   revalidatePath('/admin/ia')
-  if ('falla' in r) return { error: r.falla === 'en-uso' ? MATERIAL_EN_USO : MATERIAL_NO_EXISTE }
-  return {}
+  return 'error' in r ? { error: r.error } : {}
 }

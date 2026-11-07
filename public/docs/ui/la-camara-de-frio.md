@@ -185,9 +185,11 @@ En La Cocina, «Pedir una comanda»: se elige de acá ([la-cocina.md](la-cocina.
 - **«¿Dónde subo mis videos?» / «¿Dónde está la bodega?».** Acá: La Cocina → «La cámara de frío» (de
   día, «La nevera»). También se puede guardar algo nuevo desde «Pedir una comanda».
 - **«¿Puedo guardar desde el teléfono?».** Sí, desde la app (versión 1.2.0): la pestaña «La Cocina»
-  graba un video o saca una foto, o lo elige de la galería, y lo guarda acá con la misma cuota. Lo
-  grabado con la app no queda en la galería del teléfono: queda acá. Renombrar, cambiar el uso y
-  sacar siguen siendo del panel. Ver [La app del teléfono](app-movil.md), «La Cocina».
+  graba un video o saca una foto, o lo elige de la galería, y lo guarda acá con la misma cuota —para
+  una comanda, o sin pedir comanda, con su uso, en la burbuja «La cámara de frío»—. Lo grabado con
+  la app no queda en la galería del teléfono: queda acá. Desde el 2026-11-06 la app también muestra
+  lo que hay adentro, con «Cambiar» y «Sacar de la cámara», con las mismas reglas y frases. Ver
+  [La app del teléfono](app-movil.md), «La Cocina».
 - **«¿Mi IA puede guardar acá?».** Sí, con una llave de «Tu propio chef» (La Cocina → «Tu propio
   chef»), la misma con que programa: lo que guarda aparece acá como lo subido a mano, con la misma
   cuota. Cada vez tiene que afirmar lo mismo que la casilla de los derechos, así que conviene que
@@ -238,7 +240,7 @@ Sale de:
   frases.
 - `src/lib/cocina/materiales.ts` y `src/lib/cocina/subidas.ts`: lo que hay adentro, qué hace sacar,
   cuándo no se puede, y cuánto cabe.
-- `src/app/admin/cocina-actions.ts`: «Cambiar» y «Sacar», con sus mensajes.
+- `src/app/admin/cocina-actions.ts` y `src/lib/cocina/del-dueno.ts`: «Cambiar» y «Sacar», con sus mensajes (los mismos de la app del teléfono).
 - `src/lib/subida-por-partes.ts`: la subida por partes, retomar y cancelar.
 - `src/components/libro-de-sugerencias.tsx`: el libro que abre «¿Necesitas más espacio?».
 - `src/lib/vocabulario.ts`: «La cámara de frío» y «La nevera», y las palabras de cada modo.

@@ -1,9 +1,20 @@
 import { describe, expect, it } from 'vitest'
 import { ACOMPANAMIENTO_NO_SIRVE, PRINCIPAL_NO_SIRVE } from './pedir'
-import { INSTRUCCION_LARGA, MAX_INSTRUCCION, PRINCIPAL_FALTA } from './pedido'
+import {
+  CANTIDAD_FALTA,
+  FECHA_ILEGIBLE,
+  FORMATO_FALTA,
+  INSTRUCCION_LARGA,
+  MARCA_SIN_NOMBRE,
+  MAX_INSTRUCCION,
+  PRINCIPAL_FALTA,
+  SUBTIPO_FALTA,
+} from './pedido'
+import { MATERIAL_NO_EXISTE } from './bodega'
 import type { ComandaDelPanel } from './panel'
 import {
   MARCA_SIN_NOMBRE_TELEFONO,
+  OPCIONES_DEL_PEDIDO,
   comandaParaElTelefono,
   fraseParaElTelefono,
   marcaParaElTelefono,
@@ -61,6 +72,57 @@ describe('la comanda que manda el teléfono', () => {
   })
 })
 
+describe('la comanda completa, con las opciones del panel (desde el 2026-11-06)', () => {
+  it('lleva lo que eligió: qué es el principal, el rol de cada video, formatos, cuántos, para cuándo y su marca', () => {
+    const p = pedidoDelTelefono(
+      {
+        ref: REF,
+        principal: VIDEO,
+        subtipo: 'podcast',
+        acompanamientos: [{ id: FOTO, rol: 'camara' }],
+        formatos: ['clips', 'carruseles'],
+        cantidad: 'unos-10',
+        paraCuando: '2026-11-10',
+        instruccion: 'Corto.',
+        marca: { nombre: 'Otra', handle: 'otra', acento: null, ctaTexto: null },
+      },
+      MARCA,
+    )
+    expect(p).toEqual({
+      ref: REF,
+      principal: VIDEO,
+      subtipo: 'podcast',
+      acompanamientos: [{ id: FOTO, rol: 'camara' }],
+      formatos: ['clips', 'carruseles'],
+      cantidad: 'unos-10',
+      notas: 'Corto.',
+      paraCuando: '2026-11-10',
+      marca: { nombre: 'Otra', handle: '@otra', acento: null, ctaTexto: null },
+    })
+  })
+
+  it('lo que elige mal, con las frases del panel; la marca sin nombre que escribió ahí, la del panel', () => {
+    expect(pedidoDelTelefono({ ref: REF, principal: VIDEO, formatos: [] }, MARCA)).toEqual({ error: FORMATO_FALTA })
+    expect(pedidoDelTelefono({ ref: REF, principal: VIDEO, cantidad: 'muchos' }, MARCA)).toEqual({ error: CANTIDAD_FALTA })
+    expect(pedidoDelTelefono({ ref: REF, principal: VIDEO, subtipo: 'x' }, MARCA)).toEqual({ error: SUBTIPO_FALTA })
+    expect(pedidoDelTelefono({ ref: REF, principal: VIDEO, paraCuando: 'mañana' }, MARCA)).toEqual({ error: FECHA_ILEGIBLE })
+    expect(pedidoDelTelefono({ ref: REF, principal: VIDEO, marca: { nombre: ' ' } }, MARCA)).toEqual({ error: MARCA_SIN_NOMBRE })
+    expect(pedidoDelTelefono({ ref: REF, principal: VIDEO, acompanamientos: [3] }, MARCA)).toEqual({
+      error: 'No entendimos la comanda: actualiza La Cocina y vuelve a intentarlo.',
+    })
+  })
+
+  it('las opciones viajan con los nombres del panel', () => {
+    expect(OPCIONES_DEL_PEDIDO.subtipos.map((s) => s.nombre)).toEqual(['Un video largo', 'Un podcast en videollamada', 'Tomas sueltas'])
+    expect(OPCIONES_DEL_PEDIDO.roles.map((r) => r.valor)).toEqual(['imagen', 'camara', 'pantalla'])
+    expect(OPCIONES_DEL_PEDIDO.formatos).toEqual([
+      { valor: 'clips', nombre: 'Clips verticales' },
+      { valor: 'carruseles', nombre: 'Carruseles' },
+    ])
+    expect(OPCIONES_DEL_PEDIDO.usos[0]).toEqual({ valor: 'crudo', nombre: 'Material crudo' })
+  })
+})
+
 describe('la marca con que firma el chef', () => {
   it('la guardada manda; sin ella, el nombre de la cuenta; sin ninguno, ninguna', () => {
     expect(marcaParaElTelefono(MARCA, 'Otro')).toBe(MARCA)
@@ -74,6 +136,7 @@ describe('las frases para el teléfono', () => {
   it('las que mandan a recargar la página mandan a actualizar La Cocina; las demás, tal cual', () => {
     expect(fraseParaElTelefono(ACOMPANAMIENTO_NO_SIRVE)).toBe('Uno de los materiales ya no está en la cámara: actualiza La Cocina y vuelve a elegir.')
     expect(fraseParaElTelefono(PRINCIPAL_NO_SIRVE)).toBe(PRINCIPAL_NO_SIRVE)
+    expect(fraseParaElTelefono(MATERIAL_NO_EXISTE)).toBe('Ese material ya no está: actualiza La Cocina.')
   })
 })
 
@@ -113,7 +176,40 @@ describe('una comanda como la lista el teléfono', () => {
       fila: 'Hay 2 comandas antes que la tuya.',
       mensaje: null,
       pregunta: null,
+      cancelable: true,
+      enElMeson: 0,
+      pasos: [],
     })
+  })
+
+  it('«Lo que pasó», cancelable y lo del mesón, como la tarjeta del panel', () => {
+    const c = enElTelefono({
+      ...base,
+      estado: 'revisando',
+      antes: null,
+      enElMeson: 2,
+      eventos: [
+        { estado: 'recibida', mensaje: null, eta: null, creadoEn: new Date('2026-11-02T15:00:00Z') },
+        { estado: 'revisando', mensaje: 'Lo miro.', eta: null, creadoEn: new Date('2026-11-02T15:05:00Z') },
+      ],
+    })
+    expect(c).toMatchObject({
+      cancelable: true,
+      enElMeson: 2,
+      pasos: [
+        { estado: 'recibida', palabras: { noche: 'Comanda colgada', dia: 'Comanda colgada' }, mensaje: null, creadoEn: '2026-11-02T15:00:00.000Z' },
+        { estado: 'revisando', palabras: { noche: 'El chef mira la res', dia: 'El chef mira el atún' }, mensaje: 'Lo miro.', creadoEn: '2026-11-02T15:05:00.000Z' },
+      ],
+    })
+  })
+
+  it('la hora estimada: la del chef; mientras espera y la cocina toma sola, la de la fila; terminada, ninguna', () => {
+    const cocina = { abierta: true, atiende: 'sola' as const, minutosPorComanda: 60, trabajos: 3, ultimoLatido: AHORA }
+    const delChef = new Date('2026-11-06T20:00:00Z')
+    expect(comandaParaElTelefono({ ...base, antes: null, estado: 'revisando', eta: delChef }, AHORA, ZONA, cocina).eta).toBe(delChef.toISOString())
+    expect(comandaParaElTelefono(base, AHORA, ZONA, cocina).eta).not.toBeNull()
+    expect(comandaParaElTelefono(base, AHORA, ZONA).eta).toBeNull()
+    expect(comandaParaElTelefono({ ...base, estado: 'cancelada', antes: null, eta: delChef }, AHORA, ZONA, cocina).eta).toBeNull()
   })
 
   it('lista: cuántos cortes esperan, ya no en marcha; rechazada: el motivo y sin recorrido', () => {

@@ -1,11 +1,27 @@
 import { describe, expect, it } from 'vitest'
 import {
+  COMO_VIENE,
   FALTA_ACORTAR,
+  FALTA_FORMATO,
   FALTA_MARCA,
+  FALTA_NOMBRE_DE_MARCA,
   FALTA_SUBIR,
   FALTA_VIDEO,
   MAX_INSTRUCCION,
+  RIEL_VACIO,
+  alternarFormato,
+  antesEnLaFila,
+  cambiarRol,
+  colgar,
   cuerpoDeLaComanda,
+  enMarchaEnPalabras,
+  etiquetaDe,
+  filtrosDeClase,
+  resumenDeLaComanda,
+  rielQueSigue,
+  soltar,
+  type OpcionesDelPedido,
+  type Riel,
   duracionEnPalabras,
   estadoDeLaCuota,
   faltaParaMandar,
@@ -15,7 +31,6 @@ import {
   nuevaRef,
   paraLaCamara,
   pesoEnPalabras,
-  principalDe,
   sumarEjemplo,
   type Material,
   faltaParaResponder,
@@ -94,27 +109,119 @@ describe('la cuota y los pesos, como el panel', () => {
   })
 })
 
+const OPCIONES: OpcionesDelPedido = {
+  subtipos: [
+    { valor: 'largo', nombre: 'Un video largo' },
+    { valor: 'podcast', nombre: 'Un podcast en videollamada' },
+  ],
+  roles: [
+    { valor: 'imagen', nombre: 'Para intercalar' },
+    { valor: 'camara', nombre: 'Otra cámara' },
+    { valor: 'pantalla', nombre: 'La pantalla' },
+  ],
+  formatos: [
+    { valor: 'clips', nombre: 'Clips verticales' },
+    { valor: 'carruseles', nombre: 'Carruseles' },
+  ],
+  cantidades: [
+    { valor: 'lo-que-de', nombre: 'Lo que dé el material' },
+    { valor: 'unos-10', nombre: 'Unos 10' },
+  ],
+  usos: [
+    { valor: 'crudo', nombre: 'Material crudo' },
+    { valor: 'intro', nombre: 'Intro' },
+  ],
+  maxAcompanamientos: 20,
+}
+const MARCA = { nombre: 'La Marca', handle: '@marca', acento: '#3D7BFF', ctaTexto: null }
+
 describe('la comanda', () => {
   const materiales = [material('foto', 'imagen'), material('v1', 'video'), material('v2', 'video')]
+  const armar = (...ids: string[]): Riel => ids.reduce((r, id) => colgar(r, id, materiales), RIEL_VACIO)
 
-  it('el plato principal es el primer video elegido; lo demás acompaña, sin lo que ya no está', () => {
-    expect(principalDe(['foto', 'v2', 'v1'], materiales)).toBe('v2')
-    expect(principalDe(['foto'], materiales)).toBeNull()
-    expect(cuerpoDeLaComanda('r', ['foto', 'v2', 'se-fue', 'v1'], materiales, '  corto  ')).toEqual({
-      ref: 'r',
+  it('el plato principal es el primer video que se cuelga; lo demás va para intercalar', () => {
+    expect(armar('foto', 'v2', 'v1')).toEqual({
+      elegidos: [
+        { id: 'foto', rol: 'imagen' },
+        { id: 'v2', rol: 'imagen' },
+        { id: 'v1', rol: 'imagen' },
+      ],
       principal: 'v2',
-      acompanamientos: ['foto', 'v1'],
-      instruccion: 'corto',
+    })
+    expect(armar('foto').principal).toBeNull()
+    expect(colgar(armar('v1'), 'v1', materiales)).toEqual(armar('v1'))
+    expect(colgar(armar('v1', 'v2'), 'foto', materiales, 1)).toEqual(armar('v1', 'v2'))
+  })
+
+  it('soltar el principal, o pasarlo a acompañar, deja de principal al siguiente video', () => {
+    expect(soltar(armar('v1', 'v2'), 'v1', materiales).principal).toBe('v2')
+    expect(soltar(armar('v1', 'foto'), 'v1', materiales).principal).toBeNull()
+    const r = cambiarRol(armar('v1', 'v2'), 'v1', 'camara', materiales)
+    expect(r.principal).toBe('v2')
+    expect(r.elegidos[0]).toEqual({ id: 'v1', rol: 'camara' })
+    expect(cambiarRol(r, 'v1', 'principal', materiales).principal).toBe('v1')
+    expect(cambiarRol(r, 'foto', 'principal', materiales)).toEqual(r)
+  })
+
+  it('lo que se sacó de la cámara se cae del riel, y el principal pasa a otro', () => {
+    expect(rielQueSigue(armar('v1', 'v2'), materiales.filter((m) => m.id !== 'v1'))).toEqual({ elegidos: [{ id: 'v2', rol: 'imagen' }], principal: 'v2' })
+  })
+
+  it('el cuerpo, contra un servidor de antes: los ids de lo que acompaña y la instrucción', () => {
+    const riel = { ...armar('foto', 'v2', 'v1'), elegidos: [...armar('foto', 'v2', 'v1').elegidos, { id: 'se-fue', rol: 'imagen' as const }] }
+    expect(cuerpoDeLaComanda('r', riel, materiales, '  corto  ')).toEqual({ ref: 'r', principal: 'v2', acompanamientos: ['foto', 'v1'], instruccion: 'corto' })
+  })
+
+  it('el cuerpo completo: el rol de cada uno, lo que se pide y la marca limpia', () => {
+    const riel = cambiarRol(armar('v1', 'v2', 'foto'), 'v2', 'pantalla', materiales)
+    const elegidas = { ...COMO_VIENE, subtipo: 'podcast', formatos: ['clips', 'carruseles'], paraCuando: '2026-11-10', marca: { ...MARCA, handle: '  ', ctaTexto: ' Sígueme ' } }
+    expect(cuerpoDeLaComanda('r', riel, materiales, 'x', elegidas)).toEqual({
+      ref: 'r',
+      principal: 'v1',
+      instruccion: 'x',
+      subtipo: 'podcast',
+      acompanamientos: [
+        { id: 'v2', rol: 'pantalla' },
+        { id: 'foto', rol: 'imagen' },
+      ],
+      formatos: ['clips', 'carruseles'],
+      cantidad: 'lo-que-de',
+      paraCuando: '2026-11-10',
+      marca: { nombre: 'La Marca', handle: null, acento: '#3D7BFF', ctaTexto: 'Sígueme' },
     })
   })
 
   it('lo que falta para mandarla, en orden', () => {
-    const base = { elegidos: ['v1'], materiales, subiendo: 0, instruccion: '', marca: 'Marca' }
+    const base = { riel: armar('v1'), materiales, subiendo: 0, instruccion: '', marca: 'Marca' }
     expect(faltaParaMandar({ ...base, subiendo: 1 })).toBe(FALTA_SUBIR)
-    expect(faltaParaMandar({ ...base, elegidos: ['foto'] })).toBe(FALTA_VIDEO)
+    expect(faltaParaMandar({ ...base, riel: armar('foto') })).toBe(FALTA_VIDEO)
     expect(faltaParaMandar({ ...base, instruccion: 'a'.repeat(MAX_INSTRUCCION + 1) })).toBe(FALTA_ACORTAR)
     expect(faltaParaMandar({ ...base, marca: null })).toBe(FALTA_MARCA)
     expect(faltaParaMandar(base)).toBeNull()
+    const completo = { ...base, marca: null, opciones: { ...COMO_VIENE, marca: MARCA } }
+    expect(faltaParaMandar(completo)).toBeNull()
+    expect(faltaParaMandar({ ...completo, opciones: { ...completo.opciones, formatos: [] } })).toBe(FALTA_FORMATO)
+    expect(faltaParaMandar({ ...completo, opciones: { ...completo.opciones, marca: { ...MARCA, nombre: ' ' } } })).toBe(FALTA_NOMBRE_DE_MARCA)
+  })
+
+  it('los formatos se marcan y desmarcan en el orden del panel', () => {
+    expect(alternarFormato(['carruseles'], 'clips', OPCIONES.formatos)).toEqual(['clips', 'carruseles'])
+    expect(alternarFormato(['clips', 'carruseles'], 'clips', OPCIONES.formatos)).toEqual(['carruseles'])
+  })
+
+  it('«Confirmar», un renglón por cosa, como el panel', () => {
+    const riel = cambiarRol(armar('v1', 'v2', 'foto'), 'v2', 'camara', materiales)
+    const elegidas = { ...COMO_VIENE, paraCuando: '2026-11-10', marca: MARCA }
+    expect(resumenDeLaComanda(riel, materiales, elegidas, OPCIONES, (d) => `el ${d}`)).toEqual([
+      'Plato principal: v1.x (Un video largo)',
+      'Lo acompañan: v2.x (otra cámara), foto.x (para intercalar)',
+      'Qué sale: Clips verticales · Lo que dé el material',
+      'Los estilos: los elige el chef',
+      'Para cuándo: el 2026-11-10',
+      'Tu marca: La Marca · @marca',
+    ])
+    expect(antesEnLaFila(0)).toBe('Es la próxima en la fila.')
+    expect(antesEnLaFila(3)).toBe('Hay 3 comandas antes que la tuya.')
   })
 
   it('un ejemplo se suma en su renglón y no se repite', () => {
@@ -125,6 +232,24 @@ describe('la comanda', () => {
 
   it('la ref es un uuid v4, que el servidor acepta', () => {
     expect(nuevaRef()).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/)
+  })
+})
+
+describe('la cámara por dentro', () => {
+  it('los filtros, solo con más de una clase, con cuántos hay', () => {
+    expect(filtrosDeClase([material('a', 'video')])).toEqual([])
+    expect(filtrosDeClase([material('a', 'video'), material('b', 'imagen'), material('c', 'video')]).map((f) => f.texto)).toEqual([
+      'Todo (3)',
+      'Videos (2)',
+      'Imágenes (1)',
+    ])
+  })
+
+  it('la etiqueta: su uso con el nombre del panel o, sin uso, lo que es; y lo que no deja sacarlo', () => {
+    expect(etiquetaDe({ uso: 'intro', clase: 'video' }, OPCIONES.usos)).toBe('Intro')
+    expect(etiquetaDe({ uso: null, clase: 'otro' }, OPCIONES.usos)).toBe('Otro archivo')
+    expect(enMarchaEnPalabras(1)).toBe('En una comanda en marcha')
+    expect(enMarchaEnPalabras(2)).toBe('En 2 comandas en marcha')
   })
 })
 
