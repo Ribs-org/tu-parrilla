@@ -26,7 +26,7 @@ tus números.
 | `/api/sugerencias/respuesta` | `POST` con una llave **del admin** (o `SCHEDULE_API_KEY`): la respuesta del equipo a lo que alguien escribió en el libro de sugerencias, por el número de su issue o por su id, para responder sin el navegador. Con la llave de otra cuenta, `403` (ver «El libro de sugerencias») |
 | `/api/bodega…` | Con la misma llave: lo que hay en la cámara de frío de La Cocina (`GET /api/bodega`) y las subidas por partes para guardar ahí (`/api/bodega/subidas…`), las mismas del panel y del teléfono (ver «La Cocina») |
 | `/api/admin/…` | Lo que el panel llama desde el navegador, con la cookie de la sesión: la firma de una subida directa (`upload-url`), las subidas por partes a la cámara de frío de La Cocina (`cocina/subidas…`) y el pulso que mantiene al día sus tarjetas (`cocina/pulso`; ver «La Cocina») y la planilla de Excel de Los Números (`planilla`, y `planilla/adelanto` para lo que no cabe; ver «Llevar para la casa») |
-| `/api/mobile/…` | La API de la app del teléfono, con el token de su sesión (ver `mobile/README.md`); `cocina…` es La Cocina desde el teléfono: lo que muestra, las subidas por partes a la cámara de frío, cambiar y sacar lo de adentro, «Mandar al chef», cancelar y contestarle al chef (ver «La Cocina») |
+| `/api/mobile/…` | La API de la app del teléfono, con el token de su sesión (ver `mobile/README.md`); `cocina…` es La Cocina desde el teléfono: lo que muestra, las subidas por partes a la cámara de frío, cambiar y sacar lo de adentro, «Mandar al chef», cancelar y contestarle al chef (ver «La Cocina»); `comentarios…` es La Mesa desde el teléfono: la cola, el número de La Parrilla, «Enviar», «Descartar» y otro borrador (ver «Responder comentarios») |
 | `/api/cron/…` | Las corridas programadas: la publicación y la sincronización, que también reintenta los mensajes del libro de sugerencias que no salieron a GitHub. Solo con `CRON_SECRET` |
 | `/api/track/…` | Las balizas de visitas y clics de las páginas públicas |
 
@@ -935,8 +935,28 @@ modelo: las editas ahí y rigen desde el siguiente borrador. **Regenerar todos**
 Guardar, rehace con ellas los borradores pendientes que ya estaban escritos, hasta 40 por vez y
 cuatro a la par, dentro de unos 40 segundos.
 
-Nada sale sin tu toque. Dos toques, o el panel abierto en dos pestañas, mandan una sola vez
-(la app del teléfono no tiene comentarios): justo antes de enviar, la respuesta reclama el
+**Desde el teléfono** (desde el 2026-11-07), La Mesa se abre con una tarjeta en La Parrilla que
+dice cuántos esperan, y trae lo esencial: «Pendientes», «Enviados» y «Automáticas», el filtro por
+red, y en cada comentario el borrador para corregir, «Enviar», «Descartar» y pedir otro borrador.
+Las instrucciones, «Regenerar todos», «Descartados» y «Todos» se quedan en el panel. Las rutas,
+con el token del teléfono, llaman a las mismas funciones que el panel —con el dueño del token, las
+mismas reglas y las mismas frases— y no tienen reglas propias:
+
+| Ruta | Qué hace |
+|---|---|
+| `GET /api/mobile/comentarios?estado=&red=` | La cola de `getCola` agrupada por publicación (`src/lib/comentarios-movil.ts`), con cuántos esperan en esa red (`contarPendientes`) y las redes de los botones (`redesDeLaMesa`, la misma lista del panel). |
+| `GET /api/mobile/comentarios/pendientes` | Solo el número, para la tarjeta de La Parrilla. |
+| `POST /api/mobile/comentarios/{id}/respuesta` | «Enviar», con `{ texto }`: `responderComentario`. |
+| `POST /api/mobile/comentarios/{id}/descartar` | «Descartar»: `descartarComentario`. |
+| `POST /api/mobile/comentarios/{id}/borrador` | Otro borrador: `redactarUno`. |
+
+Un error vuelve con la frase del panel y un código según la frase (`codigoDeLaMesa`): `400` lo que
+hay que corregir en el texto, `404` el comentario que ya no está, `409` la cuenta desconectada y
+`502` lo que la red o la IA no aceptaron. Un `404` sin frase es un sitio sin estas rutas, y la app lo
+dice así (ver `mobile/README.md`, «La Mesa desde el teléfono»).
+
+Nada sale sin tu toque. Dos toques, el panel abierto en dos pestañas, o el panel y el teléfono a
+la vez, mandan una sola vez: justo antes de enviar, la respuesta reclama el
 comentario en la base por dos minutos (`enviando_hasta`), y el toque que no lo obtiene no
 manda nada. Las respuestas automáticas lo reclaman igual, así que dos sondeos encimados, o
 una respuesta a mano en el mismo momento, tampoco mandan dos.
@@ -2087,6 +2107,7 @@ src/
     borrador.ts            qué se guarda de un formulario y cómo se restaura, también desde el teléfono (sin base)
     borradores-movil.ts    los mismos borradores en la forma de la app del teléfono
     editar-movil.ts        un post programado abierto para corregirlo en el teléfono: lo que se ve y lo que se guarda sin tocar
+    comentarios-movil.ts   La Mesa en la forma de la app del teléfono: la cola agrupada por publicación y el código de cada frase (sin base)
     musica-instagram.ts    «Música de Instagram» del panel y del teléfono: la cuenta del dueño con su token, la memoria de lo que suena y la sugerencia con el modelo
     pruebas/               la Postgres de las pruebas de integración: una base nueva y migrada por archivo; y un lector de zip para mirar el XML de una planilla
     empresa.ts             quién presta el servicio: lo leen la portada, privacidad y términos
