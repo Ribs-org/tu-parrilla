@@ -374,7 +374,11 @@ production` y `npx eas-cli submit -p android --profile production`; lo mismo con
 exista la cuenta de Apple. En la Play Console, la sección de seguridad de los datos tiene que
 decir que la app usa la cámara y el micrófono para lo que la persona sube, y desde el 2026-11-07 que
 guarda el token de los avisos (`docs/play-store.md`). El build lleva también `expo-notifications`, y
-antes de armarlo van las credenciales de FCM (ver «Los avisos al teléfono», abajo).
+antes de armarlo van las credenciales de FCM (ver «Los avisos al teléfono», abajo). Y deja afuera
+`@react-native-community/datetimepicker`: el día y la hora se eligen desde el 2026-11-02 en la hoja de
+la app (`src/components/selector-fecha.tsx`), y el módulo se había quedado en `package.json` y en los
+plugins de `app.json` solo para no cambiar el binario antes de tiempo. La rama `ota-1.1.0` lo conserva:
+es el binario de la 1.1.0.
 
 Lo que no se pudo probar sin un teléfono: la cámara misma, los permisos, la copia a documentos, la
 cola que sigue después de cerrar la app y la subida nativa por partes. El 2026-11-06 se probó en Expo
