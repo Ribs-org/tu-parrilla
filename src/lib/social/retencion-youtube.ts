@@ -15,9 +15,13 @@ import { DIAS_RETENCION_YOUTUBE } from './politica-youtube'
 //   (`DIAS_VENTANA`), así que un comentario guardado hace 30 ya no vuelve a leerse, y
 //   borrarlo no lo hace reaparecer como pendiente.
 // - `social_posts`: `updated_at`, que solo toca el sync al traer el video. El título y la
-//   miniatura de un video que dejó de llegar —borrado, fuera de los 200 más nuevos, o de
-//   un canal desconectado— se vacían; la fila queda, porque es la que une las visitas a
-//   su etiqueta `?s=`, y esas visitas son de Tu Parrilla.
+//   miniatura de un video que dejó de llegar —borrado, o fuera de los 200 más nuevos— se
+//   vacían; la fila queda, porque es la que une las visitas a su etiqueta `?s=`, y esas
+//   visitas son de Tu Parrilla.
+//
+// Lo de un canal que su dueño desconecta no espera este plazo: «Desconectar» lo borra en el
+// acto con los mismos pasos, acotados a esa cuenta (`desconectar.ts`). Aquí queda solo lo que
+// una sincronización en curso alcanzó a escribir justo después.
 
 export type ReporteRetencion = {
   lecturasDePosts: number

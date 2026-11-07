@@ -516,6 +516,14 @@ compara con el panel (`telefono-copias.test.ts`). «Hace cuánto» está escrito
 Un comentario que llega con el texto vacío (la investigación de Instagram en `docs/pendientes.md`)
 dice «(sin texto)»; la pantalla no hace nada más con él.
 
+Desde el 2026-11-07, si el servidor manda `faltantes`, La Mesa muestra arriba de la cola el aviso del
+panel «Comentarios que Instagram no entrega» (`AvisoDeFaltantes`, en `src/components/mesa.tsx`). La
+frase de cada publicación llega escrita del servidor; el título y el pie son copias en `src/lib/mesa.ts`
+que vigila `telefono-copias.test.ts`. Un servidor de antes no manda el campo y el aviso no aparece. No
+pide nada nativo: llega por aire a la 1.1.0 copiando `src/app/mesa.tsx`, `src/components/mesa.tsx` y
+`src/lib/mesa.ts` sobre la punta de `ota-1.1.0` (si allá son iguales a los de `main` antes de este
+cambio; si no, solo la parte del aviso). Hasta que el dueño lo publique, el teléfono no lo muestra.
+
 **Contra un servidor de antes**, que no tiene estas rutas, la API contesta `404` sin frase:
 `useScreenData` lo avisa (`sinRuta`), y La Mesa dice «Tu Parrilla todavía no responde comentarios
 desde el teléfono. Mientras, respóndelos en La Mesa del panel web.» en vez de «No se pudo

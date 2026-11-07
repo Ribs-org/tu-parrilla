@@ -24,6 +24,7 @@ import {
 } from './social/instagram-audio'
 import { SIN_MAS_CANCIONES } from './social/musica-sugerencia'
 import { fraseColaVacia, frasePendientes, hace } from './social/comentarios/la-mesa'
+import { EXPLICACION_FALTANTES, TITULO_FALTANTES } from './social/comentarios/faltantes'
 
 // `batch.ts` trae `usuarios.ts`, que es solo de servidor; acá no se habla con la base.
 vi.mock('server-only', () => ({}))
@@ -109,7 +110,14 @@ describe('La Mesa del teléfono dice lo mismo que la del panel', () => {
     frasePendientes: (n: number) => string
     fraseColaVacia: (cronico: boolean) => string
     hace: (iso: string, ahora: number) => string
+    TITULO_FALTANTES: string
+    EXPLICACION_FALTANTES: string
   }>('mesa')
+
+  it('el aviso de los comentarios que Instagram no entrega: el título y el pie', () => {
+    expect(mesa.TITULO_FALTANTES).toBe(TITULO_FALTANTES)
+    expect(mesa.EXPLICACION_FALTANTES).toBe(EXPLICACION_FALTANTES)
+  })
 
   it('cuántos esperan y la cola vacía', () => {
     for (const n of [0, 1, 2, 5, 200]) expect(mesa.frasePendientes(n)).toBe(frasePendientes(n))
