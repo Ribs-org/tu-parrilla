@@ -32,6 +32,8 @@ export type BorradorMovilAbierto = {
   trial: string[]
   /** La canción de «Música de Instagram» de cada cuenta que la lleva. */
   musica: Record<string, MusicaInstagram>
+  /** Si es una historia: Publicar abre en «Historia», con los archivos en el orden en que salen. */
+  historia: boolean
   media: MediaDeBorrador[]
   /** Por qué no se programa desde el teléfono, o null si se puede. */
   soloEnElPanel: string | null
@@ -73,12 +75,13 @@ export function resumirParaElTelefono(b: BorradorResumido, zona: string): Borrad
  * guardar se conservan solas (`camposDesdeTelefono`). Que están, lo dice `soloEnElPanel`.
  */
 export function abrirEnElTelefono(b: BorradorCargado, zona: string, ajenas: ReadonlyMap<string, string>): BorradorMovilAbierto {
-  const { texto, cuentas, trial, musica = {} } = telefonoDesdeCampos(b.campos)
+  const { texto, cuentas, trial, musica = {}, historia = false } = telefonoDesdeCampos(b.campos)
   return {
     id: b.id,
     texto,
     cuentas: cuentas.filter((id) => !ajenas.has(id)),
     trial,
+    historia,
     musica,
     cuando: b.fecha ? isoInZone(b.fecha, zona) : null,
     media: b.media,

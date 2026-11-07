@@ -4,9 +4,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 // las cuentas con el correo de su dueño, `escrituras` anota cada `update` (lo que pone), y
 // `enviarAviso` se reemplaza para decidir si el correo sale. Lo que se prueba es la regla
 // de «un correo por caída»: cuándo se marca, cuándo se suelta y cuándo se olvida.
-const { cuentas, escrituras, enviados, envio, tomada } = vi.hoisted(() => ({
+const { cuentas, escrituras, marcasPush, alTelefono, telefono, enviados, envio, tomada } = vi.hoisted(() => ({
   cuentas: [] as Array<Record<string, unknown>>,
   escrituras: [] as Array<Record<string, unknown>>,
+  // Las marcas del aviso al teléfono (`push_fierro`), aparte de las del correo.
+  marcasPush: [] as Array<Record<string, unknown>>,
+  alTelefono: [] as Array<{ ownerId: unknown; titulo: string }>,
+  telefono: { telefonos: 0, aceptados: 0 },
   enviados: [] as Array<{ to: string; subject: string; text: string }>,
   envio: { sale: true },
   tomada: { otraCorrida: false },
@@ -27,7 +31,7 @@ vi.mock('@/db', async (importOriginal) => {
       update: () => ({
         set: (valores: Record<string, unknown>) => ({
           where: () => {
-            escrituras.push(valores)
+            ;('pushFierro' in valores ? marcasPush : escrituras).push(valores)
             const hecho = Promise.resolve(undefined)
             return Object.assign(hecho, {
               returning: async () => (tomada.otraCorrida ? [] : [{ id: 'cuenta' }]),
@@ -47,6 +51,14 @@ vi.mock('@/lib/social/publish/alert', () => ({
   },
 }))
 
+vi.mock('@/lib/push/enviar', () => ({
+  avisarAlTelefono: async (ownerId: unknown, armar: (tema: 'noche' | 'dia') => { titulo: string }) => {
+    if (telefono.telefonos > 0) alTelefono.push({ ownerId, titulo: armar('noche').titulo })
+    return { ...telefono }
+  },
+  noSalio: (e: { telefonos: number; aceptados: number }) => e.telefonos > 0 && e.aceptados === 0,
+}))
+
 const { vigilarConexiones } = await import('./run')
 
 const AHORA = new Date('2026-10-17T12:00:00Z')
@@ -61,6 +73,7 @@ function cuenta(overrides: Record<string, unknown> = {}) {
     expiresAt: null,
     lastSyncError: null,
     caidaAvisadaEn: null,
+    pushFierro: null,
     trialReels: null,
     trialReelsMotivo: null,
     trialReelsEn: null,
@@ -72,6 +85,10 @@ function cuenta(overrides: Record<string, unknown> = {}) {
 beforeEach(() => {
   cuentas.length = 0
   escrituras.length = 0
+  marcasPush.length = 0
+  alTelefono.length = 0
+  telefono.telefonos = 0
+  telefono.aceptados = 0
   enviados.length = 0
   envio.sale = true
   tomada.otraCorrida = false
@@ -80,7 +97,7 @@ beforeEach(() => {
 describe('vigilarConexiones', () => {
   it('una cuenta que se cayó y no se avisó: un correo a su dueño, y queda marcada', async () => {
     cuentas.push(cuenta({ lastSyncError: 'Reconecta TikTok para autorizar la publicación.' }))
-    expect(await vigilarConexiones(AHORA)).toEqual({ avisadas: 1, recuperadas: 0 })
+    expect(await vigilarConexiones(AHORA)).toEqual({ avisadas: 1, recuperadas: 0, alTelefono: 0 })
     expect(enviados).toHaveLength(1)
     expect(enviados[0]!.to).toBe('dueno@ejemplo.cl')
     expect(enviados[0]!.subject).toBe('Se cayó la conexión con TikTok · @vicente')
@@ -90,41 +107,91 @@ describe('vigilarConexiones', () => {
 
   it('una caída ya avisada no vuelve a mandar nada', async () => {
     cuentas.push(cuenta({ lastSyncError: 'x', caidaAvisadaEn: new Date('2026-10-16T12:00:00Z') }))
-    expect(await vigilarConexiones(AHORA)).toEqual({ avisadas: 0, recuperadas: 0 })
+    expect(await vigilarConexiones(AHORA)).toEqual({ avisadas: 0, recuperadas: 0, alTelefono: 0 })
     expect(enviados).toEqual([])
     expect(escrituras).toEqual([])
   })
 
   it('la que volvió a calentarse se olvida, para que la próxima caída avise de nuevo', async () => {
     cuentas.push(cuenta({ caidaAvisadaEn: new Date('2026-10-16T12:00:00Z') }))
-    expect(await vigilarConexiones(AHORA)).toEqual({ avisadas: 0, recuperadas: 1 })
+    expect(await vigilarConexiones(AHORA)).toEqual({ avisadas: 0, recuperadas: 1, alTelefono: 0 })
     expect(escrituras).toEqual([{ caidaAvisadaEn: null }])
     expect(enviados).toEqual([])
   })
 
   it('una desconectada a propósito no es una caída', async () => {
     cuentas.push(cuenta({ conCredencial: false }))
-    expect(await vigilarConexiones(AHORA)).toEqual({ avisadas: 0, recuperadas: 0 })
+    expect(await vigilarConexiones(AHORA)).toEqual({ avisadas: 0, recuperadas: 0, alTelefono: 0 })
     expect(enviados).toEqual([])
   })
 
   it('si el correo no sale, la marca se suelta y la pasada siguiente lo intenta otra vez', async () => {
     envio.sale = false
     cuentas.push(cuenta({ lastSyncError: 'x' }))
-    expect(await vigilarConexiones(AHORA)).toEqual({ avisadas: 0, recuperadas: 0 })
+    expect(await vigilarConexiones(AHORA)).toEqual({ avisadas: 0, recuperadas: 0, alTelefono: 0 })
     expect(escrituras).toEqual([{ caidaAvisadaEn: AHORA }, { caidaAvisadaEn: null }])
   })
 
   it('si otra corrida ya tomó la caída, esta no manda un segundo correo', async () => {
     tomada.otraCorrida = true
     cuentas.push(cuenta({ lastSyncError: 'x' }))
-    expect(await vigilarConexiones(AHORA)).toEqual({ avisadas: 0, recuperadas: 0 })
+    expect(await vigilarConexiones(AHORA)).toEqual({ avisadas: 0, recuperadas: 0, alTelefono: 0 })
     expect(enviados).toEqual([])
   })
 
   it('una cuenta sin dueño ni correo de respaldo no avisa a nadie', async () => {
     cuentas.push(cuenta({ lastSyncError: 'x', correo: null, ownerId: null }))
-    expect(await vigilarConexiones(AHORA)).toEqual({ avisadas: 0, recuperadas: 0 })
+    expect(await vigilarConexiones(AHORA)).toEqual({ avisadas: 0, recuperadas: 0, alTelefono: 0 })
     expect(escrituras).toEqual([])
+  })
+
+  it('al teléfono: la cuenta que se apagó avisa una vez, con su propia marca, sin tocar la del correo', async () => {
+    telefono.telefonos = 2
+    telefono.aceptados = 2
+    cuentas.push(cuenta({ lastSyncError: 'x' }))
+    expect(await vigilarConexiones(AHORA)).toEqual({ avisadas: 1, recuperadas: 0, alTelefono: 1 })
+    expect(alTelefono).toEqual([{ ownerId: 'owner-1', titulo: 'Se apagó TikTok · @vicente' }])
+    expect(marcasPush).toEqual([{ pushFierro: 'frio' }])
+    expect(escrituras).toEqual([{ caidaAvisadaEn: AHORA }])
+  })
+
+  it('al teléfono: la que se enfría (vence esta semana) avisa aunque no haya correo de caída', async () => {
+    telefono.telefonos = 1
+    telefono.aceptados = 1
+    cuentas.push(cuenta({ network: 'instagram', expiresAt: new Date('2026-10-20T12:00:00Z') }))
+    expect(await vigilarConexiones(AHORA)).toEqual({ avisadas: 0, recuperadas: 0, alTelefono: 1 })
+    expect(alTelefono[0]!.titulo).toBe('Instagram · @vicente se enfría')
+    expect(marcasPush).toEqual([{ pushFierro: 'enfriandose' }])
+    expect(enviados).toEqual([])
+  })
+
+  it('al teléfono: un estado ya avisado no vuelve a mandar nada', async () => {
+    telefono.telefonos = 1
+    telefono.aceptados = 1
+    cuentas.push(cuenta({ lastSyncError: 'x', caidaAvisadaEn: AHORA, pushFierro: 'frio' }))
+    await vigilarConexiones(AHORA)
+    expect(alTelefono).toEqual([])
+    expect(marcasPush).toEqual([])
+  })
+
+  it('al teléfono: la que vuelve al rojo suelta la marca, sin avisar', async () => {
+    cuentas.push(cuenta({ pushFierro: 'frio' }))
+    await vigilarConexiones(AHORA)
+    expect(marcasPush).toEqual([{ pushFierro: null }])
+    expect(alTelefono).toEqual([])
+  })
+
+  it('al teléfono: si Expo no acepta ninguno, la marca vuelve a como estaba para la pasada siguiente', async () => {
+    telefono.telefonos = 1
+    telefono.aceptados = 0
+    cuentas.push(cuenta({ lastSyncError: 'x' }))
+    await vigilarConexiones(AHORA)
+    expect(marcasPush).toEqual([{ pushFierro: 'frio' }, { pushFierro: null }])
+  })
+
+  it('al teléfono: sin teléfonos la marca se queda, y encender los avisos después no trae la caída vieja', async () => {
+    cuentas.push(cuenta({ lastSyncError: 'x' }))
+    await vigilarConexiones(AHORA)
+    expect(marcasPush).toEqual([{ pushFierro: 'frio' }])
   })
 })

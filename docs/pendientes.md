@@ -69,9 +69,6 @@ sección.
     pregunta: el diseño pide además un aviso en la pestaña de la barra del panel (como el de «Se
     quemó») y una línea en el resumen del día si hay preguntas sin responder; hoy hay correo y la
     tarjeta de color, nada en la barra ni en el resumen.
-  - **Que el chef pregunte por el teléfono con una notificación** (2026-11-06). La app muestra la
-    pregunta en «Tus comandas» y se contesta ahí, pero no avisa sola: no hay notificaciones push en
-    la app. El correo es el aviso.
   - **El mesón en el teléfono** (2026-11-06). La app ya hace lo del panel en la cámara de frío y en
     las comandas (pedir con todas las opciones, cambiar, sacar, cancelar, «Lo que pasó»), pero no el
     mesón: programar o descartar lo que entregó el chef. Quedó fuera por dos cosas: ver un creativo
@@ -571,7 +568,37 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   necesita un build nativo y pasar por las tiendas». Ya que hay build, conviene sumarle antes
   `react-native-svg`, que también espera uno (el bug de la entraña, en «Bugs»). El build ya
   lleva `expo-clipboard` (2026-11-06): sin él, «Copiar el texto» abre la lista de compartir
-  (`mobile/README.md`, «El portapapeles, con y sin su módulo nativo»).
+  (`mobile/README.md`, «El portapapeles, con y sin su módulo nativo»). Y `expo-notifications`
+  (2026-11-07), los avisos al teléfono: antes de armarlo van las credenciales de la entrada
+  siguiente, o el build sale sin avisos en Android.
+- **[dueño] Las credenciales de los avisos al teléfono (FCM), antes del build 1.2.0**
+  (2026-11-07). El código está (`src/lib/push/`, `mobile/src/lib/avisos.ts`); sin esto, en Android
+  «Avisarme» dice que no se pudieron encender. Lo pide la documentación de Expo SDK 57, «Add Android
+  FCM V1 credentials». Ningún paso pide pegar un secreto en un chat:
+  1. En [console.firebase.google.com](https://console.firebase.google.com), crea un proyecto (o
+     agrégale Firebase al proyecto de Google Cloud que ya existe).
+  2. En ese proyecto, **Agregar app → Android**, con el paquete `cl.tuparrilla.app`. Descarga el
+     `google-services.json` que entrega.
+  3. Déjalo en `mobile/google-services.json` y, en `mobile/app.json`, dentro de `"android"`, agrega
+     `"googleServicesFile": "./google-services.json"`. Ese archivo **sí** va al repositorio: según
+     Expo, trae identificadores públicos, y EAS lo necesita en el build.
+  4. En Firebase, **Configuración del proyecto → Cuentas de servicio → Generar nueva clave
+     privada → Generar clave**. Baja un JSON: **ese es secreto**, no va al repositorio ni a un chat
+     (`mobile/.gitignore` ya ignora los `*-firebase-adminsdk-*.json`).
+  5. Súbelo a Expo. En una terminal dentro de `mobile/`: `npx eas-cli credentials` → `Android` →
+     `production` → `Google Service Account` → `Manage your Google Service Account Key for Push
+     Notifications (FCM V1)` → `Set up a Google Service Account Key for Push Notifications (FCM V1)`
+     → `Upload a new service account key`, y elige el JSON. O en expo.dev → el proyecto →
+     **Credentials** → Android → `cl.tuparrilla.app` → **FCM V1 service account key → Add a service
+     account key**. Va por identificador de app, así que sirve para los dos perfiles.
+  6. Borra el JSON del paso 4 de la carpeta de descargas cuando esté subido.
+  7. Arma el build 1.2.0 (la entrada de arriba). Para probar: entra en la app, toca «Avisarme» y
+     contéstale algo desde Las Sugerencias a una sugerencia tuya; tiene que llegar «Te respondimos
+     en el libro de sugerencias».
+  8. Solo si un día enciendes la seguridad extra de push de Expo (expo.dev/settings/access-tokens),
+     crea ahí un access token y ponlo en Vercel como `EXPO_ACCESS_TOKEN`; si no, Expo rechaza cada
+     aviso. En iPhone, el build de iOS ofrece crear la llave de push de Apple cuando exista la
+     cuenta.
 - **[dueño] La app en iPhone** (2026-10-16). El código ya está listo para iOS; faltan la
   cuenta del Apple Developer Program, confirmar el identificador `cl.tuparrilla.app`
   (queda fijo al registrarlo), la ficha en App Store Connect y el primer build a
@@ -690,8 +717,13 @@ nadie paga: todas las cuentas son iguales y el README dice «Sin suscripción».
   el diseño entero está en `docs/superpowers/specs/2026-10-24-historias-design.md`. Falta:
   - el compositor del panel, con el selector «Post · Historia» y las tarjetas verticales
     (parte 2), y en La Parrilla el número de la secuencia («1/3») junto al corte y, en el
-    detalle del post, «Historia en Instagram · @cuenta»;
-  - Publicar en el teléfono, con el visor 9:16 (parte 3), por OTA;
+    detalle del post, «Historia en Instagram · @cuenta». El teléfono ya las arma (parte 3,
+    2026-11-07): el compositor tiene que leer y escribir el campo `modo` del borrador
+    (`esBorradorDeHistoria`, en `src/lib/borrador.ts`). Hasta entonces abre un borrador de historia
+    del teléfono como un post, y al guardarlo deja de ser historia;
+  - en el teléfono, ver el primer cuadro de un video en el visor (hoy, «▶» y la duración: sacarlo
+    sin `expo-video` pide una miniatura del servidor) y cambiar el orden de una secuencia ya
+    programada (hoy se borra y se programa de nuevo);
   - **[dueño] la primera historia real**, con una cuenta de prueba: si Instagram la rechaza
     desde una cuenta de creador (@vicente_edits2, si es Creator), y un video a la página de
     Facebook, cuya guía se contradice entre 60 y 90 segundos. Si Instagram ya no rechaza las de
@@ -753,9 +785,10 @@ nadie paga: todas las cuentas son iguales y el README dice «Sin suscripción».
   cuál es el juego (puntos, rachas, logros, en qué pantalla). Hasta donde se sabe, ninguna de las
   APIs que se usan entrega la bandeja de notificaciones de la red, así que el juego se arma con lo
   que ya se lee: los comentarios de La Mesa, las métricas de cada post y los seguidores de cada
-  cuenta (`src/lib/social/account-metrics.ts`). La app del teléfono no manda notificaciones:
-  avisar allí pide `expo-notifications`, que es nativo, y un build nuevo. Se cruza con «Mientras
-  no mirabas», de la entrada de arriba, que también necesita guardar la última visita por usuario.
+  cuenta (`src/lib/social/account-metrics.ts`). Desde la 1.2.0 la app tiene avisos al teléfono
+  (`src/lib/push/`, ver «Avisos al teléfono» en el `README.md`): un juego que avise usa ese mismo
+  camino. Se cruza con «Mientras no mirabas», de la entrada de arriba, que también necesita guardar
+  la última visita por usuario.
 - **Cupos y reparto de los crons por usuario** (`docs/levantamiento-terceros.md` §5.4). Hace
   falta cuando la beta pase de unos diez usuarios.
 - **[dueño] El privado de Meta (DM con el PDF): construido, falta la aprobación** (2026-10-27).

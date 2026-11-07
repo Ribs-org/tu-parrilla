@@ -26,7 +26,7 @@ tus números.
 | `/api/sugerencias/respuesta` | `POST` con una llave **del admin** (o `SCHEDULE_API_KEY`): la respuesta del equipo a lo que alguien escribió en el libro de sugerencias, por el número de su issue o por su id, para responder sin el navegador. Con la llave de otra cuenta, `403` (ver «El libro de sugerencias») |
 | `/api/bodega…` | Con la misma llave: lo que hay en la cámara de frío de La Cocina (`GET /api/bodega`) y las subidas por partes para guardar ahí (`/api/bodega/subidas…`), las mismas del panel y del teléfono (ver «La Cocina») |
 | `/api/admin/…` | Lo que el panel llama desde el navegador, con la cookie de la sesión: la firma de una subida directa (`upload-url`), las subidas por partes a la cámara de frío de La Cocina (`cocina/subidas…`) y el pulso que mantiene al día sus tarjetas (`cocina/pulso`; ver «La Cocina») y la planilla de Excel de Los Números (`planilla`, y `planilla/adelanto` para lo que no cabe; ver «Llevar para la casa») |
-| `/api/mobile/…` | La API de la app del teléfono, con el token de su sesión (ver `mobile/README.md`); `cocina…` es La Cocina desde el teléfono: lo que muestra, las subidas por partes a la cámara de frío, cambiar y sacar lo de adentro, «Mandar al chef», cancelar y contestarle al chef (ver «La Cocina») |
+| `/api/mobile/…` | La API de la app del teléfono, con el token de su sesión (ver `mobile/README.md`); `cocina…` es La Cocina desde el teléfono: lo que muestra, las subidas por partes a la cámara de frío, cambiar y sacar lo de adentro, «Mandar al chef», cancelar y contestarle al chef (ver «La Cocina»); `comentarios…` es La Mesa desde el teléfono: la cola, el número de La Parrilla, «Enviar», «Descartar» y otro borrador (ver «Responder comentarios»); `push` registra el teléfono para los avisos y `push/{token}` lo borra (ver «Avisos al teléfono») |
 | `/api/cron/…` | Las corridas programadas: la publicación y la sincronización, que también reintenta los mensajes del libro de sugerencias que no salieron a GitHub. Solo con `CRON_SECRET` |
 | `/api/track/…` | Las balizas de visitas y clics de las páginas públicas |
 
@@ -807,9 +807,14 @@ uno por archivo, que comparten `{ secuencia, orden }`: el publicador no publica 
 orden aunque tengan la misma hora (`secuencia.ts`). Instagram la publica con un contenedor
 `STORIES`; Facebook, con `/photo_stories` o, el video, con `/video_stories` en tres pasos. En La
 Parrilla una historia es el **choripán al paso**, y en el modo día un onigiri. Hoy se
-programan por la API y el CSV; el compositor del panel y el teléfono las ofrecen en las
-entregas siguientes (`docs/superpowers/specs/2026-10-24-historias-design.md`). Las historias no
-entran al sondeo de comentarios ni a las métricas.
+programan por la API, el CSV y el teléfono («Post · Historia» en Publicar, con su visor 9:16; ver
+`mobile/README.md`); el compositor del panel las ofrece en una entrega siguiente
+(`docs/superpowers/specs/2026-10-24-historias-design.md`). Una secuencia armada en el teléfono
+entra entera o no entra: `POST /api/mobile/schedule` con `secuencia: true` crea una historia por
+archivo en una sola transacción (`crearVariosProgramados`), y el borrador del que sale se consume
+una vez para todas. El borrador recuerda si es una historia en el campo `modo`; el compositor del
+panel todavía no lo lee, y abre ese borrador como un post. Las historias no entran al sondeo de
+comentarios ni a las métricas.
 
 ### TikTok
 
@@ -940,8 +945,28 @@ modelo: las editas ahí y rigen desde el siguiente borrador. **Regenerar todos**
 Guardar, rehace con ellas los borradores pendientes que ya estaban escritos, hasta 40 por vez y
 cuatro a la par, dentro de unos 40 segundos.
 
-Nada sale sin tu toque. Dos toques, o el panel abierto en dos pestañas, mandan una sola vez
-(la app del teléfono no tiene comentarios): justo antes de enviar, la respuesta reclama el
+**Desde el teléfono** (desde el 2026-11-07), La Mesa se abre con una tarjeta en La Parrilla que
+dice cuántos esperan, y trae lo esencial: «Pendientes», «Enviados» y «Automáticas», el filtro por
+red, y en cada comentario el borrador para corregir, «Enviar», «Descartar» y pedir otro borrador.
+Las instrucciones, «Regenerar todos», «Descartados» y «Todos» se quedan en el panel. Las rutas,
+con el token del teléfono, llaman a las mismas funciones que el panel —con el dueño del token, las
+mismas reglas y las mismas frases— y no tienen reglas propias:
+
+| Ruta | Qué hace |
+|---|---|
+| `GET /api/mobile/comentarios?estado=&red=` | La cola de `getCola` agrupada por publicación (`src/lib/comentarios-movil.ts`), con cuántos esperan en esa red (`contarPendientes`) y las redes de los botones (`redesDeLaMesa`, la misma lista del panel). |
+| `GET /api/mobile/comentarios/pendientes` | Solo el número, para la tarjeta de La Parrilla. |
+| `POST /api/mobile/comentarios/{id}/respuesta` | «Enviar», con `{ texto }`: `responderComentario`. |
+| `POST /api/mobile/comentarios/{id}/descartar` | «Descartar»: `descartarComentario`. |
+| `POST /api/mobile/comentarios/{id}/borrador` | Otro borrador: `redactarUno`. |
+
+Un error vuelve con la frase del panel y un código según la frase (`codigoDeLaMesa`): `400` lo que
+hay que corregir en el texto, `404` el comentario que ya no está, `409` la cuenta desconectada y
+`502` lo que la red o la IA no aceptaron. Un `404` sin frase es un sitio sin estas rutas, y la app lo
+dice así (ver `mobile/README.md`, «La Mesa desde el teléfono»).
+
+Nada sale sin tu toque. Dos toques, el panel abierto en dos pestañas, o el panel y el teléfono a
+la vez, mandan una sola vez: justo antes de enviar, la respuesta reclama el
 comentario en la base por dos minutos (`enviando_hasta`), y el toque que no lo obtiene no
 manda nada. Las respuestas automáticas lo reclaman igual, así que dos sondeos encimados, o
 una respuesta a mano en el mismo momento, tampoco mandan dos.
@@ -1403,6 +1428,7 @@ Vercel y bajan con `vercel env pull .env.local`.
 | `RESEND_API_KEY` | Manda los códigos de ingreso y los avisos: la publicación que se quemó, la cuenta que se cayó, el resumen del día y la comanda de La Cocina que terminó (ver «Avisos por correo») | Sí — sin ella nadie puede entrar al panel |
 | `PUBLISH_ALERT_TO` | Adónde va un aviso sin dueño con correo: un post o una cuenta de antes de los usuarios, y la alarma de La Cocina si falta `ADMIN_EMAIL`. Lo demás va al correo de su dueño | No — sin ella, lo que no tiene dueño no avisa; el calendario y Los Fierros lo siguen mostrando |
 | `PUBLISH_ALERT_FROM` | Remitente de los avisos | Opcional; default `onboarding@resend.dev`, que solo entrega al correo de la cuenta de Resend |
+| `EXPO_ACCESS_TOKEN` | Un access token de la cuenta de Expo, para mandar los avisos al teléfono por el servicio de push de Expo cuando el proyecto tiene encendida la «seguridad extra de push» (ver «Avisos al teléfono») | No — sin la seguridad extra Expo no pide llave; con ella encendida y sin esta variable, Expo rechaza cada aviso y solo llega el correo |
 | `SUGERENCIAS_GITHUB_TOKEN` | Abre un issue en GitHub por cada mensaje del libro de sugerencias, y comenta en él la respuesta del equipo (ver «El libro de sugerencias»). Un token *fine-grained* con acceso solo al repositorio de `SUGERENCIAS_REPO` y un único permiso: Issues, lectura y escritura | No — sin ella los mensajes se guardan igual y salen solos con el cron diario el primer día que la tenga |
 | `SUGERENCIAS_REPO` | El repositorio, con la forma `dueño/repo`, donde caen esos issues | No — por defecto `Ribs-org/tu-parrilla`. Si no tiene esa forma, no se manda nada y los mensajes esperan guardados |
 
@@ -1428,11 +1454,13 @@ diarios, así que `vercel.json` declara apenas una corrida diaria de respaldo. E
 Pro puedes cambiar ese schedule a `*/5 * * * *` y prescindir del pinger: el endpoint
 es el mismo en los dos casos, cambia solo quién lo dispara.
 
-Cada corrida hace cinco cosas, en orden: publica lo vencido, vigila las conexiones de las
-cuentas (manda el correo de las que se cayeron; ver «Avisos por correo»), mira La Cocina —cierra
+Cada corrida hace seis cosas, en orden: publica lo vencido, vigila las conexiones de las
+cuentas (manda el correo de las que se cayeron, y el aviso al teléfono de las que se enfrían o se
+apagan; ver «Avisos por correo» y «Avisos al teléfono»), mira La Cocina —cierra
 con su opción por defecto las preguntas del chef cuyo plazo pasó, y le avisa al admin de las
 comandas que llevan media hora sin tomar o pasaron su hora estimada (ver «La Cocina»)—, sondea
-comentarios (hasta los 120 segundos de la corrida) y, una vez por hora, barre los archivos huérfanos de
+comentarios (hasta los 120 segundos de la corrida), le manda al teléfono el resumen de los
+comentarios nuevos de La Mesa (uno por hora como mucho) y, una vez por hora, barre los archivos huérfanos de
 R2, las subidas de La Cocina que quedaron a medias y lo que en La Cocina ya venció (ver «La
 Cocina»): le toca a la corrida que
 empieza en los primeros cinco minutos de la hora, si no viene atrasada. Al terminar cada fase escribe `[cron] <fase> listo a los N ms` en el log, y el
@@ -1492,7 +1520,9 @@ publica cuando termine (`esMediaNoLista`, en `social/publish/instagram.ts`).
 Seis correos, todos con el remitente `PUBLISH_ALERT_FROM` y al correo del dueño (o a
 `PUBLISH_ALERT_TO` si lo que avisa no tiene dueño con correo), salvo la alarma de La Cocina, que va
 al admin. Las reglas viven en
-`src/lib/avisos/reglas.ts`, sin base; lo que lee y manda, en `src/lib/avisos/run.ts`.
+`src/lib/avisos/reglas.ts`, sin base; lo que lee y manda, en `src/lib/avisos/run.ts`. Todos menos el
+resumen del día y la alarma salen también al teléfono de quien encendió los avisos en la app (ver
+«Avisos al teléfono»).
 
 - **Una publicación que se quemó**: «No se pudo publicar en <Red>», con el motivo. Sale al
   quemarse, una vez por destino. No sale cuando el motivo es la conexión de la cuenta: de eso
@@ -1522,6 +1552,47 @@ al admin. Las reglas viven en
   una comanda sin tomar y …», con las comandas que llevan más de media hora en «Comanda colgada» o
   pasaron su hora estimada hace más de una hora. Va todo junto en un correo por pasada, y cada
   comanda suena una vez por motivo (ver «La Cocina»).
+
+### Avisos al teléfono
+
+Desde la versión 1.2.0 de la app, los avisos también llegan al teléfono, al lado del correo y nunca en
+su lugar: cada uno sale por correo igual que antes, y si el teléfono falla, el correo no se entera.
+Salen por el servicio de push de Expo (`https://exp.host/--/api/v2/push/send`), que los entrega por
+Firebase Cloud Messaging en Android y por el servicio de Apple en iPhone. El código, en
+`src/lib/push/`: el cliente de Expo y los textos sin base (`expo.ts`, `avisos.ts`), y lo que lee y
+borra (`enviar.ts`, `comentarios.ts`).
+
+- **Una publicación que se quemó**: «Se quemó: <Red>» (de día, «Se echó a perder»), con el comienzo
+  del texto y el motivo. Uno por destino, cuando sale el correo.
+- **Una cuenta que se enfría o se apaga**: «<Red> · <cuenta> se enfría» cuando su permiso vence en la
+  semana, y «Se apagó <Red> · <cuenta>» cuando su fierro queda frío (de día, el cuchillo se desafila
+  o queda sin filo). Uno por cada estado nuevo del fierro: `social_accounts.push_fierro` guarda el que
+  ya se avisó y se borra cuando vuelve al rojo. Va aparte de `caida_avisada_en`, para no cambiar
+  cuándo se reintenta el correo. El enfriarse no tiene correo propio: está en el resumen del día.
+- **Una pregunta del chef** y **una comanda que terminó** —lista en el mesón, rechazada o fallida—:
+  los mismos de su correo, en una línea.
+- **La respuesta del equipo** en el libro de sugerencias, la primera vez, como el correo.
+- **Los comentarios nuevos de La Mesa**: un resumen, no uno por comentario. «3 comentarios nuevos en
+  La Mesa», con las redes, sin el texto de nadie. Sale en la pasada del cron siguiente a que entre un
+  comentario pendiente, y después como mucho uno por hora; cuenta los que entraron desde el resumen
+  anterior y siguen esperando respuesta, sin lo que respondió una palabra clave. La marca es
+  `users.push_comentarios_hasta`. Este no tiene correo.
+
+Cada teléfono registra su token de Expo en `push_tokens` (`POST /api/mobile/push`), una fila por
+instalación, del dueño de la sesión. El token es único: si en el mismo teléfono entra otra cuenta, la
+fila pasa a ella. Se borra al apagar los avisos en Ajustes o al cerrar sesión (`DELETE
+/api/mobile/push/{token}`, solo el del dueño), cuando Expo dice que el teléfono ya no lo usa
+(`DeviceNotRegistered`), y cuando la sesión con que se registró deja de valer: cada fila guarda
+`MOBILE_TOKEN_VERSION` y la versión de sesión de la cuenta (`push_tokens.sesion`), y subir cualquiera
+de las dos —un teléfono perdido— corta también sus avisos. Los mensajes van de a 100 por pedido, el
+tope de Expo, y un 429 o un 5xx se reintenta una vez. Expo no pide llave salvo que la cuenta tenga
+encendida la seguridad extra de push; entonces hace falta `EXPO_ACCESS_TOKEN`.
+
+Lo que no hace todavía: leer los recibos de Expo, que son los que dicen si el aviso de verdad salió
+(ver `docs/deuda-tecnica.md`). Para que lleguen en Android, el build de la app necesita las
+credenciales de FCM: `google-services.json` en `mobile/` y la clave de la cuenta de servicio subida a
+EAS (los pasos, en `docs/pendientes.md`). En la app, el lado del teléfono está en `mobile/README.md`,
+«Los avisos al teléfono».
 
 ### El libro de sugerencias
 
@@ -2104,10 +2175,12 @@ src/
     borrador.ts            qué se guarda de un formulario y cómo se restaura, también desde el teléfono (sin base)
     borradores-movil.ts    los mismos borradores en la forma de la app del teléfono
     editar-movil.ts        un post programado abierto para corregirlo en el teléfono: lo que se ve y lo que se guarda sin tocar
+    comentarios-movil.ts   La Mesa en la forma de la app del teléfono: la cola agrupada por publicación y el código de cada frase (sin base)
     musica-instagram.ts    «Música de Instagram» del panel y del teléfono: la cuenta del dueño con su token, la memoria de lo que suena y la sugerencia con el modelo
     pruebas/               la Postgres de las pruebas de integración: una base nueva y migrada por archivo; y un lector de zip para mirar el XML de una planilla
     empresa.ts             quién presta el servicio: lo leen la portada, privacidad y términos
     avisos/                la caída de una cuenta y el resumen del día: las reglas sin base y lo que lee y manda
+    push/                  los avisos al teléfono por el servicio de push de Expo: el cliente y los textos sin base, el token de cada teléfono, y el resumen de La Mesa
     sugerencias/           el libro de sugerencias: qué se acepta y cómo queda el issue (sin base), el cliente de GitHub, guardar y reintentar, y la respuesta del equipo (lo que se acepta, el correo y el comentario sin base en respuestas.ts; guardarla, leerla y avisar en responder.ts)
     social/
       instagram-login.ts   el login de Instagram, sin página de Facebook: el host, los permisos y cómo leer su token

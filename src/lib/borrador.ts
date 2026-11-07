@@ -159,12 +159,44 @@ export type BorradorDelTelefono = {
    * conserva la que dejó el panel, porque esa app no pudo haberla quitado.
    */
   musica?: Record<string, MusicaInstagram>
+  /**
+   * Si es una historia (el selector «Post · Historia» de Publicar). Ausente en una app que
+   * todavía no sabe de historias: entonces se conserva lo que el borrador decía.
+   */
+  historia?: boolean
 }
 
 /** Los campos que el teléfono escribe enteros cada vez que guarda. */
 const DEL_TELEFONO = new Set(['caption', 'cuentas', 'scheduledAt', 'cuandoAhora'])
 const TRIAL = 'instagramTrial:'
 const MUSICA = 'instagramMusica:'
+/**
+ * El campo del modo: `historia`, o ausente si es un post. El compositor del panel todavía no
+ * tiene el selector (`docs/pendientes.md`): hasta entonces lo escribe solo el teléfono, y el
+ * panel abre ese borrador como un post.
+ */
+export const MODO = 'modo'
+
+/** Si los campos de un borrador son de una historia. */
+export function esBorradorDeHistoria(campos: Campos): boolean {
+  return primero(campos, MODO) === 'historia'
+}
+
+/**
+ * El modo que manda el teléfono al guardar: `modo: 'historia'` o `modo: 'post'`. Sin `modo`
+ * —una app que todavía no sabe de historias— es undefined, y se conserva el del borrador.
+ */
+export function historiaDelTelefono(body: unknown): boolean | undefined {
+  const modo = (body as { modo?: unknown } | null)?.modo
+  return modo === 'historia' ? true : modo === 'post' ? false : undefined
+}
+
+/**
+ * Programar como post un borrador que es una historia: lo manda una app que todavía no sabe de
+ * historias, que lo muestra como post. Saldría un carrusel en vez de las historias que se armaron.
+ */
+export const BORRADOR_ES_HISTORIA =
+  'Este borrador es una historia, y esta versión de la app todavía no las programa: ábrela de nuevo con señal para que se actualice.'
 
 /**
  * Los campos de un borrador después de que el teléfono lo guarda. El teléfono escribe lo
@@ -184,8 +216,10 @@ export function camposDesdeTelefono(
   for (const [nombre, valores] of Object.entries(anteriores ?? {})) {
     if (DEL_TELEFONO.has(nombre) || nombre.startsWith(TRIAL)) continue
     if (telefono.musica !== undefined && nombre.startsWith(MUSICA)) continue
+    if (telefono.historia !== undefined && nombre === MODO) continue
     campos[nombre] = valores
   }
+  if (telefono.historia) campos[MODO] = ['historia']
   const conservadas = (anteriores?.cuentas ?? []).filter((id) => ajenas.has(id))
   const cuentas = [...new Set([...telefono.cuentas, ...conservadas])]
   campos.caption = [telefono.texto]
@@ -248,6 +282,7 @@ export function telefonoDesdeCampos(campos: Campos): Omit<BorradorDelTelefono, '
   return {
     texto: primero(campos, 'caption'),
     cuentas,
+    historia: esBorradorDeHistoria(campos),
     trial: cuentas.filter((id) => instagramTrialInicial(campos, id)),
     musica: Object.fromEntries(
       cuentas.flatMap((id) => {

@@ -263,6 +263,18 @@ export default function PrivacidadPage() {
             , y nada de lo que escribes o eliges en ella se comparte con nadie.
           </li>
           <li>
+            <span className="text-fg">Desde su versión 1.2.0, puede avisarte en el teléfono</span>{' '}
+            si tú lo enciendes: lo que no se pudo publicar, una cuenta cuya conexión vence o se
+            cayó, una pregunta o una comanda del chef, la respuesta del equipo a lo que escribiste
+            y cuántos comentarios nuevos esperan respuesta. Para eso el teléfono le pide a Expo un
+            identificador de avisos y la aplicación lo guarda en este sitio, junto a tu cuenta. Cada
+            aviso sale de este sitio hacia el servicio de avisos de Expo, que lo entrega por el de
+            Google (Firebase Cloud Messaging) en Android, o por el de Apple en iPhone: los dos ven
+            ese identificador y el texto del aviso —el nombre de una cuenta, el comienzo de una
+            publicación, la pregunta del chef o la respuesta del equipo—, nunca lo que escribió otra
+            persona en un comentario. Se apagan en Ajustes, y cerrar sesión borra el identificador.
+          </li>
+          <li>
             <span className="text-fg">Habla con dos servidores, y con uno más solo si tú lo pides.</span>{' '}
             El de este sitio, al que manda lo que publicas y del que lee tus números. Y el de
             Expo, el servicio con el que está construida: cada vez que se abre, la aplicación le
@@ -271,7 +283,8 @@ export default function PrivacidadPage() {
             qué versión de la aplicación tiene instalada. No recibe nada de tu contenido ni de tu
             sesión. El tercero es Meta: si escuchas la muestra de una canción de Instagram, el
             audio llega directo de sus servidores, que ven la dirección IP del teléfono (antes de
-            la versión 1.2.0, la muestra se abre en el navegador).
+            la versión 1.2.0, la muestra se abre en el navegador). Los avisos al teléfono, si los
+            enciendes, pasan además por Expo y por Google o Apple, como dice el punto de arriba.
           </li>
           <li>
             <span className="text-fg">Todo viaja cifrado</span>, por HTTPS.
@@ -286,7 +299,8 @@ export default function PrivacidadPage() {
           Supabase. Los archivos que cada usuario sube —fotos, videos y los documentos que
           adjunta a una regla de comentarios— se almacenan en Cloudflare R2. Los códigos de
           ingreso y los avisos se mandan por correo con Resend, que recibe la dirección de
-          destino, y los borradores de respuesta y las sugerencias de canciones los redacta un
+          destino; los avisos al teléfono, por el servicio de Expo y el de Google o Apple, como se
+          explica arriba; y los borradores de respuesta y las sugerencias de canciones los redacta un
           modelo de lenguaje a través de la pasarela de IA de Vercel, con lo descrito arriba.
           Ninguno de esos proveedores recibe los datos para usarlos por su cuenta: los procesan
           por encargo. Lo que se escribe en el libro de sugerencias se publica en GitHub como se

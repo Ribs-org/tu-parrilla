@@ -4,6 +4,8 @@ import { alias } from 'drizzle-orm/pg-core'
 import { getDb, sugerencias, users, type TipoSugerencia, type Usuario } from '@/db'
 import { enviarCorreo } from '@/lib/correo'
 import { dominioProducto } from '@/lib/dominios'
+import { avisoDeRespuesta } from '@/lib/push/avisos'
+import { avisarAlTelefono } from '@/lib/push/enviar'
 import { temaDe } from '@/lib/tema'
 import type { ClienteGithub } from './github'
 import { SOLO_EL_ADMIN, SUGERENCIA_NO_EXISTE, comentarioDeRespuesta, correoDeRespuesta, type Cual } from './respuestas'
@@ -17,8 +19,9 @@ import { SOLO_EL_ADMIN, SUGERENCIA_NO_EXISTE, comentarioDeRespuesta, correoDeRes
 // - El de la persona (`misSugerencias`, `respuestasSinLeer`, `marcarRespuestaLeida`): cada
 //   consulta va atada a su dueño, como todo lo demás (`src/lib/aislamiento.test.ts`).
 //
-// Guardar la respuesta y avisar van por separado: el correo y el comentario del issue salen
-// después de responder (`avisarDeLaRespuesta`, en un `after`), y si fallan la respuesta ya quedó.
+// Guardar la respuesta y avisar van por separado: el correo, el aviso al teléfono y el comentario
+// del issue salen después de responder (`avisarDeLaRespuesta`, en un `after`), y si fallan la
+// respuesta ya quedó.
 
 /** Lo que Las Sugerencias muestra de cada una. */
 export type SugerenciaDelEquipo = {
@@ -146,6 +149,7 @@ export async function avisarDeLaRespuesta(
         nombre: users.nombre,
         zona: users.zona,
         tema: users.tema,
+        ownerId: sugerencias.ownerId,
       })
       .from(sugerencias)
       .innerJoin(users, eq(users.id, sugerencias.ownerId))
@@ -157,10 +161,15 @@ export async function avisarDeLaRespuesta(
   if (!fila?.respuesta) return salio
 
   if (primera) {
-    salio.correo = await enviarCorreo({
-      to: fila.correo,
-      ...correoDeRespuesta({ ...fila, respuesta: fila.respuesta }, sitio(), temaDe(fila.tema)),
-    })
+    const respuesta = fila.respuesta
+    // El aviso al teléfono sale con el correo, también solo la primera vez. No lanza.
+    ;[salio.correo] = await Promise.all([
+      enviarCorreo({
+        to: fila.correo,
+        ...correoDeRespuesta({ ...fila, respuesta }, sitio(), temaDe(fila.tema)),
+      }),
+      avisarAlTelefono(fila.ownerId, (tema) => avisoDeRespuesta({ id, respuesta }, tema)),
+    ])
   }
   if (fila.issue !== null && cliente) {
     try {

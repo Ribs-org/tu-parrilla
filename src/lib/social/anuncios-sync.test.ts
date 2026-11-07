@@ -60,6 +60,7 @@ function cuenta(id: string, network: string, ownerId: string, creada: string): S
     lastSyncedAt: null,
     lastSyncError: null,
     caidaAvisadaEn: null,
+    pushFierro: null,
     trialReels: null,
     trialReelsMotivo: null,
     trialReelsEn: null,
