@@ -840,6 +840,39 @@ describe('aislamiento por dueño, escrituras (SQL generado, sin base)', () => {
     expect(consultas[2]!.sql).toMatch(/^delete/i)
   })
 
+  it('api/mobile/cocina/materiales/[id]: PATCH («Cambiar» desde el teléfono) ata su UPDATE al dueño del token', async () => {
+    const { PATCH } = await import('../app/api/mobile/cocina/materiales/[id]/route')
+    const id = '00000000-0000-4000-8000-000000000001'
+    const peticion = new Request(`https://ejemplo.cl/api/mobile/cocina/materiales/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ nombre: 'Mi intro', uso: 'intro' }),
+    })
+    const consultas = await todasLasConsultas(() => PATCH(peticion, { params: Promise.resolve({ id }) }))
+    expect(consultas).toHaveLength(1)
+    expect(consultas[0]!.sql).toMatch(/^update/i)
+    esperarFiltradoPorDueno(consultas[0]!)
+  })
+
+  it('api/mobile/cocina/materiales/[id]: DELETE («Sacar» desde el teléfono) lee, mira y borra solo lo del dueño del token', async () => {
+    const { DELETE } = await import('../app/api/mobile/cocina/materiales/[id]/route')
+    const id = '00000000-0000-4000-8000-000000000001'
+    const consultas = await consultasEncadenadas(
+      () => DELETE(peticionMovil(), { params: Promise.resolve({ id }) }),
+      [[[id, 'https://x/intro.mp4']], [], []],
+    )
+    expect(consultas).toHaveLength(3)
+    for (const c of consultas) esperarFiltradoPorDueno(c)
+  })
+
+  it('api/mobile/cocina/comandas/[id]/cancelar: lee y cancela solo una comanda del dueño del token', async () => {
+    const { POST } = await import('../app/api/mobile/cocina/comandas/[id]/cancelar/route')
+    const id = '00000000-0000-4000-8000-000000000001'
+    const consultas = await consultasEncadenadas(() => POST(peticionMovil(), { params: Promise.resolve({ id }) }), [[['recibida']]])
+    expect(consultas.length).toBeGreaterThanOrEqual(2)
+    for (const c of consultas.slice(0, 2)) esperarFiltradoPorDueno(c)
+    expect(consultas[1]!.sql).toMatch(/^update "comandas"/i)
+  })
+
   it('cocina/pedir: pedirComanda mira la ref y bloquea los materiales elegidos solo entre los del dueño', async () => {
     const id = '00000000-0000-4000-8000-000000000001'
     const consultas = await consultasEncadenadas(

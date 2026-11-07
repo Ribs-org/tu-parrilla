@@ -72,6 +72,16 @@ sección.
   - **Que el chef pregunte por el teléfono con una notificación** (2026-11-06). La app muestra la
     pregunta en «Tus comandas» y se contesta ahí, pero no avisa sola: no hay notificaciones push en
     la app. El correo es el aviso.
+  - **El mesón en el teléfono** (2026-11-06). La app ya hace lo del panel en la cámara de frío y en
+    las comandas (pedir con todas las opciones, cambiar, sacar, cancelar, «Lo que pasó»), pero no el
+    mesón: programar o descartar lo que entregó el chef. Quedó fuera por dos cosas: ver un creativo
+    es reproducir su video, y `expo-video` es un módulo nativo que no traen ni la 1.1.0 ni la 1.2.0
+    (habría que sumarlo al próximo build, o abrir el video afuera con `Linking`); y «Programar» deja
+    el creativo en un borrador cuya portada y atributos pone el post al programarse desde el
+    compositor del panel, camino que el Publicar del teléfono no conoce —antes de abrirlo ahí hay
+    que comprobar que programar ese borrador desde el teléfono no los pierde—. Descartar con su
+    motivo sí sería solo JavaScript. Hoy la tarjeta de la comanda dice cuántos creativos esperan en el
+    mesón, en el panel web.
   - **Por revisar: la alarma de la cocina no ve una comanda tomada sin hora estimada** (2026-11-06).
     Suena si lleva media hora sin tomar o si pasó su `eta`; una que el chef tomó y dejó en
     `revisando` sin `eta` —el camino «la revisa una persona del equipo» del issue
@@ -526,7 +536,8 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
 - **[dueño] El build 1.2.0 de la app, con la cámara, a las tiendas** (2026-11-02). La 1.2.0 trae
   La Cocina en el teléfono: grabar un video o sacar una foto y mandárselo al chef. Pide los
   permisos de cámara y micrófono, que solo llegan con un binario nuevo, y su `runtimeVersion` es
-  otra: nada de la 1.2.0 llega por aire a un teléfono con la 1.1.0. Falta: el build de EAS de
+  otra: nada de la 1.2.0 llega por aire a un teléfono con la 1.1.0 (La Cocina sin grabar sí puede
+  llegarle desde `ota-1.1.0`: ver la entrada de abajo). Falta: el build de EAS de
   producción (el flujo «App a la tienda» de GitHub, o `npx eas-cli build -p android --profile
   production` en `mobile/`) y subirlo a Google Play (`eas submit`), con la sección de seguridad de
   los datos de la Play Console al día —la app usa la cámara y el micrófono para lo que la persona
@@ -538,6 +549,13 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   `react-native-svg`, que también espera uno (el bug de la entraña, en «Bugs»). El build ya
   lleva `expo-clipboard` (2026-11-06): sin él, «Copiar el texto» abre la lista de compartir
   (`mobile/README.md`, «El portapapeles, con y sin su módulo nativo»).
+- **[dueño] Publicar La Cocina por aire a la 1.1.0** (2026-11-06). Está preparada: la pestaña
+  entera —la cámara de frío y las comandas— sin «Grabar video» ni «Sacar foto», que la 1.1.0 no
+  puede (no trae el permiso de la cámara), con «Elegir de la galería». Se publica desde la rama
+  `ota-1.1.0` copiando los archivos que lista `mobile/README.md`, «La Cocina por aire a la 1.1.0»,
+  después de que el servidor esté en producción, con el comando de siempre en los dos canales.
+  Probado en una copia de la rama (tipos, tests y el paquete de Android); en un teléfono con la 1.1.0,
+  no.
 - **[dueño] La app en iPhone** (2026-10-16). El código ya está listo para iOS; faltan la
   cuenta del Apple Developer Program, confirmar el identificador `cl.tuparrilla.app`
   (queda fijo al registrarlo), la ficha en App Store Connect y el primer build a
