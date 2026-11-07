@@ -72,6 +72,17 @@ export function estaCaida(c: CuentaVigilada, ahora: Date): boolean {
   return !desconectadaAProposito(c) && fierroDe(c, ahora) === 'frio'
 }
 
+/**
+ * Lo que el teléfono avisa de una cuenta: que se enfría (vence esta semana) o que se apagó. Nulo con
+ * el fierro al rojo, y también si el dueño la desconectó a propósito. La misma lectura que el correo
+ * de la caída y que la tarjeta de Los Fierros.
+ */
+export function fierroQueAvisa(c: CuentaVigilada, ahora: Date): 'enfriandose' | 'frio' | null {
+  if (desconectadaAProposito(c)) return null
+  const fierro = fierroDe(c, ahora)
+  return fierro === 'al-rojo' ? null : fierro
+}
+
 export type CuentaEnRiesgo = {
   cuentaId: string
   red: string

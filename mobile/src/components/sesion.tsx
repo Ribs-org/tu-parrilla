@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import * as LocalAuthentication from 'expo-local-authentication'
+import { olvidarAlSalir, reintentarBorrado } from '../lib/avisos'
 import { barrerCachesViejas } from '../lib/cache'
 import { cerrarEnElTelefono, readToken } from '../lib/session'
 
@@ -17,7 +18,7 @@ type LaSesion = {
   token: string | null
   /** Abre la sesión con el token recién canjeado (ya guardado en el llavero por `entrar`). */
   abrir: (token: string) => void
-  /** Sale en este teléfono: borra el token y lo guardado de la cuenta, y vuelve a la entrada. */
+  /** Sale en este teléfono: borra el token de los avisos, el de la sesión y lo guardado de la cuenta, y vuelve a la entrada. */
   salir: () => Promise<void>
 }
 
@@ -58,14 +59,18 @@ export function ProveedorDeSesion({ children }: { children: ReactNode }) {
       .catch((): Estado => ({ estado: 'fuera', token: null }))
       .then(setSesion)
     void barrerCachesViejas()
+    // El token de los avisos que no se alcanzó a borrar al salir la última vez.
+    void reintentarBorrado()
   }, [])
 
   const abrir = useCallback((token: string) => setSesion({ estado: 'dentro', token }), [])
 
   const salir = useCallback(async () => {
+    // Antes que el token de la sesión, que es con lo que se borra el de los avisos del servidor.
+    await olvidarAlSalir(sesion.token).catch(() => undefined)
     await cerrarEnElTelefono()
     setSesion({ estado: 'fuera', token: null })
-  }, [])
+  }, [sesion.token])
 
   const valor = useMemo(() => ({ ...sesion, abrir, salir }), [sesion, abrir, salir])
   return <Contexto.Provider value={valor}>{children}</Contexto.Provider>

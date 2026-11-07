@@ -28,6 +28,8 @@ import {
   type PublishOutcome,
 } from './publisher'
 import { sendFailureAlert } from './alert'
+import { avisoDeQuemado } from '@/lib/push/avisos'
+import { avisarAlTelefono } from '@/lib/push/enviar'
 import { MOTIVOS_DE_CONEXION } from './conexion'
 import type { OpcionesDestino } from './opciones'
 import { marcarCaida } from '@/lib/avisos/run'
@@ -222,6 +224,13 @@ export async function publishDue(
       } catch (error) {
         console.error(`[publicar] No se pudo avisar el fallo del destino ${target.id}:`, String(error).slice(0, 300))
       }
+      // Y al teléfono, al lado del correo y con lo mismo: uno por destino quemado. No lanza.
+      await avisarAlTelefono(post.ownerId, (tema) =>
+        avisoDeQuemado(
+          { postId: post.id, red: target.network, handle: null, texto: post.caption, motivo: patch.lastError ?? '' },
+          tema,
+        ),
+      )
     }
   }
 

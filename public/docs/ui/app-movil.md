@@ -235,6 +235,12 @@ Se abre con el botón de Ajustes de cualquier pestaña. Arriba, la flecha para v
   Sin cuentas, «Todavía no conectas ninguna cuenta.». Mientras carga, «Cargando tus cuentas…».
 - Debajo, «Tus redes conectadas. Se conectan y se reconectan en el panel web.» y el botón «Abrir Los Fierros en el panel», que abre [Los Fierros](los-fierros.md) en el navegador del teléfono (ahí puede pedir entrar con el correo, como el panel).
 - **«El modo»**, con la frase «De noche: el acero y los cortes de la parrilla. Se guarda en tu cuenta: vale también en el panel web.» (de día, «De día: el fondo claro y piezas de sushi. Se guarda…») y un botón que dice adónde lleva: «Modo día» de noche, «Modo noche» de día. Cambia en el momento y lo guarda en la cuenta; sin señal, el teléfono lo recuerda y lo manda cuando vuelve la conexión.
+- **«Los avisos»**, para que la app avise en el teléfono. Una frase según cómo estén, y un botón:
+  - Encendidos: «Te llegan a este teléfono: lo que se quemó, las cuentas que se enfrían o se apagan, las preguntas del chef, las comandas que terminan, las respuestas del equipo y, una vez por hora como mucho, los comentarios nuevos de La Mesa. El correo te sigue llegando igual.» y el botón «Apagar los avisos».
+  - Apagados: «Apagados en este teléfono. Encendidos, te llegan: …» con la misma lista, y el botón «Encender los avisos». Al tocarlo, el teléfono puede preguntar si deja que Tu Parrilla mande notificaciones: hay que permitirlo.
+  - Si el teléfono no deja: «El teléfono no deja que Tu Parrilla te avise. Actívalo en los ajustes del teléfono, en Notificaciones.», con los botones «Abrir los ajustes del teléfono» y «Apagar los avisos».
+  - En una app que todavía no tiene la versión 1.2.0 desde la tienda: «Este teléfono todavía no tiene los avisos: llegan con la versión nueva de la app, la que se instala desde la tienda.», sin botón.
+  De día dice «lo que se echó a perder» y «las cuentas que se desafilan o quedan sin filo». Apagarlos o encenderlos vale solo para este teléfono; los correos no cambian.
 - **«Tu sesión»**, con «Cerrar sesión» en rojo. Pregunta «¿Cerrar sesión en este teléfono?» / «Para volver a entrar te va a llegar un código a tu correo.», con «Cancelar» y «Cerrar sesión» (en rojo). Al confirmar, la app vuelve a la pantalla de entrada y borra del teléfono lo que guardó de la cuenta —lo último que mostró cada pantalla—: quien entre después en ese teléfono no lo ve, y «atrás» ya no vuelve a ninguna pantalla de la cuenta. Las cuentas conectadas, lo programado y los borradores no se tocan: están en la cuenta, no en el teléfono.
 - **«El libro de sugerencias»** (de día, «La caja de sugerencias»), para escribirle al equipo que hace Tu Parrilla y leer lo que le respondió. Si hay respuestas que no abrió, al lado del rótulo va un punto naranjo y «1 respuesta nueva» (o «<N> respuestas nuevas»). Una tarjeta con dos botones redondeados arriba, «Escribir» y «Lo que nos escribiste» (este con un punto naranjo si hay algo sin leer); arranca en «Lo que nos escribiste» si hay respuestas sin leer, si no en «Escribir».
   - En «Escribir»: el dibujo de un libro abierto (de día, una caja de madera con una ranura), los botones «Una idea», «Algo no funciona» y «Otra cosa», un campo para escribir y el botón «Dejarlo en el libro» (de día, «Echarlo a la caja»). Es lo mismo que el libro del panel, con sus mismos textos y mensajes: está contado en [El libro de sugerencias](libro-de-sugerencias.md). En la app, en vez del navegador, el mensaje lleva la versión de la app, y al recibirse dice «Quedó en el libro.» (de día, «Quedó en la caja.») con «Escribir otra». Lo escrito no se borra al pasar a la otra pestaña.
@@ -269,6 +275,22 @@ Si el post no está entre lo descargado: «Vuelve a la lista y ábrelo de nuevo:
 4. Escríbelos en «000000» y toca «Entrar» (o la tecla de enviar del teclado). Se abre «La Parrilla».
 
 Si el código no llega, revisa el spam y que el correo esté bien escrito; «Usar otro correo» vuelve al primer paso para pedir otro. Son a lo más tres códigos cada quince minutos.
+
+### Para que la app te avise en el teléfono
+
+La primera vez que entras, unos segundos después, la app pregunta «¿Te avisamos al teléfono?» —«Cuando algo se quema, una cuenta se enfría, el chef te pregunta o te deja una comanda, el equipo te responde o te llegan comentarios a La Mesa. Se apagan cuando quieras en Ajustes.»— con «Ahora no» y «Avisarme».
+
+1. Toca «Avisarme».
+2. Si el teléfono pregunta si Tu Parrilla puede mandar notificaciones, toca «Permitir».
+
+Si tocaste «Ahora no», no vuelve a preguntar: se encienden en Ajustes → «Los avisos» → «Encender los avisos». Tocar un aviso abre su pantalla: lo que se quemó, en La Parrilla; una cuenta que se enfría o se apaga y la respuesta del equipo, en Ajustes; una pregunta del chef o una comanda, en «Tus comandas» de La Cocina; los comentarios nuevos, en La Mesa. Los comentarios llegan como un resumen («3 comentarios nuevos en La Mesa», con las redes), uno por hora como mucho.
+
+### Para apagar los avisos
+
+1. Toca el botón de Ajustes.
+2. En «Los avisos», toca «Apagar los avisos».
+
+Deja de llegar todo a este teléfono; los correos siguen igual. Cerrar sesión también los apaga en ese teléfono.
 
 ### Para ver qué viene y qué se quemó
 
@@ -484,6 +506,9 @@ En La Mesa, toca «Enviados»: lo respondido desde Tu Parrilla, por la respuesta
 
 | Lo que dice la pantalla | Qué significa | Qué hacer |
 |---|---|---|
+| «No se encendieron los avisos» con «No se pudieron encender los avisos. Revisa tu conexión y vuelve a intentarlo.» | El teléfono no pudo registrarse para los avisos: sin señal, o el servidor no respondió. | Volver a intentarlo en Ajustes → «Los avisos» → «Encender los avisos» con señal. Si sigue, avisarle a quien administra el sitio: puede faltar algo en la configuración de la app. |
+| «No se apagaron los avisos» con «No se pudieron apagar los avisos. Revisa tu conexión y vuelve a intentarlo.» | No se pudo avisar al servidor; los avisos siguen encendidos. | Volver a intentarlo con señal. |
+| «El teléfono no deja que Tu Parrilla te avise. Actívalo en los ajustes del teléfono, en Notificaciones.» | Se negó el permiso de notificaciones, y la app ya no lo puede volver a pedir. | Tocar «Abrir los ajustes del teléfono», entrar a Notificaciones y encenderlas para Tu Parrilla. |
 | «Desbloquea para entrar a Tu Parrilla» | La app pide el bloqueo del teléfono. | Usar el PIN, patrón, huella o cara del teléfono. Si se cancela, sale la pantalla de entrada. |
 | «Ese correo no se ve bien.» | Al correo le falta algo, como la @ o el dominio. | Revisarlo y volver a tocar «Mandarme un código». |
 | «Si tu correo está invitado, te llegará un código en un minuto. Vale diez minutos.» | Es lo mismo que dice el panel web, esté o no invitado el correo: no revela quién lo está. | Esperar el correo. Si no llega en unos minutos, revisar el spam y que el correo esté bien escrito, o pedirle a quien administra el sitio que lo invite. |
@@ -631,6 +656,8 @@ En La Mesa, toca «Enviados»: lo respondido desde Tu Parrilla, por la respuesta
 - «El botón de Ajustes (o "el engranaje") tiene un punto» → una cuenta se está enfriando (ámbar) o se apagó (rojo). En «Ajustes» se ve cuál; se reconecta en el panel web, con «Abrir Los Fierros en el panel». En la app, ese botón no avisa de las respuestas del libro de sugerencias: esas se ven en el rótulo del libro, al final de «Ajustes».
 - «Me llegó un correo de que me respondieron» → al final de «Ajustes», en el libro de sugerencias, «Lo que nos escribiste»: la que dice «Respuesta nueva».
 - «¿Qué versión tengo?» → «Ajustes», al pie.
+- «No me llegan los avisos» o «quiero notificaciones» → «Ajustes» → «Los avisos»: si dice «Apagados en este teléfono», tocar «Encender los avisos» y permitir las notificaciones; si dice que el teléfono no deja, «Abrir los ajustes del teléfono». Si dice que llegan con la versión nueva, hay que instalar la app desde la tienda. Los comentarios llegan como resumen, uno por hora como mucho.
+- «Me llegan demasiados avisos» o «quiero apagarlos» → «Ajustes» → «Los avisos» → «Apagar los avisos». Los correos siguen llegando.
 - «El video llegó a TikTok sin el texto» → es así con lo que va a la bandeja de TikTok. En «La Parrilla», la tarjeta del post tiene «Copiar el texto» (o «Pasar el texto…»); ver «Para copiar el texto de lo que llegó a TikTok».
 - «Toco "Pasar el texto…" y no aparece "Copiar"» → esa versión de la app no trae el portapapeles y la lista de compartir de ese teléfono no ofrece copiar. Abrir la publicación y mantener apretado el texto; una versión más nueva de la app, instalada desde la tienda, copia directo.
 - «Perdí el teléfono» → quien administra el sitio puede revocar el acceso de todos los teléfonos a la vez; las conexiones con las redes no se tocan.
@@ -703,7 +730,7 @@ Comparada con el panel web, la app no:
 - en La Cocina: muestra, programa ni descarta lo del mesón (eso es del panel, [La Cocina](la-cocina.md)), elige el color de acento de la marca ni dibuja la estación de cada comanda;
 - guarda en la galería del teléfono lo que graba;
 - invita usuarios ([Los Maestros](los-maestros.md)) ni responde sugerencias ([Las Sugerencias](las-sugerencias.md));
-- manda notificaciones;
+- muestra los avisos en la app: llegan como notificaciones del teléfono, y se encienden o apagan en Ajustes;
 - existe para iPhone.
 
 ## Para quien mantiene esta página
@@ -734,6 +761,7 @@ Lo que describe sale de estos archivos:
 - `mobile/src/components/corte-programado.tsx`
 - `mobile/src/components/copiar-texto.tsx`, `mobile/src/lib/portapapeles.ts` y `mobile/src/lib/bandeja.ts` («Copiar el texto» o «Pasar el texto…» de lo que espera en la bandeja de TikTok)
 - `mobile/src/app/ajustes.tsx` y `mobile/src/components/boton-ajustes.tsx` (Ajustes y su botón en la cabecera)
+- `mobile/src/components/avisos.tsx` y `mobile/src/lib/avisos.ts` (los avisos al teléfono: la pregunta de la primera vez, «Los avisos» de Ajustes, sus frases y adónde lleva tocar uno), y `src/lib/push/avisos.ts` (lo que dice cada aviso)
 - `mobile/src/components/libro-de-sugerencias.tsx` y `mobile/src/lib/sugerencias.ts` (el libro de sugerencias, al final de Ajustes, con «Lo que nos escribiste»), y `src/app/api/mobile/sugerencias/route.ts` y `src/app/api/mobile/sugerencias/[id]/leida/route.ts` (lo que lee y marca leído)
 - `src/app/api/mobile/fierros/route.ts` (lo que muestran)
 - `mobile/src/components/pieza.tsx`, `mobile/src/components/pieza-sushi.tsx` y `mobile/src/components/lienzo.tsx` (el corte dibujado, de noche y de día)

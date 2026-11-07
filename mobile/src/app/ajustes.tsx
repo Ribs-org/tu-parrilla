@@ -11,6 +11,7 @@ import { useVentanas } from '../components/ventana'
 import { useFierros } from '../components/boton-ajustes'
 import { API_BASE } from '../lib/config'
 import { LibroDeSugerencias } from '../components/libro-de-sugerencias'
+import { AjusteDeAvisos } from '../components/avisos'
 import { LOS_FIERROS, otroTema, type Tema } from '../lib/tema'
 import { NOMBRE_RED, type Fierros } from '../lib/tipos'
 
@@ -130,6 +131,9 @@ export default function Ajustes() {
       <View style={{ flexDirection: 'row' }}>
         <Boton texto={tema === 'dia' ? 'Modo noche' : 'Modo día'} onPress={() => cambiarTema(otroTema(tema))} />
       </View>
+
+      {/* Los avisos al teléfono, en este teléfono: encenderlos o apagarlos. El correo no cambia. */}
+      <AjusteDeAvisos />
 
       <Etiqueta margenArriba>Tu sesión</Etiqueta>
       <View style={{ alignItems: 'flex-start' }}>
