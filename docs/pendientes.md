@@ -549,13 +549,6 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   `react-native-svg`, que también espera uno (el bug de la entraña, en «Bugs»). El build ya
   lleva `expo-clipboard` (2026-11-06): sin él, «Copiar el texto» abre la lista de compartir
   (`mobile/README.md`, «El portapapeles, con y sin su módulo nativo»).
-- **[dueño] Publicar La Cocina por aire a la 1.1.0** (2026-11-06). Está preparada: la pestaña
-  entera —la cámara de frío y las comandas— sin «Grabar video» ni «Sacar foto», que la 1.1.0 no
-  puede (no trae el permiso de la cámara), con «Elegir de la galería». Se publica desde la rama
-  `ota-1.1.0` copiando los archivos que lista `mobile/README.md`, «La Cocina por aire a la 1.1.0»,
-  después de que el servidor esté en producción, con el comando de siempre en los dos canales.
-  Probado en una copia de la rama (tipos, tests y el paquete de Android); en un teléfono con la 1.1.0,
-  no.
 - **[dueño] La app en iPhone** (2026-10-16). El código ya está listo para iOS; faltan la
   cuenta del Apple Developer Program, confirmar el identificador `cl.tuparrilla.app`
   (queda fijo al registrarlo), la ficha en App Store Connect y el primer build a

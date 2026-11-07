@@ -138,7 +138,7 @@ Las dos mitades del tablero del panel ([Los Números](los-numeros.md)), más cor
 
 ### La Cocina
 
-Para grabar un video (o sacar una foto) con la cámara del teléfono, ordenar lo guardado en la cámara de frío y pedirle una comanda al chef de la casa, sin pasar por el panel. Es la misma Cocina del panel ([La Cocina](la-cocina.md)): lo grabado se guarda en la cámara de frío ([La cámara de frío](la-camara-de-frio.md)), la comanda que sale es la misma que el chef ve llegar desde el panel, con las mismas opciones del formulario «Pedir una comanda», y lo que se cambia o se saca en un lado se ve en el otro. Llegó con la versión 1.2.0 de la app; desde el 2026-11-06 hace también lo de la cámara de frío y las comandas que antes eran solo del panel.
+Para grabar un video (o sacar una foto) con la cámara del teléfono, ordenar lo guardado en la cámara de frío y pedirle una comanda al chef de la casa, sin pasar por el panel. Es la misma Cocina del panel ([La Cocina](la-cocina.md)): lo grabado se guarda en la cámara de frío ([La cámara de frío](la-camara-de-frio.md)), la comanda que sale es la misma que el chef ve llegar desde el panel, con las mismas opciones del formulario «Pedir una comanda», y lo que se cambia o se saca en un lado se ve en el otro. Está en la versión 1.2.0 de la app y, desde el 2026-11-07, también en la 1.1.0 por aire, sin «Grabar video» ni «Sacar foto» (la 1.1.0 no trae el permiso de la cámara). Desde el 2026-11-06 hace también lo de la cámara de frío y las comandas que antes eran solo del panel.
 
 Si La Cocina no está encendida para la cuenta, la pestaña muestra solo el rótulo «El chef de la casa» y una tarjeta: «El chef de la casa edita tus videos: le llevas un video largo, un podcast en videollamada o tus tomas sueltas, y te devuelve una tanda de clips y carruseles con sus textos, para que los programes en tus redes. Está en piloto, con pocas cuentas.» y «Si quieres probarla, pídesela a quien administra Tu Parrilla.».
 
@@ -194,7 +194,7 @@ Se abre con el botón de Ajustes de cualquier pestaña. Arriba, la flecha para v
 - **«El libro de sugerencias»** (de día, «La caja de sugerencias»), para escribirle al equipo que hace Tu Parrilla y leer lo que le respondió. Si hay respuestas que no abrió, al lado del rótulo va un punto naranjo y «1 respuesta nueva» (o «<N> respuestas nuevas»). Una tarjeta con dos botones redondeados arriba, «Escribir» y «Lo que nos escribiste» (este con un punto naranjo si hay algo sin leer); arranca en «Lo que nos escribiste» si hay respuestas sin leer, si no en «Escribir».
   - En «Escribir»: el dibujo de un libro abierto (de día, una caja de madera con una ranura), los botones «Una idea», «Algo no funciona» y «Otra cosa», un campo para escribir y el botón «Dejarlo en el libro» (de día, «Echarlo a la caja»). Es lo mismo que el libro del panel, con sus mismos textos y mensajes: está contado en [El libro de sugerencias](libro-de-sugerencias.md). En la app, en vez del navegador, el mensaje lleva la versión de la app, y al recibirse dice «Quedó en el libro.» (de día, «Quedó en la caja.») con «Escribir otra». Lo escrito no se borra al pasar a la otra pestaña.
   - En «Lo que nos escribiste»: lo que escribió, de lo más nuevo a lo más viejo, cada cosa en un recuadro con su tipo y su fecha («Una idea · 6 nov 2026»), a la derecha «Respuesta nueva» en naranjo con un punto, «Respondida» o «Sin respuesta todavía», y el primer renglón de lo que escribió. Tocarlo lo abre: el texto entero y, si hay respuesta, «Te respondió el equipo · <fecha>» en naranjo con la respuesta debajo; sin respuesta, «Todavía no te respondemos. Cuando lo hagamos, aparece acá y te llega un correo.». Abrir una respuesta nueva la deja leída: se apagan su «Respuesta nueva» y el punto del rótulo. Mientras carga, «Abriendo…»; sin nada escrito, «Todavía no nos escribes nada. Lo que escribas aparece acá, con lo que te respondamos.»; sin señal y sin nada guardado, «No se pudo actualizar.».
-- Al pie, la versión de la app: «Versión 1.2.0» (o «Versión 1.1.0» en un teléfono que todavía no se actualiza desde la tienda: esa no tiene La Cocina) y, si llegó una actualización por aire, « · actualización » seguido de ocho letras y números que la identifican. Sirve para saber qué versión tiene alguien que pide ayuda.
+- Al pie, la versión de la app: «Versión 1.2.0» (o «Versión 1.1.0» en un teléfono que todavía no se actualiza desde la tienda: esa tiene La Cocina sin grabar) y, si llegó una actualización por aire, « · actualización » seguido de ocho letras y números que la identifican. Sirve para saber qué versión tiene alguien que pide ayuda.
 
 Aquí no se conecta ni se desconecta nada: eso es del panel web.
 
@@ -474,7 +474,7 @@ En las versiones de la app que todavía no traen el portapapeles, el botón dice
 | «Instagram no dejó ver su música con esta cuenta. Reconéctala en Los Fierros y vuelve a intentarlo.» | El permiso de la cuenta venció o no alcanza. | Reconectarla en el panel web, en Los Fierros. |
 | «Instagram no tiene una muestra de esa canción para escuchar.» | Esa canción no trae muestra, o no se pudo abrir. | Elegirla igual si se conoce, u otra. |
 | «La música de Instagram solo funciona en cuentas conectadas con Facebook, y esta se conectó con el login de Instagram.» | Al programar, la cuenta de Instagram está conectada con el login de Instagram. | Tocar «Quitar» en la canción, o reconectar la cuenta con Facebook en el panel web. |
-| «La cuenta x no está conectada. Vuelve a conectarla en Los Fierros.» (con el nombre de la cuenta en lugar de x) | La cuenta elegida perdió la conexión. Los Fierros está en el panel web, en el botón «Ajustes»: la app no tiene esa pantalla. | Reconectarla en el panel web. |
+| «La cuenta x no está conectada. Vuelve a conectarla en Los Fierros.» (con el nombre de la cuenta en lugar de x) | La cuenta elegida perdió la conexión. Se reconecta en Los Fierros del panel web, en el botón «Ajustes»: la app muestra Los Fierros en Ajustes, solo para leer, y no conecta ni reconecta. | Reconectarla en el panel web. |
 | «Una de las cuentas elegidas no es tuya.» | Una cuenta ya no pertenece a quien publica (por ejemplo, se borró). | Cerrar la app del todo y volver a abrirla: la lista de cuentas de «Publicar» se carga al abrir. |
 | «Red desconocida o sin publicación: x.» | Se intentó publicar en una red que el teléfono no maneja (hoy, TikTok). | Publicar en esa red desde el panel web, en [La Parrilla](la-parrilla.md). |
 | «Falta subir un archivo.» | Uno de los archivos subidos ya no está en el servidor. | Los elegidos en el teléfono se vuelven a subir solos: esperar y tocar de nuevo «Programar». Si el archivo venía de un borrador, quitarlo con su «✕» y volver a elegirlo. |
@@ -575,12 +575,11 @@ En las versiones de la app que todavía no traen el portapapeles, el botón dice
 Comparada con el panel web, la app no:
 
 - deja oír el reel con la canción de «Música de Instagram» puesta (Instagram no lo permite antes de publicar), ni cambia la canción de algo ya programado;
-
 - conecta, desconecta ni reconecta redes ([Los Fierros](los-fierros.md));
 - publica en TikTok;
 - cambia los archivos, la portada, la palabra clave ni las opciones de lo programado, le suma cuentas, ni edita o borra lo que ya salió en alguna cuenta ([La Parrilla](la-parrilla.md)): corrige el texto, la hora y las cuentas, y borra, solo lo que no ha salido;
+- al programar, pone portada a un video, atributos a un post ni reglas de respuesta a comentarios con palabra clave;
 - programa un borrador que va también a TikTok o tiene una palabra clave (se edita, pero se programa en el panel web);
-- pone portada a un video, atributos a un post ni reglas de respuesta a comentarios con palabra clave;
 - carga posts por lote;
 - muestra ni responde comentarios ([La Mesa](la-mesa.md));
 - muestra la pieza de una publicación con sus versiones, «Comparar por atributo», el «⋯ Más» de «En tu página» (orígenes, links, países, equipos) ni el filtro de página o de bots ([Los Números](los-numeros.md));
