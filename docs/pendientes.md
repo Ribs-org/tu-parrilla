@@ -116,14 +116,12 @@ sección.
   debajo de la grilla, y la animación de salida apunta a él aunque no se vea. No rompe nada: la
   pieza queda elegida. Se podría apuntar el vuelo al borde visible, o mostrar el riel fijo abajo.
 
-- **En la app, la entraña de un video se lee como una longaniza** (2026-10-26, lo vio el dueño
-  al publicar un video desde el teléfono). El formato llega bien del servidor (`entrana`);
-  el problema es el dibujo. Sin `react-native-svg`, `mobile/src/components/pieza.tsx` arma
-  cada silueta con vistas de bordes redondeados, y la entraña queda como una barra larga y
-  angosta (62 × 14), casi la forma del chori. Lo de fondo es la tanda 6 de
-  `docs/auditoria-ui-2026-10-16.md`: `react-native-svg` en el próximo build nativo, con las
-  curvas del panel. Mientras tanto, se puede retocar la silueta por aire (más ancha, con un
-  extremo afinado o las vetas más marcadas) para que no se confunda.
+- **En la 1.1.0, la entraña de un video se sigue leyendo como una longaniza** (2026-10-26; desde
+  el 2026-11-07, solo en la 1.1.0). La 1.2.0 dibuja el corte en SVG con las curvas del panel
+  (`mobile/README.md`, «El corte en SVG, solo desde la 1.2.0»), pero la 1.1.0 no trae
+  `react-native-svg` y se queda con las vistas de `ota-1.1.0`. Se va solo cuando todos tengan la
+  1.2.0; si antes molesta, se puede retocar la silueta de la entraña en esa rama, por aire (más
+  ancha, con un extremo afinado o las vetas más marcadas).
 - **Instagram oculta el comentario que es solo la palabra clave, y ninguna app lo recibe**
   (2026-11-03; antes «no entrega los comentarios de @vicente_edits2», 2026-10-30). En una foto de
   @vicente.ingeniero que decía «Comment GUIA and I'll send you the guide», los comentarios `GUIA`
@@ -554,8 +552,8 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   Probarlo en un teléfono de verdad antes de soltarlo: la cámara, los permisos y la subida por
   partes de un video de varios GB no se pudieron probar sin uno. Mientras tanto, lo de la 1.1.0
   se publica por aire desde un commit anterior. Detalle en `mobile/README.md`, «La 1.2.0
-  necesita un build nativo y pasar por las tiendas». Ya que hay build, conviene sumarle antes
-  `react-native-svg`, que también espera uno (el bug de la entraña, en «Bugs»). El build ya
+  necesita un build nativo y pasar por las tiendas». El build lleva además `react-native-svg`
+  (2026-11-07), que dibuja el corte con las curvas del panel. El build ya
   lleva `expo-clipboard` (2026-11-06): sin él, «Copiar el texto» abre la lista de compartir
   (`mobile/README.md`, «El portapapeles, con y sin su módulo nativo»). Y `expo-notifications`
   (2026-11-07), los avisos al teléfono: antes de armarlo van las credenciales de la entrada
@@ -766,8 +764,10 @@ nadie paga: todas las cuentas son iguales y el README dice «Sin suscripción».
   decidir las franjas y qué mide una zona); el cierre del domingo («Aplauso para el
   asador»); las familias de cuentas, con su subíndice (TikTok₁, TikTok₂) y el corte
   trinchado (necesita tabla nueva y decidir si una familia admite dos cuentas de la misma
-  red); un archivo de tokens común para el panel y la app; y, con un build nativo, el corte
-  en SVG y la vibración en la app.
+  red); un archivo de tokens común para el panel y la app; y, con un build nativo, la vibración
+  en la app. El corte en SVG llegó con la 1.2.0 (2026-11-07); falta pasar a SVG la pieza de sushi
+  del día (`mobile/src/components/pieza-sushi.tsx`, todavía con vistas), que ya es puro JavaScript
+  sobre ese build y no se copia a `ota-1.1.0`.
 - **Gamificar las notificaciones de cada red** (2026-10-25, lo pidió el dueño). Que lo que cada
   red le avisa a un creador —seguidores nuevos, comentarios, reacciones a un post— se viva en Tu
   Parrilla como un juego, red por red. Falta definir con el dueño qué cuenta como notificación y

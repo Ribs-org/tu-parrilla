@@ -319,7 +319,8 @@ con unas burbujas arriba:
 La línea de arriba dice cómo atiende la cocina —sola, a mano o cerrada— con la frase que manda el
 servidor. El mesón (programar o descartar lo que entregó el chef) sigue en el panel: ver
 `docs/pendientes.md`. La estación dibujada de cada comanda también: el teléfono dice lo mismo con el
-estado y las cinco rayas del recorrido, sin `react-native-svg`.
+estado y las cinco rayas del recorrido, con vistas, porque la pantalla también va por aire a la 1.1.0,
+que no trae `react-native-svg`.
 
 **Las opciones viajan desde el servidor.** Los nombres de los formatos, las cantidades, los tipos de
 plato principal, los roles de un video y los usos no están copiados en la app: `GET
@@ -446,6 +447,24 @@ de compartir del sistema (`Share`, de React Native), que en Android 10 en adelan
 cual en la rama `ota-1.1.0`, que no tiene `expo-clipboard` en `package.json`: ahí siempre es la
 lista de compartir.
 
+### El corte en SVG, solo desde la 1.2.0
+
+Desde el build 1.2.0 la app trae `react-native-svg`, y el corte de cada post (`src/components/pieza.tsx`)
+se dibuja con las curvas del panel: las siluetas, las motas del chori y dónde cae cada marca están
+copiadas en `src/lib/corte.ts`, y un test de la raíz (`src/components/corte.test.ts`) las compara con
+las de `src/components/corte.tsx`. Antes la app armaba cada silueta con vistas de bordes redondeados y
+la entraña de un video quedaba como una barra larga, casi el chori. Los difuminados del panel
+(`feGaussianBlur`) se fingen con opacidad, y lo único que late es el halo de lo quemado.
+
+A diferencia del portapapeles, del audio y de los avisos, **acá no hay camino sin el módulo**: el
+dibujo entero es SVG. Así que, desde ahora, **`pieza.tsx` no se copia a la rama `ota-1.1.0`** —en un
+binario sin `react-native-svg`, La Parrilla se caería al abrir— ni nada que importe `react-native-svg`.
+La rama se queda con su `pieza.tsx` de vistas, y `src/lib/corte.ts` no le hace falta. Lo que se copie a
+esa rama de acá en adelante, mirarlo con `grep react-native-svg` antes.
+
+La pieza de sushi del día (`src/components/pieza-sushi.tsx`) sigue con vistas: pasarla a SVG es puro
+JavaScript sobre el build 1.2.0 (ver `docs/pendientes.md`).
+
 ## Los avisos al teléfono
 
 Desde la 1.2.0 (2026-11-07), la app avisa en el teléfono lo mismo que el correo: lo que se quemó, una
@@ -565,8 +584,8 @@ Para quien agregue una pantalla: los colores salen de `useColores()` (`src/compo
 nunca escritos a mano, y lo que sombrea con transparencia usa el velo del modo
 (`colores.velo + '10'`), blanco de noche y tinta de día. Las dos paletas viven en
 `src/components/colores.ts`, y un test del panel las compara con las suyas. Los dibujos de cada
-post también son dos, el corte de carne (`src/components/pieza.tsx`) y la pieza de sushi
-(`src/components/pieza-sushi.tsx`), y `Pieza` elige según el modo.
+post también son dos, el corte de carne (`src/components/pieza.tsx`, en SVG desde la 1.2.0) y la
+pieza de sushi (`src/components/pieza-sushi.tsx`, con vistas), y `Pieza` elige según el modo.
 
 Lo único que dibuja el teléfono mismo es la pantalla de arranque, y sigue oscura en los dos
 modos: cambiarla pide un build nativo (ver `docs/deuda-tecnica.md`). Las preguntas

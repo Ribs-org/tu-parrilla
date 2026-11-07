@@ -105,7 +105,8 @@ Cada parte se publica sola y no cambia la API ni los datos: es cómo se dibuja.
   filtro por red (`filtro-de-redes.tsx`, `lib/filtro.ts`), la mezcla y el renglón de cada día,
   lo que ya salió en un renglón hundido (`CorteServido`) y la línea de «ahora» en el día de hoy.
   Tres diferencias con el panel, todas por lo que la app tiene: el color de la red va en un
-  punto y no en el ícono, porque la app no tiene `react-native-svg` y sumarlo pide un build nuevo;
+  punto y no en el ícono, porque la app no tenía `react-native-svg` (llegó con la 1.2.0) y la
+  pantalla también va por aire a la 1.1.0;
   la cuenta del filtro es su red y su nombre, porque la API del teléfono no manda el id de la
   cuenta de cada destino; y el filtro no se guarda ni va a ninguna dirección. La agenda sigue en
   tarjetas: la app ya muestra un día debajo del otro, y la reja por hora no cabe en un teléfono

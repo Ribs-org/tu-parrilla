@@ -8,8 +8,9 @@ import { useColores } from './tema'
 
 /**
  * La pieza de sushi del panel (`src/components/pieza-sushi.tsx`), dibujada con vistas: el corte
- * del modo día. Como el corte de la noche (`pieza.tsx`), las siluetas son aproximadas —sin
- * `react-native-svg`, que pide un build nuevo—, pero dicen lo mismo con la misma gramática:
+ * del modo día. Las siluetas son aproximadas —se hicieron antes de que la app trajera
+ * `react-native-svg`, que llega con la 1.2.0 y ya dibuja el corte de la noche (`pieza.tsx`)—,
+ * pero dicen lo mismo con la misma gramática:
  * - la silueta es el formato: nigiri el video, un roll envuelto en salmón el carrusel (entero
  *   mientras no se sirvió, en rodajas cuando salió), sashimi la foto, temaki el texto;
  * - el pescado es la cocción: crudo, dorado y tostado bajo el soplete, y pasado —verde gris, con

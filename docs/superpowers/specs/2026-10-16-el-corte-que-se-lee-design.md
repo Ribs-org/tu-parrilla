@@ -64,7 +64,10 @@ Las decisiones que no son obvias:
    son aproximadas pero dicen lo mismo, y viaja por OTA. El formato y el sello de cada
    destino los decide el servidor (`GET /api/mobile/schedule`), para que el teléfono no
    repita la regla de TikTok ni la del fierro frío. Los colores sí se repiten, y
-   `src/lib/parrilla.test.ts` compara las dos copias.
+   `src/lib/parrilla.test.ts` compara las dos copias. **Desde la 1.2.0 (2026-11-07) ya no:**
+   el build trae `react-native-svg` y `pieza.tsx` dibuja las curvas del panel, copiadas en
+   `mobile/src/lib/corte.ts` y comparadas por `src/components/corte.test.ts`. Las vistas
+   aproximaban la entraña con una barra larga y angosta que se leía como el chori.
 
 ## Lo que queda de la propuesta
 

@@ -1,19 +1,25 @@
-import { useEffect, useState } from 'react'
-import { Animated, View, type ViewStyle } from 'react-native'
+import { useEffect, useId, useState } from 'react'
+import { Animated, View } from 'react-native'
+import Svg, { Circle, ClipPath, Defs, Ellipse, G, LinearGradient, Path, Stop } from 'react-native-svg'
+import { MOTAS, SILUETA, posiciones } from '../lib/corte'
 import { CARNE, GRASA, QUEMO, type Carne, type Coccion, type Formato, type Sello } from '../lib/parrilla'
-import { ANCHO, ESCALA, Lienzo, Punteada, useQuieto } from './lienzo'
+import { ESCALA, Lienzo, useQuieto, ANCHO } from './lienzo'
 import { PiezaDeSushi } from './pieza-sushi'
 import { useColores, useTema } from './tema'
 
 /**
- * El corte del panel (`src/components/corte.tsx`), dibujado con vistas.
+ * El corte del panel (`src/components/corte.tsx`), dibujado con `react-native-svg` y las mismas
+ * curvas (`src/lib/corte.ts`): la silueta es el formato, la carne la cocción, una marca por destino
+ * que se quema cuando ese destino confirma, el halo rojo y la banderita si algo se quemó, y el humo
+ * mientras algo sale.
  *
- * El panel lo dibuja en SVG; acá no hay `react-native-svg` instalado, y agregarlo es una
- * dependencia nativa: un build nuevo y reinstalar a mano. Esto viaja por aire a la app que
- * ya está en el teléfono, así que las siluetas son aproximadas —bordes redondeados en vez
- * de curvas—, pero dicen lo mismo: la silueta es el formato, la carne la cocción, una marca
- * por destino que se quema cuando ese destino confirma, el halo rojo y la banderita si algo
- * se quemó, y el humo mientras algo sale.
+ * Desde la 1.2.0 (2026-11-07). Hasta ahí la app no tenía `react-native-svg` y armaba cada silueta
+ * con vistas de bordes redondeados: la entraña quedaba como una barra larga y angosta, casi el chori.
+ * `react-native-svg` es nativo y solo llega con el build 1.2.0, así que **este archivo no se copia a
+ * la rama `ota-1.1.0`**: en un binario sin el módulo, la app se caería al abrir La Parrilla.
+ *
+ * Lo que no viene del panel: los difuminados (`feGaussianBlur`), que en el teléfono se fingen con
+ * opacidad, y el latido de las brasas y del quemado, que acá queda quieto salvo el halo.
  *
  * De día, la pieza de sushi (`pieza-sushi.tsx`), con la misma gramática: `Pieza` elige según
  * el modo de la cuenta.
@@ -21,15 +27,16 @@ import { useColores, useTema } from './tema'
  * Es solo el dibujo: quien lo pone escribe al lado, en palabras, lo que dice.
  */
 
-/** Dónde va la carne de cada formato dentro del lienzo, y con qué esquinas. */
-const SILUETA: Record<Formato, ViewStyle> = {
-  bife: { left: 6, top: 4, width: 53, height: 27, borderTopLeftRadius: 17, borderTopRightRadius: 13, borderBottomRightRadius: 15, borderBottomLeftRadius: 11 },
-  tira: { left: 2, top: 8, width: 60, height: 18, borderRadius: 5 },
-  entrana: { left: 1, top: 11, width: 62, height: 14, borderTopLeftRadius: 8, borderTopRightRadius: 7, borderBottomRightRadius: 6, borderBottomLeftRadius: 5 },
-  chori: { left: 8, top: 10, width: 48, height: 14, borderRadius: 7 },
-  // El choripán al paso: el pan parado, angosto como una historia, con el chori adentro.
-  choripan: { left: 22, top: 1, width: 20, height: 32, borderRadius: 6 },
+/** Lo que se dibuja del lienzo del panel: un poco más que 120 × 64, para la banderita y las marcas. */
+const CAJA = { x: -4, y: -12, ancho: 128, alto: 80 }
+const MARCO = {
+  position: 'absolute' as const,
+  left: CAJA.x * ESCALA,
+  top: CAJA.y * ESCALA,
+  width: CAJA.ancho * ESCALA,
+  height: CAJA.alto * ESCALA,
 }
+const VIEWBOX = `${CAJA.x} ${CAJA.y} ${CAJA.ancho} ${CAJA.alto}`
 
 /** El pan del choripán: se tuesta con el chori que lleva adentro, como en el panel. */
 const PAN: Record<Carne, { miga: string; corteza: string }> = {
@@ -39,123 +46,121 @@ const PAN: Record<Carne, { miga: string; corteza: string }> = {
   quemada: { miga: '#5e4532', corteza: '#3a2a1f' },
 }
 
-/** Lo que acompaña a cada carne, como en el panel: se oscurece con la cocción. */
-const VETAS: Record<Carne, { grasa: string; hueso: string; tuetano: string; nudo: string }> = {
-  cruda: { grasa: '#f6ead8', hueso: '#f2e9da', tuetano: '#c99a8a', nudo: '#b5504a' },
-  sellada: { grasa: '#f0d6b0', hueso: '#efe0c8', tuetano: '#b98366', nudo: '#93452c' },
-  punto: { grasa: '#e3b878', hueso: GRASA, tuetano: '#9a6a44', nudo: '#5e3418' },
-  quemada: { grasa: '#4a3a33', hueso: '#5d4f47', tuetano: '#2e221d', nudo: '#1a1210' },
+/** Lo que acompaña a cada carne, como en el panel: se oscurece con la cocción; la quemada no brilla. */
+const VETAS: Record<Carne, { grasa: string; hueso: string; tuetano: string; nudo: string; brillo: [string, number] | null }> = {
+  cruda: { grasa: '#f6ead8', hueso: '#f2e9da', tuetano: '#c99a8a', nudo: '#b5504a', brillo: ['#ffffff', 0.24] },
+  sellada: { grasa: '#f0d6b0', hueso: '#efe0c8', tuetano: '#b98366', nudo: '#93452c', brillo: ['#ffffff', 0.12] },
+  punto: { grasa: '#e3b878', hueso: GRASA, tuetano: '#9a6a44', nudo: '#5e3418', brillo: ['#f6c27a', 0.22] },
+  quemada: { grasa: '#4a3a33', hueso: '#5d4f47', tuetano: '#2e221d', nudo: '#1a1210', brillo: null },
 }
 
 /**
- * Dónde cae la marca de cada destino, en el lienzo del panel: entre 34 y 92, o al centro. En el
- * choripán, que es angosto, entre 50 y 70, como en el panel.
+ * La marca de un destino: una diagonal del fierro sobre la carne, como en el panel. Con los
+ * grosores del corte chico del panel (×1,35): a este tamaño, una marca tiene que seguir contándose.
  */
-function posiciones(n: number, formato: Formato): number[] {
-  const [desde, hasta, centro] = formato === 'choripan' ? [50, 70, 60] : [34, 92, 62]
-  if (n <= 1) return [centro]
-  return Array.from({ length: n }, (_, i) => desde + (i * (hasta - desde)) / (n - 1))
-}
-
-/** La marca de un destino: una diagonal del fierro, inclinada como en el panel. */
-function Marca({ x, sello }: { x: number; sello: Sello }) {
-  const colores = useColores()
-  const base: ViewStyle = { position: 'absolute', left: x - 3, top: -8, width: 6, height: 50, transform: [{ rotate: '18deg' }] }
-  if (sello === 'servido') {
-    return (
-      <View style={[base, { alignItems: 'center' }]}>
-        <View style={{ flex: 1, width: 3, borderRadius: 2, backgroundColor: '#24100a', opacity: 0.82 }} />
-      </View>
-    )
-  }
-  if (sello === 'quemado') {
-    return (
-      <View style={[base, { alignItems: 'center', justifyContent: 'center' }]}>
-        <View style={{ position: 'absolute', top: 0, bottom: 0, width: 4, borderRadius: 2, backgroundColor: '#0d0605' }} />
-        <View style={{ position: 'absolute', top: 0, bottom: 0, width: 1.2, backgroundColor: '#ff5a2e' }} />
-      </View>
-    )
-  }
+function Marca({ x, sello, ambar }: { x: number; sello: Sello; ambar: string }) {
+  const d = `M${x + 11} -2L${x - 11} 66`
+  const g = 1.35
+  const punteada = { fill: 'none', strokeLinecap: 'round' as const, strokeWidth: 3.2 * g, strokeDasharray: '3 5' }
   if (sello === 'bandeja') {
     // Quemada hasta la mitad, con el punto ámbar: salió, pero falta la mano del dueño.
     return (
-      <View style={[base, { alignItems: 'center' }]}>
-        <View style={{ height: 25, width: 3, borderRadius: 2, backgroundColor: '#24100a', opacity: 0.82 }} />
-        <View style={{ flex: 1, width: 6 }}>
-          <Punteada color="#1e0a06" ancho={2} opacidad={0.42} />
-        </View>
-        <View style={{ position: 'absolute', top: 22, width: 5, height: 5, borderRadius: 3, backgroundColor: colores.ambar, borderWidth: 0.5, borderColor: '#24100a' }} />
-      </View>
+      <>
+        <Path d={`M${x + 11} -2L${x} 32`} fill="none" strokeLinecap="round" stroke="#24100a" strokeOpacity={0.82} strokeWidth={5 * g} />
+        <Path d={`M${x} 32L${x - 11} 66`} {...punteada} stroke="#1e0a06" strokeOpacity={0.42} />
+        <Circle cx={x} cy={32} r={3.4} fill={ambar} stroke="#24100a" strokeWidth={1} />
+      </>
     )
   }
-  if (sello === 'reintento') return <View style={base}><Punteada color={colores.ambar} ancho={2} /></View>
-  if (sello === 'frio') return <View style={base}><Punteada color="#9aa7b4" ancho={2} opacidad={0.8} /></View>
-  return <View style={base}><Punteada color="#1e0a06" ancho={2} opacidad={0.42} /></View>
+  if (sello === 'pendiente' || sello === 'saliendo') return <Path d={d} {...punteada} stroke="#1e0a06" strokeOpacity={0.42} />
+  if (sello === 'reintento') return <Path d={d} {...punteada} stroke={ambar} />
+  if (sello === 'frio') {
+    return <Path d={d} fill="none" strokeLinecap="round" stroke="#9aa7b4" strokeOpacity={0.8} strokeWidth={3 * g} strokeDasharray="2 4" />
+  }
+  if (sello === 'quemado') {
+    return (
+      <>
+        <Path d={d} fill="none" strokeLinecap="round" stroke="#0d0605" strokeWidth={6.5 * g} />
+        <Path d={d} fill="none" strokeLinecap="round" stroke="#ff5a2e" strokeOpacity={0.35} strokeWidth={4} />
+        <Path d={d} fill="none" strokeLinecap="round" stroke="#ff5a2e" strokeWidth={1.6} />
+      </>
+    )
+  }
+  return <Path d={d} fill="none" strokeLinecap="round" stroke="#24100a" strokeOpacity={0.82} strokeWidth={5 * g} />
 }
 
-function Textura({ formato, carne, huesos, ancho }: { formato: Formato; carne: Carne; huesos: number; ancho: number }) {
+function Textura({ formato, carne, huesos }: { formato: Formato; carne: Carne; huesos: number }) {
   const v = VETAS[carne]
   if (formato === 'bife') {
     return (
       <>
-        <View style={{ position: 'absolute', left: 6, right: 8, top: 2, height: 3, borderRadius: 2, backgroundColor: v.grasa, opacity: 0.85 }} />
-        <View style={{ position: 'absolute', left: 16, top: 12, width: 10, height: 6, borderRadius: 4, backgroundColor: v.grasa, opacity: 0.5 }} />
+        <Path d="M17 25C21 14 39 9 60 9C78 9 92 11 101 16" stroke={v.grasa} strokeWidth={6} strokeLinecap="round" fill="none" opacity={0.85} />
+        <Ellipse cx={46} cy={32} rx={9} ry={5.5} fill={v.grasa} opacity={0.5} />
+        <Path
+          d="M62 26c6 2 10-1 16 2M70 41c5-2 9 1 14-1M28 42c4 1 7-1 10 1M84 31c4 1 6 0 9 2"
+          stroke={v.grasa}
+          strokeWidth={1.3}
+          fill="none"
+          strokeLinecap="round"
+          opacity={0.5}
+        />
       </>
     )
   }
   if (formato === 'tira') {
     // Un hueso por archivo, como en el panel: se cuentan sin abrir el post.
     const n = Math.max(huesos, 2)
-    const paso = ancho / n
-    const w = Math.min(7, paso * 0.6)
+    const paso = 110 / n
+    const rx = Math.min(7, paso * 0.3)
     return (
       <>
-        <View style={{ position: 'absolute', left: 0, right: 0, top: 1, height: 2, backgroundColor: v.grasa, opacity: 0.75 }} />
-        {Array.from({ length: n }, (_, i) => (
-          <View
-            key={i}
-            style={{
-              position: 'absolute',
-              left: (i + 0.5) * paso - w / 2,
-              top: 4,
-              width: w,
-              height: 10,
-              borderRadius: w / 2,
-              backgroundColor: v.hueso,
-              borderWidth: 0.5,
-              borderColor: 'rgba(0,0,0,0.28)',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <View style={{ width: w * 0.42, height: 4, borderRadius: 2, backgroundColor: v.tuetano }} />
-          </View>
-        ))}
+        <Path d="M6 21C30 15 90 15 114 21" stroke={v.grasa} strokeWidth={4} fill="none" opacity={0.75} />
+        {Array.from({ length: n }, (_, i) => {
+          const cx = 5 + (i + 0.5) * paso
+          return (
+            <G key={i}>
+              <Ellipse cx={cx} cy={34} rx={rx} ry={9} fill={v.hueso} stroke="#000000" strokeOpacity={0.28} strokeWidth={0.8} />
+              <Ellipse cx={cx} cy={34.5} rx={rx * 0.42} ry={3.6} fill={v.tuetano} />
+            </G>
+          )
+        })}
       </>
     )
-  }
-  if (formato === 'entrana') {
-    return <View style={{ position: 'absolute', left: 3, right: 4, top: 5, height: 1.5, borderRadius: 1, backgroundColor: v.grasa, opacity: 0.55 }} />
   }
   if (formato === 'choripan') {
     // Las dos mitades del pan tapan los costados: al medio queda el chori, que lleva la cocción.
     const pan = PAN[carne]
-    const mitad: ViewStyle = { position: 'absolute', top: 0, bottom: 0, width: 6, backgroundColor: pan.miga, borderColor: pan.corteza }
     return (
       <>
-        {[5, 12, 19, 26].map((top, i) => (
-          <View key={top} style={{ position: 'absolute', left: i % 2 ? 9 : 11, top, width: 1.6, height: 1.6, borderRadius: 1, backgroundColor: v.grasa, opacity: 0.7 }} />
+        {[6, 22, 38, 58].map((cy, i) => (
+          <Circle key={cy} cx={i % 2 ? 58 : 62} cy={cy} r={1.3} fill={v.grasa} opacity={0.7} />
         ))}
-        <View style={[mitad, { left: 0, borderRightWidth: 1 }]} />
-        <View style={[mitad, { right: 0, borderLeftWidth: 1 }]} />
+        <Path d="M40 10H54C52 22 52 43 54 55H40Z" fill={pan.miga} />
+        <Path d="M80 10H66C68 22 68 43 66 55H80Z" fill={pan.miga} />
+        <Path d="M54 10C52 22 52 43 54 55M66 10C68 22 68 43 66 55" stroke={pan.corteza} strokeWidth={1.6} fill="none" />
+        <Path d="M42 13C46 11 50 11 54 12M66 12C70 11 74 11 78 13" stroke={pan.corteza} strokeWidth={1.2} fill="none" />
+        <Path d="M46 16C45 28 45 40 47 51M74 16C75 28 75 40 73 51" stroke="#ffffff" strokeOpacity={0.22} strokeWidth={1.4} fill="none" strokeLinecap="round" />
+      </>
+    )
+  }
+  if (formato === 'entrana') {
+    // La fibra en diagonal: es lo que hace que una tira larga se lea como entraña.
+    return (
+      <>
+        {Array.from({ length: 19 }, (_, i) => {
+          const x = 6 + i * 6
+          return <Path key={i} d={`M${x} 14L${x + 7} 54`} stroke="#000000" strokeOpacity={0.16} strokeWidth={1} />
+        })}
+        <Path d="M6 30C18 22 32 21 47 24C63 28 76 30 92 25C104 21 112 21 116 24" stroke={v.grasa} strokeWidth={1.8} fill="none" opacity={0.55} />
       </>
     )
   }
   return (
     <>
-      {[8, 15, 22, 29, 36, 12, 26, 40].map((x, i) => (
-        <View key={i} style={{ position: 'absolute', left: x, top: i < 5 ? 4 : 8, width: 2, height: 2, borderRadius: 1, backgroundColor: v.grasa, opacity: 0.7 }} />
+      {MOTAS.map(([cx, cy, r]) => (
+        <Circle key={`${cx}-${cy}`} cx={cx} cy={cy} r={r} fill={v.grasa} opacity={0.7} />
       ))}
+      <Path d="M24 23C40 21 70 25 96 24" stroke="#ffffff" strokeOpacity={0.26} strokeWidth={2} fill="none" strokeLinecap="round" />
     </>
   )
 }
@@ -198,8 +203,12 @@ function Humo({ quieto }: { quieto: boolean }) {
   )
 }
 
-/** El halo rojo: late tres veces y después queda encendido. Quieto, encendido de una. */
-function Halo({ silueta, quieto, giro }: { silueta: ViewStyle; quieto: boolean; giro: ViewStyle['transform'] }) {
+/**
+ * El halo rojo alrededor de la silueta: late tres veces y después queda encendido. Quieto,
+ * encendido de una. Va en su propio lienzo para que lo que late sea una vista, con el
+ * `Animated` de siempre, y no un atributo del SVG.
+ */
+function Halo({ silueta, quieto }: { silueta: string; quieto: boolean }) {
   const [valor] = useState(() => new Animated.Value(1))
   useEffect(() => {
     if (quieto) return
@@ -213,31 +222,14 @@ function Halo({ silueta, quieto, giro }: { silueta: ViewStyle; quieto: boolean; 
     latido.start()
     return () => latido.stop()
   }, [quieto, valor])
-  const derecha = (silueta.left as number) + (silueta.width as number)
   return (
-    <>
-      <Animated.View
-        pointerEvents="none"
-        style={[silueta, { position: 'absolute', borderWidth: 1.5, borderColor: QUEMO, opacity: quieto ? 1 : valor, transform: giro }]}
-      />
-      {/* La banderita: un asta y un triángulo rojo, asomados arriba a la derecha. */}
-      <View style={{ position: 'absolute', left: derecha - 7, top: -6, width: 1.2, height: 16, backgroundColor: '#d9cbb5' }} />
-      <View
-        style={{
-          position: 'absolute',
-          left: derecha - 6,
-          top: -6,
-          width: 0,
-          height: 0,
-          borderLeftWidth: 8,
-          borderTopWidth: 3,
-          borderBottomWidth: 3,
-          borderLeftColor: QUEMO,
-          borderTopColor: 'transparent',
-          borderBottomColor: 'transparent',
-        }}
-      />
-    </>
+    <Animated.View pointerEvents="none" style={[MARCO, { opacity: quieto ? 1 : valor }]}>
+      <Svg width="100%" height="100%" viewBox={VIEWBOX}>
+        {/* El brillo del panel, fingido: una raya ancha y tenue debajo de la del halo. */}
+        <Path d={silueta} fill="none" stroke={QUEMO} strokeOpacity={0.3} strokeWidth={5} />
+        <Path d={silueta} fill="none" stroke={QUEMO} strokeWidth={2.4} />
+      </Svg>
+    </Animated.View>
   )
 }
 
@@ -257,46 +249,69 @@ export function Pieza(props: PropsDePieza) {
 
 function PiezaDeCarne({ formato, huesos = 0, carne, coccion, sellos }: PropsDePieza) {
   const quieto = useQuieto()
-  const silueta = SILUETA[formato]
-  const izquierda = silueta.left as number
-  const ancho = silueta.width as number
+  const colores = useColores()
+  // Un id por pieza: en la web (Expo web) los `id` del SVG son de toda la página, y dos piezas
+  // con el mismo recorte se pisarían. Solo letras y números, que `url(#…)` no se lleva bien con
+  // los dos puntos de `useId`.
+  const id = `tp${useId().replace(/[^a-zA-Z0-9]/g, '')}`
   const v = VETAS[carne]
-  const xs = posiciones(sellos.length, formato).map((x) => x * ESCALA - izquierda)
-  // La entraña va apenas torcida: así una tira larga se lee como entraña y no como un palo.
-  const giro: ViewStyle['transform'] = formato === 'entrana' ? [{ rotate: '-3deg' }] : []
+  const xs = posiciones(sellos.length, formato)
+  const silueta = SILUETA[formato]
+  const quemado = coccion === 'parcial' || coccion === 'quemada'
+  const tope = CARNE[carne]
   return (
     <Lienzo>
       {sellos.includes('saliendo') ? <Humo quieto={quieto} /> : null}
-      {/* La sombra sobre la parrilla. */}
-      <View style={{ position: 'absolute', left: 10, right: 10, bottom: 0, height: 4, borderRadius: 4, backgroundColor: 'rgba(0,0,0,0.45)' }} />
-      {formato === 'chori' ? (
-        <>
-          <View style={{ position: 'absolute', left: 3, top: 14, width: 6, height: 6, borderRadius: 1, backgroundColor: v.nudo, transform: [{ rotate: '45deg' }] }} />
-          <View style={{ position: 'absolute', left: 55, top: 14, width: 6, height: 6, borderRadius: 1, backgroundColor: v.nudo, transform: [{ rotate: '45deg' }] }} />
-        </>
-      ) : null}
-      <View
-        style={[
-          silueta,
-          {
-            position: 'absolute',
-            overflow: 'hidden',
-            backgroundColor: CARNE[carne].medio,
-            borderWidth: 0.5,
-            borderColor: 'rgba(0,0,0,0.45)',
-            transform: giro,
-          },
-        ]}
-      >
-        {/* El degradado, fingido: la esquina clara arriba y la honda abajo. */}
-        <View style={{ position: 'absolute', left: 0, right: 0, top: 0, height: '45%', backgroundColor: CARNE[carne].claro, opacity: 0.55 }} />
-        <View style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: '35%', backgroundColor: CARNE[carne].hondo, opacity: 0.5 }} />
-        <Textura formato={formato} carne={carne} huesos={huesos} ancho={ancho} />
-        {sellos.map((sello, i) => (
-          <Marca key={i} x={xs[i]!} sello={sello} />
-        ))}
+      <View pointerEvents="none" style={MARCO}>
+        <Svg width="100%" height="100%" viewBox={VIEWBOX}>
+          <Defs>
+            <LinearGradient id={`${id}c`} x1="0" y1="0" x2="1" y2="1">
+              <Stop offset="0" stopColor={tope.claro} />
+              <Stop offset="0.5" stopColor={tope.medio} />
+              <Stop offset="1" stopColor={tope.hondo} />
+            </LinearGradient>
+            <ClipPath id={`${id}s`}>
+              <Path d={silueta} />
+            </ClipPath>
+          </Defs>
+          {/* La sombra sobre la parrilla: en el panel va difuminada; acá, dos elipses tenues. */}
+          <Ellipse cx={60} cy={59} rx={formato === 'choripan' ? 24 : 50} ry={6} fill="#000000" opacity={0.2} />
+          <Ellipse cx={60} cy={59} rx={formato === 'choripan' ? 20 : 44} ry={4} fill="#000000" opacity={0.35} />
+          {formato === 'chori' ? (
+            <>
+              <Path d="M15 31L6 26.5L6.8 35.5Z" fill={v.nudo} />
+              <Path d="M106 32L115 27.5L114.4 36.5Z" fill={v.nudo} />
+            </>
+          ) : null}
+          <G clipPath={`url(#${id}s)`}>
+            <Path d={silueta} fill={`url(#${id}c)`} />
+            <Textura formato={formato} carne={carne} huesos={huesos} />
+            {v.brillo ? <Ellipse cx={44} cy={19} rx={28} ry={5} fill={v.brillo[0]} opacity={v.brillo[1] * 0.8} /> : null}
+            {coccion === 'quemada' ? (
+              <Path
+                d="M16 36l9-5 6 6 10-4 7 5M60 24l7 6 8-3 6 7M66 44l8-5 9 4 8-6"
+                fill="none"
+                stroke="#ff6b3d"
+                strokeWidth={1.2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            ) : null}
+            {sellos.map((sello, i) => (
+              <Marca key={i} x={xs[i]!} sello={sello} ambar={colores.ambar} />
+            ))}
+          </G>
+          <Path d={silueta} fill="none" stroke="#000000" strokeOpacity={0.45} strokeWidth={1} />
+          {quemado ? (
+            <>
+              {/* La banderita: el asta y el triángulo rojo, asomados arriba a la derecha. */}
+              <Path d="M107 20V-9" stroke="#d9cbb5" strokeWidth={1.5} strokeLinecap="round" />
+              <Path d="M107 -9L122 -4L107 1Z" fill={QUEMO} />
+            </>
+          ) : null}
+        </Svg>
       </View>
-      {coccion === 'parcial' || coccion === 'quemada' ? <Halo silueta={silueta} quieto={quieto} giro={giro} /> : null}
+      {quemado ? <Halo silueta={silueta} quieto={quieto} /> : null}
     </Lienzo>
   )
 }
