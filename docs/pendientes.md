@@ -486,7 +486,10 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   «Pendientes»: el 2026-10-26 quedó uno en el Short público «canal video 2» de Pyxis
   oficial. La Mesa solo lee los videos de los últimos siete días, y los comentarios de YouTube
   se borran a los 30, así que si la revisión se alarga más allá del 2026-11-25 hay que subir
-  otro Short público desde Studio, sincronizar al revisor y comentarlo desde parejavice.
+  otro Short público desde Studio, sincronizar al revisor y comentarlo desde parejavice. Desde el
+  2026-11-07, «Desconectar» el canal en Los Fierros también borra ese comentario en el acto, y
+  reconectar no lo trae de vuelta (el Short tiene más de siete días): para renovar el permiso del
+  revisor se usa «Reconectar», nunca «Desconectar».
 
   Lo de antes: se envió el 2026-10-10, y YouTube acusó recibo por correo a
   pyxis.latam@gmail.com, sin número de caso. Se pidieron 100.000 unidades al día del cupo general (el
@@ -511,10 +514,15 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   el usuario lo saca; lo cocinado sin programar, a los 30 días), y la carpeta
   `material/cocina/<comanda>/` del chef no tiene plazo escrito. Pedirle al chef (marca-personal)
   un plazo y, cuando lo tenga, sumarlo a `/privacidad`.
-- **Por revisar: qué se borra al desconectar YouTube** (2026-10-06). Desconectar borra las
-  credenciales y el canal deja de leerse; lo guardado se borra solo a los 30 días
-  (`retencion-youtube`). Si la auditoría de cuota pide borrarlo en el acto, hay que cambiar
-  `disconnectAccount` y `/privacidad`. Ver `docs/google-verificacion-guion.md`.
+- **Por revisar: un canal de YouTube revocado desde Google se sigue leyendo** (2026-11-07, visto
+  al cambiar «Desconectar»). Quitar Tu Parrilla en myaccount.google.com no le avisa a Tu Parrilla:
+  la fila conserva su `refresh_token`, y como las estadísticas se leen con la API key
+  (`youtubeConnector.ensureCredential` solo mira que el token exista), el sync diario sigue
+  refrescando los contadores de ese canal. El sondeo de comentarios sí falla, con
+  `invalid_grant`, y nadie lo convierte en desconexión. `/privacidad` ofrece revocar desde Google
+  como alternativa a «Desconectar»: lo honesto es que un `invalid_grant` deje la cuenta
+  desconectada y con lo de YouTube borrado (`desconectarCuenta`, en
+  `src/lib/social/desconectar.ts`).
 - **[dueño] Vercel Pro antes de abrir a terceros.** El plan Hobby es de uso personal y no
   comercial (`docs/levantamiento-terceros.md` §5).
 - **[dueño] La app en la Play Store, pista de pruebas internas** (2026-10-16). La cuenta de

@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description: 'Qué datos guarda este sitio y qué no.',
 }
 
-const ACTUALIZADO = '6 de noviembre de 2026'
+const ACTUALIZADO = '7 de noviembre de 2026'
 
 export default function PrivacidadPage() {
   return (
@@ -144,8 +144,8 @@ export default function PrivacidadPage() {
         </ul>
         <p className="leading-relaxed text-fg-muted">
           Desconectar una cuenta desde el panel borra sus credenciales y deja de leerla. El
-          historial de métricas ya recogido se conserva, salvo el de YouTube, que tiene su plazo
-          propio (abajo).
+          historial de métricas ya recogido se conserva, salvo el de YouTube, que se borra en ese
+          mismo momento (abajo).
         </p>
         <p className="leading-relaxed text-fg-muted">
           El uso que hace este sitio de la información que recibe de las APIs de Google se ajusta
@@ -177,8 +177,12 @@ export default function PrivacidadPage() {
           dejaron de llegar se borran al cumplir ese plazo. Con los datos de YouTube no se
           calculan métricas nuevas: el panel muestra sus contadores tal como los entrega
           YouTube, y al lado las visitas y los clics que mide Tu Parrilla en tu página,
-          marcados como propios. Al desconectar el canal se borran las credenciales y deja de
-          leerse; si lo pides, se borra todo antes. Puedes revocarlo desde{' '}
+          marcados como propios. Al desconectar el canal se borran las credenciales, deja de
+          leerse y, en ese mismo momento, se borra lo que se guardó de YouTube: las lecturas de
+          los contadores, los comentarios y los títulos y miniaturas de los videos. Quedan el
+          identificador y el nombre del canal, para que puedas volver a conectarlo o quitarlo del
+          todo, y el identificador de cada video, que une las visitas a tu página con su
+          etiqueta; si lo pides, se borra también. Puedes revocarlo desde{' '}
           {nombreDe('/admin/accounts')} o desde{' '}
           <a
             href="https://myaccount.google.com/permissions"

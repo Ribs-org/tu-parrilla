@@ -181,10 +181,12 @@ Cuándo: el fierro está en ámbar, dice «La conexión falló; reconecta la cue
 ### Para desconectar una cuenta
 
 1. Abre el detalle de la cuenta con la flecha de su fila y aprieta «Desconectar».
-2. Se abre una ventana: «Se desconecta «<nombre>» de <red>.» y «Sus posts y métricas ya bajados se quedan, pero no se sincroniza nada más hasta que la vuelvas a conectar. ¿Seguir?». Aprieta «Desconectar», en la ventana.
+2. Se abre una ventana: «Se desconecta «<nombre>» de <red>.» y «Sus posts y métricas ya bajados se quedan, pero no se sincroniza nada más hasta que la vuelvas a conectar. ¿Seguir?». En una cuenta de YouTube la segunda frase es otra, y el botón de la ventana va en rojo: «Se borran ya los números del canal y de sus videos, sus comentarios y los títulos y miniaturas, como piden las reglas de YouTube. Lo que programaste y las visitas a tu página se quedan. No se lee nada más hasta que lo vuelvas a conectar. ¿Seguir?» Aprieta «Desconectar», en la ventana.
 3. Aparece «Desconectada.» un momento, y la fila queda con «Sin credencial» y «Conectar →».
 
 La fila no desaparece. Una cuenta desconectada deja de traer números y comentarios, sus comentarios pendientes en La Mesa ya no se pueden responder, y no se puede publicar en ella hasta reconectarla. Para sacarla del todo, «Quitar» (abajo).
+
+En YouTube, además, se borra en el acto lo que vino de YouTube: los números del canal y de cada video, el título y la miniatura de cada video, y sus comentarios (salen de [La Mesa](la-mesa.md), también los pendientes). En [Los Números](los-numeros.md) esos videos se quedan solo con lo que mide Tu Parrilla. Se quedan lo programado desde Tu Parrilla y las visitas y clicks de la página. Al reconectar, con la sincronización siguiente vuelven el título, la miniatura y los números del día, y los comentarios de los últimos siete días; los números de los días anteriores, no.
 
 ### Para quitar una cuenta
 
@@ -261,6 +263,7 @@ Trae los posts y los números de las cuentas de Instagram, TikTok, YouTube y Fac
 | «La conexión falló; reconecta la cuenta.» | La última vez que se trajeron sus números, o al publicar, la red rechazó la conexión (permiso vencido o quitado desde la red). Si fue al publicar, al pasar el mouse aparece el motivo de esa publicación, por ejemplo «Reconecta TikTok para autorizar la publicación.»; vuelve a la normalidad con la próxima sincronización que funcione, o al reconectar. Si al pasar el mouse dice «Quitaste la app desde Facebook: vuelve a conectar.», alguien quitó Tu Parrilla desde la configuración de Facebook; si dice «Quitaste la app desde Instagram: vuelve a conectar.», la quitó desde la de Instagram, en una cuenta conectada con el login de Instagram. | «Reconectar» (o «Conectar →») en esa fila. |
 | «Sin credencial» | La cuenta no está conectada; su historial se conserva. | «Conectar →» en la fila, o fusionarla si es una repetida (en su detalle). |
 | «Se desconecta «<nombre>» de <red>.» y «Sus posts y métricas ya bajados se quedan, pero no se sincroniza nada más hasta que la vuelvas a conectar. ¿Seguir?» | Ventana antes de desconectar. | «Desconectar» para desconectarla, «Cancelar» para dejarla. |
+| «Se desconecta «<nombre>» de YouTube.» y «Se borran ya los números del canal y de sus videos, sus comentarios y los títulos y miniaturas, como piden las reglas de YouTube. Lo que programaste y las visitas a tu página se quedan. No se lee nada más hasta que lo vuelvas a conectar. ¿Seguir?» | Ventana antes de desconectar un canal de YouTube: lo que vino de YouTube se borra al confirmar. | «Desconectar» para desconectarlo y borrarlo, «Cancelar» para dejarlo como está. |
 | «Desconectada.» | Se desconectó. | Nada. |
 | ««<nombre>» quitada de Tu Parrilla.» | Se quitó la cuenta con su historial. | Nada. Para volver a tenerla, «Conectar →» en el bloque de su red. |
 | «Desconecta la cuenta antes de quitarla.» (en la ventana de «Quitar») | La cuenta se volvió a conectar mientras la ventana estaba abierta (por ejemplo, en otra pestaña). | Cerrar la ventana, «Desconectar» y volver a «Quitar». |
@@ -312,7 +315,7 @@ Trae los posts y los números de las cuentas de Instagram, TikTok, YouTube y Fac
 
 ## Lo que esta pantalla no hace
 
-- No quita una cuenta conectada, ni una con publicaciones por salir hacia ella. «Desconectar» deja la fila y sus números; para que la fila desaparezca hay que quitarla (con su historial) o fusionarla en otra (que conserva su historial).
+- No quita una cuenta conectada, ni una con publicaciones por salir hacia ella. «Desconectar» deja la fila y sus números (en YouTube, la fila sin sus números); para que la fila desaparezca hay que quitarla (con su historial) o fusionarla en otra (que conserva su historial).
 - No quita una cuenta que está en otro usuario: la quita ese usuario desde su sesión. Tampoco la traspasa: eso lo hace quien administra Tu Parrilla, en Los Maestros.
 - No deshace una fusión.
 - No elige a qué cuenta sale cada publicación: eso se marca en el compositor de [La Parrilla](la-parrilla.md).
@@ -350,6 +353,7 @@ Lo que describe sale de:
 - `src/lib/social/vuelta.ts` (la frase de «Agregar cuenta →» cuando solo se renovó la de antes)
 - `src/lib/social/meta-bajas.ts` (las frases de la baja desde Facebook y desde Instagram)
 - `src/lib/social/quitar.ts` (las reglas y las frases de «Quitar»)
+- `src/lib/social/desconectar.ts` (qué se borra de YouTube al desconectar)
 - `src/lib/social/sync.ts` y `src/lib/social/index.ts` (qué redes traen números) y `src/lib/social/threads.ts` (los números de Threads y la bandera de sus permisos de lectura)
 - `src/lib/social/publish/x.ts` y `src/lib/social/publish/threads.ts` (la renovación al publicar)
 - `src/lib/social/publish/publisher.ts`, `src/lib/social/publish/tiktok-creador.ts` y `src/app/admin/(dash)/schedule/composer.tsx` (las frases de otras pantallas que mandan a reconectar)
