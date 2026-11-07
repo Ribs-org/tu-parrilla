@@ -1031,6 +1031,55 @@ describe('aislamiento por dueño, escrituras (SQL generado, sin base)', () => {
     esperarFiltradoPorDueno(consultas[0]!)
   })
 
+  /*
+   * La Mesa en el teléfono: las rutas leen y escriben con las funciones del panel, que reciben al
+   * dueño del token. Cada consulta que alcanzan a armar —la cola, el contador, la fila que se va a
+   * responder, descartar o redactar— tiene que terminar en él.
+   */
+  describe('api/mobile/comentarios: La Mesa del teléfono, solo lo del dueño del token', () => {
+    const id = '00000000-0000-4000-8000-000000000001'
+    const conId = { params: Promise.resolve({ id }) }
+
+    it('GET lee la cola y cuenta los pendientes, los dos atados al dueño', async () => {
+      const { GET } = await import('../app/api/mobile/comentarios/route')
+      const consultas = await todasLasConsultas(() => GET(new Request('https://ejemplo.cl/api/mobile/comentarios?estado=automaticas&red=instagram')))
+      expect(consultas).toHaveLength(2)
+      for (const c of consultas) esperarFiltradoPorDueno(c)
+    })
+
+    it('pendientes: el número del acceso cuenta solo lo del dueño', async () => {
+      const { GET } = await import('../app/api/mobile/comentarios/pendientes/route')
+      const consultas = await todasLasConsultas(() => GET(peticionMovil()))
+      expect(consultas).toHaveLength(1)
+      esperarFiltradoPorDueno(consultas[0]!)
+    })
+
+    it('[id]/respuesta: «Enviar» busca el comentario solo entre los del dueño', async () => {
+      const { POST } = await import('../app/api/mobile/comentarios/[id]/respuesta/route')
+      const peticion = new Request(`https://ejemplo.cl/api/mobile/comentarios/${id}/respuesta`, {
+        method: 'POST',
+        body: JSON.stringify({ texto: 'Gracias' }),
+      })
+      const consultas = await todasLasConsultas(() => POST(peticion, conId))
+      expect(consultas).toHaveLength(1)
+      esperarFiltradoPorDueno(consultas[0]!)
+    })
+
+    it('[id]/descartar: busca el comentario solo entre los del dueño', async () => {
+      const { POST } = await import('../app/api/mobile/comentarios/[id]/descartar/route')
+      const consultas = await todasLasConsultas(() => POST(peticionMovil(), conId))
+      expect(consultas).toHaveLength(1)
+      esperarFiltradoPorDueno(consultas[0]!)
+    })
+
+    it('[id]/borrador: «Escribir otro borrador» busca el comentario solo entre los del dueño', async () => {
+      const { POST } = await import('../app/api/mobile/comentarios/[id]/borrador/route')
+      const consultas = await todasLasConsultas(() => POST(peticionMovil(), conId))
+      expect(consultas).toHaveLength(1)
+      esperarFiltradoPorDueno(consultas[0]!)
+    })
+  })
+
   it('social/quitar: una cuenta conectada no se quita, y no se borra nada', async () => {
     colaRespuestas.push([['@vicente', '1784', true]])
     expect(await quitarCuenta(DUENO, '9692387a-41cc-4a81-9f8f-7b07135d742a')).toEqual({ error: CUENTA_CONECTADA })

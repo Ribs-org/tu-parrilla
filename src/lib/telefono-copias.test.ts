@@ -23,6 +23,7 @@ import {
   VOLUMEN_VIDEO_INICIAL,
 } from './social/instagram-audio'
 import { SIN_MAS_CANCIONES } from './social/musica-sugerencia'
+import { fraseColaVacia, frasePendientes, hace } from './social/comentarios/la-mesa'
 
 // `batch.ts` trae `usuarios.ts`, que es solo de servidor; acá no se habla con la base.
 vi.mock('server-only', () => ({}))
@@ -100,6 +101,29 @@ describe('las frases que la app reconoce por su texto', () => {
   it('las de un archivo que no se puede elegir dicen lo mismo que diría el servidor', () => {
     expect(publicar.TIPO_NO_PUBLICABLE).toBe(TIPO_NO_PUBLICABLE)
     expect(publicar.ARCHIVO_MUY_GRANDE).toBe(ARCHIVO_MUY_GRANDE)
+  })
+})
+
+describe('La Mesa del teléfono dice lo mismo que la del panel', () => {
+  const mesa = delTelefono<{
+    frasePendientes: (n: number) => string
+    fraseColaVacia: (cronico: boolean) => string
+    hace: (iso: string, ahora: number) => string
+  }>('mesa')
+
+  it('cuántos esperan y la cola vacía', () => {
+    for (const n of [0, 1, 2, 5, 200]) expect(mesa.frasePendientes(n)).toBe(frasePendientes(n))
+    for (const cronico of [true, false]) expect(mesa.fraseColaVacia(cronico)).toBe(fraseColaVacia(cronico))
+  })
+
+  // El panel usa `Intl.RelativeTimeFormat`; el teléfono lo escribe a mano. Cada 17 minutos durante
+  // sesenta días, los dos tienen que decir lo mismo.
+  it('«hace» cuánto, minuto a minuto', () => {
+    const ahora = Date.parse('2026-11-07T12:00:00Z')
+    for (let minutos = 0; minutos <= 60 * 24 * 60; minutos += 17) {
+      const fecha = new Date(ahora - minutos * 60_000)
+      expect(mesa.hace(fecha.toISOString(), ahora), `${minutos} min`).toBe(hace(fecha, ahora))
+    }
   })
 })
 
