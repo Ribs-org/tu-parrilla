@@ -530,6 +530,18 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   textos, en la carpeta «Google Play» del escritorio de Vicente; el porqué, en
   `docs/play-store.md`. La tienda pública es otro trámite: una cuenta personal nueva
   necesita una prueba cerrada con doce probadores durante catorce días.
+- **[dueño] Play Console: declarar el estado de comerciante antes de febrero de 2027**
+  (2026-11-06). Google lo exige a todos los desarrolladores. Si no se hace, borra el perfil y las
+  apps de Google Play en todo el mundo. No frena la revisión de hoy. **No declararlo en la cuenta
+  personal tal como está:** como comerciante, Google publica en la Unión Europea el nombre legal y la
+  dirección del perfil de pagos, que hoy es la de la casa del dueño. Dos caminos: una cuenta de
+  organización a nombre de Pyxis con su dirección comercial y la app traspasada a ella (lo mismo
+  que «TikTok y Google con la misma entidad»), o cambiar antes la dirección del perfil de pagos por
+  una comercial. Tu Parrilla es un producto comercial de Pyxis: la respuesta honesta es «trader».
+  Otra razón para la cuenta de Pyxis: en una cuenta personal nueva, Google exige una prueba
+  cerrada de 12 probadores durante 14 días antes de pedir producción, como lo pide el Dashboard de
+  la app. Una cuenta de organización no tiene esa exigencia. Verificarlo en la ayuda de Google al
+  crearla.
 - **[dueño] El build 1.2.0 de la app, con la cámara, a las tiendas** (2026-11-02). La 1.2.0 trae
   La Cocina en el teléfono: grabar un video o sacar una foto y mandárselo al chef. Pide los
   permisos de cámara y micrófono, que solo llegan con un binario nuevo, y su `runtimeVersion` es
@@ -576,13 +588,16 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
      crea ahí un access token y ponlo en Vercel como `EXPO_ACCESS_TOKEN`; si no, Expo rechaza cada
      aviso. En iPhone, el build de iOS ofrece crear la llave de push de Apple cuando exista la
      cuenta.
-- **[dueño] Publicar La Cocina por aire a la 1.1.0** (2026-11-06). Está preparada: la pestaña
-  entera —la cámara de frío y las comandas— sin «Grabar video» ni «Sacar foto», que la 1.1.0 no
-  puede (no trae el permiso de la cámara), con «Elegir de la galería». Se publica desde la rama
-  `ota-1.1.0` copiando los archivos que lista `mobile/README.md`, «La Cocina por aire a la 1.1.0»,
-  después de que el servidor esté en producción, con el comando de siempre en los dos canales.
-  Probado en una copia de la rama (tipos, tests y el paquete de Android); en un teléfono con la 1.1.0,
-  no.
+- **[dueño] Publicar La Mesa por aire a la 1.1.0** (2026-11-07). Está preparada: responder
+  comentarios desde el teléfono, sin nada nativo nuevo. Se publica desde `ota-1.1.0` copiando los
+  siete archivos que lista `mobile/README.md`, «La Mesa por aire a la 1.1.0», después de que el
+  servidor esté en producción, con el comando de siempre en los dos canales. Probada en Expo web
+  contra una API falsa; en un teléfono, no.
+- **[dueño] Publicar las historias de Publicar por aire** (2026-11-07). Puro JavaScript, sin
+  permisos nuevos: a la 1.2.0 sale de `main`, y a la 1.1.0 desde `ota-1.1.0` copiando los archivos
+  que lista `mobile/README.md`, «Las historias por aire a la 1.1.0». Siempre después de que el
+  servidor esté en producción (sin él, una secuencia se rechaza). Probado en Expo web contra una API
+  falsa; en un teléfono, no.
 - **[dueño] La app en iPhone** (2026-10-16). El código ya está listo para iOS; faltan la
   cuenta del Apple Developer Program, confirmar el identificador `cl.tuparrilla.app`
   (queda fijo al registrarlo), la ficha en App Store Connect y el primer build a
@@ -656,10 +671,6 @@ nadie paga: todas las cuentas son iguales y el README dice «Sin suscripción».
 
 ## Features y trabajo de código
 
-- **El aviso de La Mesa abre La Parrilla** (2026-11-07). El resumen de comentarios nuevos que llega
-  al teléfono abre La Parrilla, porque La Mesa todavía no está en la app. Cuando llegue, cambiar
-  `rutaDelAviso` (`mobile/src/lib/avisos.ts`) para que abra la pantalla nueva; el servidor ya manda
-  `tipo: 'comentarios'`.
 - **Música en videos con bibliotecas con licencia** (2026-11-06; el dueño lo pospuso: caro y no lo
   bastante bueno por ahora). Las API de Instagram, TikTok y YouTube no dejan ponerle a un video su
   propia música; la excepción es la Audio API de Instagram para reels, con Facebook Login, que es
@@ -705,8 +716,13 @@ nadie paga: todas las cuentas son iguales y el README dice «Sin suscripción».
   el diseño entero está en `docs/superpowers/specs/2026-10-24-historias-design.md`. Falta:
   - el compositor del panel, con el selector «Post · Historia» y las tarjetas verticales
     (parte 2), y en La Parrilla el número de la secuencia («1/3») junto al corte y, en el
-    detalle del post, «Historia en Instagram · @cuenta»;
-  - Publicar en el teléfono, con el visor 9:16 (parte 3), por OTA;
+    detalle del post, «Historia en Instagram · @cuenta». El teléfono ya las arma (parte 3,
+    2026-11-07): el compositor tiene que leer y escribir el campo `modo` del borrador
+    (`esBorradorDeHistoria`, en `src/lib/borrador.ts`). Hasta entonces abre un borrador de historia
+    del teléfono como un post, y al guardarlo deja de ser historia;
+  - en el teléfono, ver el primer cuadro de un video en el visor (hoy, «▶» y la duración: sacarlo
+    sin `expo-video` pide una miniatura del servidor) y cambiar el orden de una secuencia ya
+    programada (hoy se borra y se programa de nuevo);
   - **[dueño] la primera historia real**, con una cuenta de prueba: si Instagram la rechaza
     desde una cuenta de creador (@vicente_edits2, si es Creator), y un video a la página de
     Facebook, cuya guía se contradice entre 60 y 90 segundos. Si Instagram ya no rechaza las de

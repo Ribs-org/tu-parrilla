@@ -1,6 +1,6 @@
 # La app del teléfono
 
-Una app para Android que muestra de un vistazo lo programado y cómo van las redes de quien entra, y le deja publicar desde la galería del teléfono. Tiene cuatro pestañas, las del panel web en versión corta —La Parrilla, Publicar, Los Números y La Cocina— y, como el panel, un botón de Ajustes, pero hace mucho menos: mira lo programado y los números, y programa o publica fotos y videos en Instagram, Facebook y YouTube. También reprograma lo que se quemó, corrige el texto, la hora y las cuentas de lo programado o lo borra, y guarda solo lo que se está escribiendo como borrador: los borradores son los mismos del panel web, así que lo empezado en un lado se sigue en el otro. En La Cocina graba un video o saca una foto con la cámara del teléfono, ordena la cámara de frío (guardar, cambiar el nombre o el uso, sacar) y le pide una comanda al chef de la casa con las mismas opciones que el panel; también la sigue, le contesta al chef y la cancela. Todo lo demás —conectar redes, cambiar los archivos de lo programado, TikTok, comentarios, la página pública, el mesón del chef— se hace en el panel web.
+Una app para Android que muestra de un vistazo lo programado y cómo van las redes de quien entra, y le deja publicar desde la galería del teléfono. Tiene cuatro pestañas, las del panel web en versión corta —La Parrilla, Publicar, Los Números y La Cocina— y, como el panel, un botón de Ajustes, pero hace mucho menos: mira lo programado y los números, y programa o publica fotos y videos en Instagram, Facebook y YouTube. También reprograma lo que se quemó, corrige el texto, la hora y las cuentas de lo programado o lo borra, y guarda solo lo que se está escribiendo como borrador: los borradores son los mismos del panel web, así que lo empezado en un lado se sigue en el otro. En La Cocina graba un video o saca una foto con la cámara del teléfono, ordena la cámara de frío (guardar, cambiar el nombre o el uso, sacar) y le pide una comanda al chef de la casa con las mismas opciones que el panel; también la sigue, le contesta al chef y la cancela. Desde La Parrilla se abre La Mesa: los comentarios que esperan respuesta, con el borrador de la IA para corregir y mandar. Todo lo demás —conectar redes, cambiar los archivos de lo programado, TikTok, las instrucciones de la IA para los comentarios, la página pública, el mesón del chef— se hace en el panel web.
 
 ## Cómo se llega
 
@@ -63,13 +63,14 @@ Abajo, cuatro pestañas en este orden: «La Parrilla», «Publicar», «Los Núm
 
 Arriba a la derecha de las cuatro, al lado del título, un botón redondo con un trinche y un cuchillo, lado a lado: abre «Ajustes». Si alguna cuenta conectada necesita que la reconecten, el botón lleva un punto: ámbar si su permiso vence esta semana, rojo si ya se apagó (venció o dejó de sincronizar). Sin nada que avisar, no hay punto. Un lector de pantalla lo lee «Ajustes» o, con aviso, «Ajustes: 1 se enfría» (o «2 se apagaron», etc.).
 
-En «La Parrilla», «Los Números» y «Tus publicaciones», la app muestra al instante lo último que descargó y lo actualiza por detrás; por eso funciona sin señal, con datos viejos. Arriba dice cuándo se actualizó: «Actualizado recién», «Actualizado hace 5 min», «Actualizado hace 2 h» o «Actualizado hace 1 d». Para actualizar a mano, se arrastra la pantalla hacia abajo.
+En «La Parrilla», «Los Números», «Tus publicaciones» y «La Mesa», la app muestra al instante lo último que descargó y lo actualiza por detrás; por eso funciona sin señal, con datos viejos. Arriba dice cuándo se actualizó: «Actualizado recién», «Actualizado hace 5 min», «Actualizado hace 2 h» o «Actualizado hace 1 d». Para actualizar a mano, se arrastra la pantalla hacia abajo.
 
 ### La Parrilla
 
 Lo programado, de hoy en adelante, y lo que se quemó. De arriba abajo:
 
 - La línea «lo que viene y cómo salió lo que ya se fue».
+- **«La Mesa»**, una tarjeta que abre La Mesa (ver «La Mesa», más abajo): el nombre y debajo cuántos comentarios esperan respuesta en todas las redes, con la frase del panel —«No hay nada esperando respuesta.», «Un comentario espera tu respuesta.» o «5 comentarios esperan tu respuesta.»—. Si hay alguno, la tarjeta lleva el borde naranjo y un círculo naranjo con el número («99+» pasado de 99). A la derecha, «›». Si Tu Parrilla todavía no cuenta los comentarios para el teléfono, la tarjeta dice «lo que te responden y tus respuestas», sin número. Al volver de La Mesa, el número se pone al día solo.
 - **«Se quemó»**, en rojo, solo si algo falló en los últimos siete días y nadie lo archivó (en el panel web, con «Archivar», o por la API): lo archivado no sale acá. Una tarjeta con borde rojo por cada red donde un corte falló (un corte que falló en dos redes da dos tarjetas), de la más reciente a la más vieja. A la izquierda, el corte dibujado con todas sus marcas, quemado y con su banderita, como en el panel (ver «El corte» en [La Parrilla](la-parrilla.md)): se ve cuál de sus redes se quemó y si las demás salieron. Al lado: arriba la hora —solo «19:00» si era de hoy, o con el día y el mes delante, «mié 14 de oct · 19:00», como en el panel— y la cuenta, «Instagram · nombre_de_cuenta»; el texto del post (o «(sin texto)»); el motivo en rojo, cuando lo hay, y el botón con borde «Reprogramar» (mientras trabaja, «Reprogramando…», y los demás botones esperan).
 - **«▸ Borradores (N)»**, solo si hay al menos un borrador guardado, del teléfono o del panel web. Al tocarlo se abre la lista (el triángulo pasa a «▾») y al tocarlo de nuevo se cierra. Cada borrador es una tarjeta con su texto en dos líneas (o «(sin texto)») y debajo, en chico, «para el vie 16 de oct a las 19:00» o «sin fecha», « · 1 archivo» o « · N archivos» si tiene, y « · guardado el mar 13 de oct a las 14:05». Van del guardado más recientemente al más viejo. Tocar uno lo abre en «Publicar».
 - **El filtro por red**, debajo de «Se quemó» y de los borradores, como el del panel (ver «El filtro por red» en [La Parrilla](la-parrilla.md)): un renglón que se desliza de lado con «Todas» y un botón por red —cada uno con un punto en el color de la red: Instagram rosado, TikTok gris, YouTube rojo, Facebook azul— y cuántos posts tiene de hoy en adelante. Un post que sale a dos redes cuenta en las dos. Tocar una red deja solo lo que sale a ella, cada post con solo sus cuentas de esa red; tocarla de nuevo, o «Todas», vuelve a mostrar todo. Si la red elegida tiene dos cuentas o más, aparece debajo otro renglón con «Todas las de <Red>» y cada cuenta, con lo suyo. Con un filtro puesto, los borradores no aparecen en sus días (siguen en «▸ Borradores (N)»), y «Se quemó» muestra todo igual. El filtro no se guarda: al cerrar la app vuelve a «Todas». Con una sola cuenta no aparece.
@@ -90,7 +91,8 @@ Si el post ya salió en alguna de sus cuentas, la pantalla solo dice en ámbar �
 
 Si se puede editar, de arriba abajo:
 
-- **«Texto»**: el texto del post, en un recuadro que se puede cambiar, con «Texto del post…» si está vacío. Debajo, a la derecha, cuántos caracteres lleva y el máximo, por ejemplo «30 / 280»: el máximo es el de la red más estricta entre las cuentas que siguen —280 si va a X, 500 a Threads, 2200 en las demás—, y pasado el máximo la cifra se pone roja.
+- Si el post es una historia, en lugar del texto: «Es una historia: no lleva texto. Aquí se cambia la hora y se quitan cuentas.».
+- **«Texto»** (en lo que no es historia): el texto del post, en un recuadro que se puede cambiar, con «Texto del post…» si está vacío. Debajo, a la derecha, cuántos caracteres lleva y el máximo, por ejemplo «30 / 280»: el máximo es el de la red más estricta entre las cuentas que siguen —280 si va a X, 500 a Threads, 2200 en las demás—, y pasado el máximo la cifra se pone roja.
 - **«Cuándo sale»**: una ficha naranja «Cuándo: 07/11 a las 19:00» (día/mes y hora, en el reloj del teléfono). Tocarla abre la hoja «Cuándo sale» (ver «Para programar un post»). Si no se toca, la hora no cambia, aunque ya haya pasado.
 - **«Cuentas»**: una línea por cuenta, «Red · nombre_de_cuenta» con el punto en el color de la red, y a la derecha «Quitar». Una cuenta quitada queda tachada, con « · se quita al guardar» y el botón «Devolver»; no se quita de verdad hasta tocar «Guardar». La última cuenta que queda no se puede quitar («Quitar» apagado), y debajo dice «Para sacarla de la última cuenta, borra la publicación.». No se pueden sumar cuentas.
 - Una nota en ámbar, si el post tiene algo que el teléfono no cambia: «Desde el teléfono no se cambia y queda como está: …. Eso se cambia en el panel web.», con la lista de lo que tenga —«el archivo» o «los N archivos», «la portada», «los atributos», «la palabra clave «…»», «las opciones de TikTok» (o de Instagram o Facebook, si es un trial reel o una historia)—. Todo eso se guarda tal cual.
@@ -99,12 +101,43 @@ Si se puede editar, de arriba abajo:
 
 Mientras guarda o borra, el texto, la ficha y los botones esperan.
 
+### La Mesa
+
+Los comentarios que la gente deja en las publicaciones de Instagram, Facebook y YouTube, con la respuesta que propone la IA, como en [La Mesa](la-mesa.md) del panel web: son los mismos comentarios, y lo que se responde en un lado ya no aparece pendiente en el otro. Se abre con la tarjeta «La Mesa» de «La Parrilla». Arriba, la barra con el título «La Mesa» y la flecha para volver. De arriba abajo:
+
+- La línea «lo que te responden y tus respuestas» y, debajo, cuántos esperan respuesta en la red elegida: «No hay nada esperando respuesta.», «Un comentario espera tu respuesta.» o «5 comentarios esperan tu respuesta.».
+- **Los filtros por estado**, botones redondos (el elegido, lleno de naranjo): «Pendientes» (el que viene elegido: los que esperan respuesta, también los que se intentaron mandar y fallaron), «Enviados» (los respondidos desde Tu Parrilla, por la respuesta automática o directo en la app de la red) y «Automáticas» (los que tomó la respuesta automática por palabra clave, en cualquier estado). «Descartados» y «Todos» solo están en el panel web.
+- **Los filtros por red**, debajo: «Todas», «Instagram», «Facebook», «YouTube» (y «Threads» solo en la cuenta del revisor de Meta que la tiene, como en el panel). Cambiar de filtro no se guarda: al volver a abrir La Mesa está en «Pendientes» y «Todas».
+- «Actualizado recién» (o hace cuánto), como en las demás pantallas. Para actualizar, se arrastra la pantalla hacia abajo.
+- **Los comentarios, agrupados por publicación**, lo más nuevo primero. Cada grupo empieza con la miniatura de la publicación, si la hay; un punto en el color de la red y «Instagram · @cuenta» en chico y mayúsculas; las primeras dos líneas del texto de la publicación, o «(sin texto)» —si la red dio el enlace, tocarlas abre la publicación en la red—, y, solo si la publicación tiene respuesta automática, «Palabra clave: GUIA» (con la palabra de esa publicación). Debajo, una tarjeta por comentario.
+- Si el filtro no tiene nada: «No hay comentarios aquí.», y en «Pendientes» además «Los nuevos llegan cada cinco minutos.».
+- Al pie, en chico: «Las instrucciones para el modelo, «Regenerar todos» y los descartados están en La Mesa del panel web.».
+
+**La tarjeta de un comentario pendiente (o que falló)**, de arriba abajo:
+
+1. Quién comentó (o «Alguien», si la red no dio el nombre) y hace cuánto: «recién», «hace 3 horas», «ayer», «anteayer», «hace 5 días».
+2. El texto del comentario. Si la red lo entregó vacío, dice «(sin texto)» en gris y cursiva.
+3. Solo si la IA no pudo escribir el borrador, en rojo: «No se pudo redactar la respuesta.».
+4. Solo si la respuesta automática lo intentó y la red no la aceptó: «La regla de palabra clave intentó responder y la red no aceptó; «Enviar» lo reintenta.».
+5. El cuadro de la respuesta, con el borrador ya escrito; vacío, con «Tu respuesta…» de ayuda, si todavía no hay borrador. Se corrige como cualquier texto; los emojis, con el teclado del teléfono.
+6. Solo si un envío anterior falló, en rojo, el motivo: «La red no aceptó la respuesta. Inténtalo de nuevo.» o «Esa cuenta ya no está conectada.».
+7. Los botones «Enviar» (naranjo) y «Descartar». Mientras «Enviar» trabaja dice «Enviando…», y «Descartar», «Descartando…».
+8. Debajo, «↺ Escribir otro borrador», o «↺ Reintentar borrador» si todavía no hay ninguno: pide otro borrador a la IA (mientras trabaja, «Escribiendo el borrador…»). No está en los que tomó la respuesta automática: su cuadro trae el mensaje de la regla.
+9. Si algo falla, el error en rojo, debajo de todo.
+
+Mientras un botón trabaja, el cuadro y los otros botones de esa tarjeta esperan.
+
+**La tarjeta de un comentario ya resuelto** (en «Enviados» y «Automáticas») no tiene botones: «Respondido:» en verde y el texto que salió, con «· Automática» al final si lo mandó la respuesta automática; «Respondido desde Instagram:» (o Facebook, YouTube) y lo que la cuenta respondió directo en la app de la red; o «Descartado», o «Descartado · El comentario ya no está en la red.». Si los mensajes privados están encendidos para la cuenta (hoy, apagados), una línea más: «Privado: pendiente», «Privado: enviado» o «Privado: no salió», a veces con « · No se pudo mandar el privado.».
+
+Si Tu Parrilla todavía no tiene La Mesa para el teléfono (la app se actualizó antes que el sitio), en vez de los comentarios dice «Tu Parrilla todavía no responde comentarios desde el teléfono. Mientras, respóndelos en La Mesa del panel web.», con «Reintentar».
+
 ### Publicar
 
 De arriba abajo:
 
 - Mientras se abre un borrador, «Abriendo borrador…», y no se puede tocar nada.
 - Si el borrador abierto tiene algo que el teléfono no programa, un aviso en amarillo: «Este borrador va también a TikTok: eso se programa en el panel web.», «Este borrador tiene la palabra clave «GUIA»: eso se programa en el panel web.» (con la palabra que tenga) o, con las dos cosas, «Este borrador va también a TikTok y tiene la palabra clave «GUIA»: eso se programa en el panel web.». Con ese aviso se puede seguir editando —se guarda igual, sin perder lo de TikTok ni la palabra clave—, pero «Programar» y «Publicar ahora» quedan apagados.
+- Dos botones grandes, **«Post»** y **«Historia»**; el elegido, lleno de naranjo. Abre en «Post», o en «Historia» si el borrador abierto es una historia. Cambiar no borra nada. En «Historia» la pantalla cambia (ver «En Historia», abajo); lo que sigue es «Post».
 - Un cuadro de texto con la ayuda «Texto del post…» (hasta 2200 caracteres). Debajo, a la izquierda, «En YouTube el primer renglón es el título» y, a la derecha, el contador, por ejemplo «120 / 2200».
 - Los archivos elegidos, como miniaturas (un video se ve como un cuadro que dice «Video»), cada uno con una «✕» para quitarlo, y el botón «+ Fotos o video» mientras queden menos de diez. Cada archivo se sube apenas se elige, uno detrás del otro; mientras tanto la miniatura lleva una franja abajo: «45 %» el que está subiendo, «En cola» los que esperan y, en rojo, «Reintentar» uno cuya subida falló (tocarlo la vuelve a intentar). Quitar uno que está subiendo cancela su subida.
 - Las cuentas a las que se puede publicar, como botones redondos con borde, «Red · nombre_de_cuenta»; la marcada se pinta en naranjo. Solo salen cuentas de Instagram, Facebook y YouTube conectadas en el panel; TikTok no aparece nunca. Con una sola cuenta conectada, viene marcada; con dos o más, ninguna. Un borrador abierto trae marcadas las suyas. Una cuenta que se desconectó sale como «Instagram · nombre_de_cuenta · reconéctala», con «reconéctala» en rojo, y no se puede marcar. Mientras no haya ninguna marcada: «Elige al menos una cuenta.»
@@ -121,7 +154,19 @@ De arriba abajo:
 - Debajo, en chico, cómo va el borrador: «Lo que escribas se guarda solo como borrador.» (antes de escribir nada), «Abriste un borrador: lo que cambies se guarda solo.», «Guardando borrador…», «Borrador guardado.» o, en rojo, «No se pudo guardar el borrador.» o «Este borrador ya no existe: se programó o se descartó. Mira cómo quedó en La Parrilla.».
 - Si hay algo escrito, algún archivo o un borrador abierto, dos botones de texto: «Nueva publicación» y, en rojo, «Descartar». Con el borrador que ya no existe, solo «Nueva publicación».
 
-Lo que se escribe se guarda solo, como borrador, un momento después del último cambio, y también si la app pasa a segundo plano. Hace falta texto o un archivo ya subido: abrir «Publicar» y salir no deja un borrador vacío. El borrador guarda el texto, los archivos ya subidos, las cuentas marcadas, el trial reel, la canción de «Música de Instagram» y la fecha, pero la fecha solo si alguien la eligió (la próxima hora en punto con que abre no se guarda). Es el mismo borrador que se ve en el panel web.
+**En Historia**, de arriba abajo, después de «Post» e «Historia»:
+
+- Sin archivos: «Cada foto o video es una historia, en 9:16. Con varios, salen una detrás de otra, en el orden de la tira.» y «+ Fotos o video».
+- Con archivos, **el visor**: la historia que se ve, del ancho de la pantalla y en 9:16, recortada como la verá quien la mire. Arriba, una raya por historia (llenas hasta la que se ve) y, con varias, «2 de 3». Se desliza de lado para pasar de una a otra. Un video no se reproduce: se ve «▶», «Video · 0:45» y su nombre. Mientras sube, «45 %», «En cola» o, en rojo, «Reintentar» (tocar la historia lo vuelve a intentar). Abajo, sobre la historia, sus avisos: en rojo «Instagram recibe la historia en foto solo en JPG.» si es una foto que no es JPG y va a Instagram; en ámbar «Se va a ver con bordes.» si no es vertical 9:16, e «Instagram corta en 60 s: súbelo partido.» (o «Facebook corta…») si el video pasa del minuto.
+- **La tira**: las historias en miniatura vertical, en el orden en que salen, con su número abajo (en ámbar si tiene un aviso) y su «✕». La que se ve lleva borde naranjo; tocar otra la pone en el visor.
+- Con dos o más: «La 2 sale después de la 1.» (o «La 1 sale primero.») y los botones de texto «← Antes» y «Después →», que cambian de lugar la que se ve.
+- «+ Fotos o video», mientras queden menos de diez.
+- Si había texto escrito en «Post»: «Una historia no lleva texto. Lo que escribiste se guarda en el borrador y vuelve si cambias a Post.».
+- Las cuentas, solo las de Instagram y Facebook (las demás siguen marcadas para «Post», pero no salen en la historia). Sin ninguna: «Las historias salen en Instagram y Facebook, y no tienes ninguna de esas cuentas lista para publicar desde el teléfono. Conéctala en el panel web, en Los Fierros.». Sin ninguna marcada: «Elige al menos una cuenta de Instagram o Facebook.». No hay trial reel ni «Música de Instagram».
+- «Cuándo: …», como en «Post»; debajo, en rojo, lo que impide programar («La 2: Instagram recibe la historia en foto solo en JPG.»).
+- **«Programar historia»** (o «Programar 3 historias») y «Publicar ahora». Están apagados mientras no haya un archivo y una cuenta de Instagram o Facebook marcada, mientras algo sube, y con una foto que no es JPG yendo a Instagram. «Publicar ahora» pregunta «¿Publicar ahora en …? Saldrá en los próximos 5 minutos. Salen 3 historias, una detrás de otra, en este orden.» (o «Sale una historia.»).
+
+Lo que se escribe se guarda solo, como borrador, un momento después del último cambio, y también si la app pasa a segundo plano. Hace falta texto o un archivo ya subido: abrir «Publicar» y salir no deja un borrador vacío. El borrador guarda el texto, los archivos ya subidos en su orden, las cuentas marcadas, el trial reel, la canción de «Música de Instagram», si es post o historia, y la fecha, pero la fecha solo si alguien la eligió (la próxima hora en punto con que abre no se guarda). Es el mismo borrador que se ve en el panel web; el panel todavía no tiene «Historia», y abre un borrador de historia como un post: si se guarda allá, deja de ser historia.
 
 Mientras se cargan las cuentas dice «Cargando cuentas…». Si no se pudieron cargar: «No se pudieron cargar las cuentas.» con «Reintentar». Si no hay ninguna que sirva: «No hay ninguna cuenta lista para publicar desde el teléfono. Conéctala en el panel web, en Los Fierros.»
 
@@ -138,7 +183,7 @@ Las dos mitades del tablero del panel ([Los Números](los-numeros.md)), más cor
 
 ### La Cocina
 
-Para grabar un video (o sacar una foto) con la cámara del teléfono, ordenar lo guardado en la cámara de frío y pedirle una comanda al chef de la casa, sin pasar por el panel. Es la misma Cocina del panel ([La Cocina](la-cocina.md)): lo grabado se guarda en la cámara de frío ([La cámara de frío](la-camara-de-frio.md)), la comanda que sale es la misma que el chef ve llegar desde el panel, con las mismas opciones del formulario «Pedir una comanda», y lo que se cambia o se saca en un lado se ve en el otro. Llegó con la versión 1.2.0 de la app; desde el 2026-11-06 hace también lo de la cámara de frío y las comandas que antes eran solo del panel.
+Para grabar un video (o sacar una foto) con la cámara del teléfono, ordenar lo guardado en la cámara de frío y pedirle una comanda al chef de la casa, sin pasar por el panel. Es la misma Cocina del panel ([La Cocina](la-cocina.md)): lo grabado se guarda en la cámara de frío ([La cámara de frío](la-camara-de-frio.md)), la comanda que sale es la misma que el chef ve llegar desde el panel, con las mismas opciones del formulario «Pedir una comanda», y lo que se cambia o se saca en un lado se ve en el otro. Está en la versión 1.2.0 de la app y, desde el 2026-11-07, también en la 1.1.0 por aire, sin «Grabar video» ni «Sacar foto» (la 1.1.0 no trae el permiso de la cámara). Desde el 2026-11-06 hace también lo de la cámara de frío y las comandas que antes eran solo del panel.
 
 Si La Cocina no está encendida para la cuenta, la pestaña muestra solo el rótulo «El chef de la casa» y una tarjeta: «El chef de la casa edita tus videos: le llevas un video largo, un podcast en videollamada o tus tomas sueltas, y te devuelve una tanda de clips y carruseles con sus textos, para que los programes en tus redes. Está en piloto, con pocas cuentas.» y «Si quieres probarla, pídesela a quien administra Tu Parrilla.».
 
@@ -200,7 +245,7 @@ Se abre con el botón de Ajustes de cualquier pestaña. Arriba, la flecha para v
 - **«El libro de sugerencias»** (de día, «La caja de sugerencias»), para escribirle al equipo que hace Tu Parrilla y leer lo que le respondió. Si hay respuestas que no abrió, al lado del rótulo va un punto naranjo y «1 respuesta nueva» (o «<N> respuestas nuevas»). Una tarjeta con dos botones redondeados arriba, «Escribir» y «Lo que nos escribiste» (este con un punto naranjo si hay algo sin leer); arranca en «Lo que nos escribiste» si hay respuestas sin leer, si no en «Escribir».
   - En «Escribir»: el dibujo de un libro abierto (de día, una caja de madera con una ranura), los botones «Una idea», «Algo no funciona» y «Otra cosa», un campo para escribir y el botón «Dejarlo en el libro» (de día, «Echarlo a la caja»). Es lo mismo que el libro del panel, con sus mismos textos y mensajes: está contado en [El libro de sugerencias](libro-de-sugerencias.md). En la app, en vez del navegador, el mensaje lleva la versión de la app, y al recibirse dice «Quedó en el libro.» (de día, «Quedó en la caja.») con «Escribir otra». Lo escrito no se borra al pasar a la otra pestaña.
   - En «Lo que nos escribiste»: lo que escribió, de lo más nuevo a lo más viejo, cada cosa en un recuadro con su tipo y su fecha («Una idea · 6 nov 2026»), a la derecha «Respuesta nueva» en naranjo con un punto, «Respondida» o «Sin respuesta todavía», y el primer renglón de lo que escribió. Tocarlo lo abre: el texto entero y, si hay respuesta, «Te respondió el equipo · <fecha>» en naranjo con la respuesta debajo; sin respuesta, «Todavía no te respondemos. Cuando lo hagamos, aparece acá y te llega un correo.». Abrir una respuesta nueva la deja leída: se apagan su «Respuesta nueva» y el punto del rótulo. Mientras carga, «Abriendo…»; sin nada escrito, «Todavía no nos escribes nada. Lo que escribas aparece acá, con lo que te respondamos.»; sin señal y sin nada guardado, «No se pudo actualizar.».
-- Al pie, la versión de la app: «Versión 1.2.0» (o «Versión 1.1.0» en un teléfono que todavía no se actualiza desde la tienda: esa no tiene La Cocina) y, si llegó una actualización por aire, « · actualización » seguido de ocho letras y números que la identifican. Sirve para saber qué versión tiene alguien que pide ayuda.
+- Al pie, la versión de la app: «Versión 1.2.0» (o «Versión 1.1.0» en un teléfono que todavía no se actualiza desde la tienda: esa tiene La Cocina sin grabar) y, si llegó una actualización por aire, « · actualización » seguido de ocho letras y números que la identifican. Sirve para saber qué versión tiene alguien que pide ayuda.
 
 Aquí no se conecta ni se desconecta nada: eso es del panel web.
 
@@ -238,7 +283,7 @@ La primera vez que entras, unos segundos después, la app pregunta «¿Te avisam
 1. Toca «Avisarme».
 2. Si el teléfono pregunta si Tu Parrilla puede mandar notificaciones, toca «Permitir».
 
-Si tocaste «Ahora no», no vuelve a preguntar: se encienden en Ajustes → «Los avisos» → «Encender los avisos». Tocar un aviso abre su pantalla: lo que se quemó, en La Parrilla; una cuenta que se enfría o se apaga y la respuesta del equipo, en Ajustes; una pregunta del chef o una comanda, en «Tus comandas» de La Cocina; los comentarios nuevos, en La Parrilla (La Mesa todavía no está en la app). Los comentarios llegan como un resumen («3 comentarios nuevos en La Mesa», con las redes), uno por hora como mucho.
+Si tocaste «Ahora no», no vuelve a preguntar: se encienden en Ajustes → «Los avisos» → «Encender los avisos». Tocar un aviso abre su pantalla: lo que se quemó, en La Parrilla; una cuenta que se enfría o se apaga y la respuesta del equipo, en Ajustes; una pregunta del chef o una comanda, en «Tus comandas» de La Cocina; los comentarios nuevos, en La Mesa. Los comentarios llegan como un resumen («3 comentarios nuevos en La Mesa», con las redes), uno por hora como mucho.
 
 ### Para apagar los avisos
 
@@ -314,6 +359,19 @@ Si Instagram no tiene la función habilitada para esa cuenta, el destino falla a
 5. «Programar» o «Publicar ahora». No hay vista previa del reel con la canción: Instagram la pega al publicar.
 
 Si Instagram rechaza la canción al publicar, el destino se quema con «Instagram no aceptó la canción «Título» de Artista en @cuenta. … Borra esta publicación y prográmala de nuevo con otra canción o sin música.»: ni el teléfono ni el panel cambian la canción de algo ya programado.
+
+### Para programar una historia
+
+Una historia sale en Instagram o en Facebook (o en las dos), sin texto. Con varias fotos o videos se arma una secuencia: cada archivo es una historia, todas a la misma hora, y salen una detrás de otra en el orden de la tira.
+
+1. En «Publicar», toca «Historia», arriba.
+2. Toca «+ Fotos o video» y elige uno o varios (hasta diez). Empiezan a subir solos.
+3. Mira cada una en el visor: desliza de lado, o toca su miniatura en la tira. Si un aviso dice «Se va a ver con bordes.» o «… corta en 60 s: súbelo partido.», se puede seguir igual.
+4. Para cambiar el orden, toca en la tira la que se quiere mover y usa «← Antes» o «Después →». Para sacar una, su «✕».
+5. Marca las cuentas: solo aparecen las de Instagram y Facebook.
+6. «Cuándo: …» para elegir la hora, y «Programar historia» (o «Programar 3 historias»). O «Publicar ahora».
+
+En «La Parrilla» cada historia es su propia tarjeta, con el choripán al paso. Si una se quema, las demás salen igual. Instagram puede no aceptar historias de una cuenta de creador: si pasa, el destino se quema con una frase que lo dice y hay que publicarla desde la app de Instagram.
 
 ### Para dejar algo a medias y seguirlo después
 
@@ -419,6 +477,31 @@ Un video que se mandó desde el panel web con «Enviar como borrador a mi bandej
 
 En las versiones de la app que todavía no traen el portapapeles, el botón dice «Pasar el texto…» y abre la lista de compartir del teléfono: ahí, toca «Copiar». Si la lista no tiene «Copiar», abre la publicación (toca la tarjeta) y copia el texto manteniéndolo apretado.
 
+### Para responder un comentario
+
+1. En «La Parrilla», toca la tarjeta «La Mesa». Se abre en «Pendientes».
+2. Busca el comentario y lee el borrador en el cuadro. Corrígelo o reescríbelo si hace falta; si está vacío, escribe la respuesta.
+3. Toca «Enviar». Mientras sale dice «Enviando…».
+4. La respuesta se publica en la red como respuesta a ese comentario, a nombre de la cuenta conectada. El comentario sale de «Pendientes» y aparece en «Enviados» como «Respondido: …».
+
+Tocar dos veces no manda dos respuestas. El largo máximo es el de la red, como en el panel: 2200 caracteres en Instagram, 8000 en Facebook, 10000 en YouTube y 500 en Threads.
+
+### Para pedir otro borrador
+
+1. En la tarjeta del comentario, toca «↺ Escribir otro borrador» (o «↺ Reintentar borrador», si no había ninguno).
+2. Si ya cambiaste el texto del cuadro, pregunta «¿Cambiar lo que escribiste por un borrador nuevo?»: toca «Cambiarlo» para reemplazarlo, o «Cancelar».
+3. Dice «Escribiendo el borrador…» y el cuadro se llena con el borrador nuevo, escrito con las instrucciones guardadas en el panel. Si la IA no pudo, aparece en rojo «No se pudo redactar la respuesta.» y queda escribirlo a mano.
+
+### Para descartar un comentario
+
+1. En la tarjeta del comentario, toca «Descartar».
+2. Pregunta «¿Descartar este comentario?» y «No se va a responder.»: toca «Descartar» (en rojo), o «Cancelar».
+3. El comentario sale de «Pendientes». No se publica nada y sigue en la red. No se deshace, ni desde el teléfono ni desde el panel; los descartados se ven en el panel web.
+
+### Para ver lo que ya se respondió
+
+En La Mesa, toca «Enviados»: lo respondido desde Tu Parrilla, por la respuesta automática y directo en la app de la red. «Automáticas» muestra solo lo que tomó la respuesta automática por palabra clave, también lo que falló.
+
 ## Mensajes que puede ver
 
 | Lo que dice la pantalla | Qué significa | Qué hacer |
@@ -441,6 +524,11 @@ En las versiones de la app que todavía no traen el portapapeles, el botón dice
 | «No se pudo reprogramar» con «Ese destino ya no existe.» | El post se borró (por ejemplo, desde el panel web). | Arrastrar hacia abajo para actualizar. |
 | «No se pudo reprogramar» con «No se pudo conectar. Revisa tu señal.» | Sin conexión. | Volver a intentarlo cuando haya señal. |
 | «No se pudo copiar» con «Abre la publicación y mantén apretado su texto para copiarlo.» | Al tocar «Copiar el texto» o «Pasar el texto…», el teléfono no dejó copiar ni compartir. | Tocar la tarjeta del post y, en «Editar publicación», mantener apretado el texto para copiarlo. |
+| «Instagram recibe la historia en foto solo en JPG.» (sobre el visor, en rojo, y bajo «Cuándo», con «La 2: …» si hay varias) | En «Historia», una foto PNG, WebP o GIF va a una cuenta de Instagram: Instagram no la acepta. «Programar historia» se apaga. | Quitarla con su «✕» y elegir la foto en JPG, o desmarcar Instagram (Facebook sí la recibe). |
+| «Se va a ver con bordes.» (sobre el visor, en ámbar) | La foto o el video no es vertical 9:16: la historia sale con franjas. | Es un aviso: se puede programar igual, o elegir uno vertical. |
+| «Instagram corta en 60 s: súbelo partido.» (o «Facebook corta…», sobre el visor, en ámbar) | El video pasa del minuto que dura una historia. | Es un aviso: se programa igual, pero la red puede cortarlo o rechazarlo al publicar (se ve en «Se quemó» con lo que dijo). Mejor partirlo en varios y subirlos como secuencia. |
+| «Una historia es un solo archivo, foto o video.» | Al programar varias historias, el sitio todavía no sabe armar la secuencia (la app se actualizó antes que el sitio). | Probar en un rato, o programarlas de a una. |
+| «Este borrador es una historia, y esta versión de la app todavía no las programa: ábrela de nuevo con señal para que se actualice.» | Una app sin actualizar quiso programar como post un borrador armado como historia. | Cerrar la app y abrirla dos veces con señal; después aparece «Historia» en «Publicar». |
 | «Ya salió en alguna cuenta: lo que queda se corrige en el panel web.» (en «Editar publicación») | El post ya se publicó en al menos una de sus cuentas: desde el teléfono no se edita ni se borra. | Corregirlo en el panel web, en [La Parrilla](la-parrilla.md); lo publicado se cambia en la red. |
 | «Hay una publicación en curso. Vuelve en un minuto.» (en «Editar publicación», o con «No se pudo guardar») | Alguna cuenta está publicando ese post en este momento. | Esperar un minuto y volver a abrirlo. |
 | «Desde el teléfono no se cambia y queda como está: … Eso se cambia en el panel web.» | El post tiene archivos, portada, atributos, palabra clave u opciones de una red: al guardar se conservan tal cual. | Nada, si solo hay que corregir el texto, la hora o las cuentas; lo demás, en el panel web. |
@@ -499,7 +587,7 @@ En las versiones de la app que todavía no traen el portapapeles, el botón dice
 | «Instagram no dejó ver su música con esta cuenta. Reconéctala en Los Fierros y vuelve a intentarlo.» | El permiso de la cuenta venció o no alcanza. | Reconectarla en el panel web, en Los Fierros. |
 | «Instagram no tiene una muestra de esa canción para escuchar.» | Esa canción no trae muestra, o no se pudo abrir. | Elegirla igual si se conoce, u otra. |
 | «La música de Instagram solo funciona en cuentas conectadas con Facebook, y esta se conectó con el login de Instagram.» | Al programar, la cuenta de Instagram está conectada con el login de Instagram. | Tocar «Quitar» en la canción, o reconectar la cuenta con Facebook en el panel web. |
-| «La cuenta x no está conectada. Vuelve a conectarla en Los Fierros.» (con el nombre de la cuenta en lugar de x) | La cuenta elegida perdió la conexión. Los Fierros está en el panel web, en el botón «Ajustes»: la app no tiene esa pantalla. | Reconectarla en el panel web. |
+| «La cuenta x no está conectada. Vuelve a conectarla en Los Fierros.» (con el nombre de la cuenta en lugar de x) | La cuenta elegida perdió la conexión. Se reconecta en Los Fierros del panel web, en el botón «Ajustes»: la app muestra Los Fierros en Ajustes, solo para leer, y no conecta ni reconecta. | Reconectarla en el panel web. |
 | «Una de las cuentas elegidas no es tuya.» | Una cuenta ya no pertenece a quien publica (por ejemplo, se borró). | Cerrar la app del todo y volver a abrirla: la lista de cuentas de «Publicar» se carga al abrir. |
 | «Red desconocida o sin publicación: x.» | Se intentó publicar en una red que el teléfono no maneja (hoy, TikTok). | Publicar en esa red desde el panel web, en [La Parrilla](la-parrilla.md). |
 | «Falta subir un archivo.» | Uno de los archivos subidos ya no está en el servidor. | Los elegidos en el teléfono se vuelven a subir solos: esperar y tocar de nuevo «Programar». Si el archivo venía de un borrador, quitarlo con su «✕» y volver a elegirlo. |
@@ -542,6 +630,20 @@ En las versiones de la app que todavía no traen el portapapeles, el botón dice
 | «No se pudo mandar: revisa la señal y vuelve a tocar «Mandar al chef». No se va a pedir dos veces.» | Sin conexión al mandar, o el servidor no contestó. | Volver a tocar «Mandar al chef» con señal: si la primera sí llegó, no se pide dos veces. |
 | «El plato principal ya no está en la cámara, o no es un video: elige otro.» o «Uno de los materiales ya no está en la cámara: actualiza La Cocina y vuelve a elegir.» | Algo de lo elegido se sacó de la cámara (por ejemplo, desde el panel). | Arrastrar hacia abajo para actualizar y volver a elegir. |
 | «Comanda colgada», «El chef mira la res», «El desposte», «El chef te pregunta», «Al fuego», «Sirviendo: …», «Lista en el mesón: N cortes», «Servida», «No se puede cocinar», «No se pudo terminar», «Cancelada» (en «Tus comandas») | El estado de cada comanda, el mismo del panel. | Lo lista se programa desde el mesón, en el panel web ([La Cocina](la-cocina.md)). |
+| «No hay nada esperando respuesta.» / «Un comentario espera tu respuesta.» / «5 comentarios esperan tu respuesta.» (en La Parrilla y en La Mesa) | Cuántos comentarios esperan respuesta. En La Mesa, en la red elegida. | Responderlos o descartarlos en La Mesa. |
+| «No hay comentarios aquí.» / «No hay comentarios aquí. Los nuevos llegan cada cinco minutos.» | El filtro elegido de La Mesa está vacío. | Probar con otro estado o con «Todas». Los de YouTube llegan cada media hora. |
+| «(sin texto)» en un comentario | La red entregó el comentario sin texto. | Abrir la publicación en la red (tocar su texto, arriba del grupo) para verlo allá, o responderlo igual. |
+| «No se pudo redactar la respuesta.» | La IA no pudo escribir el borrador. | Escribir la respuesta a mano, o «↺ Reintentar borrador». |
+| «Escribe una respuesta.» | Se tocó «Enviar» con el cuadro vacío. | Escribir algo. |
+| «La respuesta no puede pasar de <N> caracteres.» | La respuesta es más larga de lo que acepta la red. | Acortarla. |
+| «Esa cuenta ya no está conectada.» | La cuenta de ese comentario se desconectó o perdió el permiso. | Reconectarla en el panel web, en [Los Fierros](los-fierros.md), y volver a «Enviar». |
+| «La red no aceptó la respuesta. Inténtalo de nuevo.» | La red rechazó la respuesta. | «Enviar» de nuevo; si se repite, ver ese mensaje en [La Mesa](la-mesa.md). |
+| «El comentario ya no está en la red.» | Su autor lo borró; se pasó a los descartados. | Nada. |
+| «La regla de palabra clave intentó responder y la red no aceptó; «Enviar» lo reintenta.» | Falló la respuesta automática. | Revisar el texto del cuadro y tocar «Enviar». |
+| «No se pudo hablar con Tu Parrilla. Tira la pantalla hacia abajo para actualizar: si la respuesta salió, está en «Enviados».» | Al tocar «Enviar», «Descartar» o pedir otro borrador, no llegó la respuesta del servidor (sin señal, o se cortó). No se sabe si salió. | Arrastrar La Mesa hacia abajo y mirar «Enviados» antes de mandarla otra vez. |
+| «Tu Parrilla todavía no responde comentarios desde el teléfono. Mientras, respóndelos en La Mesa del panel web.» | La app se actualizó antes que el sitio. | Responder en el panel web, en [La Mesa](la-mesa.md); al rato, «Reintentar». |
+| «¿Descartar este comentario?» y «No se va a responder.» | Pregunta antes de descartar. | «Descartar» para descartarlo, «Cancelar» para dejarlo. |
+| «¿Cambiar lo que escribiste por un borrador nuevo?» | Se pidió otro borrador con el cuadro ya corregido a mano. | «Cambiarlo» para reemplazarlo, «Cancelar» para quedarse con lo escrito. |
 
 ## Si el humano dice…
 
@@ -568,7 +670,13 @@ En las versiones de la app que todavía no traen el portapapeles, el botón dice
 - «Empecé en el computador y quiero terminar en el teléfono» (o al revés) → es el mismo borrador: en el teléfono, «La Parrilla» → «▸ Borradores (N)»; en el panel web, «Borradores (N)» en [La Parrilla](la-parrilla.md).
 - «Me dice que el borrador va también a TikTok» o «que tiene la palabra clave» → eso no se programa desde el teléfono; se programa en el panel web, en [La Parrilla](la-parrilla.md). Se puede seguir editando el texto en el teléfono sin perderlo.
 - «Toqué la cruz de un día y desapareció lo que estaba escribiendo» → la cruz empieza otra publicación; lo anterior quedó en «▸ Borradores (N)».
-- «No me sale el botón de trial reel» → hace falta una cuenta de Instagram marcada y exactamente un video, sin fotos.
+- «No me sale el botón de trial reel» → hace falta una cuenta de Instagram marcada y exactamente un video, sin fotos, y estar en «Post», no en «Historia».
+- «Quiero subir una historia» → en «Publicar», tocar «Historia» arriba; ver «Para programar una historia».
+- «Desapareció el texto» (en «Publicar») → está en «Historia», que no lleva texto. Tocar «Post» arriba: el texto sigue ahí.
+- «No me aparece YouTube» (en «Publicar») → está en «Historia»: las historias salen solo en Instagram y Facebook. Para un post, tocar «Post».
+- «Programar historia está gris» → falta un archivo, una cuenta de Instagram o Facebook, que termine de subir, o hay una foto que no es JPG yendo a Instagram (lo dice en rojo bajo «Cuándo»: quitarla o desmarcar Instagram).
+- «Quiero cambiar el orden de las historias» → en el visor, tocar en la tira la que se quiere mover y usar «← Antes» o «Después →». Lo ya programado no cambia de orden: se borra y se programa de nuevo.
+- «Se va a ver con bordes» o «corta en 60 s» → son avisos, no impiden programar: el archivo no es vertical 9:16, o el video pasa de un minuto y la red lo corta.
 - «Programé algo mal» (desde el teléfono o el panel) → en «La Parrilla», tocar la tarjeta del post: «Editar publicación» corrige el texto, la hora y las cuentas, o «Borrar publicación». Los archivos se cambian en el panel web, en [La Parrilla](la-parrilla.md).
 - «Toqué un post y dice que ya salió en alguna cuenta» → desde el teléfono solo se edita lo que no ha salido en ninguna; se corrige en el panel web, en [La Parrilla](la-parrilla.md), y lo publicado, en la red.
 - «No puedo quitar la última cuenta» → para que no salga en ninguna, «Borrar publicación».
@@ -580,7 +688,13 @@ En las versiones de la app que todavía no traen el portapapeles, el botón dice
 - «Lo de la mañana se ve apagado, en un renglón» → ya salió en todas sus redes: se hunde para que lo que viene quede a la vista. Encima de la línea «ahora» va lo que ya tuvo su hora. Si es para más de treinta días adelante, la app no lo muestra.
 - «Un post dice Falló» → está arriba, en «Se quemó», con el motivo y el botón «Reprogramar». Si falló por la conexión o por el archivo, primero se arregla eso en el panel web.
 - «Los números no cambian» → mirar «Actualizado hace…» arriba y arrastrar hacia abajo para actualizar.
-- «Quiero ver los comentarios» → no están en la app; se ven en el panel web, en [La Mesa](la-mesa.md).
+- «Quiero ver los comentarios» o «¿cómo respondo desde el teléfono?» → «La Parrilla» → la tarjeta «La Mesa», arriba → corregir el borrador → «Enviar».
+- «No encuentro La Mesa» → no es una pestaña: es la tarjeta «La Mesa» arriba de «La Parrilla», debajo de «Actualizado…». Si no está, la app no se ha actualizado: se pone al día sola al abrirla dos veces con señal.
+- «Quiero cambiar cómo responde la IA» o «regenerar todos los borradores» → en el panel web, en [La Mesa](la-mesa.md), «Instrucciones para el modelo». Rigen también para los borradores que se piden desde el teléfono.
+- «Un comentario dice (sin texto)» → la red lo entregó vacío. Se puede responder igual, o abrir la publicación tocando su texto, arriba del grupo, para verlo en la red.
+- «Descarté uno por error» → no se deshace; se puede responder directamente en la app de la red.
+- «Lo respondí desde Instagram y sigue en Pendientes» → lo mismo que en el panel: hay que esperar la revisión siguiente (cinco minutos; media hora en YouTube) y arrastrar La Mesa hacia abajo para actualizar.
+- «No veo los descartados» → solo en el panel web, en [La Mesa](la-mesa.md), filtro «Descartados».
 - «Quiero cambiar mi página de links desde el teléfono» → no se puede en la app; se hace en el panel web, en [La Vitrina](la-vitrina.md), que también funciona en el navegador del teléfono.
 - «Quiero grabar un video y mandárselo al chef» → la pestaña «La Cocina» (el gorro de chef) → «Tu comanda» → marcar la casilla de los derechos → «Grabar video» → escribir la instrucción → «Mandar al chef».
 - «No me aparece "Grabar video"» → es la app 1.1.0, que no trae el permiso de la cámara: se elige de la galería («Elegir de la galería») lo grabado con la cámara del teléfono. Para grabar desde la app hay que actualizarla desde la tienda cuando salga la nueva.
@@ -602,14 +716,14 @@ En las versiones de la app que todavía no traen el portapapeles, el botón dice
 Comparada con el panel web, la app no:
 
 - deja oír el reel con la canción de «Música de Instagram» puesta (Instagram no lo permite antes de publicar), ni cambia la canción de algo ya programado;
-
 - conecta, desconecta ni reconecta redes ([Los Fierros](los-fierros.md));
 - publica en TikTok;
 - cambia los archivos, la portada, la palabra clave ni las opciones de lo programado, le suma cuentas, ni edita o borra lo que ya salió en alguna cuenta ([La Parrilla](la-parrilla.md)): corrige el texto, la hora y las cuentas, y borra, solo lo que no ha salido;
+- al programar, pone portada a un video, atributos a un post ni reglas de respuesta a comentarios con palabra clave;
 - programa un borrador que va también a TikTok o tiene una palabra clave (se edita, pero se programa en el panel web);
-- pone portada a un video, atributos a un post ni reglas de respuesta a comentarios con palabra clave;
+- reproduce un video en el visor de historias (muestra su duración), ni cambia el orden de una secuencia ya programada;
 - carga posts por lote;
-- muestra ni responde comentarios ([La Mesa](la-mesa.md));
+- en La Mesa: cambia las instrucciones para el modelo, «Regenerar todos», muestra los descartados ni el filtro «Todos», ni trae la fila de emojis (el teclado del teléfono los tiene) ([La Mesa](la-mesa.md));
 - muestra la pieza de una publicación con sus versiones, «Comparar por atributo», el «⋯ Más» de «En tu página» (orígenes, links, países, equipos) ni el filtro de página o de bots ([Los Números](los-numeros.md));
 - edita la página pública ([La Vitrina](la-vitrina.md));
 - cambia la zona horaria ([Tu Cuenta](tu-cuenta.md)) ni genera llaves ([La Cocina](la-cocina.md));
@@ -630,7 +744,9 @@ Lo que describe sale de estos archivos:
 - `src/lib/cocina/del-dueno.ts`, `src/app/api/mobile/cocina/materiales/[id]/route.ts` y `src/app/api/mobile/cocina/comandas/[id]/cancelar/route.ts` (cambiar, sacar y cancelar, con las frases del panel)
 - `src/lib/cocina/latido.ts` (la frase de cómo atiende la cocina), `src/lib/cocina/pregunta.ts` (el plazo en palabras y las frases al responder), `src/app/api/mobile/cocina/preguntas/[id]/respuesta/route.ts` (contestarle al chef)
 - `src/lib/cocina/telefono.ts` (la comanda que pide el teléfono y cómo se cuenta cada una), `src/lib/cocina/subidas.ts` y `src/lib/cocina/bodega.ts` (las frases de la subida y de la cuota), `src/lib/cocina/pedido.ts` y `src/lib/cocina/pedir.ts` (las de la comanda), `src/lib/cocina/nombres.ts` y `src/lib/cocina/tarjeta.ts` (los estados)
-- `mobile/src/app/_layout.tsx` (qué pantallas se ven con sesión y sin ella, la pantalla «Algo se rompió» y las cabeceras de «Publicación», «Editar publicación», «Tus publicaciones» y «Ajustes»)
+- `mobile/src/app/_layout.tsx` (qué pantallas se ven con sesión y sin ella, la pantalla «Algo se rompió» y las cabeceras de «Publicación», «Editar publicación», «La Mesa», «Tus publicaciones» y «Ajustes»)
+- `mobile/src/app/mesa.tsx`, `mobile/src/components/mesa.tsx` y `mobile/src/lib/mesa.ts` (La Mesa y su tarjeta en La Parrilla: los filtros, las tarjetas, sus frases y el mensaje contra un sitio sin La Mesa)
+- `src/app/api/mobile/comentarios/` y `src/lib/comentarios-movil.ts` (lo que La Mesa lee y manda, con las frases del panel), y `src/lib/social/comentarios/la-mesa.ts` (las frases que copia del panel)
 - `mobile/src/app/programado/[id].tsx` y `mobile/src/lib/editar.ts` (Editar publicación)
 - `src/lib/editar-movil.ts` (lo que muestra Editar publicación: la nota de lo que queda como está, por qué no se edita y el máximo de cada red) y `src/lib/social/publish/editar.ts` (lo que se guarda y sus frases, las mismas del editor del panel)
 - `mobile/src/components/sesion.tsx` (el desbloqueo, entrar y salir)
@@ -661,6 +777,8 @@ Lo que describe sale de estos archivos:
 - `mobile/src/lib/agenda.ts` (qué días se ven, «Se quemó», los borradores de cada día, el pie de ayer, lo que ya salió y dónde va «ahora»)
 - `mobile/src/lib/borradores.ts` (las frases del borrador, qué se guarda, la línea de cada borrador en la lista)
 - `mobile/src/lib/publicar.ts`
+- `mobile/src/lib/historias.ts` y `mobile/src/components/visor-historias.tsx` («Post · Historia», el visor 9:16, la tira, sus avisos y lo que viaja al programar una historia)
+- `src/app/api/mobile/schedule/route.ts` (programar: una secuencia de historias crea una por archivo) y `src/lib/borrador.ts` (el modo que guarda el borrador y la frase de una app sin actualizar)
 - `mobile/src/components/musica-instagram.tsx`, `mobile/src/lib/musica.ts` y `mobile/src/lib/reproductor.ts` («Música de Instagram»: el bloque, sus frases y la muestra, que con la 1.1.0 se abre afuera)
 - `src/app/api/mobile/musica/route.ts`, `src/app/api/mobile/musica/[id]/route.ts`, `src/app/api/mobile/musica/sugerencia/route.ts` y `src/lib/musica-instagram.ts` (lo que suena, la búsqueda, la muestra de una canción y «Sugiéreme una»)
 - `mobile/src/lib/subir.ts`

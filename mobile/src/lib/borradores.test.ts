@@ -40,6 +40,12 @@ describe('cuerpoDelBorrador', () => {
     expect(cuerpoDelBorrador(formulario({ fechaPuesta: true })).cuando).toBe('2026-10-20T22:00:00.000Z')
   })
 
+  it('dice si es post o historia; en historia guarda igual el texto y el trial, para cuando se vuelva a Post', () => {
+    expect(cuerpoDelBorrador(formulario()).modo).toBe('post')
+    const historia = formulario({ historia: true, texto: 'Hola', trial: ['ig-1'], archivos: [archivoElegido(VIDEO)] })
+    expect(cuerpoDelBorrador(historia)).toMatchObject({ modo: 'historia', texto: 'Hola', opciones: { 'ig-1': { trialReel: true } } })
+  })
+
   it('lleva solo los archivos ya subidos, con su nombre', () => {
     const subido = archivoDelBorrador({ url: 'https://cdn/scheduled/a.jpg', mediaType: 'image', nombre: 'a.jpg' })
     const subiendo = archivoElegido(VIDEO)

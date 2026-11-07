@@ -116,6 +116,57 @@ describe.skipIf(!URL_PRUEBAS)('escrituras y lecturas contra una Postgres de verd
     })
   })
 
+  describe('crearVariosProgramados (una secuencia de historias del teléfono)', () => {
+    const historia = (secuencia: string, orden: number) => ({ historia: { secuencia, orden } })
+
+    it('crea una historia por archivo, en orden, y consume el borrador una sola vez', async () => {
+      const { borradores, scheduledPostMedia, scheduledPostTargets, scheduledPosts } = await esquema()
+      const { crearVariosProgramados, BorradorConsumido } = await import('@/lib/social/publish/crear')
+      const owner = await dueno()
+      const ig = await cuenta(owner)
+      const [borrador] = await (await db()).insert(borradores).values({ ownerId: owner }).returning()
+      const hora = new Date(Date.now() + HORA)
+      const posts = [1, 2, 3].map((orden) => ({
+        caption: '',
+        scheduledAt: hora,
+        media: [{ url: `https://cdn.ejemplo.cl/scheduled/${orden}.jpg`, mediaType: 'image' as const }],
+        cuentas: [{ id: ig.id, network: 'instagram', handle: '@prueba' }],
+        opciones: { [ig.id]: historia('s-1', orden) },
+      }))
+
+      const ids = await crearVariosProgramados(owner, posts, borrador!.id)
+
+      expect(ids).toHaveLength(3)
+      expect(await (await db()).select().from(borradores).where(eq(borradores.id, borrador!.id))).toHaveLength(0)
+      for (const [i, id] of ids.entries()) {
+        const [media] = await (await db()).select().from(scheduledPostMedia).where(eq(scheduledPostMedia.postId, id))
+        expect(media!.blobUrl).toBe(`https://cdn.ejemplo.cl/scheduled/${i + 1}.jpg`)
+        const [destino] = await (await db()).select().from(scheduledPostTargets).where(eq(scheduledPostTargets.postId, id))
+        expect(destino!.opciones).toEqual(historia('s-1', i + 1))
+      }
+      // El mismo envío otra vez, como el que repite una respuesta perdida: no entra nada más.
+      await expect(crearVariosProgramados(owner, posts, borrador!.id)).rejects.toBeInstanceOf(BorradorConsumido)
+      expect(await (await db()).select().from(scheduledPosts).where(eq(scheduledPosts.ownerId, owner))).toHaveLength(3)
+    })
+
+    it('si una historia no entra, no entra ninguna y el borrador sigue', async () => {
+      const { borradores, scheduledPosts } = await esquema()
+      const { crearVariosProgramados } = await import('@/lib/social/publish/crear')
+      const owner = await dueno()
+      const ig = await cuenta(owner)
+      const [borrador] = await (await db()).insert(borradores).values({ ownerId: owner }).returning()
+      const hora = new Date(Date.now() + HORA)
+      const buena = { caption: '', scheduledAt: hora, media: [], cuentas: [{ id: ig.id, network: 'instagram', handle: null }] }
+      // La segunda va a una cuenta que no existe: la base la rechaza después de escribir la primera.
+      const mala = { ...buena, cuentas: [{ id: crypto.randomUUID(), network: 'instagram', handle: null }] }
+
+      await expect(crearVariosProgramados(owner, [buena, mala], borrador!.id)).rejects.toThrow()
+
+      expect(await (await db()).select().from(scheduledPosts).where(eq(scheduledPosts.ownerId, owner))).toHaveLength(0)
+      expect(await (await db()).select().from(borradores).where(eq(borradores.id, borrador!.id))).toHaveLength(1)
+    })
+  })
+
   describe('reprogramarDestino', () => {
     it('si el destino ya no está quemado, la hora del post no se mueve', async () => {
       const { scheduledPosts, scheduledPostTargets } = await esquema()

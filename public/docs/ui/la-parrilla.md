@@ -658,6 +658,10 @@ revés. El teléfono no tiene las opciones de TikTok ni la respuesta automática
 las tiene se puede editar allá sin perderlas, pero se programa acá. La API no ve los
 borradores.
 
+Al revés, el teléfono arma historias («Post · Historia» en Publicar) y este compositor todavía
+no: un borrador de historia empezado en el teléfono se abre acá como un post con sus archivos,
+y si se guarda acá deja de ser historia. Para programarlo como historia, se sigue en el teléfono.
+
 ### El panel «Borradores»
 
 Lista los borradores, del guardado más recientemente al más viejo. Cada fila trae el texto en

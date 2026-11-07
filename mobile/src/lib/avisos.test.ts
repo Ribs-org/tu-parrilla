@@ -96,13 +96,13 @@ describe('el módulo nativo', () => {
 })
 
 describe('adónde lleva tocar un aviso', () => {
-  it('cada tipo a su pantalla, y lo desconocido a La Parrilla', () => {
+  it('cada tipo a su pantalla (los comentarios, a La Mesa), y lo desconocido a La Parrilla', () => {
     expect(avisos.rutaDelAviso({ tipo: 'fierro' })).toEqual({ pathname: '/ajustes' })
     expect(avisos.rutaDelAviso({ tipo: 'sugerencia', id: 's' })).toEqual({ pathname: '/ajustes' })
     expect(avisos.rutaDelAviso({ tipo: 'pregunta' }, '7')).toEqual({ pathname: '/(tabs)/cocina', params: { vista: 'comandas', n: '7' } })
     expect(avisos.rutaDelAviso({ tipo: 'comanda' }, '8')).toEqual({ pathname: '/(tabs)/cocina', params: { vista: 'comandas', n: '8' } })
     expect(avisos.rutaDelAviso({ tipo: 'quemado' })).toEqual({ pathname: '/(tabs)' })
-    expect(avisos.rutaDelAviso({ tipo: 'comentarios' })).toEqual({ pathname: '/(tabs)' })
+    expect(avisos.rutaDelAviso({ tipo: 'comentarios' })).toEqual({ pathname: '/mesa' })
     expect(avisos.rutaDelAviso(undefined)).toEqual({ pathname: '/(tabs)' })
   })
 

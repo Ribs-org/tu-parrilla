@@ -57,18 +57,20 @@ function modulo(): Modulo | null {
 export type RutaDelAviso =
   | { pathname: '/(tabs)' }
   | { pathname: '/ajustes' }
+  | { pathname: '/mesa' }
   | { pathname: '/(tabs)/cocina'; params: { vista: 'comandas'; n: string } }
 
 /**
  * Adónde lleva tocar un aviso, según su tipo (`data.tipo`, que pone el servidor): el fierro y la
  * respuesta del equipo, a Ajustes (Los Fierros arriba, el libro al final); la pregunta del chef y la
- * comanda, a «Tus comandas» de La Cocina; lo quemado, a La Parrilla. La Mesa todavía no está en el
- * teléfono: su resumen también abre La Parrilla, y lo que no se reconoce, igual. `n` cambia en cada
+ * comanda, a «Tus comandas» de La Cocina; el resumen de comentarios, a La Mesa; lo quemado, a La
+ * Parrilla, y lo que no se reconoce, igual. `n` cambia en cada
  * toque, para que La Cocina vuelva a «Tus comandas» aunque ya estuviera abierta en otra parte.
  */
 export function rutaDelAviso(data: unknown, n: string = String(Date.now())): RutaDelAviso {
   const tipo = data && typeof data === 'object' ? (data as { tipo?: unknown }).tipo : null
   if (tipo === 'fierro' || tipo === 'sugerencia') return { pathname: '/ajustes' }
+  if (tipo === 'comentarios') return { pathname: '/mesa' }
   if (tipo === 'pregunta' || tipo === 'comanda') return { pathname: '/(tabs)/cocina', params: { vista: 'comandas', n } }
   return { pathname: '/(tabs)' }
 }

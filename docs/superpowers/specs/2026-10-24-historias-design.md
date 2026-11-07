@@ -231,3 +231,28 @@ Cada parte deja la documentación cierta al terminar (`AGENTS.md`).
   llega con el corte de su archivo (`aceptaChoripan`, en `api/mobile/schedule`).
 - **El «1/3» junto al corte y el detalle «Historia en Instagram · @cuenta»** pasan a la parte 2,
   con el compositor: son de la pantalla, no del motor.
+
+## 13. Lo que cambió al construir la parte 3, el teléfono (2026-11-07)
+
+Se hizo antes que la parte 2: el compositor del panel todavía no tiene el selector.
+
+- **La secuencia va en un solo pedido.** `POST /api/mobile/schedule` acepta `secuencia: true` con
+  las cuentas en `{ historia: true }` y varios archivos, y crea una historia por archivo en una sola
+  transacción (`crearVariosProgramados`, en `crear.ts`), consumiendo el borrador una vez. El atajo
+  de la API (`expandirHistoria`) no sirve tal cual: allá una historia que falla no arrastra a las
+  demás y la `ref` reconoce las que ya entraron en un reenvío; el teléfono no tiene `ref`, y lo que
+  impide programar dos veces es el borrador. Mandar N pedidos sueltos dejaba una secuencia a medias
+  con la señal cortada, o duplicada si se perdía una respuesta.
+- **El modo vive en el borrador** como el campo `modo: ['historia']` (ausente es post). El teléfono
+  lo manda al guardar (`modo: 'post' | 'historia'`); una app sin actualizar no lo manda y se
+  conserva, y si esa app intenta programar como post un borrador de historia se rechaza
+  (`BORRADOR_ES_HISTORIA`). El borrador guarda además el texto, el trial y la canción del modo post,
+  para no perderlos al cambiar de modo; al programar una historia no viajan.
+- **El orden se cambia con flechas** («← Antes», «Después →»), no arrastrando: como las que este
+  diseño pide para el compositor del panel, sin armar un gesto sobre una tira que también se desliza.
+- **El video se ve como «▶» con su duración**, no con su primer cuadro: el selector de imágenes no
+  da una miniatura, y sacarla en el teléfono pide un módulo nativo.
+- **Los avisos**: «Se va a ver con bordes.» (lo que se aparta de 9:16 en más de 0,05) e
+  «Instagram corta en 60 s: súbelo partido.» (o «Facebook…», si no va a Instagram). La foto que no
+  es JPG hacia Instagram apaga el botón, con la frase del servidor.
+- **Editar publicación** no ofrece el texto de una historia (`historia` en `PostEditableMovil`).

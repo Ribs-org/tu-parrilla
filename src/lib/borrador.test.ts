@@ -4,7 +4,9 @@ import {
   borradorDemasiadoGrande,
   camposDesdeFormulario,
   camposDesdeTelefono,
+  esBorradorDeHistoria,
   fechaParaDia,
+  historiaDelTelefono,
   idDeBorrador,
   instagramMusicaInicial,
   instagramTrialInicial,
@@ -198,6 +200,22 @@ describe('camposDesdeTelefono', () => {
     ])
   })
 
+  it('el modo historia lo escribe la app que lo conoce; la que no, lo conserva', () => {
+    expect(camposDesdeTelefono(null, { ...telefono, historia: true }, new Map()).modo).toEqual(['historia'])
+    const deHistoria = { cuentas: ['ig-1'], modo: ['historia'] }
+    expect(camposDesdeTelefono(deHistoria, telefono, new Map()).modo).toEqual(['historia'])
+    expect(camposDesdeTelefono(deHistoria, { ...telefono, historia: false }, new Map()).modo).toBeUndefined()
+    expect(esBorradorDeHistoria(deHistoria)).toBe(true)
+    expect(telefonoDesdeCampos(deHistoria).historia).toBe(true)
+  })
+
+  it('el modo que manda el teléfono: historia, post, o nada si la app no sabe de historias', () => {
+    expect(historiaDelTelefono({ modo: 'historia' })).toBe(true)
+    expect(historiaDelTelefono({ modo: 'post' })).toBe(false)
+    expect(historiaDelTelefono({})).toBeUndefined()
+    expect(historiaDelTelefono({ modo: 'reel' })).toBeUndefined()
+  })
+
   it('sin fecha, el campo va vacío como lo deja el panel; el trial de una cuenta no elegida no viaja', () => {
     const campos = camposDesdeTelefono(null, { texto: '', cuentas: [], scheduledAt: '', trial: ['ig-1'] }, new Map())
     expect(campos).toEqual({ caption: [''], cuentas: [], scheduledAt: [''] })
@@ -208,11 +226,11 @@ describe('telefonoDesdeCampos', () => {
   it('devuelve el texto, las cuentas y los trial reels encendidos', () => {
     expect(
       telefonoDesdeCampos({ caption: ['Hola'], cuentas: ['ig-1', 'ig-2'], 'instagramTrial:ig-2': ['on'] }),
-    ).toEqual({ texto: 'Hola', cuentas: ['ig-1', 'ig-2'], trial: ['ig-2'], musica: {} })
+    ).toEqual({ texto: 'Hola', cuentas: ['ig-1', 'ig-2'], historia: false, trial: ['ig-2'], musica: {} })
   })
 
   it('de un borrador vacío, todo vacío', () => {
-    expect(telefonoDesdeCampos({})).toEqual({ texto: '', cuentas: [], trial: [], musica: {} })
+    expect(telefonoDesdeCampos({})).toEqual({ texto: '', cuentas: [], historia: false, trial: [], musica: {} })
   })
 
   it('devuelve la música de Instagram de las cuentas elegidas, y no la que ya no se entiende', () => {

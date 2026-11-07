@@ -4,6 +4,7 @@ import { useFocusEffect, useRouter } from 'expo-router'
 import { CorteProgramado, CorteServido } from '../../components/corte-programado'
 import { FiltroDeRedes } from '../../components/filtro-de-redes'
 import { IconoPoner } from '../../components/iconos'
+import { AccesoALaMesa } from '../../components/mesa'
 import { Grilla, LineaDeAhora, MezclaDelDia, ResumenDelDia, RotuloDia } from '../../components/parrilla'
 import { Pieza } from '../../components/pieza'
 import { useSelectorFecha } from '../../components/selector-fecha'
@@ -167,6 +168,9 @@ export default function LaParrilla() {
     <Pantalla refrescando={cargando} onRefrescar={refrescar}>
       <Text style={{ color: colores.suave, fontSize: 13 }}>lo que viene y cómo salió lo que ya se fue</Text>
       <Sello texto={sello} />
+
+      {/* Los comentarios que esperan respuesta: La Mesa, un toque adentro. */}
+      <AccesoALaMesa />
 
       {quemados.length > 0 ? (
         <View style={{ gap: 8 }}>

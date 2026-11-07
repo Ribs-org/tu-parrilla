@@ -16,6 +16,8 @@ Lo que se responde directo en la app de la red (Instagram, Facebook o YouTube) n
 
 También se entra directo a `https://tu-parrilla.cl/admin/comments`. Sin sesión abierta, primero hay que entrar (ver [Ingresar](ingresar.md)).
 
+En la app del teléfono, La Mesa se abre con la tarjeta «La Mesa» de La Parrilla, y trae lo esencial: «Pendientes», «Enviados» y «Automáticas», el filtro por red, y en cada comentario el borrador para corregir, «Enviar», «Descartar» y pedir otro borrador. Las instrucciones para el modelo, «Regenerar todos», «Descartados», «Todos» y la fila de emojis se quedan aquí, en el panel: son para una sentada frente al computador, no para responder al paso. Ver «La Mesa» en [la app del teléfono](app-movil.md).
+
 ## Qué se ve
 
 Los títulos se ven en mayúsculas; aquí van como están escritos.
@@ -220,7 +222,7 @@ Aprieta el filtro «Automáticas». Ahí están todos los que tomó, también lo
 - **«La respuesta automática publicó el enlace en público»** → Es lo esperado mientras los mensajes privados estén apagados para la cuenta (hoy lo están), en YouTube, o pasados siete días desde la publicación.
 - **«¿Dónde pongo la palabra clave?»** → Al programar la publicación en [La Parrilla](la-parrilla.md), bloque «Respuesta automática por palabra clave».
 - **«El botón dice "Enviando…" y yo apreté Descartar»** → «Enviar» dice «Enviando…» mientras cualquier botón de esa tarjeta trabaja; hay que esperar a que termine.
-- **«¿Puedo responder desde el teléfono?»** → No: la app del teléfono no tiene esta cola (ver [la app del teléfono](app-movil.md)).
+- **«¿Puedo responder desde el teléfono?»** → Sí: en la app, «La Parrilla» → la tarjeta «La Mesa» → corregir el borrador → «Enviar». También se descarta y se pide otro borrador. Las instrucciones para el modelo y «Regenerar todos» están solo aquí (ver [la app del teléfono](app-movil.md)).
 
 ## Lo que esta pantalla no hace
 
@@ -229,13 +231,14 @@ Aprieta el filtro «Automáticas». Ahí están todos los que tomó, también lo
 - No edita ni borra una respuesta ya enviada, y no deshace un descarte.
 - No responde sola, salvo la respuesta automática por palabra clave, y esa no se configura aquí sino en [La Parrilla](la-parrilla.md).
 - No manda mensajes privados a mano: no tienen botón. Encendidos para la cuenta, salen solos después de responder.
-- No existe en la app del teléfono.
+- En la app del teléfono no cambia las instrucciones para el modelo ni regenera todos los borradores, y no muestra los descartados ni «Todos»: eso es solo del panel.
 
 ## Para quien mantiene esta página
 
 Lo que describe sale de:
 
 - `src/app/admin/(dash)/comments/page.tsx`
+- `src/lib/social/comentarios/la-mesa.ts` (cuántos esperan, la cola vacía y hace cuánto: las frases que copia el teléfono)
 - `src/app/admin/(dash)/comments/cola.tsx` (también el mensaje de cuando no se pudo hablar con el servidor)
 - `src/app/admin/(dash)/comments/emojis.tsx` (los emojis)
 - `src/app/admin/(dash)/comments/instrucciones.tsx` y `src/app/admin/(dash)/comments/regenerar.ts` («Regenerar todos» y sus frases)
