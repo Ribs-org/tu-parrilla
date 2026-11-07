@@ -15,7 +15,7 @@ import {
 } from './parrilla'
 import { tipoDesdeNombre, typeFromContentType } from './social/publish/batch'
 import { ARCHIVO_MUY_GRANDE, MAX_BYTES_ARCHIVO } from './social/publish/limites'
-import { SIN_TRIAL_GENERICO, avisoSinTrial } from './social/publish/opciones'
+import { HISTORIA_JPG, SIN_TRIAL_GENERICO, avisoSinTrial } from './social/publish/opciones'
 import {
   MUSICA_SOLO_LOGIN_DE_FACEBOOK,
   SIN_MUESTRA,
@@ -90,6 +90,11 @@ describe('las frases que la app reconoce por su texto', () => {
     expect(musica.SIN_MUESTRA).toBe(SIN_MUESTRA)
     expect(musica.VOLUMEN_CANCION_INICIAL).toBe(VOLUMEN_CANCION_INICIAL)
     expect(musica.VOLUMEN_VIDEO_INICIAL).toBe(VOLUMEN_VIDEO_INICIAL)
+  })
+
+  it('la foto de una historia que no es JPG se avisa con la frase con que el servidor la rechaza', () => {
+    const historias = delTelefono<{ HISTORIA_JPG: string; MAX_SEGUNDOS_HISTORIA: number }>('historias')
+    expect(historias.HISTORIA_JPG).toBe(HISTORIA_JPG)
   })
 
   it('las de un archivo que no se puede elegir dicen lo mismo que diría el servidor', () => {

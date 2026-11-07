@@ -7,6 +7,9 @@ import type { PostEditable } from './tipos'
 /** Lo que dice la pantalla si no pudo abrir el post y no fue un rechazo del servidor. */
 export const NO_SE_ABRIO_POST = 'No se pudo abrir la publicación. Revisa tu señal.'
 
+/** En lugar del texto, si la publicación es una historia: se cambia la hora y se quitan cuentas. */
+export const HISTORIA_EN_EL_EDITOR = 'Es una historia: no lleva texto. Aquí se cambia la hora y se quitan cuentas.'
+
 /** Los destinos que siguen, sin los que se marcaron para quitar. */
 export function destinosQueSiguen(post: PostEditable, quitados: readonly string[]): PostEditable['destinos'] {
   return post.destinos.filter((d) => !quitados.includes(d.id))

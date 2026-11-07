@@ -90,7 +90,8 @@ Si el post ya salió en alguna de sus cuentas, la pantalla solo dice en ámbar �
 
 Si se puede editar, de arriba abajo:
 
-- **«Texto»**: el texto del post, en un recuadro que se puede cambiar, con «Texto del post…» si está vacío. Debajo, a la derecha, cuántos caracteres lleva y el máximo, por ejemplo «30 / 280»: el máximo es el de la red más estricta entre las cuentas que siguen —280 si va a X, 500 a Threads, 2200 en las demás—, y pasado el máximo la cifra se pone roja.
+- Si el post es una historia, en lugar del texto: «Es una historia: no lleva texto. Aquí se cambia la hora y se quitan cuentas.».
+- **«Texto»** (en lo que no es historia): el texto del post, en un recuadro que se puede cambiar, con «Texto del post…» si está vacío. Debajo, a la derecha, cuántos caracteres lleva y el máximo, por ejemplo «30 / 280»: el máximo es el de la red más estricta entre las cuentas que siguen —280 si va a X, 500 a Threads, 2200 en las demás—, y pasado el máximo la cifra se pone roja.
 - **«Cuándo sale»**: una ficha naranja «Cuándo: 07/11 a las 19:00» (día/mes y hora, en el reloj del teléfono). Tocarla abre la hoja «Cuándo sale» (ver «Para programar un post»). Si no se toca, la hora no cambia, aunque ya haya pasado.
 - **«Cuentas»**: una línea por cuenta, «Red · nombre_de_cuenta» con el punto en el color de la red, y a la derecha «Quitar». Una cuenta quitada queda tachada, con « · se quita al guardar» y el botón «Devolver»; no se quita de verdad hasta tocar «Guardar». La última cuenta que queda no se puede quitar («Quitar» apagado), y debajo dice «Para sacarla de la última cuenta, borra la publicación.». No se pueden sumar cuentas.
 - Una nota en ámbar, si el post tiene algo que el teléfono no cambia: «Desde el teléfono no se cambia y queda como está: …. Eso se cambia en el panel web.», con la lista de lo que tenga —«el archivo» o «los N archivos», «la portada», «los atributos», «la palabra clave «…»», «las opciones de TikTok» (o de Instagram o Facebook, si es un trial reel o una historia)—. Todo eso se guarda tal cual.
@@ -105,6 +106,7 @@ De arriba abajo:
 
 - Mientras se abre un borrador, «Abriendo borrador…», y no se puede tocar nada.
 - Si el borrador abierto tiene algo que el teléfono no programa, un aviso en amarillo: «Este borrador va también a TikTok: eso se programa en el panel web.», «Este borrador tiene la palabra clave «GUIA»: eso se programa en el panel web.» (con la palabra que tenga) o, con las dos cosas, «Este borrador va también a TikTok y tiene la palabra clave «GUIA»: eso se programa en el panel web.». Con ese aviso se puede seguir editando —se guarda igual, sin perder lo de TikTok ni la palabra clave—, pero «Programar» y «Publicar ahora» quedan apagados.
+- Dos botones grandes, **«Post»** y **«Historia»**; el elegido, lleno de naranjo. Abre en «Post», o en «Historia» si el borrador abierto es una historia. Cambiar no borra nada. En «Historia» la pantalla cambia (ver «En Historia», abajo); lo que sigue es «Post».
 - Un cuadro de texto con la ayuda «Texto del post…» (hasta 2200 caracteres). Debajo, a la izquierda, «En YouTube el primer renglón es el título» y, a la derecha, el contador, por ejemplo «120 / 2200».
 - Los archivos elegidos, como miniaturas (un video se ve como un cuadro que dice «Video»), cada uno con una «✕» para quitarlo, y el botón «+ Fotos o video» mientras queden menos de diez. Cada archivo se sube apenas se elige, uno detrás del otro; mientras tanto la miniatura lleva una franja abajo: «45 %» el que está subiendo, «En cola» los que esperan y, en rojo, «Reintentar» uno cuya subida falló (tocarlo la vuelve a intentar). Quitar uno que está subiendo cancela su subida.
 - Las cuentas a las que se puede publicar, como botones redondos con borde, «Red · nombre_de_cuenta»; la marcada se pinta en naranjo. Solo salen cuentas de Instagram, Facebook y YouTube conectadas en el panel; TikTok no aparece nunca. Con una sola cuenta conectada, viene marcada; con dos o más, ninguna. Un borrador abierto trae marcadas las suyas. Una cuenta que se desconectó sale como «Instagram · nombre_de_cuenta · reconéctala», con «reconéctala» en rojo, y no se puede marcar. Mientras no haya ninguna marcada: «Elige al menos una cuenta.»
@@ -121,7 +123,19 @@ De arriba abajo:
 - Debajo, en chico, cómo va el borrador: «Lo que escribas se guarda solo como borrador.» (antes de escribir nada), «Abriste un borrador: lo que cambies se guarda solo.», «Guardando borrador…», «Borrador guardado.» o, en rojo, «No se pudo guardar el borrador.» o «Este borrador ya no existe: se programó o se descartó. Mira cómo quedó en La Parrilla.».
 - Si hay algo escrito, algún archivo o un borrador abierto, dos botones de texto: «Nueva publicación» y, en rojo, «Descartar». Con el borrador que ya no existe, solo «Nueva publicación».
 
-Lo que se escribe se guarda solo, como borrador, un momento después del último cambio, y también si la app pasa a segundo plano. Hace falta texto o un archivo ya subido: abrir «Publicar» y salir no deja un borrador vacío. El borrador guarda el texto, los archivos ya subidos, las cuentas marcadas, el trial reel, la canción de «Música de Instagram» y la fecha, pero la fecha solo si alguien la eligió (la próxima hora en punto con que abre no se guarda). Es el mismo borrador que se ve en el panel web.
+**En Historia**, de arriba abajo, después de «Post» e «Historia»:
+
+- Sin archivos: «Cada foto o video es una historia, en 9:16. Con varios, salen una detrás de otra, en el orden de la tira.» y «+ Fotos o video».
+- Con archivos, **el visor**: la historia que se ve, del ancho de la pantalla y en 9:16, recortada como la verá quien la mire. Arriba, una raya por historia (llenas hasta la que se ve) y, con varias, «2 de 3». Se desliza de lado para pasar de una a otra. Un video no se reproduce: se ve «▶», «Video · 0:45» y su nombre. Mientras sube, «45 %», «En cola» o, en rojo, «Reintentar» (tocar la historia lo vuelve a intentar). Abajo, sobre la historia, sus avisos: en rojo «Instagram recibe la historia en foto solo en JPG.» si es una foto que no es JPG y va a Instagram; en ámbar «Se va a ver con bordes.» si no es vertical 9:16, e «Instagram corta en 60 s: súbelo partido.» (o «Facebook corta…») si el video pasa del minuto.
+- **La tira**: las historias en miniatura vertical, en el orden en que salen, con su número abajo (en ámbar si tiene un aviso) y su «✕». La que se ve lleva borde naranjo; tocar otra la pone en el visor.
+- Con dos o más: «La 2 sale después de la 1.» (o «La 1 sale primero.») y los botones de texto «← Antes» y «Después →», que cambian de lugar la que se ve.
+- «+ Fotos o video», mientras queden menos de diez.
+- Si había texto escrito en «Post»: «Una historia no lleva texto. Lo que escribiste se guarda en el borrador y vuelve si cambias a Post.».
+- Las cuentas, solo las de Instagram y Facebook (las demás siguen marcadas para «Post», pero no salen en la historia). Sin ninguna: «Las historias salen en Instagram y Facebook, y no tienes ninguna de esas cuentas lista para publicar desde el teléfono. Conéctala en el panel web, en Los Fierros.». Sin ninguna marcada: «Elige al menos una cuenta de Instagram o Facebook.». No hay trial reel ni «Música de Instagram».
+- «Cuándo: …», como en «Post»; debajo, en rojo, lo que impide programar («La 2: Instagram recibe la historia en foto solo en JPG.»).
+- **«Programar historia»** (o «Programar 3 historias») y «Publicar ahora». Están apagados mientras no haya un archivo y una cuenta de Instagram o Facebook marcada, mientras algo sube, y con una foto que no es JPG yendo a Instagram. «Publicar ahora» pregunta «¿Publicar ahora en …? Saldrá en los próximos 5 minutos. Salen 3 historias, una detrás de otra, en este orden.» (o «Sale una historia.»).
+
+Lo que se escribe se guarda solo, como borrador, un momento después del último cambio, y también si la app pasa a segundo plano. Hace falta texto o un archivo ya subido: abrir «Publicar» y salir no deja un borrador vacío. El borrador guarda el texto, los archivos ya subidos en su orden, las cuentas marcadas, el trial reel, la canción de «Música de Instagram», si es post o historia, y la fecha, pero la fecha solo si alguien la eligió (la próxima hora en punto con que abre no se guarda). Es el mismo borrador que se ve en el panel web; el panel todavía no tiene «Historia», y abre un borrador de historia como un post: si se guarda allá, deja de ser historia.
 
 Mientras se cargan las cuentas dice «Cargando cuentas…». Si no se pudieron cargar: «No se pudieron cargar las cuentas.» con «Reintentar». Si no hay ninguna que sirva: «No hay ninguna cuenta lista para publicar desde el teléfono. Conéctala en el panel web, en Los Fierros.»
 
@@ -293,6 +307,19 @@ Si Instagram no tiene la función habilitada para esa cuenta, el destino falla a
 
 Si Instagram rechaza la canción al publicar, el destino se quema con «Instagram no aceptó la canción «Título» de Artista en @cuenta. … Borra esta publicación y prográmala de nuevo con otra canción o sin música.»: ni el teléfono ni el panel cambian la canción de algo ya programado.
 
+### Para programar una historia
+
+Una historia sale en Instagram o en Facebook (o en las dos), sin texto. Con varias fotos o videos se arma una secuencia: cada archivo es una historia, todas a la misma hora, y salen una detrás de otra en el orden de la tira.
+
+1. En «Publicar», toca «Historia», arriba.
+2. Toca «+ Fotos o video» y elige uno o varios (hasta diez). Empiezan a subir solos.
+3. Mira cada una en el visor: desliza de lado, o toca su miniatura en la tira. Si un aviso dice «Se va a ver con bordes.» o «… corta en 60 s: súbelo partido.», se puede seguir igual.
+4. Para cambiar el orden, toca en la tira la que se quiere mover y usa «← Antes» o «Después →». Para sacar una, su «✕».
+5. Marca las cuentas: solo aparecen las de Instagram y Facebook.
+6. «Cuándo: …» para elegir la hora, y «Programar historia» (o «Programar 3 historias»). O «Publicar ahora».
+
+En «La Parrilla» cada historia es su propia tarjeta, con el choripán al paso. Si una se quema, las demás salen igual. Instagram puede no aceptar historias de una cuenta de creador: si pasa, el destino se quema con una frase que lo dice y hay que publicarla desde la app de Instagram.
+
 ### Para dejar algo a medias y seguirlo después
 
 No hay que hacer nada: lo escrito se guarda solo como borrador («Borrador guardado.»). Se puede cerrar la app, cambiar de pestaña o seguirlo en el panel web, en «Borradores (<N>)» de [La Parrilla](la-parrilla.md). Si un archivo todavía está subiendo, conviene esperar a que termine: el borrador guarda solo los archivos ya subidos.
@@ -416,6 +443,11 @@ En las versiones de la app que todavía no traen el portapapeles, el botón dice
 | «No se pudo reprogramar» con «Ese destino ya no existe.» | El post se borró (por ejemplo, desde el panel web). | Arrastrar hacia abajo para actualizar. |
 | «No se pudo reprogramar» con «No se pudo conectar. Revisa tu señal.» | Sin conexión. | Volver a intentarlo cuando haya señal. |
 | «No se pudo copiar» con «Abre la publicación y mantén apretado su texto para copiarlo.» | Al tocar «Copiar el texto» o «Pasar el texto…», el teléfono no dejó copiar ni compartir. | Tocar la tarjeta del post y, en «Editar publicación», mantener apretado el texto para copiarlo. |
+| «Instagram recibe la historia en foto solo en JPG.» (sobre el visor, en rojo, y bajo «Cuándo», con «La 2: …» si hay varias) | En «Historia», una foto PNG, WebP o GIF va a una cuenta de Instagram: Instagram no la acepta. «Programar historia» se apaga. | Quitarla con su «✕» y elegir la foto en JPG, o desmarcar Instagram (Facebook sí la recibe). |
+| «Se va a ver con bordes.» (sobre el visor, en ámbar) | La foto o el video no es vertical 9:16: la historia sale con franjas. | Es un aviso: se puede programar igual, o elegir uno vertical. |
+| «Instagram corta en 60 s: súbelo partido.» (o «Facebook corta…», sobre el visor, en ámbar) | El video pasa del minuto que dura una historia. | Es un aviso: se programa igual, pero la red puede cortarlo o rechazarlo al publicar (se ve en «Se quemó» con lo que dijo). Mejor partirlo en varios y subirlos como secuencia. |
+| «Una historia es un solo archivo, foto o video.» | Al programar varias historias, el sitio todavía no sabe armar la secuencia (la app se actualizó antes que el sitio). | Probar en un rato, o programarlas de a una. |
+| «Este borrador es una historia, y esta versión de la app todavía no las programa: ábrela de nuevo con señal para que se actualice.» | Una app sin actualizar quiso programar como post un borrador armado como historia. | Cerrar la app y abrirla dos veces con señal; después aparece «Historia» en «Publicar». |
 | «Ya salió en alguna cuenta: lo que queda se corrige en el panel web.» (en «Editar publicación») | El post ya se publicó en al menos una de sus cuentas: desde el teléfono no se edita ni se borra. | Corregirlo en el panel web, en [La Parrilla](la-parrilla.md); lo publicado se cambia en la red. |
 | «Hay una publicación en curso. Vuelve en un minuto.» (en «Editar publicación», o con «No se pudo guardar») | Alguna cuenta está publicando ese post en este momento. | Esperar un minuto y volver a abrirlo. |
 | «Desde el teléfono no se cambia y queda como está: … Eso se cambia en el panel web.» | El post tiene archivos, portada, atributos, palabra clave u opciones de una red: al guardar se conservan tal cual. | Nada, si solo hay que corregir el texto, la hora o las cuentas; lo demás, en el panel web. |
@@ -541,7 +573,13 @@ En las versiones de la app que todavía no traen el portapapeles, el botón dice
 - «Empecé en el computador y quiero terminar en el teléfono» (o al revés) → es el mismo borrador: en el teléfono, «La Parrilla» → «▸ Borradores (N)»; en el panel web, «Borradores (N)» en [La Parrilla](la-parrilla.md).
 - «Me dice que el borrador va también a TikTok» o «que tiene la palabra clave» → eso no se programa desde el teléfono; se programa en el panel web, en [La Parrilla](la-parrilla.md). Se puede seguir editando el texto en el teléfono sin perderlo.
 - «Toqué la cruz de un día y desapareció lo que estaba escribiendo» → la cruz empieza otra publicación; lo anterior quedó en «▸ Borradores (N)».
-- «No me sale el botón de trial reel» → hace falta una cuenta de Instagram marcada y exactamente un video, sin fotos.
+- «No me sale el botón de trial reel» → hace falta una cuenta de Instagram marcada y exactamente un video, sin fotos, y estar en «Post», no en «Historia».
+- «Quiero subir una historia» → en «Publicar», tocar «Historia» arriba; ver «Para programar una historia».
+- «Desapareció el texto» (en «Publicar») → está en «Historia», que no lleva texto. Tocar «Post» arriba: el texto sigue ahí.
+- «No me aparece YouTube» (en «Publicar») → está en «Historia»: las historias salen solo en Instagram y Facebook. Para un post, tocar «Post».
+- «Programar historia está gris» → falta un archivo, una cuenta de Instagram o Facebook, que termine de subir, o hay una foto que no es JPG yendo a Instagram (lo dice en rojo bajo «Cuándo»: quitarla o desmarcar Instagram).
+- «Quiero cambiar el orden de las historias» → en el visor, tocar en la tira la que se quiere mover y usar «← Antes» o «Después →». Lo ya programado no cambia de orden: se borra y se programa de nuevo.
+- «Se va a ver con bordes» o «corta en 60 s» → son avisos, no impiden programar: el archivo no es vertical 9:16, o el video pasa de un minuto y la red lo corta.
 - «Programé algo mal» (desde el teléfono o el panel) → en «La Parrilla», tocar la tarjeta del post: «Editar publicación» corrige el texto, la hora y las cuentas, o «Borrar publicación». Los archivos se cambian en el panel web, en [La Parrilla](la-parrilla.md).
 - «Toqué un post y dice que ya salió en alguna cuenta» → desde el teléfono solo se edita lo que no ha salido en ninguna; se corrige en el panel web, en [La Parrilla](la-parrilla.md), y lo publicado, en la red.
 - «No puedo quitar la última cuenta» → para que no salga en ninguna, «Borrar publicación».
@@ -580,6 +618,7 @@ Comparada con el panel web, la app no:
 - publica en TikTok;
 - cambia los archivos, la portada, la palabra clave ni las opciones de lo programado, le suma cuentas, ni edita o borra lo que ya salió en alguna cuenta ([La Parrilla](la-parrilla.md)): corrige el texto, la hora y las cuentas, y borra, solo lo que no ha salido;
 - programa un borrador que va también a TikTok o tiene una palabra clave (se edita, pero se programa en el panel web);
+- reproduce un video en el visor de historias (muestra su duración), ni cambia el orden de una secuencia ya programada;
 - pone portada a un video, atributos a un post ni reglas de respuesta a comentarios con palabra clave;
 - carga posts por lote;
 - muestra ni responde comentarios ([La Mesa](la-mesa.md));
@@ -633,6 +672,8 @@ Lo que describe sale de estos archivos:
 - `mobile/src/lib/agenda.ts` (qué días se ven, «Se quemó», los borradores de cada día, el pie de ayer, lo que ya salió y dónde va «ahora»)
 - `mobile/src/lib/borradores.ts` (las frases del borrador, qué se guarda, la línea de cada borrador en la lista)
 - `mobile/src/lib/publicar.ts`
+- `mobile/src/lib/historias.ts` y `mobile/src/components/visor-historias.tsx` («Post · Historia», el visor 9:16, la tira, sus avisos y lo que viaja al programar una historia)
+- `src/app/api/mobile/schedule/route.ts` (programar: una secuencia de historias crea una por archivo) y `src/lib/borrador.ts` (el modo que guarda el borrador y la frase de una app sin actualizar)
 - `mobile/src/components/musica-instagram.tsx`, `mobile/src/lib/musica.ts` y `mobile/src/lib/reproductor.ts` («Música de Instagram»: el bloque, sus frases y la muestra, que con la 1.1.0 se abre afuera)
 - `src/app/api/mobile/musica/route.ts`, `src/app/api/mobile/musica/[id]/route.ts`, `src/app/api/mobile/musica/sugerencia/route.ts` y `src/lib/musica-instagram.ts` (lo que suena, la búsqueda, la muestra de una canción y «Sugiéreme una»)
 - `mobile/src/lib/subir.ts`
