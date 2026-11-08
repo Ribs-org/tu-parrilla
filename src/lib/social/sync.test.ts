@@ -131,6 +131,8 @@ describe('syncAccount: el día del snapshot es el del dueño', () => {
     trialReelsMotivo: null,
     trialReelsEn: null,
     tiktokMusica: null,
+    scopes: null,
+    analiticaVerificadaEn: null,
     createdAt: new Date('2026-01-01'),
   } satisfies SocialAccount
 
@@ -226,6 +228,8 @@ describe('syncAccount: lo viejo se lee por id', () => {
     trialReelsMotivo: null,
     trialReelsEn: null,
     tiktokMusica: null,
+    scopes: null,
+    analiticaVerificadaEn: null,
     createdAt: new Date('2026-01-01'),
   } satisfies SocialAccount
   const vista = { views: 50, likes: 2, comments: 0, shares: 0, saves: 0, reach: 40 }

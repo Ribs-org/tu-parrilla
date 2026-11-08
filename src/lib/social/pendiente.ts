@@ -12,6 +12,8 @@ export type ConexionPendiente = {
   candidatas: Candidata[]
   /** El id de usuario de la app de Meta, el que llega en los callbacks de baja y borrado. */
   metaUserId: string | null
+  /** Los permisos que Google dijo conceder (`social_accounts.scopes`); null en las demás redes. */
+  scopes?: string | null
   /** Cuándo se emitió, en ms. El maxAge de la cookie lo pone el navegador; esto lo verifica el servidor. */
   emitidoEn: number
   sub: string
@@ -44,6 +46,7 @@ export function leerPendiente(raw: string | undefined): ConexionPendiente | null
     // Ausente (cookie emitida antes de que existiera el campo) vale como null: rechazarla
     // diría «el login venció» a quien estaba eligiendo cuentas justo durante un despliegue.
     if (p.metaUserId != null && typeof p.metaUserId !== 'string') return null
+    if (p.scopes != null && typeof p.scopes !== 'string') return null
     // El maxAge de la cookie lo hace cumplir el navegador, y un navegador no es de fiar:
     // el reloj del servidor es lo que de verdad vence un login a medias.
     if (typeof p.emitidoEn !== 'number' || !Number.isFinite(p.emitidoEn)) return null
@@ -56,6 +59,7 @@ export function leerPendiente(raw: string | undefined): ConexionPendiente | null
       expiresAt: p.expiresAt,
       candidatas: p.candidatas,
       metaUserId: typeof p.metaUserId === 'string' ? p.metaUserId : null,
+      scopes: typeof p.scopes === 'string' ? p.scopes : undefined,
       emitidoEn: p.emitidoEn,
       sub: p.sub,
     }

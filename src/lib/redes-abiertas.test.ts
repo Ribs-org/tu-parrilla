@@ -1,6 +1,12 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { REDES_PROXIMAMENTE } from './networks'
-import { anunciosAbiertosPara, loginDeInstagramAbiertoPara, promocionarAbiertoPara, proximamentePara } from './redes-abiertas'
+import {
+  analiticaDeYoutubeAbiertaPara,
+  anunciosAbiertosPara,
+  loginDeInstagramAbiertoPara,
+  promocionarAbiertoPara,
+  proximamentePara,
+} from './redes-abiertas'
 
 describe('proximamentePara', () => {
   afterEach(() => vi.unstubAllEnvs())
@@ -75,5 +81,31 @@ describe('promocionarAbiertoPara', () => {
     vi.stubEnv('META_PERMISOS_ANUNCIOS', '1')
     vi.stubEnv('META_PERMISOS_PROMOCIONAR', '')
     expect(promocionarAbiertoPara('revisor')).toBe(false)
+  })
+})
+
+describe('analiticaDeYoutubeAbiertaPara', () => {
+  afterEach(() => vi.unstubAllEnvs())
+
+  it('sin el permiso en el conectar está cerrada, aunque la lista nombre al dueño', () => {
+    vi.stubEnv('YOUTUBE_PERMISOS_ANALITICA', '')
+    vi.stubEnv('YOUTUBE_ANALITICA_ABIERTO_PARA', '1')
+    expect(analiticaDeYoutubeAbiertaPara('revisor')).toBe(false)
+  })
+
+  it('con el permiso y sin lista, para nadie', () => {
+    vi.stubEnv('YOUTUBE_PERMISOS_ANALITICA', '1')
+    vi.stubEnv('YOUTUBE_ANALITICA_ABIERTO_PARA', '')
+    expect(analiticaDeYoutubeAbiertaPara('revisor')).toBe(false)
+  })
+
+  it('con una lista, solo para esos ids; con 1, para todos', () => {
+    vi.stubEnv('YOUTUBE_PERMISOS_ANALITICA', '1')
+    vi.stubEnv('YOUTUBE_ANALITICA_ABIERTO_PARA', 'otro, revisor')
+    expect(analiticaDeYoutubeAbiertaPara('revisor')).toBe(true)
+    expect(analiticaDeYoutubeAbiertaPara('tercero')).toBe(false)
+    expect(analiticaDeYoutubeAbiertaPara(null)).toBe(false)
+    vi.stubEnv('YOUTUBE_ANALITICA_ABIERTO_PARA', '1')
+    expect(analiticaDeYoutubeAbiertaPara('cualquiera')).toBe(true)
   })
 })

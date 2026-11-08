@@ -3,7 +3,8 @@ import { createHash, randomBytes } from 'node:crypto'
 import { usuarioActual } from '@/lib/auth'
 import { env } from '@/lib/env'
 import { fraseProximamente } from '@/lib/networks'
-import { loginDeInstagramAbiertoPara, proximamentePara } from '@/lib/redes-abiertas'
+import { analiticaDeYoutubeAbiertaPara, loginDeInstagramAbiertoPara, proximamentePara } from '@/lib/redes-abiertas'
+import { PERMISO_ANALITICA } from '@/lib/social/analitica-youtube'
 import {
   AUTORIZAR_LOGIN_DE_INSTAGRAM,
   LOGIN_DE_INSTAGRAM_CERRADO,
@@ -45,7 +46,8 @@ const SCOPES: Record<string, string> = {
   // discovery) nor videos.list (the publisher's processing poll) — both 403 without a
   // reading scope. force-ssl covers everything readonly did and also allows commenting,
   // which is what it is here for. Space-separated: that is Google's delimiter, unlike
-  // Meta's commas.
+  // Meta's commas. These two are the ones Google verified on 2026-10-14; the analytics one
+  // rides behind its own gate (`PermisosExtra.analiticaYoutube`).
   youtube:
     'https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube.force-ssl',
   threads: 'threads_basic,threads_content_publish',
@@ -94,17 +96,25 @@ const SCOPES_PROMOCIONAR: Record<string, string> = {
  * `META_PERMISOS_ANUNCIOS` (leer los anuncios) y `META_PERMISOS_PROMOCIONAR` (promocionar, solo
  * junto con la de leer). Todas por la misma razón: un permiso que el caso de uso de la app no
  * tiene activado hace que la ventana rechace el pedido entero.
+ *
+ * `analiticaYoutube` es otra cosa: el permiso de YouTube Analytics (`PERMISO_ANALITICA`), que
+ * Google no rechaza, pero que mientras no esté verificado le muestra a quien conecta el cartel de
+ * «app no verificada». Lo decide `analiticaDeYoutubeAbiertaPara` por dueño: la bandera
+ * `YOUTUBE_PERMISOS_ANALITICA` y la lista `YOUTUBE_ANALITICA_ABIERTO_PARA`.
  */
 export type PermisosExtra = {
   privado: boolean
   threads: boolean
   anuncios: boolean
   promocionar: boolean
+  analiticaYoutube?: boolean
 }
 
 export function scopesDe(network: string, extra: PermisosExtra): string | undefined {
   const base = SCOPES[network]
   if (!base) return undefined
+  // Google separa sus permisos con espacios; Meta, con comas.
+  if (network === 'youtube') return extra.analiticaYoutube ? `${base} ${PERMISO_ANALITICA}` : base
   const sumados = [
     extra.privado ? SCOPES_PRIVADO[network] : undefined,
     extra.threads && network === 'threads' ? SCOPES_THREADS_EXTRA : undefined,
@@ -127,6 +137,7 @@ export async function GET(
     threads: env('THREADS_PERMISOS_EXTRA') === '1',
     anuncios: env('META_PERMISOS_ANUNCIOS') === '1',
     promocionar: env('META_PERMISOS_PROMOCIONAR') === '1',
+    analiticaYoutube: analiticaDeYoutubeAbiertaPara(usuario.id),
   })
   if (!scope) return new NextResponse('Esa red no usa OAuth', { status: 400 })
 

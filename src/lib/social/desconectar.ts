@@ -2,6 +2,7 @@ import 'server-only'
 import { and, eq, sql, type SQL } from 'drizzle-orm'
 import { getDb, socialAccounts } from '@/db'
 import { esUuid } from '@/lib/uuid'
+import { pasosParaBorrarAnalitica } from './analitica-youtube'
 
 // «Desconectar» en Los Fierros: la cuenta deja sus credenciales y no se lee más, pero la fila se
 // queda —con ella vuelve el historial al reconectar, y su (red, id externo) sigue atado al
@@ -9,12 +10,13 @@ import { esUuid } from '@/lib/uuid'
 //
 // En YouTube, además, se borra en el acto lo que vino de su API: las políticas (§III.E.4) no
 // dejan guardar datos de un canal que ya no se refresca, y desconectado no se refresca nunca.
-// Es lo mismo que `retencion-youtube` borraría a los 30 días, acotado a esta cuenta: las
-// lecturas de los videos y del canal, los comentarios, y el título y la miniatura de cada
-// video. La fila del video se queda, porque es la que une las visitas a su etiqueta `?s=`, y
-// esas visitas las midió Tu Parrilla; también lo programado desde Tu Parrilla, que lo escribió
-// el dueño. De la cuenta quedan su id de canal y su nombre, para que la tarjeta siga ahí y se
-// pueda reconectar o quitar.
+// Es lo mismo que `retencion-youtube` borraría a su plazo, acotado a esta cuenta: las lecturas
+// de los videos y del canal, los comentarios, el título y la miniatura de cada video, y lo de
+// YouTube Analytics (sus días, sus desgloses y sus videos; `analitica-youtube.ts`). La fila del
+// video se queda, porque es la que une las visitas a su etiqueta `?s=`, y esas visitas las midió
+// Tu Parrilla; también lo programado desde Tu Parrilla, que lo escribió el dueño. De la cuenta
+// quedan su id de canal y su nombre, para que la tarjeta siga ahí y se pueda reconectar o
+// quitar; sus permisos concedidos se borran con la credencial.
 //
 // Las demás redes conservan su historial: sus términos no piden borrarlo al desconectar.
 
@@ -29,6 +31,9 @@ export function pasosParaBorrarYoutube(accountId: string): SQL[] {
     sql`delete from account_metrics where account_id = ${accountId}`,
     sql`delete from post_comments where account_id = ${accountId}`,
     sql`update social_posts set caption = null, thumbnail_url = null where account_id = ${accountId} and (caption is not null or thumbnail_url is not null)`,
+    // Lo de YouTube Analytics (`analitica-youtube.ts`): dato autorizado, que sin autorización no
+    // se guarda ni un día.
+    ...pasosParaBorrarAnalitica(accountId),
   ]
 }
 
@@ -54,7 +59,9 @@ export async function desconectarCuenta(ownerId: string, accountId: string): Pro
   return getDb().transaction(async (tx) => {
     const [cuenta] = await tx
       .update(socialAccounts)
-      .set({ accessToken: null, refreshToken: null, expiresAt: null, lastSyncError: null })
+      // Los permisos y la comprobación de la analítica se van con la credencial: al reconectar,
+      // los escribe de nuevo lo que Google conceda esa vez.
+      .set({ accessToken: null, refreshToken: null, expiresAt: null, lastSyncError: null, scopes: null, analiticaVerificadaEn: null })
       .where(and(eq(socialAccounts.id, accountId), eq(socialAccounts.ownerId, ownerId)))
       .returning({ network: socialAccounts.network })
     if (!cuenta) return false

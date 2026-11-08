@@ -510,8 +510,41 @@ título y la miniatura de los videos que llevan 30 días sin llegar. Un canal qu
 desconecta no espera ese plazo: *Desconectar* borra en el acto sus lecturas, las de sus videos,
 sus comentarios y los títulos y miniaturas (`src/lib/social/desconectar.ts`), y deja el id y el
 nombre del canal y la fila de cada video, que une las visitas a su etiqueta `?s=`. La regla vive en
-`src/lib/social/politica-youtube.ts` y el borrado en `retencion-youtube.ts`. Si algún día
-se pide y se obtiene el permiso de analítica de §III.L, es ahí donde se afloja.
+`src/lib/social/politica-youtube.ts` y el borrado en `retencion-youtube.ts`. El permiso de
+§III.L —calcular métricas propias y guardar historia de las estadísticas— no se pidió.
+
+**YouTube Analytics: escrito y cerrado.** La historia del canal llega por otra vía: la API de
+YouTube Analytics, con el token del dueño y el permiso `yt-analytics.readonly`
+(`src/lib/social/analitica-youtube.ts`, puro, y `analitica-youtube-sync.ts`). Al final de la
+sincronización diaria, para cada canal conectado con ese permiso de un dueño que nombra
+`YOUTUBE_ANALITICA_ABIERTO_PARA`, se leen los totales del canal día por día (la primera vez,
+tres años; después, los últimos 30, que YouTube todavía corrige), las fuentes de tráfico, los
+países y la edad y el género de los últimos 28 días, y cada video conocido desde que se publicó
+—views, views con interacción, minutos vistos, duración media, porcentaje visto, me gusta,
+comentarios, compartidos, suscriptores ganados y perdidos—. Una métrica que YouTube no acepta
+en un reporte (`engagedViews` es nueva) se vuelve a pedir sin ella, y queda en `—`. Va a las
+tablas `youtube_analitica_dias`, `youtube_analitica_desgloses` y `youtube_analitica_videos`,
+que cuelgan de la cuenta (o del video) en cascada, y Los Números lo muestran en «Tu canal de
+YouTube» y en «En YouTube Analytics», en la pieza. La API de Analytics tiene su propio cupo:
+no gasta las unidades de la Data API que pidió la auditoría.
+
+Son datos **autorizados** (§III.E.4.b): se pueden guardar mientras el dueño siga autorizando,
+con la condición de comprobarlo cada 30 días. La comprobación es la lectura misma: cada vez que
+la API contesta con su token queda `social_accounts.analitica_verificada_en`; un canal sin
+marca en 30 días, o sin el permiso en `social_accounts.scopes` (lo que Google dijo conceder al
+conectar, porque la ventana deja destildarlo), pierde todo lo de analítica en la retención
+diaria, y la fila de un video que lleva 30 días sin refrescarse o que el sync marcó borrado,
+también. Si YouTube contesta 401, o 403 por permisos, se borra en el acto y el canal deja de
+decir que tiene el permiso. *Desconectar* lo borra con lo demás. Lo de §III.E.4.h no se afloja:
+se muestra tal cual, sin sumar días ni restar ganados de perdidos.
+
+Lo abren dos variables: `YOUTUBE_PERMISOS_ANALITICA=1` (el permiso está agregado en la consola
+de Google) y `YOUTUBE_ANALITICA_ABIERTO_PARA` (para quién). El conectar pide el permiso solo a
+quien está en la lista: la pantalla de consentimiento se verificó el 2026-10-14 sin él, y uno
+sin verificar le muestra el cartel de «app no verificada» a quien conecta. Con la bandera puesta,
+`/privacidad` suma el párrafo que lo cuenta. Encenderlo para todos espera la segunda
+verificación de Google, que a su vez espera la auditoría de cuota (ver
+`docs/google-verificacion-guion.md`, «La analítica: segunda verificación»).
 
 ### Instagram — cuenta profesional y página de Facebook
 
@@ -1495,6 +1528,8 @@ Vercel y bajan con `vercel env pull .env.local`.
 | `YOUTUBE_CHANNEL_ID` | Deja creada la tarjeta del canal del dueño del despliegue; se sincroniza recién cuando lo conecta con OAuth | No |
 | `GOOGLE_CLIENT_ID` | Conectar YouTube para publicar (OAuth de Google) | El OAuth Client tipo Web del mismo proyecto de la API key |
 | `GOOGLE_CLIENT_SECRET` | El secreto de ese OAuth Client | Junto con el anterior; el sync de solo lectura sigue usando `YOUTUBE_API_KEY` |
+| `YOUTUBE_PERMISOS_ANALITICA` | Con `1`, conectar YouTube pide además `yt-analytics.readonly` a quien nombra la de abajo, y `/privacidad` suma el párrafo de YouTube Analytics (ver «YouTube») | No — apagada por defecto; se enciende solo con el permiso agregado en *Data Access* de la consola de Google |
+| `YOUTUBE_ANALITICA_ABIERTO_PARA` | Para quién se pide ese permiso, se lee YouTube Analytics cada noche y se ve «Tu canal de YouTube» en Los Números y «En YouTube Analytics» en la pieza. `1`, todos; ids de usuario separados por comas, solo esos | No — vacía, para nadie; sin la de arriba, cerrada igual. Es para grabar la verificación con la cuenta del revisor; aprobada, va en `1` |
 | `INSTAGRAM_APP_ID` | Conectar Instagram | No — sin ella esa red aparece como no conectada |
 | `INSTAGRAM_APP_SECRET` | Conectar Instagram, y verificar la firma de los callbacks de baja y borrado de Meta | No — sin ella esa red aparece como no conectada y esos dos callbacks responden `400` |
 | `INSTAGRAM_LOGIN_APP_ID` | Conectar Instagram con el login de Instagram, sin página de Facebook (ver «Instagram sin página de Facebook: el login de Instagram») | No — el «Instagram app ID» del caso de uso de Instagram de la app de Meta, que no es `INSTAGRAM_APP_ID`; sin ella, «Conectar con Instagram →» responde «Falta INSTAGRAM_LOGIN_APP_ID» |
@@ -2269,6 +2304,7 @@ src/
     tracking.ts            contexto de la visita desde headers
     analytics.ts           consultas del dashboard
     lo-pagado.ts           los anuncios del dueño que corrieron en el período, para «Lo pagado» en Los Números
+    analitica-youtube-lectura.ts  lo de YouTube Analytics que leen «Tu canal de YouTube» y la pieza, atado al dueño
     enlace-de-la-pagina.ts la dirección pública de la página principal del dueño: el link con ?s= de cada publicación
     planilla/              «Llevar para la casa»: las hojas y su «Léeme», lo que se lee fila por fila, y el .xlsx escrito a mano
     tablero.ts             las reglas de Los Números sin base: cuenta elegida, «⋯ Más» abiertos, la URL
@@ -2308,7 +2344,8 @@ src/
       musica-sugerencia.ts «Sugiéreme una»: el modelo elige por id entre canciones reales, y sin él el azar (sin base)
       lectura.ts           qué publicaciones se leen cada día: lo nuevo a diario, lo viejo cada vez más espaciado
       politica-youtube.ts  lo que las políticas de YouTube no dejan hacer con sus datos
-      retencion-youtube.ts borra lo de YouTube que lleva 30 días sin refrescarse
+      retencion-youtube.ts borra lo de YouTube que lleva 30 días sin refrescarse, y lo de Analytics sin autorización comprobada
+      analitica-youtube.ts YouTube Analytics: el permiso, las consultas, cómo se lee una respuesta y los nombres (sin base); analitica-youtube-sync.ts lo lee y lo guarda
       desconectar.ts       «Desconectar»: la cuenta suelta sus credenciales y, en YouTube, lo que vino de su API en el acto
       traspasar.ts         le cambia el dueño a una cuenta con lo que se bajó de ella, sin borrar nada
       anuncios.ts          leer los anuncios de Meta: qué se le pide a la Marketing API, el cruce con las publicaciones y el resumen de «Lo pagado» (sin base); anuncios-sync.ts los guarda

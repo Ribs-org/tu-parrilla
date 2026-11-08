@@ -21,7 +21,7 @@ describe('pasosDeRetencion', () => {
   const pasos = pasosDeRetencion(corte).map((p) => ({ clave: p.clave, ...dialecto.sqlToQuery(p.sql) }))
 
   it('toca las cuatro clases de dato que vienen de YouTube, cada una con su marca de refresco', () => {
-    expect(pasos.map((p) => p.clave)).toEqual(['lecturasDePosts', 'lecturasDeCuenta', 'comentarios', 'videosSinTitulo'])
+    expect(pasos.map((p) => p.clave).slice(0, 4)).toEqual(['lecturasDePosts', 'lecturasDeCuenta', 'comentarios', 'videosSinTitulo'])
     expect(pasos[0]!.sql).toMatch(/delete from post_metrics .* m\.captured_at < \$1/)
     expect(pasos[1]!.sql).toMatch(/delete from account_metrics .* captured_at < \$1/)
     expect(pasos[2]!.sql).toMatch(/delete from post_comments .* created_at < \$1/)
@@ -36,8 +36,27 @@ describe('pasosDeRetencion', () => {
 
   it('la fecha va como texto ISO, que es lo que el driver sabe mandar en SQL crudo', () => {
     for (const p of pasos) {
-      expect(p.params).toEqual(['2026-09-10T09:00:00.000Z'])
+      expect(p.params.length).toBeGreaterThan(0)
+      for (const param of p.params) expect(param).toBe('2026-09-10T09:00:00.000Z')
     }
+  })
+
+  it('la analítica no vence por vieja: vence sin el permiso o sin una comprobación en el plazo', () => {
+    const conAutorizacion = pasosDeRetencion(corte, new Date('2026-09-20T09:00:00Z')).map((p) => ({
+      clave: p.clave,
+      ...dialecto.sqlToQuery(p.sql),
+    }))
+    const [dias, desgloses, videos] = conAutorizacion.slice(4)
+    expect([dias!.clave, desgloses!.clave, videos!.clave]).toEqual(['analiticaDias', 'analiticaDesgloses', 'analiticaVideos'])
+    for (const p of [dias!, desgloses!]) {
+      expect(p.sql).not.toMatch(/captured_at/)
+      expect(p.sql).toMatch(/scopes is null or position\('https:\/\/www\.googleapis\.com\/auth\/yt-analytics\.readonly' in scopes\) = 0/)
+      expect(p.sql).toMatch(/analitica_verificada_en is null or analitica_verificada_en < \$1/)
+      expect(p.params).toEqual(['2026-09-20T09:00:00.000Z'])
+    }
+    // El video sí vence por no refrescarse, o por borrado, además de por la autorización.
+    expect(videos!.sql).toMatch(/v\.captured_at < \$1 or p\.archived_at is not null or p\.account_id in/)
+    expect(videos!.params).toEqual(['2026-09-10T09:00:00.000Z', '2026-09-20T09:00:00.000Z'])
   })
 
   it('la fila del video no se borra: une las visitas propias a su etiqueta', () => {

@@ -49,6 +49,27 @@ afterEach(() => {
   vi.restoreAllMocks()
 })
 
+describe('fetchCredential (YouTube)', () => {
+  afterEach(() => vi.unstubAllEnvs())
+
+  it('guarda los permisos que Google dijo conceder, no los pedidos', async () => {
+    vi.stubEnv('GOOGLE_CLIENT_ID', 'cliente')
+    vi.stubEnv('GOOGLE_CLIENT_SECRET', 'secreto')
+    const concedidos =
+      'https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube.force-ssl'
+    doblarFetch([
+      Response.json({ access_token: 'ACCESO', refresh_token: 'REFRESCO', expires_in: 3599, scope: concedidos }),
+      Response.json({ items: [{ id: 'UC123', snippet: { title: 'Mi canal' } }] }),
+    ])
+
+    const credential = await fetchCredential('youtube', 'CODE', 'https://ejemplo.cl/cb')
+
+    // Se pidió también el de analítica y la persona lo destildó: no está.
+    expect(credential.scopes).toBe(concedidos)
+    expect(credential.candidatas).toEqual([{ externalId: 'UC123', handle: 'Mi canal' }])
+  })
+})
+
 describe('fetchCredential (Meta)', () => {
   it('trae el id de usuario de Meta que devolvió /me', async () => {
     const pedidas = doblarFetch(respuestasDeInstagram({ ok: true, body: { id: '10201234567890' } }))
