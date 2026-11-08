@@ -757,8 +757,12 @@ nadie paga: todas las cuentas son iguales y el README dice «Sin suscripción».
   decidir las franjas y qué mide una zona); el cierre del domingo («Aplauso para el
   asador»); las familias de cuentas, con su subíndice (TikTok₁, TikTok₂) y el corte
   trinchado (necesita tabla nueva y decidir si una familia admite dos cuentas de la misma
-  red); un archivo de tokens común para el panel y la app; y, con un build nativo, la vibración
-  en la app. El corte en SVG llegó con la 1.2.0 (2026-11-07); falta pasar a SVG la pieza de sushi
+  red); un archivo de tokens común para el panel y la app; y la vibración en la app, una corta
+  cuando algo sale o se quema (tanda 6 de la auditoría): `expo-haptics` ya viaja en el build 1.2.0
+  (2026-11-07), sin usarse, para que esto llegue por aire. Falta decidir cuándo vibra —solo con la
+  app abierta no se entera de nada, y los avisos al teléfono ya suenan— y detectar en La Parrilla el
+  paso de un corte a servido o a quemado entre dos lecturas. `(tabs)/index.tsx` también va a
+  `ota-1.1.0`: pedir el nativo con `requireOptionalNativeModule('ExpoHaptics')`, como el audio. El corte en SVG llegó con la 1.2.0 (2026-11-07); falta pasar a SVG la pieza de sushi
   del día (`mobile/src/components/pieza-sushi.tsx`, todavía con vistas), que ya es puro JavaScript
   sobre ese build y no se copia a `ota-1.1.0`.
 - **Gamificar las notificaciones de cada red** (2026-10-25, lo pidió el dueño). Que lo que cada

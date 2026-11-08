@@ -409,7 +409,10 @@ antes de armarlo van las credenciales de FCM (ver «Los avisos al teléfono», a
 `@react-native-community/datetimepicker`: el día y la hora se eligen desde el 2026-11-02 en la hoja de
 la app (`src/components/selector-fecha.tsx`), y el módulo se había quedado en `package.json` y en los
 plugins de `app.json` solo para no cambiar el binario antes de tiempo. La rama `ota-1.1.0` lo conserva:
-es el binario de la 1.1.0.
+es el binario de la 1.1.0. Y suma `expo-haptics` **sin usarlo todavía**: la vibración corta cuando algo
+sale o se quema (`docs/pendientes.md`, «La propuesta de diseño 2.1») es puro JavaScript sobre el
+módulo, y con él en el binario puede llegar por aire a la 1.2.0 en vez de esperar otro build. Solo
+declara el permiso `VIBRATE`, que Android concede sin preguntar.
 
 Lo que no se pudo probar sin un teléfono: la cámara misma, los permisos, la copia a documentos, la
 cola que sigue después de cerrar la app y la subida nativa por partes. El 2026-11-06 se probó en Expo

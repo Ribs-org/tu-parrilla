@@ -148,7 +148,8 @@ casillas, y el error y el 404.
 **Tanda 6, con el próximo build nativo.** `react-native-svg` para que los cortes de la app
 tengan las curvas del panel, y una vibración corta cuando algo sale o se quema (ya anotado en
 `docs/pendientes.md`, «La propuesta de diseño 2.1»). Los cortes en SVG entraron en el build 1.2.0
-(2026-11-07, `mobile/src/components/pieza.tsx`); la pieza de sushi del día sigue con vistas.
+(2026-11-07, `mobile/src/components/pieza.tsx`); la pieza de sushi del día sigue con vistas. Para
+la vibración, el build 1.2.0 trae `expo-haptics` sin usar: cuándo vibra llega después por aire.
 
 ## Lo que queda como está
 
