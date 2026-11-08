@@ -135,14 +135,20 @@ sección.
   dueña. Los usuarios de ManyChat reportan lo mismo desde 2024 («video», «ebooks», «YES»), y ni
   Meta ni los proveedores lo explican. El informe completo, con fuentes, está en la carpeta de
   Meta del escritorio del dueño, «reports/Comentarios de palabra clave en Instagram.md».
-  Pendiente:
-  - una prueba de dos minutos: apagar «Hide comments» y «Advanced comment filtering» en Hidden
-    Words y comentar `GUIA` solo desde una cuenta nueva en la publicación. Si la dueña lo ve, es
-    el filtro de spam, que se apaga, y el panel debería decírselo al creador. Si no, es un filtro
-    de Instagram que nadie controla;
-  - en el producto: que la ayuda de la regla le pida al creador que pida la palabra dentro de una
-    frase o una palabra distinta por publicación, y que La Mesa avise cuando Instagram cuenta
-    comentarios que no entrega;
+  Desde el 2026-11-07 el producto lo cuenta: la ayuda de «Palabra clave» pide la palabra dentro de
+  una frase o una distinta por post, y La Mesa muestra «Comentarios que Instagram no entrega»
+  cuando Instagram cuenta dos o más que no llegaron (`src/lib/social/comentarios/faltantes.ts`).
+  Ese aviso no distingue las respuestas que otras personas se dan entre ellas, que Instagram
+  también cuenta y Tu Parrilla no guarda, y por eso lo dice en vez de afirmar que todo lo que falta
+  lo escondió Instagram. El teléfono también lo muestra en su La Mesa, pero recién cuando le llegue
+  por aire. Pendiente:
+  - **[dueño]** publicar el aviso por aire a la 1.1.0: son tres archivos de `mobile/` (en
+    `mobile/README.md`, «La Mesa desde el teléfono»);
+  - **[dueño]** una prueba de dos minutos: apagar «Hide comments» y «Advanced comment filtering»
+    en Hidden Words y comentar `GUIA` solo desde una cuenta nueva en la publicación. Si la dueña
+    lo ve, es el filtro de spam, que se apaga, y el aviso de La Mesa puede decirlo con certeza
+    (hoy dice «puedes probar»). Si no, es un filtro de Instagram que nadie controla, y la frase
+    del filtro sale del aviso;
   - los webhooks de comentarios, por velocidad y cupo, no por esto: piden `pages_manage_metadata`,
     que hoy no se pide.
 - **Por revisar: en qué orden entrega Instagram los comentarios** (2026-10-30). El comentario de
@@ -513,7 +519,10 @@ permisos «por decidir»** de la tabla red por red, para pedirlos todos en una m
   «Pendientes»: el 2026-10-26 quedó uno en el Short público «canal video 2» de Pyxis
   oficial. La Mesa solo lee los videos de los últimos siete días, y los comentarios de YouTube
   se borran a los 30, así que si la revisión se alarga más allá del 2026-11-25 hay que subir
-  otro Short público desde Studio, sincronizar al revisor y comentarlo desde parejavice.
+  otro Short público desde Studio, sincronizar al revisor y comentarlo desde parejavice. Desde el
+  2026-11-07, «Desconectar» el canal en Los Fierros también borra ese comentario en el acto, y
+  reconectar no lo trae de vuelta (el Short tiene más de siete días): para renovar el permiso del
+  revisor se usa «Reconectar», nunca «Desconectar».
 
   Lo de antes: se envió el 2026-10-10, y YouTube acusó recibo por correo a
   pyxis.latam@gmail.com, sin número de caso. Se pidieron 100.000 unidades al día del cupo general (el
@@ -538,10 +547,15 @@ permisos «por decidir»** de la tabla red por red, para pedirlos todos en una m
   el usuario lo saca; lo cocinado sin programar, a los 30 días), y la carpeta
   `material/cocina/<comanda>/` del chef no tiene plazo escrito. Pedirle al chef (marca-personal)
   un plazo y, cuando lo tenga, sumarlo a `/privacidad`.
-- **Por revisar: qué se borra al desconectar YouTube** (2026-10-06). Desconectar borra las
-  credenciales y el canal deja de leerse; lo guardado se borra solo a los 30 días
-  (`retencion-youtube`). Si la auditoría de cuota pide borrarlo en el acto, hay que cambiar
-  `disconnectAccount` y `/privacidad`. Ver `docs/google-verificacion-guion.md`.
+- **Por revisar: un canal de YouTube revocado desde Google se sigue leyendo** (2026-11-07, visto
+  al cambiar «Desconectar»). Quitar Tu Parrilla en myaccount.google.com no le avisa a Tu Parrilla:
+  la fila conserva su `refresh_token`, y como las estadísticas se leen con la API key
+  (`youtubeConnector.ensureCredential` solo mira que el token exista), el sync diario sigue
+  refrescando los contadores de ese canal. El sondeo de comentarios sí falla, con
+  `invalid_grant`, y nadie lo convierte en desconexión. `/privacidad` ofrece revocar desde Google
+  como alternativa a «Desconectar»: lo honesto es que un `invalid_grant` deje la cuenta
+  desconectada y con lo de YouTube borrado (`desconectarCuenta`, en
+  `src/lib/social/desconectar.ts`).
 - **[dueño] Vercel Pro antes de abrir a terceros.** El plan Hobby es de uso personal y no
   comercial (`docs/levantamiento-terceros.md` §5).
 - **[dueño] La app en la Play Store, pista de pruebas internas** (2026-10-16). La cuenta de

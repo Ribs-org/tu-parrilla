@@ -53,6 +53,16 @@ Una fila de botones redondeados; el elegido se ve resaltado.
 
 Se ven hasta 200 comentarios por filtro, los más nuevos.
 
+### Comentarios que Instagram no entrega
+
+Un recuadro ámbar entre los filtros y la cola, que aparece solo cuando Instagram cuenta en una publicación más comentarios de los que le entregó a Tu Parrilla. Se ve con el filtro de red en «Todas» o «Instagram», con cualquier estado. La app del teléfono lo muestra igual, arriba de sus comentarios.
+
+- El título «Comentarios que Instagram no entrega».
+- Una línea por publicación (hasta cinco, las más nuevas): la miniatura si la hay, la cuenta y el comienzo del texto de la publicación (al apretarlo se abre en Instagram), y en ámbar «Instagram cuenta 6 comentarios en esta publicación y solo nos entregó 4.» (con los números de esa publicación), o «… y no nos entregó ninguno.».
+- Al pie: «Instagram a veces esconde el comentario que es solo una palabra, como «GUIA», y no se lo muestra ni a ti ni a Tu Parrilla: solo lo ve quien lo escribió. Si pediste una palabra clave, pide que la escriban dentro de una frase, o usa otra palabra en el próximo post. También puedes probar a apagar, en la app de Instagram, «Palabras ocultas» → «Ocultar comentarios» y el filtro avanzado de comentarios (en inglés, Hidden Words → «Hide comments» y «Advanced comment filtering»). Las respuestas que otras personas se dan entre ellas también suman en la cuenta de Instagram y aquí no aparecen: parte de la diferencia puede ser eso.»
+
+Cuándo aparece una publicación: es de Instagram, de una cuenta conectada, de los últimos siete días (las que Tu Parrilla revisa), y faltan al menos dos. Lo que Instagram cuenta sale de la lectura diaria de los números, e incluye las respuestas; lo que llegó son los comentarios guardados más las respuestas de la cuenta que Tu Parrilla conoce. No aparece en una cuenta de la que todavía no llegó ningún comentario, en una de más de 250 comentarios (más de lo que una revisión alcanza a leer), ni en los primeros quince minutos después de que llegan los números. Como los números se leen una vez al día, un comentario nuevo puede tardar hasta la lectura siguiente en sumar.
+
 ### La cola
 
 Los comentarios van agrupados por publicación, lo más nuevo primero. Cada grupo empieza con:
@@ -218,6 +228,7 @@ Aprieta el filtro «Automáticas». Ahí están todos los que tomó, también lo
 | «No se pudo hablar con Tu Parrilla. Recarga la página y vuelve a intentarlo.» | «Regenerar todos» no recibió respuesta del servidor. | Recargar; lo que alcanzó a rehacerse ya está en los cuadros. |
 | «Guardado.» | Se guardaron las instrucciones. | Nada. |
 | «Privado: no salió · No se pudo mandar el privado.» | Solo con los privados encendidos: la respuesta pública salió, el privado no. | Nada que hacer desde aquí. |
+| «Comentarios que Instagram no entrega» y «Instagram cuenta 6 comentarios en esta publicación y solo nos entregó 4.» | Instagram suma en esa publicación comentarios que no le muestra a la cuenta ni a Tu Parrilla; lo más común es el comentario que es solo la palabra clave. Parte puede ser respuestas entre otras personas, que también suman. | En los próximos posts, pedir la palabra dentro de una frase o usar otra; probar a apagar «Ocultar comentarios» y el filtro avanzado en «Palabras ocultas» de Instagram. Los que ya se escondieron no se pueden traer desde aquí. |
 
 ## Si el humano dice…
 
@@ -232,8 +243,9 @@ Aprieta el filtro «Automáticas». Ahí están todos los que tomó, también lo
 - **«Lo respondí desde Instagram y sigue en Pendientes»** → Hay que esperar la revisión siguiente (cinco minutos; media hora en YouTube) y recargar la página. Tiene que ser una respuesta a ese comentario —no un comentario nuevo en la publicación— y hecha con la misma cuenta que está conectada. En YouTube solo se ven las primeras respuestas de cada comentario: si el comentario ya tenía muchas, la tuya puede no verse, y entonces se descarta a mano con «Descartar». Si ya se ve en «Enviados» como «Respondido desde…», no hay que hacer nada.
 - **«¿Tengo que responder dos veces, en Instagram y aquí?»** → No: responde donde te quede más cómodo. Lo que respondes en la app de la red sale solo de «Pendientes».
 - **«Descarté uno por error»** → No se deshace desde el panel; se puede responder directamente en la app de la red.
-- **«Se me perdió un comentario de la cola»** → Mirar en «Enviados» y «Descartados» (si su autor lo borró, aparece ahí con «El comentario ya no está en la red.»). Los de YouTube se borran solos a los 30 días. Cada filtro muestra solo los 200 más nuevos.
-- **«La respuesta automática no respondió»** → La palabra tiene que ir entera; la regla solo existe en publicaciones programadas desde Tu Parrilla con el bloque «Respuesta automática por palabra clave»; hay que esperar la revisión siguiente; y si la red la rechazó, está en «Pendientes» con su aviso.
+- **«Se me perdió un comentario de la cola»** → Mirar en «Enviados» y «Descartados» (si su autor lo borró, aparece ahí con «El comentario ya no está en la red.»). Los de YouTube se borran solos a los 30 días, y todos los de un canal de YouTube en cuanto se desconecta. Cada filtro muestra solo los 200 más nuevos.
+- **«La respuesta automática no respondió»** → La palabra tiene que ir entera; la regla solo existe en publicaciones programadas desde Tu Parrilla con el bloque «Respuesta automática por palabra clave»; hay que esperar la revisión siguiente; y si la red la rechazó, está en «Pendientes» con su aviso. En Instagram, si el comentario era solo la palabra («GUIA» suelto), puede que Instagram lo haya escondido: entonces no llega a La Mesa, y si eso pasa con dos o más aparece el recuadro «Comentarios que Instagram no entrega».
+- **«Alguien me dice que comentó la palabra y no le llegó nada»** / **«en Instagram dice que hay más comentarios de los que veo»** → Casi seguro Instagram escondió el comentario porque era solo la palabra: lo ve quien lo escribió y nadie más, ni la cuenta en la app ni Tu Parrilla. Pedirle que comente de nuevo con una frase («quiero la GUIA»); para los próximos posts, pedir la palabra dentro de una frase o usar otra. Se puede probar a apagar, en la app de Instagram, «Palabras ocultas» → «Ocultar comentarios» y el filtro avanzado de comentarios.
 - **«La respuesta automática publicó el enlace en público»** → Es lo esperado mientras los mensajes privados estén apagados para la cuenta (hoy lo están), en YouTube, o pasados siete días desde la publicación.
 - **«¿Dónde pongo la palabra clave?»** → Al programar la publicación en [La Parrilla](la-parrilla.md), bloque «Respuesta automática por palabra clave».
 - **«El botón dice "Enviando…" y yo apreté Descartar»** → «Enviar» dice «Enviando…» mientras cualquier botón de esa tarjeta trabaja; hay que esperar a que termine.
@@ -259,7 +271,8 @@ Lo que describe sale de:
 - `src/app/admin/(dash)/comments/instrucciones.tsx` y `src/app/admin/(dash)/comments/regenerar.ts` («Regenerar todos» y sus frases)
 - `src/app/admin/(dash)/comments/loading.tsx` y `src/components/esqueleto.tsx` (la carga)
 - `src/app/admin/actions.ts` (`responderComentario`, `descartarComentario`, `reintentarBorrador`, `regenerarBorradoresComentarios`, `guardarInstruccionesComentarios`)
-- `src/lib/comentarios-cola.ts` (los filtros, el tope de 200)
+- `src/lib/comentarios-cola.ts` (los filtros, el tope de 200, y qué publicaciones entran a «Comentarios que Instagram no entrega»)
+- `src/app/admin/(dash)/comments/faltantes.tsx` y `src/lib/social/comentarios/faltantes.ts` (el recuadro «Comentarios que Instagram no entrega», su frase y desde cuántos avisa)
 - `src/lib/social/comentarios/comentarista.ts` (las frases de fallo)
 - `src/lib/social/comentarios/responder.ts`
 - `src/lib/social/comentarios/validar.ts`
@@ -270,7 +283,7 @@ Lo que describe sale de:
 - `src/lib/social/comentarios/privado.ts` (el privado, y para quién está encendido) y `automatico.ts` (el privado de la regla)
 - `src/lib/social/comentarios/ventana.ts` y `src/lib/social/comentarios/run.ts` (cada cuánto, los siete días, los comentarios propios, los respondidos desde la app de la red)
 - `src/lib/social/comentarios/agrupar.ts`
-- `src/lib/social/retencion-youtube.ts` (los comentarios de YouTube se borran a los 30 días)
+- `src/lib/social/retencion-youtube.ts` (los comentarios de YouTube se borran a los 30 días) y `src/lib/social/desconectar.ts` (y los de un canal, al desconectarlo)
 - `src/lib/social/comentarios/index.ts`, `src/lib/social/comentarios/instagram.ts`, `src/lib/social/comentarios/facebook.ts`, `src/lib/social/comentarios/youtube.ts`, `src/lib/social/comentarios/threads.ts` y `src/lib/social/comentarios/tiktok.ts` (qué redes, el largo máximo de cada una)
 - `src/lib/social/threads.ts` (`permisosExtraDeThreads`: cuándo Threads trae respuestas), `src/lib/social/tiktok-business.ts` (cuándo una cuenta de TikTok trae comentarios) y `src/lib/redes-abiertas.ts` (para quién está abierto)
 - `src/app/admin/(dash)/schedule/regla-clave.tsx` (el nombre del bloque de la palabra clave)

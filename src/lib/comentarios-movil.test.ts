@@ -69,6 +69,33 @@ describe('mesaParaElTelefono', () => {
   })
 })
 
+describe('el aviso de los comentarios que Instagram no entrega, en el teléfono', () => {
+  it('viaja con la frase ya escrita, y vacío si el servidor no lo pidió', () => {
+    const mesa = mesaParaElTelefono([], { estado: 'pendientes', red: null }, [], 0, false, [
+      {
+        id: 'p9',
+        accountHandle: '@cuenta',
+        caption: 'Comenta GUIA',
+        thumbnailUrl: null,
+        permalink: 'https://instagram.com/p/9',
+        contados: 6,
+        entregados: 4,
+      },
+    ])
+    expect(mesa.faltantes).toEqual([
+      {
+        id: 'p9',
+        cuenta: '@cuenta',
+        texto: 'Comenta GUIA',
+        miniatura: null,
+        enlace: 'https://instagram.com/p/9',
+        frase: 'Instagram cuenta 6 comentarios en esta publicación y solo nos entregó 4.',
+      },
+    ])
+    expect(mesaParaElTelefono([], { estado: 'pendientes', red: 'facebook' }, [], 0, false).faltantes).toEqual([])
+  })
+})
+
 describe('codigoDeLaMesa', () => {
   it('cada frase del panel con su código; un 404 con frase es un comentario que no está', () => {
     const largo = validarRespuesta('x'.repeat(10), 5)

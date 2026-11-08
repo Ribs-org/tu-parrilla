@@ -109,6 +109,7 @@ Los comentarios que la gente deja en las publicaciones de Instagram, Facebook y 
 - **Los filtros por estado**, botones redondos (el elegido, lleno de naranjo): «Pendientes» (el que viene elegido: los que esperan respuesta, también los que se intentaron mandar y fallaron), «Enviados» (los respondidos desde Tu Parrilla, por la respuesta automática o directo en la app de la red) y «Automáticas» (los que tomó la respuesta automática por palabra clave, en cualquier estado). «Descartados» y «Todos» solo están en el panel web.
 - **Los filtros por red**, debajo: «Todas», «Instagram», «Facebook», «YouTube» (y «Threads» solo en la cuenta del revisor de Meta que la tiene, y «TikTok» solo donde la instalación abrió sus comentarios, como en el panel). Cambiar de filtro no se guarda: al volver a abrir La Mesa está en «Pendientes» y «Todas».
 - «Actualizado recién» (o hace cuánto), como en las demás pantallas. Para actualizar, se arrastra la pantalla hacia abajo.
+- Solo si Instagram cuenta en alguna publicación más comentarios de los que entregó, y con la red en «Todas» o «Instagram»: un recuadro ámbar con el título «Comentarios que Instagram no entrega», una línea por publicación —la miniatura si la hay, la cuenta y el comienzo del texto (tocarlo abre la publicación en Instagram) y, en ámbar, «Instagram cuenta 6 comentarios en esta publicación y solo nos entregó 4.» o «… y no nos entregó ninguno.»— y al pie la misma explicación del panel, que empieza «Instagram a veces esconde el comentario que es solo una palabra, como «GUIA»…». Cuándo aparece y qué dice entero, en «Comentarios que Instagram no entrega» de [La Mesa](la-mesa.md). Si el sitio todavía no lo manda, no aparece.
 - **Los comentarios, agrupados por publicación**, lo más nuevo primero. Cada grupo empieza con la miniatura de la publicación, si la hay; un punto en el color de la red y «Instagram · @cuenta» en chico y mayúsculas; las primeras dos líneas del texto de la publicación, o «(sin texto)» —si la red dio el enlace, tocarlas abre la publicación en la red—, y, solo si la publicación tiene respuesta automática, «Palabra clave: GUIA» (con la palabra de esa publicación). Debajo, una tarjeta por comentario.
 - Si el filtro no tiene nada: «No hay comentarios aquí.», y en «Pendientes» además «Los nuevos llegan cada cinco minutos.».
 - Al pie, en chico: «Las instrucciones para el modelo, «Regenerar todos» y los descartados están en La Mesa del panel web.».
@@ -793,6 +794,7 @@ Lo que describe sale de estos archivos:
 - `src/app/api/mobile/` (las rutas que la app llama, con sus frases de error)
 - `src/lib/mobile-api.ts`
 - `src/lib/borrador.ts` (lo que el teléfono guarda de un borrador y el aviso de TikTok o palabra clave)
+- `src/lib/social/comentarios/faltantes.ts` y `src/lib/comentarios-movil.ts` (el recuadro «Comentarios que Instagram no entrega» de La Mesa: su título, su pie y la frase de cada publicación)
 - `src/lib/borradores-movil.ts`
 - `src/lib/social/publish/validate.ts`
 - `src/lib/social/publish/opciones.ts`

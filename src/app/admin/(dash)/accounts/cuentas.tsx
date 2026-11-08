@@ -373,8 +373,14 @@ function Fila({
   async function desconectar() {
     const seguir = await confirmar({
       titulo: `Se desconecta «${nombre}» de ${networkLabel(network)}.`,
-      detalle: 'Sus posts y métricas ya bajados se quedan, pero no se sincroniza nada más hasta que la vuelvas a conectar. ¿Seguir?',
+      // YouTube no deja guardar lo de un canal que ya no se refresca: `desconectarCuenta` lo borra.
+      detalle:
+        network === 'youtube'
+          ? 'Se borran ya los números del canal y de sus videos, sus comentarios y los títulos y miniaturas, como piden las reglas de YouTube. Lo que programaste y las visitas a tu página se quedan. No se lee nada más hasta que lo vuelvas a conectar. ¿Seguir?'
+          : 'Sus posts y métricas ya bajados se quedan, pero no se sincroniza nada más hasta que la vuelvas a conectar. ¿Seguir?',
       accion: 'Desconectar',
+      // Lo borrado no vuelve al reconectar: el sync trae la lectura de hoy, no la historia.
+      peligro: network === 'youtube',
     })
     if (!seguir) return
     startTransition(async () => {

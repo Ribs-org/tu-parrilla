@@ -16,7 +16,7 @@ no en columnas de `social_accounts`. Fue para no sumar una migración a algo que
 journal de `drizzle/` se numera de corrido, y una 0034 sin la 0032 y la 0033 no pasa su test.
 
 El costo es que la credencial no cuelga de la fila por clave foránea: quitar la cuenta, desconectarla
-y traspasarla la tocan a mano (`quitar.ts`, `disconnectAccount` en `actions.ts`, `traspasar.ts`), y
+y traspasarla la tocan a mano (`quitar.ts`, `desconectar.ts`, `traspasar.ts`), y
 cualquier borrado nuevo de cuentas tiene que acordarse de ella. Y Los Fierros la busca con una
 lectura por cuenta de TikTok.
 
