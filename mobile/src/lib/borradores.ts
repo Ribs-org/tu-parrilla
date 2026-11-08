@@ -1,6 +1,8 @@
 import { opcionesParaGuardar, subidos, type Archivo, type MediaSubida, type OpcionesApp } from './publicar'
 import type { Modo } from './historias'
 import type { MusicaInstagram } from './musica'
+import { hayRegla, reglaParaEnviar, type ReglaApp } from './regla'
+import { soloFotos, tiktokParaGuardar, type TikTokElegido } from './tiktok'
 import { LA_PARRILLA, type Tema } from './tema'
 import type { BorradorResumido, CuentaApp } from './tipos'
 
@@ -45,11 +47,11 @@ export const SIN_BORRADOR = 'No se programó: primero tiene que guardarse el bor
 
 /**
  * Si hay algo que guardar. Como en el panel, abrir Publicar y salir no deja un borrador
- * vacío: hace falta texto o un archivo ya subido. Las cuentas y la fecha solas no alcanzan,
- * porque vienen puestas (la cuenta única, el día del «+»).
+ * vacío: hace falta texto, un archivo ya subido o una palabra clave. Las cuentas y la fecha
+ * solas no alcanzan, porque vienen puestas (la cuenta única, el día del «+»).
  */
-export function tieneContenido(texto: string, media: MediaSubida[]): boolean {
-  return texto.trim() !== '' || media.length > 0
+export function tieneContenido(texto: string, media: MediaSubida[], regla: ReglaApp | null = null): boolean {
+  return texto.trim() !== '' || media.length > 0 || (regla !== null && hayRegla(regla))
 }
 
 /** Lo que Publicar tiene en pantalla, tal como lo necesita el guardado. */
@@ -65,13 +67,18 @@ export type Formulario = {
   archivos: Archivo[]
   /** Si es una historia (el selector «Post · Historia»); falta en lo armado antes de que existiera. */
   historia?: boolean
+  /** Lo elegido en el bloque de TikTok de cada cuenta que se tocó o vino de un borrador. */
+  tiktok?: Record<string, TikTokElegido>
+  /** La regla de palabra clave; falta en lo armado antes de que existiera. */
+  regla?: ReglaApp
 }
 
 export type CuerpoBorrador = {
   texto: string
   cuentas: string[]
   cuando: string | null
-  opciones: OpcionesApp
+  /** Por cuenta: el trial reel y la canción de Instagram, o el bloque de TikTok (`tiktokParaGuardar`). */
+  opciones: OpcionesApp | Record<string, Record<string, unknown>>
   media: MediaSubida[]
   /**
    * Que esta app sabe de música: sin esto el servidor conserva la canción que dejó el panel,
@@ -83,6 +90,11 @@ export type CuerpoBorrador = {
    * que no sabe de historias no pudo haberlo cambiado (`historiaDelTelefono`).
    */
   modo: Modo
+  /**
+   * La palabra clave, o null sin ella. Con `X-Parrilla-Publicar: palabra-clave` (`api.ts`) el
+   * servidor la escribe tal cual —null la borra—; sin la cabecera, conserva la del panel.
+   */
+  regla: ReglaApp | null
 }
 
 /**
@@ -99,11 +111,25 @@ export function cuerpoDelBorrador(form: Formulario): CuerpoBorrador {
     texto: form.texto,
     cuentas: form.cuentas,
     cuando: form.fechaPuesta ? form.fecha.toISOString() : null,
-    opciones: opcionesParaGuardar(form.cuentas, form.trial, form.archivos, form.musica ?? {}),
+    opciones: { ...opcionesParaGuardar(form.cuentas, form.trial, form.archivos, form.musica ?? {}), ...tiktokDelForm(form) },
     media: subidos(form.archivos),
     conMusica: true,
     modo: form.historia ? 'historia' : 'post',
+    regla: form.regla ? reglaParaEnviar(form.regla) : null,
   }
+}
+
+/**
+ * El bloque de TikTok de cada cuenta marcada que lo tiene en pantalla, para el borrador. Solo
+ * hay entrada para las cuentas de TikTok, así que no hace falta saber la red de cada una.
+ */
+function tiktokDelForm(form: Formulario): Record<string, Record<string, unknown>> {
+  const fotos = soloFotos(form.archivos)
+  const salida: Record<string, Record<string, unknown>> = {}
+  for (const [id, e] of Object.entries(form.tiktok ?? {})) {
+    if (form.cuentas.includes(id)) salida[id] = tiktokParaGuardar(e, fotos)
+  }
+  return salida
 }
 
 /**
