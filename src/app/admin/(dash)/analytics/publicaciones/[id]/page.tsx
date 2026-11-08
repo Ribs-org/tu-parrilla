@@ -14,6 +14,8 @@ import { getPieza, type VersionDePieza } from '@/lib/piezas'
 import { getPostRows } from '@/lib/posts'
 import { promocionarAbiertoPara } from '@/lib/redes-abiertas'
 import { Promociones } from '../../promociones'
+import { VideoTiktokAFondo, type VersionAFondo } from '../../video-tiktok-a-fondo'
+import { videosAFondo } from '@/lib/social/tiktok-numeros-guardar'
 import type { PostRow } from '@/lib/posts-kpis'
 import { numerosHref, type Params } from '@/lib/tablero'
 import { cn, formatNumber } from '@/lib/utils'
@@ -82,6 +84,17 @@ export default async function PiezaPage({
         : query.de === 'lado'
           ? { ruta: '/admin/analytics/lado-a-lado', texto: 'Lado a lado' }
           : { ruta: '/admin/analytics/publicaciones', texto: 'Tus publicaciones' }
+  // Lo de cada versión de TikTok que da TikTok for Business, si su reja está abierta y la cuenta lo
+  // activó (`videosAFondo` llega vacío si no): el tiempo visto, de dónde llegó la gente.
+  const aFondo: VersionAFondo[] = []
+  const porCuenta = new Map<string, Awaited<ReturnType<typeof videosAFondo>>>()
+  for (const v of versiones) {
+    if (v.network !== 'tiktok' || !v.fila) continue
+    const deLaCuenta = porCuenta.get(v.fila.accountId) ?? (await videosAFondo(ownerId, v.fila.accountId))
+    porCuenta.set(v.fila.accountId, deLaCuenta)
+    const video = deLaCuenta[v.fila.externalId]
+    if (video) aFondo.push({ clave: v.clave, nombre: nombreDestino(v), video })
+  }
   const aqui = numerosHref(`/admin/analytics/publicaciones/${pieza.abierta.id}`, query, {})
   const fecha = new Intl.DateTimeFormat('es', {
     day: 'numeric',
@@ -256,6 +269,8 @@ export default async function PiezaPage({
           )}
         </p>
       </Panel>
+
+      <VideoTiktokAFondo versiones={aFondo} />
 
       {promocionar ? (
         <section id="promociones" aria-label="Promocionar" className="mt-3 scroll-mt-4">

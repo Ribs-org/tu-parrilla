@@ -1,16 +1,20 @@
 import type { SocialAccount } from '@/db'
 import { borrarAjuste, guardarAjuste, leerAjuste } from '@/lib/ajustes'
 import { env } from '@/lib/env'
-import { tiktokComentariosAbiertoPara } from '@/lib/redes-abiertas'
+import { tiktokBusinessAbiertoPara } from '@/lib/redes-abiertas'
 import { decryptToken, encryptToken } from './crypto'
 
 /**
- * Los comentarios de TikTok, por la API for Business (business-api.tiktok.com), que es la única de
- * TikTok que los lee y los responde: la app de siempre (Login Kit, Display y Content Posting, en
- * developers.tiktok.com) solo da cuántos tiene cada video. La «Accounts API» de TikTok for Business
- * es otra app, en otro portal y con otra revisión, y su autorización es aparte: el dueño ya conectó
- * la cuenta para publicar, y la autoriza una segunda vez para los comentarios. Esa segunda credencial
- * se guarda junto a la cuenta (en `ajustes`, ver `claveDeComentarios`) y no reemplaza a la primera.
+ * La app de TikTok for Business (business-api.tiktok.com), la «Accounts API». Nació para los
+ * comentarios, que es lo único de TikTok que los lee y los responde: la app de siempre (Login
+ * Kit, Display y Content Posting, en developers.tiktok.com) solo da cuántos tiene cada video. Con
+ * la misma autorización lee también lo que la app de siempre no da (`tiktok-numeros.ts`): los
+ * números de la cuenta y su audiencia, cada video más a fondo, la comparación con cuentas
+ * parecidas y lo que se busca en TikTok.
+ *
+ * Es otra app, en otro portal y con otra revisión, y su autorización es aparte: el dueño ya conectó
+ * la cuenta para publicar, y la autoriza una segunda vez aquí. Esa segunda credencial se guarda
+ * junto a la cuenta (en `ajustes`, ver `claveDeComentarios`) y no reemplaza a la primera.
  *
  * Cerrado salvo para quien diga `TIKTOK_COMENTARIOS_ABIERTO_PARA` (`redes-abiertas.ts`). Lo que se
  * leyó de la documentación, con las direcciones, está en `docs/levantamiento-terceros.md`, §3.5.
@@ -18,8 +22,43 @@ import { decryptToken, encryptToken } from './crypto'
 
 export const API_BUSINESS = 'https://business-api.tiktok.com/open_api/v1.3'
 
-/** Los dos permisos de comentarios de la Accounts API: leer, y responder (y ocultar, que no se usa). */
+/**
+ * Los dos permisos de comentarios de la Accounts API: leer, y responder (y ocultar, que no se usa).
+ * Son los únicos que la vuelta exige: sin ellos no se guarda nada. Los de los números
+ * (`PERMISOS_DE_NUMEROS`) se aprovechan si vinieron, y su falta solo apaga lo suyo.
+ */
 export const PERMISOS_DE_COMENTARIOS = ['comment.list', 'comment.list.manage'] as const
+
+/**
+ * Los permisos de los números, con el nombre que les da el token (y la casilla del portal que los
+ * marca). La comparación con cuentas parecidas («Business benchmark») no está: su documentación
+ * no dice con qué nombre llega al token, así que se pide igual y, si TikTok la niega, no se muestra.
+ */
+export const PERMISOS_DE_NUMEROS = {
+  /** Seguidores, «me gusta» y videos de por vida («Get account user info»). */
+  estadisticas: 'user.info.stats',
+  /** Lo del día y la audiencia («Get account insights»). */
+  cuenta: 'user.insights',
+  /** Cada video con sus números de siempre («Get account media»). */
+  videos: 'video.list',
+  /** Cada video más a fondo: tiempo visto, de dónde llegaron («Get account media»). */
+  videosAFondo: 'video.insights',
+  /** Lo que se busca en TikTok («Discover trending search keywords»). */
+  busquedas: 'discovery.search.words',
+} as const
+
+/** Si el token trae ese permiso, en la lista separada por comas que da TikTok. */
+export function tienePermiso(scope: string, permiso: string): boolean {
+  return scope.split(',').some((s) => s.trim() === permiso)
+}
+
+/**
+ * Los permisos de los números que el dueño no concedió: la cuenta sigue con sus comentarios, y Los
+ * Fierros le ofrece autorizar de nuevo para traer lo que falta.
+ */
+export function numerosQueFaltan(scope: string): string[] {
+  return Object.values(PERMISOS_DE_NUMEROS).filter((p) => !tienePermiso(scope, p))
+}
 
 /** La red con que se firma el state de esta vuelta: no es la de conectar TikTok (`[network]/connect`). */
 export const RED_DEL_STATE = 'tiktok-comentarios'
@@ -27,13 +66,14 @@ export const RED_DEL_STATE = 'tiktok-comentarios'
 /** Renovar con una hora de margen, como el token de publicar (`tiktok.ts`): el de acceso dura un día. */
 const MARGEN_RENOVAR_MS = 60 * 60 * 1000
 
-export const COMENTARIOS_ACTIVADOS = 'Comentarios de TikTok activados: llegan a La Mesa en la próxima pasada.'
-export const COMENTARIOS_CERRADOS = 'Los comentarios de TikTok todavía no están disponibles en Tu Parrilla.'
+export const COMENTARIOS_ACTIVADOS =
+  'TikTok for Business activado: los comentarios llegan a La Mesa en la próxima pasada, y los números con la sincronización de mañana.'
+export const COMENTARIOS_CERRADOS = 'TikTok for Business todavía no está disponible en Tu Parrilla.'
 export const COMENTARIOS_SIN_PERMISO =
   'TikTok no dio permiso para leer y responder comentarios. Vuelve a intentarlo y acepta todo lo que pide.'
 export const COMENTARIOS_OTRA_CUENTA =
   'Autorizaste otra cuenta de TikTok. Entra en TikTok con la misma cuenta de esta fila y vuelve a intentarlo.'
-export const COMENTARIOS_FALLO = 'No se pudieron activar los comentarios de TikTok. Inténtalo de nuevo.'
+export const COMENTARIOS_FALLO = 'No se pudo activar TikTok for Business. Inténtalo de nuevo.'
 
 /** La credencial de la app de TikTok for Business para una cuenta: su propio id y sus propios tokens. */
 export type CredencialDeComentarios = {
@@ -233,13 +273,16 @@ export async function borrarCredencialDeComentarios(ownerId: string, accountId: 
 }
 
 /**
- * La credencial de comentarios de una cuenta de TikTok, renovada si está por vencer, ya empaquetada
- * para el comentarista. Null —y la cuenta no se sondea, como una desconectada— si los comentarios
- * de TikTok están cerrados para el dueño, si la cuenta está desconectada o si nunca los activó.
+ * La credencial de TikTok for Business de una cuenta de TikTok, renovada si está por vencer. Null
+ * —y no se pide nada a TikTok— si TikTok for Business está cerrado para el dueño, si la cuenta está
+ * desconectada o si nunca lo activó. La usan los comentarios y los números (`tiktok-numeros.ts`).
  */
-export async function credencialDeComentarios(account: SocialAccount, ahora: number = Date.now()): Promise<string | null> {
+export async function credencialBusiness(
+  account: Pick<SocialAccount, 'id' | 'network' | 'ownerId' | 'accessToken'>,
+  ahora: number = Date.now(),
+): Promise<CredencialDeComentarios | null> {
   if (account.network !== 'tiktok' || !account.ownerId || !account.accessToken) return null
-  if (!tiktokComentariosAbiertoPara(account.ownerId)) return null
+  if (!tiktokBusinessAbiertoPara(account.ownerId)) return null
   const guardada = await leerAjuste(account.ownerId, claveDeComentarios(account.id))
   if (!guardada) return null
   let credencial = descifrar(guardada)
@@ -248,14 +291,35 @@ export async function credencialDeComentarios(account: SocialAccount, ahora: num
     credencial = await renovar(credencial)
     await guardarCredencialDeComentarios(account.ownerId, account.id, credencial)
   }
-  return empaquetar(credencial)
+  return credencial
 }
 
-/** Los ids de las cuentas de este dueño que activaron los comentarios: lo que Los Fierros pinta. */
-export async function cuentasConComentarios(ownerId: string, accountIds: string[]): Promise<string[]> {
+/**
+ * La credencial de comentarios de una cuenta de TikTok, ya empaquetada para el comentarista. Null
+ * —y la cuenta no se sondea, como una desconectada— en los mismos casos que `credencialBusiness`.
+ */
+export async function credencialDeComentarios(account: SocialAccount, ahora: number = Date.now()): Promise<string | null> {
+  const credencial = await credencialBusiness(account, ahora)
+  return credencial ? empaquetar(credencial) : null
+}
+
+/**
+ * Las cuentas de este dueño que activaron TikTok for Business, lo que Los Fierros pinta: `activadas`,
+ * todas las que lo tienen; `incompletas`, las que lo activaron sin algún permiso de los números
+ * —por ejemplo, antes de que la app los tuviera—, a las que se les ofrece autorizar de nuevo.
+ */
+export async function cuentasConComentarios(
+  ownerId: string,
+  accountIds: string[],
+): Promise<{ activadas: string[]; incompletas: string[] }> {
   const activadas: string[] = []
+  const incompletas: string[] = []
   for (const id of accountIds) {
-    if (await leerAjuste(ownerId, claveDeComentarios(id))) activadas.push(id)
+    const guardada = await leerAjuste(ownerId, claveDeComentarios(id))
+    if (!guardada) continue
+    activadas.push(id)
+    const credencial = descifrar(guardada)
+    if (credencial && numerosQueFaltan(credencial.scope).length > 0) incompletas.push(id)
   }
-  return activadas
+  return { activadas, incompletas }
 }

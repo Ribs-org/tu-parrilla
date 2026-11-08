@@ -32,9 +32,12 @@ export function pasosParaBorrarYoutube(accountId: string): SQL[] {
   ]
 }
 
-/** La credencial de comentarios de TikTok de la cuenta (`tiktok-business.ts`, `claveDeComentarios`). */
+/**
+ * Lo de TikTok for Business de la cuenta: su credencial (`tiktok-business.ts`, `claveDeComentarios`)
+ * y sus números guardados (`tiktok-numeros-guardar.ts`, `prefijoDeNumeros`).
+ */
 export function pasoParaBorrarComentariosTiktok(ownerId: string, accountId: string): SQL {
-  return sql`delete from ajustes where owner_id = ${ownerId} and clave = 'tiktok_comentarios:' || ${accountId}`
+  return sql`delete from ajustes where owner_id = ${ownerId} and (clave = 'tiktok_comentarios:' || ${accountId} or starts_with(clave, 'tiktok_business:' || ${accountId} || ':'))`
 }
 
 /**
@@ -58,8 +61,8 @@ export async function desconectarCuenta(ownerId: string, accountId: string): Pro
     if (cuenta.network === 'youtube') {
       for (const paso of pasosParaBorrarYoutube(accountId)) await tx.execute(paso)
     }
-    // En TikTok se apagan también sus comentarios, que tienen credencial propia en `ajustes`
-    // (`tiktok-business.ts`): reconectar no los vuelve a activar solo.
+    // En TikTok se apaga también TikTok for Business, que tiene credencial y números propios en
+    // `ajustes` (`tiktok-business.ts`): reconectar no lo vuelve a activar solo.
     if (cuenta.network === 'tiktok') await tx.execute(pasoParaBorrarComentariosTiktok(ownerId, accountId))
     return true
   })

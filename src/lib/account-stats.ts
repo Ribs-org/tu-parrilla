@@ -52,7 +52,10 @@ export function buildAccountCards(rows: AccountMetricRow[], from: string, to: st
     const network = list[0]!.network
     const ordered = [...list].sort((a, b) => a.day.localeCompare(b.day))
     const inside = ordered.filter((r) => r.day >= from && r.day <= to)
-    const last = inside.at(-1) ?? null
+    // El último día que trae lo del día. Casi siempre es el último leído; en TikTok, cuya cuenta
+    // llega por TikTok for Business con uno o dos días de atraso, la fila de hoy trae solo los
+    // seguidores, y lo del día está en las anteriores (`tiktok-numeros-guardar.ts`).
+    const last = inside.findLast((r) => r.profileViews !== null || r.reach !== null) ?? inside.at(-1) ?? null
 
     // El mismo motor que los posts: distingue «creció esto» de «no lo puedo saber».
     const followers = periodChange(

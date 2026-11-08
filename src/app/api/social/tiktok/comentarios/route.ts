@@ -4,7 +4,7 @@ import { getDb, socialAccounts } from '@/db'
 import { usuarioActual } from '@/lib/auth'
 import { env } from '@/lib/env'
 import { conMensaje } from '@/lib/mensaje-firmado'
-import { tiktokComentariosAbiertoPara } from '@/lib/redes-abiertas'
+import { tiktokBusinessAbiertoPara } from '@/lib/redes-abiertas'
 import { signOAuthStateDeCuenta } from '@/lib/social/oauth-state'
 import {
   COMENTARIOS_CERRADOS,
@@ -17,7 +17,7 @@ import { esUuid } from '@/lib/uuid'
 export const dynamic = 'force-dynamic'
 
 /**
- * «Activar comentarios en La Mesa →», en el detalle de una cuenta de TikTok conectada: manda al
+ * «Activar TikTok for Business (comentarios y números) →», en el detalle de una cuenta de TikTok conectada: manda al
  * dueño a autorizar esa cuenta en la app de TikTok for Business (`social/tiktok-business.ts`). La
  * cuenta viaja firmada en el state, así la vuelta sabe a qué fila pegarle la credencial.
  */
@@ -27,7 +27,7 @@ export async function GET(request: Request) {
   const origen = new URL(request.url).origin
   const volver = (texto: string) => NextResponse.redirect(`${origen}${conMensaje('/admin/accounts', texto)}`)
 
-  if (!tiktokComentariosAbiertoPara(usuario.id)) return volver(COMENTARIOS_CERRADOS)
+  if (!tiktokBusinessAbiertoPara(usuario.id)) return volver(COMENTARIOS_CERRADOS)
 
   const cuenta = new URL(request.url).searchParams.get('cuenta')
   if (!esUuid(cuenta)) return volver(COMENTARIOS_FALLO)

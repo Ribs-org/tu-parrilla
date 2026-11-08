@@ -493,7 +493,9 @@ formulario viene abierto, con el cursor en «Texto». En este orden:
    YouTube, que renuevan su permiso solas. Sin ninguna cuenta, el bloque dice «Todavía
    no tienes cuentas conectadas. Conecta una para poder programar.», y «Conecta una» lleva a
    Los Fierros (tus redes conectadas).
-6. **Un bloque «TikTok · <usuario>»** por cada cuenta de TikTok marcada (ver abajo).
+6. **Un bloque «TikTok · <usuario>»** por cada cuenta de TikTok marcada (ver abajo). Debajo de
+   todos, solo en las cuentas de TikTok donde se activó TikTok for Business (ver [Los
+   Fierros](los-fierros.md)), un recuadro **«Lo que se busca en TikTok · <usuario>»** (ver abajo).
 7. **Un bloque «Instagram · <usuario>»** por cada cuenta de Instagram marcada, solo cuando
    hay exactamente un archivo y es un video (ver abajo): el trial reel y «Música de Instagram».
 8. **«Respuesta automática por palabra clave»**, plegado (ver abajo); viene abierto y lleno si
@@ -569,6 +571,23 @@ formulario viene abierto, con el cursor en «Texto». En este orden:
     TikTok puede tardar unos minutos en mostrarlo en tu perfil.»
 
 Con dos cuentas de TikTok marcadas hay dos bloques, y cada uno se llena por separado.
+
+#### «Lo que se busca en TikTok · <usuario>»
+
+Solo para quien la instalación le abrió TikTok for Business, y solo en una cuenta de TikTok
+marcada que lo activó en [Los Fierros](los-fierros.md) aceptando todo lo que pide. Ideas para el
+texto, sacadas de lo que la gente está buscando en TikTok. No pregunta nada hasta que se aprieta:
+
+- **«Ver qué se busca»**: trae hasta 20 búsquedas en tendencia para esa cuenta. Mientras
+  pregunta, el botón dice «Buscando…».
+- Un campo **«Ideas para…»** y **«Buscar»** (o Enter, que aquí no programa nada): trae hasta 20
+  búsquedas recomendadas para lo que se escribió, como «asado» o «chimichurri».
+- Las palabras salen como fichas, y debajo «Toca una para sumarla al final del texto.»: tocar
+  una la agrega al final de «Texto», separada por un espacio.
+
+Las respuestas se recuerdan unas horas: apretar de nuevo trae lo mismo. Si TikTok no da nada:
+«TikTok no dio búsquedas esta vez.»; si la cuenta no puede pedirlo: «TikTok no dio lo que se
+busca para esta cuenta: es solo para cuentas con acceso avanzado o de empresa.»
 
 #### El bloque «Instagram · <usuario>»
 
@@ -1176,6 +1195,9 @@ final de esta sección).
 | «<archivo>: dura <N> minutos y TikTok acepta hasta 10 por la API.» | Video de más de diez minutos | Cortarlo |
 | «<archivo>: pesa <N> MB y TikTok acepta hasta 4 GB.» | Video muy pesado | Comprimirlo |
 
+| «TikTok no dio búsquedas esta vez.» | En «Lo que se busca en TikTok», TikTok contestó sin palabras | Probar otra consulta en «Ideas para…», o más tarde |
+| «TikTok no dio lo que se busca para esta cuenta: es solo para cuentas con acceso avanzado o de empresa.» | La cuenta es personal, TikTok no contestó, o se desconectó | Nada: el resto del compositor funciona igual. Para tenerlo, la cuenta tiene que ser de empresa o con acceso avanzado en TikTok |
+
 Con dos cuentas de TikTok marcadas, las frases de opciones van precedidas del usuario de la
 cuenta, entre comillas angulares y seguido de dos puntos, para saber en cuál de los dos
 bloques está el problema. Si un mismo archivo tiene varios problemas, van en la misma línea
@@ -1534,6 +1556,7 @@ Lo que describe esta página sale de:
   - `src/app/admin/(dash)/schedule/redes.tsx`
   - `src/app/admin/(dash)/schedule/regla-clave.tsx`
   - `src/app/admin/(dash)/schedule/tiktok-opciones.tsx`
+  - `src/app/admin/(dash)/schedule/busquedas-tiktok.tsx`, `src/app/admin/tiktok-actions.ts` y `src/lib/social/tiktok-numeros-guardar.ts` («Lo que se busca en TikTok», sus frases y quién lo ve)
   - `src/app/admin/(dash)/schedule/instagram-opciones.tsx`
   - `src/app/admin/(dash)/schedule/musica-instagram.tsx` («Música de Instagram»)
   - `src/app/admin/musica-actions.ts`, `src/lib/musica-instagram.ts`, `src/lib/social/instagram-audio.ts` y `src/lib/social/musica-sugerencia.ts` (buscar, escuchar y «Sugiéreme una», con sus frases)

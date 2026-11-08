@@ -25,6 +25,7 @@ import {
   weekDays,
 } from '@/lib/schedule-week'
 import { cortesEntre, cortesQuemados, horasPorVenir, servidosAyer, todosLosCortes } from '@/lib/social/publish/cortes'
+import { cuentasConBusquedas } from '@/lib/social/tiktok-numeros-guardar'
 import { cn, toZonedInput } from '@/lib/utils'
 import { BatchUpload } from './batch-upload'
 import { WeekCalendar } from './calendar'
@@ -162,6 +163,11 @@ export default async function SchedulePage({
           carga={carga}
           cuentas={cuentas}
           proximamente={[...proximamentePara(ownerId)]}
+          // «Lo que se busca en TikTok»: las cuentas que lo pueden pedir (vacío con la reja cerrada).
+          busquedasTiktok={await cuentasConBusquedas(
+            ownerId,
+            cuentas.filter((c) => c.network === 'tiktok' && c.connected).map((c) => c.id),
+          )}
           borrador={borrador ? { id: borrador.id, campos: borrador.campos, media: borrador.media } : null}
           creativo={creativo}
           // El instante guardado, en la zona de hoy: si la zona cambió en Tu Cuenta, el

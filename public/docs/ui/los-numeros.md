@@ -300,10 +300,13 @@ Amplía el período.»
 
 - **Panel «Tus cuentas»**, explicación: «Seguidores por cuenta, con lo ganado en el período; en
   YouTube, solo el total, porque sus reglas no permiten calcular lo ganado. Visitas al perfil y
-  alcance son del último día leído — Instagram es la única que los entrega hoy.»
+  alcance son del último día leído — Instagram es la única que los entrega hoy.» Para quien la
+  instalación le abrió TikTok for Business, lo último dice en cambio «— los entregan Instagram y,
+  con TikTok for Business activado, TikTok.»
 
-  Una tarjeta por cuenta con lecturas (hoy pueden ser de Instagram, Facebook y YouTube; TikTok
-  y X no tienen, y Threads solo en la cuenta del revisor de Meta, cuando la instalación pide los permisos de lectura de Threads: trae sus seguidores, y «Visitas al
+  Una tarjeta por cuenta con lecturas (hoy pueden ser de Instagram, Facebook y YouTube; X no
+  tiene; TikTok, solo en las cuentas donde se activó TikTok for Business en [Los
+  Fierros](los-fierros.md), con seguidores, visitas al perfil y alcance; y Threads solo en la cuenta del revisor de Meta, cuando la instalación pide los permisos de lectura de Threads: trae sus seguidores, y «Visitas al
   perfil» y «Alcance» quedan en «—»). Con una cuenta elegida arriba, solo la suya. Cada tarjeta:
 
   - El nombre, con el patrón «<red> · <nombre de la cuenta>» (o solo la red).
@@ -311,14 +314,40 @@ Amplía el período.»
   - Debajo, en YouTube: «suscriptores, según YouTube». En las demás: «seguidores · » y una de
     tres: «+<N> en el período», «sin cambio» o «— en el período».
   - Al pie: «Visitas al perfil (<día>): <N>» y «Alcance (<día>): <N>», donde el día es el de
-    la última lectura del período, como «3 sep». Sin lecturas en el período: «Visitas al
-    perfil: —» y «Alcance: —».
+    la última lectura del período que los trae, como «3 sep». En TikTok suele ser de dos días
+    atrás: TikTok los entrega con uno o dos días de atraso. Sin lecturas en el período: «Visitas
+    al perfil: —» y «Alcance: —». En una cuenta personal de TikTok el alcance puede quedar en
+    «—»: TikTok lo da solo a cuentas con acceso avanzado o de empresa.
 
   Debajo de las tarjetas, **solo si alguna cuenta que no es de YouTube tiene lecturas en el
   período**, dos gráficos, uno debajo del otro y con las mismas fechas: «Visitas al perfil» y
   «Alcance», un punto por día leído. Van separados porque se miden en escalas muy distintas:
   en un mismo gráfico, las visitas al perfil quedaban planas en cero. En el eje de cada
   gráfico, las cifras van abreviadas desde diez mil («34 mil»).
+
+- **Panel «TikTok, más a fondo»**, solo para quien la instalación le abrió TikTok for Business
+  y solo si alguna cuenta de TikTok lo activó en [Los Fierros](los-fierros.md) (con una cuenta
+  elegida arriba, solo la suya). Explicación: «Lo que da TikTok for Business: quién te sigue y
+  cómo te va contra cuentas parecidas a la tuya. Llega con uno o dos días de atraso.» Por cada
+  cuenta, su nombre («TikTok · <nombre>») y dos recuadros:
+
+  - **«Tu audiencia»**: tres listas con porcentajes, «Países» (con bandera, los cinco con más
+    seguidores), «Género» («Mujeres», «Hombres», «Otro») y «Edad» («18-24 años»…). Sin datos:
+    «TikTok da la audiencia desde los 100 seguidores. Todavía no llega para esta cuenta.»
+  - **«Cuentas parecidas a la tuya»**: una tabla con dos columnas, «Tú» y «Promedio del rubro»,
+    y cuatro filas: «Seguidores», «Seguidores ganados en 30 días», «Videos publicados» e
+    «Interacción». Debajo: «El promedio de las cuentas de empresa verificadas de «<rubro>», según
+    TikTok. Tu interacción sale de tus videos del período: likes, comentarios y compartidos sobre
+    views.» Sin comparación todavía: «TikTok todavía no dio la comparación para esta cuenta.»
+    Al pie, **«Tu rubro»**, un selector con los rubros de TikTok en español («Creador de
+    contenido», que viene elegido, «Comida y bebida», «Restaurantes y bares», «Belleza»…).
+    Cambiarlo pide la comparación en el acto: dice «Pidiendo la comparación…» y después «Listo:
+    la comparación es ahora con ese rubro.» (o «Se guardó el rubro, pero TikTok no dio la
+    comparación. Se vuelve a intentar mañana.», o en rojo «No se pudo cambiar el rubro de esa
+    cuenta.»).
+
+  Un «—» es que TikTok no lo dio: varios de estos números son solo para cuentas con acceso
+  avanzado o de empresa.
 
 - **Panel «Views ganadas y visitas, día a día»**, explicación: «Cuánto creció lo que se vio en
   las redes contra cuánta gente llegó a tu página. Las views no incluyen YouTube; las visitas,
@@ -667,6 +696,16 @@ salieron o no trajeron nada, por fecha. Una versión borrada en la red se ve sem
   programado: dales a los dos el mismo atributo pieza —por ejemplo {"pieza":
   "chimichurri-30s"}— en «Editar atributos» o por la API, y aparecen juntos acá.»
 
+**Panel «En TikTok, más a fondo»**, solo si alguna versión salió en una cuenta de TikTok con
+TikTok for Business activado y TikTok ya dio sus datos (al día siguiente de la sincronización).
+Explicación: «Lo que da TikTok for Business de cada versión en TikTok. Son de toda la vida del
+video, no del período, y llegan con uno o dos días de atraso.» Un recuadro por versión, con su
+nombre, y las cifras «Alcance», «Guardados», «Tiempo visto, en promedio» (en segundos, como
+«6,4 s»), «Lo vieron completo» y «No te seguían» (en porcentaje), «Seguidores nuevos» y «Visitas
+al perfil»; debajo, **«De dónde llegaron»**, con el porcentaje de cada fuente: «Para ti»,
+«Siguiendo», «Tu perfil», «Búsqueda», «Sonidos», «Mensajes» u «Otros». Un «—» es que TikTok no lo
+dio.
+
 **Panel «Promocionar»** (solo en las cuentas habilitadas; ver «Promocionar», abajo), debajo de
 las versiones, con la explicación «Un anuncio de una versión ya publicada, pagado con tu cuenta
 publicitaria de Meta. Antes de crear nada te mostramos lo máximo que puedes gastar.» Un botón por
@@ -990,7 +1029,9 @@ hasta la siguiente sincronización, y los números pueden ir hasta un día atrá
 la app de la red. X no se sincroniza: no tiene números aquí. Threads tampoco, salvo en
 la cuenta del revisor de Meta, cuando la instalación pide los permisos de lectura de Threads (ver [Los Fierros](los-fierros.md)). Ahí entran sus publicaciones propias —no
 los reposts de publicaciones ajenas— con views, likes, comentarios (sus respuestas) y
-compartidos (sus reposts más sus citas); guardados y alcance, Threads no los da.
+compartidos (sus reposts más sus citas); guardados y alcance, Threads no los da. TikTok da
+guardados y alcance de cada video solo en las cuentas donde se activó TikTok for Business; en
+las demás quedan vacíos.
 
 **Qué publicación se lee cada día.** Depende de su edad. Lo publicado en los últimos 10 días se
 lee todos los días (y, aunque la cuenta publique poco, siempre sus 200 publicaciones más
@@ -1089,7 +1130,8 @@ página ni «Bots»; sí el período y la cuenta.
 - YouTube: el total de suscriptores tal como lo da YouTube, sin lo ganado. Tampoco entra en el
   gráfico de abajo.
 - «Visitas al perfil» y «Alcance»: cifras de un solo día, el de la lectura que dice el
-  paréntesis, no del período. Solo Instagram las entrega; en Facebook y YouTube salen «—».
+  paréntesis, no del período. Las entregan Instagram y, donde se activó TikTok for Business,
+  TikTok (con uno o dos días de atraso); en Facebook y YouTube salen «—».
 - El gráfico de abajo: visitas al perfil y alcance de cada día leído, sumando las cuentas que
   los entregan (sin YouTube).
 - Dos cuentas de la misma red tienen cada una su tarjeta.
@@ -1494,6 +1536,21 @@ siempre todas las páginas y sin bots.
 ### Para ver los seguidores de cada cuenta
 
 Abrir el «⋯ Más» de «En las redes»: el panel «Tus cuentas» tiene una tarjeta por cuenta.
+
+### Para ver quién te sigue en TikTok y compararte con cuentas parecidas
+
+Solo donde la instalación abrió TikTok for Business y la cuenta lo activó en [Los
+Fierros](los-fierros.md) («Activar TikTok for Business (comentarios y números) →»).
+
+1. Abrir el «⋯ Más» de «En las redes».
+2. Bajar hasta «TikTok, más a fondo»: «Tu audiencia» dice de qué países, género y edad son tus
+   seguidores; «Cuentas parecidas a la tuya» te compara con el promedio de tu rubro.
+3. Para compararte con otro rubro, elegirlo en «Tu rubro», debajo de la tabla.
+
+### Para ver cuánto miraron un video de TikTok y de dónde llegó la gente
+
+Con TikTok for Business activado en esa cuenta: abrir la pieza del video (desde «Tus
+publicaciones» o «Lo que más creció») y bajar a «En TikTok, más a fondo».
 
 ### Para saber cuántas visitas trajo una publicación
 
@@ -2073,6 +2130,12 @@ Sale de:
   `src/lib/planilla/armar.ts`, `src/lib/planilla/xlsx.ts` y `src/lib/planilla/zip.ts` (las
   hojas y sus columnas, «Léeme», lo que se lee, los topes y el orden, y el formato)
 - `src/app/admin/(dash)/analytics/accounts.tsx` (tarjetas de «Tus cuentas» y su gráfico)
+- `src/app/admin/(dash)/analytics/tiktok-a-fondo.tsx` y `src/app/admin/(dash)/analytics/rubro-tiktok.tsx`
+  («TikTok, más a fondo» y «Tu rubro»), `src/app/admin/(dash)/analytics/video-tiktok-a-fondo.tsx`
+  («En TikTok, más a fondo» en la pieza), `src/app/admin/tiktok-actions.ts` y
+  `src/lib/social/tiktok-numeros-guardar.ts` (las frases del rubro; qué se lee y para quién),
+  `src/lib/social/tiktok-numeros.ts` y `src/lib/social/tiktok-rubros.ts` (las fuentes y los rubros
+  en español) y `src/lib/redes-abiertas.ts` (`tiktokBusinessAbiertoPara`: quién lo ve)
 - `src/app/admin/(dash)/analytics/lo-pagado.tsx` («Lo pagado»: cifras, tabla y frases),
   `src/lib/lo-pagado.ts` (qué anuncios entran por el período), `src/lib/social/anuncios.ts`
   (cómo se suma y cómo se escribe el gasto; qué se le pide a Meta) y

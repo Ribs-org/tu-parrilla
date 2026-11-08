@@ -60,7 +60,7 @@ Avisos de un momento, debajo de la fila: «Desconectada.» después de desconect
 
 - En una cuenta de Instagram conectada con el login de Instagram, primero: «Conectada con Instagram, sin página de Facebook.» Las conectadas con el login de Facebook no dicen nada.
 - En una cuenta de Instagram, si acepta trial reels, cuando ya se sabe: «Acepta trial reels.», en gris, o en ámbar la frase con que Instagram rechazó el último, por ejemplo «@cuenta no tiene trial reels: Instagram los da solo a cuentas con un mínimo de seguidores, y esta no lo alcanza. Prográmalo como reel normal o en otra cuenta.» (o «Instagram ya rechazó un trial reel en esta cuenta: prográmalo como reel normal.», si no quedó la frase). Se aprende al publicar: no sale nada mientras la cuenta no haya intentado un trial reel.
-- En una cuenta de TikTok conectada, solo para quien la instalación le abrió los comentarios de TikTok: «Activar comentarios en La Mesa →» si todavía no se activaron (ver «Para traer los comentarios de TikTok a La Mesa»), o «Sus comentarios llegan a La Mesa.» si ya. Para los demás no aparece nada.
+- En una cuenta de TikTok conectada, solo para quien la instalación le abrió TikTok for Business: «Activar TikTok for Business (comentarios y números) →» si todavía no se activó (ver «Para traer los comentarios y los números de TikTok»), o «TikTok for Business activado: sus comentarios llegan a La Mesa y sus números a Los Números.» si ya. Si se activó sin aceptar todos los permisos de los números (por ejemplo, antes de que existieran), debajo aparece además «Autorizar de nuevo para traer todos sus números →». Para los demás no aparece nada.
 - «En la red: » y el identificador que la red le da a la cuenta. Es solo informativo.
 - «En Tu Parrilla: » y el **id de la cuenta en Tu Parrilla**, con un ícono de copiar. Es un botón: al apretarlo copia el id y el ícono pasa a un visto durante dos segundos. Al pasar el mouse dice «Id de cuenta — para «cuentas» en el CSV o la API».
 - Solo si la cuenta no tiene credencial y la misma red tiene otra cuenta conectada: «¿Es la misma cuenta con otro identificador? Fusiónala y su historial pasa a la viva.», una lista desplegable con las cuentas conectadas de esa red y el botón «Es la misma cuenta →» (dice «Fusionando…» mientras trabaja).
@@ -149,16 +149,16 @@ Se conecta una página de Facebook, no un perfil personal.
 
 El aviso del bloque habla de publicar, no de conectar: una cuenta pública se conecta igual. Si la fila muestra un número largo en vez del nombre, TikTok no entregó el nombre; «Reconectar» lo vuelve a pedir.
 
-### Para traer los comentarios de TikTok a La Mesa
+### Para traer los comentarios y los números de TikTok
 
-Solo donde la instalación abrió los comentarios de TikTok: si no aparece el enlace, para esa cuenta todavía no están disponibles. Conectar TikTok sirve para publicar y traer los números, pero no los comentarios: esos piden autorizar la cuenta una segunda vez.
+Solo donde la instalación abrió TikTok for Business: si no aparece el enlace, para esa cuenta todavía no está disponible. Conectar TikTok sirve para publicar y traer los números de cada video, pero no los comentarios, ni los números de la cuenta, ni su audiencia: eso pide autorizar la cuenta una segunda vez, en TikTok for Business.
 
 1. En el bloque «TikTok», abre con la flecha el detalle de la cuenta, que tiene que estar conectada.
-2. Aprieta «Activar comentarios en La Mesa →».
-3. TikTok muestra su pantalla de autorización, con la cuenta que va a autorizar: tiene que ser la misma de esa fila. Acepta todo lo que pide: leer y responder comentarios.
-4. Vuelve con «Comentarios de TikTok activados: llegan a La Mesa en la próxima pasada.», y el detalle de la cuenta pasa a decir «Sus comentarios llegan a La Mesa.». Los comentarios aparecen en [La Mesa](la-mesa.md) en unos cinco minutos.
+2. Aprieta «Activar TikTok for Business (comentarios y números) →» (o, si ya estaba activado, «Autorizar de nuevo para traer todos sus números →»).
+3. TikTok muestra su pantalla de autorización, con la cuenta que va a autorizar: tiene que ser la misma de esa fila. Acepta todo lo que pide: leer y responder comentarios, y leer los números de la cuenta y de sus videos.
+4. Vuelve con «TikTok for Business activado: los comentarios llegan a La Mesa en la próxima pasada, y los números con la sincronización de mañana.», y el detalle de la cuenta pasa a decir «TikTok for Business activado: sus comentarios llegan a La Mesa y sus números a Los Números.». Los comentarios aparecen en [La Mesa](la-mesa.md) en unos cinco minutos; los números, al día siguiente en [Los Números](los-numeros.md) («Tus cuentas» y «TikTok, más a fondo», con «⋯ Más»), y «Lo que se busca en TikTok» aparece en el compositor de [La Parrilla](la-parrilla.md).
 
-«Desconectar» la cuenta apaga también sus comentarios: al volver a conectarla, hay que activarlos otra vez.
+«Desconectar» la cuenta apaga también TikTok for Business: al volver a conectarla, hay que activarlo otra vez.
 
 ### Threads y X / Twitter: «Próximamente»
 
@@ -264,11 +264,11 @@ Trae los posts y los números de las cuentas de Instagram, TikTok, YouTube y Fac
 | «Google no entregó el token de refresco. Reintenta la conexión.» | Google no dio el permiso para renovar la conexión sola. | Volver a conectar. |
 | «Google rechazó el código. Inténtalo de nuevo.», «Google no devolvió token.», «No se pudo leer el canal de YouTube.» | Google no terminó de entregar el permiso o no dejó leer el canal. | Volver a conectar. |
 | «TikTok rechazó el código: <número>», «TikTok no devolvió token», «TikTok no devolvió el id de la cuenta. Vuelve a conectar.» | TikTok no terminó de entregar el permiso. | Volver a conectar. |
-| «Comentarios de TikTok activados: llegan a La Mesa en la próxima pasada.» | Se activaron los comentarios de esa cuenta de TikTok. | Nada: llegan a [La Mesa](la-mesa.md) en unos cinco minutos. |
-| «TikTok no dio permiso para leer y responder comentarios. Vuelve a intentarlo y acepta todo lo que pide.» | En la pantalla de TikTok no se aceptaron los dos permisos de comentarios. | «Activar comentarios en La Mesa →» de nuevo, y aceptar todo. |
+| «TikTok for Business activado: los comentarios llegan a La Mesa en la próxima pasada, y los números con la sincronización de mañana.» | Se activó TikTok for Business en esa cuenta de TikTok. | Nada: los comentarios llegan a [La Mesa](la-mesa.md) en unos cinco minutos, y los números a [Los Números](los-numeros.md) al día siguiente. |
+| «TikTok no dio permiso para leer y responder comentarios. Vuelve a intentarlo y acepta todo lo que pide.» | En la pantalla de TikTok no se aceptaron los dos permisos de comentarios, que son los únicos sin los que no se activa. | «Activar TikTok for Business (comentarios y números) →» de nuevo, y aceptar todo. |
 | «Autorizaste otra cuenta de TikTok. Entra en TikTok con la misma cuenta de esta fila y vuelve a intentarlo.» | La pantalla de TikTok autorizó una cuenta con otro nombre que la de la fila. No se guardó nada. | Cambiar de cuenta en tiktok.com, en ese navegador, y repetir. |
-| «No se pudieron activar los comentarios de TikTok. Inténtalo de nuevo.» | TikTok no terminó de entregar el permiso, pasaron más de diez minutos, o la cuenta se desconectó mientras tanto. | Repetir; si se repite, avisar a quien administra Tu Parrilla. |
-| «Los comentarios de TikTok todavía no están disponibles en Tu Parrilla.» | Se abrió a mano la dirección de activar comentarios sin tenerlos abiertos. No se guardó nada. | Nada: todavía no se pueden activar. |
+| «No se pudo activar TikTok for Business. Inténtalo de nuevo.» | TikTok no terminó de entregar el permiso, pasaron más de diez minutos, o la cuenta se desconectó mientras tanto. | Repetir; si se repite, avisar a quien administra Tu Parrilla. |
+| «TikTok for Business todavía no está disponible en Tu Parrilla.» | Se abrió a mano la dirección de activar TikTok for Business sin tenerlo abierto. No se guardó nada. | Nada: todavía no se puede activar. |
 | «Threads todavía no está disponible en Tu Parrilla: próximamente.» (o «X / Twitter todavía no está disponible en Tu Parrilla: próximamente.») | Se abrió a mano la dirección de conexión de Threads o de X, que están en «Próximamente». No se conectó nada. | Nada: esas redes todavía no se pueden conectar. |
 | «Faltan las credenciales de la app de Meta (INSTAGRAM_APP_ID / INSTAGRAM_APP_SECRET).», «Faltan las credenciales del login de Instagram (INSTAGRAM_LOGIN_APP_ID / INSTAGRAM_LOGIN_APP_SECRET).», «Faltan las credenciales de Google (GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET).», «Faltan las credenciales de TikTok» | La instalación de Tu Parrilla no tiene configurada esa red. | Avisar a quien administra Tu Parrilla. |
 | Una página en blanco que dice «Falta INSTAGRAM_APP_ID» (o «Falta INSTAGRAM_LOGIN_APP_ID», «Falta GOOGLE_CLIENT_ID», «Falta TIKTOK_CLIENT_KEY») | Lo mismo, detectado antes de abrir la ventana de la red. | Avisar a quien administra Tu Parrilla. |
@@ -318,7 +318,7 @@ Trae los posts y los números de las cuentas de Instagram, TikTok, YouTube y Fac
 - **«Reconecté y apareció una cuenta nueva»** → En la ventana de la red se entró con otra cuenta, o la red le dio un identificador nuevo a la misma. Si es la misma cuenta, desconectar la vieja y fusionarla (ver «Para fusionar una cuenta repetida»).
 - **«Tengo dos filas de la misma cuenta»** → «Para fusionar una cuenta repetida».
 - **«Mi TikTok aparece con un número largo en vez del nombre»** → TikTok no entregó el nombre al conectar; «Reconectar» lo vuelve a pedir.
-- **«¿Cómo traigo los comentarios de TikTok?»** → Si en el detalle de la cuenta de TikTok (la flecha de su fila) aparece «Activar comentarios en La Mesa →», ver «Para traer los comentarios de TikTok a La Mesa». Si no aparece, para esa cuenta todavía no están disponibles.
+- **«¿Cómo traigo los comentarios de TikTok?»** (o **«¿por qué TikTok no tiene seguidores ni audiencia en Los Números?»**) → Si en el detalle de la cuenta de TikTok (la flecha de su fila) aparece «Activar TikTok for Business (comentarios y números) →», ver «Para traer los comentarios y los números de TikTok». Si no aparece, para esa cuenta todavía no está disponible.
 - **«¿Tengo que poner mi TikTok en privada?»** → No, ni para conectar ni para publicar: la publicación directa está aprobada y sale con la privacidad que se elija en el compositor de [La Parrilla](la-parrilla.md).
 - **«El botón "Ajustes" (o "el engranaje") tiene un punto ámbar (o rojo)»** → Una cuenta se está enfriando (o se apagó). Abrir el botón: la entrada «Los Fierros» dice cuántas, por ejemplo «1 se enfría». Aquí, la fila con el fierro ámbar o gris → «Reconectar». Una cuenta desconectada a propósito no enciende el punto.
 - **«¿Cómo conecto Threads?»** o **«no puedo conectar X»** → Todavía no se puede: las dos dicen «Próximamente». Hoy se conectan Instagram, Facebook, TikTok y YouTube.
@@ -357,7 +357,7 @@ Lo que describe sale de:
 - `src/app/admin/actions.ts` (`syncSocialNow`, `disconnectAccount`, `quitarCuentaAccion`, `fusionarCuenta`, `conectarElegidas`)
 - `src/app/api/social/[network]/connect/route.ts`
 - `src/app/api/social/[network]/callback/route.ts`
-- `src/app/api/social/tiktok/comentarios/route.ts`, `src/app/api/social/tiktok/comentarios/vuelta/route.ts` y `src/lib/social/tiktok-business.ts` («Activar comentarios en La Mesa →» y sus frases; para quién está abierto, en `src/lib/redes-abiertas.ts`)
+- `src/app/api/social/tiktok/comentarios/route.ts`, `src/app/api/social/tiktok/comentarios/vuelta/route.ts` y `src/lib/social/tiktok-business.ts` («Activar TikTok for Business (comentarios y números) →», «Autorizar de nuevo para traer todos sus números →» y sus frases; para quién está abierto, en `src/lib/redes-abiertas.ts`)
 - `src/lib/networks.ts` (nombres de las redes, avisos, `META_EN_REVISION`, las redes en «Próximamente» y los textos del login de Instagram) y `src/lib/redes-abiertas.ts` (Threads y el login de Instagram abiertos para el revisor)
 - `src/lib/social/instagram-login.ts` (el login de Instagram: la frase de cuando está cerrado) y `src/lib/social/instagram.ts` (su renovación sola)
 - `src/lib/parrilla.ts` (`estadoDelFierro`, los siete días del aviso)

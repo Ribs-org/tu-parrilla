@@ -33,9 +33,11 @@ describe('pasosParaBorrarYoutube', () => {
 })
 
 describe('pasoParaBorrarComentariosTiktok', () => {
-  it('borra solo la credencial de comentarios de esa cuenta y de ese dueño, con los dos como parámetros', () => {
+  it('borra solo la credencial y los números de TikTok for Business de esa cuenta y de ese dueño, con los dos como parámetros', () => {
     const { sql, params } = new PgDialect().sqlToQuery(pasoParaBorrarComentariosTiktok('owner-1', 'cuenta-1'))
-    expect(sql).toBe("delete from ajustes where owner_id = $1 and clave = 'tiktok_comentarios:' || $2")
-    expect(params).toEqual(['owner-1', 'cuenta-1'])
+    expect(sql).toBe(
+      "delete from ajustes where owner_id = $1 and (clave = 'tiktok_comentarios:' || $2 or starts_with(clave, 'tiktok_business:' || $3 || ':'))",
+    )
+    expect(params).toEqual(['owner-1', 'cuenta-1', 'cuenta-1'])
   })
 })

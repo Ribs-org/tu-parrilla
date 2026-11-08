@@ -4,7 +4,7 @@ import { getDb, socialAccounts } from '@/db'
 import { usuarioActual } from '@/lib/auth'
 import { env } from '@/lib/env'
 import { conMensaje } from '@/lib/mensaje-firmado'
-import { tiktokComentariosAbiertoPara } from '@/lib/redes-abiertas'
+import { tiktokBusinessAbiertoPara } from '@/lib/redes-abiertas'
 import { leerCuentaDeOAuthState } from '@/lib/social/oauth-state'
 import {
   COMENTARIOS_ACTIVADOS,
@@ -28,7 +28,8 @@ export const dynamic = 'force-dynamic'
  * redirige aquí sin la barra y con el código intacto.
  *
  * Canjea el código, comprueba que se concedieron los dos permisos de comentarios y que la cuenta
- * que autorizó es la de la fila, y guarda la credencial junto a la cuenta. Nunca crea una fila.
+ * que autorizó es la de la fila, y guarda la credencial junto a la cuenta. Nunca crea una fila. Los
+ * permisos de los números no se exigen: los que falten solo apagan lo suyo (`tiktok-numeros.ts`).
  */
 export async function GET(request: Request) {
   const usuario = await usuarioActual()
@@ -36,7 +37,7 @@ export async function GET(request: Request) {
   const url = new URL(request.url)
   const volver = (texto: string) => NextResponse.redirect(`${url.origin}${conMensaje('/admin/accounts', texto)}`)
 
-  if (!tiktokComentariosAbiertoPara(usuario.id)) return volver(COMENTARIOS_CERRADOS)
+  if (!tiktokBusinessAbiertoPara(usuario.id)) return volver(COMENTARIOS_CERRADOS)
   const base = env('TIKTOK_BUSINESS_AUTORIZACION')
   if (!base) return volver(COMENTARIOS_CERRADOS)
 
