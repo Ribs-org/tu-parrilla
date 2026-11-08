@@ -185,7 +185,9 @@ export default function PrivacidadPage() {
           </a>
           . De YouTube
           se guardan el identificador, el título, la miniatura y los contadores de{' '}
-          <span className="text-fg">tus propios videos</span>, y los comentarios de esos videos.
+          <span className="text-fg">tus propios videos</span>, y los comentarios de esos videos; si
+          eliges una playlist de tu canal para un video, se guarda su identificador para agregarlo
+          cuando salga, y sus nombres no se guardan.
           Se refrescan a diario mientras el canal esté conectado, y{' '}
           <span className="text-fg">nada de eso se guarda más de 30 días</span> sin refrescarse:
           las lecturas diarias de los contadores, los comentarios y los títulos y miniaturas que

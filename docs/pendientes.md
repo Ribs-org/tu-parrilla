@@ -666,7 +666,18 @@ permisos «por decidir»** de la tabla red por red, para pedirlos todos en una m
 - **[dueño] Probar TikTok desde el teléfono con una cuenta real** (2026-11-07). Llegó por aire a la
   1.1.0 el 2026-11-07; se probó en Expo web contra una API falsa, no contra TikTok: programar desde
   el teléfono una foto a una cuenta de TikTok y mirar que salga con la privacidad elegida.
-- **[dueño] La app en iPhone** (2026-10-16). El código ya está listo para iOS; faltan la
+- **[dueño] Publicar por aire a la 1.1.0 las opciones de YouTube** (2026-11-08). Después de que
+  el servidor con «Quién lo ve», «Hecho con IA» y «Agregar a una playlist» esté en producción,
+  copiar a la punta de `ota-1.1.0` los archivos de la lista en `mobile/README.md` («Las opciones de
+  YouTube por aire a la 1.1.0») y publicar a los dos canales. No se probó en un teléfono ni en Expo
+  web: al publicar, programar desde el teléfono un video no listado a una playlist y mirar que
+  salga así.
+- **[dueño] Probar las opciones de YouTube con un canal real** (2026-11-08). Las pruebas cubren lo
+  que se le manda a YouTube, no lo que YouTube hace: falta subir un Short no listado, uno con
+  «Hecho con IA» (mirar en YouTube Studio que quedó la declaración de contenido alterado) y uno con
+  playlist, y ver que entró al final de ella. Si `playlistItems.insert` rechaza un video recién
+  procesado, el aviso sale en el editor; ver el bloque de YouTube en `README.md`, «Varias cuentas
+  de una misma red».- **[dueño] La app en iPhone** (2026-10-16). El código ya está listo para iOS; faltan la
   cuenta del Apple Developer Program, confirmar el identificador `cl.tuparrilla.app`
   (queda fijo al registrarlo), la ficha en App Store Connect y el primer build a
   TestFlight. Pasos y comandos en `mobile/README.md`, «iPhone (iOS)».
@@ -743,6 +754,10 @@ nadie paga: todas las cuentas son iguales y el README dice «Sin suscripción».
 
 ## Features y trabajo de código
 
+- **El teléfono no muestra el aviso de la playlist de YouTube** (2026-11-08). Un video que salió sin
+  entrar a su playlist lo dice en el editor del panel y en `GET /api/schedule/posts` (`aviso`); el
+  teléfono no tiene una vista de lo publicado por destino donde ponerlo. Si se le agrega una, el
+  aviso está en `scheduled_post_targets.aviso`. Tampoco lo cuenta el resumen del día.
 - **Borrar una cuenta que ya entró, con todos sus datos** (2026-11-08, al llenar «Data safety» en
   Play). `/borrar-mis-datos` promete borrar todo dentro de 30 días a quien lo pida por correo, pero
   no hay cómo: «Quitar», en Los Maestros, solo borra a quien nunca entró (`quitar` en

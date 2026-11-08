@@ -26,13 +26,14 @@ export function redesDelTelefono(conTikTok: boolean): ReadonlySet<string> {
 
 /**
  * Lo que la app avisa que sabe hacer en Publicar, en `X-Parrilla-Publicar` (`mobile/src/lib/api.ts`):
- * `tiktok` —el bloque de TikTok, con `creator_info`— y `palabra-clave` —la respuesta automática—.
+ * `tiktok` —el bloque de TikTok, con `creator_info`—, `palabra-clave` —la respuesta automática— y
+ * `youtube` —el bloque de YouTube: visibilidad, «Hecho con IA» y playlist, desde el 2026-11-08—.
  * Va en una cabecera y no en el cuerpo porque también lo necesitan los `GET` (las cuentas que se
  * ofrecen, el borrador que se abre). Una app que no la manda es una instalación sin actualizar:
  * para ella todo sigue como antes, y lo que no ve se conserva y se programa en el panel
  * (`soloEnElPanel`).
  */
-export type LoQueSabe = 'tiktok' | 'palabra-clave'
+export type LoQueSabe = 'tiktok' | 'palabra-clave' | 'youtube'
 
 export function sabeDe(request: Request, que: LoQueSabe): boolean {
   return (request.headers.get('x-parrilla-publicar') ?? '').split(',').some((c) => c.trim() === que)

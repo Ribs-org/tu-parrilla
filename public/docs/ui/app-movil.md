@@ -157,6 +157,11 @@ De arriba abajo:
   - El interruptor **«Hecho con IA»**, con «Enciéndelo si la imagen o la voz se hicieron o se cambiaron con IA de forma realista.» (apagado) o «TikTok lo etiquetará como contenido generado con IA.» (encendido).
   - Solo con fotos, el interruptor **«Música de TikTok»**, con «TikTok le pone a las fotos una canción recomendada; la puedes cambiar después en la app de TikTok. Esta cuenta lo recuerda para la próxima vez.». Nace como se dejó la última vez en esa cuenta.
   - Al final, en chico: «Al publicar aceptas la Music Usage Confirmation de TikTok. Después de publicar, TikTok puede tardar unos minutos en mostrarlo en tu perfil.» (con «Contenido patrocinado», «Al publicar aceptas la Branded Content Policy y la Music Usage Confirmation de TikTok. …»). Los nombres subrayados son enlaces que abren esas páginas de TikTok.
+- Por cada canal de YouTube marcado, un bloque **«YouTube · nombre_del_canal»**, el mismo del panel web (una versión de la app que todavía no recibe la actualización del 2026-11-08 no lo muestra, y el video sale con lo que se haya elegido en el panel, o público):
+  - **«Quién lo ve»**: tres botones redondos, «Público» (el que viene elegido), «No listado» y «Privado». Debajo, la frase del elegido: «Lo ve cualquiera en YouTube.», «Solo quien tenga el link: no sale en tu canal ni en las búsquedas.» o «Solo tú, desde YouTube Studio.».
+  - El interruptor **«Hecho con IA»**, con «Enciéndelo si el video muestra de forma realista una persona, un lugar o un hecho que se hizo o se cambió con IA: YouTube pide avisarlo.» (apagado) o «YouTube lo marcará como contenido alterado o sintético.» (encendido).
+  - El interruptor **«Agregar a una playlist»**, con «Cuando el video salga, lo agregamos a una playlist de tu canal.» (apagado). Encendido dice «Cuando el video salga, lo agregamos al final de esa playlist. Si YouTube no lo deja, el video sale igual y te lo decimos en la publicación.», y debajo «Leyendo tus playlists…» y después un botón redondo por playlist del canal; la elegida se pinta en naranjo. Mientras no se elija ninguna, «Elige una playlist». Sin playlists: «Este canal todavía no tiene playlists. Crea una en YouTube y aprieta «Volver a cargar».». Al final, el botón de texto **«Volver a cargar»**. Si no llegó la lista, en ámbar «YouTube no respondió con tus playlists. Inténtalo de nuevo en un rato.» o «YouTube no dejó ver las playlists de este canal. Reconéctalo en Los Fierros y vuelve a intentarlo.». En un borrador cuya playlist ya no está en el canal, va un botón «La que elegiste antes (ya no aparece en el canal)», ya elegido.
+  - Si después el video sale pero no entra a la playlist, el teléfono no lo dice: se ve en el editor del post en el panel web ([La Parrilla](la-parrilla.md)), y se agrega a mano en YouTube Studio.
 - **«▸ Respuesta automática por palabra clave»**, plegado (tocarlo lo abre: «▾ …»; viene abierto si el borrador ya trae una palabra). Es el del panel web: «Palabra clave» (ejemplo «GUIA», hasta 30 letras) con «Una sola palabra. Quien la comente recibe la respuesta sin que hagas nada.»; «Mensaje» (ejemplo «Acá tienes la guía: https://…», hasta 1000) con «Pon el enlace aquí; si es de tu sitio se mide solo en Los Números.»; «Respuesta pública» (viene con «Te lo mandé por privado 📩», hasta 300) con «La que se publica bajo el comentario cuando el mensaje sale por privado.»; y al final «Con el mensaje privado encendido para tu cuenta, en Instagram y Facebook se publica esta respuesta y el mensaje con el enlace va por privado, una vez a cada persona. Si no, en YouTube o pasados siete días, el mensaje con el enlace se publica como respuesta. En TikTok todavía no hay cola de comentarios.». Con la palabra vacía no hay respuesta automática.
 - El botón «Cuándo: 14/10 a las 19:00» (con el día y la hora elegidos). De partida trae la próxima hora en punto; si se llegó desde la cruz de un día de La Parrilla, trae ese día a esa misma hora en punto, y un borrador con fecha trae la suya.
 - Los mensajes: en rojo los problemas; en gris cómo van las subidas («Subiendo el archivo…» o «Subiendo 3 archivos…») y el envío («Programando…» o «Publicando…», y después «Listo»).
@@ -366,6 +371,14 @@ Instagram y YouTube necesitan al menos un archivo; Facebook acepta solo texto. Y
 6. «Programar» o «Publicar ahora».
 
 Para mandarlo a la bandeja de TikTok y terminarlo en la app de TikTok, enciende «Enviar como borrador a mi bandeja de TikTok» en vez de los pasos 3 a 5. Sin elegir quién puede verlo, al programar sale «TikTok necesita que elijas la privacidad.».
+
+### Para subir a YouTube como no listado, privado o a una playlist
+
+1. En «Publicar», elige el video y marca el canal de YouTube. Aparece «YouTube · nombre_del_canal».
+2. En «Quién lo ve», toca «No listado» o «Privado» (si no, sale «Público»).
+3. Si el video muestra algo realista hecho o cambiado con IA, enciende «Hecho con IA».
+4. Para una playlist, enciende «Agregar a una playlist» y toca la que quieras. Si la acabas de crear en YouTube y no sale, «Volver a cargar».
+5. «Programar» o «Publicar ahora».
 
 ### Para poner una respuesta automática por palabra clave
 
@@ -843,6 +856,7 @@ Lo que describe sale de estos archivos:
 - `mobile/src/lib/publicar.ts`
 - `mobile/src/lib/historias.ts` y `mobile/src/components/visor-historias.tsx` («Post · Historia», el visor 9:16, la tira, sus avisos y lo que viaja al programar una historia)
 - `src/app/api/mobile/schedule/route.ts` (programar: una secuencia de historias crea una por archivo) y `src/lib/borrador.ts` (el modo que guarda el borrador y la frase de una app sin actualizar)
+- `mobile/src/components/youtube-opciones.tsx` y `mobile/src/lib/youtube.ts` (el bloque de YouTube, sus textos y lo que viaja), y `src/app/api/mobile/youtube/playlists/route.ts` con `src/lib/playlists-youtube.ts` (las playlists del canal, con sus frases)
 - `mobile/src/components/tiktok-opciones.tsx` y `mobile/src/lib/tiktok.ts` (el bloque de TikTok, sus textos y lo que viaja), `src/app/api/mobile/schedule/accounts/[id]/tiktok/route.ts` y `src/lib/social/publish/tiktok-cuenta.ts` (lo que dice `creator_info`, con sus frases)
 - `mobile/src/components/regla-clave.tsx` y `mobile/src/lib/regla.ts` (la respuesta automática por palabra clave), y `src/lib/social/comentarios/reglas.ts` (sus frases al programar)
 - `mobile/src/components/musica-instagram.tsx`, `mobile/src/lib/musica.ts` y `mobile/src/lib/reproductor.ts` («Música de Instagram»: el bloque, sus frases y la muestra, que con la 1.1.0 se abre afuera)

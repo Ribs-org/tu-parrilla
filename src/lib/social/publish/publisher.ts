@@ -31,7 +31,11 @@ export type PublishInput = {
 export type PublishOutcome =
   // `externalId` nulo cuando la red no entrega un id que cruce con el connector: el
   // borrador a la bandeja de TikTok publica "en la bandeja", no en el perfil.
-  | { kind: 'published'; externalId: string | null }
+  //
+  // `aviso`: salió, pero un paso de después no —hoy, agregar el video de YouTube a la playlist
+  // elegida (`youtube.ts`)—. No es un fallo: el destino queda publicado, con la frase en
+  // `scheduled_post_targets.aviso`, que el editor muestra al lado del estado.
+  | { kind: 'published'; externalId: string | null; aviso?: string }
   | { kind: 'processing'; containerId: string }
   // La red pidió esperar: se vuelve a intentar sin gastar intento, porque nada salió mal
   // con el post. Sin más datos, en la próxima corrida y sin motivo (el cupo por minuto de

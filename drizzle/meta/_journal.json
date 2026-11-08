@@ -236,8 +236,15 @@
     {
       "idx": 33,
       "version": "7",
-      "when": 1794177980609,
-      "tag": "0033_analitica_de_youtube",
+      "when": 1794177681268,
+      "tag": "0033_aviso_del_destino",
+      "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1794180208828,
+      "tag": "0034_analitica_de_youtube",
       "breakpoints": true
     }
   ]

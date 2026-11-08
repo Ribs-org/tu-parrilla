@@ -652,6 +652,11 @@ export const scheduledPostTargets = pgTable(
     externalId: text('external_id'),
     attemptCount: integer('attempt_count').notNull().default(0),
     lastError: text('last_error'),
+    // Un destino que salió con un paso de después a medias: hoy, un video de YouTube que no
+    // entró a la playlist elegida (`social/publish/youtube.ts`). Una frase nuestra, como
+    // `lastError`, pero no es un fallo: el destino sigue `published`. La escribe `publishDue`
+    // al publicar —nula si no hubo nada que avisar— y la muestra el editor.
+    aviso: text('aviso'),
     // No se intenta antes de esta hora. La pone `resolveOutcome`: la espera entre un intento
     // fallido y el siguiente (`ESPERAS_TRAS_FALLO_MS`), o la que pide una red sin cupo (el
     // tope diario de Instagram). Nula = sale en la primera corrida después de su hora.

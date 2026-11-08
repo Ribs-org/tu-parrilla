@@ -25,6 +25,8 @@ import {
   resumenOpciones,
   validarOpciones,
   validarOpcionesPorCuenta,
+  youtubeDe,
+  youtubeDesdeFormulario,
 } from './opciones'
 
 const directo = {
@@ -604,5 +606,88 @@ describe('«Música de Instagram» en las opciones de Instagram', () => {
 
   it('la API la devuelve tal como quedó', () => {
     expect(opcionesParaApi('instagram', { musica })).toEqual({ musica })
+  })
+})
+
+describe('opciones de YouTube', () => {
+  it('lo de siempre —público, sin IA, sin playlist— no guarda nada', () => {
+    expect(validarOpciones('youtube', undefined)).toEqual({ opciones: null })
+    expect(validarOpciones('youtube', null)).toEqual({ opciones: null })
+    expect(validarOpciones('youtube', {})).toEqual({ opciones: null })
+    expect(validarOpciones('youtube', { visibilidad: 'public', ia: false, playlist: null })).toEqual({ opciones: null })
+  })
+
+  it('guarda solo lo que se sale de lo de siempre', () => {
+    expect(validarOpciones('youtube', { visibilidad: 'unlisted' })).toEqual({ opciones: { visibilidad: 'unlisted' } })
+    expect(validarOpciones('youtube', { visibilidad: 'private', ia: true, playlist: 'PLabc_-123' })).toEqual({
+      opciones: { visibilidad: 'private', ia: true, playlist: 'PLabc_-123' },
+    })
+    expect(validarOpciones('youtube', { visibilidad: 'public', ia: true })).toEqual({ opciones: { ia: true } })
+  })
+
+  it('rechaza una visibilidad que no existe, una clave de más o un id de playlist sin forma', () => {
+    expect(validarOpciones('youtube', { visibilidad: 'PUBLIC_TO_EVERYONE' })).toEqual({ error: OPCIONES_ERROR })
+    expect(validarOpciones('youtube', { privacidad: 'private' })).toEqual({ error: OPCIONES_ERROR })
+    expect(validarOpciones('youtube', { ia: 'si' })).toEqual({ error: OPCIONES_ERROR })
+    expect(validarOpciones('youtube', { playlist: 'https://youtube.com/playlist?list=PL1' })).toEqual({
+      error: OPCIONES_ERROR,
+    })
+    expect(validarOpciones('youtube', { playlist: '' })).toEqual({ error: OPCIONES_ERROR })
+    expect(validarOpciones('youtube', 'privado')).toEqual({ error: OPCIONES_ERROR })
+  })
+
+  it('youtubeDe lee lo guardado, y null en otra red o con algo que no se entiende', () => {
+    expect(youtubeDe('youtube', { ia: true })).toEqual({ ia: true })
+    expect(youtubeDe('tiktok', { ia: true })).toBeNull()
+    expect(youtubeDe('youtube', { otra: 1 })).toBeNull()
+  })
+
+  it('validarOpcionesPorCuenta las acepta por cuenta, y con dos canales nombra el que falló', () => {
+    const cuentas = [
+      { id: 'yt-1', network: 'youtube', handle: 'Canal uno' },
+      { id: 'yt-2', network: 'youtube', handle: 'Canal dos' },
+    ]
+    expect(validarOpcionesPorCuenta(cuentas, { 'yt-1': { visibilidad: 'private' }, 'yt-2': { playlist: 'PL2' } })).toEqual({
+      opciones: { 'yt-1': { visibilidad: 'private' }, 'yt-2': { playlist: 'PL2' } },
+    })
+    expect(validarOpcionesPorCuenta(cuentas, { 'yt-2': { visibilidad: 'oculto' } })).toEqual({
+      error: `«Canal dos»: ${OPCIONES_ERROR}`,
+    })
+    // Sin opciones, un canal sigue saliendo como siempre: no hay nada que exigir.
+    expect(validarOpcionesPorCuenta(cuentas, {})).toEqual({ opciones: {} })
+  })
+
+  it('el formulario las lee de youtubeVisibilidad, youtubeIA y youtubePlaylist con el sufijo de la cuenta', () => {
+    const fd = new FormData()
+    fd.set('youtubeVisibilidad:y1', 'unlisted')
+    fd.set('youtubeIA:y1', 'on')
+    fd.set('youtubePlaylist:y1', 'PL9')
+    fd.set('youtubeVisibilidad:y2', 'public')
+    fd.set('youtubeIA:y2', '')
+    fd.set('youtubePlaylist:y2', '')
+    const raw = opcionesDesdeFormularioPorCuenta(fd, [
+      { id: 'y1', network: 'youtube' } as never,
+      { id: 'y2', network: 'youtube' } as never,
+    ])
+    expect(raw).toEqual({ y1: { visibilidad: 'unlisted', ia: true, playlist: 'PL9' } })
+    expect(youtubeDesdeFormulario(fd, 'y2')).toBeUndefined()
+  })
+
+  it('el resumen dice la visibilidad, la IA y la playlist', () => {
+    expect(resumenOpciones('youtube', { visibilidad: 'unlisted', ia: true, playlist: 'PL1' })).toBe(
+      'No listado · hecho con IA · a una playlist',
+    )
+    expect(resumenOpciones('youtube', { ia: true })).toBe('Público · hecho con IA')
+    expect(resumenOpciones('youtube', null)).toBeNull()
+  })
+
+  it('la API las devuelve con las tres claves explícitas', () => {
+    expect(opcionesParaApi('youtube', { ia: true })).toEqual({ visibilidad: 'public', ia: true, playlist: null })
+    expect(opcionesParaApi('youtube', { visibilidad: 'private', playlist: 'PL1' })).toEqual({
+      visibilidad: 'private',
+      ia: false,
+      playlist: 'PL1',
+    })
+    expect(opcionesParaApi('youtube', null)).toBeNull()
   })
 })

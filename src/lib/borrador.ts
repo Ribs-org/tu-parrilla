@@ -3,7 +3,14 @@
 // llenar el formulario. Sin base ni `server-only`: lo usan el compositor (navegador), la
 // acción que guarda y los tests.
 import { addDays, dayKey } from './schedule-week'
-import { PRIVACIDADES_TIKTOK, musicaDe, musicaDesdeCampo, type MusicaInstagram } from './social/publish/opciones'
+import {
+  PRIVACIDADES_TIKTOK,
+  VISIBILIDADES_YOUTUBE,
+  musicaDe,
+  musicaDesdeCampo,
+  type MusicaInstagram,
+  type VisibilidadYoutube,
+} from './social/publish/opciones'
 import { esUuid } from './uuid'
 
 /** Los valores de un formulario, nombre por nombre, tal como los entrega `FormData.getAll`. */
@@ -93,6 +100,30 @@ export function tiktokInicial(campos: Campos, cuentaId: string): TikTokInicial |
   }
 }
 
+/** Lo que el bloque de YouTube de una cuenta tenía elegido, para volver a mostrarlo. */
+export type YoutubeInicial = {
+  visibilidad: VisibilidadYoutube
+  ia: boolean
+  /** El id de la playlist, o vacío sin playlist. */
+  playlist: string
+}
+
+/**
+ * El bloque de YouTube de esa cuenta como quedó, o null si el formulario no lo tenía (un borrador
+ * de antes de que existiera, o sin esa cuenta): entonces nace como siempre, público y sin nada.
+ */
+export function youtubeInicial(campos: Campos, cuentaId: string): YoutubeInicial | null {
+  if (!(`${YOUTUBE_VISIBILIDAD}${cuentaId}` in campos)) return null
+  const visibilidad = primero(campos, `${YOUTUBE_VISIBILIDAD}${cuentaId}`)
+  return {
+    visibilidad: (VISIBILIDADES_YOUTUBE as readonly string[]).includes(visibilidad)
+      ? (visibilidad as VisibilidadYoutube)
+      : 'public',
+    ia: primero(campos, `youtubeIA:${cuentaId}`) === 'on',
+    playlist: primero(campos, `youtubePlaylist:${cuentaId}`).trim(),
+  }
+}
+
 /** Si el reel de esa cuenta de Instagram iba como trial reel. */
 export function instagramTrialInicial(campos: Campos, cuentaId: string): boolean {
   return primero(campos, `instagramTrial:${cuentaId}`) === 'on'
@@ -179,18 +210,29 @@ export type BorradorDelTelefono = {
    * compositor). Ausente en una app que no la muestra: entonces se conserva la del panel.
    */
   regla?: ReglaDeBorrador | null
+  /**
+   * Lo que el bloque de YouTube de cada cuenta tenía elegido, como lo lee el compositor
+   * (`youtubeInicial`). Ausente en una app que no trae el bloque (antes del 2026-11-08): entonces
+   * se conservan las opciones de YouTube que dejó el panel.
+   */
+  youtube?: Record<string, YoutubeInicial>
 }
 
 /** Los campos que el teléfono escribe enteros cada vez que guarda. */
 const DEL_TELEFONO = new Set(['caption', 'cuentas', 'scheduledAt', 'cuandoAhora'])
 const TRIAL = 'instagramTrial:'
 const MUSICA = 'instagramMusica:'
+const YOUTUBE_VISIBILIDAD = 'youtubeVisibilidad:'
 /** Los campos de la regla de palabra clave, los mismos que lee `reglaDesdeFormulario`. */
 const REGLA = ['reglaPalabra', 'reglaMensaje', 'reglaRespuesta']
 
 /** Si un campo es del bloque de TikTok de alguna cuenta (`tiktokModo:<id>`, `tiktokPrivacidad:<id>`…). */
 function esCampoDeTikTok(nombre: string): boolean {
   return nombre.startsWith('tiktok') && nombre.includes(':')
+}
+/** Si un campo es del bloque de YouTube de alguna cuenta (`youtubeVisibilidad:<id>`…). */
+function esCampoDeYoutube(nombre: string): boolean {
+  return nombre.startsWith('youtube') && nombre.includes(':')
 }
 /**
  * El campo del modo: `historia`, o ausente si es un post. El compositor del panel todavía no
@@ -241,6 +283,7 @@ export function camposDesdeTelefono(
     if (telefono.musica !== undefined && nombre.startsWith(MUSICA)) continue
     if (telefono.historia !== undefined && nombre === MODO) continue
     if (telefono.tiktok !== undefined && esCampoDeTikTok(nombre)) continue
+    if (telefono.youtube !== undefined && esCampoDeYoutube(nombre)) continue
     if (telefono.regla !== undefined && REGLA.includes(nombre)) continue
     campos[nombre] = valores
   }
@@ -256,6 +299,9 @@ export function camposDesdeTelefono(
   }
   for (const [id, t] of Object.entries(telefono.tiktok ?? {})) {
     if (cuentas.includes(id)) Object.assign(campos, camposDeTikTok(id, t))
+  }
+  for (const [id, y] of Object.entries(telefono.youtube ?? {})) {
+    if (cuentas.includes(id)) Object.assign(campos, camposDeYoutube(id, y))
   }
   if (telefono.regla && telefono.regla.palabra.trim() !== '') {
     campos.reglaPalabra = [telefono.regla.palabra]
@@ -281,6 +327,14 @@ function camposDeTikTok(id: string, t: TikTokInicial): Campos {
   if (t.pegar) campos[`tiktokPegar:${id}`] = ['on']
   if (t.ia) campos[`tiktokIA:${id}`] = ['on']
   if (t.musica !== undefined) campos[`tiktokMusica:${id}`] = [t.musica ? 'on' : '']
+  return campos
+}
+
+/** El bloque de YouTube de una cuenta escrito como lo deja el formulario del compositor. */
+function camposDeYoutube(id: string, y: YoutubeInicial): Campos {
+  const campos: Campos = { [`${YOUTUBE_VISIBILIDAD}${id}`]: [y.visibilidad] }
+  if (y.ia) campos[`youtubeIA:${id}`] = ['on']
+  if (y.playlist) campos[`youtubePlaylist:${id}`] = [y.playlist]
   return campos
 }
 
@@ -316,6 +370,59 @@ export function tiktokDelTelefono(
       ia: o.ia === true,
       ...(typeof o.musica === 'boolean' ? { musica: o.musica } : {}),
     }
+  }
+  return salida
+}
+
+/**
+ * Lo que el bloque de YouTube de cada cuenta tenía elegido, sacado de las `opciones` con que el
+ * teléfono guarda un borrador (`{ visibilidad, ia, playlist }`, la forma con que programa), sin
+ * validar: lo que no se entiende queda como nace el bloque —público, sin IA, sin playlist—. Solo las
+ * cuentas de YouTube elegidas (`youtube`).
+ */
+export function youtubeDelTelefono(
+  opciones: Record<string, unknown>,
+  cuentas: readonly string[],
+  youtube: ReadonlySet<string>,
+): Record<string, YoutubeInicial> {
+  const salida: Record<string, YoutubeInicial> = {}
+  for (const id of cuentas) {
+    if (!youtube.has(id)) continue
+    const crudo = opciones[id]
+    const o: Record<string, unknown> = esObjetoPlano(crudo) ? crudo : {}
+    salida[id] = {
+      visibilidad: (VISIBILIDADES_YOUTUBE as readonly unknown[]).includes(o.visibilidad)
+        ? (o.visibilidad as VisibilidadYoutube)
+        : 'public',
+      ia: o.ia === true,
+      playlist: typeof o.playlist === 'string' ? o.playlist.trim().slice(0, 64) : '',
+    }
+  }
+  return salida
+}
+
+/**
+ * Las `opciones` con que el teléfono programa un borrador, con las de YouTube que el borrador
+ * guardaba si la app no trae el bloque (`conYoutube` en false: no manda `youtube` en
+ * `X-Parrilla-Publicar`). Esa app no las ve, así que no pudo haberlas quitado, y sin esto un video
+ * que en el panel quedó privado saldría público. Una app que trae el bloque manda las suyas.
+ */
+export function opcionesConYoutubeDelBorrador(
+  conYoutube: boolean,
+  opciones: Record<string, unknown>,
+  campos: Campos | null,
+): Record<string, unknown> {
+  if (!campos || conYoutube) return opciones
+  const salida: Record<string, unknown> = { ...opciones }
+  for (const id of campos.cuentas ?? []) {
+    const y = youtubeInicial(campos, id)
+    if (!y || salida[id] !== undefined) continue
+    const propias = {
+      ...(y.visibilidad !== 'public' ? { visibilidad: y.visibilidad } : {}),
+      ...(y.ia ? { ia: true } : {}),
+      ...(y.playlist ? { playlist: y.playlist } : {}),
+    }
+    if (Object.keys(propias).length > 0) salida[id] = propias
   }
   return salida
 }
@@ -400,6 +507,12 @@ export function telefonoDesdeCampos(campos: Campos): Omit<BorradorDelTelefono, '
       }),
     ),
     regla: reglaInicial(campos),
+    youtube: Object.fromEntries(
+      cuentas.flatMap((id) => {
+        const y = youtubeInicial(campos, id)
+        return y ? [[id, y] as const] : []
+      }),
+    ),
   }
 }
 
