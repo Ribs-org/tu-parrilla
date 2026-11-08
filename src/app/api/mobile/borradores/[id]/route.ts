@@ -2,13 +2,13 @@ import { NextResponse } from 'next/server'
 import { idDeBorrador } from '@/lib/borrador'
 import { borrarBorrador, cargarBorrador } from '@/lib/borradores'
 import { abrirEnElTelefono, cuentasParaElTelefono } from '@/lib/borradores-movil'
-import { BORRADOR_NO_EXISTE } from '@/lib/mobile-api'
+import { BORRADOR_NO_EXISTE, sabeDe } from '@/lib/mobile-api'
 import { requireMobileUser } from '@/lib/mobile-guardia'
 
 export const dynamic = 'force-dynamic'
 
 /**
- * Un borrador para abrirlo en Publicar, con lo que el teléfono sabe mostrar. 404 si no
+ * Un borrador para abrirlo en Publicar, con lo que la app que pregunta sabe mostrar (`sabeDe`). 404 si no
  * existe o es de otro —sin distinguir, como el resto de la API—, o si se programó o se
  * descartó desde que La Parrilla lo listó.
  */
@@ -20,8 +20,12 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   const borrador = id ? await cargarBorrador(usuario.id, id) : null
   if (!borrador) return NextResponse.json({ error: BORRADOR_NO_EXISTE }, { status: 404 })
 
-  const { ajenas } = await cuentasParaElTelefono(usuario.id)
-  return NextResponse.json(abrirEnElTelefono(borrador, usuario.zona, ajenas))
+  // Lo que la app ve depende de lo que trae: una sin el bloque de TikTok no recibe esas cuentas,
+  // y una sin la palabra clave recibe el aviso de que eso se programa en el panel.
+  const { ajenas } = await cuentasParaElTelefono(usuario.id, sabeDe(request, 'tiktok'))
+  return NextResponse.json(
+    abrirEnElTelefono(borrador, usuario.zona, ajenas, { conRegla: sabeDe(request, 'palabra-clave') }),
+  )
 }
 
 /**

@@ -123,6 +123,7 @@ const { quitarCuenta, CUENTA_CONECTADA } = await import('./social/quitar')
 const { vincularSinId } = await import('./social/vincular-sin-id')
 const { listarBorradores, cargarBorrador, guardarBorrador, borrarBorrador } = await import('./borradores')
 const { cuentasParaElTelefono } = await import('./borradores-movil')
+const { creadorDeCuenta, recordarMusicaTikTok } = await import('./social/publish/tiktok-cuenta')
 const { leerAjuste } = await import('./ajustes')
 const { leerLoPagado, tieneAnuncios } = await import('./lo-pagado')
 const { leerProgramados } = await import('./schedule-leer')
@@ -235,8 +236,8 @@ function esperarFiltradoPorDueno({ sql, params }: Captura) {
 }
 
 /** Una petición cualquiera: `requireMobileUser` está simulado y no la mira. */
-function peticionMovil(): Request {
-  return new Request('https://ejemplo.cl/api/mobile/schedule/accounts')
+function peticionMovil(cabeceras: Record<string, string> = {}): Request {
+  return new Request('https://ejemplo.cl/api/mobile/schedule/accounts', { headers: cabeceras })
 }
 
 describe('aislamiento por dueño (SQL generado, sin base)', () => {
@@ -979,6 +980,63 @@ describe('aislamiento por dueño, escrituras (SQL generado, sin base)', () => {
     const where = sql.split(/\bwhere\b/i).pop()!
     expect(where).toMatch(/"network"\s+in\s*\(/i)
     expect(params).not.toContain('tiktok')
+  })
+
+  it('api/mobile/schedule/accounts: a la app con el bloque de TikTok le ofrece TikTok, siempre del dueño', async () => {
+    const { GET } = await import('../app/api/mobile/schedule/accounts/route')
+    const consultas = await todasLasConsultas(() => GET(peticionMovil({ 'X-Parrilla-Publicar': 'tiktok' })))
+    expect(consultas).toHaveLength(1)
+    esperarFiltradoPorDueno(consultas[0]!)
+    expect(consultas[0]!.params).toContain('tiktok')
+  })
+
+  it('borradores: cuentasParaElTelefono con TikTok lee igual solo las cuentas del dueño', async () => {
+    const consultas = await todasLasConsultas(() => cuentasParaElTelefono(DUENO, true))
+    expect(consultas).toHaveLength(1)
+    esperarFiltradoPorDueno(consultas[0]!)
+  })
+
+  /**
+   * `creator_info` se pide con el token de la cuenta: sin el dueño en la lectura, cualquiera con
+   * el id de una cuenta ajena vería su nombre, su avatar y sus privacidades, y gastaría su cupo.
+   */
+  it('tiktok-cuenta: creadorDeCuenta lee la cuenta atada al dueño antes de pedir nada a TikTok', async () => {
+    const consultas = await todasLasConsultas(() => creadorDeCuenta(DUENO, '6f1c2a54-9b1e-4c3d-8f00-0123456789ab'))
+    expect(consultas).toHaveLength(1)
+    esperarFiltradoPorDueno(consultas[0]!)
+  })
+
+  it('tiktok-cuenta: creadorDeCuenta no consulta con un id que no es uuid', async () => {
+    expect(await creadorDeCuenta(DUENO, 'nada')).toEqual({ error: 'Conecta TikTok en Los Fierros antes de programar.' })
+    expect(capturas).toHaveLength(0)
+  })
+
+  it('api/mobile/schedule/accounts/[id]/tiktok: lee solo una cuenta del dueño del token', async () => {
+    const { GET } = await import('../app/api/mobile/schedule/accounts/[id]/tiktok/route')
+    const consultas = await todasLasConsultas(() =>
+      GET(peticionMovil(), { params: Promise.resolve({ id: '6f1c2a54-9b1e-4c3d-8f00-0123456789ab' }) }),
+    )
+    expect(consultas).toHaveLength(1)
+    esperarFiltradoPorDueno(consultas[0]!)
+  })
+
+  it('tiktok-cuenta: recordarMusicaTikTok escribe solo en la cuenta del dueño', async () => {
+    const opciones = {
+      'cuenta-tt': {
+        modo: 'directo' as const,
+        privacidad: 'SELF_ONLY' as const,
+        comentarios: false,
+        duo: false,
+        pegar: false,
+        comercial: 'no' as const,
+        musica: true as const,
+      },
+    }
+    const consultas = await consultasEncadenadas(() => recordarMusicaTikTok(DUENO, opciones, { videos: 0, fotos: 2 }))
+    expect(consultas).toHaveLength(1)
+    expect(consultas[0]!.sql).toMatch(/update "social_accounts"/i)
+    esperarFiltradoPorDueno(consultas[0]!)
+    expect(consultas[0]!.params).toContain('cuenta-tt')
   })
 
   /**

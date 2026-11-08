@@ -24,7 +24,6 @@ import { scheduleBatch, MAX_BATCH_ITEMS } from '@/lib/social/publish/batch'
 import {
   errorDeHistoria,
   errorDeMediaPorOpciones,
-  musicaParaRecordar,
   opcionesDesdeFormularioPorCuenta,
   validarOpcionesPorCuenta,
 } from '@/lib/social/publish/opciones'
@@ -52,8 +51,8 @@ import {
   tomadasPorOtro,
 } from '@/lib/social/conectar'
 import { SIN_TOKEN_DE_PAGINA } from '@/lib/social/facebook'
-import { tiktokConnector } from '@/lib/social/tiktok'
-import { TIKTOK_SIN_CUENTA, consultarCreador, type CreadorTikTok } from '@/lib/social/publish/tiktok-creador'
+import type { CreadorTikTok } from '@/lib/social/publish/tiktok-creador'
+import { creadorDeCuenta, recordarMusicaTikTok } from '@/lib/social/publish/tiktok-cuenta'
 import { COOKIE_PENDIENTE, LOGIN_VENCIDO, elegidas, leerPendiente } from '@/lib/social/pendiente'
 import { networkLabel } from '@/lib/networks'
 import { crearLlave, revocarLlave } from '@/lib/llaves'
@@ -634,22 +633,12 @@ export async function updatePostCampaign(
 /* ---------------------------------------------------------- scheduling -- */
 
 /**
- * Lo que el bloque de TikTok del compositor necesita al abrirse: nombre, avatar y qué
- * privacidades puede elegir el dueño hoy. Por la cuenta que se le pide, no por «la»
- * cuenta de TikTok: con dos conectadas, las privacidades permitidas pueden diferir.
+ * Lo que el bloque de TikTok del compositor necesita al abrirse (`creadorDeCuenta`, la misma
+ * consulta que hace Publicar del teléfono).
  */
 export async function leerCreadorTikTok(accountId: string): Promise<{ creador: CreadorTikTok } | { error: string }> {
   const { id: ownerId } = await requireUser()
-  const [account] = await getDb()
-    .select()
-    .from(socialAccounts)
-    .where(and(eq(socialAccounts.id, accountId), eq(socialAccounts.ownerId, ownerId)))
-  // Sin esto, el identificador de una cuenta propia de otra red pasa el filtro del dueño
-  // y `ensureCredential` manda su token a la API de TikTok igual.
-  if (!account || account.network !== 'tiktok') return { error: TIKTOK_SIN_CUENTA }
-  const token = await tiktokConnector.ensureCredential(account)
-  if (!token) return { error: TIKTOK_SIN_CUENTA }
-  return consultarCreador(token)
+  return creadorDeCuenta(ownerId, accountId)
 }
 
 /** Los tres campos del bloque de palabra clave, crudos, listos para `validarRegla`. */
@@ -805,23 +794,11 @@ export async function createScheduledPost(_prev: FormState, formData: FormData):
     throw error
   }
 
-  // «Música de TikTok» queda recordada por cuenta: el interruptor nace así la próxima vez que
-  // se programen fotos ahí. Después de crear y fuera de la transacción a propósito: si esto
-  // falla, el post ya quedó programado y solo se pierde el recuerdo, así que no se le dice a
-  // la persona que algo salió mal.
-  try {
-    for (const { cuentaId, musica } of musicaParaRecordar(opcionesCheck.opciones, {
-      videos: videoCount,
-      fotos: uploaded.length - videoCount,
-    })) {
-      await getDb()
-        .update(socialAccounts)
-        .set({ tiktokMusica: musica })
-        .where(and(eq(socialAccounts.id, cuentaId), eq(socialAccounts.ownerId, ownerId)))
-    }
-  } catch (error) {
-    console.error('Recordar la música de TikTok:', String(error).slice(0, 300))
-  }
+  // «Música de TikTok» queda recordada por cuenta, como desde el teléfono.
+  await recordarMusicaTikTok(ownerId, opcionesCheck.opciones, {
+    videos: videoCount,
+    fotos: uploaded.length - videoCount,
+  })
 
   revalidatePath('/admin/schedule')
   return { ok: true, id }

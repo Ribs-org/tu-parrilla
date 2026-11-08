@@ -1,5 +1,7 @@
 import type { Formato, Sello } from './parrilla'
 import type { MusicaInstagram } from './musica'
+import type { ReglaApp } from './regla'
+import type { TikTokElegido } from './tiktok'
 
 export type PostProgramado = {
   id: string
@@ -46,6 +48,8 @@ export type CuentaApp = {
   trialReelsMotivo?: string | null
   /** «instagram» si se conectó con el login de Instagram: ahí no hay música de Instagram. */
   login?: 'instagram'
+  /** Solo TikTok: si sus fotos fueron con «Música de TikTok» la última vez, como nace el interruptor. */
+  tiktokMusica?: boolean
 }
 
 export type PostMetrica = {
@@ -101,7 +105,7 @@ export type BorradorResumido = { id: string; texto: string; cuando: string | nul
 export type BorradorAbierto = {
   id: string
   texto: string
-  /** Sin las cuentas de redes que el teléfono no publica: esas las conserva el servidor. */
+  /** Sin las cuentas de redes que esta app no publica: esas las conserva el servidor. */
   cuentas: string[]
   cuando: string | null
   trial: string[]
@@ -112,6 +116,10 @@ export type BorradorAbierto = {
   soloEnElPanel: string | null
   /** Si es una historia; falta si el sitio todavía no lo manda, y entonces es un post. */
   historia?: boolean
+  /** Lo elegido en el bloque de TikTok de cada cuenta; falta si el sitio todavía no lo manda. */
+  tiktok?: Record<string, TikTokElegido>
+  /** La regla de palabra clave, o null sin ella; falta si el sitio todavía no la manda. */
+  regla?: ReglaApp | null
 }
 
 /**
