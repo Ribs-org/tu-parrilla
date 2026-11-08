@@ -32,6 +32,41 @@ describe('tieneContenido', () => {
     expect(tieneContenido('Hola', [])).toBe(true)
     expect(tieneContenido('', [{ url: 'https://cdn/x.jpg', mediaType: 'image', nombre: 'x.jpg' }])).toBe(true)
   })
+
+  it('una palabra clave también, como en el panel', () => {
+    expect(tieneContenido('', [], { palabra: 'GUIA', mensaje: '', respuestaPublica: '' })).toBe(true)
+    expect(tieneContenido('', [], { palabra: ' ', mensaje: 'Toma', respuestaPublica: '' })).toBe(false)
+  })
+})
+
+describe('TikTok y la palabra clave en el borrador', () => {
+  const elegido = {
+    borrador: false,
+    privacidad: '',
+    comentarios: true,
+    duo: true,
+    pegar: false,
+    comercial: 'no' as const,
+    ia: false,
+    musica: true,
+  }
+
+  it('el bloque de cada cuenta de TikTok marcada viaja en `opciones`, a medias si hace falta', () => {
+    const foto = archivoDelBorrador({ url: 'https://cdn/scheduled/a.jpg', mediaType: 'image', nombre: 'a.jpg' })
+    const cuerpo = cuerpoDelBorrador(
+      formulario({ cuentas: ['tt-1'], tiktok: { 'tt-1': elegido, 'tt-2': elegido }, archivos: [foto] }),
+    )
+    expect(cuerpo.opciones).toEqual({
+      'tt-1': { modo: 'directo', privacidad: '', comentarios: true, duo: true, pegar: false, comercial: 'no', ia: false, musica: true },
+    })
+  })
+
+  it('la palabra clave viaja con sus tres campos; sin palabra, null, que la borra', () => {
+    const regla = { palabra: 'GUIA', mensaje: 'Toma', respuestaPublica: 'Va' }
+    expect(cuerpoDelBorrador(formulario({ regla })).regla).toEqual(regla)
+    expect(cuerpoDelBorrador(formulario({ regla: { ...regla, palabra: '' } })).regla).toBeNull()
+    expect(cuerpoDelBorrador(formulario()).regla).toBeNull()
+  })
 })
 
 describe('cuerpoDelBorrador', () => {

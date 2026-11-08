@@ -4,19 +4,39 @@ import { PUBLISHABLE, typeFromContentType } from './social/publish/batch'
 import { ARCHIVO_MUY_GRANDE, MAX_BYTES_ARCHIVO } from './social/publish/limites'
 import { CuentaInvalida, cuentaUnicaPorRed, verificarCuentas, type CuentaDestino } from './social/cuentas'
 
-// El teléfono ya manda `opciones` por cuenta, pero TikTok todavía exige
-// consultar `creator_info` por creador antes de ofrecer privacidad, comentarios, dúo
-// y demás — el teléfono no hace esa consulta ni resuelve esas interacciones, así que
-// esa red se rechaza aquí aunque el lote y el compositor ya la publiquen. Quitar esta
-// exclusión cuando la app móvil traiga ese bloque. Las redes en «Próximamente»
-// (`REDES_PROXIMAMENTE`) tampoco: no se ofrecen en ninguna parte.
+// TikTok exige consultar `creator_info` por creador antes de ofrecer privacidad, comentarios,
+// dúo y demás, y una app que no trae ese bloque no puede publicar ahí: la 1.1.0 sin su
+// actualización por aire, y todo teléfono anterior al 2026-11-07. Por eso hay dos conjuntos:
+// `REDES_MOVIL`, el de siempre, sin TikTok, y `REDES_MOVIL_CON_TIKTOK`, para la app que avisa
+// que trae el bloque (`sabeDe(request, 'tiktok')`). Las redes en «Próximamente»
+// (`REDES_PROXIMAMENTE`) no están en ninguno: no se ofrecen en ninguna parte.
 //
-// Exportada: `resolverDestinos` (más abajo) también la usa para filtrar destinos
-// elegidos por cuenta, y `GET /api/mobile/schedule/accounts` para no ofrecer un chip
-// de una cuenta que después el servidor va a rechazar.
-export const REDES_MOVIL = new Set(
-  [...PUBLISHABLE].filter((red) => red !== 'tiktok' && !REDES_PROXIMAMENTE.has(red)),
+// Exportadas: `resolverDestinos` (más abajo) también las usa para filtrar destinos elegidos
+// por cuenta, y `GET /api/mobile/schedule/accounts` para no ofrecer un chip de una cuenta que
+// después el servidor va a rechazar.
+export const REDES_MOVIL_CON_TIKTOK: ReadonlySet<string> = new Set(
+  [...PUBLISHABLE].filter((red) => !REDES_PROXIMAMENTE.has(red)),
 )
+export const REDES_MOVIL: ReadonlySet<string> = new Set([...REDES_MOVIL_CON_TIKTOK].filter((red) => red !== 'tiktok'))
+
+/** Las redes que publica la app que pregunta: con TikTok solo si trae su bloque. */
+export function redesDelTelefono(conTikTok: boolean): ReadonlySet<string> {
+  return conTikTok ? REDES_MOVIL_CON_TIKTOK : REDES_MOVIL
+}
+
+/**
+ * Lo que la app avisa que sabe hacer en Publicar, en `X-Parrilla-Publicar` (`mobile/src/lib/api.ts`):
+ * `tiktok` —el bloque de TikTok, con `creator_info`— y `palabra-clave` —la respuesta automática—.
+ * Va en una cabecera y no en el cuerpo porque también lo necesitan los `GET` (las cuentas que se
+ * ofrecen, el borrador que se abre). Una app que no la manda es una instalación sin actualizar:
+ * para ella todo sigue como antes, y lo que no ve se conserva y se programa en el panel
+ * (`soloEnElPanel`).
+ */
+export type LoQueSabe = 'tiktok' | 'palabra-clave'
+
+export function sabeDe(request: Request, que: LoQueSabe): boolean {
+  return (request.headers.get('x-parrilla-publicar') ?? '').split(',').some((c) => c.trim() === que)
+}
 
 function fraseRedNoPublicable(red: string): string {
   if (REDES_PROXIMAMENTE.has(red)) return fraseProximamente(red)
@@ -196,8 +216,8 @@ export function parseBorradorMovil(body: unknown): BorradorMovil | { error: stri
  * `cuentaUnicaPorRed` — el camino de una app vieja instalada, que se resuelve sola
  * mientras no haya dos cuentas conectadas en esa red.
  *
- * Filtra por `REDES_MOVIL` sobre los destinos YA resueltos, no sobre lo que el cuerpo
- * declaró: la app nueva nunca ofrece un chip de una red no publicable (el endpoint de
+ * Filtra por las redes del teléfono (`redesDelTelefono`: con TikTok solo si `conTikTok`, la app
+ * que trae su bloque) sobre los destinos YA resueltos, no sobre lo que el cuerpo declaró: la app nueva nunca ofrece un chip de una red no publicable (el endpoint de
  * cuentas la filtra), pero un cuerpo fabricado a mano sí podría nombrar una cuenta de
  * TikTok sin decir «tiktok» en ninguna parte — el servidor decide, no el cliente. Con
  * algún destino resuelto y ninguno publicable desde el teléfono, revienta con la misma
@@ -215,7 +235,7 @@ export function parseBorradorMovil(body: unknown): BorradorMovil | { error: stri
  */
 export async function resolverDestinos(
   ownerId: string,
-  borrador: Pick<BorradorMovil, 'cuentas' | 'redes'>,
+  borrador: Pick<BorradorMovil, 'cuentas' | 'redes'> & { conTikTok?: boolean },
   deps: {
     verificarCuentas: (ownerId: string, accountIds: string[]) => Promise<CuentaDestino[]>
     cuentaUnicaPorRed: (ownerId: string, networks: string[]) => Promise<Map<string, CuentaDestino>>
@@ -226,7 +246,8 @@ export async function resolverDestinos(
       ? await deps.verificarCuentas(ownerId, borrador.cuentas)
       : [...(await deps.cuentaUnicaPorRed(ownerId, borrador.redes)).values()]
 
-  const noPublicable = destinos.find((d) => !REDES_MOVIL.has(d.network))
+  const redes = redesDelTelefono(borrador.conTikTok === true)
+  const noPublicable = destinos.find((d) => !redes.has(d.network))
   if (noPublicable) throw new CuentaInvalida(fraseRedNoPublicable(noPublicable.network))
 
   return { cuentas: destinos, networks: [...new Set(destinos.map((d) => d.network))] }

@@ -26,7 +26,7 @@ tus números.
 | `/api/sugerencias/respuesta` | `POST` con una llave **del admin** (o `SCHEDULE_API_KEY`): la respuesta del equipo a lo que alguien escribió en el libro de sugerencias, por el número de su issue o por su id, para responder sin el navegador. Con la llave de otra cuenta, `403` (ver «El libro de sugerencias») |
 | `/api/bodega…` | Con la misma llave: lo que hay en la cámara de frío de La Cocina (`GET /api/bodega`) y las subidas por partes para guardar ahí (`/api/bodega/subidas…`), las mismas del panel y del teléfono (ver «La Cocina») |
 | `/api/admin/…` | Lo que el panel llama desde el navegador, con la cookie de la sesión: la firma de una subida directa (`upload-url`), las subidas por partes a la cámara de frío de La Cocina (`cocina/subidas…`) y el pulso que mantiene al día sus tarjetas (`cocina/pulso`; ver «La Cocina») y la planilla de Excel de Los Números (`planilla`, y `planilla/adelanto` para lo que no cabe; ver «Llevar para la casa») |
-| `/api/mobile/…` | La API de la app del teléfono, con el token de su sesión (ver `mobile/README.md`); `cocina…` es La Cocina desde el teléfono: lo que muestra, las subidas por partes a la cámara de frío, cambiar y sacar lo de adentro, «Mandar al chef», cancelar y contestarle al chef (ver «La Cocina»); `comentarios…` es La Mesa desde el teléfono: la cola, el número de La Parrilla, «Enviar», «Descartar» y otro borrador (ver «Responder comentarios»); `push` registra el teléfono para los avisos y `push/{token}` lo borra (ver «Avisos al teléfono») |
+| `/api/mobile/…` | La API de la app del teléfono, con el token de su sesión (ver `mobile/README.md`); `cocina…` es La Cocina desde el teléfono: lo que muestra, las subidas por partes a la cámara de frío, cambiar y sacar lo de adentro, «Mandar al chef», cancelar y contestarle al chef (ver «La Cocina»); `comentarios…` es La Mesa desde el teléfono: la cola, el número de La Parrilla, «Enviar», «Descartar» y otro borrador (ver «Responder comentarios»); `push` registra el teléfono para los avisos y `push/{token}` lo borra (ver «Avisos al teléfono»); `schedule/accounts/{id}/tiktok` es `creator_info` para el bloque de TikTok de Publicar (ver `mobile/README.md`, «TikTok y la palabra clave») |
 | `/api/cron/…` | Las corridas programadas: la publicación y la sincronización, que también reintenta los mensajes del libro de sugerencias que no salieron a GitHub. Solo con `CRON_SECRET` |
 | `/api/track/…` | Las balizas de visitas y clics de las páginas públicas |
 
@@ -731,12 +731,10 @@ conseguirla (`src/lib/social/vuelta.ts` y `ayuda-conexion.ts`). En Meta no hay p
 fuerce la elección de páginas: los pasos dicen cómo editar el acceso en la ventana de Facebook.
 
 Nada viene marcado por omisión, salvo que tengas exactamente una cuenta conectada — contada
-sobre las cuentas que cada pantalla puede ofrecer, que no es el mismo universo en las dos:
-el panel cuenta sobre todas las tuyas, TikTok incluido; el teléfono, solo sobre las que
-puede publicar, que hoy excluye TikTok (ver más abajo). Con una cuenta de Instagram y una de
-TikTok, por ejemplo, el panel no marca nada —dos candidatas— y el teléfono marca la de
-Instagram, porque ahí es la única que existe de verdad. No es una discrepancia: cada
-pantalla acierta sobre su propio universo. Es deliberado: antes el sistema mandaba siempre a
+sobre las cuentas que cada pantalla puede ofrecer: el panel, todas las tuyas; el teléfono, las
+que puede publicar, que desde el 2026-11-07 incluyen TikTok (ver más abajo). Una instalación
+del teléfono sin actualizar todavía no ofrece TikTok, así que con una cuenta de Instagram y
+una de TikTok marca la de Instagram, porque ahí es la única que existe. Es deliberado: antes el sistema mandaba siempre a
 la más antigua de cada red sin preguntar, y la segunda quedaba conectada y muda. Una sola
 posibilidad no es una elección; dos sí, y las eliges tú.
 
@@ -794,10 +792,24 @@ nuevo. Con el login de Instagram la música no existe: el bloque lo dice y no of
 lo rechaza. Lo que está sonando y cada búsqueda se guardan diez minutos en la memoria del
 servidor, por cuenta (`social/instagram-audio.ts`).
 
-La app
-del teléfono todavía no ofrece TikTok como destino: el bloque de TikTok necesita consultar
-la cuenta del creador (`creator_info`) y sus interacciones, y eso el teléfono todavía no lo
-tiene.
+Desde el 2026-11-07 la app del teléfono ofrece TikTok como destino, con el mismo bloque que el
+compositor —los datos de la cuenta de `creator_info`, la privacidad sin elegir, las
+interacciones, la marca, «Hecho con IA», «Música de TikTok» y el consentimiento— y la
+respuesta automática por palabra clave. Las dos rutas comparten el código del servidor: la
+consulta a `creator_info` (`GET /api/mobile/schedule/accounts/{id}/tiktok` y la acción del
+compositor llaman a `creadorDeCuenta`, en `src/lib/social/publish/tiktok-cuenta.ts`, igual que
+`recordarMusicaTikTok`), y `POST /api/mobile/schedule` valida las opciones con
+`validarOpcionesPorCuenta` y la regla con `validarRegla`, como el compositor. El teléfono además
+no deja programar un video más largo de lo que `creator_info` dice que esa cuenta publica
+(`max_video_post_duration_sec`); el compositor todavía no lo mira (ver `docs/pendientes.md`).
+
+Solo la app que lo trae recibe eso: lo avisa en el encabezado `X-Parrilla-Publicar` (`tiktok`,
+`palabra-clave`; `sabeDe`, en `src/lib/mobile-api.ts`). A una instalación sin actualizar no le
+llegan las cuentas de TikTok, sus borradores con TikTok o con palabra clave se guardan sin
+perder eso y se programan en el panel (`soloEnElPanel`, en `src/lib/borrador.ts`), y si
+intentara programarlos se rechaza con el motivo. El encabezado y no un campo del cuerpo, como
+`conMusica`, porque también lo necesitan los `GET`: las cuentas que se ofrecen y el borrador
+que se abre.
 
 Un post también puede salir como **historia** en Instagram y en la página de Facebook: es
 otra opción por destino (`{ historia: true }`), con un solo archivo, sin texto, sin palabra
@@ -2195,6 +2207,7 @@ src/
       promocionar.ts       promocionar una publicación: qué se acepta, el gasto máximo, lo que se le manda a Meta y sus errores en castellano (sin base); promocionar-meta.ts crea, pausa y detiene
       publish/secuencia.ts las historias de una secuencia salen en orden: cada una espera a la anterior
       publish/editar.ts    guardar los cambios de un post programado: la regla que comparten el editor del panel y la app del teléfono
+      publish/tiktok-cuenta.ts  creator_info de una cuenta del dueño y «Música de TikTok» recordada: lo que comparten el compositor y Publicar del teléfono
 public/docs/
   api-llm.md, api-editor.md, api.json   las guías de la API para un LLM
   ui/                      la wiki de la interfaz: una página por pantalla, para guiar a quien se pierde

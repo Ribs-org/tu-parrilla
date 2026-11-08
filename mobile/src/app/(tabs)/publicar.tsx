@@ -5,6 +5,8 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { MusicaInstagramBloque } from '../../components/musica-instagram'
+import { ReglaClave } from '../../components/regla-clave'
+import { TikTokOpciones } from '../../components/tiktok-opciones'
 import { TiraDeHistorias, VisorDeHistorias } from '../../components/visor-historias'
 import { useSelectorFecha } from '../../components/selector-fecha'
 import { fechaLegible } from '../../lib/calendario'
@@ -71,7 +73,17 @@ import {
   puedeEnviarHistoria,
   type Modo,
 } from '../../lib/historias'
+import { HISTORIA_SIN_CLAVE_AQUI, hayRegla, reglaInicial, reglaParaEnviar, type ReglaApp } from '../../lib/regla'
 import { subirUno } from '../../lib/subir'
+import {
+  cuentasDeTikTok,
+  opcionesTikTok,
+  soloFotos,
+  tiktokInicial,
+  videoMuyLargo,
+  type CreadorTikTok,
+  type TikTokElegido,
+} from '../../lib/tiktok'
 import type { BorradorAbierto, CuentaApp } from '../../lib/tipos'
 
 const MAX_TEXTO = 2200
@@ -114,6 +126,16 @@ export default function Publicar() {
   // La canción de «Música de Instagram» por cuenta. Como el trial: lo que se ve y lo que viaja
   // se deriva (`cuentasConMusica`, `opcionesDelBorrador`), así que no se limpia al quitar el video.
   const [musica, setMusica] = useState<Record<string, MusicaInstagram>>({})
+  // Lo elegido en el bloque de TikTok de cada cuenta que se tocó o vino de un borrador; las demás
+  // se ven como nace el bloque (`tiktokInicial`). Como el trial, no se limpia al desmarcar.
+  const [tiktok, setTiktok] = useState<Record<string, TikTokElegido>>({})
+  // Lo que dijo `creator_info` de cada cuenta de TikTok: arma el envío y el largo máximo del video.
+  const [creadores, setCreadores] = useState<Record<string, CreadorTikTok | null>>({})
+  // La respuesta automática por palabra clave. En Historia no viaja, pero queda guardada.
+  const [regla, setRegla] = useState<ReglaApp>(() => reglaInicial(null))
+  // Cambia al abrir otro borrador o empezar otra publicación: el bloque de la palabra clave se
+  // vuelve a armar, abierto si lo que llegó trae una.
+  const [generacion, setGeneracion] = useState(0)
   const [cuentasEstado, setCuentasEstado] = useState<EstadoCuentas>({ paso: 'cargando' })
   // Solo cuando ya se supo qué cuentas hay: mientras carga o si falló, no hay ninguna
   // que ofrecer — el estado de arriba es el que distingue esos dos casos de «ninguna».
@@ -159,7 +181,7 @@ export default function Publicar() {
   // El guardado corre un rato después del último cambio, y la cola de subida entre awaits:
   // los dos leen lo de ahora y no lo del render en que empezaron. Se copia después de
   // pintar, porque escribir un ref durante el render no está permitido.
-  const formRef = useRef<Formulario>({ texto, cuentas, trial, musica, fecha, fechaPuesta, archivos, historia: false })
+  const formRef = useRef<Formulario>({ texto, cuentas, trial, musica, fecha, fechaPuesta, archivos, historia: false, tiktok, regla })
   const disponiblesRef = useRef<CuentaApp[]>([])
   useEffect(() => {
     formRef.current = {
@@ -171,6 +193,8 @@ export default function Publicar() {
       fechaPuesta,
       archivos: archivosRef.current,
       historia: modo === 'historia',
+      tiktok,
+      regla,
     }
     disponiblesRef.current = disponibles
   })
@@ -233,7 +257,7 @@ export default function Publicar() {
       if (quieto.current || !token) return
       const cuerpo = cuerpoDelBorrador(formRef.current)
       const firma = JSON.stringify(cuerpo)
-      if ((!borradorId.current && !tieneContenido(cuerpo.texto, cuerpo.media)) || firma === ultimaFirma.current) {
+      if ((!borradorId.current && !tieneContenido(cuerpo.texto, cuerpo.media, cuerpo.regla)) || firma === ultimaFirma.current) {
         sinGuardar.current = false
         return
       }
@@ -290,7 +314,7 @@ export default function Publicar() {
       pausa.current = null
       void guardar()
     }, PAUSA_MS)
-  }, [texto, cuentas, trial, musica, fecha, fechaPuesta, firmaMedia, modo, guardar])
+  }, [texto, cuentas, trial, musica, tiktok, regla, fecha, fechaPuesta, firmaMedia, modo, guardar])
 
   // Si la app pasa a segundo plano, el sistema puede cerrarla sin avisar: lo pendiente se
   // manda antes. Igual al desmontar, si quedó algo esperando la pausa.
@@ -319,6 +343,9 @@ export default function Publicar() {
     setCuentas(marcadas)
     setTrial([])
     setMusica({})
+    setTiktok({})
+    setRegla(reglaInicial(null))
+    setGeneracion((g) => g + 1)
     setFecha(ahora)
     setFechaPuesta(false)
     setModo('post')
@@ -341,6 +368,8 @@ export default function Publicar() {
       fechaPuesta: false,
       archivos: [],
       historia: false,
+      tiktok: {},
+      regla: reglaInicial(null),
     }
   }, [cambiarArchivos])
 
@@ -384,6 +413,8 @@ export default function Publicar() {
       fechaPuesta: Boolean(b.cuando),
       archivos: lista,
       historia: b.historia === true,
+      tiktok: b.tiktok ?? {},
+      regla: reglaInicial(b.regla),
     }
     cambiarArchivos(() => lista)
     setModo(form.historia ? 'historia' : 'post')
@@ -392,6 +423,9 @@ export default function Publicar() {
     setCuentas(form.cuentas)
     setTrial(form.trial)
     setMusica(form.musica ?? {})
+    setTiktok(form.tiktok ?? {})
+    setRegla(form.regla!)
+    setGeneracion((g) => g + 1)
     setFecha(form.fecha)
     setFechaPuesta(form.fechaPuesta)
     setSoloEnElPanel(b.soloEnElPanel)
@@ -543,6 +577,11 @@ export default function Publicar() {
     })
   }
 
+  /** Lo que se ve en el bloque de TikTok de una cuenta: lo elegido, o como nace. */
+  function tiktokDe(c: CuentaApp): TikTokElegido {
+    return tiktokInicial(tiktok[c.id], c)
+  }
+
   function alternarTrial(id: string) {
     setTrial(trial.includes(id) ? trial.filter((c) => c !== id) : [...trial, id])
   }
@@ -596,8 +635,15 @@ export default function Publicar() {
             cuentas,
             cuando,
             ahora,
-            opciones: opcionesDelBorrador(disponibles, cuentas, trial, archivos, musica),
+            opciones: {
+              ...opcionesDelBorrador(disponibles, cuentas, trial, archivos, musica),
+              // Cada cuenta de TikTok con lo que su bloque muestra, como lo manda el formulario del panel.
+              ...Object.fromEntries(
+                cuentasTikTok.map((c) => [c.id, opcionesTikTok(tiktokDe(c), fotos, creadores[c.id] ?? null)]),
+              ),
+            },
             media,
+            regla: reglaParaEnviar(regla),
             borradorId: borradorId.current,
             conMusica: true,
           }
@@ -712,10 +758,15 @@ export default function Publicar() {
     ? archivos.map((a) => avisosDeHistoria(a, redesQueVan.has('instagram'), redesQueVan.has('facebook')))
     : []
   const bloqueada = avisos.some((lista) => lista.some((a) => a.bloquea))
+  const fotos = soloFotos(archivos)
+  const cuentasTikTok = esHistoria ? [] : cuentasDeTikTok(disponibles, cuentas)
+  // Un video más largo de lo que la cuenta de TikTok publica apaga «Programar»: TikTok lo
+  // rechazaría después de subirlo (lo dice el bloque, en rojo).
+  const tiktokMuyLargo = cuentasTikTok.some((c) => videoMuyLargo(archivos, creadores[c.id] ?? null) !== null)
   const sePuedeEnviar =
     (esHistoria
       ? puedeEnviarHistoria(archivos.length, van.length, bloqueada)
-      : puedeEnviar(texto, archivos.length, cuentas.length)) &&
+      : puedeEnviar(texto, archivos.length, cuentas.length) && !tiktokMuyLargo) &&
     !hayPendientes(archivos) &&
     soloEnElPanel === null &&
     estadoBorrador !== 'perdido'
@@ -789,6 +840,7 @@ export default function Publicar() {
               </View>
             ) : null}
             {texto.trim() !== '' ? <Text style={{ color: colores.tenue, fontSize: 11 }}>{HISTORIA_SIN_TEXTO_AQUI}</Text> : null}
+            {hayRegla(regla) ? <Text style={{ color: colores.tenue, fontSize: 11 }}>{HISTORIA_SIN_CLAVE_AQUI}</Text> : null}
           </>
         ) : (
           <>
@@ -840,8 +892,8 @@ export default function Publicar() {
           <ErrorConReintento mensaje="No se pudieron cargar las cuentas." onReintentar={() => void cargarCuentas()} />
         ) : disponibles.length === 0 ? (
           // Cierto tanto si no hay ninguna cuenta como si la única que hay es de una
-          // red que el teléfono no ofrece (hoy, TikTok): el endpoint ya las filtró, y
-          // desde acá no se puede distinguir un caso del otro.
+          // red que el teléfono no ofrece (hoy, las de «Próximamente»): el endpoint ya
+          // las filtró, y desde acá no se puede distinguir un caso del otro.
           <Text style={{ color: colores.tenue, fontSize: 12 }}>
             No hay ninguna cuenta lista para publicar desde el teléfono. Conéctala en el panel
             web, en {LOS_FIERROS[tema]}.
@@ -921,8 +973,23 @@ export default function Publicar() {
                 deshabilitado={ocupado}
               />
             ))}
+            {cuentasTikTok.map((c) => (
+              <TikTokOpciones
+                key={`tiktok:${c.id}`}
+                cuenta={c}
+                elegido={tiktokDe(c)}
+                onCambiar={(e) => setTiktok((antes) => ({ ...antes, [c.id]: e }))}
+                onCreador={(creador) => setCreadores((antes) => ({ ...antes, [c.id]: creador }))}
+                fotos={fotos}
+                archivos={archivos}
+                deshabilitado={ocupado}
+              />
+            ))}
           </>
         )}
+
+        {/* Como en el compositor del panel: después de las cuentas y sus opciones, antes de la fecha. */}
+        {esHistoria ? null : <ReglaClave key={generacion} regla={regla} onCambiar={setRegla} deshabilitado={ocupado} />}
 
         <Chip texto={`Cuándo: ${fechaLegible(fecha)}`} activo onPress={elegirFecha} deshabilitado={ocupado} />
 

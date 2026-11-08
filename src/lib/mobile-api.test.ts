@@ -5,6 +5,7 @@ import {
   CUERPO_ILEGIBLE,
   MAX_BYTES_SUBIDA,
   REDES_MOVIL,
+  REDES_MOVIL_CON_TIKTOK,
   TIPO_NO_PUBLICABLE,
   fierrosParaElTelefono,
   parseBorradorMovil,
@@ -15,6 +16,7 @@ import {
   prepararSubida,
   resolverCuando,
   resolverDestinos,
+  sabeDe,
 } from './mobile-api'
 import { CuentaInvalida, type CuentaDestino } from './social/cuentas'
 
@@ -386,6 +388,31 @@ describe('resolverDestinos', () => {
     await expect(resolverDestinos('owner-1', { cuentas: [], redes: ['tiktok'] }, d)).rejects.toThrow(
       'Red desconocida o sin publicación: tiktok.',
     )
+  })
+
+  it('con `conTikTok` (la app trae el bloque), TikTok es un destino como cualquiera', async () => {
+    const d = deps({ verificarCuentas: vi.fn().mockResolvedValue([IG, TT]) })
+    const r = await resolverDestinos('owner-1', { cuentas: ['c-ig', 'c-tt'], redes: [], conTikTok: true }, d)
+    expect(r).toEqual({ cuentas: [IG, TT], networks: ['instagram', 'tiktok'] })
+  })
+})
+
+describe('lo que la app sabe hacer en Publicar', () => {
+  const con = (valor?: string) =>
+    new Request('https://ejemplo.cl/api/mobile/schedule', valor === undefined ? {} : { headers: { 'X-Parrilla-Publicar': valor } })
+
+  it('lo lee de `X-Parrilla-Publicar`, valor por valor; sin la cabecera, nada', () => {
+    expect(sabeDe(con('tiktok, palabra-clave'), 'tiktok')).toBe(true)
+    expect(sabeDe(con('tiktok, palabra-clave'), 'palabra-clave')).toBe(true)
+    expect(sabeDe(con('tiktok'), 'palabra-clave')).toBe(false)
+    expect(sabeDe(con('tiktokx'), 'tiktok')).toBe(false)
+    expect(sabeDe(con(), 'tiktok')).toBe(false)
+  })
+
+  it('con TikTok son las mismas redes más TikTok, y ninguna en «Próximamente»', () => {
+    expect([...REDES_MOVIL_CON_TIKTOK].filter((r) => !REDES_MOVIL.has(r))).toEqual(['tiktok'])
+    expect(REDES_MOVIL_CON_TIKTOK.has('threads')).toBe(false)
+    expect(REDES_MOVIL_CON_TIKTOK.has('x')).toBe(false)
   })
 })
 

@@ -53,8 +53,17 @@ vi.mock('@/lib/borradores', () => ({
   listarBorradores: async () => [],
 }))
 vi.mock('@/lib/borradores-movil', () => ({
-  cuentasParaElTelefono: async () => ({ propias: new Set(['c-ig']), ajenas: new Map([['tt-1', 'TikTok']]) }),
+  // Con el bloque de TikTok (`conTikTok`), la cuenta de TikTok deja de ser ajena.
+  cuentasParaElTelefono: async (_dueno: string, conTikTok = false) =>
+    conTikTok
+      ? { propias: new Set(['c-ig', 'tt-1']), ajenas: new Map(), tiktok: new Set(['tt-1']) }
+      : { propias: new Set(['c-ig']), ajenas: new Map([['tt-1', 'TikTok']]), tiktok: new Set() },
   resumirParaElTelefono: () => null,
+}))
+
+const recordarMusicaTikTok = vi.fn()
+vi.mock('@/lib/social/publish/tiktok-cuenta', () => ({
+  recordarMusicaTikTok: (...args: unknown[]) => recordarMusicaTikTok(...args),
 }))
 
 // R2 no está configurado bajo test (sin `R2_*`): mockeado explícito, no implícito por
@@ -183,10 +192,11 @@ describe('agruparPostsMovil (GET /api/mobile/schedule)', () => {
   })
 })
 
-function peticion(body: unknown): Request {
+function peticion(body: unknown, sabe?: string): Request {
   return new Request('https://ejemplo.cl/api/mobile/schedule', {
     method: 'POST',
     body: JSON.stringify(body),
+    ...(sabe ? { headers: { 'X-Parrilla-Publicar': sabe } } : {}),
   })
 }
 
@@ -293,6 +303,163 @@ describe('POST /api/mobile/schedule', () => {
     expect(res.status).toBe(400)
     expect(await res.json()).toEqual({ error: OPCIONES_ERROR })
     expect(crearPostProgramado).not.toHaveBeenCalled()
+  })
+
+  describe('TikTok y la palabra clave desde Publicar', () => {
+    const tt: CuentaDestino = { id: 'tt-1', network: 'tiktok', handle: '@tt' }
+    const fotos = [
+      { url: 'https://cdn.ejemplo.cl/scheduled/1.jpg', mediaType: 'image' },
+      { url: 'https://cdn.ejemplo.cl/scheduled/2.jpg', mediaType: 'image' },
+    ]
+    const directo = {
+      modo: 'directo',
+      privacidad: 'PUBLIC_TO_EVERYONE',
+      comentarios: true,
+      duo: false,
+      pegar: false,
+      comercial: 'no',
+      ia: false,
+      musica: true,
+    }
+
+    beforeEach(() => recordarMusicaTikTok.mockReset())
+
+    it('una app con el bloque de TikTok resuelve con TikTok, crea con sus opciones y recuerda la música', async () => {
+      resolverDestinos.mockResolvedValueOnce({ cuentas: [tt], networks: ['tiktok'] })
+      crearPostProgramado.mockResolvedValueOnce('post-1')
+      const res = await POST(
+        peticion({ texto: 'Hola', cuentas: ['tt-1'], ahora: true, media: fotos, opciones: { 'tt-1': directo } }, 'tiktok'),
+      )
+      expect(res.status).toBe(200)
+      expect(resolverDestinos).toHaveBeenCalledWith('owner-1', expect.objectContaining({ conTikTok: true }))
+      // Limpias por `validarOpcionesPorCuenta`: `ia` apagada no se guarda.
+      const opciones = { 'tt-1': { ...directo } as Record<string, unknown> }
+      delete opciones['tt-1']!.ia
+      expect(crearPostProgramado).toHaveBeenCalledWith('owner-1', expect.objectContaining({ opciones, regla: null }))
+      expect(recordarMusicaTikTok).toHaveBeenCalledWith('owner-1', opciones, { videos: 0, fotos: 2 })
+    })
+
+    it('una app sin el bloque no pide TikTok a resolverDestinos', async () => {
+      resolverDestinos.mockResolvedValueOnce({ cuentas: [IG], networks: ['facebook'] })
+      crearPostProgramado.mockResolvedValueOnce('post-1')
+      await POST(peticion({ texto: 'Hola', cuentas: ['c-ig'], ahora: true, media: [] }))
+      expect(resolverDestinos).toHaveBeenCalledWith('owner-1', expect.objectContaining({ conTikTok: false }))
+    })
+
+    it('TikTok sin privacidad se rechaza con la frase del panel', async () => {
+      resolverDestinos.mockResolvedValueOnce({ cuentas: [tt], networks: ['tiktok'] })
+      const res = await POST(
+        peticion(
+          { texto: 'Hola', cuentas: ['tt-1'], ahora: true, media: fotos, opciones: { 'tt-1': { ...directo, privacidad: '' } } },
+          'tiktok',
+        ),
+      )
+      expect(res.status).toBe(400)
+      expect(await res.json()).toEqual({ error: 'TikTok necesita que elijas la privacidad.' })
+      expect(crearPostProgramado).not.toHaveBeenCalled()
+    })
+
+    it('una foto PNG a TikTok se rechaza como en el panel: mira el formato de cada archivo', async () => {
+      resolverDestinos.mockResolvedValueOnce({ cuentas: [tt], networks: ['tiktok'] })
+      const res = await POST(
+        peticion(
+          {
+            texto: 'Hola',
+            cuentas: ['tt-1'],
+            ahora: true,
+            media: [{ url: 'https://cdn.ejemplo.cl/scheduled/1.png', mediaType: 'image' }],
+            opciones: { 'tt-1': directo },
+          },
+          'tiktok',
+        ),
+      )
+      expect(res.status).toBe(400)
+      expect(await res.json()).toEqual({ error: 'TikTok recibe un video, o hasta 35 fotos JPG o WebP.' })
+    })
+
+    it('la regla de palabra clave de una app que la muestra se valida y se crea con el post, sin documento', async () => {
+      resolverDestinos.mockResolvedValueOnce({ cuentas: [IG], networks: ['facebook'] })
+      crearPostProgramado.mockResolvedValueOnce('post-1')
+      const regla = { palabra: 'Guía', mensaje: ' Toma: https://x.cl ', respuestaPublica: '', documentoUrl: 'https://otro.cl/a.pdf' }
+      const res = await POST(peticion({ texto: 'Hola', cuentas: ['c-ig'], ahora: true, media: [], regla }, 'palabra-clave'))
+      expect(res.status).toBe(200)
+      expect(crearPostProgramado).toHaveBeenCalledWith(
+        'owner-1',
+        expect.objectContaining({
+          regla: { palabra: 'guia', mensaje: 'Toma: https://x.cl', respuestaPublica: 'Te lo mandé por privado 📩', documentoUrl: null },
+        }),
+      )
+    })
+
+    it('una regla inválida se rechaza con la frase del panel; una app sin la palabra clave no la manda', async () => {
+      const res = await POST(
+        peticion({ texto: 'Hola', cuentas: ['c-ig'], ahora: true, media: [], regla: { palabra: 'dos palabras', mensaje: 'x' } }, 'palabra-clave'),
+      )
+      expect(res.status).toBe(400)
+      expect(await res.json()).toEqual({ error: 'La palabra clave es una sola palabra, sin espacios, hasta 30 letras.' })
+      resolverDestinos.mockResolvedValueOnce({ cuentas: [IG], networks: ['facebook'] })
+      crearPostProgramado.mockResolvedValueOnce('post-1')
+      await POST(peticion({ texto: 'Hola', cuentas: ['c-ig'], ahora: true, media: [], regla: { palabra: 'GUIA', mensaje: 'x' } }))
+      expect(crearPostProgramado).toHaveBeenCalledWith('owner-1', expect.objectContaining({ regla: null }))
+    })
+
+    it('una historia con palabra clave se rechaza', async () => {
+      const ig: CuentaDestino = { id: 'c-ig', network: 'instagram', handle: '@ig' }
+      resolverDestinos.mockResolvedValueOnce({ cuentas: [ig], networks: ['instagram'] })
+      const res = await POST(
+        peticion(
+          {
+            texto: '',
+            cuentas: ['c-ig'],
+            ahora: true,
+            media: [{ url: 'https://cdn.ejemplo.cl/scheduled/1.jpg', mediaType: 'image' }],
+            opciones: { 'c-ig': { historia: true } },
+            regla: { palabra: 'GUIA', mensaje: 'x' },
+          },
+          'palabra-clave',
+        ),
+      )
+      expect(res.status).toBe(400)
+      expect(await res.json()).toEqual({ error: 'Una historia no tiene comentarios: no lleva palabra clave.' })
+    })
+
+    it('un borrador con TikTok y palabra clave se programa desde una app que trae las dos', async () => {
+      const BORRADOR = '6f1c2a54-9b1e-4c3d-8f00-0123456789ab'
+      cargarBorrador.mockResolvedValueOnce({
+        id: BORRADOR,
+        campos: { cuentas: ['tt-1'], reglaPalabra: ['GUIA'] },
+        fecha: null,
+        media: [],
+      })
+      resolverDestinos.mockResolvedValueOnce({ cuentas: [tt], networks: ['tiktok'] })
+      crearPostProgramado.mockResolvedValueOnce('post-1')
+      const res = await POST(
+        peticion(
+          {
+            texto: 'Hola',
+            cuentas: ['tt-1'],
+            ahora: true,
+            media: fotos,
+            opciones: { 'tt-1': directo },
+            regla: { palabra: 'GUIA', mensaje: 'Toma' },
+            borradorId: BORRADOR,
+          },
+          'tiktok,palabra-clave',
+        ),
+      )
+      expect(res.status).toBe(200)
+      expect(crearPostProgramado).toHaveBeenCalledWith('owner-1', expect.objectContaining({ borradorId: BORRADOR }))
+    })
+
+    it('el mismo borrador, desde una app sin la palabra clave, sigue yendo al panel', async () => {
+      const BORRADOR = '6f1c2a54-9b1e-4c3d-8f00-0123456789ab'
+      cargarBorrador.mockResolvedValueOnce({ id: BORRADOR, campos: { cuentas: ['tt-1'], reglaPalabra: ['GUIA'] }, fecha: null, media: [] })
+      const res = await POST(
+        peticion({ texto: 'Hola', cuentas: ['tt-1'], ahora: true, media: fotos, borradorId: BORRADOR }, 'tiktok'),
+      )
+      expect(res.status).toBe(400)
+      expect(await res.json()).toEqual({ error: 'Este borrador tiene la palabra clave «GUIA»: eso se programa en el panel web.' })
+    })
   })
 
   describe('historias desde Publicar', () => {

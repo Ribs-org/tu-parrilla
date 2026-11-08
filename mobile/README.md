@@ -7,9 +7,10 @@ convivir instaladas hasta que se borre el APK. Desde el 2026-10-16 tiene las pes
 panel web, en versión corta: **La Parrilla** (lo programado día por
 día —con un filtro por red, lo que ya salió hundido en un renglón y, hoy, la línea de
 «ahora»—, lo que se quemó, los borradores y cuántos cortes salieron ayer), **Publicar**
-(eliges fotos o un video de la galería, escribes el texto, marcas las cuentas y lo
-programas, o lo mandas a salir ahora; o, con «Historia», una historia o una secuencia de
-historias para Instagram y Facebook), **Los Números** (las dos mitades del tablero, con «Tus
+(eliges fotos o un video de la galería, escribes el texto, marcas las cuentas —TikTok
+incluido desde el 2026-11-07, con su bloque de opciones— y lo programas, o lo mandas a salir
+ahora, con su respuesta automática por palabra clave si quieres; o, con «Historia», una historia
+o una secuencia de historias para Instagram y Facebook), **Los Números** (las dos mitades del tablero, con «Tus
 publicaciones» un toque adentro y los seguidores de cada red detrás de «⋯ Más») y, desde la versión
 1.2.0 (2026-11-02), **La Cocina** (grabar un video o sacar una foto con la cámara del teléfono,
 ordenar la cámara de frío y pedirle una comanda al chef de la casa con las opciones del panel; ver
@@ -155,9 +156,8 @@ En la pestaña **Publicar**:
    hasta 500 MB).
 3. Marca las cuentas a las que sale (el chip lleva la red y el handle, para distinguir
    dos cuentas de una misma red). Si tienes una sola cuenta conectada viene marcada,
-   porque no hay entre qué elegir; con dos o más, ninguna. TikTok no se ofrece todavía
-   como destino desde el teléfono: el bloque de TikTok necesita consultar la cuenta del
-   creador (`creator_info`) y sus interacciones, y eso el teléfono todavía no lo tiene.
+   porque no hay entre qué elegir; con dos o más, ninguna. Con una cuenta de TikTok marcada
+   aparece su bloque, el del panel (ver «TikTok y la palabra clave», abajo).
 4. Con una cuenta de Instagram marcada y **un solo video** elegido aparece el chip
    «Trial reel · @handle». Encendido, el reel sale solo para quienes no te siguen, y
    **tú lo compartes con todos desde la app de Instagram** cuando quieras. Con fotos o
@@ -171,7 +171,9 @@ En la pestaña **Publicar**:
    **Escuchar** la muestra y dos volúmenes, canción y video, de a 10 con «−» y «+». Con una cuenta
    conectada con el login de Instagram el bloque dice que ahí no hay música. La canción viaja en
    las opciones del destino (`musica`) y se guarda en el borrador; el editor no la cambia.
-5. Toca **Cuándo** para elegir día y hora, y luego **Programar**. O toca
+5. Si quieres, abre **«▸ Respuesta automática por palabra clave»** y escribe la palabra, el
+   mensaje y la respuesta pública, como en el panel.
+6. Toca **Cuándo** para elegir día y hora, y luego **Programar**. O toca
    **Publicar ahora**: confirma, y sale en los próximos cinco minutos.
 
 Cada archivo se sube apenas lo eliges, de a uno, con su avance sobre la miniatura; si
@@ -199,10 +201,12 @@ mismo costo, y la razón es la misma.
 
 Dos reglas que protegen a los dos lados:
 
-- El teléfono no ve las opciones de TikTok ni la respuesta automática por palabra clave.
-  Al guardar, el servidor las conserva tal como las dejó el panel, y un borrador que las
-  tiene no se programa desde el teléfono —sale un aviso y los botones se apagan—, porque
-  programarlo dejaría eso fuera y el borrador, que lo guardaba, se borraría.
+- Lo que la app no ve, el servidor lo conserva. Desde el 2026-11-07 la app ve y guarda las
+  opciones de TikTok y la palabra clave; una instalación sin actualizar no, y para ella sigue
+  la regla de antes: al guardar, el servidor conserva lo que dejó el panel, y un borrador que
+  lo tiene no se programa desde ese teléfono —sale un aviso y los botones se apagan—, porque
+  programarlo dejaría eso fuera y el borrador, que lo guardaba, se borraría. Lo mismo pasa,
+  en cualquier versión, con un borrador que va a una red en «Próximamente».
 - Programar con un borrador que ya no existe se rechaza. Cubre dos casos: que se haya
   programado o descartado en el panel, y que este mismo envío ya haya salido y se haya
   perdido la respuesta, en el que repetirlo publicaría dos veces.
@@ -231,7 +235,41 @@ app nueva manda `conMusica: true` al guardar un borrador y al programar, la viej
 la canción que el borrador traía del panel se conserva al guardar y se suma al programar.
 
 Lo que no se puede hacer desde el teléfono, y sigue siendo del panel web: poner una
-portada, etiquetar con atributos y programar en TikTok o con una palabra clave.
+portada y etiquetar con atributos.
+
+### TikTok y la palabra clave (2026-11-07)
+
+Con una cuenta de TikTok marcada, Publicar muestra el bloque del compositor del panel
+(`src/components/tiktok-opciones.tsx`, que copia `src/app/admin/(dash)/schedule/tiktok-opciones.tsx`
+de la raíz), porque la auditoría de publicación directa de TikTok exige lo mismo a cada cliente:
+los datos de la cuenta que da `creator_info` («Se publicará en la cuenta …», con el avatar, y el
+largo máximo de un video), **«Quién puede verlo»** sin nada elegido y solo con las privacidades que
+la cuenta permite, **«Permitir»** con Comentarios, Dúos y Pegar (Stitch) apagados —grises si la
+cuenta los tiene bloqueados; con fotos, solo Comentarios—, **«Este contenido promociona una
+marca»** con «Mi marca» y «Contenido patrocinado» (que no deja «Solo yo»), **«Hecho con IA»**,
+**«Música de TikTok»** con fotos, y el consentimiento («Al publicar aceptas la … de TikTok.»,
+con sus enlaces). **«Enviar como borrador a mi bandeja de TikTok»** esconde todo eso. Los textos
+son los del panel, letra por letra: los compara `src/lib/telefono-copias.test.ts` de la raíz.
+
+`creator_info` lo pide `GET /api/mobile/schedule/accounts/{id}/tiktok`, la misma consulta del
+compositor (`creadorDeCuenta`); sin él se ofrecen las cuatro privacidades y el bloque dice por qué,
+como el panel. Lo que el teléfono hace de más: con un video, dice el largo máximo de la cuenta y no
+deja programar uno más largo —TikTok lo rechazaría después de subirlo—, si el selector dio la
+duración (un archivo que vuelve de un borrador no la trae).
+
+Debajo de las cuentas, **«▸ Respuesta automática por palabra clave»**, plegada salvo que el borrador
+traiga una: la palabra, el mensaje y la respuesta pública, con los topes y los textos del panel
+(`src/components/regla-clave.tsx`). Las reglas —una palabra, el mensaje de 1 a 1000— las pone el
+servidor al programar, con sus frases. En «Historia» no se muestra ni viaja: una historia no tiene
+comentarios, y la palabra queda en el borrador para cuando se vuelva a Post.
+
+La app lo avisa con el encabezado `X-Parrilla-Publicar: tiktok,palabra-clave` (`src/lib/api.ts`), y
+solo entonces el servidor le ofrece las cuentas de TikTok, le abre los borradores con sus opciones
+de TikTok (`tiktok`) y su regla (`regla`), guarda lo que manda y la deja programarlos. Las opciones
+de TikTok viajan en `opciones`, por cuenta, como las de Instagram; la regla, en `regla`, al guardar
+(null la borra) y al programar. Todo es JavaScript y React Native (`Switch`, `Linking`,
+`expo-image`): llega por aire también a la 1.1.0 (ver «TikTok y la palabra clave por aire a la
+1.1.0», abajo).
 
 ### Las historias (2026-11-07)
 
@@ -432,6 +470,36 @@ en producción: con un servidor de antes, una sola historia sale bien, pero una 
 rechaza («Una historia es un solo archivo, foto o video.») y el borrador no recuerda el modo.
 Salieron el 2026-11-07 junto con La Mesa, en el commit `9968a71` de `ota-1.1.0`, a los dos canales,
 con el servidor ya en producción.
+
+### TikTok y la palabra clave por aire a la 1.1.0 (preparados el 2026-11-07, sin publicar)
+
+No piden nada nativo ni permisos nuevos. Para publicarlos, sobre la punta de `ota-1.1.0`, se copian
+de `main` (con esta rama fusionada) estos archivos de `mobile/`, tal cual:
+
+- `src/components/tiktok-opciones.tsx`, `src/components/regla-clave.tsx`, `src/lib/tiktok.ts` y
+  `src/lib/regla.ts`, con sus tests (`tiktok.test.ts`, `regla.test.ts`) (nuevos);
+- `src/app/(tabs)/publicar.tsx`;
+- `src/lib/api.ts` (el encabezado `X-Parrilla-Publicar`), `src/lib/borradores.ts` (con
+  `borradores.test.ts`), `src/lib/publicar.ts` (solo un comentario) y `src/lib/tipos.ts`.
+
+El 2026-11-07 esos archivos eran iguales en `main` y en `ota-1.1.0` antes de este cambio: lo único
+de `mobile/src` que difiere entre las dos es lo de la 1.2.0 —los avisos (`avisos.ts`,
+`components/avisos.tsx`, `ajustes.tsx`, `sesion.tsx`), `(tabs)/_layout.tsx` y `(tabs)/cocina.tsx`—,
+y ninguno está en la lista, así que copiarlos no le lleva a la 1.1.0 nada de la 1.2.0. Si antes
+entra a `main` otro cambio a uno de estos archivos que no vaya a la 1.1.0 (por ejemplo, algo que use
+`expo-video` o `react-native-svg`, que la 1.1.0 no trae), hay que copiar solo la parte de TikTok y la
+palabra clave. **No** se tocan `app.json` ni `package.json`.
+
+Se publica **después** de que el servidor de esta rama esté en producción. Al revés no se rompe
+nada, pero tampoco aparece: un servidor de antes no lee el encabezado, no ofrece TikTok ni manda la
+regla del borrador, y al guardar ignora la regla que manda la app. Publicarla es decisión del dueño:
+está en `docs/pendientes.md`.
+
+Lo que se probó el 2026-11-07 en Expo web contra una API falsa: el bloque con los datos de
+`creator_info`, las privacidades que permite, «Dúos» gris por bloqueado, la marca con «Contenido
+patrocinado» y su aviso, el consentimiento con los dos enlaces, la palabra clave abierta, y el
+borrador que sale con `X-Parrilla-Publicar`, las opciones de TikTok a medias y la regla. Lo que no:
+un teléfono de verdad (el `Switch` de Android) y TikTok real (lo cubren las pruebas del servidor).
 
 ### El portapapeles, con y sin su módulo nativo
 
@@ -645,7 +713,8 @@ falta volver a autorizar nada de eso, solo se cierra el acceso desde el celular.
 ## Qué no hace todavía
 
 - No pone portada ni atributos, y de lo ya programado no cambia los archivos, ni suma
-  cuentas, ni toca lo que ya salió en alguna: eso sigue en el panel. Tampoco cambia el orden de
+  cuentas, ni toca lo que ya salió en alguna, ni cambia las opciones de TikTok o la palabra
+  clave: eso sigue en el panel. Tampoco cambia el orden de
   una secuencia de historias ya programada, ni reproduce un video en el visor.
 - En La Cocina no muestra el mesón (ver `docs/pendientes.md`), no elige el color de acento de la
   marca ni dibuja la estación de cada comanda, y no sigue subiendo con la app en segundo plano: lo

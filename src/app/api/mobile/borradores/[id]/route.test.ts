@@ -36,7 +36,11 @@ vi.mock('@/lib/borradores-movil', async (importOriginal) => {
   const real = await importOriginal<typeof import('@/lib/borradores-movil')>()
   return {
     ...real,
-    cuentasParaElTelefono: async () => ({ propias: new Set(['ig-1']), ajenas: new Map([['tt-1', 'TikTok']]) }),
+    // Con el bloque de TikTok, la cuenta de TikTok es de las que la app publica.
+    cuentasParaElTelefono: async (_dueno: string, conTikTok = false) =>
+      conTikTok
+        ? { propias: new Set(['ig-1', 'tt-1']), ajenas: new Map(), tiktok: new Set(['tt-1']) }
+        : { propias: new Set(['ig-1']), ajenas: new Map([['tt-1', 'TikTok']]), tiktok: new Set() },
   }
 })
 
@@ -77,8 +81,47 @@ describe('GET /api/mobile/borradores/[id]', () => {
       historia: false,
       cuando: '2026-10-20T19:00:00-03:00',
       media: [{ url: 'https://cdn.ejemplo.cl/scheduled/a.mp4', mediaType: 'video', nombre: 'a.mp4' }],
+      tiktok: {},
+      regla: { palabra: 'GUIA', mensaje: '', respuestaPublica: '' },
       soloEnElPanel: 'Este borrador va también a TikTok y tiene la palabra clave «GUIA»: eso se programa en el panel web.',
     })
+  })
+
+  it('a una app con TikTok y la palabra clave le llegan las dos, sin el aviso', async () => {
+    cargarBorrador.mockResolvedValue({
+      id: ID,
+      campos: {
+        caption: ['Hola'],
+        cuentas: ['ig-1', 'tt-1'],
+        'tiktokModo:tt-1': ['directo'],
+        'tiktokPrivacidad:tt-1': ['FOLLOWER_OF_CREATOR'],
+        'tiktokComentarios:tt-1': ['on'],
+        'tiktokComercial:tt-1': ['no'],
+        reglaPalabra: ['GUIA'],
+        reglaMensaje: ['Toma'],
+        reglaRespuesta: ['Va'],
+      },
+      fecha: null,
+      media: [],
+    })
+    const pedidoNuevo = new Request(`https://tu-parrilla.cl/api/mobile/borradores/${ID}`, {
+      headers: { 'X-Parrilla-Publicar': 'tiktok,palabra-clave' },
+    })
+    const cuerpo = await (await GET(pedidoNuevo, con(ID))).json()
+    expect(cuerpo.cuentas).toEqual(['ig-1', 'tt-1'])
+    expect(cuerpo.tiktok).toEqual({
+      'tt-1': {
+        borrador: false,
+        privacidad: 'FOLLOWER_OF_CREATOR',
+        comentarios: true,
+        duo: false,
+        pegar: false,
+        comercial: 'no',
+        ia: false,
+      },
+    })
+    expect(cuerpo.regla).toEqual({ palabra: 'GUIA', mensaje: 'Toma', respuestaPublica: 'Va' })
+    expect(cuerpo.soloEnElPanel).toBeNull()
   })
 
   it('uno que no existe, o un id sin forma de id, es 404', async () => {

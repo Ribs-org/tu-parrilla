@@ -656,9 +656,10 @@ que se guardó con «Ahora» encendido vuelve sin fecha y con «Ahora» apagado.
 
 Los borradores son los mismos que los de la app del teléfono ([La app del teléfono](app-movil.md)):
 lo empezado en Publicar, en el teléfono, aparece acá en «Borradores (<N>)» y se sigue acá, y al
-revés. El teléfono no tiene las opciones de TikTok ni la respuesta automática: un borrador que
-las tiene se puede editar allá sin perderlas, pero se programa acá. La API no ve los
-borradores.
+revés. Desde el 2026-11-07 el teléfono tiene el mismo bloque de TikTok y la misma respuesta
+automática, así que esos borradores se siguen y se programan en cualquiera de los dos; una app
+del teléfono sin actualizar no los muestra, y un borrador que los tiene se edita allá sin
+perderlos pero se programa acá. La API no ve los borradores.
 
 Al revés, el teléfono arma historias («Post · Historia» en Publicar) y este compositor todavía
 no: un borrador de historia empezado en el teléfono se abre acá como un post con sus archivos,
