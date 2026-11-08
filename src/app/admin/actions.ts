@@ -36,6 +36,7 @@ import { BORRADOR_NO_EXISTE } from '@/lib/mobile-api'
 import { REARME } from '@/lib/social/publish/publisher'
 import { esUuid } from '@/lib/uuid'
 import { conMensaje } from '@/lib/mensaje-firmado'
+import { desconectarCuenta } from '@/lib/social/desconectar'
 import { quitarCuenta } from '@/lib/social/quitar'
 import { traspasarCuenta } from '@/lib/social/traspasar'
 import { CuentaInvalida, verificarCuentas, type CuentaDestino } from '@/lib/social/cuentas'
@@ -466,14 +467,16 @@ export async function quitarCuentaAccion(accountId: string): Promise<{ error: st
   redirect(conMensaje('/admin/accounts', `«${resultado.nombre}» quitada de Tu Parrilla.`))
 }
 
+/**
+ * «Desconectar» en Los Fierros. Revoca credenciales, no identidad: la fila se queda, y con ella
+ * el historial, salvo en YouTube, donde lo que vino de su API se borra en el acto
+ * (`desconectarCuenta`).
+ */
 export async function disconnectAccount(accountId: string): Promise<void> {
   const usuario = await requireUser()
-  // Revoca credenciales, no identidad: la fila, sus posts y sus métricas se quedan.
-  await getDb()
-    .update(socialAccounts)
-    .set({ accessToken: null, refreshToken: null, expiresAt: null, lastSyncError: null })
-    .where(and(eq(socialAccounts.id, accountId), eq(socialAccounts.ownerId, usuario.id)))
-  revalidatePath('/admin/accounts')
+  await desconectarCuenta(usuario.id, accountId)
+  // Lo de YouTube que se borró se veía también en La Mesa y en Los Números.
+  revalidatePath('/admin', 'layout')
 }
 
 /**

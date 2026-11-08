@@ -6,9 +6,11 @@ import { RechazoApi, SesionCaducada, apiPost } from '../lib/api'
 import { anotarCambio } from '../lib/cambios'
 import { esEnlaceSeguro } from '../lib/format'
 import {
+  EXPLICACION_FALTANTES,
   MESA_SIN_SERVIDOR,
   SE_CORTO_LA_MESA,
   SUBTITULO_DE_LA_MESA,
+  TITULO_FALTANTES,
   botonDeBorrador,
   esEditable,
   esServidorSinLaMesa,
@@ -17,6 +19,7 @@ import {
   lineaDelPrivado,
   seCorrigio,
   type ComentarioDeLaMesa,
+  type FaltanteDeLaMesa,
   type PublicacionDeLaMesa,
 } from '../lib/mesa'
 import { NOMBRE_RED } from '../lib/tipos'
@@ -139,6 +142,47 @@ export function GrupoDeLaMesa({ publicacion, ...acciones }: { publicacion: Publi
       {publicacion.comentarios.map((c) => (
         <TarjetaDeComentario key={c.id} comentario={c} red={publicacion.red} {...acciones} />
       ))}
+    </View>
+  )
+}
+
+/**
+ * El aviso del panel cuando Instagram cuenta comentarios que no entregó: una línea por publicación,
+ * con la frase que escribe el servidor, y el pie que explica qué hacer. Va antes de la cola y no
+ * dentro de un grupo: una publicación a la que Instagram le escondió todo no tiene grupo.
+ */
+export function AvisoDeFaltantes({ faltantes }: { faltantes: FaltanteDeLaMesa[] }) {
+  const colores = useColores()
+  if (faltantes.length === 0) return null
+  return (
+    <View
+      accessibilityLabel={TITULO_FALTANTES}
+      style={{ gap: 10, borderRadius: 12, borderWidth: 1, borderColor: colores.ambar + '66', backgroundColor: colores.ambar + '1a', padding: 12 }}
+    >
+      <Text style={{ color: colores.texto, fontSize: 14, fontWeight: '600' }}>{TITULO_FALTANTES}</Text>
+      {faltantes.map((f) => {
+        const enlace = esEnlaceSeguro(f.enlace) ? f.enlace : null
+        return (
+          <View key={f.id} style={{ flexDirection: 'row', gap: 10, alignItems: 'flex-start' }}>
+            {f.miniatura ? <Image source={{ uri: f.miniatura }} style={{ width: 40, height: 40, borderRadius: 8 }} /> : null}
+            <View style={{ flex: 1, gap: 2 }}>
+              <Pressable
+                onPress={enlace ? () => void Linking.openURL(enlace) : undefined}
+                disabled={!enlace}
+                accessibilityRole={enlace ? 'link' : undefined}
+                style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+              >
+                <Text style={{ color: colores.suave, fontSize: 12 }} numberOfLines={1}>
+                  {f.cuenta ? `${f.cuenta} · ` : ''}
+                  {f.texto || '(sin texto)'}
+                </Text>
+              </Pressable>
+              <Text style={{ color: colores.ambar, fontSize: 13 }}>{f.frase}</Text>
+            </View>
+          </View>
+        )
+      })}
+      <Text style={{ color: colores.suave, fontSize: 12, lineHeight: 18 }}>{EXPLICACION_FALTANTES}</Text>
     </View>
   )
 }

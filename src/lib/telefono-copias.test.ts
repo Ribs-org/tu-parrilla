@@ -28,6 +28,7 @@ import { ETIQUETA_PRIVACIDAD, PRIVACIDADES_TIKTOK } from './social/publish/opcio
 import { TIKTOK_CREADOR_ILEGIBLE } from './social/publish/tiktok-creador'
 import { MAX_MENSAJE, MAX_PALABRA, MAX_RESPUESTA, RESPUESTA_PUBLICA_POR_DEFECTO } from './social/comentarios/reglas'
 import { nombreDe } from './vocabulario'
+import { EXPLICACION_FALTANTES, TITULO_FALTANTES } from './social/comentarios/faltantes'
 
 // `batch.ts` trae `usuarios.ts`, que es solo de servidor; acá no se habla con la base.
 vi.mock('server-only', () => ({}))
@@ -113,7 +114,14 @@ describe('La Mesa del teléfono dice lo mismo que la del panel', () => {
     frasePendientes: (n: number) => string
     fraseColaVacia: (cronico: boolean) => string
     hace: (iso: string, ahora: number) => string
+    TITULO_FALTANTES: string
+    EXPLICACION_FALTANTES: string
   }>('mesa')
+
+  it('el aviso de los comentarios que Instagram no entrega: el título y el pie', () => {
+    expect(mesa.TITULO_FALTANTES).toBe(TITULO_FALTANTES)
+    expect(mesa.EXPLICACION_FALTANTES).toBe(EXPLICACION_FALTANTES)
+  })
 
   it('cuántos esperan y la cola vacía', () => {
     for (const n of [0, 1, 2, 5, 200]) expect(mesa.frasePendientes(n)).toBe(frasePendientes(n))

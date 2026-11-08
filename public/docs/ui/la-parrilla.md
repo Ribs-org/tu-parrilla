@@ -610,8 +610,10 @@ no aparece, y la música tampoco: Instagram solo le pone música a un reel.
 #### «Respuesta automática por palabra clave»
 
 - **«Palabra clave»**, con el placeholder «GUIA» y la ayuda «Una sola palabra. Quien la
-  comente recibe la respuesta sin que hagas nada.» Hasta 30 caracteres, solo letras y
-  números. Se guarda en minúsculas y sin tildes, y reconoce la palabra entera escrita de
+  comente recibe la respuesta sin que hagas nada. En el post, pídela dentro de una frase
+  («comenta “quiero la GUIA”») o usa otra palabra en cada post: Instagram a veces esconde el
+  comentario que es solo la palabra, y ese no le llega a nadie, ni a ti.» Hasta 30 caracteres,
+  solo letras y números. Se guarda en minúsculas y sin tildes, y reconoce la palabra entera escrita de
   cualquier forma: `guía`, `GUIA` o `#Guía!` cuentan; `guiar` no.
 - **«Mensaje»**, con el placeholder «Acá tienes la guía: https://…» y la ayuda «Pon el
   enlace aquí; si es de tu sitio se mide solo en Los Números.» Hasta 1000 caracteres.
@@ -950,6 +952,12 @@ teléfono](app-movil.md)).
 3. Escribir en «Mensaje» lo que se responde, con el enlace.
 4. Dejar «Respuesta pública» como viene, o cambiarla.
 5. «Programar» o «Guardar».
+
+En el texto del post, conviene pedir la palabra dentro de una frase («comenta "quiero la GUIA"»)
+o usar una distinta en cada post: Instagram a veces esconde el comentario que es solo la
+palabra, y ese no llega ni a la cuenta ni a Tu Parrilla. La regla reconoce la palabra igual
+dentro de la frase. Si pasa, La Mesa lo avisa con el recuadro «Comentarios que Instagram no
+entrega» (ver [La Mesa](la-mesa.md)).
 
 Solo funciona en Instagram, Facebook y YouTube. En un post ya publicado también se puede
 agregar o cambiar desde el editor: rige para los comentarios que lleguen desde ese momento.

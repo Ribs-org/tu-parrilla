@@ -1,7 +1,8 @@
 import type { CommentState, DmState } from '@/db/schema'
-import type { ComentarioFila, EstadoCola } from './comentarios-cola'
+import type { ComentarioFila, EstadoCola, PublicacionConFaltantes } from './comentarios-cola'
 import { agruparPorPublicacion } from './social/comentarios/agrupar'
 import { COMENTARIO_AUSENTE, SIN_CREDENCIAL } from './social/comentarios/comentarista'
+import { fraseDeFaltantes } from './social/comentarios/faltantes'
 import { SIN_BORRADOR } from './social/comentarios/modelo'
 import { ESCRIBE_RESPUESTA } from './social/comentarios/validar'
 
@@ -56,6 +57,22 @@ export type MesaMovil = {
   /** Cuántos esperan respuesta en la red elegida, sin importar el estado elegido, como en el panel. */
   pendientes: number
   publicaciones: PublicacionMovil[]
+  /**
+   * Las publicaciones de Instagram en que Instagram cuenta comentarios que no entregó, como el aviso
+   * del panel (`getComentariosQueFaltan`). Vacío con otra red elegida. Un teléfono de antes lo ignora.
+   */
+  faltantes: FaltanteMovil[]
+}
+
+/** Una línea del aviso «Comentarios que Instagram no entrega», con su frase ya escrita. */
+export type FaltanteMovil = {
+  id: string
+  cuenta: string | null
+  texto: string | null
+  miniatura: string | null
+  enlace: string | null
+  /** «Instagram cuenta 6 comentarios en esta publicación y solo nos entregó 4.» */
+  frase: string
 }
 
 function comentario(fila: ComentarioFila, mostrarPrivado: boolean): ComentarioMovil {
@@ -80,12 +97,21 @@ export function mesaParaElTelefono(
   redes: readonly string[],
   pendientes: number,
   mostrarPrivado: boolean,
+  faltantes: PublicacionConFaltantes[] = [],
 ): MesaMovil {
   return {
     estado: filtro.estado,
     red: filtro.red,
     redes,
     pendientes,
+    faltantes: faltantes.map((f) => ({
+      id: f.id,
+      cuenta: f.accountHandle,
+      texto: f.caption,
+      miniatura: f.thumbnailUrl,
+      enlace: f.permalink,
+      frase: fraseDeFaltantes(f.contados, f.entregados),
+    })),
     publicaciones: agruparPorPublicacion(filas).map((g) => {
       const primero = g.comentarios[0]!
       return {

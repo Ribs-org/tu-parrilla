@@ -422,6 +422,11 @@ dueño en su panel.
   va únicamente a TikTok **no hace nada** —no falla, no avisa: nunca se dispara,
   porque nadie lee esos comentarios—. La regla vale la pena solo si el post sale a alguna de esas
   tres.
+- **Instagram puede esconder el comentario que es solo la palabra.** Un `GUIA` suelto a veces
+  queda visible solo para quien lo escribió: Instagram lo cuenta, pero no se lo entrega a la
+  dueña ni a la API, y la regla nunca lo ve. Al escribir el texto del post, pide la palabra
+  dentro de una frase («comenta "quiero la GUIA"») o usa una palabra distinta en cada post;
+  la regla la reconoce igual dentro de la frase.
 - **No dice qué hizo la red con las opciones.** `GET /api/schedule/posts/{id}` (sección 3g)
   muestra lo que quedó guardado y lo que se le va a mandar a la red, no lo que la red aplicó
   después: si TikTok le negó el dúo a esa cuenta o si un trial reel ya se graduó se ve en la red.

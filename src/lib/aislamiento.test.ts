@@ -112,7 +112,7 @@ process.env.AUTH_SECRET = 'secreto-de-prueba-para-el-arnes'
 const { getRecentVisits } = await import('./analytics')
 const { getCuentas, getLecturasDe, getPostRows } = await import('./posts')
 const { contarEnlacesPorPagina, getAllProfiles, getProfileBySlug } = await import('./profiles')
-const { getCola } = await import('./comentarios-cola')
+const { getCola, getComentariosQueFaltan } = await import('./comentarios-cola')
 const { verificarCuentas, cuentaUnicaPorRed } = await import('./social/cuentas')
 const { cuentaDeMusica } = await import('./musica-instagram')
 const { esperaALaAnterior } = await import('./social/publish/secuencia')
@@ -308,6 +308,12 @@ describe('aislamiento por dueño (SQL generado, sin base)', () => {
 
   it('comentarios-cola: getCola filtra por el dueño de la cuenta', async () => {
     const consultas = await todasLasConsultas(() => getCola(DUENO, { estado: 'pendientes', red: null }))
+    expect(consultas).toHaveLength(1)
+    for (const c of consultas) esperarFiltradoPorDueno(c)
+  })
+
+  it('comentarios-cola: getComentariosQueFaltan filtra por el dueño de la cuenta', async () => {
+    const consultas = await todasLasConsultas(() => getComentariosQueFaltan(DUENO))
     expect(consultas).toHaveLength(1)
     for (const c of consultas) esperarFiltradoPorDueno(c)
   })
@@ -1122,10 +1128,10 @@ describe('aislamiento por dueño, escrituras (SQL generado, sin base)', () => {
     const id = '00000000-0000-4000-8000-000000000001'
     const conId = { params: Promise.resolve({ id }) }
 
-    it('GET lee la cola y cuenta los pendientes, los dos atados al dueño', async () => {
+    it('GET lee la cola, cuenta los pendientes y busca lo que Instagram no entregó, los tres atados al dueño', async () => {
       const { GET } = await import('../app/api/mobile/comentarios/route')
       const consultas = await todasLasConsultas(() => GET(new Request('https://ejemplo.cl/api/mobile/comentarios?estado=automaticas&red=instagram')))
-      expect(consultas).toHaveLength(2)
+      expect(consultas).toHaveLength(3)
       for (const c of consultas) esperarFiltradoPorDueno(c)
     })
 
