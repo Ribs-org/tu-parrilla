@@ -106,13 +106,6 @@ sección.
 
 ## Bugs
 
-- **El compositor del panel no mira el largo máximo de un video en TikTok** (2026-11-07, se vio al
-  llevar el bloque al teléfono). `creator_info` trae `max_video_post_duration_sec` y la guía de
-  TikTok pide no dejar mandar un video más largo; Publicar del teléfono lo dice y apaga
-  «Programar» (`videoMuyLargo`, en `mobile/src/lib/tiktok.ts`), pero el bloque del panel
-  (`tiktok-opciones.tsx`) ni lo muestra: el video sube y TikTok lo rechaza después. El panel ya
-  mide la duración en `revision-media.tsx`; falta cruzarla con el dato de la cuenta.
-
 - **En el panel a ancho de teléfono, la pieza que se elige en la cámara de frío vuela fuera de
   la pantalla** (2026-11-02, se vio al probar #296). A ese ancho el riel de la comanda queda
   debajo de la grilla, y la animación de salida apunta a él aunque no se vea. No rompe nada: la

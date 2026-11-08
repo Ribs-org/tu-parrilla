@@ -6,6 +6,7 @@ import { leerCreadorTikTok } from '@/app/admin/actions'
 import { Field, GroupLabel, Select, Toggle } from '@/components/ui'
 import type { TikTokInicial } from '@/lib/borrador'
 import type { CuentaDestino } from '@/lib/social/cuentas'
+import { duracionMaxima, videoMuyLargo, type MediaMedida } from '@/lib/social/publish/limites'
 import { TIKTOK_CREADOR_ILEGIBLE, type CreadorTikTok } from '@/lib/social/publish/tiktok-creador'
 import { ETIQUETA_PRIVACIDAD, PRIVACIDADES_TIKTOK, type PrivacidadTikTok } from '@/lib/social/publish/opciones'
 
@@ -37,15 +38,25 @@ const creadorPromesas = new Map<string, ReturnType<typeof leerCreadorTikTok>>()
  * se eligió al programar fotos ahí la última vez): la guía de TikTok prohíbe dejar puestas la
  * privacidad y las demás casillas, no esto, y quien tiene tres cuentas la elige una vez por
  * cuenta y no en cada post.
+ *
+ * Con un video, dice el largo máximo que TikTok le da a esa cuenta (`creator_info`) y, en rojo,
+ * si el video elegido se pasa: la guía de TikTok pide no dejarlo mandar. Apagar «Programar» lo
+ * hace el compositor, que se entera de cada cuenta por `onCreador`; `medidas` son las del
+ * compositor (`useMedidas`), las mismas de la revisión para TikTok.
  */
 export function TikTokOpciones({
   cuenta,
   soloFotos,
   inicial,
+  medidas,
+  onCreador,
 }: {
   cuenta: CuentaDestino & { tiktokMusica?: boolean | null }
   soloFotos: boolean
   inicial?: TikTokInicial | null
+  medidas: MediaMedida[] | null
+  /** Estable (`useCallback`): está entre las dependencias de la consulta. */
+  onCreador: (cuentaId: string, creador: CreadorTikTok) => void
 }) {
   const [creador, setCreador] = useState<CreadorTikTok | null>(null)
   const [aviso, setAviso] = useState<string | null>(null)
@@ -77,6 +88,7 @@ export function TikTokOpciones({
           setAviso(r.error)
         } else {
           setCreador(r.creador)
+          onCreador(cuenta.id, r.creador)
         }
       })
       .catch(() => {
@@ -86,13 +98,15 @@ export function TikTokOpciones({
     return () => {
       vivo = false
     }
-  }, [cuenta.id])
+  }, [cuenta.id, onCreador])
 
   // Sin creator_info se ofrecen las cuatro: el cron vuelve a consultar antes de subir y
   // falla con frase propia si la elegida ya no está permitida.
   const privacidades = creador?.privacidades ?? PRIVACIDADES_TIKTOK
   const patrocinado = comercial && tipoComercial === 'patrocinado'
   const patrocinadoPrivado = patrocinado && privacidad === 'SELF_ONLY'
+  const maxima = soloFotos ? null : duracionMaxima(creador?.maxDuracionSeg)
+  const muyLargo = soloFotos ? null : videoMuyLargo(medidas ?? [], creador?.maxDuracionSeg)
 
   return (
     <div className="space-y-4 rounded-xl bg-velo/[0.04] p-4">
@@ -107,6 +121,9 @@ export function TikTokOpciones({
           </p>
         </div>
       </div>
+
+      {maxima ? <p className="text-[0.72rem] text-fg-faint">{maxima}</p> : null}
+      {muyLargo ? <p className="text-xs text-negative">{muyLargo}</p> : null}
 
       <input type="hidden" name={`tiktokModo:${cuenta.id}`} value={borrador ? 'borrador' : 'directo'} />
       <Toggle
