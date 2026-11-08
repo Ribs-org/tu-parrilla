@@ -88,3 +88,24 @@ export function tiktokBusinessAbiertoPara(ownerId: string | null | undefined): b
   if (!ownerId) return false
   return bandera.split(',').some((id) => id.trim() === ownerId)
 }
+
+/**
+ * Si el dueño ve los números de YouTube Analytics en Los Números y la sincronización los lee de
+ * sus canales (`social/analitica-youtube.ts`). Hacen falta las dos variables:
+ * `YOUTUBE_PERMISOS_ANALITICA=1`, que dice que el permiso `yt-analytics.readonly` ya está agregado
+ * en la consola de Google, y `YOUTUBE_ANALITICA_ABIERTO_PARA`, con `1` para todos o una lista de
+ * ids de usuario separados por comas —la cuenta del revisor de Google mientras revisa—; vacía,
+ * para nadie, que es como nace.
+ *
+ * Lo mismo decide si el conectar pide el permiso (`connect/route.ts`): la pantalla de Google se
+ * verificó el 2026-10-14 sin él, y pedir un permiso sin verificar le muestra a quien conecta el
+ * cartel de «app no verificada». Así, mientras Google revisa, solo lo ve quien está en la lista.
+ */
+export function analiticaDeYoutubeAbiertaPara(ownerId: string | null | undefined): boolean {
+  if (env('YOUTUBE_PERMISOS_ANALITICA') !== '1') return false
+  const bandera = env('YOUTUBE_ANALITICA_ABIERTO_PARA')
+  if (!bandera) return false
+  if (bandera === '1') return true
+  if (!ownerId) return false
+  return bandera.split(',').some((id) => id.trim() === ownerId)
+}

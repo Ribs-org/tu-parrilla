@@ -65,6 +65,8 @@ function cuenta(id: string, network: string, ownerId: string, creada: string): S
     trialReelsMotivo: null,
     trialReelsEn: null,
     tiktokMusica: null,
+    scopes: null,
+    analiticaVerificadaEn: null,
     createdAt: new Date(creada),
   }
 }

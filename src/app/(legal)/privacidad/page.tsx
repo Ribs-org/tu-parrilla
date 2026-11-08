@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
+import { env } from '@/lib/env'
 import { nombreDe } from '@/lib/vocabulario'
 import { CONTACTO, RESPONSABLE, RUT } from '@/lib/empresa'
 
@@ -210,6 +211,21 @@ export default function PrivacidadPage() {
           </a>
           .
         </p>
+        {/* Aparece cuando el conectar empieza a pedir el permiso de YouTube Analytics
+            (`YOUTUBE_PERMISOS_ANALITICA`, `social/analitica-youtube.ts`): antes no se guarda nada
+            de eso, y la página no lo dice. */}
+        {env('YOUTUBE_PERMISOS_ANALITICA') === '1' ? (
+          <p className="leading-relaxed text-fg-muted">
+            Si al conectar el canal le das también el permiso de{' '}
+            <span className="text-fg">YouTube Analytics</span>, Tu Parrilla lee con él lo que YouTube
+            Analytics cuenta de tu canal y de tus videos —views, tiempo visto, retención, suscriptores
+            ganados y perdidos, de dónde llegó la gente, y de qué país, edad y género es tu audiencia, en
+            los porcentajes que da YouTube, sin identificar a nadie— y te lo muestra en{' '}
+            {nombreDe('/admin/analytics')} tal como lo entrega YouTube. Esos datos se guardan mientras
+            sigas autorizando: cada lectura diaria comprueba que el permiso sigue vigente, y se borran si
+            pasan 30 días sin poder comprobarlo, si quitas el permiso o si desconectas el canal.
+          </p>
+        ) : null}
       </section>
 
       <section className="space-y-3">

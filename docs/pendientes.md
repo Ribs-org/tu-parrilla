@@ -565,7 +565,8 @@ permisos «por decidir»** de la tabla red por red, para pedirlos todos en una m
   reconecta en Los Fierros entrando como `revision@tu-parrilla.cl`) y que haya algún
   comentario pendiente en La Mesa (los de
   YouTube se borran a los 30 días). Contestar siempre en el mismo hilo del correo. Al
-  aprobarse, ver «Después de aprobar» en el guion.
+  aprobarse, ver «Después de aprobar» en el guion, y recién entonces la segunda verificación,
+  la de YouTube Analytics («La analítica: segunda verificación», en el mismo guion).
 - **Por revisar: cuánto guarda el chef la copia del material de una comanda** (2026-11-06).
   `/privacidad`, «La Cocina», dice que el chef baja una copia del material a los servidores de
   Pyxis para editarlo, pero no cuánto dura: Tu Parrilla borra lo suyo (la cámara de frío, cuando
@@ -920,11 +921,17 @@ nadie paga: todas las cuentas son iguales y el README dice «Sin suscripción».
   (1) **leer las estadísticas con el token OAuth del dueño** en vez de la API key: leídas
   así son datos autorizados, que se pueden guardar mientras él siga autorizando (hay que
   revisarlo cada 30 días); vale para el canal propio y para cualquier usuario, y devuelve
-  la historia, pero no lo ganado ni el arrastre; (2) **pedir el permiso de analítica de
-  §III.L**, una vez aprobada la primera auditoría, que además devuelve lo ganado y el
-  arrastre, lo que vende la portada. Se afloja en `src/lib/social/politica-youtube.ts` y
-  `retencion-youtube.ts`. Ver `docs/google-verificacion-guion.md`, «Lo que la auditoría
-  mira de los datos guardados».
+  la historia, pero no lo ganado ni el arrastre; (2) **el permiso de YouTube Analytics**
+  (`yt-analytics.readonly`). **El (2) quedó escrito y cerrado el 2026-11-08**: lee la historia
+  del canal día por día, la retención de cada video, las fuentes de tráfico y la audiencia, y la
+  guarda mientras el dueño autoriza (ver README, «YouTube Analytics: escrito y cerrado»). Abrirlo
+  es la **[dueño]** segunda verificación de Google, que no se pide antes de que aprueben la
+  auditoría de cuota: el paso a paso está en `docs/google-verificacion-guion.md`, «La analítica:
+  segunda verificación». Lo que sigue fuera, también con Analytics: lo ganado y el arrastre
+  calculados por Tu Parrilla con datos de YouTube (§III.E.4.h); eso es el permiso aparte de
+  §III.L, que nadie pidió, y las filas de YouTube de la Data API siguen con su plazo de 30 días.
+  Por hacer cuando se abra: lo de Analytics solo se ve en el panel; no está en la planilla de
+  «Llevar para la casa», en la app del teléfono ni en la API de métricas.
 - **[dueño] Retirar `SCHEDULE_API_KEY` de Vercel** (2026-10-13). Desde que cada usuario
   genera sus llaves en su panel (hoy en La Cocina, «Tu propio chef»), la del despliegue solo
   seguía para el AM de `marca-personal`, y

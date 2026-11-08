@@ -17,6 +17,11 @@ export type CuentaAConectar = {
    * Instagram se guarda como de login de Facebook: la selección de varias cuentas solo existe ahí.
    */
   login?: 'facebook' | 'instagram'
+  /**
+   * Los permisos que Google dijo conceder, separados por espacios. Solo YouTube los guarda: es lo
+   * que dice si el canal dio el de analítica (`social/analitica-youtube.ts`).
+   */
+  scopes?: string | null
 }
 
 /**
@@ -107,6 +112,9 @@ export async function guardarCuenta(
     // Se escribe siempre en Instagram: la misma cuenta puede reconectarse por el otro login, y
     // entonces cambian el token y el host con que se le habla. Nulo en las demás redes.
     login: network === 'instagram' ? (cuenta.login ?? 'facebook') : null,
+    // En YouTube se escribe siempre, aunque venga vacío: un reconectar que destildó la analítica
+    // tiene que dejar de decir que la tiene, y entonces `retencion-youtube` borra lo leído con ella.
+    ...(network === 'youtube' ? { scopes: cuenta.scopes ?? null } : {}),
   }
   // El id de usuario de Meta va aparte porque al reconectar solo se escribe cuando lo hay:
   // así una cuenta de antes de que existiera la columna rellena su nulo, y un `/me` que

@@ -155,6 +155,32 @@ describe('el permiso de los anuncios', () => {
     expect(scopesDe('youtube', { ...SIN, anuncios: true, promocionar: true })).toBe(scopesDe('youtube', SIN))
   })
 
+  it('el de YouTube Analytics va solo en YouTube, separado con un espacio como pide Google', () => {
+    expect(scopesDe('youtube', SIN)).toBe(
+      'https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube.force-ssl',
+    )
+    expect(scopesDe('youtube', { ...SIN, analiticaYoutube: true })).toBe(
+      'https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube.force-ssl https://www.googleapis.com/auth/yt-analytics.readonly',
+    )
+    expect(scopesDe('instagram', { ...SIN, analiticaYoutube: true })).toBe(scopesDe('instagram', SIN))
+  })
+
+  it('la ventana de Google lo pide solo para quien tiene la analítica abierta, y solo con la bandera', async () => {
+    const pedidos = async () =>
+      new URL((await conectar('youtube')).headers.get('location') ?? '').searchParams.get('scope')?.split(' ') ?? []
+    try {
+      process.env.YOUTUBE_ANALITICA_ABIERTO_PARA = 'owner-1'
+      expect(await pedidos()).not.toContain('https://www.googleapis.com/auth/yt-analytics.readonly')
+      process.env.YOUTUBE_PERMISOS_ANALITICA = '1'
+      expect(await pedidos()).toContain('https://www.googleapis.com/auth/yt-analytics.readonly')
+      process.env.YOUTUBE_ANALITICA_ABIERTO_PARA = 'otro'
+      expect(await pedidos()).not.toContain('https://www.googleapis.com/auth/yt-analytics.readonly')
+    } finally {
+      delete process.env.YOUTUBE_PERMISOS_ANALITICA
+      delete process.env.YOUTUBE_ANALITICA_ABIERTO_PARA
+    }
+  })
+
   it('la ventana de Meta lo pide con la bandera puesta', async () => {
     process.env.INSTAGRAM_APP_ID = 'app'
     process.env.META_PERMISOS_ANUNCIOS = '1'
