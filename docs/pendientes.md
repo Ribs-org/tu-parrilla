@@ -559,20 +559,17 @@ permisos «por decidir»** de la tabla red por red, para pedirlos todos en una m
   `src/lib/social/desconectar.ts`).
 - **[dueño] Vercel Pro antes de abrir a terceros.** El plan Hobby es de uso personal y no
   comercial (`docs/levantamiento-terceros.md` §5).
-- **[dueño] La app en la Play Store: mandar a revisión y juntar doce probadores** (2026-10-16;
+- **[dueño] La app en la Play Store: en revisión; juntar doce probadores** (2026-10-16;
   al día el 2026-11-08). La cuenta de Play Console es personal y la app, `cl.tuparrilla.app`, se
   llama **«Parrilla»** en la ficha (decisión del dueño, 2026-11-08; el binario 1.2.0 dirá «Tu
   Parrilla» bajo el ícono). El 2026-11-08 quedaron llenas todas las tarjetas de Contenido de la app,
   la ficha (con 5 capturas, dos nuevas con datos de prueba) y la categoría Business, y se armó la
   prueba cerrada «Closed testing - Alpha»: solo Chile, la lista «Tu Parrilla - interno» (10) y la
-  versión con el `.aab` 1.1.0 (código 2). **No se ha enviado a revisión**: quedó corriendo la
-  revisión rápida de la consola. Antes de «Send changes for review»:
-  - cambiar las instrucciones del revisor («Sign in details») por las que piden cerrar y reabrir
-    la app una vez: la 1.1.0 de la tienda trae el código del 2026-10-16 y lo nuevo (La Mesa, La
-    Cocina, historias, TikTok) le llega por aire recién en la segunda apertura; si el revisor la
-    abre una sola vez, la ficha describe cosas que no ve;
-  - que `/borrar-mis-datos` nombre la app como en la ficha («Parrilla»): Google lo pide para la
-    «Delete data URL». Una línea.
+  versión con el `.aab` 1.1.0 (código 2), con las instrucciones del revisor que piden cerrar y
+  reabrir la app una vez (la 1.1.0 de la tienda trae el código del 2026-10-16 y lo nuevo llega por
+  aire en la segunda apertura). **Enviado a revisión el 2026-11-08.** Queda, opcional: que
+  `/borrar-mis-datos` nombre la app como la ficha («Parrilla»), que Google pide para la «Delete data
+  URL»; es una línea y no obliga a reenviar.
   Después: Google revisa en días; aprobada, el enlace para unirse aparece en la prueba cerrada, y
   hacen falta **al menos doce** probadores que acepten y se queden **catorce días** antes de pedir
   producción (faltan dos o más: sus Gmail a la lista, o un Grupo de Google). Sin países de Europa,
