@@ -455,7 +455,10 @@ permisos «por decidir»** de la tabla red por red, para pedirlos todos en una m
      responderlo → la respuesta en la app de TikTok. Sin guion escrito todavía; se arma con
      `docs/tiktok-revision-guion.md` como molde.
   7. Funcionando: `TIKTOK_COMENTARIOS_ABIERTO_PARA=1`, y pasar la credencial de `ajustes` a la
-     cuenta (`docs/deuda-tecnica.md`).
+     cuenta (`docs/deuda-tecnica.md`). Al abrirlo, cambiar también la frase «En TikTok todavía no
+     hay cola de comentarios.» del bloque de la palabra clave —en el panel
+     (`schedule/regla-clave.tsx`) y en el teléfono (`mobile/src/lib/regla.ts`, que sale por aire)—
+     y en su wiki (`la-parrilla.md`, `app-movil.md`): mientras esté cerrado para todos, es cierta.
 - **Meta, segunda vuelta: mensajes privados** (el privado con el enlace de la regla de
   palabra clave, `instagram_manage_messages` y `pages_messaging`) y, aparte, **Threads**
   (`threads_basic`, `threads_content_publish`). Se sacaron de la primera solicitud porque
