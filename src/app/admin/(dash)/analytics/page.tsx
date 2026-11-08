@@ -6,6 +6,7 @@ import { SeccionCargando } from './cargando'
 import { LoPagado } from './lo-pagado'
 import { ParaLlevar } from './para-llevar'
 import { QueFunciona } from './que-funciona'
+import { TiktokAFondo } from './tiktok-a-fondo'
 import { BarList } from '@/components/charts/bar-list'
 import { CampaignTable } from '@/components/charts/campaign-table'
 import { Donut } from '@/components/charts/donut'
@@ -43,7 +44,7 @@ import {
 import { parseFilters } from '@/lib/filters'
 import { networkLabel } from '@/lib/networks'
 import { etiquetaDeFechas } from '@/lib/rango'
-import { anunciosAbiertosPara, promocionarAbiertoPara } from '@/lib/redes-abiertas'
+import { anunciosAbiertosPara, promocionarAbiertoPara, tiktokBusinessAbiertoPara } from '@/lib/redes-abiertas'
 import {
   MAX_PUBLICACIONES_LEIDAS,
   getCampaignPosts,
@@ -55,6 +56,7 @@ import {
 import { topPostsByGain, type CuentaRow } from '@/lib/posts-kpis'
 import { lecturasDeCuentas } from '@/lib/lecturas-cuentas'
 import { getAllProfiles } from '@/lib/profiles'
+import { numerosDeTiktok } from '@/lib/social/tiktok-numeros-guardar'
 import {
   alternarSeccion,
   cuentaElegida,
@@ -359,6 +361,15 @@ async function RedesEnDetalle({
 }) {
   const kpis = postKpisFrom(filas)
   const serie = await getPostSeries(filters)
+  // Lo de TikTok for Business, solo con su reja abierta y en las cuentas que lo activaron
+  // (`numerosDeTiktok` llega vacío si no): la audiencia y la comparación con cuentas parecidas.
+  const tiktok = await numerosDeTiktok(
+    filters.ownerId,
+    cuentas
+      .filter((c) => c.network === 'tiktok' && (cuenta === null || c.id === cuenta.id))
+      .map((c) => ({ id: c.id, videos: filas.filter((f) => f.accountId === c.id) })),
+  )
+  const nombres = Object.fromEntries(cuentas.map((c) => [c.id, nombreDeCuenta(c)]))
 
   return (
     <div className="mt-3 grid grid-cols-1 gap-3">
@@ -378,16 +389,19 @@ async function RedesEnDetalle({
 
       <Panel
         title="Tus cuentas"
-        hint="Seguidores por cuenta, con lo ganado en el período; en YouTube, solo el total, porque sus reglas no permiten calcular lo ganado. Visitas al perfil y alcance son del último día leído — Instagram es la única que los entrega hoy."
+        hint={
+          tiktokBusinessAbiertoPara(filters.ownerId)
+            ? 'Seguidores por cuenta, con lo ganado en el período; en YouTube, solo el total, porque sus reglas no permiten calcular lo ganado. Visitas al perfil y alcance son del último día leído — los entregan Instagram y, con TikTok for Business activado, TikTok.'
+            : 'Seguidores por cuenta, con lo ganado en el período; en YouTube, solo el total, porque sus reglas no permiten calcular lo ganado. Visitas al perfil y alcance son del último día leído — Instagram es la única que los entrega hoy.'
+        }
       >
-        <AccountCards
-          cards={tarjetas}
-          nombres={Object.fromEntries(cuentas.map((c) => [c.id, nombreDeCuenta(c)]))}
-        />
+        <AccountCards cards={tarjetas} nombres={nombres} />
         <div className="mt-4">
           <AccountSeriesChart series={serieCuentas} />
         </div>
       </Panel>
+
+      <TiktokAFondo numeros={tiktok} nombres={nombres} />
 
       <Panel
         title="Views ganadas y visitas, día a día"

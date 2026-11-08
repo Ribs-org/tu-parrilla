@@ -6,7 +6,7 @@ import { Encabezado } from '@/components/ui'
 import { mensajeDeLaUrl } from '@/lib/mensaje-firmado'
 import { AvisoDeConexion } from './aviso-de-conexion'
 import { Cuentas } from './cuentas'
-import { loginDeInstagramAbiertoPara, proximamentePara, tiktokComentariosAbiertoPara } from '@/lib/redes-abiertas'
+import { loginDeInstagramAbiertoPara, proximamentePara, tiktokBusinessAbiertoPara } from '@/lib/redes-abiertas'
 import { cuentasConComentarios } from '@/lib/social/tiktok-business'
 
 export const dynamic = 'force-dynamic'
@@ -25,8 +25,8 @@ export default async function AccountsPage({
   const { id: ownerId } = await requireUser()
   const cuentas = await getCuentas(ownerId)
   const metaEnRevision = env('META_EN_REVISION') === '1'
-  // Los comentarios de TikTok, solo para quien los tiene abiertos: qué cuentas ya los activaron.
-  const comentariosTiktok = tiktokComentariosAbiertoPara(ownerId)
+  // TikTok for Business, solo para quien lo tiene abierto: qué cuentas ya lo activaron.
+  const comentariosTiktok = tiktokBusinessAbiertoPara(ownerId)
     ? await cuentasConComentarios(
         ownerId,
         cuentas.filter((c) => c.network === 'tiktok').map((c) => c.id),

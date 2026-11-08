@@ -42,6 +42,7 @@ import { PanelLateral } from './panel-lateral'
 import { ReglaClave } from './regla-clave'
 import { RevisionMedia } from './revision-media'
 import { formatoConLoQueSube, fraseDeLlegada, llenadoDe, siguienteEnCola, tipoDe, type Subida } from './subidas'
+import { BusquedasTiktok } from './busquedas-tiktok'
 import { TikTokOpciones } from './tiktok-opciones'
 import { venceAntesDe } from './vence'
 import { VistaPrevia } from './vista-previa'
@@ -211,9 +212,15 @@ export function Composer({
   desde,
   creativo = null,
   proximamente = [...REDES_PROXIMAMENTE],
+  busquedasTiktok = [],
 }: {
   carga: Record<string, number>
   cuentas: CuentaRow[]
+  /**
+   * Las cuentas de TikTok que pueden pedir «Lo que se busca en TikTok» (`cuentasConBusquedas`, en
+   * el servidor): con TikTok for Business activado y su permiso. Vacío con la reja cerrada.
+   */
+  busquedasTiktok?: readonly string[]
   /** Las redes que para este dueño dicen «Próximamente» (`proximamentePara`, en el servidor). */
   proximamente?: readonly string[]
   /** El borrador que se abre; sin él, el formulario nace vacío. */
@@ -786,6 +793,13 @@ export function Composer({
               inicial={campos ? tiktokInicial(campos, cuenta.id) : null}
             />
           ))}
+
+          {/* Solo en las cuentas con TikTok for Business y su permiso (`busquedasTiktok`). */}
+          {cuentasTikTok
+            .filter((cuenta) => busquedasTiktok.includes(cuenta.id))
+            .map((cuenta) => (
+              <BusquedasTiktok key={`busquedas-${cuenta.id}`} cuenta={cuenta} captionId={captionId} />
+            ))}
 
           {unVideo
             ? cuentasInstagram.map((cuenta) => (

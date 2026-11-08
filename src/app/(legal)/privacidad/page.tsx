@@ -118,6 +118,19 @@ export default function PrivacidadPage() {
             reproducciones, «me gusta», comentarios, veces compartido, guardados y alcance.
           </li>
           <li>
+            En TikTok, solo si el dueño de la cuenta la autoriza además en la aplicación de{' '}
+            <span className="text-fg">TikTok for Business</span>: las cifras de su cuenta
+            (seguidores, «me gusta» y videos totales, visitas al perfil, reproducciones y alcance
+            por día), la composición de su audiencia por país, género y edad —en porcentajes del
+            total, sin datos de ninguna persona—, el detalle de cada uno de sus videos (tiempo
+            visto, cuántos lo vieron completo, seguidores que trajo y de dónde llegó la gente), el
+            promedio de las cuentas de su rubro que publica TikTok y las búsquedas en tendencia que
+            TikTok le recomienda. Se usan solo para mostrárselas a él en el panel. Las cifras diarias de
+            la cuenta se guardan día a día, como las de las demás redes; lo demás se reemplaza con
+            cada lectura y las búsquedas se recuerdan unas horas. La audiencia, el detalle de los
+            videos, el promedio del rubro y las búsquedas se borran al desconectar la cuenta.
+          </li>
+          <li>
             <span className="text-fg">Los comentarios que otras personas dejan</span> en esas
             publicaciones: el texto, el nombre de usuario y el identificador de quien comentó, y
             la fecha. Se guardan para mostrarlos en la cola de comentarios del panel y para

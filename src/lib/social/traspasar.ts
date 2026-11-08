@@ -74,10 +74,12 @@ export function pasosDeTraspaso(accountId: string, destinoId: string): SQL[] {
             select 1 from scheduled_post_targets t where t.post_id = p.id and t.account_id <> ${accountId}
           )`,
     sql`update social_accounts set owner_id = ${destinoId} where id = ${accountId}`,
-    // La credencial de comentarios de TikTok vive en `ajustes`, por dueño (`social/tiktok-business.ts`):
-    // pasa con la cuenta, como la credencial de la fila.
+    // Lo de TikTok for Business vive en `ajustes`, por dueño: la credencial (`social/tiktok-business.ts`)
+    // y los números guardados (`social/tiktok-numeros-guardar.ts`). Pasa con la cuenta, como la
+    // credencial de la fila.
     sql`update ajustes set owner_id = ${destinoId}, updated_at = now()
-        where owner_id is distinct from ${destinoId} and clave = 'tiktok_comentarios:' || ${accountId}`,
+        where owner_id is distinct from ${destinoId}
+          and (clave = 'tiktok_comentarios:' || ${accountId} or starts_with(clave, 'tiktok_business:' || ${accountId} || ':'))`,
   ]
 }
 

@@ -20,7 +20,7 @@ panel de la plataforma correspondiente.
 |---|---|---|---|
 | **Instagram** | `instagram_basic`, `instagram_manage_insights`, `pages_show_list`, `pages_read_engagement`, `instagram_content_publish`, `business_management`, `instagram_manage_comments` | App de Meta en **modo desarrollo** | El diálogo de Facebook le dice que la función no está disponible; no puede conectar (es lo que le pasó a una usuaria el 2026-09-29). Solo entran cuentas con un rol en la app. |
 | **Facebook** | `pages_show_list`, `pages_read_engagement`, `pages_read_user_content`, `pages_manage_posts`, `business_management`, `pages_manage_engagement` (+ `publish_video` al confirmar) | La misma app de Meta, mismo modo | Igual que Instagram. |
-| **TikTok** | `user.info.basic`, `video.list`, `video.upload`, `video.publish` (los comentarios, aparte y cerrados: §3.5) | App **aprobada y en producción** desde el 2026-09-28 (Login Kit + Content Posting API); **auditoría de Direct Post aprobada** (aviso del 2026-10-06) | Puede conectar y publicar con la privacidad que elija, desde una cuenta pública o privada, sin cupo de usuarios por día. |
+| **TikTok** | `user.info.basic`, `video.list`, `video.upload`, `video.publish` (los comentarios y los números de TikTok for Business, aparte y cerrados: §3.5) | App **aprobada y en producción** desde el 2026-09-28 (Login Kit + Content Posting API); **auditoría de Direct Post aprobada** (aviso del 2026-10-06) | Puede conectar y publicar con la privacidad que elija, desde una cuenta pública o privada, sin cupo de usuarios por día. |
 | **YouTube** | `youtube.upload`, `youtube.force-ssl` (OAuth), más una API key para métricas | Proyecto de Google Cloud *In production* y **verificado** (2026-10-14) | Entra sin cartel ni tope de usuarios; falta la auditoría de cuota, que sube los cupos. Según la documentación, sin ella los videos quedan privados, pero a este proyecto no se le aplica: lo subido el 2026-10-09 y el 2026-10-16 salió público. |
 
 Lo que ya está resuelto del lado del producto y no hay que rehacer: usuarios invitados por
@@ -196,10 +196,36 @@ que lee y responde los comentarios de los videos propios, pero no es la que usa 
   (<https://business-api.tiktok.com/portal/docs?id=1738084416214017>). Con el sondeo de cinco
   minutos y cinco páginas por video, no aprieta.
 
-Lo que se hizo con esto: el comentarista de TikTok está escrito y cerrado detrás de
-`TIKTOK_COMENTARIOS_ABIERTO_PARA` (README, «Comentarios de TikTok: la API for Business»). Lo que
-queda —la app, el formulario, la revisión y el video— está en `docs/pendientes.md`, «Comentarios
-de TikTok en La Mesa».
+- **Los números** (leído el 2026-11-08). La misma autorización da lo que la app de siempre no
+  da, cada cosa con su casilla en el grupo «TikTok Accounts» del portal:
+  - `GET /business/get/` (<https://business-api.tiktok.com/portal/docs?id=1762228399168514>): de
+    por vida, seguidores, «me gusta» y videos (`user.info.stats`, «Get account user info»); por
+    día, hasta 60 días atrás y con 24 a 48 horas de atraso, visitas al perfil, views, likes,
+    comentarios, compartidos y seguidores, y la audiencia por país, género y edad desde 100
+    seguidores (`user.insights`, «Get account insights»). El alcance diario, la gente que
+    interactuó y el neto de seguidores son solo para cuentas con acceso avanzado o de empresa.
+  - `GET /business/video/list/` (<https://business-api.tiktok.com/portal/docs?id=1762228421622786>):
+    cada video público, de a 20 por página con cursor, con views, likes, comentarios,
+    compartidos, guardados y alcance (`video.list`) y tiempo visto, cuántos lo vieron completo,
+    seguidores que trajo, visitas al perfil, fuentes de tráfico y tipos de audiencia
+    (`video.insights`); los dos, «Get account media». Son totales de la vida del video, y dejan de
+    actualizarse al año.
+  - `GET /business/benchmark/` (<https://business-api.tiktok.com/portal/docs?id=1822388944791617>):
+    el promedio de las cuentas de empresa verificadas de un rubro (`business_category`, 25
+    valores) —seguidores, lo ganado en 30 días, videos, interacción y otros—. Su documentación no
+    dice con qué permiso llega al token («Business benchmark» en el portal).
+  - `GET /discovery/trending/search/` y `/discovery/trending/search/keyword/`
+    (<https://business-api.tiktok.com/portal/docs?id=1832798345014338> y
+    <https://business-api.tiktok.com/portal/docs?id=1832798361818114>): 20 búsquedas en tendencia,
+    o recomendadas para una consulta de hasta 255 caracteres, personalizadas o no para la cuenta
+    (`discovery.search.words`, «Discover trending search keywords»). Solo para cuentas con acceso
+    avanzado o de empresa.
+
+Lo que se hizo con esto: el comentarista de TikTok y los números están escritos y cerrados detrás
+de `TIKTOK_COMENTARIOS_ABIERTO_PARA` (README, «TikTok for Business: comentarios y números»). Lo
+que queda —crear la app cuando aprueben el registro de desarrollador, el formulario, la revisión y
+el video— está en `docs/pendientes.md`, «TikTok for Business: comentarios en La Mesa y números en
+Los Números».
 
 Las páginas del portal se dibujan con JavaScript y un lector sin navegador las ve vacías; el
 texto se leyó por la misma API con que las arma el portal
@@ -366,16 +392,21 @@ si nombra uno que la app no tiene activado.
 | `publish_video`, `read_insights` | Facebook | — | No se piden: Facebook publica hoy con `pages_manage_posts`, y `publish_video` espera a confirmar que la ventana lo acepta (un permiso rechazado anula el pedido entero, ver `connect/route.ts`); Meta retiró `read_insights` como permiso de login (las métricas de página no responden para esta página; solo se leen seguidores) | — |
 | `user.info.basic`, `video.list` | TikTok | Conectar (el id y el nombre visible) y Los Números | Aprobados (app en producción, 2026-09-28) | Hecha |
 | `video.upload`, `video.publish` | TikTok | Publicar en borrador y directo | Aprobados; auditoría de Direct Post aprobada (2026-10-06) | Hecha |
-| `user.info.stats` | TikTok | **Por decidir.** Seguidores, «me gusta» totales y número de videos: la serie de la cuenta en Los Números, que TikTok hoy no tiene | **No se pide** (el código pide solo los cuatro de arriba). Pedirlo es sumarlo en el producto «Scopes» del portal y mandar la app a revisión; después, cada cuenta reconecta una vez, porque TikTok no suma permisos a un token (<https://developers.tiktok.com/doc/scopes-overview/>) | Una revisión de la app de developers.tiktok.com, con `user.info.profile` |
-| `user.info.profile` | TikTok | **Por decidir.** El @usuario: hoy la fila muestra el nombre visible, porque `user.info.basic` no trae el usuario (<https://developers.tiktok.com/bulletin/user-info-scope-migration>) | No se pide | La misma que `user.info.stats` |
-| `comment.list`, `comment.list.manage` | TikTok (app de TikTok for Business) | La Mesa y la palabra clave en TikTok (§3.5) | Escrito y cerrado (`TIKTOK_COMENTARIOS_ABIERTO_PARA`); falta crear la app | La revisión de la app nueva, con el formulario de acceso. Si se quieren los números de la cuenta por esta vía, marcar ahí también `user.info.stats`: su `/business/get/` los da sin tocar la app de publicar |
+| `user.info.stats` en la app de siempre | TikTok | — | **No se pide**: los números de la cuenta llegan por la app de TikTok for Business (abajo), decidido el 2026-11-08. Pedirlo aquí sería otra revisión y reconectar cada cuenta, porque TikTok no suma permisos a un token (<https://developers.tiktok.com/doc/scopes-overview/>) | — |
+| `user.info.profile` | TikTok | **Por decidir.** El @usuario: hoy la fila muestra el nombre visible, porque `user.info.basic` no trae el usuario (<https://developers.tiktok.com/bulletin/user-info-scope-migration>) | No se pide, en ninguna de las dos apps | Una revisión de la app de developers.tiktok.com, o sumarlo a la de TikTok for Business |
+| «Get account user info» (`user.info.basic`, `user.info.stats`) | TikTok (app de TikTok for Business) | Reconocer la cuenta al autorizar (nombre visible); seguidores, «me gusta» y videos de por vida en Los Números («Tus cuentas», «TikTok, más a fondo») | Escrito y cerrado (`TIKTOK_COMENTARIOS_ABIERTO_PARA`); la app todavía no existe —se crea cuando aprueben el registro de desarrollador— | La revisión de la app nueva, con el formulario de acceso: los siete de este grupo juntos |
+| «Get account insights» (`user.insights`) | TikTok (app de TikTok for Business) | Lo del día de la cuenta (visitas al perfil, views, alcance) en «Tus cuentas», y la audiencia (países, género, edad) en «TikTok, más a fondo» | Igual | Igual |
+| «Get account media» (`video.list`, `video.insights`) | TikTok (app de TikTok for Business) | Guardados y alcance de cada video en «Tus publicaciones»; tiempo visto, lo vieron completo, seguidores que trajo y de dónde llegaron en la pieza («En TikTok, más a fondo»); los videos de los últimos siete días para La Mesa | Igual | Igual |
+| «Get account comment» y «Manage account comment» (`comment.list`, `comment.list.manage`) | TikTok (app de TikTok for Business) | La Mesa y la palabra clave en TikTok | Igual; son los únicos que la autorización exige | Igual |
+| «Business benchmark» | TikTok (app de TikTok for Business) | «Cuentas parecidas a la tuya» en «TikTok, más a fondo», con «Tu rubro» | Igual; su nombre en el token no está documentado, así que se pide y, si TikTok la niega, no se muestra | Igual |
+| «Discover trending search keywords» (`discovery.search.words`) | TikTok (app de TikTok for Business) | «Lo que se busca en TikTok» en el compositor de La Parrilla | Igual; solo responde a cuentas con acceso avanzado o de empresa | Igual |
 | `youtube.upload`, `youtube.force-ssl` | YouTube | Publicar, leer el canal y los videos, comentar | Verificados (2026-10-14) | Hecha |
 | `yt-analytics.readonly` | YouTube | **Por decidir.** Suscriptores ganados por día, y lo ganado y el arrastre que hoy la política de 30 días borra (`pendientes.md`, «YouTube: la historia y el arrastre») | **No se pide.** En septiembre se descartó reconectar por él (`docs/superpowers/specs/2026-09-03-metricas-de-cuenta-design.md`). Pedirlo cambia la pantalla de consentimiento, y Google pide verificar de nuevo; después, cada canal reconecta | Con la auditoría de cuota (§4.2), o después de ella, como dice la entrada de `pendientes.md` |
 | `youtube.readonly` | YouTube | — | No hace falta: `youtube.force-ssl` lo cubre | — |
 
 Lo que sale de la tabla: la **tercera vuelta de Meta** ya tiene todo lo escrito (diez permisos);
 si se deciden las métricas de las historias, no suman permisos pero sí una escena al video. En
-**TikTok** hay dos revisiones posibles e independientes —la de la app de siempre, por
-`user.info.stats` y `user.info.profile`, y la de la app nueva de TikTok for Business, por los
-comentarios—, y si se hace la segunda conviene pedir ahí también las estadísticas y dejar la
-primera quieta. En **YouTube** no falta nada para lo que el producto hace hoy.
+**TikTok** la que importa es la de la app nueva de TikTok for Business, con sus siete permisos
+del grupo «TikTok Accounts» —comentarios y números juntos, todo ya escrito—, y la app de siempre
+se queda quieta; solo `user.info.profile` sigue por decidir. En **YouTube** no falta nada para lo
+que el producto hace hoy.

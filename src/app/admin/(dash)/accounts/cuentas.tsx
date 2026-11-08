@@ -73,9 +73,11 @@ function Proximamente() {
   return <span className="ml-auto text-[0.75rem] text-fg-faint">{PROXIMAMENTE}</span>
 }
 
-/** Los comentarios de TikTok en el detalle de una cuenta de TikTok (`comentariosTiktok`). */
-const ACTIVAR_COMENTARIOS_TIKTOK = 'Activar comentarios en La Mesa →'
-const COMENTARIOS_TIKTOK_ACTIVADOS = 'Sus comentarios llegan a La Mesa.'
+/** TikTok for Business en el detalle de una cuenta de TikTok (`comentariosTiktok`). */
+const ACTIVAR_COMENTARIOS_TIKTOK = 'Activar TikTok for Business (comentarios y números) →'
+const COMENTARIOS_TIKTOK_ACTIVADOS = 'TikTok for Business activado: sus comentarios llegan a La Mesa y sus números a Los Números.'
+/** Activado sin algún permiso de los números: se ofrece autorizar de nuevo, con lo que falta. */
+const COMENTARIOS_TIKTOK_INCOMPLETOS = 'Autorizar de nuevo para traer todos sus números →'
 
 /** Adónde va la conexión de Instagram con el login de Instagram (`social/instagram-login.ts`). */
 const CONECTAR_LOGIN_DE_INSTAGRAM = '/api/social/instagram/connect?login=instagram'
@@ -104,10 +106,11 @@ const CONECTAR_LOGIN_DE_INSTAGRAM = '/api/social/instagram/connect?login=instagr
  * servidor). Con él, Instagram ofrece «Conectar con Instagram →» al lado del «Conectar →» de
  * siempre, que es el login de Facebook; sin él, Los Fierros se ve igual que antes.
  *
- * `comentariosTiktok`: null si este dueño no tiene abiertos los comentarios de TikTok
- * (`tiktokComentariosAbiertoPara`, en el servidor); si los tiene, los ids de las cuentas de TikTok
- * que ya los activaron. Con él, el detalle de cada cuenta de TikTok conectada dice si sus
- * comentarios llegan a La Mesa, u ofrece activarlos.
+ * `comentariosTiktok`: null si este dueño no tiene abierto TikTok for Business
+ * (`tiktokBusinessAbiertoPara`, en el servidor); si lo tiene, los ids de las cuentas de TikTok
+ * que ya lo activaron (`activadas`) y, de esas, las que no concedieron todos los permisos de los
+ * números (`incompletas`). Con él, el detalle de cada cuenta de TikTok conectada dice si está
+ * activado, u ofrece activarlo.
  */
 export function Cuentas({
   rows,
@@ -122,7 +125,7 @@ export function Cuentas({
   desde: number
   proximamente: readonly string[]
   loginDeInstagram?: boolean
-  comentariosTiktok?: readonly string[] | null
+  comentariosTiktok?: { activadas: readonly string[]; incompletas: readonly string[] } | null
 }) {
   const ahora = useAhora(desde)
   const esProxima = (red: string) => proximamente.includes(red)
@@ -217,9 +220,11 @@ export function Cuentas({
                       loginDeInstagram={conLoginDeInstagram(network)}
                       comentarios={
                         network === 'tiktok' && comentariosTiktok
-                          ? comentariosTiktok.includes(row.id)
-                            ? 'activados'
-                            : 'por-activar'
+                          ? comentariosTiktok.incompletas.includes(row.id)
+                            ? 'incompletos'
+                            : comentariosTiktok.activadas.includes(row.id)
+                              ? 'activados'
+                              : 'por-activar'
                           : null
                       }
                     />
@@ -335,8 +340,8 @@ function Fila({
   proxima: boolean
   /** Si el dueño tiene abierto el login de Instagram: solo entonces «Reconectar» vuelve por él. */
   loginDeInstagram?: boolean
-  /** Los comentarios de TikTok de esta cuenta, si el dueño los tiene abiertos; null en las demás. */
-  comentarios?: 'activados' | 'por-activar' | null
+  /** TikTok for Business en esta cuenta, si el dueño lo tiene abierto; null en las demás. */
+  comentarios?: 'activados' | 'incompletos' | 'por-activar' | null
 }) {
   const [pending, startTransition] = useTransition()
   const [abierta, setAbierta] = useState(false)
@@ -486,11 +491,21 @@ function Fila({
         {network === 'instagram' && row.login === 'instagram' ? (
           <p className="text-[0.72rem] text-fg-muted">{CONECTADA_CON_INSTAGRAM}</p>
         ) : null}
-        {/* Los comentarios de TikTok piden autorizar la cuenta una segunda vez, en la app de TikTok
-            for Business (`social/tiktok-business.ts`); solo en una cuenta conectada. */}
+        {/* TikTok for Business pide autorizar la cuenta una segunda vez, en su propia app
+            (`social/tiktok-business.ts`); solo en una cuenta conectada. */}
         {comentarios && row.connected ? (
-          comentarios === 'activados' ? (
-            <p className="text-[0.72rem] text-fg-muted">{COMENTARIOS_TIKTOK_ACTIVADOS}</p>
+          comentarios !== 'por-activar' ? (
+            <>
+              <p className="text-[0.72rem] text-fg-muted">{COMENTARIOS_TIKTOK_ACTIVADOS}</p>
+              {comentarios === 'incompletos' ? (
+                <a
+                  href={`/api/social/tiktok/comentarios?cuenta=${row.id}`}
+                  className="inline-block text-[0.75rem] text-fg-muted transition-colors hover:text-fg"
+                >
+                  {COMENTARIOS_TIKTOK_INCOMPLETOS}
+                </a>
+              ) : null}
+            </>
           ) : (
             <a
               href={`/api/social/tiktok/comentarios?cuenta=${row.id}`}

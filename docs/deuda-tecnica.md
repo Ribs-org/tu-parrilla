@@ -15,14 +15,23 @@ no en columnas de `social_accounts`. Fue para no sumar una migración a algo que
 (`TIKTOK_COMENTARIOS_ABIERTO_PARA`) mientras otras dos ramas tenían las suyas a medio fusionar: el
 journal de `drizzle/` se numera de corrido, y una 0034 sin la 0032 y la 0033 no pasa su test.
 
-El costo es que la credencial no cuelga de la fila por clave foránea: quitar la cuenta, desconectarla
-y traspasarla la tocan a mano (`quitar.ts`, `desconectar.ts`, `traspasar.ts`), y
-cualquier borrado nuevo de cuentas tiene que acordarse de ella. Y Los Fierros la busca con una
-lectura por cuenta de TikTok.
+Desde el 2026-11-08 la misma app da también números (`tiktok-numeros.ts`), y lo que no cabe en
+`account_metrics` ni en `post_metrics` —la audiencia, los videos «a fondo», el rubro, la
+comparación y las búsquedas recordadas— vive igual en `ajustes`, bajo `tiktok_business:<id de la
+cuenta>:` (`tiktok-numeros-guardar.ts`). Mismo motivo: nace cerrado, es lo último leído y no una
+historia, y una columna nueva haría responder 500 a los previews mientras no migren.
+
+El costo es que nada de eso cuelga de la fila por clave foránea: quitar la cuenta, desconectarla
+y traspasarla lo tocan a mano —la credencial y el prefijo— (`quitar.ts`, `desconectar.ts`,
+`traspasar.ts`), y cualquier borrado nuevo de cuentas tiene que acordarse de ello. Los Fierros, Los
+Números, la pieza y el compositor lo buscan con una lectura por cuenta de TikTok. Y los videos «a
+fondo» de una cuenta van en una sola fila JSON (hasta 500 videos), que se lee entera para mostrar
+uno en la pieza.
 
 Terminarlo, cuando TikTok apruebe la app: una migración con `tiktok_business_open_id` y la
-credencial cifrada en `social_accounts`, un paso que copie lo que haya en `ajustes`, y sacar las tres
-excepciones. Una tarde.
+credencial cifrada en `social_accounts`, una tabla `tiktok_videos` (o columnas `jsonb` en
+`post_metrics`) para lo a fondo y otra para la audiencia, un paso que copie lo que haya en `ajustes`,
+y sacar las excepciones de los tres borrados. Uno o dos días.
 
 ---
 ## Los avisos al teléfono no leen los recibos de Expo, ni se reintentan uno por uno (2026-11-07)

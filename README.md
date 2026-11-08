@@ -21,7 +21,7 @@ tus números.
 | `/api/social/meta/baja` | `POST` de Meta cuando alguien quita la app desde Facebook: deja sin credencial sus cuentas de Instagram y Facebook |
 | `/api/social/meta/borrado` | `POST` de Meta cuando alguien pide borrar sus datos: borra lo que vino de esas dos redes y devuelve el código de estado |
 | `/api/social/instagram/baja`, `/api/social/instagram/borrado` | Lo mismo, del caso de uso de Instagram de la app de Meta: solo para las cuentas de Instagram conectadas con el login de Instagram (ver «Instagram sin página de Facebook: el login de Instagram») |
-| `/api/social/tiktok/comentarios/vuelta/` | La vuelta de la app de TikTok for Business, registrada así, con la barra final, en su portal: guarda la credencial de comentarios de una cuenta de TikTok. Cerrada salvo para quien diga `TIKTOK_COMENTARIOS_ABIERTO_PARA` (ver «Comentarios de TikTok: la API for Business») |
+| `/api/social/tiktok/comentarios/vuelta/` | La vuelta de la app de TikTok for Business, registrada así, con la barra final, en su portal: guarda la credencial de TikTok for Business (comentarios y números) de una cuenta de TikTok. Cerrada salvo para quien diga `TIKTOK_COMENTARIOS_ABIERTO_PARA` (ver «TikTok for Business: comentarios y números») |
 | `/api/schedule/…`, `/api/metrics/…` | La API para tu agente, con una llave de La Cocina («Tu propio chef»): cargar, ver y sacar lo programado, archivar lo quemado, las cuentas y los números (ver «Carga masiva por API» y las secciones que le siguen) |
 | `/api/cocina/…` | La API de La Cocina, con `COCINA_SECRET`: el servidor del chef toma las comandas, baja sus insumos, informa cada estado, le pregunta al dueño y lee lo que contestó, y entrega lo cocinado al mesón del dueño (ver «La Cocina» y `docs/cocina-api.md`) |
 | `/api/media` | `POST` con la misma llave: firma la subida de un archivo directo a R2, para nombrarlo después en varias filas del lote sin que se vuelva a bajar (ver «Carga masiva por API») |
@@ -384,8 +384,8 @@ cada publicación — ver «Varias cuentas de una misma red», más abajo.
 
 **Traspasar una cuenta**, en Los Maestros, es lo único del panel que cruza dueños, y por eso solo
 lo hace el admin (`src/lib/social/traspasar.ts`). Cambia de dueño la cuenta, sus publicaciones y
-los cortes que salen solo a ella, y su credencial de comentarios de TikTok, que vive en `ajustes`
-por dueño (ver «Comentarios de TikTok: la API for Business»); lo demás —métricas, comentarios, los anuncios que se leyeron
+los cortes que salen solo a ella, y su credencial y sus números de TikTok for Business, que viven
+en `ajustes` por dueño (ver «TikTok for Business: comentarios y números»); lo demás —métricas, comentarios, los anuncios que se leyeron
 con su token, las promociones de sus publicaciones— cuelga de la cuenta y la sigue. Un corte que sale
 además a otras cuentas se queda con quien lo programó, con un destino en una cuenta que ya no es
 suya: sale igual, porque publicar busca la cuenta por su id y no por su dueño. La credencial no
@@ -873,44 +873,88 @@ cuenta en privada—, porque reintentar da lo mismo hasta que el dueño cambie s
 la auditoría aprobada, como la de este despliegue, ese rechazo no debería llegar, y el panel
 ya no avisa nada de esto ni al conectar ni al elegir la privacidad.
 
-#### Comentarios de TikTok: la API for Business
+#### TikTok for Business: comentarios y números
 
 La app de TikTok de arriba (Login Kit, Display y Content Posting) no lee ni responde
-comentarios: de cada video da solo cuántos tiene. Lo único de TikTok que los lee y los responde
-es la **Accounts API** de *TikTok API for Business* (business-api.tiktok.com), que es otra app,
-en otro portal, con su propia revisión y su propio formulario de acceso. Lo que dice su
-documentación, con las direcciones, está en `docs/levantamiento-terceros.md`, §3.5.
+comentarios —de cada video da solo cuántos tiene— y de la cuenta no da ningún número. Lo único
+de TikTok que lee y responde comentarios, y que da los números de la cuenta, su audiencia y cada
+video más a fondo, es la **Accounts API** de *TikTok API for Business* (business-api.tiktok.com),
+que es otra app, en otro portal, con su propia revisión y su propio formulario de acceso. Lo que
+dice su documentación, con las direcciones, está en `docs/levantamiento-terceros.md`, §3.5.
 
-Está **escrito y cerrado**: solo lo ve quien diga `TIKTOK_COMENTARIOS_ABIERTO_PARA`, y además
+Está **escrito y cerrado**: solo lo ve quien diga `TIKTOK_COMENTARIOS_ABIERTO_PARA` —que se sigue
+llamando así porque nació para los comentarios, pero hoy es la reja de toda la app—, y además
 hacen falta las tres variables de esa app (`TIKTOK_BUSINESS_APP_ID`, `TIKTOK_BUSINESS_SECRET` y
-`TIKTOK_BUSINESS_AUTORIZACION`). Para quien lo tiene abierto:
+`TIKTOK_BUSINESS_AUTORIZACION`). Con la reja cerrada no cambia nada que se vea, y ni la
+sincronización ni el panel le piden nada a TikTok por esta vía. Para quien lo tiene abierto:
 
-- En **Los Fierros**, el detalle de cada cuenta de TikTok conectada ofrece «Activar comentarios
-  en La Mesa →». Lleva a TikTok a autorizar esa misma cuenta por segunda vez, ahora en la app de
-  TikTok for Business, que pide `comment.list` y `comment.list.manage` (los que el portal tenga
-  marcados en la app). La vuelta (`/api/social/tiktok/comentarios/vuelta`) canjea el código,
-  comprueba que se concedieron los dos y que la cuenta que autorizó tiene el mismo nombre visible
-  que la fila, y guarda esa segunda credencial **cifrada** junto a la cuenta, en `ajustes`
-  (`tiktok_comentarios:<id de la cuenta>`): sin migración, porque es una sola por cuenta y nace
-  cerrada (`docs/deuda-tecnica.md`). Desconectar o quitar la cuenta la borra; traspasarla la pasa
-  con la cuenta. El token dura un día y se renueva solo, con el de renovación, que dura un año.
+- En **Los Fierros**, el detalle de cada cuenta de TikTok conectada ofrece «Activar TikTok for
+  Business (comentarios y números) →». Lleva a TikTok a autorizar esa misma cuenta por segunda
+  vez, ahora en la app de TikTok for Business, con los permisos que el portal tenga marcados en
+  la app: el enlace del portal los trae, así que `TIKTOK_BUSINESS_AUTORIZACION` se vuelve a copiar
+  cada vez que cambian. La vuelta (`/api/social/tiktok/comentarios/vuelta`) canjea el código,
+  exige los dos de comentarios (`comment.list` y `comment.list.manage`), comprueba que la cuenta
+  que autorizó tiene el mismo nombre visible que la fila, y guarda esa segunda credencial
+  **cifrada** junto a la cuenta, en `ajustes` (`tiktok_comentarios:<id de la cuenta>`): sin
+  migración, porque es una sola por cuenta y nace cerrada (`docs/deuda-tecnica.md`). Los permisos
+  de los números (`user.info.stats`, `user.insights`, `video.list`, `video.insights`,
+  `discovery.search.words`) no se exigen: lo que falte solo apaga lo suyo, y a una cuenta activada
+  sin alguno el detalle le ofrece «Autorizar de nuevo para traer todos sus números →». El token
+  dura un día y se renueva solo, con el de renovación, que dura un año.
 - En **La Mesa**, TikTok aparece como red y sus comentarios llegan cada cinco minutos, como los
   de Instagram (`src/lib/social/comentarios/tiktok.ts`): los públicos de primer nivel de cada
   video de los últimos siete días, con hasta tres respuestas cada uno, que dicen si la cuenta ya
   contestó desde la app. TikTok marca lo de la propia cuenta (`owner`), y con eso se reconoce lo
   del dueño. Responder es `/business/comment/reply/create/`, de hasta 1.200 caracteres. La regla
   de palabra clave funciona igual, en público: TikTok no tiene privado por esta vía.
+- En la **sincronización diaria** (`src/lib/social/tiktok-numeros.ts`, que pide y traduce, y
+  `tiktok-numeros-guardar.ts`, que guarda), cada cuenta activada lee además:
+  - **La cuenta** (`/business/get/`, «Get account user info» y «Get account insights»): los
+    últimos 30 días van a `account_metrics`, como los de las demás redes, cada uno en su propio
+    día —TikTok los da con 24 a 48 horas de atraso—, con seguidores, visitas al perfil, views,
+    alcance y gente que interactuó; la fila de hoy lleva los seguidores y los videos de por vida.
+    Con eso TikTok entra a las tarjetas de «Tus cuentas» en Los Números. La audiencia (países,
+    género y edad, desde 100 seguidores) y lo ganado en 30 días quedan en `ajustes`.
+  - **Cada video** (`/business/video/list/`, «Get account media»): sus guardados y su alcance
+    completan la lectura del día en `post_metrics`, que la app de siempre deja vacíos; las views,
+    los likes, los comentarios y los compartidos se quedan con los de siempre, que son al
+    instante (los de Business llegan atrasados y harían «perder» views en la serie). Lo demás
+    —tiempo visto, cuántos lo vieron completo, seguidores que trajo, visitas al perfil, de dónde
+    llegó la gente— son totales de toda la vida del video y se guardan, lo último leído, en
+    `ajustes`: los muestra la pieza, en «En TikTok, más a fondo». Cada video se cruza con el de la
+    fila por su id y, si no calza, por el número de su enlace; el registro dice cuántos calzaron
+    de cada forma («[tiktok-business] videos de …»).
+  - **La comparación** (`/business/benchmark/`, «Business benchmark»): el promedio de las cuentas
+    de empresa verificadas de un rubro, una vez por semana o al cambiar el rubro en Los Números
+    («Tu rubro»; por defecto, «Creador de contenido»).
+  Si Business falla o falta un permiso, la sincronización de siempre sigue sola, sin aviso: nunca
+  la tumba.
+- En **Los Números**, con «⋯ Más», debajo de «Tus cuentas», aparece «TikTok, más a fondo»: la
+  audiencia de cada cuenta activada y «Cuentas parecidas a la tuya», la comparación con el rubro.
+- En el **compositor**, debajo del bloque de TikTok de una cuenta activada con su permiso, «Lo que
+  se busca en TikTok» (`/discovery/trending/search/` y `.../keyword/`, «Discover trending search
+  keywords»): las búsquedas en tendencia para esa cuenta, o las recomendadas para una consulta.
+  No se pide nada hasta que se aprieta, y cada respuesta se recuerda seis horas por cuenta y
+  consulta (`ajustes`), por el cupo de 40 llamadas por minuto. Es solo para cuentas con acceso
+  avanzado o de empresa: a las demás les dice que TikTok no lo dio.
+
+Todo lo de TikTok for Business de una cuenta vive en `ajustes` con la credencial
+(`tiktok_comentarios:<id>`) o bajo `tiktok_business:<id>:` (audiencia, videos, rubro, comparación,
+búsquedas): desconectar o quitar la cuenta lo borra entero, y traspasarla lo pasa con ella.
 
 La dirección de vuelta que se registra en el portal lleva la barra final, que TikTok exige:
 `https://tu-parrilla.cl/api/social/tiktok/comentarios/vuelta/`. Next redirige esa dirección a la
 que no la lleva, con el código intacto.
 
 Lo que no se pudo probar sin la app aprobada: que el id de video que da la Display API (el de
-`social_posts`) sea el mismo `video_id` que pide la Accounts API —los dos son el número de la
-dirección del video, así que debería—, que una cuenta personal (no de empresa) pueda autorizar
-—la documentación no lo restringe para los comentarios, solo para algunas métricas—, y con qué
-nombre llega el código a la vuelta (se acepta `code` y `auth_code`). El registro de Vercel dice
-qué contestó TikTok.
+`social_posts`) sea el mismo `item_id` de la Accounts API —los dos son el número de la dirección
+del video, así que debería; el cruce por el enlace cubre el caso contrario y el registro lo
+contesta con la primera cuenta—, que una cuenta personal (no de empresa) pueda autorizar —la
+documentación no lo restringe para los comentarios, solo para algunas métricas, la comparación
+de su rubro y las búsquedas—, con qué nombre llega el código a la vuelta (se acepta `code` y
+`auth_code`) y con qué nombre llega al token el permiso de la comparación, que su documentación no
+dice (se pide igual, y si TikTok la niega no se muestra). El registro de Vercel dice qué contestó
+TikTok.
 
 ### Threads
 
@@ -947,7 +991,7 @@ fila en Los Fierros queda en rojo.
 
 El panel puede traer los comentarios nuevos de tus publicaciones de Instagram, Facebook y
 YouTube (y de Threads en la cuenta del revisor de Meta, ver «Threads»; y de TikTok solo donde
-`TIKTOK_COMENTARIOS_ABIERTO_PARA` lo abre, ver «Comentarios de TikTok: la API for Business»), y en la cola te propone una respuesta que apruebas de un toque. El descubrimiento
+`TIKTOK_COMENTARIOS_ABIERTO_PARA` lo abre, ver «TikTok for Business: comentarios y números»), y en la cola te propone una respuesta que apruebas de un toque. El descubrimiento
 viaja en la misma corrida que publica, cada cinco minutos, y mira tus publicaciones de los
 últimos siete días. A YouTube lo mira cada media hora, no cada cinco minutos: su cuota
 diaria es la misma que usa la sincronización de métricas, y gastarla acá te dejaría sin
@@ -1066,8 +1110,8 @@ mensaje con el enlace va por privado, una sola vez por persona en cada post; si 
 sale, queda anotado en la fila y la respuesta pública ya salió igual. Con el privado apagado, o
 en YouTube, o pasados los siete días, el mensaje con el enlace se publica como la respuesta
 pública: nunca se promete un privado que no salió. TikTok
-tiene cola de comentarios solo donde está abierta (ver «Comentarios de TikTok: la API for
-Business»): para los demás, una regla en un post que solo va a TikTok no hace nada. Si el enlace es de tu sitio, se le agrega `?s=dm-<palabra>` y aparece como fila
+tiene cola de comentarios solo donde está abierta (ver «TikTok for Business: comentarios y
+números»): para los demás, una regla en un post que solo va a TikTok no hace nada. Si el enlace es de tu sitio, se le agrega `?s=dm-<palabra>` y aparece como fila
 propia en **Los Números** (Analítica) → «En tu página» → «⋯ Más» → «Todas las etiquetas». Para eso el servidor necesita saber
 cuál es tu dominio: `SITE_URL=https://www.tu-dominio.cl` (si falta, usa el dominio de
 producción que Vercel inyecta).
@@ -1458,10 +1502,10 @@ Vercel y bajan con `vercel env pull .env.local`.
 | `INSTAGRAM_LOGIN_ABIERTO_PARA` | Ids de usuario, separados por comas, que ven «Conectar con Instagram →» en Los Fierros y pueden conectar por ese login; `1`, todos | No — vacía, el login de Instagram está cerrado para todos. Es para grabar la revisión de Meta de los permisos `instagram_business_*` con la cuenta del revisor; aprobados, va en `1` |
 | `TIKTOK_CLIENT_KEY` | Conectar TikTok | No — sin ella esa red aparece como no conectada |
 | `TIKTOK_CLIENT_SECRET` | Conectar TikTok | No — sin ella esa red aparece como no conectada |
-| `TIKTOK_BUSINESS_APP_ID` | Los comentarios de TikTok en La Mesa: el App ID de la app de TikTok for Business (business-api.tiktok.com), que no es la de `TIKTOK_CLIENT_KEY` (ver «Comentarios de TikTok: la API for Business») | No — sin ella los comentarios de TikTok quedan cerrados para todos |
-| `TIKTOK_BUSINESS_SECRET` | El Secret de esa app: canjea y renueva la credencial de comentarios | Junto con el anterior |
-| `TIKTOK_BUSINESS_AUTORIZACION` | La «TikTok account holder authorization URL» de esa app, tal cual la da el portal (App Detail → Basic Information); de ella sale también la dirección de vuelta del canje | Junto con los dos anteriores |
-| `TIKTOK_COMENTARIOS_ABIERTO_PARA` | Ids de usuario, separados por comas, que ven «Activar comentarios en La Mesa →» en sus cuentas de TikTok y cuya Mesa trae los comentarios de las que activaron; `1`, todos | No — vacía, cerrado para todos. Es para grabar la revisión de la app de TikTok for Business con la cuenta del revisor; aprobada, va en `1` |
+| `TIKTOK_BUSINESS_APP_ID` | TikTok for Business —los comentarios de TikTok en La Mesa y los números que la app de siempre no da—: el App ID de la app de TikTok for Business (business-api.tiktok.com), que no es la de `TIKTOK_CLIENT_KEY` (ver «TikTok for Business: comentarios y números») | No — sin ella TikTok for Business queda cerrado para todos |
+| `TIKTOK_BUSINESS_SECRET` | El Secret de esa app: canjea y renueva la credencial de TikTok for Business | Junto con el anterior |
+| `TIKTOK_BUSINESS_AUTORIZACION` | La «TikTok account holder authorization URL» de esa app, tal cual la da el portal (App Detail → Basic Information); de ella salen la dirección de vuelta del canje y los permisos que se piden, así que se vuelve a copiar cada vez que cambian los permisos de la app | Junto con los dos anteriores |
+| `TIKTOK_COMENTARIOS_ABIERTO_PARA` | La reja de toda la app de TikTok for Business, aunque el nombre diga comentarios (nació para ellos y ya está puesta): ids de usuario, separados por comas, que ven «Activar TikTok for Business (comentarios y números) →» en sus cuentas de TikTok, cuya Mesa trae los comentarios de las que activaron, cuyos Números muestran «TikTok, más a fondo» y cuyo compositor ofrece «Lo que se busca en TikTok»; `1`, todos | No — vacía, cerrado para todos. Es para grabar la revisión de la app de TikTok for Business con la cuenta del revisor; aprobada, va en `1` |
 | `META_EN_REVISION` | Enciende en Los Fierros el aviso de que, mientras la app de Meta esté en revisión, solo conectan las cuentas invitadas como testers | No — solo mientras la app de Meta esté en modo desarrollo |
 | `REVISION_CORREO` | El único correo (ya invitado en Los Maestros) que recibe un código de ingreso fijo en vez de uno mandado por correo, para que el revisor de Meta entre | No — solo con la app de Meta en revisión o publicada (Meta vuelve a revisarla) |
 | `REVISION_CODIGO` | El código fijo de seis dígitos que vale para ese correo; el mismo que dicen las instrucciones para revisores en Meta | No — va junto a `REVISION_CORREO` |
@@ -2257,7 +2301,9 @@ src/
     sugerencias/           el libro de sugerencias: qué se acepta y cómo queda el issue (sin base), el cliente de GitHub, guardar y reintentar, y la respuesta del equipo (lo que se acepta, el correo y el comentario sin base en respuestas.ts; guardarla, leerla y avisar en responder.ts)
     social/
       instagram-login.ts   el login de Instagram, sin página de Facebook: el host, los permisos y cómo leer su token
-      tiktok-business.ts   los comentarios de TikTok por la API for Business: la segunda autorización de la cuenta, su canje, su renovación y dónde se guarda; el comentarista, en comentarios/tiktok.ts
+      tiktok-business.ts   TikTok for Business: la segunda autorización de la cuenta, su canje, su renovación, sus permisos y dónde se guarda; el comentarista, en comentarios/tiktok.ts
+      tiktok-numeros.ts    los números de TikTok for Business —la cuenta y su audiencia, cada video a fondo, la comparación y lo que se busca—, pedidos y traducidos sin base; tiktok-rubros.ts, los rubros de la comparación
+      tiktok-numeros-guardar.ts dónde quedan esos números (account_metrics, post_metrics y ajustes), el paso de la sincronización diaria y lo que leen Los Números, la pieza y el compositor
       instagram-audio.ts   la biblioteca de música de Instagram (Audio API de Meta): lo que suena, la búsqueda y una canción, leídos sin base
       musica-sugerencia.ts «Sugiéreme una»: el modelo elige por id entre canciones reales, y sin él el azar (sin base)
       lectura.ts           qué publicaciones se leen cada día: lo nuevo a diario, lo viejo cada vez más espaciado

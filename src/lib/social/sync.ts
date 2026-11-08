@@ -15,6 +15,7 @@ import type { Connector, FetchedPost, PostMetricValues } from './connector'
 import { agruparPorRed, primariaDe } from './cuenta'
 import { connectorFor } from './index'
 import { DIAS_DE_LECTURA_DIARIA, porLeerHoy } from './lectura'
+import { sincronizarTiktokBusiness } from './tiktok-numeros-guardar'
 import { vincularSinId } from './vincular-sin-id'
 
 export type SyncReport = Array<{ network: string; handle: string | null; ok: boolean; posts: number; error?: string }>
@@ -246,8 +247,13 @@ export async function syncAccount(account: SocialAccount, primaria: boolean, pla
     const dueno = account.ownerId ? await buscarPorId(account.ownerId) : null
     const zona = dueno?.zona ?? ZONA_POR_DEFECTO
     const day = localDay(new Date(), zona)
+    // En TikTok, con TikTok for Business activado, los posts llegan completados con lo que la app de
+    // siempre no da (guardados y alcance), y se guardan la cuenta, su audiencia y la comparación
+    // (`tiktok-numeros-guardar.ts`). Sin Business, o si falla, vuelven tal cual: nunca tumba esto.
+    const paraGuardar =
+      account.network === 'tiktok' ? await sincronizarTiktokBusiness(account, fetched, desde, day) : fetched
     const lecturas: Lectura[] = []
-    for (const post of fetched) {
+    for (const post of paraGuardar) {
       lecturas.push({ postId: await upsertPost(post, account, cuenta), metrics: post.metrics })
     }
     await writeSnapshots(lecturas, day)

@@ -65,15 +65,20 @@ export function promocionarAbiertoPara(ownerId: string | null | undefined): bool
 }
 
 /**
- * Si el dueño puede activar los comentarios de TikTok (`social/tiktok-business.ts`): ver
- * «Activar comentarios en La Mesa →» en el detalle de sus cuentas de TikTok, y que La Mesa traiga
- * y responda los de las que activó. `TIKTOK_COMENTARIOS_ABIERTO_PARA=1` lo abre para todos; una
- * lista de ids de usuario separados por comas, solo para esos —así se graba la revisión de la app
- * de TikTok for Business con la cuenta del revisor—; vacía, para nadie, que es como nace. Hacen
- * falta además la app (`TIKTOK_BUSINESS_APP_ID`, `TIKTOK_BUSINESS_SECRET`) y su enlace de
- * autorización (`TIKTOK_BUSINESS_AUTORIZACION`): sin ellos, cerrado igual.
+ * Si el dueño puede activar TikTok for Business (`social/tiktok-business.ts`): ver «Activar TikTok
+ * for Business (comentarios y números) →» en el detalle de sus cuentas de TikTok, que La Mesa
+ * traiga y responda los comentarios de las que activó, que la sincronización lea sus números
+ * (`social/tiktok-numeros.ts`) —la cuenta y su audiencia, cada video más a fondo y la comparación
+ * con cuentas parecidas, en Los Números— y que el compositor ofrezca «Lo que se busca en TikTok».
+ *
+ * La variable se sigue llamando `TIKTOK_COMENTARIOS_ABIERTO_PARA` porque nació para los
+ * comentarios y ya está puesta en el despliegue; hoy es la reja de toda la app de TikTok for
+ * Business. `1` la abre para todos; una lista de ids de usuario separados por comas, solo para
+ * esos —así se graba la revisión de la app con la cuenta del revisor—; vacía, para nadie, que es
+ * como nace. Hacen falta además la app (`TIKTOK_BUSINESS_APP_ID`, `TIKTOK_BUSINESS_SECRET`) y su
+ * enlace de autorización (`TIKTOK_BUSINESS_AUTORIZACION`): sin ellos, cerrado igual.
  */
-export function tiktokComentariosAbiertoPara(ownerId: string | null | undefined): boolean {
+export function tiktokBusinessAbiertoPara(ownerId: string | null | undefined): boolean {
   if (!env('TIKTOK_BUSINESS_APP_ID') || !env('TIKTOK_BUSINESS_SECRET') || !env('TIKTOK_BUSINESS_AUTORIZACION')) {
     return false
   }

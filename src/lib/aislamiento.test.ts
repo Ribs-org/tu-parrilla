@@ -124,6 +124,7 @@ const { vincularSinId } = await import('./social/vincular-sin-id')
 const { listarBorradores, cargarBorrador, guardarBorrador, borrarBorrador } = await import('./borradores')
 const { cuentasParaElTelefono } = await import('./borradores-movil')
 const { creadorDeCuenta, recordarMusicaTikTok } = await import('./social/publish/tiktok-cuenta')
+const { cuentaTiktokDelDueno } = await import('./social/tiktok-numeros-guardar')
 const { leerAjuste } = await import('./ajustes')
 const { leerLoPagado, tieneAnuncios } = await import('./lo-pagado')
 const { leerProgramados } = await import('./schedule-leer')
@@ -1055,6 +1056,22 @@ describe('aislamiento por dueño, escrituras (SQL generado, sin base)', () => {
     const consultas = await todasLasConsultas(() => creadorDeCuenta(DUENO, '6f1c2a54-9b1e-4c3d-8f00-0123456789ab'))
     expect(consultas).toHaveLength(1)
     esperarFiltradoPorDueno(consultas[0]!)
+  })
+
+  /**
+   * TikTok for Business: «Lo que se busca en TikTok» y «Tu rubro» piden a TikTok con la credencial
+   * de una cuenta. Sin el dueño en la lectura, cualquiera con el id de una cuenta ajena gastaría su
+   * cupo o le cambiaría el rubro.
+   */
+  it('tiktok-numeros-guardar: cuentaTiktokDelDueno lee la cuenta atada al dueño antes de pedir nada a TikTok', async () => {
+    const consultas = await todasLasConsultas(() => cuentaTiktokDelDueno(DUENO, '6f1c2a54-9b1e-4c3d-8f00-0123456789ab'))
+    expect(consultas).toHaveLength(1)
+    esperarFiltradoPorDueno(consultas[0]!)
+  })
+
+  it('tiktok-numeros-guardar: cuentaTiktokDelDueno no consulta con un id que no es uuid', async () => {
+    expect(await cuentaTiktokDelDueno(DUENO, 'nada')).toBeNull()
+    expect(capturas).toHaveLength(0)
   })
 
   it('tiktok-cuenta: creadorDeCuenta no consulta con un id que no es uuid', async () => {

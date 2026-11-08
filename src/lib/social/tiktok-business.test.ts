@@ -12,11 +12,14 @@ const {
   descifrar,
   desempaquetar,
   necesitaRenovar,
+  cuentasConComentarios,
+  numerosQueFaltan,
   permisosQueFaltan,
+  tienePermiso,
   urlDeAutorizacion,
   vueltaDe,
 } = await import('./tiktok-business')
-const { tiktokComentariosAbiertoPara } = await import('@/lib/redes-abiertas')
+const { tiktokBusinessAbiertoPara } = await import('@/lib/redes-abiertas')
 
 const DUENO = 'owner-1'
 const CUENTA = { id: 'acc-1', ownerId: DUENO, network: 'tiktok', externalId: 'open-publicar', accessToken: 'cifrado' } as unknown as SocialAccount
@@ -58,20 +61,20 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
-describe('tiktokComentariosAbiertoPara', () => {
+describe('tiktokBusinessAbiertoPara', () => {
   it('nace cerrado, y sin la app tampoco abre aunque la bandera diga 1', () => {
-    expect(tiktokComentariosAbiertoPara(DUENO)).toBe(false)
+    expect(tiktokBusinessAbiertoPara(DUENO)).toBe(false)
     vi.stubEnv('TIKTOK_COMENTARIOS_ABIERTO_PARA', '1')
-    expect(tiktokComentariosAbiertoPara(DUENO)).toBe(false)
+    expect(tiktokBusinessAbiertoPara(DUENO)).toBe(false)
   })
 
   it('con la app: 1 para todos, o solo los ids de la lista', () => {
     abrir('1')
-    expect(tiktokComentariosAbiertoPara(DUENO)).toBe(true)
+    expect(tiktokBusinessAbiertoPara(DUENO)).toBe(true)
     abrir('otro, owner-1')
-    expect(tiktokComentariosAbiertoPara(DUENO)).toBe(true)
-    expect(tiktokComentariosAbiertoPara('owner-2')).toBe(false)
-    expect(tiktokComentariosAbiertoPara(null)).toBe(false)
+    expect(tiktokBusinessAbiertoPara(DUENO)).toBe(true)
+    expect(tiktokBusinessAbiertoPara('owner-2')).toBe(false)
+    expect(tiktokBusinessAbiertoPara(null)).toBe(false)
   })
 })
 
@@ -94,6 +97,38 @@ describe('el enlace y la vuelta', () => {
     expect(permisosQueFaltan('user.info.basic,comment.list,comment.list.manage')).toEqual([])
     expect(permisosQueFaltan('user.info.basic,comment.list')).toEqual(['comment.list.manage'])
     expect(permisosQueFaltan('')).toEqual(['comment.list', 'comment.list.manage'])
+  })
+})
+
+describe('los permisos de los números', () => {
+  it('tienePermiso mira la lista exacta, no un pedazo', () => {
+    expect(tienePermiso('video.list,video.insights', 'video.insights')).toBe(true)
+    expect(tienePermiso('video.list', 'video')).toBe(false)
+  })
+
+  it('numerosQueFaltan: lo que no se concedió de los números, sin contar los comentarios', () => {
+    expect(numerosQueFaltan('comment.list,comment.list.manage')).toEqual([
+      'user.info.stats',
+      'user.insights',
+      'video.list',
+      'video.insights',
+      'discovery.search.words',
+    ])
+    expect(numerosQueFaltan('user.info.stats,user.insights,video.list,video.insights,discovery.search.words')).toEqual([])
+  })
+
+  it('cuentasConComentarios separa las activadas a las que les faltan permisos de los números', async () => {
+    ajustes.leerAjuste.mockImplementation(async (_dueno: string, clave: string) =>
+      clave.endsWith('completa')
+        ? cifrar({ ...CREDENCIAL, scope: `${CREDENCIAL.scope},user.info.stats,user.insights,video.list,video.insights,discovery.search.words` })
+        : clave.endsWith('vieja')
+          ? cifrar(CREDENCIAL)
+          : null,
+    )
+    expect(await cuentasConComentarios(DUENO, ['completa', 'vieja', 'nunca'])).toEqual({
+      activadas: ['completa', 'vieja'],
+      incompletas: ['vieja'],
+    })
   })
 })
 

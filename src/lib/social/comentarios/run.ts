@@ -2,7 +2,7 @@ import 'server-only'
 import { and, desc, eq, gte, inArray, isNotNull, isNull, lt, or, sql } from 'drizzle-orm'
 import { getDb, postComments, scheduledPostTargets, socialAccounts, socialPosts } from '@/db'
 import type { SocialAccount } from '@/db'
-import { tiktokComentariosAbiertoPara } from '@/lib/redes-abiertas'
+import { tiktokBusinessAbiertoPara } from '@/lib/redes-abiertas'
 import { connectorFor } from '../index'
 import { aplicarReglas } from './automatico'
 import { comentaristaFor } from './index'
@@ -275,7 +275,7 @@ export async function sondearComentarios(
     (cuenta) =>
       comentaristaFor(cuenta.network) &&
       tocaSondear(cuenta.network, now) &&
-      (cuenta.network !== 'tiktok' || tiktokComentariosAbiertoPara(cuenta.ownerId)),
+      (cuenta.network !== 'tiktok' || tiktokBusinessAbiertoPara(cuenta.ownerId)),
   )
   const reporte: SondeoReport = {
     cuentas: [],

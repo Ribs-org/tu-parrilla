@@ -36,6 +36,16 @@ describe('buildAccountCards', () => {
     ])
   })
 
+  it('lo del día sale del último día que lo trae: en TikTok la fila de hoy trae solo los seguidores', () => {
+    const tiktok: AccountMetricRow[] = [
+      { network: 'tiktok', accountId: 't1', day: '2026-09-01', followers: 900, profileViews: 40, reach: 700 },
+      { network: 'tiktok', accountId: 't1', day: '2026-09-02', followers: 910, profileViews: 52, reach: null },
+      { network: 'tiktok', accountId: 't1', day: '2026-09-04', followers: 930, profileViews: null, reach: null },
+    ]
+    const [tarjeta] = buildAccountCards(tiktok, '2026-09-01', '2026-09-04')
+    expect(tarjeta).toMatchObject({ followers: 930, profileViews: 52, reach: null, dayLabel: '2 sep' })
+  })
+
   it('YouTube muestra el total de suscriptores, nunca lo ganado: es una métrica derivada', () => {
     const conHistoria: AccountMetricRow[] = [
       { network: 'youtube', day: '2026-09-01', followers: 200, profileViews: null, reach: null },
