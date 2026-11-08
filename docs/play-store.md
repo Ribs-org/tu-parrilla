@@ -115,7 +115,13 @@ Un cuestionario sobre qué recoge la app y si lo comparte. Para esta app:
   Google llama «compartir» a mandar datos a un tercero que no procesa por encargo: el libro de
   sugerencias publicado en GitHub cuenta como compartido.
 - **¿Se cifran en tránsito?** Sí, todo va por HTTPS.
-- **¿Puede el usuario pedir que se borren?** Sí, escribiendo al contacto de `/privacidad`.
+- **¿Cómo se crean las cuentas?** «My app does not allow users to create an account» y, a «Can users
+  login… with accounts created outside of the app?», «Yes» → «Other»: por invitación del admin en el
+  panel. Por eso Play no exige el botón de borrar la cuenta dentro de la app.
+- **¿Puede el usuario pedir que se borren?** Sí. La «Delete data URL» es `/borrar-mis-datos`, no
+  `/privacidad`: Google pide que esa página nombre la app, ponga los pasos a la vista y diga qué se
+  borra, qué se guarda y por cuánto. Se pide por correo y hoy lo hace el equipo a mano
+  (`docs/pendientes.md`, «Borrar una cuenta que ya entró»).
 
 El cuestionario tiene que decir lo mismo que `/privacidad`: si cambia una, se cambia la otra.
 Responde según lo que la app realmente hace. Si aquí mientes y Google lo detecta, la

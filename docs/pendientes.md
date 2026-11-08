@@ -715,6 +715,18 @@ nadie paga: todas las cuentas son iguales y el README dice «Sin suscripción».
 
 ## Features y trabajo de código
 
+- **Borrar una cuenta que ya entró, con todos sus datos** (2026-11-08, al llenar «Data safety» en
+  Play). `/borrar-mis-datos` promete borrar todo dentro de 30 días a quien lo pida por correo, pero
+  no hay cómo: «Quitar», en Los Maestros, solo borra a quien nunca entró (`quitar` en
+  `src/lib/usuarios.ts`), y las tablas del usuario no borran en cascada. Mientras tanto se hace a
+  mano. Falta una acción del admin, «Borrar la cuenta y sus datos», que en una transacción borre
+  lo de esa cuenta en cada tabla (o sume `ON DELETE CASCADE` con una migración), su media en R2,
+  sus tokens de push y sus llaves, y cierre o borre sus pedidos del libro de sugerencias en GitHub;
+  con su test de aislamiento. Si algún día la persona lo puede pedir sola desde Tu Cuenta, Play
+  pide además un botón dentro de la app.
+- **`/terminos` no dice que Tu Parrilla es para mayores de 18** (2026-11-08). En Play se declaró
+  «18 and over» con los menores bloqueados; conviene que los términos lo digan, en la revisión del
+  abogado («Que todo quede a nombre de Pyxis»).
 - **Música en videos con bibliotecas con licencia** (2026-11-06; el dueño lo pospuso: caro y no lo
   bastante bueno por ahora). Las API de Instagram, TikTok y YouTube no dejan ponerle a un video su
   propia música; la excepción es la Audio API de Instagram para reels, con Facebook Login, que es

@@ -16,6 +16,7 @@ export const RESERVADOS: ReadonlySet<string> = new Set([
   'admin',
   'api',
   'borrado',
+  'borrar-mis-datos',
   'ingresar',
   'landing',
   'privacidad',
