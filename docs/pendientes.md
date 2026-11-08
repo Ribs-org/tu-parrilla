@@ -729,12 +729,28 @@ funciones y distintos topes, espacio, tokens de IA y prioridad en las colas; el 
 el pagado como cortesía en Los Maestros (README, «Los planes»). Nadie paga todavía: el README sigue
 diciendo «Sin suscripción», y es cierto.
 
-- **La fase 2 de los planes: cobrar el pagado con Mercado Pago** (2026-11-08). Diseñada en
-  `docs/superpowers/specs/2026-11-08-planes-design.md`, «El cobro con Mercado Pago»: una suscripción
-  sin plan asociado por persona (`POST /preapproval` con `init_point`), el webhook firmado, la prueba
-  de 7 días una sola vez, cancelar desde «Tu plan» y la relectura diaria; cerrada tras
-  `PAGOS_ABIERTO_PARA` hasta que el dueño la abra. Por cobrar solo en la web: dentro de la app del
-  teléfono, Android obliga a Google Play Billing (con su comisión), y cobrarlo solo en la web, sin
+- **[dueño] Probar y abrir el cobro con Mercado Pago** (2026-11-08). Está escrito y **cerrado** detrás
+  de `PAGOS_ABIERTO_PARA` (README, «Los planes»; el diseño en
+  `docs/superpowers/specs/2026-11-08-planes-design.md`). No se probó contra Mercado Pago: los campos
+  y la firma salen de su SDK de Node, porque su documentación no se deja leer desde un servidor. En
+  orden:
+  1. En Mercado Pago (Tus integraciones), crear la aplicación —a nombre de Pyxis— y copiar las
+     credenciales de prueba; crear dos usuarios de prueba, vendedor y comprador.
+  2. En la aplicación, Webhooks: la URL `https://tu-parrilla.cl/api/pagos/mercadopago` con el evento
+     «Planes y suscripciones», y copiar su clave secreta.
+  3. En Vercel (production): `MERCADOPAGO_ACCESS_TOKEN` (el de prueba), `MERCADOPAGO_WEBHOOK_SECRET` y
+     `PAGOS_ABIERTO_PARA=<id del dueño>`. Redesplegar.
+  4. Probar con el comprador de prueba: «Pasar a Asador» → autorizar → volver a Tu Cuenta con «Listo:
+     ya tienes el Asador.»; ver la suscripción en Mercado Pago, la fila en Los Maestros («lo paga hasta
+     el …») y, al primer cobro, «Los cobros». Después, «Cancelar la suscripción». Si algo falla, el log
+     de Vercel dice qué contestó Mercado Pago (`[pagos] …`).
+  5. Lo que hay que mirar en esa prueba: que el `init_point` llegue y la vuelta (`back_url`) funcione;
+     que el webhook pase la firma (si contesta `401`, revisar el secreto y si Mercado Pago firma el
+     `data.id` en minúsculas); cuántos días reintenta un cobro rechazado, para ajustar `GRACIA_DIAS`
+     (5, en `src/lib/pagos/reglas.ts`); y si sin prueba el primer cobro sale al autorizar.
+  6. Con lo de abajo listo, el token de producción en Vercel y `PAGOS_ABIERTO_PARA=1`.
+
+  Por cobrar solo en la web: dentro de la app del teléfono, Android obliga a Google Play Billing (con su comisión), y cobrarlo solo en la web, sin
   botón ni enlace de pago en la app, no. Si algún día se cobra en la app, volver en la Play Console a
   «Content rating» («purchase digital goods» pasa a Yes) y a «Data safety» (sumar el historial de
   compras); «Financial features» sigue en «ninguna»: una suscripción al propio servicio no cuenta
@@ -745,7 +761,9 @@ diciendo «Sin suscripción», y es cierto.
     con un usuario de prueba comprador;
   - la boleta o factura electrónica de cada cobro, al SII: Mercado Pago no la emite;
   - que `/terminos` y `/privacidad` cuenten los planes, el cobro, la prueba y la baja, en la misma
-    revisión del abogado («Que todo quede a nombre de Pyxis», arriba), antes de abrir el cobro;
+    revisión del abogado («Que todo quede a nombre de Pyxis», arriba), antes de abrir el cobro; y que
+    `/borrar-mis-datos` diga que lo cobrado se guarda: al borrar a una persona, sus suscripciones y
+    cobros —con el correo con que pagó— quedan sin dueño, para la contabilidad;
   - Vercel Pro, que ya hacía falta antes de abrir a terceros.
 
   Al abrir el cobro, cambian también el README (la frase «Sin suscripción», arriba de todo) y la

@@ -1503,3 +1503,70 @@ export const usoIa = pgTable(
   },
   (t) => [uniqueIndex('uso_ia_owner_mes_key').on(t.ownerId, t.mes)],
 ).enableRLS()
+
+/** En qué está una suscripción, como la deja Mercado Pago (`pending`, `authorized`, `paused`, `cancelled`). */
+export const ESTADOS_SUSCRIPCION = ['pendiente', 'autorizada', 'pausada', 'cancelada'] as const
+export type EstadoSuscripcion = (typeof ESTADOS_SUSCRIPCION)[number]
+
+/**
+ * Las suscripciones al plan pagado, una por cada vez que alguien aprieta «Pasar a Asador» (la fase 2
+ * de `docs/superpowers/specs/2026-11-08-planes-design.md`). La de Mercado Pago se crea con el id de
+ * esta fila como `external_reference`, y así el webhook sabe de quién es sin adivinar por el correo.
+ * El dueño queda nulo si se borra a la persona: lo cobrado se guarda para la contabilidad.
+ */
+export const suscripciones = pgTable(
+  'suscripciones',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    ownerId: uuid('owner_id').references(() => users.id, { onDelete: 'set null' }),
+    proveedor: text('proveedor').$type<'mercadopago'>().notNull().default('mercadopago'),
+    /** El id de la suscripción en Mercado Pago (`preapproval`); nulo hasta que se crea allá. */
+    externoId: text('externo_id'),
+    estado: text('estado').$type<EstadoSuscripcion>().notNull().default('pendiente'),
+    plan: text('plan')
+      .$type<ClavePlan>()
+      .notNull()
+      .references(() => planes.clave),
+    montoClp: integer('monto_clp').notNull(),
+    /** El correo de la cuenta de Mercado Pago con que se paga: Mercado Pago lo compara al autorizar. */
+    correoPagador: text('correo_pagador').notNull(),
+    /** Si se pidió con los días de prueba del plan. */
+    conPrueba: boolean('con_prueba').notNull().default(false),
+    /** El `init_point`: adónde se manda a la persona a autorizarla. */
+    enlace: text('enlace'),
+    proximoCobro: timestamp('proximo_cobro', { withTimezone: true }),
+    creadaEn: timestamp('creada_en', { withTimezone: true }).notNull().defaultNow(),
+    actualizadaEn: timestamp('actualizada_en', { withTimezone: true }).notNull().defaultNow(),
+    canceladaEn: timestamp('cancelada_en', { withTimezone: true }),
+  },
+  (t) => [uniqueIndex('suscripciones_externo_key').on(t.externoId), index('suscripciones_owner_idx').on(t.ownerId)],
+).enableRLS()
+
+/**
+ * Cada cobro de una suscripción, como lo informa Mercado Pago (`/authorized_payments/{id}`): lo que
+ * mira el admin y lo que hace falta para la boleta. Se escribe solo desde lo que se vuelve a leer en
+ * Mercado Pago, nunca desde el cuerpo de un webhook.
+ */
+export const cobros = pgTable(
+  'cobros',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    ownerId: uuid('owner_id').references(() => users.id, { onDelete: 'set null' }),
+    suscripcionId: uuid('suscripcion_id').references(() => suscripciones.id, { onDelete: 'set null' }),
+    /** El id del cobro autorizado en Mercado Pago. */
+    externoId: text('externo_id').notNull(),
+    /** El id del pago que lo cobró, cuando lo hay. */
+    pagoId: text('pago_id'),
+    montoClp: integer('monto_clp').notNull(),
+    /** El estado del pago en Mercado Pago (`approved`, `rejected`, `pending`…), tal cual. */
+    estadoPago: text('estado_pago'),
+    /** Su detalle (`status_detail`), tal cual: dice por qué se rechazó. */
+    detalle: text('detalle'),
+    /** El estado del cobro (`scheduled`, `processed`, `recycling`…), tal cual. */
+    estadoCobro: text('estado_cobro'),
+    cobradoEn: timestamp('cobrado_en', { withTimezone: true }),
+    creadoEn: timestamp('creado_en', { withTimezone: true }).notNull().defaultNow(),
+    actualizadoEn: timestamp('actualizado_en', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex('cobros_externo_key').on(t.externoId), index('cobros_owner_idx').on(t.ownerId)],
+).enableRLS()

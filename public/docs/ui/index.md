@@ -83,7 +83,7 @@ se ve arriba, grande y en mayúsculas.
 | La Vitrina | tus páginas públicas | `/admin/profiles` | Botón «Ajustes». Su página de links | [la-vitrina.md](la-vitrina.md) |
 | Los Maestros | quién puede entrar | `/admin/usuarios` | Botón «Ajustes», solo el admin. Invitar gente, ajustar los dos planes («Los planes») y dar el pagado como cortesía («Plan», en la fila de cada persona) | [los-maestros.md](los-maestros.md) |
 | Las Sugerencias | lo que escriben al equipo y sus respuestas | `/admin/sugerencias` | Botón «Ajustes», solo el admin. Leer lo que dejan en el libro de sugerencias y responderlo | [las-sugerencias.md](las-sugerencias.md) |
-| Tu Cuenta | tu nombre y tu hora | `/admin/cuenta` | Botón «Ajustes». Nombre y zona horaria; abajo, «Tu plan»: el plan que tiene y cuánto lleva usado de cada tope | [tu-cuenta.md](tu-cuenta.md) |
+| Tu Cuenta | tu nombre y tu hora | `/admin/cuenta` | Botón «Ajustes». Nombre y zona horaria; abajo, «Tu plan»: el plan que tiene, cuánto lleva usado de cada tope y, donde está abierto, pasar al pagado con Mercado Pago o cancelar la suscripción | [tu-cuenta.md](tu-cuenta.md) |
 
 De día, dos se llaman distinto, en la barra, en Ajustes y en su título: La Parrilla es **«La
 Barra»** y Los Fierros son **«Los Cuchillos»**. La dirección y lo que se hace en cada una no
@@ -144,6 +144,7 @@ teléfono](app-movil.md).
 | Editar su página de links: foto, bio, colores, links, dirección | La Vitrina ([la-vitrina.md](la-vitrina.md)) |
 | Cambiar su nombre o su zona horaria | Tu Cuenta ([tu-cuenta.md](tu-cuenta.md)) |
 | Ver qué plan tiene, cuántas cuentas, publicaciones, espacio y tokens de IA le quedan | Tu Cuenta, «Tu plan» ([tu-cuenta.md](tu-cuenta.md)) |
+| Pagar el plan pagado, o cancelar la suscripción | Tu Cuenta, «Tu plan»: «Pasar a Asador» o «Cancelar la suscripción», solo donde pagar desde el panel está abierto ([tu-cuenta.md](tu-cuenta.md)) |
 | Darle a alguien el plan pagado, o cambiar lo que trae cada plan (solo el admin) | Los Maestros: «Plan» en su fila, o «Los planes» ([los-maestros.md](los-maestros.md)) |
 | Generar o revocar la llave que te dio a ti, o a otro agente | La Cocina, sección «Tu propio chef», bloque «1. Su llave» ([la-cocina.md](la-cocina.md)). Hasta el 2026-10-19 estaba en Tu Cuenta, y hasta el 2026-10-22 la pestaña se llamaba «Tu IA» |
 | Guardar el material en bruto (un video largo, un intro, la música, el logo), ver cuánto espacio queda, renombrar o sacar algo | La Cocina → «La cámara de frío»; de día, «La nevera» ([la-camara-de-frio.md](la-camara-de-frio.md)) |

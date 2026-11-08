@@ -3,9 +3,25 @@ import { pesoEnPalabras } from '@/lib/cocina/bodega'
 import { enMiles, enPesos, type Plan } from '@/lib/planes/plan'
 import type { UsoDelPlan } from '@/lib/planes/uso'
 import { CAMARA } from '@/lib/vocabulario'
+import type { EstadoSuscripcion } from '@/db/schema'
+import { CancelarSuscripcion, PasarAlPagado } from './pagar'
 
 // «Tu plan», en Tu Cuenta: el plan que rige, lo que lleva usado de cada tope y, desde el gratis, lo
-// que trae el pagado. Sin botones: por ahora el pagado lo da el equipo, desde Los Maestros.
+// que trae el pagado. Con el cobro abierto para la persona (`PAGOS_ABIERTO_PARA`), «Pasar a …» y, con
+// una suscripción, cuándo es el próximo cobro y «Cancelar la suscripción»; cerrado, el pagado lo da
+// el equipo desde Los Maestros.
+
+/** Lo del cobro que dibuja «Tu plan». */
+export type CobroDelPlan = {
+  /** Si la persona puede pagar desde acá. */
+  abierto: boolean
+  /** Su suscripción viva, si tiene. */
+  viva: { estado: EstadoSuscripcion; proximoCobro: Date | null; correoPagador: string } | null
+  /** Si viene de vuelta de Mercado Pago (`?plan=vuelta`). */
+  vuelta: boolean
+  /** Su correo de Tu Parrilla, con el que nace el de Mercado Pago. */
+  correo: string
+}
 
 const deTope = (usado: number, tope: number | null) => (tope === null ? `${enMiles(usado)}, sin tope` : `${enMiles(usado)} de ${enMiles(tope)}`)
 
@@ -24,19 +40,43 @@ function loQueTrae(plan: Plan, camara: { noche: string; dia: string }, conPriori
   )
 }
 
-export function TuPlan({ uso, fecha }: { uso: UsoDelPlan; fecha: (d: Date) => string }) {
+export function TuPlan({ uso, fecha, cobro }: { uso: UsoDelPlan; fecha: (d: Date) => string; cobro: CobroDelPlan }) {
   const { plan, persona, planes } = uso
   const vencido = persona.plan !== 'gratis' && plan.clave === 'gratis'
   const primero = plan.prioridad > planes.gratis.prioridad
+  const loPaga = plan.clave !== 'gratis' && persona.planOrigen === 'suscripcion'
 
   return (
     <div className="space-y-4 text-sm">
+      {cobro.vuelta ? (
+        <p role="status" className={plan.clave !== 'gratis' ? 'text-positive' : 'text-caution'}>
+          {plan.clave !== 'gratis'
+            ? `Listo: ya tienes el ${plan.nombre}.`
+            : 'Mercado Pago todavía no confirma la suscripción. Si la autorizaste, aparece aquí en unos minutos.'}
+        </p>
+      ) : null}
       <p>
         Tienes el plan <span className="font-semibold">{plan.nombre}</span>
         {plan.clave !== 'gratis' && persona.planHasta ? `, hasta el ${fecha(persona.planHasta)}` : ''}
         {plan.clave !== 'gratis' && persona.planOrigen === 'cortesia' ? ', de cortesía' : ''}.
         {vencido && persona.planHasta ? ` Tu ${planes[persona.plan].nombre} terminó el ${fecha(persona.planHasta)}.` : ''}
       </p>
+
+      {loPaga && cobro.viva ? (
+        <div>
+          <p>
+            {cobro.viva.estado === 'pausada'
+              ? `Mercado Pago tiene tu suscripción en pausa: no está cobrando (${cobro.viva.correoPagador}).`
+              : `Lo pagas con Mercado Pago (${cobro.viva.correoPagador}).`}
+            {cobro.viva.estado === 'autorizada' && cobro.viva.proximoCobro
+              ? ` Próximo cobro: ${fecha(cobro.viva.proximoCobro)}.`
+              : ''}
+          </p>
+          <CancelarSuscripcion nombre={plan.nombre} hasta={persona.planHasta ? fecha(persona.planHasta) : null} />
+        </div>
+      ) : loPaga ? (
+        <p className="text-fg-muted">Cancelaste la suscripción: no se vuelve a cobrar.</p>
+      ) : null}
 
       <dl className="grid gap-x-6 gap-y-2 sm:grid-cols-[auto_1fr]">
         <dt className="text-fg-muted">Cuentas conectadas</dt>
@@ -61,11 +101,20 @@ export function TuPlan({ uso, fecha }: { uso: UsoDelPlan; fecha: (d: Date) => st
       </p>
 
       {plan.clave === 'gratis' ? (
-        <p className="rounded-lg bg-velo/[0.04] p-3">
-          El plan <span className="font-semibold">{planes.pagado.nombre}</span> cuesta {enPesos(planes.pagado.precioClp)} al mes y
-          trae {loQueTrae(planes.pagado, CAMARA, planes.pagado.prioridad > planes.gratis.prioridad)}. Por ahora lo da el
-          equipo de Tu Parrilla.
-        </p>
+        <div className="rounded-lg bg-velo/[0.04] p-3">
+          <p>
+            El plan <span className="font-semibold">{planes.pagado.nombre}</span> cuesta {enPesos(planes.pagado.precioClp)} al mes y
+            trae {loQueTrae(planes.pagado, CAMARA, planes.pagado.prioridad > planes.gratis.prioridad)}.
+            {cobro.abierto ? '' : ' Por ahora lo da el equipo de Tu Parrilla.'}
+          </p>
+          {cobro.abierto ? (
+            <PasarAlPagado
+              correo={cobro.correo}
+              nombre={planes.pagado.nombre}
+              diasDePrueba={persona.pruebaUsadaEn ? 0 : planes.pagado.diasDePrueba}
+            />
+          ) : null}
+        </div>
       ) : null}
     </div>
   )

@@ -109,3 +109,18 @@ export function analiticaDeYoutubeAbiertaPara(ownerId: string | null | undefined
   if (!ownerId) return false
   return bandera.split(',').some((id) => id.trim() === ownerId)
 }
+
+/**
+ * Si el dueño ve «Pasar a Asador» en Tu Cuenta, el cobro del plan pagado con Mercado Pago
+ * (`src/lib/pagos/`). `PAGOS_ABIERTO_PARA=1` lo abre para todos; una lista de ids de usuario separados
+ * por comas, solo para esos —para probarlo con una cuenta de prueba de Mercado Pago sin ofrecérselo a
+ * nadie más—; vacía, para nadie. Se abre a todos después de que `/terminos` y `/privacidad` cuenten
+ * el cobro (`docs/pendientes.md`). Una suscripción ya tomada sigue cobrándose aunque se cierre.
+ */
+export function pagosAbiertosPara(ownerId: string | null | undefined): boolean {
+  const bandera = env('PAGOS_ABIERTO_PARA')
+  if (!bandera) return false
+  if (bandera === '1') return true
+  if (!ownerId) return false
+  return bandera.split(',').some((id) => id.trim() === ownerId)
+}

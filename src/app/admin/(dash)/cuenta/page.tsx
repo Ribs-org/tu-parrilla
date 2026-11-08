@@ -3,6 +3,9 @@ import { Panel } from '@/components/charts/panel'
 import { Encabezado } from '@/components/ui'
 import { requireUser } from '@/lib/auth'
 import { usoDelPlan } from '@/lib/planes/uso'
+import { mercadoPagoConfigurado } from '@/lib/pagos/mercadopago'
+import { alVolverDeMercadoPago, suscripcionVivaDe } from '@/lib/pagos/suscripciones'
+import { pagosAbiertosPara } from '@/lib/redes-abiertas'
 import { nombreDe } from '@/lib/vocabulario'
 import { horaEn, zonasDisponibles } from '@/lib/zona'
 import { FormularioCuenta } from './formulario'
@@ -10,9 +13,17 @@ import { TuPlan } from './tu-plan'
 
 export const dynamic = 'force-dynamic'
 
-export default async function CuentaPage() {
+export default async function CuentaPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}) {
   const usuario = await requireUser()
+  // De vuelta de Mercado Pago: la suscripción se lee antes de dibujar, sin esperar el webhook.
+  const vuelta = (await searchParams).plan === 'vuelta'
+  if (vuelta) await alVolverDeMercadoPago(usuario.id)
   const uso = await usoDelPlan(usuario.id)
+  const viva = await suscripcionVivaDe(usuario.id)
   const FECHA = new Intl.DateTimeFormat('es-CL', { dateStyle: 'medium', timeZone: usuario.zona })
 
   return (
@@ -43,7 +54,16 @@ export default async function CuentaPage() {
         />
       </Panel>
       <Panel title="Tu plan" className="mt-6">
-        <TuPlan uso={uso} fecha={(d) => FECHA.format(d)} />
+        <TuPlan
+          uso={uso}
+          fecha={(d) => FECHA.format(d)}
+          cobro={{
+            abierto: pagosAbiertosPara(usuario.id) && mercadoPagoConfigurado(),
+            viva: viva ? { estado: viva.estado, proximoCobro: viva.proximoCobro, correoPagador: viva.correoPagador } : null,
+            vuelta,
+            correo: usuario.correo,
+          }}
+        />
       </Panel>
     </>
   )

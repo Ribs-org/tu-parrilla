@@ -253,6 +253,13 @@
       "when": 1794181309202,
       "tag": "0035_planes",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1794181418427,
+      "tag": "0036_suscripciones_y_cobros",
+      "breakpoints": true
     }
   ]
 }

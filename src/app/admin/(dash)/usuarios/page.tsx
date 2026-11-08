@@ -6,6 +6,10 @@ import { listarUsuarios } from '@/lib/usuarios'
 import { pesoEnPalabras } from '@/lib/cocina/bodega'
 import { claveQueRige, cuotaDeLaCamara, planEnPalabras } from '@/lib/planes/plan'
 import { leerPlanes } from '@/lib/planes/planes'
+import { enPesos } from '@/lib/planes/plan'
+import { mercadoPagoConfigurado } from '@/lib/pagos/mercadopago'
+import { estadoDePagoEnPalabras } from '@/lib/pagos/reglas'
+import { cobrosRecientes } from '@/lib/pagos/suscripciones'
 import { dayKey } from '@/lib/schedule-week'
 import { ocupadoPorUsuario } from '@/lib/cocina/materiales'
 import { DeNocheYDeDia } from '@/components/de-noche-y-de-dia'
@@ -26,6 +30,7 @@ export default async function UsuariosPage() {
     await ocupadoPorUsuario(),
     await leerPlanes(),
   ]
+  const cobros = await cobrosRecientes()
   const ahora = new Date()
   const hoy = dayKey(ahora, zona)
   return (
@@ -44,6 +49,29 @@ export default async function UsuariosPage() {
           <TarjetaDePlan plan={planes.pagado} />
         </div>
       </Panel>
+      {mercadoPagoConfigurado() || cobros.length > 0 ? (
+        <Panel title="Los cobros" className="mb-6">
+          {cobros.length === 0 ? (
+            <p className="text-sm text-fg-muted">Todavía no hay cobros.</p>
+          ) : (
+            <ul className="divide-y divide-velo/[0.06] text-sm">
+              {cobros.map((c) => (
+                <li key={c.id} className="flex flex-wrap items-center gap-3 py-2">
+                  <span className="font-mono text-xs text-fg-faint">{FECHA.format(c.cobradoEn ?? c.creadoEn)}</span>
+                  <span className="min-w-0 flex-1 truncate">{c.correo ?? '(persona borrada)'}</span>
+                  <span className="font-mono">{enPesos(c.montoClp)}</span>
+                  <span className={c.estadoPago === 'approved' ? 'text-positive' : 'text-fg-muted'}>
+                    {estadoDePagoEnPalabras(c.estadoPago)}
+                  </span>
+                  {c.detalle && c.estadoPago !== 'approved' ? (
+                    <span className="basis-full font-mono text-[0.7rem] text-fg-faint">{c.detalle}</span>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          )}
+        </Panel>
+      ) : null}
       <Panel title="Invitar" className="mb-6">
         <FormularioInvitar />
       </Panel>
