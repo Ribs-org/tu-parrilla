@@ -28,7 +28,7 @@ export default function BorrarMisDatosPage() {
           Borrar tu cuenta y tus datos
         </h1>
         <p className="mt-2 text-sm text-fg-muted">
-          Tu Parrilla (la app «Tu Parrilla» de Google Play y el panel web), de {RESPONSABLE}.
+          Tu Parrilla (la app «Parrilla» de Google Play y el panel web), de {RESPONSABLE}.
           Actualizado el {ACTUALIZADO}.
         </p>
       </header>
@@ -114,7 +114,7 @@ export default function BorrarMisDatosPage() {
       <section className="space-y-3" lang="en">
         <h2 className={titulo}>In English</h2>
         <p className="leading-relaxed text-fg-muted">
-          To delete your Tu Parrilla account and its data, email{' '}
+          To delete your Tu Parrilla account (the «Parrilla» app on Google Play) and its data, email{' '}
           <a href={`mailto:${CONTACTO}?subject=${encodeURIComponent(ASUNTO)}`} className={enlace}>
             {CONTACTO}
           </a>{' '}
