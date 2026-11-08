@@ -666,12 +666,9 @@ permisos «por decidir»** de la tabla red por red, para pedirlos todos en una m
 - **[dueño] Probar TikTok desde el teléfono con una cuenta real** (2026-11-07). Llegó por aire a la
   1.1.0 el 2026-11-07; se probó en Expo web contra una API falsa, no contra TikTok: programar desde
   el teléfono una foto a una cuenta de TikTok y mirar que salga con la privacidad elegida.
-- **[dueño] Publicar por aire a la 1.1.0 las opciones de YouTube** (2026-11-08). Después de que
-  el servidor con «Quién lo ve», «Hecho con IA» y «Agregar a una playlist» esté en producción,
-  copiar a la punta de `ota-1.1.0` los archivos de la lista en `mobile/README.md` («Las opciones de
-  YouTube por aire a la 1.1.0») y publicar a los dos canales. No se probó en un teléfono ni en Expo
-  web: al publicar, programar desde el teléfono un video no listado a una playlist y mirar que
-  salga así.
+- **[dueño] Probar desde el teléfono las opciones de YouTube** (2026-11-08). Llegaron por aire a la
+  1.1.0 el 2026-11-08; no se probaron en un teléfono ni en Expo web: programar desde el teléfono un
+  video no listado a una playlist y mirar que salga así.
 - **[dueño] Probar las opciones de YouTube con un canal real** (2026-11-08). Las pruebas cubren lo
   que se le manda a YouTube, no lo que YouTube hace: falta subir un Short no listado, uno con
   «Hecho con IA» (mirar en YouTube Studio que quedó la declaración de contenido alterado) y uno con
