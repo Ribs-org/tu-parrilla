@@ -111,6 +111,40 @@ describe.skipIf(!URL_PRUEBAS)('desconectar una cuenta, contra una Postgres de ve
     expect(queda.post?.caption).toBe('Cómo hacer un asado')
   })
 
+  it('YouTube revocado desde Google: borra lo mismo y deja el motivo en la tarjeta', async () => {
+    const ana = await persona()
+    const { cuenta, post } = await cuentaConHistoria(ana, 'youtube')
+
+    expect(
+      await desconectarCuenta(ana, cuenta.id, { motivo: 'Google dejó de dar acceso…', refreshToken: 'refresco' }),
+    ).toBe(true)
+
+    const queda = await loQueQueda(cuenta.id, post.id)
+    expect(queda.cuenta).toMatchObject({
+      accessToken: null,
+      refreshToken: null,
+      expiresAt: null,
+      lastSyncError: 'Google dejó de dar acceso…',
+    })
+    expect(queda).toMatchObject({ lecturas: 0, delCanal: 0, comentarios: 0, destinos: 1 })
+    expect(queda.post).toMatchObject({ caption: null, thumbnailUrl: null })
+  })
+
+  it('YouTube revocado, pero reconectado entre medio: la conexión nueva no se toca', async () => {
+    const ana = await persona()
+    const { cuenta, post } = await cuentaConHistoria(ana, 'youtube')
+
+    // Google rechazó un refresh token que la fila ya no tiene: el dueño reconectó y hay otro.
+    expect(
+      await desconectarCuenta(ana, cuenta.id, { motivo: 'Google dejó de dar acceso…', refreshToken: 'el-de-antes' }),
+    ).toBe(false)
+
+    const queda = await loQueQueda(cuenta.id, post.id)
+    expect(queda.cuenta).toMatchObject({ accessToken: 'acceso', refreshToken: 'refresco', lastSyncError: null })
+    expect(queda).toMatchObject({ lecturas: 1, delCanal: 1, comentarios: 1 })
+    expect(queda.post?.caption).toBe('Cómo hacer un asado')
+  })
+
   it('el canal de otro dueño no se desconecta ni se borra, y el YouTube propio de al lado tampoco', async () => {
     const [ana, bea] = [await persona(), await persona()]
     const deAna = await cuentaConHistoria(ana, 'youtube')

@@ -119,22 +119,58 @@ async function setThumbnail(token: string, videoId: string, coverUrl: string): P
 const REFRESH_WINDOW_MS = 5 * 60 * 1000
 
 /**
+ * Lo que dice la tarjeta del canal (`last_sync_error`) cuando Google ya no da acceso. Neutra a
+ * propósito: el `invalid_grant` no dice si el dueño quitó Tu Parrilla en
+ * myaccount.google.com/permissions o si el token venció solo, por seis meses sin usarse.
+ */
+export const YOUTUBE_REVOCADO = 'Google dejó de dar acceso a este canal: vuelve a conectar.'
+
+/**
+ * Si la respuesta de Google al renovar dice que el refresh token ya no sirve, y no que algo
+ * tropezó. `invalid_grant` es «el token es inválido, venció o se revocó»: ningún reintento lo
+ * arregla y solo reconectar da otro. Cualquier otra cosa —un 5xx, un `invalid_client` por una
+ * variable mal puesta— no dice nada del canal, y desconectarlo por eso apagaría a todos.
+ */
+export function esTokenRevocado(status: number, cuerpo: string): boolean {
+  if (status !== 400) return false
+  try {
+    return (JSON.parse(cuerpo) as { error?: unknown }).error === 'invalid_grant'
+  } catch {
+    return false
+  }
+}
+
+/**
+ * La credencial de escritura, o por qué no la hay: `revocada` si Google ya no da acceso, y
+ * entonces la cuenta ya quedó desconectada; `sin` si no hay credencial o no se pudo renovar
+ * ahora (la red, un 5xx), que no dice nada del canal.
+ */
+export type RenovacionYoutube = { token: string } | { revocada: true } | { sin: true }
+
+/**
  * The write credential: OAuth, not the read-side API key. Refreshes itself when the
  * hourly token is about to die — Google's refresh answer carries no new refresh token,
  * so the stored one survives — and re-encrypts what it saves, like every credential
  * in this repo.
+ *
+ * Quitar Tu Parrilla desde la cuenta de Google no le avisa a Tu Parrilla: se sabe acá, cuando
+ * Google contesta `invalid_grant`. Entonces la cuenta se desconecta como con «Desconectar»
+ * —sin credenciales y con lo de YouTube borrado, porque desconectado no se refresca nunca y las
+ * políticas no dejan guardarlo así— y con `YOUTUBE_REVOCADO` en la tarjeta. Pasa por acá todo lo
+ * que usa el token: publicar, el sondeo de comentarios y, desde que lo revisa, la
+ * sincronización diaria (`youtubeConnector.ensureCredential`).
  */
-export async function ensureYoutubeCredential(account: SocialAccount): Promise<string | null> {
-  if (!account.accessToken || !account.refreshToken) return null
+export async function renovarYoutube(account: SocialAccount): Promise<RenovacionYoutube> {
+  if (!account.accessToken || !account.refreshToken) return { sin: true }
   const token = decryptToken(account.accessToken)
 
   const stillValid =
     account.expiresAt && account.expiresAt.getTime() - Date.now() > REFRESH_WINDOW_MS
-  if (stillValid) return token
+  if (stillValid) return { token }
 
   const clientId = env('GOOGLE_CLIENT_ID')
   const clientSecret = env('GOOGLE_CLIENT_SECRET')
-  if (!clientId || !clientSecret) return token
+  if (!clientId || !clientSecret) return { token }
 
   const response = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
@@ -148,11 +184,14 @@ export async function ensureYoutubeCredential(account: SocialAccount): Promise<s
     }),
   })
   if (!response.ok) {
-    console.error('Google refresh:', response.status, (await response.text()).slice(0, 300))
-    return null
+    const cuerpo = await response.text()
+    console.error('Google refresh:', response.status, cuerpo.slice(0, 300))
+    if (!esTokenRevocado(response.status, cuerpo)) return { sin: true }
+    await soltarCanalRevocado(account, account.refreshToken)
+    return { revocada: true }
   }
   const data = (await response.json()) as { access_token?: string; expires_in?: number }
-  if (!data.access_token) return null
+  if (!data.access_token) return { sin: true }
 
   await getDb()
     .update(socialAccounts)
@@ -162,7 +201,28 @@ export async function ensureYoutubeCredential(account: SocialAccount): Promise<s
     })
     .where(eq(socialAccounts.id, account.id))
 
-  return data.access_token
+  return { token: data.access_token }
+}
+
+/** `renovarYoutube` para quien solo necesita el token: publicar y el sondeo de comentarios. */
+export async function ensureYoutubeCredential(account: SocialAccount): Promise<string | null> {
+  const renovacion = await renovarYoutube(account)
+  return 'token' in renovacion ? renovacion.token : null
+}
+
+/**
+ * Desconecta el canal que Google ya no deja leer. Por import dinámico porque `desconectar.ts` es
+ * solo de servidor y este archivo lo importan módulos puros con tests (`arreglo.ts`). Una fila
+ * sin dueño —anterior a los usuarios— no se puede desconectar por dueño: se queda como está, y
+ * su sondeo seguirá encontrando el mismo `invalid_grant` en el log.
+ */
+async function soltarCanalRevocado(account: SocialAccount, refreshToken: string): Promise<void> {
+  if (!account.ownerId) return
+  const { desconectarCuenta } = await import('../desconectar')
+  const solto = await desconectarCuenta(account.ownerId, account.id, { motivo: YOUTUBE_REVOCADO, refreshToken })
+  if (solto) {
+    console.warn(`[youtube] ${account.handle ?? account.id}: Google ya no da acceso; quedó desconectada y sin lo de YouTube`)
+  }
 }
 
 const UPLOAD_URL =

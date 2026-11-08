@@ -193,7 +193,8 @@ export default function PrivacidadPage() {
           >
             myaccount.google.com/permissions
           </a>
-          .
+          ; si lo revocas desde Google, Tu Parrilla lo nota la próxima vez que le pide permiso —en
+          general, antes de dos horas— y borra lo mismo que al desconectar.
         </p>
       </section>
 

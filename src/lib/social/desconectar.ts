@@ -37,22 +37,50 @@ export function pasoParaBorrarComentariosTiktok(ownerId: string, accountId: stri
   return sql`delete from ajustes where owner_id = ${ownerId} and clave = 'tiktok_comentarios:' || ${accountId}`
 }
 
+/** Cuando no es el dueño quien desconecta, sino la red que dejó de dar acceso. */
+export type Desconexion = {
+  /**
+   * Por qué, en `last_sync_error`: la tarjeta lo dice al pasar el mouse, y con él la cuenta
+   * cuenta como caída —avisa por correo y al teléfono— y no como desconectada a propósito
+   * (`avisos/reglas.ts`). Es lo que hace una baja desde Facebook (`meta-bajas.ts`).
+   */
+  motivo: string
+  /**
+   * El refresh token que la red rechazó, cifrado como está en la base. Solo se desconecta si la
+   * fila lo sigue teniendo: si el dueño reconectó mientras tanto, la conexión nueva no se toca.
+   */
+  refreshToken: string
+}
+
 /**
  * Desconecta una cuenta del dueño y, si es de YouTube, borra lo que vino de su API, todo en una
  * transacción: no queda una cuenta desconectada con sus datos a medio borrar. Devuelve false si
  * la cuenta no es suya (o no existe), y entonces no toca nada.
  *
+ * Sin `porLaRed` es «Desconectar» en Los Fierros. Con él, la red ya no da acceso (Google contestó
+ * `invalid_grant`, en `publish/youtube.ts`): se borra lo mismo, con su motivo.
+ *
  * Una sincronización que ya estaba leyendo el canal puede alcanzar a escribir la lectura del
  * día después de esto; esa la borra `retencion-youtube` en su plazo, y la siguiente ya no lee
  * el canal, porque sin credencial no se sincroniza.
  */
-export async function desconectarCuenta(ownerId: string, accountId: string): Promise<boolean> {
+export async function desconectarCuenta(
+  ownerId: string,
+  accountId: string,
+  porLaRed?: Desconexion,
+): Promise<boolean> {
   if (!esUuid(accountId)) return false
   return getDb().transaction(async (tx) => {
     const [cuenta] = await tx
       .update(socialAccounts)
-      .set({ accessToken: null, refreshToken: null, expiresAt: null, lastSyncError: null })
-      .where(and(eq(socialAccounts.id, accountId), eq(socialAccounts.ownerId, ownerId)))
+      .set({ accessToken: null, refreshToken: null, expiresAt: null, lastSyncError: porLaRed?.motivo ?? null })
+      .where(
+        and(
+          eq(socialAccounts.id, accountId),
+          eq(socialAccounts.ownerId, ownerId),
+          porLaRed ? eq(socialAccounts.refreshToken, porLaRed.refreshToken) : undefined,
+        ),
+      )
       .returning({ network: socialAccounts.network })
     if (!cuenta) return false
     if (cuenta.network === 'youtube') {

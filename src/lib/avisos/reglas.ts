@@ -56,8 +56,8 @@ function fierroDe(c: CuentaVigilada, ahora: Date) {
 
 /**
  * «Desconectar» deja la cuenta sin credencial y sin error: es una decisión del dueño, y no
- * avisa nada. Sin credencial pero con el error escrito —una baja desde Facebook— sí es una
- * caída: la cuenta no se fue porque él quisiera.
+ * avisa nada. Sin credencial pero con el error escrito —una baja desde Facebook, un canal que
+ * Google revocó (`renovarYoutube`)— sí es una caída: la cuenta no se fue porque él quisiera.
  */
 function desconectadaAProposito(c: Pick<CuentaVigilada, 'conCredencial' | 'lastSyncError'>): boolean {
   return !c.conCredencial && !c.lastSyncError

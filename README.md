@@ -509,7 +509,14 @@ lecturas diarias de más de 30 días, los comentarios guardados hace más de 30 
 título y la miniatura de los videos que llevan 30 días sin llegar. Un canal que su dueño
 desconecta no espera ese plazo: *Desconectar* borra en el acto sus lecturas, las de sus videos,
 sus comentarios y los títulos y miniaturas (`src/lib/social/desconectar.ts`), y deja el id y el
-nombre del canal y la fila de cada video, que une las visitas a su etiqueta `?s=`. La regla vive en
+nombre del canal y la fila de cada video, que une las visitas a su etiqueta `?s=`. Lo mismo pasa
+si el dueño quita Tu Parrilla desde su cuenta de Google (myaccount.google.com/permissions): Google
+no avisa, pero el próximo intento de renovar el token de OAuth recibe `invalid_grant`, y entonces
+la cuenta se desconecta con ese mismo borrado y con «Google dejó de dar acceso a este canal: vuelve
+a conectar.» en su tarjeta, que cuenta como caída y avisa por correo
+(`renovarYoutube`, en `src/lib/social/publish/youtube.ts`). Lo renuevan el sondeo de comentarios,
+cada media hora, y la sincronización diaria antes de leer con la API key, así que se nota en menos
+de dos horas. Un rechazo de otro tipo —un 5xx, una variable mal puesta— no desconecta nada. La regla vive en
 `src/lib/social/politica-youtube.ts` y el borrado en `retencion-youtube.ts`. Si algún día
 se pide y se obtiene el permiso de analítica de §III.L, es ahí donde se afloja.
 
@@ -1590,7 +1597,8 @@ resumen del día y la alarma salen también al teléfono de quien encendió los 
   avisa el correo siguiente, una sola vez.
 - **Una cuenta cuya conexión se cayó**: «Se cayó la conexión con <Red> · <cuenta>», con
   cuántas publicaciones tiene por salir ahí. Sale cuando su fierro queda frío —vencida, con la
-  sincronización rota, con una baja desde Facebook, o porque la red rechazó la conexión al
+  sincronización rota, con una baja desde Facebook, con un canal de YouTube revocado desde
+  Google, o porque la red rechazó la conexión al
   publicar (`marcarCaida` lo anota en la cuenta desde el primer intento)—, a los cinco
   minutos, en la pasada siguiente del cron de publicación. Llega uno por caída, no uno por
   post: `social_accounts.caida_avisada_en` lo marca y se borra cuando el fierro vuelve a
@@ -2263,7 +2271,7 @@ src/
       lectura.ts           qué publicaciones se leen cada día: lo nuevo a diario, lo viejo cada vez más espaciado
       politica-youtube.ts  lo que las políticas de YouTube no dejan hacer con sus datos
       retencion-youtube.ts borra lo de YouTube que lleva 30 días sin refrescarse
-      desconectar.ts       «Desconectar»: la cuenta suelta sus credenciales y, en YouTube, lo que vino de su API en el acto
+      desconectar.ts       «Desconectar»: la cuenta suelta sus credenciales y, en YouTube, lo que vino de su API en el acto; también cuando Google revoca el canal
       traspasar.ts         le cambia el dueño a una cuenta con lo que se bajó de ella, sin borrar nada
       anuncios.ts          leer los anuncios de Meta: qué se le pide a la Marketing API, el cruce con las publicaciones y el resumen de «Lo pagado» (sin base); anuncios-sync.ts los guarda
       promocionar.ts       promocionar una publicación: qué se acepta, el gasto máximo, lo que se le manda a Meta y sus errores en castellano (sin base); promocionar-meta.ts crea, pausa y detiene
