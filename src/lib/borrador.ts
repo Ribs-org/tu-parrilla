@@ -3,7 +3,7 @@
 // llenar el formulario. Sin base ni `server-only`: lo usan el compositor (navegador), la
 // acción que guarda y los tests.
 import { addDays, dayKey } from './schedule-week'
-import { musicaDe, musicaDesdeCampo, type MusicaInstagram } from './social/publish/opciones'
+import { PRIVACIDADES_TIKTOK, musicaDe, musicaDesdeCampo, type MusicaInstagram } from './social/publish/opciones'
 import { esUuid } from './uuid'
 
 /** Los valores de un formulario, nombre por nombre, tal como los entrega `FormData.getAll`. */
@@ -142,9 +142,13 @@ export function fechaParaDia(dia: string, ahora: Date, zona: string): string {
 
 /* ------------------------------------------------------------- el teléfono -- */
 
+/** La regla de palabra clave como la escriben el compositor y el teléfono: los tres campos, crudos. */
+export type ReglaDeBorrador = { palabra: string; mensaje: string; respuestaPublica: string }
+
 /**
- * Lo que la app del teléfono sabe editar de un borrador. Es menos que el compositor: no
- * tiene las opciones de TikTok ni la palabra clave, así que esos campos no viajan.
+ * Lo que la app del teléfono sabe editar de un borrador. Es menos que el compositor: no tiene
+ * portada ni atributos. Las opciones de TikTok y la palabra clave las trae la app desde el
+ * 2026-11-07; una de antes no, y entonces esos campos no viajan y se conservan.
  */
 export type BorradorDelTelefono = {
   texto: string
@@ -164,12 +168,30 @@ export type BorradorDelTelefono = {
    * todavía no sabe de historias: entonces se conserva lo que el borrador decía.
    */
   historia?: boolean
+  /**
+   * Lo que el bloque de TikTok de cada cuenta tenía elegido, como lo lee el compositor
+   * (`tiktokInicial`). Ausente en una app que no trae el bloque: entonces se conservan las
+   * opciones de TikTok que dejó el panel.
+   */
+  tiktok?: Record<string, TikTokInicial>
+  /**
+   * La regla de palabra clave, o null si no tiene (la palabra vacía la borra, como en el
+   * compositor). Ausente en una app que no la muestra: entonces se conserva la del panel.
+   */
+  regla?: ReglaDeBorrador | null
 }
 
 /** Los campos que el teléfono escribe enteros cada vez que guarda. */
 const DEL_TELEFONO = new Set(['caption', 'cuentas', 'scheduledAt', 'cuandoAhora'])
 const TRIAL = 'instagramTrial:'
 const MUSICA = 'instagramMusica:'
+/** Los campos de la regla de palabra clave, los mismos que lee `reglaDesdeFormulario`. */
+const REGLA = ['reglaPalabra', 'reglaMensaje', 'reglaRespuesta']
+
+/** Si un campo es del bloque de TikTok de alguna cuenta (`tiktokModo:<id>`, `tiktokPrivacidad:<id>`…). */
+function esCampoDeTikTok(nombre: string): boolean {
+  return nombre.startsWith('tiktok') && nombre.includes(':')
+}
 /**
  * El campo del modo: `historia`, o ausente si es un post. El compositor del panel todavía no
  * tiene el selector (`docs/pendientes.md`): hasta entonces lo escribe solo el teléfono, y el
@@ -200,12 +222,13 @@ export const BORRADOR_ES_HISTORIA =
 
 /**
  * Los campos de un borrador después de que el teléfono lo guarda. El teléfono escribe lo
- * suyo y todo lo demás queda como lo dejó el panel: las opciones de TikTok, la palabra
- * clave. Así un borrador que empezó en el panel no pierde nada por tocarlo en el teléfono.
+ * suyo y todo lo demás queda como lo dejó el panel: la portada, los atributos y, en una app
+ * que no los trae (sin `tiktok` ni `regla`), las opciones de TikTok y la palabra clave. Así
+ * un borrador que empezó en el panel no pierde nada por tocarlo en el teléfono.
  *
- * `ajenas` son las cuentas que el teléfono no puede mostrar (hoy, las de TikTok), con el
- * nombre de su red: no las ve, así que no puede haberlas desmarcado, y se conservan entre
- * las elegidas.
+ * `ajenas` son las cuentas que la app no puede mostrar (las de TikTok en una app sin su
+ * bloque, las de una red en «Próximamente»), con el nombre de su red: no las ve, así que no
+ * puede haberlas desmarcado, y se conservan entre las elegidas.
  */
 export function camposDesdeTelefono(
   anteriores: Campos | null,
@@ -217,6 +240,8 @@ export function camposDesdeTelefono(
     if (DEL_TELEFONO.has(nombre) || nombre.startsWith(TRIAL)) continue
     if (telefono.musica !== undefined && nombre.startsWith(MUSICA)) continue
     if (telefono.historia !== undefined && nombre === MODO) continue
+    if (telefono.tiktok !== undefined && esCampoDeTikTok(nombre)) continue
+    if (telefono.regla !== undefined && REGLA.includes(nombre)) continue
     campos[nombre] = valores
   }
   if (telefono.historia) campos[MODO] = ['historia']
@@ -229,7 +254,85 @@ export function camposDesdeTelefono(
   for (const [id, musica] of Object.entries(telefono.musica ?? {})) {
     if (cuentas.includes(id)) campos[`${MUSICA}${id}`] = [JSON.stringify(musica)]
   }
+  for (const [id, t] of Object.entries(telefono.tiktok ?? {})) {
+    if (cuentas.includes(id)) Object.assign(campos, camposDeTikTok(id, t))
+  }
+  if (telefono.regla && telefono.regla.palabra.trim() !== '') {
+    campos.reglaPalabra = [telefono.regla.palabra]
+    campos.reglaMensaje = [telefono.regla.mensaje]
+    campos.reglaRespuesta = [telefono.regla.respuestaPublica]
+  }
   return campos
+}
+
+/**
+ * El bloque de TikTok de una cuenta escrito como lo deja el formulario del compositor, para que
+ * `tiktokInicial` lo lea igual venga de donde venga: las casillas apagadas no se escriben, y
+ * «Música de TikTok» solo si estaba a la vista (`on` o vacío).
+ */
+function camposDeTikTok(id: string, t: TikTokInicial): Campos {
+  const campos: Campos = {
+    [`tiktokModo:${id}`]: [t.borrador ? 'borrador' : 'directo'],
+    [`tiktokPrivacidad:${id}`]: [t.privacidad],
+    [`tiktokComercial:${id}`]: [t.comercial],
+  }
+  if (t.comentarios) campos[`tiktokComentarios:${id}`] = ['on']
+  if (t.duo) campos[`tiktokDuo:${id}`] = ['on']
+  if (t.pegar) campos[`tiktokPegar:${id}`] = ['on']
+  if (t.ia) campos[`tiktokIA:${id}`] = ['on']
+  if (t.musica !== undefined) campos[`tiktokMusica:${id}`] = [t.musica ? 'on' : '']
+  return campos
+}
+
+function esObjetoPlano(valor: unknown): valor is Record<string, unknown> {
+  return typeof valor === 'object' && valor !== null && !Array.isArray(valor)
+}
+
+/**
+ * Lo que el bloque de TikTok de cada cuenta tenía elegido, sacado de las `opciones` con que el
+ * teléfono guarda un borrador: la misma forma con que programa (`{ modo, privacidad, … }`), pero
+ * sin validar, porque un borrador puede estar a medias —la privacidad sin elegir todavía—. Lo que
+ * no se entiende queda como nace el bloque: privacidad sin elegir, todo apagado. Solo las cuentas
+ * de TikTok elegidas (`tiktok`).
+ */
+export function tiktokDelTelefono(
+  opciones: Record<string, unknown>,
+  cuentas: readonly string[],
+  tiktok: ReadonlySet<string>,
+): Record<string, TikTokInicial> {
+  const salida: Record<string, TikTokInicial> = {}
+  for (const id of cuentas) {
+    if (!tiktok.has(id)) continue
+    const crudo = opciones[id]
+    const o: Record<string, unknown> = esObjetoPlano(crudo) ? crudo : {}
+    const comercial = o.comercial === 'marca_propia' || o.comercial === 'patrocinado' ? o.comercial : 'no'
+    salida[id] = {
+      borrador: o.modo === 'borrador',
+      privacidad: (PRIVACIDADES_TIKTOK as readonly unknown[]).includes(o.privacidad) ? (o.privacidad as string) : '',
+      comentarios: o.comentarios === true,
+      duo: o.duo === true,
+      pegar: o.pegar === true,
+      comercial,
+      ia: o.ia === true,
+      ...(typeof o.musica === 'boolean' ? { musica: o.musica } : {}),
+    }
+  }
+  return salida
+}
+
+/**
+ * La regla de palabra clave que manda el teléfono (`regla: { palabra, mensaje, respuestaPublica }`),
+ * o null si no hay: como en el compositor (`reglaDesdeFormulario`), la palabra vacía es «sin
+ * regla» aunque el mensaje siga escrito. Solo esos tres campos: un `documentoUrl` no se acepta
+ * desde acá, porque `crearPostProgramado` lo guardaría sin revisar que sea una URL nuestra.
+ */
+export function reglaDelTelefono(body: unknown): ReglaDeBorrador | null {
+  const regla = (body as { regla?: unknown } | null)?.regla
+  if (!esObjetoPlano(regla)) return null
+  const texto = (v: unknown) => (typeof v === 'string' ? v : '')
+  const palabra = texto(regla.palabra)
+  if (palabra.trim() === '') return null
+  return { palabra, mensaje: texto(regla.mensaje), respuestaPublica: texto(regla.respuestaPublica) }
 }
 
 /**
@@ -290,20 +393,36 @@ export function telefonoDesdeCampos(campos: Campos): Omit<BorradorDelTelefono, '
         return musica ? [[id, musica] as const] : []
       }),
     ),
+    tiktok: Object.fromEntries(
+      cuentas.flatMap((id) => {
+        const t = tiktokInicial(campos, id)
+        return t ? [[id, t] as const] : []
+      }),
+    ),
+    regla: reglaInicial(campos),
   }
 }
 
 /**
- * Por qué un borrador no se puede programar desde el teléfono, o null si se puede. Va a
- * alguna cuenta que el teléfono no publica (`ajenas`, con el nombre de su red), o tiene
- * una palabra clave, que el teléfono no muestra. Programarlo desde ahí dejaría eso fuera
- * sin que nadie lo viera, y el borrador —que lo guardaba— se borraría al programar.
+ * Por qué un borrador no se puede programar desde el teléfono, o null si se puede. Va a alguna
+ * cuenta que la app no publica (`ajenas`, con el nombre de su red: TikTok para una app sin su
+ * bloque, y las redes en «Próximamente» para todas), o tiene una palabra clave y la app no la
+ * muestra (`conRegla` en false). Programarlo desde ahí dejaría eso fuera sin que nadie lo viera,
+ * y el borrador —que lo guardaba— se borraría.
+ *
+ * Desde el 2026-11-07 la app trae TikTok y la palabra clave (`sabeDe`, en `mobile-api.ts`): para
+ * ella las cuentas de TikTok no son ajenas y `conRegla` va encendido, así que esto queda para las
+ * instalaciones sin actualizar y para las redes en «Próximamente».
  */
-export function soloEnElPanel(campos: Campos, ajenas: ReadonlyMap<string, string>): string | null {
+export function soloEnElPanel(
+  campos: Campos,
+  ajenas: ReadonlyMap<string, string>,
+  { conRegla = false }: { conRegla?: boolean } = {},
+): string | null {
   const partes: string[] = []
   const redes = [...new Set((campos.cuentas ?? []).flatMap((id) => (ajenas.has(id) ? [ajenas.get(id)!] : [])))]
   if (redes.length > 0) partes.push(`va también a ${redes.join(' y ')}`)
-  const regla = reglaInicial(campos)
+  const regla = conRegla ? null : reglaInicial(campos)
   if (regla) partes.push(`tiene la palabra clave «${regla.palabra.trim()}»`)
   return partes.length > 0 ? `Este borrador ${partes.join(' y ')}: eso se programa en el panel web.` : null
 }
