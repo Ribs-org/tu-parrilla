@@ -567,9 +567,7 @@ permisos «por decidir»** de la tabla red por red, para pedirlos todos en una m
   prueba cerrada «Closed testing - Alpha»: solo Chile, la lista «Tu Parrilla - interno» (10) y la
   versión con el `.aab` 1.1.0 (código 2), con las instrucciones del revisor que piden cerrar y
   reabrir la app una vez (la 1.1.0 de la tienda trae el código del 2026-10-16 y lo nuevo llega por
-  aire en la segunda apertura). **Enviado a revisión el 2026-11-08.** Queda, opcional: que
-  `/borrar-mis-datos` nombre la app como la ficha («Parrilla»), que Google pide para la «Delete data
-  URL»; es una línea y no obliga a reenviar.
+  aire en la segunda apertura). **Enviado a revisión el 2026-11-08.**
   Después: Google revisa en días; aprobada, el enlace para unirse aparece en la prueba cerrada, y
   hacen falta **al menos doce** probadores que acepten y se queden **catorce días** antes de pedir
   producción (faltan dos o más: sus Gmail a la lista, o un Grupo de Google). Sin países de Europa,
