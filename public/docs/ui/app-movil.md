@@ -295,7 +295,7 @@ Si el post no está entre lo descargado: «Vuelve a la lista y ábrelo de nuevo:
 
 1. Abre la app.
 2. Escribe tu correo en «tu@correo.cl» y toca «Mandarme un código».
-3. Abre el correo «… es tu código para entrar a Parrilla» y copia los seis dígitos.
+3. Abre el correo «… es tu código para entrar a Tu Parrilla» y copia los seis dígitos.
 4. Escríbelos en «000000» y toca «Entrar» (o la tecla de enviar del teclado). Se abre «La Parrilla».
 
 Si el código no llega, revisa el spam y que el correo esté bien escrito; «Usar otro correo» vuelve al primer paso para pedir otro. Son a lo más tres códigos cada quince minutos.

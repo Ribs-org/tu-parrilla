@@ -744,7 +744,7 @@ nadie paga: todas las cuentas son iguales y el README dice «Sin suscripción».
   Mubert (la sublicencia, desde US$499 al mes).
 
 - **El correo del código, con un enlace para entrar** (2026-11-02, lo pidió el dueño). Hoy dice
-  «NNNNNN es tu código para entrar a Parrilla» y nada más (`pedir` en `src/lib/usuarios.ts`):
+  «NNNNNN es tu código para entrar a Tu Parrilla» y nada más (`pedir` en `src/lib/usuarios.ts`):
   hay que copiar el código a mano. Sumar un botón que entre directo, sin sacar el código, que
   sigue sirviendo para la app y para abrir el correo en otro aparato. Al diseñarlo: los filtros de
   correo abren los enlaces antes que la persona, así que el enlace no puede gastar el código al

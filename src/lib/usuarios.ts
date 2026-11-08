@@ -236,8 +236,8 @@ export async function pedir(correo: string): Promise<boolean> {
   if (fijo !== null) return true
   const enviado = await enviarCorreo({
     to: usuario.correo,
-    subject: `${codigo} es tu código para entrar a Parrilla`,
-    text: `Tu código para entrar a Parrilla es ${codigo}. Vale diez minutos. Si no lo pediste, ignora este correo.`,
+    subject: `${codigo} es tu código para entrar a Tu Parrilla`,
+    text: `Tu código para entrar a Tu Parrilla es ${codigo}. Vale diez minutos. Si no lo pediste, ignora este correo.`,
   })
   if (!enviado) {
     // Fuera de producción el código ya salió por la consola, que es la entrega: la fila se

@@ -22,7 +22,7 @@ O directo: `https://tu-parrilla.cl/admin/usuarios`.
 ## Qué se ve
 
 Arriba, el título «Los Maestros» (se ve en mayúsculas), debajo «quién puede entrar», y la frase
-«Quién puede entrar a Parrilla. Invitar manda el primer código al correo.». Después, tres
+«Quién puede entrar a Tu Parrilla. Invitar manda el primer código al correo.». Después, tres
 bloques.
 
 ### Bloque «Invitar»
@@ -87,7 +87,7 @@ Las fechas van en números (día-mes-año).
    «invitado <fecha>».
 
 La invitación hace tres cosas: deja entrar a ese correo, le manda de inmediato un código para
-entrar (el mismo correo de siempre, «NNNNNN es tu código para entrar a Parrilla», que vale diez
+entrar (el mismo correo de siempre, «NNNNNN es tu código para entrar a Tu Parrilla», que vale diez
 minutos y **no trae enlace**), y le crea su página pública, ya publicada, que después edita en
 La Vitrina (tus páginas públicas, [la-vitrina.md](la-vitrina.md)). La dirección de esa página sale de lo que va antes
 de la @ del correo, con un número al final si ya está tomada.

@@ -21,7 +21,7 @@ export default async function UsuariosPage() {
     <>
       <header className="mb-6">
         <Encabezado ruta="/admin/usuarios" />
-        <p className="mt-1 text-sm text-fg-muted">Quién puede entrar a Parrilla. Invitar manda el primer código al correo.</p>
+        <p className="mt-1 text-sm text-fg-muted">Quién puede entrar a Tu Parrilla. Invitar manda el primer código al correo.</p>
       </header>
       <Panel title="Invitar" className="mb-6">
         <FormularioInvitar />

@@ -62,8 +62,8 @@ válido en la dirección, vuelve al paso 1.
 
 ### El correo que llega
 
-El asunto es «NNNNNN es tu código para entrar a Parrilla» (con los seis dígitos delante) y el
-cuerpo, «Tu código para entrar a Parrilla es NNNNNN. Vale diez minutos. Si no lo pediste,
+El asunto es «NNNNNN es tu código para entrar a Tu Parrilla» (con los seis dígitos delante) y el
+cuerpo, «Tu código para entrar a Tu Parrilla es NNNNNN. Vale diez minutos. Si no lo pediste,
 ignora este correo.». No trae enlace: el código se escribe a mano en el paso 2. La invitación
 del admin manda este mismo correo.
 
@@ -79,7 +79,7 @@ botón «Reintentar».
 
 1. Abrir `https://tu-parrilla.cl/ingresar`.
 2. Escribir el correo con el que te invitaron y apretar «Mandarme un código».
-3. Buscar en el correo el mensaje «… es tu código para entrar a Parrilla». Puede tardar un
+3. Buscar en el correo el mensaje «… es tu código para entrar a Tu Parrilla». Puede tardar un
    minuto; si no aparece, mirar en spam o promociones.
 4. Escribir los seis dígitos, sin espacios, y apretar «Entrar». Se abre La Parrilla.
 
