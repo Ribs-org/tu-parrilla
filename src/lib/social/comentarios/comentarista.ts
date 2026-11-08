@@ -44,7 +44,17 @@ export type Comentarista = {
    */
   ensureCredential?(account: SocialAccount): Promise<string | null>
   listar(account: SocialAccount, token: string, postExternalId: string): Promise<ComentarioLeido[]>
-  responder(account: SocialAccount, token: string, comentarioExternalId: string, texto: string): Promise<string>
+  /**
+   * `postExternalId` es la publicación del comentario. Las demás redes no lo necesitan —el id del
+   * comentario les basta—, pero TikTok pide el video en cada respuesta.
+   */
+  responder(
+    account: SocialAccount,
+    token: string,
+    comentarioExternalId: string,
+    texto: string,
+    postExternalId?: string,
+  ): Promise<string>
   /** Cuántos caracteres acepta la red en una respuesta. */
   limiteTexto: number
 }

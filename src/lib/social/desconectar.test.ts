@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest'
 // `server-only` no está en `node_modules` (solo lo entiende el bundler de Next).
 vi.mock('server-only', () => ({}))
 
-const { pasosParaBorrarYoutube } = await import('./desconectar')
+const { pasoParaBorrarComentariosTiktok, pasosParaBorrarYoutube } = await import('./desconectar')
 const { pasosDeRetencion } = await import('./retencion-youtube')
 
 describe('pasosParaBorrarYoutube', () => {
@@ -29,5 +29,13 @@ describe('pasosParaBorrarYoutube', () => {
 
   it('la fila del video no se borra: une las visitas a su etiqueta', () => {
     expect(pasos.some((p) => /delete from social_posts/.test(p.sql))).toBe(false)
+  })
+})
+
+describe('pasoParaBorrarComentariosTiktok', () => {
+  it('borra solo la credencial de comentarios de esa cuenta y de ese dueño, con los dos como parámetros', () => {
+    const { sql, params } = new PgDialect().sqlToQuery(pasoParaBorrarComentariosTiktok('owner-1', 'cuenta-1'))
+    expect(sql).toBe("delete from ajustes where owner_id = $1 and clave = 'tiktok_comentarios:' || $2")
+    expect(params).toEqual(['owner-1', 'cuenta-1'])
   })
 })

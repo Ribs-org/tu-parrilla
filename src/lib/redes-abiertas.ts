@@ -63,3 +63,23 @@ export function anunciosAbiertosPara(ownerId: string | null | undefined): boolea
 export function promocionarAbiertoPara(ownerId: string | null | undefined): boolean {
   return anunciosAbiertosPara(ownerId) && env('META_PERMISOS_ANUNCIOS') === '1' && env('META_PERMISOS_PROMOCIONAR') === '1'
 }
+
+/**
+ * Si el dueño puede activar los comentarios de TikTok (`social/tiktok-business.ts`): ver
+ * «Activar comentarios en La Mesa →» en el detalle de sus cuentas de TikTok, y que La Mesa traiga
+ * y responda los de las que activó. `TIKTOK_COMENTARIOS_ABIERTO_PARA=1` lo abre para todos; una
+ * lista de ids de usuario separados por comas, solo para esos —así se graba la revisión de la app
+ * de TikTok for Business con la cuenta del revisor—; vacía, para nadie, que es como nace. Hacen
+ * falta además la app (`TIKTOK_BUSINESS_APP_ID`, `TIKTOK_BUSINESS_SECRET`) y su enlace de
+ * autorización (`TIKTOK_BUSINESS_AUTORIZACION`): sin ellos, cerrado igual.
+ */
+export function tiktokComentariosAbiertoPara(ownerId: string | null | undefined): boolean {
+  if (!env('TIKTOK_BUSINESS_APP_ID') || !env('TIKTOK_BUSINESS_SECRET') || !env('TIKTOK_BUSINESS_AUTORIZACION')) {
+    return false
+  }
+  const bandera = env('TIKTOK_COMENTARIOS_ABIERTO_PARA')
+  if (!bandera) return false
+  if (bandera === '1') return true
+  if (!ownerId) return false
+  return bandera.split(',').some((id) => id.trim() === ownerId)
+}

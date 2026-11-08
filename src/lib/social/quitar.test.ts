@@ -21,6 +21,7 @@ describe('pasosParaQuitar', () => {
       'social_posts',
       'account_metrics',
       'scheduled_post_targets',
+      'ajustes',
       'social_accounts',
     ])
   })

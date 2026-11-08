@@ -2,7 +2,7 @@ import 'server-only'
 import { and, desc, eq, gte, inArray, isNotNull, isNull, sql, type SQL } from 'drizzle-orm'
 import { getDb, postComments, reglasClave, scheduledPostTargets, socialAccounts, socialPosts } from '@/db'
 import type { CommentState, DmState } from '@/db/schema'
-import { proximamentePara } from '@/lib/redes-abiertas'
+import { proximamentePara, tiktokComentariosAbiertoPara } from '@/lib/redes-abiertas'
 import { comentariosQueFaltan } from '@/lib/social/comentarios/faltantes'
 import { DIAS_VENTANA } from '@/lib/social/comentarios/ventana'
 import { permisosExtraDeThreads } from '@/lib/social/threads'
@@ -18,11 +18,12 @@ const REDES = ['instagram', 'facebook', 'youtube'] as const
  * Los botones de red de La Mesa para este dueño, en el panel y en el teléfono. Threads solo
  * aparece donde ya trae respuestas: abierta para él (`proximamentePara`, la cuenta del revisor de
  * Meta) y con sus permisos de lectura pedidos (`permisosExtraDeThreads`). Para los demás está en
- * «Próximamente» y su botón no filtraría nada.
+ * «Próximamente» y su botón no filtraría nada. TikTok, igual: solo para quien tiene abiertos sus
+ * comentarios (`tiktokComentariosAbiertoPara`, `social/tiktok-business.ts`).
  */
 export function redesDeLaMesa(ownerId: string): readonly string[] {
   const conThreads = permisosExtraDeThreads() && !proximamentePara(ownerId).has('threads')
-  return conThreads ? [...REDES, 'threads'] : REDES
+  return [...REDES, ...(conThreads ? ['threads'] : []), ...(tiktokComentariosAbiertoPara(ownerId) ? ['tiktok'] : [])]
 }
 
 /** Lo pendiente incluye lo fallido: las dos cosas esperan un toque del dueño. */

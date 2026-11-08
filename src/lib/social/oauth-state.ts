@@ -60,6 +60,31 @@ export async function leerOAuthState(
   }
 }
 
+/**
+ * Un state que además nombra una cuenta ya conectada: la vuelta no crea una fila, le agrega algo a
+ * esa (los comentarios de TikTok, `social/tiktok-business.ts`). La cuenta viaja firmada por la
+ * misma razón que `login`: quien arma el enlace no puede elegir a qué fila se le pega la credencial.
+ */
+export function signOAuthStateDeCuenta(network: string, ownerId: string, cuenta: string): Promise<string> {
+  return new SignJWT({ purpose: PURPOSE, network, cuenta })
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setExpirationTime('10m')
+    .setSubject(ownerId)
+    .sign(secret())
+}
+
+/** La cuenta que firmó `signOAuthStateDeCuenta` para esta red y este dueño, o null si no calza. */
+export async function leerCuentaDeOAuthState(state: string, network: string, ownerId: string): Promise<string | null> {
+  try {
+    const { payload } = await jwtVerify(state, secret())
+    if (payload.purpose !== PURPOSE || payload.network !== network || payload.sub !== ownerId) return null
+    return typeof payload.cuenta === 'string' ? payload.cuenta : null
+  } catch {
+    return null
+  }
+}
+
 /** True only for a state this app minted, for this same network and this same owner. */
 export async function oauthStateMatches(state: string, network: string, ownerId: string): Promise<boolean> {
   return (await leerOAuthState(state, network, ownerId)) !== null

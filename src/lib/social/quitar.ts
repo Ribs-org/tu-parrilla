@@ -42,6 +42,8 @@ export function pasosParaQuitar(ownerId: string, accountId: string): SQL[] {
     sql`delete from social_posts where account_id = ${accountId}`,
     sql`delete from account_metrics where account_id = ${accountId}`,
     sql`delete from scheduled_post_targets where account_id = ${accountId}`,
+    // La credencial de comentarios de TikTok, que vive en `ajustes` (`social/tiktok-business.ts`).
+    sql`delete from ajustes where owner_id = ${ownerId} and clave = 'tiktok_comentarios:' || ${accountId}`,
     sql`delete from social_accounts where id = ${accountId} and owner_id = ${ownerId}`,
   ]
 }

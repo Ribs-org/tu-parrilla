@@ -32,6 +32,11 @@ export function pasosParaBorrarYoutube(accountId: string): SQL[] {
   ]
 }
 
+/** La credencial de comentarios de TikTok de la cuenta (`tiktok-business.ts`, `claveDeComentarios`). */
+export function pasoParaBorrarComentariosTiktok(ownerId: string, accountId: string): SQL {
+  return sql`delete from ajustes where owner_id = ${ownerId} and clave = 'tiktok_comentarios:' || ${accountId}`
+}
+
 /**
  * Desconecta una cuenta del dueño y, si es de YouTube, borra lo que vino de su API, todo en una
  * transacción: no queda una cuenta desconectada con sus datos a medio borrar. Devuelve false si
@@ -53,6 +58,9 @@ export async function desconectarCuenta(ownerId: string, accountId: string): Pro
     if (cuenta.network === 'youtube') {
       for (const paso of pasosParaBorrarYoutube(accountId)) await tx.execute(paso)
     }
+    // En TikTok se apagan también sus comentarios, que tienen credencial propia en `ajustes`
+    // (`tiktok-business.ts`): reconectar no los vuelve a activar solo.
+    if (cuenta.network === 'tiktok') await tx.execute(pasoParaBorrarComentariosTiktok(ownerId, accountId))
     return true
   })
 }
