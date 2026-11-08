@@ -547,7 +547,7 @@ patrocinado» y su aviso, el consentimiento con los dos enlaces, la palabra clav
 borrador que sale con `X-Parrilla-Publicar`, las opciones de TikTok a medias y la regla. Lo que no:
 un teléfono de verdad (el `Switch` de Android) y TikTok real (lo cubren las pruebas del servidor).
 
-### Las opciones de YouTube por aire a la 1.1.0 (sin publicar todavía)
+### Las opciones de YouTube por aire a la 1.1.0 (publicadas el 2026-11-08)
 
 El bloque «YouTube · <canal>» de Publicar —«Quién lo ve», «Hecho con IA» y «Agregar a una
 playlist»— es puro JavaScript sobre lo que la 1.1.0 ya trae (`Switch`, los `Chip` de
@@ -572,6 +572,8 @@ no se entendieron.». Al revés no pasa nada: una app sin el bloque no manda `yo
 encabezado, y el servidor programa un borrador con las opciones de YouTube que dejó el panel. Lo
 probado: `tsc`, los tests y el lint de la app, y los del sitio; no se probó en un teléfono ni en
 Expo web.
+Salieron el 2026-11-08, con el servidor ya en producción, en el commit `1200f3a` de `ota-1.1.0`, a
+los dos canales.
 
 ### El portapapeles, con y sin su módulo nativo
 
