@@ -16,6 +16,7 @@ import {
 import { conLoginDeInstagram } from './social/instagram-login'
 import { sugerirCancion, type PedirAlModelo, type Sugerencia } from './social/musica-sugerencia'
 import { MUSICA_LOGIN_INSTAGRAM } from './social/publish/opciones'
+import { conTokens, quedanTokens } from './planes/tokens'
 import { esUuid } from './uuid'
 
 // «Música de Instagram» para el panel y el teléfono: la cuenta del dueño, su token y la memoria
@@ -94,8 +95,9 @@ export async function cancionDeLaCuenta(
   return cancionPorId(r.cuenta, audioId)
 }
 
-const pedirAlModelo: PedirAlModelo = async (instrucciones, pedido) => {
-  const { text } = await generateText({
+/** La llamada al modelo, con los tokens que gastó para el tope del plan (`planes/tokens.ts`). */
+async function pedirAlModelo(instrucciones: string, pedido: string): Promise<{ valor: string; tokens: number | undefined }> {
+  const { text, usage } = await generateText({
     model: env('MUSICA_MODELO') ?? MODELO_MUSICA_POR_DEFECTO,
     instructions: instrucciones,
     prompt: pedido,
@@ -105,7 +107,7 @@ const pedirAlModelo: PedirAlModelo = async (instrucciones, pedido) => {
     providerOptions: { gateway: { reasoning: { enabled: false } } },
     abortSignal: AbortSignal.timeout(TIMEOUT_MS),
   })
-  return text
+  return { valor: text, tokens: usage.totalTokens }
 }
 
 /** Lo que pide «Sugiéreme una», ya limpio: lo demás de la entrada no se mira. */
@@ -129,8 +131,13 @@ export async function sugerenciaParaLaCuenta(
 ): Promise<{ sugerencia: Sugerencia; busquedas: string[] } | { agotadas: true; busquedas: string[] } | { error: string }> {
   const r = await cuentaDeMusica(ownerId, cuentaId)
   if ('error' in r) return r
+  // Sin pasarela o sin tokens del plan, sin modelo: elige al azar entre lo que encontró, como
+  // siempre que el modelo no contesta. Si los tokens se acaban entre las dos llamadas, la segunda
+  // lanza `SinTokens` y `sugerirCancion` cae al azar igual.
+  const conModelo = hayPasarela() && (await quedanTokens(ownerId))
+  const conTope: PedirAlModelo = (instrucciones, texto) => conTokens(ownerId, () => pedirAlModelo(instrucciones, texto))
   return sugerirCancion(pedido, {
     buscar: (busqueda) => buscarConMemoria(r.cuenta, busqueda),
-    pedirAlModelo: hayPasarela() ? pedirAlModelo : null,
+    pedirAlModelo: conModelo ? conTope : null,
   })
 }

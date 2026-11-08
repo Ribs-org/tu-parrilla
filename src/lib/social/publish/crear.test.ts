@@ -23,6 +23,14 @@ const db = vi.hoisted(() => ({
   borradorExiste: true,
 }))
 
+// Los topes del plan van contra la base de verdad; acá no hay plan que mirar.
+vi.mock('@/lib/planes/topes', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/planes/topes')>()),
+  exigirCupoEnLaParrilla: async () => {},
+  exigirCupoAlRearmar: async () => {},
+  exigirCupoDeCuentas: async () => {},
+  sinCupoEnLaParrilla: async () => null,
+}))
 vi.mock('@/db', async (importOriginal) => {
   const real = await importOriginal<typeof import('@/db')>()
   const tx = {

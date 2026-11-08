@@ -219,11 +219,9 @@ export function nombreDePeso(clase: ClaseMaterial, bytes: number): { noche: stri
 
 // --- La cuota -------------------------------------------------------------------------------
 
-/**
- * Lo que le cabe a cada uno en la cámara si nadie dijo otra cosa: 20 GB, lo que pidió el dueño el
- * 2026-11-02 «para jugar». La de cada uno va en `users.bodega_bytes`; nula, esta.
- */
-export const CUOTA_BODEGA_POR_DEFECTO = 20 * 1024 ** 3
+// Lo que le cabe a cada uno en la cámara lo dice su plan (`planes.bodega_bytes`: 20 GB el gratis,
+// lo que pidió el dueño el 2026-11-02 «para jugar»), salvo que el admin le haya puesto otra a mano
+// en Los Maestros (`users.bodega_bytes`). Ver `cuotaDeLaCamara`, en `src/lib/planes/plan.ts`.
 
 /** Desde cuánto se avisa que se está llenando. */
 export const UMBRAL_LLENANDOSE = 0.85
@@ -234,11 +232,11 @@ export const GANCHOS = 10
 /** El tope de la cuota que el admin puede escribir: 10 TB, para que un cero de más no pase. */
 export const MAX_CUOTA_GB = 10_000
 
-export const CUOTA_ILEGIBLE = `La cuota es un número de GB, de 1 a ${MAX_CUOTA_GB.toLocaleString('es-CL')}, como 20 o 50. Vacía, vuelve a la de siempre.`
+export const CUOTA_ILEGIBLE = `La cuota es un número de GB, de 1 a ${MAX_CUOTA_GB.toLocaleString('es-CL')}, como 20 o 50. Vacía, vuelve a la de su plan.`
 
 /**
  * La cuota que escribe el admin en Los Maestros, en GB («20», «7,5»), pasada a bytes; vacía es la
- * de siempre (null), y lo que no es un número razonable, la frase de por qué.
+ * de su plan (null), y lo que no es un número razonable, la frase de por qué.
  */
 export function leerCuotaEnGb(texto: unknown): number | null | { error: string } {
   const limpio = typeof texto === 'string' ? texto.trim().replace(',', '.') : ''
@@ -247,10 +245,6 @@ export function leerCuotaEnGb(texto: unknown): number | null | { error: string }
   const gigas = Number(limpio)
   if (gigas < 1 || gigas > MAX_CUOTA_GB) return { error: CUOTA_ILEGIBLE }
   return Math.round(gigas * 1024 ** 3)
-}
-
-export function cuotaDe(usuario: { bodegaBytes: number | null }): number {
-  return usuario.bodegaBytes ?? CUOTA_BODEGA_POR_DEFECTO
 }
 
 export type EstadoDeLaCuota = 'holgada' | 'llenandose' | 'llena'

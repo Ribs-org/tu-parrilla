@@ -10,6 +10,7 @@ import {
   type Creativo,
 } from '@/db'
 import { servirSiTermino } from '@/lib/cocina/meson'
+import { exigirCupoEnLaParrilla } from '@/lib/planes/topes'
 import type { CuentaDestino } from '../cuentas'
 import type { ReglaLimpia } from '../comentarios/reglas'
 import { validateAtributos, type Atributos } from './atributos'
@@ -102,6 +103,8 @@ export async function crearVariosProgramados(
   borradorId: string | null,
 ): Promise<string[]> {
   const { ids, comandaId } = await getDb().transaction(async (tx) => {
+    // El tope del plan, antes de consumir el borrador: si no cabe, el borrador se queda.
+    await exigirCupoEnLaParrilla(tx, ownerId, posts.length)
     let creativo: Creativo | null = null
     if (borradorId) {
       const consumidos = await tx

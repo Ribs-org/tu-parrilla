@@ -80,7 +80,7 @@ De arriba abajo:
 
 1. Quién comentó (o «Alguien», si la red no dio el nombre) y hace cuánto: «recién», «hace 3 horas», «ayer», «anteayer», «hace 5 días». En la misma línea, arriba a la derecha, un botón redondo con una flecha que vuelve hacia atrás: pide otro borrador a la IA. Al pasar el mouse dice «Escribir otro borrador», o «Reintentar borrador» si todavía no hay ninguno. Mientras trabaja, la flecha gira. No está en los que tomó la respuesta automática: su cuadro trae el mensaje de la regla.
 2. El texto del comentario.
-3. Solo si la IA no pudo escribir el borrador, en rojo: «No se pudo redactar la respuesta.»
+3. Solo si la IA no pudo escribir el borrador, en rojo: «No se pudo redactar la respuesta.» (o, si se acabaron los tokens de IA del plan este mes, «Se acabaron los tokens de IA de tu plan este mes.»)
 4. Solo si la respuesta automática lo intentó y la red no la aceptó: «La regla de palabra clave intentó responder y la red no aceptó; «Enviar» lo reintenta.»
 5. Justo encima del cuadro, en letra chica y apagada, «🙂 Emojis»: al apretarlo se abre una
    fila de 25 emojis (🙌 🙏 ❤️ 🔥 😊 😂 y otros, y al final la bandera de Chile 🇨🇱) y el
@@ -212,6 +212,7 @@ Aprieta el filtro «Automáticas». Ahí están todos los que tomó, también lo
 | «Un comentario espera tu respuesta.» / «5 comentarios esperan tu respuesta.» | Cuántos hay en «Pendientes», para la red elegida. | Responderlos o descartarlos. |
 | «No hay comentarios aquí.» / «No hay comentarios aquí. Los nuevos llegan cada cinco minutos.» | El filtro elegido está vacío. | Probar con «Todos» y «Todas». Los de YouTube llegan cada media hora. |
 | «No se pudo redactar la respuesta.» | La IA no pudo escribir el borrador, o la instalación no tiene IA configurada. | Escribir la respuesta a mano, o «Reintentar borrador». |
+| «Se acabaron los tokens de IA de tu plan este mes.», en rojo en el lugar del borrador, o al lado de «Regenerar todos» | La persona ya gastó los tokens de IA de su plan este mes: los borradores dejan de salir, y los comentarios siguen llegando. Cuánto lleva gastado se ve en Tu Cuenta, en «Tu plan» ([tu-cuenta.md](tu-cuenta.md)) | Escribir la respuesta a mano. Los tokens vuelven a cero el primer día del mes siguiente; después, «Reintentar borrador» |
 | «Escribe una respuesta.» | Se apretó «Enviar» con el cuadro vacío. | Escribir algo. |
 | «La respuesta no puede pasar de <N> caracteres.» | La respuesta es más larga de lo que acepta la red. | Acortarla. |
 | «Esa cuenta ya no está conectada.» | La cuenta de ese comentario se desconectó o perdió el permiso. | Reconectarla en [Los Fierros](los-fierros.md) y volver a «Enviar». |

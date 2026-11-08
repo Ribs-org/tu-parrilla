@@ -473,6 +473,7 @@ libre. Sin `ref`, reenviar una fila la programa otra vez.
 | Tope general | 11 o más archivos, con alguna red además de `tiktok` (una fila solo con `tiktok` admite hasta 35 fotos) | `Máximo diez archivos por publicación.` |
 | Al menos un destino | sin `cuentas` y sin `redes` (o ambas vacías) | `Elige al menos una cuenta o una red.` |
 | Fecha futura | hora ya pasada | `La hora debe estar en el futuro.` |
+| Tope del plan | el plan del dueño de la llave ya tiene su máximo de publicaciones esperando salir (10 en el gratis; contando las filas de esta misma llamada, y cada publicación una vez aunque salga a varias redes) | `Tu plan <nombre> deja hasta <N> publicaciones esperando a la vez: espera a que salga alguna o borra una.` |
 
 Las reglas de `x` y de `threads` quedan para cuando salgan de «Próximamente»: hoy esas filas
 se rechazan antes, con la frase de la primera.

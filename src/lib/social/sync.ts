@@ -1,7 +1,8 @@
 import 'server-only'
 import { createHash } from 'node:crypto'
-import { and, asc, eq, inArray, isNull, sql } from 'drizzle-orm'
+import { and, asc, desc, eq, inArray, isNull, sql } from 'drizzle-orm'
 import { accountMetrics, getDb, postMetrics, socialAccounts, socialPosts } from '@/db'
+import { prioridadDelDueno } from '@/lib/planes/prioridad'
 import type { SocialAccount } from '@/db'
 import { localDay } from '../analytics'
 import { esChoqueCon } from '../choque-de-unicidad'
@@ -357,7 +358,8 @@ export async function syncAll(ownerId?: string): Promise<SyncReport> {
     .select()
     .from(socialAccounts)
     .where(ownerId ? eq(socialAccounts.ownerId, ownerId) : undefined)
-    .orderBy(asc(socialAccounts.createdAt))
+    // Las de los planes con prioridad primero dentro de cada red (`planes-design.md`).
+    .orderBy(desc(prioridadDelDueno(socialAccounts.ownerId)), asc(socialAccounts.createdAt))
   // Solo las redes con conector: una fila de x se sincroniza el día que exista su conector,
   // no antes. La de threads tiene el suyo, pero se queda quieta mientras falten sus permisos
   // de lectura (`permisosExtraDeThreads`, en `threads.ts`).

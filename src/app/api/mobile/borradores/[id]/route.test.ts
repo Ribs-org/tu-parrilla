@@ -17,6 +17,10 @@ const USUARIO: Usuario = {
   cocinaDesde: null,
   bodegaBytes: null,
   pushComentariosHasta: null,
+  plan: 'gratis',
+  planHasta: null,
+  planOrigen: null,
+  pruebaUsadaEn: null,
   createdAt: new Date('2026-01-01'),
   updatedAt: new Date('2026-01-01'),
 }

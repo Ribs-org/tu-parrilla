@@ -176,7 +176,8 @@ Tu Cuenta. Las rutas no cambiaron. Cada pantalla lleva su subtítulo en llano po
 nombre no dice nada.
 
 En **Tu Cuenta** (`/admin/cuenta`) cambias dos cosas tuyas: el nombre con el que apareces
-y tu zona horaria. La zona es de cada usuario, no del sitio: naces con la de
+y tu zona horaria; y abajo, en «Tu plan», ves qué plan tienes y cuánto llevas usado de cada tope
+(ver «Los planes»). La zona es de cada usuario, no del sitio: naces con la de
 `SITE_TIMEZONE` y la cambias cuando quieras, y debajo del selector se ve qué hora es en la
 tuya ahora mismo, calculada en el servidor. El correo con el que entras no se cambia desde
 ahí. Tu zona manda en el panel —el calendario, la lista, el editor de un corte y las
@@ -1970,6 +1971,50 @@ nada; Los Fierros y el compositor lo muestran como aviso. Sin parámetros. Antes
 ya programado, y para una recién conectada había que pedirle al dueño que lo copiara de Los
 Fierros. Lo puro está en `src/lib/cuentas-api.ts`.
 
+## Los planes
+
+Dos planes, el gratis y el pagado («Asador»), con las mismas funciones: lo que cambia son los
+topes, el espacio, los tokens de IA y quién pasa primero en las colas. El diseño, con el porqué de
+cada número, está en `docs/superpowers/specs/2026-11-08-planes-design.md`. Cada plan es una fila de
+`planes` que el admin edita en Los Maestros («Los planes»); las dos nacen en la migración
+`0033_planes.sql`:
+
+| | Gratis | Asador |
+|---|---|---|
+| Precio al mes | $0 | $34.990, IVA incluido |
+| Cuentas conectadas | 3 | 15 |
+| Publicaciones esperando a la vez | 10 | sin tope |
+| Cámara de frío | 20 GB | 100 GB |
+| Tokens de IA al mes | 100.000 | 2.000.000 |
+| Prioridad en las colas | 0 | 1 |
+
+**Toda persona nace en el gratis.** El pagado lo da hoy el admin, como cortesía —hasta un día o sin
+fecha— con «Plan» en la fila de cada persona en Los Maestros. Cobrarlo desde el panel con Mercado
+Pago es la fase 2 del diseño, todavía no hecha. El plan de alguien es `users.plan`, que rige mientras
+`users.plan_hasta` no pase: después rige el gratis sin que nadie lo escriba (`claveQueRige`, en
+`src/lib/planes/plan.ts`).
+
+**Los topes se miran al escribir, nunca al leer.** Bajar de plan no desconecta ni borra nada: lo que
+ya está sigue y lo programado sale, pero no se puede conectar otra cuenta ni programar más hasta
+quedar bajo el tope. Las cuentas se cuentan al conectar (`guardarCuenta`): solo las que tienen
+credencial, y renovar una que ya estaba conectada no suma. Las publicaciones esperando se cuentan
+al programar desde el panel, el teléfono o la API (`crearVariosProgramados` y el lote) y al
+reprogramar un destino quemado: una publicación es un corte con algún destino por salir, vaya a una
+red o a cuatro. Los dos corren en la transacción que escribe, con la fila del dueño trabada, para
+que dos pestañas a la vez no se pasen del tope entre las dos (`src/lib/planes/topes.ts`).
+
+**Los tokens** son los de los borradores de La Mesa y de «Sugiéreme una»: antes de cada llamada se
+mira si al dueño le quedan, y después se suma lo que la pasarela dice que gastó (`usage.totalTokens`)
+en `uso_ia`, por mes en la zona del dueño (`conTokens`, en `src/lib/planes/tokens.ts`). Sin tokens,
+el borrador queda con «Se acabaron los tokens de IA de tu plan este mes.» y se responde a mano, y
+«Sugiéreme una» elige sin el modelo.
+
+**La prioridad** ordena las cuatro colas que recorren a todos: la fila del chef de La Cocina
+(`ordenarFila`: las pruebas primero, después la ronda de los de mayor prioridad, después la de los
+demás), la publicación, el sondeo de comentarios con sus borradores, y la sincronización diaria.
+Dentro de una misma prioridad, el orden de siempre (`prioridadDelDueno`, en
+`src/lib/planes/prioridad.ts`).
+
 ## La Cocina
 
 La Cocina es la fábrica de creativos de cada usuario dentro de Tu Parrilla:
@@ -2191,12 +2236,12 @@ sistema (`mobile/src/lib/subir-por-partes.ts` y `archivo-local.ts`).
 en `…/insumos/`), con un uuid en la clave, y su URL nunca sale al navegador: el chef lo baja con un
 enlace firmado que vence en una hora.
 
-**La cuota de la cámara.** 20 GB por usuario (`CUOTA_BODEGA_POR_DEFECTO`, en
-`src/lib/cocina/bodega.ts`); el que tenga otra la lleva en `users.bodega_bytes`, que el admin cambia
-en Los Maestros y que un plan de pago podrá escribir sin tocar el código. Se mira en el servidor al
+**La cuota de la cámara.** La de su plan: 20 GB en el gratis y 100 GB en el pagado (ver «Los
+planes»); el que tenga otra puesta a mano la lleva en `users.bodega_bytes`, que el admin cambia en Los
+Maestros y que gana sobre la del plan (`cuotaDeLaCamara`). Se mira en el servidor al
 abrir cada subida, antes de firmar nada, contando lo guardado **y lo que está subiendo**, con la
 fila del usuario bloqueada para que dos subidas a la vez no pasen las dos. «¿Necesitas más
-espacio?» abre el libro de sugerencias: comprar espacio todavía no existe. Pesa: 20 GB por usuario
+espacio?» abre el libro de sugerencias: pagar el plan desde el panel todavía no existe. Pesa: 20 GB por usuario
 pasa los 10 GB gratis de R2 para todo el bucket, y cada GB de más cuesta unos US$0,015 al mes
 (diez usuarios llenos, unos US$3). Si el material se queda en R2 o va al Drive del dueño está en
 `docs/pendientes.md`.
@@ -2270,6 +2315,7 @@ src/
     analytics.ts           consultas del dashboard
     lo-pagado.ts           los anuncios del dueño que corrieron en el período, para «Lo pagado» en Los Números
     enlace-de-la-pagina.ts la dirección pública de la página principal del dueño: el link con ?s= de cada publicación
+    planes/                los dos planes: cuál rige y sus frases (plan.ts, sin base), leerlos y cambiarlos (planes.ts), los topes al escribir (topes.ts), los tokens de IA del mes (tokens.ts), la prioridad en las colas (prioridad.ts) y lo que dibuja «Tu plan» (uso.ts)
     planilla/              «Llevar para la casa»: las hojas y su «Léeme», lo que se lee fila por fila, y el .xlsx escrito a mano
     tablero.ts             las reglas de Los Números sin base: cuenta elegida, «⋯ Más» abiertos, la URL
     pieza.ts               qué junta las versiones de una pieza y las medianas por atributo (sin base)

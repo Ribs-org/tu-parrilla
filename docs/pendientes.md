@@ -94,7 +94,8 @@ sección.
     plan, o si va al Drive del dueño —que pide su API, el OAuth y una cuenta con espacio, y que el
     chef baje de ahí, cuando Drive era justo el cuello de botella que La Cocina sacó del camino
     («Todo en el almacén de Tu Parrilla, no en Drive», en el diseño de La Cocina)—. También, cuánto
-    le toca a cada plan: hoy la cuota se cambia a mano en Los Maestros (`users.bodega_bytes`).
+    le toca a cada plan: desde el 2026-11-08 la pone el plan (20 GB el gratis, 100 GB el pagado, en
+    Los Maestros → «Los planes»), y a mano sigue ganando `users.bodega_bytes`.
   - **[dueño] Decidir juntas la aprobación de lo que propone el chef (#283) y el aviso de la
     entrega (#284)** (2026-11-03). #283 pide que el chef proponga estados y entregas y que una
     persona del equipo los apruebe desde Tu Parrilla: una tabla de propuestas, sus endpoints y una
@@ -713,32 +714,33 @@ Nada de esto bloquea un trámite hoy; conviene ordenarlo antes de abrir a tercer
 
 ## Finanzas: planes y pagos
 
-Pedido del dueño el 2026-10-23, como uno de los dos ejes de trabajo, junto con los trámites. Hoy
-nadie paga: todas las cuentas son iguales y el README dice «Sin suscripción».
+Pedido del dueño el 2026-10-23, como uno de los dos ejes de trabajo, junto con los trámites. Desde
+el 2026-11-08 hay dos planes, el gratis y el pagado («Asador», $34.990 al mes), con las mismas
+funciones y distintos topes, espacio, tokens de IA y prioridad en las colas; el admin los edita y da
+el pagado como cortesía en Los Maestros (README, «Los planes»). Nadie paga todavía: el README sigue
+diciendo «Sin suscripción», y es cierto.
 
-- **Tres niveles de cuenta y una forma de pagar** (2026-10-23). Tres planes, cada uno con sus
-  límites, y una integración para que la gente pague desde Tu Parrilla. Por decidir: el nombre y
-  el precio de cada plan, qué limita cada uno (las cuentas conectadas, lo programado, las comandas
-  de La Cocina, el espacio de la media) y con qué proveedor se cobra. Se apoya en «Cupos y reparto
-  de los crons por usuario», en la sección de abajo, que todavía no está hecho. Si se cobra dentro de
-  la app del teléfono, las tiendas tienen sus propias reglas de cobro: por revisar antes de
-  elegir. En Android: cobrar el plan dentro de la app obliga a Google Play Billing (con su
-  comisión); cobrarlo solo en la web, sin botón ni enlace de pago en la app, no. Si se cobra en la
-  app, volver en la Play Console a «Content rating» («purchase digital goods» pasa a Yes) y a «Data
-  safety» (sumar el historial de compras); «Financial features» sigue en «ninguna»: una suscripción
-  al propio servicio no cuenta (anotado el 2026-11-08, al llenarlas).
-- **Que el admin maneje los planes a mano** (2026-10-23). Desde la cuenta del dueño, en Los
-  Maestros o al lado: mover los límites de cada plan, cambiarle el plan a una cuenta y dar cuentas
-  gratis, sin pasar por el cobro.
-- **[dueño] Lo que pide cobrar, fuera del código** (2026-10-23):
-  - la cuenta del proveedor de pagos a nombre de Pyxis;
-  - la boleta o factura electrónica de cada cobro;
-  - que `/terminos` y `/privacidad` cuenten los planes, el cobro y la baja, en la misma revisión
-    del abogado («Que todo quede a nombre de Pyxis», arriba);
+- **La fase 2 de los planes: cobrar el pagado con Mercado Pago** (2026-11-08). Diseñada en
+  `docs/superpowers/specs/2026-11-08-planes-design.md`, «El cobro con Mercado Pago»: una suscripción
+  sin plan asociado por persona (`POST /preapproval` con `init_point`), el webhook firmado, la prueba
+  de 7 días una sola vez, cancelar desde «Tu plan» y la relectura diaria; cerrada tras
+  `PAGOS_ABIERTO_PARA` hasta que el dueño la abra. Por cobrar solo en la web: dentro de la app del
+  teléfono, Android obliga a Google Play Billing (con su comisión), y cobrarlo solo en la web, sin
+  botón ni enlace de pago en la app, no. Si algún día se cobra en la app, volver en la Play Console a
+  «Content rating» («purchase digital goods» pasa a Yes) y a «Data safety» (sumar el historial de
+  compras); «Financial features» sigue en «ninguna»: una suscripción al propio servicio no cuenta
+  (anotado el 2026-11-08, al llenarlas).
+- **[dueño] Lo que pide cobrar, fuera del código** (2026-10-23; al día el 2026-11-08):
+  - la cuenta de Mercado Pago a nombre de Pyxis, con el retiro a la cuenta del Santander; para la
+    fase 2, sus credenciales (`MERCADOPAGO_ACCESS_TOKEN` y el secreto del webhook) y las de prueba,
+    con un usuario de prueba comprador;
+  - la boleta o factura electrónica de cada cobro, al SII: Mercado Pago no la emite;
+  - que `/terminos` y `/privacidad` cuenten los planes, el cobro, la prueba y la baja, en la misma
+    revisión del abogado («Que todo quede a nombre de Pyxis», arriba), antes de abrir el cobro;
   - Vercel Pro, que ya hacía falta antes de abrir a terceros.
 
-  Al salir, cambian también el README (la frase «Sin suscripción», arriba de todo) y la portada,
-  que debe seguir describiendo la app y enlazando Privacidad y Términos.
+  Al abrir el cobro, cambian también el README (la frase «Sin suscripción», arriba de todo) y la
+  portada, que debe seguir describiendo la app y enlazando Privacidad y Términos.
 
 ## Features y trabajo de código
 
@@ -874,7 +876,8 @@ nadie paga: todas las cuentas son iguales y el README dice «Sin suscripción».
   camino. Se cruza con «Mientras no mirabas», de la entrada de arriba, que también necesita guardar
   la última visita por usuario.
 - **Cupos y reparto de los crons por usuario** (`docs/levantamiento-terceros.md` §5.4). Hace
-  falta cuando la beta pase de unos diez usuarios.
+  falta cuando la beta pase de unos diez usuarios. Desde el 2026-11-08 la prioridad del plan ordena
+  las colas (README, «Los planes»); falta el cupo por usuario y la cola de trabajo.
 - **[dueño] El privado de Meta (DM con el PDF): construido, falta la aprobación** (2026-10-27).
   El privado tras responder a mano y el de la regla de palabra clave están hechos y apagados.
   Para la segunda vuelta del App Review: activar `instagram_manage_messages` y

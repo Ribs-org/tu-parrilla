@@ -12,14 +12,11 @@ import {
 } from '@/app/admin/actions'
 import { useConfirmar } from '@/components/confirmar'
 import { Ventana } from '@/components/ventana'
-import { CUOTA_BODEGA_POR_DEFECTO, pesoEnPalabras } from '@/lib/cocina/bodega'
 import { useRevision } from '@/components/revision'
 import { Button, Field, Input, Select, Submit } from '@/components/ui'
 import { networkLabel } from '@/lib/networks'
 import { revisarCorreo } from '@/lib/revisiones'
 import type { CuentaTraspasable } from '@/lib/social/traspasar'
-
-const CUOTA_EN_PALABRAS = pesoEnPalabras(CUOTA_BODEGA_POR_DEFECTO)
 
 export function FormularioInvitar() {
   const [state, action] = useActionState<FormState, FormData>(invitarUsuario, {})
@@ -209,9 +206,10 @@ export function BotonCerrarSesiones({ id }: { id: string }) {
 
 /**
  * La cuota de la cámara de frío de alguien, en GB: «Cambiar la cuota» abre una ventana con el
- * campo. Vacía, vuelve a la de siempre (20 GB). Lo que ya tiene guardado no se borra aunque baje.
+ * campo. Vacía, vuelve a la de su plan (`delPlan`, en palabras). Lo que ya tiene guardado no se
+ * borra aunque baje.
  */
-export function BotonCuota({ id, correo, gigas }: { id: string; correo: string; gigas: string }) {
+export function BotonCuota({ id, correo, gigas, delPlan }: { id: string; correo: string; gigas: string; delPlan: string }) {
   const ventana = useRef<HTMLDialogElement>(null)
   const idTitulo = useId()
   const [valor, setValor] = useState(gigas)
@@ -243,7 +241,7 @@ export function BotonCuota({ id, correo, gigas }: { id: string; correo: string; 
           <h2 id={idTitulo} className="font-titulo text-base font-semibold uppercase tracking-[0.05em]">
             La cuota de {correo}
           </h2>
-          <Field label="GB" hint={`Vacía, la de siempre: ${CUOTA_EN_PALABRAS}. Lo que ya tiene guardado no se borra aunque la bajes.`}>
+          <Field label="GB" hint={`Vacía, la de su plan: ${delPlan}. Lo que ya tiene guardado no se borra aunque la bajes.`}>
             <Input
               value={valor}
               inputMode="decimal"

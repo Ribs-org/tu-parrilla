@@ -1,6 +1,7 @@
 import 'server-only'
-import { and, desc, eq, gte, inArray, isNotNull, isNull, lt, or, sql } from 'drizzle-orm'
+import { and, asc, desc, eq, gte, inArray, isNotNull, isNull, lt, or, sql } from 'drizzle-orm'
 import { getDb, postComments, scheduledPostTargets, socialAccounts, socialPosts } from '@/db'
+import { prioridadDelDueno } from '@/lib/planes/prioridad'
 import type { SocialAccount } from '@/db'
 import { tiktokBusinessAbiertoPara } from '@/lib/redes-abiertas'
 import { connectorFor } from '../index'
@@ -261,10 +262,14 @@ export async function sondearComentarios(
   /** Desde cuándo corre la corrida que lo llama: su presupuesto se cuenta desde ahí, no desde acá. */
   inicio: number = Date.now(),
 ): Promise<SondeoReport> {
+  // Las cuentas de los planes con prioridad primero: si la corrida se queda sin tiempo, lo que
+  // espera a la pasada siguiente es lo del gratis. Dentro de cada prioridad, por antigüedad, para
+  // que el corte no caiga cada vez en un orden distinto.
   const cuentas = await getDb()
     .select()
     .from(socialAccounts)
     .where(isNotNull(socialAccounts.accessToken))
+    .orderBy(desc(prioridadDelDueno(socialAccounts.ownerId)), asc(socialAccounts.createdAt))
 
   // A la que no le toca esta pasada se la salta acá: antes de pedirle credencial y antes
   // de preguntarle nada a la base. No lleva entrada en el reporte porque no es un fallo,
