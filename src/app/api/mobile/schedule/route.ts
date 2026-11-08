@@ -16,6 +16,7 @@ import {
   esBorradorDeHistoria,
   idDeBorrador,
   opcionesConMusicaDelBorrador,
+  opcionesConYoutubeDelBorrador,
   primero,
   reglaDelTelefono,
   soloEnElPanel,
@@ -310,8 +311,13 @@ export async function POST(request: Request) {
       conRegla,
     })
     if (motivo) return NextResponse.json({ error: motivo }, { status: 400 })
-    // Una app que no sabe de música no la manda: la del borrador se conserva.
-    opcionesPedidas = opcionesConMusicaDelBorrador(body, borrador.opciones, deDonde.campos)
+    // Una app que no sabe de música no la manda: la del borrador se conserva. Las opciones de
+    // YouTube, igual, en una app sin su bloque.
+    opcionesPedidas = opcionesConYoutubeDelBorrador(
+      sabeDe(request, 'youtube'),
+      opcionesConMusicaDelBorrador(body, borrador.opciones, deDonde.campos),
+      deDonde.campos,
+    )
   }
 
   const base = basePublica()

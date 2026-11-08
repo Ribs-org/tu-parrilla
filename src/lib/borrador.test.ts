@@ -20,6 +20,9 @@ import {
   tieneContenido,
   tiktokDelTelefono,
   tiktokInicial,
+  opcionesConYoutubeDelBorrador,
+  youtubeDelTelefono,
+  youtubeInicial,
 } from './borrador'
 
 const ZONA = 'America/Santiago'
@@ -278,7 +281,7 @@ describe('telefonoDesdeCampos', () => {
   it('devuelve el texto, las cuentas y los trial reels encendidos', () => {
     expect(
       telefonoDesdeCampos({ caption: ['Hola'], cuentas: ['ig-1', 'ig-2'], 'instagramTrial:ig-2': ['on'] }),
-    ).toEqual({ texto: 'Hola', cuentas: ['ig-1', 'ig-2'], historia: false, trial: ['ig-2'], musica: {}, tiktok: {}, regla: null })
+    ).toEqual({ texto: 'Hola', cuentas: ['ig-1', 'ig-2'], historia: false, trial: ['ig-2'], musica: {}, tiktok: {}, regla: null, youtube: {} })
   })
 
   it('de un borrador vacío, todo vacío', () => {
@@ -290,6 +293,7 @@ describe('telefonoDesdeCampos', () => {
       musica: {},
       tiktok: {},
       regla: null,
+      youtube: {},
     })
   })
 
@@ -421,5 +425,69 @@ describe('reglaDelTelefono', () => {
     expect(reglaDelTelefono({ regla: null })).toBeNull()
     expect(reglaDelTelefono({})).toBeNull()
     expect(reglaDelTelefono({ regla: { palabra: 'GUIA', mensaje: 3 } })).toEqual({ palabra: 'GUIA', mensaje: '', respuestaPublica: '' })
+  })
+})
+
+describe('las opciones de YouTube en un borrador', () => {
+  const campos = {
+    cuentas: ['yt-1', 'yt-2'],
+    'youtubeVisibilidad:yt-1': ['unlisted'],
+    'youtubeIA:yt-1': ['on'],
+    'youtubePlaylist:yt-1': ['PL1'],
+    'youtubeVisibilidad:yt-2': ['public'],
+    'youtubeIA:yt-2': [''],
+    'youtubePlaylist:yt-2': [''],
+  }
+
+  it('youtubeInicial vuelve a mostrar lo elegido, y null si el bloque no estaba', () => {
+    expect(youtubeInicial(campos, 'yt-1')).toEqual({ visibilidad: 'unlisted', ia: true, playlist: 'PL1' })
+    expect(youtubeInicial(campos, 'yt-2')).toEqual({ visibilidad: 'public', ia: false, playlist: '' })
+    expect(youtubeInicial(campos, 'otra')).toBeNull()
+    expect(youtubeInicial({ 'youtubeVisibilidad:x': ['oculto'] }, 'x')!.visibilidad).toBe('public')
+  })
+
+  it('telefonoDesdeCampos se las da al teléfono por cuenta', () => {
+    expect(telefonoDesdeCampos(campos).youtube).toEqual({
+      'yt-1': { visibilidad: 'unlisted', ia: true, playlist: 'PL1' },
+      'yt-2': { visibilidad: 'public', ia: false, playlist: '' },
+    })
+  })
+
+  it('youtubeDelTelefono lee las opciones del teléfono sin validar, solo de las cuentas de YouTube elegidas', () => {
+    expect(
+      youtubeDelTelefono(
+        { 'yt-1': { visibilidad: 'private', ia: true, playlist: 'PL9' }, 'yt-2': { visibilidad: 'nada', ia: 'si' }, 'ig-1': { trialReel: true } },
+        ['yt-1', 'yt-2', 'ig-1'],
+        new Set(['yt-1', 'yt-2']),
+      ),
+    ).toEqual({
+      'yt-1': { visibilidad: 'private', ia: true, playlist: 'PL9' },
+      'yt-2': { visibilidad: 'public', ia: false, playlist: '' },
+    })
+  })
+
+  it('camposDesdeTelefono: una app con el bloque las reescribe; una sin él las conserva', () => {
+    const telefono = { texto: 'Hola', cuentas: ['yt-1'], scheduledAt: '', trial: [] }
+    const anteriores = { cuentas: ['yt-1'], 'youtubeVisibilidad:yt-1': ['private'], 'youtubePlaylist:yt-1': ['PL1'] }
+    const sinBloque = camposDesdeTelefono(anteriores, telefono, new Map())
+    expect(sinBloque['youtubeVisibilidad:yt-1']).toEqual(['private'])
+    expect(sinBloque['youtubePlaylist:yt-1']).toEqual(['PL1'])
+    const conBloque = camposDesdeTelefono(
+      anteriores,
+      { ...telefono, youtube: { 'yt-1': { visibilidad: 'unlisted', ia: true, playlist: '' } } },
+      new Map(),
+    )
+    expect(conBloque['youtubeVisibilidad:yt-1']).toEqual(['unlisted'])
+    expect(conBloque['youtubeIA:yt-1']).toEqual(['on'])
+    expect(conBloque['youtubePlaylist:yt-1']).toBeUndefined()
+  })
+
+  it('opcionesConYoutubeDelBorrador: a una app sin el bloque le pone las del borrador; a una con él, no', () => {
+    expect(opcionesConYoutubeDelBorrador(false, { 'ig-1': { trialReel: true } }, campos)).toEqual({
+      'ig-1': { trialReel: true },
+      'yt-1': { visibilidad: 'unlisted', ia: true, playlist: 'PL1' },
+    })
+    expect(opcionesConYoutubeDelBorrador(true, {}, campos)).toEqual({})
+    expect(opcionesConYoutubeDelBorrador(false, {}, null)).toEqual({})
   })
 })

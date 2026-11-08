@@ -50,6 +50,9 @@ export function decidirFusion(
  *   `post_id, account_id`): se mueve lo que no choca y se borra lo que sí. En un choque
  *   la fila de la viva gana: es la que sigue viva.
  * - `post_comments`: sin unique, se mueve entero.
+ * - Los días y desgloses de YouTube Analytics (`youtube_analitica_*`) no se mueven: caen en
+ *   cascada con la cuenta absorbida, que ya está sin credencial, y la viva los vuelve a leer
+ *   enteros de YouTube. Los de cada video van con su post.
  * - `social_accounts`: al final, cuando ya nada la referencia; las tres tablas sin
  *   cascada impedirían borrarla antes. Atada al dueño, no solo al id.
  *

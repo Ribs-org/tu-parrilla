@@ -1,5 +1,5 @@
 {
-  "id": "dc6de636-2618-49f0-a11b-c10ebd1dc1f9",
+  "id": "0c9b84d0-8353-4105-ba39-0337d05c677e",
   "prevId": "27cdfef3-964f-4534-a8d1-120bc7a6e259",
   "version": "7",
   "dialect": "postgresql",
@@ -2133,83 +2133,6 @@
       "checkConstraints": {},
       "isRLSEnabled": true
     },
-    "public.planes": {
-      "name": "planes",
-      "schema": "",
-      "columns": {
-        "clave": {
-          "name": "clave",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "nombre": {
-          "name": "nombre",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "precio_clp": {
-          "name": "precio_clp",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "dias_de_prueba": {
-          "name": "dias_de_prueba",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "cuentas_max": {
-          "name": "cuentas_max",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "en_la_parrilla_max": {
-          "name": "en_la_parrilla_max",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "bodega_bytes": {
-          "name": "bodega_bytes",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "tokens_mes": {
-          "name": "tokens_mes",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "prioridad": {
-          "name": "prioridad",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "actualizado_en": {
-          "name": "actualizado_en",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": true
-    },
     "public.post_comments": {
       "name": "post_comments",
       "schema": "",
@@ -3368,6 +3291,12 @@
         },
         "last_error": {
           "name": "last_error",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "aviso": {
+          "name": "aviso",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -4765,31 +4694,6 @@
           "primaryKey": false,
           "notNull": false
         },
-        "plan": {
-          "name": "plan",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'gratis'"
-        },
-        "plan_hasta": {
-          "name": "plan_hasta",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "plan_origen": {
-          "name": "plan_origen",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "prueba_usada_en": {
-          "name": "prueba_usada_en",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
         "push_comentarios_hasta": {
           "name": "push_comentarios_hasta",
           "type": "timestamp with time zone",
@@ -4812,21 +4716,7 @@
         }
       },
       "indexes": {},
-      "foreignKeys": {
-        "users_plan_planes_clave_fk": {
-          "name": "users_plan_planes_clave_fk",
-          "tableFrom": "users",
-          "tableTo": "planes",
-          "columnsFrom": [
-            "plan"
-          ],
-          "columnsTo": [
-            "clave"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "users_correo_unique": {
@@ -4837,81 +4727,6 @@
           ]
         }
       },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": true
-    },
-    "public.uso_ia": {
-      "name": "uso_ia",
-      "schema": "",
-      "columns": {
-        "owner_id": {
-          "name": "owner_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "mes": {
-          "name": "mes",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "tokens": {
-          "name": "tokens",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "actualizado_en": {
-          "name": "actualizado_en",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "uso_ia_owner_mes_key": {
-          "name": "uso_ia_owner_mes_key",
-          "columns": [
-            {
-              "expression": "owner_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "mes",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "uso_ia_owner_id_users_id_fk": {
-          "name": "uso_ia_owner_id_users_id_fk",
-          "tableFrom": "uso_ia",
-          "tableTo": "users",
-          "columnsFrom": [
-            "owner_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": true

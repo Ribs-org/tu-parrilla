@@ -340,7 +340,12 @@ después de programar, en vez de decirle a la persona que lo revise en la red:
   mandaste y no está ahí no se guardó (TikTok ignora claves desconocidas).
 - TikTok en `borrador` trae `{ "modo": "borrador" }`; un trial reel, `{ "trialReel": true }`;
   un reel con música de Instagram, `{ "musica": { "audioId", "titulo", "artista", "volumenMusica", "volumenVideo" } }`
-  (más `"trialReel": true` si también lo es); una red que no pide nada, `null`.
+  (más `"trialReel": true` si también lo es); YouTube con alguna opción,
+  `{ "visibilidad", "ia", "playlist" }` con las tres explícitas (sección 5d), y `null` si sale como
+  siempre; una red que no pide nada, `null`.
+- Un destino `published` puede traer **`aviso`**: salió, pero algo de después quedó a medias. Hoy
+  solo en YouTube, cuando el video no entró a la playlist elegida (sección 5d). No es un fallo ni
+  se reintenta: díselo a la persona para que lo agregue en YouTube Studio. En todo lo demás es `null`.
 
 Son las opciones que **Tu Parrilla le manda** a la red. Lo que la cuenta no permite (un dúo
 deshabilitado en TikTok, por ejemplo) se manda apagado sin fallar, y eso solo se ve en la red.
@@ -487,6 +492,30 @@ Tres cosas, en orden:
   `La música de Instagram solo funciona en cuentas conectadas con Facebook, y esta se conectó con el login de Instagram.`
 - **No hay vista previa** del reel con la canción. Si Instagram la rechaza al publicar, el destino
   falla al tiro con `Instagram no aceptó la canción «<titulo>» de <artista> en <cuenta>. Instagram dice: «…». Borra esta publicación y prográmala de nuevo con otra canción o sin música.`
+
+## 5d. YouTube: visibilidad, «Hecho con IA» y playlist
+
+```json
+"opciones": { "youtube": { "visibilidad": "unlisted", "ia": true, "playlist": "PLx0sYbCqOb8TBPRdmBHs5Iftvv9TPboYG" } }
+```
+
+- Todo es opcional. Sin `opciones`, el video sale **público**, sin la declaración de IA y sin
+  playlist, como siempre.
+- `visibilidad`: `public`, `unlisted` (solo con el link) o `private` (solo el dueño). No uses los
+  valores de TikTok (`PUBLIC_TO_EVERYONE`…): se rechazan.
+- `ia: true` declara el video como contenido alterado o sintético. Ponlo cuando algo realista —una
+  persona, un lugar, un hecho— se hizo o se cambió con IA y podría pasar por real; no para una
+  animación evidente ni un filtro. Si no sabes, pregúntale a la persona.
+- `playlist`: el id de una playlist **del canal**, o `null`. Esta API no lista playlists: pídeselo
+  a la persona —es lo que va después de `list=` en el link de la playlist— y no inventes uno. Se
+  aceptan letras, números, `_` y `-`; un link entero se rechaza: manda solo el id.
+- Una clave distinta de esas tres se rechaza con `Las opciones de la red no se entendieron.`
+- **La playlist se agrega cuando el video ya salió.** Si YouTube no lo deja (la playlist se borró,
+  no es del canal), el destino queda `published` igual y trae un `aviso` en
+  `GET /api/schedule/posts/{id}`:
+  `Salió en YouTube, pero YouTube no lo agregó a la playlist que elegiste. Agrégalo tú desde YouTube Studio.`
+  o `Salió en YouTube, pero la playlist que elegiste ya no está en el canal. Si quieres, agrégalo a otra desde YouTube Studio.`
+  No reprogrames por eso: el video ya está en el canal, y reprogramarlo lo subiría otra vez.
 
 ## 5b. Historias de Instagram y Facebook
 

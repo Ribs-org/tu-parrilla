@@ -245,8 +245,8 @@ export function TikTokOpciones({
   )
 }
 
-/** Un renglón con su interruptor: el `Toggle` del panel. */
-function Interruptor({
+/** Un renglón con su interruptor: el `Toggle` del panel. Lo usa también el bloque de YouTube. */
+export function Interruptor({
   texto,
   pista,
   valor,

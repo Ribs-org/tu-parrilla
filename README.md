@@ -511,8 +511,44 @@ título y la miniatura de los videos que llevan 30 días sin llegar. Un canal qu
 desconecta no espera ese plazo: *Desconectar* borra en el acto sus lecturas, las de sus videos,
 sus comentarios y los títulos y miniaturas (`src/lib/social/desconectar.ts`), y deja el id y el
 nombre del canal y la fila de cada video, que une las visitas a su etiqueta `?s=`. La regla vive en
-`src/lib/social/politica-youtube.ts` y el borrado en `retencion-youtube.ts`. Si algún día
-se pide y se obtiene el permiso de analítica de §III.L, es ahí donde se afloja.
+`src/lib/social/politica-youtube.ts` y el borrado en `retencion-youtube.ts`. El permiso de
+§III.L —calcular métricas propias y guardar historia de las estadísticas— no se pidió. Las playlists
+de «Agregar a una playlist» siguen la misma regla: sus títulos viven unos minutos en la memoria
+del servidor y no se guardan; del destino queda solo el id de la elegida (ver el bloque de YouTube
+en «Varias cuentas de una misma red», más abajo).
+
+**YouTube Analytics: escrito y cerrado.** La historia del canal llega por otra vía: la API de
+YouTube Analytics, con el token del dueño y el permiso `yt-analytics.readonly`
+(`src/lib/social/analitica-youtube.ts`, puro, y `analitica-youtube-sync.ts`). Al final de la
+sincronización diaria, para cada canal conectado con ese permiso de un dueño que nombra
+`YOUTUBE_ANALITICA_ABIERTO_PARA`, se leen los totales del canal día por día (la primera vez,
+tres años; después, los últimos 30, que YouTube todavía corrige), las fuentes de tráfico, los
+países y la edad y el género de los últimos 28 días, y cada video conocido desde que se publicó
+—views, views con interacción, minutos vistos, duración media, porcentaje visto, me gusta,
+comentarios, compartidos, suscriptores ganados y perdidos—. Una métrica que YouTube no acepta
+en un reporte (`engagedViews` es nueva) se vuelve a pedir sin ella, y queda en `—`. Va a las
+tablas `youtube_analitica_dias`, `youtube_analitica_desgloses` y `youtube_analitica_videos`,
+que cuelgan de la cuenta (o del video) en cascada, y Los Números lo muestran en «Tu canal de
+YouTube» y en «En YouTube Analytics», en la pieza. La API de Analytics tiene su propio cupo:
+no gasta las unidades de la Data API que pidió la auditoría.
+
+Son datos **autorizados** (§III.E.4.b): se pueden guardar mientras el dueño siga autorizando,
+con la condición de comprobarlo cada 30 días. La comprobación es la lectura misma: cada vez que
+la API contesta con su token queda `social_accounts.analitica_verificada_en`; un canal sin
+marca en 30 días, o sin el permiso en `social_accounts.scopes` (lo que Google dijo conceder al
+conectar, porque la ventana deja destildarlo), pierde todo lo de analítica en la retención
+diaria, y la fila de un video que lleva 30 días sin refrescarse o que el sync marcó borrado,
+también. Si YouTube contesta 401, o 403 por permisos, se borra en el acto y el canal deja de
+decir que tiene el permiso. *Desconectar* lo borra con lo demás. Lo de §III.E.4.h no se afloja:
+se muestra tal cual, sin sumar días ni restar ganados de perdidos.
+
+Lo abren dos variables: `YOUTUBE_PERMISOS_ANALITICA=1` (el permiso está agregado en la consola
+de Google) y `YOUTUBE_ANALITICA_ABIERTO_PARA` (para quién). El conectar pide el permiso solo a
+quien está en la lista: la pantalla de consentimiento se verificó el 2026-10-14 sin él, y uno
+sin verificar le muestra el cartel de «app no verificada» a quien conecta. Con la bandera puesta,
+`/privacidad` suma el párrafo que lo cuenta. Encenderlo para todos espera la segunda
+verificación de Google, que a su vez espera la auditoría de cuota (ver
+`docs/google-verificacion-guion.md`, «La analítica: segunda verificación»).
 
 ### Instagram — cuenta profesional y página de Facebook
 
@@ -798,6 +834,26 @@ nuevo. Con el login de Instagram la música no existe: el bloque lo dice y no of
 lo rechaza. Lo que está sonando y cada búsqueda se guardan diez minutos en la memoria del
 servidor, por cuenta (`social/instagram-audio.ts`).
 
+YouTube también tiene un bloque por canal marcado, en el compositor y en Publicar del teléfono
+(desde el 2026-11-08): **quién lo ve** —Público, que es lo de siempre, No listado o Privado
+(`privacyStatus`)—, **«Hecho con IA»** —la declaración de contenido alterado o sintético de
+YouTube, `containsSyntheticMedia`, que se manda solo encendida, como la de TikTok— y **«Agregar a
+una playlist»**. Ninguna pide un permiso de Google nuevo: las dos primeras viajan en el
+`videos.insert` de siempre, y las playlists se leen y se llenan con `youtube.force-ssl`, que la app
+ya tiene (la pantalla de consentimiento está verificada, y cambiarle un permiso pediría otra
+verificación). La lista se le pide a YouTube recién al encender el interruptor
+(`playlists.list mine=true`, 1 unidad del cupo por página de 50) y vive cinco minutos en la memoria
+del servidor, por canal (`social/playlists-youtube.ts`); de la elegida se guarda solo el id en las
+opciones del destino, no el título, porque los datos de la API de YouTube no se guardan sin
+refrescar. Cuando el video termina de procesarse, el publicador lo agrega al final de esa
+playlist (`playlistItems.insert`, 50 unidades: una subida con playlist cuesta eso más lo de
+siempre). Si YouTube no lo deja —la playlist se borró, el permiso, la red—, el destino **no
+falla**: el video ya está en el canal y reintentar lo subiría otra vez. Queda publicado con un
+aviso (`scheduled_post_targets.aviso`) que el editor muestra en ámbar debajo de su estado y que
+`GET /api/schedule/posts` devuelve como `aviso`. Un teléfono sin actualizar no trae el bloque: al
+programar un borrador, el servidor le pone las opciones de YouTube que dejó el panel
+(`opcionesConYoutubeDelBorrador`), para que un video que quedó privado no salga público.
+
 Desde el 2026-11-07 la app del teléfono ofrece TikTok como destino, con el mismo bloque que el
 compositor —los datos de la cuenta de `creator_info`, la privacidad sin elegir, las
 interacciones, la marca, «Hecho con IA», «Música de TikTok» y el consentimiento— y la
@@ -810,7 +866,7 @@ no deja programar un video más largo de lo que `creator_info` dice que esa cuen
 (`max_video_post_duration_sec`); el compositor todavía no lo mira (ver `docs/pendientes.md`).
 
 Solo la app que lo trae recibe eso: lo avisa en el encabezado `X-Parrilla-Publicar` (`tiktok`,
-`palabra-clave`; `sabeDe`, en `src/lib/mobile-api.ts`). A una instalación sin actualizar no le
+`palabra-clave` y, desde el 2026-11-08, `youtube`; `sabeDe`, en `src/lib/mobile-api.ts`). A una instalación sin actualizar no le
 llegan las cuentas de TikTok, sus borradores con TikTok o con palabra clave se guardan sin
 perder eso y se programan en el panel (`soloEnElPanel`, en `src/lib/borrador.ts`), y si
 intentara programarlos se rechaza con el motivo. El encabezado y no un campo del cuerpo, como
@@ -1496,6 +1552,8 @@ Vercel y bajan con `vercel env pull .env.local`.
 | `YOUTUBE_CHANNEL_ID` | Deja creada la tarjeta del canal del dueño del despliegue; se sincroniza recién cuando lo conecta con OAuth | No |
 | `GOOGLE_CLIENT_ID` | Conectar YouTube para publicar (OAuth de Google) | El OAuth Client tipo Web del mismo proyecto de la API key |
 | `GOOGLE_CLIENT_SECRET` | El secreto de ese OAuth Client | Junto con el anterior; el sync de solo lectura sigue usando `YOUTUBE_API_KEY` |
+| `YOUTUBE_PERMISOS_ANALITICA` | Con `1`, conectar YouTube pide además `yt-analytics.readonly` a quien nombra la de abajo, y `/privacidad` suma el párrafo de YouTube Analytics (ver «YouTube») | No — apagada por defecto; se enciende solo con el permiso agregado en *Data Access* de la consola de Google |
+| `YOUTUBE_ANALITICA_ABIERTO_PARA` | Para quién se pide ese permiso, se lee YouTube Analytics cada noche y se ve «Tu canal de YouTube» en Los Números y «En YouTube Analytics» en la pieza. `1`, todos; ids de usuario separados por comas, solo esos | No — vacía, para nadie; sin la de arriba, cerrada igual. Es para grabar la verificación con la cuenta del revisor; aprobada, va en `1` |
 | `INSTAGRAM_APP_ID` | Conectar Instagram | No — sin ella esa red aparece como no conectada |
 | `INSTAGRAM_APP_SECRET` | Conectar Instagram, y verificar la firma de los callbacks de baja y borrado de Meta | No — sin ella esa red aparece como no conectada y esos dos callbacks responden `400` |
 | `INSTAGRAM_LOGIN_APP_ID` | Conectar Instagram con el login de Instagram, sin página de Facebook (ver «Instagram sin página de Facebook: el login de Instagram») | No — el «Instagram app ID» del caso de uso de Instagram de la app de Meta, que no es `INSTAGRAM_APP_ID`; sin ella, «Conectar con Instagram →» responde «Falta INSTAGRAM_LOGIN_APP_ID» |
@@ -1846,8 +1904,9 @@ Y `opciones`, obligatorio cuando algún destino de la fila es una cuenta de TikT
 modo, la privacidad y las casillas que TikTok exige elegir por publicación) y opcional
 para Instagram (`trialReel`, para que el reel salga como trial reel — solo lo ven quienes
 no siguen la cuenta, hasta que el dueño lo comparte desde la app —, y `musica`, la canción de
-«Música de Instagram» con su `audioId`) y para Instagram y
-Facebook (`historia`, para que salga como historia). Una fila con `"historia": true` y varios
+«Música de Instagram» con su `audioId`), para Instagram y
+Facebook (`historia`, para que salga como historia) y para YouTube (`visibilidad`, `ia` y
+`playlist`, con el id de la playlist). Una fila con `"historia": true` y varios
 archivos es el atajo de una secuencia: se expande en una historia por archivo y vuelve con
 `postIds`. Se llavea por destino:
 cada clave se busca primero entre los identificadores de cuenta de la fila, y si no
@@ -1977,7 +2036,7 @@ Dos planes, el gratis y el pagado («Asador»), con las mismas funciones: lo que
 topes, el espacio, los tokens de IA y quién pasa primero en las colas. El diseño, con el porqué de
 cada número, está en `docs/superpowers/specs/2026-11-08-planes-design.md`. Cada plan es una fila de
 `planes` que el admin edita en Los Maestros («Los planes»); las dos nacen en la migración
-`0033_planes.sql`:
+`0035_planes.sql`:
 
 | | Gratis | Asador |
 |---|---|---|
@@ -2314,6 +2373,7 @@ src/
     tracking.ts            contexto de la visita desde headers
     analytics.ts           consultas del dashboard
     lo-pagado.ts           los anuncios del dueño que corrieron en el período, para «Lo pagado» en Los Números
+    analitica-youtube-lectura.ts  lo de YouTube Analytics que leen «Tu canal de YouTube» y la pieza, atado al dueño
     enlace-de-la-pagina.ts la dirección pública de la página principal del dueño: el link con ?s= de cada publicación
     planes/                los dos planes: cuál rige y sus frases (plan.ts, sin base), leerlos y cambiarlos (planes.ts), los topes al escribir (topes.ts), los tokens de IA del mes (tokens.ts), la prioridad en las colas (prioridad.ts) y lo que dibuja «Tu plan» (uso.ts)
     planilla/              «Llevar para la casa»: las hojas y su «Léeme», lo que se lee fila por fila, y el .xlsx escrito a mano
@@ -2340,6 +2400,7 @@ src/
     editar-movil.ts        un post programado abierto para corregirlo en el teléfono: lo que se ve y lo que se guarda sin tocar
     comentarios-movil.ts   La Mesa en la forma de la app del teléfono: la cola agrupada por publicación y el código de cada frase (sin base)
     musica-instagram.ts    «Música de Instagram» del panel y del teléfono: la cuenta del dueño con su token, la memoria de lo que suena y la sugerencia con el modelo
+    playlists-youtube.ts   «Agregar a una playlist» del panel y del teléfono: el canal del dueño con su token y la memoria corta de sus playlists
     pruebas/               la Postgres de las pruebas de integración: una base nueva y migrada por archivo; y un lector de zip para mirar el XML de una planilla
     empresa.ts             quién presta el servicio: lo leen la portada, privacidad y términos
     avisos/                la caída de una cuenta y el resumen del día: las reglas sin base y lo que lee y manda
@@ -2352,9 +2413,11 @@ src/
       tiktok-numeros-guardar.ts dónde quedan esos números (account_metrics, post_metrics y ajustes), el paso de la sincronización diaria y lo que leen Los Números, la pieza y el compositor
       instagram-audio.ts   la biblioteca de música de Instagram (Audio API de Meta): lo que suena, la búsqueda y una canción, leídos sin base
       musica-sugerencia.ts «Sugiéreme una»: el modelo elige por id entre canciones reales, y sin él el azar (sin base)
+      playlists-youtube.ts las playlists de un canal de YouTube y agregarle un video, con sus avisos, leídos sin base
       lectura.ts           qué publicaciones se leen cada día: lo nuevo a diario, lo viejo cada vez más espaciado
       politica-youtube.ts  lo que las políticas de YouTube no dejan hacer con sus datos
-      retencion-youtube.ts borra lo de YouTube que lleva 30 días sin refrescarse
+      retencion-youtube.ts borra lo de YouTube que lleva 30 días sin refrescarse, y lo de Analytics sin autorización comprobada
+      analitica-youtube.ts YouTube Analytics: el permiso, las consultas, cómo se lee una respuesta y los nombres (sin base); analitica-youtube-sync.ts lo lee y lo guarda
       desconectar.ts       «Desconectar»: la cuenta suelta sus credenciales y, en YouTube, lo que vino de su API en el acto
       traspasar.ts         le cambia el dueño a una cuenta con lo que se bajó de ella, sin borrar nada
       anuncios.ts          leer los anuncios de Meta: qué se le pide a la Marketing API, el cruce con las publicaciones y el resumen de «Lo pagado» (sin base); anuncios-sync.ts los guarda

@@ -176,7 +176,15 @@ export async function publishDue(
     // de esa manda, y pisarlo devolvería a la fila algo que ya salió.
     const escrito = await db
       .update(scheduledPostTargets)
-      .set({ ...patch, publicandoDesde, reclamadoHasta: null, updatedAt: now })
+      .set({
+        ...patch,
+        publicandoDesde,
+        reclamadoHasta: null,
+        updatedAt: now,
+        // Lo que salió con un paso de después a medias (la playlist de YouTube): se anota al
+        // publicar, y cualquier otro publicado lo deja limpio.
+        ...(outcome.kind === 'published' ? { aviso: outcome.aviso ?? null } : {}),
+      })
       .where(and(eq(scheduledPostTargets.id, target.id), eq(scheduledPostTargets.reclamadoHasta, reclamo)))
       .returning({ id: scheduledPostTargets.id })
     if (escrito.length === 0) {

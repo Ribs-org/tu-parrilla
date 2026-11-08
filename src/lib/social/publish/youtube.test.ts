@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { ARCHIVO_MUY_GRANDE } from './limites'
+import { PLAYLIST_NO_AGREGADO, PLAYLIST_YA_NO_EXISTE } from '../playlists-youtube'
 import {
   YOUTUBE_REJECTED,
   classifyUploadStatus,
@@ -57,6 +58,142 @@ describe('youtubeMetadata', () => {
     expect(youtubeMetadata('Título\ncuerpo')).toEqual({
       snippet: { title: 'Título', description: 'Título\ncuerpo' },
       status: { privacyStatus: 'public', selfDeclaredMadeForKids: false },
+    })
+  })
+})
+
+describe('youtubeMetadata con las opciones del destino', () => {
+  it('sin opciones va exactamente lo de antes: público y sin la declaración de IA', () => {
+    expect(youtubeMetadata('Hola', null).status).toEqual({ privacyStatus: 'public', selfDeclaredMadeForKids: false })
+    expect(youtubeMetadata('Hola', { playlist: 'PL123' }).status).toEqual({
+      privacyStatus: 'public',
+      selfDeclaredMadeForKids: false,
+    })
+  })
+
+  it('la visibilidad elegida es el privacyStatus', () => {
+    expect(youtubeMetadata('Hola', { visibilidad: 'unlisted' }).status.privacyStatus).toBe('unlisted')
+    expect(youtubeMetadata('Hola', { visibilidad: 'private' }).status.privacyStatus).toBe('private')
+  })
+
+  it('«Hecho con IA» encendido declara contenido sintético; apagado no manda la clave', () => {
+    expect(youtubeMetadata('Hola', { ia: true }).status).toEqual({
+      privacyStatus: 'public',
+      selfDeclaredMadeForKids: false,
+      containsSyntheticMedia: true,
+    })
+    expect('containsSyntheticMedia' in youtubeMetadata('Hola', { visibilidad: 'private' }).status).toBe(false)
+  })
+})
+
+describe('publish: las opciones viajan en la subida', () => {
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('el multipart lleva la visibilidad y la declaración de IA del destino', async () => {
+    const llamadas: Array<{ url: string; body?: unknown }> = []
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string, init?: RequestInit) => {
+        llamadas.push({ url, body: init?.body })
+        if (url === video.url) return new Response(new Uint8Array([1, 2, 3]), { status: 200 })
+        return Response.json({ id: 'vid-1' })
+      }),
+    )
+    const salida = await youtubePublisher.publish({
+      caption: 'Hola',
+      media: [video],
+      containerId: null,
+      token: 't',
+      accountExternalId: 'canal',
+      coverUrl: null,
+      opciones: { visibilidad: 'unlisted', ia: true, playlist: 'PL123' },
+    })
+    expect(salida).toEqual({ kind: 'processing', containerId: 'vid-1' })
+    const subida = llamadas.find((l) => l.url.includes('/upload/youtube/v3/videos'))!
+    const texto = new TextDecoder().decode(subida.body as Uint8Array)
+    expect(texto).toContain('"privacyStatus":"unlisted"')
+    expect(texto).toContain('"containsSyntheticMedia":true')
+    // La playlist no se toca al subir: espera a que el video termine de procesarse.
+    expect(llamadas.some((l) => l.url.includes('playlistItems'))).toBe(false)
+  })
+})
+
+describe('publish: la playlist, cuando el video ya salió', () => {
+  afterEach(() => vi.unstubAllGlobals())
+
+  function sondeo(playlist: Response | Error) {
+    const llamadas: Array<{ url: string; init?: RequestInit }> = []
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string, init?: RequestInit) => {
+        llamadas.push({ url, init })
+        if (url.includes('/youtube/v3/videos?part=status')) {
+          return Response.json({ items: [{ status: { uploadStatus: 'processed' } }] })
+        }
+        if (playlist instanceof Error) throw playlist
+        return playlist
+      }),
+    )
+    return llamadas
+  }
+
+  const entrada = (opciones: unknown) => ({
+    caption: 'Hola',
+    media: [video],
+    containerId: 'vid-1',
+    token: 't',
+    accountExternalId: 'canal',
+    coverUrl: null,
+    opciones: opciones as never,
+  })
+
+  it('sin playlist publica sin llamar a playlistItems', async () => {
+    const llamadas = sondeo(Response.json({}))
+    expect(await youtubePublisher.publish(entrada({ visibilidad: 'private' }))).toEqual({
+      kind: 'published',
+      externalId: 'vid-1',
+    })
+    expect(llamadas.some((l) => l.url.includes('playlistItems'))).toBe(false)
+  })
+
+  it('con playlist la agrega una vez, con el video y la playlist elegidos', async () => {
+    const llamadas = sondeo(Response.json({ id: 'item-1' }))
+    expect(await youtubePublisher.publish(entrada({ playlist: 'PL123' }))).toEqual({
+      kind: 'published',
+      externalId: 'vid-1',
+    })
+    const agregar = llamadas.filter((l) => l.url.includes('playlistItems'))
+    expect(agregar).toHaveLength(1)
+    expect(agregar[0]!.init?.method).toBe('POST')
+    expect(JSON.parse(String(agregar[0]!.init?.body))).toEqual({
+      snippet: { playlistId: 'PL123', resourceId: { kind: 'youtube#video', videoId: 'vid-1' } },
+    })
+  })
+
+  it('si YouTube no la agrega, el destino queda publicado con el aviso, no fallado', async () => {
+    sondeo(new Response('{"error":{"code":403}}', { status: 403 }))
+    expect(await youtubePublisher.publish(entrada({ playlist: 'PL123' }))).toEqual({
+      kind: 'published',
+      externalId: 'vid-1',
+      aviso: PLAYLIST_NO_AGREGADO,
+    })
+  })
+
+  it('una playlist que ya no existe lo dice con su frase', async () => {
+    sondeo(new Response('{"error":{"code":404}}', { status: 404 }))
+    expect(await youtubePublisher.publish(entrada({ playlist: 'PL123' }))).toEqual({
+      kind: 'published',
+      externalId: 'vid-1',
+      aviso: PLAYLIST_YA_NO_EXISTE,
+    })
+  })
+
+  it('una llamada que se corta tampoco tumba lo publicado', async () => {
+    sondeo(new Error('socket hang up'))
+    expect(await youtubePublisher.publish(entrada({ playlist: 'PL123' }))).toEqual({
+      kind: 'published',
+      externalId: 'vid-1',
+      aviso: PLAYLIST_NO_AGREGADO,
     })
   })
 })

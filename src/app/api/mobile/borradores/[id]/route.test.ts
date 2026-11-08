@@ -87,6 +87,7 @@ describe('GET /api/mobile/borradores/[id]', () => {
       media: [{ url: 'https://cdn.ejemplo.cl/scheduled/a.mp4', mediaType: 'video', nombre: 'a.mp4' }],
       tiktok: {},
       regla: { palabra: 'GUIA', mensaje: '', respuestaPublica: '' },
+      youtube: {},
       soloEnElPanel: 'Este borrador va también a TikTok y tiene la palabra clave «GUIA»: eso se programa en el panel web.',
     })
   })

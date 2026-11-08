@@ -243,7 +243,7 @@ cuenta, y sus atributos son uno solo—, así que sin `pieza` nada las une:
 
 No la uses como `serie`: es para variantes del mismo contenido, no para un tema que se repite.
 
-### `opciones` (obligatorio si algún destino es una cuenta de TikTok; opcional para Instagram)
+### `opciones` (obligatorio si algún destino es una cuenta de TikTok; opcional para Instagram, Facebook y YouTube)
 
 Lo que cada destino exige elegir. La clave del objeto **no
 es la red**: es el identificador de la cuenta destino. Para no obligarte a conocer los
@@ -375,6 +375,32 @@ falla al tiro, sin reintentos y sin publicar sin ella, con
 `Instagram no aceptó la canción «<titulo>» de <artista> en <cuenta>. Instagram dice: «…». Borra esta publicación y prográmala de nuevo con otra canción o sin música.`
 Si la cuenta se reconectó con el login de Instagram después de programar, falla con
 `<cuenta> se conectó con el login de Instagram, y así Instagram no deja ponerle música a un reel. Reconéctala con Facebook en Los Fierros, o borra esta publicación y prográmala de nuevo sin música.`
+
+**YouTube — visibilidad, IA y playlist.** Con un destino de YouTube, `opciones` acepta, todo
+opcional:
+
+```json
+"opciones": { "youtube": { "visibilidad": "unlisted", "ia": true, "playlist": "PLx0sYbCqOb8TBPRdmBHs5Iftvv9TPboYG" } }
+```
+
+- `visibilidad`: `public` (lo de siempre, si no viene), `unlisted` (solo quien tenga el link) o
+  `private` (solo el dueño, en YouTube Studio). Es el `privacyStatus` del video.
+- `ia`: booleano, ausente vale `false`. En `true`, el video sale declarado como contenido
+  alterado o sintético (`containsSyntheticMedia`): YouTube lo pide cuando algo realista —una
+  persona, un lugar, un hecho— se hizo o se cambió con IA y podría pasar por real. Una animación
+  evidente o un filtro de color no lo necesitan.
+- `playlist`: el id de una playlist del canal, o `null` sin playlist. Por esta API no se listan
+  playlists: el id es lo que va después de `list=` en el link de la playlist
+  (`youtube.com/playlist?list=PL…`), o se elige en el panel o en el teléfono. Letras, números,
+  `_` y `-`, de 2 a 64; un link entero o un texto vacío se rechazan. No se comprueba al
+  programar que la playlist exista ni que sea del canal: cuando el video termina de procesarse
+  se agrega al final de ella, y si YouTube no lo deja el destino queda **publicado igual**, con
+  un `aviso` (sección 3) en vez de un `error`.
+
+Cualquier otra clave se rechaza (`privacidad` en vez de `visibilidad`, por ejemplo), igual que en
+Instagram: `Las opciones de la red no se entendieron.` Sin `opciones`, un video de YouTube sale
+público, sin la declaración de IA y sin playlist, como siempre. Con dos canales en la fila, la
+clave es el id de cada cuenta.
 
 **Instagram y Facebook — historias.** Con destinos de Instagram o de Facebook, `opciones`
 acepta `historia`:
@@ -1171,9 +1197,9 @@ Un rango pasado vale (lista lo ya publicado). Formato inválido o rango invertid
       "atributos": { "hook": "pregunta-polemica", "tema": "retail" },
       "ref": "septiembre-fila-12",
       "redes": [
-        { "red": "instagram", "estado": "published", "error": null, "externalId": "18114074218999893", "intentos": 1, "proximoIntento": null, "cuentaId": "8f0a…", "handle": "@vicente", "archivado": false, "opciones": null },
-        { "red": "youtube", "estado": "scheduled", "error": "No se pudo hablar con la red. Se reintentará.", "externalId": null, "intentos": 1, "proximoIntento": "2026-09-10T09:15:00-03:00", "cuentaId": "b21c…", "handle": null, "archivado": false, "opciones": null },
-        { "red": "tiktok", "estado": "failed", "error": "TikTok no acepta el archivo: revisa formato, tamaño o duración.", "externalId": null, "intentos": 3, "proximoIntento": null, "cuentaId": "9d4e…", "handle": "@vicente", "archivado": false, "opciones": { "modo": "directo", "privacidad": "PUBLIC_TO_EVERYONE", "comentarios": true, "duo": true, "pegar": true, "comercial": "no", "ia": true, "musica": false } }
+        { "red": "instagram", "estado": "published", "error": null, "aviso": null, "externalId": "18114074218999893", "intentos": 1, "proximoIntento": null, "cuentaId": "8f0a…", "handle": "@vicente", "archivado": false, "opciones": null },
+        { "red": "youtube", "estado": "scheduled", "error": "No se pudo hablar con la red. Se reintentará.", "aviso": null, "externalId": null, "intentos": 1, "proximoIntento": "2026-09-10T09:15:00-03:00", "cuentaId": "b21c…", "handle": null, "archivado": false, "opciones": null },
+        { "red": "tiktok", "estado": "failed", "error": "TikTok no acepta el archivo: revisa formato, tamaño o duración.", "aviso": null, "externalId": null, "intentos": 3, "proximoIntento": null, "cuentaId": "9d4e…", "handle": "@vicente", "archivado": false, "opciones": { "modo": "directo", "privacidad": "PUBLIC_TO_EVERYONE", "comentarios": true, "duo": true, "pegar": true, "comercial": "no", "ia": true, "musica": false } }
       ]
     }
   ]
@@ -1213,6 +1239,13 @@ Un rango pasado vale (lista lo ya publicado). Formato inválido o rango invertid
   igual, solo pierde el handle). **`archivado`** es `true` en un destino quemado que se
   archivó (sección 3d): sigue `failed` y con su `error`, pero ya no cuenta en el resumen ni en
   «Se quemó». `false` en todo lo demás.
+  **`aviso`** es una frase en un destino `published` al que le quedó algo a medias, y `null` en
+  todo lo demás. Hoy solo YouTube lo usa: el video salió, pero no entró a la playlist elegida
+  (`opciones.playlist`). No es un fallo —no se reintenta, porque reintentar subiría el video
+  otra vez—: se agrega a mano en YouTube Studio. Es una de estas dos:
+  `Salió en YouTube, pero YouTube no lo agregó a la playlist que elegiste. Agrégalo tú desde YouTube Studio.`
+  o, si la playlist ya no existe,
+  `Salió en YouTube, pero la playlist que elegiste ya no está en el canal. Si quieres, agrégalo a otra desde YouTube Studio.`
   **`opciones`** es lo que se eligió para esa red al programar (sección 1, `opciones`): en
   TikTok `directo`, todas las casillas explícitas —`comentarios`, `duo`, `pegar`, `ia` y
   `musica` en `false` si no se encendieron—, así que una clave que mandaste y no aparece no se guardó; en
@@ -1220,6 +1253,9 @@ Un rango pasado vale (lista lo ya publicado). Formato inválido o rango invertid
   música de Instagram, `{ "musica": { "audioId": …, "titulo": …, "artista": …, "volumenMusica": …, "volumenVideo": … } }`
   (con `"trialReel": true` al lado si también lo es), con los volúmenes siempre explícitos; en una
   historia, `{ "historia": true }` o, en una secuencia, `{ "historia": { "secuencia": …, "orden": … } }`;
+  en YouTube con alguna opción, las tres claves explícitas
+  (`{ "visibilidad": "unlisted", "ia": false, "playlist": null }`), y `null` si salió como siempre
+  —público, sin IA, sin playlist—;
   `null` en las redes que no piden nada. Es lo que Tu Parrilla le manda a la red, no lo que la red
   aplicó: lo que la cuenta tiene bloqueado (un dúo deshabilitado en TikTok) se manda apagado sin
   fallar, y eso solo se ve en la red.

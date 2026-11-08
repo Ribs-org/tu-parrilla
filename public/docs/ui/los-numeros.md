@@ -34,6 +34,13 @@ nada, la pantalla dice lo máximo que puede gastar y pregunta. Después se pausa
 detiene desde la misma pieza o desde «Lo pagado». Mientras Meta revisa estos permisos, las dos
 cosas se ven solo en las cuentas que el equipo de Tu Parrilla habilitó; en las demás no existen.
 
+Para algunas cuentas también, después de esa, **«Tu canal de YouTube»**: lo que YouTube
+Analytics cuenta del canal —las views y los minutos vistos de cada día, de dónde llegó la gente
+(el feed de Shorts, la búsqueda, sitios de afuera) y de qué país, edad y género es quien mira—,
+y en la pieza de un video de YouTube, **«En YouTube Analytics»**: su duración media, el
+porcentaje visto y los suscriptores que ganó y perdió. Lo cuenta YouTube, y va tal cual. Mientras
+Google revisa ese permiso, se ve solo en las cuentas que el equipo de Tu Parrilla habilitó.
+
 Dos palabras que no hay que mezclar: la **etiqueta** es el `?s=` del link de cada publicación,
 que dice por cuál llegó la gente a la página; los **atributos** son lo que se le anota a un post
 programado —el hook, el tema, la serie— en su editor de [La Parrilla](la-parrilla.md) o por la
@@ -417,6 +424,53 @@ no sale de una publicación de tus cuentas conectadas: suma arriba, pero no tien
 - La frase «Para promocionar una publicación, ábrela —en «Ver todas las publicaciones →» o en
   «Lo que más creció»— y busca «Promocionar», debajo de sus versiones.»
 
+### Sección «Tu canal de YouTube» (solo en algunas cuentas)
+
+Después de «Lo pagado» (o de «En las redes», si esa no está) y antes de «En tu página», **solo en
+las cuentas habilitadas mientras Google revisa el permiso de YouTube Analytics**, y solo si la
+persona tiene un canal de YouTube conectado. En las demás no aparece nada, ni siquiera el título.
+Con una cuenta elegida en el selector de «En las redes», muestra solo ese canal si es de YouTube,
+y desaparece si es de otra red.
+
+**La cabeza.** El título «Tu canal de YouTube» y debajo «Lo que YouTube Analytics cuenta de tu
+canal: cuánto se vio, de dónde llegó la gente y quién mira. Las cifras van tal como las da
+YouTube.» No tiene «⋯ Más».
+
+**El aviso de reconectar.** Si algún canal de la persona se conectó sin el permiso para leer
+YouTube Analytics —antes de que se pidiera, o porque lo desmarcó en la ventana de Google—, un
+recuadro: «Reconecta YouTube para ver sus números completos.» y debajo ««<canal>» se conectó sin
+el permiso para leer YouTube Analytics. Vuelve a conectarlo y, en la ventana de Google, deja
+marcado ese permiso: los números llegan con la sincronización diaria.» (con dos canales,
+««<canal>» y «<canal>» se conectaron …»), y al final el enlace «Reconectar YouTube →», que abre
+la ventana de Google para conectar YouTube.
+
+**Por cada canal con el permiso** (con más de uno, cada bloque lleva el nombre del canal arriba,
+en chico), tres paneles:
+
+- **«Día a día»**, explicación «Views y minutos vistos de cada día del período, como los da
+  YouTube. Los últimos días todavía pueden cambiar: YouTube tarda unos días en asentarlos.» Dos
+  gráficos de áreas, uno debajo del otro y con las mismas fechas, rotulados «Views» y «Minutos
+  vistos». Cada punto es un día, también con «Todo». Al pasar el mouse aparece la fecha completa
+  y el valor. Sin días leídos en el período: «Todavía no hay días de YouTube Analytics en este
+  período: llegan con la sincronización diaria.»
+- **«De dónde llegó la gente»**, explicación «En los últimos 28 días (<fechas>), las views por
+  fuente de tráfico, con los minutos vistos al lado.» Una barra por fuente, de más a menos views,
+  con los minutos al lado («420 min»). Las fuentes se llaman como en YouTube Studio: «Feed de
+  Shorts», «Búsqueda de YouTube», «Funciones de exploración (inicio y suscripciones)», «Videos
+  sugeridos», «Fuentes externas (sitios y apps)», «Directo o desconocido», «Páginas de canal»,
+  «Otras funciones de YouTube», «Listas de reproducción», «Notificaciones», «Páginas de hashtags»,
+  «Pantallas finales», entre otras. Sin datos: «Todavía no hay fuentes de tráfico leídas: llegan
+  con la sincronización diaria.»
+- **«Quién mira»**, explicación «En los últimos 28 días (<fechas>). Los países, por views; la
+  edad y el género, en el porcentaje de espectadores que da YouTube.» Una barra por país (hasta
+  diez, con su bandera), y debajo, en dos columnas, cada grupo de edad y género con su
+  porcentaje: «Mujeres · 25–34  31.2%», «Hombres · 18–24», «Otro · 65 o más»… Sin países: «Todavía
+  no hay países leídos: llegan con la sincronización diaria.» Sin edad ni género: «YouTube no
+  entrega edad ni género de un canal con pocos espectadores en el período.»
+
+Las fechas de los 28 días van con el mismo formato del botón del período («12 oct – 8 nov»), y no
+cambian con el período elegido: el período solo mueve «Día a día».
+
 ### Mitad «En tu página»
 
 **La cabeza.** El título «En tu página» y debajo «Quién entró a tu página de links —tu
@@ -705,6 +759,20 @@ nombre, y las cifras «Alcance», «Guardados», «Tiempo visto, en promedio» (
 al perfil»; debajo, **«De dónde llegaron»**, con el porcentaje de cada fuente: «Para ti»,
 «Siguiendo», «Tu perfil», «Búsqueda», «Sonidos», «Mensajes» u «Otros». Un «—» es que TikTok no lo
 dio.
+
+**Panel «En YouTube Analytics»** (solo en las cuentas habilitadas para YouTube Analytics, y solo
+si alguna versión es un video de YouTube que ya llegó), debajo de las versiones, con la
+explicación «Desde que se publicó, como lo cuenta YouTube Analytics; se actualiza con la
+sincronización diaria. Duración media y porcentaje visto son los promedios que da YouTube por
+reproducción.» Si el canal de esa versión se conectó sin el permiso, arriba el mismo aviso de
+«Tu canal de YouTube»: «Reconecta YouTube para ver sus números completos.», con su «Reconectar
+YouTube →». Una tabla con una fila por versión de YouTube y las columnas «Versión», «Views»,
+«Views con interacción», «Minutos vistos», «Duración media» (como en YouTube Studio: «0:27»,
+«1:05»), «Porcentaje visto» («82.4%»; en un Short que se repite puede pasar de 100), «Me
+gusta», «Comentarios», «Compartidos», «Suscriptores ganados» y «Suscriptores perdidos». Debajo
+del nombre de cada versión, en chico, «Hasta el <día>» (el último día que cubren sus números), o
+«Sin números de YouTube Analytics todavía: llegan con la sincronización diaria.» si todavía no
+hay; entonces las cifras van en «—».
 
 **Panel «Promocionar»** (solo en las cuentas habilitadas; ver «Promocionar», abajo), debajo de
 las versiones, con la explicación «Un anuncio de una versión ya publicada, pagado con tu cuenta
@@ -1324,6 +1392,31 @@ primero, así que esa nunca queda fuera.
 **Los atributos.** Los que todas las versiones comparten van arriba, una vez; los que cambian
 de una a otra —o que alguna no tiene— van en columnas, porque eso es lo que hay que comparar.
 
+**«En YouTube Analytics».** Son los totales de cada video desde que se publicó hasta el día que
+dice debajo de su nombre, y el período elegido no los mueve. Pueden no calzar con «Views» de la
+tabla de arriba: esa la da la lectura pública de YouTube y esta, YouTube Analytics, que cuenta
+distinto y llega con unos días de atraso. «Views con interacción» es lo que YouTube llama
+*engaged views*; un «—» es que YouTube no lo dio. «Porcentaje visto» y «Duración media» son el
+promedio por reproducción, tal como los da YouTube. Los suscriptores son los que se ganaron o se
+perdieron desde la página de ese video, no los del canal entero.
+
+### En «Tu canal de YouTube»
+
+**De dónde salen.** De YouTube Analytics, con la sincronización diaria, leído con el permiso que
+la persona dio al conectar YouTube. Un día de hoy aparece mañana, o al apretar «Sincronizar
+ahora» en [Los Fierros](los-fierros.md); YouTube tarda unos días en asentar sus cifras, así que
+los últimos días de «Día a día» pueden subir de un día para otro.
+
+**Qué filtra el período.** Solo «Día a día». «De dónde llegó la gente» y «Quién mira» son
+siempre de los últimos 28 días, como YouTube Studio de entrada. La página y «Bots» no le aplican.
+
+**Por qué no hay totales del período.** Las reglas de YouTube no dejan calcular métricas con sus
+datos: cada cifra va como la dio YouTube, día por día, sin sumar ni restar. Por lo mismo, los
+suscriptores ganados y perdidos van separados, sin un neto.
+
+**La edad y el género** son el porcentaje de espectadores de cada grupo que da YouTube, sin
+identificar a nadie. YouTube no los entrega si el canal tuvo pocos espectadores.
+
 ### En «Comparar por atributo»
 
 **Qué publicaciones cuenta.** Las publicadas dentro del período (no las que solo tuvieron
@@ -1459,6 +1552,29 @@ Solo en las cuentas donde aparece «Lo pagado» (ver «Sección «Lo pagado»»,
 3. En «Lo pagado», leer las cuatro cifras y, en «Tus publicaciones promocionadas», cada
    publicación con lo que gastó y lo que logró. Su texto abre la pieza, con sus números
    orgánicos.
+
+### Para ver de dónde llega la gente a tu canal de YouTube, y quién mira
+
+Solo en las cuentas donde aparece «Tu canal de YouTube» (ver «Sección «Tu canal de YouTube»»,
+arriba).
+
+1. Si sale «Reconecta YouTube para ver sus números completos.», apretar «Reconectar YouTube →»,
+   entrar con la cuenta de Google del canal y, en la ventana de Google, dejar marcado el permiso
+   de YouTube Analytics. Al día siguiente, o después de «Sincronizar ahora» en Los Fierros,
+   llegan los números.
+2. Bajar a «Tu canal de YouTube»: «De dónde llegó la gente» dice cuánto vino del feed de Shorts,
+   de la búsqueda o de afuera; «Quién mira», de qué países y de qué edad y género.
+3. Para ver cómo se movió el canal día a día, elegir el período (o «Todo») y mirar «Día a día».
+
+### Para ver cuánto se miró un video de YouTube (retención)
+
+Solo en las cuentas donde aparece «Tu canal de YouTube».
+
+1. Abrir la pieza del video: desde «Ver todas las publicaciones →», «Lo que más creció» o «Tu
+   mejor 10 %».
+2. Bajar a «En YouTube Analytics»: «Duración media» es cuánto se miró en promedio, y «Porcentaje
+   visto», qué parte del video. «Suscriptores ganados» dice cuántos se suscribieron desde ese
+   video.
 
 ### Para promocionar una publicación
 
@@ -1764,6 +1880,10 @@ De día, donde una de estas frases dice «La Parrilla» dice «La Barra», y «L
 | «Elige las dos fechas.» (en el selector de fechas) | Uno de los dos campos está vacío o a medio escribir. | Completar el campo. |
 | «Todavía no hay anuncios leídos. Si promocionaste una publicación, vuelve a conectar Instagram en Los Fierros y acepta el permiso para ver tus anuncios: los números llegan con la sincronización diaria.» (en «Lo pagado») | Nunca se leyó un anuncio de la persona: no dio el permiso para ver sus anuncios, no tiene una cuenta publicitaria, o sus anuncios nunca llegaron a mostrarse. | Volver a conectar Instagram en Los Fierros aceptando todos los permisos, y esperar la sincronización o apretar «Sincronizar ahora». |
 | «Ningún anuncio tuyo corrió en este período.» (en «Lo pagado») | Hay anuncios leídos, pero ninguno estuvo corriendo en las fechas elegidas. | Ampliar el período, o «Todo». |
+| «Reconecta YouTube para ver sus números completos.» (en «Tu canal de YouTube» y en «En YouTube Analytics», en la pieza) | El canal se conectó sin el permiso para leer YouTube Analytics: antes de que Tu Parrilla lo pidiera, o porque se desmarcó en la ventana de Google. También aparece si después se quitó el permiso desde la cuenta de Google. | Apretar «Reconectar YouTube →», entrar con la cuenta de Google del canal, dejar marcado el permiso de YouTube Analytics y esperar la sincronización (o «Sincronizar ahora» en Los Fierros). |
+| «Todavía no hay días de YouTube Analytics en este período: llegan con la sincronización diaria.» (en «Día a día») | El canal tiene el permiso, pero no hay días leídos en esas fechas: se conectó hoy, o el período es de antes de lo que se leyó (la primera lectura trae los últimos tres años). | Esperar la sincronización, o elegir otro período. |
+| «Sin números de YouTube Analytics todavía: llegan con la sincronización diaria.» (en «En YouTube Analytics», en la pieza) | Ese video todavía no tiene números de YouTube Analytics: es nuevo, o YouTube aún no lo cuenta. | Esperar uno o dos días. |
+| «YouTube no entrega edad ni género de un canal con pocos espectadores en el período.» (en «Quién mira») | YouTube esconde la edad y el género cuando son pocos espectadores, para no identificar a nadie. | Nada: aparece sola cuando el canal tiene más audiencia. |
 | «Ninguno de estos anuncios promociona una publicación de tus cuentas conectadas.» (en «Tus publicaciones promocionadas») | Los anuncios del período no salen de una publicación de Instagram o Facebook conectada en Tu Parrilla. | Nada: sus números ya están en las cuatro cifras. Si la publicación es de otra cuenta, conectarla en Los Fierros. |
 | «Meta deshabilitó esta cuenta publicitaria. El motivo está en el Administrador de anuncios, en la Calidad de la cuenta.» (en «Promocionar») | Meta no deja anunciar con esa cuenta publicitaria. | Elegir otra cuenta, o resolverlo en el Administrador de anuncios. |
 | «Esta cuenta publicitaria tiene un pago pendiente: págalo en el Administrador de anuncios (Facturación) y vuelve.», «Esta cuenta publicitaria está en período de gracia por un pago: regularízalo en el Administrador de anuncios antes de gastar más.» (en «Promocionar») | Hay una deuda con Meta en esa cuenta. | Pagarla en el Administrador de anuncios y volver. |
@@ -1855,6 +1975,14 @@ De día, donde una de estas frases dice «La Parrilla» dice «La Barra», y «L
 
 ## Si el humano dice…
 
+- **«¿Dónde veo la retención de mis Shorts?» / «el tiempo visto» / «de dónde viene mi tráfico
+  en YouTube» / «la edad de mi audiencia»**: en el tablero, la sección «Tu canal de YouTube»
+  (tráfico y audiencia), y en la pieza de cada video, «En YouTube Analytics» (duración media y
+  porcentaje visto). Si no aparece, la cuenta todavía no está habilitada: mientras Google revisa
+  el permiso de YouTube Analytics, solo la ven algunas cuentas. Si aparece con «Reconecta YouTube
+  para ver sus números completos.», falta volver a conectar el canal dejando marcado ese permiso.
+- **«¿Por qué YouTube Analytics no suma las views del período?»**: las reglas de YouTube no dejan
+  calcular métricas con sus datos; cada día va como lo dio YouTube, en «Día a día».
 - **«¿Dónde veo cómo le fue a lo que promocioné?» / «mis anuncios» / «lo que pagué en Meta»**: en
   el tablero, la sección «Lo pagado», entre «En las redes» y «En tu página». Si no aparece, la
   cuenta todavía no está habilitada: mientras Meta revisa el permiso para leer anuncios, solo la
@@ -2073,6 +2201,9 @@ De día, donde una de estas frases dice «La Parrilla» dice «La Barra», y «L
   segmentación ni lo gastado día a día; y la planilla de «Llevar para la casa» no lo lleva.
 - No adivina versiones: dos posts programados se ven juntos solo si comparten el atributo
   `pieza`. Una publicación subida a mano en la red no se junta con nada.
+- «Tu canal de YouTube» no suma ni resta lo que da YouTube: no muestra totales del período, ni
+  suscriptores netos, ni la retención minuto a minuto de un video (la curva de YouTube Studio), ni
+  ingresos. La planilla de «Llevar para la casa» no lleva lo de YouTube Analytics.
 - No edita los atributos aquí: «Editar atributos» lleva al editor del post, en
   [La Parrilla](la-parrilla.md).
 - «Comparar por atributo» no cruza dos atributos a la vez (hook y tema juntos), ni muestra qué
@@ -2203,6 +2334,12 @@ Sale de:
   de dónde sale la etiqueta)
 - `src/lib/networks.ts` (nombres de las redes y de los orígenes, y cómo se deducen)
 - `src/lib/social/politica-youtube.ts` y `src/lib/social/retencion-youtube.ts` (YouTube)
+- `src/app/admin/(dash)/analytics/tu-canal-de-youtube.tsx` («Tu canal de YouTube» y el aviso de
+  reconectar), `src/app/admin/(dash)/analytics/publicaciones/[id]/en-youtube-analytics.tsx` («En
+  YouTube Analytics», en la pieza), `src/lib/analitica-youtube-lectura.ts` (qué se lee),
+  `src/lib/social/analitica-youtube.ts` (los nombres de las fuentes y de la audiencia, la
+  duración, la frase de reconectar) y `src/lib/redes-abiertas.ts` (`analiticaDeYoutubeAbiertaPara`:
+  quién la ve)
 - `src/lib/social/comentarios/reglas.ts` (las etiquetas `dm-`)
 - `src/lib/social/sync.ts` y `src/lib/social/index.ts` (qué redes se sincronizan, borrados,
   lectura diaria), con `vercel.json` (la hora de la sincronización), y

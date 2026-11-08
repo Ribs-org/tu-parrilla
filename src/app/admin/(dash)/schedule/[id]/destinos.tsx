@@ -20,6 +20,8 @@ type Destino = {
   handle: string | null
   status: TargetStatus
   lastError: string | null
+  /** Salió, pero un paso de después no (la playlist de YouTube): `scheduled_post_targets.aviso`. */
+  aviso?: string | null
   opciones: unknown
   externalId: string | null
   captionOverride: string | null
@@ -37,7 +39,8 @@ const CLASE_ESTADO: Record<string, string> = {
 
 /**
  * Cómo va el post en cada red, arriba del editor: su corte con todas las marcas y, al lado, una
- * línea por destino con su chip, su estado en palabras, el motivo si falló o reintenta, y lo
+ * línea por destino con su chip, su estado en palabras, el motivo si falló o reintenta, el aviso
+ * si salió con algo a medias (un video que no entró a su playlist de YouTube), y lo
  * que se puede hacer —el arreglo exacto cuando lo hay (`arregloDe`), «Reprogramar» y
  * «Archivar» si se quemó, o «Reconectar» si su fierro está frío—. Un quemado archivado lo
  * dice, y se desarchiva acá: es el único lugar del panel donde se ve, porque «Se quemó» ya no
@@ -89,6 +92,7 @@ export function DestinosDelPost({
                 {motivo ? (
                   <p className={cn('mt-0.5 text-[0.8rem]', d.status === 'failed' ? 'text-negative' : 'text-caution')}>{motivo}</p>
                 ) : null}
+                {d.status === 'published' && d.aviso ? <p className="mt-0.5 text-[0.8rem] text-caution">{d.aviso}</p> : null}
                 {d.status === 'failed' && d.archivadoEn ? (
                   <p className="mt-0.5 text-[0.8rem] text-fg-muted">
                     Archivado: ya no sale en «<DeNocheYDeDia noche={SE_QUEMO.noche} dia={SE_QUEMO.dia} />» ni en el

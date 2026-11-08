@@ -47,6 +47,8 @@ export type Credential = {
   candidatas: CandidataConToken[]
   /** El id de usuario de la app de Meta; solo en `instagram` y `facebook`, y sin valor si /me falló. */
   metaUserId?: string
+  /** Los permisos que la red dijo conceder, tal como los dijo; solo YouTube los guarda (`social_accounts.scopes`). */
+  scopes?: string | null
   /** Con qué login se conectó una cuenta de Instagram (`social/instagram-login.ts`). */
   login?: LoginDeInstagram
 }
@@ -294,6 +296,8 @@ async function youtubeCredential(code: string, redirectUri: string): Promise<Cre
     refreshToken: tokens.refresh_token,
     expiresAt: new Date(Date.now() + (tokens.expires_in ?? 3600) * 1000),
     candidatas: canales.map((c) => ({ externalId: c.id, handle: c.snippet?.title ?? null })),
+    // La ventana de Google deja destildar cada permiso: lo concedido es esto, no lo pedido.
+    scopes: tokens.scope ?? null,
   }
 }
 
@@ -564,6 +568,7 @@ export async function GET(
         expiresAt: credential.expiresAt,
         metaUserId: credential.metaUserId,
         login: credential.login,
+        scopes: credential.scopes,
       })
       // Una conexión que terminó no puede dejar otra a medias detrás: la cookie de una
       // elección anterior abandonada seguiría viva diez minutos y confundiría al panel. Si se
@@ -588,6 +593,7 @@ export async function GET(
         expiresAt: credential.expiresAt?.toISOString() ?? null,
         candidatas: credential.candidatas.map(({ externalId, handle }) => ({ externalId, handle })),
         metaUserId: credential.metaUserId ?? null,
+        scopes: credential.scopes ?? null,
         emitidoEn: Date.now(),
         sub: usuario.id,
       }),

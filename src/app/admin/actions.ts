@@ -577,6 +577,7 @@ export async function conectarElegidas(formData: FormData): Promise<void> {
         refreshToken: pendiente.refreshToken,
         expiresAt: pendiente.expiresAt ? new Date(pendiente.expiresAt) : null,
         metaUserId: pendiente.metaUserId,
+        scopes: pendiente.scopes,
       })
     }
   } catch (error) {

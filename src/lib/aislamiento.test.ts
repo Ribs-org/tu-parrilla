@@ -115,6 +115,8 @@ const { contarEnlacesPorPagina, getAllProfiles, getProfileBySlug } = await impor
 const { getCola, getComentariosQueFaltan } = await import('./comentarios-cola')
 const { verificarCuentas, cuentaUnicaPorRed } = await import('./social/cuentas')
 const { cuentaDeMusica } = await import('./musica-instagram')
+const { playlistsDeLaCuenta } = await import('./playlists-youtube')
+const { playlistsAccion } = await import('@/app/admin/playlists-actions')
 const { esperaALaAnterior } = await import('./social/publish/secuencia')
 const { todosLosCortes, cortesEntre, cortesQuemados, horasPorVenir, servidosAyer } = await import(
   './social/publish/cortes'
@@ -338,6 +340,27 @@ describe('aislamiento por dueño (SQL generado, sin base)', () => {
 
   it('musica-instagram: cuentaDeMusica solo usa una cuenta del dueño (buscar, escuchar y sugerir pasan por acá)', async () => {
     const consultas = await todasLasConsultas(() => cuentaDeMusica(DUENO, '6f1c2a54-9b1e-4c3d-8f00-0123456789ab'))
+    expect(consultas).toHaveLength(1)
+    esperarFiltradoPorDueno(consultas[0]!)
+  })
+
+  it('playlists-youtube: playlistsDeLaCuenta solo usa un canal del dueño (el compositor y el teléfono pasan por acá)', async () => {
+    const consultas = await todasLasConsultas(() => playlistsDeLaCuenta(DUENO, '6f1c2a54-9b1e-4c3d-8f00-0123456789ab'))
+    expect(consultas).toHaveLength(1)
+    esperarFiltradoPorDueno(consultas[0]!)
+  })
+
+  it('admin/playlists-actions: playlistsAccion ata la cuenta al dueño de la sesión', async () => {
+    const consultas = await todasLasConsultas(() => playlistsAccion('6f1c2a54-9b1e-4c3d-8f00-0123456789ab'))
+    expect(consultas).toHaveLength(1)
+    esperarFiltradoPorDueno(consultas[0]!)
+  })
+
+  it('api/mobile/youtube/playlists: GET solo lee un canal del dueño del token', async () => {
+    const { GET } = await import('../app/api/mobile/youtube/playlists/route')
+    const consultas = await todasLasConsultas(() =>
+      GET(new Request('https://ejemplo.cl/api/mobile/youtube/playlists?cuenta=6f1c2a54-9b1e-4c3d-8f00-0123456789ab')),
+    )
     expect(consultas).toHaveLength(1)
     esperarFiltradoPorDueno(consultas[0]!)
   })

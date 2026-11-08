@@ -7,6 +7,7 @@ import { LoPagado } from './lo-pagado'
 import { ParaLlevar } from './para-llevar'
 import { QueFunciona } from './que-funciona'
 import { TiktokAFondo } from './tiktok-a-fondo'
+import { TuCanalDeYoutube } from './tu-canal-de-youtube'
 import { BarList } from '@/components/charts/bar-list'
 import { CampaignTable } from '@/components/charts/campaign-table'
 import { Donut } from '@/components/charts/donut'
@@ -44,7 +45,12 @@ import {
 import { parseFilters } from '@/lib/filters'
 import { networkLabel } from '@/lib/networks'
 import { etiquetaDeFechas } from '@/lib/rango'
-import { anunciosAbiertosPara, promocionarAbiertoPara, tiktokBusinessAbiertoPara } from '@/lib/redes-abiertas'
+import {
+  analiticaDeYoutubeAbiertaPara,
+  anunciosAbiertosPara,
+  promocionarAbiertoPara,
+  tiktokBusinessAbiertoPara,
+} from '@/lib/redes-abiertas'
 import {
   MAX_PUBLICACIONES_LEIDAS,
   getCampaignPosts,
@@ -108,7 +114,9 @@ function nombreDeCuenta(cuenta: Pick<CuentaRow, 'network' | 'handle'>): string {
  * «En tu página» es quién entró a tu página de links y qué apretó, y lo cuenta Tu Parrilla.
  * Cada mitad muestra dos números y una lista; el resto espera detrás de su «⋯ Más», que la
  * URL abre (`?mas=redes`, `?mas=pagina`) para que no se consulte lo que no se va a ver.
- * Entre las dos, solo para quien `anunciosAbiertosPara` deja, «Lo pagado» (`lo-pagado.tsx`).
+ * Entre las dos, solo para quien `anunciosAbiertosPara` deja, «Lo pagado» (`lo-pagado.tsx`), y
+ * solo para quien `analiticaDeYoutubeAbiertaPara` deja, «Tu canal de YouTube»
+ * (`tu-canal-de-youtube.tsx`).
  *
  * Reemplaza a dos pantallas que compartían barra de filtros y no se explicaban entre sí (ver
  * `docs/superpowers/specs/2026-10-13-numeros-tablero-design.md`).
@@ -159,6 +167,12 @@ export default async function NumerosPage({ searchParams }: { searchParams: Prom
               params={params}
               nombres={Object.fromEntries(cuentas.map((c) => [c.id, nombreDeCuenta(c)]))}
             />
+          </Suspense>
+        ) : null}
+        {/* Solo para quien `YOUTUBE_ANALITICA_ABIERTO_PARA` nombra, mientras Google revisa el permiso. */}
+        {analiticaDeYoutubeAbiertaPara(ownerId) && (cuenta === null || cuenta.network === 'youtube') ? (
+          <Suspense fallback={<SeccionCargando orden={3} />}>
+            <TuCanalDeYoutube ownerId={ownerId} periodo={filters.periodo} cuentaId={cuenta?.id ?? null} />
           </Suspense>
         ) : null}
         <Suspense fallback={<SeccionCargando orden={4} />}>

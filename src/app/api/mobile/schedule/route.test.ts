@@ -108,6 +108,7 @@ function filaTarget(overrides: Partial<ScheduledPostTarget> = {}): ScheduledPost
     externalId: null,
     attemptCount: 0,
     lastError: null,
+    aviso: null,
     reintentarDesde: null,
     opciones: null,
     reclamadoHasta: null,
@@ -576,6 +577,35 @@ describe('POST /api/mobile/schedule', () => {
 
       await POST(peticion({ texto: 'Hola', cuentas: ['c-ig'], ahora: true, media: video, borradorId: BORRADOR, conMusica: true }))
       expect(crearPostProgramado).toHaveBeenLastCalledWith('owner-1', expect.objectContaining({ opciones: {} }))
+      cargarBorrador.mockReset()
+      resolverDestinos.mockReset()
+    })
+
+    it('una app sin el bloque de YouTube programa con las opciones de YouTube del borrador; una con él, con las suyas', async () => {
+      const yt: CuentaDestino = { id: 'c-yt', network: 'youtube', handle: 'Canal' }
+      const campos = { cuentas: ['c-yt'], 'youtubeVisibilidad:c-yt': ['private'], 'youtubeIA:c-yt': ['on'] }
+      const video = [{ url: 'https://cdn.ejemplo.cl/scheduled/a.mp4', mediaType: 'video' }]
+      cargarBorrador.mockResolvedValue({ id: BORRADOR, campos, fecha: null, media: [] })
+      resolverDestinos.mockResolvedValue({ cuentas: [yt], networks: ['youtube'] })
+      crearPostProgramado.mockResolvedValue('post-1')
+
+      // Sin esto, el video que en el panel quedó privado saldría público.
+      await POST(peticion({ texto: 'Hola', cuentas: ['c-yt'], ahora: true, media: video, borradorId: BORRADOR }))
+      expect(crearPostProgramado).toHaveBeenLastCalledWith(
+        'owner-1',
+        expect.objectContaining({ opciones: { 'c-yt': { visibilidad: 'private', ia: true } } }),
+      )
+
+      await POST(
+        peticion(
+          { texto: 'Hola', cuentas: ['c-yt'], ahora: true, media: video, borradorId: BORRADOR, opciones: { 'c-yt': { visibilidad: 'unlisted' } } },
+          'tiktok,palabra-clave,youtube',
+        ),
+      )
+      expect(crearPostProgramado).toHaveBeenLastCalledWith(
+        'owner-1',
+        expect.objectContaining({ opciones: { 'c-yt': { visibilidad: 'unlisted' } } }),
+      )
       cargarBorrador.mockReset()
       resolverDestinos.mockReset()
     })

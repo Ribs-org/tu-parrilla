@@ -90,10 +90,10 @@ describe('armarProgramados', () => {
       atributos: { hook: 'pregunta' },
       ref: 'lote-7',
       redes: [
-        { red: 'instagram', estado: 'published', error: null, externalId: '18', intentos: 1, proximoIntento: null, cuentaId: 'acc-ig', handle: '@vicente', archivado: false, opciones: null },
+        { red: 'instagram', estado: 'published', error: null, aviso: null, externalId: '18', intentos: 1, proximoIntento: null, cuentaId: 'acc-ig', handle: '@vicente', archivado: false, opciones: null },
         // Quemado y archivado: la hora de su último reintento ya no dice nada, aunque la fila la
         // traiga, y el error se queda aunque esté archivado.
-        { red: 'x', estado: 'failed', error: 'X aún no recibe video desde el calendario.', externalId: null, intentos: 3, proximoIntento: null, cuentaId: 'acc-x', handle: null, archivado: true, opciones: null },
+        { red: 'x', estado: 'failed', error: 'X aún no recibe video desde el calendario.', aviso: null, externalId: null, intentos: 3, proximoIntento: null, cuentaId: 'acc-x', handle: null, archivado: true, opciones: null },
       ],
     })
   })
@@ -134,6 +134,21 @@ describe('armarProgramados', () => {
       { trialReel: true },
       null,
     ])
+  })
+
+  it('un YouTube publicado que no entró a su playlist trae el aviso; en otro estado no', () => {
+    const base = { post: { id: 'p5', caption: '', scheduledAt: new Date('2026-06-21T22:00:00Z'), coverUrl: null, atributos: null, ref: null }, handle: null }
+    const destino = { network: 'youtube', lastError: null, externalId: 'v1', attemptCount: 1, reintentarDesde: null, accountId: 'acc-yt' }
+    const [post] = armarProgramados(
+      [
+        { ...base, target: { ...destino, status: 'published', aviso: 'Salió en YouTube, pero…', opciones: { playlist: 'PL1' } } },
+        { ...base, target: { ...destino, accountId: 'acc-yt2', status: 'scheduled', aviso: 'viejo' } },
+      ],
+      [],
+      ZONE,
+    )
+    expect(post!.redes.map((r) => r.aviso)).toEqual(['Salió en YouTube, pero…', null])
+    expect(post!.redes[0]!.opciones).toEqual({ visibilidad: 'public', ia: false, playlist: 'PL1' })
   })
 
   it('un post sin media ni atributos viaja con lista vacía y null, nunca 0', () => {

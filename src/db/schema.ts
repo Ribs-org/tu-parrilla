@@ -315,6 +315,17 @@ export const socialAccounts = pgTable(
     // (`musicaParaRecordar`). Es lo único de TikTok que se recuerda: la privacidad y las demás
     // casillas nacen siempre sin elegir, como pide la guía de TikTok.
     tiktokMusica: boolean('tiktok_musica'),
+    // Los permisos que la red dijo conceder al conectar, tal como los dijo (Google los separa con
+    // espacios). Solo YouTube por ahora: es lo que distingue un canal conectado con el permiso de
+    // analítica de uno conectado antes, o de uno cuyo dueño lo destildó en la ventana de Google
+    // (`social/analitica-youtube.ts`). Nulo en las demás redes y en los canales conectados antes
+    // del 2026-11-08, que se leen como «sin analítica».
+    scopes: text('scopes'),
+    // La última vez que la API de YouTube Analytics contestó con el token de este canal: la prueba
+    // de que el dueño sigue autorizando. Las políticas dejan guardar esos datos mientras haya
+    // autorización, y piden comprobarla cada 30 días (§III.E.4.b); sin una prueba en ese plazo,
+    // `retencion-youtube` borra lo de analítica del canal. Nula mientras nunca se haya leído.
+    analiticaVerificadaEn: timestamp('analitica_verificada_en', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [
@@ -431,6 +442,97 @@ export const accountMetrics = pgTable(
     unique('account_metrics_account_day_key').on(t.day, t.accountId),
     index('account_metrics_day_idx').on(t.day),
   ],
+).enableRLS()
+
+/**
+ * Lo que la API de YouTube Analytics dice de un canal, día por día (`social/analitica-youtube.ts`).
+ * Cada fila es el valor de ese día tal como lo da YouTube, no un acumulado: aquí no se resta ni se
+ * suma nada (§III.E.4.h). Se reescriben los últimos días en cada sincronización, porque YouTube
+ * tarda unos días en asentar sus cifras.
+ *
+ * Son datos autorizados de la API de Analytics: se guardan mientras el dueño siga autorizando, sin
+ * el plazo de 30 días de las estadísticas leídas con la API key (§III.E.4.b). Ver
+ * `politica-youtube.ts`. Cuelgan de la cuenta, en cascada: «Quitar» y la fusión las llevan con ella.
+ */
+export const youtubeAnaliticaDias = pgTable(
+  'youtube_analitica_dias',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    accountId: uuid('account_id')
+      .notNull()
+      .references(() => socialAccounts.id, { onDelete: 'cascade' }),
+    day: date('day').notNull(),
+    views: integer('views'),
+    engagedViews: integer('engaged_views'),
+    minutosVistos: integer('minutos_vistos'),
+    // En segundos, como lo da YouTube.
+    duracionMedia: integer('duracion_media'),
+    likes: integer('likes'),
+    comments: integer('comments'),
+    shares: integer('shares'),
+    suscriptoresGanados: integer('suscriptores_ganados'),
+    suscriptoresPerdidos: integer('suscriptores_perdidos'),
+    capturedAt: timestamp('captured_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [unique('youtube_analitica_dias_account_day_key').on(t.accountId, t.day)],
+).enableRLS()
+
+/**
+ * Lo que YouTube Analytics dice de un video desde que se publicó hasta `hasta`: una fila por
+ * video, que la sincronización reescribe a diario. Se borra con su post, y `retencion-youtube`
+ * borra la que lleva 30 días sin refrescarse: un video borrado o privado deja de llegar, y las
+ * políticas piden comprobar cada 30 días que el video sigue ahí.
+ */
+export const youtubeAnaliticaVideos = pgTable(
+  'youtube_analitica_videos',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    postId: uuid('post_id')
+      .notNull()
+      .references(() => socialPosts.id, { onDelete: 'cascade' }),
+    views: integer('views'),
+    engagedViews: integer('engaged_views'),
+    minutosVistos: integer('minutos_vistos'),
+    duracionMedia: integer('duracion_media'),
+    // Lo que YouTube llama `averageViewPercentage`, tal cual (puede pasar de 100 en un Short que
+    // se repite).
+    porcentajeVisto: doublePrecision('porcentaje_visto'),
+    likes: integer('likes'),
+    comments: integer('comments'),
+    shares: integer('shares'),
+    suscriptoresGanados: integer('suscriptores_ganados'),
+    suscriptoresPerdidos: integer('suscriptores_perdidos'),
+    desde: date('desde').notNull(),
+    hasta: date('hasta').notNull(),
+    capturedAt: timestamp('captured_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [unique('youtube_analitica_videos_post_key').on(t.postId)],
+).enableRLS()
+
+/**
+ * Los desgloses del canal de los últimos 28 días, tal como los da YouTube Analytics: de dónde llegó
+ * la gente (`tipo` «trafico», `clave` el `insightTrafficSourceType`), de qué país (`pais`, el código
+ * ISO) y de qué edad y género (`audiencia`, «age25-34|female»). Las dos primeras traen views y
+ * minutos; la audiencia, solo el porcentaje de espectadores que da YouTube. Se reescriben enteros en
+ * cada sincronización.
+ */
+export const youtubeAnaliticaDesgloses = pgTable(
+  'youtube_analitica_desgloses',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    accountId: uuid('account_id')
+      .notNull()
+      .references(() => socialAccounts.id, { onDelete: 'cascade' }),
+    tipo: text('tipo').notNull().$type<'trafico' | 'pais' | 'audiencia'>(),
+    clave: text('clave').notNull(),
+    views: integer('views'),
+    minutosVistos: integer('minutos_vistos'),
+    porcentaje: doublePrecision('porcentaje'),
+    desde: date('desde').notNull(),
+    hasta: date('hasta').notNull(),
+    capturedAt: timestamp('captured_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [unique('youtube_analitica_desgloses_key').on(t.accountId, t.tipo, t.clave)],
 ).enableRLS()
 
 /**
@@ -593,6 +695,11 @@ export const scheduledPostTargets = pgTable(
     externalId: text('external_id'),
     attemptCount: integer('attempt_count').notNull().default(0),
     lastError: text('last_error'),
+    // Un destino que salió con un paso de después a medias: hoy, un video de YouTube que no
+    // entró a la playlist elegida (`social/publish/youtube.ts`). Una frase nuestra, como
+    // `lastError`, pero no es un fallo: el destino sigue `published`. La escribe `publishDue`
+    // al publicar —nula si no hubo nada que avisar— y la muestra el editor.
+    aviso: text('aviso'),
     // No se intenta antes de esta hora. La pone `resolveOutcome`: la espera entre un intento
     // fallido y el siguiente (`ESPERAS_TRAS_FALLO_MS`), o la que pide una red sin cupo (el
     // tope diario de Instagram). Nula = sale en la primera corrida después de su hora.

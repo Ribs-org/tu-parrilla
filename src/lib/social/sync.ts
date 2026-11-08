@@ -9,6 +9,7 @@ import { esChoqueCon } from '../choque-de-unicidad'
 import { env } from '../env'
 import { adminId, buscarPorId } from '../usuarios'
 import { ZONA_POR_DEFECTO } from '../zona'
+import { sincronizarAnaliticaDeYoutube } from './analitica-youtube-sync'
 import { sincronizarAnuncios } from './anuncios-sync'
 import { postsToArchive } from './archive'
 import { campaignTagFor, type CuentaTag } from './campaign'
@@ -394,6 +395,16 @@ export async function syncAll(ownerId?: string): Promise<SyncReport> {
     if (anuncios > 0) console.log(`[sync] anuncios: ${anuncios} leídos`)
   } catch (error) {
     console.error('[sync] anuncios:', String(error).slice(0, 300))
+  }
+  // YouTube Analytics, igual: al final, por su cuenta y sin tocar el informe. Solo los canales con
+  // el permiso, de dueños con la analítica abierta (`analitica-youtube-sync.ts`).
+  try {
+    for (const canal of await sincronizarAnaliticaDeYoutube(ownerId)) {
+      if (canal.ok) console.log(`[sync] analítica de YouTube ${canal.canal}: ${canal.dias} días, ${canal.videos} videos`)
+      else console.error(`[sync] analítica de YouTube ${canal.canal}:`, canal.error)
+    }
+  } catch (error) {
+    console.error('[sync] analítica de YouTube:', String(error).slice(0, 300))
   }
   return porRedResuelto.flat()
 }

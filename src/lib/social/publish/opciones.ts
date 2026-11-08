@@ -1,5 +1,6 @@
-// Lo que cada red obliga a elegir por destino antes de publicar. TikTok, Instagram y Facebook
-// piden algo hoy; la unión crece red por red y el resto del sistema solo transporta el objeto.
+// Lo que cada red obliga o deja elegir por destino antes de publicar. TikTok, Instagram,
+// Facebook y YouTube tienen algo hoy; la unión crece red por red y el resto del sistema solo
+// transporta el objeto.
 
 import type { CuentaDestino } from '../cuentas'
 
@@ -70,7 +71,34 @@ export type OpcionesFacebook = { historia: Historia }
  */
 export type Historia = true | { secuencia: string; orden: number }
 
-export type OpcionesDestino = OpcionesTikTok | OpcionesInstagram | OpcionesFacebook
+/**
+ * YouTube: quién lo ve, si es contenido hecho o alterado con IA, y una playlist del canal donde
+ * agregarlo. Todo opcional y guardado solo cuando no es lo de siempre —público, sin IA, sin
+ * playlist—, para que un destino sin opciones siga diciendo exactamente eso, como antes de que
+ * existieran. Nada de esto pide un permiso de Google nuevo: `videos.insert` lo lleva en
+ * `status`, y `playlists.list` y `playlistItems.insert` van con `youtube.force-ssl`, que la app
+ * ya tiene.
+ */
+export type OpcionesYoutube = {
+  /** `status.privacyStatus` del video. Ausente es público. */
+  visibilidad?: Exclude<VisibilidadYoutube, 'public'>
+  /**
+   * Hecho con IA: la declaración de contenido alterado o sintético de YouTube
+   * (`status.containsSyntheticMedia`). Opcional y solo cuando está encendido, como en TikTok.
+   */
+  ia?: true
+  /**
+   * El id de una playlist del canal, para `playlistItems.insert` cuando el video sale. Solo el
+   * id: el título se le pregunta a YouTube cuando hay que mostrarlo (`playlists-youtube.ts`) y
+   * no se guarda, porque las políticas de la API de YouTube no dejan guardar sus datos sin
+   * refrescarlos (`politica-youtube.ts`).
+   */
+  playlist?: string
+}
+
+export type VisibilidadYoutube = 'public' | 'unlisted' | 'private'
+
+export type OpcionesDestino = OpcionesTikTok | OpcionesInstagram | OpcionesFacebook | OpcionesYoutube
 
 export const PRIVACIDADES_TIKTOK: readonly PrivacidadTikTok[] = [
   'PUBLIC_TO_EVERYONE',
@@ -87,6 +115,34 @@ export const ETIQUETA_PRIVACIDAD: Record<PrivacidadTikTok, string> = {
 }
 
 const COMERCIALES: readonly ComercialTikTok[] = ['no', 'marca_propia', 'patrocinado']
+
+export const VISIBILIDADES_YOUTUBE: readonly VisibilidadYoutube[] = ['public', 'unlisted', 'private']
+
+export const ETIQUETA_VISIBILIDAD_YOUTUBE: Record<VisibilidadYoutube, string> = {
+  public: 'Público',
+  unlisted: 'No listado',
+  private: 'Privado',
+}
+
+/** Lo que dice cada visibilidad al elegirla, en el compositor y en el teléfono. */
+export const AYUDA_VISIBILIDAD_YOUTUBE: Record<VisibilidadYoutube, string> = {
+  public: 'Lo ve cualquiera en YouTube.',
+  unlisted: 'Solo quien tenga el link: no sale en tu canal ni en las búsquedas.',
+  private: 'Solo tú, desde YouTube Studio.',
+}
+
+/**
+ * Las dos frases del interruptor «Hecho con IA» de YouTube, apagado y encendido. YouTube pide
+ * declararlo cuando lo realista se hizo o se cambió con IA y podría pasar por real; una
+ * animación evidente o un filtro de color no.
+ */
+export const IA_YOUTUBE_APAGADO =
+  'Enciéndelo si el video muestra de forma realista una persona, un lugar o un hecho que se hizo o se cambió con IA: YouTube pide avisarlo.'
+export const IA_YOUTUBE_ENCENDIDO = 'YouTube lo marcará como contenido alterado o sintético.'
+
+/** El id de una playlist de YouTube: `PL…` las que hace una persona; las del sistema tienen otras formas. */
+const PLAYLIST_ID = /^[A-Za-z0-9_-]{2,64}$/
+const CLAVES_YOUTUBE = ['visibilidad', 'ia', 'playlist']
 
 export const TIKTOK_SIN_PRIVACIDAD = 'TikTok necesita que elijas la privacidad.'
 export const TIKTOK_PATROCINADO_PRIVADO = 'Un contenido patrocinado no puede ser privado.'
@@ -271,6 +327,43 @@ function validarFacebook(raw: unknown): { opciones: OpcionesFacebook | null } | 
 }
 
 /**
+ * YouTube: `visibilidad` (`public`, `unlisted` o `private`; ausente es `public`), `ia`
+ * (booleano) y `playlist` (el id, o `null` sin playlist). Todo en lo de siempre es `null`: no se
+ * guarda nada. Una clave desconocida se rechaza, como en Instagram: quien manda `privacidad` en
+ * vez de `visibilidad` tiene que enterarse, no recibir un video público creyendo que era privado.
+ */
+function validarYoutube(raw: unknown): { opciones: OpcionesYoutube | null } | { error: string } {
+  if (raw === undefined || raw === null) return { opciones: null }
+  if (!esObjeto(raw)) return { error: OPCIONES_ERROR }
+  if (JSON.stringify(raw).length > MAX_SERIALIZED) return { error: OPCIONES_ERROR }
+  for (const clave of Object.keys(raw)) if (!CLAVES_YOUTUBE.includes(clave)) return { error: OPCIONES_ERROR }
+  const visibilidad = raw.visibilidad === undefined ? 'public' : raw.visibilidad
+  if (!(VISIBILIDADES_YOUTUBE as readonly unknown[]).includes(visibilidad)) return { error: OPCIONES_ERROR }
+  const ia = casilla(raw.ia)
+  if (ia === null) return { error: OPCIONES_ERROR }
+  const { playlist } = raw
+  if (playlist !== undefined && playlist !== null && (typeof playlist !== 'string' || !PLAYLIST_ID.test(playlist))) {
+    return { error: OPCIONES_ERROR }
+  }
+  const opciones: OpcionesYoutube = {
+    ...(visibilidad !== 'public' ? { visibilidad: visibilidad as Exclude<VisibilidadYoutube, 'public'> } : {}),
+    ...(ia ? { ia: true as const } : {}),
+    ...(typeof playlist === 'string' ? { playlist } : {}),
+  }
+  return { opciones: Object.keys(opciones).length > 0 ? opciones : null }
+}
+
+/**
+ * Las opciones de YouTube de un destino tal como quedaron guardadas, o null si no tiene (o si lo
+ * guardado no se entiende). Las leen el publicador, el resumen y el editor.
+ */
+export function youtubeDe(network: string, opciones: unknown): OpcionesYoutube | null {
+  if (network !== 'youtube') return null
+  const check = validarYoutube(opciones)
+  return 'error' in check ? null : check.opciones
+}
+
+/**
  * `historia`: ausente o `false` es que no lo es; `true`, una suelta; un objeto, una de una
  * secuencia. Lo demás es un error de forma, como en el trial reel.
  */
@@ -314,6 +407,7 @@ export function validarOpciones(
   if (network === 'tiktok') return validarTikTok(raw)
   if (network === 'instagram') return validarInstagram(raw)
   if (network === 'facebook') return validarFacebook(raw)
+  if (network === 'youtube') return validarYoutube(raw)
   if (raw === undefined || raw === null) return { opciones: null }
   return { error: OPCIONES_ERROR }
 }
@@ -335,6 +429,7 @@ function errorDeHistoriaEnDestinos(cuentas: CuentaDestino[], opciones: Record<st
  * Las opciones guardadas de un destino como las devuelve `GET /api/schedule/posts`: la forma
  * que se aceptó, con cada casilla de TikTok explícita —`ia` y `musica` en false incluidas— para que quien
  * programó a ciegas pueda comprobar qué quedó sin adivinar qué significa una clave ausente.
+ * YouTube igual: con alguna opción, sus tres claves explícitas (`visibilidad`, `ia`, `playlist`).
  * Lo guardado ya pasó por `validarOpciones`; si una fila vieja no la pasara, sale tal cual.
  */
 export function opcionesParaApi(network: string, guardadas: unknown): Record<string, unknown> | null {
@@ -343,6 +438,10 @@ export function opcionesParaApi(network: string, guardadas: unknown): Record<str
   if ('error' in check) return esObjeto(guardadas) ? guardadas : null
   const o = check.opciones
   if (o && 'modo' in o && o.modo === 'directo') return { ...o, ia: Boolean(o.ia), musica: Boolean(o.musica) }
+  if (o && network === 'youtube') {
+    const y = o as OpcionesYoutube
+    return { visibilidad: y.visibilidad ?? 'public', ia: Boolean(y.ia), playlist: y.playlist ?? null }
+  }
   return o
 }
 
@@ -439,7 +538,7 @@ export function validarOpcionesPorCuenta(
  * privacidad viaja vacía a propósito: así la validación responde con la frase de la
  * privacidad y no con la de la forma. El interruptor de Instagram (`instagramTrial:<id>`)
  * y la canción de «Música de Instagram» (`instagramMusica:<id>`, en JSON) siguen la misma
- * convención de sufijo por cuenta.
+ * convención de sufijo por cuenta, y los tres campos de YouTube también (`youtubeDesdeFormulario`).
  */
 export function opcionesDesdeFormularioPorCuenta(
   formData: FormData,
@@ -454,6 +553,11 @@ export function opcionesDesdeFormularioPorCuenta(
       if (trial || musica !== undefined) {
         raw[cuenta.id] = { ...(trial ? { trialReel: true } : {}), ...(musica !== undefined ? { musica } : {}) }
       }
+      continue
+    }
+    if (cuenta.network === 'youtube') {
+      const youtube = youtubeDesdeFormulario(formData, cuenta.id)
+      if (youtube) raw[cuenta.id] = youtube
       continue
     }
     if (cuenta.network !== 'tiktok') continue
@@ -474,6 +578,24 @@ export function opcionesDesdeFormularioPorCuenta(
           }
   }
   return raw
+}
+
+/**
+ * El bloque de YouTube de una cuenta: `youtubeVisibilidad:<id>`, `youtubeIA:<id>` y
+ * `youtubePlaylist:<id>` (el id, o vacío sin playlist). Si todo está en lo de siempre es
+ * undefined: no hay nada que mandar. Lo que no se entiende viaja tal cual, para que la
+ * validación lo rechace con su frase en vez de publicar con otra visibilidad.
+ */
+export function youtubeDesdeFormulario(formData: FormData, cuentaId: string): Record<string, unknown> | undefined {
+  const visibilidad = String(formData.get(`youtubeVisibilidad:${cuentaId}`) ?? '')
+  const ia = formData.get(`youtubeIA:${cuentaId}`) === 'on'
+  const playlist = String(formData.get(`youtubePlaylist:${cuentaId}`) ?? '').trim()
+  const raw: Record<string, unknown> = {
+    ...(visibilidad && visibilidad !== 'public' ? { visibilidad } : {}),
+    ...(ia ? { ia: true } : {}),
+    ...(playlist ? { playlist } : {}),
+  }
+  return Object.keys(raw).length > 0 ? raw : undefined
 }
 
 /**
@@ -523,6 +645,15 @@ export function resumenOpciones(network: string, opciones: unknown, fotos = fals
     if (check.opciones.trialReel) partes.push('Trial reel — lo compartes tú desde Instagram')
     if (check.opciones.musica && unVideo) partes.push(`Con música de Instagram: ${nombreDeCancion(check.opciones.musica)}`)
     return partes.length > 0 ? partes.join(' · ') : null
+  }
+  if (network === 'youtube') {
+    const y = youtubeDe(network, opciones)
+    if (!y) return null
+    return [
+      ETIQUETA_VISIBILIDAD_YOUTUBE[y.visibilidad ?? 'public'],
+      ...(y.ia ? ['hecho con IA'] : []),
+      ...(y.playlist ? ['a una playlist'] : []),
+    ].join(' · ')
   }
   if (network !== 'tiktok') return null
   const check = validarTikTok(opciones)

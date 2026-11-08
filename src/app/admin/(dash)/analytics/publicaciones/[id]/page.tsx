@@ -12,10 +12,11 @@ import { networkLabel } from '@/lib/networks'
 import { CLAVE_PIEZA, ordenarVersiones, repartirAtributos, textoDeAtributo } from '@/lib/pieza'
 import { getPieza, type VersionDePieza } from '@/lib/piezas'
 import { getPostRows } from '@/lib/posts'
-import { promocionarAbiertoPara } from '@/lib/redes-abiertas'
+import { analiticaDeYoutubeAbiertaPara, promocionarAbiertoPara } from '@/lib/redes-abiertas'
 import { Promociones } from '../../promociones'
 import { VideoTiktokAFondo, type VersionAFondo } from '../../video-tiktok-a-fondo'
 import { videosAFondo } from '@/lib/social/tiktok-numeros-guardar'
+import { EnYoutubeAnalytics } from './en-youtube-analytics'
 import type { PostRow } from '@/lib/posts-kpis'
 import { numerosHref, type Params } from '@/lib/tablero'
 import { cn, formatNumber } from '@/lib/utils'
@@ -271,6 +272,10 @@ export default async function PiezaPage({
       </Panel>
 
       <VideoTiktokAFondo versiones={aFondo} />
+      {/* Solo para quien `YOUTUBE_ANALITICA_ABIERTO_PARA` nombra, mientras Google revisa el permiso. */}
+      {analiticaDeYoutubeAbiertaPara(ownerId) ? (
+        <EnYoutubeAnalytics ownerId={ownerId} versiones={versiones} hoy={filters.periodo.hoy} />
+      ) : null}
 
       {promocionar ? (
         <section id="promociones" aria-label="Promocionar" className="mt-3 scroll-mt-4">

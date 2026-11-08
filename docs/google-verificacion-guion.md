@@ -118,9 +118,28 @@ afirmar que se cumplen:
   La planilla de Los Números, además, deja fuera por su cuenta lo de más de 30 días, para no
   llevarse lo que la limpieza de ese día todavía no alcanzó a borrar.
 
+Desde el 2026-11-08 la subida tiene tres opciones por canal, ninguna con un permiso nuevo: la
+visibilidad (`privacyStatus`: público, no listado o privado; la justificación de `youtube.upload`
+de arriba dice «as a public video», que sigue siendo lo de siempre), «Hecho con IA»
+(`containsSyntheticMedia`) y «Agregar a una playlist», que lee las playlists del canal
+(`playlists.list mine=true`) y agrega el video publicado a la elegida (`playlistItems.insert`),
+las dos con `youtube.force-ssl`. Si la auditoría pregunta por esas llamadas: es el creador
+eligiendo una playlist de **su** canal para **su** video, y es la única escritura además de la
+subida y las respuestas. Los títulos de las playlists no se guardan —viven cinco minutos en la
+memoria del servidor, por canal—; queda el id de la elegida en las opciones del destino, porque
+sin él no se puede agregar después (`src/lib/social/playlists-youtube.ts`).
+
 La regla vive en `src/lib/social/politica-youtube.ts` y el borrado en
 `retencion-youtube.ts`. Existe un permiso aparte (§III.L) para que un desarrollador de
 analítica calcule métricas propias y guarde historia; no se pidió en la primera auditoría.
+
+Lo de YouTube Analytics, escrito y cerrado desde el 2026-11-08 (abajo, «La analítica: segunda
+verificación»), sigue otra regla, y conviene saberla contestar: leído con el token del dueño, es
+dato **autorizado** de §III.E.4.b, que se guarda mientras haga falta con una condición —comprobar
+cada 30 días que el dueño sigue autorizando y que el video sigue ahí—. La comprobación es la
+lectura diaria misma (queda `analitica_verificada_en`); sin ella en 30 días, sin el permiso, con
+un 401 de YouTube o al desconectar, se borra todo lo de analítica del canal. §III.E.4.h vale
+igual: se muestra tal cual, sin sumar ni restar nada.
 
 ### La cuenta de prueba y su contenido
 
@@ -278,3 +297,105 @@ la evidencia en `evidencia/` de la misma carpeta: son la base para una reauditor
   de 100 usuarios. No tocar la pantalla de consentimiento sin pedir otra verificación.
 - Con la cuota aprobada: suben los cupos (10.000 unidades y 100 subidas al día). El aviso
   de «sale privado» ya se quitó el 2026-10-16, porque al proyecto no se le aplicaba.
+- Con la cuota aprobada, y no antes: la segunda verificación, la de YouTube Analytics (abajo).
+
+## La analítica: segunda verificación
+
+Fecha: 2026-11-08. El código está escrito y cerrado (README, «YouTube Analytics: escrito y
+cerrado»): con el permiso `https://www.googleapis.com/auth/yt-analytics.readonly`, la
+sincronización diaria lee de YouTube Analytics la historia del canal día por día, cada video
+desde que salió (tiempo visto, duración media, porcentaje visto, suscriptores ganados y
+perdidos), las fuentes de tráfico y la audiencia, y Los Números lo muestran en «Tu canal de
+YouTube» y, en la pieza de cada video, en «En YouTube Analytics». Es lo que el dueño pidió para
+que sus canales guarden la historia (`docs/pendientes.md`, «YouTube: la historia y el arrastre
+de las cuentas propias»).
+
+**No se pide antes de que aprueben la auditoría de cuota.** Agregar un permiso es cambiar la
+pantalla de consentimiento, y eso abre una verificación nueva mientras la auditoría sigue
+mirando la de hoy. Además, un permiso sin verificar le muestra el cartel de «Google no ha
+verificado esta app» a quien lo pida; por eso el conectar lo pide solo a quien nombra
+`YOUTUBE_ANALITICA_ABIERTO_PARA`, y solo con `YOUTUBE_PERMISOS_ANALITICA=1`.
+
+El permiso es *sensible*, no *restringido* (como los dos de hoy): no hay CASA. La API de
+YouTube Analytics tiene su propio cupo, aparte del de la Data API: no cambia el cálculo que se
+mandó en la auditoría.
+
+### La justificación (inglés, para Data Access; 924 caracteres)
+
+> Tu Parrilla is a private, invite-only dashboard where each creator schedules and measures
+> posts on their own channel. With yt-analytics.readonly we read, once a day, YouTube Analytics
+> reports for the creator's own channel only (ids=channel==MINE): daily views and watch time;
+> per video, average view duration, average percentage viewed, likes, comments, shares and
+> subscribers gained/lost; traffic sources (Shorts feed, search, external) and audience country,
+> age and gender. We show these figures unchanged, only to the channel owner, in the Numbers tab
+> and on each video's page, so they can see which Shorts hold attention and where viewers come
+> from. We compute no new metrics from them. Data is kept only while the user stays authorized:
+> every daily read re-checks the grant, and data is deleted after 30 days without a successful
+> check, when the scope is revoked, or on Disconnect. Shown at 0:40-2:10 in the demo video.
+
+Se pega en una sola línea; los minutos se corrigen con los del video que se grabe. Para la caja
+*Additional info* (1000 caracteres) sirve el resumen que se mandó la primera vez, cambiando la
+primera frase por: «Second verification: adds yt-analytics.readonly to the two scopes verified
+on 2026-10-14; nothing else changed on the consent screen.»
+
+### El video (con la cuenta del revisor)
+
+Mismas reglas que el primero: barra de direcciones a la vista, el nombre de la app en el
+consentimiento, todos los clientes OAuth del proyecto (hoy uno, `portafolio-web`). Antes de
+rodar: revocar Tu Parrilla en myaccount.google.com → Seguridad → Acceso de terceros con la
+cuenta de «Pyxis oficial», para que el consentimiento salga entero, y que el canal tenga al
+menos un Short con vistas de los últimos días.
+
+| # | Acción | Subt. |
+|---|---|---|
+| 1 | `tu-parrilla.cl/privacidad`, en el párrafo de YouTube Analytics (aparece con la bandera puesta). | 1 |
+| 2 | `/ingresar` con el revisor. Ajustes → **Los Fierros** → **Reconectar** en «Pyxis oficial». | 2 |
+| 3 | El consentimiento de Google: **detenerse tres segundos** en «Tu Parrilla» y en los **tres** permisos, con el de YouTube Analytics marcado. Continuar. (Puede salir el cartel de app no verificada: es lo esperado, se pasa por «Avanzado».) | 3 |
+| 4 | De vuelta en Los Fierros, **Sincronizar**. Esperar que termine (lee también YouTube Analytics). | 4 |
+| 5 | **Los Números** → bajar a «Tu canal de YouTube»: «Día a día», «De dónde llegó la gente» (mostrar «Feed de Shorts») y «Quién mira». | 5 |
+| 6 | «Ver todas las publicaciones →» → un Short de Pyxis oficial → su pieza → «En YouTube Analytics»: duración media y porcentaje visto. | 6 |
+| 7 | Los Fierros → la tarjeta → **Desconectar** → Los Números ya no muestra la sección. myaccount.google.com → quitar Tu Parrilla. | 7 |
+| 8 | Terminar la grabación. Volver a conectar «Pyxis oficial» al revisor (**Conectar →**, dejando marcado el permiso), para que Google lo encuentre conectado. | |
+
+Subtítulos:
+
+1. Privacy policy: what YouTube Analytics data we keep, and for how long.
+2. The creator reconnects their own YouTube channel.
+3. Google consent: app name and the three scopes, including yt-analytics.readonly.
+4. One daily read of YouTube Analytics for their own channel (ids=channel==MINE).
+5. Channel reports, shown unchanged: daily views and watch time, traffic sources, audience.
+6. Per video: average view duration and percentage viewed, as YouTube reports them.
+7. Disconnect deletes the stored analytics at once; revoking in Google works too.
+
+### Qué hacer, en orden
+
+1. **[dueño]** Esperar el correo de que la auditoría de cuota quedó aprobada. Antes, nada de lo
+   de abajo.
+2. **[dueño]** Google Cloud Console, proyecto `portafolio-page` → *APIs & Services* → *Library*
+   → **YouTube Analytics API** → *Enable*. Sin eso, cada lectura contesta 403 y la sección se
+   queda vacía.
+3. **[dueño]** Google Auth Platform → **Data Access** → *Add or remove scopes* → agregar
+   `…/auth/yt-analytics.readonly` (si no aparece en la lista, pegarlo en *Manually add scopes*)
+   → guardar, y pegar la justificación de arriba en el campo de ese permiso.
+4. **[dueño]** Vercel, *Production*: `YOUTUBE_PERMISOS_ANALITICA=1` y
+   `YOUTUBE_ANALITICA_ABIERTO_PARA=<id del revisor>` (el usuario de `revision@tu-parrilla.cl`).
+   Redesplegar. Así lo pide solo el revisor, y `/privacidad` ya lo cuenta.
+5. **[dueño]** Grabar el video de arriba, subirlo no listado al canal Pyxis oficial y pegar el
+   enlace en el campo *YouTube link* del permiso, en Data Access.
+6. **[dueño]** **Verification Center** → *Prepare for verification* → revisar el resumen →
+   *Additional info* → las cuatro preguntas en *No* → enviar. Lo que se pegue, al final de
+   `TEXTOS-FORMULARIO.txt` en la carpeta «YouTube - Verification».
+7. Mientras revisan: no tocar la pantalla de consentimiento, y que «Pyxis oficial» siga
+   conectado al revisor con el permiso.
+8. **[dueño]** Aprobada: `YOUTUBE_ANALITICA_ABIERTO_PARA=1` y redesplegar. Cada creador ve en
+   Los Números «Reconecta YouTube para ver sus números completos.» hasta que reconecta su canal
+   y deja marcado el permiso. Después: sacar de la wiki (`los-numeros.md`) que la sección se ve
+   solo en algunas cuentas, y borrar la entrada de `docs/pendientes.md`.
+
+**Mientras tanto, el comentario de prueba.** El revisor de la auditoría tiene un comentario en
+La Mesa sobre el Short «canal video 2» de Pyxis oficial, que se borra a los 30 días: hacia el
+**2026-11-25**. Si la auditoría no contestó para entonces, subir un Short público nuevo desde
+YouTube Studio, apretar «Sincronizar» entrando como el revisor y comentarlo desde parejavice
+(el detalle, en `docs/pendientes.md`, en la entrada de la auditoría de cuota). Renovar el permiso
+del revisor siempre con **Reconectar**, nunca con «Desconectar»: desconectar borra ese
+comentario en el acto.

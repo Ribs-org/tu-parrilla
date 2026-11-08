@@ -37,15 +37,16 @@ function pedir<T>(path: string, token: string, init: RequestInit = {}): Promise<
     `${API_BASE}${path}`,
     // `X-Parrilla-Cortes`: los cortes que esta versión sabe dibujar además de los de siempre. Sin
     // él, el servidor le manda a una historia el corte de su archivo (`aceptaChoripan`).
-    // `X-Parrilla-Publicar`: lo que Publicar de esta versión sabe hacer —el bloque de TikTok y la
-    // palabra clave—. Sin él, el servidor no ofrece TikTok y deja esos borradores para el panel
-    // (`sabeDe`, en `src/lib/mobile-api.ts` del sitio).
+    // `X-Parrilla-Publicar`: lo que Publicar de esta versión sabe hacer —el bloque de TikTok, la
+    // palabra clave y el bloque de YouTube—. Sin él, el servidor no ofrece TikTok, deja esos
+    // borradores para el panel y conserva las opciones de YouTube que dejó el panel (`sabeDe`, en
+    // `src/lib/mobile-api.ts` del sitio).
     {
       ...init,
       headers: {
         Authorization: `Bearer ${token}`,
         'X-Parrilla-Cortes': 'choripan',
-        'X-Parrilla-Publicar': 'tiktok,palabra-clave',
+        'X-Parrilla-Publicar': 'tiktok,palabra-clave,youtube',
         ...init.headers,
       },
     },

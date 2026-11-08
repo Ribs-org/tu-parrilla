@@ -2,6 +2,7 @@ import type { Formato, Sello } from './parrilla'
 import type { MusicaInstagram } from './musica'
 import type { ReglaApp } from './regla'
 import type { TikTokElegido } from './tiktok'
+import type { YoutubeElegido } from './youtube'
 
 export type PostProgramado = {
   id: string
@@ -120,6 +121,8 @@ export type BorradorAbierto = {
   tiktok?: Record<string, TikTokElegido>
   /** La regla de palabra clave, o null sin ella; falta si el sitio todavía no la manda. */
   regla?: ReglaApp | null
+  /** Lo elegido en el bloque de YouTube de cada cuenta; falta si el sitio todavía no lo manda. */
+  youtube?: Record<string, YoutubeElegido>
 }
 
 /**

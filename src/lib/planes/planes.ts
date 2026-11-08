@@ -20,7 +20,7 @@ const COLUMNAS_PLAN = {
   prioridad: planes.prioridad,
 }
 
-/** Los dos planes, por clave. Nacen en la migración `0033_planes.sql`: si falta uno, la base está mal. */
+/** Los dos planes, por clave. Nacen en la migración `0035_planes.sql`: si falta uno, la base está mal. */
 export async function leerPlanes(db: Lector = getDb()): Promise<Record<ClavePlan, Plan>> {
   const filas = await db.select(COLUMNAS_PLAN).from(planes)
   const porClave = Object.fromEntries(filas.map((p) => [p.clave, p])) as Partial<Record<ClavePlan, Plan>>
