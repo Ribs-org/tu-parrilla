@@ -3,10 +3,10 @@ import { View, type ColorValue } from 'react-native'
 /**
  * Los iconos de la barra de abajo, dibujados con `View`.
  *
- * Dibujados y no de una librería por dos razones. La primera es que ni
- * `@expo/vector-icons` ni `react-native-svg` están instalados, y los dos son dependencia
- * nativa: agregarlos obliga a compilar un build nuevo y a reinstalarlo a mano, mientras
- * que esto viaja en una actualización por aire al build que ya está en el teléfono. La
+ * Dibujados y no de una librería por dos razones. La primera es que se hicieron cuando la app
+ * no traía ni `@expo/vector-icons` ni `react-native-svg`, que son dependencia nativa, y así
+ * viajaban por aire a la 1.1.0, que sigue sin ellos: este archivo se comparte con la rama
+ * `ota-1.1.0` y no puede usar `react-native-svg`, que la app trae recién desde la 1.2.0. La
  * segunda es que un set genérico no tiene una parrilla, y es justo la que cuenta acá.
  *
  * Desde el 2026-10-16 la barra tiene las pestañas del panel —La Parrilla, Publicar y Los

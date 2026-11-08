@@ -904,6 +904,51 @@ describe('aislamiento por dueño, escrituras (SQL generado, sin base)', () => {
     expect(consultas[1]!.sql).toMatch(/^update "comandas"/i)
   })
 
+  /*
+   * El mesón en el teléfono (2026-11-07). El id del creativo y el de la comanda viajan desde la app:
+   * sin el dueño en el WHERE, cualquiera con sesión vería, programaría o descartaría lo que el chef le
+   * cocinó a otro sabiendo un id.
+   */
+  it('api/mobile/cocina/meson: GET lee el mesón y cuenta los borradores solo del dueño del token', async () => {
+    const { GET } = await import('../app/api/mobile/cocina/meson/route')
+    const conCocina = USUARIO as { cocinaDesde: Date | null }
+    conCocina.cocinaDesde = new Date('2026-10-22')
+    try {
+      const comanda = '00000000-0000-4000-8000-000000000001'
+      const consultas = await consultasEncadenadas(
+        () => GET(new Request(`https://ejemplo.cl/api/mobile/cocina/meson?comanda=${comanda}`)),
+        [[], []],
+      )
+      expect(consultas).toHaveLength(2)
+      for (const c of consultas) esperarFiltradoPorDueno(c)
+      expect(consultas[0]!.params).toContain(comanda)
+    } finally {
+      conCocina.cocinaDesde = null
+    }
+  })
+
+  it('api/mobile/cocina/creativos/[id]/programar: pasa a un borrador solo un creativo del dueño del token', async () => {
+    const { POST } = await import('../app/api/mobile/cocina/creativos/[id]/programar/route')
+    const id = '00000000-0000-4000-8000-000000000001'
+    const consultas = await consultasEncadenadas(() => POST(peticionMovil(), { params: Promise.resolve({ id }) }), [[]])
+    expect(consultas).toHaveLength(1)
+    expect(consultas[0]!.sql).toMatch(/^update "creativos"/i)
+    esperarFiltradoPorDueno(consultas[0]!)
+  })
+
+  it('api/mobile/cocina/creativos/[id]/descartar: descarta solo un creativo del dueño del token', async () => {
+    const { POST } = await import('../app/api/mobile/cocina/creativos/[id]/descartar/route')
+    const id = '00000000-0000-4000-8000-000000000001'
+    const peticion = new Request(`https://ejemplo.cl/api/mobile/cocina/creativos/${id}/descartar`, {
+      method: 'POST',
+      body: JSON.stringify({ motivo: 'corte', nota: 'Muy largo' }),
+    })
+    const consultas = await consultasEncadenadas(() => POST(peticion, { params: Promise.resolve({ id }) }), [[]])
+    expect(consultas).toHaveLength(1)
+    expect(consultas[0]!.sql).toMatch(/^update "creativos"/i)
+    esperarFiltradoPorDueno(consultas[0]!)
+  })
+
   it('cocina/pedir: pedirComanda mira la ref y bloquea los materiales elegidos solo entre los del dueño', async () => {
     const id = '00000000-0000-4000-8000-000000000001'
     const consultas = await consultasEncadenadas(

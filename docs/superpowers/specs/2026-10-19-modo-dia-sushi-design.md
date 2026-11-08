@@ -338,7 +338,8 @@ panel de día con sus piezas de sushi.
   con las mismas medidas del panel (`lib/pieza-sushi.ts`, que un test compara): el nigiri, el
   roll entero o en rodajas, el sashimi y el temaki, el pescado pasado con moho y olor, las bandas
   de nori y la llama del soplete. Las curvas finas esperan a `react-native-svg`, que pide un
-  build nativo (tanda 6 de la auditoría).
+  build nativo (tanda 6 de la auditoría). Llegó con el build 1.2.0 (2026-11-07) y ya dibuja el
+  corte de la noche; la pieza de sushi todavía no (`docs/pendientes.md`).
 - **Los colores:** `COLORES_NOCHE` y `COLORES_DIA` (`mobile/src/components/colores.ts`), que
   cada pantalla pide con `useColores()`. `paleta.test.ts` compara los del día con el panel, uno
   por uno. La parrilla de cada día se lava de salmón y la miniatura lleva su banda de nori.

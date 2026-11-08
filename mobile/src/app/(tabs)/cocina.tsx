@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { KeyboardAvoidingView, Platform, Pressable, RefreshControl, ScrollView, Text, TextInput, View } from 'react-native'
 import * as ImagePicker from 'expo-image-picker'
-import { useFocusEffect, useLocalSearchParams } from 'expo-router'
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import {
@@ -129,12 +129,14 @@ const marcaDe = (data: Cocina): MarcaBasica => data.tuMarca ?? { nombre: data.ma
  * Contra un servidor de antes del 2026-11-06, que no manda las opciones del pedido (`opciones`),
  * queda el camino corto de la 1.2.0: el riel y la instrucción, sin cambiar, sacar ni cancelar. En
  * un teléfono cuyo binario no trae el permiso de la cámara (la 1.1.0, que recibe esto por aire) no
- * aparecen «Grabar video» ni «Sacar foto» (`src/lib/grabar.ts`). El mesón sigue en el panel web.
+ * aparecen «Grabar video» ni «Sacar foto» (`src/lib/grabar.ts`). Desde la 1.2.0, «Ver el mesón» en cada
+ * comanda abre el mesón (`src/app/meson.tsx`); la rama `ota-1.1.0` no lo trae.
  */
 export default function LaCocina() {
   const colores = useColores()
   const { tema } = useTema()
   const { token, salir } = useSesion()
+  const router = useRouter()
   const { avisar, preguntar } = useVentanas()
   const insets = useSafeAreaInsets()
   const { abrir: abrirSelector, selector } = useSelectorFecha()
@@ -910,10 +912,18 @@ export default function LaCocina() {
             {data.comandas.length === 0 ? (
               <Text style={{ color: colores.tenue, fontSize: 13 }}>Todavía no tienes comandas.</Text>
             ) : (
-              data.comandas.map((c) => <TarjetaDeComanda key={c.id} comanda={c} onResponder={responder} onCancelar={opciones ? cancelar : undefined} />)
+              data.comandas.map((c) => (
+                <TarjetaDeComanda
+                  key={c.id}
+                  comanda={c}
+                  onResponder={responder}
+                  onCancelar={opciones ? cancelar : undefined}
+                  onVerMeson={(id) => router.navigate({ pathname: '/meson', params: { comanda: id } })}
+                />
+              ))
             )}
             <Text style={{ color: colores.tenue, fontSize: 11, lineHeight: 16 }}>
-              Lo que el chef cocina espera en {MESON[tema].toLowerCase()}, en el panel web: desde ahí lo programas o lo descartas.
+              Lo que el chef cocina espera en {MESON[tema].toLowerCase()}: tócalo en su comanda para verlo, programarlo o descartarlo.
             </Text>
           </>
         ) : null}

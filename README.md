@@ -27,7 +27,7 @@ tus números.
 | `/api/sugerencias/respuesta` | `POST` con una llave **del admin** (o `SCHEDULE_API_KEY`): la respuesta del equipo a lo que alguien escribió en el libro de sugerencias, por el número de su issue o por su id, para responder sin el navegador. Con la llave de otra cuenta, `403` (ver «El libro de sugerencias») |
 | `/api/bodega…` | Con la misma llave: lo que hay en la cámara de frío de La Cocina (`GET /api/bodega`) y las subidas por partes para guardar ahí (`/api/bodega/subidas…`), las mismas del panel y del teléfono (ver «La Cocina») |
 | `/api/admin/…` | Lo que el panel llama desde el navegador, con la cookie de la sesión: la firma de una subida directa (`upload-url`), las subidas por partes a la cámara de frío de La Cocina (`cocina/subidas…`) y el pulso que mantiene al día sus tarjetas (`cocina/pulso`; ver «La Cocina») y la planilla de Excel de Los Números (`planilla`, y `planilla/adelanto` para lo que no cabe; ver «Llevar para la casa») |
-| `/api/mobile/…` | La API de la app del teléfono, con el token de su sesión (ver `mobile/README.md`); `cocina…` es La Cocina desde el teléfono: lo que muestra, las subidas por partes a la cámara de frío, cambiar y sacar lo de adentro, «Mandar al chef», cancelar y contestarle al chef (ver «La Cocina»); `comentarios…` es La Mesa desde el teléfono: la cola, el número de La Parrilla, «Enviar», «Descartar» y otro borrador (ver «Responder comentarios»); `push` registra el teléfono para los avisos y `push/{token}` lo borra (ver «Avisos al teléfono»); `schedule/accounts/{id}/tiktok` es `creator_info` para el bloque de TikTok de Publicar (ver `mobile/README.md`, «TikTok y la palabra clave») |
+| `/api/mobile/…` | La API de la app del teléfono, con el token de su sesión (ver `mobile/README.md`); `cocina…` es La Cocina desde el teléfono: lo que muestra, las subidas por partes a la cámara de frío, cambiar y sacar lo de adentro, «Mandar al chef», cancelar, contestarle al chef y el mesón con «Programar» y «Descartar» (ver «La Cocina»); `comentarios…` es La Mesa desde el teléfono: la cola, el número de La Parrilla, «Enviar», «Descartar» y otro borrador (ver «Responder comentarios»); `push` registra el teléfono para los avisos y `push/{token}` lo borra (ver «Avisos al teléfono»); `schedule/accounts/{id}/tiktok` es `creator_info` para el bloque de TikTok de Publicar (ver `mobile/README.md`, «TikTok y la palabra clave») |
 | `/api/cron/…` | Las corridas programadas: la publicación y la sincronización, que también reintenta los mensajes del libro de sugerencias que no salieron a GitHub. Solo con `CRON_SECRET` |
 | `/api/track/…` | Las balizas de visitas y clics de las páginas públicas |
 
@@ -240,8 +240,10 @@ El porqué, en `docs/superpowers/specs/2026-10-20-parrilla-en-el-tiempo-design.m
 la silueta dice el formato —entraña video, tira de asado carrusel con un hueso por archivo,
 bife foto, chori texto, choripán al paso historia—, la carne cómo va, una marca por destino que se quema cuando ese
 destino sale, y un halo rojo con banderita si algo se quemó; humo mientras sale. El texto va
-al lado, en la chapa, nunca sobre la carne. La app del teléfono dibuja el mismo corte con
-vistas (`mobile/src/components/pieza.tsx`), con el formato y el sello de cada destino que le
+al lado, en la chapa, nunca sobre la carne. La app del teléfono dibuja el mismo corte
+(`mobile/src/components/pieza.tsx`): desde la 1.2.0 en SVG, con las mismas curvas
+(`mobile/src/lib/corte.ts`, que compara `src/components/corte.test.ts`), y en la 1.1.0 con vistas
+aproximadas; con el formato y el sello de cada destino que le
 manda `GET /api/mobile/schedule`. Un formato nuevo solo le llega a la app que dice saber
 dibujarlo en el encabezado `X-Parrilla-Cortes` (hoy, `choripan`): una instalación vieja que
 recibiera uno desconocido se caería al dibujarlo, así que a ella la historia le llega con el
@@ -1993,8 +1995,10 @@ galería) y lo guarda en la cámara de frío por partes, para la comanda o sin p
 uso; muestra lo que hay adentro con «Cambiar» y «Sacar de la cámara»; pide la comanda con las
 opciones de «Pedir una comanda» —qué es el plato principal y cada video, los formatos, cuántos,
 para cuándo, la instrucción y la marca, salvo el color de acento, que va el guardado—, y sigue las
-comandas con «Lo que pasó», le contesta al chef y las cancela. El mesón sigue en el panel (ver
-`docs/pendientes.md`). Las rutas, con el token del teléfono (`src/lib/cocina/telefono-api.ts`):
+comandas con «Lo que pasó», le contesta al chef y las cancela. Desde la 1.2.0 (2026-11-07), también el
+mesón: «Ver el mesón» en la tarjeta de una comanda abre lo que entregó el chef, con el video que se
+reproduce ahí mismo (`expo-video`), «Programar» y «Descartar» con su motivo. Las rutas, con el token
+del teléfono (`src/lib/cocina/telefono-api.ts`):
 
 | Ruta | Qué hace |
 |---|---|
@@ -2004,11 +2008,16 @@ comandas con «Lo que pasó», le contesta al chef y las cancela. El mesón sigu
 | `POST /api/mobile/cocina/comandas/{id}/cancelar` | «Cancelar la comanda», mientras no esté en el horno. |
 | `PATCH` y `DELETE /api/mobile/cocina/materiales/{id}` | «Cambiar» el nombre y el uso, y «Sacar de la cámara». |
 | `POST /api/mobile/cocina/preguntas/{id}/respuesta` | Contestarle al chef. |
+| `GET /api/mobile/cocina/meson` | El mesón, por comanda y por pieza, como la página del panel (`mesonDelDueno`); con `?comanda=<id>`, solo esa. Cada creativo con su media, su portada, su estilo, sus atributos, el título de YouTube, el texto y, en su última semana, «Se borra el … si no lo programas.»; además cuántos esperan en un borrador y los motivos de un descarte con sus nombres (`src/lib/cocina/meson-telefono.ts`). Pide la cocina encendida, como la página. |
+| `POST /api/mobile/cocina/creativos/{id}/programar` | «Programar»: lo pasa a un borrador (`programarCreativo`) y devuelve `{ borradorId }`, que la app abre en Publicar. |
+| `POST /api/mobile/cocina/creativos/{id}/descartar` | «Descartar», con `{ motivo, nota }` (`descartarCreativo`, con `leerDescarte`). |
 
 Cancelar, cambiar y sacar no tienen una copia para el teléfono: el panel (`src/app/admin/cocina-actions.ts`)
 y estas rutas llaman a las mismas funciones (`src/lib/cocina/del-dueno.ts`), con las mismas reglas y
 frases; las que mandan a «recargar la página» se dicen «actualiza La Cocina» en el teléfono. Ninguna
-de las tres pide la cocina encendida, como en el panel. Cómo sube el teléfono un video de varios GB,
+de las tres pide la cocina encendida, como en el panel. El mesón tampoco tiene copia: programar y
+descartar llaman a `programarCreativo` y `descartarCreativo` (`src/lib/cocina/meson.ts`), las de
+`cocina-actions.ts`. Cómo sube el teléfono un video de varios GB,
 y qué hace la app con un servidor de antes o en la 1.1.0, en `mobile/README.md`.
 
 El admin enciende y apaga la cocina de cada cuenta en Los Maestros (`users.cocina_desde`).
@@ -2034,7 +2043,12 @@ comanda y por pieza, para programarlo o descartarlo:
   - los atributos, con su pieza y su estilo;
   - en cada destino de YouTube, el título como primera línea del texto (`captionOverride`).
 
-  Lo hace el mismo camino para el panel y el teléfono.
+  Lo hace el mismo camino para el panel y el teléfono: `crearVariosProgramados` lo lee del creativo
+  del borrador, venga el pedido de donde venga. El título es el que tenga el borrador
+  (`campos.tituloYoutube`, el del chef o el corregido en el compositor); el teléfono no lo muestra,
+  y `POST /api/mobile/schedule` lo toma del borrador.
+- **Desde el teléfono** (1.2.0), «Programar» deja el creativo en el mismo borrador y lo abre en
+  Publicar, donde faltan las cuentas y la hora; TikTok y la palabra clave siguen siendo del panel.
 - **«Descartar»** pide el motivo de un toque (el corte, la letra, el tema o el audio), borra los
   archivos y deja la fila con su motivo, que es memoria para el chef.
 - **Una comanda lista queda servida** sola cuando ya no le queda nada por decidir.
@@ -2222,7 +2236,7 @@ src/
     cuentas-api.ts         las cuentas de GET /api/schedule/cuentas: los dos ids y cómo está la conexión (sin base)
     media-api.ts           la clave de un archivo que sube un cliente de la API, en la carpeta de su dueño (sin base)
     archivar-api.ts        el cuerpo y las respuestas de archivar y desarchivar lo quemado por API
-    cocina/                La Cocina: la cámara de frío (lo que se guarda, su cuota y sus nombres por tamaño en bodega.ts; lo de adentro en materiales.ts), los estados de una comanda, la fila del chef, lo que entrega, lo que lee y escribe su API (/api/cocina), las subidas por partes del panel, del teléfono y de la API (subidas-http.ts, que sirve a /api/admin/cocina, /api/mobile/cocina y /api/bodega; la puerta de la llave en llave-api.ts), colgar una comanda, la comanda que pide el teléfono (telefono.ts), cancelar, cambiar y sacar para el panel y el teléfono (del-dueno.ts), el pulso de las tarjetas vivas, cómo atiende la cocina según el latido (latido.ts), las preguntas del chef con su plazo (pregunta.ts y preguntar.ts), la alarma al admin (alarma.ts), los correos de la comanda que terminó y de la pregunta, y el mesón
+    cocina/                La Cocina: la cámara de frío (lo que se guarda, su cuota y sus nombres por tamaño en bodega.ts; lo de adentro en materiales.ts), los estados de una comanda, la fila del chef, lo que entrega, lo que lee y escribe su API (/api/cocina), las subidas por partes del panel, del teléfono y de la API (subidas-http.ts, que sirve a /api/admin/cocina, /api/mobile/cocina y /api/bodega; la puerta de la llave en llave-api.ts), colgar una comanda, la comanda que pide el teléfono (telefono.ts), cancelar, cambiar y sacar para el panel y el teléfono (del-dueno.ts), el pulso de las tarjetas vivas, cómo atiende la cocina según el latido (latido.ts), las preguntas del chef con su plazo (pregunta.ts y preguntar.ts), la alarma al admin (alarma.ts), los correos de la comanda que terminó y de la pregunta, y el mesón (lo que manda al teléfono, en meson-telefono.ts)
     color-de-red.ts        el color de marca de cada red en La Parrilla, como clases de Tailwind escritas enteras
     piezas.ts              la pieza de una publicación: sus destinos programados unidos a lo publicado
     auth.ts                sesión del panel

@@ -16,6 +16,7 @@ import {
   esBorradorDeHistoria,
   idDeBorrador,
   opcionesConMusicaDelBorrador,
+  primero,
   reglaDelTelefono,
   soloEnElPanel,
 } from '@/lib/borrador'
@@ -252,6 +253,12 @@ export function partirEnHistorias(
  * revisión da el motivo; la de la transacción (`BorradorConsumido`) cierra el caso de dos
  * envíos a la vez, que pasaban los dos por la revisión antes de que ninguno lo borrara.
  *
+ * Un borrador que salió del mesón de La Cocina lleva el título de YouTube en sus campos
+ * (`tituloYoutube`): el del chef, o el que se corrigió en el compositor del panel. El teléfono no
+ * lo muestra ni lo manda, así que va el del borrador, y el post queda con el mismo título que si
+ * se programara en el panel. La portada y los atributos los pone `crearVariosProgramados` desde el
+ * creativo del borrador, venga de donde venga el pedido.
+ *
  * Una app que trae el bloque de TikTok y la palabra clave (`sabeDe`) puede elegir cuentas de
  * TikTok —sus opciones pasan por `validarOpcionesPorCuenta`, como las del compositor— y mandar la
  * `regla`, que pasa por `validarRegla` y se crea con el post; después de crear, «Música de TikTok»
@@ -290,11 +297,14 @@ export async function POST(request: Request) {
   let borradorId: string | null = null
   let opcionesPedidas = borrador.opciones
   let deDondeEsHistoria = false
+  let tituloYoutube: string | undefined
   if (pedido !== undefined && pedido !== null) {
     borradorId = idDeBorrador(pedido)
     const deDonde = borradorId ? await cargarBorrador(usuario.id, borradorId) : null
     if (!deDonde) return NextResponse.json({ error: BORRADOR_NO_EXISTE }, { status: 404 })
     deDondeEsHistoria = esBorradorDeHistoria(deDonde.campos)
+    // El del compositor, como lo lee `programar` en el panel: sin el campo, el del chef.
+    if (deDonde.campos.tituloYoutube) tituloYoutube = primero(deDonde.campos, 'tituloYoutube').trim().slice(0, 100)
     const motivo = soloEnElPanel(deDonde.campos, (await cuentasParaElTelefono(usuario.id, conTikTok)).ajenas, {
       conRegla,
     })
@@ -386,6 +396,7 @@ export async function POST(request: Request) {
         opciones: partes[0]!.opciones,
         regla: reglaCheck.regla,
         borradorId,
+        tituloYoutube,
       })
       const videos = partes[0]!.media.filter((m) => m.mediaType === 'video').length
       await recordarMusicaTikTok(usuario.id, partes[0]!.opciones, { videos, fotos: partes[0]!.media.length - videos })

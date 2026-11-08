@@ -158,6 +158,19 @@ function Raiz() {
                 contentStyle: { backgroundColor: colores.fondo },
               }}
             />
+            {/* El mesón se abre desde «Tus comandas» de La Cocina (desde la 1.2.0); el título lo
+                cambia la pantalla según el modo: «El mesón» o «La bandeja». */}
+            <Stack.Screen
+              name="meson"
+              options={{
+                headerShown: true,
+                title: 'El mesón',
+                headerTitleStyle: { color: colores.texto, fontFamily: TIPO_TITULO },
+                headerTintColor: colores.brasa,
+                headerStyle: { backgroundColor: colores.tarjeta },
+                contentStyle: { backgroundColor: colores.fondo },
+              }}
+            />
             {/* «Tus publicaciones» se abre desde Los Números y vuelve ahí: la misma cabecera. */}
             <Stack.Screen
               name="publicaciones"

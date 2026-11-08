@@ -69,16 +69,11 @@ sección.
     pregunta: el diseño pide además un aviso en la pestaña de la barra del panel (como el de «Se
     quemó») y una línea en el resumen del día si hay preguntas sin responder; hoy hay correo y la
     tarjeta de color, nada en la barra ni en el resumen.
-  - **El mesón en el teléfono** (2026-11-06). La app ya hace lo del panel en la cámara de frío y en
-    las comandas (pedir con todas las opciones, cambiar, sacar, cancelar, «Lo que pasó»), pero no el
-    mesón: programar o descartar lo que entregó el chef. Quedó fuera por dos cosas: ver un creativo
-    es reproducir su video, y `expo-video` es un módulo nativo que no traen ni la 1.1.0 ni la 1.2.0
-    (habría que sumarlo al próximo build, o abrir el video afuera con `Linking`); y «Programar» deja
-    el creativo en un borrador cuya portada y atributos pone el post al programarse desde el
-    compositor del panel, camino que el Publicar del teléfono no conoce —antes de abrirlo ahí hay
-    que comprobar que programar ese borrador desde el teléfono no los pierde—. Descartar con su
-    motivo sí sería solo JavaScript. Hoy la tarjeta de la comanda dice cuántos creativos esperan en el
-    mesón, en el panel web.
+  - **[dueño] Probar el mesón en el teléfono con un creativo de verdad** (2026-11-07). Llega con el
+    build 1.2.0 (`expo-video`): «Ver el mesón» en la comanda, el video, «Programar» hasta Publicar y
+    «Descartar». Se probó la tarjeta dibujada en un navegador y el servidor con tests; el video en un
+    teléfono, no. Programado desde el teléfono, el post en La Parrilla tiene que traer la portada,
+    los atributos y, en YouTube, el título del chef.
   - **Por revisar: la alarma de la cocina no ve una comanda tomada sin hora estimada** (2026-11-06).
     Suena si lleva media hora sin tomar o si pasó su `eta`; una que el chef tomó y dejó en
     `revisando` sin `eta` —el camino «la revisa una persona del equipo» del issue
@@ -123,14 +118,12 @@ sección.
   debajo de la grilla, y la animación de salida apunta a él aunque no se vea. No rompe nada: la
   pieza queda elegida. Se podría apuntar el vuelo al borde visible, o mostrar el riel fijo abajo.
 
-- **En la app, la entraña de un video se lee como una longaniza** (2026-10-26, lo vio el dueño
-  al publicar un video desde el teléfono). El formato llega bien del servidor (`entrana`);
-  el problema es el dibujo. Sin `react-native-svg`, `mobile/src/components/pieza.tsx` arma
-  cada silueta con vistas de bordes redondeados, y la entraña queda como una barra larga y
-  angosta (62 × 14), casi la forma del chori. Lo de fondo es la tanda 6 de
-  `docs/auditoria-ui-2026-10-16.md`: `react-native-svg` en el próximo build nativo, con las
-  curvas del panel. Mientras tanto, se puede retocar la silueta por aire (más ancha, con un
-  extremo afinado o las vetas más marcadas) para que no se confunda.
+- **En la 1.1.0, la entraña de un video se sigue leyendo como una longaniza** (2026-10-26; desde
+  el 2026-11-07, solo en la 1.1.0). La 1.2.0 dibuja el corte en SVG con las curvas del panel
+  (`mobile/README.md`, «El corte en SVG, solo desde la 1.2.0»), pero la 1.1.0 no trae
+  `react-native-svg` y se queda con las vistas de `ota-1.1.0`. Se va solo cuando todos tengan la
+  1.2.0; si antes molesta, se puede retocar la silueta de la entraña en esa rama, por aire (más
+  ancha, con un extremo afinado o las vetas más marcadas).
 - **Instagram oculta el comentario que es solo la palabra clave, y ninguna app lo recibe**
   (2026-11-03; antes «no entrega los comentarios de @vicente_edits2», 2026-10-30). En una foto de
   @vicente.ingeniero que decía «Comment GUIA and I'll send you the guide», los comentarios `GUIA`
@@ -599,24 +592,27 @@ permisos «por decidir»** de la tabla red por red, para pedirlos todos en una m
   cerrada de 12 probadores durante 14 días antes de pedir producción, como lo pide el Dashboard de
   la app. Una cuenta de organización no tiene esa exigencia. Verificarlo en la ayuda de Google al
   crearla.
-- **[dueño] El build 1.2.0 de la app, con la cámara, a las tiendas** (2026-11-02). La 1.2.0 trae
-  La Cocina en el teléfono: grabar un video o sacar una foto y mandárselo al chef. Pide los
-  permisos de cámara y micrófono, que solo llegan con un binario nuevo, y su `runtimeVersion` es
-  otra: nada de la 1.2.0 llega por aire a un teléfono con la 1.1.0 (La Cocina sin grabar sí puede
-  llegarle desde `ota-1.1.0`: ver la entrada de abajo). Falta: el build de EAS de
-  producción (el flujo «App a la tienda» de GitHub, o `npx eas-cli build -p android --profile
-  production` en `mobile/`) y subirlo a Google Play (`eas submit`), con la sección de seguridad de
-  los datos de la Play Console al día —la app usa la cámara y el micrófono para lo que la persona
-  sube—; y lo mismo en el App Store cuando exista la cuenta de Apple (ver la entrada de abajo).
-  Probarlo en un teléfono de verdad antes de soltarlo: la cámara, los permisos y la subida por
-  partes de un video de varios GB no se pudieron probar sin uno. Mientras tanto, lo de la 1.1.0
-  se publica por aire desde un commit anterior. Detalle en `mobile/README.md`, «La 1.2.0
-  necesita un build nativo y pasar por las tiendas». Ya que hay build, conviene sumarle antes
-  `react-native-svg`, que también espera uno (el bug de la entraña, en «Bugs»). El build ya
-  lleva `expo-clipboard` (2026-11-06): sin él, «Copiar el texto» abre la lista de compartir
-  (`mobile/README.md`, «El portapapeles, con y sin su módulo nativo»). Y `expo-notifications`
-  (2026-11-07), los avisos al teléfono: antes de armarlo van las credenciales de la entrada
-  siguiente, o el build sale sin avisos en Android.
+- **[dueño] El build 1.2.0 de la app, a la Play Store** (2026-11-02; listo para armarse desde el
+  2026-11-07). Todo lo nativo que esperaba un build ya está en `main`: la cámara y el micrófono de La
+  Cocina, `expo-clipboard`, `expo-audio` (con `expo-asset`, que pedía), `expo-notifications`,
+  `react-native-svg` (el corte con las curvas del panel), `expo-video` (el mesón), `expo-haptics` (sin
+  usar todavía) y fuera `@react-native-community/datetimepicker`; los módulos de Expo, en los parches que
+  pide el SDK 57 (`npx expo-doctor` sin avisos). Nada de la 1.2.0 llega por aire a la 1.1.0
+  (`runtimeVersion` es la versión de la app). Falta solo lo del dueño, en orden, con el detalle en
+  `docs/play-store.md`, «La 1.2.0, de punta a punta»:
+  1. las credenciales de FCM (la entrada de abajo): el `google-services.json` en `main` y la clave en
+     EAS;
+  2. lo que el flujo necesita y todavía no está: el secreto `EXPO_TOKEN` en GitHub y la clave de la
+     cuenta de servicio de Google Play en EAS (ver «La app en la Play Store», arriba). Sin ellos, el
+     build se arma a mano y el `.aab` se sube a mano;
+  3. el build: Actions → «App a la tienda» → Run, desde `main`;
+  4. el envío a la pista interna, que hace el mismo flujo (o `eas submit`);
+  5. en la Play Console, la seguridad de los datos con lo de «CUANDO SUBA LA 1.2.0» de
+     `TEXTOS-FORMULARIO.txt` y el token de los avisos, y la versión publicada;
+  6. probarla en el teléfono: la cámara y sus permisos, una subida de varios GB, «Avisarme», el mesón
+     y el corte.
+
+  Y en el App Store cuando exista la cuenta de Apple (ver «La app en iPhone», abajo).
 - **[dueño] Las credenciales de los avisos al teléfono (FCM), antes del build 1.2.0**
   (2026-11-07). El código está (`src/lib/push/`, `mobile/src/lib/avisos.ts`); sin esto, en Android
   «Avisarme» dice que no se pudieron encender. Lo pide la documentación de Expo SDK 57, «Add Android
@@ -760,10 +756,6 @@ nadie paga: todas las cuentas son iguales y el README dice «Sin suscripción».
   - sin reemplazo posible: el selector de archivos del sistema, y el aviso del navegador al
     cerrar la pestaña con una subida en curso en La Cocina (`beforeunload` en
     `ia/pedir/formulario.tsx`), que el navegador no deja dibujar a nadie más.
-- **Sacar `@react-native-community/datetimepicker` de la app** (2026-11-02). Ya no se usa: el día
-  y la hora se eligen en la hoja de la app (`mobile/src/components/selector-fecha.tsx`). Se dejó
-  en `package.json` y en los plugins de `app.json` para que este cambio llegue solo por aire;
-  sacarlo cambia el binario, así que va con el próximo build nativo.
 
 - **Historias en Instagram y Facebook: lo que falta** (2026-10-25). El motor está hecho —el
   contrato, los publicadores, la secuencia en orden, el choripán al paso y la API y el CSV—;
@@ -775,7 +767,8 @@ nadie paga: todas las cuentas son iguales y el README dice «Sin suscripción».
     (`esBorradorDeHistoria`, en `src/lib/borrador.ts`). Hasta entonces abre un borrador de historia
     del teléfono como un post, y al guardarlo deja de ser historia;
   - en el teléfono, ver el primer cuadro de un video en el visor (hoy, «▶» y la duración: sacarlo
-    sin `expo-video` pide una miniatura del servidor) y cambiar el orden de una secuencia ya
+    sin `expo-video` pide una miniatura del servidor; `expo-video` entró con el build 1.2.0 para el
+    mesón, pero el visor también va por aire a la 1.1.0, que no lo trae) y cambiar el orden de una secuencia ya
     programada (hoy se borra y se programa de nuevo);
   - **[dueño] la primera historia real**, con una cuenta de prueba: si Instagram la rechaza
     desde una cuenta de creador (@vicente_edits2, si es Creator), y un video a la página de
@@ -829,8 +822,14 @@ nadie paga: todas las cuentas son iguales y el README dice «Sin suscripción».
   decidir las franjas y qué mide una zona); el cierre del domingo («Aplauso para el
   asador»); las familias de cuentas, con su subíndice (TikTok₁, TikTok₂) y el corte
   trinchado (necesita tabla nueva y decidir si una familia admite dos cuentas de la misma
-  red); un archivo de tokens común para el panel y la app; y, con un build nativo, el corte
-  en SVG y la vibración en la app.
+  red); un archivo de tokens común para el panel y la app; y la vibración en la app, una corta
+  cuando algo sale o se quema (tanda 6 de la auditoría): `expo-haptics` ya viaja en el build 1.2.0
+  (2026-11-07), sin usarse, para que esto llegue por aire. Falta decidir cuándo vibra —solo con la
+  app abierta no se entera de nada, y los avisos al teléfono ya suenan— y detectar en La Parrilla el
+  paso de un corte a servido o a quemado entre dos lecturas. `(tabs)/index.tsx` también va a
+  `ota-1.1.0`: pedir el nativo con `requireOptionalNativeModule('ExpoHaptics')`, como el audio. El corte en SVG llegó con la 1.2.0 (2026-11-07); falta pasar a SVG la pieza de sushi
+  del día (`mobile/src/components/pieza-sushi.tsx`, todavía con vistas), que ya es puro JavaScript
+  sobre ese build y no se copia a `ota-1.1.0`.
 - **Gamificar las notificaciones de cada red** (2026-10-25, lo pidió el dueño). Que lo que cada
   red le avisa a un creador —seguidores nuevos, comentarios, reacciones a un post— se viva en Tu
   Parrilla como un juego, red por red. Falta definir con el dueño qué cuenta como notificación y

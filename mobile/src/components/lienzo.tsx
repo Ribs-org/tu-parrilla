@@ -3,7 +3,7 @@ import { AccessibilityInfo, View } from 'react-native'
 
 /*
  * Lo que comparten el corte de la noche (`pieza.tsx`) y la pieza de sushi del día
- * (`pieza-sushi.tsx`): el lienzo donde se dibujan, «quitar animaciones» y la línea punteada.
+ * (`pieza-sushi.tsx`): el lienzo donde se dibujan y «quitar animaciones».
  */
 
 /** El lienzo: 120 × 64 del panel, a poco más de la mitad. Se dibuja ahí y se agranda entero. */
@@ -27,17 +27,6 @@ export function useQuieto(): boolean {
     }
   }, [])
   return quieto
-}
-
-/** Una línea punteada de segmentos: RN no dibuja bien un borde punteado de un solo lado. */
-export function Punteada({ color, ancho, opacidad = 1 }: { color: string; ancho: number; opacidad?: number }) {
-  return (
-    <View style={{ flex: 1, alignItems: 'center', gap: 3, opacity: opacidad }}>
-      {Array.from({ length: 7 }, (_, i) => (
-        <View key={i} style={{ width: ancho, height: 4, borderRadius: ancho / 2, backgroundColor: color }} />
-      ))}
-    </View>
-  )
 }
 
 /**

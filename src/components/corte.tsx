@@ -68,7 +68,7 @@ const PAN: Record<Carne, { miga: string; corteza: string }> = {
 }
 
 /** Las motas del chori. */
-const MOTAS: Array<[number, number, number]> = [
+export const MOTAS: Array<[number, number, number]> = [
   [26, 27, 1.6], [34, 36, 1.3], [44, 29, 1.8], [52, 38, 1.2], [60, 27, 1.5], [68, 35, 1.7], [76, 28, 1.2],
   [84, 38, 1.5], [92, 30, 1.6], [98, 36, 1.1], [30, 40, 1.1], [64, 42, 1.2], [88, 25, 1],
 ]
@@ -203,7 +203,7 @@ function Textura({ formato, carne, huesos }: { formato: Formato; carne: Carne; h
  * Dónde cae la marca de cada destino: repartidas entre 34 y 92, o al centro si es una. En el
  * choripán, que es angosto, entre 50 y 70: más afuera, la silueta las recortaría enteras.
  */
-function posiciones(n: number, formato: Formato): number[] {
+export function posiciones(n: number, formato: Formato): number[] {
   const [desde, hasta, centro] = formato === 'choripan' ? [50, 70, 60] : [34, 92, 62]
   if (n <= 1) return [centro]
   return Array.from({ length: n }, (_, i) => desde + (i * (hasta - desde)) / (n - 1))

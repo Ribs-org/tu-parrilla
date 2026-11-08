@@ -62,14 +62,22 @@
           "microphonePermission": "Para que el video que grabas para el chef de La Cocina tenga sonido."
         }
       ],
-      "@react-native-community/datetimepicker",
       [
         "expo-notifications",
         {
           "icon": "./assets/images/android-icon-monochrome.png",
           "color": "#e8621f"
         }
-      ]
+      ],
+      [
+        "expo-video",
+        {
+          "supportsBackgroundPlayback": false,
+          "supportsPictureInPicture": false
+        }
+      ],
+      "expo-asset",
+      "expo-image"
     ],
     "experiments": {
       "typedRoutes": true,

@@ -298,8 +298,9 @@ construir esta parte, está en `docs/superpowers/specs/2026-10-24-historias-desi
   intenta programar como post un borrador de historia, se rechaza (`BORRADOR_ES_HISTORIA`) en vez
   de publicar un carrusel. El compositor del panel todavía no tiene «Historia»: abre ese borrador
   como un post (ver `docs/pendientes.md`).
-- **Un video no se reproduce en el visor**: pediría `expo-video`, que es nativo. Se ve «▶» con su
-  duración. El orden se cambia con flechas y no arrastrando: arrastrar pedía armar el gesto con
+- **Un video no se reproduce en el visor**: pediría `expo-video`, que es nativo y entró con el build
+  1.2.0 para el mesón; el visor todavía no lo usa, porque también va por aire a la 1.1.0. Se ve «▶» con
+  su duración. El orden se cambia con flechas y no arrastrando: arrastrar pedía armar el gesto con
   `react-native-gesture-handler` sobre una tira que también se desliza, y las flechas dicen lo
   mismo con un toque y se leen con el lector de pantalla.
 - **Editar publicación** abre una historia sin el cuadro del texto («Es una historia: no lleva
@@ -351,13 +352,13 @@ con unas burbujas arriba:
   lo que hay adentro con **Cambiar** (nombre y uso) y **Sacar de la cámara**, con su pregunta.
 - **Tus comandas.** Las últimas quince con su estado, que se actualizan solas mientras alguna está en
   marcha; la pregunta del chef con sus opciones y su plazo, para contestarla ahí; «Lo que pasó» paso
-  a paso, la hora estimada, cuántos creativos esperan en el mesón y **Cancelar la comanda** mientras
-  no esté en el horno.
+  a paso, la hora estimada, cuántos creativos esperan en el mesón con **Ver el mesón** (desde la 1.2.0)
+  y **Cancelar la comanda** mientras no esté en el horno.
 
 La línea de arriba dice cómo atiende la cocina —sola, a mano o cerrada— con la frase que manda el
-servidor. El mesón (programar o descartar lo que entregó el chef) sigue en el panel: ver
-`docs/pendientes.md`. La estación dibujada de cada comanda también: el teléfono dice lo mismo con el
-estado y las cinco rayas del recorrido, sin `react-native-svg`.
+servidor. La estación dibujada de cada comanda sigue en el panel: el teléfono dice lo mismo con el
+estado y las cinco rayas del recorrido, con vistas, porque la pantalla también va por aire a la 1.1.0,
+que no trae `react-native-svg`.
 
 **Las opciones viajan desde el servidor.** Los nombres de los formatos, las cantidades, los tipos de
 plato principal, los roles de un video y los usos no están copiados en la app: `GET
@@ -392,6 +393,37 @@ medias, al abrir La Cocina sigue donde quedó —el servidor dice qué partes ll
 al quitarlo, la copia se borra; al abrir La Cocina se barre lo que ya nadie espera, y cerrar sesión
 borra la cola. En la web (`archivo-local.web.ts`) el archivo es el del navegador y no se guarda.
 
+### El mesón (desde la 1.2.0, 2026-11-07)
+
+**Ver el mesón** (de día, **Ver la bandeja**), en la tarjeta de una comanda que tiene creativos
+esperando, abre una pantalla de la pila (`src/app/meson.tsx`) con lo de esa comanda —y **Ver todo el
+mesón** para lo de todas—, como la página del panel: por comanda y por pieza, cada creativo con su video
+(la portada con «▶ Ver el video», que al tocarla monta el reproductor) o sus láminas, cuándo se borra
+en su última semana, el estilo, lo que rotó, el título de YouTube, «El texto ▾», **Programar** y
+**Descartar**, que pide el motivo de un toque y una nota opcional. Las frases y los motivos vienen del
+servidor (`GET /api/mobile/cocina/meson`); las del panel, en `src/lib/meson.ts`.
+
+**Programar** llama a `POST /api/mobile/cocina/creativos/{id}/programar`, que hace lo mismo que el
+botón del panel —pasa el creativo a un borrador de La Parrilla con su texto, su título y su media— y la
+app abre ese borrador en Publicar, como uno de la lista de borradores: faltan las cuentas y la hora. Que
+programarlo desde el teléfono no pierda nada se comprobó antes de abrirlo: la portada y los atributos
+los pone el servidor al crear el post, desde el creativo del borrador (`crearVariosProgramados`, con
+su test de integración en `src/lib/cocina/meson.integracion.test.ts`), y el título de YouTube del
+borrador lo toma `POST /api/mobile/schedule` de sus campos (`route.test.ts`), porque Publicar no lo
+muestra. TikTok y la palabra clave siguen siendo del panel, como para cualquier borrador.
+
+**El video** usa `expo-video`, que es nativo y llega con el build 1.2.0 (sin reproducir en segundo
+plano ni en ventana flotante: el plugin en `app.json` lo deja apagado). Como el audio, no se importa
+directo: `src/components/meson.tsx` pregunta por el módulo (`src/lib/video.ts`) y recién entonces carga
+`src/components/video-del-creativo.tsx`; sin él, el video se abre fuera de la app. Aun así, **ni
+`src/app/meson.tsx` ni `src/components/meson.tsx` ni `src/components/video-del-creativo.tsx` se copian a
+`ota-1.1.0`**: esa rama no tiene `expo-video` en `package.json` y Metro no armaría el paquete. Lo que
+sí se puede copiar es `src/components/cocina.tsx`: sin `onVerMeson`, la tarjeta dice como antes que lo
+que espera está en el panel web.
+
+Contra un servidor de antes, sin la ruta, la pantalla dice «Tu Parrilla todavía no muestra el mesón en
+el teléfono…» en vez de «No se pudo actualizar.».
+
 ### La 1.2.0 necesita un build nativo y pasar por las tiendas
 
 Grabar pide los permisos de cámara y micrófono (`cameraPermission` y `microphonePermission` del
@@ -411,7 +443,21 @@ production` y `npx eas-cli submit -p android --profile production`; lo mismo con
 exista la cuenta de Apple. En la Play Console, la sección de seguridad de los datos tiene que
 decir que la app usa la cámara y el micrófono para lo que la persona sube, y desde el 2026-11-07 que
 guarda el token de los avisos (`docs/play-store.md`). El build lleva también `expo-notifications`, y
-antes de armarlo van las credenciales de FCM (ver «Los avisos al teléfono», abajo).
+antes de armarlo van las credenciales de FCM (ver «Los avisos al teléfono», abajo). Y deja afuera
+`@react-native-community/datetimepicker`: el día y la hora se eligen desde el 2026-11-02 en la hoja de
+la app (`src/components/selector-fecha.tsx`), y el módulo se había quedado en `package.json` y en los
+plugins de `app.json` solo para no cambiar el binario antes de tiempo. La rama `ota-1.1.0` lo conserva:
+es el binario de la 1.1.0. Y suma `expo-haptics` **sin usarlo todavía**: la vibración corta cuando algo
+sale o se quema (`docs/pendientes.md`, «La propuesta de diseño 2.1») es puro JavaScript sobre el
+módulo, y con él en el binario puede llegar por aire a la 1.2.0 en vez de esperar otro build. Solo
+declara el permiso `VIBRATE`, que Android concede sin preguntar.
+
+Antes del build se pasó `npx expo-doctor` (2026-11-07): faltaba `expo-asset`, que `expo-audio` pide
+como dependencia nativa y sin el que la app puede caerse fuera de Expo Go, y los módulos de Expo
+estaban unos parches atrás de lo que pide el SDK 57; los dos se arreglaron con `npx expo install`
+(`expo-asset` y `--fix`), que además sumó los plugins sin opciones de `expo-asset` y `expo-image` a
+`app.json`. El paso a paso del dueño para armarlo y subirlo, en `docs/play-store.md`, «La 1.2.0, de
+punta a punta».
 
 Lo que no se pudo probar sin un teléfono: la cámara misma, los permisos, la copia a documentos, la
 cola que sigue después de cerrar la app y la subida nativa por partes. El 2026-11-06 se probó en Expo
@@ -513,6 +559,24 @@ de compartir del sistema (`Share`, de React Native), que en Android 10 en adelan
 «Copiar», pero no en todos los teléfonos: por eso no promete copiar. El mismo archivo sirve tal
 cual en la rama `ota-1.1.0`, que no tiene `expo-clipboard` en `package.json`: ahí siempre es la
 lista de compartir.
+
+### El corte en SVG, solo desde la 1.2.0
+
+Desde el build 1.2.0 la app trae `react-native-svg`, y el corte de cada post (`src/components/pieza.tsx`)
+se dibuja con las curvas del panel: las siluetas, las motas del chori y dónde cae cada marca están
+copiadas en `src/lib/corte.ts`, y un test de la raíz (`src/components/corte.test.ts`) las compara con
+las de `src/components/corte.tsx`. Antes la app armaba cada silueta con vistas de bordes redondeados y
+la entraña de un video quedaba como una barra larga, casi el chori. Los difuminados del panel
+(`feGaussianBlur`) se fingen con opacidad, y lo único que late es el halo de lo quemado.
+
+A diferencia del portapapeles, del audio y de los avisos, **acá no hay camino sin el módulo**: el
+dibujo entero es SVG. Así que, desde ahora, **`pieza.tsx` no se copia a la rama `ota-1.1.0`** —en un
+binario sin `react-native-svg`, La Parrilla se caería al abrir— ni nada que importe `react-native-svg`.
+La rama se queda con su `pieza.tsx` de vistas, y `src/lib/corte.ts` no le hace falta. Lo que se copie a
+esa rama de acá en adelante, mirarlo con `grep react-native-svg` antes.
+
+La pieza de sushi del día (`src/components/pieza-sushi.tsx`) sigue con vistas: pasarla a SVG es puro
+JavaScript sobre el build 1.2.0 (ver `docs/pendientes.md`).
 
 ## Los avisos al teléfono
 
@@ -641,8 +705,8 @@ Para quien agregue una pantalla: los colores salen de `useColores()` (`src/compo
 nunca escritos a mano, y lo que sombrea con transparencia usa el velo del modo
 (`colores.velo + '10'`), blanco de noche y tinta de día. Las dos paletas viven en
 `src/components/colores.ts`, y un test del panel las compara con las suyas. Los dibujos de cada
-post también son dos, el corte de carne (`src/components/pieza.tsx`) y la pieza de sushi
-(`src/components/pieza-sushi.tsx`), y `Pieza` elige según el modo.
+post también son dos, el corte de carne (`src/components/pieza.tsx`, en SVG desde la 1.2.0) y la
+pieza de sushi (`src/components/pieza-sushi.tsx`, con vistas), y `Pieza` elige según el modo.
 
 Lo único que dibuja el teléfono mismo es la pantalla de arranque, y sigue oscura en los dos
 modos: cambiarla pide un build nativo (ver `docs/deuda-tecnica.md`). Las preguntas
@@ -716,9 +780,9 @@ falta volver a autorizar nada de eso, solo se cierra el acceso desde el celular.
   cuentas, ni toca lo que ya salió en alguna, ni cambia las opciones de TikTok o la palabra
   clave: eso sigue en el panel. Tampoco cambia el orden de
   una secuencia de historias ya programada, ni reproduce un video en el visor.
-- En La Cocina no muestra el mesón (ver `docs/pendientes.md`), no elige el color de acento de la
-  marca ni dibuja la estación de cada comanda, y no sigue subiendo con la app en segundo plano: lo
-  primero es del panel, y lo último retoma al volver a abrir La Cocina.
+- En La Cocina no elige el color de acento de la marca ni dibuja la estación de cada comanda, y no
+  sigue subiendo con la app en segundo plano: lo primero es del panel, y lo último retoma al volver a
+  abrir La Cocina. El mesón llega con la 1.2.0; en la 1.1.0, sigue en el panel.
 - En La Mesa no cambia las instrucciones para el modelo, no regenera todos los borradores, no muestra
   los descartados ni «Todos» y no trae la fila de emojis: eso sigue en el panel.
 - No hay versión para iPhone que se pueda instalar: el código está listo, falta la
