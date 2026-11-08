@@ -253,9 +253,10 @@ son los del panel, letra por letra: los compara `src/lib/telefono-copias.test.ts
 
 `creator_info` lo pide `GET /api/mobile/schedule/accounts/{id}/tiktok`, la misma consulta del
 compositor (`creadorDeCuenta`); sin él se ofrecen las cuatro privacidades y el bloque dice por qué,
-como el panel. Lo que el teléfono hace de más: con un video, dice el largo máximo de la cuenta y no
-deja programar uno más largo —TikTok lo rechazaría después de subirlo—, si el selector dio la
-duración (un archivo que vuelve de un borrador no la trae).
+como el panel. Con un video, dice el largo máximo de la cuenta y no deja programar uno más largo
+—TikTok lo rechazaría después de subirlo—, si el selector dio la duración (un archivo que vuelve de
+un borrador no la trae). El panel hace lo mismo con las mismas frases (`videoMuyLargo`, en
+`src/lib/social/publish/limites.ts`), y `telefono-copias.test.ts` las compara.
 
 Debajo de las cuentas, **«▸ Respuesta automática por palabra clave»**, plegada salvo que el borrador
 traiga una: la palabra, el mensaje y la respuesta pública, con los topes y los textos del panel

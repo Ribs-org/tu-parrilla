@@ -474,7 +474,8 @@ formulario viene abierto, con el cursor en «Texto». En este orden:
    Mide cada archivo en el navegador y dice, en verde, «El archivo cumple lo que pide
    TikTok.» o «Los archivos cumplen lo que pide TikTok.»; o, en un recuadro rojo, «TikTok va
    a rechazar esto:» con una línea por archivo, «<nombre del archivo>: <problema>.». Es un
-   aviso: no impide programar. Solo mide lo elegido desde que se abrió el panel: los archivos
+   aviso: no impide programar (el largo máximo de cada cuenta, en su bloque de TikTok, sí lo
+   impide). Solo mide lo elegido desde que se abrió el panel: los archivos
    que vienen de un borrador guardado no se vuelven a medir.
 5. **«Cuentas»**, una ficha redonda por cuenta: el fierro de la cuenta —la rayita que dice la
    temperatura de su conexión, como en [Los Fierros](los-fierros.md): naranja al rojo, ámbar
@@ -532,6 +533,12 @@ formulario viene abierto, con el cursor en «Texto». En este orden:
 - Debajo del nombre, con la foto de la cuenta: «Se publicará en la cuenta <nombre en
   TikTok>». Mientras pregunta a TikTok dice «Leyendo tu cuenta…»; si TikTok no contesta,
   ahí sale el error (ver la tabla de TikTok en los mensajes, más abajo).
+- Sin archivos o con un video, en chico: «En esta cuenta, TikTok publica videos de hasta 10
+  min.» (con el largo que TikTok le da a esa cuenta; a algunas les da menos). Si el video
+  elegido es más largo, debajo y en rojo: «Este video dura 12 min y TikTok publica en esta
+  cuenta videos de hasta 10 min.», y «Programar» queda apagado hasta que se cambie el video o
+  se desmarque esa cuenta. Como la revisión para TikTok, solo mide lo elegido desde que se
+  abrió el panel: un video que viene de un borrador guardado no se mide.
 - El interruptor **«Enviar como borrador a mi bandeja de TikTok»**. Encendido, dice «Te
   llegará una notificación en TikTok para terminar la publicación desde el teléfono.» y el
   resto del bloque desaparece: no hay nada más que elegir. Ojo: este «borrador» es de TikTok
@@ -1174,6 +1181,8 @@ final de esta sección).
 | «<archivo>: mide <ancho>×<alto> y TikTok pide al menos 360 px de lado.» | Video muy chico | Usar uno más grande |
 | «<archivo>: mide <ancho>×<alto> y TikTok no pasa de 4096 px de lado.» | Video muy grande | Achicarlo |
 | «<archivo>: dura <N> minutos y TikTok acepta hasta 10 por la API.» | Video de más de diez minutos | Cortarlo |
+| «En esta cuenta, TikTok publica videos de hasta <largo>.», en chico en el bloque de la cuenta | El largo máximo que TikTok le da a esa cuenta | Nada: es para saberlo antes de elegir el video |
+| «Este video dura <largo> y TikTok publica en esta cuenta videos de hasta <largo>.», en rojo en el bloque de la cuenta, con «Programar» apagado | El video es más largo de lo que TikTok deja publicar en esa cuenta: lo subiría y lo rechazaría después | Elegir un video más corto (o cortarlo), o desmarcar esa cuenta de TikTok |
 | «<archivo>: pesa <N> MB y TikTok acepta hasta 4 GB.» | Video muy pesado | Comprimirlo |
 
 Con dos cuentas de TikTok marcadas, las frases de opciones van precedidas del usuario de la
@@ -1353,7 +1362,9 @@ editor.
 - **La fecha viene puesta a las 9.** Es lo que propone al abrir desde un día del calendario;
   se cambia en «Fecha y hora».
 - **Elegí un archivo y el botón Programar está gris.** Está subiendo («En cola» o «<N> %» en
-  su miniatura): esperar a que llegue. Si dice «No llegó», apretar «Reintentar» o quitarlo.
+  su miniatura): esperar a que llegue. Si dice «No llegó», apretar «Reintentar» o quitarlo. Si
+  ya llegó y es un video, mirar el bloque de TikTok: si dice en rojo «Este video dura…», es más
+  largo de lo que esa cuenta publica; elegir uno más corto o desmarcar la cuenta.
 - **Quiero cambiar el orden de los archivos.** En el compositor, quitarlos con su ✕ y volver a
   elegirlos en el orden que se quiere; o programar y reordenar en el editor con las flechas.
 - **¿Dónde subo un CSV? / No encuentro la carga masiva.** «Subir CSV», arriba a la derecha de
@@ -1530,7 +1541,7 @@ Lo que describe esta página sale de:
   - `src/app/admin/(dash)/schedule/reprogramar.tsx`
   - `src/app/admin/(dash)/schedule/copiar-texto.tsx` («Copiar el texto» de lo que espera en la bandeja de TikTok)
   - `src/app/admin/(dash)/schedule/archivar.tsx` (el botón «Archivar» / «Desarchivar»)
-  - `src/app/admin/(dash)/schedule/revision-media.tsx`
+  - `src/app/admin/(dash)/schedule/revision-media.tsx` y `src/lib/social/publish/limites.ts` (la revisión para TikTok y el largo máximo de cada cuenta, con sus frases)
   - `src/app/admin/(dash)/schedule/redes.tsx`
   - `src/app/admin/(dash)/schedule/regla-clave.tsx`
   - `src/app/admin/(dash)/schedule/tiktok-opciones.tsx`

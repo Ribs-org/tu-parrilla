@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { problemasTikTok, type MediaMedida } from './limites'
+import { duracionMaxima, problemasTikTok, segundosLegibles, videoMuyLargo, type MediaMedida } from './limites'
 
 const foto = (extra: Partial<MediaMedida> = {}): MediaMedida => ({
   nombre: 'foto.jpg',
@@ -72,5 +72,47 @@ describe('videos', () => {
 
   it('sin duración legible no inventa un problema', () => {
     expect(problemasTikTok(video({ segundos: null }))).toEqual([])
+  })
+})
+
+describe('el largo máximo de la cuenta', () => {
+  it('dice el máximo que da creator_info, o nada sin dato', () => {
+    expect(duracionMaxima(600)).toBe('En esta cuenta, TikTok publica videos de hasta 10 min.')
+    expect(duracionMaxima(180)).toBe('En esta cuenta, TikTok publica videos de hasta 3 min.')
+    expect(duracionMaxima(null)).toBeNull()
+    expect(duracionMaxima(undefined)).toBeNull()
+    expect(duracionMaxima(0)).toBeNull()
+  })
+
+  it('avisa del video que se pasa del máximo de esa cuenta', () => {
+    expect(videoMuyLargo([video({ segundos: 601 })], 600)).toBe(
+      'Este video dura 10 min 1 s y TikTok publica en esta cuenta videos de hasta 10 min.',
+    )
+    // El caso del bug: el límite general de la API son 10 minutos, pero la cuenta tiene 3.
+    expect(problemasTikTok(video({ segundos: 240 }))).toEqual([])
+    expect(videoMuyLargo([video({ segundos: 240 })], 180)).toBe(
+      'Este video dura 4 min y TikTok publica en esta cuenta videos de hasta 3 min.',
+    )
+  })
+
+  it('calla si cabe, si no hay video, si no se midió o si no se sabe el máximo', () => {
+    expect(videoMuyLargo([video({ segundos: 600 })], 600)).toBeNull()
+    expect(videoMuyLargo([foto()], 600)).toBeNull()
+    expect(videoMuyLargo([], 600)).toBeNull()
+    expect(videoMuyLargo([video({ segundos: null })], 600)).toBeNull()
+    expect(videoMuyLargo([video({ segundos: 9999 })], null)).toBeNull()
+  })
+
+  it('mira el primer video medido', () => {
+    expect(videoMuyLargo([foto(), video({ segundos: null }), video({ segundos: 200 })], 180)).toBe(
+      'Este video dura 3 min 20 s y TikTok publica en esta cuenta videos de hasta 3 min.',
+    )
+  })
+
+  it('en palabras', () => {
+    expect(segundosLegibles(45)).toBe('45 s')
+    expect(segundosLegibles(60)).toBe('1 min')
+    expect(segundosLegibles(210)).toBe('3 min 30 s')
+    expect(segundosLegibles(599.6)).toBe('10 min')
   })
 })

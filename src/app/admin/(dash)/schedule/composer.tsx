@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { startTransition, useActionState, useEffect, useId, useMemo, useRef, useState } from 'react'
+import { startTransition, useActionState, useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import {
   createScheduledPost,
   descartarBorrador,
@@ -29,6 +29,8 @@ import {
 import { colorDeRed } from '@/lib/color-de-red'
 import type { CuentaRow } from '@/lib/posts-kpis'
 import { REDES_PROXIMAMENTE, networkLabel } from '@/lib/networks'
+import { videoMuyLargo } from '@/lib/social/publish/limites'
+import type { CreadorTikTok } from '@/lib/social/publish/tiktok-creador'
 import { calorDelDia, estadoDelFierro, type Calor, type Fierro, type Sello } from '@/lib/parrilla'
 import { FALTA_FECHA } from '@/lib/revisiones'
 import { addDays, dayKey, dayLabelConMes, mondayOfKey } from '@/lib/schedule-week'
@@ -40,7 +42,7 @@ import { TablaDeArchivos } from './archivos'
 import { InstagramOpciones } from './instagram-opciones'
 import { PanelLateral } from './panel-lateral'
 import { ReglaClave } from './regla-clave'
-import { RevisionMedia } from './revision-media'
+import { RevisionMedia, useMedidas } from './revision-media'
 import { formatoConLoQueSube, fraseDeLlegada, llenadoDe, siguienteEnCola, tipoDe, type Subida } from './subidas'
 import { TikTokOpciones } from './tiktok-opciones'
 import { venceAntesDe } from './vence'
@@ -309,6 +311,17 @@ export function Composer({
     () => media.map((m) => locales[m.url]).filter((f): f is File => Boolean(f)),
     [media, locales],
   )
+  const medidas = useMedidas(archivosParaRevisar, cuentasTikTok.length > 0)
+  // Lo que `creator_info` dijo de cada cuenta de TikTok, para apagar «Programar» si el video se
+  // pasa del largo máximo de alguna marcada: TikTok lo subiría y lo rechazaría después. Lo dice
+  // en rojo el bloque de esa cuenta; acá solo se apaga el botón, como cuando algo sube.
+  const [creadores, setCreadores] = useState<Record<string, CreadorTikTok>>({})
+  const alLeerCreador = useCallback(
+    (cuentaId: string, creador: CreadorTikTok) => setCreadores((antes) => ({ ...antes, [cuentaId]: creador })),
+    [],
+  )
+  const tiktokMuyLargo =
+    medidas !== null && cuentasTikTok.some((c) => videoMuyLargo(medidas, creadores[c.id]?.maxDuracionSeg) !== null)
 
   const [cuando, setCuando] = useState(fechaInicial)
   // «Ahora» deja el campo de fecha fuera de juego: la hora la decide el servidor.
@@ -708,7 +721,7 @@ export function Composer({
             onReintentar={reintentar}
           />
 
-          <RevisionMedia files={archivosParaRevisar} activo={cuentasTikTok.length > 0} />
+          <RevisionMedia medidas={medidas} />
 
           <div>
             <GroupLabel>Cuentas</GroupLabel>
@@ -784,6 +797,8 @@ export function Composer({
               cuenta={cuenta}
               soloFotos={soloFotos}
               inicial={campos ? tiktokInicial(campos, cuenta.id) : null}
+              medidas={medidas}
+              onCreador={alLeerCreador}
             />
           ))}
 
@@ -873,8 +888,13 @@ export function Composer({
           ) : null}
           <div className="flex flex-wrap items-center gap-3">
             {/* Con el borrador perdido no se programa: si se programó en otro lado, saldría
-                dos veces. */}
-            <Button type="submit" variant="primary" disabled={programando || subidas.length > 0 || estado === 'perdido'}>
+                dos veces. Con un video más largo de lo que publica una cuenta de TikTok
+                marcada, tampoco: lo dice en rojo el bloque de esa cuenta. */}
+            <Button
+              type="submit"
+              variant="primary"
+              disabled={programando || subidas.length > 0 || estado === 'perdido' || tiktokMuyLargo}
+            >
               {programando ? 'Programando…' : 'Programar'}
             </Button>
             <Button type="button" variant="ghost" onClick={() => void descartar()}>

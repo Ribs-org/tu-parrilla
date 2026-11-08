@@ -84,3 +84,46 @@ export function problemasTikTok(media: MediaMedida): string[] {
   }
   return problemas
 }
+
+/**
+ * El largo máximo de un video **en una cuenta**: el que `creator_info` devuelve como
+ * `max_video_post_duration_sec`. No es el de arriba (`TIKTOK_VIDEO_MAX_SEGUNDOS`, el de la API
+ * para todos): TikTok da a cada cuenta el suyo, y a una cuenta nueva o pequeña le puede tocar
+ * uno más corto. La guía de publicación directa pide mostrarlo y no dejar mandar un video más
+ * largo, porque TikTok lo acepta, lo sube y recién entonces lo rechaza.
+ *
+ * Las frases son las de Publicar del teléfono (`mobile/src/lib/tiktok.ts`), letra por letra: las
+ * compara `src/lib/telefono-copias.test.ts`.
+ */
+
+/** «10 min», «3 min 30 s», «45 s». */
+export function segundosLegibles(segundos: number): string {
+  const s = Math.round(segundos)
+  const min = Math.floor(s / 60)
+  const resto = s % 60
+  if (min === 0) return `${resto} s`
+  return resto === 0 ? `${min} min` : `${min} min ${resto} s`
+}
+
+/** Lo que dice el bloque de TikTok del largo máximo en esa cuenta, o null sin dato. */
+export function duracionMaxima(maxDuracionSeg: number | null | undefined): string | null {
+  if (!maxDuracionSeg) return null
+  return `En esta cuenta, TikTok publica videos de hasta ${segundosLegibles(maxDuracionSeg)}.`
+}
+
+/**
+ * Si el video elegido dura más de lo que esa cuenta deja publicar, la frase que lo dice; null si
+ * cabe, si no hay video, si no se sabe el máximo o si no se pudo medir el video (un archivo que
+ * viene de un borrador guardado no se mide, como en la revisión de arriba).
+ */
+export function videoMuyLargo(
+  medidas: readonly Pick<MediaMedida, 'tipo' | 'segundos'>[],
+  maxDuracionSeg: number | null | undefined,
+): string | null {
+  if (!maxDuracionSeg) return null
+  const video = medidas.find((m) => m.tipo === 'video' && m.segundos)
+  if (!video) return null
+  const segundos = video.segundos!
+  if (segundos <= maxDuracionSeg) return null
+  return `Este video dura ${segundosLegibles(segundos)} y TikTok publica en esta cuenta videos de hasta ${segundosLegibles(maxDuracionSeg)}.`
+}

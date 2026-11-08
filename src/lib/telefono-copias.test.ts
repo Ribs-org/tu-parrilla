@@ -14,7 +14,13 @@ import {
   medianaDe,
 } from './parrilla'
 import { tipoDesdeNombre, typeFromContentType } from './social/publish/batch'
-import { ARCHIVO_MUY_GRANDE, MAX_BYTES_ARCHIVO } from './social/publish/limites'
+import {
+  ARCHIVO_MUY_GRANDE,
+  MAX_BYTES_ARCHIVO,
+  duracionMaxima,
+  segundosLegibles,
+  videoMuyLargo,
+} from './social/publish/limites'
 import { HISTORIA_JPG, SIN_TRIAL_GENERICO, avisoSinTrial } from './social/publish/opciones'
 import {
   MUSICA_SOLO_LOGIN_DE_FACEBOOK,
@@ -271,6 +277,31 @@ describe('TikTok y la palabra clave en Publicar dicen lo mismo que el compositor
       ...Object.values(tiktok.TEXTOS_TIKTOK),
     ]) {
       expect(panel, texto).toContain(juntar(texto))
+    }
+  })
+
+  it('el largo máximo de un video en la cuenta: las mismas frases con los mismos números', () => {
+    type Creador = { maxDuracionSeg: number | null }
+    type Archivo = { mediaType: 'image' | 'video'; medidas?: { ancho: number; alto: number; duracionMs: number | null } }
+    const tiktok = delTelefono<{
+      segundosLegibles: (segundos: number) => string
+      duracionMaxima: (creador: Creador | null) => string | null
+      videoMuyLargo: (archivos: Archivo[], creador: Creador | null) => string | null
+    }>('tiktok')
+    for (const s of [0, 1, 45, 60, 61, 180, 210, 599.6, 600, 601, 3600]) {
+      expect(tiktok.segundosLegibles(s), String(s)).toBe(segundosLegibles(s))
+    }
+    for (const max of [null, 0, 60, 180, 600]) {
+      expect(tiktok.duracionMaxima({ maxDuracionSeg: max }), String(max)).toBe(duracionMaxima(max))
+      for (const segundos of [null, 30, 180, 181, 600, 601]) {
+        const archivo: Archivo = {
+          mediaType: 'video',
+          medidas: { ancho: 1080, alto: 1920, duracionMs: segundos === null ? null : segundos * 1000 },
+        }
+        expect(tiktok.videoMuyLargo([archivo], { maxDuracionSeg: max }), `${segundos} s de ${max}`).toBe(
+          videoMuyLargo([{ tipo: 'video', segundos }], max),
+        )
+      }
     }
   })
 

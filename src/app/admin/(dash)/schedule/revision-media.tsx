@@ -4,15 +4,11 @@ import { useEffect, useState } from 'react'
 import { problemasTikTok, type MediaMedida } from '@/lib/social/publish/limites'
 
 /**
- * Mide los archivos elegidos en el navegador y dice si TikTok los va a rechazar, antes de
- * programar. El navegador ya tiene el archivo en la mano, así que leer ancho, alto y
- * duración no cuesta nada; lo que cuesta es enterarse veinte minutos después, cuando TikTok
- * termina de procesar y contesta que la foto pasaba de 1080p.
- *
- * Solo revisa TikTok porque es la única red con límites estrechos y con un rechazo tan
- * diferido. Las demás fallan rápido y con su propio mensaje.
+ * Mide en el navegador los archivos elegidos en esta sesión, mientras haya una cuenta de TikTok
+ * marcada. Null mientras mide o si no hay nada que medir. Las medidas las leen la revisión de
+ * abajo y el bloque de cada cuenta de TikTok, que las cruza con el largo máximo de esa cuenta.
  */
-export function RevisionMedia({ files, activo }: { files: File[]; activo: boolean }) {
+export function useMedidas(files: File[], activo: boolean): MediaMedida[] | null {
   // Las medidas viajan junto a la selección que las produjo: así, al cambiar de archivos,
   // no hace falta vaciarlas dentro del efecto (React lo prohíbe) para no mostrar las viejas.
   const [medido, setMedido] = useState<{ para: File[]; medidas: MediaMedida[] } | null>(null)
@@ -30,7 +26,22 @@ export function RevisionMedia({ files, activo }: { files: File[]; activo: boolea
 
   if (!activo || files.length === 0) return null
   if (!medido || medido.para !== files) return null
-  const medidas = medido.medidas
+  return medido.medidas
+}
+
+/**
+ * Dice si TikTok va a rechazar los archivos elegidos, antes de programar. El navegador ya
+ * tiene el archivo en la mano, así que leer ancho, alto y duración no cuesta nada; lo que
+ * cuesta es enterarse veinte minutos después, cuando TikTok termina de procesar y contesta
+ * que la foto pasaba de 1080p.
+ *
+ * Solo revisa TikTok porque es la única red con límites estrechos y con un rechazo tan
+ * diferido. Las demás fallan rápido y con su propio mensaje. El largo máximo de cada cuenta
+ * no va acá sino en su bloque (`tiktok-opciones.tsx`): dos cuentas pueden tener máximos
+ * distintos.
+ */
+export function RevisionMedia({ medidas }: { medidas: MediaMedida[] | null }) {
+  if (!medidas || medidas.length === 0) return null
 
   const conProblemas = medidas
     .map((media) => ({ media, problemas: problemasTikTok(media) }))
