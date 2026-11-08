@@ -40,8 +40,9 @@ sin eso.
 ## Parte 2 — Crear la app
 
 1. En la consola, **Crear app**.
-2. Nombre: `Tu Parrilla`. El que se ve en el teléfono sale del build (`name` en
-   `mobile/app.json`); el de la ficha es este, y conviene que digan lo mismo.
+2. Nombre: en la ficha quedó `Parrilla` (decisión del dueño, 2026-11-08). El que se ve bajo el
+   ícono sale del build (`name` en `mobile/app.json`, «Tu Parrilla»); no tienen que coincidir,
+   pero la «Delete data URL» (`/borrar-mis-datos`) sí tiene que nombrar la app como la ficha.
 3. Idioma predeterminado: español.
 4. Marca que es una **app**, no un juego, y que es **gratuita**.
 5. Acepta las declaraciones de políticas y de leyes de exportación.
