@@ -121,6 +121,25 @@ describe.skipIf(!URL_PRUEBAS)('contra una Postgres de verdad', () => {
       expect((await leerCuenta()).trialReels).toBeNull()
     })
 
+    it('lo que salió con un paso a medias queda publicado y con su aviso; lo que sale limpio, sin aviso', async () => {
+      const { publishDue } = await import('./run')
+      const aviso = 'Salió en YouTube, pero YouTube no lo agregó a la playlist que elegiste. Agrégalo tú desde YouTube Studio.'
+      const conAviso = await destinoVencido()
+      publicar.mockResolvedValueOnce({ kind: 'published', externalId: 'v-1', aviso })
+      const informe = await publishDue()
+      expect(informe.published).toBe(1)
+      expect(informe.failed).toBe(0)
+      const fila = await leer(conAviso.id)
+      expect(fila?.status).toBe('published')
+      expect(fila?.lastError).toBeNull()
+      expect(fila?.aviso).toBe(aviso)
+
+      const limpio = await destinoVencido({ aviso: 'uno viejo' })
+      publicar.mockResolvedValueOnce({ kind: 'published', externalId: 'v-2' })
+      await publishDue()
+      expect((await leer(limpio.id))?.aviso).toBeNull()
+    })
+
     it('dos corridas a la vez publican una sola vez', async () => {
       const { publishDue } = await import('./run')
       const destino = await destinoVencido()

@@ -24,7 +24,16 @@ import {
 } from './social/instagram-audio'
 import { SIN_MAS_CANCIONES } from './social/musica-sugerencia'
 import { fraseColaVacia, frasePendientes, hace } from './social/comentarios/la-mesa'
-import { ETIQUETA_PRIVACIDAD, PRIVACIDADES_TIKTOK } from './social/publish/opciones'
+import {
+  AYUDA_VISIBILIDAD_YOUTUBE,
+  ETIQUETA_PRIVACIDAD,
+  ETIQUETA_VISIBILIDAD_YOUTUBE,
+  IA_YOUTUBE_APAGADO,
+  IA_YOUTUBE_ENCENDIDO,
+  PRIVACIDADES_TIKTOK,
+  VISIBILIDADES_YOUTUBE,
+} from './social/publish/opciones'
+import { PLAYLISTS_NO_RESPONDE } from './social/playlists-youtube'
 import { TIKTOK_CREADOR_ILEGIBLE } from './social/publish/tiktok-creador'
 import { MAX_MENSAJE, MAX_PALABRA, MAX_RESPUESTA, RESPUESTA_PUBLICA_POR_DEFECTO } from './social/comentarios/reglas'
 import { nombreDe } from './vocabulario'
@@ -272,6 +281,24 @@ describe('TikTok y la palabra clave en Publicar dicen lo mismo que el compositor
     ]) {
       expect(panel, texto).toContain(juntar(texto))
     }
+  })
+
+  it('el bloque de YouTube: las visibilidades, sus nombres, sus ayudas y cada texto', () => {
+    const youtube = delTelefono<{
+      VISIBILIDADES_YOUTUBE: readonly string[]
+      ETIQUETA_VISIBILIDAD_YOUTUBE: Record<string, string>
+      AYUDA_VISIBILIDAD_YOUTUBE: Record<string, string>
+      PLAYLISTS_NO_RESPONDE: string
+      TEXTOS_YOUTUBE: Record<string, string>
+    }>('youtube')
+    expect(youtube.VISIBILIDADES_YOUTUBE).toEqual(VISIBILIDADES_YOUTUBE)
+    expect(youtube.ETIQUETA_VISIBILIDAD_YOUTUBE).toEqual(ETIQUETA_VISIBILIDAD_YOUTUBE)
+    expect(youtube.AYUDA_VISIBILIDAD_YOUTUBE).toEqual(AYUDA_VISIBILIDAD_YOUTUBE)
+    expect(youtube.PLAYLISTS_NO_RESPONDE).toBe(PLAYLISTS_NO_RESPONDE)
+    const { iaApagada, iaEncendida, ...resto } = youtube.TEXTOS_YOUTUBE
+    expect([iaApagada, iaEncendida]).toEqual([IA_YOUTUBE_APAGADO, IA_YOUTUBE_ENCENDIDO])
+    const panel = fuenteDelPanel('youtube-opciones.tsx')
+    for (const texto of Object.values(resto)) expect(panel, texto).toContain(juntar(texto))
   })
 
   it('la palabra clave: los topes, la respuesta de siempre y cada texto', () => {

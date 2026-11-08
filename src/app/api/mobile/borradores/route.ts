@@ -7,6 +7,7 @@ import {
   musicaDelTelefono,
   reglaDelTelefono,
   tiktokDelTelefono,
+  youtubeDelTelefono,
 } from '@/lib/borrador'
 import { cargarBorrador, guardarBorrador, type MediaDeBorrador } from '@/lib/borradores'
 import { cuentasParaElTelefono } from '@/lib/borradores-movil'
@@ -34,7 +35,8 @@ export const dynamic = 'force-dynamic'
  * `media`— más el `id` del borrador si ya existe, un `nombre` por archivo y el `modo` (`post` o
  * `historia`; sin él se conserva el que tenía, ver `historiaDelTelefono`). Una app que trae el
  * bloque de TikTok y la palabra clave (`sabeDe`) manda además las opciones de cada cuenta de
- * TikTok en `opciones`, a medias si hace falta, y la `regla`. Sin `id`, crea
+ * TikTok en `opciones`, a medias si hace falta, y la `regla`; una que trae el bloque de YouTube
+ * (`youtube`), las de cada canal. Sin `id`, crea
  * uno. Un `id` que ya no existe responde 404 y no se recrea, como en el panel: alguien lo
  * programó o lo descartó en otro lado.
  *
@@ -80,7 +82,7 @@ export async function POST(request: Request) {
   // Solo cuentas del dueño que el teléfono publica: una que no, el teléfono no la pudo
   // haber mostrado. Las demás del borrador las conserva `camposDesdeTelefono`.
   const conTikTok = sabeDe(request, 'tiktok')
-  const { propias, ajenas, tiktok } = await cuentasParaElTelefono(usuario.id, conTikTok)
+  const { propias, ajenas, tiktok, youtube } = await cuentasParaElTelefono(usuario.id, conTikTok)
   const cuentas = datos.cuentas.filter((c) => propias.has(c))
   const trial = Object.entries(datos.opciones)
     .filter(([c, o]) => cuentas.includes(c) && (o as { trialReel?: unknown }).trialReel === true)
@@ -107,6 +109,8 @@ export async function POST(request: Request) {
       // no pudo haberlas cambiado, y se conservan las que dejó el panel.
       ...(conTikTok ? { tiktok: tiktokDelTelefono(datos.opciones, cuentas, tiktok) } : {}),
       ...(sabeDe(request, 'palabra-clave') ? { regla: reglaDelTelefono(body) } : {}),
+      // Las de YouTube, igual: solo de una app que trae su bloque.
+      ...(sabeDe(request, 'youtube') ? { youtube: youtubeDelTelefono(datos.opciones, cuentas, youtube) } : {}),
     },
     ajenas,
   )

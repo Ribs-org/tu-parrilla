@@ -82,6 +82,8 @@ export type FilaProgramada = {
     network: string
     status: string
     lastError: string | null
+    // Salió, pero un paso de después no (la playlist de YouTube); null si no hubo nada.
+    aviso?: string | null
     externalId: string | null
     attemptCount: number
     reintentarDesde: Date | null
@@ -119,6 +121,9 @@ export type PostProgramadoApi = {
     red: string
     estado: string
     error: string | null
+    // Un destino publicado al que le quedó algo a medias: hoy, un video de YouTube que no entró
+    // a la playlist elegida. No es un fallo; null en todo lo demás.
+    aviso: string | null
     externalId: string | null
     intentos: number
     // Cuándo es el próximo intento de un destino que espera (tras un fallo, o por el tope
@@ -172,6 +177,7 @@ export function armarProgramados(
       red: target.network,
       estado: target.status,
       error: target.lastError,
+      aviso: target.status === 'published' ? (target.aviso ?? null) : null,
       externalId: target.externalId,
       intentos: target.attemptCount,
       proximoIntento:

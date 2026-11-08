@@ -232,6 +232,13 @@
       "when": 1794023767460,
       "tag": "0032_push_al_telefono",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1794177681268,
+      "tag": "0033_aviso_del_destino",
+      "breakpoints": true
     }
   ]
 }

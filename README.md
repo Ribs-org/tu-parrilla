@@ -511,7 +511,10 @@ desconecta no espera ese plazo: *Desconectar* borra en el acto sus lecturas, las
 sus comentarios y los títulos y miniaturas (`src/lib/social/desconectar.ts`), y deja el id y el
 nombre del canal y la fila de cada video, que une las visitas a su etiqueta `?s=`. La regla vive en
 `src/lib/social/politica-youtube.ts` y el borrado en `retencion-youtube.ts`. Si algún día
-se pide y se obtiene el permiso de analítica de §III.L, es ahí donde se afloja.
+se pide y se obtiene el permiso de analítica de §III.L, es ahí donde se afloja. Las playlists
+de «Agregar a una playlist» siguen la misma regla: sus títulos viven unos minutos en la memoria
+del servidor y no se guardan; del destino queda solo el id de la elegida (ver el bloque de YouTube
+en «Varias cuentas de una misma red», más abajo).
 
 ### Instagram — cuenta profesional y página de Facebook
 
@@ -797,6 +800,26 @@ nuevo. Con el login de Instagram la música no existe: el bloque lo dice y no of
 lo rechaza. Lo que está sonando y cada búsqueda se guardan diez minutos en la memoria del
 servidor, por cuenta (`social/instagram-audio.ts`).
 
+YouTube también tiene un bloque por canal marcado, en el compositor y en Publicar del teléfono
+(desde el 2026-11-08): **quién lo ve** —Público, que es lo de siempre, No listado o Privado
+(`privacyStatus`)—, **«Hecho con IA»** —la declaración de contenido alterado o sintético de
+YouTube, `containsSyntheticMedia`, que se manda solo encendida, como la de TikTok— y **«Agregar a
+una playlist»**. Ninguna pide un permiso de Google nuevo: las dos primeras viajan en el
+`videos.insert` de siempre, y las playlists se leen y se llenan con `youtube.force-ssl`, que la app
+ya tiene (la pantalla de consentimiento está verificada, y cambiarle un permiso pediría otra
+verificación). La lista se le pide a YouTube recién al encender el interruptor
+(`playlists.list mine=true`, 1 unidad del cupo por página de 50) y vive cinco minutos en la memoria
+del servidor, por canal (`social/playlists-youtube.ts`); de la elegida se guarda solo el id en las
+opciones del destino, no el título, porque los datos de la API de YouTube no se guardan sin
+refrescar. Cuando el video termina de procesarse, el publicador lo agrega al final de esa
+playlist (`playlistItems.insert`, 50 unidades: una subida con playlist cuesta eso más lo de
+siempre). Si YouTube no lo deja —la playlist se borró, el permiso, la red—, el destino **no
+falla**: el video ya está en el canal y reintentar lo subiría otra vez. Queda publicado con un
+aviso (`scheduled_post_targets.aviso`) que el editor muestra en ámbar debajo de su estado y que
+`GET /api/schedule/posts` devuelve como `aviso`. Un teléfono sin actualizar no trae el bloque: al
+programar un borrador, el servidor le pone las opciones de YouTube que dejó el panel
+(`opcionesConYoutubeDelBorrador`), para que un video que quedó privado no salga público.
+
 Desde el 2026-11-07 la app del teléfono ofrece TikTok como destino, con el mismo bloque que el
 compositor —los datos de la cuenta de `creator_info`, la privacidad sin elegir, las
 interacciones, la marca, «Hecho con IA», «Música de TikTok» y el consentimiento— y la
@@ -809,7 +832,7 @@ no deja programar un video más largo de lo que `creator_info` dice que esa cuen
 (`max_video_post_duration_sec`); el compositor todavía no lo mira (ver `docs/pendientes.md`).
 
 Solo la app que lo trae recibe eso: lo avisa en el encabezado `X-Parrilla-Publicar` (`tiktok`,
-`palabra-clave`; `sabeDe`, en `src/lib/mobile-api.ts`). A una instalación sin actualizar no le
+`palabra-clave` y, desde el 2026-11-08, `youtube`; `sabeDe`, en `src/lib/mobile-api.ts`). A una instalación sin actualizar no le
 llegan las cuentas de TikTok, sus borradores con TikTok o con palabra clave se guardan sin
 perder eso y se programan en el panel (`soloEnElPanel`, en `src/lib/borrador.ts`), y si
 intentara programarlos se rechaza con el motivo. El encabezado y no un campo del cuerpo, como
@@ -1845,8 +1868,9 @@ Y `opciones`, obligatorio cuando algún destino de la fila es una cuenta de TikT
 modo, la privacidad y las casillas que TikTok exige elegir por publicación) y opcional
 para Instagram (`trialReel`, para que el reel salga como trial reel — solo lo ven quienes
 no siguen la cuenta, hasta que el dueño lo comparte desde la app —, y `musica`, la canción de
-«Música de Instagram» con su `audioId`) y para Instagram y
-Facebook (`historia`, para que salga como historia). Una fila con `"historia": true` y varios
+«Música de Instagram» con su `audioId`), para Instagram y
+Facebook (`historia`, para que salga como historia) y para YouTube (`visibilidad`, `ia` y
+`playlist`, con el id de la playlist). Una fila con `"historia": true` y varios
 archivos es el atajo de una secuencia: se expande en una historia por archivo y vuelve con
 `postIds`. Se llavea por destino:
 cada clave se busca primero entre los identificadores de cuenta de la fila, y si no
@@ -2294,6 +2318,7 @@ src/
     editar-movil.ts        un post programado abierto para corregirlo en el teléfono: lo que se ve y lo que se guarda sin tocar
     comentarios-movil.ts   La Mesa en la forma de la app del teléfono: la cola agrupada por publicación y el código de cada frase (sin base)
     musica-instagram.ts    «Música de Instagram» del panel y del teléfono: la cuenta del dueño con su token, la memoria de lo que suena y la sugerencia con el modelo
+    playlists-youtube.ts   «Agregar a una playlist» del panel y del teléfono: el canal del dueño con su token y la memoria corta de sus playlists
     pruebas/               la Postgres de las pruebas de integración: una base nueva y migrada por archivo; y un lector de zip para mirar el XML de una planilla
     empresa.ts             quién presta el servicio: lo leen la portada, privacidad y términos
     avisos/                la caída de una cuenta y el resumen del día: las reglas sin base y lo que lee y manda
@@ -2306,6 +2331,7 @@ src/
       tiktok-numeros-guardar.ts dónde quedan esos números (account_metrics, post_metrics y ajustes), el paso de la sincronización diaria y lo que leen Los Números, la pieza y el compositor
       instagram-audio.ts   la biblioteca de música de Instagram (Audio API de Meta): lo que suena, la búsqueda y una canción, leídos sin base
       musica-sugerencia.ts «Sugiéreme una»: el modelo elige por id entre canciones reales, y sin él el azar (sin base)
+      playlists-youtube.ts las playlists de un canal de YouTube y agregarle un video, con sus avisos, leídos sin base
       lectura.ts           qué publicaciones se leen cada día: lo nuevo a diario, lo viejo cada vez más espaciado
       politica-youtube.ts  lo que las políticas de YouTube no dejan hacer con sus datos
       retencion-youtube.ts borra lo de YouTube que lleva 30 días sin refrescarse

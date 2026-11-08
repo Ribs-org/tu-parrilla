@@ -498,7 +498,9 @@ formulario viene abierto, con el cursor en «Texto». En este orden:
    Fierros](los-fierros.md)), un recuadro **«Lo que se busca en TikTok · <usuario>»** (ver abajo).
 7. **Un bloque «Instagram · <usuario>»** por cada cuenta de Instagram marcada, solo cuando
    hay exactamente un archivo y es un video (ver abajo): el trial reel y «Música de Instagram».
-8. **«Respuesta automática por palabra clave»**, plegado (ver abajo); viene abierto y lleno si
+8. **Un bloque «YouTube · <canal>»** por cada canal de YouTube marcado (ver abajo): quién lo
+   ve, «Hecho con IA» y «Agregar a una playlist».
+9. **«Respuesta automática por palabra clave»**, plegado (ver abajo); viene abierto y lleno si
    el borrador tenía una palabra.
 9. **«Fecha y hora»**, el campo de día y hora («Elegir día y hora» mientras está vacío), que
    abre el calendario ([index.md](index.md), «Las ventanas del panel»), con el botón «Ahora» al lado. Al abrir desde
@@ -625,6 +627,34 @@ Con una cuenta conectada con el login de Instagram, en vez de todo eso dice: «L
 Instagram no está disponible en esta cuenta: se conectó con el login de Instagram, y Meta solo la
 da a las cuentas conectadas con Facebook.» Con fotos o más de un archivo el bloque de Instagram
 no aparece, y la música tampoco: Instagram solo le pone música a un reel.
+
+#### El bloque «YouTube · <canal>»
+
+Aparece por cada canal de YouTube marcado, con o sin archivos. De arriba abajo:
+
+- **«Quién lo ve»**, una lista con **«Público»** (lo que viene puesto, como siempre), **«No
+  listado»** y **«Privado»**. Debajo, la ayuda de la elegida: «Lo ve cualquiera en YouTube.»,
+  «Solo quien tenga el link: no sale en tu canal ni en las búsquedas.» o «Solo tú, desde YouTube
+  Studio.».
+- El interruptor **«Hecho con IA»**, apagado al partir (en un borrador, como quedó). Apagado dice
+  «Enciéndelo si el video muestra de forma realista una persona, un lugar o un hecho que se hizo
+  o se cambió con IA: YouTube pide avisarlo.»; encendido, «YouTube lo marcará como contenido
+  alterado o sintético.». YouTube muestra esa marca en el video. Una animación que se nota que no
+  es real, o un filtro de color, no la necesitan.
+- El interruptor **«Agregar a una playlist»**, apagado al partir, con «Cuando el video salga, lo
+  agregamos a una playlist de tu canal.». Al encenderlo dice «Cuando el video salga, lo agregamos
+  al final de esa playlist. Si YouTube no lo deja, el video sale igual y te lo decimos en la
+  publicación.», y debajo aparece «Leyendo tus playlists…» y después una lista que parte en
+  «Elige una playlist» con las playlists del canal. Sin elegir ninguna, el video no se agrega a
+  ninguna. Si el canal no tiene: «Este canal todavía no tiene playlists. Crea una en YouTube y
+  aprieta «Volver a cargar».». Al pie, **«Volver a cargar»** («Cargando…» mientras pregunta), para
+  una playlist que se acaba de crear en YouTube. Si YouTube no contesta: «YouTube no respondió con
+  tus playlists. Inténtalo de nuevo en un rato.»; si la conexión del canal ya no sirve: «YouTube no
+  dejó ver las playlists de este canal. Reconéctalo en Los Fierros y vuelve a intentarlo.». En un
+  borrador cuya playlist ya no está en el canal, la lista muestra «La que elegiste antes (ya no
+  aparece en el canal)».
+
+Con dos canales marcados hay dos bloques, y cada uno se llena por separado.
 
 #### «Respuesta automática por palabra clave»
 
@@ -764,7 +794,11 @@ Debajo, un recuadro con cómo va el post en cada red: a la izquierda, su corte c
 marcas (ver «El corte»); al lado, una línea por destino con su chip, «<Red> · <usuario>» y el
 estado en palabras («· Programado», «· Reintentando», «· Publicando…», «· Publicado», «· En tu
 bandeja de TikTok», «· Falló» o «· Su fierro está frío: reconéctala»). Si el destino reintenta
-o falló, debajo va el motivo, en ámbar o en rojo. Si falló, debajo del motivo van los mismos
+o falló, debajo va el motivo, en ámbar o en rojo. Un video de YouTube que salió pero no entró a
+la playlist elegida dice «· Publicado» y, debajo en ámbar, «Salió en YouTube, pero YouTube no lo
+agregó a la playlist que elegiste. Agrégalo tú desde YouTube Studio.» o «Salió en YouTube, pero
+la playlist que elegiste ya no está en el canal. Si quieres, agrégalo a otra desde YouTube
+Studio.»: no es un fallo, y no hay que reprogramarlo. Si falló, debajo del motivo van los mismos
 botones que en «Se quemó»: el arreglo cuando el motivo lo dice —**«Reconectar»**, que lleva a
 Los Fierros, o **«Cambiar el archivo»**, que baja a «Media» en este mismo editor—,
 **«Reprogramar»** y **«Archivar»**. Si ya estaba archivado, debajo del motivo dice
@@ -799,7 +833,9 @@ El formulario, en orden:
    lleva la etiqueta de IA y « · con música de TikTok» si son fotos con «Música de TikTok»
    encendida; o «Trial reel — lo compartes tú desde
    Instagram», y « · Con música de Instagram: «Título» de Artista» (o solo «Con música de
-   Instagram: …») si el reel lleva canción. Esas opciones no se pueden cambiar aquí: para
+   Instagram: …») si el reel lleva canción; en YouTube, si se eligió algo fuera de lo de siempre,
+   la visibilidad («Público», «No listado» o «Privado») con « · hecho con IA» y « · a una
+   playlist» si van (sin nada elegido, YouTube no lleva resumen: sale público). Esas opciones no se pueden cambiar aquí: para
    cambiar o quitar la canción, se borra el post y se programa de nuevo.
 4. **«Media»**: una fila por archivo, con su miniatura (los videos se pueden reproducir ahí
    mismo), su dirección, un ícono para abrirlo en otra pestaña («Abrir en una pestaña
@@ -939,6 +975,17 @@ teléfono](app-movil.md)).
 2. Marcar la cuenta de Instagram en «Cuentas». Aparece «Instagram · <usuario>».
 3. Encender «Publicar como trial reel».
 4. Fecha y hora, y «Programar». Después, se comparte con todos desde la app de Instagram.
+
+### Para subir un video a YouTube como no listado, privado o en una playlist
+
+1. En «Nueva publicación», elegir el video y marcar el canal de YouTube en «Cuentas». Aparece
+   «YouTube · <canal>».
+2. En «Quién lo ve», elegir «No listado» o «Privado» (si no, sale «Público»).
+3. Si el video muestra algo realista hecho o cambiado con IA, encender «Hecho con IA».
+4. Para una playlist, encender «Agregar a una playlist» y elegirla en la lista. Si es nueva y no
+   aparece, «Volver a cargar».
+5. Fecha y hora, y «Programar». Cuando el video sale, se agrega solo a la playlist; si no se pudo,
+   el editor del post lo dice en ámbar y hay que agregarlo desde YouTube Studio.
 
 ### Para ponerle música de Instagram a un reel
 
@@ -1156,6 +1203,10 @@ de esa tanda queda: hay que volver a elegirlos.
 | «El texto es demasiado largo para Instagram.» | Más de 2200 caracteres, vaya a la red que vaya (pasa en el editor o el CSV) | Acortarlo |
 | «TikTok recibe un video, o hasta 35 fotos JPG o WebP.» | Con TikTok marcado: dos videos, video con fotos, más de 35 fotos, o un formato que no acepta (por ejemplo PNG) | Dejar un video MP4, MOV o WebM, o fotos JPG o WebP |
 | «Un trial reel es un solo video, sin fotos.» | En el editor se cambiaron los archivos de un trial reel | Dejar exactamente un video |
+| «Salió en YouTube, pero YouTube no lo agregó a la playlist que elegiste. Agrégalo tú desde YouTube Studio.» | En el editor, debajo de un YouTube «Publicado»: el video salió, pero YouTube no dejó agregarlo a la playlist | Agregarlo a la playlist en YouTube Studio; no reprogramar, que lo subiría otra vez |
+| «Salió en YouTube, pero la playlist que elegiste ya no está en el canal. Si quieres, agrégalo a otra desde YouTube Studio.» | Igual, pero la playlist se borró en YouTube antes de que el video saliera | Agregarlo a otra en YouTube Studio, si se quiere |
+| «YouTube no respondió con tus playlists. Inténtalo de nuevo en un rato.» | En el bloque de YouTube, la lista de playlists no llegó | «Volver a cargar» en un rato |
+| «YouTube no dejó ver las playlists de este canal. Reconéctalo en Los Fierros y vuelve a intentarlo.» | La conexión del canal ya no sirve para leer sus playlists | Reconectar el canal en Los Fierros |
 | «La música de Instagram solo funciona en cuentas conectadas con Facebook, y esta se conectó con el login de Instagram.» | Un borrador o un pedido traía música para una cuenta conectada con el login de Instagram | Quitar la canción, o reconectar la cuenta con Facebook en Los Fierros |
 | «Una historia no lleva música de Instagram.» | Una historia con canción (pasa por la API) | Quitar la canción |
 
@@ -1560,6 +1611,7 @@ Lo que describe esta página sale de:
   - `src/app/admin/(dash)/schedule/instagram-opciones.tsx`
   - `src/app/admin/(dash)/schedule/musica-instagram.tsx` («Música de Instagram»)
   - `src/app/admin/musica-actions.ts`, `src/lib/musica-instagram.ts`, `src/lib/social/instagram-audio.ts` y `src/lib/social/musica-sugerencia.ts` (buscar, escuchar y «Sugiéreme una», con sus frases)
+  - `src/app/admin/(dash)/schedule/youtube-opciones.tsx` (el bloque de YouTube), con sus visibilidades y las frases de «Hecho con IA» en `src/lib/social/publish/opciones.ts`, y las playlists en `src/app/admin/playlists-actions.ts`, `src/lib/playlists-youtube.ts` y `src/lib/social/playlists-youtube.ts` (con los avisos de la playlist)
   - `src/app/admin/(dash)/schedule/etiqueta.ts`
   - `src/app/admin/(dash)/schedule/orden.ts`
   - `src/app/admin/(dash)/schedule/enlace.ts`

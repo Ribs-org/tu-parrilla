@@ -1,7 +1,14 @@
 import 'server-only'
 import { eq } from 'drizzle-orm'
 import { getDb, socialAccounts } from '@/db'
-import { soloEnElPanel, telefonoDesdeCampos, textoDe, type ReglaDeBorrador, type TikTokInicial } from './borrador'
+import {
+  soloEnElPanel,
+  telefonoDesdeCampos,
+  textoDe,
+  type ReglaDeBorrador,
+  type TikTokInicial,
+  type YoutubeInicial,
+} from './borrador'
 import type { BorradorCargado, BorradorResumido, MediaDeBorrador } from './borradores'
 import { isoInZone } from './metrics-api'
 import { redesDelTelefono } from './mobile-api'
@@ -39,6 +46,8 @@ export type BorradorMovilAbierto = {
   tiktok: Record<string, TikTokInicial>
   /** La regla de palabra clave, o null si no tiene. */
   regla: ReglaDeBorrador | null
+  /** Lo que el bloque de YouTube de cada cuenta tenía elegido (`youtubeInicial`); una app sin el bloque lo ignora. */
+  youtube: Record<string, YoutubeInicial>
   /** Por qué no se programa desde el teléfono, o null si se puede. */
   soloEnElPanel: string | null
 }
@@ -47,12 +56,13 @@ export type BorradorMovilAbierto = {
  * Las cuentas del dueño partidas en dos: las que la app publica, y las que no con el nombre de su
  * red. Las primeras son las únicas que un borrador guardado desde el teléfono puede elegir; las
  * segundas se conservan sin que el teléfono las toque. Las de TikTok son de las primeras solo si
- * la app trae su bloque (`conTikTok`); `tiktok` las nombra, para leer sus opciones al guardar.
+ * la app trae su bloque (`conTikTok`); `tiktok` las nombra, para leer sus opciones al guardar, y
+ * `youtube` nombra las de YouTube, por lo mismo.
  */
 export async function cuentasParaElTelefono(
   ownerId: string,
   conTikTok = false,
-): Promise<{ propias: Set<string>; ajenas: Map<string, string>; tiktok: Set<string> }> {
+): Promise<{ propias: Set<string>; ajenas: Map<string, string>; tiktok: Set<string>; youtube: Set<string> }> {
   const filas = await getDb()
     .select({ id: socialAccounts.id, network: socialAccounts.network })
     .from(socialAccounts)
@@ -61,12 +71,14 @@ export async function cuentasParaElTelefono(
   const propias = new Set<string>()
   const ajenas = new Map<string, string>()
   const tiktok = new Set<string>()
+  const youtube = new Set<string>()
   for (const f of filas) {
     if (redes.has(f.network)) propias.add(f.id)
     else ajenas.set(f.id, networkLabel(f.network))
     if (f.network === 'tiktok' && redes.has('tiktok')) tiktok.add(f.id)
+    if (f.network === 'youtube' && redes.has('youtube')) youtube.add(f.id)
   }
-  return { propias, ajenas, tiktok }
+  return { propias, ajenas, tiktok, youtube }
 }
 
 export function resumirParaElTelefono(b: BorradorResumido, zona: string): BorradorResumidoMovil {
@@ -90,7 +102,16 @@ export function abrirEnElTelefono(
   ajenas: ReadonlyMap<string, string>,
   { conRegla = false }: { conRegla?: boolean } = {},
 ): BorradorMovilAbierto {
-  const { texto, cuentas, trial, musica = {}, historia = false, tiktok = {}, regla = null } = telefonoDesdeCampos(b.campos)
+  const {
+    texto,
+    cuentas,
+    trial,
+    musica = {},
+    historia = false,
+    tiktok = {},
+    regla = null,
+    youtube = {},
+  } = telefonoDesdeCampos(b.campos)
   const visibles = cuentas.filter((id) => !ajenas.has(id))
   return {
     id: b.id,
@@ -103,6 +124,7 @@ export function abrirEnElTelefono(
     media: b.media,
     tiktok: Object.fromEntries(Object.entries(tiktok).filter(([id]) => visibles.includes(id))),
     regla,
+    youtube: Object.fromEntries(Object.entries(youtube).filter(([id]) => visibles.includes(id))),
     soloEnElPanel: soloEnElPanel(b.campos, ajenas, { conRegla }),
   }
 }

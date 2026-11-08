@@ -3,6 +3,7 @@ import type { Modo } from './historias'
 import type { MusicaInstagram } from './musica'
 import { hayRegla, reglaParaEnviar, type ReglaApp } from './regla'
 import { soloFotos, tiktokParaGuardar, type TikTokElegido } from './tiktok'
+import { opcionesYoutube, type YoutubeElegido } from './youtube'
 import { LA_PARRILLA, type Tema } from './tema'
 import type { BorradorResumido, CuentaApp } from './tipos'
 
@@ -71,6 +72,8 @@ export type Formulario = {
   tiktok?: Record<string, TikTokElegido>
   /** La regla de palabra clave; falta en lo armado antes de que existiera. */
   regla?: ReglaApp
+  /** Lo elegido en el bloque de YouTube de cada cuenta que se tocó o vino de un borrador. */
+  youtube?: Record<string, YoutubeElegido>
 }
 
 export type CuerpoBorrador = {
@@ -111,7 +114,11 @@ export function cuerpoDelBorrador(form: Formulario): CuerpoBorrador {
     texto: form.texto,
     cuentas: form.cuentas,
     cuando: form.fechaPuesta ? form.fecha.toISOString() : null,
-    opciones: { ...opcionesParaGuardar(form.cuentas, form.trial, form.archivos, form.musica ?? {}), ...tiktokDelForm(form) },
+    opciones: {
+      ...opcionesParaGuardar(form.cuentas, form.trial, form.archivos, form.musica ?? {}),
+      ...tiktokDelForm(form),
+      ...youtubeDelForm(form),
+    },
     media: subidos(form.archivos),
     conMusica: true,
     modo: form.historia ? 'historia' : 'post',
@@ -128,6 +135,18 @@ function tiktokDelForm(form: Formulario): Record<string, Record<string, unknown>
   const salida: Record<string, Record<string, unknown>> = {}
   for (const [id, e] of Object.entries(form.tiktok ?? {})) {
     if (form.cuentas.includes(id)) salida[id] = tiktokParaGuardar(e, fotos)
+  }
+  return salida
+}
+
+/**
+ * El bloque de YouTube de cada cuenta marcada que se tocó o vino de un borrador. Como el de TikTok,
+ * solo hay entrada para las cuentas de YouTube; el servidor lo lee con `youtubeDelTelefono`.
+ */
+function youtubeDelForm(form: Formulario): Record<string, Record<string, unknown>> {
+  const salida: Record<string, Record<string, unknown>> = {}
+  for (const [id, e] of Object.entries(form.youtube ?? {})) {
+    if (form.cuentas.includes(id)) salida[id] = opcionesYoutube(e)
   }
   return salida
 }

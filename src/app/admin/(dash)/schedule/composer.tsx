@@ -24,6 +24,7 @@ import {
   reglaInicial,
   tieneContenido,
   tiktokInicial,
+  youtubeInicial,
   type Campos,
 } from '@/lib/borrador'
 import { colorDeRed } from '@/lib/color-de-red'
@@ -46,6 +47,7 @@ import { BusquedasTiktok } from './busquedas-tiktok'
 import { TikTokOpciones } from './tiktok-opciones'
 import { venceAntesDe } from './vence'
 import { VistaPrevia } from './vista-previa'
+import { YoutubeOpciones } from './youtube-opciones'
 import { useAhora } from '@/lib/use-ahora'
 
 // Twin of PUBLISHABLE (publish/batch.ts). NETWORKS in the editor
@@ -284,6 +286,11 @@ export function Composer({
     campos || pedida
       ? publicables.filter((c) => c.network === 'instagram' && marcadaAlAbrir(c))
       : cuentasInicialesDe(publicables, 'instagram'),
+  )
+  const [cuentasYoutube, setCuentasYoutube] = useState<CuentaRow[]>(() =>
+    campos || pedida
+      ? publicables.filter((c) => c.network === 'youtube' && marcadaAlAbrir(c))
+      : cuentasInicialesDe(publicables, 'youtube'),
   )
   // Todas las marcadas, para la marca de cada una en «Así va a quedar».
   const [marcadas, setMarcadas] = useState<ReadonlySet<string>>(
@@ -567,7 +574,13 @@ export function Composer({
       return siguientes
     })
     const setCuentas =
-      cuenta.network === 'tiktok' ? setCuentasTikTok : cuenta.network === 'instagram' ? setCuentasInstagram : null
+      cuenta.network === 'tiktok'
+        ? setCuentasTikTok
+        : cuenta.network === 'instagram'
+          ? setCuentasInstagram
+          : cuenta.network === 'youtube'
+            ? setCuentasYoutube
+            : null
     if (!setCuentas) return
     setCuentas((prev) => (marcada ? [...prev, cuenta] : prev.filter((c) => c.id !== cuenta.id)))
   }
@@ -812,6 +825,10 @@ export function Composer({
                 />
               ))
             : null}
+
+          {cuentasYoutube.map((cuenta) => (
+            <YoutubeOpciones key={cuenta.id} cuenta={cuenta} inicial={campos ? youtubeInicial(campos, cuenta.id) : null} />
+          ))}
 
           <ReglaClave inicial={reglaGuardada} />
 
