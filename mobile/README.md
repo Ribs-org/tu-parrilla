@@ -517,7 +517,7 @@ rechaza («Una historia es un solo archivo, foto o video.») y el borrador no re
 Salieron el 2026-11-07 junto con La Mesa, en el commit `9968a71` de `ota-1.1.0`, a los dos canales,
 con el servidor ya en producción.
 
-### TikTok y la palabra clave por aire a la 1.1.0 (preparados el 2026-11-07, sin publicar)
+### TikTok y la palabra clave por aire a la 1.1.0 (publicados el 2026-11-07)
 
 No piden nada nativo ni permisos nuevos. Para publicarlos, sobre la punta de `ota-1.1.0`, se copian
 de `main` (con esta rama fusionada) estos archivos de `mobile/`, tal cual:
@@ -538,8 +538,8 @@ palabra clave. **No** se tocan `app.json` ni `package.json`.
 
 Se publica **después** de que el servidor de esta rama esté en producción. Al revés no se rompe
 nada, pero tampoco aparece: un servidor de antes no lee el encabezado, no ofrece TikTok ni manda la
-regla del borrador, y al guardar ignora la regla que manda la app. Publicarla es decisión del dueño:
-está en `docs/pendientes.md`.
+regla del borrador, y al guardar ignora la regla que manda la app. Salió el 2026-11-07, con el
+servidor ya en producción, en el commit `b7e45a2` de `ota-1.1.0`, a los dos canales.
 
 Lo que se probó el 2026-11-07 en Expo web contra una API falsa: el bloque con los datos de
 `creator_info`, las privacidades que permite, «Dúos» gris por bloqueado, la marca con «Contenido
@@ -654,7 +654,8 @@ frase de cada publicación llega escrita del servidor; el título y el pie son c
 que vigila `telefono-copias.test.ts`. Un servidor de antes no manda el campo y el aviso no aparece. No
 pide nada nativo: llega por aire a la 1.1.0 copiando `src/app/mesa.tsx`, `src/components/mesa.tsx` y
 `src/lib/mesa.ts` sobre la punta de `ota-1.1.0` (si allá son iguales a los de `main` antes de este
-cambio; si no, solo la parte del aviso). Hasta que el dueño lo publique, el teléfono no lo muestra.
+cambio; si no, solo la parte del aviso). Salió el 2026-11-07 con TikTok y la palabra clave, en el
+commit `b7e45a2` de `ota-1.1.0`, a los dos canales.
 
 **Contra un servidor de antes**, que no tiene estas rutas, la API contesta `404` sin frase:
 `useScreenData` lo avisa (`sinRuta`), y La Mesa dice «Tu Parrilla todavía no responde comentarios

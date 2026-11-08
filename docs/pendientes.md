@@ -140,10 +140,8 @@ sección.
   cuando Instagram cuenta dos o más que no llegaron (`src/lib/social/comentarios/faltantes.ts`).
   Ese aviso no distingue las respuestas que otras personas se dan entre ellas, que Instagram
   también cuenta y Tu Parrilla no guarda, y por eso lo dice en vez de afirmar que todo lo que falta
-  lo escondió Instagram. El teléfono también lo muestra en su La Mesa, pero recién cuando le llegue
-  por aire. Pendiente:
-  - **[dueño]** publicar el aviso por aire a la 1.1.0: son tres archivos de `mobile/` (en
-    `mobile/README.md`, «La Mesa desde el teléfono»);
+  lo escondió Instagram. El teléfono también lo muestra en su La Mesa (por aire a la 1.1.0 desde el
+  2026-11-07). Pendiente:
   - **[dueño]** una prueba de dos minutos: apagar «Hide comments» y «Advanced comment filtering»
     en Hidden Words y comentar `GUIA` solo desde una cuenta nueva en la publicación. Si la dueña
     lo ve, es el filtro de spam, que se apaga, y el aviso de La Mesa puede decirlo con certeza
@@ -641,13 +639,9 @@ permisos «por decidir»** de la tabla red por red, para pedirlos todos en una m
      crea ahí un access token y ponlo en Vercel como `EXPO_ACCESS_TOKEN`; si no, Expo rechaza cada
      aviso. En iPhone, el build de iOS ofrece crear la llave de push de Apple cuando exista la
      cuenta.
-- **[dueño] Publicar TikTok y la palabra clave de Publicar por aire** (2026-11-07). Puro JavaScript,
-  sin permisos nuevos: a la 1.2.0 sale de `main`, y a la 1.1.0 desde `ota-1.1.0` copiando los
-  archivos que lista `mobile/README.md`, «TikTok y la palabra clave por aire a la 1.1.0» (ninguno
-  trae lo de la 1.2.0). Después de que el servidor esté en producción, con el comando de siempre en
-  los dos canales. Probado en Expo web contra una API falsa; en un teléfono y contra TikTok real,
-  no: la primera vez, programar desde el teléfono una foto a una cuenta de TikTok y mirar que salga
-  con la privacidad elegida.
+- **[dueño] Probar TikTok desde el teléfono con una cuenta real** (2026-11-07). Llegó por aire a la
+  1.1.0 el 2026-11-07; se probó en Expo web contra una API falsa, no contra TikTok: programar desde
+  el teléfono una foto a una cuenta de TikTok y mirar que salga con la privacidad elegida.
 - **[dueño] La app en iPhone** (2026-10-16). El código ya está listo para iOS; faltan la
   cuenta del Apple Developer Program, confirmar el identificador `cl.tuparrilla.app`
   (queda fijo al registrarlo), la ficha en App Store Connect y el primer build a
