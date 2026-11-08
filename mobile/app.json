@@ -68,6 +68,13 @@
           "icon": "./assets/images/android-icon-monochrome.png",
           "color": "#e8621f"
         }
+      ],
+      [
+        "expo-video",
+        {
+          "supportsBackgroundPlayback": false,
+          "supportsPictureInPicture": false
+        }
       ]
     ],
     "experiments": {

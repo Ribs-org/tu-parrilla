@@ -409,6 +409,28 @@ describe('POST /api/mobile/schedule', () => {
       resolverDestinos.mockReset()
     })
 
+    /*
+     * Un borrador que salió del mesón trae el título de YouTube en sus campos: el del chef, o el que
+     * se corrigió en el compositor del panel. El teléfono no lo muestra; programar desde ahí tiene que
+     * dejar el mismo título que el panel. La portada y los atributos los pone `crearVariosProgramados`
+     * desde el creativo del borrador (`meson.integracion.test.ts`), sin nada del pedido.
+     */
+    it('un borrador del mesón programa con su título de YouTube, el corregido o vacío; sin el campo, el del chef', async () => {
+      resolverDestinos.mockResolvedValue({ cuentas: [IG], networks: ['facebook'] })
+      crearPostProgramado.mockResolvedValue('post-1')
+      for (const [campos, titulo] of [
+        [{ tituloYoutube: ['  El título corregido  '] }, 'El título corregido'],
+        [{ tituloYoutube: [''] }, ''],
+        [{}, undefined],
+      ] as const) {
+        cargarBorrador.mockResolvedValueOnce({ id: BORRADOR, campos, fecha: null, media: [] })
+        await POST(peticion({ texto: 'Hola', cuentas: ['c-ig'], ahora: true, media: [], borradorId: BORRADOR }))
+        expect(crearPostProgramado).toHaveBeenLastCalledWith('owner-1', expect.objectContaining({ borradorId: BORRADOR, tituloYoutube: titulo }))
+      }
+      resolverDestinos.mockReset()
+      crearPostProgramado.mockReset()
+    })
+
     it('si el borrador ya no existe, no se crea nada: puede ser el mismo envío repetido', async () => {
       cargarBorrador.mockResolvedValueOnce(null)
       for (const borradorId of [BORRADOR, 'no-es-uuid']) {

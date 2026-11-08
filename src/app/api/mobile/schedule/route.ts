@@ -16,6 +16,7 @@ import {
   esBorradorDeHistoria,
   idDeBorrador,
   opcionesConMusicaDelBorrador,
+  primero,
   soloEnElPanel,
 } from '@/lib/borrador'
 import { cargarBorrador, listarBorradores } from '@/lib/borradores'
@@ -248,6 +249,12 @@ export function partirEnHistorias(
  * revisión da el motivo; la de la transacción (`BorradorConsumido`) cierra el caso de dos
  * envíos a la vez, que pasaban los dos por la revisión antes de que ninguno lo borrara.
  *
+ * Un borrador que salió del mesón de La Cocina lleva el título de YouTube en sus campos
+ * (`tituloYoutube`): el del chef, o el que se corrigió en el compositor del panel. El teléfono no
+ * lo muestra ni lo manda, así que va el del borrador, y el post queda con el mismo título que si
+ * se programara en el panel. La portada y los atributos los pone `crearVariosProgramados` desde el
+ * creativo del borrador, venga de donde venga el pedido.
+ *
  * Una secuencia de historias (`secuencia: true`) crea un post por archivo en la misma
  * transacción (`partirEnHistorias`) y responde además `ids`, en su orden. Un borrador que es una
  * historia no se programa como post (`BORRADOR_ES_HISTORIA`): lo intenta una app sin actualizar.
@@ -273,11 +280,14 @@ export async function POST(request: Request) {
   let borradorId: string | null = null
   let opcionesPedidas = borrador.opciones
   let deDondeEsHistoria = false
+  let tituloYoutube: string | undefined
   if (pedido !== undefined && pedido !== null) {
     borradorId = idDeBorrador(pedido)
     const deDonde = borradorId ? await cargarBorrador(usuario.id, borradorId) : null
     if (!deDonde) return NextResponse.json({ error: BORRADOR_NO_EXISTE }, { status: 404 })
     deDondeEsHistoria = esBorradorDeHistoria(deDonde.campos)
+    // El del compositor, como lo lee `programar` en el panel: sin el campo, el del chef.
+    if (deDonde.campos.tituloYoutube) tituloYoutube = primero(deDonde.campos, 'tituloYoutube').trim().slice(0, 100)
     const motivo = soloEnElPanel(deDonde.campos, (await cuentasParaElTelefono(usuario.id)).ajenas)
     if (motivo) return NextResponse.json({ error: motivo }, { status: 400 })
     // Una app que no sabe de música no la manda: la del borrador se conserva.
@@ -365,6 +375,7 @@ export async function POST(request: Request) {
         cuentas,
         opciones: partes[0]!.opciones,
         borradorId,
+        tituloYoutube,
       })
       return NextResponse.json({ id, cuando })
     }

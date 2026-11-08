@@ -260,8 +260,9 @@ construir esta parte, está en `docs/superpowers/specs/2026-10-24-historias-desi
   intenta programar como post un borrador de historia, se rechaza (`BORRADOR_ES_HISTORIA`) en vez
   de publicar un carrusel. El compositor del panel todavía no tiene «Historia»: abre ese borrador
   como un post (ver `docs/pendientes.md`).
-- **Un video no se reproduce en el visor**: pediría `expo-video`, que es nativo. Se ve «▶» con su
-  duración. El orden se cambia con flechas y no arrastrando: arrastrar pedía armar el gesto con
+- **Un video no se reproduce en el visor**: pediría `expo-video`, que es nativo y entró con el build
+  1.2.0 para el mesón; el visor todavía no lo usa, porque también va por aire a la 1.1.0. Se ve «▶» con
+  su duración. El orden se cambia con flechas y no arrastrando: arrastrar pedía armar el gesto con
   `react-native-gesture-handler` sobre una tira que también se desliza, y las flechas dicen lo
   mismo con un toque y se leen con el lector de pantalla.
 - **Editar publicación** abre una historia sin el cuadro del texto («Es una historia: no lleva
@@ -313,12 +314,11 @@ con unas burbujas arriba:
   lo que hay adentro con **Cambiar** (nombre y uso) y **Sacar de la cámara**, con su pregunta.
 - **Tus comandas.** Las últimas quince con su estado, que se actualizan solas mientras alguna está en
   marcha; la pregunta del chef con sus opciones y su plazo, para contestarla ahí; «Lo que pasó» paso
-  a paso, la hora estimada, cuántos creativos esperan en el mesón y **Cancelar la comanda** mientras
-  no esté en el horno.
+  a paso, la hora estimada, cuántos creativos esperan en el mesón con **Ver el mesón** (desde la 1.2.0)
+  y **Cancelar la comanda** mientras no esté en el horno.
 
 La línea de arriba dice cómo atiende la cocina —sola, a mano o cerrada— con la frase que manda el
-servidor. El mesón (programar o descartar lo que entregó el chef) sigue en el panel: ver
-`docs/pendientes.md`. La estación dibujada de cada comanda también: el teléfono dice lo mismo con el
+servidor. La estación dibujada de cada comanda sigue en el panel: el teléfono dice lo mismo con el
 estado y las cinco rayas del recorrido, con vistas, porque la pantalla también va por aire a la 1.1.0,
 que no trae `react-native-svg`.
 
@@ -354,6 +354,37 @@ que termina de subir, y guarda la cola en AsyncStorage (`cocina-pendientes`): si
 medias, al abrir La Cocina sigue donde quedó —el servidor dice qué partes llegaron—. Al terminar o
 al quitarlo, la copia se borra; al abrir La Cocina se barre lo que ya nadie espera, y cerrar sesión
 borra la cola. En la web (`archivo-local.web.ts`) el archivo es el del navegador y no se guarda.
+
+### El mesón (desde la 1.2.0, 2026-11-07)
+
+**Ver el mesón** (de día, **Ver la bandeja**), en la tarjeta de una comanda que tiene creativos
+esperando, abre una pantalla de la pila (`src/app/meson.tsx`) con lo de esa comanda —y **Ver todo el
+mesón** para lo de todas—, como la página del panel: por comanda y por pieza, cada creativo con su video
+(la portada con «▶ Ver el video», que al tocarla monta el reproductor) o sus láminas, cuándo se borra
+en su última semana, el estilo, lo que rotó, el título de YouTube, «El texto ▾», **Programar** y
+**Descartar**, que pide el motivo de un toque y una nota opcional. Las frases y los motivos vienen del
+servidor (`GET /api/mobile/cocina/meson`); las del panel, en `src/lib/meson.ts`.
+
+**Programar** llama a `POST /api/mobile/cocina/creativos/{id}/programar`, que hace lo mismo que el
+botón del panel —pasa el creativo a un borrador de La Parrilla con su texto, su título y su media— y la
+app abre ese borrador en Publicar, como uno de la lista de borradores: faltan las cuentas y la hora. Que
+programarlo desde el teléfono no pierda nada se comprobó antes de abrirlo: la portada y los atributos
+los pone el servidor al crear el post, desde el creativo del borrador (`crearVariosProgramados`, con
+su test de integración en `src/lib/cocina/meson.integracion.test.ts`), y el título de YouTube del
+borrador lo toma `POST /api/mobile/schedule` de sus campos (`route.test.ts`), porque Publicar no lo
+muestra. TikTok y la palabra clave siguen siendo del panel, como para cualquier borrador.
+
+**El video** usa `expo-video`, que es nativo y llega con el build 1.2.0 (sin reproducir en segundo
+plano ni en ventana flotante: el plugin en `app.json` lo deja apagado). Como el audio, no se importa
+directo: `src/components/meson.tsx` pregunta por el módulo (`src/lib/video.ts`) y recién entonces carga
+`src/components/video-del-creativo.tsx`; sin él, el video se abre fuera de la app. Aun así, **ni
+`src/app/meson.tsx` ni `src/components/meson.tsx` ni `src/components/video-del-creativo.tsx` se copian a
+`ota-1.1.0`**: esa rama no tiene `expo-video` en `package.json` y Metro no armaría el paquete. Lo que
+sí se puede copiar es `src/components/cocina.tsx`: sin `onVerMeson`, la tarjeta dice como antes que lo
+que espera está en el panel web.
+
+Contra un servidor de antes, sin la ruta, la pantalla dice «Tu Parrilla todavía no muestra el mesón en
+el teléfono…» en vez de «No se pudo actualizar.».
 
 ### La 1.2.0 necesita un build nativo y pasar por las tiendas
 
@@ -662,9 +693,9 @@ falta volver a autorizar nada de eso, solo se cierra el acceso desde el celular.
 - No pone portada ni atributos, y de lo ya programado no cambia los archivos, ni suma
   cuentas, ni toca lo que ya salió en alguna: eso sigue en el panel. Tampoco cambia el orden de
   una secuencia de historias ya programada, ni reproduce un video en el visor.
-- En La Cocina no muestra el mesón (ver `docs/pendientes.md`), no elige el color de acento de la
-  marca ni dibuja la estación de cada comanda, y no sigue subiendo con la app en segundo plano: lo
-  primero es del panel, y lo último retoma al volver a abrir La Cocina.
+- En La Cocina no elige el color de acento de la marca ni dibuja la estación de cada comanda, y no
+  sigue subiendo con la app en segundo plano: lo primero es del panel, y lo último retoma al volver a
+  abrir La Cocina. El mesón llega con la 1.2.0; en la 1.1.0, sigue en el panel.
 - En La Mesa no cambia las instrucciones para el modelo, no regenera todos los borradores, no muestra
   los descartados ni «Todos» y no trae la fila de emojis: eso sigue en el panel.
 - No hay versión para iPhone que se pueda instalar: el código está listo, falta la

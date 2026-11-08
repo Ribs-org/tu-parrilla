@@ -23,6 +23,7 @@ import {
   type UsoDeLaCamara,
 } from '../lib/cocina'
 import { CAMARA_LLENA, CAMARA_LLENANDOSE, MESON, SACAR_DE_LA_CAMARA } from '../lib/tema'
+import { VER_EL_MESON, fraseQueEspera } from '../lib/meson'
 
 /*
  * Las piezas de La Cocina en el teléfono (`app/(tabs)/cocina.tsx`), con la imagen del panel: lo que
@@ -493,11 +494,17 @@ export function TarjetaDeComanda({
   comanda,
   onResponder,
   onCancelar,
+  onVerMeson,
 }: {
   comanda: ComandaDelTelefono
   onResponder: Responder
   /** «Cancelar la comanda»: devuelve la frase del error, o null si salió. Sin él, no se ofrece. */
   onCancelar?: (id: string) => Promise<string | null>
+  /**
+   * «Ver el mesón», si la comanda tiene algo esperando: desde la 1.2.0, que reproduce los videos con
+   * `expo-video`. Sin él —la rama `ota-1.1.0`—, la tarjeta dice que espera en el panel web.
+   */
+  onVerMeson?: (id: string) => void
 }) {
   const colores = useColores()
   const { tema } = useTema()
@@ -549,7 +556,12 @@ export function TarjetaDeComanda({
         <Text style={{ color: termino ? colores.rojo : colores.suave, fontSize: 12 }}>{termino ? comanda.mensaje : `El chef: «${comanda.mensaje}»`}</Text>
       ) : null}
       {pregunta ? <PreguntaDelChefEnLaTarjeta pregunta={pregunta} onResponder={onResponder} /> : null}
-      {comanda.enElMeson ? (
+      {comanda.enElMeson && onVerMeson ? (
+        <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+          <Text style={{ color: colores.suave, fontSize: 12 }}>{fraseQueEspera(comanda.enElMeson, MESON[tema])}</Text>
+          <BotonTexto texto={VER_EL_MESON[tema]} onPress={() => onVerMeson(comanda.id)} />
+        </View>
+      ) : comanda.enElMeson ? (
         <Text style={{ color: colores.suave, fontSize: 12 }}>
           {comanda.enElMeson === 1 ? 'Te espera 1 creativo' : `Te esperan ${comanda.enElMeson} creativos`} en {MESON[tema].toLowerCase()}, en el panel web.
         </Text>

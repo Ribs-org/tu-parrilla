@@ -69,16 +69,11 @@ sección.
     pregunta: el diseño pide además un aviso en la pestaña de la barra del panel (como el de «Se
     quemó») y una línea en el resumen del día si hay preguntas sin responder; hoy hay correo y la
     tarjeta de color, nada en la barra ni en el resumen.
-  - **El mesón en el teléfono** (2026-11-06). La app ya hace lo del panel en la cámara de frío y en
-    las comandas (pedir con todas las opciones, cambiar, sacar, cancelar, «Lo que pasó»), pero no el
-    mesón: programar o descartar lo que entregó el chef. Quedó fuera por dos cosas: ver un creativo
-    es reproducir su video, y `expo-video` es un módulo nativo que no traen ni la 1.1.0 ni la 1.2.0
-    (habría que sumarlo al próximo build, o abrir el video afuera con `Linking`); y «Programar» deja
-    el creativo en un borrador cuya portada y atributos pone el post al programarse desde el
-    compositor del panel, camino que el Publicar del teléfono no conoce —antes de abrirlo ahí hay
-    que comprobar que programar ese borrador desde el teléfono no los pierde—. Descartar con su
-    motivo sí sería solo JavaScript. Hoy la tarjeta de la comanda dice cuántos creativos esperan en el
-    mesón, en el panel web.
+  - **[dueño] Probar el mesón en el teléfono con un creativo de verdad** (2026-11-07). Llega con el
+    build 1.2.0 (`expo-video`): «Ver el mesón» en la comanda, el video, «Programar» hasta Publicar y
+    «Descartar». Se probó la tarjeta dibujada en un navegador y el servidor con tests; el video en un
+    teléfono, no. Programado desde el teléfono, el post en La Parrilla tiene que traer la portada,
+    los atributos y, en YouTube, el título del chef.
   - **Por revisar: la alarma de la cocina no ve una comanda tomada sin hora estimada** (2026-11-06).
     Suena si lleva media hora sin tomar o si pasó su `eta`; una que el chef tomó y dejó en
     `revisando` sin `eta` —el camino «la revisa una persona del equipo» del issue
@@ -706,7 +701,8 @@ nadie paga: todas las cuentas son iguales y el README dice «Sin suscripción».
     (`esBorradorDeHistoria`, en `src/lib/borrador.ts`). Hasta entonces abre un borrador de historia
     del teléfono como un post, y al guardarlo deja de ser historia;
   - en el teléfono, ver el primer cuadro de un video en el visor (hoy, «▶» y la duración: sacarlo
-    sin `expo-video` pide una miniatura del servidor) y cambiar el orden de una secuencia ya
+    sin `expo-video` pide una miniatura del servidor; `expo-video` entró con el build 1.2.0 para el
+    mesón, pero el visor también va por aire a la 1.1.0, que no lo trae) y cambiar el orden de una secuencia ya
     programada (hoy se borra y se programa de nuevo);
   - **[dueño] la primera historia real**, con una cuenta de prueba: si Instagram la rechaza
     desde una cuenta de creador (@vicente_edits2, si es Creator), y un video a la página de
