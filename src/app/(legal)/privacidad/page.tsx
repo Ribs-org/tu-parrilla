@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 
 import { nombreDe } from '@/lib/vocabulario'
 import { CONTACTO, RESPONSABLE, RUT } from '@/lib/empresa'
@@ -8,7 +9,7 @@ export const metadata: Metadata = {
   description: 'Qué datos guarda este sitio y qué no.',
 }
 
-const ACTUALIZADO = '7 de noviembre de 2026'
+const ACTUALIZADO = '8 de noviembre de 2026'
 
 export default function PrivacidadPage() {
   return (
@@ -319,6 +320,13 @@ export default function PrivacidadPage() {
           >
             {CONTACTO}
           </a>
+          . Los pasos para borrar tu cuenta entera, qué se borra y qué se guarda están en{' '}
+          <Link
+            href="/borrar-mis-datos"
+            className="text-fg underline decoration-white/20 underline-offset-4 transition-colors hover:decoration-white/50"
+          >
+            Borrar tu cuenta y tus datos
+          </Link>
           . Si solo visitaste las páginas públicas, ten en cuenta que, por el diseño descrito
           arriba, lo más probable es que no exista forma de vincular ningún registro contigo: de
           las visitas no se guardan identificadores estables.
