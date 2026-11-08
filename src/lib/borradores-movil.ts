@@ -1,10 +1,10 @@
 import 'server-only'
 import { eq } from 'drizzle-orm'
 import { getDb, socialAccounts } from '@/db'
-import { soloEnElPanel, telefonoDesdeCampos, textoDe } from './borrador'
+import { soloEnElPanel, telefonoDesdeCampos, textoDe, type ReglaDeBorrador, type TikTokInicial } from './borrador'
 import type { BorradorCargado, BorradorResumido, MediaDeBorrador } from './borradores'
 import { isoInZone } from './metrics-api'
-import { REDES_MOVIL } from './mobile-api'
+import { redesDelTelefono } from './mobile-api'
 import { networkLabel } from './networks'
 import type { MusicaInstagram } from './social/publish/opciones'
 
@@ -35,29 +35,38 @@ export type BorradorMovilAbierto = {
   /** Si es una historia: Publicar abre en «Historia», con los archivos en el orden en que salen. */
   historia: boolean
   media: MediaDeBorrador[]
+  /** Lo que el bloque de TikTok de cada cuenta tenía elegido (`tiktokInicial`). */
+  tiktok: Record<string, TikTokInicial>
+  /** La regla de palabra clave, o null si no tiene. */
+  regla: ReglaDeBorrador | null
   /** Por qué no se programa desde el teléfono, o null si se puede. */
   soloEnElPanel: string | null
 }
 
 /**
- * Las cuentas del dueño partidas en dos: las que el teléfono publica, y las que no (hoy,
- * TikTok) con el nombre de su red. Las primeras son las únicas que un borrador guardado
- * desde el teléfono puede elegir; las segundas se conservan sin que el teléfono las toque.
+ * Las cuentas del dueño partidas en dos: las que la app publica, y las que no con el nombre de su
+ * red. Las primeras son las únicas que un borrador guardado desde el teléfono puede elegir; las
+ * segundas se conservan sin que el teléfono las toque. Las de TikTok son de las primeras solo si
+ * la app trae su bloque (`conTikTok`); `tiktok` las nombra, para leer sus opciones al guardar.
  */
 export async function cuentasParaElTelefono(
   ownerId: string,
-): Promise<{ propias: Set<string>; ajenas: Map<string, string> }> {
+  conTikTok = false,
+): Promise<{ propias: Set<string>; ajenas: Map<string, string>; tiktok: Set<string> }> {
   const filas = await getDb()
     .select({ id: socialAccounts.id, network: socialAccounts.network })
     .from(socialAccounts)
     .where(eq(socialAccounts.ownerId, ownerId))
+  const redes = redesDelTelefono(conTikTok)
   const propias = new Set<string>()
   const ajenas = new Map<string, string>()
+  const tiktok = new Set<string>()
   for (const f of filas) {
-    if (REDES_MOVIL.has(f.network)) propias.add(f.id)
+    if (redes.has(f.network)) propias.add(f.id)
     else ajenas.set(f.id, networkLabel(f.network))
+    if (f.network === 'tiktok' && redes.has('tiktok')) tiktok.add(f.id)
   }
-  return { propias, ajenas }
+  return { propias, ajenas, tiktok }
 }
 
 export function resumirParaElTelefono(b: BorradorResumido, zona: string): BorradorResumidoMovil {
@@ -71,20 +80,29 @@ export function resumirParaElTelefono(b: BorradorResumido, zona: string): Borrad
 }
 
 /**
- * Las cuentas que el teléfono no publica no se mandan: no tiene cómo mostrarlas, y al
- * guardar se conservan solas (`camposDesdeTelefono`). Que están, lo dice `soloEnElPanel`.
+ * Las cuentas que la app no publica no se mandan: no tiene cómo mostrarlas, y al guardar se
+ * conservan solas (`camposDesdeTelefono`). Que están, lo dice `soloEnElPanel`, que también avisa
+ * de la palabra clave si la app no la muestra (`conRegla`).
  */
-export function abrirEnElTelefono(b: BorradorCargado, zona: string, ajenas: ReadonlyMap<string, string>): BorradorMovilAbierto {
-  const { texto, cuentas, trial, musica = {}, historia = false } = telefonoDesdeCampos(b.campos)
+export function abrirEnElTelefono(
+  b: BorradorCargado,
+  zona: string,
+  ajenas: ReadonlyMap<string, string>,
+  { conRegla = false }: { conRegla?: boolean } = {},
+): BorradorMovilAbierto {
+  const { texto, cuentas, trial, musica = {}, historia = false, tiktok = {}, regla = null } = telefonoDesdeCampos(b.campos)
+  const visibles = cuentas.filter((id) => !ajenas.has(id))
   return {
     id: b.id,
     texto,
-    cuentas: cuentas.filter((id) => !ajenas.has(id)),
+    cuentas: visibles,
     trial,
     historia,
     musica,
     cuando: b.fecha ? isoInZone(b.fecha, zona) : null,
     media: b.media,
-    soloEnElPanel: soloEnElPanel(b.campos, ajenas),
+    tiktok: Object.fromEntries(Object.entries(tiktok).filter(([id]) => visibles.includes(id))),
+    regla,
+    soloEnElPanel: soloEnElPanel(b.campos, ajenas, { conRegla }),
   }
 }

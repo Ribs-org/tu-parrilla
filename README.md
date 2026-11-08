@@ -26,7 +26,7 @@ tus números.
 | `/api/sugerencias/respuesta` | `POST` con una llave **del admin** (o `SCHEDULE_API_KEY`): la respuesta del equipo a lo que alguien escribió en el libro de sugerencias, por el número de su issue o por su id, para responder sin el navegador. Con la llave de otra cuenta, `403` (ver «El libro de sugerencias») |
 | `/api/bodega…` | Con la misma llave: lo que hay en la cámara de frío de La Cocina (`GET /api/bodega`) y las subidas por partes para guardar ahí (`/api/bodega/subidas…`), las mismas del panel y del teléfono (ver «La Cocina») |
 | `/api/admin/…` | Lo que el panel llama desde el navegador, con la cookie de la sesión: la firma de una subida directa (`upload-url`), las subidas por partes a la cámara de frío de La Cocina (`cocina/subidas…`) y el pulso que mantiene al día sus tarjetas (`cocina/pulso`; ver «La Cocina») y la planilla de Excel de Los Números (`planilla`, y `planilla/adelanto` para lo que no cabe; ver «Llevar para la casa») |
-| `/api/mobile/…` | La API de la app del teléfono, con el token de su sesión (ver `mobile/README.md`); `cocina…` es La Cocina desde el teléfono: lo que muestra, las subidas por partes a la cámara de frío, cambiar y sacar lo de adentro, «Mandar al chef», cancelar, contestarle al chef y el mesón con «Programar» y «Descartar» (ver «La Cocina»); `comentarios…` es La Mesa desde el teléfono: la cola, el número de La Parrilla, «Enviar», «Descartar» y otro borrador (ver «Responder comentarios»); `push` registra el teléfono para los avisos y `push/{token}` lo borra (ver «Avisos al teléfono») |
+| `/api/mobile/…` | La API de la app del teléfono, con el token de su sesión (ver `mobile/README.md`); `cocina…` es La Cocina desde el teléfono: lo que muestra, las subidas por partes a la cámara de frío, cambiar y sacar lo de adentro, «Mandar al chef», cancelar, contestarle al chef y el mesón con «Programar» y «Descartar» (ver «La Cocina»); `comentarios…` es La Mesa desde el teléfono: la cola, el número de La Parrilla, «Enviar», «Descartar» y otro borrador (ver «Responder comentarios»); `push` registra el teléfono para los avisos y `push/{token}` lo borra (ver «Avisos al teléfono»); `schedule/accounts/{id}/tiktok` es `creator_info` para el bloque de TikTok de Publicar (ver `mobile/README.md`, «TikTok y la palabra clave») |
 | `/api/cron/…` | Las corridas programadas: la publicación y la sincronización, que también reintenta los mensajes del libro de sugerencias que no salieron a GitHub. Solo con `CRON_SECRET` |
 | `/api/track/…` | Las balizas de visitas y clics de las páginas públicas |
 
@@ -489,7 +489,8 @@ Un canal se sincroniza **solo mientras su dueño lo tiene conectado** con el OAu
 Google desde **Los Fierros** (Cuentas, en Ajustes); eso pide además `GOOGLE_CLIENT_ID` y
 `GOOGLE_CLIENT_SECRET` (ver «Variables de entorno»). `YOUTUBE_CHANNEL_ID` solo deja
 creada la tarjeta del canal del dueño del despliegue, esperando su *Conectar*. Desconectar
-borra las credenciales y el canal deja de leerse. Cambiar el id no reemplaza la cuenta:
+borra las credenciales, el canal deja de leerse y, en el acto, se borra lo que vino de la API
+(ver el párrafo siguiente). Cambiar el id no reemplaza la cuenta:
 crea una segunda fila de YouTube, sin conectar, que no se sincroniza.
 
 **Lo que YouTube no deja hacer con sus datos.** Las políticas de los Servicios de API de
@@ -502,7 +503,10 @@ visitas, los clicks y el CTR los mide Tu Parrilla y la tabla los marca como prop
 («En tu página · lo mide Tu Parrilla»), que es lo que la política pide para un dato propio al lado de
 los de YouTube. Y al final de la sincronización diaria se borra lo que pasó el plazo: las
 lecturas diarias de más de 30 días, los comentarios guardados hace más de 30 días, y el
-título y la miniatura de los videos que llevan 30 días sin llegar. La regla vive en
+título y la miniatura de los videos que llevan 30 días sin llegar. Un canal que su dueño
+desconecta no espera ese plazo: *Desconectar* borra en el acto sus lecturas, las de sus videos,
+sus comentarios y los títulos y miniaturas (`src/lib/social/desconectar.ts`), y deja el id y el
+nombre del canal y la fila de cada video, que une las visitas a su etiqueta `?s=`. La regla vive en
 `src/lib/social/politica-youtube.ts` y el borrado en `retencion-youtube.ts`. Si algún día
 se pide y se obtiene el permiso de analítica de §III.L, es ahí donde se afloja.
 
@@ -701,7 +705,8 @@ el login. Si el intento no sirve, la credencial caduca y la tarjeta de esa cuent
 Cuando pase, entra al panel y pulsa **Reconectar** en la tarjeta de esa cuenta. El
 historial de métricas ya recogido no se toca. Cuenta con hacerlo cada dos meses más o menos.
 
-Desconectar borra las credenciales de esa cuenta y conserva su historial. Para volver,
+Desconectar borra las credenciales de esa cuenta y conserva su historial, salvo en YouTube, donde
+lo que vino de su API se borra en el acto (ver «YouTube»). Para volver,
 **Reconectar** en su tarjeta; para sumar otra cuenta de la misma red, **Agregar
 cuenta** en el bloque de la red. Una tarjeta ya desconectada tiene además **Quitar**, que
 pregunta en una ventana y borra la cuenta con su historial (sus publicaciones, números,
@@ -728,12 +733,10 @@ conseguirla (`src/lib/social/vuelta.ts` y `ayuda-conexion.ts`). En Meta no hay p
 fuerce la elección de páginas: los pasos dicen cómo editar el acceso en la ventana de Facebook.
 
 Nada viene marcado por omisión, salvo que tengas exactamente una cuenta conectada — contada
-sobre las cuentas que cada pantalla puede ofrecer, que no es el mismo universo en las dos:
-el panel cuenta sobre todas las tuyas, TikTok incluido; el teléfono, solo sobre las que
-puede publicar, que hoy excluye TikTok (ver más abajo). Con una cuenta de Instagram y una de
-TikTok, por ejemplo, el panel no marca nada —dos candidatas— y el teléfono marca la de
-Instagram, porque ahí es la única que existe de verdad. No es una discrepancia: cada
-pantalla acierta sobre su propio universo. Es deliberado: antes el sistema mandaba siempre a
+sobre las cuentas que cada pantalla puede ofrecer: el panel, todas las tuyas; el teléfono, las
+que puede publicar, que desde el 2026-11-07 incluyen TikTok (ver más abajo). Una instalación
+del teléfono sin actualizar todavía no ofrece TikTok, así que con una cuenta de Instagram y
+una de TikTok marca la de Instagram, porque ahí es la única que existe. Es deliberado: antes el sistema mandaba siempre a
 la más antigua de cada red sin preguntar, y la segunda quedaba conectada y muda. Una sola
 posibilidad no es una elección; dos sí, y las eliges tú.
 
@@ -791,10 +794,24 @@ nuevo. Con el login de Instagram la música no existe: el bloque lo dice y no of
 lo rechaza. Lo que está sonando y cada búsqueda se guardan diez minutos en la memoria del
 servidor, por cuenta (`social/instagram-audio.ts`).
 
-La app
-del teléfono todavía no ofrece TikTok como destino: el bloque de TikTok necesita consultar
-la cuenta del creador (`creator_info`) y sus interacciones, y eso el teléfono todavía no lo
-tiene.
+Desde el 2026-11-07 la app del teléfono ofrece TikTok como destino, con el mismo bloque que el
+compositor —los datos de la cuenta de `creator_info`, la privacidad sin elegir, las
+interacciones, la marca, «Hecho con IA», «Música de TikTok» y el consentimiento— y la
+respuesta automática por palabra clave. Las dos rutas comparten el código del servidor: la
+consulta a `creator_info` (`GET /api/mobile/schedule/accounts/{id}/tiktok` y la acción del
+compositor llaman a `creadorDeCuenta`, en `src/lib/social/publish/tiktok-cuenta.ts`, igual que
+`recordarMusicaTikTok`), y `POST /api/mobile/schedule` valida las opciones con
+`validarOpcionesPorCuenta` y la regla con `validarRegla`, como el compositor. El teléfono además
+no deja programar un video más largo de lo que `creator_info` dice que esa cuenta publica
+(`max_video_post_duration_sec`); el compositor todavía no lo mira (ver `docs/pendientes.md`).
+
+Solo la app que lo trae recibe eso: lo avisa en el encabezado `X-Parrilla-Publicar` (`tiktok`,
+`palabra-clave`; `sabeDe`, en `src/lib/mobile-api.ts`). A una instalación sin actualizar no le
+llegan las cuentas de TikTok, sus borradores con TikTok o con palabra clave se guardan sin
+perder eso y se programan en el panel (`soloEnElPanel`, en `src/lib/borrador.ts`), y si
+intentara programarlos se rechaza con el motivo. El encabezado y no un campo del cuerpo, como
+`conMusica`, porque también lo necesitan los `GET`: las cuentas que se ofrecen y el borrador
+que se abre.
 
 Un post también puede salir como **historia** en Instagram y en la página de Facebook: es
 otra opción por destino (`{ historia: true }`), con un solo archivo, sin texto, sin palabra
@@ -951,7 +968,7 @@ mismas reglas y las mismas frases— y no tienen reglas propias:
 
 | Ruta | Qué hace |
 |---|---|
-| `GET /api/mobile/comentarios?estado=&red=` | La cola de `getCola` agrupada por publicación (`src/lib/comentarios-movil.ts`), con cuántos esperan en esa red (`contarPendientes`) y las redes de los botones (`redesDeLaMesa`, la misma lista del panel). |
+| `GET /api/mobile/comentarios?estado=&red=` | La cola de `getCola` agrupada por publicación (`src/lib/comentarios-movil.ts`), con cuántos esperan en esa red (`contarPendientes`), las redes de los botones (`redesDeLaMesa`, la misma lista del panel) y, en `faltantes`, el aviso «Comentarios que Instagram no entrega» (`getComentariosQueFaltan`, con la frase ya escrita; vacío con otra red elegida). |
 | `GET /api/mobile/comentarios/pendientes` | Solo el número, para la tarjeta de La Parrilla. |
 | `POST /api/mobile/comentarios/{id}/respuesta` | «Enviar», con `{ texto }`: `responderComentario`. |
 | `POST /api/mobile/comentarios/{id}/descartar` | «Descartar»: `descartarComentario`. |
@@ -1018,6 +1035,18 @@ enlace que muere después o una página de Drive no rompan la respuesta días m�
 documento nunca se manda como adjunto, siempre como enlace al final del mismo mensaje —así
 que, igual que el resto de la regla, sale en la respuesta pública mientras el privado esté
 apagado.
+
+Instagram esconde a veces el comentario que es **solo** la palabra: lo suma en su cuenta de
+comentarios, pero no se lo muestra a la dueña ni a la API, así que la regla nunca lo ve (el
+caso está en `docs/pendientes.md`). La ayuda de «Palabra clave» pide la palabra dentro de una
+frase o una distinta por post, y La Mesa avisa con «Comentarios que Instagram no entrega»
+cuando, en una publicación de Instagram de los últimos siete días, la última lectura del sync
+cuenta al menos dos comentarios más de los que llegaron (los guardados más las respuestas de la
+dueña que se conocen). Se calcula al abrir La Mesa, sin columna propia
+(`src/lib/social/comentarios/faltantes.ts` y `getComentariosQueFaltan`, en
+`src/lib/comentarios-cola.ts`). Las respuestas que otras personas se dan entre ellas también
+suman en Instagram y no se guardan, y por eso el aviso dice que parte de la diferencia puede ser
+eso.
 
 ### Modo Tinder
 
@@ -2186,11 +2215,13 @@ src/
       lectura.ts           qué publicaciones se leen cada día: lo nuevo a diario, lo viejo cada vez más espaciado
       politica-youtube.ts  lo que las políticas de YouTube no dejan hacer con sus datos
       retencion-youtube.ts borra lo de YouTube que lleva 30 días sin refrescarse
+      desconectar.ts       «Desconectar»: la cuenta suelta sus credenciales y, en YouTube, lo que vino de su API en el acto
       traspasar.ts         le cambia el dueño a una cuenta con lo que se bajó de ella, sin borrar nada
       anuncios.ts          leer los anuncios de Meta: qué se le pide a la Marketing API, el cruce con las publicaciones y el resumen de «Lo pagado» (sin base); anuncios-sync.ts los guarda
       promocionar.ts       promocionar una publicación: qué se acepta, el gasto máximo, lo que se le manda a Meta y sus errores en castellano (sin base); promocionar-meta.ts crea, pausa y detiene
       publish/secuencia.ts las historias de una secuencia salen en orden: cada una espera a la anterior
       publish/editar.ts    guardar los cambios de un post programado: la regla que comparten el editor del panel y la app del teléfono
+      publish/tiktok-cuenta.ts  creator_info de una cuenta del dueño y «Música de TikTok» recordada: lo que comparten el compositor y Publicar del teléfono
 public/docs/
   api-llm.md, api-editor.md, api.json   las guías de la API para un LLM
   ui/                      la wiki de la interfaz: una página por pantalla, para guiar a quien se pierde

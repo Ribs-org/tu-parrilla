@@ -610,8 +610,10 @@ no aparece, y la música tampoco: Instagram solo le pone música a un reel.
 #### «Respuesta automática por palabra clave»
 
 - **«Palabra clave»**, con el placeholder «GUIA» y la ayuda «Una sola palabra. Quien la
-  comente recibe la respuesta sin que hagas nada.» Hasta 30 caracteres, solo letras y
-  números. Se guarda en minúsculas y sin tildes, y reconoce la palabra entera escrita de
+  comente recibe la respuesta sin que hagas nada. En el post, pídela dentro de una frase
+  («comenta “quiero la GUIA”») o usa otra palabra en cada post: Instagram a veces esconde el
+  comentario que es solo la palabra, y ese no le llega a nadie, ni a ti.» Hasta 30 caracteres,
+  solo letras y números. Se guarda en minúsculas y sin tildes, y reconoce la palabra entera escrita de
   cualquier forma: `guía`, `GUIA` o `#Guía!` cuentan; `guiar` no.
 - **«Mensaje»**, con el placeholder «Acá tienes la guía: https://…» y la ayuda «Pon el
   enlace aquí; si es de tu sitio se mide solo en Los Números.» Hasta 1000 caracteres.
@@ -654,9 +656,10 @@ que se guardó con «Ahora» encendido vuelve sin fecha y con «Ahora» apagado.
 
 Los borradores son los mismos que los de la app del teléfono ([La app del teléfono](app-movil.md)):
 lo empezado en Publicar, en el teléfono, aparece acá en «Borradores (<N>)» y se sigue acá, y al
-revés. El teléfono no tiene las opciones de TikTok ni la respuesta automática: un borrador que
-las tiene se puede editar allá sin perderlas, pero se programa acá. La API no ve los
-borradores.
+revés. Desde el 2026-11-07 el teléfono tiene el mismo bloque de TikTok y la misma respuesta
+automática, así que esos borradores se siguen y se programan en cualquiera de los dos; una app
+del teléfono sin actualizar no los muestra, y un borrador que los tiene se edita allá sin
+perderlos pero se programa acá. La API no ve los borradores.
 
 Al revés, el teléfono arma historias («Post · Historia» en Publicar) y este compositor todavía
 no: un borrador de historia empezado en el teléfono se abre acá como un post con sus archivos,
@@ -949,6 +952,12 @@ teléfono](app-movil.md)).
 3. Escribir en «Mensaje» lo que se responde, con el enlace.
 4. Dejar «Respuesta pública» como viene, o cambiarla.
 5. «Programar» o «Guardar».
+
+En el texto del post, conviene pedir la palabra dentro de una frase («comenta "quiero la GUIA"»)
+o usar una distinta en cada post: Instagram a veces esconde el comentario que es solo la
+palabra, y ese no llega ni a la cuenta ni a Tu Parrilla. La regla reconoce la palabra igual
+dentro de la frase. Si pasa, La Mesa lo avisa con el recuadro «Comentarios que Instagram no
+entrega» (ver [La Mesa](la-mesa.md)).
 
 Solo funciona en Instagram, Facebook y YouTube. En un post ya publicado también se puede
 agregar o cambiar desde el editor: rige para los comentarios que lleguen desde ese momento.

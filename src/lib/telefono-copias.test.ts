@@ -24,6 +24,11 @@ import {
 } from './social/instagram-audio'
 import { SIN_MAS_CANCIONES } from './social/musica-sugerencia'
 import { fraseColaVacia, frasePendientes, hace } from './social/comentarios/la-mesa'
+import { ETIQUETA_PRIVACIDAD, PRIVACIDADES_TIKTOK } from './social/publish/opciones'
+import { TIKTOK_CREADOR_ILEGIBLE } from './social/publish/tiktok-creador'
+import { MAX_MENSAJE, MAX_PALABRA, MAX_RESPUESTA, RESPUESTA_PUBLICA_POR_DEFECTO } from './social/comentarios/reglas'
+import { nombreDe } from './vocabulario'
+import { EXPLICACION_FALTANTES, TITULO_FALTANTES } from './social/comentarios/faltantes'
 
 // `batch.ts` trae `usuarios.ts`, que es solo de servidor; acá no se habla con la base.
 vi.mock('server-only', () => ({}))
@@ -109,7 +114,14 @@ describe('La Mesa del teléfono dice lo mismo que la del panel', () => {
     frasePendientes: (n: number) => string
     fraseColaVacia: (cronico: boolean) => string
     hace: (iso: string, ahora: number) => string
+    TITULO_FALTANTES: string
+    EXPLICACION_FALTANTES: string
   }>('mesa')
+
+  it('el aviso de los comentarios que Instagram no entrega: el título y el pie', () => {
+    expect(mesa.TITULO_FALTANTES).toBe(TITULO_FALTANTES)
+    expect(mesa.EXPLICACION_FALTANTES).toBe(EXPLICACION_FALTANTES)
+  })
 
   it('cuántos esperan y la cola vacía', () => {
     for (const n of [0, 1, 2, 5, 200]) expect(mesa.frasePendientes(n)).toBe(frasePendientes(n))
@@ -222,5 +234,61 @@ describe('las reglas de la parrilla dan lo mismo en el teléfono', () => {
     for (const [ganadas, mediana] of [[null, 10], [10, null], [5, 0], [25, 10], [20, 10], [12, 10], [3, 10]] as const) {
       expect(movil.comoSalio(ganadas, mediana)).toBe(comoSalio(ganadas, mediana))
     }
+  })
+})
+
+/**
+ * El bloque de TikTok y el de la palabra clave del teléfono son los del compositor del panel. Los
+ * textos tienen que ser los mismos, letra por letra: los de TikTok los pide su auditoría de
+ * publicación directa, y la wiki de la UI cita los del panel. Se buscan en la fuente de cada
+ * componente del panel, con los espacios juntados (el JSX los parte en renglones).
+ */
+describe('TikTok y la palabra clave en Publicar dicen lo mismo que el compositor', () => {
+  const fuenteDelPanel = (ruta: string) =>
+    readFileSync(new URL(`../app/admin/(dash)/schedule/${ruta}`, import.meta.url), 'utf8').replace(/\s+/g, ' ')
+  const juntar = (texto: string) => texto.replace(/\s+/g, ' ')
+
+  it('el bloque de TikTok: las privacidades, sus nombres y cada texto', () => {
+    const tiktok = delTelefono<{
+      PRIVACIDADES_TIKTOK: readonly string[]
+      ETIQUETA_PRIVACIDAD: Record<string, string>
+      TIKTOK_CREADOR_ILEGIBLE: string
+      LEYENDO_LA_CUENTA: string
+      MUSIC_USAGE: string
+      BRANDED_CONTENT: string
+      TEXTOS_TIKTOK: Record<string, string>
+    }>('tiktok')
+    expect(tiktok.PRIVACIDADES_TIKTOK).toEqual(PRIVACIDADES_TIKTOK)
+    expect(tiktok.ETIQUETA_PRIVACIDAD).toEqual(ETIQUETA_PRIVACIDAD)
+    expect(tiktok.TIKTOK_CREADOR_ILEGIBLE).toBe(TIKTOK_CREADOR_ILEGIBLE)
+    const panel = fuenteDelPanel('tiktok-opciones.tsx')
+    for (const texto of [
+      tiktok.LEYENDO_LA_CUENTA,
+      tiktok.MUSIC_USAGE,
+      tiktok.BRANDED_CONTENT,
+      'Se publicará en la cuenta',
+      'Al publicar aceptas la',
+      ...Object.values(tiktok.TEXTOS_TIKTOK),
+    ]) {
+      expect(panel, texto).toContain(juntar(texto))
+    }
+  })
+
+  it('la palabra clave: los topes, la respuesta de siempre y cada texto', () => {
+    const regla = delTelefono<{
+      MAX_PALABRA: number
+      MAX_MENSAJE: number
+      MAX_RESPUESTA: number
+      RESPUESTA_PUBLICA_POR_DEFECTO: string
+      TEXTOS_REGLA: Record<string, string>
+    }>('regla')
+    expect([regla.MAX_PALABRA, regla.MAX_MENSAJE, regla.MAX_RESPUESTA]).toEqual([MAX_PALABRA, MAX_MENSAJE, MAX_RESPUESTA])
+    expect(regla.RESPUESTA_PUBLICA_POR_DEFECTO).toBe(RESPUESTA_PUBLICA_POR_DEFECTO)
+    const { mensajePista, ...resto } = regla.TEXTOS_REGLA
+    // El panel arma esta con el nombre de la pestaña; el teléfono la escribe entera.
+    expect(mensajePista).toBe(`Pon el enlace aquí; si es de tu sitio se mide solo en ${nombreDe('/admin/analytics')}.`)
+    expect(nombreDe('/admin/analytics', 'dia')).toBe(nombreDe('/admin/analytics'))
+    const panel = fuenteDelPanel('regla-clave.tsx')
+    for (const texto of Object.values(resto)) expect(panel, texto).toContain(juntar(texto))
   })
 })

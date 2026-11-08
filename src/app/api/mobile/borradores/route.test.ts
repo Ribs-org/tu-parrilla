@@ -33,11 +33,12 @@ vi.mock('@/lib/borradores', () => ({
   guardarBorrador: (...args: unknown[]) => guardarBorrador(...args),
 }))
 
+// Con el bloque de TikTok (`conTikTok`), la cuenta de TikTok es de las que la app publica.
 vi.mock('@/lib/borradores-movil', () => ({
-  cuentasParaElTelefono: async () => ({
-    propias: new Set(['ig-1', 'fb-1']),
-    ajenas: new Map([['tt-1', 'TikTok']]),
-  }),
+  cuentasParaElTelefono: async (_dueno: string, conTikTok = false) =>
+    conTikTok
+      ? { propias: new Set(['ig-1', 'fb-1', 'tt-1']), ajenas: new Map(), tiktok: new Set(['tt-1']) }
+      : { propias: new Set(['ig-1', 'fb-1']), ajenas: new Map([['tt-1', 'TikTok']]), tiktok: new Set() },
 }))
 
 vi.mock('@/lib/storage', () => ({
@@ -49,10 +50,10 @@ const { POST } = await import('./route')
 
 const ID = '6f1c2a54-9b1e-4c3d-8f00-0123456789ab'
 
-function pedir(cuerpo: unknown): Request {
+function pedir(cuerpo: unknown, sabe?: string): Request {
   return new Request('https://tu-parrilla.cl/api/mobile/borradores', {
     method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    headers: { 'content-type': 'application/json', ...(sabe ? { 'x-parrilla-publicar': sabe } : {}) },
     body: typeof cuerpo === 'string' ? cuerpo : JSON.stringify(cuerpo),
   })
 }
@@ -114,6 +115,49 @@ describe('POST /api/mobile/borradores', () => {
       fecha: null,
       media: [],
     })
+  })
+
+  it('una app con TikTok y la palabra clave las escribe en los campos que lee el panel', async () => {
+    cargarBorrador.mockResolvedValue({
+      id: ID,
+      campos: { cuentas: ['tt-1'], 'tiktokModo:tt-1': ['borrador'], reglaPalabra: ['VIEJA'] },
+      fecha: null,
+      media: [],
+    })
+    const respuesta = await POST(
+      pedir(
+        {
+          id: ID,
+          texto: 'Hola',
+          cuentas: ['ig-1', 'tt-1'],
+          cuando: null,
+          opciones: { 'tt-1': { modo: 'directo', privacidad: '', comentarios: true, comercial: 'no', ia: false } },
+          media: [],
+          regla: { palabra: 'GUIA', mensaje: 'Toma', respuestaPublica: 'Va', documentoUrl: 'https://x.cl/a.pdf' },
+        },
+        'tiktok,palabra-clave',
+      ),
+    )
+    expect(respuesta.status).toBe(200)
+    expect(guardarBorrador.mock.calls[0]![1].campos).toEqual({
+      caption: ['Hola'],
+      cuentas: ['ig-1', 'tt-1'],
+      scheduledAt: [''],
+      'tiktokModo:tt-1': ['directo'],
+      'tiktokPrivacidad:tt-1': [''],
+      'tiktokComercial:tt-1': ['no'],
+      'tiktokComentarios:tt-1': ['on'],
+      reglaPalabra: ['GUIA'],
+      reglaMensaje: ['Toma'],
+      reglaRespuesta: ['Va'],
+    })
+  })
+
+  it('una app con la palabra clave que la vacía, la borra del borrador', async () => {
+    cargarBorrador.mockResolvedValue({ id: ID, campos: { cuentas: ['ig-1'], reglaPalabra: ['GUIA'], reglaMensaje: ['Toma'] }, fecha: null, media: [] })
+    await POST(pedir({ id: ID, texto: 'Hola', cuentas: ['ig-1'], media: [], regla: { palabra: ' ', mensaje: 'Toma' } }, 'palabra-clave'))
+    expect(guardarBorrador.mock.calls[0]![1].campos.reglaPalabra).toBeUndefined()
+    expect(guardarBorrador.mock.calls[0]![1].campos.reglaMensaje).toBeUndefined()
   })
 
   it('con `conMusica`, la canción de Instagram del teléfono queda en el campo que lee el panel', async () => {

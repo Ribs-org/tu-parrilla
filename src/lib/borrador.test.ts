@@ -12,11 +12,13 @@ import {
   instagramTrialInicial,
   musicaDelTelefono,
   opcionesConMusicaDelBorrador,
+  reglaDelTelefono,
   reglaInicial,
   soloEnElPanel,
   telefonoDesdeCampos,
   textoDe,
   tieneContenido,
+  tiktokDelTelefono,
   tiktokInicial,
 } from './borrador'
 
@@ -216,6 +218,56 @@ describe('camposDesdeTelefono', () => {
     expect(historiaDelTelefono({ modo: 'reel' })).toBeUndefined()
   })
 
+  it('una app con el bloque de TikTok reemplaza sus opciones, y el compositor las lee igual', () => {
+    const anteriores = {
+      cuentas: ['ig-1', 'tt-1', 'tt-2'],
+      'tiktokModo:tt-1': ['directo'],
+      'tiktokPrivacidad:tt-1': ['SELF_ONLY'],
+      'tiktokTipoComercial:tt-1': ['patrocinado'],
+      'tiktokModo:tt-2': ['borrador'],
+    }
+    const tiktok = {
+      'tt-1': {
+        borrador: false,
+        privacidad: 'PUBLIC_TO_EVERYONE',
+        comentarios: true,
+        duo: false,
+        pegar: true,
+        comercial: 'marca_propia' as const,
+        ia: true,
+        musica: false,
+      },
+    }
+    const campos = camposDesdeTelefono(anteriores, { ...telefono, cuentas: ['ig-1', 'tt-1'], tiktok }, new Map())
+    // tt-2 se desmarcó en el teléfono: sale con sus opciones.
+    expect(campos.cuentas).toEqual(['ig-1', 'tt-1'])
+    expect(Object.keys(campos).filter((c) => c.startsWith('tiktok')).sort()).toEqual([
+      'tiktokComentarios:tt-1',
+      'tiktokComercial:tt-1',
+      'tiktokIA:tt-1',
+      'tiktokModo:tt-1',
+      'tiktokMusica:tt-1',
+      'tiktokPegar:tt-1',
+      'tiktokPrivacidad:tt-1',
+    ])
+    expect(tiktokInicial(campos, 'tt-1')).toEqual(tiktok['tt-1'])
+    expect(telefonoDesdeCampos(campos).tiktok).toEqual(tiktok)
+  })
+
+  it('la palabra clave la escribe la app que la muestra; null la borra; la que no la muestra, la conserva', () => {
+    const anteriores = { cuentas: ['ig-1'], reglaPalabra: ['GUIA'], reglaMensaje: ['Toma'], reglaRespuesta: ['Va'] }
+    expect(reglaInicial(camposDesdeTelefono(anteriores, telefono, new Map()))).toEqual({
+      palabra: 'GUIA',
+      mensaje: 'Toma',
+      respuestaPublica: 'Va',
+    })
+    expect(reglaInicial(camposDesdeTelefono(anteriores, { ...telefono, regla: null }, new Map()))).toBeNull()
+    const nueva = { palabra: 'PDF', mensaje: 'Acá está', respuestaPublica: 'Te lo mandé por privado 📩' }
+    const campos = camposDesdeTelefono(anteriores, { ...telefono, regla: nueva }, new Map())
+    expect(reglaInicial(campos)).toEqual(nueva)
+    expect(telefonoDesdeCampos(campos).regla).toEqual(nueva)
+  })
+
   it('sin fecha, el campo va vacío como lo deja el panel; el trial de una cuenta no elegida no viaja', () => {
     const campos = camposDesdeTelefono(null, { texto: '', cuentas: [], scheduledAt: '', trial: ['ig-1'] }, new Map())
     expect(campos).toEqual({ caption: [''], cuentas: [], scheduledAt: [''] })
@@ -226,11 +278,19 @@ describe('telefonoDesdeCampos', () => {
   it('devuelve el texto, las cuentas y los trial reels encendidos', () => {
     expect(
       telefonoDesdeCampos({ caption: ['Hola'], cuentas: ['ig-1', 'ig-2'], 'instagramTrial:ig-2': ['on'] }),
-    ).toEqual({ texto: 'Hola', cuentas: ['ig-1', 'ig-2'], historia: false, trial: ['ig-2'], musica: {} })
+    ).toEqual({ texto: 'Hola', cuentas: ['ig-1', 'ig-2'], historia: false, trial: ['ig-2'], musica: {}, tiktok: {}, regla: null })
   })
 
   it('de un borrador vacío, todo vacío', () => {
-    expect(telefonoDesdeCampos({})).toEqual({ texto: '', cuentas: [], historia: false, trial: [], musica: {} })
+    expect(telefonoDesdeCampos({})).toEqual({
+      texto: '',
+      cuentas: [],
+      historia: false,
+      trial: [],
+      musica: {},
+      tiktok: {},
+      regla: null,
+    })
   })
 
   it('devuelve la música de Instagram de las cuentas elegidas, y no la que ya no se entiende', () => {
@@ -310,5 +370,56 @@ describe('soloEnElPanel', () => {
     expect(soloEnElPanel({ cuentas: ['tt-1'], reglaPalabra: ['GUIA'] }, TIKTOK)).toBe(
       'Este borrador va también a TikTok y tiene la palabra clave «GUIA»: eso se programa en el panel web.',
     )
+  })
+
+  it('a una app que muestra la palabra clave y TikTok (sin ajenas), no le dice nada', () => {
+    expect(soloEnElPanel({ cuentas: ['tt-1'], reglaPalabra: ['GUIA'] }, new Map(), { conRegla: true })).toBeNull()
+    expect(soloEnElPanel({ cuentas: ['ig-1'], reglaPalabra: ['GUIA'] }, TIKTOK, { conRegla: true })).toBeNull()
+    expect(soloEnElPanel({ cuentas: ['tt-1'], reglaPalabra: ['GUIA'] }, TIKTOK, { conRegla: true })).toBe(
+      'Este borrador va también a TikTok: eso se programa en el panel web.',
+    )
+  })
+})
+
+describe('tiktokDelTelefono', () => {
+  it('lee el bloque de cada cuenta de TikTok elegida, a medias si hace falta', () => {
+    const opciones = {
+      'tt-1': { modo: 'directo', privacidad: '', comentarios: true, comercial: 'patrocinado', musica: true },
+      'tt-2': { modo: 'borrador' },
+      'tt-3': { modo: 'directo', privacidad: 'SELF_ONLY' },
+      'ig-1': { trialReel: true },
+    }
+    expect(tiktokDelTelefono(opciones, ['tt-1', 'tt-2', 'ig-1'], new Set(['tt-1', 'tt-2', 'tt-3']))).toEqual({
+      'tt-1': {
+        borrador: false,
+        privacidad: '',
+        comentarios: true,
+        duo: false,
+        pegar: false,
+        comercial: 'patrocinado',
+        ia: false,
+        musica: true,
+      },
+      'tt-2': { borrador: true, privacidad: '', comentarios: false, duo: false, pegar: false, comercial: 'no', ia: false },
+    })
+  })
+
+  it('lo que no se entiende nace como el bloque: sin privacidad, todo apagado', () => {
+    expect(tiktokDelTelefono({ 'tt-1': { privacidad: 'TODOS', comentarios: 'si', comercial: 'x' } }, ['tt-1'], new Set(['tt-1']))).toEqual({
+      'tt-1': { borrador: false, privacidad: '', comentarios: false, duo: false, pegar: false, comercial: 'no', ia: false },
+    })
+    expect(tiktokDelTelefono({}, ['tt-1'], new Set(['tt-1']))['tt-1']!.privacidad).toBe('')
+  })
+})
+
+describe('reglaDelTelefono', () => {
+  it('los tres campos, sin documento; la palabra vacía es sin regla', () => {
+    expect(
+      reglaDelTelefono({ regla: { palabra: 'GUIA', mensaje: 'Toma', respuestaPublica: 'Va', documentoUrl: 'https://x.cl/a.pdf' } }),
+    ).toEqual({ palabra: 'GUIA', mensaje: 'Toma', respuestaPublica: 'Va' })
+    expect(reglaDelTelefono({ regla: { palabra: '  ', mensaje: 'Toma' } })).toBeNull()
+    expect(reglaDelTelefono({ regla: null })).toBeNull()
+    expect(reglaDelTelefono({})).toBeNull()
+    expect(reglaDelTelefono({ regla: { palabra: 'GUIA', mensaje: 3 } })).toEqual({ palabra: 'GUIA', mensaje: '', respuestaPublica: '' })
   })
 })

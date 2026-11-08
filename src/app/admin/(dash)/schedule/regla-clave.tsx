@@ -18,7 +18,10 @@ export function ReglaClave({
     <details open={Boolean(inicial)} className="rounded-xl bg-velo/[0.04] p-4">
       <summary className="cursor-pointer text-sm font-medium">Respuesta automática por palabra clave</summary>
       <div className="mt-4 space-y-4">
-        <Field label="Palabra clave" hint="Una sola palabra. Quien la comente recibe la respuesta sin que hagas nada.">
+        <Field
+          label="Palabra clave"
+          hint="Una sola palabra. Quien la comente recibe la respuesta sin que hagas nada. En el post, pídela dentro de una frase («comenta “quiero la GUIA”») o usa otra palabra en cada post: Instagram a veces esconde el comentario que es solo la palabra, y ese no le llega a nadie, ni a ti."
+        >
           <Input name="reglaPalabra" maxLength={MAX_PALABRA} defaultValue={inicial?.palabra ?? ''} placeholder="GUIA" className="max-w-[16rem]" />
         </Field>
         <Field label="Mensaje" hint={`Pon el enlace aquí; si es de tu sitio se mide solo en ${nombreDe('/admin/analytics')}.`}>

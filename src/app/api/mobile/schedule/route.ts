@@ -17,6 +17,7 @@ import {
   idDeBorrador,
   opcionesConMusicaDelBorrador,
   primero,
+  reglaDelTelefono,
   soloEnElPanel,
 } from '@/lib/borrador'
 import { cargarBorrador, listarBorradores } from '@/lib/borradores'
@@ -37,8 +38,11 @@ import {
   parseMediaMovil,
   resolverCuando,
   resolverDestinos,
+  sabeDe,
   type MediaMovil,
 } from '@/lib/mobile-api'
+import { validarRegla } from '@/lib/social/comentarios/reglas'
+import { recordarMusicaTikTok } from '@/lib/social/publish/tiktok-cuenta'
 import { BorradorConsumido, CreativoNoEsta, crearPostProgramado, crearVariosProgramados } from '@/lib/social/publish/crear'
 import { CREATIVO_NO_ESTA } from '@/lib/cocina/meson-motivos'
 import { CuentaInvalida } from '@/lib/social/cuentas'
@@ -255,6 +259,11 @@ export function partirEnHistorias(
  * se programara en el panel. La portada y los atributos los pone `crearVariosProgramados` desde el
  * creativo del borrador, venga de donde venga el pedido.
  *
+ * Una app que trae el bloque de TikTok y la palabra clave (`sabeDe`) puede elegir cuentas de
+ * TikTok —sus opciones pasan por `validarOpcionesPorCuenta`, como las del compositor— y mandar la
+ * `regla`, que pasa por `validarRegla` y se crea con el post; después de crear, «Música de TikTok»
+ * queda recordada por cuenta (`recordarMusicaTikTok`), como en el panel.
+ *
  * Una secuencia de historias (`secuencia: true`) crea un post por archivo en la misma
  * transacción (`partirEnHistorias`) y responde además `ids`, en su orden. Un borrador que es una
  * historia no se programa como post (`BORRADOR_ES_HISTORIA`): lo intenta una app sin actualizar.
@@ -276,6 +285,14 @@ export async function POST(request: Request) {
   const media = parseMediaMovil(body)
   if ('error' in media) return NextResponse.json({ error: media.error }, { status: 400 })
 
+  // Lo que trae la app que manda (`sabeDe`): con TikTok, sus cuentas son destinos como cualquiera;
+  // con la palabra clave, la `regla` del cuerpo es la del post. Una app sin actualizar no trae
+  // ninguna de las dos, y un borrador que las tiene se programa en el panel (`soloEnElPanel`).
+  const conTikTok = sabeDe(request, 'tiktok')
+  const conRegla = sabeDe(request, 'palabra-clave')
+  const reglaCheck = validarRegla(conRegla ? (reglaDelTelefono(body) ?? undefined) : undefined)
+  if ('error' in reglaCheck) return NextResponse.json({ error: reglaCheck.error }, { status: 400 })
+
   const pedido = (body as { borradorId?: unknown }).borradorId
   let borradorId: string | null = null
   let opcionesPedidas = borrador.opciones
@@ -288,7 +305,9 @@ export async function POST(request: Request) {
     deDondeEsHistoria = esBorradorDeHistoria(deDonde.campos)
     // El del compositor, como lo lee `programar` en el panel: sin el campo, el del chef.
     if (deDonde.campos.tituloYoutube) tituloYoutube = primero(deDonde.campos, 'tituloYoutube').trim().slice(0, 100)
-    const motivo = soloEnElPanel(deDonde.campos, (await cuentasParaElTelefono(usuario.id)).ajenas)
+    const motivo = soloEnElPanel(deDonde.campos, (await cuentasParaElTelefono(usuario.id, conTikTok)).ajenas, {
+      conRegla,
+    })
     if (motivo) return NextResponse.json({ error: motivo }, { status: 400 })
     // Una app que no sabe de música no la manda: la del borrador se conserva.
     opcionesPedidas = opcionesConMusicaDelBorrador(body, borrador.opciones, deDonde.campos)
@@ -307,7 +326,7 @@ export async function POST(request: Request) {
   let cuentas: Awaited<ReturnType<typeof resolverDestinos>>['cuentas']
   let networks: string[]
   try {
-    ;({ cuentas, networks } = await resolverDestinos(usuario.id, borrador))
+    ;({ cuentas, networks } = await resolverDestinos(usuario.id, { ...borrador, conTikTok }))
   } catch (fallo) {
     if (fallo instanceof CuentaInvalida) return NextResponse.json({ error: fallo.message }, { status: 400 })
     throw fallo
@@ -330,10 +349,9 @@ export async function POST(request: Request) {
     const videos = parte.media.filter((m) => m.mediaType === 'video').length
     const mediaPorOpciones = errorDeMediaPorOpciones(parte.opciones, { videos, fotos, sinTipo: 0 })
     if (mediaPorOpciones) return NextResponse.json({ error: mediaPorOpciones }, { status: 400 })
-    // El teléfono no pone palabra clave: esa parte de la regla no tiene cómo dispararse aquí.
     const historia = errorDeHistoria(parte.opciones, {
       caption: borrador.texto,
-      conPalabraClave: false,
+      conPalabraClave: reglaCheck.regla !== null,
       aInstagram: networks.includes('instagram'),
       fotos: parte.media.filter((m) => m.mediaType === 'image').map((m) => extensionDe(m.url)),
     })
@@ -346,6 +364,8 @@ export async function POST(request: Request) {
         videoCount: videos,
         networks,
         scheduledAt,
+        // Solo TikTok la mira (fotos en JPG o WebP); la clave termina con el nombre del archivo.
+        formats: parte.media.map((m) => extensionDe(m.url)),
       },
       now,
       { proximamente: proximamentePara(usuario.id) },
@@ -374,9 +394,12 @@ export async function POST(request: Request) {
         media: partes[0]!.media,
         cuentas,
         opciones: partes[0]!.opciones,
+        regla: reglaCheck.regla,
         borradorId,
         tituloYoutube,
       })
+      const videos = partes[0]!.media.filter((m) => m.mediaType === 'video').length
+      await recordarMusicaTikTok(usuario.id, partes[0]!.opciones, { videos, fotos: partes[0]!.media.length - videos })
       return NextResponse.json({ id, cuando })
     }
     const ids = await crearVariosProgramados(
