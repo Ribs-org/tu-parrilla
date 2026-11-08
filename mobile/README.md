@@ -414,6 +414,13 @@ sale o se quema (`docs/pendientes.md`, «La propuesta de diseño 2.1») es puro 
 módulo, y con él en el binario puede llegar por aire a la 1.2.0 en vez de esperar otro build. Solo
 declara el permiso `VIBRATE`, que Android concede sin preguntar.
 
+Antes del build se pasó `npx expo-doctor` (2026-11-07): faltaba `expo-asset`, que `expo-audio` pide
+como dependencia nativa y sin el que la app puede caerse fuera de Expo Go, y los módulos de Expo
+estaban unos parches atrás de lo que pide el SDK 57; los dos se arreglaron con `npx expo install`
+(`expo-asset` y `--fix`), que además sumó los plugins sin opciones de `expo-asset` y `expo-image` a
+`app.json`. El paso a paso del dueño para armarlo y subirlo, en `docs/play-store.md`, «La 1.2.0, de
+punta a punta».
+
 Lo que no se pudo probar sin un teléfono: la cámara misma, los permisos, la copia a documentos, la
 cola que sigue después de cerrar la app y la subida nativa por partes. El 2026-11-06 se probó en Expo
 web, contra una API falsa, lo de la cámara de frío y las comandas: elegir y cambiar el rol de cada

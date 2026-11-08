@@ -222,6 +222,53 @@ nunca.
 
 ---
 
+## La 1.2.0, de punta a punta
+
+Lo nativo que se fue juntando desde la 1.1.0 sale en un solo binario: la cámara y el micrófono de
+La Cocina, el portapapeles, el audio de la música de Instagram, los avisos al teléfono, el corte en
+SVG, el video del mesón y la vibración (el módulo, sin usar todavía). Está todo en `main`; lo que
+falta es tuyo. En este orden:
+
+1. **Las credenciales de los avisos (FCM).** Los pasos están en `docs/pendientes.md`, «Las
+   credenciales de los avisos al teléfono (FCM)»: el `google-services.json` entra a `main` con su
+   línea en `mobile/app.json`, y la clave de la cuenta de servicio de Firebase se sube a EAS. Va
+   **antes** del build: el archivo se lee al construir, y un binario sin él no recibe avisos en
+   Android.
+2. **Lo que necesita el flujo de GitHub**, si todavía no está: el secreto `EXPO_TOKEN` («Y un secreto
+   en GitHub», arriba) y la clave JSON de la cuenta de servicio de Google Play en EAS (Parte 4). Sin
+   el primero, el flujo no arranca; sin la segunda, construye pero no envía.
+3. **El build.** En la app de GitHub: **Actions → «App a la tienda» → Run**, con la rama `main` y la
+   casilla de enviar marcada. Corre las pruebas de la app, el chequeo de tipos y el lint, y le pide
+   a EAS el binario de producción (`.aab`). La versión que ve la gente sale de `mobile/app.json`
+   (`1.2.0`); el número interno lo sube EAS (`autoIncrement` con `appVersionSource: remote` en
+   `mobile/eas.json`): si la cuenta quedó en el 2 de la 1.1.0, este sale con el 3. Sin el flujo, lo
+   mismo desde `mobile/` en un computador: `npx eas-cli build -p android --profile production`.
+4. **El envío.** El mismo flujo lo manda a la pista interna (`eas submit … --latest`; la pista la
+   fija `eas.json`). A mano: `npx eas-cli submit -p android --profile production --latest`. Si
+   Google lo rechaza con «Only releases with status draft may be created on draft app» —la app
+   sigue en borrador hasta que Google la revise—, baja el `.aab` de expo.dev (Builds) y súbelo tú
+   en **Pruebas → Pruebas internas → Crear versión**, como la primera vez.
+5. **La Play Console.** Antes de publicar la versión:
+   - en **Seguridad de los datos**, lo que dice «CUANDO SUBA LA 1.2.0» en `TEXTOS-FORMULARIO.txt`
+     (Audio → Grabaciones de voz o sonido; la nota en Fotos y videos; la línea de la descripción) y,
+     en «Identificadores de dispositivo u otros», el token de los avisos, con la finalidad
+     «Funcionalidad de la app» (ver «Seguridad de los datos», arriba). `TEXTOS-FORMULARIO.txt` todavía
+     no trae esta última;
+   - las notas de la versión, cortas: la cámara en La Cocina, el mesón, los avisos;
+   - revisar y publicar en la pista interna.
+
+   El video, el SVG y la vibración no cambian el formulario: no recogen nada. La vibración declara el
+   permiso `VIBRATE`, que Google no pide justificar.
+6. **Probarla en tu teléfono**, al actualizar desde la Play Store: grabar un video y una foto (los
+   permisos se piden la primera vez), una subida de varios GB, «Avisarme» en Ajustes, el mesón de una
+   comanda con un video que se reproduce y «Programar» hasta La Parrilla, y que la entraña de un video
+   ya no se vea como un chori. Nada de eso se pudo probar sin un teléfono.
+
+Desde ahí, lo de la 1.2.0 se publica por aire desde `main` en el canal `production`; lo de los
+teléfonos que se queden en la 1.1.0, desde la rama `ota-1.1.0` (ver `mobile/README.md`).
+
+---
+
 ## Errores comunes, para que no te agarren
 
 **«Version code ya usado».** Google exige que cada binario suba un número interno. EAS lo

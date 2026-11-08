@@ -75,7 +75,9 @@
           "supportsBackgroundPlayback": false,
           "supportsPictureInPicture": false
         }
-      ]
+      ],
+      "expo-asset",
+      "expo-image"
     ],
     "experiments": {
       "typedRoutes": true,

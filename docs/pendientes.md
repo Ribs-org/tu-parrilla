@@ -535,25 +535,27 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
   cerrada de 12 probadores durante 14 días antes de pedir producción, como lo pide el Dashboard de
   la app. Una cuenta de organización no tiene esa exigencia. Verificarlo en la ayuda de Google al
   crearla.
-- **[dueño] El build 1.2.0 de la app, con la cámara, a las tiendas** (2026-11-02). La 1.2.0 trae
-  La Cocina en el teléfono: grabar un video o sacar una foto y mandárselo al chef. Pide los
-  permisos de cámara y micrófono, que solo llegan con un binario nuevo, y su `runtimeVersion` es
-  otra: nada de la 1.2.0 llega por aire a un teléfono con la 1.1.0 (La Cocina sin grabar sí puede
-  llegarle desde `ota-1.1.0`: ver la entrada de abajo). Falta: el build de EAS de
-  producción (el flujo «App a la tienda» de GitHub, o `npx eas-cli build -p android --profile
-  production` en `mobile/`) y subirlo a Google Play (`eas submit`), con la sección de seguridad de
-  los datos de la Play Console al día —la app usa la cámara y el micrófono para lo que la persona
-  sube—; y lo mismo en el App Store cuando exista la cuenta de Apple (ver la entrada de abajo).
-  Probarlo en un teléfono de verdad antes de soltarlo: la cámara, los permisos y la subida por
-  partes de un video de varios GB no se pudieron probar sin uno. Mientras tanto, lo de la 1.1.0
-  se publica por aire desde un commit anterior. Detalle en `mobile/README.md`, «La 1.2.0
-  necesita un build nativo y pasar por las tiendas». El build lleva además `react-native-svg`
-  (2026-11-07), que dibuja el corte con las curvas del panel, y ya no lleva
-  `@react-native-community/datetimepicker`, que nada usaba. El build ya
-  lleva `expo-clipboard` (2026-11-06): sin él, «Copiar el texto» abre la lista de compartir
-  (`mobile/README.md`, «El portapapeles, con y sin su módulo nativo»). Y `expo-notifications`
-  (2026-11-07), los avisos al teléfono: antes de armarlo van las credenciales de la entrada
-  siguiente, o el build sale sin avisos en Android.
+- **[dueño] El build 1.2.0 de la app, a la Play Store** (2026-11-02; listo para armarse desde el
+  2026-11-07). Todo lo nativo que esperaba un build ya está en `main`: la cámara y el micrófono de La
+  Cocina, `expo-clipboard`, `expo-audio` (con `expo-asset`, que pedía), `expo-notifications`,
+  `react-native-svg` (el corte con las curvas del panel), `expo-video` (el mesón), `expo-haptics` (sin
+  usar todavía) y fuera `@react-native-community/datetimepicker`; los módulos de Expo, en los parches que
+  pide el SDK 57 (`npx expo-doctor` sin avisos). Nada de la 1.2.0 llega por aire a la 1.1.0
+  (`runtimeVersion` es la versión de la app). Falta solo lo del dueño, en orden, con el detalle en
+  `docs/play-store.md`, «La 1.2.0, de punta a punta»:
+  1. las credenciales de FCM (la entrada de abajo): el `google-services.json` en `main` y la clave en
+     EAS;
+  2. lo que el flujo necesita y todavía no está: el secreto `EXPO_TOKEN` en GitHub y la clave de la
+     cuenta de servicio de Google Play en EAS (ver «La app en la Play Store», arriba). Sin ellos, el
+     build se arma a mano y el `.aab` se sube a mano;
+  3. el build: Actions → «App a la tienda» → Run, desde `main`;
+  4. el envío a la pista interna, que hace el mismo flujo (o `eas submit`);
+  5. en la Play Console, la seguridad de los datos con lo de «CUANDO SUBA LA 1.2.0» de
+     `TEXTOS-FORMULARIO.txt` y el token de los avisos, y la versión publicada;
+  6. probarla en el teléfono: la cámara y sus permisos, una subida de varios GB, «Avisarme», el mesón
+     y el corte.
+
+  Y en el App Store cuando exista la cuenta de Apple (ver «La app en iPhone», abajo).
 - **[dueño] Las credenciales de los avisos al teléfono (FCM), antes del build 1.2.0**
   (2026-11-07). El código está (`src/lib/push/`, `mobile/src/lib/avisos.ts`); sin esto, en Android
   «Avisarme» dice que no se pudieron encender. Lo pide la documentación de Expo SDK 57, «Add Android
