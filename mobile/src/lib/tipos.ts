@@ -110,6 +110,8 @@ export type BorradorAbierto = {
   media: { url: string; mediaType: 'image' | 'video'; nombre: string }[]
   /** Por qué este borrador se programa solo en el panel web, o null si se puede desde acá. */
   soloEnElPanel: string | null
+  /** Si es una historia; falta si el sitio todavía no lo manda, y entonces es un post. */
+  historia?: boolean
 }
 
 /**
@@ -124,6 +126,8 @@ export type PostEditable = {
   destinos: { id: string; red: string; handle: string | null; estado: string; limite: number }[]
   seConserva: string | null
   bloqueo: string | null
+  /** Si es una historia, que no lleva texto; falta si el sitio todavía no lo manda. */
+  historia?: boolean
 }
 
 /**

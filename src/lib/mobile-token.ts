@@ -28,6 +28,15 @@ function version(): string {
   return env('MOBILE_TOKEN_VERSION') ?? '1'
 }
 
+/**
+ * Qué sesión del teléfono es esta: la versión de `MOBILE_TOKEN_VERSION` y la de la cuenta. La guarda
+ * cada token de los avisos al registrarse (`push_tokens.sesion`), y un aviso solo sale a los que
+ * todavía la tienen: revocar las sesiones corta también los avisos.
+ */
+export function sesionDelTelefono(sesionVersion: number): string {
+  return `${version()}:${sesionVersion}`
+}
+
 export function mintMobileToken(claims: { sub: string; sv: number }): Promise<string> {
   return new SignJWT({ purpose: PURPOSE, v: version(), sv: claims.sv })
     .setSubject(claims.sub)

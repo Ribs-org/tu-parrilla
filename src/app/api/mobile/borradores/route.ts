@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { borradorDemasiadoGrande, camposDesdeTelefono, idDeBorrador, musicaDelTelefono } from '@/lib/borrador'
+import { borradorDemasiadoGrande, camposDesdeTelefono, historiaDelTelefono, idDeBorrador, musicaDelTelefono } from '@/lib/borrador'
 import { cargarBorrador, guardarBorrador, type MediaDeBorrador } from '@/lib/borradores'
 import { cuentasParaElTelefono } from '@/lib/borradores-movil'
 import {
@@ -22,7 +22,8 @@ export const dynamic = 'force-dynamic'
  * teléfono se sigue en el panel y al revés.
  *
  * El cuerpo es el de `POST /api/mobile/schedule` —`texto`, `cuentas`, `cuando`, `opciones`,
- * `media`— más el `id` del borrador si ya existe, y un `nombre` por archivo. Sin `id`, crea
+ * `media`— más el `id` del borrador si ya existe, un `nombre` por archivo y el `modo` (`post` o
+ * `historia`; sin él se conserva el que tenía, ver `historiaDelTelefono`). Sin `id`, crea
  * uno. Un `id` que ya no existe responde 404 y no se recrea, como en el panel: alguien lo
  * programó o lo descartó en otro lado.
  *
@@ -75,13 +76,22 @@ export async function POST(request: Request) {
   // La «Música de Instagram»: la app que la conoce lo dice con `conMusica`; una vieja no, y se
   // conserva la que dejó el panel.
   const musica = musicaDelTelefono(body, datos.opciones, cuentas)
+  // El modo (`modo`: post o historia), igual: una app que no sabe de historias no lo manda.
+  const historia = historiaDelTelefono(body)
 
   // El teléfono manda el instante ya resuelto; el panel lee la hora de pared en la zona
   // del dueño. Con las dos se guarda: `fecha` para el calendario, el campo para el panel.
   const fecha = resolverCuando(false, datos.cuando, new Date())
   const campos = camposDesdeTelefono(
     anterior?.campos ?? null,
-    { texto: datos.texto, cuentas, scheduledAt: toZonedInput(fecha, usuario.zona), trial, ...(musica ? { musica } : {}) },
+    {
+      texto: datos.texto,
+      cuentas,
+      scheduledAt: toZonedInput(fecha, usuario.zona),
+      trial,
+      ...(musica ? { musica } : {}),
+      ...(historia !== undefined ? { historia } : {}),
+    },
     ajenas,
   )
   if (borradorDemasiadoGrande(campos)) return NextResponse.json({ error: CUERPO_ILEGIBLE }, { status: 400 })

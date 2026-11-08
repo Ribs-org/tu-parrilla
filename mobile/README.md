@@ -8,14 +8,18 @@ panel web, en versión corta: **La Parrilla** (lo programado día por
 día —con un filtro por red, lo que ya salió hundido en un renglón y, hoy, la línea de
 «ahora»—, lo que se quemó, los borradores y cuántos cortes salieron ayer), **Publicar**
 (eliges fotos o un video de la galería, escribes el texto, marcas las cuentas y lo
-programas, o lo mandas a salir ahora), **Los Números** (las dos mitades del tablero, con «Tus
+programas, o lo mandas a salir ahora; o, con «Historia», una historia o una secuencia de
+historias para Instagram y Facebook), **Los Números** (las dos mitades del tablero, con «Tus
 publicaciones» un toque adentro y los seguidores de cada red detrás de «⋯ Más») y, desde la versión
 1.2.0 (2026-11-02), **La Cocina** (grabar un video o sacar una foto con la cámara del teléfono,
 ordenar la cámara de frío y pedirle una comanda al chef de la casa con las opciones del panel; ver
-«La Cocina desde el teléfono», más abajo).
+«La Cocina desde el teléfono», más abajo). Desde el 2026-11-07, La Parrilla tiene arriba una tarjeta
+**La Mesa**, con cuántos comentarios esperan respuesta, que abre los comentarios con su borrador
+para corregir y mandar (ver «La Mesa desde el teléfono»).
 Arriba a la derecha de todas, el botón de **Ajustes** (un trinche y un cuchillo, lado a lado): tus cuentas con la temperatura de su
 fierro (`/api/mobile/fierros`), con un punto en el botón si alguna se enfría o se apagó,
-el modo —la noche o el día con sushi, el mismo de la cuenta—, «Cerrar sesión» y, al final, el
+el modo —la noche o el día con sushi, el mismo de la cuenta—, desde la 1.2.0 «Los avisos» (encender o
+apagar los avisos al teléfono; ver «Los avisos al teléfono», más abajo), «Cerrar sesión» y, al final, el
 libro de sugerencias (de día, la caja) para escribirle al equipo y leer lo que respondió, como en el panel
 (`/api/mobile/sugerencias`, y `…/{id}/leida` al abrir una respuesta). Antes eran cinco con nombres propios: Resumen, Contenido, Publicar, Cuentas y
 Calendario. Los datos son los mismos que ve el panel web, leídos desde
@@ -229,6 +233,45 @@ la canción que el borrador traía del panel se conserva al guardar y se suma al
 Lo que no se puede hacer desde el teléfono, y sigue siendo del panel web: poner una
 portada, etiquetar con atributos y programar en TikTok o con una palabra clave.
 
+### Las historias (2026-11-07)
+
+Arriba de Publicar, **«Post · Historia»**. En Historia, cada foto o video es una historia de
+Instagram o Facebook: sin texto, sin trial reel, sin canción y solo con las cuentas de esas dos
+redes. Lo primero es el **visor**: la historia en 9:16, recortada como se va a ver, con una raya
+por historia arriba y deslizando de lado para pasar de una a otra; debajo, la tira con el orden en
+que salen, «← Antes» y «Después →» para cambiarlo y la «✕» de cada una. El botón dice
+**«Programar historia»** o **«Programar N historias»**. El diseño entero, y lo que se decidió al
+construir esta parte, está en `docs/superpowers/specs/2026-10-24-historias-design.md`.
+
+- **Una secuencia entra entera.** La app manda un solo pedido con `secuencia: true`, las cuentas en
+  `{ historia: true }` y los archivos en su orden; el servidor crea una historia por archivo, con
+  la misma hora y su lugar (`{ secuencia, orden }`), en una sola transacción, y consume el borrador
+  una vez para todas. Así una secuencia no queda a medias por una señal que se corta, y un envío
+  repetido no la duplica: el borrador ya no está. Contra un servidor de antes, varios archivos se
+  rechazan con «Una historia es un solo archivo, foto o video.»; una sola historia funciona igual.
+- **Lo que se avisa antes**, sobre el visor y con las frases del servidor: una foto que no es JPG
+  hacia Instagram apaga «Programar» (`HISTORIA_JPG`, que el servidor rechazaría igual); un video de
+  más de 60 s y lo que no es 9:16 se avisan en ámbar y se programa igual, porque el servidor no
+  mide. El ancho, el alto y la duración los da el selector de imágenes (`medidasDe`); un archivo
+  que vuelve de un borrador no los trae, y no se avisa.
+- **El borrador recuerda el modo** (`modo: 'historia'`, en `src/lib/borrador.ts` de la raíz) y
+  guarda igual el texto, el trial reel y la canción: cambiar a Historia y volver a Post no pierde
+  nada. Una app sin actualizar no manda `modo`, y el servidor conserva el que había; si esa app
+  intenta programar como post un borrador de historia, se rechaza (`BORRADOR_ES_HISTORIA`) en vez
+  de publicar un carrusel. El compositor del panel todavía no tiene «Historia»: abre ese borrador
+  como un post (ver `docs/pendientes.md`).
+- **Un video no se reproduce en el visor**: pediría `expo-video`, que es nativo. Se ve «▶» con su
+  duración. El orden se cambia con flechas y no arrastrando: arrastrar pedía armar el gesto con
+  `react-native-gesture-handler` sobre una tira que también se desliza, y las flechas dicen lo
+  mismo con un toque y se leen con el lector de pantalla.
+- **Editar publicación** abre una historia sin el cuadro del texto («Es una historia: no lleva
+  texto…»): el servidor rechazaría guardarlo. Lo dice el campo `historia` de
+  `GET /api/mobile/schedule/posts/{id}`; uno de antes no lo manda y la pantalla muestra el texto.
+
+Todo es JavaScript y lo que la app ya trae (`expo-image`, `expo-image-picker`, el `ScrollView` de
+React Native): sin módulos ni permisos nuevos, llega por aire también a la 1.1.0 (ver «Las
+historias por aire a la 1.1.0», abajo).
+
 ### Corregir o borrar lo programado
 
 Tocar la tarjeta de un post en La Parrilla abre **Editar publicación**: el texto, la hora
@@ -328,7 +371,9 @@ sacarla de un commit más viejo que la punta de la rama le quita a la gente lo q
 tienda» de GitHub, o a mano con la cuenta de Expo, `npx eas-cli build -p android --profile
 production` y `npx eas-cli submit -p android --profile production`; lo mismo con `-p ios` cuando
 exista la cuenta de Apple. En la Play Console, la sección de seguridad de los datos tiene que
-decir que la app usa la cámara y el micrófono para lo que la persona sube.
+decir que la app usa la cámara y el micrófono para lo que la persona sube, y desde el 2026-11-07 que
+guarda el token de los avisos (`docs/play-store.md`). El build lleva también `expo-notifications`, y
+antes de armarlo van las credenciales de FCM (ver «Los avisos al teléfono», abajo).
 
 Lo que no se pudo probar sin un teléfono: la cámara misma, los permisos, la copia a documentos, la
 cola que sigue después de cerrar la app y la subida nativa por partes. El 2026-11-06 se probó en Expo
@@ -336,7 +381,7 @@ web, contra una API falsa, lo de la cámara de frío y las comandas: elegir y ca
 video, las opciones con «Para cuándo», el cuerpo que sale al mandar, «Cambiar», «Sacar de la cámara»,
 «Lo que pasó», «Cancelar la comanda», y el camino corto contra un servidor de antes.
 
-### La Cocina por aire a la 1.1.0 (preparada el 2026-11-06, sin publicar)
+### La Cocina por aire a la 1.1.0 (publicada el 2026-11-07)
 
 Se puede, y el código ya está hecho para eso. Lo único nativo que la pestaña necesita y la 1.1.0 no
 trae es el permiso de la cámara y el del micrófono: sin ellos, Android contesta que no al pedirlos,
@@ -366,9 +411,27 @@ llegue a esos teléfonos, ni los permisos, que no llegan por aire— ni `package
 necesita `expo-clipboard` para esto. Se probó el 2026-11-06 en una copia de la rama con esos archivos:
 `tsc`, los tests y `npx expo export --platform android` pasan. Y se publica después de que el
 servidor de esta rama esté en producción, aunque la app aguanta el orden contrario (ver «Las opciones
-viajan desde el servidor», arriba). Publicarla es decisión del dueño: está en `docs/pendientes.md`. En Expo web, contra una API
+viajan desde el servidor», arriba). En Expo web, contra una API
 falsa, sí se probó el resto: elegir de la galería, subir en dos partes con su avance, la frase de
 la cuota, mandar la comanda con la instrucción y la cocina apagada.
+
+### Las historias por aire a la 1.1.0 (publicadas el 2026-11-07)
+
+No piden nada nativo, así que se copian tal cual, sobre la punta de `ota-1.1.0`, de `main` con la
+rama de las historias fusionada (archivos de `mobile/`):
+
+- `src/app/(tabs)/publicar.tsx` y `src/app/programado/[id].tsx`;
+- `src/components/visor-historias.tsx`;
+- `src/lib/historias.ts` (con `historias.test.ts`), `src/lib/publicar.ts`, `src/lib/borradores.ts`
+  (con `borradores.test.ts`), `src/lib/editar.ts` y `src/lib/tipos.ts`.
+
+El 2026-11-07 esos archivos eran iguales en `main` y en `ota-1.1.0` antes de este cambio
+(`publicar.tsx` ya traía ahí la música de #328), así que copiarlos no pisa nada de la rama. **No**
+se tocan `app.json` ni `package.json`. Y se publica **después** de que el servidor de esta rama esté
+en producción: con un servidor de antes, una sola historia sale bien, pero una secuencia se
+rechaza («Una historia es un solo archivo, foto o video.») y el borrador no recuerda el modo.
+Salieron el 2026-11-07 junto con La Mesa, en el commit `9968a71` de `ota-1.1.0`, a los dos canales,
+con el servidor ya en producción.
 
 ### El portapapeles, con y sin su módulo nativo
 
@@ -382,6 +445,108 @@ de compartir del sistema (`Share`, de React Native), que en Android 10 en adelan
 «Copiar», pero no en todos los teléfonos: por eso no promete copiar. El mismo archivo sirve tal
 cual en la rama `ota-1.1.0`, que no tiene `expo-clipboard` en `package.json`: ahí siempre es la
 lista de compartir.
+
+## Los avisos al teléfono
+
+Desde la 1.2.0 (2026-11-07), la app avisa en el teléfono lo mismo que el correo: lo que se quemó, una
+cuenta que se enfría o se apaga, una pregunta del chef, una comanda que terminó y la respuesta del
+equipo en el libro de sugerencias; y, sin correo, un resumen de los comentarios nuevos de La Mesa, uno
+por hora como mucho. Los manda el servidor (`src/lib/push/` en la raíz; ver «Avisos al teléfono» en el
+`README.md` de la raíz). Acá, `src/lib/avisos.ts` y `src/components/avisos.tsx`:
+
+- **Cuándo pregunta.** No al abrir: unos ocho segundos después de entrar, la primera vez, con la
+  ventana de la app «¿Te avisamos al teléfono?», «Ahora no» y «Avisarme». Recién con «Avisarme» se
+  pide el permiso del sistema —en Android 13 en adelante, `POST_NOTIFICATIONS`, que declara el propio
+  `expo-notifications`—. Antes se crea el canal de Android `avisos`: sin un canal, Android 13 no
+  pregunta, y un aviso a un canal que no existe no se muestra. «Ahora no», o un permiso negado, no
+  vuelve a preguntar: quedan en Ajustes → «Los avisos». La respuesta se guarda en el teléfono
+  (`avisos-telefono` en AsyncStorage), y cerrar sesión la borra, para que quien entre después elija.
+- **El token.** Con el permiso, `getExpoPushTokenAsync` (con el `projectId` de EAS) da el token de
+  Expo, que va a `POST /api/mobile/push`. Se vuelve a mandar cada vez que la app abre con los avisos
+  encendidos, porque Expo lo puede cambiar. «Apagar los avisos» y «Cerrar sesión» lo borran con
+  `DELETE /api/mobile/push/{token}`; si al salir no hay señal, queda anotado en el almacén seguro y se
+  borra al abrir la app la vez siguiente. El servidor, además, deja de mandarle a un token cuya sesión
+  se revocó (`MOBILE_TOKEN_VERSION`, «Si se pierde el teléfono»).
+- **Tocar un aviso** abre su pantalla (`rutaDelAviso`): el fierro y la respuesta del equipo, Ajustes;
+  la pregunta del chef y la comanda, «Tus comandas» de La Cocina (`/cocina?vista=comandas`); los
+  comentarios, La Mesa (`/mesa`); lo quemado, La Parrilla. También si el aviso abrió la app cerrada
+  (`getLastNotificationResponse`). Con la app abierta, el aviso se muestra igual, arriba.
+
+**Con y sin el módulo nativo**, como el portapapeles y el audio: `expo-notifications` es nativo y
+entra con el build 1.2.0; un binario que no lo trae revienta al cargarlo, porque pide sus módulos
+nativos con `requireNativeModule` apenas se importa. Por eso `src/lib/avisos.ts` no lo importa:
+pregunta por `ExpoPushTokenManager` y `ExpoNotificationPermissionsModule` con
+`requireOptionalNativeModule` y solo entonces lo carga con un `require`. Sin el módulo, la app no
+pregunta nada y Ajustes dice que los avisos llegan con la versión nueva. Lo cuida
+`src/lib/avisos.test.ts`. La rama `ota-1.1.0` no lleva esto; si algún día se porta, el archivo sirve
+tal cual, con `expo-notifications` en su `package.json` (solo el JavaScript) y **sin** tocar su
+`app.json`.
+
+**Lo que pide el build.** `app.json` trae el plugin de `expo-notifications` con el ícono de la
+notificación (la silueta blanca de `android-icon-monochrome.png`) y el color de la brasa. En Android,
+los avisos salen por Firebase Cloud Messaging, que pide dos cosas antes del build: el
+`google-services.json` en esta carpeta, nombrado en `app.json` (`android.googleServicesFile`), y la
+clave de la cuenta de servicio de FCM subida a EAS. Las hace el dueño; los pasos, en
+`docs/pendientes.md`. Sin ellas el build sale igual, pero «Avisarme» dice «No se pudieron encender los
+avisos…». En iPhone, el build de iOS crea la llave de push de Apple.
+
+Lo que no se pudo probar: sin un build nativo no se recibe un aviso de verdad, ni se ve la pregunta
+del sistema. Los tests cubren que sin el módulo no se carga nada, adónde lleva cada aviso y que el
+token se borra al apagar y al salir; el servidor, contra una Postgres de verdad, con Expo de mentira.
+
+## La Mesa desde el teléfono
+
+Desde el 2026-11-07. No es una pestaña: cinco no caben cómodas en la barra, y una tarjeta con el
+número en la entrada avisa sin pedir un toque. Es una pantalla de la pila, como «Tus publicaciones», que se
+abre con la tarjeta «La Mesa» de La Parrilla (`AccesoALaMesa`, en `src/components/mesa.tsx`); la
+tarjeta dice cuántos esperan respuesta, con `GET /api/mobile/comentarios/pendientes`.
+
+La pantalla (`src/app/mesa.tsx`) trae lo esencial de La Mesa del panel: «Pendientes», «Enviados» y
+«Automáticas», el filtro por red, y en cada comentario el borrador editable, «Enviar», «Descartar»
+y el botón para pedir otro borrador, con las preguntas del panel antes de descartar y antes de
+pisar lo corregido a mano. Las instrucciones para el modelo, «Regenerar todos», «Descartados»,
+«Todos» y la fila de emojis se quedan en el panel: lo primero es para una sentada frente al
+computador, y el teclado del teléfono ya trae emojis. Las rutas y lo que responden, en el
+`README.md` de la raíz, «Responder comentarios»: son las funciones del panel, con el dueño del
+token, así que las reglas y las frases son las mismas. Lo que la app copia del panel —cuántos
+esperan, la cola vacía y «hace 3 horas»— está en `src/lib/mesa.ts`, y un test de la raíz lo
+compara con el panel (`telefono-copias.test.ts`). «Hace cuánto» está escrito a mano, no con
+`Intl.RelativeTimeFormat`, que Hermes no trae completo.
+
+Un comentario que llega con el texto vacío (la investigación de Instagram en `docs/pendientes.md`)
+dice «(sin texto)»; la pantalla no hace nada más con él.
+
+**Contra un servidor de antes**, que no tiene estas rutas, la API contesta `404` sin frase:
+`useScreenData` lo avisa (`sinRuta`), y La Mesa dice «Tu Parrilla todavía no responde comentarios
+desde el teléfono. Mientras, respóndelos en La Mesa del panel web.» en vez de «No se pudo
+actualizar.»; la tarjeta de La Parrilla se queda con el subtítulo, sin número. Así da lo mismo qué
+sale primero, la web o la actualización por aire.
+
+### La Mesa por aire a la 1.1.0 (publicada el 2026-11-07)
+
+No pide nada nativo: `TextInput`, `Linking`, `KeyboardAvoidingView` y `Modal` son de React Native,
+y `expo-image`, `expo-router` y `react-native-safe-area-context` ya están en la 1.1.0. Ni permisos
+nuevos. Para publicarla, sobre la punta de `ota-1.1.0`, se copian de `main` (con esta rama
+fusionada) estos archivos de `mobile/`, tal cual:
+
+- `src/app/mesa.tsx`, `src/components/mesa.tsx`, `src/lib/mesa.ts` y su test, `src/lib/mesa.test.ts`
+  (nuevos);
+- `src/app/_layout.tsx` (la pantalla «La Mesa» en la pila, detrás de la sesión);
+- `src/app/(tabs)/index.tsx` (la tarjeta en La Parrilla);
+- `src/lib/useScreenData.ts` (`sinRuta`).
+
+El 2026-11-07, `mobile/src` de `ota-1.1.0` era igual al de `main`, así que los siete caen sin
+choques. Si antes entra a `main` otro cambio a `_layout.tsx` o a `(tabs)/index.tsx` que no vaya a la
+1.1.0, hay que copiar solo la parte de La Mesa. **No** se tocan `app.json` ni `package.json`. Se
+publica después de que el servidor esté en producción, aunque la app aguanta el orden contrario.
+Salió el 2026-11-07 junto con las historias, en el commit `9968a71` de `ota-1.1.0`, a los dos canales.
+
+Lo que se probó el 2026-11-07, en Expo web contra una API falsa: la tarjeta con el número, los tres
+filtros y el de red, «(sin texto)», «Alguien», el borrador que falló y la automática que falló,
+«Enviar» con sus errores («Escribe una respuesta.», «Esa cuenta ya no está conectada.»), pedir otro
+borrador sobre lo corregido, «Descartar» con su pregunta, el número que baja al enviar, y el mensaje
+contra un servidor sin La Mesa. Lo que no: un teléfono de verdad (el teclado encima del cuadro) y
+el servidor real contra la red (lo cubren las pruebas del panel y las de aislamiento).
 
 ## El modo día
 
@@ -463,7 +628,8 @@ más:
    súbela a `2`).
 3. Eso invalida de inmediato todas las sesiones de la app ya abiertas en
    cualquier teléfono — van a pedir el correo y el código de nuevo la próxima vez
-   que se abran.
+   que se abran. También corta los avisos al teléfono: el servidor deja de mandarlos a
+   los teléfonos que se registraron con la sesión anterior.
 
 Este paso **no afecta** las conexiones con Instagram, Facebook o YouTube: no hace
 falta volver a autorizar nada de eso, solo se cierra el acceso desde el celular.
@@ -471,10 +637,12 @@ falta volver a autorizar nada de eso, solo se cierra el acceso desde el celular.
 ## Qué no hace todavía
 
 - No pone portada ni atributos, y de lo ya programado no cambia los archivos, ni suma
-  cuentas, ni toca lo que ya salió en alguna: eso sigue en el panel.
+  cuentas, ni toca lo que ya salió en alguna: eso sigue en el panel. Tampoco cambia el orden de
+  una secuencia de historias ya programada, ni reproduce un video en el visor.
 - En La Cocina no muestra el mesón (ver `docs/pendientes.md`), no elige el color de acento de la
   marca ni dibuja la estación de cada comanda, y no sigue subiendo con la app en segundo plano: lo
   primero es del panel, y lo último retoma al volver a abrir La Cocina.
-- No manda notificaciones (no avisa solo cuando hay un dato nuevo).
+- En La Mesa no cambia las instrucciones para el modelo, no regenera todos los borradores, no muestra
+  los descartados ni «Todos» y no trae la fila de emojis: eso sigue en el panel.
 - No hay versión para iPhone que se pueda instalar: el código está listo, falta la
   cuenta de Apple (ver «iPhone (iOS)», arriba).

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { KeyboardAvoidingView, Platform, Pressable, RefreshControl, ScrollView, Text, TextInput, View } from 'react-native'
 import * as ImagePicker from 'expo-image-picker'
-import { useFocusEffect } from 'expo-router'
+import { useFocusEffect, useLocalSearchParams } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import {
@@ -141,7 +141,16 @@ export default function LaCocina() {
   const { data, cargando, error, sello, refrescar, refrescarSiVieja } = useScreenData<Cocina>('cocina', '/api/mobile/cocina', token, salir)
   const [grabar] = useState(sePuedeGrabar)
 
-  const [vista, setVista] = useState<Vista>('comanda')
+  // Un aviso al teléfono de una pregunta del chef o de una comanda abre «Tus comandas»
+  // (`rutaDelAviso`, en `lib/avisos.ts`); `n` cambia en cada toque, aunque la pestaña ya estuviera
+  // abierta. Se atiende al dibujar, no en un efecto: el toque nuevo cambia la vista una vez.
+  const { vista: vistaPedida, n: toque } = useLocalSearchParams<{ vista?: string; n?: string }>()
+  const [vista, setVista] = useState<Vista>(vistaPedida === 'comandas' ? 'comandas' : 'comanda')
+  const [toqueAtendido, setToqueAtendido] = useState(toque)
+  if (toque !== toqueAtendido) {
+    setToqueAtendido(toque)
+    if (vistaPedida === 'comandas') setVista('comandas')
+  }
   const [riel, setRiel] = useState<Riel>(RIEL_VACIO)
   const [guardadosAca, setGuardadosAca] = useState<Material[]>([])
   const [sacados, setSacados] = useState<string[]>([])

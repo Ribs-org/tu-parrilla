@@ -73,24 +73,40 @@ function atributosDelCreativo(c: Creativo): Atributos | null {
  */
 export async function crearPostProgramado(
   ownerId: string,
-  input: {
-    caption: string
-    scheduledAt: Date
-    media: MediaSubida[]
-    cuentas: CuentaDestino[]
-    opciones?: Record<string, OpcionesDestino>
-    regla?: ReglaLimpia | null
-    borradorId?: string | null
-    /** El título de YouTube del compositor, para un borrador del mesón. Sin él, el del chef. */
-    tituloYoutube?: string | null
-  },
+  input: PostAProgramar & { borradorId?: string | null },
 ): Promise<string> {
-  const { id, comandaId } = await getDb().transaction(async (tx) => {
+  const [id] = await crearVariosProgramados(ownerId, [input], input.borradorId ?? null)
+  return id!
+}
+
+export type PostAProgramar = {
+  caption: string
+  scheduledAt: Date
+  media: MediaSubida[]
+  cuentas: CuentaDestino[]
+  opciones?: Record<string, OpcionesDestino>
+  regla?: ReglaLimpia | null
+  /** El título de YouTube del compositor, para un borrador del mesón. Sin él, el del chef. */
+  tituloYoutube?: string | null
+}
+
+/**
+ * Varios posts en una sola transacción, con el borrador —si lo hay— consumido una vez para
+ * todos: una secuencia de historias del teléfono (`api/mobile/schedule`) entra entera o no
+ * entra, y un envío repetido cuya respuesta se perdió no la programa dos veces. Si el borrador
+ * salió del mesón, lo del creativo va en el primero. Devuelve los ids en el orden en que llegaron.
+ */
+export async function crearVariosProgramados(
+  ownerId: string,
+  posts: PostAProgramar[],
+  borradorId: string | null,
+): Promise<string[]> {
+  const { ids, comandaId } = await getDb().transaction(async (tx) => {
     let creativo: Creativo | null = null
-    if (input.borradorId) {
+    if (borradorId) {
       const consumidos = await tx
         .delete(borradores)
-        .where(and(eq(borradores.id, input.borradorId), eq(borradores.ownerId, ownerId)))
+        .where(and(eq(borradores.id, borradorId), eq(borradores.ownerId, ownerId)))
         .returning({ id: borradores.id, creativoId: borradores.creativoId })
       if (consumidos.length === 0) throw new BorradorConsumido()
       const creativoId = consumidos[0]!.creativoId
@@ -104,53 +120,60 @@ export async function crearPostProgramado(
       }
     }
 
-    const conVideo = input.media.some((m) => m.mediaType === 'video')
-    const [post] = await tx
-      .insert(scheduledPosts)
-      .values({
-        ownerId,
-        caption: input.caption,
-        scheduledAt: input.scheduledAt,
-        ...(creativo ? { coverUrl: conVideo ? creativo.portadaUrl : null, atributos: atributosDelCreativo(creativo) } : {}),
-      })
-      .returning()
-    if (input.media.length > 0) {
-      await tx.insert(scheduledPostMedia).values(
-        input.media.map((m, position) => ({
+    const ids: string[] = []
+    for (const [i, input] of posts.entries()) {
+      const delCreativo = i === 0 ? creativo : null
+      const conVideo = input.media.some((m) => m.mediaType === 'video')
+      const [post] = await tx
+        .insert(scheduledPosts)
+        .values({
+          ownerId,
+          caption: input.caption,
+          scheduledAt: input.scheduledAt,
+          ...(delCreativo
+            ? { coverUrl: conVideo ? delCreativo.portadaUrl : null, atributos: atributosDelCreativo(delCreativo) }
+            : {}),
+        })
+        .returning()
+      if (input.media.length > 0) {
+        await tx.insert(scheduledPostMedia).values(
+          input.media.map((m, position) => ({
+            postId: post!.id,
+            blobUrl: m.url,
+            mediaType: m.mediaType,
+            position,
+          })),
+        )
+      }
+      const titulo = delCreativo ? (input.tituloYoutube ?? delCreativo.tituloYoutube ?? '').trim() : ''
+      await tx.insert(scheduledPostTargets).values(
+        input.cuentas.map((cuenta) => ({
           postId: post!.id,
-          blobUrl: m.url,
-          mediaType: m.mediaType,
-          position,
+          network: cuenta.network,
+          accountId: cuenta.id,
+          opciones: input.opciones?.[cuenta.id] ?? null,
+          captionOverride: titulo && cuenta.network === 'youtube' ? `${titulo}\n${input.caption}` : null,
         })),
       )
-    }
-    const titulo = creativo ? (input.tituloYoutube ?? creativo.tituloYoutube ?? '').trim() : ''
-    await tx.insert(scheduledPostTargets).values(
-      input.cuentas.map((cuenta) => ({
-        postId: post!.id,
-        network: cuenta.network,
-        accountId: cuenta.id,
-        opciones: input.opciones?.[cuenta.id] ?? null,
-        captionOverride: titulo && cuenta.network === 'youtube' ? `${titulo}\n${input.caption}` : null,
-      })),
-    )
-    // Ojo si alguna vez le llega una regla con `documentoUrl`: acá se inserta tal cual, sin
-    // copiar el archivo. El lote (`batch.ts`) sí lo copia a R2 con `documentoToBlob` antes de
-    // escribir la regla, porque `reglas_clave.documento_url` tiene que ser una URL nuestra —una
-    // ajena muere cuando el tercero borre su archivo, y el barrido no protege lo que no es
-    // nuestro—. Hoy ningún llamador de esta función arma ese campo; ver `docs/deuda-tecnica.md`.
-    if (input.regla) {
-      await tx.insert(reglasClave).values({ postId: post!.id, ...input.regla })
+      // Ojo si alguna vez le llega una regla con `documentoUrl`: acá se inserta tal cual, sin
+      // copiar el archivo. El lote (`batch.ts`) sí lo copia a R2 con `documentoToBlob` antes de
+      // escribir la regla, porque `reglas_clave.documento_url` tiene que ser una URL nuestra —una
+      // ajena muere cuando el tercero borre su archivo, y el barrido no protege lo que no es
+      // nuestro—. Hoy ningún llamador de esta función arma ese campo; ver `docs/deuda-tecnica.md`.
+      if (input.regla) {
+        await tx.insert(reglasClave).values({ postId: post!.id, ...input.regla })
+      }
+      ids.push(post!.id)
     }
     if (creativo) {
-      await tx.update(creativos).set({ estado: 'programado', postId: post!.id }).where(eq(creativos.id, creativo.id))
+      await tx.update(creativos).set({ estado: 'programado', postId: ids[0]! }).where(eq(creativos.id, creativo.id))
     }
-    return { id: post!.id, comandaId: creativo?.comandaId ?? null }
+    return { ids, comandaId: creativo?.comandaId ?? null }
   })
   // Fuera de la transacción y sin poder tumbar lo programado: si era lo último que esperaba en el
   // mesón, la comanda queda servida.
   if (comandaId) {
     await servirSiTermino(comandaId, new Date()).catch((e) => console.error('crear: servir la comanda', String(e).slice(0, 200)))
   }
-  return id
+  return ids
 }

@@ -2,6 +2,8 @@ import { and, count, eq } from 'drizzle-orm'
 import { comandas, creativos, getDb, insumos, preguntas, users } from '@/db'
 import { dominioProducto } from '@/lib/dominios'
 import { destinatario, enviarAviso } from '@/lib/social/publish/alert'
+import { avisoDeComanda, avisoDePregunta } from '@/lib/push/avisos'
+import { avisarAlTelefono } from '@/lib/push/enviar'
 import { temaDe } from '@/lib/tema'
 import { correoDeComanda, correoDePregunta, type AvisoDeComanda } from './correo-de-comanda'
 import { siNoContestas } from './pregunta'
@@ -17,6 +19,9 @@ import { siNoContestas } from './pregunta'
 // que se quemó y la cuenta que se cayó. Si Resend falla, no se reintenta: la tarjeta de La Cocina
 // dice el estado igual. Reintentarlo sin arriesgar un segundo correo pide marcarlo en la comanda
 // (`docs/deuda-tecnica.md`, «El correo de la comanda no se reintenta»).
+//
+// Al lado de cada correo sale el aviso al teléfono (`src/lib/push/enviar.ts`), con la misma regla:
+// una vez, sin reintento. Sale aunque el dueño no tenga correo, y su fallo no toca el del correo.
 
 /** El origen del panel para el enlace del correo; sin dominio del producto, la ruta sola. */
 function sitio(): string {
@@ -33,13 +38,12 @@ export async function avisarDeLaComanda(comandaId: string, estado: AvisoDeComand
   try {
     const db = getDb()
     const [fila] = await db
-      .select({ motivo: comandas.motivo, correo: users.correo, tema: users.tema })
+      .select({ motivo: comandas.motivo, correo: users.correo, tema: users.tema, ownerId: comandas.ownerId })
       .from(comandas)
       .innerJoin(users, eq(users.id, comandas.ownerId))
       .where(eq(comandas.id, comandaId))
     if (!fila) return false
     const para = destinatario(fila.correo ?? undefined)
-    if (!para) return false
     const [principal] = await db
       .select({ nombre: insumos.nombre })
       .from(insumos)
@@ -49,12 +53,12 @@ export async function avisarDeLaComanda(comandaId: string, estado: AvisoDeComand
       .select({ n: count() })
       .from(creativos)
       .where(and(eq(creativos.comandaId, comandaId), eq(creativos.estado, 'mesa')))
-    const correo = correoDeComanda(
-      { id: comandaId, estado, principal: principal?.nombre ?? null, motivo: fila.motivo, enElMeson: n },
-      sitio(),
-      temaDe(fila.tema),
-    )
-    return await enviarAviso(para, correo)
+    const comanda = { id: comandaId, estado, principal: principal?.nombre ?? null, motivo: fila.motivo, enElMeson: n }
+    const [salio] = await Promise.all([
+      para ? enviarAviso(para, correoDeComanda(comanda, sitio(), temaDe(fila.tema))) : Promise.resolve(false),
+      avisarAlTelefono(fila.ownerId, (tema) => avisoDeComanda(comanda, tema)),
+    ])
+    return salio
   } catch (error) {
     console.error('No se pudo mandar el correo de la comanda:', String(error).slice(0, 300))
     return false
@@ -75,7 +79,6 @@ export async function avisarDeLaPregunta(preguntaId: string, ahora: Date = new D
       .where(eq(preguntas.id, preguntaId))
     if (!fila) return false
     const para = destinatario(fila.correo ?? undefined)
-    if (!para) return false
     const p = fila.pregunta
     const [principal] = await db
       .select({ nombre: insumos.nombre })
@@ -91,7 +94,11 @@ export async function avisarDeLaPregunta(preguntaId: string, ahora: Date = new D
       },
       sitio(),
     )
-    return await enviarAviso(para, correo)
+    const [salio] = await Promise.all([
+      para ? enviarAviso(para, correo) : Promise.resolve(false),
+      avisarAlTelefono(p.ownerId, () => avisoDePregunta({ comandaId: p.comandaId, principal: principal?.nombre ?? null, texto: p.texto })),
+    ])
+    return salio
   } catch (error) {
     console.error('No se pudo mandar el correo de la pregunta:', String(error).slice(0, 300))
     return false

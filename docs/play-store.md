@@ -100,10 +100,18 @@ Un cuestionario sobre qué recoge la app y si lo comparte. Para esta app:
     grabaciones de voz o sonido». Sobra un poco, pero declarar de menos es lo que Google castiga;
   - el identificador del dispositivo y su IP, que ve Expo en la consulta de actualizaciones que
     la app hace al abrirse («identificadores del dispositivo», finalidad «funcionalidad de la
-    app»).
+    app»);
+  - desde la 1.2.0, si la persona enciende los avisos, el token de avisos de Expo de ese
+    teléfono, que se guarda en el servidor junto a la cuenta: va en el mismo «identificadores del
+    dispositivo», con la finalidad «funcionalidad de la app». El texto de cada aviso —el nombre de
+    una cuenta, el comienzo de una publicación, la pregunta del chef, la respuesta del equipo— es
+    contenido que ya está declarado arriba; no lleva lo que escribe otra persona en un comentario.
 - **¿Se comparten con terceros?** El contenido no se vende ni se usa para publicidad. Lo que sale
   hacia otros es lo que cuenta `/privacidad`: Expo (lo de arriba), Meta al escuchar la muestra de
   una canción de Instagram, y GitHub con el texto del libro de sugerencias, sin nombre ni correo.
+  Los avisos al teléfono pasan por el servicio de push de Expo y por Firebase Cloud Messaging de
+  Google, que ven el token y el texto del aviso para entregarlo: es procesamiento por encargo, no
+  «compartir» en el sentido de Google, igual que Resend con los correos.
   Google llama «compartir» a mandar datos a un tercero que no procesa por encargo: el libro de
   sugerencias publicado en GitHub cuenta como compartido.
 - **¿Se cifran en tránsito?** Sí, todo va por HTTPS.

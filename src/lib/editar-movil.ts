@@ -3,6 +3,7 @@ import { getDb, reglasClave, scheduledPostMedia, scheduledPostTargets, scheduled
 import { isoInZone } from './metrics-api'
 import { networkLabel } from './networks'
 import { EN_CURSO, YA_SALIO_EN_ALGUNA } from './social/publish/editar'
+import { esHistoria } from './social/publish/opciones'
 import { enVuelo } from './social/publish/publisher'
 import { MAX_CAPTION_LENGTH, THREADS_CAPTION_LIMIT, X_CAPTION_LIMIT } from './social/publish/validate'
 import { esUuid } from './uuid'
@@ -21,6 +22,8 @@ export type PostEditableMovil = {
   destinos: Array<{ id: string; red: string; handle: string | null; estado: string; limite: number }>
   /** Lo que se guarda sin tocar, en una frase, o null si no hay nada. */
   seConserva: string | null
+  /** Si es una historia: no lleva texto, así que la pantalla no ofrece escribirlo. */
+  historia: boolean
   /** Por qué este post no se edita desde el teléfono, o null si se puede. */
   bloqueo: string | null
 }
@@ -130,6 +133,7 @@ export async function postParaEditarEnElTelefono(
       palabra: regla?.palabra.trim() || null,
       redesConOpciones: filas.flatMap(({ target }) => (target.opciones == null ? [] : [target.network])),
     }),
+    historia: filas.length > 0 && filas.every(({ target }) => esHistoria(target.opciones)),
     bloqueo: bloqueoDe(filas.map(({ target }) => target)),
   }
 }

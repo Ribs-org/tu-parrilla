@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { Panel } from '@/components/charts/panel'
 import { requireUser } from '@/lib/auth'
 import { leerAjuste } from '@/lib/ajustes'
-import { contarPendientes, ESTADOS_COLA, getCola, type EstadoCola } from '@/lib/comentarios-cola'
+import { contarPendientes, ESTADOS_COLA, getCola, redesDeLaMesa, type EstadoCola } from '@/lib/comentarios-cola'
 import {
   CLAVE_INSTRUCCIONES,
   INSTRUCCIONES_POR_DEFECTO,
@@ -10,27 +10,13 @@ import {
 } from '@/lib/social/comentarios/instrucciones'
 import { privadoActivo } from '@/lib/social/comentarios/privado'
 import { networkLabel } from '@/lib/networks'
-import { proximamentePara, tiktokComentariosAbiertoPara } from '@/lib/redes-abiertas'
-import { permisosExtraDeThreads } from '@/lib/social/threads'
+import { frasePendientes } from '@/lib/social/comentarios/la-mesa'
 import { cn } from '@/lib/utils'
 import { Encabezado } from '@/components/ui'
 import { Cola } from './cola'
 import { Instrucciones } from './instrucciones'
 
 export const dynamic = 'force-dynamic'
-
-const REDES = ['instagram', 'facebook', 'youtube'] as const
-
-/**
- * Los botones de red de este dueño. Threads solo aparece donde ya trae respuestas: abierta para
- * él (`proximamentePara`, la cuenta del revisor de Meta) y con sus permisos de lectura pedidos
- * (`permisosExtraDeThreads`). Para los demás está en «Próximamente» y su botón no filtraría nada.
- * TikTok, igual: solo para quien tiene abiertos sus comentarios (`tiktokComentariosAbiertoPara`).
- */
-function redesDe(ownerId: string): readonly string[] {
-  const conThreads = permisosExtraDeThreads() && !proximamentePara(ownerId).has('threads')
-  return [...REDES, ...(conThreads ? ['threads'] : []), ...(tiktokComentariosAbiertoPara(ownerId) ? ['tiktok'] : [])]
-}
 
 const ETIQUETA_ESTADO: Record<EstadoCola, string> = {
   pendientes: 'Pendientes',
@@ -60,7 +46,7 @@ export default async function CommentsPage({
     ? (params.estado as EstadoCola)
     : 'pendientes'
   const { id: ownerId } = await requireUser()
-  const redes = redesDe(ownerId)
+  const redes = redesDeLaMesa(ownerId)
   const red = redes.includes(String(params.red)) ? String(params.red) : null
   const [filas, pendientes, instrucciones] = await Promise.all([
     getCola(ownerId, { estado, red }),
@@ -79,11 +65,7 @@ export default async function CommentsPage({
       <header className="mb-6">
         <Encabezado ruta="/admin/comments" />
         <p className="mt-1 text-sm text-fg-muted">
-          {pendientes === 0
-            ? 'No hay nada esperando respuesta.'
-            : pendientes === 1
-              ? 'Un comentario espera tu respuesta.'
-              : `${pendientes} comentarios esperan tu respuesta.`}
+          {frasePendientes(pendientes)}
         </p>
       </header>
 

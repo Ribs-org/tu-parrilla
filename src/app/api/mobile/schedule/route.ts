@@ -10,7 +10,14 @@ import {
   type ScheduledPostTarget,
 } from '@/db'
 import { localDay } from '@/lib/analytics'
-import { idDeBorrador, opcionesConMusicaDelBorrador, soloEnElPanel } from '@/lib/borrador'
+import { randomUUID } from 'node:crypto'
+import {
+  BORRADOR_ES_HISTORIA,
+  esBorradorDeHistoria,
+  idDeBorrador,
+  opcionesConMusicaDelBorrador,
+  soloEnElPanel,
+} from '@/lib/borrador'
 import { cargarBorrador, listarBorradores } from '@/lib/borradores'
 import { cuentasParaElTelefono, resumirParaElTelefono } from '@/lib/borradores-movil'
 import { isoInZone } from '@/lib/metrics-api'
@@ -29,12 +36,23 @@ import {
   parseMediaMovil,
   resolverCuando,
   resolverDestinos,
+  type MediaMovil,
 } from '@/lib/mobile-api'
-import { BorradorConsumido, CreativoNoEsta, crearPostProgramado } from '@/lib/social/publish/crear'
+import { BorradorConsumido, CreativoNoEsta, crearPostProgramado, crearVariosProgramados } from '@/lib/social/publish/crear'
 import { CREATIVO_NO_ESTA } from '@/lib/cocina/meson-motivos'
 import { CuentaInvalida } from '@/lib/social/cuentas'
+import { HISTORIA_DEMASIADAS } from '@/lib/social/publish/batch'
 import { extensionDe, validateScheduleDraft } from '@/lib/social/publish/validate'
-import { errorDeHistoria, errorDeMediaPorOpciones, esHistoria, validarOpcionesPorCuenta } from '@/lib/social/publish/opciones'
+import {
+  HISTORIA_MEDIA,
+  MAX_HISTORIAS_SECUENCIA,
+  OPCIONES_ERROR,
+  errorDeHistoria,
+  errorDeMediaPorOpciones,
+  esHistoria,
+  validarOpcionesPorCuenta,
+  type OpcionesDestino,
+} from '@/lib/social/publish/opciones'
 import { basePublica, keyDesdeUrl, tamanoEnAlmacen } from '@/lib/storage'
 import { proximamentePara } from '@/lib/redes-abiertas'
 
@@ -180,6 +198,36 @@ export async function GET(request: Request) {
   })
 }
 
+/** Lo que se crea de un envío: un post, o una historia por archivo si es una secuencia. */
+export type ParteDelEnvio = { media: MediaMovil[]; opciones: Record<string, OpcionesDestino> }
+
+/**
+ * Una secuencia de historias desde Publicar (`secuencia: true`, con las cuentas en
+ * `{ historia: true }` y varios archivos en el orden en que salen): una historia por archivo,
+ * todas a la misma hora y con la secuencia compartida, para que salgan en orden
+ * (`secuencia.ts`). Es el mismo atajo de la API (`expandirHistoria`, en `batch.ts`), pero entra
+ * en una sola transacción: el teléfono no tiene `ref` con que reconocer las que ya entraron, y
+ * el borrador es lo que impide programarla dos veces. Sin `secuencia`, o con un solo archivo,
+ * es un post como siempre.
+ */
+export function partirEnHistorias(
+  body: unknown,
+  cuentas: ReadonlyArray<{ id: string }>,
+  opciones: Record<string, OpcionesDestino>,
+  media: MediaMovil[],
+  secuencia: string,
+): ParteDelEnvio[] | { error: string } {
+  const pedida = (body as { secuencia?: unknown } | null)?.secuencia === true
+  if (!pedida || cuentas.length === 0 || media.length === 1) return [{ media, opciones }]
+  if (!cuentas.every((c) => esHistoria(opciones[c.id]))) return { error: OPCIONES_ERROR }
+  if (media.length === 0) return { error: HISTORIA_MEDIA }
+  if (media.length > MAX_HISTORIAS_SECUENCIA) return { error: HISTORIA_DEMASIADAS }
+  return media.map((m, i) => ({
+    media: [m],
+    opciones: Object.fromEntries(cuentas.map((c) => [c.id, { historia: { secuencia, orden: i + 1 } }])),
+  }))
+}
+
 /**
  * El post con sus archivos ya en R2. Antes de crear: que cada URL sea del almacén
  * propio y bajo `scheduled/` (un cuerpo forjado no puede apuntar a cualquier URL de
@@ -199,6 +247,10 @@ export async function GET(request: Request) {
  * el teléfono no programa (`soloEnElPanel`), que se perdería con el borrador. La primera
  * revisión da el motivo; la de la transacción (`BorradorConsumido`) cierra el caso de dos
  * envíos a la vez, que pasaban los dos por la revisión antes de que ninguno lo borrara.
+ *
+ * Una secuencia de historias (`secuencia: true`) crea un post por archivo en la misma
+ * transacción (`partirEnHistorias`) y responde además `ids`, en su orden. Un borrador que es una
+ * historia no se programa como post (`BORRADOR_ES_HISTORIA`): lo intenta una app sin actualizar.
  */
 export async function POST(request: Request) {
   const usuario = await requireMobileUser(request)
@@ -220,10 +272,12 @@ export async function POST(request: Request) {
   const pedido = (body as { borradorId?: unknown }).borradorId
   let borradorId: string | null = null
   let opcionesPedidas = borrador.opciones
+  let deDondeEsHistoria = false
   if (pedido !== undefined && pedido !== null) {
     borradorId = idDeBorrador(pedido)
     const deDonde = borradorId ? await cargarBorrador(usuario.id, borradorId) : null
     if (!deDonde) return NextResponse.json({ error: BORRADOR_NO_EXISTE }, { status: 404 })
+    deDondeEsHistoria = esBorradorDeHistoria(deDonde.campos)
     const motivo = soloEnElPanel(deDonde.campos, (await cuentasParaElTelefono(usuario.id)).ajenas)
     if (motivo) return NextResponse.json({ error: motivo }, { status: 400 })
     // Una app que no sabe de música no la manda: la del borrador se conserva.
@@ -251,33 +305,43 @@ export async function POST(request: Request) {
 
   const opcionesCheck = validarOpcionesPorCuenta(cuentas, opcionesPedidas)
   if ('error' in opcionesCheck) return NextResponse.json({ error: opcionesCheck.error }, { status: 400 })
-  const fotos = media.filter((m) => m.mediaType === 'image').length
-  const videos = media.filter((m) => m.mediaType === 'video').length
-  const mediaPorOpciones = errorDeMediaPorOpciones(opcionesCheck.opciones, { videos, fotos, sinTipo: 0 })
-  if (mediaPorOpciones) return NextResponse.json({ error: mediaPorOpciones }, { status: 400 })
-  // El teléfono no pone palabra clave: esa parte de la regla no tiene cómo dispararse aquí.
-  const historia = errorDeHistoria(opcionesCheck.opciones, {
-    caption: borrador.texto,
-    conPalabraClave: false,
-    aInstagram: networks.includes('instagram'),
-    fotos: media.filter((m) => m.mediaType === 'image').map((m) => extensionDe(m.url)),
-  })
-  if (historia) return NextResponse.json({ error: historia }, { status: 400 })
+  // Una app que no sabe de historias ve este borrador como un post: saldría un carrusel.
+  if (deDondeEsHistoria && !Object.values(opcionesCheck.opciones).some(esHistoria)) {
+    return NextResponse.json({ error: BORRADOR_ES_HISTORIA }, { status: 400 })
+  }
+  const partes = partirEnHistorias(body, cuentas, opcionesCheck.opciones, media, randomUUID())
+  if ('error' in partes) return NextResponse.json({ error: partes.error }, { status: 400 })
 
   const now = new Date()
   const scheduledAt = resolverCuando(borrador.ahora, borrador.cuando, now)
-  const error = validateScheduleDraft(
-    {
+  // Cada parte con sus reglas: una secuencia son varias historias, y cada una es un post.
+  for (const parte of partes) {
+    const fotos = parte.media.filter((m) => m.mediaType === 'image').length
+    const videos = parte.media.filter((m) => m.mediaType === 'video').length
+    const mediaPorOpciones = errorDeMediaPorOpciones(parte.opciones, { videos, fotos, sinTipo: 0 })
+    if (mediaPorOpciones) return NextResponse.json({ error: mediaPorOpciones }, { status: 400 })
+    // El teléfono no pone palabra clave: esa parte de la regla no tiene cómo dispararse aquí.
+    const historia = errorDeHistoria(parte.opciones, {
       caption: borrador.texto,
-      imageCount: fotos,
-      videoCount: videos,
-      networks,
-      scheduledAt,
-    },
-    now,
-    { proximamente: proximamentePara(usuario.id) },
-  )
-  if (error) return NextResponse.json({ error }, { status: 400 })
+      conPalabraClave: false,
+      aInstagram: networks.includes('instagram'),
+      fotos: parte.media.filter((m) => m.mediaType === 'image').map((m) => extensionDe(m.url)),
+    })
+    if (historia) return NextResponse.json({ error: historia }, { status: 400 })
+
+    const error = validateScheduleDraft(
+      {
+        caption: borrador.texto,
+        imageCount: fotos,
+        videoCount: videos,
+        networks,
+        scheduledAt,
+      },
+      now,
+      { proximamente: proximamentePara(usuario.id) },
+    )
+    if (error) return NextResponse.json({ error }, { status: 400 })
+  }
 
   try {
     for (const m of media) {
@@ -292,15 +356,30 @@ export async function POST(request: Request) {
   }
 
   try {
-    const id = await crearPostProgramado(usuario.id, {
-      caption: borrador.texto,
-      scheduledAt: scheduledAt!,
-      media,
-      cuentas,
-      opciones: opcionesCheck.opciones,
+    const cuando = isoInZone(scheduledAt!, usuario.zona)
+    if (partes.length === 1) {
+      const id = await crearPostProgramado(usuario.id, {
+        caption: borrador.texto,
+        scheduledAt: scheduledAt!,
+        media: partes[0]!.media,
+        cuentas,
+        opciones: partes[0]!.opciones,
+        borradorId,
+      })
+      return NextResponse.json({ id, cuando })
+    }
+    const ids = await crearVariosProgramados(
+      usuario.id,
+      partes.map((parte) => ({
+        caption: borrador.texto,
+        scheduledAt: scheduledAt!,
+        media: parte.media,
+        cuentas,
+        opciones: parte.opciones,
+      })),
       borradorId,
-    })
-    return NextResponse.json({ id, cuando: isoInZone(scheduledAt!, usuario.zona) })
+    )
+    return NextResponse.json({ id: ids[0], ids, cuando })
   } catch (dbError) {
     if (dbError instanceof BorradorConsumido) {
       return NextResponse.json({ error: BORRADOR_NO_EXISTE }, { status: 404 })

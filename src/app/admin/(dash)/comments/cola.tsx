@@ -10,6 +10,7 @@ import { Button, Textarea } from '@/components/ui'
 import type { DmState } from '@/db/schema'
 import type { ComentarioFila, EstadoCola } from '@/lib/comentarios-cola'
 import { agruparPorPublicacion } from '@/lib/social/comentarios/agrupar'
+import { fraseColaVacia, hace } from '@/lib/social/comentarios/la-mesa'
 import { networkLabel } from '@/lib/networks'
 import { useAhora } from '@/lib/use-ahora'
 import { Emojis, insertar } from './emojis'
@@ -38,15 +39,6 @@ const ETIQUETA_DM: Record<DmState, string> = {
   fallido: 'no salió',
 }
 
-const RELATIVE = new Intl.RelativeTimeFormat('es', { numeric: 'auto' })
-
-function hace(fecha: Date, ahora: number): string {
-  const horas = Math.round((ahora - fecha.getTime()) / 3.6e6)
-  if (horas < 1) return 'recién'
-  if (horas < 24) return RELATIVE.format(-horas, 'hour')
-  return RELATIVE.format(-Math.round(horas / 24), 'day')
-}
-
 /**
  * `desde` es la hora con que el servidor armó la página: «hace 3 horas» se cuenta contra ella al
  * dibujar y al hidratar, y recién después contra el reloj del navegador (`useAhora`).
@@ -65,11 +57,7 @@ export function Cola({
   const ahora = useAhora(desde)
   if (filas.length === 0) {
     const cronico = estado === 'pendientes' || estado === 'todos'
-    return (
-      <Empty>
-        No hay comentarios aquí.{cronico ? ' Los nuevos llegan cada cinco minutos.' : ''}
-      </Empty>
-    )
+    return <Empty>{fraseColaVacia(cronico)}</Empty>
   }
   const grupos = agruparPorPublicacion(filas)
   return (

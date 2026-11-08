@@ -2,7 +2,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { ScheduledPost, ScheduledPostTarget, Usuario } from '@/db'
 import { CuentaInvalida, type CuentaDestino } from '@/lib/social/cuentas'
 import { BORRADOR_NO_EXISTE } from '@/lib/mobile-api'
-import { OPCIONES_ERROR, TRIAL_REEL_MEDIA } from '@/lib/social/publish/opciones'
+import { BORRADOR_ES_HISTORIA } from '@/lib/borrador'
+import { HISTORIA_JPG, HISTORIA_MEDIA, OPCIONES_ERROR, TRIAL_REEL_MEDIA } from '@/lib/social/publish/opciones'
 
 // `route.ts` llega a `@/lib/usuarios` por `@/lib/mobile-api` → `publish/batch`, y ese
 // módulo trae `server-only` (no resuelve bajo Vitest). Mismo motivo y mismo arreglo que
@@ -21,6 +22,7 @@ const USUARIO: Usuario = {
   primerIngresoEn: new Date('2026-01-01'),
   cocinaDesde: null,
   bodegaBytes: null,
+  pushComentariosHasta: null,
   createdAt: new Date('2026-01-01'),
   updatedAt: new Date('2026-01-01'),
 }
@@ -36,9 +38,11 @@ vi.mock('@/lib/mobile-api', async (importOriginal) => {
 })
 
 const crearPostProgramado = vi.fn()
+const crearVariosProgramados = vi.fn()
 vi.mock('@/lib/social/publish/crear', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/lib/social/publish/crear')>()),
   crearPostProgramado: (...args: unknown[]) => crearPostProgramado(...args),
+  crearVariosProgramados: (...args: unknown[]) => crearVariosProgramados(...args),
 }))
 
 const cargarBorrador = vi.fn()
@@ -198,6 +202,7 @@ describe('POST /api/mobile/schedule', () => {
   beforeEach(() => {
     resolverDestinos.mockReset()
     crearPostProgramado.mockReset()
+    crearVariosProgramados.mockReset()
     cargarBorrador.mockReset()
     borrarBorrador.mockReset()
     borrarBorrador.mockResolvedValue(undefined)
@@ -288,6 +293,87 @@ describe('POST /api/mobile/schedule', () => {
     expect(res.status).toBe(400)
     expect(await res.json()).toEqual({ error: OPCIONES_ERROR })
     expect(crearPostProgramado).not.toHaveBeenCalled()
+  })
+
+  describe('historias desde Publicar', () => {
+    const ig: CuentaDestino = { id: 'ig-1', network: 'instagram', handle: '@ig' }
+    const fb: CuentaDestino = { id: 'fb-1', network: 'facebook', handle: 'Página' }
+    const foto = (n: string) => ({ url: `https://cdn.ejemplo.cl/scheduled/${n}.jpg`, mediaType: 'image' })
+    const historia = { 'ig-1': { historia: true }, 'fb-1': { historia: true } }
+
+    it('una historia suelta es un post con su opción, como siempre', async () => {
+      resolverDestinos.mockResolvedValueOnce({ cuentas: [ig, fb], networks: ['instagram', 'facebook'] })
+      crearPostProgramado.mockResolvedValueOnce('post-1')
+      const res = await POST(
+        peticion({ texto: '', cuentas: ['ig-1', 'fb-1'], ahora: true, media: [foto('a')], opciones: historia, secuencia: true }),
+      )
+      expect(res.status).toBe(200)
+      expect(crearPostProgramado).toHaveBeenCalledWith('owner-1', expect.objectContaining({ opciones: historia }))
+      expect(crearVariosProgramados).not.toHaveBeenCalled()
+    })
+
+    it('una secuencia crea una historia por archivo, en orden y en una sola transacción con el borrador', async () => {
+      const BORRADOR = '6f1c2a54-9b1e-4c3d-8f00-0123456789ab'
+      cargarBorrador.mockResolvedValueOnce({ id: BORRADOR, campos: { cuentas: ['ig-1', 'fb-1'], modo: ['historia'] }, fecha: null, media: [] })
+      resolverDestinos.mockResolvedValueOnce({ cuentas: [ig, fb], networks: ['instagram', 'facebook'] })
+      crearVariosProgramados.mockResolvedValueOnce(['p-1', 'p-2', 'p-3'])
+      const res = await POST(
+        peticion({
+          texto: '',
+          cuentas: ['ig-1', 'fb-1'],
+          cuando: '2026-12-01T22:00:00.000Z',
+          media: [foto('a'), foto('b'), foto('c')],
+          opciones: historia,
+          secuencia: true,
+          borradorId: BORRADOR,
+          conMusica: true,
+        }),
+      )
+      expect(res.status).toBe(200)
+      expect(await res.json()).toEqual(expect.objectContaining({ id: 'p-1', ids: ['p-1', 'p-2', 'p-3'] }))
+      expect(crearPostProgramado).not.toHaveBeenCalled()
+      const [, posts, borradorId] = crearVariosProgramados.mock.calls[0]!
+      expect(borradorId).toBe(BORRADOR)
+      expect(posts).toHaveLength(3)
+      const secuencia = posts[0].opciones['ig-1'].historia.secuencia
+      expect(posts.map((p: { media: unknown[] }) => p.media)).toEqual([[foto('a')], [foto('b')], [foto('c')]])
+      posts.forEach((p: { opciones: unknown }, i: number) => {
+        const lugar = { historia: { secuencia, orden: i + 1 } }
+        expect(p.opciones).toEqual({ 'ig-1': lugar, 'fb-1': lugar })
+      })
+    })
+
+    it('en una secuencia cada historia pasa sus reglas: una PNG a Instagram se rechaza y no se crea ninguna', async () => {
+      resolverDestinos.mockResolvedValueOnce({ cuentas: [ig], networks: ['instagram'] })
+      const png = { url: 'https://cdn.ejemplo.cl/scheduled/b.png', mediaType: 'image' }
+      const res = await POST(
+        peticion({ texto: '', cuentas: ['ig-1'], ahora: true, media: [foto('a'), png], opciones: { 'ig-1': { historia: true } }, secuencia: true }),
+      )
+      expect(res.status).toBe(400)
+      expect(await res.json()).toEqual({ error: HISTORIA_JPG })
+      expect(crearVariosProgramados).not.toHaveBeenCalled()
+    })
+
+    it('sin `secuencia`, varios archivos en una historia se rechazan como antes', async () => {
+      resolverDestinos.mockResolvedValueOnce({ cuentas: [ig], networks: ['instagram'] })
+      const res = await POST(
+        peticion({ texto: '', cuentas: ['ig-1'], ahora: true, media: [foto('a'), foto('b')], opciones: { 'ig-1': { historia: true } } }),
+      )
+      expect(res.status).toBe(400)
+      expect(await res.json()).toEqual({ error: HISTORIA_MEDIA })
+    })
+
+    it('un borrador que es una historia no se programa como post: lo manda una app sin actualizar', async () => {
+      const BORRADOR = '6f1c2a54-9b1e-4c3d-8f00-0123456789ab'
+      cargarBorrador.mockResolvedValueOnce({ id: BORRADOR, campos: { cuentas: ['ig-1'], modo: ['historia'] }, fecha: null, media: [] })
+      resolverDestinos.mockResolvedValueOnce({ cuentas: [ig], networks: ['instagram'] })
+      const res = await POST(
+        peticion({ texto: '', cuentas: ['ig-1'], ahora: true, media: [foto('a'), foto('b')], borradorId: BORRADOR }),
+      )
+      expect(res.status).toBe(400)
+      expect(await res.json()).toEqual({ error: BORRADOR_ES_HISTORIA })
+      expect(crearPostProgramado).not.toHaveBeenCalled()
+    })
   })
 
   describe('desde un borrador', () => {

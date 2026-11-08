@@ -15,6 +15,7 @@ vi.mock('@/lib/cocina/subidas', () => ({ barrerSubidas: vi.fn(async () => ({ abo
 vi.mock('@/lib/cocina/barrido', () => ({ barrerCocina: vi.fn(async () => ({ crudos: 2, vencidos: 1, servidas: 0 })) }))
 vi.mock('@/lib/cocina/preguntar', () => ({ vencerPreguntas: vi.fn(async () => 1) }))
 vi.mock('@/lib/cocina/alarma', () => ({ vigilarLaCocina: vi.fn(async () => ({ avisadas: 2 })) }))
+vi.mock('@/lib/push/comentarios', () => ({ resumirComentarios: vi.fn(async () => ({ avisados: 3 })) }))
 
 const { GET } = await import('./route')
 const { barrerHuerfanos } = await import('@/lib/storage-gc')
@@ -22,6 +23,7 @@ const { barrerSubidas } = await import('@/lib/cocina/subidas')
 const { barrerCocina } = await import('@/lib/cocina/barrido')
 const { vencerPreguntas } = await import('@/lib/cocina/preguntar')
 const { vigilarLaCocina } = await import('@/lib/cocina/alarma')
+const { resumirComentarios } = await import('@/lib/push/comentarios')
 
 const corrida = (authorization?: string) =>
   GET(new Request('https://tu-parrilla.cl/api/cron/publish-social', authorization ? { headers: { authorization } } : {}))
@@ -66,5 +68,12 @@ describe('la corrida de publicación', () => {
     expect(vencerPreguntas).toHaveBeenCalledTimes(1)
     expect(vigilarLaCocina).toHaveBeenCalledTimes(1)
     expect(await r.json()).toMatchObject({ preguntas: 1, alarma: { avisadas: 2 } })
+  })
+
+  it('el resumen de comentarios al teléfono va en cada corrida, después del sondeo', async () => {
+    vi.setSystemTime(new Date('2026-10-23T12:35:00Z'))
+    const r = await corrida('Bearer secreto-del-cron')
+    expect(resumirComentarios).toHaveBeenCalledTimes(1)
+    expect(await r.json()).toMatchObject({ alTelefono: { avisados: 3 } })
   })
 })

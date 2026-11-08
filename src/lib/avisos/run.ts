@@ -6,6 +6,8 @@ import { creativos, getDb, insumos, scheduledPosts, scheduledPostTargets, social
 import { DIAS_DE_AVISO } from '@/lib/cocina/barrido'
 import { dominioProducto } from '@/lib/dominios'
 import { destinatario, enviarAviso } from '@/lib/social/publish/alert'
+import { avisoDeFierro } from '@/lib/push/avisos'
+import { avisarAlTelefono, noSalio } from '@/lib/push/enviar'
 import { temaDe } from '@/lib/tema'
 import { ZONA_POR_DEFECTO } from '@/lib/zona'
 import {
@@ -16,6 +18,7 @@ import {
   correoDeResumen,
   cuentasEnRiesgo,
   estaCaida,
+  fierroQueAvisa,
   pistaCorta,
   type CuentaVigilada,
   type PorVencer,
@@ -76,16 +79,18 @@ export async function marcarCaida(accountId: string, motivo: string): Promise<vo
  * en el `where`, porque dos corridas pueden cruzarse; si el correo no sale, se suelta para
  * que la pasada siguiente lo intente de nuevo.
  */
-export async function vigilarConexiones(ahora: Date = new Date()): Promise<{ avisadas: number; recuperadas: number }> {
+export async function vigilarConexiones(ahora: Date = new Date()): Promise<{ avisadas: number; recuperadas: number; alTelefono: number }> {
   const db = getDb()
   const cuentas = await db
-    .select({ ...columnasVigiladas, correo: users.correo, tema: users.tema })
+    .select({ ...columnasVigiladas, pushFierro: socialAccounts.pushFierro, correo: users.correo, tema: users.tema })
     .from(socialAccounts)
     .leftJoin(users, eq(users.id, socialAccounts.ownerId))
 
   let avisadas = 0
   let recuperadas = 0
+  let alTelefono = 0
   for (const cuenta of cuentas) {
+    if (await avisarFierroAlTelefono(cuenta, ahora)) alTelefono++
     const caida = estaCaida(cuenta, ahora)
 
     if (!caida && cuenta.caidaAvisadaEn) {
@@ -123,7 +128,52 @@ export async function vigilarConexiones(ahora: Date = new Date()): Promise<{ avi
         .where(and(eq(socialAccounts.id, cuenta.id), eq(socialAccounts.caidaAvisadaEn, ahora)))
     }
   }
-  return { avisadas, recuperadas }
+  return { avisadas, recuperadas, alTelefono }
+}
+
+/**
+ * El aviso al teléfono de una cuenta que se enfría o se apagó, uno por cada estado nuevo de su
+ * fierro: `push_fierro` guarda el que ya se avisó y se borra cuando vuelve al rojo. Va aparte de la
+ * marca del correo (`caidaAvisadaEn`), para no cambiar cuándo se reintenta el correo. La marca se toma
+ * antes de mandar, con el valor leído en el `where`; si Expo no aceptó ninguno habiendo teléfonos, se
+ * suelta para la pasada siguiente. Sin teléfonos se queda puesta: encender los avisos después no
+ * trae el aviso de una caída vieja. Devuelve si salió. No lanza.
+ */
+async function avisarFierroAlTelefono(
+  cuenta: { id: string; ownerId: string | null; network: string; handle: string | null; pushFierro: 'enfriandose' | 'frio' | null } & CuentaVigilada,
+  ahora: Date,
+): Promise<boolean> {
+  try {
+    const db = getDb()
+    const estado = fierroQueAvisa(cuenta, ahora)
+    if (estado === cuenta.pushFierro) return false
+    const antes = cuenta.pushFierro
+    const tomada = await db
+      .update(socialAccounts)
+      .set({ pushFierro: estado })
+      .where(
+        and(
+          eq(socialAccounts.id, cuenta.id),
+          antes ? eq(socialAccounts.pushFierro, antes) : isNull(socialAccounts.pushFierro),
+        ),
+      )
+      .returning({ id: socialAccounts.id })
+    if (tomada.length === 0 || !estado) return false
+    const enviado = await avisarAlTelefono(cuenta.ownerId, (tema) =>
+      avisoDeFierro({ red: cuenta.network, handle: cuenta.handle, estado }, tema),
+    )
+    if (noSalio(enviado)) {
+      await db
+        .update(socialAccounts)
+        .set({ pushFierro: antes })
+        .where(and(eq(socialAccounts.id, cuenta.id), eq(socialAccounts.pushFierro, estado)))
+      return false
+    }
+    return enviado.aceptados > 0
+  } catch (error) {
+    console.error('[push] No se pudo avisar el fierro al teléfono:', String(error).slice(0, 300))
+    return false
+  }
 }
 
 /**
