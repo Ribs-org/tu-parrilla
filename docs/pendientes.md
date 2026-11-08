@@ -559,25 +559,29 @@ permisos «por decidir»** de la tabla red por red, para pedirlos todos en una m
   `src/lib/social/desconectar.ts`).
 - **[dueño] Vercel Pro antes de abrir a terceros.** El plan Hobby es de uso personal y no
   comercial (`docs/levantamiento-terceros.md` §5).
-- **[dueño] La app en la Play Store, pista de pruebas internas** (2026-10-16). La cuenta de
-  Play Console (personal) y la app existen: está como «Parrilla», `cl.tuparrilla.app`, en
-  borrador. El binario está listo, `tu-parrilla-1.1.0-2.aab` (versión 1.1.0, código 2,
-  salido de `a6bd08f`; lo demás le llega por aire en el canal `production`). Lo nativo que
-  cambió después entra en el próximo build, sin apuro: desde el 2026-10-21 Android no respalda
-  los datos de la app (`allowBackup: false` en `mobile/app.json`) y salieron dos módulos que no
-  se usaban (`expo-device` y `expo-web-browser`); el binario de hoy sigue respaldando lo que la
-  app guarda. La versión interna con ese `.aab` se publicó el 2026-10-17, «Tu Parrilla
-  (Alfa)», sin revisar: hasta que Google revise la app, la tienda se la muestra a los
-  probadores como «cl.tuparrilla.app (unreviewed)». Desde el 2026-10-26 el dueño está en la
-  lista de verificadores «Tu Parrilla - interno» y tiene la app instalada desde la tienda.
-  Falta, en la consola, lo que pide esa revisión —el nombre «Tu Parrilla» y la ficha, y las
-  tarjetas de Contenido de la app—. Para que lo siguiente salga sin entrar a la
-  consola: la cuenta de servicio con
-  su clave JSON para EAS (nunca en un chat ni en el repo) y el secreto `EXPO_TOKEN` en
-  GitHub, que el flujo «App a la tienda» necesita y todavía no está. El paso a paso y los
-  textos, en la carpeta «Google Play» del escritorio de Vicente; el porqué, en
-  `docs/play-store.md`. La tienda pública es otro trámite: una cuenta personal nueva
-  necesita una prueba cerrada con doce probadores durante catorce días.
+- **[dueño] La app en la Play Store: mandar a revisión y juntar doce probadores** (2026-10-16;
+  al día el 2026-11-08). La cuenta de Play Console es personal y la app, `cl.tuparrilla.app`, se
+  llama **«Parrilla»** en la ficha (decisión del dueño, 2026-11-08; el binario 1.2.0 dirá «Tu
+  Parrilla» bajo el ícono). El 2026-11-08 quedaron llenas todas las tarjetas de Contenido de la app,
+  la ficha (con 5 capturas, dos nuevas con datos de prueba) y la categoría Business, y se armó la
+  prueba cerrada «Closed testing - Alpha»: solo Chile, la lista «Tu Parrilla - interno» (10) y la
+  versión con el `.aab` 1.1.0 (código 2). **No se ha enviado a revisión**: quedó corriendo la
+  revisión rápida de la consola. Antes de «Send changes for review»:
+  - cambiar las instrucciones del revisor («Sign in details») por las que piden cerrar y reabrir
+    la app una vez: la 1.1.0 de la tienda trae el código del 2026-10-16 y lo nuevo (La Mesa, La
+    Cocina, historias, TikTok) le llega por aire recién en la segunda apertura; si el revisor la
+    abre una sola vez, la ficha describe cosas que no ve;
+  - que `/borrar-mis-datos` nombre la app como en la ficha («Parrilla»): Google lo pide para la
+    «Delete data URL». Una línea.
+  Después: Google revisa en días; aprobada, el enlace para unirse aparece en la prueba cerrada, y
+  hacen falta **al menos doce** probadores que acepten y se queden **catorce días** antes de pedir
+  producción (faltan dos o más: sus Gmail a la lista, o un Grupo de Google). Sin países de Europa,
+  por el estado de comerciante (la entrada de abajo). Lo que se respondió en cada tarjeta, el
+  paso a paso y lo que sigue están en la carpeta «Google Play» del escritorio de Vicente
+  (`PASOS.txt`, recuadro del 2026-11-08, y `TEXTOS-FORMULARIO.txt`); el porqué, en
+  `docs/play-store.md`. Para que lo siguiente salga sin entrar a la consola: la cuenta de servicio
+  con su clave JSON para EAS (nunca en un chat ni en el repo) y el secreto `EXPO_TOKEN` en GitHub,
+  que el flujo «App a la tienda» necesita (la entrada del build 1.2.0, abajo).
 - **[dueño] Play Console: declarar el estado de comerciante antes de febrero de 2027**
   (2026-11-06). Google lo exige a todos los desarrolladores. Si no se hace, borra el perfil y las
   apps de Google Play en todo el mundo. No frena la revisión de hoy. **No declararlo en la cuenta
