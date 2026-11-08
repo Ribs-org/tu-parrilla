@@ -73,6 +73,10 @@ function Proximamente() {
   return <span className="ml-auto text-[0.75rem] text-fg-faint">{PROXIMAMENTE}</span>
 }
 
+/** Los comentarios de TikTok en el detalle de una cuenta de TikTok (`comentariosTiktok`). */
+const ACTIVAR_COMENTARIOS_TIKTOK = 'Activar comentarios en La Mesa →'
+const COMENTARIOS_TIKTOK_ACTIVADOS = 'Sus comentarios llegan a La Mesa.'
+
 /** Adónde va la conexión de Instagram con el login de Instagram (`social/instagram-login.ts`). */
 const CONECTAR_LOGIN_DE_INSTAGRAM = '/api/social/instagram/connect?login=instagram'
 
@@ -99,6 +103,11 @@ const CONECTAR_LOGIN_DE_INSTAGRAM = '/api/social/instagram/connect?login=instagr
  * `loginDeInstagram`: si este dueño ve el login de Instagram (`loginDeInstagramAbiertoPara`, en el
  * servidor). Con él, Instagram ofrece «Conectar con Instagram →» al lado del «Conectar →» de
  * siempre, que es el login de Facebook; sin él, Los Fierros se ve igual que antes.
+ *
+ * `comentariosTiktok`: null si este dueño no tiene abiertos los comentarios de TikTok
+ * (`tiktokComentariosAbiertoPara`, en el servidor); si los tiene, los ids de las cuentas de TikTok
+ * que ya los activaron. Con él, el detalle de cada cuenta de TikTok conectada dice si sus
+ * comentarios llegan a La Mesa, u ofrece activarlos.
  */
 export function Cuentas({
   rows,
@@ -106,12 +115,14 @@ export function Cuentas({
   desde,
   proximamente,
   loginDeInstagram = false,
+  comentariosTiktok = null,
 }: {
   rows: CuentaRow[]
   metaEnRevision: boolean
   desde: number
   proximamente: readonly string[]
   loginDeInstagram?: boolean
+  comentariosTiktok?: readonly string[] | null
 }) {
   const ahora = useAhora(desde)
   const esProxima = (red: string) => proximamente.includes(red)
@@ -204,6 +215,13 @@ export function Cuentas({
                       ahora={ahora}
                       proxima={esProxima(network)}
                       loginDeInstagram={conLoginDeInstagram(network)}
+                      comentarios={
+                        network === 'tiktok' && comentariosTiktok
+                          ? comentariosTiktok.includes(row.id)
+                            ? 'activados'
+                            : 'por-activar'
+                          : null
+                      }
                     />
                   ))}
                 </ul>
@@ -308,6 +326,7 @@ function Fila({
   ahora,
   proxima,
   loginDeInstagram = false,
+  comentarios = null,
 }: {
   row: CuentaRow
   network: string
@@ -316,6 +335,8 @@ function Fila({
   proxima: boolean
   /** Si el dueño tiene abierto el login de Instagram: solo entonces «Reconectar» vuelve por él. */
   loginDeInstagram?: boolean
+  /** Los comentarios de TikTok de esta cuenta, si el dueño los tiene abiertos; null en las demás. */
+  comentarios?: 'activados' | 'por-activar' | null
 }) {
   const [pending, startTransition] = useTransition()
   const [abierta, setAbierta] = useState(false)
@@ -464,6 +485,20 @@ function Fila({
       <div id={detalle} hidden={!abierta} className="space-y-1.5 pb-2.5 pl-10 pr-1">
         {network === 'instagram' && row.login === 'instagram' ? (
           <p className="text-[0.72rem] text-fg-muted">{CONECTADA_CON_INSTAGRAM}</p>
+        ) : null}
+        {/* Los comentarios de TikTok piden autorizar la cuenta una segunda vez, en la app de TikTok
+            for Business (`social/tiktok-business.ts`); solo en una cuenta conectada. */}
+        {comentarios && row.connected ? (
+          comentarios === 'activados' ? (
+            <p className="text-[0.72rem] text-fg-muted">{COMENTARIOS_TIKTOK_ACTIVADOS}</p>
+          ) : (
+            <a
+              href={`/api/social/tiktok/comentarios?cuenta=${row.id}`}
+              className="inline-block text-[0.75rem] text-fg-muted transition-colors hover:text-fg"
+            >
+              {ACTIVAR_COMENTARIOS_TIKTOK}
+            </a>
+          )
         ) : null}
         {/* Si acepta trial reels, como lo dijo Meta al publicar uno (`trial-reels.ts`). */}
         {network === 'instagram' && row.trialReels ? (

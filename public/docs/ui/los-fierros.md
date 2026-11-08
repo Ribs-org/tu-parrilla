@@ -2,7 +2,7 @@
 
 `/admin/accounts`, dentro del botón «Ajustes» de la barra del panel (no es una pestaña). La lista para elegir cuentas, que aparece sola cuando una red devuelve varias, vive en `/admin/accounts/elegir`.
 
-Los Fierros (en llano: las cuentas conectadas) es donde se conectan a Tu Parrilla las cuentas de Instagram, TikTok, YouTube y Facebook, donde se renuevan cuando su permiso vence y donde se desconectan. Threads y X / Twitter también están en la lista, pero dicen «Próximamente»: todavía no se pueden conectar. Cada cuenta es una fila con su «fierro», una barra corta de color que dice si la conexión está viva; lo que se usa poco se abre con la flecha de la fila. Sin una cuenta conectada aquí, el panel no puede publicar en esa red. Las cuatro redes que se conectan sirven para publicar y traen los números de sus posts; los comentarios (en [La Mesa](la-mesa.md)) llegan de Instagram, Facebook y YouTube (y de Threads solo en la cuenta del revisor de Meta, ver «Threads y X / Twitter: «Próximamente»»).
+Los Fierros (en llano: las cuentas conectadas) es donde se conectan a Tu Parrilla las cuentas de Instagram, TikTok, YouTube y Facebook, donde se renuevan cuando su permiso vence y donde se desconectan. Threads y X / Twitter también están en la lista, pero dicen «Próximamente»: todavía no se pueden conectar. Cada cuenta es una fila con su «fierro», una barra corta de color que dice si la conexión está viva; lo que se usa poco se abre con la flecha de la fila. Sin una cuenta conectada aquí, el panel no puede publicar en esa red. Las cuatro redes que se conectan sirven para publicar y traen los números de sus posts; los comentarios (en [La Mesa](la-mesa.md)) llegan de Instagram, Facebook y YouTube (y de Threads solo en la cuenta del revisor de Meta, ver «Threads y X / Twitter: «Próximamente»»; y de TikTok solo donde la instalación lo abrió y la cuenta los activó, ver «Para traer los comentarios de TikTok a La Mesa»).
 
 **De día** esta pantalla se llama «Los Cuchillos», en el menú de Ajustes y en su título, y el fierro de cada cuenta es un cuchillo chico: el mango oscuro y la hoja en salmón tostado (con filo, viva), en ámbar (se desafila: vence en la semana) o gris (sin filo: hay que reconectar). La línea de una cuenta que vence dice «Este cuchillo se está desafilando: la conexión vence <fecha>. Reconéctala antes de que pierda el filo.», el aviso de Ajustes dice «1 se desafila» o «1 sin filo», y el botón Ajustes lleva dos palillos en vez del trinche y el cuchillo. Lo demás, igual: ver «El modo día», en [index.md](index.md).
 
@@ -60,6 +60,7 @@ Avisos de un momento, debajo de la fila: «Desconectada.» después de desconect
 
 - En una cuenta de Instagram conectada con el login de Instagram, primero: «Conectada con Instagram, sin página de Facebook.» Las conectadas con el login de Facebook no dicen nada.
 - En una cuenta de Instagram, si acepta trial reels, cuando ya se sabe: «Acepta trial reels.», en gris, o en ámbar la frase con que Instagram rechazó el último, por ejemplo «@cuenta no tiene trial reels: Instagram los da solo a cuentas con un mínimo de seguidores, y esta no lo alcanza. Prográmalo como reel normal o en otra cuenta.» (o «Instagram ya rechazó un trial reel en esta cuenta: prográmalo como reel normal.», si no quedó la frase). Se aprende al publicar: no sale nada mientras la cuenta no haya intentado un trial reel.
+- En una cuenta de TikTok conectada, solo para quien la instalación le abrió los comentarios de TikTok: «Activar comentarios en La Mesa →» si todavía no se activaron (ver «Para traer los comentarios de TikTok a La Mesa»), o «Sus comentarios llegan a La Mesa.» si ya. Para los demás no aparece nada.
 - «En la red: » y el identificador que la red le da a la cuenta. Es solo informativo.
 - «En Tu Parrilla: » y el **id de la cuenta en Tu Parrilla**, con un ícono de copiar. Es un botón: al apretarlo copia el id y el ícono pasa a un visto durante dos segundos. Al pasar el mouse dice «Id de cuenta — para «cuentas» en el CSV o la API».
 - Solo si la cuenta no tiene credencial y la misma red tiene otra cuenta conectada: «¿Es la misma cuenta con otro identificador? Fusiónala y su historial pasa a la viva.», una lista desplegable con las cuentas conectadas de esa red y el botón «Es la misma cuenta →» (dice «Fusionando…» mientras trabaja).
@@ -147,6 +148,17 @@ Se conecta una página de Facebook, no un perfil personal.
 3. Vuelve con «TikTok conectado.». TikTok conecta siempre una cuenta por vez.
 
 El aviso del bloque habla de publicar, no de conectar: una cuenta pública se conecta igual. Si la fila muestra un número largo en vez del nombre, TikTok no entregó el nombre; «Reconectar» lo vuelve a pedir.
+
+### Para traer los comentarios de TikTok a La Mesa
+
+Solo donde la instalación abrió los comentarios de TikTok: si no aparece el enlace, para esa cuenta todavía no están disponibles. Conectar TikTok sirve para publicar y traer los números, pero no los comentarios: esos piden autorizar la cuenta una segunda vez.
+
+1. En el bloque «TikTok», abre con la flecha el detalle de la cuenta, que tiene que estar conectada.
+2. Aprieta «Activar comentarios en La Mesa →».
+3. TikTok muestra su pantalla de autorización, con la cuenta que va a autorizar: tiene que ser la misma de esa fila. Acepta todo lo que pide: leer y responder comentarios.
+4. Vuelve con «Comentarios de TikTok activados: llegan a La Mesa en la próxima pasada.», y el detalle de la cuenta pasa a decir «Sus comentarios llegan a La Mesa.». Los comentarios aparecen en [La Mesa](la-mesa.md) en unos cinco minutos.
+
+«Desconectar» la cuenta apaga también sus comentarios: al volver a conectarla, hay que activarlos otra vez.
 
 ### Threads y X / Twitter: «Próximamente»
 
@@ -252,6 +264,11 @@ Trae los posts y los números de las cuentas de Instagram, TikTok, YouTube y Fac
 | «Google no entregó el token de refresco. Reintenta la conexión.» | Google no dio el permiso para renovar la conexión sola. | Volver a conectar. |
 | «Google rechazó el código. Inténtalo de nuevo.», «Google no devolvió token.», «No se pudo leer el canal de YouTube.» | Google no terminó de entregar el permiso o no dejó leer el canal. | Volver a conectar. |
 | «TikTok rechazó el código: <número>», «TikTok no devolvió token», «TikTok no devolvió el id de la cuenta. Vuelve a conectar.» | TikTok no terminó de entregar el permiso. | Volver a conectar. |
+| «Comentarios de TikTok activados: llegan a La Mesa en la próxima pasada.» | Se activaron los comentarios de esa cuenta de TikTok. | Nada: llegan a [La Mesa](la-mesa.md) en unos cinco minutos. |
+| «TikTok no dio permiso para leer y responder comentarios. Vuelve a intentarlo y acepta todo lo que pide.» | En la pantalla de TikTok no se aceptaron los dos permisos de comentarios. | «Activar comentarios en La Mesa →» de nuevo, y aceptar todo. |
+| «Autorizaste otra cuenta de TikTok. Entra en TikTok con la misma cuenta de esta fila y vuelve a intentarlo.» | La pantalla de TikTok autorizó una cuenta con otro nombre que la de la fila. No se guardó nada. | Cambiar de cuenta en tiktok.com, en ese navegador, y repetir. |
+| «No se pudieron activar los comentarios de TikTok. Inténtalo de nuevo.» | TikTok no terminó de entregar el permiso, pasaron más de diez minutos, o la cuenta se desconectó mientras tanto. | Repetir; si se repite, avisar a quien administra Tu Parrilla. |
+| «Los comentarios de TikTok todavía no están disponibles en Tu Parrilla.» | Se abrió a mano la dirección de activar comentarios sin tenerlos abiertos. No se guardó nada. | Nada: todavía no se pueden activar. |
 | «Threads todavía no está disponible en Tu Parrilla: próximamente.» (o «X / Twitter todavía no está disponible en Tu Parrilla: próximamente.») | Se abrió a mano la dirección de conexión de Threads o de X, que están en «Próximamente». No se conectó nada. | Nada: esas redes todavía no se pueden conectar. |
 | «Faltan las credenciales de la app de Meta (INSTAGRAM_APP_ID / INSTAGRAM_APP_SECRET).», «Faltan las credenciales del login de Instagram (INSTAGRAM_LOGIN_APP_ID / INSTAGRAM_LOGIN_APP_SECRET).», «Faltan las credenciales de Google (GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET).», «Faltan las credenciales de TikTok» | La instalación de Tu Parrilla no tiene configurada esa red. | Avisar a quien administra Tu Parrilla. |
 | Una página en blanco que dice «Falta INSTAGRAM_APP_ID» (o «Falta INSTAGRAM_LOGIN_APP_ID», «Falta GOOGLE_CLIENT_ID», «Falta TIKTOK_CLIENT_KEY») | Lo mismo, detectado antes de abrir la ventana de la red. | Avisar a quien administra Tu Parrilla. |
@@ -301,6 +318,7 @@ Trae los posts y los números de las cuentas de Instagram, TikTok, YouTube y Fac
 - **«Reconecté y apareció una cuenta nueva»** → En la ventana de la red se entró con otra cuenta, o la red le dio un identificador nuevo a la misma. Si es la misma cuenta, desconectar la vieja y fusionarla (ver «Para fusionar una cuenta repetida»).
 - **«Tengo dos filas de la misma cuenta»** → «Para fusionar una cuenta repetida».
 - **«Mi TikTok aparece con un número largo en vez del nombre»** → TikTok no entregó el nombre al conectar; «Reconectar» lo vuelve a pedir.
+- **«¿Cómo traigo los comentarios de TikTok?»** → Si en el detalle de la cuenta de TikTok (la flecha de su fila) aparece «Activar comentarios en La Mesa →», ver «Para traer los comentarios de TikTok a La Mesa». Si no aparece, para esa cuenta todavía no están disponibles.
 - **«¿Tengo que poner mi TikTok en privada?»** → No, ni para conectar ni para publicar: la publicación directa está aprobada y sale con la privacidad que se elija en el compositor de [La Parrilla](la-parrilla.md).
 - **«El botón "Ajustes" (o "el engranaje") tiene un punto ámbar (o rojo)»** → Una cuenta se está enfriando (o se apagó). Abrir el botón: la entrada «Los Fierros» dice cuántas, por ejemplo «1 se enfría». Aquí, la fila con el fierro ámbar o gris → «Reconectar». Una cuenta desconectada a propósito no enciende el punto.
 - **«¿Cómo conecto Threads?»** o **«no puedo conectar X»** → Todavía no se puede: las dos dicen «Próximamente». Hoy se conectan Instagram, Facebook, TikTok y YouTube.
@@ -322,7 +340,7 @@ Trae los posts y los números de las cuentas de Instagram, TikTok, YouTube y Fac
 - No muestra los números de las cuentas ni de sus publicaciones: están en [Los Números](los-numeros.md). Tampoco los de los anuncios, ni conecta una cuenta publicitaria aparte: los anuncios se leen y se crean con la misma conexión de Instagram, y salen en «Lo pagado», en Los Números. Desconectar o quitar una cuenta no detiene una promoción que ya está en Meta: eso se hace antes, en la pieza, o en el Administrador de anuncios.
 - No muestra ni responde comentarios: eso es [La Mesa](la-mesa.md).
 - No conecta Threads ni X / Twitter, que dicen «Próximamente», ni otras redes que las de la lista (ni LinkedIn, ni WhatsApp, ni otras).
-- No trae números de X / Twitter, ni comentarios de TikTok o X. De Threads, números y respuestas solo en la cuenta del revisor de Meta.
+- No trae números de X / Twitter, ni comentarios de X. De Threads, números y respuestas solo en la cuenta del revisor de Meta; de TikTok, comentarios solo donde la instalación los abrió y la cuenta los activó.
 - No elige con qué cuenta se entra en la ventana de la red: eso lo decide la red, y «Reconectar» no está atado a la fila.
 - Desmarcar una cuenta ya conectada en la lista no la desconecta: solo no la renueva.
 - No genera llaves de API: eso es [La Cocina](la-cocina.md), en «Tu propio chef».
@@ -339,6 +357,7 @@ Lo que describe sale de:
 - `src/app/admin/actions.ts` (`syncSocialNow`, `disconnectAccount`, `quitarCuentaAccion`, `fusionarCuenta`, `conectarElegidas`)
 - `src/app/api/social/[network]/connect/route.ts`
 - `src/app/api/social/[network]/callback/route.ts`
+- `src/app/api/social/tiktok/comentarios/route.ts`, `src/app/api/social/tiktok/comentarios/vuelta/route.ts` y `src/lib/social/tiktok-business.ts` («Activar comentarios en La Mesa →» y sus frases; para quién está abierto, en `src/lib/redes-abiertas.ts`)
 - `src/lib/networks.ts` (nombres de las redes, avisos, `META_EN_REVISION`, las redes en «Próximamente» y los textos del login de Instagram) y `src/lib/redes-abiertas.ts` (Threads y el login de Instagram abiertos para el revisor)
 - `src/lib/social/instagram-login.ts` (el login de Instagram: la frase de cuando está cerrado) y `src/lib/social/instagram.ts` (su renovación sola)
 - `src/lib/parrilla.ts` (`estadoDelFierro`, los siete días del aviso)

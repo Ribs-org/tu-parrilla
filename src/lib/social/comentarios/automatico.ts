@@ -198,7 +198,7 @@ export async function aplicarReglas(
 
     cupo.restantes -= 1
     try {
-      const replyId = await comentarista.responder(account, tokenEscritura, c.externalId, plan.publico)
+      const replyId = await comentarista.responder(account, tokenEscritura, c.externalId, plan.publico, c.postExternalId)
       await db
         .update(postComments)
         .set({

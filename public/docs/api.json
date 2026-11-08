@@ -62,7 +62,7 @@
           },
           "regla": {
             "type": "object",
-            "description": "Respuesta automática por palabra clave: cuando alguien comente 'palabra' (completa, sin mayúsculas ni tildes) en Instagram, Facebook o YouTube, el sistema responde en la siguiente corrida del cron. Requiere 'palabra' y 'mensaje' juntos; si ambos faltan, la fila queda sin regla (no es error). Ver api-llm.md, sección 'Lo que Meta no permite', antes de asumir que hay un envío por privado. Instagram puede esconder el comentario que es solo la palabra: en el texto del post, pídela dentro de una frase o usa una distinta en cada post.",
+            "description": "Respuesta automática por palabra clave: cuando alguien comente 'palabra' (completa, sin mayúsculas ni tildes) en Instagram, Facebook o YouTube (y en Threads y TikTok solo en las cuentas donde la instalación abrió sus comentarios), el sistema responde en la siguiente corrida del cron. Requiere 'palabra' y 'mensaje' juntos; si ambos faltan, la fila queda sin regla (no es error). Ver api-llm.md, sección 'Lo que Meta no permite', antes de asumir que hay un envío por privado. Instagram puede esconder el comentario que es solo la palabra: en el texto del post, pídela dentro de una frase o usa una distinta en cada post.",
             "required": ["palabra", "mensaje"],
             "additionalProperties": false,
             "properties": {

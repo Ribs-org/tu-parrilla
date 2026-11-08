@@ -474,6 +474,7 @@ export async function quitarCuentaAccion(accountId: string): Promise<{ error: st
  */
 export async function disconnectAccount(accountId: string): Promise<void> {
   const usuario = await requireUser()
+  // En TikTok, `desconectarCuenta` apaga también sus comentarios (su credencial en `ajustes`).
   await desconectarCuenta(usuario.id, accountId)
   // Lo de YouTube que se borró se veía también en La Mesa y en Los Números.
   revalidatePath('/admin', 'layout')

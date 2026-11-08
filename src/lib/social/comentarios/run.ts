@@ -2,6 +2,7 @@ import 'server-only'
 import { and, desc, eq, gte, inArray, isNotNull, isNull, lt, or, sql } from 'drizzle-orm'
 import { getDb, postComments, scheduledPostTargets, socialAccounts, socialPosts } from '@/db'
 import type { SocialAccount } from '@/db'
+import { tiktokComentariosAbiertoPara } from '@/lib/redes-abiertas'
 import { connectorFor } from '../index'
 import { aplicarReglas } from './automatico'
 import { comentaristaFor } from './index'
@@ -268,8 +269,13 @@ export async function sondearComentarios(
   // A la que no le toca esta pasada se la salta acá: antes de pedirle credencial y antes
   // de preguntarle nada a la base. No lleva entrada en el reporte porque no es un fallo,
   // es que todavía no es su turno.
+  // TikTok, igual: con sus comentarios cerrados para el dueño no hay nada que pedir, y sin este
+  // filtro cada cuenta de TikTok sumaría una línea vacía al reporte cada cinco minutos.
   const aSondear = cuentas.filter(
-    (cuenta) => comentaristaFor(cuenta.network) && tocaSondear(cuenta.network, now),
+    (cuenta) =>
+      comentaristaFor(cuenta.network) &&
+      tocaSondear(cuenta.network, now) &&
+      (cuenta.network !== 'tiktok' || tiktokComentariosAbiertoPara(cuenta.ownerId)),
   )
   const reporte: SondeoReport = {
     cuentas: [],
