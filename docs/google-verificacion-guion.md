@@ -118,6 +118,17 @@ afirmar que se cumplen:
   La planilla de Los Números, además, deja fuera por su cuenta lo de más de 30 días, para no
   llevarse lo que la limpieza de ese día todavía no alcanzó a borrar.
 
+Desde el 2026-11-08 la subida tiene tres opciones por canal, ninguna con un permiso nuevo: la
+visibilidad (`privacyStatus`: público, no listado o privado; la justificación de `youtube.upload`
+de arriba dice «as a public video», que sigue siendo lo de siempre), «Hecho con IA»
+(`containsSyntheticMedia`) y «Agregar a una playlist», que lee las playlists del canal
+(`playlists.list mine=true`) y agrega el video publicado a la elegida (`playlistItems.insert`),
+las dos con `youtube.force-ssl`. Si la auditoría pregunta por esas llamadas: es el creador
+eligiendo una playlist de **su** canal para **su** video, y es la única escritura además de la
+subida y las respuestas. Los títulos de las playlists no se guardan —viven cinco minutos en la
+memoria del servidor, por canal—; queda el id de la elegida en las opciones del destino, porque
+sin él no se puede agregar después (`src/lib/social/playlists-youtube.ts`).
+
 La regla vive en `src/lib/social/politica-youtube.ts` y el borrado en
 `retencion-youtube.ts`. Existe un permiso aparte (§III.L) para que un desarrollador de
 analítica calcule métricas propias y guarde historia; no se pidió en la primera auditoría.

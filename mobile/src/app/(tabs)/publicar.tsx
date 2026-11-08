@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { MusicaInstagramBloque } from '../../components/musica-instagram'
 import { ReglaClave } from '../../components/regla-clave'
 import { TikTokOpciones } from '../../components/tiktok-opciones'
+import { YoutubeOpciones } from '../../components/youtube-opciones'
 import { TiraDeHistorias, VisorDeHistorias } from '../../components/visor-historias'
 import { useSelectorFecha } from '../../components/selector-fecha'
 import { fechaLegible } from '../../lib/calendario'
@@ -85,6 +86,7 @@ import {
   type TikTokElegido,
 } from '../../lib/tiktok'
 import type { BorradorAbierto, CuentaApp } from '../../lib/tipos'
+import { cuentasDeYoutube, opcionesYoutube, youtubeInicial, type YoutubeElegido } from '../../lib/youtube'
 
 const MAX_TEXTO = 2200
 
@@ -131,6 +133,9 @@ export default function Publicar() {
   const [tiktok, setTiktok] = useState<Record<string, TikTokElegido>>({})
   // Lo que dijo `creator_info` de cada cuenta de TikTok: arma el envío y el largo máximo del video.
   const [creadores, setCreadores] = useState<Record<string, CreadorTikTok | null>>({})
+  // Lo elegido en el bloque de YouTube de cada cuenta que se tocó o vino de un borrador; las demás
+  // se ven como nace el bloque (`youtubeInicial`). Como el de TikTok, no se limpia al desmarcar.
+  const [youtube, setYoutube] = useState<Record<string, YoutubeElegido>>({})
   // La respuesta automática por palabra clave. En Historia no viaja, pero queda guardada.
   const [regla, setRegla] = useState<ReglaApp>(() => reglaInicial(null))
   // Cambia al abrir otro borrador o empezar otra publicación: el bloque de la palabra clave se
@@ -181,7 +186,19 @@ export default function Publicar() {
   // El guardado corre un rato después del último cambio, y la cola de subida entre awaits:
   // los dos leen lo de ahora y no lo del render en que empezaron. Se copia después de
   // pintar, porque escribir un ref durante el render no está permitido.
-  const formRef = useRef<Formulario>({ texto, cuentas, trial, musica, fecha, fechaPuesta, archivos, historia: false, tiktok, regla })
+  const formRef = useRef<Formulario>({
+    texto,
+    cuentas,
+    trial,
+    musica,
+    fecha,
+    fechaPuesta,
+    archivos,
+    historia: false,
+    tiktok,
+    regla,
+    youtube,
+  })
   const disponiblesRef = useRef<CuentaApp[]>([])
   useEffect(() => {
     formRef.current = {
@@ -195,6 +212,7 @@ export default function Publicar() {
       historia: modo === 'historia',
       tiktok,
       regla,
+      youtube,
     }
     disponiblesRef.current = disponibles
   })
@@ -314,7 +332,7 @@ export default function Publicar() {
       pausa.current = null
       void guardar()
     }, PAUSA_MS)
-  }, [texto, cuentas, trial, musica, tiktok, regla, fecha, fechaPuesta, firmaMedia, modo, guardar])
+  }, [texto, cuentas, trial, musica, tiktok, youtube, regla, fecha, fechaPuesta, firmaMedia, modo, guardar])
 
   // Si la app pasa a segundo plano, el sistema puede cerrarla sin avisar: lo pendiente se
   // manda antes. Igual al desmontar, si quedó algo esperando la pausa.
@@ -344,6 +362,7 @@ export default function Publicar() {
     setTrial([])
     setMusica({})
     setTiktok({})
+    setYoutube({})
     setRegla(reglaInicial(null))
     setGeneracion((g) => g + 1)
     setFecha(ahora)
@@ -370,6 +389,7 @@ export default function Publicar() {
       historia: false,
       tiktok: {},
       regla: reglaInicial(null),
+      youtube: {},
     }
   }, [cambiarArchivos])
 
@@ -415,6 +435,7 @@ export default function Publicar() {
       historia: b.historia === true,
       tiktok: b.tiktok ?? {},
       regla: reglaInicial(b.regla),
+      youtube: b.youtube ?? {},
     }
     cambiarArchivos(() => lista)
     setModo(form.historia ? 'historia' : 'post')
@@ -424,6 +445,7 @@ export default function Publicar() {
     setTrial(form.trial)
     setMusica(form.musica ?? {})
     setTiktok(form.tiktok ?? {})
+    setYoutube(form.youtube ?? {})
     setRegla(form.regla!)
     setGeneracion((g) => g + 1)
     setFecha(form.fecha)
@@ -577,6 +599,11 @@ export default function Publicar() {
     })
   }
 
+  /** Lo que se ve en el bloque de YouTube de una cuenta: lo elegido, o como nace. */
+  function youtubeDe(c: CuentaApp): YoutubeElegido {
+    return youtubeInicial(youtube[c.id])
+  }
+
   /** Lo que se ve en el bloque de TikTok de una cuenta: lo elegido, o como nace. */
   function tiktokDe(c: CuentaApp): TikTokElegido {
     return tiktokInicial(tiktok[c.id], c)
@@ -641,6 +668,8 @@ export default function Publicar() {
               ...Object.fromEntries(
                 cuentasTikTok.map((c) => [c.id, opcionesTikTok(tiktokDe(c), fotos, creadores[c.id] ?? null)]),
               ),
+              // Y cada canal de YouTube con lo que su bloque muestra.
+              ...Object.fromEntries(cuentasYoutube.map((c) => [c.id, opcionesYoutube(youtubeDe(c))])),
             },
             media,
             regla: reglaParaEnviar(regla),
@@ -760,6 +789,7 @@ export default function Publicar() {
   const bloqueada = avisos.some((lista) => lista.some((a) => a.bloquea))
   const fotos = soloFotos(archivos)
   const cuentasTikTok = esHistoria ? [] : cuentasDeTikTok(disponibles, cuentas)
+  const cuentasYoutube = esHistoria ? [] : cuentasDeYoutube(disponibles, cuentas)
   // Un video más largo de lo que la cuenta de TikTok publica apaga «Programar»: TikTok lo
   // rechazaría después de subirlo (lo dice el bloque, en rojo).
   const tiktokMuyLargo = cuentasTikTok.some((c) => videoMuyLargo(archivos, creadores[c.id] ?? null) !== null)
@@ -982,6 +1012,16 @@ export default function Publicar() {
                 onCreador={(creador) => setCreadores((antes) => ({ ...antes, [c.id]: creador }))}
                 fotos={fotos}
                 archivos={archivos}
+                deshabilitado={ocupado}
+              />
+            ))}
+            {cuentasYoutube.map((c) => (
+              <YoutubeOpciones
+                // Con la generación: un borrador que se abre arma el bloque de nuevo, con su playlist.
+                key={`youtube:${c.id}:${generacion}`}
+                cuenta={c}
+                elegido={youtubeDe(c)}
+                onCambiar={(e) => setYoutube((antes) => ({ ...antes, [c.id]: e }))}
                 deshabilitado={ocupado}
               />
             ))}

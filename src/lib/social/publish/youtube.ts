@@ -13,6 +13,8 @@ import { eq } from 'drizzle-orm'
 import { env } from '@/lib/env'
 import { decryptToken, encryptToken } from '../crypto'
 import { randomUUID } from 'node:crypto'
+import { youtubeDe, type OpcionesYoutube, type VisibilidadYoutube } from './opciones'
+import { agregarAPlaylist, type Fetcher } from '../playlists-youtube'
 
 export const YOUTUBE_ONLY_VIDEO = 'YouTube solo recibe video.'
 export const YOUTUBE_REJECTED = 'YouTube rechazó el video.'
@@ -28,15 +30,28 @@ export function youtubeTitle(caption: string): string {
   return (firstLine ?? 'Video').slice(0, MAX_TITLE) || 'Video'
 }
 
-export function youtubeMetadata(caption: string): {
+/**
+ * Lo que `videos.insert` recibe junto al video. Las opciones del destino (`OpcionesYoutube`)
+ * eligen la visibilidad —pública si no dicen nada, como siempre— y, encendida, la declaración de
+ * contenido alterado o sintético (`containsSyntheticMedia`): apagada no se manda, como la
+ * etiqueta de IA de TikTok, y un destino sin opciones lleva exactamente lo de antes.
+ */
+export function youtubeMetadata(
+  caption: string,
+  opciones: OpcionesYoutube | null = null,
+): {
   snippet: { title: string; description: string }
-  status: { privacyStatus: 'public'; selfDeclaredMadeForKids: false }
+  status: { privacyStatus: VisibilidadYoutube; selfDeclaredMadeForKids: false; containsSyntheticMedia?: true }
 } {
   return {
     snippet: { title: youtubeTitle(caption), description: caption },
-    // Business content, deliberately declared not-for-kids: the spec's default, and a
-    // declaration YouTube requires on every upload.
-    status: { privacyStatus: 'public', selfDeclaredMadeForKids: false },
+    status: {
+      privacyStatus: opciones?.visibilidad ?? 'public',
+      // Business content, deliberately declared not-for-kids: the spec's default, and a
+      // declaration YouTube requires on every upload.
+      selfDeclaredMadeForKids: false,
+      ...(opciones?.ia ? { containsSyntheticMedia: true as const } : {}),
+    },
   }
 }
 
@@ -165,6 +180,27 @@ export async function ensureYoutubeCredential(account: SocialAccount): Promise<s
   return data.access_token
 }
 
+/**
+ * El video terminó de procesarse: salió. Si el destino eligió una playlist, recién ahora se lo
+ * agrega —el video ya existe entero, y es el único momento que pasa una sola vez por destino—.
+ * Que no entre no lo convierte en fallo: el video está en el canal y reintentar lo subiría otra
+ * vez. Queda como aviso en el destino (`aviso`), que el editor muestra al lado del estado.
+ *
+ * Si la corrida muriera después de agregarlo y antes de anotar el destino, la siguiente lo
+ * agregaría de nuevo: una playlist acepta el mismo video dos veces. Es la misma ventana que tiene
+ * el resto del publicador, y lo peor que deja es una entrada repetida que se borra en YouTube.
+ */
+export async function publicado(
+  token: string,
+  videoId: string,
+  opciones: OpcionesYoutube | null,
+  fetcher: Fetcher = fetch,
+): Promise<PublishOutcome> {
+  if (!opciones?.playlist) return { kind: 'published', externalId: videoId }
+  const aviso = await agregarAPlaylist(token, opciones.playlist, videoId, PLAZO_RED_MS, fetcher)
+  return { kind: 'published', externalId: videoId, ...(aviso ? { aviso } : {}) }
+}
+
 const UPLOAD_URL =
   'https://www.googleapis.com/upload/youtube/v3/videos?part=snippet,status&uploadType=multipart'
 
@@ -197,7 +233,7 @@ export const youtubePublisher: Publisher = {
       const verdict = classifyUploadStatus(payload)
       if (verdict === 'error') return { kind: 'failed', reason: YOUTUBE_REJECTED }
       if (verdict === 'processing') return { kind: 'processing', containerId: input.containerId }
-      return { kind: 'published', externalId: input.containerId }
+      return publicado(input.token, input.containerId, youtubeDe('youtube', input.opciones))
     }
 
     const video = singleVideo(input.media)
@@ -232,7 +268,11 @@ export const youtubePublisher: Publisher = {
         Authorization: `Bearer ${input.token}`,
         'Content-Type': `multipart/related; boundary=${boundary}`,
       },
-      body: youtubeUploadBody(JSON.stringify(youtubeMetadata(input.caption)), bytes, boundary) as BodyInit,
+      body: youtubeUploadBody(
+        JSON.stringify(youtubeMetadata(input.caption, youtubeDe('youtube', input.opciones))),
+        bytes,
+        boundary,
+      ) as BodyInit,
     })
     if (!response.ok) {
       console.error('YouTube upload:', response.status, (await response.text()).slice(0, 300))

@@ -547,6 +547,32 @@ patrocinado» y su aviso, el consentimiento con los dos enlaces, la palabra clav
 borrador que sale con `X-Parrilla-Publicar`, las opciones de TikTok a medias y la regla. Lo que no:
 un teléfono de verdad (el `Switch` de Android) y TikTok real (lo cubren las pruebas del servidor).
 
+### Las opciones de YouTube por aire a la 1.1.0 (sin publicar todavía)
+
+El bloque «YouTube · <canal>» de Publicar —«Quién lo ve», «Hecho con IA» y «Agregar a una
+playlist»— es puro JavaScript sobre lo que la 1.1.0 ya trae (`Switch`, los `Chip` de
+`components/ui.tsx`, `apiGet`): no pide módulos ni permisos nuevos. Para publicarlo, sobre la punta
+de `ota-1.1.0`, se copian de `main` (con esta rama fusionada) estos archivos de `mobile/`, tal cual:
+
+- `src/components/youtube-opciones.tsx`, `src/lib/youtube.ts` y `src/lib/youtube.test.ts` (nuevos);
+- `src/app/(tabs)/publicar.tsx`;
+- `src/components/tiktok-opciones.tsx` (solo exporta `Interruptor`, que el bloque de YouTube usa);
+- `src/lib/api.ts` (`youtube` en `X-Parrilla-Publicar`), `src/lib/borradores.ts` (con
+  `borradores.test.ts`) y `src/lib/tipos.ts`.
+
+El 2026-11-08 esos archivos eran iguales en `main` y en `ota-1.1.0` antes de este cambio
+(`git diff origin/ota-1.1.0 origin/main` sobre ellos no da nada), así que copiarlos no le lleva a
+la 1.1.0 nada de la 1.2.0. Si antes entra a `main` otro cambio a uno de ellos que no vaya a la
+1.1.0, hay que copiar solo la parte de YouTube. **No** se tocan `app.json` ni `package.json`.
+
+Se publica **después** de que el servidor de esta rama esté en producción. Con un servidor de antes
+el bloque se ve, pero la lista de playlists contesta 404 («YouTube no respondió con tus
+playlists…») y el servidor rechaza al programar las opciones de YouTube con «Las opciones de la red
+no se entendieron.». Al revés no pasa nada: una app sin el bloque no manda `youtube` en el
+encabezado, y el servidor programa un borrador con las opciones de YouTube que dejó el panel. Lo
+probado: `tsc`, los tests y el lint de la app, y los del sitio; no se probó en un teléfono ni en
+Expo web.
+
 ### El portapapeles, con y sin su módulo nativo
 
 «Copiar el texto», en la tarjeta de lo que espera en la bandeja de TikTok, usa `expo-clipboard`,

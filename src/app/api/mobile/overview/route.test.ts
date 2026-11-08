@@ -36,6 +36,7 @@ function filaTarget(overrides: Partial<ScheduledPostTarget> = {}): ScheduledPost
     externalId: null,
     attemptCount: 0,
     lastError: null,
+    aviso: null,
     reintentarDesde: null,
     opciones: null,
     reclamadoHasta: null,

@@ -61,6 +61,12 @@ describe('TikTok y la palabra clave en el borrador', () => {
     })
   })
 
+  it('el bloque de YouTube de cada canal marcado viaja en `opciones` con sus tres claves', () => {
+    const elegidoYt = { visibilidad: 'unlisted' as const, ia: true, playlist: '' }
+    const cuerpo = cuerpoDelBorrador(formulario({ cuentas: ['yt-1'], youtube: { 'yt-1': elegidoYt, 'yt-2': elegidoYt } }))
+    expect(cuerpo.opciones).toEqual({ 'yt-1': { visibilidad: 'unlisted', ia: true, playlist: null } })
+  })
+
   it('la palabra clave viaja con sus tres campos; sin palabra, null, que la borra', () => {
     const regla = { palabra: 'GUIA', mensaje: 'Toma', respuestaPublica: 'Va' }
     expect(cuerpoDelBorrador(formulario({ regla })).regla).toEqual(regla)
