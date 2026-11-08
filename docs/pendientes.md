@@ -699,7 +699,11 @@ nadie paga: todas las cuentas son iguales y el README dice «Sin suscripción».
   de La Cocina, el espacio de la media) y con qué proveedor se cobra. Se apoya en «Cupos y reparto
   de los crons por usuario», en la sección de abajo, que todavía no está hecho. Si se cobra dentro de
   la app del teléfono, las tiendas tienen sus propias reglas de cobro: por revisar antes de
-  elegir.
+  elegir. En Android: cobrar el plan dentro de la app obliga a Google Play Billing (con su
+  comisión); cobrarlo solo en la web, sin botón ni enlace de pago en la app, no. Si se cobra en la
+  app, volver en la Play Console a «Content rating» («purchase digital goods» pasa a Yes) y a «Data
+  safety» (sumar el historial de compras); «Financial features» sigue en «ninguna»: una suscripción
+  al propio servicio no cuenta (anotado el 2026-11-08, al llenarlas).
 - **Que el admin maneje los planes a mano** (2026-10-23). Desde la cuenta del dueño, en Los
   Maestros o al lado: mover los límites de cada plan, cambiarle el plan a una cuenta y dar cuentas
   gratis, sin pasar por el cobro.

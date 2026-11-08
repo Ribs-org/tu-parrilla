@@ -54,6 +54,12 @@ export default function BorrarMisDatosPage() {
           </li>
         </ol>
         <p className="leading-relaxed text-fg-muted">
+          <span className="text-fg">También puedes borrar solo una parte</span>, sin cerrar la
+          cuenta: escribe igual, con el asunto «Borrar parte de mis datos de Tu Parrilla», y di qué
+          quieres borrar —por ejemplo, las fotos y videos que subiste, los comentarios guardados o lo
+          que escribiste en el libro de sugerencias—. Se borra en el mismo plazo, y te avisamos.
+        </p>
+        <p className="leading-relaxed text-fg-muted">
           Si solo quieres que Tu Parrilla deje de leer una red, no hace falta borrar la cuenta: en el
           panel, en Los Fierros, desconéctala. Eso borra sus credenciales y deja de leerla (lo que se
           guarda en ese caso está en la{' '}
@@ -118,7 +124,8 @@ export default function BorrarMisDatosPage() {
           uploaded media, La Cocina material, API keys, phone notification tokens and suggestion-book
           messages) within 30 days, then email you when it is done. Encrypted database backups are
           kept for 90 days and then deleted automatically. Content already published on your social
-          networks stays there and can be deleted from each network.
+          networks stays there and can be deleted from each network. You can also ask us to delete only part of your data (for example, uploaded photos
+          and videos, stored comments or suggestion-book messages) without deleting your account.
         </p>
       </section>
     </article>
