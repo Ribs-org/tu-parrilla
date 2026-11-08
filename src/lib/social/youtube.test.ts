@@ -2,6 +2,12 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { SocialAccount } from '@/db'
 import fixture from './fixtures/youtube-videos.json'
 import { normalizeYouTubeVideo, youtubeConnector, type YouTubeVideo } from './youtube'
+import type { RenovacionYoutube } from './publish/youtube'
+
+// La renovación del token de OAuth tiene sus propios tests (`publish/youtube-renovar.test.ts`):
+// acá solo importa qué hace la sincronización con lo que contesta.
+const renovarYoutube = vi.hoisted(() => vi.fn(async (): Promise<RenovacionYoutube> => ({ sin: true })))
+vi.mock('./publish/youtube', () => ({ renovarYoutube }))
 
 const [video, short] = fixture.items as YouTubeVideo[]
 
@@ -53,6 +59,23 @@ describe('youtubeConnector.ensureCredential', () => {
   it('con el canal desconectado no entrega nada, aunque la key exista: no se sigue leyendo', async () => {
     vi.stubEnv('YOUTUBE_API_KEY', 'AIza-prueba')
     expect(await youtubeConnector.ensureCredential(cuenta(null))).toBeNull()
+  })
+
+  it('revocado desde Google no entrega nada: el refresh token sigue en la fila, pero ya no sirve', async () => {
+    vi.stubEnv('YOUTUBE_API_KEY', 'AIza-prueba')
+    renovarYoutube.mockResolvedValueOnce({ revocada: true })
+    expect(await youtubeConnector.ensureCredential(cuenta('cifrado'))).toBeNull()
+  })
+
+  it('si renovar solo tropezó, se lee igual: los contadores son públicos', async () => {
+    vi.stubEnv('YOUTUBE_API_KEY', 'AIza-prueba')
+    const silencio = vi.spyOn(console, 'error').mockImplementation(() => {})
+    renovarYoutube.mockResolvedValueOnce({ sin: true })
+    expect(await youtubeConnector.ensureCredential(cuenta('cifrado'))).toBe('AIza-prueba')
+    renovarYoutube.mockRejectedValueOnce(new TypeError('fetch failed'))
+    expect(await youtubeConnector.ensureCredential(cuenta('cifrado'))).toBe('AIza-prueba')
+    expect(silencio).toHaveBeenCalledTimes(1)
+    silencio.mockRestore()
   })
 })
 

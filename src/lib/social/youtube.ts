@@ -12,6 +12,7 @@ import {
 } from './connector'
 import { normalizeYoutubeAccount } from './account-metrics'
 import { laMasVieja, sigueListando } from './lectura'
+import { renovarYoutube } from './publish/youtube'
 
 export type YouTubeVideo = {
   id: string
@@ -95,8 +96,19 @@ export const youtubeConnector: Connector = {
   // botón de Conectar. Sin credencial, `syncAccount` lo trata como desconectado y no
   // escribe nada; lo que ya estaba guardado lo borró «Desconectar» en el acto
   // (`desconectar.ts`).
+  //
+  // Que el refresh token exista no basta: si el dueño quitó Tu Parrilla desde su cuenta de
+  // Google, la fila lo conserva y la key sigue leyendo. Por eso se renueva el de OAuth antes de
+  // leer: revocado, `renovarYoutube` desconecta la cuenta y no se lee. Si la renovación solo
+  // tropezó (la red, un 5xx), se lee igual: los contadores son públicos y no es motivo para
+  // perder el día.
   async ensureCredential(account: SocialAccount) {
     if (!account.refreshToken) return null
+    const renovacion = await renovarYoutube(account).catch((error: unknown) => {
+      console.error('[sync] youtube, al renovar el token:', String(error).slice(0, 300))
+      return { sin: true } as const
+    })
+    if ('revocada' in renovacion) return null
     return env('YOUTUBE_API_KEY') ?? null
   },
 

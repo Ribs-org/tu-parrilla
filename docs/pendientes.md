@@ -548,15 +548,6 @@ permisos «por decidir»** de la tabla red por red, para pedirlos todos en una m
   el usuario lo saca; lo cocinado sin programar, a los 30 días), y la carpeta
   `material/cocina/<comanda>/` del chef no tiene plazo escrito. Pedirle al chef (marca-personal)
   un plazo y, cuando lo tenga, sumarlo a `/privacidad`.
-- **Por revisar: un canal de YouTube revocado desde Google se sigue leyendo** (2026-11-07, visto
-  al cambiar «Desconectar»). Quitar Tu Parrilla en myaccount.google.com no le avisa a Tu Parrilla:
-  la fila conserva su `refresh_token`, y como las estadísticas se leen con la API key
-  (`youtubeConnector.ensureCredential` solo mira que el token exista), el sync diario sigue
-  refrescando los contadores de ese canal. El sondeo de comentarios sí falla, con
-  `invalid_grant`, y nadie lo convierte en desconexión. `/privacidad` ofrece revocar desde Google
-  como alternativa a «Desconectar»: lo honesto es que un `invalid_grant` deje la cuenta
-  desconectada y con lo de YouTube borrado (`desconectarCuenta`, en
-  `src/lib/social/desconectar.ts`).
 - **[dueño] Vercel Pro antes de abrir a terceros.** El plan Hobby es de uso personal y no
   comercial (`docs/levantamiento-terceros.md` §5).
 - **[dueño] La app en la Play Store, pista de pruebas internas** (2026-10-16). La cuenta de

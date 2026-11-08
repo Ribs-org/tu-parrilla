@@ -89,7 +89,10 @@ Dos preguntas que la auditoría puede hacer y que conviene tener contestadas:
   esa cuenta). Quedan el id y el nombre del canal, para que la tarjeta siga en Los Fierros y se
   pueda reconectar o quitar, y la fila de cada video con su id, que une las visitas a la página
   del creador con su etiqueta: esas visitas las mide Tu Parrilla. La ventana de «Desconectar» lo
-  avisa antes, y la privacidad lo dice así. «Quitar» borra también lo que queda.
+  avisa antes, y la privacidad lo dice así. «Quitar» borra también lo que queda. Desde el
+  2026-11-08, revocar desde myaccount.google.com hace lo mismo: Google no avisa, pero la
+  renovación siguiente del token recibe `invalid_grant`, y la cuenta se desconecta con ese mismo
+  borrado, en general antes de dos horas (`renovarYoutube`, en `src/lib/social/publish/youtube.ts`).
 - **Los borradores de respuesta con IA.** El texto de un comentario de YouTube se manda a un
   modelo de lenguaje para proponer la respuesta, y la privacidad lo cuenta. *Limited Use*
   prohíbe usar datos de Google para entrenar modelos, no para una función que el usuario
@@ -134,7 +137,11 @@ esas.
 ### Justo antes de rodar
 
 - Revocar Tu Parrilla en myaccount.google.com → Seguridad → Acceso de terceros, para que
-  el consentimiento salga entero.
+  el consentimiento salga entero. Desde el 2026-11-08 eso desconecta el canal en Tu Parrilla
+  y borra lo que vino de YouTube, como «Desconectar», antes de dos horas. No revocar así la
+  cuenta de Google de un canal que el revisor necesita con datos —«Pyxis oficial», con su
+  comentario en «Pendientes»—: al reconectar vuelven solo los comentarios de los últimos siete
+  días. Grabar con otra cuenta de Google, o dejar un comentario nuevo después.
 - Cerrar sesión del panel. Ventana limpia, 1280×800 o más.
 - Un video vertical corto listo para subir.
 
