@@ -487,7 +487,8 @@ Un canal se sincroniza **solo mientras su dueño lo tiene conectado** con el OAu
 Google desde **Los Fierros** (Cuentas, en Ajustes); eso pide además `GOOGLE_CLIENT_ID` y
 `GOOGLE_CLIENT_SECRET` (ver «Variables de entorno»). `YOUTUBE_CHANNEL_ID` solo deja
 creada la tarjeta del canal del dueño del despliegue, esperando su *Conectar*. Desconectar
-borra las credenciales y el canal deja de leerse. Cambiar el id no reemplaza la cuenta:
+borra las credenciales, el canal deja de leerse y, en el acto, se borra lo que vino de la API
+(ver el párrafo siguiente). Cambiar el id no reemplaza la cuenta:
 crea una segunda fila de YouTube, sin conectar, que no se sincroniza.
 
 **Lo que YouTube no deja hacer con sus datos.** Las políticas de los Servicios de API de
@@ -500,7 +501,10 @@ visitas, los clicks y el CTR los mide Tu Parrilla y la tabla los marca como prop
 («En tu página · lo mide Tu Parrilla»), que es lo que la política pide para un dato propio al lado de
 los de YouTube. Y al final de la sincronización diaria se borra lo que pasó el plazo: las
 lecturas diarias de más de 30 días, los comentarios guardados hace más de 30 días, y el
-título y la miniatura de los videos que llevan 30 días sin llegar. La regla vive en
+título y la miniatura de los videos que llevan 30 días sin llegar. Un canal que su dueño
+desconecta no espera ese plazo: *Desconectar* borra en el acto sus lecturas, las de sus videos,
+sus comentarios y los títulos y miniaturas (`src/lib/social/desconectar.ts`), y deja el id y el
+nombre del canal y la fila de cada video, que une las visitas a su etiqueta `?s=`. La regla vive en
 `src/lib/social/politica-youtube.ts` y el borrado en `retencion-youtube.ts`. Si algún día
 se pide y se obtiene el permiso de analítica de §III.L, es ahí donde se afloja.
 
@@ -699,7 +703,8 @@ el login. Si el intento no sirve, la credencial caduca y la tarjeta de esa cuent
 Cuando pase, entra al panel y pulsa **Reconectar** en la tarjeta de esa cuenta. El
 historial de métricas ya recogido no se toca. Cuenta con hacerlo cada dos meses más o menos.
 
-Desconectar borra las credenciales de esa cuenta y conserva su historial. Para volver,
+Desconectar borra las credenciales de esa cuenta y conserva su historial, salvo en YouTube, donde
+lo que vino de su API se borra en el acto (ver «YouTube»). Para volver,
 **Reconectar** en su tarjeta; para sumar otra cuenta de la misma red, **Agregar
 cuenta** en el bloque de la red. Una tarjeta ya desconectada tiene además **Quitar**, que
 pregunta en una ventana y borra la cuenta con su historial (sus publicaciones, números,
@@ -949,7 +954,7 @@ mismas reglas y las mismas frases— y no tienen reglas propias:
 
 | Ruta | Qué hace |
 |---|---|
-| `GET /api/mobile/comentarios?estado=&red=` | La cola de `getCola` agrupada por publicación (`src/lib/comentarios-movil.ts`), con cuántos esperan en esa red (`contarPendientes`) y las redes de los botones (`redesDeLaMesa`, la misma lista del panel). |
+| `GET /api/mobile/comentarios?estado=&red=` | La cola de `getCola` agrupada por publicación (`src/lib/comentarios-movil.ts`), con cuántos esperan en esa red (`contarPendientes`), las redes de los botones (`redesDeLaMesa`, la misma lista del panel) y, en `faltantes`, el aviso «Comentarios que Instagram no entrega» (`getComentariosQueFaltan`, con la frase ya escrita; vacío con otra red elegida). |
 | `GET /api/mobile/comentarios/pendientes` | Solo el número, para la tarjeta de La Parrilla. |
 | `POST /api/mobile/comentarios/{id}/respuesta` | «Enviar», con `{ texto }`: `responderComentario`. |
 | `POST /api/mobile/comentarios/{id}/descartar` | «Descartar»: `descartarComentario`. |
@@ -1016,6 +1021,18 @@ enlace que muere después o una página de Drive no rompan la respuesta días m�
 documento nunca se manda como adjunto, siempre como enlace al final del mismo mensaje —así
 que, igual que el resto de la regla, sale en la respuesta pública mientras el privado esté
 apagado.
+
+Instagram esconde a veces el comentario que es **solo** la palabra: lo suma en su cuenta de
+comentarios, pero no se lo muestra a la dueña ni a la API, así que la regla nunca lo ve (el
+caso está en `docs/pendientes.md`). La ayuda de «Palabra clave» pide la palabra dentro de una
+frase o una distinta por post, y La Mesa avisa con «Comentarios que Instagram no entrega»
+cuando, en una publicación de Instagram de los últimos siete días, la última lectura del sync
+cuenta al menos dos comentarios más de los que llegaron (los guardados más las respuestas de la
+dueña que se conocen). Se calcula al abrir La Mesa, sin columna propia
+(`src/lib/social/comentarios/faltantes.ts` y `getComentariosQueFaltan`, en
+`src/lib/comentarios-cola.ts`). Las respuestas que otras personas se dan entre ellas también
+suman en Instagram y no se guardan, y por eso el aviso dice que parte de la diferencia puede ser
+eso.
 
 ### Modo Tinder
 
@@ -2172,6 +2189,7 @@ src/
       lectura.ts           qué publicaciones se leen cada día: lo nuevo a diario, lo viejo cada vez más espaciado
       politica-youtube.ts  lo que las políticas de YouTube no dejan hacer con sus datos
       retencion-youtube.ts borra lo de YouTube que lleva 30 días sin refrescarse
+      desconectar.ts       «Desconectar»: la cuenta suelta sus credenciales y, en YouTube, lo que vino de su API en el acto
       traspasar.ts         le cambia el dueño a una cuenta con lo que se bajó de ella, sin borrar nada
       anuncios.ts          leer los anuncios de Meta: qué se le pide a la Marketing API, el cruce con las publicaciones y el resumen de «Lo pagado» (sin base); anuncios-sync.ts los guarda
       promocionar.ts       promocionar una publicación: qué se acepta, el gasto máximo, lo que se le manda a Meta y sus errores en castellano (sin base); promocionar-meta.ts crea, pausa y detiene

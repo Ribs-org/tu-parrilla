@@ -93,8 +93,8 @@ export const youtubeConnector: Connector = {
   // de un canal que su dueño tiene conectado: sin esa condición, un canal desconectado se
   // seguiría leyendo a diario con la key, y su tarjeta diría «Sincronizado recién» bajo un
   // botón de Conectar. Sin credencial, `syncAccount` lo trata como desconectado y no
-  // escribe nada; lo que ya estaba guardado lo borra la retención a los 30 días
-  // (`retencion-youtube`).
+  // escribe nada; lo que ya estaba guardado lo borró «Desconectar» en el acto
+  // (`desconectar.ts`).
   async ensureCredential(account: SocialAccount) {
     if (!account.refreshToken) return null
     return env('YOUTUBE_API_KEY') ?? null

@@ -82,11 +82,14 @@ Las dos cosas están desde el 2026-10-06.
 
 Dos preguntas que la auditoría puede hacer y que conviene tener contestadas:
 
-- **Qué pasa con los datos al desconectar.** Desconectar borra las credenciales
-  (`disconnectAccount`, en `src/app/admin/actions.ts`) y el canal deja de leerse; lo ya
-  guardado se borra solo en 30 días, como todo dato de YouTube que nadie refresca (ver
-  abajo). La privacidad lo dice así. Si YouTube pide borrarlo en el acto, hay que cambiar
-  el código y la página: está anotado en `docs/pendientes.md`.
+- **Qué pasa con los datos al desconectar.** Desde el 2026-11-07, desconectar borra en el
+  acto las credenciales y lo que vino de la API: las lecturas de los videos y del canal, los
+  comentarios, y el título y la miniatura de cada video (`desconectarCuenta`, en
+  `src/lib/social/desconectar.ts`; son los mismos pasos que la retención de 30 días, acotados a
+  esa cuenta). Quedan el id y el nombre del canal, para que la tarjeta siga en Los Fierros y se
+  pueda reconectar o quitar, y la fila de cada video con su id, que une las visitas a la página
+  del creador con su etiqueta: esas visitas las mide Tu Parrilla. La ventana de «Desconectar» lo
+  avisa antes, y la privacidad lo dice así. «Quitar» borra también lo que queda.
 - **Los borradores de respuesta con IA.** El texto de un comentario de YouTube se manda a un
   modelo de lenguaje para proponer la respuesta, y la privacidad lo cuenta. *Limited Use*
   prohíbe usar datos de Google para entrenar modelos, no para una función que el usuario
@@ -227,8 +230,8 @@ Es el «YouTube API Services – Audit and Quota Extension Form». Pide:
   dueño del canal; que se refrescan a diario y nada se guarda más de 30 días sin
   refrescar; que no se calculan métricas con ellos y lo propio va marcado como propio (ver
   «Lo que la auditoría mira de los datos guardados»); que el usuario puede revocar (Los
-  Fierros y Google); que no se venden; que al desconectar se borran las credenciales y se
-  deja de leer, y que se borra todo a petición.
+  Fierros y Google); que no se venden; que al desconectar se borran las credenciales, se deja
+  de leer y se borra en el acto lo guardado de YouTube, y que se borra todo a petición.
 - **Enlaces**: privacidad, términos, y el video de arriba sirve.
 
 Sin esta auditoría, la app funciona para leer y responder comentarios, pero **no para
