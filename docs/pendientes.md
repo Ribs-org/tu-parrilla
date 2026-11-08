@@ -111,6 +111,13 @@ sección.
 
 ## Bugs
 
+- **El compositor del panel no mira el largo máximo de un video en TikTok** (2026-11-07, se vio al
+  llevar el bloque al teléfono). `creator_info` trae `max_video_post_duration_sec` y la guía de
+  TikTok pide no dejar mandar un video más largo; Publicar del teléfono lo dice y apaga
+  «Programar» (`videoMuyLargo`, en `mobile/src/lib/tiktok.ts`), pero el bloque del panel
+  (`tiktok-opciones.tsx`) ni lo muestra: el video sube y TikTok lo rechaza después. El panel ya
+  mide la duración en `revision-media.tsx`; falta cruzarla con el dato de la cuenta.
+
 - **En el panel a ancho de teléfono, la pieza que se elige en la cámara de frío vuela fuera de
   la pantalla** (2026-11-02, se vio al probar #296). A ese ancho el riel de la comanda queda
   debajo de la grilla, y la animación de salida apunta a él aunque no se vea. No rompe nada: la
@@ -588,6 +595,13 @@ otros permisos hacen falta**, para pedirlos todos en una misma vuelta.
      crea ahí un access token y ponlo en Vercel como `EXPO_ACCESS_TOKEN`; si no, Expo rechaza cada
      aviso. En iPhone, el build de iOS ofrece crear la llave de push de Apple cuando exista la
      cuenta.
+- **[dueño] Publicar TikTok y la palabra clave de Publicar por aire** (2026-11-07). Puro JavaScript,
+  sin permisos nuevos: a la 1.2.0 sale de `main`, y a la 1.1.0 desde `ota-1.1.0` copiando los
+  archivos que lista `mobile/README.md`, «TikTok y la palabra clave por aire a la 1.1.0» (ninguno
+  trae lo de la 1.2.0). Después de que el servidor esté en producción, con el comando de siempre en
+  los dos canales. Probado en Expo web contra una API falsa; en un teléfono y contra TikTok real,
+  no: la primera vez, programar desde el teléfono una foto a una cuenta de TikTok y mirar que salga
+  con la privacidad elegida.
 - **[dueño] La app en iPhone** (2026-10-16). El código ya está listo para iOS; faltan la
   cuenta del Apple Developer Program, confirmar el identificador `cl.tuparrilla.app`
   (queda fijo al registrarlo), la ficha en App Store Connect y el primer build a
@@ -745,16 +759,15 @@ nadie paga: todas las cuentas son iguales y el README dice «Sin suscripción».
   `docs/auditoria-ui-2026-10-16.md`.
 - **El rediseño de la app del teléfono, partes 3 y 4** (2026-10-16). Las partes 1 y 2
   dejaron las tres pestañas del panel, «Reprogramar» en «Se quemó» y los borradores
-  compartidos con el panel. Faltan: (3) La Mesa como otra pestaña (la cuarta es La Cocina
-  desde el 2026-11-02), para leer y responder comentarios; (4) TikTok desde Publicar —exige mostrar los datos de la cuenta
-  (`creator_info`) antes de publicar—, y Threads y X cuando salgan de «Próximamente»; y con eso
-  la palabra clave: hoy un borrador
-  con TikTok o con palabra clave se edita en el teléfono pero se programa en el panel
-  (`soloEnElPanel` en `src/lib/borrador.ts`). El nombre y el ícono «Tu Parrilla» ya están en
+  compartidos con el panel. La parte 3 (La Mesa, como tarjeta de La Parrilla) y TikTok con la
+  palabra clave en Publicar llegaron el 2026-11-07. Falta: Threads y X desde Publicar cuando
+  salgan de «Próximamente»; hasta entonces un borrador que va a una de esas redes se programa en
+  el panel (`soloEnElPanel` en `src/lib/borrador.ts`). El nombre y el ícono «Tu Parrilla» ya están en
   `mobile/app.json`, con el identificador `cl.tuparrilla.app`: llegan con el primer build de
   la Play Store, no por aire. Cuando ninguna
   instalación vieja las pida, salen `/api/mobile/overview` y `/api/mobile/schedule/check`,
-  que la app nueva ya no usa.
+  que la app nueva ya no usa, y la parte de `soloEnElPanel` y de `REDES_MOVIL` que cuida a una app
+  sin el encabezado `X-Parrilla-Publicar`.
 
 - **La propuesta de diseño 2.1: lo que falta** (2026-10-16). De la propuesta externa del 16
   de octubre (no está en el repo) entró el corte dibujado

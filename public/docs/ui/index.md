@@ -128,7 +128,7 @@ teléfono](app-movil.md).
 | Retomar algo que dejó a medias; ver lo que escribió y no programó | La Parrilla, botón «Borradores (N)» ([la-parrilla.md](la-parrilla.md)); en el teléfono, La Parrilla → «Borradores (N)» ([app-movil.md](app-movil.md)) |
 | Cambiar o borrar algo programado; reprogramar lo que falló | La Parrilla, abriendo el post ([la-parrilla.md](la-parrilla.md)); lo que falló, también desde «Se quemó», arriba del calendario |
 | Sacar de «Se quemó» lo que ya no pide nada, sin borrarlo | «Archivar», en la fila de «Se quemó»; se desarchiva desde el editor del post ([la-parrilla.md](la-parrilla.md)) |
-| Una palabra clave que responde comentarios sola | Al programar el post, en La Parrilla; las respuestas se ven en La Mesa |
+| Una palabra clave que responde comentarios sola | Al programar el post, en La Parrilla, o en Publicar de la app del teléfono ([app-movil.md](app-movil.md)); las respuestas se ven en La Mesa |
 | Saber cómo le fue en el período: views y seguidores ganados, visitas a su página | Los Números, el tablero ([los-numeros.md](los-numeros.md)) |
 | Ver vistas, likes, visitas y clics de cada publicación; cambiar su etiqueta `?s=` o copiar su link | Los Números → «Ver todas las publicaciones →», la pantalla «Tus publicaciones» ([los-numeros.md](los-numeros.md)) |
 | Ver cuánta gente visitó su página y de dónde vino | Los Números, mitad «En tu página» y su «⋯ Más» ([los-numeros.md](los-numeros.md)) |

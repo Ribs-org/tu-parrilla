@@ -1,6 +1,6 @@
 # La app del teléfono
 
-Una app para Android que muestra de un vistazo lo programado y cómo van las redes de quien entra, y le deja publicar desde la galería del teléfono. Tiene cuatro pestañas, las del panel web en versión corta —La Parrilla, Publicar, Los Números y La Cocina— y, como el panel, un botón de Ajustes, pero hace mucho menos: mira lo programado y los números, y programa o publica fotos y videos en Instagram, Facebook y YouTube. También reprograma lo que se quemó, corrige el texto, la hora y las cuentas de lo programado o lo borra, y guarda solo lo que se está escribiendo como borrador: los borradores son los mismos del panel web, así que lo empezado en un lado se sigue en el otro. En La Cocina graba un video o saca una foto con la cámara del teléfono, ordena la cámara de frío (guardar, cambiar el nombre o el uso, sacar) y le pide una comanda al chef de la casa con las mismas opciones que el panel; también la sigue, le contesta al chef y la cancela. Desde La Parrilla se abre La Mesa: los comentarios que esperan respuesta, con el borrador de la IA para corregir y mandar. Todo lo demás —conectar redes, cambiar los archivos de lo programado, TikTok, las instrucciones de la IA para los comentarios, la página pública, el mesón del chef— se hace en el panel web.
+Una app para Android que muestra de un vistazo lo programado y cómo van las redes de quien entra, y le deja publicar desde la galería del teléfono. Tiene cuatro pestañas, las del panel web en versión corta —La Parrilla, Publicar, Los Números y La Cocina— y, como el panel, un botón de Ajustes, pero hace mucho menos: mira lo programado y los números, y programa o publica fotos y videos en Instagram, Facebook, YouTube y TikTok, con la respuesta automática por palabra clave si se quiere. También reprograma lo que se quemó, corrige el texto, la hora y las cuentas de lo programado o lo borra, y guarda solo lo que se está escribiendo como borrador: los borradores son los mismos del panel web, así que lo empezado en un lado se sigue en el otro. En La Cocina graba un video o saca una foto con la cámara del teléfono, ordena la cámara de frío (guardar, cambiar el nombre o el uso, sacar) y le pide una comanda al chef de la casa con las mismas opciones que el panel; también la sigue, le contesta al chef y la cancela. Desde La Parrilla se abre La Mesa: los comentarios que esperan respuesta, con el borrador de la IA para corregir y mandar. Todo lo demás —conectar redes, cambiar los archivos de lo programado, las instrucciones de la IA para los comentarios, la página pública, el mesón del chef— se hace en el panel web.
 
 ## Cómo se llega
 
@@ -136,11 +136,11 @@ Si Tu Parrilla todavía no tiene La Mesa para el teléfono (la app se actualizó
 De arriba abajo:
 
 - Mientras se abre un borrador, «Abriendo borrador…», y no se puede tocar nada.
-- Si el borrador abierto tiene algo que el teléfono no programa, un aviso en amarillo: «Este borrador va también a TikTok: eso se programa en el panel web.», «Este borrador tiene la palabra clave «GUIA»: eso se programa en el panel web.» (con la palabra que tenga) o, con las dos cosas, «Este borrador va también a TikTok y tiene la palabra clave «GUIA»: eso se programa en el panel web.». Con ese aviso se puede seguir editando —se guarda igual, sin perder lo de TikTok ni la palabra clave—, pero «Programar» y «Publicar ahora» quedan apagados.
+- Si el borrador abierto va a una red que el teléfono no programa (Threads o X, mientras estén en «Próximamente»), un aviso en amarillo: «Este borrador va también a Threads: eso se programa en el panel web.» (con la red que sea). Con ese aviso se puede seguir editando —se guarda igual, sin perder esa cuenta—, pero «Programar» y «Publicar ahora» quedan apagados. Una versión de la app de antes del 2026-11-07 que todavía no se actualizó dice lo mismo de TikTok y de la palabra clave («Este borrador va también a TikTok: eso se programa en el panel web.», «Este borrador tiene la palabra clave «GUIA»: eso se programa en el panel web.»): esa versión no los muestra; la actual sí.
 - Dos botones grandes, **«Post»** y **«Historia»**; el elegido, lleno de naranjo. Abre en «Post», o en «Historia» si el borrador abierto es una historia. Cambiar no borra nada. En «Historia» la pantalla cambia (ver «En Historia», abajo); lo que sigue es «Post».
 - Un cuadro de texto con la ayuda «Texto del post…» (hasta 2200 caracteres). Debajo, a la izquierda, «En YouTube el primer renglón es el título» y, a la derecha, el contador, por ejemplo «120 / 2200».
 - Los archivos elegidos, como miniaturas (un video se ve como un cuadro que dice «Video»), cada uno con una «✕» para quitarlo, y el botón «+ Fotos o video» mientras queden menos de diez. Cada archivo se sube apenas se elige, uno detrás del otro; mientras tanto la miniatura lleva una franja abajo: «45 %» el que está subiendo, «En cola» los que esperan y, en rojo, «Reintentar» uno cuya subida falló (tocarlo la vuelve a intentar). Quitar uno que está subiendo cancela su subida.
-- Las cuentas a las que se puede publicar, como botones redondos con borde, «Red · nombre_de_cuenta»; la marcada se pinta en naranjo. Solo salen cuentas de Instagram, Facebook y YouTube conectadas en el panel; TikTok no aparece nunca. Con una sola cuenta conectada, viene marcada; con dos o más, ninguna. Un borrador abierto trae marcadas las suyas. Una cuenta que se desconectó sale como «Instagram · nombre_de_cuenta · reconéctala», con «reconéctala» en rojo, y no se puede marcar. Mientras no haya ninguna marcada: «Elige al menos una cuenta.»
+- Las cuentas a las que se puede publicar, como botones redondos con borde, «Red · nombre_de_cuenta»; la marcada se pinta en naranjo. Salen las cuentas de Instagram, Facebook, YouTube y TikTok conectadas en el panel (una versión de la app sin actualizar no muestra TikTok). Con una sola cuenta conectada, viene marcada; con dos o más, ninguna. Un borrador abierto trae marcadas las suyas. Una cuenta que se desconectó sale como «Instagram · nombre_de_cuenta · reconéctala», con «reconéctala» en rojo, y no se puede marcar. Mientras no haya ninguna marcada: «Elige al menos una cuenta.»
 - Solo si hay una cuenta de Instagram marcada y exactamente un video (sin fotos): un botón «Trial reel · nombre_de_cuenta» por cada cuenta de Instagram marcada, y la explicación «Un trial reel solo lo ven quienes no te siguen. Tú decides desde Instagram cuándo compartirlo con todos.» Debajo, en ámbar, una línea por cada una de esas cuentas donde Instagram ya rechazó un trial reel, con la frase del rechazo (o «Instagram ya rechazó un trial reel en esta cuenta: prográmalo como reel normal.»). El botón se puede tocar igual, pero lo más probable es que se queme.
 - Con la misma condición —una cuenta de Instagram marcada y exactamente un video—, un bloque **«Música de Instagram · nombre_de_cuenta»** por cada cuenta de Instagram marcada, con «Una canción de la biblioteca de Instagram encima del sonido del video. Instagram no deja ver el reel con la canción antes de publicarlo: sale tal como lo dejes acá.» Tiene:
   - **«Sugiéreme una»** («Buscando una…» mientras piensa): propone una canción que le quede al post, leyendo el texto escrito. Sale en un recuadro con ««Título» de Artista», una frase de por qué (o «Es de las que están sonando en Instagram estos días.» / «Salió buscando «…».»), «Escuchar», **«Usar esta»** y **«Otra»** («Buscando otra…»), que trae una distinta sin repetir las ya mostradas. Cuando no quedan: «Ya te mostré todas las que encontré para este post. Busca una por nombre.»
@@ -148,9 +148,18 @@ De arriba abajo:
   - Con una canción puesta: «Canción elegida: «Título» de Artista», «Escuchar», «Quitar» (en rojo), y dos filas de volumen, «Canción: 50 %» y «Video: 100 %», cada una con «−» y «+» que suben o bajan de a 10 (de 1 a 100 %), con «Si en el video hablas, bájale a la canción para que no tape tu voz.»
   - Con la versión 1.1.0 de la app (la que no trae el reproductor de audio), «Escuchar» abre la muestra fuera de la app —en el navegador o el reproductor del teléfono—, y el bloque lo dice: «En esta versión de la app, la muestra se abre fuera de ella.» Desde la 1.2.0 suena ahí mismo.
   - Con una cuenta conectada con el login de Instagram, en vez de todo eso: «La música de Instagram no está disponible en esta cuenta: se conectó con el login de Instagram, y Meta solo la da a las cuentas conectadas con Facebook.»
+- Por cada cuenta de TikTok marcada, un bloque **«TikTok · nombre_de_cuenta»**, el mismo del panel web (lo pide TikTok). Arriba, la foto de la cuenta en TikTok y «Se publicará en la cuenta <nombre en TikTok>»; mientras se lee, «Leyendo tu cuenta…», y si no se pudo, en ámbar, «No pude leer tu cuenta de TikTok.», «Reconecta TikTok para autorizar la publicación.» o «Conecta TikTok en Los Fierros antes de programar.». Sin archivos o con un video, «En esta cuenta, TikTok publica videos de hasta 10 min.» (con el largo que dé TikTok), y en rojo, si el video elegido es más largo, «Este video dura 12 min y TikTok publica en esta cuenta videos de hasta 10 min.»: con eso «Programar» y «Publicar ahora» quedan apagados. Después:
+  - El interruptor **«Enviar como borrador a mi bandeja de TikTok»**. Encendido dice «Te llegará una notificación en TikTok para terminar la publicación desde el teléfono.» y esconde todo lo que sigue.
+  - **«Quién puede verlo»**: botones redondos con las opciones que la cuenta permite, entre «Todos», «Amigos mutuos», «Seguidores» y «Solo yo». Ninguno viene elegido (lo exige TikTok); mientras no se elija, «Elige quién puede verlo». Con «Contenido patrocinado», «Solo yo» se apaga.
+  - **«Permitir»**: «Comentarios», «Dúos» y «Pegar (Stitch)», apagados; tocar uno lo enciende (en naranjo). Uno que la cuenta tiene bloqueado en TikTok sale gris y no se toca. Con fotos solamente, solo «Comentarios».
+  - El interruptor **«Este contenido promociona una marca»**. Encendido, dos botones: «Mi marca» («Se etiquetará como Contenido promocional») y «Contenido patrocinado» («Se etiquetará como Colaboración pagada»); debajo va la frase del elegido. Con «Contenido patrocinado» y «Solo yo» o sin elegir quién puede verlo, en rojo: «Un contenido patrocinado no puede ser privado. Vuelve a elegir quién puede verlo.»
+  - El interruptor **«Hecho con IA»**, con «Enciéndelo si la imagen o la voz se hicieron o se cambiaron con IA de forma realista.» (apagado) o «TikTok lo etiquetará como contenido generado con IA.» (encendido).
+  - Solo con fotos, el interruptor **«Música de TikTok»**, con «TikTok le pone a las fotos una canción recomendada; la puedes cambiar después en la app de TikTok. Esta cuenta lo recuerda para la próxima vez.». Nace como se dejó la última vez en esa cuenta.
+  - Al final, en chico: «Al publicar aceptas la Music Usage Confirmation de TikTok. Después de publicar, TikTok puede tardar unos minutos en mostrarlo en tu perfil.» (con «Contenido patrocinado», «Al publicar aceptas la Branded Content Policy y la Music Usage Confirmation de TikTok. …»). Los nombres subrayados son enlaces que abren esas páginas de TikTok.
+- **«▸ Respuesta automática por palabra clave»**, plegado (tocarlo lo abre: «▾ …»; viene abierto si el borrador ya trae una palabra). Es el del panel web: «Palabra clave» (ejemplo «GUIA», hasta 30 letras) con «Una sola palabra. Quien la comente recibe la respuesta sin que hagas nada.»; «Mensaje» (ejemplo «Acá tienes la guía: https://…», hasta 1000) con «Pon el enlace aquí; si es de tu sitio se mide solo en Los Números.»; «Respuesta pública» (viene con «Te lo mandé por privado 📩», hasta 300) con «La que se publica bajo el comentario cuando el mensaje sale por privado.»; y al final «Con el mensaje privado encendido para tu cuenta, en Instagram y Facebook se publica esta respuesta y el mensaje con el enlace va por privado, una vez a cada persona. Si no, en YouTube o pasados siete días, el mensaje con el enlace se publica como respuesta. En TikTok todavía no hay cola de comentarios.». Con la palabra vacía no hay respuesta automática.
 - El botón «Cuándo: 14/10 a las 19:00» (con el día y la hora elegidos). De partida trae la próxima hora en punto; si se llegó desde la cruz de un día de La Parrilla, trae ese día a esa misma hora en punto, y un borrador con fecha trae la suya.
 - Los mensajes: en rojo los problemas; en gris cómo van las subidas («Subiendo el archivo…» o «Subiendo 3 archivos…») y el envío («Programando…» o «Publicando…», y después «Listo»).
-- Abajo, «Programar» y «Publicar ahora». Los dos están apagados mientras no haya texto o algún archivo y al menos una cuenta marcada, mientras algún archivo no haya terminado de subir, mientras se envía, y con el aviso amarillo de arriba.
+- Abajo, «Programar» y «Publicar ahora». Los dos están apagados mientras no haya texto o algún archivo y al menos una cuenta marcada, mientras algún archivo no haya terminado de subir, mientras se envía, con un video más largo de lo que la cuenta de TikTok marcada publica, y con el aviso amarillo de arriba.
 - Debajo, en chico, cómo va el borrador: «Lo que escribas se guarda solo como borrador.» (antes de escribir nada), «Abriste un borrador: lo que cambies se guarda solo.», «Guardando borrador…», «Borrador guardado.» o, en rojo, «No se pudo guardar el borrador.» o «Este borrador ya no existe: se programó o se descartó. Mira cómo quedó en La Parrilla.».
 - Si hay algo escrito, algún archivo o un borrador abierto, dos botones de texto: «Nueva publicación» y, en rojo, «Descartar». Con el borrador que ya no existe, solo «Nueva publicación».
 
@@ -161,12 +170,12 @@ De arriba abajo:
 - **La tira**: las historias en miniatura vertical, en el orden en que salen, con su número abajo (en ámbar si tiene un aviso) y su «✕». La que se ve lleva borde naranjo; tocar otra la pone en el visor.
 - Con dos o más: «La 2 sale después de la 1.» (o «La 1 sale primero.») y los botones de texto «← Antes» y «Después →», que cambian de lugar la que se ve.
 - «+ Fotos o video», mientras queden menos de diez.
-- Si había texto escrito en «Post»: «Una historia no lleva texto. Lo que escribiste se guarda en el borrador y vuelve si cambias a Post.».
-- Las cuentas, solo las de Instagram y Facebook (las demás siguen marcadas para «Post», pero no salen en la historia). Sin ninguna: «Las historias salen en Instagram y Facebook, y no tienes ninguna de esas cuentas lista para publicar desde el teléfono. Conéctala en el panel web, en Los Fierros.». Sin ninguna marcada: «Elige al menos una cuenta de Instagram o Facebook.». No hay trial reel ni «Música de Instagram».
+- Si había texto escrito en «Post»: «Una historia no lleva texto. Lo que escribiste se guarda en el borrador y vuelve si cambias a Post.». Si había una palabra clave: «Una historia no lleva palabra clave. La que pusiste se guarda en el borrador y vuelve si cambias a Post.».
+- Las cuentas, solo las de Instagram y Facebook (las demás siguen marcadas para «Post», pero no salen en la historia). Sin ninguna: «Las historias salen en Instagram y Facebook, y no tienes ninguna de esas cuentas lista para publicar desde el teléfono. Conéctala en el panel web, en Los Fierros.». Sin ninguna marcada: «Elige al menos una cuenta de Instagram o Facebook.». No hay trial reel, «Música de Instagram», bloque de TikTok ni respuesta automática por palabra clave.
 - «Cuándo: …», como en «Post»; debajo, en rojo, lo que impide programar («La 2: Instagram recibe la historia en foto solo en JPG.»).
 - **«Programar historia»** (o «Programar 3 historias») y «Publicar ahora». Están apagados mientras no haya un archivo y una cuenta de Instagram o Facebook marcada, mientras algo sube, y con una foto que no es JPG yendo a Instagram. «Publicar ahora» pregunta «¿Publicar ahora en …? Saldrá en los próximos 5 minutos. Salen 3 historias, una detrás de otra, en este orden.» (o «Sale una historia.»).
 
-Lo que se escribe se guarda solo, como borrador, un momento después del último cambio, y también si la app pasa a segundo plano. Hace falta texto o un archivo ya subido: abrir «Publicar» y salir no deja un borrador vacío. El borrador guarda el texto, los archivos ya subidos en su orden, las cuentas marcadas, el trial reel, la canción de «Música de Instagram», si es post o historia, y la fecha, pero la fecha solo si alguien la eligió (la próxima hora en punto con que abre no se guarda). Es el mismo borrador que se ve en el panel web; el panel todavía no tiene «Historia», y abre un borrador de historia como un post: si se guarda allá, deja de ser historia.
+Lo que se escribe se guarda solo, como borrador, un momento después del último cambio, y también si la app pasa a segundo plano. Hace falta texto, un archivo ya subido o una palabra clave: abrir «Publicar» y salir no deja un borrador vacío. El borrador guarda el texto, los archivos ya subidos en su orden, las cuentas marcadas, el trial reel, la canción de «Música de Instagram», lo elegido en el bloque de TikTok (aunque falte elegir quién puede verlo), la palabra clave, si es post o historia, y la fecha, pero la fecha solo si alguien la eligió (la próxima hora en punto con que abre no se guarda). Es el mismo borrador que se ve en el panel web; el panel todavía no tiene «Historia», y abre un borrador de historia como un post: si se guarda allá, deja de ser historia.
 
 Mientras se cargan las cuentas dice «Cargando cuentas…». Si no se pudieron cargar: «No se pudieron cargar las cuentas.» con «Reintentar». Si no hay ninguna que sirva: «No hay ninguna cuenta lista para publicar desde el teléfono. Conéctala en el panel web, en Los Fierros.»
 
@@ -325,16 +334,33 @@ Reprogramar no arregla la causa: si falló porque la cuenta se desconectó o el 
 1. Pestaña «Publicar», o la cruz de un día en «La Parrilla» (así ya trae ese día puesto).
 2. Escribe el texto en el cuadro «Texto del post…». En YouTube, el primer renglón es el título del video.
 3. Toca «+ Fotos o video», da permiso para ver la galería si lo pide y elige hasta diez archivos en total (un video puede pesar hasta 500 MB). Empiezan a subir solos: cada miniatura dice cuánto lleva. Para sacar uno, toca su «✕».
-4. Toca las cuentas a las que debe salir: quedan marcadas en naranjo.
+4. Toca las cuentas a las que debe salir: quedan marcadas en naranjo. Si marcaste una de TikTok, completa su bloque (ver «Para programar en TikTok»).
 5. Toca «Cuándo: …». Sube desde abajo la hoja «Cuándo sale»: el mes, con «‹» y «›» para cambiarlo (hoy con un borde naranjo, el elegido relleno y los días que ya pasaron apagados); debajo, la fila «Hora» (de 00 a 23) y la fila «Minutos» (de cinco en cinco), que se deslizan de lado. Toca el día, la hora y los minutos, y «Listo». Lo que ya pasó no se puede elegir, y «Listo» se apaga si la fecha que traía ya pasó. «Cancelar», o tocar fuera de la hoja, la deja como estaba. La hora es la del reloj del teléfono.
 6. Cuando los archivos terminaron de subir, toca «Programar».
 7. Abajo se ve «Programando…» y después «Listo». Un segundo después el formulario se vacía y la app salta a «La Parrilla», donde ya aparece el post si cae dentro de los próximos treinta días. Si venía de un borrador, el borrador sale de la lista.
 
 Instagram y YouTube necesitan al menos un archivo; Facebook acepta solo texto. YouTube necesita un video: con solo fotos, el post se programa igual, pero el destino de YouTube falla al publicarse con «YouTube solo recibe video.», que se ve en «La Parrilla».
 
+### Para programar en TikTok
+
+1. En «Publicar», elige el video o las fotos (TikTok recibe un video, o hasta 35 fotos JPG o WebP; desde el teléfono, hasta diez archivos) y escribe el texto.
+2. Marca la cuenta de TikTok. Aparece «TikTok · nombre_de_cuenta» con «Se publicará en la cuenta …».
+3. En «Quién puede verlo», toca una opción: no viene ninguna elegida.
+4. En «Permitir», enciende lo que quieras dejar: «Comentarios», «Dúos», «Pegar (Stitch)».
+5. Si promociona una marca, enciende «Este contenido promociona una marca» y elige «Mi marca» o «Contenido patrocinado». Si es hecho con IA, enciende «Hecho con IA».
+6. «Programar» o «Publicar ahora».
+
+Para mandarlo a la bandeja de TikTok y terminarlo en la app de TikTok, enciende «Enviar como borrador a mi bandeja de TikTok» en vez de los pasos 3 a 5. Sin elegir quién puede verlo, al programar sale «TikTok necesita que elijas la privacidad.».
+
+### Para poner una respuesta automática por palabra clave
+
+1. En «Publicar», en «Post», toca «▸ Respuesta automática por palabra clave».
+2. Escribe la «Palabra clave» (una sola palabra), el «Mensaje» con el enlace y, si quieres, cambia la «Respuesta pública».
+3. «Programar» o «Publicar ahora». Para quitarla, borra la palabra.
+
 ### Para publicar de inmediato
 
-1. Arma el post como en los pasos 1 a 4 de arriba.
+1. Arma el post como en los pasos 1 a 4 de «Para programar un post».
 2. Toca «Publicar ahora».
 3. Aparece la ventana «Publicar ahora» con el texto «¿Publicar ahora en nombre_de_cuenta y otra_cuenta? Saldrá en los próximos 5 minutos.».
 4. Toca «Publicar» (o «Cancelar» para no hacer nada).
@@ -383,7 +409,7 @@ No hay que hacer nada: lo escrito se guarda solo como borrador («Borrador guard
 2. Se abre en «Publicar» con lo que tenía: el texto, los archivos, las cuentas, el trial reel y la fecha. Lo que estaba en «Publicar» antes queda en los borradores.
 3. Sigue escribiendo («Abriste un borrador: lo que cambies se guarda solo.»), o «Programar».
 
-Un borrador empezado en el panel web se abre igual. Si va también a TikTok o tiene una palabra clave, sale el aviso amarillo y se programa en el panel web; desde el teléfono se puede editar sin que eso se pierda.
+Un borrador empezado en el panel web se abre igual, con su bloque de TikTok y su palabra clave. Si va también a Threads o X, sale el aviso amarillo y se programa en el panel web; desde el teléfono se puede editar sin que eso se pierda.
 
 ### Para empezar otra publicación sin perder la que está
 
@@ -556,7 +582,7 @@ En La Mesa, toca «Enviados»: lo respondido desde Tu Parrilla, por la respuesta
 | «El archivo supera los 500 MB.» | Un archivo es demasiado grande. | Elegir uno más liviano. |
 | «Elige al menos una cuenta.» | No hay ninguna cuenta marcada. | Tocar al menos una. |
 | «No se pudieron cargar las cuentas.» | Falló la descarga de la lista de cuentas. | «Reintentar». |
-| «No hay ninguna cuenta lista para publicar desde el teléfono. Conéctala en el panel web, en Los Fierros.» | No hay ninguna cuenta de Instagram, Facebook o YouTube. | Conectar la cuenta en el panel web, en [Los Fierros](los-fierros.md). Si solo hay TikTok, desde el teléfono no se puede publicar. |
+| «No hay ninguna cuenta lista para publicar desde el teléfono. Conéctala en el panel web, en Los Fierros.» | No hay ninguna cuenta de Instagram, Facebook, YouTube o TikTok (o, en una versión de la app sin actualizar, solo hay TikTok). | Conectar la cuenta en el panel web, en [Los Fierros](los-fierros.md); si solo hay TikTok, actualizar la app abriéndola dos veces con señal. |
 | «… · reconéctala» | Esa cuenta perdió la conexión. | Reconectarla en el panel web, en [Los Fierros](los-fierros.md). |
 | «45 %», «En cola» (sobre una miniatura) | El archivo está subiendo, o espera su turno. | Esperar. |
 | «Subiendo el archivo…», «Subiendo N archivos…» | Faltan archivos por subir; mientras tanto «Programar» y «Publicar ahora» están apagados. | Esperar. |
@@ -571,13 +597,22 @@ En La Mesa, toca «Enviados»: lo respondido desde Tu Parrilla, por la respuesta
 | «Abriendo borrador…» | Se está descargando el borrador que se tocó. | Esperar. |
 | «Ese borrador ya no existe: se programó o se descartó.» | Se tocó un borrador que ya no está. | Arrastrar «La Parrilla» hacia abajo para actualizar la lista. |
 | «No se pudo abrir el borrador. Revisa tu señal.» | Sin conexión al abrir un borrador. | Volver a tocarlo cuando haya señal. |
-| «Este borrador va también a TikTok: eso se programa en el panel web.» (o con «tiene la palabra clave «…»») | El borrador tiene algo que el teléfono no programa. Se puede editar, pero no enviar desde acá. | Programarlo en el panel web, en [La Parrilla](la-parrilla.md). |
+| «Este borrador va también a Threads: eso se programa en el panel web.» (o con otra red; en una versión sin actualizar, también «… a TikTok …» o «… tiene la palabra clave «…» …») | El borrador tiene algo que esta versión del teléfono no programa. Se puede editar, pero no enviar desde acá. | Programarlo en el panel web, en [La Parrilla](la-parrilla.md), o, si es TikTok o la palabra clave, actualizar la app abriéndola dos veces con señal. |
+| «Leyendo tu cuenta…» (en el bloque de TikTok) | Se están pidiendo a TikTok los datos de la cuenta. | Esperar. |
+| «No pude leer tu cuenta de TikTok.» (en ámbar, en el bloque de TikTok) | TikTok no contestó con los datos de la cuenta. Se ofrecen las cuatro opciones de «Quién puede verlo». | Se puede programar igual; TikTok vuelve a revisar antes de publicar. |
+| «Reconecta TikTok para autorizar la publicación.» o «Conecta TikTok en Los Fierros antes de programar.» | El permiso de esa cuenta de TikTok venció o no alcanza. | Reconectarla en el panel web, en [Los Fierros](los-fierros.md). |
+| «Este video dura … y TikTok publica en esta cuenta videos de hasta ….» | El video es más largo de lo que TikTok deja publicar en esa cuenta. «Programar» y «Publicar ahora» se apagan. | Elegir un video más corto, o desmarcar la cuenta de TikTok. |
+| «TikTok necesita que elijas la privacidad.» | Hay una cuenta de TikTok marcada sin nada elegido en «Quién puede verlo» (o lo elegido la cuenta ya no lo permite). | Elegir una opción en «Quién puede verlo», o encender «Enviar como borrador a mi bandeja de TikTok». |
+| «Un contenido patrocinado no puede ser privado.» (al programar) o «Un contenido patrocinado no puede ser privado. Vuelve a elegir quién puede verlo.» (en el bloque) | «Contenido patrocinado» con «Solo yo» o sin elegir quién puede verlo. | Elegir otra opción en «Quién puede verlo». |
+| «TikTok recibe un video, o hasta 35 fotos JPG o WebP.» | A TikTok va más de un video, un video con fotos, o una foto PNG o GIF. | Dejar un solo video, o fotos JPG o WebP. |
+| «La palabra clave es una sola palabra, sin espacios, hasta 30 letras.», «El mensaje del privado va de 1 a 1000 caracteres.», «La respuesta pública va de 1 a 300 caracteres.» | Algo de la respuesta automática por palabra clave no cumple. | Corregirlo en «Respuesta automática por palabra clave», o borrar la palabra para no ponerla. |
+| «Una historia no tiene comentarios: no lleva palabra clave.» | Una historia llegó con palabra clave (no debería verse desde la app). | Borrar la palabra en «Post», o programarla como post. |
 | «Descartar» / «¿Descartar este borrador? Lo escrito y los archivos elegidos se pierden.» | Confirmación de descartar. | «Descartar» o «Cancelar». |
 | «No se pudo descartar el borrador: sigue en la lista de borradores.» | Sin conexión al descartar; el formulario se vació, pero el borrador sigue guardado. | Abrirlo desde «Borradores (N)» y volver a descartarlo cuando haya señal. |
 | «Hay un archivo que no terminó de subir» / «Espera a que termine, reinténtalo o quítalo antes de dejar esta publicación.» | Se tocó «Nueva publicación», un borrador o la cruz de un día con un archivo todavía subiendo o caído. | Esperar a que suba, tocar «Reintentar» en la miniatura o quitarlo, y volver a intentar. |
 | «No se pudo guardar el borrador» / «Si sigues, lo último que cambiaste se pierde.» | Se quiso dejar la publicación, pero el último guardado falló. | «Quedarme» y esperar a tener señal, o «Seguir igual» si no importa perder lo último. |
 | «Publicar ahora» / «¿Publicar ahora en …? Saldrá en los próximos 5 minutos.» | Confirmación de publicar de inmediato. | «Publicar» o «Cancelar». |
-| «Instagram, YouTube y TikTok necesitan al menos un archivo.» | Hay una cuenta de Instagram o YouTube marcada y ningún archivo. | Agregar una foto o video, o desmarcar esas cuentas. |
+| «Instagram, YouTube y TikTok necesitan al menos un archivo.» | Hay una cuenta de Instagram, YouTube o TikTok marcada y ningún archivo. | Agregar una foto o video, o desmarcar esas cuentas. |
 | «Escribe un texto o adjunta un archivo.» | El post está vacío. | Escribir texto o agregar un archivo. |
 | «Máximo diez archivos por publicación.» | Hay más de diez archivos. | Quitar algunos. |
 | «La hora debe estar en el futuro.» | La hora elegida ya pasó. | Tocar «Cuándo: …» y elegir una hora futura. |
@@ -589,7 +624,7 @@ En La Mesa, toca «Enviados»: lo respondido desde Tu Parrilla, por la respuesta
 | «La música de Instagram solo funciona en cuentas conectadas con Facebook, y esta se conectó con el login de Instagram.» | Al programar, la cuenta de Instagram está conectada con el login de Instagram. | Tocar «Quitar» en la canción, o reconectar la cuenta con Facebook en el panel web. |
 | «La cuenta x no está conectada. Vuelve a conectarla en Los Fierros.» (con el nombre de la cuenta en lugar de x) | La cuenta elegida perdió la conexión. Se reconecta en Los Fierros del panel web, en el botón «Ajustes»: la app muestra Los Fierros en Ajustes, solo para leer, y no conecta ni reconecta. | Reconectarla en el panel web. |
 | «Una de las cuentas elegidas no es tuya.» | Una cuenta ya no pertenece a quien publica (por ejemplo, se borró). | Cerrar la app del todo y volver a abrirla: la lista de cuentas de «Publicar» se carga al abrir. |
-| «Red desconocida o sin publicación: x.» | Se intentó publicar en una red que el teléfono no maneja (hoy, TikTok). | Publicar en esa red desde el panel web, en [La Parrilla](la-parrilla.md). |
+| «Red desconocida o sin publicación: x.» | Se intentó publicar en una red que esa versión del teléfono no maneja (TikTok, en una versión sin actualizar). | Publicar en esa red desde el panel web, en [La Parrilla](la-parrilla.md). |
 | «Falta subir un archivo.» | Uno de los archivos subidos ya no está en el servidor. | Los elegidos en el teléfono se vuelven a subir solos: esperar y tocar de nuevo «Programar». Si el archivo venía de un borrador, quitarlo con su «✕» y volver a elegirlo. |
 | «No se pudo guardar. Intenta de nuevo.» | Falla del servidor al programar el post. | Volver a tocar «Programar» o «Publicar ahora». |
 | «Falta configurar Cloudflare R2 (R2_*).» | El sitio no tiene configurado dónde guardar archivos. | Avisar a quien administra el sitio. |
@@ -661,14 +696,16 @@ En La Mesa, toca «Enviados»: lo respondido desde Tu Parrilla, por la respuesta
 - «El video llegó a TikTok sin el texto» → es así con lo que va a la bandeja de TikTok. En «La Parrilla», la tarjeta del post tiene «Copiar el texto» (o «Pasar el texto…»); ver «Para copiar el texto de lo que llegó a TikTok».
 - «Toco "Pasar el texto…" y no aparece "Copiar"» → esa versión de la app no trae el portapapeles y la lista de compartir de ese teléfono no ofrece copiar. Abrir la publicación y mantener apretado el texto; una versión más nueva de la app, instalada desde la tienda, copia directo.
 - «Perdí el teléfono» → quien administra el sitio puede revocar el acceso de todos los teléfonos a la vez; las conexiones con las redes no se tocan.
-- «No me aparece TikTok para publicar» → desde el teléfono no se publica en TikTok; se hace en el panel web, en [La Parrilla](la-parrilla.md).
+- «No me aparece TikTok para publicar» → la cuenta tiene que estar conectada en el panel web, en [Los Fierros](los-fierros.md). Si está conectada y no sale, la app no se ha actualizado: abrirla dos veces con señal. Mientras, se programa en el panel web, en [La Parrilla](la-parrilla.md).
+- «¿Por qué no viene elegido quién puede verlo en TikTok?» → TikTok exige que lo elija la persona cada vez; las casillas de «Permitir» también nacen apagadas. Solo «Música de TikTok» recuerda lo de la última vez.
+- «¿Cómo pongo la palabra clave desde el teléfono?» → en «Publicar», en «Post», «▸ Respuesta automática por palabra clave»; ver «Para poner una respuesta automática por palabra clave».
 - «No aparece mi cuenta» o «dice reconéctala» → las cuentas se conectan y reconectan en el panel web, en [Los Fierros](los-fierros.md). La app no conecta nada.
-- «Los botones Programar y Publicar ahora están grises» → falta texto o un archivo, falta marcar una cuenta, un archivo todavía está subiendo («Subiendo…») o falló («Reintentar» en la miniatura), o el borrador tiene el aviso amarillo de TikTok o palabra clave.
+- «Los botones Programar y Publicar ahora están grises» → falta texto o un archivo, falta marcar una cuenta, un archivo todavía está subiendo («Subiendo…») o falló («Reintentar» en la miniatura), el video es más largo de lo que la cuenta de TikTok publica (lo dice en rojo su bloque), o el borrador tiene el aviso amarillo de arriba.
 - «Perdí lo que estaba escribiendo» → se guarda solo: está en «La Parrilla» → «▸ Borradores (N)». Si no está, no tenía texto ni archivos subidos, o el guardado falló («No se pudo guardar el borrador.»).
 - «Toqué Programar y dice que primero tiene que guardarse el borrador» → no hubo señal para guardarlo, y sin borrador la app no programa, para no publicar dos veces. Con señal, volver a tocar «Programar»: guarda el borrador y lo programa.
 - «Me sale Algo se rompió» → «Reintentar». Si se repite, cerrar la app y abrirla de nuevo; si sigue, avisar a quien administra el sitio.
 - «Empecé en el computador y quiero terminar en el teléfono» (o al revés) → es el mismo borrador: en el teléfono, «La Parrilla» → «▸ Borradores (N)»; en el panel web, «Borradores (N)» en [La Parrilla](la-parrilla.md).
-- «Me dice que el borrador va también a TikTok» o «que tiene la palabra clave» → eso no se programa desde el teléfono; se programa en el panel web, en [La Parrilla](la-parrilla.md). Se puede seguir editando el texto en el teléfono sin perderlo.
+- «Me dice que el borrador va también a TikTok» o «que tiene la palabra clave» → esa app no se ha actualizado: abrirla dos veces con señal y volver a abrir el borrador. Mientras, se programa en el panel web, en [La Parrilla](la-parrilla.md); se puede seguir editando el texto en el teléfono sin perderlo. Si dice Threads o X, eso se programa en el panel.
 - «Toqué la cruz de un día y desapareció lo que estaba escribiendo» → la cruz empieza otra publicación; lo anterior quedó en «▸ Borradores (N)».
 - «No me sale el botón de trial reel» → hace falta una cuenta de Instagram marcada y exactamente un video, sin fotos, y estar en «Post», no en «Historia».
 - «Quiero subir una historia» → en «Publicar», tocar «Historia» arriba; ver «Para programar una historia».
@@ -717,10 +754,9 @@ Comparada con el panel web, la app no:
 
 - deja oír el reel con la canción de «Música de Instagram» puesta (Instagram no lo permite antes de publicar), ni cambia la canción de algo ya programado;
 - conecta, desconecta ni reconecta redes ([Los Fierros](los-fierros.md));
-- publica en TikTok;
 - cambia los archivos, la portada, la palabra clave ni las opciones de lo programado, le suma cuentas, ni edita o borra lo que ya salió en alguna cuenta ([La Parrilla](la-parrilla.md)): corrige el texto, la hora y las cuentas, y borra, solo lo que no ha salido;
-- al programar, pone portada a un video, atributos a un post ni reglas de respuesta a comentarios con palabra clave;
-- programa un borrador que va también a TikTok o tiene una palabra clave (se edita, pero se programa en el panel web);
+- al programar, pone portada a un video ni atributos a un post, ni un documento PDF en la respuesta automática;
+- programa un borrador que va también a Threads o X (se edita, pero se programa en el panel web);
 - reproduce un video en el visor de historias (muestra su duración), ni cambia el orden de una secuencia ya programada;
 - carga posts por lote;
 - en La Mesa: cambia las instrucciones para el modelo, «Regenerar todos», muestra los descartados ni el filtro «Todos», ni trae la fila de emojis (el teclado del teléfono los tiene) ([La Mesa](la-mesa.md));
@@ -779,6 +815,8 @@ Lo que describe sale de estos archivos:
 - `mobile/src/lib/publicar.ts`
 - `mobile/src/lib/historias.ts` y `mobile/src/components/visor-historias.tsx` («Post · Historia», el visor 9:16, la tira, sus avisos y lo que viaja al programar una historia)
 - `src/app/api/mobile/schedule/route.ts` (programar: una secuencia de historias crea una por archivo) y `src/lib/borrador.ts` (el modo que guarda el borrador y la frase de una app sin actualizar)
+- `mobile/src/components/tiktok-opciones.tsx` y `mobile/src/lib/tiktok.ts` (el bloque de TikTok, sus textos y lo que viaja), `src/app/api/mobile/schedule/accounts/[id]/tiktok/route.ts` y `src/lib/social/publish/tiktok-cuenta.ts` (lo que dice `creator_info`, con sus frases)
+- `mobile/src/components/regla-clave.tsx` y `mobile/src/lib/regla.ts` (la respuesta automática por palabra clave), y `src/lib/social/comentarios/reglas.ts` (sus frases al programar)
 - `mobile/src/components/musica-instagram.tsx`, `mobile/src/lib/musica.ts` y `mobile/src/lib/reproductor.ts` («Música de Instagram»: el bloque, sus frases y la muestra, que con la 1.1.0 se abre afuera)
 - `src/app/api/mobile/musica/route.ts`, `src/app/api/mobile/musica/[id]/route.ts`, `src/app/api/mobile/musica/sugerencia/route.ts` y `src/lib/musica-instagram.ts` (lo que suena, la búsqueda, la muestra de una canción y «Sugiéreme una»)
 - `mobile/src/lib/subir.ts`
@@ -792,7 +830,7 @@ Lo que describe sale de estos archivos:
 - `mobile/src/lib/parrilla.ts`
 - `src/app/api/mobile/` (las rutas que la app llama, con sus frases de error)
 - `src/lib/mobile-api.ts`
-- `src/lib/borrador.ts` (lo que el teléfono guarda de un borrador y el aviso de TikTok o palabra clave)
+- `src/lib/borrador.ts` (lo que el teléfono guarda de un borrador y el aviso de lo que se programa en el panel)
 - `src/lib/borradores-movil.ts`
 - `src/lib/social/publish/validate.ts`
 - `src/lib/social/publish/opciones.ts`
