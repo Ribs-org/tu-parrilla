@@ -20,7 +20,7 @@ lo publicado por hook, tema o serie para ver qué funciona. Y «Tu mejor 10 %» 
 rindió en el período —o lo que menos—, cuánto había que sacar para estar ahí y qué tienen en
 común esas publicaciones. Las dos pueden comparar a igual edad: las views a los 7 días de
 publicada, y «Contra su cuenta», que mide a cada publicación contra lo normal de su propia
-cuenta. «Lado a lado» pone dos publicaciones una al lado de la otra —por ejemplo, la mejor y la
+cuenta; «Tu mejor 10 %», además, a las 48 horas. «Lado a lado» pone dos publicaciones una al lado de la otra —por ejemplo, la mejor y la
 peor—, con su portada, el link para ver el video en la red y cómo crecieron. Y «Llevar para
 la casa» (de día, «Para llevar»), al lado del título, baja todo eso a una planilla de Excel.
 
@@ -933,12 +933,12 @@ publicaciones frente al resto.»
   cuenta con el patrón «<red> · <nombre de la cuenta>».
 - El selector de lado: «Lo mejor» (el de entrada) y «Lo peor».
 - El selector de métrica: «Contra su cuenta, a los 7 días» (el de entrada), «Por views a los 7
-  días», «Por views ganadas», «Por visitas a tu página», «Por clicks en tus links», «Por
-  interacciones» y «Por arrastre».
+  días», «Contra su cuenta, a las 48 horas», «Por views a las 48 horas», «Por views ganadas»,
+  «Por visitas a tu página», «Por clicks en tus links», «Por interacciones» y «Por arrastre».
 - El selector de porcentaje: «El mejor 5 %», «El mejor 10 %» (el de entrada), «El mejor 20 %»
   y «El mejor 25 %»; con «Lo peor», «El peor 5 %» y así.
 - El botón «Con las de menos de 7 días», **solo con las métricas que no son a igual edad**
-  (todas menos las dos primeras). Al entrar está apagado: lo publicado hace menos de 7 días
+  (todas menos las cuatro primeras). Al entrar está apagado: lo publicado hace menos de 7 días
   no compite, contando hasta el final del período, o hasta ahora si el período llega a hoy.
   Prendido, se ve en naranjo y compite todo. Al pasar el mouse: «Lo publicado hace menos de 7
   días casi no tuvo tiempo de sumar: apagado, no compite.»
@@ -947,7 +947,7 @@ publicaciones frente al resto.»
 
 | Rótulo | Valor | Aclaración debajo |
 |---|---|---|
-| «Entran» | «<N> de <M>»: cuántas entraron de cuántas compiten | Quién compite: «Con 7 días cumplidos, de cuentas con 5 o más · sin YouTube» en «Contra su cuenta»; «Publicaciones con 7 días cumplidos · sin YouTube» en views a los 7 días; en las demás, «Publicaciones con <métrica>», y « · sin YouTube» en views ganadas, interacciones y arrastre |
+| «Entran» | «<N> de <M>»: cuántas entraron de cuántas compiten | Quién compite: «Con 7 días cumplidos, de cuentas con 5 o más · sin YouTube» en «Contra su cuenta»; «Publicaciones con 7 días cumplidos · sin YouTube» en views a los 7 días; «Con 48 horas cumplidas, de cuentas con 5 o más · sin YouTube» en «Contra su cuenta, a las 48 horas»; «Publicaciones con 48 horas cumplidas · sin YouTube» en views a las 48 horas; en las demás, «Publicaciones con <métrica>», y « · sin YouTube» en views ganadas, interacciones y arrastre |
 | «El corte» | El número de la última que entró | «<Métrica> para entrar»; con «Lo peor», «<Métrica>: entran las que no pasaron de esto» |
 | «Rinden» | «×4,6»: cuántas veces más rinde la publicación del medio del grupo que la del medio del resto. Con «Lo peor» sale menos de uno, con dos decimales («×0,21») | «La mediana de arriba contra la del resto» («de abajo» con «Lo peor») |
 
@@ -969,7 +969,8 @@ derecha del título, si alguna compite, el enlace «Lado a lado →». Una fila
 por publicación que entró: su puesto, su miniatura, el texto (o «?s=<etiqueta>» si no tiene),
 debajo en chico «<red> · <nombre de la cuenta> · <fecha>», y a la derecha su número en la
 métrica elegida: en porcentaje con dos decimales si es el arrastre, y como «×3,0» en «Contra su
-cuenta», con sus views a los 7 días debajo, en chico («300 views»). El texto abre la pieza en la
+cuenta», con sus views a los 7 días debajo, en chico («300 views»); en «Contra su cuenta, a las
+48 horas», lo mismo con sus views a las 48 horas. El texto abre la pieza en la
 misma pestaña.
 
 **Panel «Qué tienen en común»**, explicación «Lo que se repite más entre las de arriba que
@@ -982,10 +983,11 @@ frecuente es en el grupo («×2,4»).
 
 **Panel «Arriba y el resto»** («Abajo y el resto» con «Lo peor»), explicación «Medianas: la
 publicación del medio de cada grupo. Cada una cuenta solo a quien tiene ese número; YouTube no
-entra en «Contra su cuenta», en las views (a los 7 días o ganadas), en las interacciones ni en
-el arrastre.» Una tabla con las columnas «Tu mejor <N> %» (o «Tu peor <N> %») y «El resto», y
-las filas «Contra su cuenta», «Views a los 7 días», «Views ganadas», «Visitas a tu página»,
-«Interacciones» y «Arrastre».
+entra en «Contra su cuenta», en las views (a los 7 días, a las 48 horas o ganadas), en las
+interacciones ni en el arrastre.» Una tabla con las columnas «Tu mejor <N> %» (o «Tu peor <N>
+%») y «El resto», y las filas «Contra su cuenta», «Views a los 7 días», «Contra su cuenta a las
+48 horas», «Views a las 48 horas», «Views ganadas», «Visitas a tu página», «Interacciones» y
+«Arrastre».
 
 **Al pie**, en chico, lo que aplique:
 
@@ -996,6 +998,14 @@ las filas «Contra su cuenta», «Views a los 7 días», «Views ganadas», «Vi
 - con views a los 7 días: ««Views a los 7 días» es el contador una semana después de publicar:
   así lo de hace un mes no le gana a lo de ayer solo por llevar más tiempo. Lo publicado en la
   última semana todavía no compite.»;
+- con «Contra su cuenta, a las 48 horas»: ««Contra su cuenta a las 48 horas» divide las views a
+  las 48 horas de cada publicación por la mediana de su cuenta en el período: ×2 es el doble de
+  lo normal de esa cuenta a esa edad. Una cuenta con menos de 5 publicaciones con su lectura de
+  las 48 horas no compite, y lo de los últimos 2 días tampoco.»;
+- con views a las 48 horas: ««Views a las 48 horas» es el contador 2 días después de publicar,
+  de la primera lectura antes de las 72 horas: sirve para decidir antes que a los 7 días, con lo
+  que pasó al principio. Lo publicado en los últimos 2 días todavía no compite, y tampoco lo que
+  se quedó sin esa lectura.»;
 - con todas menos visitas y clicks: «YouTube no compite en «<Métrica>»: sus reglas no permiten
   calcular métricas con sus datos. Sí compite en visitas y clicks, que mide Tu Parrilla.»;
 - con el arrastre, además, «En el arrastre solo compiten las que ganaron al menos la mediana de
@@ -1048,8 +1058,9 @@ misma publicación: compite una sola. Elige otra en el selector, o amplía el pe
 - El texto (cortado a tres líneas), en chico «<red> · <nombre de la cuenta> · <fecha>», el
   enlace en naranjo «Ver en <red>» con una flechita en diagonal, que abre el post en la red en
   otra pestaña, y «Abrir su pieza».
-- Seis números: «Contra su cuenta» («×3,4»), «Views a los 7 días», «Views ganadas» (en el
-  período), «Views en total», «Visitas a tu página» y «Arrastre». Cualquiera puede ser «—».
+- Ocho números: «Contra su cuenta» («×3,4»), «Views a los 7 días», «Contra su cuenta a las 48
+  horas», «Views a las 48 horas», «Views ganadas» (en el período), «Views en total», «Visitas a
+  tu página» y «Arrastre». Cualquiera puede ser «—».
 
 **Panel «Cómo crecieron»**, explicación «Las views de cada una por días cumplidos desde que se
 publicó, hasta los 30: así se comparan a la misma edad aunque hayan salido en semanas
@@ -1099,7 +1110,9 @@ la cuenta del revisor de Meta, cuando la instalación pide los permisos de lectu
 los reposts de publicaciones ajenas— con views, likes, comentarios (sus respuestas) y
 compartidos (sus reposts más sus citas); guardados y alcance, Threads no los da. TikTok da
 guardados y alcance de cada video solo en las cuentas donde se activó TikTok for Business; en
-las demás quedan vacíos.
+las demás quedan vacíos. Facebook todavía no da views ni alcance: quedan en «—» en todas sus
+publicaciones, reels incluidos, hasta que Meta apruebe el permiso que los lee; no quiere decir
+que nadie las vio. Sus likes, comentarios y compartidos sí llegan.
 
 **Qué publicación se lee cada día.** Depende de su edad. Lo publicado en los últimos 10 días se
 lee todos los días (y, aunque la cuenta publique poco, siempre sus 200 publicaciones más
@@ -1464,13 +1477,19 @@ suerte.
 todas, sin las borradas, que **tienen** la métrica elegida. Un número que no se sabe no
 compite:
 
-- En «Contra su cuenta», «views a los 7 días», «views ganadas», «interacciones» y «arrastre»
-  no compite YouTube (sus reglas no lo permiten).
+- En «Contra su cuenta» (a los 7 días o a las 48 horas), las views a los 7 días o a las 48
+  horas, «views ganadas», «interacciones» y «arrastre» no compite YouTube (sus reglas no lo
+  permiten).
 - En «visitas» y «clicks» no compite una publicación cuyo link con su etiqueta nunca trajo una
   visita.
 - En «views a los 7 días» y «Contra su cuenta» no compite lo publicado hace menos de 7 días,
   que todavía no tiene su lectura, ni lo que no se leyó entre los 7 y los 9 días. En «Contra su
   cuenta», tampoco lo de una cuenta con menos de 5 publicaciones del período con esa lectura.
+- En «views a las 48 horas» y «Contra su cuenta, a las 48 horas», lo mismo a los 2 días: no
+  compite lo publicado hace menos de 48 horas ni lo que no se leyó entre las 48 y las 72 horas
+  (si la sincronización de ese día falló, esa publicación se queda sin el número). En «Contra
+  su cuenta, a las 48 horas», tampoco lo de una cuenta con menos de 5 publicaciones del período
+  con esa lectura.
 - En las demás, con «Con las de menos de 7 días» apagado (como al entrar), no compite lo que
   tenía menos de 7 días al final del período, o a hoy si el período llega a hoy: casi no tuvo
   tiempo de sumar, y con «Lo peor» llenaría la lista.
@@ -1492,6 +1511,11 @@ menor a mayor, y ahí sí entra una con cero: es justamente lo que se busca.
 - «Views a los 7 días»: el contador de views una semana después de publicar (la primera
   lectura después de cumplir 7 días, contados desde la hora de publicación, si llegó antes de
   los 9). Mide a todas a la misma edad, pero una cuenta grande le sigue ganando a una chica.
+- «Contra su cuenta, a las 48 horas» y «Views a las 48 horas»: lo mismo a los 2 días (la
+  primera lectura después de cumplir 48 horas, si llegó antes de las 72). Sirven para decidir
+  antes qué subir a la cuenta principal: lo que salió el lunes ya se puede mirar el miércoles.
+  Lo normal a los 2 días no es lo normal a los 7: se comparan entre ellas, no con las de los 7
+  días.
 - «Views ganadas»: lo ganado en el período. Le da ventaja a lo que salió al principio del
   período sobre lo que salió al final.
 - «Visitas a tu página» y «Clicks en tus links»: lo que trajo cada publicación por su link, en
@@ -1847,7 +1871,8 @@ Para comparar una publicación cualquiera: abrir su pieza y apretar «Comparar l
 
 1. En «Tu mejor 10 %», elegir una métrica que no sea a igual edad (por ejemplo «Por views
    ganadas»): con «Contra su cuenta» y «Por views a los 7 días», lo de la última semana no
-   tiene número todavía.
+   tiene número todavía. Si lo que importa es lo de esta semana, «Contra su cuenta, a las 48
+   horas» ya mide lo publicado hasta hace 2 días.
 2. Apretar «Con las de menos de 7 días». Prendido se ve en naranjo; apretarlo otra vez lo
    apaga.
 
@@ -1957,6 +1982,8 @@ De día, donde una de estas frases dice «La Parrilla» dice «La Barra», y «L
 | «Ninguna publicación del período tiene <métrica>. Las visitas y los clicks se cuentan cuando alguien entra por el link con la etiqueta de la publicación.» | Ninguna publicación del período tiene su link pegado con su etiqueta. | Pegar los links (ver «Para copiar el link…»), o elegir otra métrica. |
 | «Ninguna cuenta tiene 5 publicaciones del período con 7 días cumplidos, y con menos no hay contra qué compararlas. Amplía el período, o mira «Por views a los 7 días».» | Con «Contra su cuenta»: ninguna cuenta tiene 5 publicaciones del período con su lectura de los 7 días (pasa con «Hoy» o «7 días»). | Elegir «30 días» o más, u otra métrica. |
 | «Ninguna publicación del período tiene su lectura de los 7 días: lo de la última semana todavía no los cumple. Amplía el período. YouTube no entra en esta métrica.» | Con «Por views a los 7 días»: todo lo del período se publicó hace menos de 7 días, o es de YouTube. | Elegir un período más largo, o que termine hace más de una semana. |
+| «Ninguna cuenta tiene 5 publicaciones del período con su lectura de las 48 horas, y con menos no hay contra qué compararlas. Amplía el período, o mira «Por views a las 48 horas».» | Con «Contra su cuenta, a las 48 horas»: ninguna cuenta tiene 5 publicaciones del período con su lectura de las 48 horas (pasa con «Hoy»). | Elegir «7 días» o más, u otra métrica. |
+| «Ninguna publicación del período tiene su lectura de las 48 horas: lo de los últimos 2 días todavía no las cumple. Amplía el período. YouTube no entra en esta métrica.» | Con «Por views a las 48 horas»: todo lo del período se publicó hace menos de 2 días, o es de YouTube. | Elegir un período más largo. |
 | «Todo lo del período que tiene <métrica> se publicó hace menos de 7 días. Prende «Con las de menos de 7 días» para verlo, o amplía el período.» | Con «Con las de menos de 7 días» apagado, lo único que tiene esa métrica es reciente. | Prender el botón, o ampliar el período. |
 | «Ninguna publicación del período sumó <métrica>.» | Con «Lo mejor», todas las que compiten tienen cero (abajo, el cero sí entra). | Ampliar el período, u otra métrica. |
 | «<N> publicaciones de menos de 7 días no compiten: casi no tuvieron tiempo de sumar. Para sumarlas, prende «Con las de menos de 7 días».» (o «1 publicación de menos de 7 días no compite: casi no tuvo tiempo de sumar.») | Con el botón apagado, quedaron fuera las publicadas hace menos de 7 días. | Nada, si se quiere comparar lo que tuvo tiempo; prender el botón para que compitan. |
@@ -2039,8 +2066,9 @@ De día, donde una de estas frases dice «La Parrilla» dice «La Barra», y «L
   su propia cuenta a los 7 días. Es la métrica de entrada de «Tu mejor 10 %», y una columna de
   «Comparar por atributo».
 - **«No aparece lo que publiqué ayer» (en «Tu mejor 10 %»)**: con «Contra su cuenta» y «Por
-  views a los 7 días», lo de la última semana todavía no tiene su lectura de los 7 días. En las
-  demás métricas, prender «Con las de menos de 7 días».
+  views a los 7 días», lo de la última semana todavía no tiene su lectura de los 7 días: con
+  «Contra su cuenta, a las 48 horas» aparece a los 2 días. En las métricas que no son a igual
+  edad, prender «Con las de menos de 7 días».
 - **«Quiero ver los videos que mejor y peor anduvieron» / «¿por qué este anduvo mejor que
   este otro?»**: «Tu mejor 10 %» → «Lado a lado →». Ahí están la mejor y la peor con sus
   portadas, sus atributos y cómo crecieron; «Ver en <red>» abre cada video en la red. Para dos
@@ -2048,8 +2076,12 @@ De día, donde una de estas frases dice «La Parrilla» dice «La Barra», y «L
   lado →».
 - **«¿Dónde veo el video?»**: en la red, con «Ver en <red>» (en «Lado a lado», en «Tus
   publicaciones» o en la pieza). Tu Parrilla no guarda el video después de publicarlo.
+- **«¿Puedo saber antes de una semana qué anduvo bien?» / «¿qué subo a la cuenta principal?»**:
+  «Tu mejor 10 %» con «Contra su cuenta, a las 48 horas» y la cuenta de prueba elegida en el
+  selector de cuenta: mide lo publicado hasta hace 2 días contra lo normal de esa cuenta a esa
+  edad.
 - **«Mi video de YouTube no aparece en mi mejor 10 %»**: en «Contra su cuenta», en las views
-  (a los 7 días o ganadas), en las interacciones y en el arrastre YouTube no compite, porque
+  (a los 7 días, a las 48 horas o ganadas), en las interacciones y en el arrastre YouTube no compite, porque
   sus reglas no permiten calcular métricas con sus datos. Con «Por visitas a tu página» o «Por
   clicks en tus links» sí aparece.
 
@@ -2209,7 +2241,7 @@ De día, donde una de estas frases dice «La Parrilla» dice «La Barra», y «L
 - «Comparar por atributo» no cruza dos atributos a la vez (hook y tema juntos), ni muestra qué
   publicaciones forman cada fila.
 - «Tu mejor 10 %» no acepta un porcentaje distinto de 5, 10, 20 o 25 (la API, cualquiera de 1 a
-  50), no ordena por views acumuladas, no mide a otra edad que los 7 días, y «Qué tienen en
+  50), no ordena por views acumuladas, no mide a otra edad que los 7 días y las 48 horas, y «Qué tienen en
   común» no dice qué causó el resultado: dice qué se repite.
 - No guarda ni reproduce los videos: se ven en la red, con «Ver en <red>». «Lado a lado» no
   dibuja la curva de YouTube ni compara más de dos publicaciones a la vez.
@@ -2292,8 +2324,8 @@ Sale de:
   sus notas) y `src/lib/que-funciona.ts` (qué se mira, el mínimo, cuándo uno anduvo mejor y
   cada frase; la música, en `musicaDe` y `queFuncionaLaMusica`); lo que se sabe de cómo salió
   cada publicación, en `publicadosDesdeTuParrilla`, `src/lib/post-attributes.ts`
-- `src/lib/igual-edad.ts` (los 7 días, «Contra su cuenta», su mínimo de 5 y qué es reciente);
-  la lectura de los 7 días sale de `getPostRows`, en `src/lib/posts.ts`
+- `src/lib/igual-edad.ts` (los 7 días, las 48 horas, «Contra su cuenta», su mínimo de 5 y qué es
+  reciente); la lectura de cada edad sale de `getPostRows`, en `src/lib/posts.ts`
 - `src/app/admin/(dash)/analytics/lado-a-lado/page.tsx` («Lado a lado»), `src/lib/lado-a-lado.ts`
   (la curva por edad, los atributos de A y B, las 12 portadas) y
   `src/components/charts/curva-chart.tsx` (el gráfico); las lecturas salen de `getLecturasDe`,

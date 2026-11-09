@@ -10,6 +10,8 @@ import {
   collectPublishedPosts,
   halveLimit,
   isTooMuchData,
+  isVideoWithoutReelInsights,
+  videoIdDe,
   type FacebookPagesList,
   type FacebookInsights,
   type FacebookPost,
@@ -321,5 +323,121 @@ describe('página demasiado pesada (Graph code 1)', () => {
     }
     await expect(collectPublishedPosts('https://graph.test/p?limit=50', fetchJson)).rejects.toBe(otro)
     expect(calls).toBe(1)
+  })
+})
+
+describe('las insights de un reel (#338)', () => {
+  const reel: FacebookPost = {
+    id: '1203923749477794_122122891587448275',
+    created_time: '2026-11-05T15:30:00+0000',
+    attachments: { data: [{ media_type: 'video', target: { id: '987654321' } }] },
+    likes: { summary: { total_count: 1 } },
+  }
+
+  it('videoIdDe saca el id del video de un post de video, y nada de otro post', () => {
+    expect(videoIdDe(reel)).toBe('987654321')
+    expect(videoIdDe({ ...reel, attachments: { data: [{ media_type: 'video' }] } })).toBeNull()
+    expect(videoIdDe({ ...reel, attachments: { data: [{ media_type: 'photo', target: { id: '1' } }] } })).toBeNull()
+    expect(videoIdDe(statusPost)).toBeNull()
+  })
+
+  it('las views y el alcance del reel pisan los del post; los likes exactos siguen del post', () => {
+    const post = normalizeFacebookPost(reel, { data: [{ name: 'post_media_view', values: [{ value: 3 }] }] }, {
+      data: [
+        { name: 'blue_reels_play_count', values: [{ value: 412 }] },
+        { name: 'post_impressions_unique', values: [{ value: 300 }] },
+      ],
+    })
+    expect(post.metrics).toMatchObject({ views: 412, reach: 300, likes: 1 })
+  })
+
+  it('los compartidos salen de post_video_social_actions solo si vienen desglosados', () => {
+    const conDesglose = normalizeFacebookPost(reel, {}, {
+      data: [{ name: 'post_video_social_actions', values: [{ value: { SHARE: 4, COMMENT: 2 } }] }],
+    })
+    expect(conDesglose.metrics.shares).toBe(4)
+    // Un solo número mezcla comentarios y compartidos: no se adivina.
+    const sinDesglose = normalizeFacebookPost(reel, {}, {
+      data: [{ name: 'post_video_social_actions', values: [{ value: 6 }] }],
+    })
+    expect(sinDesglose.metrics.shares).toBeNull()
+  })
+
+  it('el shares.count del post pisa el desglose del reel', () => {
+    const post = normalizeFacebookPost({ ...reel, shares: { count: 9 } }, {}, {
+      data: [{ name: 'post_video_social_actions', values: [{ value: { share: 4 } }] }],
+    })
+    expect(post.metrics.shares).toBe(9)
+  })
+
+  it('isVideoWithoutReelInsights tolera el 404, el video que no es reel y el permiso; nada más', () => {
+    expect(isVideoWithoutReelInsights(new FacebookHttpError(404, 'x'))).toBe(true)
+    expect(isVideoWithoutReelInsights(new FacebookHttpError(400, 'x', 100))).toBe(true)
+    expect(isVideoWithoutReelInsights(new FacebookHttpError(400, 'x', 10))).toBe(true)
+    expect(isVideoWithoutReelInsights(new FacebookHttpError(400, 'x', 200))).toBe(true)
+    expect(isVideoWithoutReelInsights(new FacebookHttpError(400, 'x', 190))).toBe(false)
+    expect(isVideoWithoutReelInsights(new FacebookHttpError(400, 'x', 4))).toBe(false)
+    expect(isVideoWithoutReelInsights(new FacebookHttpError(500, 'x'))).toBe(false)
+    expect(isVideoWithoutReelInsights(new Error('red'))).toBe(false)
+  })
+
+  describe('fetchMetricsById', () => {
+    afterEach(() => {
+      vi.unstubAllGlobals()
+      vi.unstubAllEnvs()
+    })
+
+    const cuenta = { id: 'acc-1', externalId: '1203923749477794' } as never
+
+    function graph(videoInsights: () => Response) {
+      const urls: string[] = []
+      vi.stubGlobal(
+        'fetch',
+        vi.fn(async (url: string) => {
+          urls.push(url)
+          if (url.includes('/video_insights')) return videoInsights()
+          if (url.includes('/insights')) return Response.json({ data: [] })
+          return Response.json(reel)
+        }),
+      )
+      return urls
+    }
+
+    it('con la bandera apagada no pide el id del video ni sus insights', async () => {
+      const urls = graph(() => Response.json({ data: [] }))
+      const metricas = await facebookConnector.fetchMetricsById!(cuenta, 'token', [reel.id])
+      expect(urls.some((u) => u.includes('/video_insights'))).toBe(false)
+      expect(urls.some((u) => u.includes('target'))).toBe(false)
+      expect(metricas.get(reel.id)).toMatchObject({ views: null, reach: null, likes: 1 })
+    })
+
+    it('con la bandera encendida lee las views y el alcance del video del reel', async () => {
+      vi.stubEnv('FACEBOOK_INSIGHTS_DE_REELS', '1')
+      const urls = graph(() =>
+        Response.json({
+          data: [
+            { name: 'blue_reels_play_count', values: [{ value: 412 }] },
+            { name: 'post_impressions_unique', values: [{ value: 300 }] },
+          ],
+        }),
+      )
+      const metricas = await facebookConnector.fetchMetricsById!(cuenta, 'token', [reel.id])
+      expect(urls.some((u) => u.includes('target{id}'))).toBe(true)
+      expect(urls.some((u) => u.includes('/987654321/video_insights?metric='))).toBe(true)
+      expect(metricas.get(reel.id)).toMatchObject({ views: 412, reach: 300, likes: 1 })
+    })
+
+    it('encendida sin el permiso, el reel queda en null y la lectura no se cae', async () => {
+      vi.stubEnv('FACEBOOK_INSIGHTS_DE_REELS', '1')
+      graph(() => new Response(JSON.stringify({ error: { code: 10 } }), { status: 400 }))
+      const metricas = await facebookConnector.fetchMetricsById!(cuenta, 'token', [reel.id])
+      expect(metricas.get(reel.id)).toMatchObject({ views: null, reach: null, likes: 1 })
+    })
+
+    it('un token vencido en las insights del video sube', async () => {
+      vi.stubEnv('FACEBOOK_INSIGHTS_DE_REELS', '1')
+      graph(() => new Response(JSON.stringify({ error: { code: 190 } }), { status: 400 }))
+      await expect(facebookConnector.fetchMetricsById!(cuenta, 'token', [reel.id])).rejects.toThrow('Facebook 400')
+    })
   })
 })

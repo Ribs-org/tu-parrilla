@@ -35,10 +35,13 @@ const SCOPES: Record<string, string> = {
   // network's authorization is its own consent screen. The dialog only accepts scopes
   // the app's Meta use cases activate: pages_read_user_content and pages_manage_posts
   // need the «Administrar páginas» use case (without it the dialog rejects the whole
-  // request as "Invalid Scopes"). read_insights stays out — Meta deprecated it as a
-  // login scope — and publish_video waits until the dialog is confirmed to accept it:
-  // one rejected scope voids the entire request, breaking the connect flow for the
-  // other four. `pages_manage_engagement` is the one that opens listing and replying to
+  // request as "Invalid Scopes"). read_insights stays out for the same reason: the dialog
+  // rejected it in August 2026 because the app's use case does not carry it, not because
+  // Meta retired it (its reference still documents it, and the post and reel insights
+  // require it — see `social/facebook.ts`, issue #338). Adding it is the third Meta
+  // review, behind a flag like the others. publish_video waits until the dialog is
+  // confirmed to accept it: one rejected scope voids the entire request, breaking the
+  // connect flow for the others. `pages_manage_engagement` is the one that opens listing and replying to
   // comments on the Page's own posts; with the app in development mode it needs no review.
   facebook:
     'pages_show_list,pages_read_engagement,pages_read_user_content,pages_manage_posts,business_management,pages_manage_engagement',

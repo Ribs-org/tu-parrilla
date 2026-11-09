@@ -2,18 +2,22 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { borrarAjuste, guardarAjuste } from '@/lib/ajustes'
 import { requireUser } from '@/lib/auth'
+import { CLAVE_CORREOS_DE_LA_COCINA, CORREOS_APAGADOS } from '@/lib/cocina/correo-de-comanda'
 import { CREATIVO_NO_ESTA, descartarCreativo, leerDescarte, programarCreativo } from '@/lib/cocina/meson'
 import { cambiarElMaterial, cancelarLaComanda, sacarDeLaCamara } from '@/lib/cocina/del-dueno'
+import { verEntrega } from '@/lib/cocina/panel'
 import { leerPedido } from '@/lib/cocina/pedido'
 import { NO_SE_PIDIO, pedirComanda } from '@/lib/cocina/pedir'
 import { responderPregunta } from '@/lib/cocina/preguntar'
 import { esUuid } from '@/lib/uuid'
 
 // Lo que el dueño hace con sus comandas desde La Cocina. Aparte de `actions.ts`, que ya es largo:
-// pedir, cancelar, contestarle al chef, programar y descartar desde el mesón, y la cámara de frío.
-// El id del dueño sale siempre de la sesión, nunca de lo que llega. Cancelar, cambiar y sacar son
-// los mismos que hace la app del teléfono (`src/lib/cocina/del-dueno.ts`).
+// pedir, cancelar, contestarle al chef, programar y descartar desde el mesón, la cámara de frío,
+// la entrega que ya vio salir y sus correos. El id del dueño sale siempre de la sesión, nunca de lo
+// que llega. Cancelar, cambiar y sacar son los mismos que hace la app del teléfono
+// (`src/lib/cocina/del-dueno.ts`).
 
 /** Cancela una comanda propia que todavía no está en el horno. No pide la cocina encendida: si el admin la apagó, igual se puede cancelar. */
 export async function cancelarComandaPropia(id: string): Promise<{ error?: string }> {
@@ -101,4 +105,30 @@ export async function sacarMaterialPropio(id: string): Promise<{ error?: string 
   revalidatePath('/admin/ia/bodega')
   revalidatePath('/admin/ia')
   return 'error' in r ? { error: r.error } : {}
+}
+
+/**
+ * Anota que el dueño vio salir esa entrega de una comanda suya —la primera tanda o la comanda
+ * lista—, para que la animación no se repita (`entrega-del-plato.tsx`). La llama la tarjeta al
+ * empezar a animarla. No revalida nada: la página ya muestra lo que hay, y volver a dibujarla
+ * cortaría la animación.
+ */
+export async function verEntregaPropia(id: unknown, entrega: unknown): Promise<void> {
+  const usuario = await requireUser()
+  if (typeof id !== 'string' || !esUuid(id)) return
+  if (entrega !== 'sirviendo' && entrega !== 'lista') return
+  await verEntrega(usuario.id, id, entrega)
+}
+
+/**
+ * Enciende o apaga los correos de La Cocina del dueño: los de cada entrega y cada final de sus
+ * comandas. Encendidos es sin fila, como antes de que se pudieran apagar; apagados, la fila
+ * (`CLAVE_CORREOS_DE_LA_COCINA`). Lo que llega se valida: solo `true` los enciende.
+ */
+export async function guardarCorreosDeLaCocina(encendidos: unknown): Promise<{ error?: string }> {
+  const usuario = await requireUser()
+  if (encendidos === true) await borrarAjuste(usuario.id, CLAVE_CORREOS_DE_LA_COCINA)
+  else await guardarAjuste(usuario.id, CLAVE_CORREOS_DE_LA_COCINA, CORREOS_APAGADOS)
+  revalidatePath('/admin/cuenta')
+  return {}
 }

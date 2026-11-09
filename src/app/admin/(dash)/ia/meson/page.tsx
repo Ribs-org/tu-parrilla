@@ -2,13 +2,21 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { Panel } from '@/components/charts/panel'
 import { DeNocheYDeDia, NombreDe } from '@/components/de-noche-y-de-dia'
+import { EstacionDeLaComanda } from '@/components/estacion-comanda'
 import { requireUser } from '@/lib/auth'
-import { cuantosEnBorradores, mesonDelDueno } from '@/lib/cocina/meson'
+import { cuantosEnBorradores, mesonDelDueno, type ComandaEnElMeson } from '@/lib/cocina/meson'
+import { estadoEnPalabras } from '@/lib/cocina/tarjeta'
 import { esUuid } from '@/lib/uuid'
 import { MESON, nombreDe } from '@/lib/vocabulario'
+import { EntregaDelPlato } from '../entrega-del-plato'
 import { TarjetaDelCreativo } from './tarjeta'
 
 export const dynamic = 'force-dynamic'
+
+/** Cuántos creativos de esa comanda esperan en el mesón. */
+function enLaComanda(c: ComandaEnElMeson): number {
+  return c.piezas.reduce((n, p) => n + p.creativos.length, 0)
+}
 
 /**
  * El mesón —de día, la bandeja—: lo que el chef entregó, por comanda y por pieza, para revisarlo y
@@ -63,6 +71,24 @@ export default async function MesonPage({ searchParams }: { searchParams: Promis
         <div className="space-y-6">
           {meson.map((c) => (
             <Panel key={c.id} title={c.principal ?? 'Comanda sin plato principal'} hint={`Pedida el ${fecha.format(c.creadaEn)}`}>
+              {/* Si llega antes de verla en La Cocina —por el enlace del correo—, el plato sale acá. */}
+              {c.entrega ? (
+                <EntregaDelPlato
+                  como="div"
+                  comandaId={c.id}
+                  entrega={c.entrega}
+                  className="mb-5 flex items-center gap-3 rounded-lg p-1 sm:gap-4"
+                  claseEstacion="w-24 sm:w-28"
+                  estacion={<EstacionDeLaComanda estado={c.estado} tandasServidas={c.tandasServidas} className="block h-auto w-full" />}
+                >
+                  <p className="text-sm text-fg-muted">
+                    <DeNocheYDeDia
+                      noche={estadoEnPalabras({ ...c, enElMeson: enLaComanda(c) }, 'noche')}
+                      dia={estadoEnPalabras({ ...c, enElMeson: enLaComanda(c) }, 'dia')}
+                    />
+                  </p>
+                </EntregaDelPlato>
+              ) : null}
               <div className="space-y-6">
                 {c.piezas.map((p) => (
                   <section key={p.pieza ?? p.creativos[0]!.id}>

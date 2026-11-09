@@ -1,11 +1,12 @@
 import { createHash } from 'node:crypto'
 import { and, asc, count, desc, eq, inArray, isNotNull, isNull, max, sql } from 'drizzle-orm'
-import { comandaEventos, comandas, creativos, getDb, insumos, latidos, preguntas, users, type EstadoComanda } from '@/db'
+import { comandaEventos, comandas, creativos, getDb, insumos, latidos, preguntas, users, type EntregaDeComanda, type EstadoComanda } from '@/db'
 import { prioridadDelDueno } from '@/lib/planes/prioridad'
 import { CANCELABLES, EN_MARCHA } from './estados'
 import { ordenarFila } from './fila'
 import { clasificarCocina, type EstadoDeLaCocina } from './latido'
 import { instruccionDe } from './pedido'
+import { entregaSinVer } from './tarjeta'
 
 // Lo que la pestaña La Cocina lee y escribe para su dueño: sus comandas con su línea de tiempo, si
 // la cocina está abierta, y cancelar. Todo por dueño; lo de los demás entra solo como una cuenta
@@ -57,6 +58,8 @@ export type ComandaDelPanel = {
   eventos: EventoDelPanel[]
   /** Lo que el chef pregunta y espera respuesta; solo mientras la comanda está en `pregunta`. */
   pregunta: PreguntaDelPanel | null
+  /** La entrega que el dueño todavía no vio salir (`entregaSinVer`): la tarjeta la anima una vez. */
+  entrega: EntregaDeComanda | null
 }
 
 export type PreguntaDelPanel = {
@@ -146,8 +149,24 @@ export async function comandasDelDueno(ownerId: string): Promise<ComandaDelPanel
             vuelveA: abierta.estadoPrevio,
           }
         : null,
+      entrega: entregaSinVer(c.estado, c.entregaVista ?? null),
     }
   })
+}
+
+/**
+ * Anota que el dueño vio salir esa entrega, para que la animación no se repita: ni al volver, ni en
+ * otro navegador. Solo la suya, y solo si la comanda sigue en ese momento: si mientras miraba la
+ * primera tanda la comanda quedó lista, `lista` sigue sin ver y sale cuando la mire. No toca
+ * `actualizada_en`: no es un cambio de la comanda, y la vigía no tiene por qué recargar por esto.
+ */
+export async function verEntrega(ownerId: string, id: string, entrega: EntregaDeComanda): Promise<boolean> {
+  const filas = await getDb()
+    .update(comandas)
+    .set({ entregaVista: entrega })
+    .where(and(eq(comandas.id, id), eq(comandas.ownerId, ownerId), eq(comandas.estado, entrega)))
+    .returning({ id: comandas.id })
+  return filas.length > 0
 }
 
 export type PulsoDeLaCocina = {

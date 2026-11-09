@@ -42,7 +42,7 @@ describe('buildMetricPost', () => {
     permalink: 'https://instagram.com/p/x', caption: 'Hola', thumbnailUrl: null,
     mediaType: 'video', publishedLabel: '3 sep', publishedAt: new Date('2026-01-15T14:15:00Z'),
     campaign: 'reel-42', archived: false,
-    views: 5210, viewsChange: 1200, viewsA7Dias: 4800, likesChange: 30, commentsChange: 2, sharesChange: 1,
+    views: 5210, viewsChange: 1200, viewsA7Dias: 4800, viewsA48h: 2100, likesChange: 30, commentsChange: 2, sharesChange: 1,
     isNew: false, likes: 310, comments: 12, shares: 8, saves: null, reach: 4100,
     visits: 85, uniques: 60, clicks: 40, ctr: 3.3, pull: 7.1,
   }
@@ -55,6 +55,7 @@ describe('buildMetricPost', () => {
       etiqueta: 'reel-42', atributos: { hook: 'pregunta' }, archivado: false,
       metricas: {
         views: 5210, viewsGanadas: 1200, viewsA7Dias: 4800, contraSuCuenta: null,
+        viewsA48h: 2100, contraSuCuenta48h: null,
         likes: 310, comentarios: 12,
         compartidos: 8, alcance: 4100, visitasAlSitio: 85, clicks: 40,
         ctr: 3.3, arrastre: 7.1,
@@ -73,6 +74,16 @@ describe('buildMetricPost', () => {
 
   it('«contra su cuenta» llega de quien tiene la lista entera', () => {
     expect(buildMetricPost(row, null, ZONE, null, 2.5).metricas.contraSuCuenta).toBe(2.5)
+  })
+
+  it('«contra su cuenta» a las 48 horas viaja aparte de la de los 7 días', () => {
+    const { metricas } = buildMetricPost(row, null, ZONE, null, 2.5, 1.2)
+    expect(metricas.contraSuCuenta).toBe(2.5)
+    expect(metricas.contraSuCuenta48h).toBe(1.2)
+  })
+
+  it('sin su lectura a las 48 horas, viewsA48h viaja null, nunca 0', () => {
+    expect(buildMetricPost({ ...row, viewsA48h: null }, null, ZONE).metricas.viewsA48h).toBeNull()
   })
 })
 

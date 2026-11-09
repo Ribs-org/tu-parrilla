@@ -105,6 +105,10 @@ export type MetricPost = {
     viewsA7Dias: number | null
     /** Las views a los 7 días sobre la mediana de su cuenta en el rango: 2 es el doble de lo normal. */
     contraSuCuenta: number | null
+    /** El contador a los 2 días: la primera lectura entre las 48 y las 72 horas (`igual-edad.ts`). */
+    viewsA48h: number | null
+    /** Lo mismo que `contraSuCuenta`, con las views a las 48 horas. */
+    contraSuCuenta48h: number | null
     likes: number | null
     comentarios: number | null
     compartidos: number | null
@@ -118,8 +122,8 @@ export type MetricPost = {
 
 /**
  * Nombres en español para el consumidor; los nulls viajan intactos (nunca 0). `contraSuCuenta`
- * depende de las demás publicaciones de la cuenta en el rango, así que la calcula quien tiene
- * la lista entera (`contraSuCuenta` de `igual-edad.ts`).
+ * y `contraSuCuenta48h` dependen de las demás publicaciones de la cuenta en el rango, así que
+ * las calcula quien tiene la lista entera (`contraSuCuenta` de `igual-edad.ts`, a cada edad).
  */
 export function buildMetricPost(
   row: PostRow,
@@ -127,6 +131,7 @@ export function buildMetricPost(
   zone: string,
   cuenta: CuentaApi | null = null,
   contraSuCuenta: number | null = null,
+  contraSuCuenta48h: number | null = null,
 ): MetricPost {
   return {
     red: row.network,
@@ -143,6 +148,8 @@ export function buildMetricPost(
       viewsGanadas: row.viewsChange,
       viewsA7Dias: row.viewsA7Dias,
       contraSuCuenta,
+      viewsA48h: row.viewsA48h,
+      contraSuCuenta48h,
       likes: row.likes,
       comentarios: row.comments,
       compartidos: row.shares,

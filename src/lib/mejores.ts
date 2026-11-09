@@ -3,7 +3,7 @@
 // resto. Puro, para que lo prueben los tests; lo usan la pantalla de Los Números y
 // `GET /api/metrics/mejores`.
 
-import { contraSuCuenta, esReciente } from './igual-edad'
+import { A_LAS_48_HORAS, contraSuCuenta, esReciente } from './igual-edad'
 import { networkLabel } from './networks'
 import { medianaDe } from './parrilla'
 import { CLAVE_PIEZA, textoDeAtributo } from './pieza'
@@ -13,6 +13,8 @@ import type { Atributos } from './social/publish/atributos'
 export type Metrica =
   | 'contraSuCuenta'
   | 'viewsA7Dias'
+  | 'contraSuCuenta48h'
+  | 'viewsA48h'
   | 'viewsGanadas'
   | 'visitas'
   | 'clicks'
@@ -22,19 +24,29 @@ export type Metrica =
 /** La tajada de arriba o la de abajo. */
 export type Lado = 'mejor' | 'peor'
 
+/** `contraSuCuenta` de lo que compite a cada edad, por id de publicación. */
+export type Relativos = {
+  aLos7Dias: ReadonlyMap<string, number>
+  a48h: ReadonlyMap<string, number>
+}
+
+/** Cada publicación contra lo normal de su cuenta, a las dos edades (`igual-edad.ts`). */
+export function relativosDe(filas: readonly PostRow[]): Relativos {
+  return { aLos7Dias: contraSuCuenta(filas), a48h: contraSuCuenta(filas, A_LAS_48_HORAS) }
+}
+
 type DefinicionMetrica = {
   /** Su nombre en una cifra o en una columna: «Views ganadas». */
   nombre: string
   /** La opción del selector: «Por views ganadas». */
   opcion: string
-  /** `relativos` es `contraSuCuenta` de lo que compite, por id de publicación. */
-  valor: (fila: PostRow, relativos: ReadonlyMap<string, number>) => number | null
+  valor: (fila: PostRow, relativos: Relativos) => number | null
   /** Derivada de lo que da la red: YouTube no entra (`politica-youtube`). */
   sinYouTube: boolean
   /** Un conteo, un porcentaje, o cuántas veces lo normal de su cuenta. */
   formato: 'conteo' | 'porcentaje' | 'veces'
   /**
-   * Se mide a la misma edad para todas. Lo de menos de 7 días no la tiene, así que el
+   * Se mide a la misma edad para todas. Lo que todavía no la cumple no la tiene, así que el
    * interruptor de las recientes no le aplica.
    */
   igualEdad: boolean
@@ -53,13 +65,13 @@ export function interaccionesDe(fila: PostRow): number | null {
  * Las métricas por las que se puede ordenar. Las visitas y los clicks los mide Tu Parrilla,
  * así que YouTube compite; lo ganado, las interacciones y el arrastre salen de restar
  * lecturas de la red, y `getPostRows` ya se las anula a YouTube, igual que las views a los 7
- * días, de las que sale «contra su cuenta».
+ * días y a las 48 horas, de las que sale «contra su cuenta» a cada edad.
  */
 export const METRICAS: Record<Metrica, DefinicionMetrica> = {
   contraSuCuenta: {
     nombre: 'Contra su cuenta',
     opcion: 'Contra su cuenta, a los 7 días',
-    valor: (f, relativos) => relativos.get(f.id) ?? null,
+    valor: (f, relativos) => relativos.aLos7Dias.get(f.id) ?? null,
     sinYouTube: true,
     formato: 'veces',
     igualEdad: true,
@@ -68,6 +80,22 @@ export const METRICAS: Record<Metrica, DefinicionMetrica> = {
     nombre: 'Views a los 7 días',
     opcion: 'Por views a los 7 días',
     valor: (f) => f.viewsA7Dias,
+    sinYouTube: true,
+    formato: 'conteo',
+    igualEdad: true,
+  },
+  contraSuCuenta48h: {
+    nombre: 'Contra su cuenta a las 48 horas',
+    opcion: 'Contra su cuenta, a las 48 horas',
+    valor: (f, relativos) => relativos.a48h.get(f.id) ?? null,
+    sinYouTube: true,
+    formato: 'veces',
+    igualEdad: true,
+  },
+  viewsA48h: {
+    nombre: 'Views a las 48 horas',
+    opcion: 'Por views a las 48 horas',
+    valor: (f) => f.viewsA48h,
     sinYouTube: true,
     formato: 'conteo',
     igualEdad: true,
@@ -117,6 +145,8 @@ export const METRICAS: Record<Metrica, DefinicionMetrica> = {
 export const ORDEN_METRICAS: readonly Metrica[] = [
   'contraSuCuenta',
   'viewsA7Dias',
+  'contraSuCuenta48h',
+  'viewsA48h',
   'viewsGanadas',
   'visitas',
   'clicks',
@@ -142,7 +172,7 @@ export const PERCENTIL_MIN = 1
 export const PERCENTIL_MAX = 50
 
 export const METRICA_ERROR =
-  'La métrica no se entendió (usa contraSuCuenta, viewsA7Dias, viewsGanadas, visitas, clicks, interacciones o arrastre).'
+  'La métrica no se entendió (usa contraSuCuenta, viewsA7Dias, contraSuCuenta48h, viewsA48h, viewsGanadas, visitas, clicks, interacciones o arrastre).'
 export const PERCENTIL_ERROR = 'El percentil tiene que ser un entero entre 1 y 50.'
 export const LADO_ERROR = 'El lado no se entendió (usa mejor o peor).'
 export const RECIENTES_ERROR = 'recientes va con si o no.'
@@ -176,6 +206,8 @@ export type Entrada = { fila: PostRow; atributos: Atributos | null }
 export type Medianas = {
   contraSuCuenta: number | null
   viewsA7Dias: number | null
+  contraSuCuenta48h: number | null
+  viewsA48h: number | null
   viewsGanadas: number | null
   visitas: number | null
   interacciones: number | null
@@ -228,12 +260,14 @@ export type Resultado = {
   enComun: Rasgo[]
 }
 
-function medianasDe(entradas: Entrada[], relativos: ReadonlyMap<string, number>): Medianas {
+function medianasDe(entradas: Entrada[], relativos: Relativos): Medianas {
   const de = (pick: (f: PostRow) => number | null) =>
     medianaDe(entradas.map((e) => pick(e.fila)).filter((v): v is number => v !== null))
   return {
-    contraSuCuenta: de((f) => relativos.get(f.id) ?? null),
+    contraSuCuenta: de((f) => relativos.aLos7Dias.get(f.id) ?? null),
     viewsA7Dias: de((f) => f.viewsA7Dias),
+    contraSuCuenta48h: de((f) => relativos.a48h.get(f.id) ?? null),
+    viewsA48h: de((f) => f.viewsA48h),
     viewsGanadas: de((f) => f.viewsChange),
     visitas: de((f) => f.visits),
     interacciones: de(interaccionesDe),
@@ -349,7 +383,7 @@ export function enComun(grupo: Entrada[], todas: Entrada[], zona: string): Rasgo
  * 100)` (al menos una) y todas las empatadas con la última. Arriba nunca entra una con cero,
  * que no rindió nada; abajo sí, que es justamente lo que se busca. Un null es «no se sabe» y
  * no compite: YouTube en lo derivado, un post cuyo link nunca se pegó en las visitas, uno sin
- * su lectura de los 7 días.
+ * su lectura a los 7 días o a las 48 horas.
  *
  * Con `conRecientes: false`, en las métricas que no son a igual edad tampoco compite lo que
  * tenía menos de 7 días al cierre: casi no tuvo tiempo de sumar, y abajo llenaría la tajada.
@@ -366,7 +400,7 @@ export function tajada(
   const sinRecientes = !def.igualEdad && opciones.conRecientes === false
   const cierre = opciones.cierre ?? new Date()
 
-  const relativos = contraSuCuenta(entradas.map((e) => e.fila))
+  const relativos = relativosDe(entradas.map((e) => e.fila))
   const conValor = entradas
     .map((e) => ({ ...e, valor: def.valor(e.fila, relativos) }))
     .filter((e): e is Entrada & { valor: number } => e.valor !== null)

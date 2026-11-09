@@ -28,7 +28,7 @@ import {
 } from '@/lib/storage'
 import { prioridadDelDueno } from '@/lib/planes/prioridad'
 import { esUuid } from '@/lib/uuid'
-import { AVISAN, type AvisoDeComanda } from './correo-de-comanda'
+import { avisoDelCambio, type AvisoDeComanda } from './correo-de-comanda'
 import type { CreativoAnunciado } from './creativo'
 import { baseDeNombre } from './insumos'
 import { TERMINALES, puedePasar } from './estados'
@@ -259,6 +259,8 @@ export type CambioDeEstado = {
   eta?: Date | null
   motivo?: string | null
   tandas?: { servidas: number; total: number | null }
+  /** El asunto del correo que dispara este cambio, ya saneado (`asuntoDe`). No se guarda: va solo al correo. */
+  asunto?: string | null
 }
 
 export type ResultadoCambio =
@@ -280,6 +282,8 @@ export type ResultadoCambio =
  * pero Postgres deja escribir a una sola: la otra espera el candado de la fila, vuelve a mirar el
  * `where`, ya no calza y termina en `409`. Y un reintento posterior choca con la transición
  * (`lista` no pasa a `lista`; lo terminado no se mueve). Así, el `aviso` sale de una sola llamada.
+ * La primera tanda, igual: avisa solo el paso que entra a `sirviendo` (`avisoDelCambio`), y uno de
+ * `sirviendo` a `sirviendo` —otra tanda, o un reintento— no avisa.
  */
 export async function cambiarEstado(id: string, cambio: CambioDeEstado, ahora: Date): Promise<ResultadoCambio> {
   const actual = await leer(id)
@@ -329,7 +333,7 @@ export async function cambiarEstado(id: string, cambio: CambioDeEstado, ahora: D
     if (!ahoraEsta) return { falla: 'no-existe' }
     return TERMINALES.has(ahoraEsta.estado) ? { falla: 'terminada' } : { falla: 'transicion', de: ahoraEsta.estado }
   }
-  return { ok: true, comanda: escrita, aviso: AVISAN.has(escrita.estado) ? (escrita.estado as AvisoDeComanda) : null }
+  return { ok: true, comanda: escrita, aviso: avisoDelCambio(actual.estado, escrita.estado) }
 }
 
 export type ResultadoEnlace = { url: string; vence: string } | { falla: 'no-existe' | 'sin-tomar' | 'terminada' }

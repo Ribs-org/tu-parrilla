@@ -157,6 +157,7 @@ describe('una comanda como la lista el teléfono', () => {
     cancelable: true,
     eventos: [],
     pregunta: null,
+    entrega: null,
   }
   const AHORA = new Date('2026-11-06T15:00:00Z')
   const ZONA = 'America/Santiago'

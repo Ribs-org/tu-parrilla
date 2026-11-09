@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { PALABRAS_DE_DIA } from '@/lib/vocabulario'
 import { NOMBRE_ESTADO } from './nombres'
-import { antesEnLaFila, estadoEnPalabras, tramoDelRecorrido } from './tarjeta'
+import { antesEnLaFila, entregaSinVer, estadoEnPalabras, tramoDelRecorrido } from './tarjeta'
 
 const comanda = (estado: Parameters<typeof estadoEnPalabras>[0]['estado'], extra = {}) => ({
   estado,
@@ -54,5 +54,21 @@ describe('el recorrido de la tarjeta', () => {
     expect(tramoDelRecorrido('pregunta', 'revisando')).toBe(1)
     expect(tramoDelRecorrido('pregunta', 'en_preparacion')).toBe(2)
     expect(tramoDelRecorrido('pregunta')).toBe(1)
+  })
+})
+
+describe('la entrega que el dueño no vio salir', () => {
+  it('la primera tanda, una vez; y lista, aunque haya visto la primera tanda', () => {
+    expect(entregaSinVer('sirviendo', null)).toBe('sirviendo')
+    expect(entregaSinVer('sirviendo', 'sirviendo')).toBeNull()
+    expect(entregaSinVer('lista', null)).toBe('lista')
+    expect(entregaSinVer('lista', 'sirviendo')).toBe('lista')
+    expect(entregaSinVer('lista', 'lista')).toBeNull()
+  })
+
+  it('lo que no es una entrega no sale de la cocina: ni lo que viene antes, ni lo servido o terminado mal', () => {
+    for (const estado of ['recibida', 'revisando', 'en_preparacion', 'pregunta', 'en_el_horno', 'servida', 'rechazada', 'fallida', 'cancelada'] as const) {
+      expect(entregaSinVer(estado, null)).toBeNull()
+    }
   })
 })

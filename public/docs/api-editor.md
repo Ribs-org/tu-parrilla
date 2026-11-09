@@ -836,6 +836,8 @@ Parámetros, todos opcionales:
         "viewsGanadas": 1200,
         "viewsA7Dias": 4800,
         "contraSuCuenta": 1.6,
+        "viewsA48h": 2100,
+        "contraSuCuenta48h": 1.3,
         "likes": 310,
         "comentarios": 12,
         "compartidos": 8,
@@ -866,8 +868,23 @@ Parámetros, todos opcionales:
   publicación no tiene `viewsA7Dias`, o si su cuenta tiene menos de 5 publicaciones del
   rango con `viewsA7Dias`. Depende del rango, porque «lo normal» es lo de ese rango; no de
   `red` ni de `cuenta`, que no cambian qué publicaciones tiene cada cuenta.
-- En YouTube, `viewsGanadas`, `viewsA7Dias`, `contraSuCuenta` y `arrastre` vienen siempre
-  `null`: sus políticas no permiten calcular métricas con sus datos.
+- **`viewsA48h`** — lo mismo a los 2 días: la primera lectura después de cumplir 48 horas
+  desde la hora de publicación, si llegó antes de las 72. Sin día de más, a diferencia de la
+  de los 7 días: al principio una publicación crece rápido, y una lectura más tarde ya no es
+  la misma edad. `null` si todavía no cumple 48 horas o si la sincronización de ese día no la
+  leyó; nunca `0`. Sirve para decidir antes: lo que sale un lunes se puede rankear el
+  miércoles.
+- **`contraSuCuenta48h`** — `viewsA48h` dividido por la mediana de las de su cuenta en el
+  rango, con la misma regla que `contraSuCuenta`: `null` si la publicación no tiene
+  `viewsA48h`, o si su cuenta tiene menos de 5 publicaciones del rango con `viewsA48h`. Lo
+  normal a los 2 días no es lo normal a los 7: compárala con otra `contraSuCuenta48h`, no
+  con `contraSuCuenta`.
+- En YouTube, `viewsGanadas`, `viewsA7Dias`, `contraSuCuenta`, `viewsA48h`,
+  `contraSuCuenta48h` y `arrastre` vienen siempre `null`: sus políticas no permiten calcular métricas con sus datos.
+- En Facebook, `views`, `alcance` y lo que sale de las views (`viewsGanadas`, `viewsA7Dias`,
+  `contraSuCuenta`, `viewsA48h`, `contraSuCuenta48h`, `arrastre`) vienen hoy `null` en todas las publicaciones, reels incluidos:
+  Meta los da solo con un permiso (`read_insights`) que Tu Parrilla todavía no tiene. `likes`,
+  `comentarios` y `compartidos` sí llegan. No es que nadie los vea: es que no se sabe.
 - **`likes`, `comentarios`, `compartidos`, `alcance`** — lo que reporta la red.
 - **`visitasAlSitio`, `clicks`, `ctr`** — tráfico real que ese post llevó a la
   página pública del dueño, atribuido por la etiqueta `?s=` (ver abajo). Ninguna red te da
@@ -926,16 +943,17 @@ Parámetros, todos opcionales:
 - `desde`, `hasta`, `red`, `cuenta`: igual que en `/api/metrics/posts`, con las mismas
   frases de error. El rango filtra por **fecha de publicación**.
 - `metrica`: por cuál se ordena. `viewsGanadas` (por defecto), `contraSuCuenta`,
-  `viewsA7Dias` (las dos de la sección 2), `visitas` (visitas a la página del dueño),
+  `viewsA7Dias`, `contraSuCuenta48h`, `viewsA48h` (las cuatro de la sección 2, a igual
+  edad), `visitas` (visitas a la página del dueño),
   `clicks`, `interacciones` (likes, comentarios y compartidos ganados en el rango) o
   `arrastre`. La pantalla entra con `contraSuCuenta`; la API se queda en `viewsGanadas`
-  para no cambiarle la respuesta a quien ya la usa. Otra cosa: `400` con `La métrica no se entendió (usa contraSuCuenta, viewsA7Dias, viewsGanadas, visitas, clicks, interacciones o arrastre).`
+  para no cambiarle la respuesta a quien ya la usa. Otra cosa: `400` con `La métrica no se entendió (usa contraSuCuenta, viewsA7Dias, contraSuCuenta48h, viewsA48h, viewsGanadas, visitas, clicks, interacciones o arrastre).`
 - `percentil`: qué tajada, un entero de 1 a 50; por defecto `10`. Otra cosa: `400` con
   `El percentil tiene que ser un entero entre 1 y 50.`
 - `lado`: `mejor` (por defecto), la tajada de arriba, o `peor`, la de abajo. Otra cosa:
   `400` con `El lado no se entendió (usa mejor o peor).`
 - `recientes`: `si` (por defecto) o `no`. Con `no`, en las métricas que no son a igual
-  edad (todas menos `contraSuCuenta` y `viewsA7Dias`) no compite lo que tenía menos de 7
+  edad (todas menos `contraSuCuenta`, `viewsA7Dias`, `contraSuCuenta48h` y `viewsA48h`) no compite lo que tenía menos de 7
   días al cierre del rango: casi no tuvo tiempo de sumar, y en el peor X % llenaría la
   tajada. La pantalla entra con `no`; la API, con `si`, como respondió siempre. Otra cosa:
   `400` con `recientes va con si o no.`
@@ -965,12 +983,12 @@ Parámetros, todos opcionales:
       "externalId": "18114074218999893",
       "texto": "Tres errores al editar reels",
       "atributos": { "hook": "pregunta", "tema": "edicion" },
-      "metricas": { "viewsGanadas": 21000, "viewsA7Dias": 18500, "contraSuCuenta": 3.4, "visitasAlSitio": 214, "…": "…" }
+      "metricas": { "viewsGanadas": 21000, "viewsA7Dias": 18500, "contraSuCuenta": 3.4, "viewsA48h": 9100, "contraSuCuenta48h": 2.9, "visitasAlSitio": 214, "…": "…" }
     }
   ],
   "medianas": {
-    "mejores": { "contraSuCuenta": 2.6, "viewsA7Dias": 8900, "viewsGanadas": 9800, "visitas": 120, "interacciones": 640, "arrastre": 1.1 },
-    "resto": { "contraSuCuenta": 0.9, "viewsA7Dias": 2300, "viewsGanadas": 2100, "visitas": 18, "interacciones": 95, "arrastre": 0.8 }
+    "mejores": { "contraSuCuenta": 2.6, "viewsA7Dias": 8900, "contraSuCuenta48h": 2.2, "viewsA48h": 4100, "viewsGanadas": 9800, "visitas": 120, "interacciones": 640, "arrastre": 1.1 },
+    "resto": { "contraSuCuenta": 0.9, "viewsA7Dias": 2300, "contraSuCuenta48h": 0.9, "viewsA48h": 1200, "viewsGanadas": 2100, "visitas": 18, "interacciones": 95, "arrastre": 0.8 }
   },
   "enComun": [
     { "rasgo": "hook", "valor": "pregunta", "enMejores": 4, "mejores": 6, "enTodas": 9, "todas": 58, "veces": 4.3 },
@@ -991,12 +1009,17 @@ abajo como lo de arriba.
 
 - **`compiten`** son las publicaciones del rango que tienen la métrica; `publicaciones`,
   todas. Las que no la tienen no compiten (un `null` es «no se sabe», nunca cero):
-  - En `viewsGanadas`, `contraSuCuenta`, `viewsA7Dias`, `interacciones` y `arrastre`,
-    **YouTube no compite**: sus políticas no permiten calcular métricas con sus datos. En
+  - En `viewsGanadas`, `contraSuCuenta`, `viewsA7Dias`, `contraSuCuenta48h`, `viewsA48h`,
+    `interacciones` y `arrastre`, **YouTube no compite**: sus políticas no permiten calcular métricas con sus datos. En
     `visitas` y `clicks` sí, porque esas las mide Tu Parrilla.
   - En `viewsA7Dias` y `contraSuCuenta` no compite lo publicado hace menos de 7 días, que
     todavía no tiene su lectura; en `contraSuCuenta`, tampoco una cuenta con menos de 5
     publicaciones del rango con `viewsA7Dias`.
+  - En `viewsA48h` y `contraSuCuenta48h`, lo mismo con las 48 horas: no compite lo publicado
+    hace menos de 2 días ni lo que se quedó sin su lectura de las 48 horas; en
+    `contraSuCuenta48h`, tampoco una cuenta con menos de 5 publicaciones del rango con
+    `viewsA48h`. Para el mejor 10 % de cada cuenta de prueba a los 2 días:
+    `?cuenta=<la cuenta>&metrica=contraSuCuenta48h&percentil=10`.
   - Con `recientes=no`, en las demás tampoco compite lo que tenía menos de 7 días al cierre
     del rango. **`fueraPorRecientes`** dice cuántas habrían competido y quedaron fuera.
   - En `visitas` y `clicks` no compite un post cuyo link con `?s=` nunca se usó.
