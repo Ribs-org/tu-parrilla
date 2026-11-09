@@ -554,6 +554,13 @@ permisos «por decidir»** de la tabla red por red, para pedirlos todos en una m
   con su código fijo, explicado como contraseña. Los Shorts que sube Tu Parrilla salen
   públicos: la regla de subir en privado no se le aplica a este proyecto.
 
+  Cómo saber si contestaron, sin depender del correo (que puede llegar a pyxis.latam o a
+  parejavice, y traer una pregunta en vez de la aprobación): en
+  <https://console.cloud.google.com/apis/api/youtube.googleapis.com/quotas?project=portafolio-page>,
+  «Queries per day» deja de decir 10.000 cuando la aprueban. Revisado el 2026-11-09: sigue en
+  10.000, con 738 usadas ese día (4 subidas); el cupo aparte de subidas es de 100 al día, así
+  que hoy el cupo no frena nada.
+
   Para que el revisor pueda probar La Mesa tiene que haber un comentario de YouTube en
   «Pendientes»: el 2026-10-26 quedó uno en el Short público «canal video 2» de Pyxis
   oficial. La Mesa solo lee los videos de los últimos siete días, y los comentarios de YouTube
@@ -778,6 +785,12 @@ diciendo «Sin suscripción», y es cierto.
 
 ## Features y trabajo de código
 
+- **La Cocina en la portada (#324)** (2026-11-09). Una sección en `tu-parrilla.cl` que cuente
+  qué entrega La Cocina, en cuánto tiempo y cómo se pide. Decidido por el dueño: el ejemplo del
+  antes y el después son **solo sus dos mejores cortos**, que el equipo de contenido identifica
+  (pedido en el issue). Falta: **[dueño]** el plazo que se promete (se le recomendó «en menos de
+  24 horas»: el 2026-10-27 un pedido esperó siete horas a que el chef lo tomara), y los dos
+  cortos con su original.
 - **«Sincronizar ahora» le puede quitar a una publicación su lectura de las 48 horas** (2026-11-08,
   al sumar `viewsA48h`, #358). La lectura del día (`post_metrics`, una por publicación y día) se
   reescribe entera en cada sincronización, también su `captured_at`. La ventana de las 48 horas
