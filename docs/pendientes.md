@@ -622,8 +622,8 @@ permisos «por decidir»** de la tabla red por red, para pedirlos todos en una m
   pide el SDK 57 (`npx expo-doctor` sin avisos). Nada de la 1.2.0 llega por aire a la 1.1.0
   (`runtimeVersion` es la versión de la app). Falta solo lo del dueño, en orden, con el detalle en
   `docs/play-store.md`, «La 1.2.0, de punta a punta»:
-  1. las credenciales de FCM (la entrada de abajo): el `google-services.json` ya está en `main`;
-     falta la clave en EAS;
+  1. las credenciales de FCM (la entrada de abajo): hechas el 2026-11-08, el `google-services.json`
+     en `main` y la clave en EAS;
   2. lo que el flujo necesita y todavía no está: el secreto `EXPO_TOKEN` en GitHub y la clave de la
      cuenta de servicio de Google Play en EAS (ver «La app en la Play Store», arriba). Sin ellos, el
      build se arma a mano y el `.aab` se sube a mano;
@@ -644,16 +644,11 @@ permisos «por decidir»** de la tabla red por red, para pedirlos todos en una m
      Android `cl.tuparrilla.app` está registrada, y su `google-services.json` está en `mobile/`,
      nombrado en `mobile/app.json` (`android.googleServicesFile`). Ese archivo **sí** va al
      repositorio: según Expo, trae identificadores públicos, y EAS lo necesita en el build.
-  4. En Firebase, **Configuración del proyecto → Cuentas de servicio → Generar nueva clave
-     privada → Generar clave**. Baja un JSON: **ese es secreto**, no va al repositorio ni a un chat
-     (`mobile/.gitignore` ya ignora los `*-firebase-adminsdk-*.json`).
-  5. Súbelo a Expo. En una terminal dentro de `mobile/`: `npx eas-cli credentials` → `Android` →
-     `production` → `Google Service Account` → `Manage your Google Service Account Key for Push
-     Notifications (FCM V1)` → `Set up a Google Service Account Key for Push Notifications (FCM V1)`
-     → `Upload a new service account key`, y elige el JSON. O en expo.dev → el proyecto →
-     **Credentials** → Android → `cl.tuparrilla.app` → **FCM V1 service account key → Add a service
-     account key**. Va por identificador de app, así que sirve para los dos perfiles.
-  6. Borra el JSON del paso 4 de la carpeta de descargas cuando esté subido.
+  4–6. Hechos el 2026-11-08: la clave de la cuenta de servicio de Firebase está en EAS (expo.dev →
+     Credentials → Android → `cl.tuparrilla.app` → FCM V1 service account key, proyecto
+     `tu-parrilla`). Si hubiera que cambiarla: Firebase → Configuración del proyecto → Cuentas de
+     servicio → Generar nueva clave privada, y reemplazarla ahí. Es secreta: nunca al repositorio
+     ni a un chat (`mobile/.gitignore` ignora los `*-firebase-adminsdk-*.json`).
   7. Arma el build 1.2.0 (la entrada de arriba). Para probar: entra en la app, toca «Avisarme» y
      contéstale algo desde Las Sugerencias a una sugerencia tuya; tiene que llegar «Te respondimos
      en el libro de sugerencias».
