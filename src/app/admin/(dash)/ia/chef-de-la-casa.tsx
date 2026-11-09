@@ -14,6 +14,7 @@ import { antesEnLaFila, estadoEnPalabras, tramoDelRecorrido } from '@/lib/cocina
 import { cn } from '@/lib/utils'
 import { CAMARA, MESON, nombreDe } from '@/lib/vocabulario'
 import { BotonCancelarComanda } from './cancelar'
+import { EntregaDelPlato } from './entrega-del-plato'
 import { ResponderAlChef } from './responder'
 import { VigiaDeLaCocina } from './vigia'
 
@@ -22,7 +23,8 @@ import { VigiaDeLaCocina } from './vigia'
 // apagada, qué es y cómo se enciende; encendida, si la cocina está abierta y cómo atiende —sola, a
 // mano o nadie (`latido.ts`)— y las comandas, con lo que el chef pregunta y su respuesta. Mientras
 // alguna está en marcha, las tarjetas se actualizan solas (`vigia.tsx`) y su estación se mueve
-// (`estacion-comanda.tsx`).
+// (`estacion-comanda.tsx`); cuando entrega, el plato sale de la cocina una vez
+// (`entrega-del-plato.tsx`).
 
 const QUE_ES =
   'El chef de la casa edita tus videos: le llevas un video largo, un podcast en videollamada o tus tomas sueltas, y te devuelve una tanda de clips y carruseles con sus textos, para que los programes en tus redes. Está en piloto, con pocas cuentas.'
@@ -148,14 +150,17 @@ function Tarjeta({
   // Cuando el chef pregunta, la tarjeta se pone de color: es lo único que espera al dueño.
   const pregunta = c.estado === 'pregunta' ? c.pregunta : null
   return (
-    <li
+    // La primera vez que el dueño la ve servir o lista, el plato sale de la cocina (`entrega-del-plato.tsx`).
+    <EntregaDelPlato
+      comandaId={c.id}
+      entrega={c.entrega}
       className={cn(
         'flex gap-3 rounded-lg border p-3 sm:gap-4 sm:p-4',
         malo ? 'border-negative/40' : pregunta ? 'border-brasa/60 bg-brasa/[0.06]' : 'border-acero-700',
       )}
+      claseEstacion="w-[4.5rem] sm:w-28"
+      estacion={<EstacionDeLaComanda estado={c.estado} tandasServidas={c.tandasServidas} className="block h-auto w-full" />}
     >
-      <EstacionDeLaComanda estado={c.estado} tandasServidas={c.tandasServidas} className="h-auto w-[4.5rem] self-start sm:w-28" />
-      <div className="min-w-0 flex-1">
       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
         <p className="min-w-0 truncate text-sm font-medium">{c.principal ?? 'Comanda sin plato principal'}</p>
         <span className="text-xs text-fg-faint">pedida {fechaHora.format(c.creadaEn)}</span>
@@ -210,8 +215,7 @@ function Tarjeta({
           <BotonCancelarComanda id={c.id} />
         </div>
       ) : null}
-      </div>
-    </li>
+    </EntregaDelPlato>
   )
 }
 

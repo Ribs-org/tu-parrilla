@@ -25,7 +25,16 @@ function creativo(cambios: Partial<CreativoDelMeson> = {}): CreativoDelMeson {
 }
 
 const meson = (c: CreativoDelMeson): ComandaEnElMeson[] => [
-  { id: 'c-1', principal: 'El podcast', creadaEn: new Date('2026-11-01T12:00:00Z'), piezas: [{ pieza: c.pieza, creativos: [c] }] },
+  {
+    id: 'c-1',
+    principal: 'El podcast',
+    creadaEn: new Date('2026-11-01T12:00:00Z'),
+    piezas: [{ pieza: c.pieza, creativos: [c] }],
+    estado: 'lista',
+    tandasServidas: 1,
+    tandasTotal: 1,
+    entrega: null,
+  },
 ]
 
 describe('el mesón en el teléfono', () => {

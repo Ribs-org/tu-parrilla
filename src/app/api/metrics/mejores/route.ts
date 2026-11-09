@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { cierreDe, contraSuCuenta } from '@/lib/igual-edad'
+import { cierreDe } from '@/lib/igual-edad'
 import {
   LADO_ERROR,
   LADO_POR_DEFECTO,
@@ -12,6 +12,7 @@ import {
   esLado,
   esMetrica,
   leerPercentil,
+  relativosDe,
   tajada,
 } from '@/lib/mejores'
 import { buildMetricPost } from '@/lib/metrics-api'
@@ -64,13 +65,14 @@ export async function GET(request: Request) {
       publishedTo: to,
       limit: MAX_PUBLICACIONES_LEIDAS,
       aLos7Dias: true,
+      aLas48Horas: true,
       ...(cuenta ? { accountId: cuenta.id } : {}),
     },
   )
   const filas = red === null ? all : all.filter((row) => row.network === red)
   const atributosDe = await attributesFor(ownerId, filas)
   const atributosDeFila = (fila: (typeof filas)[number]) => atributosDe.get(`${fila.network}:${fila.externalId}`) ?? null
-  const relativos = contraSuCuenta(filas)
+  const relativos = relativosDe(filas)
 
   const r = tajada(
     filas.map((fila) => ({ fila, atributos: atributosDeFila(fila) })),
@@ -98,7 +100,14 @@ export async function GET(request: Request) {
     [grupo]: r.grupo.map((m) => ({
       puesto: m.puesto,
       valor: m.valor,
-      ...buildMetricPost(m.fila, m.atributos, zone, cuentasPorId.get(m.fila.accountId) ?? null, relativos.get(m.fila.id) ?? null),
+      ...buildMetricPost(
+        m.fila,
+        m.atributos,
+        zone,
+        cuentasPorId.get(m.fila.accountId) ?? null,
+        relativos.aLos7Dias.get(m.fila.id) ?? null,
+        relativos.a48h.get(m.fila.id) ?? null,
+      ),
     })),
     medianas: { [grupo]: r.medianas.grupo, resto: r.medianas.resto },
     enComun: r.enComun.map((rasgo) => ({

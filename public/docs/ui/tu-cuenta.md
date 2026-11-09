@@ -5,9 +5,10 @@ menú; debajo, separado por una línea, solo queda el libro de sugerencias, que 
 [libro-de-sugerencias.md](libro-de-sugerencias.md)). La ven todos los usuarios.
 
 Tu Cuenta guarda dos datos de la persona —su nombre y su zona horaria— y muestra su plan: el
-gratis o el pagado, y cuánto lleva usado de cada tope. Las llaves de API, que
-estaban acá hasta el 2026-10-19, se mudaron a la cuarta pestaña de la barra, que hoy se llama
-La Cocina: están en su sección «Tu propio chef» ([la-cocina.md](la-cocina.md)).
+gratis o el pagado, y cuánto lleva usado de cada tope. Con La Cocina, también decide si le llegan
+sus correos. Las llaves de API, que estaban acá hasta el 2026-10-19, se mudaron a la cuarta
+pestaña de la barra, que hoy se llama La Cocina: están en su sección «Tu propio chef»
+([la-cocina.md](la-cocina.md)).
 
 ## Cómo se llega
 
@@ -23,7 +24,7 @@ Arriba, el título «Tu Cuenta» (se ve en mayúsculas), debajo «tu nombre y tu
 «Con qué nombre apareces, en qué zona horaria vives y qué plan tienes. El correo con el que entras
 no se cambia acá. Las llaves para tu IA están en La Cocina, en «Tu propio chef».», donde «La
 Cocina» es un enlace a esa pantalla.
-Después, dos bloques.
+Después, dos bloques, y un tercero si la cuenta tiene La Cocina.
 
 ### Bloque «Tus datos»
 
@@ -70,6 +71,19 @@ Después, dos bloques.
     tarjeta y hace el primer cobro al terminar. Después cobra cada mes. Se cancela cuando quieras,
     desde aquí.» (sin la parte de la prueba si ya la usó); y el botón «Pasar a Maestro Parrillero» (mientras
     trabaja, «Abriendo Mercado Pago…»).
+
+### Bloque «Los correos de La Cocina»
+
+Solo si la cuenta tiene La Cocina encendida ([la-cocina.md](la-cocina.md)).
+
+- Un interruptor, «Avisarme por correo cuando el chef entrega», con la ayuda «Cuando sale la
+  primera tanda, cuando la comanda queda lista y si el chef no la puede cocinar o terminar.».
+  Viene encendido. Guarda al tocarlo, sin botón: mientras guarda, «Guardando…»; después,
+  «Guardado.» en verde, o «No se pudo guardar. Inténtalo de nuevo.» en rojo, y el interruptor
+  vuelve a como estaba.
+- La frase «Apagado, igual te llega el correo cuando el chef te pregunta algo, porque la comanda
+  espera tu respuesta, y el aviso al teléfono si tienes la app. La Cocina dice cómo va cada comanda
+  igual.».
 
 ## Qué se puede hacer
 
@@ -121,6 +135,16 @@ panel), las horas del calendario y del formulario para programar, y las fechas q
 API. Lo ya programado no se mueve: sale en el mismo momento de siempre, solo que el panel lo
 muestra con la hora de la zona nueva.
 
+### Para dejar de recibir los correos de La Cocina
+
+1. En «Los correos de La Cocina», tocar el interruptor «Avisarme por correo cuando el chef
+   entrega» para apagarlo. Sale «Guardado.».
+2. Para volver a recibirlos, tocarlo de nuevo.
+
+Apagado, no llegan los correos de la primera tanda, de la comanda lista ni de la que el chef no
+pudo cocinar o terminar. Siguen llegando el de una pregunta del chef y los avisos de la app del
+teléfono, y La Cocina muestra todo igual. Es lo mismo que el enlace del final de esos correos.
+
 ## Mensajes que puede ver
 
 | Lo que dice la pantalla | Qué significa | Qué hacer |
@@ -131,7 +155,8 @@ muestra con la hora de la zona nueva.
 | «Ya tienes el plan pagado.» | Ya tiene el plan Maestro Parrillero (por ejemplo, de cortesía). | Nada. |
 | «Pagar desde el panel todavía no está abierto.» | Pagar no está abierto para esta cuenta. | Pedir el pagado al equipo, en el libro de sugerencias. |
 | «No tienes una suscripción que cancelar.» | Se apretó «Cancelar la suscripción» cuando ya no había una viva. | Recargar. |
-| «Guardado.» | El nombre y la zona quedaron guardados. | Nada. |
+| «Guardado.» | El nombre y la zona quedaron guardados; o, en «Los correos de La Cocina», el interruptor. | Nada. |
+| «No se pudo guardar. Inténtalo de nuevo.» | El interruptor de los correos de La Cocina no se guardó (sin conexión, o se cerró la sesión); volvió a como estaba. | Recargar la página y tocarlo de nuevo. |
 | «Esa zona horaria no existe.» | Se mandó una zona que el sistema no conoce. Con la lista normal no debería pasar. | Recargar la página y elegir de la lista. |
 
 ## Si el humano dice…
@@ -154,6 +179,11 @@ muestra con la hora de la zona nueva.
 - **«¿Puedo pagar desde la app del teléfono?».** No: el plan se paga en el panel web.
 - **«Se acabaron mis tokens».** Vuelven a cero el primer día del mes siguiente, en su zona horaria.
   Mientras tanto, los comentarios se responden a mano en La Mesa.
+- **«No quiero los correos del chef» / «¿Cómo apago los correos de La Cocina?».** En esta pantalla,
+  «Los correos de La Cocina»: apagar el interruptor. Si el bloque no está, la cuenta no tiene La
+  Cocina encendida y no le llegan esos correos.
+- **«Apagué los correos y igual me llegó uno del chef».** Si era una pregunta del chef, es a
+  propósito: esa no se apaga, porque la comanda espera la respuesta.
 - **«No encuentro Tu Cuenta en la barra».** No es una pestaña: está dentro del botón
   «Ajustes», a la derecha de la barra.
 
@@ -179,6 +209,9 @@ Sale de:
 - `src/app/admin/(dash)/cuenta/pagar.tsx`, `src/app/admin/planes-actions.ts`, `src/lib/pagos/reglas.ts`
   y `src/lib/pagos/suscripciones.ts`: «Pasar a Maestro Parrillero», «Cancelar la suscripción», la vuelta de Mercado
   Pago y sus frases; `src/lib/redes-abiertas.ts` (`pagosAbiertosPara`): para quién está abierto.
+- `src/app/admin/(dash)/cuenta/correos-de-la-cocina.tsx` y `src/app/admin/cocina-actions.ts`
+  (`guardarCorreosDeLaCocina`): «Los correos de La Cocina», el interruptor y sus frases; qué apaga,
+  en `src/lib/cocina/correo-de-comanda.ts` y `src/lib/cocina/avisar.ts`.
 - `src/lib/zona.ts`: la lista de zonas, la hora y «Esa zona horaria no existe.».
 - `src/app/admin/actions.ts` (`guardarCuenta`).
 - `src/components/charts/panel.tsx` y `src/components/ui.tsx`: el bloque, los campos y el

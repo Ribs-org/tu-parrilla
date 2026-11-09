@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { AVISAN, correoDeComanda, correoDePregunta, type ComandaQueAvisa } from './correo-de-comanda'
+import {
+  AVISAN,
+  avisoDelCambio,
+  correoDeComanda,
+  correoDePregunta,
+  correosApagados,
+  type ComandaQueAvisa,
+} from './correo-de-comanda'
 
 const SITIO = 'https://tu-parrilla.cl'
 const base: ComandaQueAvisa = { id: 'c0ffee', estado: 'lista', principal: 'video9.mp4', motivo: null, enElMeson: 12 }
@@ -9,12 +16,60 @@ describe('el correo de una comanda que terminó', () => {
     expect([...AVISAN].sort()).toEqual(['fallida', 'lista', 'rechazada'])
   })
 
+  it('sirviendo avisa solo al entrar: la primera tanda, no las que siguen', () => {
+    expect(avisoDelCambio('en_el_horno', 'sirviendo')).toBe('sirviendo')
+    expect(avisoDelCambio('en_preparacion', 'sirviendo')).toBe('sirviendo')
+    expect(avisoDelCambio('sirviendo', 'sirviendo')).toBeNull()
+    expect(avisoDelCambio('sirviendo', 'lista')).toBe('lista')
+    expect(avisoDelCambio('en_el_horno', 'lista')).toBe('lista')
+    expect(avisoDelCambio('revisando', 'rechazada')).toBe('rechazada')
+    expect(avisoDelCambio('sirviendo', 'fallida')).toBe('fallida')
+    expect(avisoDelCambio('revisando', 'en_preparacion')).toBeNull()
+    expect(avisoDelCambio('en_preparacion', 'en_el_horno')).toBeNull()
+  })
+
+  it('apagados es solo la fila que lo dice: sin fila, salen', () => {
+    expect(correosApagados(null)).toBe(false)
+    expect(correosApagados('apagados')).toBe(true)
+    expect(correosApagados('otra cosa')).toBe(false)
+  })
+
+  it('la primera tanda: lo que ya llegó, el «1 de 5», el mensaje del chef y que avisa de nuevo al terminar', () => {
+    const c: ComandaQueAvisa = { ...base, estado: 'sirviendo', enElMeson: 3, mensaje: 'Aquí va lo primero', tandas: { servidas: 1, total: 5 } }
+    const { subject, text } = correoDeComanda(c, SITIO)
+    expect(subject).toBe('Salió la primera tanda: «video9.mp4»')
+    expect(text).toContain('El chef empezó a servir «video9.mp4»: te dejó 3 cortes en el mesón, listos para programar. Van 1 de 5 tandas en el mesón.')
+    expect(text).toContain('El chef: «Aquí va lo primero»')
+    expect(text).toContain('Míralo en el mesón: https://tu-parrilla.cl/admin/ia/meson?comanda=c0ffee')
+    expect(text).toContain('te escribimos de nuevo cuando esté lista')
+    expect(correoDeComanda({ ...c, enElMeson: 0, tandas: undefined, principal: null }, SITIO, 'dia').text).toContain(
+      'El chef empezó a servir tu comanda: lo primero está llegando a la bandeja.',
+    )
+  })
+
+  it('el asunto del chef reemplaza al de siempre, en cualquier correo; vacío, queda el de siempre', () => {
+    expect(correoDeComanda({ ...base, asunto: 'Aquí su pedido 🍖' }, SITIO).subject).toBe('Aquí su pedido 🍖')
+    expect(correoDeComanda({ ...base, estado: 'sirviendo', asunto: 'Va la primera' }, SITIO).subject).toBe('Va la primera')
+    expect(correoDeComanda({ ...base, estado: 'fallida', motivo: 'x', asunto: 'Lo siento' }, SITIO).subject).toBe('Lo siento')
+    expect(correoDeComanda({ ...base, asunto: '   ' }, SITIO).subject).toBe('Lista en el mesón: «video9.mp4»')
+  })
+
+  it('cada correo dice dónde se apagan', () => {
+    for (const estado of ['sirviendo', 'lista', 'rechazada', 'fallida'] as const) {
+      expect(correoDeComanda({ ...base, estado, motivo: 'x' }, SITIO).text).toContain(
+        'Si no quieres estos correos, apágalos en Tu Cuenta: https://tu-parrilla.cl/admin/cuenta',
+      )
+    }
+  })
+
   it('lista, de noche: cuántos cortes quedaron en el mesón, con el enlace a esa comanda', () => {
     const { subject, text } = correoDeComanda(base, SITIO)
     expect(subject).toBe('Lista en el mesón: «video9.mp4»')
     expect(text).toContain('El chef terminó «video9.mp4»: te dejó 12 cortes en el mesón, listos para programar.')
     expect(text).toContain('Míralo en el mesón: https://tu-parrilla.cl/admin/ia/meson?comanda=c0ffee')
     expect(text).toContain('Lo que nadie programa en 30 días se borra solo.')
+    expect(text).not.toContain('El chef: «')
+    expect(correoDeComanda({ ...base, mensaje: ' Aquí su pedido ' }, SITIO).text).toContain('El chef: «Aquí su pedido»')
   })
 
   it('lista, de día: la bandeja y las piezas', () => {

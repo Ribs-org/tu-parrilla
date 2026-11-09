@@ -54,6 +54,15 @@ describe('lo que dice cada aviso al teléfono', () => {
       id: 'c-1',
     })
     const lista = { id: 'c-1', estado: 'lista' as const, principal: 'video9.mp4', motivo: null, enElMeson: 3 }
+    expect(avisoDeComanda({ ...lista, estado: 'sirviendo' }, 'noche')).toEqual({
+      titulo: 'Salió la primera tanda: «video9.mp4»',
+      cuerpo: 'El chef te dejó 3 cortes en el mesón; lo demás sigue en la cocina.',
+      tipo: 'comanda',
+      id: 'c-1',
+    })
+    expect(avisoDeComanda({ ...lista, estado: 'sirviendo', enElMeson: 0 }, 'dia').cuerpo).toBe(
+      'Lo primero está llegando a la bandeja; lo demás sigue en la cocina.',
+    )
     expect(avisoDeComanda(lista, 'noche')).toMatchObject({
       titulo: 'Lista en el mesón: «video9.mp4»',
       cuerpo: 'El chef te dejó 3 cortes en el mesón, para programar en el panel.',

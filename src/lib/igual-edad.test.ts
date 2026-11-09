@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { MIN_DE_SU_CUENTA, cierreDe, contraSuCuenta, esReciente } from './igual-edad'
+import { A_LAS_48_HORAS, A_LOS_7_DIAS, MIN_DE_SU_CUENTA, cierreDe, contraSuCuenta, esReciente } from './igual-edad'
 import type { PostRow } from './posts-kpis'
 
 function fila(id: string, accountId: string, viewsA7Dias: number | null): PostRow {
@@ -19,6 +19,7 @@ function fila(id: string, accountId: string, viewsA7Dias: number | null): PostRo
     views: null,
     viewsChange: null,
     viewsA7Dias,
+    viewsA48h: null,
     likesChange: null,
     commentsChange: null,
     sharesChange: null,
@@ -71,6 +72,32 @@ describe('contraSuCuenta', () => {
   it('con la mediana en cero no hay «lo normal»', () => {
     const r = contraSuCuenta(['1', '2', '3', '4', '5'].map((id) => fila(id, 'a', id === '5' ? 10 : 0)))
     expect(r.size).toBe(0)
+  })
+})
+
+describe('contraSuCuenta a las 48 horas', () => {
+  const temprana = (id: string, views: number | null, a7: number | null = null): PostRow => ({
+    ...fila(id, 'a', a7),
+    viewsA48h: views,
+  })
+
+  it('mide con las views a las 48 horas, no con las de los 7 días', () => {
+    const filas = [temprana('t1', 400, 10), ...['t2', 't3', 't4', 't5'].map((id) => temprana(id, 100, 10))]
+    const r = contraSuCuenta(filas, A_LAS_48_HORAS)
+    expect(r.get('t1')).toBe(4)
+    expect(r.get('t2')).toBe(1)
+    // A los 7 días son todas iguales: cada una es lo normal.
+    expect(contraSuCuenta(filas).get('t1')).toBe(1)
+  })
+
+  it(`con menos de ${MIN_DE_SU_CUENTA} lecturas a las 48 horas, la cuenta no tiene contra qué medir`, () => {
+    const filas = [...['t1', 't2', 't3', 't4'].map((id) => temprana(id, 100)), temprana('t5', null, 500)]
+    expect(contraSuCuenta(filas, A_LAS_48_HORAS).size).toBe(0)
+  })
+
+  it('las ventanas: de 48 a 72 horas, y de 7 a 9 días', () => {
+    expect(A_LAS_48_HORAS).toEqual({ campo: 'viewsA48h', desdeHoras: 48, hastaHoras: 72 })
+    expect(A_LOS_7_DIAS).toEqual({ campo: 'viewsA7Dias', desdeHoras: 168, hastaHoras: 216 })
   })
 })
 

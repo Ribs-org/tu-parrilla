@@ -310,8 +310,10 @@ atributo, la red, el formato, el día o la franja horaria); la misma cuenta la h
 `GET /api/metrics/mejores` para un agente. Entra con «contra su cuenta»: las views de cada
 publicación a los 7 días de publicada, divididas por la mediana de su cuenta en el período,
 para comparar mil publicaciones por semana en varias cuentas sin que gane la más vieja ni la
-cuenta más grande (`src/lib/igual-edad.ts`). En las otras métricas, lo publicado hace menos
-de 7 días no compite salvo que se prenda «Con las de menos de 7 días». **Lado a lado**
+cuenta más grande (`src/lib/igual-edad.ts`). Lo mismo a las 48 horas («Contra su cuenta, a
+las 48 horas» y «Por views a las 48 horas»), para decidir en 2 días y no en 7 qué pasa de una
+cuenta de prueba a la principal. En las métricas que no son a igual edad, lo publicado hace
+menos de 7 días no compite salvo que se prenda «Con las de menos de 7 días». **Lado a lado**
 (`/admin/analytics/lado-a-lado`) pone dos publicaciones —al entrar, la mejor y la peor— con
 su portada, el link para ver el video en la red, sus atributos y cómo crecieron sus views por
 días desde que salieron; el video no se guarda (`src/lib/lado-a-lado.ts`). El porqué del tablero, en
@@ -1611,7 +1613,7 @@ Vercel y bajan con `vercel env pull .env.local`.
 | `MIGRAR_PREVIEWS` | Que los previews migren la base | Solo cuando el preview tenga una base propia; contra la de producción, no |
 | `DATABASE_URL_PRUEBAS` | Solo para las pruebas de integración: una Postgres desechable donde cada archivo crea y migra su propia base (ver «Comandos»). No va en Vercel | No — sin ella esas pruebas se saltan. Nunca la de producción |
 | `SCHEDULE_API_KEY` | La llave del despliegue: abre `POST /api/schedule/batch` (carga masiva), `POST /api/media` (subir un archivo una vez), `GET` y `DELETE /api/schedule/posts/{id}` (un post, o sacarlo), `POST /api/schedule/posts/{id}/archivar` y `…/desarchivar` (archivar lo quemado), `GET /api/schedule/posts` (calendario), `GET /api/schedule/resumen` (el resumen del día), `GET /api/schedule/cuentas` (las cuentas), `GET /api/metrics/posts` (métricas), `GET /api/metrics/mejores` (el mejor X %), `GET /api/metrics/que-funciona` (qué tema, estilo y formato funcionan, y si la música ayuda) y `/api/bodega…` (la cámara de frío de La Cocina) a nombre del admin. Es anterior a las llaves por usuario y sigue para el agente que ya la usa | No — sin ella esos endpoints aceptan solo las llaves que cada usuario genera en La Cocina («Tu propio chef»); si la pones, genérala igual que `CRON_SECRET` |
-| `RESEND_API_KEY` | Manda los códigos de ingreso y los avisos: la publicación que se quemó, la cuenta que se cayó, el resumen del día y la comanda de La Cocina que terminó (ver «Avisos por correo») | Sí — sin ella nadie puede entrar al panel |
+| `RESEND_API_KEY` | Manda los códigos de ingreso y los avisos: la publicación que se quemó, la cuenta que se cayó, el resumen del día y la comanda de La Cocina que entregó o terminó (ver «Avisos por correo») | Sí — sin ella nadie puede entrar al panel |
 | `PUBLISH_ALERT_TO` | Adónde va un aviso sin dueño con correo: un post o una cuenta de antes de los usuarios, y la alarma de La Cocina si falta `ADMIN_EMAIL`. Lo demás va al correo de su dueño | No — sin ella, lo que no tiene dueño no avisa; el calendario y Los Fierros lo siguen mostrando |
 | `PUBLISH_ALERT_FROM` | Remitente de los avisos | Opcional; default `onboarding@resend.dev`, que solo entrega al correo de la cuenta de Resend |
 | `EXPO_ACCESS_TOKEN` | Un access token de la cuenta de Expo, para mandar los avisos al teléfono por el servicio de push de Expo cuando el proyecto tiene encendida la «seguridad extra de push» (ver «Avisos al teléfono») | No — sin la seguridad extra Expo no pide llave; con ella encendida y sin esta variable, Expo rechaza cada aviso y solo llega el correo |
@@ -1729,9 +1731,14 @@ resumen del día y la alarma salen también al teléfono de quien encendió los 
   la sincronización diaria (9:00 UTC), y solo los días en que hay algo que contar. Lo mismo,
   salvo lo del mesón, se lee por API en `GET /api/schedule/resumen` (ver «Resumen por API»),
   para que quien programa con un agente se entere aunque los correos le lleguen al dueño.
-- **Una comanda de La Cocina que terminó**: «Lista en el mesón: «<archivo>»», «No se puede
-  cocinar: …» o «No se pudo terminar: …» (de día, con las palabras del día). Sale una vez por
-  comanda, cuando el chef la deja lista, la rechaza o la da por fallida (ver «La Cocina»).
+- **Una comanda de La Cocina que entregó o terminó**: «Salió la primera tanda: «<archivo>»»,
+  «Lista en el mesón: …», «No se puede cocinar: …» o «No se pudo terminar: …» (de día, con las
+  palabras del día), con lo que hay en el mesón y el `mensaje` del chef, o su `motivo`. Sale una vez
+  por cambio: la primera vez que la comanda pasa a sirviendo, y cuando el chef la deja lista, la
+  rechaza o la da por fallida. El chef puede mandar el asunto (`asunto`, en
+  `docs/cocina-api.md`). El dueño los apaga en Tu Cuenta, «Los correos de La Cocina» (una fila
+  `cocina_correos` en `ajustes`); apagados, el aviso al teléfono y el correo de una pregunta siguen
+  (ver «La Cocina»).
 - **Una pregunta del chef**: «El chef te pregunta: «<archivo>»», con la pregunta, sus opciones,
   el plazo en la zona del dueño y lo que hace el chef si nadie contesta. Una por pregunta.
 - **La alarma de La Cocina, al admin** (`ADMIN_EMAIL`, o `PUBLISH_ALERT_TO` si falta): «La Cocina:
@@ -1742,7 +1749,8 @@ resumen del día y la alarma salen también al teléfono de quien encendió los 
 ### Avisos al teléfono
 
 Desde la versión 1.2.0 de la app, los avisos también llegan al teléfono, al lado del correo y nunca en
-su lugar: cada uno sale por correo igual que antes, y si el teléfono falla, el correo no se entera.
+su lugar: cada uno sale por correo igual que antes —salvo los de La Cocina de quien los apagó—, y si
+el teléfono falla, el correo no se entera.
 Salen por el servicio de push de Expo (`https://exp.host/--/api/v2/push/send`), que los entrega por
 Firebase Cloud Messaging en Android y por el servicio de Apple en iPhone. El código, en
 `src/lib/push/`: el cliente de Expo y los textos sin base (`expo.ts`, `avisos.ts`), y lo que lee y
@@ -1755,8 +1763,9 @@ borra (`enviar.ts`, `comentarios.ts`).
   o queda sin filo). Uno por cada estado nuevo del fierro: `social_accounts.push_fierro` guarda el que
   ya se avisó y se borra cuando vuelve al rojo. Va aparte de `caida_avisada_en`, para no cambiar
   cuándo se reintenta el correo. El enfriarse no tiene correo propio: está en el resumen del día.
-- **Una pregunta del chef** y **una comanda que terminó** —lista en el mesón, rechazada o fallida—:
-  los mismos de su correo, en una línea.
+- **Una pregunta del chef** y **una comanda que entregó o terminó** —la primera tanda, lista en el
+  mesón, rechazada o fallida—: los mismos de su correo, en una línea, con el título de siempre aunque
+  el chef haya mandado otro asunto. Salen aunque el dueño haya apagado los correos de La Cocina.
 - **La respuesta del equipo** en el libro de sugerencias, la primera vez, como el correo.
 - **Los comentarios nuevos de La Mesa**: un resumen, no uno por comentario. «3 comentarios nuevos en
   La Mesa», con las redes, sin el texto de nadie. Sale en la pasada del cron siguiente a que entre un
@@ -1952,10 +1961,11 @@ permalink, texto, `publicadoEl` (ISO con el offset de la zona del dueño), la et
 sincronización siguiente a su publicación, que es la que le encuentra el id del video —ver
 `docs/deuda-tecnica.md`, «TikTok: el id del video se recupera por texto y hora»—) y `metricas`: `views`
 (acumulado), `viewsGanadas` (dentro del rango), `viewsA7Dias` (el contador a la semana de
-publicada), `contraSuCuenta` (eso sobre la mediana de su cuenta en el rango), `likes`,
+publicada), `contraSuCuenta` (eso sobre la mediana de su cuenta en el rango), `viewsA48h` y
+`contraSuCuenta48h` (lo mismo a los 2 días: la primera lectura entre las 48 y las 72 horas), `likes`,
 `comentarios`, `compartidos`, `alcance`, `visitasAlSitio`, `clicks`, `ctr` y `arrastre`. Un
 `null` significa que la red no reportó ese número — nunca cero. En YouTube, `viewsGanadas`,
-`viewsA7Dias`, `contraSuCuenta` y `arrastre` vienen siempre en `null`: sus políticas no
+`viewsA7Dias`, `contraSuCuenta`, `viewsA48h`, `contraSuCuenta48h` y `arrastre` vienen siempre en `null`: sus políticas no
 permiten calcular métricas nuevas con sus datos (ver «Analítica de posts»). `truncado: true` avisa que el tope de filas mordió y la respuesta
 es parcial.
 
@@ -1963,8 +1973,8 @@ Las métricas las trae la sincronización diaria, así que lo publicado hoy apar
 números recién al día siguiente.
 
 `GET /api/metrics/mejores`, con los mismos parámetros más `metrica` (`viewsGanadas` por
-defecto, `contraSuCuenta`, `viewsA7Dias`, `visitas`, `clicks`, `interacciones` o
-`arrastre`), `percentil` (entero de 1 a 50, 10 por defecto), `lado` (`mejor` por defecto, o
+defecto, `contraSuCuenta`, `viewsA7Dias`, `contraSuCuenta48h`, `viewsA48h`, `visitas`,
+`clicks`, `interacciones` o `arrastre`), `percentil` (entero de 1 a 50, 10 por defecto), `lado` (`mejor` por defecto, o
 `peor`) y `recientes` (`si` por defecto, o `no` para dejar fuera lo de menos de 7 días),
 devuelve el mejor (o el peor) X % de lo publicado en el rango: el corte para entrar, cuántas
 compiten, las del grupo con sus métricas, las medianas del grupo contra las del resto y lo
@@ -2172,6 +2182,13 @@ La cámara de frío, con su modelo y su cuota, está en
   `/api/admin/cocina/pulso`, que devuelve una firma de lo que la tarjeta muestra en cuatro
   consultas chicas, y solo si cambió vuelve a pedir la página (`router.refresh`, sin recargarla).
   Con la pestaña oculta o sin nada en marcha, no pregunta (`ia/vigia.tsx`);
+- **la entrega** (desde el 2026-11-08): la primera vez que el dueño ve una comanda que pasó a
+  sirviendo (la primera tanda) o a lista, el plato sale de la cocina —la estación entra desde el
+  pase, se levanta la campana (de día, se abre la cortina) y la tarjeta se enciende en brasa—, en
+  La Cocina o en el mesón si llega por el correo. Una vez por entrega: lo que vio se anota en
+  `comandas.entrega_vista` y no en el navegador, para que no se repita en otro equipo
+  (`ia/entrega-del-plato.tsx`). Con `prefers-reduced-motion`, queda el borde y la frase, sin
+  movimiento;
 - **las preguntas del chef** (desde el 2026-11-06): cuando el chef tiene una duda, la comanda pasa
   a «El chef te pregunta», la tarjeta se pone de color con la pregunta, sus opciones (o un campo
   libre) y el plazo con lo que hace si nadie contesta, y llega un correo. Contestar —en el panel o
@@ -2305,14 +2322,22 @@ Por eso dos trabajadores no toman la misma comanda, y un cambio que llega tarde 
 cancelación. Servir y cancelar son del usuario: el chef no lleva a ninguno de los dos.
 
 **El dueño recibe un correo cuando el chef le pregunta algo**, uno por pregunta: lo pide solo la
-llamada que la hizo, no un reintento. Y **cuando su comanda termina**: lista (con cuántos cortes quedaron en el
-mesón y el enlace a `/admin/ia/meson?comanda=<id>`), rechazada o fallida (con el motivo del chef).
-Sale con el remitente de los avisos, `PUBLISH_ALERT_FROM`, en el modo de la cuenta, y después de
-responderle al chef (`after`). Uno por cambio: la misma condición sobre el estado decide qué
-petición escribió la transición, y solo esa lo pide (`aviso`, en `cambiarEstado`); un reintento o
-dos peticiones iguales a la vez reciben `409` y no mandan nada. Servida no avisa: llega siempre
-después de lista, y la hace el dueño. Si Resend falla, ese correo no se reintenta
-(`docs/deuda-tecnica.md`). El texto está en `src/lib/cocina/correo-de-comanda.ts`.
+llamada que la hizo, no un reintento. Y **cuando el chef le entrega o la comanda termina**: la
+primera tanda y lista (con cuántos cortes hay en el mesón, el `mensaje` del chef y el enlace a
+`/admin/ia/meson?comanda=<id>`), rechazada o fallida (con el motivo del chef). La primera tanda es
+el paso que entra a sirviendo; las tandas que siguen no avisan. Si el chef manda `asunto` con el
+cambio, reemplaza al de siempre (saneado en una línea, hasta 120 caracteres; `asuntoDe`, en
+`src/lib/cocina/api.ts`). Sale con el remitente de los avisos, `PUBLISH_ALERT_FROM`, en el modo de
+la cuenta, y después de responderle al chef (`after`), con el mensaje y las tandas de ese cambio y no
+los de la tanda siguiente. Uno por cambio: la misma condición sobre el estado decide qué petición
+escribió la transición, y solo esa lo pide (`aviso`, en `cambiarEstado`); un reintento o dos
+peticiones iguales a la vez reciben `409` y no mandan nada. Servida no avisa: llega siempre después
+de lista, y la hace el dueño. El dueño los apaga en Tu Cuenta (`cocina_correos` en `ajustes`; sin
+fila, salen), y entonces no sale el correo pero sí el aviso al teléfono; el de la pregunta no se
+apaga, porque tiene plazo. Desde el 2026-11-08, sin aprobación de por medio: el chef escribe y
+entrega solo, y el aviso sale cuando él cambia el estado (#283 se cerró así). Si Resend falla, ese
+correo no se reintenta (`docs/deuda-tecnica.md`). El texto está en
+`src/lib/cocina/correo-de-comanda.ts`.
 
 **Un creativo llega al mesón solo con sus archivos arriba.** Pasa por tres pasos:
 
@@ -2436,13 +2461,13 @@ src/
     pieza.ts               qué junta las versiones de una pieza y las medianas por atributo (sin base)
     mejores.ts             el mejor (o el peor) X % de lo publicado: el corte, las medianas y lo que se repite (sin base)
     que-funciona.ts        «Qué te funciona»: qué tema, estilo y formato anduvieron mejor, y si la música ayudó, con su mínimo y su frase (sin base)
-    igual-edad.ts          comparar a la misma edad y contra la propia cuenta: los 7 días y «contra su cuenta» (sin base)
+    igual-edad.ts          comparar a la misma edad y contra la propia cuenta: los 7 días, las 48 horas y «contra su cuenta» (sin base)
     lado-a-lado.ts         dos publicaciones lado a lado: la curva por edad y sus atributos (sin base)
     metrics-consulta.ts    lo que comparten las rutas de /api/metrics: la llave, el rango, la red y la cuenta
     cuentas-api.ts         las cuentas de GET /api/schedule/cuentas: los dos ids y cómo está la conexión (sin base)
     media-api.ts           la clave de un archivo que sube un cliente de la API, en la carpeta de su dueño (sin base)
     archivar-api.ts        el cuerpo y las respuestas de archivar y desarchivar lo quemado por API
-    cocina/                La Cocina: la cámara de frío (lo que se guarda, su cuota y sus nombres por tamaño en bodega.ts; lo de adentro en materiales.ts), los estados de una comanda, la fila del chef, lo que entrega, lo que lee y escribe su API (/api/cocina), las subidas por partes del panel, del teléfono y de la API (subidas-http.ts, que sirve a /api/admin/cocina, /api/mobile/cocina y /api/bodega; la puerta de la llave en llave-api.ts), colgar una comanda, la comanda que pide el teléfono (telefono.ts), cancelar, cambiar y sacar para el panel y el teléfono (del-dueno.ts), el pulso de las tarjetas vivas, cómo atiende la cocina según el latido (latido.ts), las preguntas del chef con su plazo (pregunta.ts y preguntar.ts), la alarma al admin (alarma.ts), los correos de la comanda que terminó y de la pregunta, y el mesón (lo que manda al teléfono, en meson-telefono.ts)
+    cocina/                La Cocina: la cámara de frío (lo que se guarda, su cuota y sus nombres por tamaño en bodega.ts; lo de adentro en materiales.ts), los estados de una comanda, la fila del chef, lo que entrega, lo que lee y escribe su API (/api/cocina), las subidas por partes del panel, del teléfono y de la API (subidas-http.ts, que sirve a /api/admin/cocina, /api/mobile/cocina y /api/bodega; la puerta de la llave en llave-api.ts), colgar una comanda, la comanda que pide el teléfono (telefono.ts), cancelar, cambiar y sacar para el panel y el teléfono (del-dueno.ts), el pulso de las tarjetas vivas, cómo atiende la cocina según el latido (latido.ts), las preguntas del chef con su plazo (pregunta.ts y preguntar.ts), la alarma al admin (alarma.ts), los correos de la comanda que entregó o terminó y de la pregunta, la entrega que el dueño todavía no vio (tarjeta.ts), y el mesón (lo que manda al teléfono, en meson-telefono.ts)
     color-de-red.ts        el color de marca de cada red en La Parrilla, como clases de Tailwind escritas enteras
     piezas.ts              la pieza de una publicación: sus destinos programados unidos a lo publicado
     auth.ts                sesión del panel

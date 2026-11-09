@@ -69,6 +69,12 @@ sección.
     pregunta: el diseño pide además un aviso en la pestaña de la barra del panel (como el de «Se
     quemó») y una línea en el resumen del día si hay preguntas sin responder; hoy hay correo y la
     tarjeta de color, nada en la barra ni en el resumen.
+  - **La entrega, en la app del teléfono** (2026-11-08). Desde #284, el panel hace salir el plato de
+    la cocina la primera vez que el dueño mira la primera tanda o la comanda lista, y lo anota en
+    `comandas.entrega_vista` (`src/app/admin/(dash)/ia/entrega-del-plato.tsx`). La app muestra las
+    comandas sin la estación dibujada, y ni la anima ni la anota: quien la ve primero en el teléfono
+    la ve salir después en el panel. No se llevó porque la app 1.1.0 recibe sus OTA desde otra rama;
+    pide la estación en la app y una ruta de `/api/mobile/cocina` que llame a `verEntrega`.
   - **[dueño] Probar el mesón en el teléfono con un creativo de verdad** (2026-11-07). Llega con el
     build 1.2.0 (`expo-video`): «Ver el mesón» en la comanda, el video, «Programar» hasta Publicar y
     «Descartar». Se probó la tarjeta dibujada en un navegador y el servidor con tests; el video en un
@@ -96,12 +102,6 @@ sección.
     («Todo en el almacén de Tu Parrilla, no en Drive», en el diseño de La Cocina)—. También, cuánto
     le toca a cada plan: desde el 2026-11-08 la pone el plan (20 GB el gratis, 200 GB el pagado, en
     Los Maestros → «Los planes»), y a mano sigue ganando `users.bodega_bytes`.
-  - **[dueño] Decidir juntas la aprobación de lo que propone el chef (#283) y el aviso de la
-    entrega (#284)** (2026-11-03). #283 pide que el chef proponga estados y entregas y que una
-    persona del equipo los apruebe desde Tu Parrilla: una tabla de propuestas, sus endpoints y una
-    vista en el panel. De #284 ya sale el correo de lista (#295); faltan el de la primera vez que
-    pasa a `sirviendo`, la animación de entrega (una vez por entrega), un asunto opcional y poder
-    apagarlo. Van juntas porque, con aprobación, el aviso sale al aprobar y no al proponer.
   - **Del equipo de contenido:** el cliente del chef en `marca-personal`, contra
     `docs/cocina-api.md`.
 
@@ -774,6 +774,15 @@ diciendo «Sin suscripción», y es cierto.
 
 ## Features y trabajo de código
 
+- **«Sincronizar ahora» le puede quitar a una publicación su lectura de las 48 horas** (2026-11-08,
+  al sumar `viewsA48h`, #358). La lectura del día (`post_metrics`, una por publicación y día) se
+  reescribe entera en cada sincronización, también su `captured_at`. La ventana de las 48 horas
+  (de 48 a 72, `src/lib/igual-edad.ts`) no tiene día de más, a diferencia de la de los 7 días:
+  una sincronización a mano H horas después del cron de la mañana corre esa lectura H horas, y lo
+  publicado entre 72 − H y 72 horas antes del cron se queda sin `viewsA48h` (null, nunca 0). Lo
+  mismo si el cron de un día falla. Arreglarlo es elegir: estirar la ventana (pierde precisión
+  justo cuando la publicación crece rápido) o guardar la lectura de las 48 horas aparte, la
+  primera vez que cae en la ventana, sin que la reescriba la del mismo día.
 - **El teléfono no muestra el aviso de la playlist de YouTube** (2026-11-08). Un video que salió sin
   entrar a su playlist lo dice en el editor del panel y en `GET /api/schedule/posts` (`aviso`); el
   teléfono no tiene una vista de lo publicado por destino donde ponerlo. Si se le agrega una, el

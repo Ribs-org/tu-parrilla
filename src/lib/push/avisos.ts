@@ -79,13 +79,25 @@ export function avisoDePregunta(p: { comandaId: string; principal: string | null
   }
 }
 
-/** Una comanda que terminó: lista en el mesón, rechazada o fallida. */
+/** Una comanda que entregó o terminó: la primera tanda, lista en el mesón, rechazada o fallida. */
 export function avisoDeComanda(
   c: { id: string; estado: AvisoDeComanda; principal: string | null; motivo: string | null; enElMeson: number },
   tema: Tema,
 ): AvisoAlTelefono {
-  const titulo = `${NOMBRE_ESTADO[c.estado][tema]}: ${c.principal ? `«${c.principal}»` : 'tu comanda'}`
+  const cual = c.principal ? `«${c.principal}»` : 'tu comanda'
   const donde = MESON[tema].toLowerCase()
+  if (c.estado === 'sirviendo') {
+    return {
+      titulo: `Salió la primera tanda: ${cual}`,
+      cuerpo:
+        c.enElMeson > 0
+          ? `El chef te dejó ${cortes(c.enElMeson, tema)} en ${donde}; lo demás sigue en la cocina.`
+          : `Lo primero está llegando a ${donde}; lo demás sigue en la cocina.`,
+      tipo: 'comanda',
+      id: c.id,
+    }
+  }
+  const titulo = `${NOMBRE_ESTADO[c.estado][tema]}: ${cual}`
   const cuerpo =
     c.estado === 'lista'
       ? c.enElMeson > 0

@@ -278,7 +278,51 @@ describe.skipIf(!URL_PRUEBAS)('la API de la cocina, contra una Postgres de verda
     expect(enviados[0]!.text).toContain(`https://tu-parrilla.cl/admin/ia/meson?comanda=${c.id}`)
   })
 
-  it('fallida y rechazada: un correo cada una, con el motivo; lo que sigue en curso no avisa', async () => {
+  it('la primera tanda: un correo, con el asunto del chef saneado y su mensaje; las tandas que siguen no avisan', async () => {
+    const enviados = correosDeMentira()
+    const { POST } = await import('@/app/api/cocina/comandas/[id]/estado/route')
+    const { creativos } = await esquema()
+    const c = await comanda(conCocina, { estado: 'en_el_horno', tomadaPor: 'servidor' })
+    await insumo(conCocina, c.id)
+    await (await db())
+      .insert(creativos)
+      .values(['a', 'b'].map((ref) => ({ ownerId: conCocina, comandaId: c.id, ref, tipo: 'video' as const, estado: 'mesa' as const })))
+    const cambiar = (cuerpo: unknown) => POST(pedido(`/api/cocina/comandas/${c.id}/estado`, cuerpo), params(c.id))
+
+    const largo = await cambiar({ estado: 'sirviendo', asunto: 'x'.repeat(121) })
+    expect(largo.status).toBe(400)
+    expect(await largo.json()).toEqual({ error: '«asunto» es un texto de hasta 120 caracteres, o null.' })
+    expect(
+      (await cambiar({ estado: 'sirviendo', mensaje: 'Aquí va lo primero', asunto: 'Su primera tanda\r\nBcc: otro@ej.cl', tandas: { servidas: 1, total: 3 } }))
+        .status,
+    ).toBe(200)
+    expect((await cambiar({ estado: 'sirviendo', asunto: 'Otra más', tandas: { servidas: 2, total: 3 } })).status).toBe(200)
+    await correrLoDeDespues()
+
+    expect(enviados).toHaveLength(1)
+    expect(enviados[0]).toMatchObject({ to: 'con@ejemplo.cl', subject: 'Su primera tanda Bcc: otro@ej.cl' })
+    expect(enviados[0]!.text).toContain('El chef empezó a servir «video9.mp4»: te dejó 2 cortes en el mesón, listos para programar. Van 1 de 3 tandas en el mesón.')
+    expect(enviados[0]!.text).toContain('El chef: «Aquí va lo primero»')
+  })
+
+  it('con los correos apagados en Tu Cuenta no sale ninguno, y el cambio pasa igual', async () => {
+    const enviados = correosDeMentira()
+    const { POST } = await import('@/app/api/cocina/comandas/[id]/estado/route')
+    const { ajustes } = await esquema()
+    await (await db()).insert(ajustes).values({ ownerId: conCocina, clave: 'cocina_correos', valor: 'apagados' })
+    try {
+      const c = await comanda(conCocina, { estado: 'en_el_horno', tomadaPor: 'servidor' })
+      const cambiar = (cuerpo: unknown) => POST(pedido(`/api/cocina/comandas/${c.id}/estado`, cuerpo), params(c.id))
+      expect((await cambiar({ estado: 'sirviendo', tandas: { servidas: 1, total: 2 } })).status).toBe(200)
+      expect((await cambiar({ estado: 'lista' })).status).toBe(200)
+      await correrLoDeDespues()
+      expect(enviados).toHaveLength(0)
+    } finally {
+      await (await db()).delete(ajustes).where(eq(ajustes.ownerId, conCocina))
+    }
+  })
+
+  it('fallida y rechazada: un correo cada una, con el motivo; lo que sigue en curso no avisa hasta servir', async () => {
     const enviados = correosDeMentira()
     const { POST } = await import('@/app/api/cocina/comandas/[id]/estado/route')
     const enCurso = await comanda(conCocina, { estado: 'revisando', tomadaPor: 'servidor' })
@@ -287,8 +331,10 @@ describe.skipIf(!URL_PRUEBAS)('la API de la cocina, contra una Postgres de verda
     const cambiar = (id: string, cuerpo: unknown) => POST(pedido(`/api/cocina/comandas/${id}/estado`, cuerpo), params(id))
 
     expect((await cambiar(enCurso.id, { estado: 'en_preparacion' })).status).toBe(200)
-    expect((await cambiar(enCurso.id, { estado: 'en_el_horno' })).status).toBe(200)
-    expect((await cambiar(enCurso.id, { estado: 'sirviendo', tandas: { servidas: 1, total: 2 } })).status).toBe(200)
+    // Un asunto en un cambio que no avisa no manda nada.
+    expect((await cambiar(enCurso.id, { estado: 'en_el_horno', asunto: 'Va al fuego' })).status).toBe(200)
+    await correrLoDeDespues()
+    expect(enviados).toHaveLength(0)
 
     const fallida = { estado: 'fallida', motivo: 'Se cortó la luz en la cocina a mitad del render.' }
     // El reintento del chef, después de que la primera ya escribió: lo terminado no se mueve.
