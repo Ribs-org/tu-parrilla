@@ -10,6 +10,7 @@ const registrarCobro = vi.fn(async () => {})
 vi.mock('@/lib/pagos/suscripciones', () => ({ sincronizarSuscripcion, registrarCobro }))
 
 const { POST } = await import('./route')
+const { MercadoPagoFallo } = await import('@/lib/pagos/mercadopago')
 
 const SECRETO = 'secreto-del-webhook'
 
@@ -63,6 +64,15 @@ describe('POST /api/pagos/mercadopago', () => {
     const silencio = vi.spyOn(console, 'error').mockImplementation(() => {})
     sincronizarSuscripcion.mockRejectedValueOnce(new Error('la base no contesta'))
     expect((await POST(aviso('subscription_preapproval', 'abc'))).status).toBe(500)
+    silencio.mockRestore()
+  })
+
+  it('un id que Mercado Pago no conoce, como el de «Simular notificación», se contesta 200', async () => {
+    const silencio = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    sincronizarSuscripcion.mockRejectedValueOnce(new MercadoPagoFallo(404, 'not found'))
+    expect((await POST(aviso('subscription_preapproval', '123456'))).status).toBe(200)
+    registrarCobro.mockRejectedValueOnce(new MercadoPagoFallo(404, 'not found'))
+    expect((await POST(aviso('subscription_authorized_payment', '123456'))).status).toBe(200)
     silencio.mockRestore()
   })
 })

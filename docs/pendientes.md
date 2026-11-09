@@ -733,32 +733,24 @@ diciendo «Sin suscripción», y es cierto.
   de `PAGOS_ABIERTO_PARA` (README, «Los planes»; el diseño en
   `docs/superpowers/specs/2026-11-08-planes-design.md`). No se probó contra Mercado Pago: los campos
   y la firma salen de su SDK de Node, porque su documentación no se deja leer desde un servidor. En
-  orden:
-  1. En Mercado Pago (Tus integraciones), crear la aplicación —a nombre de Pyxis— y copiar las
-     credenciales de prueba; crear dos usuarios de prueba, vendedor y comprador.
-  2. En la aplicación, Webhooks: la URL `https://tu-parrilla.cl/api/pagos/mercadopago` con el evento
-     «Planes y suscripciones», y copiar su clave secreta.
-  3. En Vercel (production): `MERCADOPAGO_ACCESS_TOKEN` (el de prueba), `MERCADOPAGO_WEBHOOK_SECRET` y
-     `PAGOS_ABIERTO_PARA=<id del dueño>`. Redesplegar.
-  4. Probar con el comprador de prueba: «Pasar a Maestro Parrillero» → autorizar → volver a Tu Cuenta con «Listo:
-     ya tienes el plan Maestro Parrillero.»; ver la suscripción en Mercado Pago, la fila en Los Maestros («lo paga hasta
-     el …») y, al primer cobro, «Los cobros». Después, «Cancelar la suscripción». Si algo falla, el log
-     de Vercel dice qué contestó Mercado Pago (`[pagos] …`).
-  5. Lo que hay que mirar en esa prueba: que el `init_point` llegue y la vuelta (`back_url`) funcione;
-     que el webhook pase la firma (si contesta `401`, revisar el secreto y si Mercado Pago firma el
-     `data.id` en minúsculas); cuántos días reintenta un cobro rechazado, para ajustar `GRACIA_DIAS`
-     (5, en `src/lib/pagos/reglas.ts`); y si sin prueba el primer cobro sale al autorizar.
-  6. Con lo de abajo listo, el token de producción en Vercel y `PAGOS_ABIERTO_PARA=1`.
+  orden, y con cada clic, en `docs/mercadopago-paso-a-paso.md`: fusionar #359 y después #360; la
+  cuenta de Pyxis con el retiro al Santander; la aplicación; los usuarios de prueba, vendedor y
+  comprador, y el token del vendedor de prueba; el webhook `https://tu-parrilla.cl/api/pagos/mercadopago`
+  con «Planes y suscripciones»; las tres variables en Vercel; la prueba completa; y, con lo de abajo
+  listo, el token de producción y `PAGOS_ABIERTO_PARA=1`. Lo que hay que mirar en la prueba: que el
+  webhook pase la firma (con `401`, revisar el secreto y si Mercado Pago firma el `data.id` en
+  minúsculas); si sin prueba el primer cobro sale al autorizar; y cuántos días reintenta un cobro
+  rechazado, para ajustar `GRACIA_DIAS` (5, en `src/lib/pagos/reglas.ts`).
 
-  Por cobrar solo en la web: dentro de la app del teléfono, Android obliga a Google Play Billing (con su comisión), y cobrarlo solo en la web, sin
-  botón ni enlace de pago en la app, no. Si algún día se cobra en la app, volver en la Play Console a
-  «Content rating» («purchase digital goods» pasa a Yes) y a «Data safety» (sumar el historial de
+  Se cobra solo en la web: lo que se vende dentro de una app de Android tiene que ir por Google Play
+  Billing, con su comisión, y cobrar en la web sin botón ni enlace de pago en la app no lo exige. Si
+  algún día se cobra en la app, volver en la Play Console a «Content rating» («purchase digital goods» pasa a Yes) y a «Data safety» (sumar el historial de
   compras); «Financial features» sigue en «ninguna»: una suscripción al propio servicio no cuenta
   (anotado el 2026-11-08, al llenarlas).
 - **[dueño] Lo que pide cobrar, fuera del código** (2026-10-23; al día el 2026-11-08):
   - la cuenta de Mercado Pago a nombre de Pyxis, con el retiro a la cuenta del Santander; para la
     fase 2, sus credenciales (`MERCADOPAGO_ACCESS_TOKEN` y el secreto del webhook) y las de prueba,
-    con un usuario de prueba comprador;
+    con un vendedor y un comprador de prueba (`docs/mercadopago-paso-a-paso.md`);
   - la boleta o factura electrónica de cada cobro, al SII: Mercado Pago no la emite;
   - que `/terminos` y `/privacidad` cuenten los planes, el cobro, la prueba y la baja, en la misma
     revisión del abogado («Que todo quede a nombre de Pyxis», arriba), antes de abrir el cobro; y que

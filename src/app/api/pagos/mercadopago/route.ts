@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { env } from '@/lib/env'
+import { MercadoPagoFallo } from '@/lib/pagos/mercadopago'
 import { firmaValida, temaDeAviso } from '@/lib/pagos/reglas'
 import { registrarCobro, sincronizarSuscripcion } from '@/lib/pagos/suscripciones'
 
@@ -14,8 +15,10 @@ const TOLERANCIA_S = 15 * 60
  *
  * Es público y sin sesión, así que la única llave es la firma (`x-signature`, ver `firmaValida`). Del
  * aviso solo se cree el id: el estado se vuelve a leer en Mercado Pago, y de ahí sale lo que cambia el
- * plan de la persona. Un aviso de otro tema se contesta `200` y no se mira. Si leer o escribir falla,
- * `500`, y Mercado Pago lo reintenta; la relectura diaria cubre el caso de que nunca llegue.
+ * plan de la persona. Un aviso de otro tema se contesta `200` y no se mira, y uno cuyo id Mercado Pago
+ * no conoce —el de «Simular notificación», en su panel, es inventado— también: reintentarlo no lo
+ * haría aparecer. Si leer o escribir falla, `500`, y Mercado Pago lo reintenta; la relectura diaria
+ * cubre el caso de que nunca llegue.
  */
 export async function POST(request: Request) {
   const secreto = env('MERCADOPAGO_WEBHOOK_SECRET')
@@ -47,6 +50,10 @@ export async function POST(request: Request) {
     if (tema === 'suscripcion') await sincronizarSuscripcion(dataId)
     if (tema === 'cobro') await registrarCobro(dataId)
   } catch (error) {
+    if (error instanceof MercadoPagoFallo && error.status === 404) {
+      console.warn(`[pagos] webhook: Mercado Pago no conoce ${tipo ?? 'el aviso'} ${dataId.slice(0, 40)}`)
+      return new NextResponse(null, { status: 200 })
+    }
     console.error('[pagos] webhook:', String(error).slice(0, 300))
     return new NextResponse(null, { status: 500 })
   }

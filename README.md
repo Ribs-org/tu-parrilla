@@ -2091,7 +2091,8 @@ asociado por persona (`src/lib/pagos/`):
 2. La vuelta es Tu Cuenta con `?plan=vuelta`, que relee la suscripción sin esperar al webhook.
 3. El webhook (`/api/pagos/mercadopago`) verifica la firma (`x-signature`: HMAC-SHA256 de
    `id:<data.id>;request-id:<x-request-id>;ts:<ts>;`, y no más vieja que 15 minutos) y vuelve a leer
-   en Mercado Pago la suscripción o el cobro del aviso: del cuerpo solo se cree el id.
+   en Mercado Pago la suscripción o el cobro del aviso: del cuerpo solo se cree el id. Un id que
+   Mercado Pago no conoce —el de «Simular notificación», en su panel— se contesta `200` y no se mira.
 4. Autorizada, la persona tiene el pagado hasta el próximo cobro más cinco días de gracia
    (`GRACIA_DIAS`, una suposición: la documentación de Mercado Pago no se deja leer desde un servidor
    y no se pudo confirmar cuántos días reintenta un cobro rechazado). Cada cobro aprobado se anota en
@@ -2103,7 +2104,8 @@ asociado por persona (`src/lib/pagos/`):
    una semana (`releerSuscripciones`).
 
 En Mercado Pago, la aplicación lleva el webhook `https://tu-parrilla.cl/api/pagos/mercadopago` con
-el evento «Planes y suscripciones». Los nombres de los campos y la firma salen del SDK oficial de
+el evento «Planes y suscripciones». Ponerlo en marcha, con los usuarios de prueba y cada clic, está
+en `docs/mercadopago-paso-a-paso.md`. Los nombres de los campos y la firma salen del SDK oficial de
 Node (`mercadopago` 3.6.1), no de su documentación. Al borrar a una persona, sus suscripciones y
 cobros se quedan sin dueño, para la contabilidad. La app del teléfono no cobra ni enlaza al cobro: lo
 que se vende dentro de una app de Android tiene que ir por Google Play Billing.
