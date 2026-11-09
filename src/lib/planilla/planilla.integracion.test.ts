@@ -214,8 +214,15 @@ describe.skipIf(!URL_PRUEBAS)('la planilla de Los Números, contra una Postgres 
 
   it('no trae nada de otro dueño', () => {
     const todo = JSON.stringify(hojas)
-    for (const ajeno of ['"bea"', 'De Bea', 'Lo de Bea', 'Comentario de Bea', 'bea-utm', 'bea.example', 'ig-bea-1', '9999', '777']) {
+    for (const ajeno of ['"bea"', 'De Bea', 'Lo de Bea', 'Comentario de Bea', 'bea-utm', 'bea.example', 'ig-bea-1']) {
       expect(todo, ajeno).not.toContain(ajeno)
+    }
+    // Los números de Bea, como celda entera y no como pedazo de otra: un id o una fecha de
+    // Ana pueden traer «777» por azar, y eso no es una fuga (falló así el 2026-11-09).
+    for (const numero of [9999, 777]) {
+      for (const celda of [`[${numero},`, `,${numero},`, `,${numero}]`, `[${numero}]`, `"${numero}"`]) {
+        expect(todo, celda).not.toContain(celda)
+      }
     }
     expect(filas('Cuentas').map((c) => c['Cuenta'])).toEqual(expect.arrayContaining(['ana', 'anacanal']))
     expect(filas('Cuentas')).toHaveLength(2)
