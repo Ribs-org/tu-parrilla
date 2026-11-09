@@ -717,6 +717,11 @@ Nada de esto bloquea un trámite hoy; conviene ordenarlo antes de abrir a tercer
   porque la documentación no dice si viaja con el traspaso y sin ella la Play Store no
   acepta más versiones. Después, `owner` en `mobile/app.json` y los enlaces de
   `mobile/README.md`. La cuenta de Apple para iPhone conviene sacarla ya a nombre de Pyxis.
+  Con el traspaso, si se quiere, renombrar el proyecto (2026-11-08: el dueño preguntó): el nombre
+  `vicente-numeros` es el `slug` de `mobile/app.json` y solo se ve en expo.dev; en el teléfono y en
+  la tienda la app se llama por `name`. Renombrarlo en expo.dev obliga a cambiar el `slug` en
+  `main` **y** en `ota-1.1.0` a la vez: si no calza con el del servidor, EAS rechaza el build y
+  la publicación por aire. Por eso no se hace en medio del build 1.2.0.
 
 ## Finanzas: planes y pagos
 
