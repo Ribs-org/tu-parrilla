@@ -41,6 +41,29 @@ export const ESTADO_DESCONOCIDO = '«estado» no es un estado de comanda.'
 export const ETA_ILEGIBLE = '«eta» tiene que ser una fecha ISO con su zona, o null.'
 export const TANDAS_ILEGIBLES = '«tandas» es { "servidas": <n>, "total": <n> o null }, con enteros desde 0.'
 
+/** El largo del asunto del correo al dueño, ya en una línea: lo que cabe en la bandeja de entrada sin cortarse tanto. */
+export const ASUNTO_MAXIMO = 120
+export const ASUNTO_ILEGIBLE = `«asunto» es un texto de hasta ${ASUNTO_MAXIMO} caracteres, o null.`
+
+/**
+ * El asunto que manda el chef para el correo al dueño, saneado: en una sola línea —los saltos, los
+ * tabuladores y los demás caracteres de control pasan a ser un espacio—, sin los que invierten la
+ * dirección del texto (con ellos un asunto se puede leer distinto de lo que dice), con los
+ * espacios juntos y sin los de los bordes. Null si no vino o quedó vacío: sale el de siempre. Si
+ * no es texto, o saneado pasa de `ASUNTO_MAXIMO`, la frase de por qué.
+ */
+export function asuntoDe(crudo: unknown): string | null | { error: string } {
+  if (crudo === undefined || crudo === null) return null
+  if (typeof crudo !== 'string') return { error: ASUNTO_ILEGIBLE }
+  const limpio = crudo
+    .replace(/[\u0000-\u001f\u007f-\u009f\u2028\u2029]/g, ' ')
+    .replace(/[\u200e\u200f\u202a-\u202e\u2066-\u2069]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+  if (limpio.length > ASUNTO_MAXIMO) return { error: ASUNTO_ILEGIBLE }
+  return limpio || null
+}
+
 export function trabajadorDe(cuerpo: Record<string, unknown>): string | null {
   const t = cuerpo.trabajador
   return typeof t === 'string' && t.trim().length > 0 && t.length <= 100 ? t.trim() : null
@@ -80,5 +103,8 @@ export function cambioDe(cuerpo: Record<string, unknown>): CambioDeEstado | { er
     if (total !== null && servidas > total) return { error: TANDAS_ILEGIBLES }
     cambio.tandas = { servidas, total }
   }
+  const asunto = asuntoDe(cuerpo.asunto)
+  if (asunto !== null && typeof asunto === 'object') return asunto
+  if (asunto) cambio.asunto = asunto
   return cambio
 }

@@ -388,9 +388,12 @@ fase posterior. Mientras tanto, el teléfono sube acompañamientos e imágenes d
 
 ### Avisos
 
-Llega un correo cuando el chef pregunta, cuando la comanda está lista, cuando se rechaza o falla, y
-cuando un creativo del mesón está por borrarse. El resumen del día suma una línea si hay preguntas
-sin responder o creativos sin programar.
+Llega un correo cuando el chef pregunta, cuando sale la primera tanda (#284), cuando la comanda
+está lista, cuando se rechaza o falla, y cuando un creativo del mesón está por borrarse. El resumen
+del día suma una línea si hay preguntas sin responder o creativos sin programar. Los de la comanda
+—la primera tanda, lista, rechazada, fallida— el dueño los puede apagar; el de una pregunta no,
+porque tiene plazo. Y en el panel, la primera vez que el dueño mira una entrega, el plato sale de
+la cocina: una animación corta, una vez por entrega.
 
 ## Los insumos y sus dibujos
 

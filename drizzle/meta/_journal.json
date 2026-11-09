@@ -260,6 +260,13 @@
       "when": 1794181418427,
       "tag": "0036_suscripciones_y_cobros",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1794190827635,
+      "tag": "0037_entrega_vista",
+      "breakpoints": true
     }
   ]
 }

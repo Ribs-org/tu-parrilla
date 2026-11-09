@@ -1046,6 +1046,9 @@ export const ESTADOS_COMANDA = [
 ] as const
 export type EstadoComanda = (typeof ESTADOS_COMANDA)[number]
 
+/** Los dos momentos en que el chef le entrega al dueño: la primera tanda en el mesón y la comanda entera. */
+export type EntregaDeComanda = 'sirviendo' | 'lista'
+
 export const TIPOS_COMANDA = ['tanda', 'prueba', 'reestilo'] as const
 export type TipoComanda = (typeof TIPOS_COMANDA)[number]
 
@@ -1123,6 +1126,10 @@ export const comandas = pgTable(
     tomadaEn: timestamp('tomada_en', { withTimezone: true }),
     listaEn: timestamp('lista_en', { withTimezone: true }),
     servidaEn: timestamp('servida_en', { withTimezone: true }),
+    // La última entrega que el dueño vio salir en el panel —la primera tanda (`sirviendo`) o la
+    // comanda entera (`lista`)—: con eso, la animación de la entrega pasa una vez por entrega, y no
+    // en cada visita ni en cada navegador (`entregaSinVer`, en `src/lib/cocina/tarjeta.ts`).
+    entregaVista: text('entrega_vista').$type<EntregaDeComanda>(),
     // La red de seguridad del admin (`src/lib/cocina/alarma.ts`): cuándo se le avisó que esta
     // comanda llevaba más de media hora sin tomar, y la hora estimada que ya se le avisó como
     // pasada. Con eso sale una vez por comanda y por motivo, y no en cada corrida del cron.

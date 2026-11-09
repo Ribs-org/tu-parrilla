@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 // `mobile-api` llega a `usuarios` por `batch.ts`, y `usuarios` importa `server-only`.
 vi.mock('server-only', () => ({}))
 
-const { ESTADO_DESCONOCIDO, ETA_ILEGIBLE, TANDAS_ILEGIBLES, cambioDe, cocinaAutorizada, cuerpoDe, trabajadorDe } = await import('./api')
+const { ASUNTO_ILEGIBLE, ASUNTO_MAXIMO, ESTADO_DESCONOCIDO, ETA_ILEGIBLE, TANDAS_ILEGIBLES, asuntoDe, cambioDe, cocinaAutorizada, cuerpoDe, trabajadorDe } = await import('./api')
 
 const pedido = (authorization?: string) =>
   new Request('https://tu-parrilla.cl/api/cocina/comandas', authorization ? { headers: { authorization } } : {})
@@ -45,6 +45,32 @@ describe('cambioDe', () => {
 
   it('un estado que no existe no entra', () => {
     expect(cambioDe({ estado: 'horneando' })).toEqual({ error: ESTADO_DESCONOCIDO })
+  })
+
+  it('el asunto del correo es opcional, va saneado y tiene tope', () => {
+    expect(cambioDe({ estado: 'lista', asunto: 'Aquí su pedido' })).toEqual({ estado: 'lista', asunto: 'Aquí su pedido' })
+    expect(cambioDe({ estado: 'lista', asunto: null })).toEqual({ estado: 'lista' })
+    expect(cambioDe({ estado: 'lista', asunto: '  ' })).toEqual({ estado: 'lista' })
+    expect(cambioDe({ estado: 'lista', asunto: 42 })).toEqual({ error: ASUNTO_ILEGIBLE })
+    expect(cambioDe({ estado: 'lista', asunto: 'x'.repeat(ASUNTO_MAXIMO + 1) })).toEqual({ error: ASUNTO_ILEGIBLE })
+    expect(cambioDe({ estado: 'lista', asunto: 'x'.repeat(ASUNTO_MAXIMO) })).toMatchObject({ asunto: 'x'.repeat(ASUNTO_MAXIMO) })
+  })
+})
+
+describe('asuntoDe', () => {
+  it('en una línea: los saltos y los caracteres de control pasan a ser un espacio', () => {
+    expect(asuntoDe('Aquí su pedido\r\nBcc: alguien@ej.cl')).toBe('Aquí su pedido Bcc: alguien@ej.cl')
+    expect(asuntoDe('\tLista\u0000 ya\u2028')).toBe('Lista ya')
+  })
+
+  it('sin los caracteres que dan vuelta el texto, pero con los emojis enteros', () => {
+    expect(asuntoDe('Pedido \u202elisto\u202c')).toBe('Pedido listo')
+    expect(asuntoDe('El chef 👨‍🍳 te sirve')).toBe('El chef 👨‍🍳 te sirve')
+  })
+
+  it('el tope se mide ya saneado', () => {
+    expect(asuntoDe(`${'x'.repeat(ASUNTO_MAXIMO)}\n\n\n`)).toBe('x'.repeat(ASUNTO_MAXIMO))
+    expect(asuntoDe(undefined)).toBeNull()
   })
 })
 

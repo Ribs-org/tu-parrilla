@@ -5,13 +5,21 @@ import { destinatario, enviarAviso } from '@/lib/social/publish/alert'
 import { avisoDeComanda, avisoDePregunta } from '@/lib/push/avisos'
 import { avisarAlTelefono } from '@/lib/push/enviar'
 import { temaDe } from '@/lib/tema'
-import { correoDeComanda, correoDePregunta, type AvisoDeComanda } from './correo-de-comanda'
+import { leerAjuste } from '@/lib/ajustes'
+import {
+  CLAVE_CORREOS_DE_LA_COCINA,
+  correoDeComanda,
+  correoDePregunta,
+  correosApagados,
+  type AvisoDeComanda,
+} from './correo-de-comanda'
 import { siNoContestas } from './pregunta'
 
-// Los correos al dueño de una comanda. El de cuando termina lo pide la ruta del chef
-// (`/api/cocina/comandas/{id}/estado`) después de responder, y solo cuando `cambiarEstado` dice
-// que ese cambio lo debe (`aviso`): la que escribió la transición es una sola petición, así que el
-// correo sale una vez por cambio aunque el chef reintente o mande dos a la vez. El de cuando el
+// Los correos al dueño de una comanda. El de una entrega o un final —la primera tanda, lista,
+// rechazada o fallida— lo pide la ruta del chef (`/api/cocina/comandas/{id}/estado`) después de
+// responder, y solo cuando `cambiarEstado` dice que ese cambio lo debe (`aviso`): la que escribió
+// la transición es una sola petición, así que el correo sale una vez por cambio aunque el chef
+// reintente o mande dos a la vez. El dueño los puede apagar en Tu Cuenta. El de cuando el
 // chef pregunta, igual: lo pide `/api/cocina/comandas/{id}/preguntas` solo si esa llamada hizo la
 // pregunta, y no un reintento.
 //
@@ -30,11 +38,23 @@ function sitio(): string {
 }
 
 /**
- * Le manda al dueño el correo de ese cambio: lista, rechazada o fallida. Devuelve si salió. Nunca
- * lanza: corre después de que el chef ya tuvo su respuesta, y un correo que no sale no deshace el
- * cambio.
+ * Lo que dijo el chef en el cambio que avisa, tal como quedó escrito: lo trae la ruta y no se lee
+ * de nuevo, porque el correo sale después de responder y para entonces el chef ya puede haber
+ * mandado la tanda siguiente, con otro mensaje y otro «2 de 5».
  */
-export async function avisarDeLaComanda(comandaId: string, estado: AvisoDeComanda): Promise<boolean> {
+export type DelCambio = {
+  asunto?: string | null
+  mensaje?: string | null
+  tandas?: { servidas: number; total: number | null }
+}
+
+/**
+ * Le manda al dueño el correo de ese cambio —la primera tanda, lista, rechazada o fallida— con el
+ * asunto que haya mandado el chef. Devuelve si salió. Si el dueño los apagó en Tu Cuenta, no sale
+ * (y devuelve false), pero el aviso al teléfono sí. Nunca lanza: corre después de que el chef ya
+ * tuvo su respuesta, y un correo que no sale no deshace el cambio.
+ */
+export async function avisarDeLaComanda(comandaId: string, estado: AvisoDeComanda, delCambio: DelCambio = {}): Promise<boolean> {
   try {
     const db = getDb()
     const [fila] = await db
@@ -43,7 +63,8 @@ export async function avisarDeLaComanda(comandaId: string, estado: AvisoDeComand
       .innerJoin(users, eq(users.id, comandas.ownerId))
       .where(eq(comandas.id, comandaId))
     if (!fila) return false
-    const para = destinatario(fila.correo ?? undefined)
+    const apagados = correosApagados(await leerAjuste(fila.ownerId, CLAVE_CORREOS_DE_LA_COCINA))
+    const para = apagados ? undefined : destinatario(fila.correo ?? undefined)
     const [principal] = await db
       .select({ nombre: insumos.nombre })
       .from(insumos)
@@ -53,7 +74,16 @@ export async function avisarDeLaComanda(comandaId: string, estado: AvisoDeComand
       .select({ n: count() })
       .from(creativos)
       .where(and(eq(creativos.comandaId, comandaId), eq(creativos.estado, 'mesa')))
-    const comanda = { id: comandaId, estado, principal: principal?.nombre ?? null, motivo: fila.motivo, enElMeson: n }
+    const comanda = {
+      id: comandaId,
+      estado,
+      principal: principal?.nombre ?? null,
+      motivo: fila.motivo,
+      mensaje: delCambio.mensaje ?? null,
+      asunto: delCambio.asunto ?? null,
+      enElMeson: n,
+      tandas: estado === 'sirviendo' ? delCambio.tandas : undefined,
+    }
     const [salio] = await Promise.all([
       para ? enviarAviso(para, correoDeComanda(comanda, sitio(), temaDe(fila.tema))) : Promise.resolve(false),
       avisarAlTelefono(fila.ownerId, (tema) => avisoDeComanda(comanda, tema)),
