@@ -12,6 +12,7 @@ import {
 import { normalizeFacebookAccount } from './account-metrics'
 import { decryptToken } from './crypto'
 import { laMasVieja, sigueListando } from './lectura'
+import { env } from '../env'
 
 /** El `me/accounts?fields=id,name,access_token` payload. */
 export type FacebookPageEntry = { id?: string; name?: string; access_token?: string }
@@ -96,7 +97,8 @@ export type FacebookPost = {
   permalink_url?: string
   full_picture?: string
   created_time?: string
-  attachments?: { data?: Array<{ media_type?: string }> }
+  /** `target.id` es el id del video cuando el post es un video o un reel. */
+  attachments?: { data?: Array<{ media_type?: string; target?: { id?: string } }> }
   shares?: { count?: number }
   likes?: { summary?: { total_count?: number } }
   comments?: { summary?: { total_count?: number } }
@@ -120,6 +122,53 @@ const METRIC_NAMES: Record<string, keyof PostMetricValues> = {
 // exact likes.summary count from the post object, which wins whenever both answer.
 const REACTIONS_METRIC = 'post_reactions_by_type_total'
 
+/**
+ * Las de un reel, que no salen de las insights del post («Interactions on Reels are not
+ * included», https://developers.facebook.com/docs/graph-api/reference/insights) sino de las del
+ * video: `/{video-id}/video_insights`, sección «Reels»
+ * (https://developers.facebook.com/docs/graph-api/reference/video/video_insights/). Las views
+ * son `blue_reels_play_count`, las reproducciones sin contar las repeticiones; el alcance,
+ * `post_impressions_unique`, la gente que lo vio al menos una vez.
+ */
+const REEL_METRIC_NAMES: Record<string, keyof PostMetricValues> = {
+  blue_reels_play_count: 'views',
+  post_impressions_unique: 'reach',
+}
+
+// «The number of comments on your reel and the number of times your reel was shared»: un
+// solo número no separa los dos, así que solo se usa si llega desglosado y con su parte
+// de compartidos. Meta no documenta la forma del valor.
+const REEL_SOCIAL_METRIC = 'post_video_social_actions'
+
+const REEL_INSIGHT_METRICS = `${Object.keys(REEL_METRIC_NAMES).join(',')},${REEL_SOCIAL_METRIC}`
+
+/**
+ * Leer las insights de los reels, solo con `FACEBOOK_INSIGHTS_DE_REELS=1`. `video_insights` pide
+ * `read_insights`, que la conexión de Facebook no pide hoy (`connect/route.ts`): sin él cada
+ * reel gastaría una llamada para nada. Se enciende cuando la app de Meta tenga el permiso
+ * aprobado y las páginas se hayan reconectado con él (issue #338, `docs/levantamiento-terceros.md`).
+ */
+export function insightsDeReelsEncendidas(): boolean {
+  return env('FACEBOOK_INSIGHTS_DE_REELS') === '1'
+}
+
+/** El id del video de un post de video o de reel; null en cualquier otro post. */
+export function videoIdDe(post: FacebookPost): string | null {
+  const adjunto = post.attachments?.data?.[0]
+  if (adjunto?.media_type !== 'video') return null
+  const id = adjunto.target?.id
+  return typeof id === 'string' && id.length > 0 ? id : null
+}
+
+/** Los compartidos de `post_video_social_actions`, solo si llegan desglosados. */
+function compartidosDe(value: unknown): number | null {
+  if (typeof value !== 'object' || value === null) return null
+  for (const [clave, cuenta] of Object.entries(value)) {
+    if (/^shares?$/i.test(clave) && typeof cuenta === 'number') return cuenta
+  }
+  return null
+}
+
 function mediaTypeOf(post: FacebookPost): string {
   const attached = post.attachments?.data?.[0]?.media_type
   if (attached === 'video') return 'video'
@@ -131,6 +180,8 @@ function mediaTypeOf(post: FacebookPost): string {
 export function normalizeFacebookPost(
   post: FacebookPost,
   insights: FacebookInsights,
+  /** Las `video_insights` de un reel: sus views y su alcance pisan las del post. */
+  reel: FacebookInsights = {},
 ): FetchedPost {
   const metrics: PostMetricValues = { ...NO_METRICS }
   for (const entry of insights.data ?? []) {
@@ -145,6 +196,17 @@ export function normalizeFacebookPost(
       continue
     }
     const key = entry.name ? METRIC_NAMES[entry.name] : undefined
+    if (key && typeof value === 'number') metrics[key] = value
+  }
+
+  for (const entry of reel.data ?? []) {
+    const value = entry.values?.[0]?.value
+    if (entry.name === REEL_SOCIAL_METRIC) {
+      const compartidos = compartidosDe(value)
+      if (compartidos !== null) metrics.shares = compartidos
+      continue
+    }
+    const key = entry.name ? REEL_METRIC_NAMES[entry.name] : undefined
     if (key && typeof value === 'number') metrics[key] = value
   }
 
@@ -243,9 +305,16 @@ const INSIGHTS_CHUNK_SIZE = 5
 // likes.summary/comments.summary answer (#10) unless the token carries
 // pages_read_user_content — granted since the Meta app gained the «Administrar
 // páginas» use case. A token from before that consent needs reconnecting.
-const POST_FIELDS =
-  'id,message,permalink_url,full_picture,attachments{media_type},created_time,shares,likes.summary(true),comments.summary(true)'
+// `target{id}` —el id del video— solo hace falta para las insights del reel, y solo se pide
+// con ellas encendidas.
+function postFields(conReels: boolean): string {
+  const adjuntos = conReels ? 'attachments{media_type,target{id}}' : 'attachments{media_type}'
+  return `id,message,permalink_url,full_picture,${adjuntos},created_time,shares,likes.summary(true),comments.summary(true)`
+}
 
+// Meta documenta `read_insights` como requisito de estas insights
+// (https://developers.facebook.com/docs/graph-api/reference/insights), y la conexión no lo
+// pide: es lo que explica que las views y el alcance de Facebook lleguen en null (#338).
 const INSIGHT_METRICS = `post_media_view,post_total_media_view_unique,${REACTIONS_METRIC}`
 
 /** Las estadísticas de un post; un 404 es un post sin ellas, y cualquier otro error sube. */
@@ -256,6 +325,38 @@ async function insightsOf(id: string, token: string): Promise<FacebookInsights> 
     if (isPostWithoutInsights(error)) return {}
     throw error
   }
+}
+
+/**
+ * Si Graph dice que este video no tiene las insights de un reel, en vez de que la corrida esté
+ * mal: un 404; el code 100, que es un video que no es reel (sus métricas no le corresponden) o
+ * un id que no es video; y los code 10 y 200, que son el permiso. El permiso se tolera para que
+ * encender la bandera antes de tiempo deje los números en null y no tumbe la lectura entera.
+ * Un token vencido (190), un límite (4, 17, 32) o un 5xx siguen subiendo.
+ */
+export function isVideoWithoutReelInsights(error: unknown): boolean {
+  if (!(error instanceof FacebookHttpError)) return false
+  if (error.status === 404) return true
+  return error.status === 400 && (error.code === 100 || error.code === 10 || error.code === 200)
+}
+
+/** Las `video_insights` de un reel, o nada si el post no es video o la bandera está apagada. */
+async function reelInsightsOf(post: FacebookPost, token: string, conReels: boolean): Promise<FacebookInsights> {
+  const videoId = conReels ? videoIdDe(post) : null
+  if (!videoId) return {}
+  try {
+    return (await getJson(
+      `${GRAPH}/${videoId}/video_insights?metric=${REEL_INSIGHT_METRICS}&access_token=${token}`,
+    )) as FacebookInsights
+  } catch (error) {
+    if (isVideoWithoutReelInsights(error)) return {}
+    throw error
+  }
+}
+
+async function normalizarConInsights(post: FacebookPost, token: string, conReels: boolean): Promise<FetchedPost> {
+  const [insights, reel] = await Promise.all([insightsOf(post.id, token), reelInsightsOf(post, token, conReels)])
+  return normalizeFacebookPost(post, insights, reel)
 }
 
 export const facebookConnector: Connector = {
@@ -276,7 +377,8 @@ export const facebookConnector: Connector = {
     const pageId = account.externalId
     if (!token || !pageId) return { posts: [], windowWasCapped: false }
 
-    const first = `${GRAPH}/${pageId}/published_posts?fields=${POST_FIELDS}&limit=${PAGE_SIZE}&access_token=${token}`
+    const conReels = insightsDeReelsEncendidas()
+    const first = `${GRAPH}/${pageId}/published_posts?fields=${postFields(conReels)}&limit=${PAGE_SIZE}&access_token=${token}`
     const { posts: fetched, windowWasCapped } = await collectPublishedPosts(first, getJson, opciones?.desde)
 
     const posts: FetchedPost[] = []
@@ -287,7 +389,7 @@ export const facebookConnector: Connector = {
     for (let i = 0; i < fetched.length; i += INSIGHTS_CHUNK_SIZE) {
       const chunk = fetched.slice(i, i + INSIGHTS_CHUNK_SIZE)
       const chunkPosts = await Promise.all(
-        chunk.map(async (item) => normalizeFacebookPost(item, await insightsOf(item.id, token))),
+        chunk.map((item) => normalizarConInsights(item, token, conReels)),
       )
       posts.push(...chunkPosts)
     }
@@ -296,18 +398,20 @@ export const facebookConnector: Connector = {
   },
 
   /**
-   * Dos lecturas por post, como en el listado: los likes, comentarios y compartidos
-   * exactos vienen en el post mismo, y las views en sus insights.
+   * Las mismas lecturas por post que en el listado: los likes, comentarios y compartidos
+   * exactos vienen en el post mismo, las views en sus insights y, en un reel con la bandera
+   * encendida, las views y el alcance en las del video.
    */
   async fetchMetricsById(_account: SocialAccount, token: string | null, externalIds: string[]) {
     const metricas = new Map<string, PostMetricValues>()
     if (!token) return metricas
+    const conReels = insightsDeReelsEncendidas()
     for (let i = 0; i < externalIds.length; i += INSIGHTS_CHUNK_SIZE) {
       await Promise.all(
         externalIds.slice(i, i + INSIGHTS_CHUNK_SIZE).map(async (id) => {
           try {
-            const post = (await getJson(`${GRAPH}/${id}?fields=${POST_FIELDS}&access_token=${token}`)) as FacebookPost
-            metricas.set(id, normalizeFacebookPost({ ...post, id }, await insightsOf(id, token)).metrics)
+            const post = (await getJson(`${GRAPH}/${id}?fields=${postFields(conReels)}&access_token=${token}`)) as FacebookPost
+            metricas.set(id, (await normalizarConInsights({ ...post, id }, token, conReels)).metrics)
           } catch (error) {
             if (!isPostGone(error)) throw error
           }

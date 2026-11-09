@@ -881,6 +881,10 @@ Parámetros, todos opcionales:
   con `contraSuCuenta`.
 - En YouTube, `viewsGanadas`, `viewsA7Dias`, `contraSuCuenta`, `viewsA48h`,
   `contraSuCuenta48h` y `arrastre` vienen siempre `null`: sus políticas no permiten calcular métricas con sus datos.
+- En Facebook, `views`, `alcance` y lo que sale de las views (`viewsGanadas`, `viewsA7Dias`,
+  `contraSuCuenta`, `viewsA48h`, `contraSuCuenta48h`, `arrastre`) vienen hoy `null` en todas las publicaciones, reels incluidos:
+  Meta los da solo con un permiso (`read_insights`) que Tu Parrilla todavía no tiene. `likes`,
+  `comentarios` y `compartidos` sí llegan. No es que nadie los vea: es que no se sabe.
 - **`likes`, `comentarios`, `compartidos`, `alcance`** — lo que reporta la red.
 - **`visitasAlSitio`, `clicks`, `ctr`** — tráfico real que ese post llevó a la
   página pública del dueño, atribuido por la etiqueta `?s=` (ver abajo). Ninguna red te da

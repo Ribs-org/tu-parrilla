@@ -1110,7 +1110,9 @@ la cuenta del revisor de Meta, cuando la instalación pide los permisos de lectu
 los reposts de publicaciones ajenas— con views, likes, comentarios (sus respuestas) y
 compartidos (sus reposts más sus citas); guardados y alcance, Threads no los da. TikTok da
 guardados y alcance de cada video solo en las cuentas donde se activó TikTok for Business; en
-las demás quedan vacíos.
+las demás quedan vacíos. Facebook todavía no da views ni alcance: quedan en «—» en todas sus
+publicaciones, reels incluidos, hasta que Meta apruebe el permiso que los lee; no quiere decir
+que nadie las vio. Sus likes, comentarios y compartidos sí llegan.
 
 **Qué publicación se lee cada día.** Depende de su edad. Lo publicado en los últimos 10 días se
 lee todos los días (y, aunque la cuenta publique poco, siempre sus 200 publicaciones más
