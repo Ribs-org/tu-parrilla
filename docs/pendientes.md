@@ -784,9 +784,9 @@ diciendo «Sin suscripción», y es cierto.
 - **La Cocina en la portada (#324)** (2026-11-09). Una sección en `tu-parrilla.cl` que cuente
   qué entrega La Cocina, en cuánto tiempo y cómo se pide. Decidido por el dueño: el ejemplo del
   antes y el después son **solo sus dos mejores cortos**, que el equipo de contenido identifica
-  (pedido en el issue). Falta: **[dueño]** el plazo que se promete (se le recomendó «en menos de
-  24 horas»: el 2026-10-27 un pedido esperó siete horas a que el chef lo tomara), y los dos
-  cortos con su original.
+  (pedido en el issue), y **no se promete un plazo**: en vez de un tiempo, algo como «espera
+  mientras el chef edita por ti». Falta solo que el equipo de contenido mande los dos cortos con
+  su original.
 - **«Sincronizar ahora» le puede quitar a una publicación su lectura de las 48 horas** (2026-11-08,
   al sumar `viewsA48h`, #358). La lectura del día (`post_metrics`, una por publicación y día) se
   reescribe entera en cada sincronización, también su `captured_at`. La ventana de las 48 horas
