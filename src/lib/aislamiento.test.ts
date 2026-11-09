@@ -174,8 +174,8 @@ const DUENO = 'owner-1'
  */
 const PERSONA_GRATIS = [['gratis', null, null, null, 'America/Santiago', null]]
 const PLANES = [
-  ['gratis', 'Gratis', 0, 0, 3, 10, 21474836480, 100000, 0],
-  ['pagado', 'Asador', 34990, 7, 15, null, 107374182400, 2000000, 1],
+  ['gratis', 'Gratis', 0, 0, 7, 50, 21474836480, 100000, 0],
+  ['pagado', 'Maestro Parrillero', 34990, 7, 15, null, 214748364800, 2000000, 1],
 ]
 
 const USUARIO = {

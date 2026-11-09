@@ -60,14 +60,14 @@ describe('cabe', () => {
 
 describe('las frases de los topes', () => {
   it('nombran el plan y el tope, en singular o plural', () => {
-    expect(topeDeCuentas({ nombre: 'Gratis', cuentasMax: 3 })).toBe(
-      'Tu plan Gratis conecta hasta 3 cuentas: desconecta una en Los Fierros para conectar esta.',
+    expect(topeDeCuentas({ nombre: 'Gratis', cuentasMax: 7 })).toBe(
+      'Tu plan Gratis conecta hasta 7 cuentas: desconecta una en Los Fierros para conectar esta.',
     )
     expect(topeDeCuentas({ nombre: 'Gratis', cuentasMax: 1 })).toBe(
       'Tu plan Gratis conecta hasta 1 cuenta: desconecta una en Los Fierros para conectar esta.',
     )
-    expect(topeEnLaParrilla({ nombre: 'Gratis', enLaParrillaMax: 10 })).toBe(
-      'Tu plan Gratis deja hasta 10 publicaciones esperando a la vez: espera a que salga alguna o borra una.',
+    expect(topeEnLaParrilla({ nombre: 'Gratis', enLaParrillaMax: 50 })).toBe(
+      'Tu plan Gratis deja hasta 50 publicaciones esperando a la vez: espera a que salga alguna o borra una.',
     )
     expect(SIN_TOKENS).toBe('Se acabaron los tokens de IA de tu plan este mes.')
     expect(enPesos(34990)).toBe('$34.990')
@@ -76,25 +76,25 @@ describe('las frases de los topes', () => {
 
 describe('leerPlan', () => {
   const campos = {
-    nombre: ' Asador ',
+    nombre: ' Maestro Parrillero ',
     precioClp: '34.990',
     diasDePrueba: '7',
     cuentasMax: '15',
     enLaParrillaMax: '',
     tokensMes: '2.000.000',
-    bodegaGb: '100',
+    bodegaGb: '200',
     prioridad: '1',
   }
 
   it('lee los números con o sin puntos de miles, y un tope vacío es sin tope', () => {
     expect(leerPlan('pagado', campos)).toEqual({
-      nombre: 'Asador',
+      nombre: 'Maestro Parrillero',
       precioClp: 34990,
       diasDePrueba: 7,
       cuentasMax: 15,
       enLaParrillaMax: null,
       tokensMes: 2_000_000,
-      bodegaBytes: 100 * 1024 ** 3,
+      bodegaBytes: 200 * 1024 ** 3,
       prioridad: 1,
     })
   })
@@ -116,25 +116,25 @@ describe('leerPlan', () => {
 })
 
 describe('planEnPalabras', () => {
-  const planes = { gratis: { nombre: 'Gratis' }, pagado: { nombre: 'Asador' } }
+  const planes = { gratis: { nombre: 'Gratis' }, pagado: { nombre: 'Maestro Parrillero' } }
   const fecha = (d: Date) => d.toISOString().slice(0, 10)
 
   it('dice el plan, de dónde sale y hasta cuándo', () => {
     expect(planEnPalabras({ plan: 'gratis', planHasta: null, planOrigen: null }, planes, ahora, fecha)).toBe('Gratis')
     expect(planEnPalabras({ plan: 'pagado', planHasta: null, planOrigen: 'cortesia' }, planes, ahora, fecha)).toBe(
-      'Asador · cortesía',
+      'Maestro Parrillero · cortesía',
     )
     expect(planEnPalabras({ plan: 'pagado', planHasta: manana, planOrigen: 'cortesia' }, planes, ahora, fecha)).toBe(
-      'Asador · cortesía hasta el 2026-11-09',
+      'Maestro Parrillero · cortesía hasta el 2026-11-09',
     )
     expect(planEnPalabras({ plan: 'pagado', planHasta: manana, planOrigen: 'suscripcion' }, planes, ahora, fecha)).toBe(
-      'Asador · lo paga hasta el 2026-11-09',
+      'Maestro Parrillero · lo paga hasta el 2026-11-09',
     )
   })
 
   it('si venció, dice que rige el gratis y desde cuándo', () => {
     expect(planEnPalabras({ plan: 'pagado', planHasta: ayer, planOrigen: 'cortesia' }, planes, ahora, fecha)).toBe(
-      'Gratis · su Asador venció el 2026-11-07',
+      'Gratis · su plan Maestro Parrillero venció el 2026-11-07',
     )
   })
 })

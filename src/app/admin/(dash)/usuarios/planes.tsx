@@ -136,7 +136,7 @@ export function BotonPlan({
             <GroupLabel>Cortesía hasta</GroupLabel>
             <SelectorFecha modo="fecha" value={dia} onChange={setDia} min={hoy} hoy={hoy} quitable aria-label="Cortesía hasta" />
             <span className="mt-1 block text-[0.72rem] text-fg-faint">
-              Vacía, sin fecha. Le da el {pagado} sin pagar; al terminar, vuelve sola al gratis.
+              Vacía, sin fecha. Le da el plan {pagado} sin pagar; al terminar, vuelve sola al gratis.
             </span>
           </div>
           {error ? (

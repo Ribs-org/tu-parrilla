@@ -36,7 +36,7 @@ export async function suscripcionVivaDe(ownerId: string) {
 }
 
 /**
- * «Pasar a Asador»: crea la suscripción en Mercado Pago y devuelve adónde mandar a la persona para
+ * «Pasar a Maestro Parrillero»: crea la suscripción en Mercado Pago y devuelve adónde mandar a la persona para
  * autorizarla. Un enlace pedido hace menos de un día, con el mismo correo y el mismo precio, se reusa:
  * apretar dos veces no deja dos suscripciones esperando.
  */

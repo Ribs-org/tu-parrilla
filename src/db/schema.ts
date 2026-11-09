@@ -1509,7 +1509,7 @@ export const ESTADOS_SUSCRIPCION = ['pendiente', 'autorizada', 'pausada', 'cance
 export type EstadoSuscripcion = (typeof ESTADOS_SUSCRIPCION)[number]
 
 /**
- * Las suscripciones al plan pagado, una por cada vez que alguien aprieta «Pasar a Asador» (la fase 2
+ * Las suscripciones al plan pagado, una por cada vez que alguien aprieta «Pasar a Maestro Parrillero» (la fase 2
  * de `docs/superpowers/specs/2026-11-08-planes-design.md`). La de Mercado Pago se crea con el id de
  * esta fila como `external_reference`, y así el webhook sabe de quién es sin adivinar por el correo.
  * El dueño queda nulo si se borra a la persona: lo cobrado se guarda para la contabilidad.

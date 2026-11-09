@@ -1586,7 +1586,7 @@ Vercel y bajan con `vercel env pull .env.local`.
 | `ANUNCIOS_ABIERTO_PARA` | Para quién se leen los anuncios de Meta y se ve «Lo pagado» en Los Números; con las dos banderas de arriba, también «Promocionar». `1`, para todos; una lista de ids de usuario separados por comas, solo para esos (la cuenta del revisor de Meta mientras revisa) | No — apagada por defecto; sin `ads_read` concedido la lectura falla cada noche, así que se abre para todos solo con los permisos aprobados |
 | `MERCADOPAGO_ACCESS_TOKEN` | El Access Token de la aplicación de Mercado Pago (Tus integraciones → Credenciales): con él se crean, leen y cancelan las suscripciones al plan pagado. El de prueba sirve para probar con usuarios de prueba | No — sin él, «Tu plan» no ofrece pagar y la relectura diaria no corre (ver «Los planes») |
 | `MERCADOPAGO_WEBHOOK_SECRET` | La clave secreta del webhook de esa aplicación (Webhooks → «Planes y suscripciones»): con ella `/api/pagos/mercadopago` verifica la firma de cada aviso | No — sin ella el webhook contesta `400` a todo, y las suscripciones se ponen al día solo al volver de Mercado Pago y en la relectura diaria |
-| `PAGOS_ABIERTO_PARA` | Para quién aparece «Pasar a Asador» en Tu Cuenta: `1`, para todos; una lista de ids de usuario separados por comas, solo para esos (para probar con una cuenta de prueba) | No — vacía, cerrado para todos. Se abre a todos cuando `/terminos` y `/privacidad` cuenten el cobro |
+| `PAGOS_ABIERTO_PARA` | Para quién aparece «Pasar a Maestro Parrillero» en Tu Cuenta: `1`, para todos; una lista de ids de usuario separados por comas, solo para esos (para probar con una cuenta de prueba) | No — vacía, cerrado para todos. Se abre a todos cuando `/terminos` y `/privacidad` cuenten el cobro |
 | `SITE_URL` | Tu dominio, para etiquetar los enlaces del mensaje automático | No — sin ella se usa el dominio de producción de Vercel |
 | `COCINA_SECRET` | La credencial de La Cocina: la que el servidor del chef manda en `Authorization: Bearer …` a `/api/cocina/…` para tomar comandas, bajar insumos, informar estados y entregar creativos (ver «La Cocina» y `docs/cocina-api.md`). La conocen solo este despliegue y el servidor del chef | No — sin ella esas rutas responden `401` y la cocina queda cerrada; si la pones, genérala igual que `CRON_SECRET` y dásela al servidor del chef |
 | `CRON_SECRET` | Autoriza las corridas programadas: el sync diario y la publicación cada 5 minutos. Vercel la manda sola a su cron; el pinger externo la manda en `Authorization: Bearer …` | Sí — Vercel no la crea: se genera igual que `AUTH_SECRET` y se agrega. Sin ella los crons responden `401` y no corre nada |
@@ -2036,18 +2036,18 @@ Fierros. Lo puro está en `src/lib/cuentas-api.ts`.
 
 ## Los planes
 
-Dos planes, el gratis y el pagado («Asador»), con las mismas funciones: lo que cambia son los
+Dos planes, el gratis y el pagado («Maestro Parrillero»), con las mismas funciones: lo que cambia son los
 topes, el espacio, los tokens de IA y quién pasa primero en las colas. El diseño, con el porqué de
 cada número, está en `docs/superpowers/specs/2026-11-08-planes-design.md`. Cada plan es una fila de
 `planes` que el admin edita en Los Maestros («Los planes»); las dos nacen en la migración
 `0035_planes.sql`:
 
-| | Gratis | Asador |
+| | Gratis | Maestro Parrillero |
 |---|---|---|
 | Precio al mes | $0 | $34.990, IVA incluido |
-| Cuentas conectadas | 3 | 15 |
-| Publicaciones esperando a la vez | 10 | sin tope |
-| Cámara de frío | 20 GB | 100 GB |
+| Cuentas conectadas | 7 | 15 |
+| Publicaciones esperando a la vez | 50 | sin tope |
+| Cámara de frío | 20 GB | 200 GB |
 | Tokens de IA al mes | 100.000 | 2.000.000 |
 | Prioridad en las colas | 0 | 1 |
 
@@ -2078,12 +2078,12 @@ demás), la publicación, el sondeo de comentarios con sus borradores, y la sinc
 Dentro de una misma prioridad, el orden de siempre (`prioridadDelDueno`, en
 `src/lib/planes/prioridad.ts`).
 
-**El cobro, con Mercado Pago, está escrito y cerrado**: «Pasar a Asador» solo aparece para quien
+**El cobro, con Mercado Pago, está escrito y cerrado**: «Pasar a Maestro Parrillero» solo aparece para quien
 diga `PAGOS_ABIERTO_PARA`, y solo con `MERCADOPAGO_ACCESS_TOKEN` puesta. Se abre a todos cuando
 `/terminos` y `/privacidad` lo cuenten (`docs/pendientes.md`). Es una suscripción mensual sin plan
 asociado por persona (`src/lib/pagos/`):
 
-1. «Pasar a Asador» pide el correo de la cuenta de Mercado Pago con que se va a pagar —Mercado Pago lo
+1. «Pasar a Maestro Parrillero» pide el correo de la cuenta de Mercado Pago con que se va a pagar —Mercado Pago lo
    compara al autorizar—, crea una fila de `suscripciones` y la suscripción en Mercado Pago
    (`POST /preapproval`, con el id de la fila como `external_reference`, el precio del plan en CLP y,
    si la persona nunca los usó, los días de prueba), y manda a la persona a su `init_point`. Tu
@@ -2329,7 +2329,7 @@ sistema (`mobile/src/lib/subir-por-partes.ts` y `archivo-local.ts`).
 en `…/insumos/`), con un uuid en la clave, y su URL nunca sale al navegador: el chef lo baja con un
 enlace firmado que vence en una hora.
 
-**La cuota de la cámara.** La de su plan: 20 GB en el gratis y 100 GB en el pagado (ver «Los
+**La cuota de la cámara.** La de su plan: 20 GB en el gratis y 200 GB en el pagado (ver «Los
 planes»); el que tenga otra puesta a mano la lleva en `users.bodega_bytes`, que el admin cambia en Los
 Maestros y que gana sobre la del plan (`cuotaDeLaCamara`). Se mira en el servidor al
 abrir cada subida, antes de firmar nada, contando lo guardado **y lo que está subiendo**, con la

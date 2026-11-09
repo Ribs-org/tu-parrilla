@@ -56,7 +56,7 @@ export async function pasarAlGratisAccion(userId: string): Promise<{ error?: str
 }
 
 /**
- * «Pasar a Asador»: crea la suscripción en Mercado Pago y devuelve adónde mandar a la persona. El
+ * «Pasar a Maestro Parrillero»: crea la suscripción en Mercado Pago y devuelve adónde mandar a la persona. El
  * navegador va ahí; la vuelta es Tu Cuenta con `?plan=vuelta`, que la lee sin esperar el webhook.
  */
 export async function pasarAlPagadoAccion(correoPagador: string): Promise<{ enlace: string } | { error: string }> {

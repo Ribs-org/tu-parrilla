@@ -25,7 +25,7 @@ export type CobroDelPlan = {
 
 const deTope = (usado: number, tope: number | null) => (tope === null ? `${enMiles(usado)}, sin tope` : `${enMiles(usado)} de ${enMiles(tope)}`)
 
-/** Lo que trae un plan, en una frase: «15 cuentas, sin tope en la parrilla, 100 GB…». */
+/** Lo que trae un plan, en una frase: «15 cuentas, sin tope en la parrilla, 200 GB…». */
 function loQueTrae(plan: Plan, camara: { noche: string; dia: string }, conPrioridad: boolean) {
   const cuentas = plan.cuentasMax === null ? 'cuentas sin tope' : `${enMiles(plan.cuentasMax)} cuentas`
   const parrilla =
@@ -51,7 +51,7 @@ export function TuPlan({ uso, fecha, cobro }: { uso: UsoDelPlan; fecha: (d: Date
       {cobro.vuelta ? (
         <p role="status" className={plan.clave !== 'gratis' ? 'text-positive' : 'text-caution'}>
           {plan.clave !== 'gratis'
-            ? `Listo: ya tienes el ${plan.nombre}.`
+            ? `Listo: ya tienes el plan ${plan.nombre}.`
             : 'Mercado Pago todavía no confirma la suscripción. Si la autorizaste, aparece aquí en unos minutos.'}
         </p>
       ) : null}
@@ -59,7 +59,7 @@ export function TuPlan({ uso, fecha, cobro }: { uso: UsoDelPlan; fecha: (d: Date
         Tienes el plan <span className="font-semibold">{plan.nombre}</span>
         {plan.clave !== 'gratis' && persona.planHasta ? `, hasta el ${fecha(persona.planHasta)}` : ''}
         {plan.clave !== 'gratis' && persona.planOrigen === 'cortesia' ? ', de cortesía' : ''}.
-        {vencido && persona.planHasta ? ` Tu ${planes[persona.plan].nombre} terminó el ${fecha(persona.planHasta)}.` : ''}
+        {vencido && persona.planHasta ? ` Tu plan ${planes[persona.plan].nombre} terminó el ${fecha(persona.planHasta)}.` : ''}
       </p>
 
       {loPaga && cobro.viva ? (

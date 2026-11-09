@@ -94,7 +94,7 @@ sección.
     plan, o si va al Drive del dueño —que pide su API, el OAuth y una cuenta con espacio, y que el
     chef baje de ahí, cuando Drive era justo el cuello de botella que La Cocina sacó del camino
     («Todo en el almacén de Tu Parrilla, no en Drive», en el diseño de La Cocina)—. También, cuánto
-    le toca a cada plan: desde el 2026-11-08 la pone el plan (20 GB el gratis, 100 GB el pagado, en
+    le toca a cada plan: desde el 2026-11-08 la pone el plan (20 GB el gratis, 200 GB el pagado, en
     Los Maestros → «Los planes»), y a mano sigue ganando `users.bodega_bytes`.
   - **[dueño] Decidir juntas la aprobación de lo que propone el chef (#283) y el aviso de la
     entrega (#284)** (2026-11-03). #283 pide que el chef proponga estados y entregas y que una
@@ -724,7 +724,7 @@ Nada de esto bloquea un trámite hoy; conviene ordenarlo antes de abrir a tercer
 ## Finanzas: planes y pagos
 
 Pedido del dueño el 2026-10-23, como uno de los dos ejes de trabajo, junto con los trámites. Desde
-el 2026-11-08 hay dos planes, el gratis y el pagado («Asador», $34.990 al mes), con las mismas
+el 2026-11-08 hay dos planes, el gratis y el pagado («Maestro Parrillero», $34.990 al mes), con las mismas
 funciones y distintos topes, espacio, tokens de IA y prioridad en las colas; el admin los edita y da
 el pagado como cortesía en Los Maestros (README, «Los planes»). Nadie paga todavía: el README sigue
 diciendo «Sin suscripción», y es cierto.
@@ -740,8 +740,8 @@ diciendo «Sin suscripción», y es cierto.
      «Planes y suscripciones», y copiar su clave secreta.
   3. En Vercel (production): `MERCADOPAGO_ACCESS_TOKEN` (el de prueba), `MERCADOPAGO_WEBHOOK_SECRET` y
      `PAGOS_ABIERTO_PARA=<id del dueño>`. Redesplegar.
-  4. Probar con el comprador de prueba: «Pasar a Asador» → autorizar → volver a Tu Cuenta con «Listo:
-     ya tienes el Asador.»; ver la suscripción en Mercado Pago, la fila en Los Maestros («lo paga hasta
+  4. Probar con el comprador de prueba: «Pasar a Maestro Parrillero» → autorizar → volver a Tu Cuenta con «Listo:
+     ya tienes el plan Maestro Parrillero.»; ver la suscripción en Mercado Pago, la fila en Los Maestros («lo paga hasta
      el …») y, al primer cobro, «Los cobros». Después, «Cancelar la suscripción». Si algo falla, el log
      de Vercel dice qué contestó Mercado Pago (`[pagos] …`).
   5. Lo que hay que mirar en esa prueba: que el `init_point` llegue y la vuelta (`back_url`) funcione;

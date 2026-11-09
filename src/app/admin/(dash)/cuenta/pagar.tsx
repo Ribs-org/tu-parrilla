@@ -71,7 +71,7 @@ export function CancelarSuscripcion({ nombre, hasta }: { nombre: string; hasta: 
     const seguir = await confirmar({
       titulo: '¿Cancelar la suscripción?',
       detalle: hasta
-        ? `No se te vuelve a cobrar. Sigues con el ${nombre} hasta el ${hasta}; después pasas al gratis.`
+        ? `No se te vuelve a cobrar. Sigues con el plan ${nombre} hasta el ${hasta}; después pasas al gratis.`
         : 'No se te vuelve a cobrar; después pasas al gratis.',
       accion: 'Cancelar la suscripción',
       peligro: true,

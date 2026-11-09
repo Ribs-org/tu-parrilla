@@ -58,7 +58,7 @@ describe('firmaValida', () => {
 })
 
 describe('cuerpoDeSuscripcion', () => {
-  const plan = { nombre: 'Asador', precioClp: 34990, diasDePrueba: 7 }
+  const plan = { nombre: 'Maestro Parrillero', precioClp: 34990, diasDePrueba: 7 }
   const entrada = {
     plan,
     suscripcionId: 'f1c3b8d2-0000-4000-8000-000000000001',
@@ -69,7 +69,7 @@ describe('cuerpoDeSuscripcion', () => {
 
   it('una suscripción mensual en pesos, con la prueba y la referencia a nuestra fila', () => {
     expect(cuerpoDeSuscripcion(entrada)).toEqual({
-      reason: 'Tu Parrilla — Asador',
+      reason: 'Tu Parrilla — Maestro Parrillero',
       external_reference: entrada.suscripcionId,
       payer_email: 'ana@ejemplo.cl',
       back_url: entrada.volverA,

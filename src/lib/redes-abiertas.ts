@@ -111,7 +111,7 @@ export function analiticaDeYoutubeAbiertaPara(ownerId: string | null | undefined
 }
 
 /**
- * Si el dueño ve «Pasar a Asador» en Tu Cuenta, el cobro del plan pagado con Mercado Pago
+ * Si el dueño ve «Pasar a Maestro Parrillero» en Tu Cuenta, el cobro del plan pagado con Mercado Pago
  * (`src/lib/pagos/`). `PAGOS_ABIERTO_PARA=1` lo abre para todos; una lista de ids de usuario separados
  * por comas, solo para esos —para probarlo con una cuenta de prueba de Mercado Pago sin ofrecérselo a
  * nadie más—; vacía, para nadie. Se abre a todos después de que `/terminos` y `/privacidad` cuenten

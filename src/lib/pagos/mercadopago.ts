@@ -42,7 +42,7 @@ export class MercadoPagoFallo extends Error {
   }
 }
 
-/** Si hay credencial para hablar con Mercado Pago. Sin ella, «Pasar a Asador» no se ofrece. */
+/** Si hay credencial para hablar con Mercado Pago. Sin ella, «Pasar a Maestro Parrillero» no se ofrece. */
 export function mercadoPagoConfigurado(): boolean {
   return Boolean(env('MERCADOPAGO_ACCESS_TOKEN'))
 }

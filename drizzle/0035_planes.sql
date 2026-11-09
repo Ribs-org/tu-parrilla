@@ -15,8 +15,8 @@ ALTER TABLE "planes" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
 -- Los dos planes nacen acá, antes de la llave de `users.plan`, que exige la fila `gratis`. El admin
 -- los edita después en Los Maestros (docs/superpowers/specs/2026-11-08-planes-design.md).
 INSERT INTO "planes" ("clave", "nombre", "precio_clp", "dias_de_prueba", "cuentas_max", "en_la_parrilla_max", "bodega_bytes", "tokens_mes", "prioridad") VALUES
-	('gratis', 'Gratis', 0, 0, 3, 10, 21474836480, 100000, 0),
-	('pagado', 'Asador', 34990, 7, 15, NULL, 107374182400, 2000000, 1);--> statement-breakpoint
+	('gratis', 'Gratis', 0, 0, 7, 50, 21474836480, 100000, 0),
+	('pagado', 'Maestro Parrillero', 34990, 7, 15, NULL, 214748364800, 2000000, 1);--> statement-breakpoint
 CREATE TABLE "uso_ia" (
 	"owner_id" uuid NOT NULL,
 	"mes" text NOT NULL,

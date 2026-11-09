@@ -33,7 +33,7 @@ espacio, los tokens y quién pasa primero en las colas. Toda persona nace en el 
 tarjetas, «El gratis» y «El pagado», cada una con sus campos ya llenos con lo que tiene hoy:
 
 - «Nombre»: como lo ve la persona en Tu Cuenta y en los avisos de los topes (hoy «Gratis» y
-  «Asador»);
+  «Maestro Parrillero»);
 - solo en el pagado, «Precio al mes (CLP, con IVA)» y «Días de prueba». El gratis no tiene: no se
   cobra;
 - «Cuentas conectadas», «Esperando en la parrilla» y «Tokens de IA al mes», cada uno con la ayuda
@@ -75,9 +75,10 @@ del admin. Cada fila trae:
 | «invitado <fecha>» | Fue invitado ese día y todavía no ha entrado nunca. | «Quitar» |
 | «entró <fecha>» | Ya entró; la fecha es la de su **primer** ingreso, no la del último. | «Cerrar sesiones» |
 
-- su plan, en letra chica: «Gratis»; «Asador · cortesía» (sin fecha) o «Asador · cortesía hasta el
-  <fecha>»; «Asador · lo paga hasta el <fecha>» si lo paga con Mercado Pago (la fecha es la del próximo
-  cobro más la gracia); o, si ya terminó, «Gratis · su Asador venció el <fecha>» (con los nombres
+- su plan, en letra chica: «Gratis»; «Maestro Parrillero · cortesía» (sin fecha) o «Maestro
+  Parrillero · cortesía hasta el <fecha>»; «Maestro Parrillero · lo paga hasta el <fecha>» si lo
+  paga con Mercado Pago (la fecha es la del próximo cobro más la gracia); o, si ya terminó, «Gratis ·
+  su plan Maestro Parrillero venció el <fecha>» (con los nombres
   que tengan los planes). Al lado, el botón «Plan» (ver «Para darle el pagado a alguien», abajo);
 - con la cocina encendida, «cocina desde <fecha>»;
 - con la cocina encendida, o si le quedó algo guardado de cuando la tuvo, cuánto ocupa en la cámara de
@@ -182,10 +183,10 @@ Pago no le cancela la suscripción: la cancela esa persona, en Tu Cuenta.
 1. En su fila, «Plan».
 2. Se abre la ventana «El plan de <correo>», con «Ahora: <su plan>.».
 3. En «Cortesía hasta», elegir el día en que termina, o dejarlo vacío para que sea sin fecha. La
-   ayuda lo dice: «Vacía, sin fecha. Le da el Asador sin pagar; al terminar, vuelve sola al
+   ayuda lo dice: «Vacía, sin fecha. Le da el plan Maestro Parrillero sin pagar; al terminar, vuelve sola al
    gratis.».
-4. «Dar cortesía» (mientras trabaja, «Guardando…»). La fila pasa a decir «Asador · cortesía» o
-   «Asador · cortesía hasta el <fecha>».
+4. «Dar cortesía» (mientras trabaja, «Guardando…»). La fila pasa a decir «Maestro Parrillero ·
+   cortesía» o «Maestro Parrillero · cortesía hasta el <fecha>».
 
 Para quitárselo, en la misma ventana, «Pasar al gratis». «Cancelar» la cierra sin cambiar nada. La
 cortesía termina al final del día elegido, en la zona del admin.
@@ -194,7 +195,7 @@ cortesía termina al final del día elegido, en la zona del admin.
 
 La cámara de frío es donde cada uno guarda su material en bruto para el chef
 ([la-camara-de-frio.md](la-camara-de-frio.md)). A cada uno le cabe lo de su plan (hoy 20 GB en el
-gratis y 100 GB en el pagado), salvo que el admin diga otra cosa acá, que gana sobre la del plan.
+gratis y 200 GB en el pagado), salvo que el admin diga otra cosa acá, que gana sobre la del plan.
 
 1. En su fila, «Cambiar la cuota».
 2. En la ventana «La cuota de <correo>», escribir en «GB» cuántos le caben: un número de 1 a 10.000,
@@ -282,8 +283,8 @@ Para devolverla, se traspasa de vuelta, con estos mismos pasos.
 - **«¿Cómo le doy el chef de la casa a alguien?».** «Encender la cocina», en su fila.
 - **«¿Cómo le doy el plan pagado a alguien?» / «quiero darle más espacio o más tokens».** «Plan», en
   su fila, y «Dar cortesía». Solo más espacio: «Cambiar la cuota».
-- **«Le di una cortesía y su fila sigue diciendo Gratis».** Si dice «Gratis · su Asador venció el
-  <fecha>», la cortesía ya terminó: darle otra, con otra fecha o sin fecha.
+- **«Le di una cortesía y su fila sigue diciendo Gratis».** Si dice «Gratis · su plan Maestro
+  Parrillero venció el <fecha>», la cortesía ya terminó: darle otra, con otra fecha o sin fecha.
 - **«Cambié un tope y alguien quedó pasado».** No pierde nada: no puede sumar hasta quedar bajo el
   tope.
 - **«Apagué la cocina de alguien: ¿perdió sus comandas?».** No: siguen ahí. El chef deja de verlas

@@ -114,7 +114,8 @@ teléfono](app-movil.md).
    encienden y se apagan de a poco, en tonos de brasa—, la pantalla está cargando.
 6. **Si ve «Entra con tu correo»**, su sesión terminó (o nunca entró): tiene que pedir un
    código de nuevo ([ingresar.md](ingresar.md)).
-7. **Si no ve «Los Maestros» en Ajustes**, no es el admin: es lo esperado.
+7. **Si no ve «Los Maestros» en Ajustes**, no es el admin: es lo esperado. Tener el plan
+   «Maestro Parrillero», el pagado, no lo hace admin: es otra cosa con un nombre parecido.
 
 ## Qué quiere hacer → dónde se hace
 
@@ -144,7 +145,7 @@ teléfono](app-movil.md).
 | Editar su página de links: foto, bio, colores, links, dirección | La Vitrina ([la-vitrina.md](la-vitrina.md)) |
 | Cambiar su nombre o su zona horaria | Tu Cuenta ([tu-cuenta.md](tu-cuenta.md)) |
 | Ver qué plan tiene, cuántas cuentas, publicaciones, espacio y tokens de IA le quedan | Tu Cuenta, «Tu plan» ([tu-cuenta.md](tu-cuenta.md)) |
-| Pagar el plan pagado, o cancelar la suscripción | Tu Cuenta, «Tu plan»: «Pasar a Asador» o «Cancelar la suscripción», solo donde pagar desde el panel está abierto ([tu-cuenta.md](tu-cuenta.md)) |
+| Pagar el plan pagado, o cancelar la suscripción | Tu Cuenta, «Tu plan»: «Pasar a Maestro Parrillero» o «Cancelar la suscripción», solo donde pagar desde el panel está abierto ([tu-cuenta.md](tu-cuenta.md)) |
 | Darle a alguien el plan pagado, o cambiar lo que trae cada plan (solo el admin) | Los Maestros: «Plan» en su fila, o «Los planes» ([los-maestros.md](los-maestros.md)) |
 | Generar o revocar la llave que te dio a ti, o a otro agente | La Cocina, sección «Tu propio chef», bloque «1. Su llave» ([la-cocina.md](la-cocina.md)). Hasta el 2026-10-19 estaba en Tu Cuenta, y hasta el 2026-10-22 la pestaña se llamaba «Tu IA» |
 | Guardar el material en bruto (un video largo, un intro, la música, el logo), ver cuánto espacio queda, renombrar o sacar algo | La Cocina → «La cámara de frío»; de día, «La nevera» ([la-camara-de-frio.md](la-camara-de-frio.md)) |
