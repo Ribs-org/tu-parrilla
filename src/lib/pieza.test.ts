@@ -33,6 +33,7 @@ function fila(overrides: Partial<PostRow>): PostRow {
     views: null,
     viewsChange: null,
     viewsA7Dias: null,
+    viewsA48h: null,
     likesChange: null,
     commentsChange: null,
     sharesChange: null,

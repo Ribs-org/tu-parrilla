@@ -627,8 +627,9 @@ permisos «por decidir»** de la tabla red por red, para pedirlos todos en una m
      en `main` y la clave en EAS;
   2. lo que el flujo necesita: hecho el 2026-11-08, el secreto `EXPO_TOKEN` en GitHub y la clave de
      la cuenta de servicio de Google Play en EAS (`docs/play-store.md`, Parte 4);
-  3. el build: Actions → «App a la tienda» → Run, desde `main`;
-  4. el envío a la pista interna, que hace el mismo flujo (o `eas submit`);
+  3–4. hechos el 2026-11-08: el flujo «App a la tienda» armó la 1.2.0 (código de versión 3) y
+     `eas submit` la mandó a la pista interna sin errores (la app en revisión no la rechazó por
+     «draft»);
   5. en la Play Console, la seguridad de los datos con lo de «CUANDO SUBA LA 1.2.0» de
      `TEXTOS-FORMULARIO.txt` y el token de los avisos, y la versión publicada;
   6. probarla en el teléfono: la cámara y sus permisos, una subida de varios GB, «Avisarme», el mesón
@@ -760,6 +761,15 @@ diciendo «Sin suscripción», y es cierto.
 
 ## Features y trabajo de código
 
+- **«Sincronizar ahora» le puede quitar a una publicación su lectura de las 48 horas** (2026-11-08,
+  al sumar `viewsA48h`, #358). La lectura del día (`post_metrics`, una por publicación y día) se
+  reescribe entera en cada sincronización, también su `captured_at`. La ventana de las 48 horas
+  (de 48 a 72, `src/lib/igual-edad.ts`) no tiene día de más, a diferencia de la de los 7 días:
+  una sincronización a mano H horas después del cron de la mañana corre esa lectura H horas, y lo
+  publicado entre 72 − H y 72 horas antes del cron se queda sin `viewsA48h` (null, nunca 0). Lo
+  mismo si el cron de un día falla. Arreglarlo es elegir: estirar la ventana (pierde precisión
+  justo cuando la publicación crece rápido) o guardar la lectura de las 48 horas aparte, la
+  primera vez que cae en la ventana, sin que la reescriba la del mismo día.
 - **El teléfono no muestra el aviso de la playlist de YouTube** (2026-11-08). Un video que salió sin
   entrar a su playlist lo dice en el editor del panel y en `GET /api/schedule/posts` (`aviso`); el
   teléfono no tiene una vista de lo publicado por destino donde ponerlo. Si se le agrega una, el
