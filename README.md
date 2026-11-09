@@ -10,7 +10,7 @@ tus números.
 
 | URL | Qué es |
 | --- | --- |
-| `/` | En el dominio del producto (`DOMINIO_PRODUCTO`), la portada de Tu Parrilla, con los enlaces a privacidad y términos. En cualquier otro, la página principal del dueño del dominio: cada usuario tiene una, pero solo la del admin se sirve en la raíz |
+| `/` | En el dominio del producto (`DOMINIO_PRODUCTO`), la portada de Tu Parrilla, con los enlaces a privacidad y términos, los creadores que trabajan con Tu Parrilla (cada uno dio su permiso) y un contador de las vistas y los «me gusta» de todas las cuentas conectadas, sin YouTube (`src/lib/portada-numeros.ts`). En cualquier otro, la página principal del dueño del dominio: cada usuario tiene una, pero solo la del admin se sirve en la raíz |
 | `/ingresar` | La entrada al panel: el correo y el código de seis dígitos que llega a ese correo. Como el panel, se abre en el dominio del producto |
 | `/borrar-mis-datos` | Cómo pedir que se borre una cuenta con todos sus datos, qué se borra y qué se guarda (los respaldos, 90 días). Pública y sin sesión: es la «Delete data URL» de la ficha de Google Play, que la revisa (`docs/play-store.md`). El borrado lo hace hoy el equipo a mano (ver `docs/pendientes.md`) |
 | `/privacidad`, `/terminos` | La política de privacidad y los términos, públicos y sin sesión. Google y Meta los revisan para verificar la app. Además los enlaza, junto con `/`, el *Branding* de `rclone-servidor`, otra app de Google de Infraestructura (#294): si alguna de las tres cambia de ruta o se baja, avisar en `VicentePareja/servidor_propio` |
@@ -2425,6 +2425,7 @@ src/
     icono-ajustes.tsx      el botón de Ajustes: el trinche y el cuchillo de noche, los palillos de día
     landing.tsx            la portada del producto, armada con las piezas del panel y con los dos modos; landing-demos.tsx, lo que se toca
     landing-semana.ts      la semana de ejemplo, que comparten la portada y sus imágenes para compartir (/api/og, /api/og/dia)
+    contador-que-sube.tsx  una cifra que sube desde cero al aparecer: el contador de la portada
     esqueleto.tsx          las piezas de la carga del panel: la forma de cada pantalla, con su pulso tibio
     profile-view.tsx       la página pública (también alimenta la vista previa del editor)
     click-tracker.tsx      escucha delegada de clicks
@@ -2483,6 +2484,7 @@ src/
     playlists-youtube.ts   «Agregar a una playlist» del panel y del teléfono: el canal del dueño con su token y la memoria corta de sus playlists
     pruebas/               la Postgres de las pruebas de integración: una base nueva y migrada por archivo; y un lector de zip para mirar el XML de una planilla
     empresa.ts             quién presta el servicio: lo leen la portada, privacidad y términos
+    portada-numeros.ts     el contador de la portada: las vistas y los «me gusta» de todas las cuentas conectadas, sumados, sin YouTube (§III.E.4.h) y guardados un cuarto de hora
     avisos/                la caída de una cuenta y el resumen del día: las reglas sin base y lo que lee y manda
     push/                  los avisos al teléfono por el servicio de push de Expo: el cliente y los textos sin base, el token de cada teléfono, y el resumen de La Mesa
     sugerencias/           el libro de sugerencias: qué se acepta y cómo queda el issue (sin base), el cliente de GitHub, guardar y reintentar, y la respuesta del equipo (lo que se acepta, el correo y el comentario sin base en respuestas.ts; guardarla, leerla y avisar en responder.ts)
