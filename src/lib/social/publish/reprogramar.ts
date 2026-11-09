@@ -1,12 +1,14 @@
 import { and, eq, inArray } from 'drizzle-orm'
 import { getDb, scheduledPosts, scheduledPostTargets } from '@/db'
+import { TopeDelPlan, exigirCupoAlRearmar } from '@/lib/planes/topes'
 import { esUuid } from '@/lib/uuid'
 import { REARME } from './publisher'
 
 export const REPROGRAMAR_PASADO = 'La hora debe estar en el futuro.'
 export const DESTINO_NO_EXISTE = 'Ese destino ya no existe.'
 
-export type ResultadoReprogramar = 'reprogramado' | 'no-existe'
+/** `sinCupo` trae la frase del tope del plan: el post vuelve a esperar y ya no cabe. */
+export type ResultadoReprogramar = 'reprogramado' | 'no-existe' | { sinCupo: string }
 
 /**
  * «Reprogramar» un destino quemado, con la regla que comparten el panel («Se quemó» y la
@@ -51,17 +53,26 @@ export async function reprogramarDestino(
   // del cron. Antes la hora del post iba primero y sin condición, así que en esa carrera se
   // movía igual, y un destino hermano todavía programado se corría con ella. Si ya no estaba
   // quemado no se toca nada; la pantalla, al repintarse, muestra cómo quedó.
-  await db.transaction(async (tx) => {
-    const rearmados = await tx
-      .update(scheduledPostTargets)
-      .set({ ...REARME, updatedAt: new Date() })
-      .where(and(eq(scheduledPostTargets.id, targetId), eq(scheduledPostTargets.status, 'failed')))
-      .returning({ id: scheduledPostTargets.id })
-    if (rearmados.length === 0) return
-    await tx
-      .update(scheduledPosts)
-      .set({ scheduledAt, updatedAt: new Date() })
-      .where(and(eq(scheduledPosts.id, target.postId), eq(scheduledPosts.ownerId, ownerId)))
-  })
+  //
+  // Un post cuyo único destino que esperaba era este vuelve a contar entre las publicaciones que
+  // esperan: el tope del plan se mira en la misma transacción.
+  try {
+    await db.transaction(async (tx) => {
+      await exigirCupoAlRearmar(tx, ownerId, target.postId, targetId)
+      const rearmados = await tx
+        .update(scheduledPostTargets)
+        .set({ ...REARME, updatedAt: new Date() })
+        .where(and(eq(scheduledPostTargets.id, targetId), eq(scheduledPostTargets.status, 'failed')))
+        .returning({ id: scheduledPostTargets.id })
+      if (rearmados.length === 0) return
+      await tx
+        .update(scheduledPosts)
+        .set({ scheduledAt, updatedAt: new Date() })
+        .where(and(eq(scheduledPosts.id, target.postId), eq(scheduledPosts.ownerId, ownerId)))
+    })
+  } catch (error) {
+    if (error instanceof TopeDelPlan) return { sinCupo: error.message }
+    throw error
+  }
   return 'reprogramado'
 }

@@ -97,8 +97,8 @@ export async function sacarMaterial(ownerId: string, id: string, ahora: Date): P
 }
 
 /**
- * La cuota de la cámara de un usuario, en bytes; null vuelve a la de siempre. La cambia el admin
- * desde Los Maestros; un plan de pago, mañana, escribirá lo mismo.
+ * La cuota de la cámara de un usuario puesta a mano, en bytes; null vuelve a la de su plan
+ * (`cuotaDeLaCamara`). La cambia el admin desde Los Maestros.
  */
 export async function cambiarCuotaDeLaCamara(usuarioId: string, bytes: number | null): Promise<boolean> {
   const [fila] = await getDb().update(users).set({ bodegaBytes: bytes }).where(eq(users.id, usuarioId)).returning({ id: users.id })

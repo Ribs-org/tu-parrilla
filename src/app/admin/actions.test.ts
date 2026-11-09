@@ -7,6 +7,14 @@ import { ARCHIVO_MUY_GRANDE } from '@/lib/social/publish/limites'
 // `usuarios.ts`, que este archivo importa por debajo de `actions.ts`, trae `server-only`,
 // que solo entiende el bundler de Next: se sustituye por un módulo vacío para poder
 // importar el módulo real bajo Vitest (mismo motivo que en `usuarios.test.ts`).
+// Los topes del plan van contra la base de verdad; acá no hay plan que mirar.
+vi.mock('@/lib/planes/topes', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/planes/topes')>()),
+  exigirCupoEnLaParrilla: async () => {},
+  exigirCupoAlRearmar: async () => {},
+  exigirCupoDeCuentas: async () => {},
+  sinCupoEnLaParrilla: async () => null,
+}))
 vi.mock('server-only', () => ({}))
 
 /** Las rutas que cada acción mandó a repintar, en orden: lo único que delata un revalidado. */

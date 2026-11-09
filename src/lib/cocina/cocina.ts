@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto'
-import { and, asc, eq, inArray, isNotNull, isNull } from 'drizzle-orm'
+import { and, asc, desc, eq, inArray, isNotNull, isNull } from 'drizzle-orm'
 import {
   comandaEventos,
   comandas,
@@ -26,6 +26,7 @@ import {
   urlParaSubir,
   urlPublica,
 } from '@/lib/storage'
+import { prioridadDelDueno } from '@/lib/planes/prioridad'
 import { esUuid } from '@/lib/uuid'
 import { AVISAN, type AvisoDeComanda } from './correo-de-comanda'
 import type { CreativoAnunciado } from './creativo'
@@ -145,11 +146,18 @@ export async function preguntasDeComandas(ids: string[]): Promise<Map<string, Pr
 export async function comandasParaElChef(estado: EstadoComanda): Promise<ComandaParaElChef[]> {
   const db = getDb()
   const filas = await db
-    .select({ comanda: comandas, nombre: users.nombre })
+    .select({ comanda: comandas, nombre: users.nombre, prioridad: prioridadDelDueno(comandas.ownerId) })
     .from(comandas)
     .innerJoin(users, eq(users.id, comandas.ownerId))
     .where(and(eq(comandas.estado, estado), inArray(comandas.ownerId, conCocina())))
-    .orderBy(asc(comandas.creadaEn))
+    // En las que esperan, la prioridad del plan va antes del límite: una comanda pagada nueva no
+    // queda fuera detrás de cien gratis más viejas, y `ordenarFila` reparte después dentro de cada
+    // prioridad. Las de otro estado van por fecha, como promete `docs/cocina-api.md`.
+    .orderBy(
+      ...(estado === 'recibida'
+        ? [desc(prioridadDelDueno(comandas.ownerId)), asc(comandas.creadaEn)]
+        : [asc(comandas.creadaEn)]),
+    )
     .limit(LIMITE_COMANDAS)
   if (filas.length === 0) return []
 
@@ -178,11 +186,12 @@ export async function comandasParaElChef(estado: EstadoComanda): Promise<Comanda
   // Una que espera nunca preguntó: se pregunta después de tomarla.
   const deLasPreguntas = estado === 'recibida' ? new Map<string, PreguntaParaElChef[]>() : await preguntasDeComandas(ids)
 
-  const armadas = filas.map(({ comanda: c, nombre }) => ({
+  const armadas = filas.map(({ comanda: c, nombre, prioridad }) => ({
     id: c.id,
     ownerId: c.ownerId,
     tipo: c.tipo,
     creadaEn: c.creadaEn,
+    prioridad,
     salida: {
       id: c.id,
       tipo: c.tipo,

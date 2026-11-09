@@ -607,7 +607,8 @@ como lo dejes acá.» No hay forma de oír el reel ya mezclado: solo la muestra 
 - **«Sugiéreme una»** («Buscando una…» mientras piensa): Parrilla propone **una** canción que le
   quede al post, leyendo el texto escrito hasta ese momento. Aparece en un recuadro con su nombre
   (««Título» de Artista»), debajo una frase de por qué le queda (sin el modelo de IA configurado
-  en el sitio, «Es de las que están sonando en Instagram estos días.» o «Salió buscando «…».»),
+  en el sitio, o si se acabaron los tokens de IA del plan este mes, la elige sin el modelo: «Es de
+  las que están sonando en Instagram estos días.» o «Salió buscando «…».»),
   un botón redondo para escucharla, **«Usar esta»** y **«Otra»** («Buscando otra…»), que trae
   una distinta sin repetir ninguna de las ya mostradas. Cuando ya no quedan: «Ya te mostré todas
   las que encontré para este post. Busca una por nombre.»
@@ -1159,6 +1160,7 @@ alguna, hay que borrarlo en la red misma.
 | «Escribe un texto o adjunta un archivo.» | No hay ni texto ni archivos | Agregar uno de los dos |
 | «La fecha no se entendió.» | La fecha está vacía o incompleta | Completar día y hora |
 | «La hora debe estar en el futuro.» | La hora elegida ya pasó (pasa con un borrador que tenía una fecha que ya llegó) | Elegir una futura, o «Ahora» |
+| «Tu plan <nombre> deja hasta <N> publicaciones esperando a la vez: espera a que salga alguna o borra una.» (por ejemplo, «Tu plan Gratis deja hasta 50 publicaciones esperando a la vez: …»), al apretar «Programar» | El plan de la persona ya tiene su máximo de publicaciones esperando salir. Una que sale a varias redes cuenta una vez; las que ya salieron no cuentan. Lo escrito queda en «Borradores» | Esperar a que salga alguna, o eliminar una que no haga falta. El plan y cuánto queda se ven en Tu Cuenta, en «Tu plan» ([tu-cuenta.md](tu-cuenta.md)) |
 | «Máximo diez archivos por publicación.» | Más de diez archivos (si TikTok es la única red, admite hasta 35 fotos) | Quitar archivos con su ✕ |
 | «Una de las cuentas elegidas no es tuya.» | Una cuenta dejó de existir mientras la pantalla estaba abierta | Cerrar el panel (queda el borrador) y volver a abrirlo desde «Borradores (<N>)» |
 | «Ese borrador ya no existe.» | El borrador abierto en el compositor ya se programó (en otra pestaña o en el teléfono) o se descartó: un borrador no se programa dos veces | Mirar el calendario: si ya está programado, no hay nada que hacer; si no, cerrar el panel y armarlo de nuevo con «Nueva publicación» |
@@ -1305,6 +1307,7 @@ puede decir:
 | «El post ya no existe.» | Se borró antes | Recargar |
 | «Ya se publicó (o está publicando): elimínalo en la red.» | Se intentó eliminar algo que ya salió en alguna red, o que el publicador está subiendo en ese momento | Borrarlo en la red misma; para sacar solo las redes que no salieron, desmarcarlas en el editor. Si no había salido en ninguna, era el publicador subiéndolo: recargar en un minuto y ver cómo quedó |
 | «La hora debe estar en el futuro.» | En «Reprogramar», la hora ya pasó | Elegir una futura |
+| «Tu plan <nombre> deja hasta <N> publicaciones esperando a la vez: espera a que salga alguna o borra una.», en «Reprogramar» | Era lo único de ese post que faltaba salir, y al volver a programarlo no cabe en el tope de publicaciones esperando del plan | Esperar a que salga alguna, o eliminar una que no haga falta |
 | «Ese destino ya no existe.» | En «Reprogramar» o en «Archivar»: esa red del post, o el post entero, se borró mientras la ventana estaba abierta | Recargar |
 | «Ese destino no está quemado: solo lo quemado se archiva o se desarchiva.» | En «Archivar» o «Desarchivar»: ese destino ya no está quemado (alguien lo reprogramó, o salió con «Subir ahora») | Recargar y ver cómo quedó |
 

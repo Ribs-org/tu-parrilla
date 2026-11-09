@@ -2,6 +2,7 @@
 // selección (varias). Sin `server-only`: lo importa una server action.
 import { and, eq, inArray, isNotNull, ne } from 'drizzle-orm'
 import { getDb, socialAccounts } from '@/db'
+import { exigirCupoDeCuentas } from '@/lib/planes/topes'
 import { encryptToken } from './crypto'
 
 export type CuentaAConectar = {
@@ -85,51 +86,59 @@ export async function tomadasPorOtro(ownerId: string, network: string, externalI
  * Dice cuál de las dos pasó, para que «Agregar cuenta →» no vuelva diciendo «conectado» cuando
  * solo se renovó la de antes. Una fila sin dueño (de antes de que existieran los dueños) cuenta
  * como nueva: en el panel de esta persona no estaba.
+ *
+ * Una cuenta que no estaba conectada —nueva, o una propia desconectada— suma una al tope de
+ * cuentas del plan, y si no cabe lanza `TopeDelPlan` (`planes/topes.ts`) sin guardar nada. Renovar
+ * una que ya estaba conectada no suma.
  */
 export async function guardarCuenta(
   ownerId: string,
   network: string,
   cuenta: CuentaAConectar,
 ): Promise<'nueva' | 'renovada'> {
-  // Hasta que la entrega 3 cambie la única a (owner_id, network, external_id), dos dueños
-  // caen en la misma fila: avisar es la única salida honesta. Pisar el token dejaría al
-  // primero publicando con la credencial del segundo.
-  const [existente] = await getDb()
-    .select({ ownerId: socialAccounts.ownerId })
-    .from(socialAccounts)
-    .where(and(eq(socialAccounts.network, network), eq(socialAccounts.externalId, cuenta.externalId)))
-    .limit(1)
-  if (existente && existente.ownerId !== null && existente.ownerId !== ownerId) {
-    throw new CuentaDeOtro(nombreDeCandidata(cuenta))
-  }
+  return getDb().transaction(async (tx) => {
+    // Hasta que la entrega 3 cambie la única a (owner_id, network, external_id), dos dueños
+    // caen en la misma fila: avisar es la única salida honesta. Pisar el token dejaría al
+    // primero publicando con la credencial del segundo.
+    const [existente] = await tx
+      .select({ id: socialAccounts.id, ownerId: socialAccounts.ownerId, accessToken: socialAccounts.accessToken })
+      .from(socialAccounts)
+      .where(and(eq(socialAccounts.network, network), eq(socialAccounts.externalId, cuenta.externalId)))
+      .limit(1)
+    if (existente && existente.ownerId !== null && existente.ownerId !== ownerId) {
+      throw new CuentaDeOtro(nombreDeCandidata(cuenta))
+    }
+    const propia = existente?.ownerId === ownerId ? existente : null
+    if (!propia?.accessToken) await exigirCupoDeCuentas(tx, ownerId, propia?.id ?? null)
 
-  const valores = {
-    handle: cuenta.handle,
-    accessToken: encryptToken(cuenta.accessToken),
-    refreshToken: cuenta.refreshToken ? encryptToken(cuenta.refreshToken) : null,
-    expiresAt: cuenta.expiresAt,
-    lastSyncError: null,
-    // Se escribe siempre en Instagram: la misma cuenta puede reconectarse por el otro login, y
-    // entonces cambian el token y el host con que se le habla. Nulo en las demás redes.
-    login: network === 'instagram' ? (cuenta.login ?? 'facebook') : null,
-    // En YouTube se escribe siempre, aunque venga vacío: un reconectar que destildó la analítica
-    // tiene que dejar de decir que la tiene, y entonces `retencion-youtube` borra lo leído con ella.
-    ...(network === 'youtube' ? { scopes: cuenta.scopes ?? null } : {}),
-  }
-  // El id de usuario de Meta va aparte porque al reconectar solo se escribe cuando lo hay:
-  // así una cuenta de antes de que existiera la columna rellena su nulo, y un `/me` que
-  // falló no borra el id que ya estaba guardado. Las demás redes nunca lo traen.
-  const metaUserId = cuenta.metaUserId ?? null
-  await getDb()
-    .insert(socialAccounts)
-    .values({ network, externalId: cuenta.externalId, ownerId, metaUserId, ...valores })
-    // El target sigue siendo (network, external_id) hasta la entrega 3: mientras tanto dos
-    // usuarios no pueden conectar la misma cuenta, y es preferible a que uno pise al otro.
-    .onConflictDoUpdate({
-      target: [socialAccounts.network, socialAccounts.externalId],
-      set: metaUserId ? { ...valores, metaUserId } : valores,
-    })
-  return existente?.ownerId === ownerId ? 'renovada' : 'nueva'
+    const valores = {
+      handle: cuenta.handle,
+      accessToken: encryptToken(cuenta.accessToken),
+      refreshToken: cuenta.refreshToken ? encryptToken(cuenta.refreshToken) : null,
+      expiresAt: cuenta.expiresAt,
+      lastSyncError: null,
+      // Se escribe siempre en Instagram: la misma cuenta puede reconectarse por el otro login, y
+      // entonces cambian el token y el host con que se le habla. Nulo en las demás redes.
+      login: network === 'instagram' ? (cuenta.login ?? 'facebook') : null,
+      // En YouTube se escribe siempre, aunque venga vacío: un reconectar que destildó la analítica
+      // tiene que dejar de decir que la tiene, y entonces `retencion-youtube` borra lo leído con ella.
+      ...(network === 'youtube' ? { scopes: cuenta.scopes ?? null } : {}),
+    }
+    // El id de usuario de Meta va aparte porque al reconectar solo se escribe cuando lo hay:
+    // así una cuenta de antes de que existiera la columna rellena su nulo, y un `/me` que
+    // falló no borra el id que ya estaba guardado. Las demás redes nunca lo traen.
+    const metaUserId = cuenta.metaUserId ?? null
+    await tx
+      .insert(socialAccounts)
+      .values({ network, externalId: cuenta.externalId, ownerId, metaUserId, ...valores })
+      // El target sigue siendo (network, external_id) hasta la entrega 3: mientras tanto dos
+      // usuarios no pueden conectar la misma cuenta, y es preferible a que uno pise al otro.
+      .onConflictDoUpdate({
+        target: [socialAccounts.network, socialAccounts.externalId],
+        set: metaUserId ? { ...valores, metaUserId } : valores,
+      })
+    return propia ? 'renovada' : 'nueva'
+  })
 }
 
 const GRAPH = 'https://graph.facebook.com/v23.0'

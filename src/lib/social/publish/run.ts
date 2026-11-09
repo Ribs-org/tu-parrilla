@@ -8,6 +8,7 @@ import {
   socialAccounts,
   users,
 } from '@/db'
+import { prioridadDelDueno } from '@/lib/planes/prioridad'
 import { fraseProximamente } from '@/lib/networks'
 import { proximamentePara } from '@/lib/redes-abiertas'
 import { CONNECTORS } from '@/lib/social'
@@ -68,7 +69,7 @@ export async function publishDue(
   const correoPorOwner = new Map<string, string | undefined>()
 
   const due = await db
-    .select({ target: scheduledPostTargets, post: scheduledPosts })
+    .select({ target: scheduledPostTargets, post: scheduledPosts, prioridad: prioridadDelDueno(scheduledPosts.ownerId) })
     .from(scheduledPostTargets)
     .innerJoin(scheduledPosts, eq(scheduledPostTargets.postId, scheduledPosts.id))
     .where(

@@ -137,6 +137,7 @@ no por subcadena parcial ni regex:
 | `X / Twitter todavía no está disponible en Tu Parrilla: próximamente.` | `x` en `redes`, o una cuenta de X en `cuentas`: está en «Próximamente» |
 | `Hay redes repetidas en la fila.` | `redes` con la misma red dos veces |
 | `No se pudo leer una media de la fila.` | `media` o `portada`: descarga fallida, timeout, o tipo ajeno; el porqué viene en `motivo` (abajo) |
+| `Tu plan <nombre> deja hasta <N> publicaciones esperando a la vez: espera a que salga alguna o borra una.` (por ejemplo, `Tu plan Gratis deja hasta 50 publicaciones esperando a la vez: espera a que salga alguna o borra una.`) | ninguno: el plan del dueño de la llave ya tiene ese número de publicaciones esperando salir, contando las de esta misma llamada. Una publicación cuenta una vez aunque salga a varias redes; las que ya salieron no cuentan. No se arregla reenviando: hay que esperar a que salga alguna o borrarla (`DELETE /api/schedule/posts/{id}`) |
 | `Al lote se le acabó el tiempo antes de terminar esta fila. Reenvíala.` | el lote llegó a su tiempo máximo (unos tres minutos) antes de terminar la fila; reenviarla con su `ref` es seguro |
 | `La portada requiere un video en media.` | `portada` sin video en `media` |
 | `La portada debe ser una imagen.` | `portada` resultó ser video u otra cosa |

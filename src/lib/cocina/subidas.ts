@@ -14,8 +14,10 @@ import {
   urlPublica,
   SIN_ALMACEN,
 } from '@/lib/storage'
+import { cuotaDeLaCamara } from '@/lib/planes/plan'
+import { planDe } from '@/lib/planes/planes'
 import { esUuid } from '@/lib/uuid'
-import { CUOTA_BODEGA_POR_DEFECTO, claseDe, extensionDe, noCabe, type ClaseMaterial, type SubidaPedida, type UsoMaterial } from './bodega'
+import { claseDe, extensionDe, noCabe, type ClaseMaterial, type SubidaPedida, type UsoMaterial } from './bodega'
 import { MAX_PARTES_POR_PEDIDO, TAMANO_PARTE, baseDeNombre, bytesDeParte, cuantasPartes, partesQueFaltan } from './insumos'
 
 // Las subidas a la cámara de frío de La Cocina (de día, la nevera), desde el panel: un largo crudo
@@ -111,13 +113,13 @@ export type UsoDeLaCamara = { cuantos: number; guardados: number; subiendo: numb
 /** Cuánto ocupa el dueño en la cámara, cuántas cosas tiene y cuánto le cabe: lo que dibuja la cuota. */
 export async function usoDeLaCamara(ownerId: string): Promise<UsoDeLaCamara> {
   const db = getDb()
-  const [u] = await db.select({ bodegaBytes: users.bodegaBytes }).from(users).where(eq(users.id, ownerId))
+  const { plan, persona } = await planDe(ownerId, new Date(), db)
   const [c] = await db
     .select({ n: sql<number>`count(*)`.mapWith(Number) })
     .from(materiales)
     .where(and(eq(materiales.ownerId, ownerId), isNull(materiales.borradoEn)))
   const { guardados, subiendo } = await ocupadosCon(db, ownerId)
-  return { cuantos: c?.n ?? 0, guardados, subiendo, cuota: u?.bodegaBytes ?? CUOTA_BODEGA_POR_DEFECTO }
+  return { cuantos: c?.n ?? 0, guardados, subiendo, cuota: cuotaDeLaCamara(persona, plan) }
 }
 
 class NoCabe extends Error {
@@ -144,9 +146,11 @@ export async function abrirSubida(
   let abiertaEnAlmacen: string | null = null
   try {
     const fila = await getDb().transaction(async (tx) => {
-      const [u] = await tx.select({ bodegaBytes: users.bodegaBytes }).from(users).where(eq(users.id, dueno.id)).for('update')
+      const [u] = await tx.select({ id: users.id }).from(users).where(eq(users.id, dueno.id)).for('update')
       if (!u) throw new Error('El dueño de la subida no existe')
-      const cuota = u.bodegaBytes ?? CUOTA_BODEGA_POR_DEFECTO
+      // La del plan que rige, o la que el admin puso a mano (`cuotaDeLaCamara`).
+      const { plan, persona } = await planDe(dueno.id, ahora, tx)
+      const cuota = cuotaDeLaCamara(persona, plan)
       const { guardados, subiendo } = await ocupadosCon(tx, dueno.id)
       const libres = cuota - guardados - subiendo
       if (pedido.bytes > libres) throw new NoCabe(noCabe(pedido.nombre, pedido.bytes, libres, cuota))
