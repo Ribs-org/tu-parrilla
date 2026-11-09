@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { headers } from 'next/headers'
 import { Landing, metadataLanding } from '@/components/landing'
+import { numerosDeLaPortada } from '@/lib/portada-numeros'
 import { COLOR_DE_BARRA, temaDelEnlace } from '@/lib/tema'
 import { temaDeLaPortada } from '@/lib/tema-servidor'
 
@@ -29,6 +30,9 @@ export async function generateViewport({ searchParams }: { searchParams: Busqued
 }
 
 export default async function LandingPage({ searchParams }: { searchParams: Busqueda }) {
-  const { tema, delEnlace } = await temaDeLaPortada((await searchParams).modo)
-  return <Landing tema={tema} delEnlace={delEnlace} />
+  const [{ tema, delEnlace }, numeros] = await Promise.all([
+    temaDeLaPortada((await searchParams).modo),
+    numerosDeLaPortada(),
+  ])
+  return <Landing tema={tema} delEnlace={delEnlace} numeros={numeros} />
 }

@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description: 'Qué datos guarda este sitio y qué no.',
 }
 
-const ACTUALIZADO = '8 de noviembre de 2026'
+const ACTUALIZADO = '9 de noviembre de 2026'
 
 export default function PrivacidadPage() {
   return (
@@ -117,6 +117,13 @@ export default function PrivacidadPage() {
             Se guardan los datos públicos de esas publicaciones: identificador, enlace,
             descripción, miniatura y fecha, junto con sus contadores públicos de
             reproducciones, «me gusta», comentarios, veces compartido, guardados y alcance.
+          </li>
+          <li>
+            La portada del sitio muestra <span className="text-fg">dos totales</span>: las vistas y
+            los «me gusta» de las publicaciones de todas las cuentas de Instagram, Facebook y TikTok
+            conectadas, sumados. Es una cifra por cada uno, sin nombres: no dice de qué cuenta ni de
+            quién viene cada parte. Las de YouTube no entran, y una cuenta deja de sumar al
+            desconectarla.
           </li>
           <li>
             En TikTok, solo si el dueño de la cuenta la autoriza además en la aplicación de{' '}

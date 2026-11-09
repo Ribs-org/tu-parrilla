@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { headers } from 'next/headers'
 import { Landing, metadataLanding } from '@/components/landing'
 import { esDominioDelProducto } from '@/lib/dominios'
+import { numerosDeLaPortada } from '@/lib/portada-numeros'
 import { COLOR_DE_BARRA, temaDelEnlace } from '@/lib/tema'
 import { temaDeLaPortada } from '@/lib/tema-servidor'
 import { getDefaultProfile } from '@/lib/profiles'
@@ -53,8 +54,11 @@ export default async function HomePage({
   searchParams: Promise<SearchParams>
 }) {
   if (await enElProducto()) {
-    const { tema, delEnlace } = await temaDeLaPortada((await searchParams).modo)
-    return <Landing tema={tema} delEnlace={delEnlace} />
+    const [{ tema, delEnlace }, numeros] = await Promise.all([
+      temaDeLaPortada((await searchParams).modo),
+      numerosDeLaPortada(),
+    ])
+    return <Landing tema={tema} delEnlace={delEnlace} numeros={numeros} />
   }
 
   const { profile, failed } = await load()

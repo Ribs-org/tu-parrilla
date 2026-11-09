@@ -58,6 +58,23 @@ describe('la portada', () => {
     expect(dia.alternates?.canonical).toBe('https://tu-parrilla.cl/')
   })
 
+  it('muestra a los creadores que trabajan con Tu Parrilla, enlazados a su perfil', () => {
+    expect(texto).toContain('Creadores que trabajan con Tu Parrilla')
+    expect(html).toContain('href="https://www.instagram.com/vicente_pareja_j/"')
+    expect(html).toContain('href="https://www.tiktok.com/@chinocomprensible"')
+    expect(html).toContain('rel="noopener noreferrer"')
+  })
+
+  it('el contador suma vistas y me gusta sin YouTube, y sin cifras no aparece', () => {
+    const conNumeros = renderToStaticMarkup(createElement(Landing, { numeros: { vistas: 1234567, meGusta: 8901 } }))
+    const textoCon = conNumeros.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ')
+    expect(textoCon).toContain('1.234.567')
+    expect(textoCon).toContain('8.901')
+    expect(textoCon).toContain('las cuentas de Instagram, Facebook y TikTok conectadas a Tu Parrilla')
+    expect(textoCon).toContain('YouTube no entra')
+    expect(texto).not.toContain('Lo que ya salió de la parrilla')
+  })
+
   it('no pide nada: sin formulario, y el único ingreso es por invitación', () => {
     expect(html).not.toMatch(/<form/)
     expect(texto).toContain('Tu Parrilla es por invitación')

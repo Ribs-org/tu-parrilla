@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { Plus } from 'lucide-react'
+import { ArrowUpRight, Plus } from 'lucide-react'
 import { CLASE_BORDE, CLASE_ESTADO, RotuloCalor } from '@/app/admin/(dash)/schedule/calendar'
 import { bordeDe, estadoCorto } from '@/app/admin/(dash)/schedule/dibujo'
 import { DesplazarAHoy } from '@/app/admin/(dash)/schedule/desplazar-a-hoy'
@@ -9,11 +9,14 @@ import { BOTON_CHICO, BOTON_CHICO_SECUNDARIO, ENLACE_BOTON, ENLACE_BOTON_SECUNDA
 import { BotonTema } from '@/components/boton-tema'
 import { Corte, CorteDefs, MarcaDeTuParrilla } from '@/components/corte'
 import { DeNocheYDeDia, NombreDe } from '@/components/de-noche-y-de-dia'
+import { ContadorQueSube } from '@/components/contador-que-sube'
 import { Icon } from '@/components/icon'
 import { ArmaUnCorte, SeArmaMientrasSube } from '@/components/landing-demos'
 import { CONTACTO, RESPONSABLE, RUT } from '@/lib/empresa'
 import { PROXIMAMENTE, REDES_PROXIMAMENTE, networkLabel } from '@/lib/networks'
 import { calorDelDia, carneDe, coccionDe, formatoDe, selloDe, type Calor, type Fierro } from '@/lib/parrilla'
+import type { NumerosDeLaPortada } from '@/lib/portada-numeros'
+import { sinMetricasDerivadas } from '@/lib/social/politica-youtube'
 import { NO_PUBLISH_TOKEN } from '@/lib/social/publish/publisher'
 import { FOTO, SEMANA, VIDEO, fotos, type CorteDeMuestra, type DiaDeMuestra, type Estado } from '@/components/landing-semana'
 import { PiezaDefs } from '@/components/pieza-sushi'
@@ -31,7 +34,9 @@ import { SE_ENFRIA, SE_QUEMO, nombreDe } from '@/lib/vocabulario'
  * Ninguna es un dibujo que se parece: si el panel cambia, la portada cambia con él. Lo que
  * se toca vive en `landing-demos.tsx`.
  *
- * No hace nada: no hay registro ni formulario. Los únicos enlaces son entrar y lo legal. Y
+ * No hace nada: no hay registro ni formulario. Los únicos enlaces son entrar, lo legal y los
+ * perfiles de los creadores que salen en ella (`CREADORES`). Lo único que lee de la base es el
+ * contador, una suma sin nombres (`lib/portada-numeros.ts`), y sin él la portada se sirve igual. Y
  * tiene que seguir diciendo qué hace la app y para qué usa los datos de cada red, con la
  * privacidad a la vista: es lo que Google miró para verificar la marca
  * (`docs/google-verificacion-guion.md`).
@@ -405,6 +410,84 @@ function LasRedes() {
   )
 }
 
+/**
+ * Los creadores que trabajan con Tu Parrilla y salen en la portada. Cada uno dio su permiso para
+ * aparecer, el 2026-11-09: nadie entra a esta lista sin pedírselo, y para sacar a alguien basta con
+ * borrarlo de acá. Es un enlace a su perfil y nada más. Mostrar su foto o sus publicaciones pediría
+ * el script de la red, y ese script trae las cookies de seguimiento que `/privacidad` dice que la
+ * portada no tiene.
+ */
+const CREADORES: ReadonlyArray<{ red: string; usuario: string; enlace: string }> = [
+  { red: 'instagram', usuario: 'vicente_pareja_j', enlace: 'https://www.instagram.com/vicente_pareja_j/' },
+  { red: 'tiktok', usuario: 'chinocomprensible', enlace: 'https://www.tiktok.com/@chinocomprensible' },
+]
+
+function Creadores() {
+  return (
+    <ul className="grid w-full max-w-3xl gap-3 sm:grid-cols-2">
+      {CREADORES.map((c) => (
+        <li key={`${c.red}-${c.usuario}`}>
+          <a
+            href={c.enlace}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="chapa chapa-hover group flex items-center gap-4 rounded-xl px-5 py-4"
+          >
+            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full border border-acero-600 bg-acero-800">
+              <Icon name={c.red} className="h-5 w-5" />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-base text-fg">@{c.usuario}</span>
+              <span className="block text-[0.8rem] text-fg-muted">en {networkLabel(c.red)}</span>
+            </span>
+            <ArrowUpRight className="h-4 w-4 shrink-0 text-fg-faint transition-colors group-hover:text-fg" aria-hidden />
+            <span className="sr-only">(se abre en otra pestaña)</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+/**
+ * «Instagram, Facebook y TikTok»: las que publican hoy, menos las que no dejan sumar sus cifras
+ * (YouTube, `politica-youtube.ts`). Son las que entran al contador.
+ */
+const LAS_QUE_SUMAN = new Intl.ListFormat('es', { type: 'conjunction' }).format(
+  REDES_DE_LA_PORTADA.filter((red) => !REDES_PROXIMAMENTE.has(red) && !sinMetricasDerivadas(red)).map(networkLabel),
+)
+
+/** Las vistas y los «me gusta» de todas las cuentas conectadas, sumados, subiendo al aparecer. */
+function ElContador({ numeros }: { numeros: NumerosDeLaPortada }) {
+  const cifras = [
+    { valor: numeros.vistas, nombre: 'vistas' },
+    { valor: numeros.meGusta, nombre: 'me gusta' },
+  ]
+  return (
+    <div className="mt-12 sm:mt-16">
+      <p className="font-titulo text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-fg-faint">
+        <DeNocheYDeDia noche="Lo que ya salió de la parrilla" dia="Lo que ya salió de la barra" />
+      </p>
+      <ul className="mt-4 grid max-w-3xl gap-6 sm:grid-cols-2">
+        {cifras.map((c) => (
+          <li key={c.nombre}>
+            <ContadorQueSube
+              hasta={c.valor}
+              className="block font-titulo text-5xl font-semibold leading-none tracking-[0.01em] text-fg sm:text-6xl"
+            />
+            <span className="mt-2 block font-titulo text-[0.8rem] uppercase tracking-[0.18em] text-fg-muted">{c.nombre}</span>
+          </li>
+        ))}
+      </ul>
+      <p className="mt-5 max-w-[62ch] text-[0.8rem] leading-relaxed text-fg-faint">
+        Entre todas las publicaciones de las cuentas de {LAS_QUE_SUMAN} conectadas a Tu Parrilla, como
+        las cuenta cada red. Sube cada día, cuando se leen sus números. YouTube no entra: sus reglas no
+        dejan sumar sus cifras.
+      </p>
+    </div>
+  )
+}
+
 /** El cierre: una parrilla llena, con tres cortes a punto. Es un dibujo y nada más. */
 function ParrillaLlena() {
   return (
@@ -438,8 +521,17 @@ function ParrillaLlena() {
 /**
  * `tema` es el modo con que se abre: el de la dirección (`?modo=dia`) o el del equipo
  * (`temaDeLaPortada`). `delEnlace`, si vino de la dirección: el botón lo anota en el equipo.
+ * `numeros`, el contador (`numerosDeLaPortada`); sin él, la sección de los creadores va sola.
  */
-export function Landing({ tema = 'noche', delEnlace = false }: { tema?: Tema; delEnlace?: boolean }) {
+export function Landing({
+  tema = 'noche',
+  delEnlace = false,
+  numeros = null,
+}: {
+  tema?: Tema
+  delEnlace?: boolean
+  numeros?: NumerosDeLaPortada | null
+}) {
   return (
     <main className="acerado min-h-dvh bg-acero-950 px-6 py-8 sm:py-10" data-tema={tema}>
       <CorteDefs />
@@ -582,6 +674,17 @@ export function Landing({ tema = 'noche', delEnlace = false }: { tema?: Tema; de
             .
           </p>
         </Rasgo>
+
+        <section className="py-12 sm:py-16">
+          <Encabezado donde="Con nosotros" titulo="Creadores que trabajan con Tu Parrilla" />
+          <p className="mt-4 max-w-[62ch] text-[0.95rem] leading-relaxed text-fg-muted">
+            Ya programan con Tu Parrilla. Míralos donde publican:
+          </p>
+          <div className="mt-8">
+            <Creadores />
+          </div>
+          {numeros ? <ElContador numeros={numeros} /> : null}
+        </section>
 
         {/* El cierre: la semana servida, y la única puerta que hay. */}
         <section className="grid items-center gap-10 py-12 sm:py-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] lg:gap-16">
