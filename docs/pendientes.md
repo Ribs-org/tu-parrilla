@@ -716,7 +716,11 @@ Nada de esto bloquea un trámite hoy; conviene ordenarlo antes de abrir a tercer
 
 - **[dueño] Que un abogado revise `/privacidad` y `/terminos`.** Desde el 2026-10-05 nombran
   a PYXIS SpA como responsable y describen el servicio tal como funciona hoy, pero los
-  redactó Claude a partir del código, no alguien con criterio legal.
+  redactó Claude a partir del código, no alguien con criterio legal. Desde el 2026-11-09 la
+  portada suma en público las vistas y los «me gusta» de todas las cuentas conectadas de
+  Instagram, Facebook y TikTok (`src/lib/portada-numeros.ts`), y `/privacidad` lo dice: que
+  revise también si ese uso calza con los términos para desarrolladores de Meta y de TikTok.
+  YouTube quedó fuera porque sus políticas no dejan crear métricas con sus datos (§III.E.4.h).
 - **[dueño] El código.** Lo escribió Vicente; lo prolijo es cederlo o licenciarlo a Pyxis
   con un documento simple. Verlo con el contador o un abogado: es una decisión legal, no
   técnica.

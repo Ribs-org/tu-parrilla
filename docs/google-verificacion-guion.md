@@ -110,7 +110,10 @@ afirmar que se cumplen:
   Parrilla»), porque un dato propio al lado de los de YouTube tiene que leerse claro como no
   suyo. La planilla de Excel de Los Números («Llevar para la casa», desde el 2026-11-02) sigue
   la misma regla: de YouTube lleva solo los contadores, los títulos y los comentarios tal como
-  llegaron, ninguna columna calculada, y su hoja «Léeme» lo dice.
+  llegaron, ninguna columna calculada, y su hoja «Léeme» lo dice. El contador de la portada
+  (desde el 2026-11-09), que suma las vistas y los «me gusta» de todas las cuentas conectadas,
+  deja fuera a YouTube por esta misma regla (`src/lib/portada-numeros.ts`), y la portada lo dice
+  debajo de las cifras.
 - **Nada guardado más de 30 días sin refrescar** (§III.E.4.b–d). Las estadísticas se leen
   con la API key, y leídas así no pueden pasar de 30 días; el resto de los datos se borra
   o se refresca dentro de ese plazo. La sincronización diaria termina borrando lo que se
