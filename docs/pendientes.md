@@ -730,7 +730,7 @@ diciendo «Sin suscripción», y es cierto.
   de `PAGOS_ABIERTO_PARA` (README, «Los planes»; el diseño en
   `docs/superpowers/specs/2026-11-08-planes-design.md`). No se probó contra Mercado Pago: los campos
   y la firma salen de su SDK de Node, porque su documentación no se deja leer desde un servidor. En
-  orden, y con cada clic, en `docs/mercadopago-paso-a-paso.md`: fusionar #359 y después #360; la
+  orden, y con cada clic, en `docs/mercadopago-paso-a-paso.md` (los PRs ya entraron, #359 y #360): la
   cuenta de Pyxis con el retiro al Santander; la aplicación; los usuarios de prueba, vendedor y
   comprador, y el token del vendedor de prueba; el webhook `https://tu-parrilla.cl/api/pagos/mercadopago`
   con «Planes y suscripciones»; las tres variables en Vercel; la prueba completa; y, con lo de abajo

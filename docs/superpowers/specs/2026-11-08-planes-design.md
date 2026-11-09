@@ -1,11 +1,9 @@
 # Los planes: el gratis y el pagado, y el cobro con Mercado Pago
 
-Fecha: 2026-11-08. **Diseño. Implementado**: la fase 1 en la rama `planes` y la fase 2 en `planes-mercadopago`,
-cerrada detrás de `PAGOS_ABIERTO_PARA` y sin probar contra Mercado Pago.
-Va en dos partes, cada una en su rama: la **fase 1**
-(`planes`) son los dos planes, sus topes, la prioridad, el admin y «Tu plan»; la **fase 2**
-(`planes-mercadopago`) es el cobro. La fase 1 se sostiene sola: sin cobro, el admin da el
-pagado a mano. Cierra las entradas «Tres niveles de cuenta y una forma de pagar» y «Que el
+Fecha: 2026-11-08. **Diseño. Implementado y en producción** desde el mismo día: la fase 1 en
+#359 y la fase 2 en #360, cerrada detrás de `PAGOS_ABIERTO_PARA` y sin probar contra Mercado Pago.
+La **fase 1** son los dos planes, sus topes, la prioridad, el admin y «Tu plan»; la **fase 2** es el
+cobro. La fase 1 se sostiene sola: sin cobro, el admin da el pagado a mano. Cierra las entradas «Tres niveles de cuenta y una forma de pagar» y «Que el
 admin maneje los planes a mano» de `docs/pendientes.md` (eran tres niveles; el dueño eligió dos).
 
 ## Lo que pidió el dueño
