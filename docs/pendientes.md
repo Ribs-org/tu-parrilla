@@ -274,7 +274,8 @@ Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataf
 Lo que falta para abrir cada plataforma, de un vistazo (el detalle está en cada entrada, más
 abajo): los **mensajes privados de Instagram** (en «Meta, segunda vuelta»), el **login con
 Instagram** sin página de Facebook (hecho y cerrado, espera una tercera vuelta), los permisos de Meta para
-**leer y promocionar anuncios** (construido, espera la tercera vuelta), la **Play Store** (la pista interna ya existe; la tienda pública es otro trámite) y
+**leer y promocionar anuncios** (construido, espera la tercera vuelta), las **views y el alcance
+de Facebook** (`read_insights`, candidato a la tercera vuelta), la **Play Store** (la pista interna ya existe; la tienda pública es otro trámite) y
 el **App Store** de iPhone, las integraciones con **Threads** y con **X**, los **comentarios de
 TikTok** (hechos y cerrados, esperan una app nueva de TikTok for Business), y **decidir los
 permisos «por decidir»** de la tabla red por red, para pedirlos todos en una misma vuelta.
@@ -345,6 +346,18 @@ permisos «por decidir»** de la tabla red por red, para pedirlos todos en una m
   la solicitud después de que contesten la de la segunda vuelta. Si en la prueba los números de
   un post salen vacíos, lo primero a mirar es el log del sync («threads … sin números»): la
   documentación marca `views` como «en desarrollo».
+- **Facebook: las views y el alcance de los reels, con `read_insights` en la tercera vuelta**
+  (2026-11-08, issue #338). Todos los posts de Facebook llegan con `views` y `alcance` en `null`:
+  Meta exige `read_insights` en las insights del post y en las del video de un reel, y la
+  conexión no lo pide (la tabla de `docs/levantamiento-terceros.md`, §8, tiene las fuentes). La
+  lectura de los reels está escrita y apagada (`FACEBOOK_INSIGHTS_DE_REELS`, README, «Facebook:
+  las views y el alcance»), y no se probó contra la API real: no había un token con el permiso.
+  Falta: (1) **[dueño]** agregar `read_insights` en el caso de uso de la app de Meta, después de
+  que contesten la segunda vuelta; (2) sumarlo al conectar de Facebook detrás de su propia
+  bandera, como `META_PERMISOS_ANUNCIOS`; (3) reconectar la página del revisor, encender
+  `FACEBOOK_INSIGHTS_DE_REELS` y mirar que un reel traiga números —si `post_video_social_actions`
+  llega desglosado, también los compartidos—; (4) grabarlo y pedirlo en la tercera vuelta;
+  (5) aprobado, reconectar cada página.
 - **Meta: los anuncios (`ads_read` y `ads_management`), tercera vuelta del App Review**
   (2026-10-21; construido el 2026-11-05). El dueño eligió primero solo leer y después «todo lo
   posible desde Tu Parrilla»: leer los resultados y también promocionar. Lo hecho:

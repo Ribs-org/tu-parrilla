@@ -592,6 +592,23 @@ la app desde tu cuenta de Facebook: sin él no hay forma de saber a qué cuentas
 Las cuentas conectadas antes del 2026-09-30 lo tienen vacío hasta que vuelvas a conectar
 Instagram y Facebook.
 
+#### Facebook: las views y el alcance
+
+La página de Facebook se lee con la misma app (`src/lib/social/facebook.ts`): los posts de
+`/{página}/published_posts`, con sus likes, comentarios y compartidos exactos en el post mismo.
+Las **views y el alcance llegan hoy en `null`**, en todos los posts de Facebook (issue #338).
+Meta los da en las insights, y las insights piden `read_insights`, que la conexión de Facebook
+no pide: el diálogo lo rechazó en agosto de 2026 porque la app de Meta no lo tiene agregado en su
+caso de uso. Y un reel tiene además las suyas aparte: las del post no cuentan lo que pasa en los
+reels, y sus reproducciones y su alcance salen de `/{video-id}/video_insights`
+(`blue_reels_play_count` y `post_impressions_unique`), que también piden `read_insights`.
+
+Esa segunda lectura está escrita y cerrada detrás de `FACEBOOK_INSIGHTS_DE_REELS=1`: con ella,
+cada reel pide el id de su video y sus insights. Se enciende cuando la app tenga `read_insights`
+aprobado y las páginas se hayan reconectado con él, lo que es la tercera vuelta de Meta (ver
+`docs/levantamiento-terceros.md`, §8). `compartidos` sigue viniendo del campo `shares` del post
+(no pide `read_insights`): cuando Graph no lo trae, queda en `null`.
+
 #### Las dos URLs que Meta exige
 
 En **App Settings → Basic**, al final del formulario, hay dos campos que el App Review pide
@@ -1582,6 +1599,7 @@ Vercel y bajan con `vercel env pull .env.local`.
 | `META_PERMISOS_ANUNCIOS` | Con `1`, conectar Instagram y Facebook pide además `ads_read`, para leer los resultados de los anuncios («Lo pagado») | No — encenderla solo después de activar `ads_read` en los casos de uso de la app de Meta: si no, Meta rechaza la ventana entera |
 | `META_PERMISOS_PROMOCIONAR` | Con `1`, y solo junto a `META_PERMISOS_ANUNCIOS=1`, conectar Instagram y Facebook pide además `ads_management`, para promocionar una publicación desde Tu Parrilla | No — encenderla solo después de activar `ads_management` en los casos de uso de la app de Meta: si no, Meta rechaza la ventana entera. Sin ella no se ofrece «Promocionar» |
 | `ANUNCIOS_ABIERTO_PARA` | Para quién se leen los anuncios de Meta y se ve «Lo pagado» en Los Números; con las dos banderas de arriba, también «Promocionar». `1`, para todos; una lista de ids de usuario separados por comas, solo para esos (la cuenta del revisor de Meta mientras revisa) | No — apagada por defecto; sin `ads_read` concedido la lectura falla cada noche, así que se abre para todos solo con los permisos aprobados |
+| `FACEBOOK_INSIGHTS_DE_REELS` | Con `1`, la lectura diaria de Facebook pide además las insights del video de cada reel (`/video_insights`) y trae sus views y su alcance, que hoy llegan en `null` (ver «Facebook: las views y el alcance») | No — apagada por defecto; Meta exige `read_insights`, que la conexión de Facebook todavía no pide. Encendida antes de tiempo no rompe nada: gasta una llamada por reel y los números siguen en `null` |
 | `SITE_URL` | Tu dominio, para etiquetar los enlaces del mensaje automático | No — sin ella se usa el dominio de producción de Vercel |
 | `COCINA_SECRET` | La credencial de La Cocina: la que el servidor del chef manda en `Authorization: Bearer …` a `/api/cocina/…` para tomar comandas, bajar insumos, informar estados y entregar creativos (ver «La Cocina» y `docs/cocina-api.md`). La conocen solo este despliegue y el servidor del chef | No — sin ella esas rutas responden `401` y la cocina queda cerrada; si la pones, genérala igual que `CRON_SECRET` y dásela al servidor del chef |
 | `CRON_SECRET` | Autoriza las corridas programadas: el sync diario y la publicación cada 5 minutos. Vercel la manda sola a su cron; el pinger externo la manda en `Authorization: Bearer …` | Sí — Vercel no la crea: se genera igual que `AUTH_SECRET` y se agrega. Sin ella los crons responden `401` y no corre nada |

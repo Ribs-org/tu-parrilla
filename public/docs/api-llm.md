@@ -698,5 +698,10 @@ Cuatro reglas que cambian la lectura:
 - **YouTube no entra en `viewsGanadas`, `viewsA7Dias`, `contraSuCuenta`, `interacciones` ni
   `arrastre`**: sus políticas no permiten calcular métricas con sus datos. Sí entra en
   `visitas` y `clicks`, que mide Tu Parrilla.
+- **Facebook llega hoy sin `views` ni `alcance`** (y sin lo que sale de ellas: `viewsGanadas`,
+  `viewsA7Dias`, `contraSuCuenta`, `arrastre`), en todas sus publicaciones, reels incluidos:
+  Meta los da solo con un permiso que Tu Parrilla todavía no tiene. `likes`, `comentarios` y
+  `compartidos` sí llegan. Deja Facebook fuera de cualquier comparación de views en vez de
+  leer esos `null` como «nadie lo vio».
 - **`pocas: true`** (compiten menos de 20) quiere decir que el mejor 10 % son una o dos
   publicaciones: no concluyas nada; amplía el rango o sube `percentil`.
