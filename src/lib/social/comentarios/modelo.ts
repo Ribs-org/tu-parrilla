@@ -27,9 +27,10 @@ export function hayPasarela(): boolean {
   return Boolean(env('AI_GATEWAY_API_KEY') || env('VERCEL_OIDC_TOKEN'))
 }
 
-export async function pedirBorrador(entrada: EntradaPrompt): Promise<string> {
+/** El borrador y los tokens que gastó, para el tope del plan (`planes/tokens.ts`). */
+export async function pedirBorrador(entrada: EntradaPrompt): Promise<{ valor: string; tokens: number | undefined }> {
   const { system, prompt } = armarPrompt(entrada)
-  const { text } = await generateText({
+  const { text, usage } = await generateText({
     model: env('COMENTARIOS_MODELO') ?? MODELO_POR_DEFECTO,
     instructions: system,
     prompt,
@@ -39,5 +40,5 @@ export async function pedirBorrador(entrada: EntradaPrompt): Promise<string> {
     providerOptions: { gateway: { reasoning: { enabled: false } } },
     abortSignal: AbortSignal.timeout(TIMEOUT_MS),
   })
-  return text
+  return { valor: text, tokens: usage.totalTokens }
 }

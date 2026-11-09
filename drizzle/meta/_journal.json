@@ -246,6 +246,13 @@
       "when": 1794180208828,
       "tag": "0034_analitica_de_youtube",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1794181309202,
+      "tag": "0035_planes",
+      "breakpoints": true
     }
   ]
 }

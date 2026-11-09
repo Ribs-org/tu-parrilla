@@ -8,8 +8,9 @@ no guardar.
 La cámara de frío es donde la persona guarda su material en bruto para el chef de la casa: un video
 largo, su intro y su outro, su música, su logo, fotos, una tipografía. Se guarda sin pedir comanda,
 **no vence**, y de acá sale lo que se le lleva al chef: al pedir una comanda se elige de la cámara
-(«Pedir una comanda», en [la-cocina.md](la-cocina.md)). Cada uno tiene una cuota de espacio: 20 GB,
-salvo que el admin le haya dado otra.
+(«Pedir una comanda», en [la-cocina.md](la-cocina.md)). Cada uno tiene una cuota de espacio, la de su
+plan —hoy 20 GB en el gratis y 200 GB en el pagado ([tu-cuenta.md](tu-cuenta.md), «Tu plan»)—, salvo
+que el admin le haya dado otra.
 
 Si la persona dice «la bodega», «el refrigerador», «la nevera» o «donde subo mis videos», es esta.
 
@@ -195,10 +196,11 @@ En La Cocina, «Pedir una comanda»: se elige de acá ([la-cocina.md](la-cocina.
   cuota. Cada vez tiene que afirmar lo mismo que la casilla de los derechos, así que conviene que
   la persona se lo confirme. Renombrar, cambiar el uso y sacar siguen siendo del panel. Cómo se
   hace está en la guía de la API ([../api-llm.md](../api-llm.md), sección 3h).
-- **«¿Cuánto me cabe?».** 20 GB, salvo que el admin le haya dado otra cuota. El bloque «Cuánto cabe»
-  dice cuánto lleva.
-- **«Necesito más espacio» / «¿Cómo compro más?».** Comprar todavía no existe. «¿Necesitas más
-  espacio?» le escribe al equipo; mientras tanto, sacar lo que no se use.
+- **«¿Cuánto me cabe?».** Lo de su plan (20 GB en el gratis, 200 GB en el pagado), salvo que el admin
+  le haya dado otra cuota. El bloque «Cuánto cabe» dice cuánto lleva.
+- **«Necesito más espacio» / «¿Cómo compro más?».** Pagar desde el panel todavía no existe: el plan
+  pagado, con más espacio, lo da el equipo. «¿Necesitas más espacio?» le escribe al equipo; mientras
+  tanto, sacar lo que no se use.
 - **«¿Se borra solo?».** No: lo de la cámara no vence. Se va solo cuando la persona lo saca.
 - **«Saqué algo que estaba en una comanda, ¿se rompió?».** No se puede sacar mientras la comanda está
   en marcha. Una comanda que ya terminó no cambia: guarda el nombre de lo que llevó.

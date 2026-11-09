@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto'
 import { and, asc, count, desc, eq, inArray, isNotNull, isNull, max, sql } from 'drizzle-orm'
 import { comandaEventos, comandas, creativos, getDb, insumos, latidos, preguntas, users, type EstadoComanda } from '@/db'
+import { prioridadDelDueno } from '@/lib/planes/prioridad'
 import { CANCELABLES, EN_MARCHA } from './estados'
 import { ordenarFila } from './fila'
 import { clasificarCocina, type EstadoDeLaCocina } from './latido'
@@ -108,7 +109,7 @@ export async function comandasDelDueno(ownerId: string): Promise<ComandaDelPanel
   const orden = propias.some((c) => c.estado === 'recibida')
     ? ordenarFila(
         await db
-          .select({ id: comandas.id, ownerId: comandas.ownerId, tipo: comandas.tipo, creadaEn: comandas.creadaEn })
+          .select({ id: comandas.id, ownerId: comandas.ownerId, tipo: comandas.tipo, creadaEn: comandas.creadaEn, prioridad: prioridadDelDueno(comandas.ownerId) })
           .from(comandas)
           .innerJoin(users, eq(users.id, comandas.ownerId))
           .where(and(eq(comandas.estado, 'recibida'), isNotNull(users.cocinaDesde))),

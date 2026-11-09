@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs'
+import { topeEnLaParrilla } from './planes/plan'
 import { describe, expect, it, vi } from 'vitest'
 import {
   MAX_DOCUMENTO_BYTES,
@@ -88,6 +89,14 @@ describe('la documentación para LLM no le miente al código', () => {
     ]) {
       expect(guia).toContain(frase)
     }
+  })
+
+  it('el tope del plan: el patrón en las dos guías, y el ejemplo de la guía para LLM es la frase del código', () => {
+    const patron = topeEnLaParrilla({ nombre: '<nombre>', enLaParrillaMax: 0 }).replace('0 publicaciones', '<N> publicaciones')
+    for (const archivo of ['public/docs/api-llm.md', 'public/docs/api-editor.md']) {
+      expect(readFileSync(archivo, 'utf8'), archivo).toContain(patron)
+    }
+    expect(readFileSync('public/docs/api-llm.md', 'utf8')).toContain(topeEnLaParrilla({ nombre: 'Gratis', enLaParrillaMax: 50 }))
   })
 
   it('las frases de la ref, del resumen y del tope de Instagram son las del código, en las dos guías', () => {

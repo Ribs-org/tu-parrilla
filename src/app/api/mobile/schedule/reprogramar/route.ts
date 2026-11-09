@@ -31,8 +31,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: REPROGRAMAR_PASADO }, { status: 400 })
   }
 
-  if ((await reprogramarDestino(usuario.id, body.destino, cuando)) === 'no-existe') {
-    return NextResponse.json({ error: DESTINO_NO_EXISTE }, { status: 404 })
-  }
+  const resultado = await reprogramarDestino(usuario.id, body.destino, cuando)
+  if (resultado === 'no-existe') return NextResponse.json({ error: DESTINO_NO_EXISTE }, { status: 404 })
+  if (typeof resultado === 'object') return NextResponse.json({ error: resultado.sinCupo }, { status: 409 })
   return NextResponse.json({ ok: true })
 }

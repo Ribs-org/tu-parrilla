@@ -2,21 +2,26 @@ import Link from 'next/link'
 import { Panel } from '@/components/charts/panel'
 import { Encabezado } from '@/components/ui'
 import { requireUser } from '@/lib/auth'
+import { usoDelPlan } from '@/lib/planes/uso'
 import { nombreDe } from '@/lib/vocabulario'
 import { horaEn, zonasDisponibles } from '@/lib/zona'
 import { FormularioCuenta } from './formulario'
+import { TuPlan } from './tu-plan'
 
 export const dynamic = 'force-dynamic'
 
 export default async function CuentaPage() {
   const usuario = await requireUser()
+  const uso = await usoDelPlan(usuario.id)
+  const FECHA = new Intl.DateTimeFormat('es-CL', { dateStyle: 'medium', timeZone: usuario.zona })
 
   return (
     <>
       <header className="mb-6">
         <Encabezado ruta="/admin/cuenta" />
         <p className="mt-1 text-sm text-fg-muted">
-          Con qué nombre apareces y en qué zona horaria vives. El correo con el que entras no se cambia acá.
+          Con qué nombre apareces, en qué zona horaria vives y qué plan tienes. El correo con el que entras no se
+          cambia acá.
           Las llaves para tu IA están en{' '}
           {/* Vivían acá hasta el 2026-10-19: quien las busca por costumbre encuentra adónde se fueron. */}
           <Link href="/admin/ia" className="text-brasa underline-offset-2 hover:underline">
@@ -36,6 +41,9 @@ export default async function CuentaPage() {
           // `revalidatePath` de la acción vuelve a pintar esta página y la trae nueva.
           ahora={horaEn(usuario.zona, new Date())}
         />
+      </Panel>
+      <Panel title="Tu plan" className="mt-6">
+        <TuPlan uso={uso} fecha={(d) => FECHA.format(d)} />
       </Panel>
     </>
   )

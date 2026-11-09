@@ -135,12 +135,16 @@ anotado y no se lee todavía.
 ### `GET /api/cocina/comandas?estado=recibida`
 
 Las comandas en un estado. Sin `estado`, `recibida`: las que esperan. Un estado que no existe da
-`400` con `«estado» no es un estado de comanda.` Trae hasta 100 por llamada, las más viejas.
+`400` con `«estado» no es un estado de comanda.` Trae hasta 100 por llamada, las más viejas (en
+las que esperan, primero las de los planes con más prioridad).
 
 Las que esperan vienen **en el orden en que conviene tomarlas**:
 
 - las pruebas primero;
-- después, una de cada dueño por vuelta, nunca dos seguidas del mismo dueño si otro espera;
+- después, las de los dueños con el plan pagado, y después las del gratis (la prioridad de cada plan,
+  que el admin ajusta: `docs/superpowers/specs/2026-11-08-planes-design.md`);
+- dentro de cada prioridad, una de cada dueño por vuelta, nunca dos seguidas del mismo dueño si otro
+  espera;
 - dentro de cada dueño, de la más vieja a la más nueva.
 
 Con otro estado, por fecha.

@@ -1,5 +1,7 @@
 import { and, asc, eq, inArray, isNotNull, isNull } from 'drizzle-orm'
 import { comandaEventos, comandas, getDb, insumos, marcas, materiales, users, type Usuario } from '@/db'
+import { prioridadDelDueno } from '@/lib/planes/prioridad'
+import { planDe } from '@/lib/planes/planes'
 import { esChoqueCon } from '@/lib/choque-de-unicidad'
 import { claseDe } from './bodega'
 import { COCINA_APAGADA } from './subidas'
@@ -25,12 +27,15 @@ export async function marcaDe(ownerId: string): Promise<MarcaBasica | null> {
 /** El lugar que tendría en la fila una comanda que se cuelgue ahora: cuántas irían antes. */
 export async function lugarDeUnaNueva(ownerId: string, ahora: Date): Promise<number> {
   const fila = await getDb()
-    .select({ id: comandas.id, ownerId: comandas.ownerId, tipo: comandas.tipo, creadaEn: comandas.creadaEn })
+    .select({ id: comandas.id, ownerId: comandas.ownerId, tipo: comandas.tipo, creadaEn: comandas.creadaEn, prioridad: prioridadDelDueno(comandas.ownerId) })
     .from(comandas)
     .innerJoin(users, eq(users.id, comandas.ownerId))
     .where(and(eq(comandas.estado, 'recibida'), isNotNull(users.cocinaDesde)))
   const NUEVA = 'nueva'
-  return ordenarFila([...fila, { id: NUEVA, ownerId, tipo: 'tanda' as const, creadaEn: ahora }]).findIndex((c) => c.id === NUEVA)
+  const { plan } = await planDe(ownerId, ahora)
+  return ordenarFila([...fila, { id: NUEVA, ownerId, tipo: 'tanda' as const, creadaEn: ahora, prioridad: plan.prioridad }]).findIndex(
+    (c) => c.id === NUEVA,
+  )
 }
 
 class MaterialesCambiaron extends Error {

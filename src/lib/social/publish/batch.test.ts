@@ -50,6 +50,14 @@ const guardarMock = vi.fn(async (...args: [key: string, body: Blob, contentType:
 // Lo que ya está en el almacén, por URL: lo que un test sube con `POST /api/media` y el lote
 // tiene que encontrar sin bajarlo. `keyDesdeUrl` es la real, contra la misma base pública.
 const { enAlmacen } = vi.hoisted(() => ({ enAlmacen: new Map<string, { bytes: number; tipo: string }>() }))
+// Los topes del plan van contra la base de verdad; acá no hay plan que mirar.
+vi.mock('@/lib/planes/topes', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/lib/planes/topes')>()),
+  exigirCupoEnLaParrilla: async () => {},
+  exigirCupoAlRearmar: async () => {},
+  exigirCupoDeCuentas: async () => {},
+  sinCupoEnLaParrilla: async () => null,
+}))
 vi.mock('@/lib/storage', async (importOriginal) => {
   const real = await importOriginal<typeof import('@/lib/storage')>()
   return {

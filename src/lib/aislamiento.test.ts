@@ -146,6 +146,7 @@ const { makeDefault, updateProfile, deleteScheduledPost, guardarCuenta, guardarT
 // `guardarCuenta` son dos funciones distintas con el mismo nombre: la de `admin/actions`
 // guarda la cuenta *del usuario* y la de `social/conectar`, una cuenta *de una red*.
 const { guardarCuenta: guardarCuentaDeRed, tomadasPorOtro } = await import('./social/conectar')
+const { cuentasConectadas, esperandoEnLaParrilla, planDe, tokensDelMes } = await import('./planes/planes')
 const {
   contarFilas,
   leerClicks,
@@ -165,6 +166,16 @@ beforeEach(() => {
 })
 
 const DUENO = 'owner-1'
+
+/**
+ * Lo que contesta la base cuando algo pregunta por el plan de un dueño (`planDe`): su fila —plan,
+ * hasta, origen, cámara a mano, zona y prueba— y las dos filas de `planes`, que son de todos.
+ */
+const PERSONA_GRATIS = [['gratis', null, null, null, 'America/Santiago', null]]
+const PLANES = [
+  ['gratis', 'Gratis', 0, 0, 7, 50, 21474836480, 100000, 0],
+  ['pagado', 'Maestro Parrillero', 34990, 7, 15, null, 214748364800, 2000000, 1],
+]
 
 const USUARIO = {
   id: DUENO,
@@ -492,12 +503,31 @@ describe('aislamiento por dueño (SQL generado, sin base)', () => {
     for (const c of consultas) esperarFiltradoPorDueno(c)
   })
 
-  it('cocina/subidas: usoDeLaCamara lee la cuota de la fila del dueño, y cuenta solo lo suyo', async () => {
-    const consultas = await consultasEncadenadas(() => usoDeLaCamara(DUENO), [[[null]], [[0]], [[0]], [[0]]])
-    expect(consultas).toHaveLength(4)
+  it('cocina/subidas: usoDeLaCamara lee la cuota de la fila del dueño y de su plan, y cuenta solo lo suyo', async () => {
+    const consultas = await consultasEncadenadas(() => usoDeLaCamara(DUENO), [PERSONA_GRATIS, PLANES, [[0]], [[0]], [[0]]])
+    expect(consultas).toHaveLength(5)
     expect(consultas[0]!.params).toContain(DUENO)
     expect(consultas[0]!.sql.split(/\bwhere\b/i).pop()).toMatch(/"id"\s*=\s*\$/)
-    for (const c of consultas.slice(1)) esperarFiltradoPorDueno(c)
+    // Los planes son de todos: la tabla no tiene dueño.
+    expect(consultas[1]!.sql).toMatch(/from "planes"/i)
+    for (const c of consultas.slice(2)) esperarFiltradoPorDueno(c)
+  })
+
+  it('planes: el plan de alguien se lee por su id, y lo que lleva usado se cuenta solo de lo suyo', async () => {
+    const delPlan = await consultasEncadenadas(() => planDe(DUENO), [PERSONA_GRATIS, PLANES])
+    expect(delPlan[0]!.params).toContain(DUENO)
+    expect(delPlan[0]!.sql.split(/\bwhere\b/i).pop()).toMatch(/"id"\s*=\s*\$/)
+    capturas.length = 0
+    const db = (await import('@/db')).getDb()
+    for (const contar of [
+      () => cuentasConectadas(db, DUENO),
+      () => esperandoEnLaParrilla(db, DUENO),
+      () => tokensDelMes(db, DUENO, 'America/Santiago', new Date('2026-11-08T12:00:00Z')),
+    ]) {
+      const [consulta] = await consultasEncadenadas(contar, [[[0]]])
+      esperarFiltradoPorDueno(consulta!)
+      capturas.length = 0
+    }
   })
 
   it('llaves: listarLlaves solo trae las del dueño, y nunca su hash', async () => {
@@ -772,11 +802,16 @@ describe('aislamiento por dueño, escrituras (SQL generado, sin base)', () => {
           expiresAt: null,
           metaUserId: '10201234567890',
         }),
-      [[]], // nadie tiene esa cuenta todavía: sigue al insert.
+      // Nadie tiene esa cuenta todavía; el dueño trabado, su plan y sus cuentas conectadas para el
+      // tope; y el insert.
+      [[], [[DUENO]], PERSONA_GRATIS, PLANES, [[0]], []],
     )
-    expect(consultas).toHaveLength(2)
+    expect(consultas).toHaveLength(6)
 
-    const [lectura, escritura] = consultas as [Captura, Captura]
+    const lectura = consultas[0]!
+    const escritura = consultas[consultas.length - 1]!
+    // El tope cuenta las cuentas de este dueño, no las de todos.
+    esperarFiltradoPorDueno(consultas[4]!)
     // La lectura mira la cuenta, no al dueño: ese es el guardia de choque.
     expect(lectura.sql).toMatch(/from "social_accounts"/i)
     expect(lectura.params).toContain('17841400000000000')
@@ -788,7 +823,7 @@ describe('aislamiento por dueño, escrituras (SQL generado, sin base)', () => {
   })
 
   it('social/conectar: guardarCuenta no pisa la cuenta de otro dueño, y la nombra', async () => {
-    colaRespuestas.push([['otro-dueno']])
+    colaRespuestas.push([['cuenta-1', 'otro-dueno', 'cifrado']])
     await expect(
       guardarCuentaDeRed(DUENO, 'instagram', {
         externalId: '17841400000000000',
@@ -806,11 +841,12 @@ describe('aislamiento por dueño, escrituras (SQL generado, sin base)', () => {
   // diferencia entre «conectado» y «se renovó y no se agregó otra».
   it('social/conectar: guardarCuenta dice si la cuenta era nueva para este dueño o solo se renovó', async () => {
     const cuenta = { externalId: '17841400000000000', handle: '@mia', accessToken: 'token', refreshToken: null, expiresAt: null }
-    colaRespuestas.push([], []) // nadie la tenía; el insert.
+    const tope = [[[DUENO]], PERSONA_GRATIS, PLANES, [[0]]] // el dueño trabado, su plan y sus conectadas
+    colaRespuestas.push([], ...tope, []) // nadie la tenía; el tope; el insert.
     expect(await guardarCuentaDeRed(DUENO, 'instagram', cuenta)).toBe('nueva')
-    colaRespuestas.push([[DUENO]], []) // ya era de este dueño; el upsert.
+    colaRespuestas.push([['cuenta-1', DUENO, 'cifrado']], []) // ya era suya y conectada: sin tope; el upsert.
     expect(await guardarCuentaDeRed(DUENO, 'instagram', cuenta)).toBe('renovada')
-    colaRespuestas.push([[null]], []) // una fila de antes de los dueños: en su panel no estaba.
+    colaRespuestas.push([['cuenta-1', null, null]], ...tope, []) // una fila de antes de los dueños: en su panel no estaba.
     expect(await guardarCuentaDeRed(DUENO, 'instagram', cuenta)).toBe('nueva')
   })
 
