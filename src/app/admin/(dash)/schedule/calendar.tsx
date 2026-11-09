@@ -12,7 +12,7 @@ import type { Tema } from '@/lib/tema'
 import { cn } from '@/lib/utils'
 import { ROTULO_CALOR, servidos } from '@/lib/vocabulario'
 import { DesplazarAHoy } from './desplazar-a-hoy'
-import { dibujoDe, type Borde, type Dibujo } from './dibujo'
+import { dibujoDe, type Dibujo } from './dibujo'
 import { etiquetaDestino, motivoDestino, nombreDestino } from './etiqueta'
 import { FilasConAhora } from './linea-de-ahora'
 import { Redes } from './redes'
@@ -33,26 +33,6 @@ type Item = {
  */
 export function RotuloCalor({ calor }: { calor: Calor }) {
   return <DeNocheYDeDia noche={ROTULO_CALOR.noche[calor]} dia={ROTULO_CALOR.dia[calor]} />
-}
-
-/**
- * La tarjeta de un corte: chapa, y no carne. La carne es el dibujo de arriba; la tarjeta solo
- * cambia de borde cuando necesita algo del dueño (`bordeDe`, en `dibujo.ts`). La comparten la
- * vista «Día» y la portada.
- */
-export const CLASE_BORDE: Record<Borde, string> = {
-  cuenta: 'border-acero-700',
-  atencion: 'border-caution/75',
-  mano: 'border-negative/80',
-}
-
-/** El color del estado en palabras, al lado de la hora. */
-export const CLASE_ESTADO: Record<Coccion, string> = {
-  cruda: 'text-fg',
-  sellada: 'text-fg',
-  punto: 'text-positive',
-  parcial: 'text-negative',
-  quemada: 'text-negative',
 }
 
 /**
@@ -323,6 +303,19 @@ export function CabezaDeDia({
   )
 }
 
+/** La forma de una fila de la semana, sin su estado (`CLASE_FILA`): el calendario y la portada. */
+export const CLASE_FILA_BASE =
+  'flex flex-wrap items-center gap-x-1.5 gap-y-0.5 rounded-[4px] border py-0.5 pl-0.5 pr-1 transition-colors'
+
+type DestinoDeFila = {
+  network: string
+  handle: string | null
+  status: string
+  externalId: string | null
+  opciones: unknown
+  lastError: string | null
+}
+
 /**
  * Un corte en la semana: una fila de una línea. El texto no cabe en una columna de un séptimo
  * de pantalla; va en su globito (`data-globito`), con cómo le fue a cada red y su motivo, y en el editor, que
@@ -348,31 +341,56 @@ function FilaDeCorte({
       // Sin prefetch: una semana cargada son cientos de filas, y cada una pedía su editor por
       // adelantado (ver `docs/pendientes.md`).
       prefetch={false}
-      data-globito={[
-        `${hora} · ${texto}`,
-        ...targets.map((t) => {
-          const motivo = motivoDestino(t)
-          return `${nombreDestino(t)}: ${etiquetaDestino(t)}${motivo ? ` — ${motivo}` : ''}`
-        }),
-      ].join('\n')}
+      data-globito={globitoDeFila(hora, texto, targets)}
       data-recien={post.id === recien ? '' : undefined}
-      // `flex-wrap`: en el teléfono la columna de un día mide poco más de cien píxeles, y las redes
-      // de un corte que sale a dos, o la de uno quemado, no caben al lado de la hora. Bajan a un
-      // segundo renglón en vez de taparla.
-      className={cn(
-        'flex flex-wrap items-center gap-x-1.5 gap-y-0.5 rounded-[4px] border py-0.5 pl-0.5 pr-1 transition-colors',
-        CLASE_FILA[estado],
-        post.id === recien && 'recien',
-      )}
+      // `flex-wrap`, en `CLASE_FILA_BASE`: en el teléfono la columna de un día mide poco más de cien
+      // píxeles, y las redes de un corte que sale a dos, o la de uno quemado, no caben al lado de la
+      // hora. Bajan a un segundo renglón en vez de taparla.
+      className={cn(CLASE_FILA_BASE, CLASE_FILA[estado], post.id === recien && 'recien')}
     >
+      <DentroDeLaFila hora={hora} texto={texto} targets={targets} dibujo={dibujo} estado={estado} />
+    </Link>
+  )
+}
+
+/** El globito de una fila: la hora y el texto, y cómo le fue a cada red con su motivo. */
+export function globitoDeFila(hora: string, texto: string, targets: readonly DestinoDeFila[]): string {
+  return [
+    `${hora} · ${texto}`,
+    ...targets.map((t) => {
+      const motivo = motivoDestino(t)
+      return `${nombreDestino(t)}: ${etiquetaDestino(t)}${motivo ? ` — ${motivo}` : ''}`
+    }),
+  ].join('\n')
+}
+
+/**
+ * Lo de adentro de una fila: el corte en chico, la hora y sus redes. Lo comparten el calendario,
+ * que lo envuelve en el enlace al editor, y la semana de la portada, que no lleva a ninguna parte.
+ */
+export function DentroDeLaFila({
+  hora,
+  texto,
+  targets,
+  dibujo,
+  estado,
+}: {
+  hora: string
+  texto: string
+  targets: DestinoDeFila[]
+  dibujo: Dibujo
+  estado: EstadoDeFila
+}) {
+  return (
+    <>
       <Corte {...dibujo} chico className={cn('w-[1.85rem] shrink-0', estado === 'servida' && 'opacity-55')} />
       <span className={cn('font-mono text-[0.66rem] tabular-nums', estado === 'servida' ? 'text-fg-muted' : 'text-fg')}>{hora}</span>
       {estado === 'servida' ? (
         // Salió en todas: los íconos solos y un ✓ para todos. Un chip con su ✓ por red hacía que
         // lo ya servido se viera más cargado que lo que viene, y es lo que menos hay que mirar.
         <span className="ml-auto flex shrink-0 items-center gap-1">
-          {targets.map((t) => (
-            <Icon key={t.id} name={t.network} className={cn('h-3 w-3 shrink-0', colorDeRed(t.network))} />
+          {targets.map((t, i) => (
+            <Icon key={`${t.network}-${i}`} name={t.network} className={cn('h-3 w-3 shrink-0', colorDeRed(t.network))} />
           ))}
           <span aria-hidden className="text-[0.66rem] text-positive">
             ✓
@@ -389,7 +407,7 @@ function FilaDeCorte({
       <span className="sr-only">
         {NOMBRE_FORMATO[dibujo.formato]} · {NOMBRE_COCCION[dibujo.coccion]} · {texto}
       </span>
-    </Link>
+    </>
   )
 }
 

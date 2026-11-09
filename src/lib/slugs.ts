@@ -27,6 +27,7 @@ export const RESERVADOS: ReadonlySet<string> = new Set([
   'robots.txt',
   'sitemap.xml',
   // `public/`
+  'creadores',
   'docs',
   // Del framework, nunca llegan a `/[slug]` pero se reservan igual
   '_next',

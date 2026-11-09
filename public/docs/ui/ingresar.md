@@ -20,9 +20,10 @@ desde la próxima vez. La de error sigue siempre de noche.
   «Tu Parrilla es por invitación.» y «No hay registro abierto. Si ya te invitaron, entra con tu
   correo.», el botón «Entrar con tu correo». La portada no tiene registro: todo lo demás que se
   ve ahí —la semana de ejemplo, el corte que se arma, las fotos que suben— es una muestra del
-  panel, y no guarda nada. Antes del final, «Creadores que trabajan con Tu Parrilla» enlaza a
-  sus perfiles, y debajo va un contador: las vistas y los «me gusta» de todas las cuentas de
-  Instagram, Facebook y TikTok conectadas, sumados, sin YouTube.
+  panel, y no guarda nada. Justo después de la semana, «Creadores que trabajan con Tu Parrilla»
+  muestra a cada uno con su foto y enlaza a su perfil; al lado va un contador: las vistas y los
+  «me gusta» de todas las cuentas de Instagram, Facebook y TikTok conectadas, sumados, sin
+  YouTube.
 - Abriendo cualquier dirección del panel (`/admin` o lo que cuelgue de ahí) sin sesión: lleva a
   `/ingresar`. Al entrar se llega siempre a La Parrilla, la entrada del panel
   ([la-parrilla.md](la-parrilla.md)), no a la dirección que se había abierto.

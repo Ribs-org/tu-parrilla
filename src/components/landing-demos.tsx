@@ -19,6 +19,7 @@ import {
   type Coccion,
   type Sello,
 } from '@/lib/parrilla'
+import { HISTORIA_DESTINOS } from '@/lib/social/publish/opciones'
 import { NO_PUBLISH_TOKEN } from '@/lib/social/publish/publisher'
 import { cn } from '@/lib/utils'
 import { SE_QUEMO } from '@/lib/vocabulario'
@@ -42,7 +43,7 @@ const COLOR_ESTADO: Record<Coccion, string> = {
   quemada: 'text-negative',
 }
 
-type Lleva = 'video' | 'carrusel' | 'foto' | 'texto'
+type Lleva = 'video' | 'carrusel' | 'foto' | 'texto' | 'historia'
 type Va = 'programada' | 'saliendo' | 'publicada' | 'quemada'
 type Red = 'instagram' | 'facebook' | 'tiktok' | 'youtube'
 
@@ -51,6 +52,9 @@ const LLEVA: ReadonlyArray<{ clave: Lleva; nombre: string; media: ReadonlyArray<
   { clave: 'carrusel', nombre: 'Cinco fotos', media: Array.from({ length: 5 }, () => ({ mediaType: 'image' })) },
   { clave: 'foto', nombre: 'Una foto', media: [{ mediaType: 'image' }] },
   { clave: 'texto', nombre: 'Solo texto', media: [] },
+  // Una historia es un solo archivo, foto o video (`HISTORIA_MEDIA`): el formato lo da la opción,
+  // no el archivo (`formatoDe`).
+  { clave: 'historia', nombre: 'Una historia', media: [{ mediaType: 'video' }] },
 ]
 
 const VA: ReadonlyArray<{ clave: Va; nombre: ReactNode }> = [
@@ -84,10 +88,12 @@ const CUENTA: Record<Red, string> = {
 
 /**
  * Las reglas del compositor, para no ofrecer lo que adentro se rechaza: Instagram, TikTok y
- * YouTube necesitan un archivo (`validate.ts`), y YouTube solo recibe video (`youtube.ts`).
+ * YouTube necesitan un archivo (`validate.ts`), YouTube solo recibe video (`youtube.ts`), y una
+ * historia va solo a Instagram y Facebook (`HISTORIA_DESTINOS`).
  */
 function admite(red: Red, lleva: Lleva): boolean {
   if (lleva === 'texto') return red === 'facebook'
+  if (lleva === 'historia') return red === 'instagram' || red === 'facebook'
   if (red === 'youtube') return lleva === 'video'
   return true
 }
@@ -96,6 +102,7 @@ const POR_QUE_NO: Partial<Record<Lleva, string>> = {
   texto: 'Sin archivo, solo Facebook: Instagram, TikTok y YouTube necesitan uno.',
   carrusel: 'YouTube solo recibe video.',
   foto: 'YouTube solo recibe video.',
+  historia: HISTORIA_DESTINOS,
 }
 
 /** Cómo va cada destino. «Se quemó en una» (de día, «Se echó a perder en una»): la primera red falló, y las demás salieron. */
@@ -119,11 +126,12 @@ export function ArmaUnCorte() {
   const redes = REDES.filter((red) => marcadas.has(red) && admite(red, lleva))
   const destinos = redes.map((network, i) => {
     const status = estadoDe(va, i)
-    return { network, handle: CUENTA[network], externalId: null, opciones: null, status, lastError: status === 'failed' ? NO_PUBLISH_TOKEN : null }
+    const opciones = lleva === 'historia' ? { historia: true } : null
+    return { network, handle: CUENTA[network], externalId: null, opciones, status, lastError: status === 'failed' ? NO_PUBLISH_TOKEN : null }
   })
   const estados = destinos.map((d) => d.status)
   const sellos: Sello[] = destinos.map((d) => selloDe(d))
-  const { formato, huesos } = formatoDe(media)
+  const { formato, huesos } = formatoDe(media, 0, lleva === 'historia')
   const coccion = coccionDe(estados)
   const quemado = destinos.find((d) => d.status === 'failed')
 

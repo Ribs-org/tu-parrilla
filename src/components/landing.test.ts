@@ -1,8 +1,12 @@
+import { existsSync } from 'node:fs'
+import { join } from 'node:path'
 import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import { CONTACTO, RESPONSABLE, RUT } from '@/lib/empresa'
+import { NOMBRE_FORMATO, formatoDe, type Formato } from '@/lib/parrilla'
 import { Landing, metadataLanding } from './landing'
+import { SEMANA } from './landing-semana'
 
 // La portada es lo que Google miró para verificar la marca, y lo que mira cualquier revisión
 // de una red: tiene que decir qué hace la app y para qué usa los datos de cada red, con la
@@ -58,11 +62,29 @@ describe('la portada', () => {
     expect(dia.alternates?.canonical).toBe('https://tu-parrilla.cl/')
   })
 
-  it('muestra a los creadores que trabajan con Tu Parrilla, enlazados a su perfil', () => {
+  it('muestra a los creadores que trabajan con Tu Parrilla, enlazados a su perfil y con su foto', () => {
     expect(texto).toContain('Creadores que trabajan con Tu Parrilla')
     expect(html).toContain('href="https://www.instagram.com/vicente_pareja_j/"')
     expect(html).toContain('href="https://www.tiktok.com/@chinocomprensible"')
     expect(html).toContain('rel="noopener noreferrer"')
+    // Las fotos se sirven del sitio, no de la red: que estén en `public/` y no apunten afuera.
+    const fotos = [...html.matchAll(/creadores%2F([\w.-]+\.webp)/g)].map((m) => m[1]!)
+    expect(new Set(fotos)).toEqual(new Set(['vicente_pareja_j.webp', 'chinocomprensible.webp']))
+    for (const foto of fotos) expect(existsSync(join(process.cwd(), 'public', 'creadores', foto))).toBe(true)
+    expect(html).not.toMatch(/cdninstagram|fbcdn|tiktokcdn/)
+  })
+
+  it('los creadores van arriba: justo después de la semana, antes de la leyenda', () => {
+    expect(html.indexOf('Creadores que trabajan con Tu Parrilla')).toBeLessThan(html.indexOf('Pruébalo'))
+  })
+
+  it('la semana de ejemplo dibuja todos los formatos del panel, y la leyenda los nombra', () => {
+    // Si La Parrilla suma un formato y la portada no, esto falla: pasó con la historia, que llegó
+    // el 2026-10-26 y la portada siguió contando cuatro hasta el 2026-11-09.
+    const formatos = new Set(SEMANA.flatMap((d) => d.cortes.map((c) => formatoDe(c.media, 0, c.historia).formato)))
+    expect(formatos).toEqual(new Set(Object.keys(NOMBRE_FORMATO) as Formato[]))
+    expect(texto).toContain('chori el texto y choripán al paso la historia')
+    expect(texto).toContain('temaki el texto y onigiri la historia')
   })
 
   it('el contador suma vistas y me gusta sin YouTube, y sin cifras no aparece', () => {
