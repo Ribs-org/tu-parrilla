@@ -9,6 +9,8 @@ export type CorteDeMuestra = {
   destinos: ReadonlyArray<{ network: string; status: Estado }>
   /** El que acaba de caer: se enciende una vez al abrir, como al volver del compositor. */
   recien?: true
+  /** Una historia de Instagram o Facebook: el choripán de noche, el onigiri de día. */
+  historia?: true
 }
 export type DiaDeMuestra = {
   dia: string
@@ -25,7 +27,7 @@ export const fotos = (n: number) => Array.from({ length: n }, () => FOTO)
 /**
  * La semana del inicio. Estática a propósito: es una ilustración, no datos de nadie. Tiene de
  * todo lo que la parrilla dice sin palabras: un día lleno, dos fríos, uno saliendo con su
- * humo, uno recién puesto, y los cuatro formatos.
+ * humo, uno recién puesto, y los cinco formatos, la historia incluida.
  */
 export const SEMANA: readonly DiaDeMuestra[] = [
   {
@@ -125,6 +127,13 @@ export const SEMANA: readonly DiaDeMuestra[] = [
         texto: 'La pregunta de la semana',
         media: [],
         destinos: [{ network: 'facebook', status: 'scheduled' }],
+      },
+      {
+        hora: '20:00',
+        texto: 'Lo que viene la otra semana',
+        media: [VIDEO],
+        destinos: [{ network: 'instagram', status: 'scheduled' }],
+        historia: true,
       },
     ],
   },

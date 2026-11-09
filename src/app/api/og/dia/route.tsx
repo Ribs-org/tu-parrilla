@@ -101,7 +101,7 @@ export function GET() {
                 {dia.cortes.map((corte) => (
                   <PiezaOg
                     key={corte.hora}
-                    {...formatoDe(corte.media)}
+                    {...formatoDe(corte.media, 0, corte.historia)}
                     carne={carneDe(corte.destinos.map((d) => d.status))}
                   />
                 ))}

@@ -10,7 +10,7 @@ tus números.
 
 | URL | Qué es |
 | --- | --- |
-| `/` | En el dominio del producto (`DOMINIO_PRODUCTO`), la portada de Tu Parrilla, con los enlaces a privacidad y términos, los creadores que trabajan con Tu Parrilla (cada uno dio su permiso) y un contador de las vistas y los «me gusta» de todas las cuentas conectadas, sin YouTube (`src/lib/portada-numeros.ts`). En cualquier otro, la página principal del dueño del dominio: cada usuario tiene una, pero solo la del admin se sirve en la raíz |
+| `/` | En el dominio del producto (`DOMINIO_PRODUCTO`), la portada de Tu Parrilla, con los enlaces a privacidad y términos, los creadores que trabajan con Tu Parrilla (cada uno dio su permiso; sus fotos, en `public/creadores/`) y un contador de las vistas y los «me gusta» de todas las cuentas conectadas, sin YouTube (`src/lib/portada-numeros.ts`). En cualquier otro, la página principal del dueño del dominio: cada usuario tiene una, pero solo la del admin se sirve en la raíz |
 | `/ingresar` | La entrada al panel: el correo y el código de seis dígitos que llega a ese correo. Como el panel, se abre en el dominio del producto |
 | `/borrar-mis-datos` | Cómo pedir que se borre una cuenta con todos sus datos, qué se borra y qué se guarda (los respaldos, 90 días). Pública y sin sesión: es la «Delete data URL» de la ficha de Google Play, que la revisa (`docs/play-store.md`). El borrado lo hace hoy el equipo a mano (ver `docs/pendientes.md`) |
 | `/privacidad`, `/terminos` | La política de privacidad y los términos, públicos y sin sesión. Google y Meta los revisan para verificar la app. Además los enlaza, junto con `/`, el *Branding* de `rclone-servidor`, otra app de Google de Infraestructura (#294): si alguna de las tres cambia de ruta o se baja, avisar en `VicentePareja/servidor_propio` |
@@ -1683,8 +1683,8 @@ así que un destino se quema recién unas dos horas y cuarto después de su hora
 caída hasta dos horas ya no lo pierde. Antes los tres intentos iban en corridas seguidas y
 se gastaban en diez minutos. «Subir ahora» no espera: es el dueño pidiendo el intento ya.
 Mientras espera el siguiente, el panel lo muestra como **Reintentando** con el motivo del
-intento anterior —en el editor del post y en la cola; la tarjeta del calendario dice
-«Reintentando» con sus redes y deja el motivo al pasar el mouse—, y el correo de aviso llega
+intento anterior —en el editor del post y en la cola; en el calendario, la fila del corte marca
+esa red con ↻ y dice «Reintentando» con el motivo al pasar el mouse—, y el correo de aviso llega
 solo cuando se quema: sin ese motivo a la vista, un reintento escondía el error real hasta
 agotar los intentos.
 

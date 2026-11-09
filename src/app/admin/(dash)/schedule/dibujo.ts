@@ -1,5 +1,5 @@
-// Qué se dibuja de un corte en La Parrilla: la silueta, la carne, una marca por destino y lo
-// que dice la tarjeta en palabras. Puro: la semana, la vista «Día» y «Se quemó» lo arman igual,
+// Qué se dibuja de un corte en La Parrilla: la silueta, la carne, una marca por destino y el
+// borde de su fila. Puro: la semana, la vista «Día», «Se quemó» y la portada lo arman igual,
 // y acá se lo puede pinchar con un test sin pintar nada.
 
 import type { TargetStatus } from '@/db/schema'
@@ -51,21 +51,8 @@ export function dibujoDe(
 }
 
 /**
- * El estado en palabras, al lado de la hora. Nada para lo que solo está programado —es el
- * caso de casi todo, y escribirlo en cada tarjeta sería ruido—: la marca punteada ya lo dice.
- * Lo quemado en parte lleva la cuenta, porque es lo que el dibujo dice y una palabra sola no.
- */
-export function estadoCorto(coccion: Coccion, sellos: readonly Sello[]): string | null {
-  if (coccion === 'sellada') return 'saliendo'
-  if (coccion === 'punto') return 'publicado'
-  if (coccion === 'quemada') return 'falló'
-  if (coccion === 'parcial') return `falló en ${sellos.filter((s) => s === 'quemado').length} de ${sellos.length}`
-  return null
-}
-
-/**
- * Qué borde lleva la tarjeta. La tarjeta no se pinta de colores: cambia de borde solo cuando
- * necesita algo del dueño. Ámbar, si pide atención —un borrador espera en la bandeja de
+ * Qué borde lleva la fila de un corte (`estadoDeFila`, en `semana.ts`). No se pinta de colores:
+ * cambia de borde solo cuando necesita algo del dueño. Ámbar, si pide atención —un borrador espera en la bandeja de
  * TikTok, un destino reintenta, una cuenta se enfrió—; rojo, si pide su mano: se quemó.
  */
 export type Borde = 'cuenta' | 'atencion' | 'mano'

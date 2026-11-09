@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { bordeDe, dibujoDe, estadoCorto } from './dibujo'
+import { bordeDe, dibujoDe } from './dibujo'
 
 const destino = (accountId: string, status: 'scheduled' | 'publishing' | 'published' | 'failed', extra = {}) => ({
   accountId,
@@ -48,19 +48,6 @@ describe('dibujoDe', () => {
   it('un video que salió en todas sus redes se dibuja a punto y como entraña, sin su archivo', () => {
     const dibujo = dibujoDe([destino('a', 'published'), destino('b', 'published')], [], new Set(), 1)
     expect(dibujo).toMatchObject({ formato: 'entrana', carne: 'punto' })
-  })
-})
-
-describe('estadoCorto', () => {
-  it('lo programado no dice nada: la marca punteada ya lo dice', () => {
-    expect(estadoCorto('cruda', ['pendiente'])).toBeNull()
-  })
-
-  it('lo quemado en parte dice cuántos de cuántos', () => {
-    expect(estadoCorto('parcial', ['servido', 'quemado', 'servido'])).toBe('falló en 1 de 3')
-    expect(estadoCorto('quemada', ['quemado'])).toBe('falló')
-    expect(estadoCorto('sellada', ['saliendo'])).toBe('saliendo')
-    expect(estadoCorto('punto', ['servido'])).toBe('publicado')
   })
 })
 
