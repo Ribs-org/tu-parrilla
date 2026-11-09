@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "516547873095",
+    "project_id": "tu-parrilla",
+    "storage_bucket": "tu-parrilla.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:516547873095:android:437c11b0aa643e4952a462",
+        "android_client_info": {
+          "package_name": "cl.tuparrilla.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD9Y1VZm6LG32msLm30A93wqbJ69gSOUkQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
