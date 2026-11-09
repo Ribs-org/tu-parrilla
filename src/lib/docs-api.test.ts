@@ -96,7 +96,7 @@ describe('la documentación para LLM no le miente al código', () => {
     for (const archivo of ['public/docs/api-llm.md', 'public/docs/api-editor.md']) {
       expect(readFileSync(archivo, 'utf8'), archivo).toContain(patron)
     }
-    expect(readFileSync('public/docs/api-llm.md', 'utf8')).toContain(topeEnLaParrilla({ nombre: 'Gratis', enLaParrillaMax: 10 }))
+    expect(readFileSync('public/docs/api-llm.md', 'utf8')).toContain(topeEnLaParrilla({ nombre: 'Gratis', enLaParrillaMax: 50 }))
   })
 
   it('las frases de la ref, del resumen y del tope de Instagram son las del código, en las dos guías', () => {

@@ -145,9 +145,9 @@ export function leerPlan(clave: ClavePlan, campos: Record<string, unknown>): Cam
 }
 
 /**
- * El plan de alguien en una línea, para su fila en Los Maestros: «Gratis», «Asador · cortesía hasta
- * el 8 dic 2026», «Asador · cortesía», «Asador · lo paga hasta el 8 dic 2026», o, si venció,
- * «Gratis · su Asador venció el 8 dic 2026». `fecha` escribe el día en la zona de quien mira.
+ * El plan de alguien en una línea, para su fila en Los Maestros: «Gratis», «Maestro Parrillero ·
+ * cortesía hasta el 8 dic 2026», «Maestro Parrillero · cortesía», «Maestro Parrillero · lo paga hasta
+ * el 8 dic 2026», o, si venció, «Gratis · su plan Maestro Parrillero venció el 8 dic 2026». `fecha` escribe el día en la zona de quien mira.
  */
 export function planEnPalabras(
   persona: ConPlan,
@@ -157,7 +157,7 @@ export function planEnPalabras(
 ): string {
   if (persona.plan === 'gratis') return planes.gratis.nombre
   const nombre = planes[persona.plan].nombre
-  if (claveQueRige(persona, ahora) === 'gratis') return `${planes.gratis.nombre} · su ${nombre} venció el ${fecha(persona.planHasta!)}`
+  if (claveQueRige(persona, ahora) === 'gratis') return `${planes.gratis.nombre} · su plan ${nombre} venció el ${fecha(persona.planHasta!)}`
   const como = persona.planOrigen === 'suscripcion' ? 'lo paga' : 'cortesía'
   return persona.planHasta ? `${nombre} · ${como} hasta el ${fecha(persona.planHasta)}` : `${nombre} · ${como}`
 }

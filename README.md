@@ -2032,18 +2032,18 @@ Fierros. Lo puro está en `src/lib/cuentas-api.ts`.
 
 ## Los planes
 
-Dos planes, el gratis y el pagado («Asador»), con las mismas funciones: lo que cambia son los
+Dos planes, el gratis y el pagado («Maestro Parrillero»), con las mismas funciones: lo que cambia son los
 topes, el espacio, los tokens de IA y quién pasa primero en las colas. El diseño, con el porqué de
 cada número, está en `docs/superpowers/specs/2026-11-08-planes-design.md`. Cada plan es una fila de
 `planes` que el admin edita en Los Maestros («Los planes»); las dos nacen en la migración
 `0035_planes.sql`:
 
-| | Gratis | Asador |
+| | Gratis | Maestro Parrillero |
 |---|---|---|
 | Precio al mes | $0 | $34.990, IVA incluido |
-| Cuentas conectadas | 3 | 15 |
-| Publicaciones esperando a la vez | 10 | sin tope |
-| Cámara de frío | 20 GB | 100 GB |
+| Cuentas conectadas | 7 | 15 |
+| Publicaciones esperando a la vez | 50 | sin tope |
+| Cámara de frío | 20 GB | 200 GB |
 | Tokens de IA al mes | 100.000 | 2.000.000 |
 | Prioridad en las colas | 0 | 1 |
 
@@ -2295,7 +2295,7 @@ sistema (`mobile/src/lib/subir-por-partes.ts` y `archivo-local.ts`).
 en `…/insumos/`), con un uuid en la clave, y su URL nunca sale al navegador: el chef lo baja con un
 enlace firmado que vence en una hora.
 
-**La cuota de la cámara.** La de su plan: 20 GB en el gratis y 100 GB en el pagado (ver «Los
+**La cuota de la cámara.** La de su plan: 20 GB en el gratis y 200 GB en el pagado (ver «Los
 planes»); el que tenga otra puesta a mano la lleva en `users.bodega_bytes`, que el admin cambia en Los
 Maestros y que gana sobre la del plan (`cuotaDeLaCamara`). Se mira en el servidor al
 abrir cada subida, antes de firmar nada, contando lo guardado **y lo que está subiendo**, con la

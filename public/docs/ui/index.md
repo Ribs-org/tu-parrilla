@@ -114,7 +114,8 @@ teléfono](app-movil.md).
    encienden y se apagan de a poco, en tonos de brasa—, la pantalla está cargando.
 6. **Si ve «Entra con tu correo»**, su sesión terminó (o nunca entró): tiene que pedir un
    código de nuevo ([ingresar.md](ingresar.md)).
-7. **Si no ve «Los Maestros» en Ajustes**, no es el admin: es lo esperado.
+7. **Si no ve «Los Maestros» en Ajustes**, no es el admin: es lo esperado. Tener el plan
+   «Maestro Parrillero», el pagado, no lo hace admin: es otra cosa con un nombre parecido.
 
 ## Qué quiere hacer → dónde se hace
 

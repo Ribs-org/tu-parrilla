@@ -9,7 +9,7 @@ import { CAMARA } from '@/lib/vocabulario'
 
 const deTope = (usado: number, tope: number | null) => (tope === null ? `${enMiles(usado)}, sin tope` : `${enMiles(usado)} de ${enMiles(tope)}`)
 
-/** Lo que trae un plan, en una frase: «15 cuentas, sin tope en la parrilla, 100 GB…». */
+/** Lo que trae un plan, en una frase: «15 cuentas, sin tope en la parrilla, 200 GB…». */
 function loQueTrae(plan: Plan, camara: { noche: string; dia: string }, conPrioridad: boolean) {
   const cuentas = plan.cuentasMax === null ? 'cuentas sin tope' : `${enMiles(plan.cuentasMax)} cuentas`
   const parrilla =
@@ -35,7 +35,7 @@ export function TuPlan({ uso, fecha }: { uso: UsoDelPlan; fecha: (d: Date) => st
         Tienes el plan <span className="font-semibold">{plan.nombre}</span>
         {plan.clave !== 'gratis' && persona.planHasta ? `, hasta el ${fecha(persona.planHasta)}` : ''}
         {plan.clave !== 'gratis' && persona.planOrigen === 'cortesia' ? ', de cortesía' : ''}.
-        {vencido && persona.planHasta ? ` Tu ${planes[persona.plan].nombre} terminó el ${fecha(persona.planHasta)}.` : ''}
+        {vencido && persona.planHasta ? ` Tu plan ${planes[persona.plan].nombre} terminó el ${fecha(persona.planHasta)}.` : ''}
       </p>
 
       <dl className="grid gap-x-6 gap-y-2 sm:grid-cols-[auto_1fr]">

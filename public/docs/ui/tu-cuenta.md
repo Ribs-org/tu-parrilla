@@ -38,11 +38,11 @@ Después, dos bloques.
 
 ### Bloque «Tu plan»
 
-- La frase con el plan que tiene: «Tienes el plan Gratis.», o «Tienes el plan Asador, de cortesía.»,
-  o «Tienes el plan Asador, hasta el <fecha>, de cortesía.» (con los nombres que tengan los planes).
-  Si su pagado ya terminó, después: «Tu Asador terminó el <fecha>.».
+- La frase con el plan que tiene: «Tienes el plan Gratis.», o «Tienes el plan Maestro Parrillero, de
+  cortesía.», o «Tienes el plan Maestro Parrillero, hasta el <fecha>, de cortesía.» (con los nombres que tengan los planes).
+  Si su pagado ya terminó, después: «Tu plan Maestro Parrillero terminó el <fecha>.».
 - Lo que lleva usado, cada cosa con su número:
-  - «Cuentas conectadas»: «2 de 3», o «2, sin tope»;
+  - «Cuentas conectadas»: «2 de 7», o «2, sin tope»;
   - «Esperando en la parrilla»: cuántas publicaciones esperan salir contra su tope, igual;
   - «La cámara de frío» (de día, «La nevera»): «3,1 GB de 20 GB»;
   - «Tokens de IA este mes»: «12.400 de 100.000», o «…, sin tope»;
@@ -50,8 +50,8 @@ Después, dos bloques.
 - La frase «Llegar a un tope no borra ni desconecta nada: lo que ya está sigue, y lo nuevo espera a
   que haya lugar. Los tokens se cuentan en los borradores de La Mesa y en «Sugiéreme una», y vuelven a
   cero cada mes.».
-- Solo en el gratis, un recuadro con lo que trae el pagado: «El plan Asador cuesta $34.990 al mes y
-  trae 15 cuentas, sin tope en la parrilla, 100 GB en la cámara de frío y 2.000.000 tokens de IA al
+- Solo en el gratis, un recuadro con lo que trae el pagado: «El plan Maestro Parrillero cuesta $34.990 al
+  mes y trae 15 cuentas, sin tope en la parrilla, 200 GB en la cámara de frío y 2.000.000 tokens de IA al
   mes, con prioridad en las colas. Por ahora lo da el equipo de Tu Parrilla.» (con lo que tenga hoy
   el pagado).
 

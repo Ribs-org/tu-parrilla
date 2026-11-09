@@ -22,21 +22,25 @@ Y al revisar la propuesta, el mismo día:
 - el pagado parte con **7 días de prueba**.
 
 La propuesta también traía un tope de cuentas conectadas y de publicaciones esperando en el
-gratis (3 y 10), que el dueño no objetó. Quedan como topes del plan, editables, y se pueden
-dejar sin tope desde el admin.
+gratis (3 y 10). Al revisar los PRs, el mismo día, el dueño los subió y le puso nombre al pagado:
+
+- el pagado se llama **«Maestro Parrillero»** y lleva **200 GB** en la cámara de frío;
+- el gratis conecta **7 cuentas** y deja **50 publicaciones** esperando a la vez.
+
+Son topes del plan, editables, y se pueden dejar sin tope desde el admin.
 
 ## Los dos planes
 
 Todo lo de esta tabla es una fila de la base y se cambia desde Los Maestros, sin tocar el
 código. Lo único fijo son las dos claves, `gratis` y `pagado`: el código sabe cuál se vende.
 
-| | Gratis | Asador (el pagado) |
+| | Gratis | Maestro Parrillero (el pagado) |
 |---|---|---|
 | Precio al mes | $0 | **$34.990**, IVA incluido |
 | Días de prueba | — | **7**, una vez por persona |
-| Cuentas conectadas | 3 | 15 |
-| Publicaciones esperando a la vez | 10 | sin tope |
-| Cámara de frío | 20 GB (lo de hoy) | 100 GB |
+| Cuentas conectadas | 7 | 15 |
+| Publicaciones esperando a la vez | 50 | sin tope |
+| Cámara de frío | 20 GB (lo de hoy) | 200 GB |
 | Tokens de IA al mes | 100.000 | 2.000.000 |
 | Prioridad en las colas | normal | primero |
 
@@ -44,15 +48,17 @@ Todo lo demás —La Parrilla, Los Números con su planilla, La Mesa con los bor
 clave, La Cocina, la API para tu agente, la página de links, la app del teléfono— está en los dos.
 
 **Por qué esos números.** La cámara de 20 GB es la de hoy: bajarla dejaría a la beta con más
-de lo que le cabe. 100 GB en R2 cuestan cerca de US$1,5 al mes. Un borrador de La Mesa son unos
+de lo que le cabe. 200 GB en R2 cuestan cerca de US$3 al mes. Un borrador de La Mesa son unos
 mil tokens con Claude Haiku (tope de 300 de salida), y «Sugiéreme una», hasta dos llamadas de 200:
 100.000 tokens son unos cien borradores al mes, y dos millones, unos dos mil, alrededor de US$3 de
 pasarela. Las 15 cuentas cuidan las cuotas que comparten todos, sobre todo la de YouTube, que es
 una sola para el proyecto.
 
-**El nombre.** «Asador» es quien está a cargo del asado: el que sabe. Es el nombre con que nace
-la fila y se cambia en el admin; el gratis se llama «Gratis». Son los nombres que ve la persona en
-«Tu plan» y en los avisos de los topes.
+**El nombre.** «Maestro Parrillero», el que eligió el dueño. Es el nombre con que nace la fila y
+se cambia en el admin; el gratis se llama «Gratis». No es lo mismo que «Los Maestros», la pantalla
+del admin: tener el plan no da acceso a ella. Donde la frase lo pide, el panel dice «el plan
+Maestro Parrillero» y no «el Maestro Parrillero», para que no se lea como una persona. Son los
+nombres que ve la persona en «Tu plan» y en los avisos de los topes.
 
 ## El modelo de datos
 
@@ -136,9 +142,9 @@ En Los Maestros, que ya es solo del admin, un bloque nuevo arriba, **«Los plane
 plan con su nombre, su precio, los días de prueba y cada tope, y «Guardar». Un tope vacío es sin
 tope.
 
-En la fila de cada persona, su plan: «Gratis», o «Asador · cortesía hasta el 8 dic» / «Asador ·
-cortesía» / «Asador · paga con Mercado Pago» (fase 2). Y un botón **«Plan»** que abre: el plan que
-rige, «Dar cortesía» —el pagado, hasta una fecha o sin fecha— y «Pasar al gratis». Lo que la
+En la fila de cada persona, su plan: «Gratis», o «Maestro Parrillero · cortesía hasta el 8 dic» /
+«Maestro Parrillero · cortesía» / «Maestro Parrillero · paga con Mercado Pago» (fase 2). Y un
+botón **«Plan»** que abre: el plan que rige, «Dar cortesía» —el pagado, hasta una fecha o sin fecha— y «Pasar al gratis». Lo que la
 persona paga no se toca desde acá: una cortesía sobre una suscripción viva no la cancela, y la
 fase 2 lo dice al lado.
 
@@ -148,7 +154,7 @@ Un bloque **«Tu plan»** debajo de «Tus datos»: el nombre del plan que rige y
 lleva usado de cada tope —«Cuentas conectadas: 2 de 3», «Esperando en la parrilla: 4 de 10», «La
 cámara de frío: 3,1 GB de 20 GB», «Tokens de IA este mes: 12.400 de 100.000»—, con el plan pagado
 al lado para comparar. En la fase 1 no tiene botones: el pagado lo da el admin. En la fase 2 suma
-«Pasar a Asador» y, con una suscripción, «Cancelar la suscripción».
+«Pasar a Maestro Parrillero» y, con una suscripción, «Cancelar la suscripción».
 
 ## El cobro con Mercado Pago (fase 2)
 
@@ -160,12 +166,12 @@ quién es sin adivinar por el correo.
 
 El flujo:
 
-1. En «Tu plan», **«Pasar a Asador»** pide el correo de la cuenta de Mercado Pago con que se va a
-   pagar, que nace con el de Tu Parrilla: Mercado Pago rechaza la autorización si `payer_email` no
+1. En «Tu plan», **«Pasar a Maestro Parrillero»** pide el correo de la cuenta de Mercado Pago con
+   que se va a pagar, que nace con el de Tu Parrilla: Mercado Pago rechaza la autorización si `payer_email` no
    es el de la cuenta que paga (lo reporta su SDK de Node, issue 421).
 2. El servidor crea la fila de `suscripciones` (`pendiente`) y la suscripción en Mercado Pago:
-   `reason` («Tu Parrilla — Asador»), `external_reference`, `payer_email`, `back_url` (Tu Cuenta),
-   `status: pending` y `auto_recurring` con `frequency: 1`, `frequency_type: months`,
+   `reason` («Tu Parrilla — Maestro Parrillero»), `external_reference`, `payer_email`, `back_url`
+   (Tu Cuenta), `status: pending` y `auto_recurring` con `frequency: 1`, `frequency_type: months`,
    `transaction_amount` (el precio del plan), `currency_id: CLP` y, si nunca usó la prueba,
    `free_trial: { frequency: 7, frequency_type: days }`. Redirige al `init_point`.
 3. La vuelta a Tu Cuenta lee la suscripción en Mercado Pago (`GET /preapproval/{id}`) y la deja al
@@ -190,7 +196,7 @@ El flujo:
 detalle, la fecha), para el admin y para la boleta.
 
 Variables: `MERCADOPAGO_ACCESS_TOKEN` y `MERCADOPAGO_WEBHOOK_SECRET`, y `PAGOS_ABIERTO_PARA` como
-las demás puertas del repo: mientras no diga `1`, «Pasar a Asador» se ve solo para esos ids. En
+las demás puertas del repo: mientras no diga `1`, «Pasar a Maestro Parrillero» se ve solo para esos ids. En
 Mercado Pago (Tus integraciones → Webhooks), la URL `https://tu-parrilla.cl/api/pagos/mercadopago`
 con el evento «Planes y suscripciones».
 

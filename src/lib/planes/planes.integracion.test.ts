@@ -50,21 +50,22 @@ describe.skipIf(!URL_PRUEBAS)('los planes, contra una Postgres de verdad', () =>
 
   it('la migración siembra los dos planes, y toda persona nace en el gratis', async () => {
     const planes = await leerPlanes()
-    expect(planes.gratis).toMatchObject({ nombre: 'Gratis', precioClp: 0, cuentasMax: 3, enLaParrillaMax: 10, prioridad: 0 })
-    expect(planes.pagado).toMatchObject({ nombre: 'Asador', precioClp: 34990, diasDePrueba: 7, enLaParrillaMax: null, prioridad: 1 })
+    expect(planes.gratis).toMatchObject({ nombre: 'Gratis', precioClp: 0, cuentasMax: 7, enLaParrillaMax: 50, prioridad: 0 })
+    expect(planes.pagado).toMatchObject({ nombre: 'Maestro Parrillero', precioClp: 34990, diasDePrueba: 7, enLaParrillaMax: null, prioridad: 1 })
     const ana = await persona()
     expect((await planDe(ana)).plan.clave).toBe('gratis')
   })
 
-  it('en la parrilla: diez esperando entran, la undécima no; una que sale a dos redes es una', async () => {
+  it('en la parrilla: las del tope esperando entran, la siguiente no; una que sale a dos redes es una', async () => {
+    const tope = (await leerPlanes()).gratis.enLaParrillaMax!
     const ana = await persona()
     const [a, b] = [await cuentaConectada(ana), await cuentaConectada(ana)]
     await crearVariosProgramados(ana, [post([a, b])], null)
-    for (let i = 0; i < 9; i++) await crearVariosProgramados(ana, [post([a])], null)
+    for (let i = 1; i < tope; i++) await crearVariosProgramados(ana, [post([a])], null)
     await expect(crearVariosProgramados(ana, [post([a])], null)).rejects.toBeInstanceOf(TopeDelPlan)
     // Una secuencia entera tampoco entra a medias.
     await expect(crearVariosProgramados(ana, [post([a]), post([a])], null)).rejects.toThrow(
-      'Tu plan Gratis deja hasta 10 publicaciones esperando a la vez',
+      `Tu plan Gratis deja hasta ${tope} publicaciones esperando a la vez`,
     )
   })
 
@@ -72,31 +73,32 @@ describe.skipIf(!URL_PRUEBAS)('los planes, contra una Postgres de verdad', () =>
     const { scheduledPostTargets } = await esquema()
     const [ana, bea] = [await persona(), await persona()]
     const [deAna, deBea] = [await cuentaConectada(ana), await cuentaConectada(bea)]
-    for (let i = 0; i < 10; i++) await crearVariosProgramados(bea, [post([deBea])], null)
+    const tope = (await leerPlanes()).gratis.enLaParrillaMax!
+    for (let i = 0; i < tope; i++) await crearVariosProgramados(bea, [post([deBea])], null)
     const ids = []
-    for (let i = 0; i < 10; i++) ids.push(...(await crearVariosProgramados(ana, [post([deAna])], null)))
+    for (let i = 0; i < tope; i++) ids.push(...(await crearVariosProgramados(ana, [post([deAna])], null)))
     // Sale una: deja lugar a otra.
     await (await db()).update(scheduledPostTargets).set({ status: 'published' }).where(eq(scheduledPostTargets.postId, ids[0]!))
     await expect(crearVariosProgramados(ana, [post([deAna])], null)).resolves.toHaveLength(1)
   })
 
-  it('las cuentas: tres conectadas entran, la cuarta no; renovar una conectada no suma', async () => {
+  it('las cuentas: las del tope conectadas entran, la siguiente no; renovar una conectada no suma', async () => {
+    const tope = (await leerPlanes()).gratis.cuentasMax!
     const ana = await persona()
     const primera = crypto.randomUUID()
     await conectar(ana, primera)
-    await conectar(ana)
-    await conectar(ana)
+    for (let i = 1; i < tope; i++) await conectar(ana)
     await expect(conectar(ana)).rejects.toBeInstanceOf(TopeDelPlan)
     await expect(conectar(ana, primera)).resolves.toBe('renovada')
   })
 
   it('las cuentas: reconectar una propia desconectada vuelve a sumar', async () => {
     const { socialAccounts } = await esquema()
+    const tope = (await leerPlanes()).gratis.cuentasMax!
     const ana = await persona()
     const primera = crypto.randomUUID()
     await conectar(ana, primera)
-    await conectar(ana)
-    await conectar(ana)
+    for (let i = 1; i < tope; i++) await conectar(ana)
     await (await db()).update(socialAccounts).set({ accessToken: null }).where(eq(socialAccounts.externalId, primera))
     await conectar(ana) // quedó lugar: entra otra
     await expect(conectar(ana, primera)).rejects.toBeInstanceOf(TopeDelPlan)
@@ -104,7 +106,7 @@ describe.skipIf(!URL_PRUEBAS)('los planes, contra una Postgres de verdad', () =>
 
   it('una cortesía sube los topes, y al vencer vuelve sola al gratis', async () => {
     const ana = await persona()
-    for (let i = 0; i < 3; i++) await conectar(ana)
+    for (let i = 0; i < (await leerPlanes()).gratis.cuentasMax!; i++) await conectar(ana)
     await darCortesia(ana, null)
     expect((await planDe(ana)).plan.clave).toBe('pagado')
     await expect(conectar(ana)).resolves.toBe('nueva')
