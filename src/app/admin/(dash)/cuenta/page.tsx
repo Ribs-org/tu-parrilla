@@ -1,13 +1,16 @@
 import Link from 'next/link'
 import { Panel } from '@/components/charts/panel'
 import { Encabezado } from '@/components/ui'
+import { leerAjuste } from '@/lib/ajustes'
 import { requireUser } from '@/lib/auth'
+import { CLAVE_CORREOS_DE_LA_COCINA, correosApagados } from '@/lib/cocina/correo-de-comanda'
 import { usoDelPlan } from '@/lib/planes/uso'
 import { mercadoPagoConfigurado } from '@/lib/pagos/mercadopago'
 import { alVolverDeMercadoPago, suscripcionVivaDe } from '@/lib/pagos/suscripciones'
 import { pagosAbiertosPara } from '@/lib/redes-abiertas'
 import { nombreDe } from '@/lib/vocabulario'
 import { horaEn, zonasDisponibles } from '@/lib/zona'
+import { CorreosDeLaCocina } from './correos-de-la-cocina'
 import { FormularioCuenta } from './formulario'
 import { TuPlan } from './tu-plan'
 
@@ -24,6 +27,7 @@ export default async function CuentaPage({
   if (vuelta) await alVolverDeMercadoPago(usuario.id)
   const uso = await usoDelPlan(usuario.id)
   const viva = await suscripcionVivaDe(usuario.id)
+  const correos = usuario.cocinaDesde ? await leerAjuste(usuario.id, CLAVE_CORREOS_DE_LA_COCINA) : null
   const FECHA = new Intl.DateTimeFormat('es-CL', { dateStyle: 'medium', timeZone: usuario.zona })
 
   return (
@@ -65,6 +69,12 @@ export default async function CuentaPage({
           }}
         />
       </Panel>
+      {/* Solo con la cocina: sin ella no hay comandas que avisen. */}
+      {usuario.cocinaDesde ? (
+        <Panel title="Los correos de La Cocina" className="mt-6">
+          <CorreosDeLaCocina encendidos={!correosApagados(correos)} />
+        </Panel>
+      ) : null}
     </>
   )
 }

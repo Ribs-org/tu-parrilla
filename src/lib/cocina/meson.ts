@@ -1,7 +1,8 @@
 import { and, asc, desc, eq, inArray, isNull } from 'drizzle-orm'
-import { borradorMedia, borradores, comandaEventos, comandas, creativoMedia, creativos, getDb, insumos, type EstadoCreativo } from '@/db'
+import { borradorMedia, borradores, comandaEventos, comandas, creativoMedia, creativos, getDb, insumos, type EntregaDeComanda, type EstadoComanda, type EstadoCreativo } from '@/db'
 import { borrar } from '@/lib/storage'
 import { DIAS_INSUMO } from './panel'
+import { entregaSinVer } from './tarjeta'
 
 // El mesón (de día, la bandeja): lo que el chef entregó y espera que el dueño lo programe o lo
 // descarte (`docs/superpowers/specs/2026-10-22-la-cocina-design.md`, «El mesón»). Se agrupa por
@@ -32,7 +33,17 @@ export type CreativoDelMeson = {
 }
 
 export type PiezaDelMeson = { pieza: string | null; creativos: CreativoDelMeson[] }
-export type ComandaEnElMeson = { id: string; principal: string | null; creadaEn: Date; piezas: PiezaDelMeson[] }
+export type ComandaEnElMeson = {
+  id: string
+  principal: string | null
+  creadaEn: Date
+  piezas: PiezaDelMeson[]
+  estado: EstadoComanda
+  tandasServidas: number
+  tandasTotal: number | null
+  /** La entrega que el dueño todavía no vio salir (`entregaSinVer`): el mesón la anima una vez. */
+  entrega: EntregaDeComanda | null
+}
 
 /**
  * Lo que hay en el mesón del dueño, de la comanda más nueva a la más vieja, y dentro de cada una
@@ -69,7 +80,7 @@ export async function mesonDelDueno(ownerId: string, comandaId?: string): Promis
     .orderBy(asc(creativoMedia.position))
   const ids = [...new Set(enMesa.map((c) => c.comandaId))]
   const filas = await db
-    .select({ id: comandas.id, creadaEn: comandas.creadaEn })
+    .select({ id: comandas.id, creadaEn: comandas.creadaEn, estado: comandas.estado, tandasServidas: comandas.tandasServidas, tandasTotal: comandas.tandasTotal, entregaVista: comandas.entregaVista })
     .from(comandas)
     .where(inArray(comandas.id, ids))
     .orderBy(desc(comandas.creadaEn))
@@ -107,6 +118,10 @@ export async function mesonDelDueno(ownerId: string, comandaId?: string): Promis
       principal: principales.find((p) => p.comandaId === c.id)?.nombre ?? null,
       creadaEn: c.creadaEn,
       piezas: [...piezas.values()],
+      estado: c.estado,
+      tandasServidas: c.tandasServidas,
+      tandasTotal: c.tandasTotal,
+      entrega: entregaSinVer(c.estado, c.entregaVista ?? null),
     }
   })
 }

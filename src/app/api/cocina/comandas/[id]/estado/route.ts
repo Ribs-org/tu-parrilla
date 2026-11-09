@@ -17,8 +17,9 @@ export const dynamic = 'force-dynamic'
  * Un cambio de estado de una comanda tomada, con su mensaje, su hora estimada y, al servir, sus
  * tandas («3 de 5»). La transición tiene que existir (`src/lib/cocina/estados.ts`).
  *
- * Si el cambio la terminó —lista, rechazada o fallida—, el correo al dueño sale después de
- * responder (`after`): el chef no espera a Resend, y un correo lento no lo hace reintentar.
+ * Si el cambio entregó —la primera tanda, o lista— o la terminó mal —rechazada o fallida—, el
+ * correo al dueño sale después de responder (`after`), con el `asunto` si el chef lo mandó: el
+ * chef no espera a Resend, y un correo lento no lo hace reintentar.
  */
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   if (!cocinaAutorizada(request)) return noAutorizado()
@@ -36,7 +37,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   }
   const c = r.comanda
   const aviso = r.aviso
-  if (aviso) after(() => avisarDeLaComanda(c.id, aviso))
+  const delCambio = {
+    asunto: cambio.asunto ?? null,
+    mensaje: c.mensaje,
+    tandas: { servidas: c.tandasServidas, total: c.tandasTotal },
+  }
+  if (aviso) after(() => avisarDeLaComanda(c.id, aviso, delCambio))
   return NextResponse.json({
     ok: true,
     id: c.id,

@@ -227,6 +227,56 @@ describe.skipIf(!URL_PRUEBAS)('la pestaña La Cocina, contra una Postgres de ver
     expect((await pulso()).vivas).toBe(0)
   })
 
+  it('la entrega sale una vez: la primera tanda y lista, cada una hasta que el dueño la ve, y solo la suya', async () => {
+    const { comandasDelDueno, pulsoDeLaCocina } = await import('./panel')
+    const { verEntregaPropia } = await import('@/app/admin/cocina-actions')
+    const { comandas } = await esquema()
+    const mia = await comanda(duena.id, { estado: 'sirviendo' })
+    const ajena = await comanda(otra.id, { estado: 'sirviendo' })
+    const entrega = async () => (await comandasDelDueno(duena.id)).find((c) => c.id === mia.id)!.entrega
+    const ahora = new Date()
+
+    expect(await entrega()).toBe('sirviendo')
+    const antes = await pulsoDeLaCocina(duena.id, ahora)
+
+    // La de otra no se toca con la sesión de la dueña, y lo que llega se valida.
+    quien = duena
+    await verEntregaPropia(ajena.id, 'sirviendo')
+    expect((await comandasDelDueno(otra.id))[0]!.entrega).toBe('sirviendo')
+    await verEntregaPropia(mia.id, 'cualquiera')
+    await verEntregaPropia('no-es-un-id', 'sirviendo')
+    expect(await entrega()).toBe('sirviendo')
+    // Ver una entrega que no es la de ahora no anota nada: la comanda ya está en otra.
+    await verEntregaPropia(mia.id, 'lista')
+    expect(await entrega()).toBe('sirviendo')
+
+    await verEntregaPropia(mia.id, 'sirviendo')
+    expect(await entrega()).toBeNull()
+    // No es un cambio de la comanda: la vigía no recarga por esto.
+    expect((await pulsoDeLaCocina(duena.id, ahora)).firma).toBe(antes.firma)
+
+    // Queda lista: es otra entrega, y sale aunque ya vio la primera tanda.
+    await (await db()).update(comandas).set({ estado: 'lista' }).where(eq(comandas.id, mia.id))
+    expect(await entrega()).toBe('lista')
+    await verEntregaPropia(mia.id, 'lista')
+    expect(await entrega()).toBeNull()
+  })
+
+  it('los correos de La Cocina: apagarlos deja la fila de la dueña, encenderlos la borra', async () => {
+    const { guardarCorreosDeLaCocina } = await import('@/app/admin/cocina-actions')
+    const { leerAjuste } = await import('@/lib/ajustes')
+    quien = duena
+    expect(await leerAjuste(duena.id, 'cocina_correos')).toBeNull()
+    await guardarCorreosDeLaCocina(false)
+    expect(await leerAjuste(duena.id, 'cocina_correos')).toBe('apagados')
+    expect(await leerAjuste(otra.id, 'cocina_correos')).toBeNull()
+    // Lo que no es `true` no los enciende.
+    await guardarCorreosDeLaCocina('true')
+    expect(await leerAjuste(duena.id, 'cocina_correos')).toBe('apagados')
+    await guardarCorreosDeLaCocina(true)
+    expect(await leerAjuste(duena.id, 'cocina_correos')).toBeNull()
+  })
+
   it('encender y apagar la cocina de alguien: solo el admin', async () => {
     const { encenderCocina } = await import('@/app/admin/actions')
     const { users } = await esquema()

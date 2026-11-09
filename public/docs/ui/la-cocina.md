@@ -78,6 +78,8 @@ comandas.». Con comandas, una tarjeta por comanda, de la más nueva a la más v
 - a la izquierda, un cuadro con su estación: un dibujo que cambia según en qué va la comanda y
   que, mientras el chef trabaja, se mueve (ver «La estación de cada comanda», abajo). Es solo un
   dibujo: no se aprieta;
+- solo la primera vez que se ve una entrega, arriba de todo, en anaranjado y mayúsculas: «Salió la
+  primera tanda» o «Recién salida de la cocina» (ver «La entrega», abajo);
 - arriba, el nombre del archivo del plato principal (por ejemplo, «video9.mp4»), o «Comanda sin
   plato principal», y a la derecha «pedida <fecha y hora>»;
 - el estado, en palabras (la tabla de abajo). Una comanda rechazada o que no se pudo terminar
@@ -144,11 +146,19 @@ recargar la página: el estado, la estación, el recorrido, el mensaje del chef,
 volver a ella mira de inmediato. Con todas listas, servidas o terminadas, deja de mirar y se va
 «Se actualiza sola».
 
-**Llega un correo cuando termina.** Al quedar «Lista en el mesón», el dueño recibe un correo con
-cuántos cortes quedaron en el mesón y el enlace para verlos; al quedar «No se puede cocinar» o «No
-se pudo terminar», uno con el motivo del chef. Llega uno por comanda, al correo con que entra al
-panel, en su modo (de día, «Lista en la bandeja»). «Servida» y «Cancelada» no mandan correo: las
-hace la persona.
+**Llega un correo cuando el chef entrega y cuando termina**, al correo con que entra al panel y en
+su modo (de día, la bandeja y las piezas):
+
+- la primera vez que pasa a «Sirviendo», con el asunto «Salió la primera tanda: «<plato
+  principal>»»: cuántos cortes ya están en el mesón, el «1 de 5», lo que dijo el chef («El chef:
+  «…»», si dijo algo) y el enlace al mesón. Las tandas que siguen no mandan otro;
+- al quedar «Lista en el mesón», con ese asunto: cuántos cortes quedaron en el mesón, lo que dijo el
+  chef y el enlace para verlos;
+- al quedar «No se puede cocinar» o «No se pudo terminar», con ese asunto: el motivo del chef.
+
+El chef puede ponerle otro asunto; lo de adentro es igual. Cada correo termina con «Si no quieres
+estos correos, apágalos en Tu Cuenta: <enlace>»: se apagan en Tu Cuenta, «Los correos de La Cocina»
+([tu-cuenta.md](tu-cuenta.md)). «Servida» y «Cancelada» no mandan correo: las hace la persona.
 
 **Y uno cuando el chef pregunta.** Con el asunto «El chef te pregunta: «<plato principal>»» (o «…:
 tu comanda»): la pregunta, «Las opciones: «…», «…».» si las hay, el plazo con lo que pasa si nadie
@@ -175,6 +185,26 @@ Con el movimiento reducido del sistema (la opción de accesibilidad «Reducir mo
 teléfono o el computador), nada se mueve: cada estación queda quieta en un cuadro que dice lo
 mismo —la comanda colgada, la lupa sobre la carne, la parrilla prendida, el corte ya en la tabla—,
 y el punto de «Se actualiza sola» deja de latir. La tarjeta se sigue actualizando igual.
+
+### La entrega
+
+La primera vez que la persona ve una comanda que pasó a «Sirviendo» (llegó la primera tanda) o a
+«Lista en el mesón», el plato sale de la cocina, unos tres segundos: la estación entra desde la
+izquierda; de noche, una campana de acero que tapa la tabla se levanta y sube el humo; de día, se
+abre una cortina azul de dos paños y una luz cruza la bandeja. Mientras, el borde de la tarjeta se
+enciende en anaranjado y se apaga. Arriba del nombre queda «Salió la primera tanda» (al servir) o
+«Recién salida de la cocina» (lista) mientras no se recargue la página.
+
+Pasa **una sola vez por entrega**, y no una vez por equipo: si la vio en el computador, no la vuelve
+a ver en otro ni al volver. Son dos entregas distintas: quien vio salir la primera tanda la ve salir
+otra vez cuando la comanda queda lista. Si la comanda llega a la pantalla mientras está abierta (la
+tarjeta se actualiza sola), sale en ese momento; con la pestaña en segundo plano espera a que se
+mire. Si la persona entra directo al mesón —por el enlace del correo—, sale allá (ver «El mesón»), y
+en La Cocina ya no.
+
+Con «Reducir movimiento» no se mueve nada: la tarjeta queda con el borde anaranjado un momento y
+la frase arriba. La app del teléfono no la muestra, y lo que se mira en el teléfono no cuenta como
+visto.
 
 ### La escena
 
@@ -323,7 +353,11 @@ Parrilla, con sus cuentas y su hora por elegir.» y el enlace «Ver los borrador
 
 Sin nada, «Todavía no hay nada en el mesón.» (de día, «… en la bandeja.»). Con algo, un bloque por
 comanda, de la más nueva a la más vieja, con el nombre del plato principal de título y «Pedida el
-<fecha>» debajo. Adentro, lo entregado por pieza: «Pieza «<pieza>» · <N> estilos» y sus versiones
+<fecha>» debajo. Si es una entrega que la persona todavía no vio (no pasó por La Cocina desde que
+llegó, por ejemplo porque entró por el correo), arriba del bloque sale la estación de la comanda con
+la animación de la entrega, «Salió la primera tanda» o «Recién salida de la cocina» y el estado en
+palabras («Sirviendo: 1 de 5 tandas en el mesón», «Lista en el mesón: 12 cortes»); ver «La
+entrega». Al volver al mesón ya no está. Adentro, lo entregado por pieza: «Pieza «<pieza>» · <N> estilos» y sus versiones
 una al lado de la otra (en el teléfono, de a dos). Cada creativo es una tarjeta:
 
 - el video, que se reproduce ahí mismo, con su portada antes de darle play; o la primera lámina
@@ -525,7 +559,8 @@ No se deshace: los archivos se borran.
 En «El chef de la casa», buscar su tarjeta por el nombre del plato principal. El estado dice en
 qué va, la estación y el recorrido lo muestran, y «Lo que pasó» cuenta cada paso con su hora. No
 hace falta recargar: mientras la pestaña esté a la vista, la tarjeta se pone al día sola en unos
-segundos. Cuando termina, llega un correo.
+segundos. Cuando sale la primera tanda y cuando termina, llega un correo (si no se apagaron en Tu
+Cuenta).
 
 ### Para contestarle al chef
 
@@ -666,12 +701,23 @@ Al final de la pantalla, «El manual del parrillero →». Adentro, elegir la p�
   cancelarla y pedirla de nuevo.
 - **«¿Dónde quedó “Qué destacar o qué evitar”?».** Desde el 2026-11-02 es «4. Tu instrucción al
   chef», su propio bloque.
-- **«¿Me avisan cuando esté lista?».** Sí: llega un correo cuando queda lista en el mesón, y
-  también si el chef la rechaza o no la pudo terminar. Mientras tanto, la tarjeta se actualiza
-  sola. Si no llegó, mirar la carpeta de spam; la tarjeta dice el estado igual.
+- **«¿Me avisan cuando esté lista?».** Sí: llega un correo cuando sale la primera tanda, otro
+  cuando queda lista en el mesón, y uno si el chef la rechaza o no la pudo terminar. Mientras
+  tanto, la tarjeta se actualiza sola. Si no llegó, mirar la carpeta de spam y que no estén
+  apagados en Tu Cuenta, «Los correos de La Cocina»; la tarjeta dice el estado igual.
+- **«No quiero esos correos» / «Me llegan demasiados correos de la cocina».** Se apagan en Tu
+  Cuenta (botón «Ajustes» → «Tu Cuenta»), bloque «Los correos de La Cocina»: apagar «Avisarme por
+  correo cuando el chef entrega» ([tu-cuenta.md](tu-cuenta.md)). El enlace del final de cada correo
+  lleva ahí. El de una pregunta del chef sigue llegando.
+- **«El plato salió de la cocina» / «¿Qué fue esa animación?».** Es la entrega: la primera vez que
+  se ve la primera tanda o la comanda lista, el plato sale una vez (ver «La entrega»).
+- **«Quiero ver la animación de nuevo» / «No alcancé a verla».** No se repite: sale una vez por
+  entrega, aunque se recargue o se abra en otro equipo. La siguiente sale cuando la comanda quede
+  lista. Lo que trajo está en el mesón igual.
 - **«La animación no se mueve».** Con «Reducir movimiento» activado en el sistema, las estaciones
-  quedan quietas a propósito. Una comanda lista, servida o terminada tampoco se mueve: no hay
-  nada en marcha.
+  quedan quietas a propósito, y la entrega no sale: queda el borde anaranjado y la frase. Una
+  comanda servida o terminada tampoco se mueve: no hay nada en marcha; una lista solo humea (de
+  día, una luz cruza la bandeja).
 - **«¿Puedo pedir desde la app del teléfono?».** Sí, desde la versión 1.2.0: la pestaña «La
   Cocina» de la app graba un video (o saca una foto, o elige de la galería), lo guarda en la cámara
   de frío y pide la comanda con las mismas opciones que «Pedir una comanda» —qué es el plato
@@ -741,8 +787,10 @@ Al final de la pantalla, «El manual del parrillero →». Adentro, elegir la p�
 - No elige estilos: en esta fase los elige el chef.
 - El mesón es del panel: la app del teléfono pide, sigue, contesta y cancela, pero no programa ni
   descarta lo que entregó el chef ([app-movil.md](app-movil.md)).
-- No avisa por correo cada paso: solo cuando la comanda termina (lista, rechazada o que no se
-  pudo terminar) y cuando el chef pregunta.
+- No avisa por correo cada paso: solo cuando sale la primera tanda, cuando la comanda termina
+  (lista, rechazada o que no se pudo terminar) y cuando el chef pregunta. Los correos no se
+  apagan desde acá: es en Tu Cuenta.
+- No repite la animación de una entrega ya vista.
 - No cambia una respuesta ya mandada al chef, ni deja preguntarle algo al chef: pregunta él.
 - No cambia la instrucción al chef de una comanda ya colgada.
 - No vuelve a mostrar una llave ya generada, no permite renombrarla y no limita lo que puede
@@ -773,8 +821,11 @@ Sale de:
   se mueve en cada estado; sus movimientos y su versión quieta están en `src/app/globals.css`.
 - `src/app/admin/(dash)/ia/vigia.tsx` y `src/app/api/admin/cocina/pulso/route.ts`: «Se actualiza
   sola», cada cuánto mira y cuándo deja de mirar.
-- `src/lib/cocina/correo-de-comanda.ts`: el correo cuando la comanda termina y cuando el chef
-  pregunta, su asunto y su texto.
+- `src/app/admin/(dash)/ia/entrega-del-plato.tsx`: la entrega, la campana y la cortina, «Salió la
+  primera tanda» y «Recién salida de la cocina», y cuándo sale; sus movimientos y su versión quieta
+  están en `src/app/globals.css`. Qué entrega falta ver, `entregaSinVer` en `src/lib/cocina/tarjeta.ts`.
+- `src/lib/cocina/correo-de-comanda.ts`: el correo de la primera tanda, cuando la comanda termina y
+  cuando el chef pregunta, su asunto, su texto y el enlace a Tu Cuenta para apagarlos.
 - `src/app/admin/(dash)/ia/cancelar.tsx`, `src/app/admin/cocina-actions.ts` y `src/lib/cocina/del-dueno.ts`: «Cancelar la
   comanda», su pregunta y sus mensajes, y lo que hace «Colgar la comanda».
 - `src/app/admin/(dash)/ia/pedir/page.tsx` y `src/app/admin/(dash)/ia/pedir/formulario.tsx`:

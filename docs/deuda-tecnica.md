@@ -633,7 +633,8 @@ puede bajarla.
 
 ## El correo de la comanda no se reintenta (2026-11-02)
 
-Cuando el chef deja una comanda lista, rechazada o fallida, el dueño recibe un correo
+Cuando el chef sirve la primera tanda de una comanda, o la deja lista, rechazada o fallida, el
+dueño recibe un correo
 (`src/lib/cocina/avisar.ts`). Que salga uno solo lo garantiza la escritura del cambio: la
 condición sobre el estado anterior deja escribir a una sola petición, y solo esa lo pide. No
 hay nada guardado que diga «este correo salió», y eso tiene un costo: si Resend falla, o la

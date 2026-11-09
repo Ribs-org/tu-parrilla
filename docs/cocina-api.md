@@ -11,7 +11,8 @@ entrega solo se está escribiendo (VicentePareja/marca-personal#22), y lo que ne
 - el admin le enciende la cocina a una cuenta en Los Maestros;
 - el usuario guarda su material en bruto en la cámara de frío de La Cocina (la bodega), y pide
   eligiendo de ahí: el mismo material sirve para varias comandas;
-- sigue su comanda en La Cocina;
+- sigue su comanda en La Cocina, y la primera vez que mira una entrega —la primera tanda o la
+  comanda lista— la ve salir de la cocina, una animación corta (desde el 2026-11-08);
 - contesta lo que el chef le pregunta, en La Cocina del panel o del teléfono (desde el 2026-11-06);
 - lo que el chef entrega espera en el mesón, donde el usuario lo programa o lo descarta.
 
@@ -272,13 +273,22 @@ Responde `{ "url": "<GET firmado>", "vence": "<ISO>" }`.
 {
   "estado": "sirviendo",
   "mensaje": "Salió la tanda base",
+  "asunto": "Tu primera tanda está en el mesón",
   "eta": "2026-10-23T14:00:00-03:00",
   "tandas": { "servidas": 1, "total": 5 }
 }
 ```
 
 - `estado` es obligatorio. Lo demás es opcional:
-  - `mensaje`: lo que el usuario lee en la línea de tiempo, hasta 500 caracteres.
+  - `mensaje`: lo que el usuario lee en la línea de tiempo, hasta 500 caracteres. En un cambio que
+    entrega —la primera tanda o `lista`— va también en el correo (abajo).
+  - `asunto`: el asunto del correo que dispara este cambio, en vez del de siempre. Va en una sola
+    línea: los saltos, los tabuladores y los demás caracteres de control pasan a ser un espacio, los
+    que invierten la dirección del texto se sacan, los espacios seguidos quedan en uno y los de los
+    bordes se van. Ya saneado, hasta **120 caracteres**; si pasa, o no es texto, `400` con
+    `«asunto» es un texto de hasta 120 caracteres, o null.` y el cambio no se hace. Vacío o `null`
+    es el de siempre. En un cambio que no manda correo no hace nada. Es el `--asunto` que el equipo
+    de contenido pidió para `pipeline.cocina estado` (#284).
   - `eta`: la hora estimada de entrega, en ISO **con su zona**, o `null`. Una hora sin zona da
     `400` con `«eta» tiene que ser una fecha ISO con su zona, o null.`
   - `tandas`: el «3 de 5», con `servidas` y `total` enteros desde 0 (`total` puede ser `null` si
@@ -292,12 +302,32 @@ Responde `{ "url": "<GET firmado>", "vence": "<ISO>" }`.
 | `409` `Esa comanda todavía no está tomada: tómala primero.` | Sigue en `recibida` |
 | `409` `Esa comanda ya terminó: no recibe más cambios.` | Está terminada: servida, rechazada, cancelada o fallida |
 | `400` `Al rechazarla o darla por fallida, di por qué en «motivo»: el usuario lo lee.` | Falta el motivo |
+| `400` `«asunto» es un texto de hasta 120 caracteres, o null.` | El `asunto` no es texto, o saneado pasa de 120 |
 
-**El correo al dueño.** Cuando un cambio deja la comanda `lista`, `rechazada` o `fallida`, Tu
-Parrilla le manda un correo al dueño después de responder: lista, con lo que quedó en el mesón y
-el enlace; rechazada o fallida, con el `motivo`. Sale una vez por cambio: lo manda solo la
-petición que escribió la transición, así que un reintento —que recibe `409`— o dos peticiones
+**El correo al dueño.** Tu Parrilla le manda un correo al dueño después de responder cuando un
+cambio:
+
+- **entra a `sirviendo`**, la primera tanda: «Salió la primera tanda: «<archivo>»», con lo que ya
+  está en el mesón, el «1 de 5» y el enlace. Las tandas que siguen —de `sirviendo` a `sirviendo`—
+  no mandan otro;
+- **deja la comanda `lista`**: «Lista en el mesón: «<archivo>»», con lo que quedó en el mesón y el
+  enlace;
+- **la deja `rechazada` o `fallida`**: con el `motivo`.
+
+Los de una entrega —la primera tanda y lista— llevan el `mensaje` de ese cambio como «El chef:
+«…»»: escríbelo para que se lea solo, en un correo, y no como un paso más de la línea de tiempo.
+Con `asunto`, el correo lleva ese asunto en vez del de siempre; el cuerpo no cambia, y el aviso
+al teléfono tampoco.
+
+Sale una vez por cambio: lo manda solo la petición que escribió la transición, así que un
+reintento —que recibe `409`, o `200` sin correo si es otra vuelta a `sirviendo`— o dos peticiones
 iguales a la vez no mandan otro. Por eso el `motivo` tiene que poder leerse solo, en un correo.
+
+El aviso sale cuando el chef cambia el estado: no hay una aprobación de por medio (se decidió el
+2026-11-08, al cerrar #283). **El dueño puede apagar estos correos** en su panel (Tu Cuenta, «Los
+correos de La Cocina»); entonces no sale el correo, y todo lo demás sigue igual: el cambio, la
+respuesta al chef, la tarjeta y el aviso al teléfono. El correo de una pregunta no se apaga, porque
+la comanda espera la respuesta.
 
 ### `POST /api/cocina/comandas/{id}/preguntas`
 
@@ -500,7 +530,7 @@ curl -s -X POST "$COCINA/creativos/<creativo>/listo" -H "$AUTH"
 
 # 6. Al servir cada tanda, y al terminar
 curl -s -X POST "$COCINA/comandas/<id>/estado" -H "$AUTH" -d '{"estado":"sirviendo","tandas":{"servidas":1,"total":5}}'
-curl -s -X POST "$COCINA/comandas/<id>/estado" -H "$AUTH" -d '{"estado":"lista","tandas":{"servidas":5,"total":5}}'
+curl -s -X POST "$COCINA/comandas/<id>/estado" -H "$AUTH" -d '{"estado":"lista","mensaje":"Aquí su pedido","asunto":"Tu comanda está lista","tandas":{"servidas":5,"total":5}}'
 ```
 
 ## La red de seguridad
