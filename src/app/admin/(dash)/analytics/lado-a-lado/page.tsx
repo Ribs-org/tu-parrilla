@@ -8,7 +8,7 @@ import { NombreDe } from '@/components/de-noche-y-de-dia'
 import { InterruptorEnUrl, RangoBar, SelectorEnUrl } from '@/components/filter-bar'
 import { requireUser } from '@/lib/auth'
 import { parseFilters } from '@/lib/filters'
-import { DIAS_A_IGUAL_EDAD, cierreDe, contraSuCuenta } from '@/lib/igual-edad'
+import { DIAS_A_IGUAL_EDAD, HORAS_A_EDAD_TEMPRANA, cierreDe } from '@/lib/igual-edad'
 import { DIAS_DE_LA_CURVA, PORTADAS_POR_LADO, atributosLadoALado, curvaLadoALado, idPedido } from '@/lib/lado-a-lado'
 import {
   METRICAS,
@@ -18,6 +18,7 @@ import {
   PERCENTIL_POR_DEFECTO,
   esMetrica,
   leerPercentil,
+  relativosDe,
   tajada,
 } from '@/lib/mejores'
 import { networkLabel } from '@/lib/networks'
@@ -63,6 +64,7 @@ function Ficha({
   fila,
   cuenta,
   relativo,
+  relativo48h,
   puesto,
   pieza,
 }: {
@@ -72,6 +74,8 @@ function Ficha({
   cuenta: CuentaRow | undefined
   /** Su «contra su cuenta», o null si no se sabe. */
   relativo: number | null
+  /** Lo mismo a las 48 horas. */
+  relativo48h: number | null
   /** Dónde quedó: en qué tajada y en qué puesto. */
   puesto: string
   /** El link a su pieza, con la vuelta a esta pantalla. */
@@ -80,6 +84,8 @@ function Ficha({
   const numeros = [
     { nombre: 'Contra su cuenta', valor: veces(relativo) },
     { nombre: `Views a los ${DIAS_A_IGUAL_EDAD} días`, valor: conteo(fila.viewsA7Dias) },
+    { nombre: `Contra su cuenta a las ${HORAS_A_EDAD_TEMPRANA} horas`, valor: veces(relativo48h) },
+    { nombre: `Views a las ${HORAS_A_EDAD_TEMPRANA} horas`, valor: conteo(fila.viewsA48h) },
     { nombre: 'Views ganadas', valor: conteo(fila.viewsChange) },
     { nombre: 'Views en total', valor: conteo(fila.views) },
     { nombre: 'Visitas a tu página', valor: conteo(fila.visits) },
@@ -181,6 +187,7 @@ export default async function LadoALadoPage({ searchParams }: { searchParams: Pr
     publishedTo: filters.to,
     limit: MAX_PUBLICACIONES_LEIDAS,
     aLos7Dias: true,
+    aLas48Horas: true,
     ...(cuenta ? { accountId: cuenta.id } : {}),
   })
   const atributosDe = await attributesFor(ownerId, filas)
@@ -188,7 +195,7 @@ export default async function LadoALadoPage({ searchParams }: { searchParams: Pr
   const opciones = { conRecientes, cierre: cierreDe(filters.to) }
   const arriba = tajada(entradas, metrica, percentil, zona, { ...opciones, lado: 'mejor' })
   const abajo = tajada(entradas, metrica, percentil, zona, { ...opciones, lado: 'peor' })
-  const relativos = contraSuCuenta(filas)
+  const relativos = relativosDe(filas)
 
   // A y B pueden venir de fuera del período (desde una pieza vieja): se leen por su id.
   const deId = new Map(filas.map((f) => [f.id, f]))
@@ -197,7 +204,7 @@ export default async function LadoALadoPage({ searchParams }: { searchParams: Pr
   const faltan = [pedidaA, pedidaB].filter((id): id is string => id !== null && !deId.has(id))
   const extra =
     faltan.length > 0
-      ? await getPostRows({ ...filters, profileId: null, includeBots: false }, true, { ids: faltan, aLos7Dias: true })
+      ? await getPostRows({ ...filters, profileId: null, includeBots: false }, true, { ids: faltan, aLos7Dias: true, aLas48Horas: true })
       : []
   for (const fila of extra) deId.set(fila.id, fila)
   const atributosExtra = extra.length > 0 ? await attributesFor(ownerId, extra) : new Map<string, Atributos>()
@@ -341,7 +348,8 @@ export default async function LadoALadoPage({ searchParams }: { searchParams: Pr
                 color={lado.color}
                 fila={lado.fila}
                 cuenta={deQuien.get(lado.fila.accountId)}
-                relativo={relativos.get(lado.fila.id) ?? null}
+                relativo={relativos.aLos7Dias.get(lado.fila.id) ?? null}
+                relativo48h={relativos.a48h.get(lado.fila.id) ?? null}
                 puesto={puesto(lado.fila)}
                 pieza={numerosHref(`/admin/analytics/publicaciones/${lado.fila.id}`, params, { de: 'lado' })}
               />

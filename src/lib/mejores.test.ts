@@ -31,6 +31,7 @@ function fila(overrides: Partial<PostRow>): PostRow {
     views: null,
     viewsChange: null,
     viewsA7Dias: null,
+    viewsA48h: null,
     likesChange: null,
     commentsChange: null,
     sharesChange: null,
@@ -272,6 +273,44 @@ describe('tajada: a igual edad', () => {
     const r = tajada(entradas, 'contraSuCuenta', 10, ZONA)
     expect(r.compiten).toBe(0)
     expect(r.grupo).toEqual([])
+  })
+})
+
+describe('tajada: a las 48 horas', () => {
+  it('views a las 48 horas: un null no compite, aunque tenga su lectura de los 7 días', () => {
+    const entradas = [
+      { fila: fila({ id: 'con', viewsA48h: 800 }), atributos: null },
+      { fila: fila({ id: 'sin', viewsA48h: null, viewsA7Dias: 99_000 }), atributos: null },
+    ]
+    const r = tajada(entradas, 'viewsA48h', 50, ZONA)
+    expect(r.compiten).toBe(1)
+    expect(r.grupo.map((m) => m.fila.id)).toEqual(['con'])
+    expect(r.medianas.grupo.viewsA48h).toBe(800)
+  })
+
+  it('contra su cuenta a las 48 horas: cada cuenta contra lo suyo a esa edad', () => {
+    const de = (cuenta: string, id: string, views: number): Entrada => ({
+      fila: fila({ id, accountId: cuenta, viewsA48h: views }),
+      atributos: null,
+    })
+    const entradas = [
+      de('chica', 'c-triple', 300),
+      ...['c1', 'c2', 'c3', 'c4'].map((id) => de('chica', id, 100)),
+      de('grande', 'g-doble', 20_000),
+      ...['g1', 'g2', 'g3', 'g4'].map((id) => de('grande', id, 10_000)),
+    ]
+    const r = tajada(entradas, 'contraSuCuenta48h', 10, ZONA)
+    expect(r.grupo.map((m) => [m.fila.id, m.valor])).toEqual([['c-triple', 3]])
+    expect(r.medianas.grupo.contraSuCuenta48h).toBe(3)
+    // Sin lectura de los 7 días, «contra su cuenta» de siempre no se sabe.
+    expect(r.medianas.grupo.contraSuCuenta).toBeNull()
+  })
+
+  it('a igual edad: el interruptor de las recientes no le aplica', () => {
+    const entradas = [{ fila: fila({ id: 'a48', viewsA48h: 300, publishedAt: new Date('2026-08-09T12:00:00Z') }), atributos: null }]
+    const r = tajada(entradas, 'viewsA48h', 10, ZONA, { conRecientes: false, cierre: new Date('2026-08-10T12:00:00Z') })
+    expect(r.compiten).toBe(1)
+    expect(r.fueraPorRecientes).toBe(0)
   })
 })
 

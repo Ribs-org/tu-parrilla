@@ -627,6 +627,30 @@ describe('aislamiento por dueño (SQL generado, sin base)', () => {
     expect(aLos7Dias.params).toContain('post-1')
   })
 
+  it('posts: con las dos edades, cada consulta de más va por el id que ya filtró la primera', async () => {
+    const consultas = await consultasEncadenadas(
+      () =>
+        getPostRows(
+          {
+            ownerId: DUENO,
+            zone: 'America/Santiago',
+            profileId: null,
+            from: new Date('2026-01-01'),
+            to: new Date('2026-01-31'),
+            includeBots: true,
+          },
+          false,
+          { aLos7Dias: true, aLas48Horas: true },
+        ),
+      [[filaPost], [], [], [], [], [], [], []],
+    )
+    expect(consultas).toHaveLength(8)
+    for (const aUnaEdad of [consultas[3]!, consultas[4]!]) {
+      expect(aUnaEdad.sql).toMatch(/captured_at/)
+      expect(aUnaEdad.params).toContain('post-1')
+    }
+  })
+
   it('posts: getLecturasDe ata sus lecturas al dueño por el post, aunque los ids vengan de la URL', async () => {
     const consultas = await todasLasConsultas(() => getLecturasDe(DUENO, ['post-1', 'post-ajeno']))
     expect(consultas).toHaveLength(1)

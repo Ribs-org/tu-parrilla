@@ -623,7 +623,10 @@ Tres endpoints de lectura, con la misma llave. El detalle de cada número está 
   hasta los tres meses, cada cuatro después), así que pueden ir hasta esas semanas atrás.
   Dos métricas comparan a la misma edad: `viewsA7Dias`, el contador una semana después de
   publicar, y `contraSuCuenta`, eso dividido por la mediana de su cuenta en el rango (`2` es
-  el doble de lo normal de esa cuenta). Lo de los últimos 7 días todavía no las tiene.
+  el doble de lo normal de esa cuenta). Lo de los últimos 7 días todavía no las tiene. Lo
+  mismo a los 2 días: `viewsA48h` (la primera lectura entre las 48 y las 72 horas) y
+  `contraSuCuenta48h`, para decidir antes; lo de las últimas 48 horas todavía no las tiene, y
+  una que se quedó sin esa lectura viene `null`, nunca `0`.
 - `GET /api/metrics/mejores?desde=…&hasta=…&metrica=viewsGanadas&percentil=10` — el mejor X %
   de lo publicado en el rango: `corte` (lo que había que sacar para entrar), `compiten`,
   `mejores` (filas como las de arriba, con `puesto` y `valor`), `medianas` de arriba contra
@@ -662,11 +665,13 @@ Tres endpoints de lectura, con la misma llave. El detalle de cada número está 
 
 Filtros que valen en los tres: `red`, y `cuenta` —su `id` (el de la sección 3d) o su nombre en
 la red, con o sin «@»—. Para «el mejor 10 % de esta cuenta», pasa `cuenta`: sin ella, la cuenta más grande
-llena la tajada de arriba, salvo con `metrica=contraSuCuenta`, que mide a cada una contra lo
-suyo. Solo de `mejores`:
+llena la tajada de arriba, salvo con `metrica=contraSuCuenta` (o `contraSuCuenta48h`), que
+mide a cada una contra lo suyo. Solo de `mejores`:
 
-- `metrica`: `viewsGanadas` (por defecto), `contraSuCuenta`, `viewsA7Dias`, `visitas`,
-  `clicks`, `interacciones` o `arrastre`.
+- `metrica`: `viewsGanadas` (por defecto), `contraSuCuenta`, `viewsA7Dias`,
+  `contraSuCuenta48h`, `viewsA48h`, `visitas`, `clicks`, `interacciones` o `arrastre`. Las
+  cuatro primeras son a igual edad. El mejor 10 % de una cuenta a los 2 días:
+  `?cuenta=…&metrica=contraSuCuenta48h&percentil=10`.
 - `percentil`: un entero de 1 a 50 (por defecto 10).
 - `lado`: `mejor` (por defecto) o `peor`.
 - `recientes`: `si` (por defecto) o `no`. Con `no`, en las métricas que no son a igual edad
@@ -681,7 +686,7 @@ Frases de error (`400`):
 | `Red desconocida: <valor>.` | `red` que no es una de las seis |
 | `Cuenta desconocida: <valor>.` | ninguna cuenta del dueño tiene ese id ni ese nombre |
 | `Hay más de una cuenta llamada <valor>: usa su id, o agrega red=.` | el nombre se repite en dos redes |
-| `La métrica no se entendió (usa contraSuCuenta, viewsA7Dias, viewsGanadas, visitas, clicks, interacciones o arrastre).` | `metrica` desconocida |
+| `La métrica no se entendió (usa contraSuCuenta, viewsA7Dias, contraSuCuenta48h, viewsA48h, viewsGanadas, visitas, clicks, interacciones o arrastre).` | `metrica` desconocida |
 | `El percentil tiene que ser un entero entre 1 y 50.` | `percentil` fuera de rango o con decimales |
 | `El lado no se entendió (usa mejor o peor).` | `lado` desconocido |
 | `recientes va con si o no.` | `recientes` con otro valor |
@@ -692,12 +697,14 @@ Cuatro reglas que cambian la lectura:
 - **Para comparar publicaciones entre sí, `contraSuCuenta`.** `viewsGanadas` le da ventaja a
   lo que salió al principio del rango, y entre cuentas, a la más grande; `contraSuCuenta`
   mide a todas a los 7 días y contra lo normal de su propia cuenta. Una cuenta con menos de 5
-  publicaciones del rango con `viewsA7Dias` no la tiene. Para «qué tema, estilo o formato
+  publicaciones del rango con `viewsA7Dias` no la tiene. Para decidir a los 2 días,
+  `contraSuCuenta48h`, con la misma regla; compárala con otra a las 48 horas, no con la de
+  los 7 días. Para «qué tema, estilo o formato
   funciona» y «¿le pongo música?», `/api/metrics/que-funciona` ya lo responde; para otro atributo (el `hook`, la
   `serie`), agrupa por atributo las filas de `/api/metrics/posts` y compara las medianas de
   `contraSuCuenta`.
-- **YouTube no entra en `viewsGanadas`, `viewsA7Dias`, `contraSuCuenta`, `interacciones` ni
-  `arrastre`**: sus políticas no permiten calcular métricas con sus datos. Sí entra en
+- **YouTube no entra en `viewsGanadas`, `viewsA7Dias`, `contraSuCuenta`, `viewsA48h`,
+  `contraSuCuenta48h`, `interacciones` ni `arrastre`**: sus políticas no permiten calcular métricas con sus datos. Sí entra en
   `visitas` y `clicks`, que mide Tu Parrilla.
 - **`pocas: true`** (compiten menos de 20) quiere decir que el mejor 10 % son una o dos
   publicaciones: no concluyas nada; amplía el rango o sube `percentil`.
