@@ -599,9 +599,9 @@ permisos «por decidir»** de la tabla red por red, para pedirlos todos en una m
   por el estado de comerciante (la entrada de abajo). Lo que se respondió en cada tarjeta, el
   paso a paso y lo que sigue están en la carpeta «Google Play» del escritorio de Vicente
   (`PASOS.txt`, recuadro del 2026-11-08, y `TEXTOS-FORMULARIO.txt`); el porqué, en
-  `docs/play-store.md`. Para que lo siguiente salga sin entrar a la consola: la cuenta de servicio
-  con su clave JSON para EAS (nunca en un chat ni en el repo) y el secreto `EXPO_TOKEN` en GitHub,
-  que el flujo «App a la tienda» necesita (la entrada del build 1.2.0, abajo).
+  `docs/play-store.md`. Desde el 2026-11-08 lo siguiente sale sin entrar a la consola: la cuenta
+  de servicio `eas-submit` tiene su clave en EAS y el secreto `EXPO_TOKEN` está en GitHub (la
+  entrada del build 1.2.0, abajo).
 - **[dueño] Play Console: declarar el estado de comerciante antes de febrero de 2027**
   (2026-11-06). Google lo exige a todos los desarrolladores. Si no se hace, borra el perfil y las
   apps de Google Play en todo el mundo. No frena la revisión de hoy. **No declararlo en la cuenta
@@ -624,9 +624,8 @@ permisos «por decidir»** de la tabla red por red, para pedirlos todos en una m
   `docs/play-store.md`, «La 1.2.0, de punta a punta»:
   1. las credenciales de FCM (la entrada de abajo): hechas el 2026-11-08, el `google-services.json`
      en `main` y la clave en EAS;
-  2. lo que el flujo necesita y todavía no está: el secreto `EXPO_TOKEN` en GitHub y la clave de la
-     cuenta de servicio de Google Play en EAS (ver «La app en la Play Store», arriba). Sin ellos, el
-     build se arma a mano y el `.aab` se sube a mano;
+  2. lo que el flujo necesita: hecho el 2026-11-08, el secreto `EXPO_TOKEN` en GitHub y la clave de
+     la cuenta de servicio de Google Play en EAS (`docs/play-store.md`, Parte 4);
   3. el build: Actions → «App a la tienda» → Run, desde `main`;
   4. el envío a la pista interna, que hace el mismo flujo (o `eas submit`);
   5. en la Play Console, la seguridad de los datos con lo de «CUANDO SUBA LA 1.2.0» de
