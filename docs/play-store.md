@@ -149,19 +149,25 @@ credenciales de prueba para revisarla, dale una cuenta de prueba, **nunca la tuy
 
 ## Parte 4 — La cuenta de servicio
 
-Esto es lo que le permite a EAS subir binarios sin que tú entres a la consola cada vez.
+Esto es lo que le permite a EAS subir binarios sin que tú entres a la consola cada vez. **Hecho
+el 2026-11-08**; si hubiera que rehacerlo, así se hizo:
 
-1. En Play Console, ve a **Configuración → Acceso a la API**.
-2. Vincula un proyecto de Google Cloud. Si no tienes uno, la misma pantalla te deja crearlo.
-3. Crea una **cuenta de servicio**. Google te lleva a la consola de Cloud para hacerlo.
-4. En Cloud, dentro de esa cuenta de servicio, crea una **clave JSON** y descárgala.
-5. Vuelve a Play Console y **concédele acceso** a esa cuenta de servicio sobre tu app, con
-   permiso para publicar versiones.
+1. En Google Cloud, en el proyecto `tu-parrilla` (el mismo de Firebase, no el de YouTube, que no se
+   toca mientras dure su auditoría), habilita la **Google Play Android Developer API**.
+2. En **IAM y administración → Cuentas de servicio**, crea `eas-submit`, **sin roles** en el
+   proyecto: el permiso que importa se da en Play Console.
+3. En esa cuenta, **Claves → Agregar clave → Crear clave nueva → JSON**.
+4. En Play Console ya no se vincula el proyecto: en **Usuarios y permisos → Invitar usuarios**, el
+   correo `eas-submit@tu-parrilla.iam.gserviceaccount.com`, con permiso solo sobre la app
+   «Parrilla»: ver la información de la app, publicar en pistas de prueba y administrar las
+   pistas de prueba y sus listas. **No** puede publicar a producción, tocar la ficha ni ver
+   finanzas. Una cuenta de servicio no acepta la invitación: queda activa sola.
+5. Sube el JSON en expo.dev → el proyecto → **Credentials → Android → `cl.tuparrilla.app` →
+   Google service account key for Expo Submit**, y bórralo del computador.
 
 **Ese archivo JSON es una credencial.** No lo guardes en el repositorio, no lo pegues en un
-chat y no lo mandes por correo. Cuando lo tengas, avísame y lo subimos al almacén de
-credenciales de EAS, que es donde tiene que vivir. `eas.json` ya declara la pista —interna—
-y no nombra el archivo: lo toma de ahí.
+chat y no lo mandes por correo: vive solo en EAS. `eas.json` ya declara la pista —interna— y no
+nombra el archivo: lo toma de ahí. Para cortarle el acceso, se borra el usuario en Play Console.
 
 ### Y un secreto en GitHub
 
@@ -173,7 +179,9 @@ Expo:
    repository secret**.
 3. Nombre exacto: `EXPO_TOKEN`. Valor: el token.
 
-Sin ese secreto el flujo falla en el primer paso, con un error de autenticación.
+Sin ese secreto el flujo falla en el primer paso, con un error de autenticación. Está desde el
+2026-11-08, con un token personal de `vicentepareja` llamado `github-actions` (expo.dev → Access
+tokens); si se revoca allá, hay que crear otro y reemplazar el secreto.
 
 ---
 
@@ -236,12 +244,12 @@ La Cocina, el portapapeles, el audio de la música de Instagram, los avisos al t
 SVG, el video del mesón y la vibración (el módulo, sin usar todavía). Está todo en `main`; lo que
 falta es tuyo. En este orden:
 
-1. **Las credenciales de los avisos (FCM).** Los pasos están en `docs/pendientes.md`, «Las
+1. **Las credenciales de los avisos (FCM).** Hechas el 2026-11-08. Los pasos están en `docs/pendientes.md`, «Las
    credenciales de los avisos al teléfono (FCM)»: el `google-services.json` entra a `main` con su
    línea en `mobile/app.json`, y la clave de la cuenta de servicio de Firebase se sube a EAS. Va
    **antes** del build: el archivo se lee al construir, y un binario sin él no recibe avisos en
    Android.
-2. **Lo que necesita el flujo de GitHub**, si todavía no está: el secreto `EXPO_TOKEN` («Y un secreto
+2. **Lo que necesita el flujo de GitHub**, hecho el 2026-11-08: el secreto `EXPO_TOKEN` («Y un secreto
    en GitHub», arriba) y la clave JSON de la cuenta de servicio de Google Play en EAS (Parte 4). Sin
    el primero, el flujo no arranca; sin la segunda, construye pero no envía.
 3. **El build.** En la app de GitHub: **Actions → «App a la tienda» → Run**, con la rama `main` y la

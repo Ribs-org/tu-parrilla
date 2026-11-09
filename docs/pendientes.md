@@ -599,9 +599,9 @@ permisos «por decidir»** de la tabla red por red, para pedirlos todos en una m
   por el estado de comerciante (la entrada de abajo). Lo que se respondió en cada tarjeta, el
   paso a paso y lo que sigue están en la carpeta «Google Play» del escritorio de Vicente
   (`PASOS.txt`, recuadro del 2026-11-08, y `TEXTOS-FORMULARIO.txt`); el porqué, en
-  `docs/play-store.md`. Para que lo siguiente salga sin entrar a la consola: la cuenta de servicio
-  con su clave JSON para EAS (nunca en un chat ni en el repo) y el secreto `EXPO_TOKEN` en GitHub,
-  que el flujo «App a la tienda» necesita (la entrada del build 1.2.0, abajo).
+  `docs/play-store.md`. Desde el 2026-11-08 lo siguiente sale sin entrar a la consola: la cuenta
+  de servicio `eas-submit` tiene su clave en EAS y el secreto `EXPO_TOKEN` está en GitHub (la
+  entrada del build 1.2.0, abajo).
 - **[dueño] Play Console: declarar el estado de comerciante antes de febrero de 2027**
   (2026-11-06). Google lo exige a todos los desarrolladores. Si no se hace, borra el perfil y las
   apps de Google Play en todo el mundo. No frena la revisión de hoy. **No declararlo en la cuenta
@@ -622,11 +622,10 @@ permisos «por decidir»** de la tabla red por red, para pedirlos todos en una m
   pide el SDK 57 (`npx expo-doctor` sin avisos). Nada de la 1.2.0 llega por aire a la 1.1.0
   (`runtimeVersion` es la versión de la app). Falta solo lo del dueño, en orden, con el detalle en
   `docs/play-store.md`, «La 1.2.0, de punta a punta»:
-  1. las credenciales de FCM (la entrada de abajo): el `google-services.json` en `main` y la clave en
-     EAS;
-  2. lo que el flujo necesita y todavía no está: el secreto `EXPO_TOKEN` en GitHub y la clave de la
-     cuenta de servicio de Google Play en EAS (ver «La app en la Play Store», arriba). Sin ellos, el
-     build se arma a mano y el `.aab` se sube a mano;
+  1. las credenciales de FCM (la entrada de abajo): hechas el 2026-11-08, el `google-services.json`
+     en `main` y la clave en EAS;
+  2. lo que el flujo necesita: hecho el 2026-11-08, el secreto `EXPO_TOKEN` en GitHub y la clave de
+     la cuenta de servicio de Google Play en EAS (`docs/play-store.md`, Parte 4);
   3. el build: Actions → «App a la tienda» → Run, desde `main`;
   4. el envío a la pista interna, que hace el mismo flujo (o `eas submit`);
   5. en la Play Console, la seguridad de los datos con lo de «CUANDO SUBA LA 1.2.0» de
@@ -639,23 +638,16 @@ permisos «por decidir»** de la tabla red por red, para pedirlos todos en una m
   (2026-11-07). El código está (`src/lib/push/`, `mobile/src/lib/avisos.ts`); sin esto, en Android
   «Avisarme» dice que no se pudieron encender. Lo pide la documentación de Expo SDK 57, «Add Android
   FCM V1 credentials». Ningún paso pide pegar un secreto en un chat:
-  1. En [console.firebase.google.com](https://console.firebase.google.com), crea un proyecto (o
-     agrégale Firebase al proyecto de Google Cloud que ya existe).
-  2. En ese proyecto, **Agregar app → Android**, con el paquete `cl.tuparrilla.app`. Descarga el
-     `google-services.json` que entrega.
-  3. Déjalo en `mobile/google-services.json` y, en `mobile/app.json`, dentro de `"android"`, agrega
-     `"googleServicesFile": "./google-services.json"`. Ese archivo **sí** va al repositorio: según
-     Expo, trae identificadores públicos, y EAS lo necesita en el build.
-  4. En Firebase, **Configuración del proyecto → Cuentas de servicio → Generar nueva clave
-     privada → Generar clave**. Baja un JSON: **ese es secreto**, no va al repositorio ni a un chat
-     (`mobile/.gitignore` ya ignora los `*-firebase-adminsdk-*.json`).
-  5. Súbelo a Expo. En una terminal dentro de `mobile/`: `npx eas-cli credentials` → `Android` →
-     `production` → `Google Service Account` → `Manage your Google Service Account Key for Push
-     Notifications (FCM V1)` → `Set up a Google Service Account Key for Push Notifications (FCM V1)`
-     → `Upload a new service account key`, y elige el JSON. O en expo.dev → el proyecto →
-     **Credentials** → Android → `cl.tuparrilla.app` → **FCM V1 service account key → Add a service
-     account key**. Va por identificador de app, así que sirve para los dos perfiles.
-  6. Borra el JSON del paso 4 de la carpeta de descargas cuando esté subido.
+  1–3. Hechos el 2026-11-08: el proyecto de Firebase es `tu-parrilla`, propio y no el de Google
+     Cloud de YouTube (`portafolio-page`), que no se toca mientras dure su auditoría; la app
+     Android `cl.tuparrilla.app` está registrada, y su `google-services.json` está en `mobile/`,
+     nombrado en `mobile/app.json` (`android.googleServicesFile`). Ese archivo **sí** va al
+     repositorio: según Expo, trae identificadores públicos, y EAS lo necesita en el build.
+  4–6. Hechos el 2026-11-08: la clave de la cuenta de servicio de Firebase está en EAS (expo.dev →
+     Credentials → Android → `cl.tuparrilla.app` → FCM V1 service account key, proyecto
+     `tu-parrilla`). Si hubiera que cambiarla: Firebase → Configuración del proyecto → Cuentas de
+     servicio → Generar nueva clave privada, y reemplazarla ahí. Es secreta: nunca al repositorio
+     ni a un chat (`mobile/.gitignore` ignora los `*-firebase-adminsdk-*.json`).
   7. Arma el build 1.2.0 (la entrada de arriba). Para probar: entra en la app, toca «Avisarme» y
      contéstale algo desde Las Sugerencias a una sugerencia tuya; tiene que llegar «Te respondimos
      en el libro de sugerencias».
@@ -719,6 +711,11 @@ Nada de esto bloquea un trámite hoy; conviene ordenarlo antes de abrir a tercer
   porque la documentación no dice si viaja con el traspaso y sin ella la Play Store no
   acepta más versiones. Después, `owner` en `mobile/app.json` y los enlaces de
   `mobile/README.md`. La cuenta de Apple para iPhone conviene sacarla ya a nombre de Pyxis.
+  Con el traspaso, si se quiere, renombrar el proyecto (2026-11-08: el dueño preguntó): el nombre
+  `vicente-numeros` es el `slug` de `mobile/app.json` y solo se ve en expo.dev; en el teléfono y en
+  la tienda la app se llama por `name`. Renombrarlo en expo.dev obliga a cambiar el `slug` en
+  `main` **y** en `ota-1.1.0` a la vez: si no calza con el del servidor, EAS rechaza el build y
+  la publicación por aire. Por eso no se hace en medio del build 1.2.0.
 
 ## Finanzas: planes y pagos
 
