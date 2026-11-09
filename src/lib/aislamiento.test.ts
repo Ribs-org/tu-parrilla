@@ -147,6 +147,7 @@ const { makeDefault, updateProfile, deleteScheduledPost, guardarCuenta, guardarT
 // guarda la cuenta *del usuario* y la de `social/conectar`, una cuenta *de una red*.
 const { guardarCuenta: guardarCuentaDeRed, tomadasPorOtro } = await import('./social/conectar')
 const { cuentasConectadas, esperandoEnLaParrilla, planDe, tokensDelMes } = await import('./planes/planes')
+const { suscripcionVivaDe } = await import('./pagos/suscripciones')
 const {
   contarFilas,
   leerClicks,
@@ -528,6 +529,13 @@ describe('aislamiento por dueño (SQL generado, sin base)', () => {
       esperarFiltradoPorDueno(consulta!)
       capturas.length = 0
     }
+  })
+
+  it('pagos: la suscripción viva de alguien se busca solo entre las suyas', async () => {
+    const consultas = await todasLasConsultas(() => suscripcionVivaDe(DUENO))
+    expect(consultas).toHaveLength(1)
+    expect(consultas[0]!.sql).toMatch(/from "suscripciones"/i)
+    esperarFiltradoPorDueno(consultas[0]!)
   })
 
   it('llaves: listarLlaves solo trae las del dueño, y nunca su hash', async () => {

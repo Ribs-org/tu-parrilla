@@ -1,6 +1,7 @@
 # Los planes: el gratis y el pagado, y el cobro con Mercado Pago
 
-Fecha: 2026-11-08. **Diseño. La fase 1 está implementada** en la rama `planes`; la fase 2, no.
+Fecha: 2026-11-08. **Diseño. Implementado**: la fase 1 en la rama `planes` y la fase 2 en `planes-mercadopago`,
+cerrada detrás de `PAGOS_ABIERTO_PARA` y sin probar contra Mercado Pago.
 Va en dos partes, cada una en su rama: la **fase 1**
 (`planes`) son los dos planes, sus topes, la prioridad, el admin y «Tu plan»; la **fase 2**
 (`planes-mercadopago`) es el cobro. La fase 1 se sostiene sola: sin cobro, el admin da el

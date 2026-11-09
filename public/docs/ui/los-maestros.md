@@ -24,7 +24,7 @@ O directo: `https://tu-parrilla.cl/admin/usuarios`.
 
 Arriba, el título «Los Maestros» (se ve en mayúsculas), debajo «quién puede entrar», y la frase
 «Quién puede entrar a Tu Parrilla. Invitar manda el primer código al correo.». Después, cuatro
-bloques.
+bloques (cinco con «Los cobros»).
 
 ### Bloque «Los planes»
 
@@ -42,6 +42,15 @@ tarjetas, «El gratis» y «El pagado», cada una con sus campos ya llenos con l
 - «Prioridad», con la ayuda «Más alta, primero en las colas.»;
 - el botón «Guardar» (mientras trabaja, «Guardando…») y, al lado, «Guardado.» en verde o el error
   en rojo.
+
+### Bloque «Los cobros»
+
+Solo si la instalación tiene Mercado Pago configurado, o si ya hubo algún cobro. Los últimos
+cincuenta cobros de las suscripciones al plan pagado, del más nuevo al más viejo, uno por línea: la
+fecha, el correo de quien paga (o «(persona borrada)»), el monto, como «$34.990», y el estado:
+«aprobado» en verde, «rechazado», «pendiente», «devuelto», «anulado» o «sin pago todavía». Debajo de
+uno que no se aprobó, en chico, el detalle que dio Mercado Pago (por ejemplo `cc_rejected_insufficient_amount`).
+Sin cobros: «Todavía no hay cobros.».
 
 ### Bloque «Invitar»
 
@@ -67,8 +76,9 @@ del admin. Cada fila trae:
 | «entró <fecha>» | Ya entró; la fecha es la de su **primer** ingreso, no la del último. | «Cerrar sesiones» |
 
 - su plan, en letra chica: «Gratis»; «Maestro Parrillero · cortesía» (sin fecha) o «Maestro
-  Parrillero · cortesía hasta el <fecha>»; o, si la cortesía ya terminó, «Gratis · su plan Maestro
-  Parrillero venció el <fecha>» (con los nombres
+  Parrillero · cortesía hasta el <fecha>»; «Maestro Parrillero · lo paga hasta el <fecha>» si lo
+  paga con Mercado Pago (la fecha es la del próximo cobro más la gracia); o, si ya terminó, «Gratis ·
+  su plan Maestro Parrillero venció el <fecha>» (con los nombres
   que tengan los planes). Al lado, el botón «Plan» (ver «Para darle el pagado a alguien», abajo);
 - con la cocina encendida, «cocina desde <fecha>»;
 - con la cocina encendida, o si le quedó algo guardado de cuando la tuvo, cuánto ocupa en la cámara de
@@ -167,7 +177,8 @@ hasta quedar bajo el tope nuevo.
 
 ### Para darle el pagado a alguien
 
-Pagar desde el panel todavía no existe: el pagado se da acá, como cortesía.
+Sin que pague: el pagado se da acá, como cortesía. Una cortesía sobre alguien que paga con Mercado
+Pago no le cancela la suscripción: la cancela esa persona, en Tu Cuenta.
 
 1. En su fila, «Plan».
 2. Se abre la ventana «El plan de <correo>», con «Ahora: <su plan>.».
@@ -295,8 +306,8 @@ Para devolverla, se traspasa de vuelta, con estos mismos pasos.
 - No da acceso a los datos de nadie: cada usuario ve solo sus redes, sus publicaciones y sus
   páginas, también el admin. De las cuentas ajenas, el admin ve aquí solo lo que trae la lista de
   «Cuenta» para traspasarlas.
-- No cobra: el pagado se da a mano, como cortesía, y la cuota también se cambia a mano.
-- No cancela ni muestra pagos: todavía nadie paga desde el panel.
+- No cancela la suscripción de nadie: la cancela cada uno en Tu Cuenta, o en Mercado Pago.
+- No emite boletas: «Los cobros» es la lista para hacerlas.
 - No traspasa varias cuentas de una vez, ni pide el acuerdo de quien la tiene o de quien la recibe:
   lo decide el admin.
 
@@ -308,6 +319,7 @@ Sale de:
 - `src/app/admin/(dash)/usuarios/formularios.tsx`: «Invitar», «Quitar», «Cerrar sesiones», el
   botón de La Cocina, «Cambiar la cuota», «Traspasar una cuenta», sus confirmaciones y sus mensajes.
 - `src/app/admin/(dash)/usuarios/planes.tsx`: «Los planes» (las tarjetas) y el botón «Plan».
+- `src/lib/pagos/suscripciones.ts` (`cobrosRecientes`) y `src/lib/pagos/reglas.ts` (`estadoDePagoEnPalabras`): «Los cobros».
 - `src/app/admin/planes-actions.ts` y `src/lib/planes/plan.ts`: guardar un plan, dar una cortesía y
   pasar al gratis, con sus frases, y el plan de cada fila en palabras (`planEnPalabras`).
 - `src/lib/cocina/materiales.ts` (`ocupadoPorUsuario`, `cambiarCuotaDeLaCamara`) y `src/lib/cocina/bodega.ts`: cuánto ocupa cada uno y la frase de una cuota que no se entiende.
