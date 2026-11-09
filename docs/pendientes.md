@@ -622,8 +622,8 @@ permisos «por decidir»** de la tabla red por red, para pedirlos todos en una m
   pide el SDK 57 (`npx expo-doctor` sin avisos). Nada de la 1.2.0 llega por aire a la 1.1.0
   (`runtimeVersion` es la versión de la app). Falta solo lo del dueño, en orden, con el detalle en
   `docs/play-store.md`, «La 1.2.0, de punta a punta»:
-  1. las credenciales de FCM (la entrada de abajo): el `google-services.json` en `main` y la clave en
-     EAS;
+  1. las credenciales de FCM (la entrada de abajo): el `google-services.json` ya está en `main`;
+     falta la clave en EAS;
   2. lo que el flujo necesita y todavía no está: el secreto `EXPO_TOKEN` en GitHub y la clave de la
      cuenta de servicio de Google Play en EAS (ver «La app en la Play Store», arriba). Sin ellos, el
      build se arma a mano y el `.aab` se sube a mano;
@@ -639,13 +639,11 @@ permisos «por decidir»** de la tabla red por red, para pedirlos todos en una m
   (2026-11-07). El código está (`src/lib/push/`, `mobile/src/lib/avisos.ts`); sin esto, en Android
   «Avisarme» dice que no se pudieron encender. Lo pide la documentación de Expo SDK 57, «Add Android
   FCM V1 credentials». Ningún paso pide pegar un secreto en un chat:
-  1. En [console.firebase.google.com](https://console.firebase.google.com), crea un proyecto (o
-     agrégale Firebase al proyecto de Google Cloud que ya existe).
-  2. En ese proyecto, **Agregar app → Android**, con el paquete `cl.tuparrilla.app`. Descarga el
-     `google-services.json` que entrega.
-  3. Déjalo en `mobile/google-services.json` y, en `mobile/app.json`, dentro de `"android"`, agrega
-     `"googleServicesFile": "./google-services.json"`. Ese archivo **sí** va al repositorio: según
-     Expo, trae identificadores públicos, y EAS lo necesita en el build.
+  1–3. Hechos el 2026-11-08: el proyecto de Firebase es `tu-parrilla`, propio y no el de Google
+     Cloud de YouTube (`portafolio-page`), que no se toca mientras dure su auditoría; la app
+     Android `cl.tuparrilla.app` está registrada, y su `google-services.json` está en `mobile/`,
+     nombrado en `mobile/app.json` (`android.googleServicesFile`). Ese archivo **sí** va al
+     repositorio: según Expo, trae identificadores públicos, y EAS lo necesita en el build.
   4. En Firebase, **Configuración del proyecto → Cuentas de servicio → Generar nueva clave
      privada → Generar clave**. Baja un JSON: **ese es secreto**, no va al repositorio ni a un chat
      (`mobile/.gitignore` ya ignora los `*-firebase-adminsdk-*.json`).
