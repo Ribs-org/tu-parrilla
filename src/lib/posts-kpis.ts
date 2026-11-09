@@ -72,6 +72,12 @@ export type PostRow = {
    * (`politica-youtube`) y si quien llamó a `getPostRows` no la pidió (`aLos7Dias`).
    */
   viewsA7Dias: number | null
+  /**
+   * Lo mismo a los 2 días: la primera lectura después de cumplir 48 horas, si llegó antes de
+   * las 72 (`igual-edad.ts`). Null en los mismos casos, y si quien llamó a `getPostRows` no la
+   * pidió (`aLas48Horas`).
+   */
+  viewsA48h: number | null
   likesChange: number | null
   commentsChange: number | null
   sharesChange: number | null

@@ -12,7 +12,7 @@ import {
 } from '@/db'
 import type { Filters, Granularity } from './analytics'
 import { describe, granularityFor, localDay } from './analytics'
-import { DIAS_A_IGUAL_EDAD, DIAS_HASTA_LA_LECTURA } from './igual-edad'
+import { A_LAS_48_HORAS, A_LOS_7_DIAS, type Edad } from './igual-edad'
 import {
   postKpisFrom,
   type CuentaRow,
@@ -82,8 +82,8 @@ export const MAX_PUBLICACIONES_LEIDAS = 10_000
  * recent», which at 1,000 posts a week covered three days of a thirty-day window.
  *
  * `aLos7Dias` agrega las views de cada publicación a la semana de publicada, para comparar a
- * igual edad (`igual-edad.ts`). Es una consulta más, así que solo la piden las pantallas y
- * las rutas que la usan.
+ * igual edad (`igual-edad.ts`), y `aLas48Horas` las de los 2 días. Cada una es una consulta
+ * más, así que solo la piden las pantallas y las rutas que la usan.
  */
 export async function getPostRows(
   f: Filters,
@@ -96,6 +96,7 @@ export async function getPostRows(
     ids?: string[]
     conActividad?: boolean
     aLos7Dias?: boolean
+    aLas48Horas?: boolean
   } = {},
 ): Promise<PostRow[]> {
   if (opts.ids?.length === 0) return []
@@ -175,12 +176,12 @@ export async function getPostRows(
     .orderBy(postMetrics.postId, desc(postMetrics.day))
   const snapshots = [...antes, ...adentro]
 
-  // La primera lectura después de cumplir 7 días, si llegó antes de los 9. Por la hora en que
-  // se tomó (`captured_at`) y no por el día: el día de una lectura es el del dueño, y un post
-  // de las 23:00 y otro de las 01:00 del mismo día no tienen la misma edad en la lectura de la
-  // mañana siguiente.
-  const aLos7Dias = new Map<string, number>()
-  if (opts.aLos7Dias) {
+  // Las views a una edad (`igual-edad.ts`): la primera lectura dentro de su ventana —desde los
+  // 7 días hasta los 9, o desde las 48 horas hasta las 72—. Por la hora en que se tomó
+  // (`captured_at`) y no por el día: el día de una lectura es el del dueño, y un post de las
+  // 23:00 y otro de las 01:00 del mismo día no tienen la misma edad en la lectura de la mañana
+  // siguiente.
+  const lecturasAEdad = async (edad: Edad): Promise<Map<string, number>> => {
     const lecturas = await db
       .selectDistinctOn([postMetrics.postId], { postId: postMetrics.postId, views: postMetrics.views })
       .from(postMetrics)
@@ -189,13 +190,17 @@ export async function getPostRows(
         and(
           inArray(postMetrics.postId, ids),
           isNotNull(postMetrics.views),
-          sql`${postMetrics.capturedAt} >= ${socialPosts.publishedAt} + make_interval(days => ${DIAS_A_IGUAL_EDAD})`,
-          sql`${postMetrics.capturedAt} < ${socialPosts.publishedAt} + make_interval(days => ${DIAS_HASTA_LA_LECTURA})`,
+          sql`${postMetrics.capturedAt} >= ${socialPosts.publishedAt} + make_interval(hours => ${edad.desdeHoras})`,
+          sql`${postMetrics.capturedAt} < ${socialPosts.publishedAt} + make_interval(hours => ${edad.hastaHoras})`,
         ),
       )
       .orderBy(postMetrics.postId, asc(postMetrics.capturedAt))
-    for (const lectura of lecturas) if (lectura.views !== null) aLos7Dias.set(lectura.postId, lectura.views)
+    const porPost = new Map<string, number>()
+    for (const lectura of lecturas) if (lectura.views !== null) porPost.set(lectura.postId, lectura.views)
+    return porPost
   }
+  const aLos7Dias = opts.aLos7Dias ? await lecturasAEdad(A_LOS_7_DIAS) : new Map<string, number>()
+  const aLas48Horas = opts.aLas48Horas ? await lecturasAEdad(A_LAS_48_HORAS) : new Map<string, number>()
 
   const byPost = new Map<string, typeof snapshots>()
   for (const snapshot of snapshots) {
@@ -298,6 +303,7 @@ export async function getPostRows(
       // El contador de YouTube a los 7 días no es derivado, pero compararlo sí (de ahí sale
       // «contra su cuenta»): fuera, como lo ganado.
       viewsA7Dias: derivadas ? (aLos7Dias.get(post.id) ?? null) : null,
+      viewsA48h: derivadas ? (aLas48Horas.get(post.id) ?? null) : null,
       likesChange: derivadas ? likes.change : null,
       commentsChange: derivadas ? comments.change : null,
       sharesChange: derivadas ? shares.change : null,

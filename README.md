@@ -308,8 +308,10 @@ atributo, la red, el formato, el día o la franja horaria); la misma cuenta la h
 `GET /api/metrics/mejores` para un agente. Entra con «contra su cuenta»: las views de cada
 publicación a los 7 días de publicada, divididas por la mediana de su cuenta en el período,
 para comparar mil publicaciones por semana en varias cuentas sin que gane la más vieja ni la
-cuenta más grande (`src/lib/igual-edad.ts`). En las otras métricas, lo publicado hace menos
-de 7 días no compite salvo que se prenda «Con las de menos de 7 días». **Lado a lado**
+cuenta más grande (`src/lib/igual-edad.ts`). Lo mismo a las 48 horas («Contra su cuenta, a
+las 48 horas» y «Por views a las 48 horas»), para decidir en 2 días y no en 7 qué pasa de una
+cuenta de prueba a la principal. En las métricas que no son a igual edad, lo publicado hace
+menos de 7 días no compite salvo que se prenda «Con las de menos de 7 días». **Lado a lado**
 (`/admin/analytics/lado-a-lado`) pone dos publicaciones —al entrar, la mejor y la peor— con
 su portada, el link para ver el video en la red, sus atributos y cómo crecieron sus views por
 días desde que salieron; el video no se guarda (`src/lib/lado-a-lado.ts`). El porqué del tablero, en
@@ -1929,10 +1931,11 @@ permalink, texto, `publicadoEl` (ISO con el offset de la zona del dueño), la et
 sincronización siguiente a su publicación, que es la que le encuentra el id del video —ver
 `docs/deuda-tecnica.md`, «TikTok: el id del video se recupera por texto y hora»—) y `metricas`: `views`
 (acumulado), `viewsGanadas` (dentro del rango), `viewsA7Dias` (el contador a la semana de
-publicada), `contraSuCuenta` (eso sobre la mediana de su cuenta en el rango), `likes`,
+publicada), `contraSuCuenta` (eso sobre la mediana de su cuenta en el rango), `viewsA48h` y
+`contraSuCuenta48h` (lo mismo a los 2 días: la primera lectura entre las 48 y las 72 horas), `likes`,
 `comentarios`, `compartidos`, `alcance`, `visitasAlSitio`, `clicks`, `ctr` y `arrastre`. Un
 `null` significa que la red no reportó ese número — nunca cero. En YouTube, `viewsGanadas`,
-`viewsA7Dias`, `contraSuCuenta` y `arrastre` vienen siempre en `null`: sus políticas no
+`viewsA7Dias`, `contraSuCuenta`, `viewsA48h`, `contraSuCuenta48h` y `arrastre` vienen siempre en `null`: sus políticas no
 permiten calcular métricas nuevas con sus datos (ver «Analítica de posts»). `truncado: true` avisa que el tope de filas mordió y la respuesta
 es parcial.
 
@@ -1940,8 +1943,8 @@ Las métricas las trae la sincronización diaria, así que lo publicado hoy apar
 números recién al día siguiente.
 
 `GET /api/metrics/mejores`, con los mismos parámetros más `metrica` (`viewsGanadas` por
-defecto, `contraSuCuenta`, `viewsA7Dias`, `visitas`, `clicks`, `interacciones` o
-`arrastre`), `percentil` (entero de 1 a 50, 10 por defecto), `lado` (`mejor` por defecto, o
+defecto, `contraSuCuenta`, `viewsA7Dias`, `contraSuCuenta48h`, `viewsA48h`, `visitas`,
+`clicks`, `interacciones` o `arrastre`), `percentil` (entero de 1 a 50, 10 por defecto), `lado` (`mejor` por defecto, o
 `peor`) y `recientes` (`si` por defecto, o `no` para dejar fuera lo de menos de 7 días),
 devuelve el mejor (o el peor) X % de lo publicado en el rango: el corte para entrar, cuántas
 compiten, las del grupo con sus métricas, las medianas del grupo contra las del resto y lo
@@ -2335,7 +2338,7 @@ src/
     pieza.ts               qué junta las versiones de una pieza y las medianas por atributo (sin base)
     mejores.ts             el mejor (o el peor) X % de lo publicado: el corte, las medianas y lo que se repite (sin base)
     que-funciona.ts        «Qué te funciona»: qué tema, estilo y formato anduvieron mejor, y si la música ayudó, con su mínimo y su frase (sin base)
-    igual-edad.ts          comparar a la misma edad y contra la propia cuenta: los 7 días y «contra su cuenta» (sin base)
+    igual-edad.ts          comparar a la misma edad y contra la propia cuenta: los 7 días, las 48 horas y «contra su cuenta» (sin base)
     lado-a-lado.ts         dos publicaciones lado a lado: la curva por edad y sus atributos (sin base)
     metrics-consulta.ts    lo que comparten las rutas de /api/metrics: la llave, el rango, la red y la cuenta
     cuentas-api.ts         las cuentas de GET /api/schedule/cuentas: los dos ids y cómo está la conexión (sin base)

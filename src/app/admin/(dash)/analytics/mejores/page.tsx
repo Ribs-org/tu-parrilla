@@ -6,7 +6,7 @@ import { StatTile } from '@/components/charts/stat-tile'
 import { InterruptorEnUrl, RangoBar, SelectorEnUrl } from '@/components/filter-bar'
 import { requireUser } from '@/lib/auth'
 import { parseFilters } from '@/lib/filters'
-import { DIAS_A_IGUAL_EDAD, MIN_DE_SU_CUENTA, cierreDe } from '@/lib/igual-edad'
+import { DIAS_A_IGUAL_EDAD, HORAS_A_EDAD_TEMPRANA, MIN_DE_SU_CUENTA, cierreDe } from '@/lib/igual-edad'
 import {
   LADO_POR_DEFECTO,
   METRICAS,
@@ -55,6 +55,8 @@ const FORMATO = { conteo, porcentaje, veces } as const
 const QUIEN_COMPITE: Record<Metrica, string> = {
   contraSuCuenta: `Con ${DIAS_A_IGUAL_EDAD} días cumplidos, de cuentas con ${MIN_DE_SU_CUENTA} o más · sin YouTube`,
   viewsA7Dias: `Publicaciones con ${DIAS_A_IGUAL_EDAD} días cumplidos · sin YouTube`,
+  contraSuCuenta48h: `Con ${HORAS_A_EDAD_TEMPRANA} horas cumplidas, de cuentas con ${MIN_DE_SU_CUENTA} o más · sin YouTube`,
+  viewsA48h: `Publicaciones con ${HORAS_A_EDAD_TEMPRANA} horas cumplidas · sin YouTube`,
   viewsGanadas: 'Publicaciones con views ganadas · sin YouTube',
   visitas: 'Publicaciones con visitas a tu página',
   clicks: 'Publicaciones con clicks en tus links',
@@ -72,6 +74,10 @@ function nadieCompite(metrica: Metrica, fueraPorRecientes: number): string {
       return `Ninguna cuenta tiene ${MIN_DE_SU_CUENTA} publicaciones del período con ${DIAS_A_IGUAL_EDAD} días cumplidos, y con menos no hay contra qué compararlas. Amplía el período, o mira «Por views a los ${DIAS_A_IGUAL_EDAD} días».`
     case 'viewsA7Dias':
       return `Ninguna publicación del período tiene su lectura de los ${DIAS_A_IGUAL_EDAD} días: lo de la última semana todavía no los cumple. Amplía el período. YouTube no entra en esta métrica.`
+    case 'contraSuCuenta48h':
+      return `Ninguna cuenta tiene ${MIN_DE_SU_CUENTA} publicaciones del período con su lectura de las ${HORAS_A_EDAD_TEMPRANA} horas, y con menos no hay contra qué compararlas. Amplía el período, o mira «Por views a las ${HORAS_A_EDAD_TEMPRANA} horas».`
+    case 'viewsA48h':
+      return `Ninguna publicación del período tiene su lectura de las ${HORAS_A_EDAD_TEMPRANA} horas: lo de los últimos 2 días todavía no las cumple. Amplía el período. YouTube no entra en esta métrica.`
     case 'visitas':
     case 'clicks':
       return `Ninguna publicación del período tiene ${METRICAS[metrica].nombre.toLowerCase()}. Las visitas y los clicks se cuentan cuando alguien entra por el link con la etiqueta de la publicación.`
@@ -84,6 +90,8 @@ function nadieCompite(metrica: Metrica, fueraPorRecientes: number): string {
 const A_IGUAL_EDAD: Partial<Record<Metrica, string>> = {
   viewsA7Dias: `«Views a los ${DIAS_A_IGUAL_EDAD} días» es el contador una semana después de publicar: así lo de hace un mes no le gana a lo de ayer solo por llevar más tiempo. Lo publicado en la última semana todavía no compite. `,
   contraSuCuenta: `«Contra su cuenta» divide las views a los ${DIAS_A_IGUAL_EDAD} días de cada publicación por la mediana de su cuenta en el período: ×2 es el doble de lo normal de esa cuenta, esté en la red que esté y tenga los seguidores que tenga. Una cuenta con menos de ${MIN_DE_SU_CUENTA} publicaciones con ${DIAS_A_IGUAL_EDAD} días cumplidos no compite, y lo de la última semana tampoco. `,
+  viewsA48h: `«Views a las ${HORAS_A_EDAD_TEMPRANA} horas» es el contador 2 días después de publicar, de la primera lectura antes de las 72 horas: sirve para decidir antes que a los ${DIAS_A_IGUAL_EDAD} días, con lo que pasó al principio. Lo publicado en los últimos 2 días todavía no compite, y tampoco lo que se quedó sin esa lectura. `,
+  contraSuCuenta48h: `«Contra su cuenta a las ${HORAS_A_EDAD_TEMPRANA} horas» divide las views a las ${HORAS_A_EDAD_TEMPRANA} horas de cada publicación por la mediana de su cuenta en el período: ×2 es el doble de lo normal de esa cuenta a esa edad. Una cuenta con menos de ${MIN_DE_SU_CUENTA} publicaciones con su lectura de las ${HORAS_A_EDAD_TEMPRANA} horas no compite, y lo de los últimos 2 días tampoco. `,
 }
 
 /**
@@ -113,6 +121,7 @@ export default async function MejoresPage({ searchParams }: { searchParams: Prom
     publishedTo: filters.to,
     limit: MAX_PUBLICACIONES_LEIDAS,
     aLos7Dias: true,
+    aLas48Horas: true,
     ...(cuenta ? { accountId: cuenta.id } : {}),
   })
   const atributosDe = await attributesFor(ownerId, filas)
@@ -133,6 +142,8 @@ export default async function MejoresPage({ searchParams }: { searchParams: Prom
   const medianas: Array<{ nombre: string; campo: keyof Medianas; formato: (v: number | null) => string }> = [
     { nombre: 'Contra su cuenta', campo: 'contraSuCuenta', formato: veces },
     { nombre: `Views a los ${DIAS_A_IGUAL_EDAD} días`, campo: 'viewsA7Dias', formato: conteo },
+    { nombre: `Contra su cuenta a las ${HORAS_A_EDAD_TEMPRANA} horas`, campo: 'contraSuCuenta48h', formato: veces },
+    { nombre: `Views a las ${HORAS_A_EDAD_TEMPRANA} horas`, campo: 'viewsA48h', formato: conteo },
     { nombre: 'Views ganadas', campo: 'viewsGanadas', formato: conteo },
     { nombre: 'Visitas a tu página', campo: 'visitas', formato: conteo },
     { nombre: 'Interacciones', campo: 'interacciones', formato: conteo },
@@ -286,9 +297,9 @@ export default async function MejoresPage({ searchParams }: { searchParams: Prom
                     <span className="block font-mono text-[0.9rem] font-semibold tabular-nums text-fg">
                       {formato(m.valor)}
                     </span>
-                    {metrica === 'contraSuCuenta' ? (
+                    {metrica === 'contraSuCuenta' || metrica === 'contraSuCuenta48h' ? (
                       <span className="block font-mono text-[0.68rem] tabular-nums text-fg-faint">
-                        {conteo(m.fila.viewsA7Dias)} views
+                        {conteo(metrica === 'contraSuCuenta' ? m.fila.viewsA7Dias : m.fila.viewsA48h)} views
                       </span>
                     ) : null}
                   </span>
@@ -335,7 +346,7 @@ export default async function MejoresPage({ searchParams }: { searchParams: Prom
       <Panel
         className="mt-4"
         title={peor ? 'Abajo y el resto' : 'Arriba y el resto'}
-        hint={`Medianas: la publicación del medio de cada grupo. Cada una cuenta solo a quien tiene ese número; YouTube no entra en «Contra su cuenta», en las views (a los ${DIAS_A_IGUAL_EDAD} días o ganadas), en las interacciones ni en el arrastre.`}
+        hint={`Medianas: la publicación del medio de cada grupo. Cada una cuenta solo a quien tiene ese número; YouTube no entra en «Contra su cuenta», en las views (a los ${DIAS_A_IGUAL_EDAD} días, a las ${HORAS_A_EDAD_TEMPRANA} horas o ganadas), en las interacciones ni en el arrastre.`}
       >
         {r.compiten === 0 ? (
           <Empty>Sin publicaciones que comparar.</Empty>

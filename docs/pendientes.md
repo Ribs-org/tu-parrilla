@@ -748,6 +748,15 @@ nadie paga: todas las cuentas son iguales y el README dice «Sin suscripción».
 
 ## Features y trabajo de código
 
+- **«Sincronizar ahora» le puede quitar a una publicación su lectura de las 48 horas** (2026-11-08,
+  al sumar `viewsA48h`, #358). La lectura del día (`post_metrics`, una por publicación y día) se
+  reescribe entera en cada sincronización, también su `captured_at`. La ventana de las 48 horas
+  (de 48 a 72, `src/lib/igual-edad.ts`) no tiene día de más, a diferencia de la de los 7 días:
+  una sincronización a mano H horas después del cron de la mañana corre esa lectura H horas, y lo
+  publicado entre 72 − H y 72 horas antes del cron se queda sin `viewsA48h` (null, nunca 0). Lo
+  mismo si el cron de un día falla. Arreglarlo es elegir: estirar la ventana (pierde precisión
+  justo cuando la publicación crece rápido) o guardar la lectura de las 48 horas aparte, la
+  primera vez que cae en la ventana, sin que la reescriba la del mismo día.
 - **El teléfono no muestra el aviso de la playlist de YouTube** (2026-11-08). Un video que salió sin
   entrar a su playlist lo dice en el editor del panel y en `GET /api/schedule/posts` (`aviso`); el
   teléfono no tiene una vista de lo publicado por destino donde ponerlo. Si se le agrega una, el
