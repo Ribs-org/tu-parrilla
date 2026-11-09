@@ -627,8 +627,9 @@ permisos «por decidir»** de la tabla red por red, para pedirlos todos en una m
      en `main` y la clave en EAS;
   2. lo que el flujo necesita: hecho el 2026-11-08, el secreto `EXPO_TOKEN` en GitHub y la clave de
      la cuenta de servicio de Google Play en EAS (`docs/play-store.md`, Parte 4);
-  3. el build: Actions → «App a la tienda» → Run, desde `main`;
-  4. el envío a la pista interna, que hace el mismo flujo (o `eas submit`);
+  3–4. hechos el 2026-11-08: el flujo «App a la tienda» armó la 1.2.0 (código de versión 3) y
+     `eas submit` la mandó a la pista interna sin errores (la app en revisión no la rechazó por
+     «draft»);
   5. en la Play Console, la seguridad de los datos con lo de «CUANDO SUBA LA 1.2.0» de
      `TEXTOS-FORMULARIO.txt` y el token de los avisos, y la versión publicada;
   6. probarla en el teléfono: la cámara y sus permisos, una subida de varios GB, «Avisarme», el mesón
