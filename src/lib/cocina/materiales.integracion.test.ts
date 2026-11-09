@@ -239,7 +239,7 @@ describe.skipIf(!URL_PRUEBAS)('la cámara de frío, contra una Postgres de verda
     }
   })
 
-  it('la cuota la cambia el admin en GB, y vacía vuelve a la de siempre; Los Maestros ve cuánto ocupa cada uno', async () => {
+  it('la cuota la cambia el admin en GB, y vacía vuelve a la de su plan; Los Maestros ve cuánto ocupa cada uno', async () => {
     const { cambiarCuotaDeLaCamaraAccion } = await import('@/app/admin/actions')
     const { ocupadoPorUsuario } = await import('./materiales')
     const { usoDeLaCamara } = await import('./subidas')

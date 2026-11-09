@@ -1,7 +1,10 @@
 import 'server-only'
-import { and, desc, eq, inArray, isNotNull, isNull, or } from 'drizzle-orm'
+import { and, desc, eq, inArray, isNotNull, isNull, or, sql } from 'drizzle-orm'
 import { getDb, postComments, scheduledPostTargets, scheduledPosts, socialAccounts, socialPosts } from '@/db'
 import { leerAjuste } from '@/lib/ajustes'
+import { SIN_TOKENS } from '@/lib/planes/plan'
+import { prioridadDelDueno } from '@/lib/planes/prioridad'
+import { SinTokens, conTokens } from '@/lib/planes/tokens'
 import { reglasPara } from './automatico'
 import { CLAVE_INSTRUCCIONES, normalizarInstrucciones } from './instrucciones'
 import { comentaristaFor } from './index'
@@ -43,15 +46,19 @@ async function captionDe(accountId: string, postExternalId: string): Promise<str
 
 /**
  * Solo la parte del modelo. Lanza si falla o devuelve vacío; quien llama decide qué
- * marcar, porque la fase y el botón marcan distinto.
+ * marcar, porque la fase y el botón marcan distinto. Con los tokens del plan del dueño gastados,
+ * lanza `SinTokens` sin llamar al modelo.
  */
 async function redactarFila(
+  ownerId: string,
   fila: { text: string; author: string | null },
   caption: string | null,
   instrucciones: string,
   limite: number,
 ): Promise<string> {
-  const crudo = await pedirBorrador({ instrucciones, caption, comentario: fila.text, autor: fila.author })
+  const crudo = await conTokens(ownerId, () =>
+    pedirBorrador({ instrucciones, caption, comentario: fila.text, autor: fila.author }),
+  )
   const borrador = limpiarBorrador(crudo, limite)
   // Un borrador vacío no sirve de nada en la cola: cuenta como fallo, y el dueño
   // reintenta o escribe a mano.
@@ -91,7 +98,15 @@ export async function redactarPendientes(inicio: number): Promise<RedaccionRepor
         isNull(postComments.draftError),
       ),
     )
-    .orderBy(desc(postComments.publishedAt))
+    // Lo de los planes con prioridad primero; dentro de cada uno, del más nuevo al más viejo.
+    .orderBy(
+      desc(
+        prioridadDelDueno(
+          sql`(select ${socialAccounts.ownerId} from ${socialAccounts} where ${socialAccounts.id} = ${postComments.accountId})`,
+        ),
+      ),
+      desc(postComments.publishedAt),
+    )
     .limit(MAX_BORRADORES_POR_CORRIDA)
 
   if (pendientes.length === 0) return reporte
@@ -125,6 +140,9 @@ export async function redactarPendientes(inicio: number): Promise<RedaccionRepor
 
   // La marca no se estampa en el momento del fallo: se junta acá y se decide al final.
   const fallidos: string[] = []
+  // Los de un dueño que ya gastó los tokens de su plan: no son fallos del modelo, y se marcan con
+  // su frase para que no vuelvan a ocupar el lugar de otros en cada pasada.
+  const sinTokens: string[] = []
   let seguidos = 0
   let abandonada = false
 
@@ -140,10 +158,16 @@ export async function redactarPendientes(inicio: number): Promise<RedaccionRepor
       const caption = await captionDe(fila.accountId, fila.postExternalId)
       const instrucciones = await instruccionesDe(fila.accountId)
 
+      const ownerId = ownerPorCuenta.get(fila.accountId)
+      if (!ownerId) continue
       let borrador: string
       try {
-        borrador = await redactarFila(fila, caption, instrucciones, comentarista.limiteTexto)
+        borrador = await redactarFila(ownerId, fila, caption, instrucciones, comentarista.limiteTexto)
       } catch (error) {
+        if (error instanceof SinTokens) {
+          sinTokens.push(fila.id)
+          continue
+        }
         // Solo el modelo llega acá: es el único fallo que puede marcar la fila y sacarla de
         // las pasadas siguientes hasta que el dueño reintente.
         console.error(`[comentarios] borrador ${fila.network}:`, String(error).slice(0, 300))
@@ -171,6 +195,17 @@ export async function redactarPendientes(inicio: number): Promise<RedaccionRepor
       reporte.redactados += 1
     } catch (error) {
       console.error(`[comentarios] borrador ${fila.network}:`, String(error).slice(0, 300))
+    }
+  }
+
+  if (sinTokens.length > 0) {
+    try {
+      await db
+        .update(postComments)
+        .set({ draftError: SIN_TOKENS, updatedAt: new Date() })
+        .where(and(inArray(postComments.id, sinTokens), isNull(postComments.draft)))
+    } catch (error) {
+      console.error('[comentarios] marca de sin tokens:', String(error).slice(0, 300))
     }
   }
 
@@ -237,14 +272,16 @@ export async function regenerarBorradores(ownerId: string, inicio: number = Date
   let regenerados = 0
   let fallidos = 0
   let hechos = 0
+  let sinTokens = false
   for (let i = 0; i < lote.length; i += A_LA_PAR) {
-    if (Date.now() - inicio >= REGENERAR_MS) break
+    if (Date.now() - inicio >= REGENERAR_MS || sinTokens) break
     await Promise.all(
       lote.slice(i, i + A_LA_PAR).map(async (fila) => {
         const comentarista = comentaristaFor(fila.network)
         if (!comentarista) return
         try {
           const borrador = await redactarFila(
+            ownerId,
             fila,
             await captionDe(fila.accountId, fila.postExternalId),
             instrucciones,
@@ -257,6 +294,11 @@ export async function regenerarBorradores(ownerId: string, inicio: number = Date
             .where(and(eq(postComments.id, fila.id), inArray(postComments.state, ['pendiente', 'fallido'])))
           regenerados += 1
         } catch (error) {
+          // Sin tokens el borrador de antes se queda como estaba, y no se pide ninguno más.
+          if (error instanceof SinTokens) {
+            sinTokens = true
+            return
+          }
           console.error(`[comentarios] regenerar ${fila.network}:`, String(error).slice(0, 300))
           fallidos += 1
         }
@@ -264,6 +306,7 @@ export async function regenerarBorradores(ownerId: string, inicio: number = Date
     )
     hechos = Math.min(i + A_LA_PAR, lote.length)
   }
+  if (sinTokens && regenerados === 0) return { error: SIN_TOKENS }
   return { regenerados, fallidos, quedan: filas.length - hechos }
 }
 
@@ -296,18 +339,19 @@ export async function redactarUno(ownerId: string, id: string): Promise<{ ok: tr
   const instrucciones = normalizarInstrucciones(await leerAjuste(ownerId, CLAVE_INSTRUCCIONES))
   const caption = await captionDe(fila.accountId, fila.postExternalId)
   try {
-    const borrador = await redactarFila(fila, caption, instrucciones, comentarista.limiteTexto)
+    const borrador = await redactarFila(ownerId, fila, caption, instrucciones, comentarista.limiteTexto)
     await db
       .update(postComments)
       .set({ draft: borrador, draftError: null, updatedAt: new Date() })
       .where(eq(postComments.id, id))
     return { ok: true }
   } catch (error) {
-    console.error(`[comentarios] reintento ${fila.network}:`, String(error).slice(0, 300))
+    const frase = error instanceof SinTokens ? SIN_TOKENS : SIN_BORRADOR
+    if (!(error instanceof SinTokens)) console.error(`[comentarios] reintento ${fila.network}:`, String(error).slice(0, 300))
     await db
       .update(postComments)
-      .set({ draftError: SIN_BORRADOR, updatedAt: new Date() })
+      .set({ draftError: frase, updatedAt: new Date() })
       .where(eq(postComments.id, id))
-    return { error: SIN_BORRADOR }
+    return { error: frase }
   }
 }

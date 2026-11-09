@@ -14,16 +14,25 @@ export function lugarEnSecuencia(network: string, opciones: unknown): { secuenci
 }
 
 /**
- * Lo vencido, en el orden en que tiene que salir: por hora, y dentro de una misma hora las
- * historias de una secuencia por su lugar. Así, en una misma corrida, la 1 sale antes que la 2
- * y la 2 la encuentra ya publicada si era una foto. Lo demás conserva el orden que traía.
+ * Lo vencido, en el orden en que tiene que salir: primero lo de los planes con más prioridad
+ * (`prioridad`, la del dueño: si la corrida no alcanza, lo que queda para la siguiente es lo del
+ * gratis), después por hora, y dentro de una misma hora las historias de una secuencia por su
+ * lugar. Así, en una misma corrida, la 1 sale antes que la 2 y la 2 la encuentra ya publicada si
+ * era una foto: una secuencia es de un solo dueño, y la prioridad no la separa. Lo demás conserva
+ * el orden que traía.
  */
-export function ordenarParaPublicar<T extends { target: { network: string; opciones: unknown }; post: { scheduledAt: Date } }>(
-  filas: T[],
-): T[] {
+export function ordenarParaPublicar<
+  T extends { target: { network: string; opciones: unknown }; post: { scheduledAt: Date }; prioridad?: number },
+>(filas: T[]): T[] {
   return filas
     .map((fila, i) => ({ fila, i, orden: lugarEnSecuencia(fila.target.network, fila.target.opciones)?.orden ?? 0 }))
-    .sort((a, b) => a.fila.post.scheduledAt.getTime() - b.fila.post.scheduledAt.getTime() || a.orden - b.orden || a.i - b.i)
+    .sort(
+      (a, b) =>
+        (b.fila.prioridad ?? 0) - (a.fila.prioridad ?? 0) ||
+        a.fila.post.scheduledAt.getTime() - b.fila.post.scheduledAt.getTime() ||
+        a.orden - b.orden ||
+        a.i - b.i,
+    )
     .map(({ fila }) => fila)
 }
 

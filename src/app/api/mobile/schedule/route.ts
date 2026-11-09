@@ -45,6 +45,7 @@ import {
 import { validarRegla } from '@/lib/social/comentarios/reglas'
 import { recordarMusicaTikTok } from '@/lib/social/publish/tiktok-cuenta'
 import { BorradorConsumido, CreativoNoEsta, crearPostProgramado, crearVariosProgramados } from '@/lib/social/publish/crear'
+import { TopeDelPlan } from '@/lib/planes/topes'
 import { CREATIVO_NO_ESTA } from '@/lib/cocina/meson-motivos'
 import { CuentaInvalida } from '@/lib/social/cuentas'
 import { HISTORIA_DEMASIADAS } from '@/lib/social/publish/batch'
@@ -426,6 +427,9 @@ export async function POST(request: Request) {
     }
     if (dbError instanceof CreativoNoEsta) {
       return NextResponse.json({ error: CREATIVO_NO_ESTA }, { status: 409 })
+    }
+    if (dbError instanceof TopeDelPlan) {
+      return NextResponse.json({ error: dbError.message }, { status: 409 })
     }
     console.error('schedule/crear:', String(dbError).slice(0, 300))
     return NextResponse.json({ error: NO_SE_GUARDO }, { status: 500 })

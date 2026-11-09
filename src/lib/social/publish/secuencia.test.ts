@@ -41,3 +41,16 @@ describe('ordenarParaPublicar', () => {
     expect(ordenarParaPublicar(filas).map((f) => f.id)).toEqual(['reel', 'foto', 'historia-2'])
   })
 })
+
+describe('ordenarParaPublicar con los planes', () => {
+  it('lo del pagado sale primero aunque venza después; la secuencia de un dueño sigue en orden', () => {
+    const antes = new Date(hora.getTime() - 60_000)
+    const filas = [
+      { ...fila('gratis-reel', 'instagram', null, antes), prioridad: 0 },
+      { ...fila('pagado-2', 'instagram', { historia: { secuencia: 's', orden: 2 } }), prioridad: 1 },
+      { ...fila('pagado-1', 'instagram', { historia: { secuencia: 's', orden: 1 } }), prioridad: 1 },
+      fila('sin-prioridad', 'facebook', null, antes),
+    ]
+    expect(ordenarParaPublicar(filas).map((f) => f.id)).toEqual(['pagado-1', 'pagado-2', 'gratis-reel', 'sin-prioridad'])
+  })
+})

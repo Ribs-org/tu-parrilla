@@ -3,6 +3,7 @@ import { usuarioActual } from '@/lib/auth'
 import { env } from '@/lib/env'
 import { fraseProximamente } from '@/lib/networks'
 import { CuentaDeOtro, guardarCuenta, siQueriasOtra } from '@/lib/social/conectar'
+import { TopeDelPlan } from '@/lib/planes/topes'
 import { COOKIE_AGREGAR, fraseDeVuelta, pidioAgregar } from '@/lib/social/vuelta'
 import {
   NO_FACEBOOK_PAGE,
@@ -600,13 +601,14 @@ export async function GET(
     )
     return sinMarca(response)
   } catch (error) {
-    // Only our own OAuthError (and CuentaDeOtro, same idea) carries a message we wrote
+    // Only our own OAuthError (and CuentaDeOtro and TopeDelPlan, same idea) carries a message we wrote
     // ourselves. Everything else — a non-JSON upstream body breaking `.json()`, a DB
     // write failure — gets logged server-side and a fixed fallback, never its raw
     // message, in the redirect.
     // Con una sola cuenta en el login, la de otro era lo único que la red entregó: la
     // persona casi siempre quería otra, así que se le dice cómo pedirla.
     if (error instanceof CuentaDeOtro) return back(`${error.message} ${siQueriasOtra(network, login)}`)
+    if (error instanceof TopeDelPlan) return back(error.message)
     if (error instanceof OAuthError) return back(error.message)
     console.error('Error conectando red social:', error)
     return back('No se pudo conectar. Inténtalo de nuevo.')

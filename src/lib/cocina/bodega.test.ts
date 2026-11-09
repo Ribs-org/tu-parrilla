@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest'
 import {
   CLASES,
   CORTES,
-  CUOTA_BODEGA_POR_DEFECTO,
   CUOTA_ILEGIBLE,
   DERECHOS_FALTAN,
   GANCHOS,
@@ -12,7 +11,6 @@ import {
   USO_DESCONOCIDO,
   USOS_MATERIAL,
   claseDe,
-  cuotaDe,
   estadoDeLaCuota,
   extensionDe,
   ganchosOcupados,
@@ -119,12 +117,6 @@ describe('cómo se llama según lo que pesa', () => {
 })
 
 describe('la cuota', () => {
-  it('20 GB si nadie dijo otra cosa', () => {
-    expect(CUOTA_BODEGA_POR_DEFECTO).toBe(20 * GB)
-    expect(cuotaDe({ bodegaBytes: null })).toBe(20 * GB)
-    expect(cuotaDe({ bodegaBytes: 50 * GB })).toBe(50 * GB)
-  })
-
   it('holgada, llenándose desde el 85 % y llena al tope', () => {
     expect(estadoDeLaCuota(0, 20 * GB)).toBe('holgada')
     expect(estadoDeLaCuota(16.9 * GB, 20 * GB)).toBe('holgada')

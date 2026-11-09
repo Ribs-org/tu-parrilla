@@ -16,6 +16,7 @@ import { getDb, scheduledPosts, scheduledPostMedia, scheduledPostTargets, reglas
 import { and, eq } from 'drizzle-orm'
 import { randomUUID } from 'node:crypto'
 import { CuentaInvalida, cuentaUnicaPorRed, verificarCuentas, type CuentaDestino } from '../cuentas'
+import { TopeDelPlan, exigirCupoEnLaParrilla, sinCupoEnLaParrilla } from '@/lib/planes/topes'
 import { validarRegla, REGLA_DOCUMENTO } from '../comentarios/reglas'
 import { descargarSeguro, leerConTope, TOPE_POR_DEFECTO_MS, type MotivoDeDescarga } from './descarga-segura'
 import { Cupo, enParalelo } from './concurrencia'
@@ -786,6 +787,12 @@ async function programarSinRepetir(
     if ('error' in opcionesCheck) return { ok: false, error: opcionesCheck.error }
     const opciones = opcionesCheck.opciones
 
+    // Igual de temprano: si el plan ya no deja más publicaciones esperando, la fila se rechaza
+    // sin bajar su media. La transacción de abajo lo vuelve a mirar con el dueño trabado, porque
+    // las filas de un lote corren a la vez.
+    const sinCupo = await sinCupoEnLaParrilla(ownerId, now)
+    if (sinCupo) return { ok: false, error: sinCupo }
+
     // Igual de temprano: con cuentas nombradas, `validateBatchItem` solo corrió la
     // regla de media del trial reel con `opciones` vacío (no conocía los destinos).
     // Ahora que `opciones` está resuelto de verdad, esta es la comprobación completa
@@ -914,6 +921,7 @@ async function programarSinRepetir(
     const atributos = 'error' in atributosCheck ? null : atributosCheck.atributos
 
     const postId = await getDb().transaction(async (tx) => {
+      await exigirCupoEnLaParrilla(tx, ownerId, 1, now)
       const [post] = await tx
         .insert(scheduledPosts)
         .values({ ownerId, caption: item.texto, scheduledAt, coverUrl, atributos, ref })
@@ -953,6 +961,7 @@ async function programarSinRepetir(
     return { ok: true, postId }
   } catch (error) {
     if (error instanceof CuentaInvalida) return { ok: false, error: error.message }
+    if (error instanceof TopeDelPlan) return { ok: false, error: error.message }
     // Otro envío guardó esta `ref` mientras esta fila descargaba su media: el post ya está,
     // y es ese el que vuelve. Lo que esta fila subió a R2 queda sin referencia y se lo lleva
     // el barrido de huérfanos.

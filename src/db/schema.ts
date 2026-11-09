@@ -22,6 +22,35 @@ import type { TipoSugerencia } from '../lib/sugerencias/tipos'
 export const ROLES = ['admin', 'usuario'] as const
 export type Rol = (typeof ROLES)[number]
 
+/** Las dos claves de plan que el código conoce: cuál es el gratis y cuál se vende. */
+export const CLAVES_PLAN = ['gratis', 'pagado'] as const
+export type ClavePlan = (typeof CLAVES_PLAN)[number]
+
+/** De dónde sale el plan pagado de una persona: lo dio el admin o lo paga. */
+export const ORIGENES_PLAN = ['cortesia', 'suscripcion'] as const
+export type OrigenPlan = (typeof ORIGENES_PLAN)[number]
+
+/**
+ * Los planes (`docs/superpowers/specs/2026-11-08-planes-design.md`): una fila por plan, con su
+ * nombre, su precio y sus topes, que el admin edita en Los Maestros. Las dos filas nacen en la
+ * migración que crea la tabla. Un tope nulo es sin tope. Las funciones son las mismas en los dos:
+ * lo que cambia son los topes, el espacio, los tokens y la prioridad en las colas.
+ */
+export const planes = pgTable('planes', {
+  clave: text('clave').$type<ClavePlan>().primaryKey(),
+  nombre: text('nombre').notNull(),
+  /** Entero: el peso chileno no tiene decimales. IVA incluido; 0 en el gratis. */
+  precioClp: integer('precio_clp').notNull().default(0),
+  diasDePrueba: integer('dias_de_prueba').notNull().default(0),
+  cuentasMax: integer('cuentas_max'),
+  enLaParrillaMax: integer('en_la_parrilla_max'),
+  bodegaBytes: bigint('bodega_bytes', { mode: 'number' }).notNull(),
+  tokensMes: integer('tokens_mes'),
+  /** Más alto pasa primero en las colas: el chef, la publicación, los comentarios y el sync. */
+  prioridad: integer('prioridad').notNull().default(0),
+  actualizadoEn: timestamp('actualizado_en', { withTimezone: true }).notNull().defaultNow(),
+}).enableRLS()
+
 /**
  * Quién usa Parrilla. Hasta el subproyecto de inquilinos todo el mundo ve todo; esta tabla
  * existe para que la sesión diga quién eres y para invitar. `sesion_version` cierra las
@@ -51,11 +80,25 @@ export const users = pgTable('users', {
   cocinaDesde: timestamp('cocina_desde', { withTimezone: true }),
   /**
    * Cuántos bytes le caben en la cámara de frío de La Cocina (la bodega,
-   * `docs/superpowers/specs/2026-11-02-la-bodega-design.md`). Nula es la de siempre,
-   * `CUOTA_BODEGA_POR_DEFECTO` en `src/lib/cocina/bodega.ts`: un plan de pago escribe esta columna
-   * sin tocar el código. Hoy la cambia el admin en Los Maestros.
+   * `docs/superpowers/specs/2026-11-02-la-bodega-design.md`) puesta a mano por el admin en Los
+   * Maestros. Nula es la de su plan (`planes.bodega_bytes`, ver `cuotaDeLaCamara`).
    */
   bodegaBytes: bigint('bodega_bytes', { mode: 'number' }),
+  /**
+   * El plan que tiene. Rige mientras `planHasta` no pase; después, el gratis, sin que nadie lo
+   * escriba (`planQueRige`, en `src/lib/planes/plan.ts`).
+   */
+  plan: text('plan')
+    .$type<ClavePlan>()
+    .notNull()
+    .default('gratis')
+    .references(() => planes.clave),
+  /** Hasta cuándo rige `plan`; nula es sin fecha. */
+  planHasta: timestamp('plan_hasta', { withTimezone: true }),
+  /** De dónde sale un plan que no es el gratis; nula en el gratis. */
+  planOrigen: text('plan_origen').$type<OrigenPlan>(),
+  /** Cuándo usó los días de prueba del pagado: no se repiten. */
+  pruebaUsadaEn: timestamp('prueba_usada_en', { withTimezone: true }),
   /**
    * Hasta cuándo se le contaron al teléfono los comentarios nuevos de La Mesa: el resumen siguiente
    * cuenta los que entraron después. Nula mientras no haya salido ninguno. La escribe
@@ -1442,3 +1485,88 @@ export type Creativo = typeof creativos.$inferSelect
 export type CreativoMedia = typeof creativoMedia.$inferSelect
 export type Sugerencia = typeof sugerencias.$inferSelect
 export type PushToken = typeof pushTokens.$inferSelect
+
+/**
+ * Los tokens de IA que gastó cada dueño en un mes —los borradores de La Mesa y «Sugiéreme una»—,
+ * contra el tope de su plan (`tokensMes`). `mes` es `2026-11`, en la zona del dueño. Se suma
+ * después de cada llamada al modelo (`src/lib/planes/tokens.ts`).
+ */
+export const usoIa = pgTable(
+  'uso_ia',
+  {
+    ownerId: uuid('owner_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    mes: text('mes').notNull(),
+    tokens: bigint('tokens', { mode: 'number' }).notNull().default(0),
+    actualizadoEn: timestamp('actualizado_en', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex('uso_ia_owner_mes_key').on(t.ownerId, t.mes)],
+).enableRLS()
+
+/** En qué está una suscripción, como la deja Mercado Pago (`pending`, `authorized`, `paused`, `cancelled`). */
+export const ESTADOS_SUSCRIPCION = ['pendiente', 'autorizada', 'pausada', 'cancelada'] as const
+export type EstadoSuscripcion = (typeof ESTADOS_SUSCRIPCION)[number]
+
+/**
+ * Las suscripciones al plan pagado, una por cada vez que alguien aprieta «Pasar a Maestro Parrillero» (la fase 2
+ * de `docs/superpowers/specs/2026-11-08-planes-design.md`). La de Mercado Pago se crea con el id de
+ * esta fila como `external_reference`, y así el webhook sabe de quién es sin adivinar por el correo.
+ * El dueño queda nulo si se borra a la persona: lo cobrado se guarda para la contabilidad.
+ */
+export const suscripciones = pgTable(
+  'suscripciones',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    ownerId: uuid('owner_id').references(() => users.id, { onDelete: 'set null' }),
+    proveedor: text('proveedor').$type<'mercadopago'>().notNull().default('mercadopago'),
+    /** El id de la suscripción en Mercado Pago (`preapproval`); nulo hasta que se crea allá. */
+    externoId: text('externo_id'),
+    estado: text('estado').$type<EstadoSuscripcion>().notNull().default('pendiente'),
+    plan: text('plan')
+      .$type<ClavePlan>()
+      .notNull()
+      .references(() => planes.clave),
+    montoClp: integer('monto_clp').notNull(),
+    /** El correo de la cuenta de Mercado Pago con que se paga: Mercado Pago lo compara al autorizar. */
+    correoPagador: text('correo_pagador').notNull(),
+    /** Si se pidió con los días de prueba del plan. */
+    conPrueba: boolean('con_prueba').notNull().default(false),
+    /** El `init_point`: adónde se manda a la persona a autorizarla. */
+    enlace: text('enlace'),
+    proximoCobro: timestamp('proximo_cobro', { withTimezone: true }),
+    creadaEn: timestamp('creada_en', { withTimezone: true }).notNull().defaultNow(),
+    actualizadaEn: timestamp('actualizada_en', { withTimezone: true }).notNull().defaultNow(),
+    canceladaEn: timestamp('cancelada_en', { withTimezone: true }),
+  },
+  (t) => [uniqueIndex('suscripciones_externo_key').on(t.externoId), index('suscripciones_owner_idx').on(t.ownerId)],
+).enableRLS()
+
+/**
+ * Cada cobro de una suscripción, como lo informa Mercado Pago (`/authorized_payments/{id}`): lo que
+ * mira el admin y lo que hace falta para la boleta. Se escribe solo desde lo que se vuelve a leer en
+ * Mercado Pago, nunca desde el cuerpo de un webhook.
+ */
+export const cobros = pgTable(
+  'cobros',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    ownerId: uuid('owner_id').references(() => users.id, { onDelete: 'set null' }),
+    suscripcionId: uuid('suscripcion_id').references(() => suscripciones.id, { onDelete: 'set null' }),
+    /** El id del cobro autorizado en Mercado Pago. */
+    externoId: text('externo_id').notNull(),
+    /** El id del pago que lo cobró, cuando lo hay. */
+    pagoId: text('pago_id'),
+    montoClp: integer('monto_clp').notNull(),
+    /** El estado del pago en Mercado Pago (`approved`, `rejected`, `pending`…), tal cual. */
+    estadoPago: text('estado_pago'),
+    /** Su detalle (`status_detail`), tal cual: dice por qué se rechazó. */
+    detalle: text('detalle'),
+    /** El estado del cobro (`scheduled`, `processed`, `recycling`…), tal cual. */
+    estadoCobro: text('estado_cobro'),
+    cobradoEn: timestamp('cobrado_en', { withTimezone: true }),
+    creadoEn: timestamp('creado_en', { withTimezone: true }).notNull().defaultNow(),
+    actualizadoEn: timestamp('actualizado_en', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex('cobros_externo_key').on(t.externoId), index('cobros_owner_idx').on(t.ownerId)],
+).enableRLS()

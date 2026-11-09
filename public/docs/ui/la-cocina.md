@@ -89,7 +89,9 @@ comandas.». Con comandas, una tarjeta por comanda, de la más nueva a la más v
   toda al mesón. Una rechazada, que no se pudo terminar o cancelada no lo lleva. Mientras el chef
   pregunta, queda en el tramo donde estaba (el chef mira, o el desposte);
 - mientras espera su turno, cuántas van antes: «Es la próxima en la fila.», «Hay 1 comanda antes
-  que la tuya.» o «Hay N comandas antes que la tuya.»;
+  que la tuya.» o «Hay N comandas antes que la tuya.». En la fila van primero las pruebas de
+  estilo, después las de quienes tienen el plan pagado y después las del gratis, una de cada
+  persona por vuelta ([tu-cuenta.md](tu-cuenta.md), «Tu plan»);
 - «Hora estimada: <fecha y hora>», si se sabe: la da el chef al tomarla y la corrige en cada
   paso; mientras espera, sale de la fila y de lo que tarda una comanda en promedio, y solo si la
   cocina toma las comandas sola (a mano no se promete una hora);

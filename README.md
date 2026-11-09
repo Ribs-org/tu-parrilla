@@ -29,7 +29,8 @@ tus números.
 | `/api/bodega…` | Con la misma llave: lo que hay en la cámara de frío de La Cocina (`GET /api/bodega`) y las subidas por partes para guardar ahí (`/api/bodega/subidas…`), las mismas del panel y del teléfono (ver «La Cocina») |
 | `/api/admin/…` | Lo que el panel llama desde el navegador, con la cookie de la sesión: la firma de una subida directa (`upload-url`), las subidas por partes a la cámara de frío de La Cocina (`cocina/subidas…`) y el pulso que mantiene al día sus tarjetas (`cocina/pulso`; ver «La Cocina») y la planilla de Excel de Los Números (`planilla`, y `planilla/adelanto` para lo que no cabe; ver «Llevar para la casa») |
 | `/api/mobile/…` | La API de la app del teléfono, con el token de su sesión (ver `mobile/README.md`); `cocina…` es La Cocina desde el teléfono: lo que muestra, las subidas por partes a la cámara de frío, cambiar y sacar lo de adentro, «Mandar al chef», cancelar, contestarle al chef y el mesón con «Programar» y «Descartar» (ver «La Cocina»); `comentarios…` es La Mesa desde el teléfono: la cola, el número de La Parrilla, «Enviar», «Descartar» y otro borrador (ver «Responder comentarios»); `push` registra el teléfono para los avisos y `push/{token}` lo borra (ver «Avisos al teléfono»); `schedule/accounts/{id}/tiktok` es `creator_info` para el bloque de TikTok de Publicar (ver `mobile/README.md`, «TikTok y la palabra clave») |
-| `/api/cron/…` | Las corridas programadas: la publicación y la sincronización, que también reintenta los mensajes del libro de sugerencias que no salieron a GitHub. Solo con `CRON_SECRET` |
+| `/api/cron/…` | Las corridas programadas: la publicación y la sincronización, que también reintenta los mensajes del libro de sugerencias que no salieron a GitHub y relee en Mercado Pago las suscripciones del plan pagado. Solo con `CRON_SECRET` |
+| `/api/pagos/mercadopago` | `POST` de Mercado Pago cuando cambia una suscripción al plan pagado o uno de sus cobros. Pública y sin sesión: la llave es la firma (`MERCADOPAGO_WEBHOOK_SECRET`). Ver «Los planes» |
 | `/api/track/…` | Las balizas de visitas y clics de las páginas públicas |
 
 Corre en planes gratis: Next.js 16 en Vercel, Postgres en Supabase y la media en Cloudflare R2
@@ -176,7 +177,8 @@ Tu Cuenta. Las rutas no cambiaron. Cada pantalla lleva su subtítulo en llano po
 nombre no dice nada.
 
 En **Tu Cuenta** (`/admin/cuenta`) cambias dos cosas tuyas: el nombre con el que apareces
-y tu zona horaria. La zona es de cada usuario, no del sitio: naces con la de
+y tu zona horaria; y abajo, en «Tu plan», ves qué plan tienes y cuánto llevas usado de cada tope
+(ver «Los planes»). La zona es de cada usuario, no del sitio: naces con la de
 `SITE_TIMEZONE` y la cambias cuando quieras, y debajo del selector se ve qué hora es en la
 tuya ahora mismo, calculada en el servidor. El correo con el que entras no se cambia desde
 ahí. Tu zona manda en el panel —el calendario, la lista, el editor de un corte y las
@@ -1600,6 +1602,9 @@ Vercel y bajan con `vercel env pull .env.local`.
 | `META_PERMISOS_PROMOCIONAR` | Con `1`, y solo junto a `META_PERMISOS_ANUNCIOS=1`, conectar Instagram y Facebook pide además `ads_management`, para promocionar una publicación desde Tu Parrilla | No — encenderla solo después de activar `ads_management` en los casos de uso de la app de Meta: si no, Meta rechaza la ventana entera. Sin ella no se ofrece «Promocionar» |
 | `ANUNCIOS_ABIERTO_PARA` | Para quién se leen los anuncios de Meta y se ve «Lo pagado» en Los Números; con las dos banderas de arriba, también «Promocionar». `1`, para todos; una lista de ids de usuario separados por comas, solo para esos (la cuenta del revisor de Meta mientras revisa) | No — apagada por defecto; sin `ads_read` concedido la lectura falla cada noche, así que se abre para todos solo con los permisos aprobados |
 | `FACEBOOK_INSIGHTS_DE_REELS` | Con `1`, la lectura diaria de Facebook pide además las insights del video de cada reel (`/video_insights`) y trae sus views y su alcance, que hoy llegan en `null` (ver «Facebook: las views y el alcance») | No — apagada por defecto; Meta exige `read_insights`, que la conexión de Facebook todavía no pide. Encendida antes de tiempo no rompe nada: gasta una llamada por reel y los números siguen en `null` |
+| `MERCADOPAGO_ACCESS_TOKEN` | El Access Token de la aplicación de Mercado Pago (Tus integraciones → Credenciales): con él se crean, leen y cancelan las suscripciones al plan pagado. El de prueba sirve para probar con usuarios de prueba | No — sin él, «Tu plan» no ofrece pagar y la relectura diaria no corre (ver «Los planes») |
+| `MERCADOPAGO_WEBHOOK_SECRET` | La clave secreta del webhook de esa aplicación (Webhooks → «Planes y suscripciones»): con ella `/api/pagos/mercadopago` verifica la firma de cada aviso | No — sin ella el webhook contesta `400` a todo, y las suscripciones se ponen al día solo al volver de Mercado Pago y en la relectura diaria |
+| `PAGOS_ABIERTO_PARA` | Para quién aparece «Pasar a Maestro Parrillero» en Tu Cuenta: `1`, para todos; una lista de ids de usuario separados por comas, solo para esos (para probar con una cuenta de prueba) | No — vacía, cerrado para todos. Se abre a todos cuando `/terminos` y `/privacidad` cuenten el cobro |
 | `SITE_URL` | Tu dominio, para etiquetar los enlaces del mensaje automático | No — sin ella se usa el dominio de producción de Vercel |
 | `COCINA_SECRET` | La credencial de La Cocina: la que el servidor del chef manda en `Authorization: Bearer …` a `/api/cocina/…` para tomar comandas, bajar insumos, informar estados y entregar creativos (ver «La Cocina» y `docs/cocina-api.md`). La conocen solo este despliegue y el servidor del chef | No — sin ella esas rutas responden `401` y la cocina queda cerrada; si la pones, genérala igual que `CRON_SECRET` y dásela al servidor del chef |
 | `CRON_SECRET` | Autoriza las corridas programadas: el sync diario y la publicación cada 5 minutos. Vercel la manda sola a su cron; el pinger externo la manda en `Authorization: Bearer …` | Sí — Vercel no la crea: se genera igual que `AUTH_SECRET` y se agrega. Sin ella los crons responden `401` y no corre nada |
@@ -2047,6 +2052,82 @@ nada; Los Fierros y el compositor lo muestran como aviso. Sin parámetros. Antes
 ya programado, y para una recién conectada había que pedirle al dueño que lo copiara de Los
 Fierros. Lo puro está en `src/lib/cuentas-api.ts`.
 
+## Los planes
+
+Dos planes, el gratis y el pagado («Maestro Parrillero»), con las mismas funciones: lo que cambia son los
+topes, el espacio, los tokens de IA y quién pasa primero en las colas. El diseño, con el porqué de
+cada número, está en `docs/superpowers/specs/2026-11-08-planes-design.md`. Cada plan es una fila de
+`planes` que el admin edita en Los Maestros («Los planes»); las dos nacen en la migración
+`0035_planes.sql`:
+
+| | Gratis | Maestro Parrillero |
+|---|---|---|
+| Precio al mes | $0 | $34.990, IVA incluido |
+| Cuentas conectadas | 7 | 15 |
+| Publicaciones esperando a la vez | 50 | sin tope |
+| Cámara de frío | 20 GB | 200 GB |
+| Tokens de IA al mes | 100.000 | 2.000.000 |
+| Prioridad en las colas | 0 | 1 |
+
+**Toda persona nace en el gratis.** El pagado lo da el admin como cortesía —hasta un día o sin
+fecha— con «Plan» en la fila de cada persona en Los Maestros, o lo paga la persona con Mercado Pago
+desde «Tu plan» (abajo, cerrado por ahora). El plan de alguien es `users.plan`, que rige mientras
+`users.plan_hasta` no pase: después rige el gratis sin que nadie lo escriba (`claveQueRige`, en
+`src/lib/planes/plan.ts`).
+
+**Los topes se miran al escribir, nunca al leer.** Bajar de plan no desconecta ni borra nada: lo que
+ya está sigue y lo programado sale, pero no se puede conectar otra cuenta ni programar más hasta
+quedar bajo el tope. Las cuentas se cuentan al conectar (`guardarCuenta`): solo las que tienen
+credencial, y renovar una que ya estaba conectada no suma. Las publicaciones esperando se cuentan
+al programar desde el panel, el teléfono o la API (`crearVariosProgramados` y el lote) y al
+reprogramar un destino quemado: una publicación es un corte con algún destino por salir, vaya a una
+red o a cuatro. Los dos corren en la transacción que escribe, con la fila del dueño trabada, para
+que dos pestañas a la vez no se pasen del tope entre las dos (`src/lib/planes/topes.ts`).
+
+**Los tokens** son los de los borradores de La Mesa y de «Sugiéreme una»: antes de cada llamada se
+mira si al dueño le quedan, y después se suma lo que la pasarela dice que gastó (`usage.totalTokens`)
+en `uso_ia`, por mes en la zona del dueño (`conTokens`, en `src/lib/planes/tokens.ts`). Sin tokens,
+el borrador queda con «Se acabaron los tokens de IA de tu plan este mes.» y se responde a mano, y
+«Sugiéreme una» elige sin el modelo.
+
+**La prioridad** ordena las cuatro colas que recorren a todos: la fila del chef de La Cocina
+(`ordenarFila`: las pruebas primero, después la ronda de los de mayor prioridad, después la de los
+demás), la publicación, el sondeo de comentarios con sus borradores, y la sincronización diaria.
+Dentro de una misma prioridad, el orden de siempre (`prioridadDelDueno`, en
+`src/lib/planes/prioridad.ts`).
+
+**El cobro, con Mercado Pago, está escrito y cerrado**: «Pasar a Maestro Parrillero» solo aparece para quien
+diga `PAGOS_ABIERTO_PARA`, y solo con `MERCADOPAGO_ACCESS_TOKEN` puesta. Se abre a todos cuando
+`/terminos` y `/privacidad` lo cuenten (`docs/pendientes.md`). Es una suscripción mensual sin plan
+asociado por persona (`src/lib/pagos/`):
+
+1. «Pasar a Maestro Parrillero» pide el correo de la cuenta de Mercado Pago con que se va a pagar —Mercado Pago lo
+   compara al autorizar—, crea una fila de `suscripciones` y la suscripción en Mercado Pago
+   (`POST /preapproval`, con el id de la fila como `external_reference`, el precio del plan en CLP y,
+   si la persona nunca los usó, los días de prueba), y manda a la persona a su `init_point`. Tu
+   Parrilla nunca ve una tarjeta. Un enlace de menos de un día se reusa.
+2. La vuelta es Tu Cuenta con `?plan=vuelta`, que relee la suscripción sin esperar al webhook.
+3. El webhook (`/api/pagos/mercadopago`) verifica la firma (`x-signature`: HMAC-SHA256 de
+   `id:<data.id>;request-id:<x-request-id>;ts:<ts>;`, y no más vieja que 15 minutos) y vuelve a leer
+   en Mercado Pago la suscripción o el cobro del aviso: del cuerpo solo se cree el id. Un id que
+   Mercado Pago no conoce —el de «Simular notificación», en su panel— se contesta `200` y no se mira.
+4. Autorizada, la persona tiene el pagado hasta el próximo cobro más cinco días de gracia
+   (`GRACIA_DIAS`, una suposición: la documentación de Mercado Pago no se deja leer desde un servidor
+   y no se pudo confirmar cuántos días reintenta un cobro rechazado). Cada cobro aprobado se anota en
+   `cobros` y corre la fecha; uno rechazado no, y si en la gracia no entra, el plan cae solo al
+   gratis. Nunca acorta lo que ya tenía: una cortesía sin fecha se queda.
+5. «Cancelar la suscripción» la cancela en Mercado Pago; el pagado sigue hasta el fin de lo pagado (o
+   de la prueba), y después, el gratis.
+6. Cada día, la sincronización relee las suscripciones vivas y las que esperan desde hace menos de
+   una semana (`releerSuscripciones`).
+
+En Mercado Pago, la aplicación lleva el webhook `https://tu-parrilla.cl/api/pagos/mercadopago` con
+el evento «Planes y suscripciones». Ponerlo en marcha, con los usuarios de prueba y cada clic, está
+en `docs/mercadopago-paso-a-paso.md`. Los nombres de los campos y la firma salen del SDK oficial de
+Node (`mercadopago` 3.6.1), no de su documentación. Al borrar a una persona, sus suscripciones y
+cobros se quedan sin dueño, para la contabilidad. La app del teléfono no cobra ni enlaza al cobro: lo
+que se vende dentro de una app de Android tiene que ir por Google Play Billing.
+
 ## La Cocina
 
 La Cocina es la fábrica de creativos de cada usuario dentro de Tu Parrilla:
@@ -2268,12 +2349,12 @@ sistema (`mobile/src/lib/subir-por-partes.ts` y `archivo-local.ts`).
 en `…/insumos/`), con un uuid en la clave, y su URL nunca sale al navegador: el chef lo baja con un
 enlace firmado que vence en una hora.
 
-**La cuota de la cámara.** 20 GB por usuario (`CUOTA_BODEGA_POR_DEFECTO`, en
-`src/lib/cocina/bodega.ts`); el que tenga otra la lleva en `users.bodega_bytes`, que el admin cambia
-en Los Maestros y que un plan de pago podrá escribir sin tocar el código. Se mira en el servidor al
+**La cuota de la cámara.** La de su plan: 20 GB en el gratis y 200 GB en el pagado (ver «Los
+planes»); el que tenga otra puesta a mano la lleva en `users.bodega_bytes`, que el admin cambia en Los
+Maestros y que gana sobre la del plan (`cuotaDeLaCamara`). Se mira en el servidor al
 abrir cada subida, antes de firmar nada, contando lo guardado **y lo que está subiendo**, con la
 fila del usuario bloqueada para que dos subidas a la vez no pasen las dos. «¿Necesitas más
-espacio?» abre el libro de sugerencias: comprar espacio todavía no existe. Pesa: 20 GB por usuario
+espacio?» abre el libro de sugerencias: pagar el plan desde el panel todavía no existe. Pesa: 20 GB por usuario
 pasa los 10 GB gratis de R2 para todo el bucket, y cada GB de más cuesta unos US$0,015 al mes
 (diez usuarios llenos, unos US$3). Si el material se queda en R2 o va al Drive del dueño está en
 `docs/pendientes.md`.
@@ -2348,6 +2429,8 @@ src/
     lo-pagado.ts           los anuncios del dueño que corrieron en el período, para «Lo pagado» en Los Números
     analitica-youtube-lectura.ts  lo de YouTube Analytics que leen «Tu canal de YouTube» y la pieza, atado al dueño
     enlace-de-la-pagina.ts la dirección pública de la página principal del dueño: el link con ?s= de cada publicación
+    pagos/                 el cobro del plan pagado con Mercado Pago: la firma, el cuerpo y los estados (reglas.ts, sin base), lo que se le pide (mercadopago.ts) y las suscripciones y sus cobros (suscripciones.ts)
+    planes/                los dos planes: cuál rige y sus frases (plan.ts, sin base), leerlos y cambiarlos (planes.ts), los topes al escribir (topes.ts), los tokens de IA del mes (tokens.ts), la prioridad en las colas (prioridad.ts) y lo que dibuja «Tu plan» (uso.ts)
     planilla/              «Llevar para la casa»: las hojas y su «Léeme», lo que se lee fila por fila, y el .xlsx escrito a mano
     tablero.ts             las reglas de Los Números sin base: cuenta elegida, «⋯ Más» abiertos, la URL
     pieza.ts               qué junta las versiones de una pieza y las medianas por atributo (sin base)

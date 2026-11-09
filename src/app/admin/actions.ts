@@ -31,6 +31,7 @@ import { extensionDe, validateScheduleDraft } from '@/lib/social/publish/validat
 import { validateAtributos, ATRIBUTOS_ERROR, type Atributos } from '@/lib/social/publish/atributos'
 import { POST_NO_EXISTE, editarPostProgramado } from '@/lib/social/publish/editar'
 import { BorradorConsumido, CreativoNoEsta, crearPostProgramado } from '@/lib/social/publish/crear'
+import { TopeDelPlan } from '@/lib/planes/topes'
 import { CREATIVO_NO_ESTA } from '@/lib/cocina/meson-motivos'
 import { BORRADOR_NO_EXISTE } from '@/lib/mobile-api'
 import { REARME } from '@/lib/social/publish/publisher'
@@ -583,6 +584,9 @@ export async function conectarElegidas(formData: FormData): Promise<void> {
     if (error instanceof CuentaDeOtro) {
       // Solo si otro la tomó entre la revisión de arriba y este guardado.
       fallo = error.message
+    } else if (error instanceof TopeDelPlan) {
+      // Las que cupieron ya quedaron guardadas; la frase dice por qué no entró la siguiente.
+      fallo = error.message
     } else {
       console.error('conectarElegidas:', String(error).slice(0, 300))
       fallo = 'No se pudo guardar la cuenta. Inténtalo de nuevo.'
@@ -796,6 +800,7 @@ export async function createScheduledPost(_prev: FormState, formData: FormData):
   } catch (error) {
     if (error instanceof BorradorConsumido) return { error: BORRADOR_NO_EXISTE }
     if (error instanceof CreativoNoEsta) return { error: CREATIVO_NO_ESTA }
+    if (error instanceof TopeDelPlan) return { error: error.message }
     throw error
   }
 
@@ -934,9 +939,9 @@ export async function rescheduleTarget(targetId: string, localDatetime: string):
   }
 
   // La regla, compartida con la app del teléfono, vive en `reprogramarDestino`.
-  if ((await reprogramarDestino(ownerId, targetId, scheduledAt)) === 'no-existe') {
-    return { error: DESTINO_NO_EXISTE }
-  }
+  const resultado = await reprogramarDestino(ownerId, targetId, scheduledAt)
+  if (resultado === 'no-existe') return { error: DESTINO_NO_EXISTE }
+  if (typeof resultado === 'object') return { error: resultado.sinCupo }
 
   // «Se quemó», arriba del calendario, muestra los mismos destinos con el mismo botón: sin
   // esto, la fila que se acaba de arreglar sigue pidiendo una acción que ya se hizo.
@@ -1173,7 +1178,7 @@ export async function encenderCocina(id: string, encender: boolean): Promise<{ e
 
 /**
  * Le cambia a alguien la cuota de la cámara de frío de La Cocina, desde Los Maestros: en GB, y
- * vacía vuelve a la de siempre (20 GB). Solo el admin. Lo que ya está guardado no se borra aunque
+ * vacía vuelve a la de su plan. Solo el admin. Lo que ya está guardado no se borra aunque
  * la cuota baje: deja de poder guardar más hasta que haga espacio.
  */
 export async function cambiarCuotaDeLaCamaraAccion(id: string, gigas: string): Promise<{ error?: string }> {

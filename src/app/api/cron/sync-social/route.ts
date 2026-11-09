@@ -4,6 +4,7 @@ import { purgarYoutubeViejo } from '@/lib/social/retencion-youtube'
 import { syncAll } from '@/lib/social/sync'
 import { clienteGithub } from '@/lib/sugerencias/github'
 import { reintentarSugerencias } from '@/lib/sugerencias/guardar'
+import { releerSuscripciones } from '@/lib/pagos/suscripciones'
 import { env } from '@/lib/env'
 import { cronAutorizado } from '@/lib/cron-auth'
 
@@ -52,7 +53,16 @@ export async function GET(request: Request) {
       console.error('Falló el reintento de las sugerencias:', String(error).slice(0, 300))
       sugerencias = { error: 'El reintento de las sugerencias falló; ver el log.' }
     }
-    return NextResponse.json({ report, retencion, resumenes, sugerencias })
+    // Las suscripciones del plan pagado, releídas en Mercado Pago: un webhook perdido no deja a
+    // nadie con el plan equivocado más de un día. Mismo trato: si falla, mañana se releen.
+    let pagos: Awaited<ReturnType<typeof releerSuscripciones>> | { error: string }
+    try {
+      pagos = await releerSuscripciones()
+    } catch (error) {
+      console.error('Falló la relectura de las suscripciones:', String(error).slice(0, 300))
+      pagos = { error: 'La relectura de las suscripciones falló; ver el log.' }
+    }
+    return NextResponse.json({ report, retencion, resumenes, sugerencias, pagos })
   } catch (error) {
     // Reaching here is the other case entirely: syncAll settles every network on its own,
     // so a throw is the orchestrator itself breaking, before any per-network catch could
