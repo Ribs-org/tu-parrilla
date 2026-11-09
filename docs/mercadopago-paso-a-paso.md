@@ -10,18 +10,17 @@ desde un servidor, así que los nombres de los menús son los que tenía su pane
 cambiado. Si un botón no está donde dice, lo que importa es lo que hace el paso. Las credenciales y
 la clave secreta no se pegan en ningún chat ni issue: van directo a Vercel.
 
-## 1. Fusionar los dos PRs, en orden
+## 1. Los dos PRs: hecho el 2026-11-08
 
-1. En GitHub, fusionar el PR de la fase 1 (#359). El despliegue de producción corre la migración
-   `0035_planes.sql` antes de construir; si falla, el código nuevo no se promueve.
-2. En Vercel → el proyecto → «Deployments», esperar a que el de `main` quede «Ready».
-3. Comprobar en `https://tu-parrilla.cl/admin/usuarios`, «Los planes»: dos tarjetas, «El gratis»
-   (7 cuentas, 50 esperando, 20 GB, 100.000 tokens) y «El pagado», «Maestro Parrillero» ($34.990,
-   7 días de prueba, 15 cuentas, «Esperando en la parrilla» vacío, 200 GB, 2.000.000 tokens,
-   prioridad 1). Y en Tu Cuenta, el bloque «Tu plan».
-4. Fusionar el de la fase 2 (#360), después de ponerlo al día con `main` y de que su CI pase. Corre
-   la migración `0036_suscripciones_y_cobros.sql`. Nadie ve nada nuevo todavía: sin
-   `MERCADOPAGO_ACCESS_TOKEN`, «Pasar a Maestro Parrillero» no aparece.
+#359 y #360 están en `main`, y sus migraciones (`0035_planes.sql` y
+`0036_suscripciones_y_cobros.sql`) corrieron en producción: el despliegue las corre antes de
+construir, y si una falla, el código nuevo no se promueve. Nadie ve nada del cobro todavía: sin
+`MERCADOPAGO_ACCESS_TOKEN`, «Pasar a Maestro Parrillero» no aparece.
+
+Lo que queda de este paso es mirarlo con la sesión del admin, en `https://tu-parrilla.cl/admin/usuarios`,
+«Los planes»: dos tarjetas, «El gratis» (7 cuentas, 50 esperando, 20 GB, 100.000 tokens) y «El
+pagado», «Maestro Parrillero» ($34.990, 7 días de prueba, 15 cuentas, «Esperando en la parrilla»
+vacío, 200 GB, 2.000.000 tokens, prioridad 1). Y en Tu Cuenta, el bloque «Tu plan».
 
 ## 2. La cuenta de Mercado Pago de Pyxis
 
