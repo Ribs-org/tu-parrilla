@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Pressable, Text, View } from 'react-native'
 import { useFocusEffect, useRouter } from 'expo-router'
+import { TarjetaDelChef } from '../../components/tarjeta-del-chef'
 import { CorteProgramado, CorteServido } from '../../components/corte-programado'
 import { FiltroDeRedes } from '../../components/filtro-de-redes'
 import { IconoPoner } from '../../components/iconos'
@@ -168,6 +169,9 @@ export default function LaParrilla() {
     <Pantalla refrescando={cargando} onRefrescar={refrescar}>
       <Text style={{ color: colores.suave, fontSize: 13 }}>lo que viene y cómo salió lo que ya se fue</Text>
       <Sello texto={sello} />
+
+      {/* A la quinta apertura, una vez, si La Cocina está encendida y nunca se abrió. */}
+      <TarjetaDelChef />
 
       {/* Los comentarios que esperan respuesta: La Mesa, un toque adentro. */}
       <AccesoALaMesa />

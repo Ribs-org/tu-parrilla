@@ -1,10 +1,12 @@
 'use server'
 
+import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { after } from 'next/server'
 import { createSession } from '@/lib/auth'
-import { CORREO_INVALIDO, DEMASIADOS_INTENTOS, normalizarCorreo } from '@/lib/ingreso'
+import { CORREO_INVALIDO, DEMASIADOS_INTENTOS, PUENTE_VENCIDO, normalizarCorreo } from '@/lib/ingreso'
 import { demasiadosIntentos } from '@/lib/limite-ip'
+import { COOKIE_DESDE_LA_APP, VIDA_DE_DESDE_LA_APP_S, cruzarPuente, mirarPuente } from '@/lib/puente'
 import { canjear, pedir } from '@/lib/usuarios'
 
 export type FormState = { error?: string; ok?: boolean; correo?: string }
@@ -44,4 +46,31 @@ export async function canjearCodigo(_prev: FormState, formData: FormData): Promi
 
   await createSession(resultado.usuario)
   redirect('/admin')
+}
+
+/** Con qué correo entra la llave del puente, sin gastarla: la página lo muestra antes de «Entrar». */
+export async function mirar(llave: string): Promise<{ correo: string } | { error: string }> {
+  if (await demasiadosIntentos('cruzar-puente', 20, 10 * 60_000)) return { error: DEMASIADOS_INTENTOS }
+  const correo = await mirarPuente(llave)
+  return correo ? { correo } : { error: PUENTE_VENCIDO }
+}
+
+/**
+ * Cruza el puente de la app (`lib/puente.ts`): abre la sesión del panel en este navegador y lleva a
+ * Los Fierros, que es para lo que la app lo abre. Pisa la sesión que hubiera: quien aprieta
+ * «Entrar» vio con qué correo entraba.
+ */
+export async function cruzar(llave: string): Promise<{ error: string }> {
+  if (await demasiadosIntentos('cruzar-puente', 20, 10 * 60_000)) return { error: DEMASIADOS_INTENTOS }
+  const usuario = await cruzarPuente(llave)
+  if (!usuario) return { error: PUENTE_VENCIDO }
+  await createSession(usuario)
+  ;(await cookies()).set(COOKIE_DESDE_LA_APP, '1', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+    maxAge: VIDA_DE_DESDE_LA_APP_S,
+  })
+  redirect('/admin/accounts')
 }

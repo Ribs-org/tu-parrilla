@@ -15,6 +15,7 @@ import {
   TarjetaEnLaCamara,
   VentanaCambiar,
 } from '../../components/cocina'
+import { usePrimeraVuelta } from '../../components/primera-vuelta'
 import { useSelectorFecha } from '../../components/selector-fecha'
 import { Boton, BotonTexto, Cargando, Chip, ErrorConReintento, Etiqueta, Sello, TIPO_TITULO, Tarjeta } from '../../components/ui'
 import { useSesion } from '../../components/sesion'
@@ -192,6 +193,10 @@ export default function LaCocina() {
   const max = opciones?.maxAcompanamientos ?? MAX_ACOMPANAMIENTOS
 
   /* ---- al volver a la pestaña, y mientras el chef trabaja ---- */
+
+  // Quien abre La Cocina ya la conoce: el chef no se presenta en La Parrilla.
+  const { conocerLaCocina } = usePrimeraVuelta()
+  useFocusEffect(conocerLaCocina)
 
   useFocusEffect(
     useCallback(() => {

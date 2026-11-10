@@ -8,6 +8,7 @@ import { Oswald_600SemiBold } from '@expo-google-fonts/oswald/600SemiBold'
 import { useFonts } from 'expo-font'
 import { StatusBar } from 'expo-status-bar'
 import { PALETAS } from '../components/colores'
+import { ProveedorDePrimeraVuelta, usePrimeraVuelta } from '../components/primera-vuelta'
 import { ProveedorDeSesion, useSesion } from '../components/sesion'
 import { Cargando, TIPO_TITULO } from '../components/ui'
 import { ProveedorDeTema, useColores, useTema } from '../components/tema'
@@ -23,7 +24,9 @@ export default function RootLayout() {
     <ProveedorDeTema>
       <ProveedorDeVentanas>
         <ProveedorDeSesion>
-          <Raiz />
+          <ProveedorDePrimeraVuelta>
+            <Raiz />
+          </ProveedorDePrimeraVuelta>
         </ProveedorDeSesion>
       </ProveedorDeVentanas>
     </ProveedorDeTema>
@@ -92,20 +95,33 @@ function Raiz() {
    */
   const [fuentesListas, errorFuentes] = useFonts({ Oswald_600SemiBold })
   const dentro = estado === 'dentro'
+  // La bienvenida, a medias o recién empezada (`lib/primera-vuelta.ts`): mientras dure, ella y no
+  // las pestañas. Hay que esperar a leerla para no mostrar La Parrilla un instante antes.
+  const { cargada, vuelta } = usePrimeraVuelta()
+  const bienvenida = dentro && vuelta.bienvenida === 'abierta'
 
   return (
     <ThemeProvider value={navegacion}>
       {/* La hora y la batería, claras sobre la noche y oscuras sobre el papel de arroz. */}
       <StatusBar style={tema === 'dia' ? 'dark' : 'light'} />
-      {estado !== 'arrancando' && (fuentesListas || errorFuentes) ? (
+      {estado !== 'arrancando' && cargada && (fuentesListas || errorFuentes) ? (
         <Stack
           screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colores.fondo } }}
         >
           {/* Cada pantalla de la cuenta, detrás de la sesión: afuera no se llega a ninguna, ni por
               un enlace ni volviendo atrás, y al salir se van todas de la pila. Una ruta que no
               esté nombrada acá queda fuera de la reja: expo-router la agrega igual, sin guardia. */}
-          <Stack.Protected guard={dentro}>
+          {/* La bienvenida va primera: con ella abierta, las pestañas no están, y la raíz cae en la
+              primera pantalla que sí. Al terminarla se va de la pila y cae en las pestañas, como al
+              entrar desde la pantalla de entrada. Mientras dura no sale la pregunta de los avisos,
+              que vive en las pestañas. */}
+          <Stack.Protected guard={bienvenida}>
+            <Stack.Screen name="bienvenida" />
+          </Stack.Protected>
+          <Stack.Protected guard={dentro && !bienvenida}>
             <Stack.Screen name="(tabs)" />
+          </Stack.Protected>
+          <Stack.Protected guard={dentro}>
             {/* La única pantalla con cabecera: el detalle se empuja sobre esta pila y sin
                 ella no hay cómo volver ni queda libre la franja de la hora. Declararla
                 acá y no en el propio archivo la deja puesta también mientras el detalle
