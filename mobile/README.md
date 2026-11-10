@@ -147,6 +147,32 @@ la app guardó de la cuenta —lo último que mostró cada pantalla, para abrir 
 más. Entrar también lo borra, por si el teléfono cambió de manos. Para cortar todos los teléfonos
 a la vez, «Si se pierde el teléfono», abajo.
 
+## La primera vuelta
+
+Lo justo para partir, sin un recorrido por cada pantalla (el porqué, en
+`docs/superpowers/specs/2026-11-10-primera-vuelta-design.md`):
+
+- **La bienvenida** (`src/app/bienvenida.tsx`). Al canjear el código, el servidor dice si la
+  cuenta no tiene ninguna red conectada (`sinRedes`, en la respuesta de `POST /api/mobile/session`).
+  Si no tiene, la raíz abre la bienvenida en vez de las pestañas: una guardia más en
+  `src/app/_layout.tsx`, como la de la sesión. Su botón abre Los Fierros del panel con el puente
+  (abajo). La pregunta de los avisos vive en las pestañas, así que no sale mientras dura.
+- **El puente** (`src/lib/puente.ts`, y del lado del sitio `src/lib/puente.ts` y
+  `/api/mobile/puente`). Las redes se conectan en el panel, y abrirlo en el navegador pedía otro
+  código. Ahora la app pide una dirección de un solo uso que vale dos minutos y la abre:
+  `/ingresar/puente#t=<llave>` muestra con qué correo se entra y, al apretar «Entrar», abre la
+  sesión del panel y lleva a Los Fierros. El botón «Abrir Los
+  Fierros en el panel» de Ajustes usa lo mismo. Contra un sitio de antes, abre Los Fierros sin
+  sesión, como antes.
+- **El chef, a la quinta** (`src/components/tarjeta-del-chef.tsx`). La app cuenta las aperturas
+  (arrancar, o volver después de media hora fuera) y a la quinta presenta al chef en La Parrilla,
+  una vez, si La Cocina está encendida, sin comandas y nunca abierta en ese teléfono.
+
+Lo que recuerda —la bienvenida a medias o vista, las aperturas y el chef— va en AsyncStorage
+(`primera-vuelta`, `src/lib/primera-vuelta.ts`) y es de la cuenta: se borra al salir y al entrar.
+Todo es JavaScript: llega por aire, también a la 1.1.0 (usa `Linking`, `AppState` y `BackHandler`
+de React Native y AsyncStorage, que ya están en los dos builds).
+
 ## Cómo publicar desde el teléfono
 
 En la pestaña **Publicar**:

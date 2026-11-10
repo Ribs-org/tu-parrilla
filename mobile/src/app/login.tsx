@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { usePrimeraVuelta } from '../components/primera-vuelta'
 import { useSesion } from '../components/sesion'
 import { Boton, Titulo } from '../components/ui'
 import { useColores } from '../components/tema'
@@ -17,6 +18,7 @@ export default function Login() {
   const [error, setError] = useState<string | null>(null)
   const [ocupado, setOcupado] = useState(false)
   const { abrir } = useSesion()
+  const { entrar: empezarLaVuelta } = usePrimeraVuelta()
   // El proveedor ya lo monta expo-router en su raíz; acá solo se leen los márgenes.
   const insets = useSafeAreaInsets()
 
@@ -48,7 +50,10 @@ export default function Login() {
       setError(resultado.error)
       return
     }
-    // Con la sesión abierta, la raíz deja pasar a las pestañas y saca esta pantalla de la pila.
+    // Antes de abrir: sin redes, la raíz deja pasar a la bienvenida y no a las pestañas.
+    empezarLaVuelta(resultado.sinRedes)
+    // Con la sesión abierta, la raíz deja pasar a las pestañas (o a la bienvenida) y saca esta
+    // pantalla de la pila.
     abrir(resultado.token)
   }
 

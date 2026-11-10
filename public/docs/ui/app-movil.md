@@ -10,7 +10,7 @@ Una app para Android que muestra de un vistazo lo programado y cómo van las red
 - Si el teléfono tiene PIN, patrón, huella o reconocimiento de cara, cada vez que la app arranca pide desbloquear con el aviso «Desbloquea para entrar a Tu Parrilla» (si seguía abierta en segundo plano, al volver a ella no lo pide). Si se cancela, la app muestra la pantalla de entrada, y la próxima vez que arranque lo vuelve a pedir. Sin desbloquear no se llega a ninguna pantalla de la cuenta, ni con un enlace.
 - Si la sesión deja de valer (por ejemplo, porque quien administra el sitio revocó el acceso de los teléfonos), la app vuelve sola a la pantalla de entrada, sin ningún mensaje, y borra lo que tenía guardado de la cuenta, como al cerrar sesión.
 - Para salir: el botón de arriba a la derecha → «Ajustes» → «Cerrar sesión» (ver «Ajustes», más abajo).
-- Al entrar se abre La Parrilla.
+- Al entrar se abre La Parrilla. La primera vez en un teléfono, si la cuenta no tiene ninguna red conectada, se abre antes la bienvenida (ver «La bienvenida», más abajo).
 
 ## Qué se ve
 
@@ -57,6 +57,23 @@ Tiene dos pasos, uno detrás del otro en la misma pantalla:
 
 Si algo falla, el mensaje sale en rojo debajo del campo.
 
+### La bienvenida
+
+Sale una sola vez, al entrar con el código, y solo si la cuenta no tiene ninguna red conectada. Quien ya tiene redes —porque partió en el panel web o porque entra en otro teléfono— no la ve: va directo a La Parrilla. No tiene pestañas ni cabecera. De arriba abajo:
+
+- «Tu Parrilla», en chico.
+- El título «Prende los fierros» (de día, «Afila los cuchillos»).
+- «Te damos la bienvenida. Para partir, conecta tus redes: Instagram, TikTok, YouTube o Facebook. Con eso publicas desde acá, ves cómo le va a cada corte y respondes los comentarios.»
+- En chico: «Se conectan en el panel web, en Los Fierros (de día, Los Cuchillos). Te llevamos con tu sesión abierta; cuando termines, vuelve acá.»
+- El botón naranjo **«Conectar mis redes»** (mientras abre, «Abriendo…»): abre el navegador del teléfono en «Desde la app», que muestra el correo de la cuenta y, con «Entrar», lleva a [Los Fierros](los-fierros.md) con la sesión del panel abierta, sin pedir otro código.
+- **«Después»**, en chico: va a La Parrilla. La bienvenida no vuelve a salir.
+
+Al volver a la app desde el navegador, la pantalla relee las cuentas. Con al menos una conectada cambia: el título «Fierros prendidos» (de día, «Cuchillos afilados»), «Listo. Ya está conectada:» (o «Ya están conectadas:»), una tarjeta por cuenta con «Red · nombre_de_cuenta», «Puedes conectar otras cuando quieras, desde Ajustes.», el botón naranjo **«Ir a La Parrilla»** (de día, «Ir a La Barra») y, en chico, **«Conectar otra»**.
+
+El botón atrás de Android hace lo mismo que «Después». Si el teléfono cierra la app mientras la persona está en el navegador, al abrirla de nuevo la bienvenida sigue ahí. Mientras está abierta no sale la pregunta de los avisos al teléfono: llega unos segundos después de llegar a La Parrilla.
+
+Si el panel no se puede abrir: «No se pudo abrir el panel» / «Revisa la señal y prueba de nuevo.», con «Entendido».
+
 ### La barra de pestañas
 
 Abajo, cuatro pestañas en este orden: «La Parrilla», «Publicar», «Los Números» y «La Cocina». «Publicar» se ve como un círculo naranjo con una cruz, y «La Cocina», como un gorro de chef. La pestaña activa se ve en naranjo y su nombre sale también como título arriba de la pantalla. La Cocina llegó con la versión 1.2.0 de la app y, desde el 2026-11-07, también a la 1.1.0 por aire, sin grabar con la cámara (ver «La Cocina», más abajo).
@@ -70,6 +87,7 @@ En «La Parrilla», «Los Números», «Tus publicaciones» y «La Mesa», la ap
 Lo programado, de hoy en adelante, y lo que se quemó. De arriba abajo:
 
 - La línea «lo que viene y cómo salió lo que ya se fue».
+- **«Te presento al chef»**, una sola vez: a la quinta vez que se abre la app con esa cuenta (cuenta también volver a ella después de media hora fuera), si [La Cocina](la-cocina.md) está encendida para la cuenta, no tiene comandas y nunca se abrió la pestaña La Cocina en ese teléfono. Una tarjeta con «La Cocina» en chico, «Te presento al chef», «Le mandas lo que grabaste y te devuelve cortes listos para programar. Te espera en La Cocina.», el botón naranjo «Ir a La Cocina», que abre esa pestaña, y «Ahora no». Cualquiera de los dos la quita para siempre en ese teléfono.
 - **«La Mesa»**, una tarjeta que abre La Mesa (ver «La Mesa», más abajo): el nombre y debajo cuántos comentarios esperan respuesta en todas las redes, con la frase del panel —«No hay nada esperando respuesta.», «Un comentario espera tu respuesta.» o «5 comentarios esperan tu respuesta.»—. Si hay alguno, la tarjeta lleva el borde naranjo y un círculo naranjo con el número («99+» pasado de 99). A la derecha, «›». Si Tu Parrilla todavía no cuenta los comentarios para el teléfono, la tarjeta dice «lo que te responden y tus respuestas», sin número. Al volver de La Mesa, el número se pone al día solo.
 - **«Se quemó»**, en rojo, solo si algo falló en los últimos siete días y nadie lo archivó (en el panel web, con «Archivar», o por la API): lo archivado no sale acá. Una tarjeta con borde rojo por cada red donde un corte falló (un corte que falló en dos redes da dos tarjetas), de la más reciente a la más vieja. A la izquierda, el corte dibujado con todas sus marcas, quemado y con su banderita, como en el panel (ver «El corte» en [La Parrilla](la-parrilla.md)): se ve cuál de sus redes se quemó y si las demás salieron. Al lado: arriba la hora —solo «19:00» si era de hoy, o con el día y el mes delante, «mié 14 de oct · 19:00», como en el panel— y la cuenta, «Instagram · nombre_de_cuenta»; el texto del post (o «(sin texto)»); el motivo en rojo, cuando lo hay, y el botón con borde «Reprogramar» (mientras trabaja, «Reprogramando…», y los demás botones esperan).
 - **«▸ Borradores (N)»**, solo si hay al menos un borrador guardado, del teléfono o del panel web. Al tocarlo se abre la lista (el triángulo pasa a «▾») y al tocarlo de nuevo se cierra. Cada borrador es una tarjeta con su texto en dos líneas (o «(sin texto)») y debajo, en chico, «para el vie 16 de oct a las 19:00» o «sin fecha», « · 1 archivo» o « · N archivos» si tiene, y « · guardado el mar 13 de oct a las 14:05». Van del guardado más recientemente al más viejo. Tocar uno lo abre en «Publicar».
@@ -262,7 +280,7 @@ Se abre con el botón de Ajustes de cualquier pestaña. Arriba, la flecha para v
   - «Se apagó: así no publica. Reconéctala en el panel.» (en rojo)
   - «Desconectada.»
   Sin cuentas, «Todavía no conectas ninguna cuenta.». Mientras carga, «Cargando tus cuentas…».
-- Debajo, «Tus redes conectadas. Se conectan y se reconectan en el panel web.» y el botón «Abrir Los Fierros en el panel», que abre [Los Fierros](los-fierros.md) en el navegador del teléfono (ahí puede pedir entrar con el correo, como el panel).
+- Debajo, «Tus redes conectadas. Se conectan y se reconectan en el panel web.» y el botón «Abrir Los Fierros en el panel», que abre [Los Fierros](los-fierros.md) en el navegador del teléfono con la sesión del panel ya abierta, sin pedir otro código (ver «Desde la app» en [Entrar al panel](ingresar.md)). Si el panel no se puede abrir: «No se pudo abrir el panel» / «Revisa la señal y prueba de nuevo.». Con una versión del sitio anterior a esto, abre Los Fierros sin sesión, y ahí pide entrar con el correo.
 - **«El modo»**, con la frase «De noche: el acero y los cortes de la parrilla. Se guarda en tu cuenta: vale también en el panel web.» (de día, «De día: el fondo claro y piezas de sushi. Se guarda…») y un botón que dice adónde lleva: «Modo día» de noche, «Modo noche» de día. Cambia en el momento y lo guarda en la cuenta; sin señal, el teléfono lo recuerda y lo manda cuando vuelve la conexión.
 - **«Los avisos»**, para que la app avise en el teléfono. Una frase según cómo estén, y un botón:
   - Encendidos: «Te llegan a este teléfono: lo que se quemó, las cuentas que se enfrían o se apagan, las preguntas del chef, las comandas que terminan, las respuestas del equipo y, una vez por hora como mucho, los comentarios nuevos de La Mesa. El correo te sigue llegando igual.» y el botón «Apagar los avisos».
@@ -301,7 +319,15 @@ Si el post no está entre lo descargado: «Vuelve a la lista y ábrelo de nuevo:
 1. Abre la app.
 2. Escribe tu correo en «tu@correo.cl» y toca «Mandarme un código».
 3. Abre el correo «… es tu código para entrar a Tu Parrilla» y copia los seis dígitos.
-4. Escríbelos en «000000» y toca «Entrar» (o la tecla de enviar del teclado). Se abre «La Parrilla».
+4. Escríbelos en «000000» y toca «Entrar» (o la tecla de enviar del teclado). Se abre «La Parrilla» o, si todavía no conectaste ninguna red, la bienvenida.
+
+### Para conectar tus redes desde el teléfono
+
+1. En la bienvenida, toca «Conectar mis redes». Si ya pasaste la bienvenida: el botón de arriba a la derecha → «Ajustes» → «Abrir Los Fierros en el panel».
+2. Se abre el navegador con «Vas a entrar al panel como <tu correo>.». Si el correo es el tuyo, toca «Entrar»: llegas a Los Fierros con tu sesión abierta. Ahí conecta cada red (ver [Los Fierros](los-fierros.md)).
+3. Vuelve a la app. La bienvenida muestra lo que quedó conectado; toca «Ir a La Parrilla».
+
+El enlace que abre el navegador vale dos minutos y una sola vez: si dice «Este enlace ya no sirve: vale dos minutos y una sola vez.», vuelve a la app y tócalo de nuevo.
 
 El botón «Entrar a Tu Parrilla» del correo abre el navegador, no la app: entra al panel web. Para la app, los seis dígitos se escriben a mano.
 
@@ -820,6 +846,8 @@ Lo que describe sale de estos archivos:
 
 - `mobile/app.json` (el nombre del ícono, la versión y los textos de los permisos de la cámara y el micrófono)
 - `mobile/src/app/(tabs)/cocina.tsx` y `mobile/src/components/cocina.tsx` (La Cocina)
+- `mobile/src/app/bienvenida.tsx`, `mobile/src/components/primera-vuelta.tsx`, `mobile/src/components/tarjeta-del-chef.tsx` y `mobile/src/lib/primera-vuelta.ts` (la bienvenida, la tarjeta del chef y cuándo salen), con `sinRedes` en `src/app/api/mobile/session/route.ts`
+- `mobile/src/lib/puente.ts` y `src/app/api/mobile/puente/route.ts` (abrir Los Fierros del panel con la sesión abierta)
 - `mobile/src/app/meson.tsx`, `mobile/src/components/meson.tsx`, `mobile/src/components/video-del-creativo.tsx` y `mobile/src/lib/meson.ts` (el mesón, sus frases y el video), con `src/app/api/mobile/cocina/meson/route.ts`, `src/app/api/mobile/cocina/creativos/[id]/` y `src/lib/cocina/meson-telefono.ts` (lo que manda el sitio) y `src/lib/cocina/meson-motivos.ts` (los motivos y las frases del panel)
 - `mobile/src/lib/cocina.ts`, `mobile/src/lib/subir-por-partes.ts` y `mobile/src/lib/archivo-local.ts` (el riel y los roles, lo que falta para mandar, «Confirmar», los filtros, el nombre de lo grabado, la subida por partes y la copia de lo grabado)
 - `mobile/src/lib/grabar.ts` (si el teléfono muestra «Grabar video» y «Sacar foto») y `mobile/src/components/selector-fecha.tsx` (la hoja de «Para cuándo»)

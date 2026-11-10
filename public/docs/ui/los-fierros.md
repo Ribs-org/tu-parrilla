@@ -11,7 +11,7 @@ Los Fierros (en llano: las cuentas conectadas) es donde se conectan a Tu Parrill
 1. En la barra de arriba del panel, abre el botón «Ajustes», a la derecha. En un teléfono se ve solo el ícono, un trinche y un cuchillo, lado a lado (de día, dos palillos), sin la palabra.
 2. En el menú que se despliega, elige «Los Fierros» (de día, «Los Cuchillos»; debajo dice «tus redes conectadas»).
 
-También se entra directo a `https://tu-parrilla.cl/admin/accounts`. Sin sesión abierta, primero hay que entrar (ver [Ingresar](ingresar.md)).
+También se entra directo a `https://tu-parrilla.cl/admin/accounts`. Sin sesión abierta, primero hay que entrar (ver [Ingresar](ingresar.md)). Desde la app del teléfono, «Conectar mis redes» en la bienvenida y «Abrir Los Fierros en el panel» en Ajustes la abren en el navegador con la sesión ya abierta (ver [la app del teléfono](app-movil.md)).
 
 La lista de `/admin/accounts/elegir` no tiene enlace propio: aparece después de conectar Instagram, Facebook o YouTube cuando la red devuelve más de una cuenta.
 
@@ -22,6 +22,7 @@ Los títulos de la pantalla se ven en mayúsculas; aquí van como están escrito
 ### Arriba
 
 - El título «Los Fierros» y debajo «tus redes conectadas».
+- Solo si se llegó desde la app del teléfono, durante una hora: una franja con «Cuando termines, vuelve a la app de Tu Parrilla: ahí vas a ver tus redes.».
 - Solo al volver de conectar, o de un intento fallido: una franja con una frase, por ejemplo «Instagram conectado.». Todas las posibles están en «Mensajes que puede ver». La frase viaja en la dirección de la página: si se recarga, vuelve a aparecer, y eso no significa que se haya conectado otra vez.
 - Si la frase es «Ninguna página de Facebook tiene una cuenta de Instagram asociada.» o «Esta cuenta no administra ninguna página de Facebook.», la franja termina con «Cómo arreglarlo» y además se abre sola una ventana: «Instagram no se conectó» (o «Facebook no se conectó»), con el porqué, los pasos numerados y los botones «Volver a conectar Instagram» (o «Volver a conectar Facebook») y «Cerrar». Esc o un clic fuera también la cierran, y «Cómo arreglarlo» la vuelve a abrir. Como la frase, la ventana vuelve a aparecer si se recarga la página.
 - Lo mismo cuando «Agregar cuenta →» vuelve con la cuenta de antes: la frase es «<Red> entró con la cuenta que ya estaba conectada: se renovó y no se agregó otra.» (por ejemplo, «TikTok entró con la cuenta que ya estaba conectada: se renovó y no se agregó otra.»), y la ventana se llama «No se agregó otra cuenta de TikTok» (o «… de Instagram», «No se agregó otra página de Facebook», «No se agregó otro canal de YouTube»), con su botón «Agregar otra cuenta de TikTok» (o el de su red). Ver «Para agregar otra cuenta de la misma red».
@@ -345,13 +346,13 @@ Trae los posts y los números de las cuentas de Instagram, TikTok, YouTube y Fac
 - No elige con qué cuenta se entra en la ventana de la red: eso lo decide la red, y «Reconectar» no está atado a la fila.
 - Desmarcar una cuenta ya conectada en la lista no la desconecta: solo no la renueva.
 - No genera llaves de API: eso es [La Cocina](la-cocina.md), en «Tu propio chef».
-- No existe en la app del teléfono: las redes se conectan solo desde el panel web (ver [la app del teléfono](app-movil.md)).
+- No existe en la app del teléfono: las redes se conectan solo desde el panel web (ver [la app del teléfono](app-movil.md)). La app abre esta pantalla en el navegador, con la sesión abierta.
 
 ## Para quien mantiene esta página
 
 Lo que describe sale de:
 
-- `src/app/admin/(dash)/accounts/page.tsx`
+- `src/app/admin/(dash)/accounts/page.tsx` (con la franja de la app, que sale de la cookie de `src/lib/puente.ts`)
 - `src/app/admin/(dash)/accounts/cuentas.tsx`
 - `src/app/admin/(dash)/accounts/elegir/page.tsx`
 - `src/app/admin/(dash)/accounts/loading.tsx`, `src/app/admin/(dash)/carga-general.tsx` y `src/components/esqueleto.tsx` (la carga)

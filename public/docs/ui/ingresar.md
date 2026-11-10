@@ -86,6 +86,25 @@ escribe este código: NNNNNN. Vale diez minutos.», dónde pedir otro si se venc
 (`https://tu-parrilla.cl/ingresar`, con el mismo correo) y que en la app del teléfono se entra
 igual.
 
+### Desde la app (`/ingresar/puente`)
+
+La abre la app del teléfono, en su navegador, cuando la persona toca «Conectar mis redes» en la
+bienvenida o «Abrir Los Fierros en el panel» en Ajustes ([app-movil.md](app-movil.md)). No se
+llega a ella de otra forma. La tarjeta dice «Parrilla», el título «Desde la app» y, después de
+un «Abriendo…», «Vas a entrar al panel como <correo>.», «Si no lo abriste tú desde la app de Tu
+Parrilla, cierra esta página.» y el botón **«Entrar»** (mientras trabaja, «Entrando…»). Al
+apretarlo abre la sesión del panel con la cuenta de la app y lleva a [Los Fierros](los-fierros.md),
+sin correo ni código. Si en ese navegador había otra sesión abierta, queda la de la app.
+
+No entra sola, a propósito: alguien podría mandarle a otra persona un enlace de su propia cuenta, y
+esa persona quedaría dentro de un panel ajeno, donde podría conectar sus redes sin darse cuenta. El
+correo a la vista es lo que lo evita: si no es el tuyo, no aprietes «Entrar».
+
+El enlace vale dos minutos y una sola vez. Si ya no sirve, la tarjeta dice, en rojo, «Este enlace
+ya no sirve: vale dos minutos y una sola vez.» (o «Este enlace no trae su llave.», si se abrió
+cortado), «Vuelve a la app y ábrelo de nuevo, o entra con tu correo.» y el enlace «Entrar con tu
+correo», que lleva al paso 1.
+
 ### Si algo se rompe al preparar el ingreso
 
 Una tarjeta con el título «Algo se rompió», la frase «No fue nada que hicieras: no pudimos
@@ -130,6 +149,9 @@ códigos y los topes son los mismos de la web —vale solo el último código pe
 donde venga, y los errores del teléfono suman para el tope del día—. Su pantalla está en
 [app-movil.md](app-movil.md).
 
+Para ir de la app al panel no hace falta otro código: los botones de la app que abren Los Fierros
+abren la sesión del panel solos (ver «Desde la app», arriba).
+
 ## Mensajes que puede ver
 
 | Lo que dice la pantalla | Qué significa | Qué hacer |
@@ -141,6 +163,8 @@ donde venga, y los errores del teléfono suman para el tope del día—. Su pant
 | «Demasiados intentos. Pide un código nuevo.» | Se probaron cinco códigos equivocados contra el mismo código, o hubo muchos intentos seguidos desde la misma conexión. Ese código ya no sirve aunque se escriba bien. | Pedir un código nuevo (ver arriba). Si el mensaje sigue saliendo con el código nuevo, esperar unos diez minutos. |
 | «Demasiados intentos en las últimas 24 horas. Prueba de nuevo más tarde.» | Con ese correo se escribieron diez códigos equivocados en el último día, sumando todos los códigos pedidos. Mientras dure, no entra ni con el código correcto. Una sesión ya abierta, en otro navegador, sigue andando. | Esperar: se libera solo, a más tardar un día después de pedir el código con que empezaron los errores. Si la persona no escribió esos códigos, alguien está probando con su correo: avisarle al admin. |
 | «Algo se rompió» | Falló el servidor, no la persona. | Apretar «Reintentar». Si se repite, avisarle al admin. |
+| «Este enlace ya no sirve: vale dos minutos y una sola vez.» | En «Desde la app»: el enlace que abrió la app ya se usó o pasaron más de dos minutos. | Volver a la app y tocar de nuevo el botón que lo abrió. |
+| «Este enlace no trae su llave.» | En «Desde la app»: la dirección llegó cortada, sin lo que va después de `#t=`. | Volver a la app y tocar de nuevo el botón. |
 
 ## Si el humano dice…
 
@@ -185,6 +209,9 @@ Sale de:
 - `src/app/ingresar/page.tsx`, `src/app/ingresar/codigo/page.tsx`,
   `src/app/ingresar/formularios.tsx`, `src/app/ingresar/acciones.ts` y
   `src/app/ingresar/error.tsx`: las dos pantallas, sus textos y la de error.
+- `src/app/ingresar/puente/page.tsx`, `CruzarPuente` en `formularios.tsx`, `cruzar` en
+  `acciones.ts` y `src/lib/puente.ts`: «Desde la app», la llave de dos minutos y la cookie que
+  hace que Los Fierros diga que se puede volver a la app.
 - `src/app/admin/login/page.tsx`: la dirección antigua.
 - `src/lib/ingreso.ts`: las frases, los diez minutos, los cinco intentos, los tres códigos
   cada quince minutos y los diez errores por día.

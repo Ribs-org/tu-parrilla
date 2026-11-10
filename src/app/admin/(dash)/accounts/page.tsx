@@ -1,4 +1,6 @@
+import { cookies } from 'next/headers'
 import { requireUser } from '@/lib/auth'
+import { COOKIE_DESDE_LA_APP } from '@/lib/puente'
 import { getCuentas } from '@/lib/posts'
 import { env } from '@/lib/env'
 import { ayudaDeConexion } from '@/lib/social/ayuda-conexion'
@@ -25,6 +27,9 @@ export default async function AccountsPage({
   const { id: ownerId } = await requireUser()
   const cuentas = await getCuentas(ownerId)
   const metaEnRevision = env('META_EN_REVISION') === '1'
+  // Abierta desde la app por el puente (`lib/puente.ts`): después de conectar, el navegador se
+  // queda acá y nada le decía a la persona que ya podía volver.
+  const desdeLaApp = (await cookies()).has(COOKIE_DESDE_LA_APP)
   // TikTok for Business, solo para quien lo tiene abierto: qué cuentas ya lo activaron.
   const comentariosTiktok = tiktokBusinessAbiertoPara(ownerId)
     ? await cuentasConComentarios(
@@ -39,6 +44,11 @@ export default async function AccountsPage({
       </header>
       {/* La ayuda se arma acá, en el servidor: sus frases vienen de los conectores de Meta, que
           no viajan al navegador. */}
+      {desdeLaApp ? (
+        <p className="mb-4 rounded-2xl border border-acero-700 bg-acero-800 px-4 py-3 text-sm text-fg-muted">
+          Cuando termines, vuelve a la app de Tu Parrilla: ahí vas a ver tus redes.
+        </p>
+      ) : null}
       {mensaje ? <AvisoDeConexion mensaje={mensaje} ayuda={ayudaDeConexion(mensaje)} /> : null}
       <Cuentas
         rows={cuentas}

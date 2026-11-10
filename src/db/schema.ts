@@ -128,6 +128,26 @@ export const codigosIngreso = pgTable(
 ).enableRLS()
 
 /**
+ * El puente del teléfono al panel (`src/lib/puente.ts`): una llave de un solo uso, que vale dos
+ * minutos, para abrir la sesión del panel en el navegador del teléfono sin pedir otro código. Se
+ * guarda con hash, como los códigos; la llave misma solo la ve el teléfono que la pidió.
+ */
+export const puentes = pgTable(
+  'puentes',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    hash: text('hash').notNull().unique(),
+    expiraEn: timestamp('expira_en', { withTimezone: true }).notNull(),
+    usadoEn: timestamp('usado_en', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('puentes_user_idx').on(t.userId)],
+).enableRLS()
+
+/**
  * A public page. Every owner has exactly one default profile; the rest live at `/<slug>`.
  * Only the admin's default profile is served at `/` — a guest's default profile lives at
  * `/<slug>` too, same as their other pages (see `rutaPublicaDe` in `lib/utils.ts`).

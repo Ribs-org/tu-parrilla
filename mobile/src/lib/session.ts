@@ -7,6 +7,7 @@ import { API_BASE } from './config'
 import { SERVIDOR_FALLO, SIN_SENAL, fraseDeRechazo } from './ingreso'
 import { CLAVE_TEMA_SIN_SUBIR } from './tema'
 import { CLAVE_PENDIENTES } from './cocina'
+import { CLAVE_PRIMERA_VUELTA } from './primera-vuelta'
 
 // El almacén seguro está respaldado por el llavero del sistema; la caché de datos
 // vive en AsyncStorage, que es texto plano. El token nunca cruza esa frontera.
@@ -26,7 +27,8 @@ export function clearToken(): Promise<void> {
 
 /**
  * Lo que la app guardó de una cuenta en este teléfono: lo último que mostró cada pantalla, un
- * cambio de modo que no alcanzó a subir y lo que La Cocina dejó subiendo a medias (sus copias de
+ * cambio de modo que no alcanzó a subir, la primera vuelta (la bienvenida, el chef y las
+ * aperturas) y lo que La Cocina dejó subiendo a medias (sus copias de
  * lo grabado las barre La Cocina al abrirse). Se borra al salir y también al entrar —quien canceló
  * el candado puede entrar con otro correo—, para que nadie vea en este teléfono nada de la cuenta de
  * antes ni le suba su modo. La copia del modo (`CLAVE_TEMA`) se queda: es del teléfono, y la
@@ -37,6 +39,7 @@ async function borrarLoDeLaCuenta(): Promise<void> {
     borrarCaches(),
     AsyncStorage.removeItem(CLAVE_TEMA_SIN_SUBIR),
     AsyncStorage.removeItem(CLAVE_PENDIENTES),
+    AsyncStorage.removeItem(CLAVE_PRIMERA_VUELTA),
   ])
 }
 
@@ -68,13 +71,18 @@ export async function pedirCodigo(correo: string): Promise<{ ok: true } | { erro
   return 'error' in resultado ? resultado : { ok: true }
 }
 
-export async function entrar(correo: string, codigo: string): Promise<{ token: string } | { error: string }> {
+/**
+ * Canjea el código por el token. `sinRedes` dice si la cuenta no tiene ninguna red conectada, para
+ * abrir la bienvenida en vez de La Parrilla; un servidor de antes no lo manda, y entonces es false.
+ */
+export async function entrar(correo: string, codigo: string): Promise<{ token: string; sinRedes: boolean } | { error: string }> {
   const resultado = await postear('/api/mobile/session', { correo, codigo })
   if ('error' in resultado) return resultado
   const { cuerpo } = resultado
   const token = cuerpo && typeof cuerpo === 'object' && 'token' in cuerpo ? cuerpo.token : null
   if (typeof token !== 'string' || !token) return { error: SERVIDOR_FALLO }
+  const sinRedes = cuerpo && typeof cuerpo === 'object' && 'sinRedes' in cuerpo && cuerpo.sinRedes === true
   await borrarLoDeLaCuenta()
   await saveToken(token)
-  return { token }
+  return { token, sinRedes: Boolean(sinRedes) }
 }
