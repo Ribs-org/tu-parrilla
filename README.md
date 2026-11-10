@@ -29,7 +29,7 @@ tus números.
 | `/api/bodega…` | Con la misma llave: lo que hay en la cámara de frío de La Cocina (`GET /api/bodega`) y las subidas por partes para guardar ahí (`/api/bodega/subidas…`), las mismas del panel y del teléfono (ver «La Cocina») |
 | `/api/admin/…` | Lo que el panel llama desde el navegador, con la cookie de la sesión: la firma de una subida directa (`upload-url`), las subidas por partes a la cámara de frío de La Cocina (`cocina/subidas…`) y el pulso que mantiene al día sus tarjetas (`cocina/pulso`; ver «La Cocina») y la planilla de Excel de Los Números (`planilla`, y `planilla/adelanto` para lo que no cabe; ver «Llevar para la casa») |
 | `/api/mobile/…` | La API de la app del teléfono, con el token de su sesión (ver `mobile/README.md`); `cocina…` es La Cocina desde el teléfono: lo que muestra, las subidas por partes a la cámara de frío, cambiar y sacar lo de adentro, «Mandar al chef», cancelar, contestarle al chef y el mesón con «Programar» y «Descartar» (ver «La Cocina»); `comentarios…` es La Mesa desde el teléfono: la cola, el número de La Parrilla, «Enviar», «Descartar» y otro borrador (ver «Responder comentarios»); `push` registra el teléfono para los avisos y `push/{token}` lo borra (ver «Avisos al teléfono»); `schedule/accounts/{id}/tiktok` es `creator_info` para el bloque de TikTok de Publicar (ver `mobile/README.md`, «TikTok y la palabra clave») |
-| `/api/cron/…` | Las corridas programadas: la publicación y la sincronización, que también reintenta los mensajes del libro de sugerencias que no salieron a GitHub y relee en Mercado Pago las suscripciones del plan pagado. Solo con `CRON_SECRET` |
+| `/api/cron/…` | Las corridas programadas: la publicación, la sincronización —que también reintenta los mensajes del libro de sugerencias que no salieron a GitHub y relee en Mercado Pago las suscripciones del plan pagado— y los números de cada hora. Solo con `CRON_SECRET` |
 | `/api/pagos/mercadopago` | `POST` de Mercado Pago cuando cambia una suscripción al plan pagado o uno de sus cobros. Pública y sin sesión: la llave es la firma (`MERCADOPAGO_WEBHOOK_SECRET`). Ver «Los planes» |
 | `/api/track/…` | Las balizas de visitas y clics de las páginas públicas |
 
@@ -1285,6 +1285,22 @@ Una publicación que ya no responde cuando se la pide por id (borrada, casi siem
 y nada más: no se archiva, porque la misma respuesta de Meta cubre «sin permiso». Solo se
 archiva lo que falta dentro de lo que el listado alcanzó a ver, como siempre.
 
+**Y cada hora, lo de las últimas 48 horas** (`src/lib/social/reciente.ts`, en
+`/api/cron/numeros-recientes`; ver «Los números cada hora», más abajo). Instagram, Facebook y
+TikTok listan solo lo publicado en ese plazo —sin el mínimo de 200— y escriben la lectura de
+hoy en `post_metrics`, la misma fila del día, más al día; lo que no conocían lo guardan, con su
+`?s=`. YouTube no, por su cupo. Nada con más de 48 horas, para no tocar la lectura «a las 48
+horas» de Los Números (`viewsA48h`, que es la primera entre las 48 y las 72). Esa lectura no
+archiva, no lee la cuenta ni TikTok for Business y no cambia la tarjeta de Los Fierros: eso es
+de la del día. Una lectura que no trae un número no borra el que la fila del día ya tenía
+(`writeSnapshots`), así que los guardados y el alcance que completó Business se quedan.
+
+**Los seguidores de cada publicación** (`post_metrics.seguidores`) los da solo Instagram, y solo
+en las fotos y los carruseles (`follows`): Meta no tiene esa métrica en los reels, y pedirla en
+uno contesta un error, así que no se pide. Si Meta rechaza la llamada con `follows`, se repite
+sin él. Los de TikTok for Business no van ahí, sino con el resto de su detalle en `ajustes`,
+que se borra al desconectar.
+
 **Lo pagado: leer los anuncios de Meta.** Al final de cada sincronización, para
 cada dueño que nombra `ANUNCIOS_ABIERTO_PARA`, Tu Parrilla lee con la Marketing API sus cuentas
 publicitarias (`me/adaccounts`) y los anuncios de cada una, con sus totales de principio a fin
@@ -1609,7 +1625,7 @@ Vercel y bajan con `vercel env pull .env.local`.
 | `PAGOS_ABIERTO_PARA` | Para quién aparece «Pasar a Maestro Parrillero» en Tu Cuenta: `1`, para todos; una lista de ids de usuario separados por comas, solo para esos (para probar con una cuenta de prueba) | No — vacía, cerrado para todos. Se abre a todos cuando `/terminos` y `/privacidad` cuenten el cobro |
 | `SITE_URL` | Tu dominio, para etiquetar los enlaces del mensaje automático | No — sin ella se usa el dominio de producción de Vercel |
 | `COCINA_SECRET` | La credencial de La Cocina: la que el servidor del chef manda en `Authorization: Bearer …` a `/api/cocina/…` para tomar comandas, bajar insumos, informar estados y entregar creativos (ver «La Cocina» y `docs/cocina-api.md`). La conocen solo este despliegue y el servidor del chef | No — sin ella esas rutas responden `401` y la cocina queda cerrada; si la pones, genérala igual que `CRON_SECRET` y dásela al servidor del chef |
-| `CRON_SECRET` | Autoriza las corridas programadas: el sync diario y la publicación cada 5 minutos. Vercel la manda sola a su cron; el pinger externo la manda en `Authorization: Bearer …` | Sí — Vercel no la crea: se genera igual que `AUTH_SECRET` y se agrega. Sin ella los crons responden `401` y no corre nada |
+| `CRON_SECRET` | Autoriza las corridas programadas: el sync diario, la publicación cada 5 minutos y los números cada hora. Vercel la manda sola a su cron; el pinger externo la manda en `Authorization: Bearer …` | Sí — Vercel no la crea: se genera igual que `AUTH_SECRET` y se agrega. Sin ella los crons responden `401` y no corre nada |
 | `MIGRAR_PREVIEWS` | Que los previews migren la base | Solo cuando el preview tenga una base propia; contra la de producción, no |
 | `DATABASE_URL_PRUEBAS` | Solo para las pruebas de integración: una Postgres desechable donde cada archivo crea y migra su propia base (ver «Comandos»). No va en Vercel | No — sin ella esas pruebas se saltan. Nunca la de producción |
 | `SCHEDULE_API_KEY` | La llave del despliegue: abre `POST /api/schedule/batch` (carga masiva), `POST /api/media` (subir un archivo una vez), `GET` y `DELETE /api/schedule/posts/{id}` (un post, o sacarlo), `POST /api/schedule/posts/{id}/archivar` y `…/desarchivar` (archivar lo quemado), `GET /api/schedule/posts` (calendario), `GET /api/schedule/resumen` (el resumen del día), `GET /api/schedule/cuentas` (las cuentas), `GET /api/metrics/posts` (métricas), `GET /api/metrics/mejores` (el mejor X %), `GET /api/metrics/que-funciona` (qué tema, estilo y formato funcionan, y si la música ayuda) y `/api/bodega…` (la cámara de frío de La Cocina) a nombre del admin. Es anterior a las llaves por usuario y sigue para el agente que ya la usa | No — sin ella esos endpoints aceptan solo las llaves que cada usuario genera en La Cocina («Tu propio chef»); si la pones, genérala igual que `CRON_SECRET` |
@@ -1702,6 +1718,23 @@ Tampoco es un fallo que Meta diga que el contenedor no está listo para publicar
 2207027, «Espera un momento»): le pasa a veces hasta a una foto, que suele estar lista al tiro.
 El destino queda saliendo con su contenedor, y la corrida siguiente pregunta su estado y lo
 publica cuando termine (`esMediaNoLista`, en `social/publish/instagram.ts`).
+
+### Los números cada hora
+
+`/api/cron/numeros-recientes` relee lo publicado en las últimas 48 horas en Instagram, Facebook
+y TikTok (ver «Y cada hora, lo de las últimas 48 horas», en «Conectar y sincronizar»). Como la
+publicación, la llama **el pinger externo, cada hora**, con el mismo header `Authorization:
+Bearer <CRON_SECRET>`: el plan Hobby de Vercel no deja más crons que los dos diarios de
+`vercel.json`. **Hay que darlo de alta en cron-job.org**, a los 30 minutos de cada hora: así no
+cae encima de la sincronización diaria de las 9:00 UTC, que escribe las mismas filas. Sin esa
+entrada la ruta existe y no la llama nadie: los números siguen llegando una vez al día, sin
+ningún error a la vista.
+
+Las redes van en paralelo y las cuentas de una red en serie, las de los planes con prioridad
+primero. Ninguna cuenta empieza pasados los 200 segundos de la corrida (`maxDuration` es 240):
+lo que no alcanzó dice `saltada` en el informe y queda para la hora siguiente. Una cuenta que
+falla deja su error en el informe y en el log (`[reciente] …`) y las demás siguen; la ruta
+contesta 200 igual, y 500 solo si se rompió la corrida entera.
 
 ### Avisos por correo
 
@@ -1969,8 +2002,9 @@ publicada), `contraSuCuenta` (eso sobre la mediana de su cuenta en el rango), `v
 permiten calcular métricas nuevas con sus datos (ver «Analítica de posts»). `truncado: true` avisa que el tope de filas mordió y la respuesta
 es parcial.
 
-Las métricas las trae la sincronización diaria, así que lo publicado hoy aparece con
-números recién al día siguiente.
+Las métricas las trae la sincronización diaria y, para lo publicado en las últimas 48 horas en
+Instagram, Facebook y TikTok, la lectura de cada hora: lo publicado hoy en esas redes aparece con
+números dentro de la hora siguiente; en YouTube, recién al día siguiente.
 
 `GET /api/metrics/mejores`, con los mismos parámetros más `metrica` (`viewsGanadas` por
 defecto, `contraSuCuenta`, `viewsA7Dias`, `contraSuCuenta48h`, `viewsA48h`, `visitas`,
@@ -2100,9 +2134,10 @@ en `uso_ia`, por mes en la zona del dueño (`conTokens`, en `src/lib/planes/toke
 el borrador queda con «Se acabaron los tokens de IA de tu plan este mes.» y se responde a mano, y
 «Sugiéreme una» elige sin el modelo.
 
-**La prioridad** ordena las cuatro colas que recorren a todos: la fila del chef de La Cocina
+**La prioridad** ordena las cinco colas que recorren a todos: la fila del chef de La Cocina
 (`ordenarFila`: las pruebas primero, después la ronda de los de mayor prioridad, después la de los
-demás), la publicación, el sondeo de comentarios con sus borradores, y la sincronización diaria.
+demás), la publicación, el sondeo de comentarios con sus borradores, la sincronización diaria y
+la lectura de cada hora.
 Dentro de una misma prioridad, el orden de siempre (`prioridadDelDueno`, en
 `src/lib/planes/prioridad.ts`).
 
@@ -2497,6 +2532,7 @@ src/
       musica-sugerencia.ts «Sugiéreme una»: el modelo elige por id entre canciones reales, y sin él el azar (sin base)
       playlists-youtube.ts las playlists de un canal de YouTube y agregarle un video, con sus avisos, leídos sin base
       lectura.ts           qué publicaciones se leen cada día: lo nuevo a diario, lo viejo cada vez más espaciado
+      reciente.ts          los números de cada hora: lo de las últimas 48 horas, otra vez, sin YouTube
       politica-youtube.ts  lo que las políticas de YouTube no dejan hacer con sus datos
       retencion-youtube.ts borra lo de YouTube que lleva 30 días sin refrescarse, y lo de Analytics sin autorización comprobada
       analitica-youtube.ts YouTube Analytics: el permiso, las consultas, cómo se lee una respuesta y los nombres (sin base); analitica-youtube-sync.ts lo lee y lo guarda

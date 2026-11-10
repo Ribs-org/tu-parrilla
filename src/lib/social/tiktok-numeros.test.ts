@@ -212,6 +212,15 @@ describe('fusionarConBusiness', () => {
     expect(calce).toEqual({ porId: 1, porEnlace: 0, sinCalzar: 0 })
   })
 
+  it('los seguidores que trajo cada video se quedan en lo de Business y no pasan a la lectura del día', () => {
+    // `/privacidad` promete borrar el detalle de los videos de Business al desconectar, y la
+    // lectura del día se queda: por eso no viajan en `post_metrics`.
+    const conSeguidores = normalizarVideoBusiness({ item_id: '1', share_url: 'https://www.tiktok.com/@a/video/1', video_views: 10, new_followers: 8 })!
+    const { posts, aFondo } = fusionarConBusiness([post('1')], [conSeguidores])
+    expect(aFondo.get('1')?.seguidoresNuevos).toBe(8)
+    expect(posts[0]!.metrics.seguidores).toBeUndefined()
+  })
+
   it('si el id no calza, cruza por el número del enlace; y lo que no está queda tal cual', () => {
     const { posts, aFondo, calce } = fusionarConBusiness(
       [post('7'), post('8'), post('id-raro', 'https://www.tiktok.com/@a/video/9')],

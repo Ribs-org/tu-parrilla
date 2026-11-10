@@ -12,7 +12,7 @@ import {
 } from './connector'
 import { normalizeInstagramAccount } from './account-metrics'
 import { decryptToken } from './crypto'
-import { laMasVieja, sigueListando } from './lectura'
+import { dentroDeLoPedido, laMasVieja, minimoDelListado, sigueListando } from './lectura'
 import { GRAPH_FACEBOOK, RENOVAR_LOGIN_DE_INSTAGRAM, conLoginDeInstagram, graphDeInstagram } from './instagram-login'
 
 // Dos logins, un conector (`instagram-login.ts`). El de siempre es Instagram con login de
@@ -109,6 +109,7 @@ const METRIC_NAMES: Record<string, keyof PostMetricValues> = {
   comments: 'comments',
   saved: 'saves',
   shares: 'shares',
+  follows: 'seguidores',
 }
 
 /** REELS and VIDEO both arrive as media_type VIDEO; only the product type separates them. */
@@ -216,11 +217,42 @@ function codesOf(body: string): { code?: number; subcode?: number } {
 const INSIGHT_METRICS = 'views,reach,likes,comments,saved,shares'
 
 /**
+ * Si a esta publicación se le piden también los seguidores que trajo. Meta da `follows` solo en
+ * el feed —fotos, carruseles y los videos de antes de los reels— y en las historias; en un reel
+ * la misma llamada contesta el error #100
+ * (developers.facebook.com/documentation/instagram-platform/reference/instagram-media/insights).
+ * Una publicación sin tipo de producto no se arriesga.
+ */
+export function conSeguidores(media: InstagramMedia): boolean {
+  return media.media_product_type === 'FEED'
+}
+
+/**
  * Las estadísticas de una publicación. Sin estadísticas para siempre (`isMediaWithoutInsights`)
  * vuelve vacío y la publicación queda con todo en null, como siempre; cualquier otro error
  * sube.
+ *
+ * Con `seguidores`, pide además `follows`. Si esa llamada falla por cualquier otra cosa, se
+ * repite sin él: los seguidores son un extra, y una métrica que Meta deje de aceptar no puede
+ * costar los números de siempre. Si el problema era otro —el token, un límite—, la segunda
+ * falla igual y ese error sube.
  */
-async function insightsOf(id: string, token: string, graph: string = GRAPH): Promise<InstagramInsights> {
+async function insightsOf(
+  id: string,
+  token: string,
+  graph: string = GRAPH,
+  seguidores = false,
+): Promise<InstagramInsights> {
+  if (seguidores) {
+    try {
+      return (await getJson(
+        `${graph}/${id}/insights?metric=${INSIGHT_METRICS},follows&access_token=${token}`,
+      )) as InstagramInsights
+    } catch (error) {
+      if (isMediaWithoutInsights(error)) return {}
+      console.warn(`[instagram] ${id} sin seguidores, se pide de nuevo sin ellos:`, String(error).slice(0, 200))
+    }
+  }
   try {
     return (await getJson(`${graph}/${id}/insights?metric=${INSIGHT_METRICS}&access_token=${token}`)) as InstagramInsights
   } catch (error) {
@@ -350,7 +382,11 @@ export const instagramConnector: Connector = {
     let pagesFetched = 0
     let masVieja: Date | null = null
 
-    while (next && pagesFetched < MAX_MEDIA_PAGES && sigueListando(media.length, masVieja, opciones?.desde)) {
+    while (
+      next &&
+      pagesFetched < MAX_MEDIA_PAGES &&
+      sigueListando(media.length, masVieja, opciones?.desde, minimoDelListado(opciones))
+    ) {
       const page = (await getJson(next)) as {
         data?: InstagramMedia[]
         paging?: { next?: string }
@@ -364,15 +400,19 @@ export const instagramConnector: Connector = {
       next = page.paging?.next ?? ''
     }
 
+    const aLeer = dentroDeLoPedido(media, (item) => new Date(item.timestamp ?? 0), opciones)
     const posts: FetchedPost[] = []
     // Sequential chunks rather than one Promise.all over every post: hundreds of
     // concurrent requests risk a 429 from the Graph API, and since a systemic insights
     // failure aborts the whole sync (see `insightsOf`), keeping concurrency low keeps that
-    // risk low. Wall-clock doesn't matter much — this runs once a day from a cron.
-    for (let i = 0; i < media.length; i += INSIGHTS_CHUNK_SIZE) {
-      const chunk = media.slice(i, i + INSIGHTS_CHUNK_SIZE)
+    // risk low. Wall-clock doesn't matter much: the daily run reads everything once, and
+    // the hourly one only the last 48 hours.
+    for (let i = 0; i < aLeer.length; i += INSIGHTS_CHUNK_SIZE) {
+      const chunk = aLeer.slice(i, i + INSIGHTS_CHUNK_SIZE)
       const chunkPosts = await Promise.all(
-        chunk.map(async (item) => normalizeInstagramMedia(item, await insightsOf(item.id, token, graph))),
+        chunk.map(async (item) =>
+          normalizeInstagramMedia(item, await insightsOf(item.id, token, graph, conSeguidores(item))),
+        ),
       )
       posts.push(...chunkPosts)
     }
@@ -383,6 +423,9 @@ export const instagramConnector: Connector = {
     return { posts, windowWasCapped: next !== '' }
   },
 
+  // Sin seguidores: por id no se sabe si la publicación es un reel, y pedirlos en uno contesta
+  // un error. Lo que se lee así tiene más de diez días; sus seguidores quedan en la última
+  // lectura del listado que los trajo.
   async fetchMetricsById(account: SocialAccount, token: string | null, externalIds: string[]) {
     const metricas = new Map<string, PostMetricValues>()
     if (!token) return metricas

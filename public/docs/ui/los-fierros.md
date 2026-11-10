@@ -237,7 +237,7 @@ No se puede deshacer. Si las dos están conectadas, la opción no aparece: prime
 1. Aprieta «Sincronizar ahora», abajo de todo.
 2. Espera «Listo.» o un error.
 
-Trae los posts y los números de las cuentas de Instagram, TikTok, YouTube y Facebook, y de Threads solo en la cuenta del revisor cuando la instalación pide sus permisos de lectura; no toca X ni los comentarios. Se puede apretar una vez cada cinco minutos. Los números también se traen solos una vez al día.
+Trae los posts y los números de las cuentas de Instagram, TikTok, YouTube y Facebook, y de Threads solo en la cuenta del revisor cuando la instalación pide sus permisos de lectura; no toca X ni los comentarios. Se puede apretar una vez cada cinco minutos. Los números también se traen solos una vez al día y, los de lo publicado en las últimas 48 horas en Instagram, Facebook y TikTok, cada hora.
 
 ## Mensajes que puede ver
 

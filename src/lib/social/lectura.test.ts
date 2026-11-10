@@ -2,9 +2,11 @@ import { describe, expect, it } from 'vitest'
 import {
   DIAS_DE_LECTURA_DIARIA,
   MIN_LISTADAS,
+  dentroDeLoPedido,
   diasEntre,
   intervaloDeLectura,
   laMasVieja,
+  minimoDelListado,
   porLeerHoy,
   sigueListando,
   tocaLeer,
@@ -119,6 +121,28 @@ describe('sigueListando', () => {
     expect(sigueListando(MIN_LISTADAS, new Date('2026-10-12'), desde)).toBe(true)
     expect(sigueListando(MIN_LISTADAS, desde, desde)).toBe(true)
     expect(sigueListando(MIN_LISTADAS, new Date('2026-10-09T23:59:00Z'), desde)).toBe(false)
+  })
+})
+
+describe('la lectura de cada hora (soloDesde)', () => {
+  const desde = new Date('2026-10-18T12:00:00Z')
+
+  it('no tiene el mínimo de siempre: pide la primera página y sigue solo mientras sea de la ventana', () => {
+    expect(minimoDelListado()).toBe(MIN_LISTADAS)
+    expect(minimoDelListado({ desde })).toBe(MIN_LISTADAS)
+    const minimo = minimoDelListado({ desde, soloDesde: true })
+    expect(minimo).toBe(1)
+    expect(sigueListando(0, null, desde, minimo)).toBe(true)
+    expect(sigueListando(50, new Date('2026-10-19T00:00:00Z'), desde, minimo)).toBe(true)
+    expect(sigueListando(50, new Date('2026-10-18T11:59:00Z'), desde, minimo)).toBe(false)
+  })
+
+  it('deja afuera lo que salió antes de desde, y solo cuando se pidió', () => {
+    const items = [new Date('2026-10-19T00:00:00Z'), desde, new Date('2026-10-18T11:59:00Z')]
+    const fecha = (d: Date) => d
+    expect(dentroDeLoPedido(items, fecha, { desde, soloDesde: true })).toEqual(items.slice(0, 2))
+    expect(dentroDeLoPedido(items, fecha, { desde })).toEqual(items)
+    expect(dentroDeLoPedido(items, fecha)).toEqual(items)
   })
 })
 

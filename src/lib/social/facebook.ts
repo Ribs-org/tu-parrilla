@@ -11,7 +11,7 @@ import {
 } from './connector'
 import { normalizeFacebookAccount } from './account-metrics'
 import { decryptToken } from './crypto'
-import { laMasVieja, sigueListando } from './lectura'
+import { dentroDeLoPedido, laMasVieja, minimoDelListado, sigueListando } from './lectura'
 import { env } from '../env'
 
 /** El `me/accounts?fields=id,name,access_token` payload. */
@@ -262,13 +262,14 @@ export async function collectPublishedPosts(
   firstUrl: string,
   fetchJson: (url: string) => Promise<Record<string, unknown>>,
   desde?: Date,
+  minimo?: number,
 ): Promise<{ posts: FacebookPost[]; windowWasCapped: boolean }> {
   const posts: FacebookPost[] = []
   let next = firstUrl
   let pagesFetched = 0
   let masVieja: Date | null = null
 
-  while (next && pagesFetched < MAX_POST_PAGES && sigueListando(posts.length, masVieja, desde)) {
+  while (next && pagesFetched < MAX_POST_PAGES && sigueListando(posts.length, masVieja, desde, minimo)) {
     let page: { data?: FacebookPost[]; paging?: { next?: string } }
     try {
       page = await fetchJson(next)
@@ -379,13 +380,19 @@ export const facebookConnector: Connector = {
 
     const conReels = insightsDeReelsEncendidas()
     const first = `${GRAPH}/${pageId}/published_posts?fields=${postFields(conReels)}&limit=${PAGE_SIZE}&access_token=${token}`
-    const { posts: fetched, windowWasCapped } = await collectPublishedPosts(first, getJson, opciones?.desde)
+    const { posts: listados, windowWasCapped } = await collectPublishedPosts(
+      first,
+      getJson,
+      opciones?.desde,
+      minimoDelListado(opciones),
+    )
+    const fetched = dentroDeLoPedido(listados, (item) => new Date(item.created_time ?? 0), opciones)
 
     const posts: FetchedPost[] = []
     // Sequential chunks rather than one Promise.all over every post: hundreds of
     // concurrent requests risk a 429, and a systemic insights failure aborts the whole
     // sync, so keeping concurrency low keeps that risk low. Wall-clock doesn't matter
-    // much — this runs once a day from a cron.
+    // much: the daily run reads everything once, and the hourly one only the last 48 hours.
     for (let i = 0; i < fetched.length; i += INSIGHTS_CHUNK_SIZE) {
       const chunk = fetched.slice(i, i + INSIGHTS_CHUNK_SIZE)
       const chunkPosts = await Promise.all(

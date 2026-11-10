@@ -112,7 +112,7 @@ Tu Parrilla is a private scheduling and analytics dashboard for content creators
 | `pages_show_list` | «After Facebook Login we list the Pages the creator manages so they can pick which Page (and its linked Instagram account) to connect. Shown at 0:40–1:05 in the screencast.» |
 | `pages_read_engagement` | «We read the creator's own Page posts and their reactions, comments and shares to show them in the Content and Numbers tabs. 1:30–1:50.» |
 | `instagram_basic` | «We read the creator's own Instagram professional account (id, username) and their media list to label the account and show their posts. 1:05–1:30.» |
-| `instagram_manage_insights` | «We read reach, impressions and follower counts of the creator's own account and media, once a day, to draw the charts in the Numbers tab. 1:50–2:10.» |
+| `instagram_manage_insights` | «We read reach, impressions and follower counts of the creator's own account and media, once a day (and every hour for media from the last 48 hours), to draw the charts in the Numbers tab. 1:50–2:10.» |
 | `instagram_content_publish` | «The creator schedules a reel, a photo or a carousel from the Calendar; at the scheduled time we create the media container and publish it to their own account. Includes the optional trial-reel flag chosen by the creator. 2:10–3:00.» |
 | `instagram_manage_comments` | «We fetch new comments on the creator's own recent media and show them in a queue; the creator sends a reply with one tap, and can set a keyword rule that replies automatically with a fixed public text. 3:00–3:40.» |
 | `pages_manage_engagement` | «Same as above for comments on the creator's own Page posts: read them and post the creator's reply. 3:40–3:55.» |
@@ -163,7 +163,7 @@ reel publicado por la app, y la corrida de comentarios tarda hasta cinco minutos
 5. pages_show_list / business_management: the creator picks their own Page.
 6. Same for their Facebook Page.
 7. instagram_basic / pages_read_engagement: their own posts and counters.
-8. instagram_manage_insights: reach and followers, once a day.
+8. instagram_manage_insights: reach and followers, once a day, and hourly for recent media.
 9. instagram_content_publish: a reel scheduled and published to their own account.
 10. pages_manage_posts: a photo published to their own Page.
 11. instagram_manage_comments: comments on their own media, replied with one tap or by a keyword rule.

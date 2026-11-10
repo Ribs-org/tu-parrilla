@@ -280,7 +280,7 @@ GET /v2/user/info/ — open_id, display_name (to label the connected account).
 **Explain how you determined the daily usage estimate:**
 
 ```
-Each connected creator publishes at most a handful of posts per day (typically 1–3). Per published post we make one creator_info query, one init call and up to 12 status polls (every 5 minutes until PUBLISH_COMPLETE). Metrics are read once a day per creator (one video/list call). For the first year we plan for up to 100 connected creators: ~300 posts/day ≈ 4,200 Content Posting API calls/day, plus ~100 video/list calls/day. We do not batch or retry beyond the polling described.
+Each connected creator publishes at most a handful of posts per day (typically 1–3). Per published post we make one creator_info query, one init call and up to 12 status polls (every 5 minutes until PUBLISH_COMPLETE). Metrics are read once a day per creator, and again every hour for the videos of the last 48 hours (one video/list call each time). For the first year we plan for up to 100 connected creators: ~300 posts/day ≈ 4,200 Content Posting API calls/day, plus ~2,500 video/list calls/day. We do not batch or retry beyond the polling described.
 ```
 
 **Supporting documents:** el video (guion abajo), `https://tu-parrilla.cl/privacidad`,

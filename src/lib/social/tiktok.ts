@@ -9,7 +9,7 @@ import {
   type PostMetricValues,
 } from './connector'
 import { decryptToken } from './crypto'
-import { laMasVieja, sigueListando } from './lectura'
+import { dentroDeLoPedido, laMasVieja, minimoDelListado, sigueListando } from './lectura'
 
 const API = 'https://open.tiktokapis.com/v2'
 const PAGE_SIZE = 20
@@ -132,7 +132,10 @@ export const tiktokConnector: Connector = {
     let moreToPage = false
     let masVieja: Date | null = null
 
-    while (pagesFetched < MAX_VIDEO_PAGES && sigueListando(videos.length, masVieja, opciones?.desde)) {
+    while (
+      pagesFetched < MAX_VIDEO_PAGES &&
+      sigueListando(videos.length, masVieja, opciones?.desde, minimoDelListado(opciones))
+    ) {
       const response = await fetch(`${API}/video/list/?fields=${VIDEO_FIELDS}`, {
         method: 'POST',
         headers: {
@@ -162,7 +165,8 @@ export const tiktokConnector: Connector = {
 
     // Videos still waiting behind the cursor mean the loop stopped at its window or its
     // page ceiling rather than at the end of the account. Nothing listed is dropped.
-    return { posts: videos.map(normalizeTikTokVideo), windowWasCapped: moreToPage }
+    const posts = dentroDeLoPedido(videos.map(normalizeTikTokVideo), (post) => post.publishedAt, opciones)
+    return { posts, windowWasCapped: moreToPage }
   },
 
   /**

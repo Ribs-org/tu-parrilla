@@ -7,6 +7,12 @@ export type PostMetricValues = {
   shares: number | null
   saves: number | null
   reach: number | null
+  /**
+   * Cuántos siguieron a la cuenta desde la publicación. Opcional porque casi ninguna red lo da:
+   * hoy solo las fotos y los carruseles de Instagram (`follows`). Ausente se guarda nulo, igual
+   * que los demás.
+   */
+  seguidores?: number | null
 }
 
 export type AccountMetricValues = {
@@ -86,8 +92,15 @@ export type Connector = {
   fetchAccountMetrics?(account: SocialAccount, token: string): Promise<AccountMetricValues>
 }
 
-/** Hasta dónde listar: además del mínimo, todo lo publicado desde `desde` (`lectura.ts`). */
-export type OpcionesDeListado = { desde?: Date }
+/**
+ * Hasta dónde listar: además del mínimo, todo lo publicado desde `desde` (`lectura.ts`).
+ *
+ * Con `soloDesde`, solo eso: sin el mínimo de siempre, y sin lo listado que salió antes de
+ * `desde`, que no se devuelve ni se le piden sus números. Es la lectura de cada hora
+ * (`reciente.ts`), que paga solo lo de las últimas 48 horas. Lo respetan Instagram, Facebook,
+ * TikTok y Threads; YouTube no, porque esa lectura no lo llama (su cupo).
+ */
+export type OpcionesDeListado = { desde?: Date; soloDesde?: boolean }
 
 /** Every metric absent — the starting point a connector fills in with what it has. */
 export const NO_METRICS: PostMetricValues = {

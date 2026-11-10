@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description: 'Qué datos guarda este sitio y qué no.',
 }
 
-const ACTUALIZADO = '9 de noviembre de 2026'
+const ACTUALIZADO = '10 de noviembre de 2026'
 
 export default function PrivacidadPage() {
   return (
@@ -116,7 +116,9 @@ export default function PrivacidadPage() {
           <li>
             Se guardan los datos públicos de esas publicaciones: identificador, enlace,
             descripción, miniatura y fecha, junto con sus contadores públicos de
-            reproducciones, «me gusta», comentarios, veces compartido, guardados y alcance.
+            reproducciones, «me gusta», comentarios, veces compartido, guardados y alcance y, en las
+            fotos y los carruseles de Instagram, cuántas personas empezaron a seguir la cuenta desde
+            cada una (un número, sin decir quiénes).
           </li>
           <li>
             La portada del sitio muestra <span className="text-fg">dos totales</span>: las vistas y

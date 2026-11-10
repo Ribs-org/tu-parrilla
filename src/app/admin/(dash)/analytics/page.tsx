@@ -334,7 +334,7 @@ async function EnLasRedes({
             }
           })}
           color={seriesColor(0)}
-          emptyLabel="Ninguna publicación ganó views en este período. Las métricas llegan con la sincronización diaria, así que lo publicado hoy aparece mañana."
+          emptyLabel="Ninguna publicación ganó views en este período. Lo publicado hoy aparece con la lectura de cada hora; lo de YouTube, mañana."
         />
       </Panel>
 

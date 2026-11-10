@@ -42,7 +42,7 @@ export async function leerNumerosDeLaPortada(): Promise<NumerosDeLaPortada> {
 
 /**
  * La misma suma, guardada un cuarto de hora: la portada se sirve en cada visita y la cifra solo
- * cambia cuando la sincronización trae lecturas nuevas, una vez al día.
+ * cambia cuando llegan lecturas nuevas, cada hora para lo reciente (`social/reciente.ts`).
  */
 const enCache = unstable_cache(leerNumerosDeLaPortada, ['portada-numeros'], { revalidate: 900 })
 

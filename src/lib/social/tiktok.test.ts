@@ -75,3 +75,29 @@ describe('tiktokConnector.fetchMetricsById', () => {
     await expect(tiktokConnector.fetchMetricsById!({} as never, 'token', ['v0'])).rejects.toThrow('TikTok 429')
   })
 })
+
+describe('tiktokConnector.fetchPosts, la lectura de cada hora', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('con soloDesde, una página basta y lo de antes de la ventana no vuelve', async () => {
+    let paginas = 0
+    const segundos = (iso: string) => Date.parse(iso) / 1000
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => {
+        paginas++
+        const videos = [
+          { id: 'nuevo', create_time: segundos('2026-11-10T09:00:00Z'), view_count: 5 },
+          { id: 'viejo', create_time: segundos('2026-11-07T09:00:00Z'), view_count: 9 },
+        ]
+        return Response.json({ data: { videos, has_more: true, cursor: 1 } })
+      }),
+    )
+    const desde = new Date('2026-11-08T12:00:00Z')
+    const { posts } = await tiktokConnector.fetchPosts({} as never, 'token', { desde, soloDesde: true })
+    expect(paginas).toBe(1)
+    expect(posts.map((p) => p.externalId)).toEqual(['nuevo'])
+  })
+})

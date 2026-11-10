@@ -11,7 +11,7 @@ import {
   type OpcionesDeListado,
   type PostMetricValues,
 } from './connector'
-import { laMasVieja, sigueListando } from './lectura'
+import { dentroDeLoPedido, laMasVieja, minimoDelListado, sigueListando } from './lectura'
 import { ensureThreadsCredential } from './publish/threads'
 
 const GRAPH = 'https://graph.threads.net/v1.0'
@@ -176,7 +176,7 @@ export const threadsConnector: Connector = {
     let paginas = 0
     let masVieja: Date | null = null
 
-    while (next && paginas < MAX_PAGES && sigueListando(media.length, masVieja, opciones?.desde)) {
+    while (next && paginas < MAX_PAGES && sigueListando(media.length, masVieja, opciones?.desde, minimoDelListado(opciones))) {
       const page = (await getJson(next)) as { data?: ThreadsMedia[]; paging?: Paging }
       paginas++
       const data = page.data ?? []
@@ -187,10 +187,11 @@ export const threadsConnector: Connector = {
       next = paginaSiguiente(next, page.paging, data.length === 0)
     }
 
+    const aLeer = dentroDeLoPedido(media, (item) => new Date(item.timestamp ?? 0), opciones)
     const posts: FetchedPost[] = []
     // De a pocas a la vez, como Instagram: cientos de llamadas juntas arriesgan el límite de la red.
-    for (let i = 0; i < media.length; i += INSIGHTS_CHUNK_SIZE) {
-      const chunk = media.slice(i, i + INSIGHTS_CHUNK_SIZE)
+    for (let i = 0; i < aLeer.length; i += INSIGHTS_CHUNK_SIZE) {
+      const chunk = aLeer.slice(i, i + INSIGHTS_CHUNK_SIZE)
       posts.push(
         ...(await Promise.all(
           chunk.map(async (item) => {
