@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import fixture from './fixtures/instagram-media.json'
 import {
   InstagramHttpError,
+  conSeguidores,
   instagramConnector,
   instagramTokenExpiry,
   isMediaGone,
@@ -230,5 +231,128 @@ describe('instagramConnector, por ventana y por id', () => {
       vi.fn(async () => new Response(JSON.stringify({ error: { code: 190, error_subcode: 463 } }), { status: 400 })),
     )
     await expect(instagramConnector.fetchMetricsById!(cuenta, 'token', ['viva'])).rejects.toThrow('Instagram 400')
+  })
+})
+
+describe('la lectura de cada hora y los seguidores de cada publicación', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    vi.restoreAllMocks()
+  })
+
+  const cuenta = { id: 'acc-1', externalId: 'ig-1' } as never
+  const desde = new Date('2026-11-08T12:00:00Z')
+  const conFollows = { data: [{ name: 'views', values: [{ value: 70 }] }, { name: 'follows', values: [{ value: 4 }] }] }
+  const sinFollows = { data: [{ name: 'views', values: [{ value: 70 }] }] }
+
+  /** Una página de media: las nuevas de la ventana y una de antes, todas con cursor. */
+  function pagina() {
+    return {
+      data: [
+        { id: 'foto', media_product_type: 'FEED', media_type: 'IMAGE', timestamp: '2026-11-10T09:00:00Z' },
+        { id: 'reel', media_product_type: 'REELS', media_type: 'VIDEO', timestamp: '2026-11-09T09:00:00Z' },
+        { id: 'vieja', media_product_type: 'FEED', media_type: 'IMAGE', timestamp: '2026-11-07T09:00:00Z' },
+      ],
+      paging: { next: 'https://graph.test/media?p=2' },
+    }
+  }
+
+  it('Meta da follows solo en el feed: no se pide en un reel ni en lo que no dice qué es', () => {
+    expect(conSeguidores({ id: 'a', media_product_type: 'FEED' })).toBe(true)
+    expect(conSeguidores({ id: 'a', media_product_type: 'REELS' })).toBe(false)
+    expect(conSeguidores({ id: 'a' })).toBe(false)
+  })
+
+  it('normaliza follows como los seguidores de la publicación', () => {
+    expect(normalizeInstagramMedia({ id: 'a' }, conFollows).metrics.seguidores).toBe(4)
+    expect(normalizeInstagramMedia({ id: 'a' }, sinFollows).metrics.seguidores).toBeUndefined()
+  })
+
+  it('con soloDesde, una página basta, lo de antes no se lee y follows va solo en la foto', async () => {
+    const urls: string[] = []
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => {
+        urls.push(url)
+        if (url.includes('/insights')) return Response.json(url.includes('follows') ? conFollows : sinFollows)
+        return Response.json(pagina())
+      }),
+    )
+    const { posts } = await instagramConnector.fetchPosts(cuenta, 'token', { desde, soloDesde: true })
+    expect(posts.map((p) => p.externalId)).toEqual(['foto', 'reel'])
+    expect(posts[0]!.metrics.seguidores).toBe(4)
+    expect(posts[1]!.metrics.seguidores).toBeUndefined()
+    const insights = urls.filter((u) => u.includes('/insights'))
+    expect(insights).toHaveLength(2)
+    expect(insights.find((u) => u.includes('/foto/'))).toContain('follows')
+    expect(insights.find((u) => u.includes('/reel/'))).not.toContain('follows')
+    // La de antes de la ventana se listó, pero no se le pidieron sus números.
+    expect(urls.some((u) => u.includes('/vieja/'))).toBe(false)
+    expect(urls.filter((u) => !u.includes('/insights'))).toHaveLength(1)
+  })
+
+  it('sin soloDesde, la lectura del día lista como siempre, con follows en las fotos', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => {
+        if (url.includes('/insights')) return Response.json(url.includes('follows') ? conFollows : sinFollows)
+        return Response.json({ data: pagina().data })
+      }),
+    )
+    const { posts } = await instagramConnector.fetchPosts(cuenta, 'token', { desde })
+    expect(posts.map((p) => [p.externalId, p.metrics.seguidores])).toEqual([
+      ['foto', 4],
+      ['reel', undefined],
+      ['vieja', 4],
+    ])
+  })
+
+  it('si Meta rechaza follows, repite sin él y los números de siempre llegan igual', async () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const urls: string[] = []
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => {
+        urls.push(url)
+        if (url.includes('follows')) {
+          return new Response(JSON.stringify({ error: { code: 100, message: 'metric' } }), { status: 400 })
+        }
+        if (url.includes('/insights')) return Response.json(sinFollows)
+        return Response.json({ data: [pagina().data[0]] })
+      }),
+    )
+    const { posts } = await instagramConnector.fetchPosts(cuenta, 'token')
+    expect(posts[0]!.metrics.views).toBe(70)
+    expect(posts[0]!.metrics.seguidores).toBeUndefined()
+    expect(urls.filter((u) => u.includes('/insights'))).toHaveLength(2)
+  })
+
+  it('si el problema era el token, la segunda también falla y el error sube', async () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => {
+        if (url.includes('/insights')) {
+          return new Response(JSON.stringify({ error: { code: 190, error_subcode: 463 } }), { status: 400 })
+        }
+        return Response.json({ data: [pagina().data[0]] })
+      }),
+    )
+    await expect(instagramConnector.fetchPosts(cuenta, 'token')).rejects.toThrow('Instagram 400')
+  })
+
+  it('una foto sin estadísticas para siempre no se pide dos veces', async () => {
+    const urls: string[] = []
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string) => {
+        urls.push(url)
+        if (url.includes('/insights')) return new Response('{}', { status: 404 })
+        return Response.json({ data: [pagina().data[0]] })
+      }),
+    )
+    const { posts } = await instagramConnector.fetchPosts(cuenta, 'token')
+    expect(posts[0]!.metrics.views).toBeNull()
+    expect(urls.filter((u) => u.includes('/insights'))).toHaveLength(1)
   })
 })

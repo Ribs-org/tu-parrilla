@@ -105,7 +105,7 @@ async function insertOrUpdatePost(
   return row!.id
 }
 
-async function upsertPost(post: FetchedPost, account: SocialAccount, cuenta: CuentaTag): Promise<string> {
+export async function upsertPost(post: FetchedPost, account: SocialAccount, cuenta: CuentaTag): Promise<string> {
   try {
     return await insertOrUpdatePost(post, account, campaignTagFor(account.network, post.externalId, cuenta))
   } catch (error) {
@@ -137,7 +137,25 @@ export function lecturasSinRepetir(lecturas: readonly Lectura[]): Lectura[] {
   return [...new Map(lecturas.map((l) => [l.postId, l])).values()]
 }
 
-async function writeSnapshots(lecturas: readonly Lectura[], day: string): Promise<void> {
+/**
+ * Lo que escribe una lectura sobre otra del mismo día: cada número nuevo, salvo los que no
+ * trae, que se quedan como estaban. La lectura de cada hora no pasa por TikTok for Business
+ * (`reciente.ts`): sin esto dejaría sin guardados ni alcance, hasta el día siguiente, lo que la
+ * del día completó. Y unos seguidores que Meta no contestó una vez se quedan con los de antes.
+ * `captured_at` es el de la última, aunque un número venga de una anterior.
+ */
+const SOBRE_LA_DEL_DIA = {
+  views: sql`coalesce(excluded.views, ${postMetrics.views})`,
+  likes: sql`coalesce(excluded.likes, ${postMetrics.likes})`,
+  comments: sql`coalesce(excluded.comments, ${postMetrics.comments})`,
+  shares: sql`coalesce(excluded.shares, ${postMetrics.shares})`,
+  saves: sql`coalesce(excluded.saves, ${postMetrics.saves})`,
+  reach: sql`coalesce(excluded.reach, ${postMetrics.reach})`,
+  seguidores: sql`coalesce(excluded.seguidores, ${postMetrics.seguidores})`,
+}
+
+/** Las lecturas de `day`, una por publicación (`lecturasSinRepetir`), sobre las que ya tenía. */
+export async function writeSnapshots(lecturas: readonly Lectura[], day: string): Promise<void> {
   const unicas = lecturasSinRepetir(lecturas)
   for (let i = 0; i < unicas.length; i += LECTURAS_POR_INSERT) {
     await getDb()
@@ -145,15 +163,7 @@ async function writeSnapshots(lecturas: readonly Lectura[], day: string): Promis
       .values(unicas.slice(i, i + LECTURAS_POR_INSERT).map((l) => ({ postId: l.postId, day, ...l.metrics })))
       .onConflictDoUpdate({
         target: [postMetrics.postId, postMetrics.day],
-        set: {
-          views: sql`excluded.views`,
-          likes: sql`excluded.likes`,
-          comments: sql`excluded.comments`,
-          shares: sql`excluded.shares`,
-          saves: sql`excluded.saves`,
-          reach: sql`excluded.reach`,
-          capturedAt: new Date(),
-        },
+        set: { ...SOBRE_LA_DEL_DIA, capturedAt: new Date() },
       })
   }
 }

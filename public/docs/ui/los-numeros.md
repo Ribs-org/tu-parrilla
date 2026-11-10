@@ -727,8 +727,9 @@ Cada fila, en la columna «Versión»:
   «Publicando…», «Publicado», «Falló», «Reintentando», «En tu bandeja de TikTok», «Borrada en la
   red» o «Fuera de La Parrilla».
 - Si falló o se está reintentando, el error de la red, en rojo.
-- Si ya se publicó pero la red todavía no la entrega: «Sin números todavía: llegan con la
-  sincronización diaria.», y en un trial reel además «Un trial reel puede no aparecer hasta que
+- Si ya se publicó pero la red todavía no la entrega: en Instagram, Facebook y TikTok, «Sin
+  números todavía: llegan dentro de la hora.»; en las demás, «Sin números todavía: llegan con la
+  sincronización diaria.». En un trial reel, además «Un trial reel puede no aparecer hasta que
   lo compartas.» No aparece en un borrador mandado a la bandeja de TikTok («En tu bandeja de
   TikTok»): ese no tiene números hasta que se publique desde la app.
 - Dos enlaces chicos: «Ver en <red>» con una flechita en diagonal, que abre la publicación en
@@ -1103,9 +1104,11 @@ fechas se puede compartir; unas fechas que no se entienden se ignoran y queda el
 **De dónde salen los números de la red.** La red no se consulta en vivo. Una sincronización
 lee todas las cuentas una vez al día (a las 9:00 UTC, las 5 o 6 de la mañana en Chile según la
 época) y guarda una lectura de cada publicación que le toca; también corre al apretar
-«Sincronizar ahora» en [Los Fierros](los-fierros.md). Por eso una publicación nueva no aparece
-hasta la siguiente sincronización, y los números pueden ir hasta un día atrás de lo que muestra
-la app de la red. X no se sincroniza: no tiene números aquí. Threads tampoco, salvo en
+«Sincronizar ahora» en [Los Fierros](los-fierros.md). Además, cada hora se vuelve a leer lo
+publicado en las últimas 48 horas en Instagram, Facebook y TikTok: la lectura de hoy de esas
+publicaciones se va poniendo al día, y una nueva aparece dentro de la hora. En YouTube y en lo
+más viejo, una publicación nueva no aparece hasta la siguiente sincronización, y los números
+pueden ir hasta un día atrás de lo que muestra la app de la red. X no se sincroniza: no tiene números aquí. Threads tampoco, salvo en
 la cuenta del revisor de Meta, cuando la instalación pide los permisos de lectura de Threads (ver [Los Fierros](los-fierros.md)). Ahí entran sus publicaciones propias —no
 los reposts de publicaciones ajenas— con views, likes, comentarios (sus respuestas) y
 compartidos (sus reposts más sus citas); guardados y alcance, Threads no los da. TikTok da
@@ -1186,8 +1189,9 @@ una chica, ni lo viejo a lo nuevo.
   son solo dos lados, uno anda mejor si saca ×1,2 o más de lo que sacó el otro, aunque los dos
   estén bajo lo normal de la cuenta: las fotos pueden andar menos que los videos y la música
   igual hacerles diferencia.
-- **Son views, no seguidores.** Ninguna red entrega los seguidores que trajo cada publicación:
-  TikTok da solo el total de la cuenta, e Instagram no lo da en los reels.
+- **Son views, no seguidores.** Casi ninguna publicación trae los seguidores que dio: Instagram
+  los da solo en las fotos y los carruseles, no en los reels; TikTok, solo con TikTok for
+  Business; Facebook, nunca. Con tan pocas, no alcanza para comparar.
 
 **«Interacciones».** Likes, comentarios y compartidos **ganados** en el período, sumados, sin
 YouTube.
@@ -1934,7 +1938,7 @@ De día, donde una de estas frases dice «La Parrilla» dice «La Barra», y «L
 | «Listo: se descargó <archivo>. …» | La planilla está en las descargas del navegador. | Abrirla y empezar por «Léeme». |
 | «—» en «Views ganadas» | Ninguna publicación tiene lo ganado conocido: todo es de YouTube, no hay lectura de antes del período, o no hay publicaciones sincronizadas. | Esperar la próxima sincronización, o elegir un período más corto que el tiempo que lleva conectada la cuenta. |
 | «—» en «Seguidores ganados» | Ninguna cuenta tiene una lectura de antes del período para comparar, o solo hay YouTube, TikTok, Threads o X (Threads sí suma en la cuenta del revisor de Meta, con sus permisos de lectura). | Igual que arriba. |
-| «Ninguna publicación ganó views en este período. Las métricas llegan con la sincronización diaria, así que lo publicado hoy aparece mañana.» (en «Lo que más creció») | Ninguna publicación ganó más de cero views conocidas en el período. | Ampliar el período, o esperar la próxima sincronización. |
+| «Ninguna publicación ganó views en este período. Lo publicado hoy aparece con la lectura de cada hora; lo de YouTube, mañana.» (en «Lo que más creció») | Ninguna publicación ganó más de cero views conocidas en el período. | Ampliar el período, o esperar la próxima lectura: dentro de la hora en Instagram, Facebook y TikTok; al día siguiente en YouTube. |
 | «No publicaste nada en este período. Amplía el período.» (en «Qué te funciona») | No hay publicaciones publicadas en el período (de la cuenta elegida, si hay una). | Elegir un período más largo, o «Todas las cuentas». |
 | «Todavía no alcanza para decirlo: hacen falta dos temas con al menos 10 publicaciones medidas a los 7 días cada uno. Hoy: …» (o «estilos», «formatos»; en «Qué te funciona») | Hay valores, pero menos de dos con 10 publicaciones medidas. | Ampliar el período («90 días»), o seguir anotando el atributo en lo que se programa. |
 | «Todavía no hay cómo medirlo: cada publicación se mide a los 7 días, contra lo normal de su cuenta, y una cuenta necesita al menos 5 publicaciones medidas en el período.» (en «Qué te funciona») | Nada de lo que lleva ese valor tiene todavía su lectura de los 7 días, o su cuenta tiene menos de 5 así (pasa con «Hoy» o «7 días», y con YouTube). | Elegir «30 días» o más. |
@@ -2180,7 +2184,8 @@ De día, donde una de estas frases dice «La Parrilla» dice «La Barra», y «L
   («Ver en <red>»), o desde la pieza, con «Ver en <red>».
 - **«¿Qué tema (o qué formato) me funciona mejor?» / «¿qué me trajo más seguidores?»**: «Qué te
   funciona», en el tablero, debajo de «Lo que más creció». Lo dice en views contra lo normal de
-  cada cuenta, no en seguidores: ninguna red da los seguidores que trajo cada publicación.
+  cada cuenta, no en seguidores: casi ninguna publicación los trae (Instagram los da solo en
+  fotos y carruseles; TikTok, solo con TikTok for Business).
 - **«Qué te funciona dice Todavía no alcanza»**: hacen falta dos valores con al menos 10
   publicaciones medidas cada uno. Ampliar el período, o seguir anotando `tema` y `estilo` en lo
   que se programa.
@@ -2254,7 +2259,7 @@ De día, donde una de estas frases dice «La Parrilla» dice «La Barra», y «L
 - No cuenta a quien descarga la página sin ejecutarla, ni con «Bots».
 - No muestra seguidores perdidos, ni lee cuentas de TikTok o X (ni de Threads, salvo en la
   cuenta del revisor de Meta).
-- «Qué te funciona» no dice los seguidores que trajo cada publicación (ninguna red los da), ni
+- «Qué te funciona» no dice los seguidores que trajo cada publicación (casi ninguna los trae), ni
   mira otros atributos que `tema` y `estilo`: para un hook o una serie, «Comparar por atributo».
   En «Música» no dice qué canción anduvo mejor, ni sabe nada de lo subido directo en la red.
 - No pega el link en la red, ni edita ni borra la publicación allá: lo único que se edita aquí
@@ -2374,8 +2379,9 @@ Sale de:
   quién la ve)
 - `src/lib/social/comentarios/reglas.ts` (las etiquetas `dm-`)
 - `src/lib/social/sync.ts` y `src/lib/social/index.ts` (qué redes se sincronizan, borrados,
-  lectura diaria), con `vercel.json` (la hora de la sincronización), y
-  `src/lib/social/lectura.ts` (qué publicación se lee cada día, según su edad)
+  lectura diaria), con `vercel.json` (la hora de la sincronización),
+  `src/lib/social/lectura.ts` (qué publicación se lee cada día, según su edad) y
+  `src/lib/social/reciente.ts` (lo que se vuelve a leer cada hora, y la frase de la pieza)
 - `src/app/admin/(dash)/error.tsx`, `src/app/admin/(dash)/nav.tsx`, `src/lib/vocabulario.ts`
 - `src/app/admin/(dash)/analytics/loading.tsx`, `src/app/admin/(dash)/analytics/cargando.tsx`,
   `src/app/admin/(dash)/analytics/cabeza.tsx` (la bajada, que comparten la pantalla y su carga),

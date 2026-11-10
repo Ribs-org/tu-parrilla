@@ -405,6 +405,11 @@ export const postMetrics = pgTable(
     shares: integer('shares'),
     saves: integer('saves'),
     reach: integer('reach'),
+    // Cuántos siguieron a la cuenta desde esta publicación, acumulado como los demás. Solo lo dan
+    // las fotos y los carruseles de Instagram (`follows`; los reels no tienen esa métrica); nulo
+    // en todo lo demás. Los de TikTok for Business no vienen acá: van con el resto de su detalle
+    // en `ajustes`, que `/privacidad` promete borrar al desconectar, y esta tabla se queda.
+    seguidores: integer('seguidores'),
     capturedAt: timestamp('captured_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [unique('post_metrics_post_day_key').on(t.postId, t.day), index('post_metrics_day_idx').on(t.day)],

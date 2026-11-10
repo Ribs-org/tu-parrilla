@@ -222,6 +222,21 @@ describe('collectPublishedPosts', () => {
     expect(callCount()).toBe(4)
   })
 
+  it('con un mínimo de uno (la lectura de cada hora), para en la primera página que ya pasó la ventana', async () => {
+    let calls = 0
+    const fetchJson = async () => {
+      calls++
+      // Cada página, un día más atrás, del 20 de octubre.
+      const dia = new Date(Date.UTC(2026, 9, 21 - calls, 12)).toISOString()
+      return { data: [{ id: String(calls), created_time: dia }], paging: { next: `https://graph.test/p${calls}` } }
+    }
+    const desde = new Date(Date.UTC(2026, 9, 19))
+    const { posts } = await collectPublishedPosts('https://graph.test/p0', fetchJson, desde, 1)
+    // El 20 y el 19 son de la ventana; el 18 es el que dice que se pasó.
+    expect(calls).toBe(3)
+    expect(posts).toHaveLength(3)
+  })
+
   it('un cursor que no trae datos no lo hace loopear para siempre', async () => {
     // Graph puede devolver data: [] con paging.next presente; sin tope de páginas el
     // while nunca llenaría el array y nunca saldría.

@@ -1,0 +1,1 @@
+ALTER TABLE "post_metrics" ADD COLUMN "seguidores" integer;

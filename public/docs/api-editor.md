@@ -9,7 +9,8 @@ aquí, el sistema no lo hace.
 Un calendario de publicación, conectado a las cuentas reales del dueño de tu llave —la
 persona que te la dio—. Tú
 programas posts por API; un proceso automático los publica a su hora en cada red y
-guarda el resultado. Otro proceso sincroniza a diario las métricas de lo publicado.
+guarda el resultado. Otro proceso sincroniza a diario las métricas de lo publicado, y cada
+hora las de lo publicado en las últimas 48 horas en Instagram, Facebook y TikTok.
 Cierras el ciclo leyendo esas métricas junto a las etiquetas que tú mismo pusiste al
 programar.
 
@@ -919,9 +920,11 @@ parte el rango en trozos más chicos.
 1. **El rango filtra por fecha de publicación, no por actividad.** Un video publicado
    el 30 de agosto que explota el 5 de septiembre aparece en una consulta de *agosto*
    (con sus views ganadas dentro del rango que pidas), no en una de septiembre.
-2. **Las métricas llegan con la sincronización diaria.** Lo publicado hoy tendrá
-   números recién mañana. No concluyas nada de un post de hace dos horas. Y lo viejo se
-   lee menos seguido: una publicación de los últimos 10 días se lee todos los días; una
+2. **Las métricas llegan con la sincronización diaria y, en lo reciente, cada hora.** Lo
+   publicado en las últimas 48 horas en Instagram, Facebook y TikTok se lee de nuevo cada
+   hora, así que lo de hoy tiene números dentro de la hora siguiente; en YouTube, recién
+   mañana. Igual no concluyas nada de un post de hace dos horas. Y lo viejo se lee menos
+   seguido: una publicación de los últimos 10 días se lee todos los días; una
    más vieja, una vez por semana hasta el mes, cada dos semanas hasta los tres meses y
    cada cuatro después. Sus números pueden ir hasta esas semanas atrás de lo que muestra
    la red.

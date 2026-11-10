@@ -4,6 +4,11 @@
 // los números del día en que salió de la ventana —y se veía peor de lo que era—. Ahora la
 // lectura va por edad: lo nuevo se lista y se lee entero a diario, y lo viejo se lee por
 // su id, cada vez más espaciado, porque casi no se mueve. Puro, para los tests.
+//
+// Además, lo de las últimas 48 horas se vuelve a leer cada hora (`reciente.ts`), con el listado
+// recortado a eso (`soloDesde`).
+
+import type { OpcionesDeListado } from './connector'
 
 /** Lo publicado en estos últimos días se lista y se lee entero, todos los días. */
 export const DIAS_DE_LECTURA_DIARIA = 10
@@ -62,14 +67,38 @@ export function porLeerHoy(conocidas: readonly Conocida[], listadas: ReadonlySet
 }
 
 /**
- * Si un listado (de lo más nuevo hacia atrás) sigue pidiendo páginas: hasta juntar
- * `MIN_LISTADAS`, y después mientras lo más viejo que trajo siga siendo de `desde` en
- * adelante. Cada conector pone además su tope de páginas, que es lo que lo frena si la red
- * entrega páginas vacías con cursor.
+ * Si un listado (de lo más nuevo hacia atrás) sigue pidiendo páginas: hasta juntar `minimo`
+ * —por omisión, `MIN_LISTADAS`—, y después mientras lo más viejo que trajo siga siendo de
+ * `desde` en adelante. Cada conector pone además su tope de páginas, que es lo que lo frena
+ * si la red entrega páginas vacías con cursor.
  */
-export function sigueListando(listadas: number, masVieja: Date | null, desde: Date | undefined): boolean {
-  if (listadas < MIN_LISTADAS) return true
+export function sigueListando(
+  listadas: number,
+  masVieja: Date | null,
+  desde: Date | undefined,
+  minimo: number = MIN_LISTADAS,
+): boolean {
+  if (listadas < minimo) return true
   return desde !== undefined && masVieja !== null && masVieja.getTime() >= desde.getTime()
+}
+
+/**
+ * El mínimo de un listado: el de siempre, o uno si se pidió solo lo de `desde` en adelante
+ * (`soloDesde`, la lectura de cada hora). Uno y no cero: sin nada listado todavía no hay
+ * fecha que mirar, y la primera página se pide igual.
+ */
+export function minimoDelListado(opciones?: OpcionesDeListado): number {
+  return opciones?.soloDesde ? 1 : MIN_LISTADAS
+}
+
+/**
+ * Lo listado que entra en lo pedido: todo, salvo con `soloDesde`, que deja afuera lo que salió
+ * antes de `desde`. Va antes de pedir los números de cada publicación, para no pagarlos.
+ */
+export function dentroDeLoPedido<T>(items: readonly T[], fechaDe: (item: T) => Date, opciones?: OpcionesDeListado): T[] {
+  const desde = opciones?.desde
+  if (!opciones?.soloDesde || !desde) return [...items]
+  return items.filter((item) => fechaDe(item).getTime() >= desde.getTime())
 }
 
 /** La más vieja entre la que se llevaba y una fecha nueva. */

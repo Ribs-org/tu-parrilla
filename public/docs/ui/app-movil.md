@@ -606,7 +606,7 @@ En La Mesa, toca «Enviados»: lo respondido desde Tu Parrilla, por la respuesta
 | «▸ Borradores (N)» | Hay N borradores guardados, del teléfono o del panel web. | Tocarlo para ver la lista. |
 | «BORRADOR · 19:00» (tarjeta punteada en un día) | Un borrador con esa fecha. Todavía no está programado: no va a salir solo. | Tocarlo para abrirlo y programarlo. |
 | «Ayer no salió nada.» / «Ayer: N cortes servidos» | Cuántos posts de ayer salieron en al menos una red. | Nada. |
-| «Ninguna publicación ganó views en este período. Las métricas llegan con la sincronización diaria, así que lo publicado hoy aparece mañana.» (en «Lo que más creció») | Ninguna publicación ganó views conocidas en el período. | Elegir un período más largo, o esperar la sincronización del día siguiente. |
+| «Ninguna publicación ganó views en este período. Lo publicado hoy aparece con la lectura de cada hora; lo de YouTube, mañana.» (en «Lo que más creció») | Ninguna publicación ganó views conocidas en el período. | Elegir un período más largo, o esperar la próxima lectura: dentro de la hora en Instagram, Facebook y TikTok; al día siguiente en YouTube. |
 | «Ninguna visita llegó todavía por el link de una publicación.» (en «Qué publicación te trajo gente») | En el período no llegó ninguna visita con etiqueta. | Elegir un período más largo; pegar los links con etiqueta (ver [Los Números](los-numeros.md)). |
 | «—» bajo «Visitas» o «Clicks en tus links» | No hay con qué comparar: el período anterior tuvo cero, o el período es «Todo». | Nada. |
 | «Cargando tus cuentas…» | Se están descargando las tarjetas de «⋯ Más: tus cuentas». | Esperar. |

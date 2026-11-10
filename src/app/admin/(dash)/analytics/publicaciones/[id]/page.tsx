@@ -15,6 +15,7 @@ import { getPostRows } from '@/lib/posts'
 import { analiticaDeYoutubeAbiertaPara, promocionarAbiertoPara } from '@/lib/redes-abiertas'
 import { Promociones } from '../../promociones'
 import { VideoTiktokAFondo, type VersionAFondo } from '../../video-tiktok-a-fondo'
+import { seLeeCadaHora } from '@/lib/social/reciente'
 import { videosAFondo } from '@/lib/social/tiktok-numeros-guardar'
 import { EnYoutubeAnalytics } from './en-youtube-analytics'
 import type { PostRow } from '@/lib/posts-kpis'
@@ -202,7 +203,9 @@ export default async function PiezaPage({
                         bandeja de TikTok— no va a sincronizar nunca, y el estado ya lo dice. */}
                     {v.status === 'published' && !v.fila && v.externalId !== null ? (
                       <span className="block max-w-xs text-[0.72rem] leading-snug text-fg-faint">
-                        Sin números todavía: llegan con la sincronización diaria.
+                        {seLeeCadaHora(v.network)
+                          ? 'Sin números todavía: llegan dentro de la hora.'
+                          : 'Sin números todavía: llegan con la sincronización diaria.'}
                         {v.trial ? ' Un trial reel puede no aparecer hasta que lo compartas.' : ''}
                       </span>
                     ) : null}

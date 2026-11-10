@@ -787,10 +787,18 @@ diciendo «Sin suscripción», y es cierto.
 
 - **Lo que trajo: la app que se siente red social** (pedido y diseñado el 2026-11-10). En cada
   corte de los últimos siete días, un circulito con lo nuevo desde que se miró —«me gusta»,
-  comentarios y visitas—, en una fila arriba de La Parrilla de la app; el número en el ícono; los
-  números cada hora para lo reciente; hitos, racha y un aviso de lo bueno al día. Cuatro fases,
-  ninguna hecha todavía: el diseño, con lo que cada red da y lo que YouTube no deja, en
+  comentarios y visitas—, en una fila arriba de La Parrilla de la app; el número en el ícono;
+  hitos, racha y un aviso de lo bueno al día. La fase 1, los números cada hora, está hecha (falta
+  su alta en cron-job.org, abajo); faltan la 2 (la fila, el detalle y el ícono), la 3 (hitos y
+  racha) y la 4 (el aviso). El diseño, con lo que cada red da y lo que YouTube no deja, en
   `docs/superpowers/specs/2026-11-10-lo-que-trajo-design.md`. Después: llevarlo al panel.
+- **[dueño] Los números cada hora: darlos de alta en cron-job.org** (2026-11-10). Una tarea nueva
+  que llame `https://tu-parrilla.cl/api/cron/numeros-recientes` **cada hora, a los 30 minutos**
+  (no a la hora en punto: a las 9:00 UTC corre la sincronización diaria), con el mismo header
+  que la de publicar: `Authorization: Bearer <CRON_SECRET>`. Sin ella la ruta no la llama nadie
+  y los números siguen llegando una vez al día. Se comprueba en el historial de la tarea: cada
+  corrida contesta 200 con `{"informe":[…]}`, una fila por cuenta (README, «Los números cada
+  hora»).
 - **La Cocina en la portada (#324)** (2026-11-09). Una sección en `tu-parrilla.cl` que cuente
   qué entrega La Cocina, en cuánto tiempo y cómo se pide. Decidido por el dueño: el ejemplo del
   antes y el después son **solo sus dos mejores cortos**, que el equipo de contenido identifica

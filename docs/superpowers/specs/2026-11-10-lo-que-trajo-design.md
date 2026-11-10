@@ -1,7 +1,7 @@
 # Lo que trajo: la app que se siente red social
 
-Fecha: 2026-11-10. **Diseño, sin implementar.** Cuatro fases, cada una en su PR y cada una
-sostenida sola; el orden está en «Las fases», al final. Es de la app del teléfono: el panel no
+Fecha: 2026-11-10. **La fase 1 está hecha; las otras tres, sin implementar.** Cuatro fases,
+cada una en su PR y cada una sostenida sola; el orden está en «Las fases», al final. Es de la app del teléfono: el panel no
 cambia en esta entrega (ver «Lo que no entra»).
 
 ## Lo que pidió el dueño
@@ -149,7 +149,15 @@ eso el circulito de los «me gusta» se movería una vez al día. Para que se si
 
 **Lee además los seguidores de las fotos y carruseles de Instagram** (`follows`), en las dos
 lecturas: una columna nueva, `post_metrics.seguidores`. No se piden en los reels, porque esa
-combinación contesta un error.
+combinación contesta un error. Los de TikTok for Business no van a esa columna: se quedan con el
+resto del detalle de Business en `ajustes`, que `/privacidad` promete borrar al desconectar la
+cuenta, y `post_metrics` se queda. El detalle del corte los lee de ahí.
+
+Como se hizo (fase 1): la ruta lista con `soloDesde` (`OpcionesDeListado`), que recorta el
+listado a lo de `desde` y no le pide números a lo de antes; la lectura nueva de un día no borra
+el número que la anterior traía y ella no (`writeSnapshots`), porque la de cada hora no pasa por
+TikTok for Business; y no toca la tarjeta de Los Fierros. Lo cuenta el README, en «Los números
+cada hora».
 
 ## Los hitos
 
@@ -197,7 +205,8 @@ No hay aviso de la racha que se apaga: el dueño pidió avisos de lo bueno.
   momento de mirarlo.
 - **`hitos`**: `post_id` (a `scheduled_posts` en cascada), `owner_id`, `umbral`, `alcanzado_en`,
   `celebrado_en`, `avisado_en`; único por `(post_id, umbral)`.
-- **`post_metrics.seguidores`**: entero, nulo donde la red no lo da.
+- **`post_metrics.seguidores`**: entero, nulo donde la red no lo da. Hecho en la fase 1, solo con
+  los de Instagram.
 - **`users.push_bueno`** (por defecto encendido) y **`users.push_bueno_en`**.
 
 Todo con su dueño en el `where`, como pide el arnés de aislamiento (`src/lib/aislamiento.test.ts`).
