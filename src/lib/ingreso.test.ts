@@ -6,6 +6,7 @@ import {
   VIGENCIA_MS,
   codigoCoincide,
   codigoDeRevision,
+  correoDelCodigo,
   generarCodigo,
   hashCodigo,
   normalizarCorreo,
@@ -82,5 +83,53 @@ describe('puedePedir', () => {
     expect(puedePedir([hace(1000), hace(2000), hace(3000)], now)).toBe(false)
     expect(puedePedir([hace(VENTANA_MS + 1), hace(2000), hace(3000)], now)).toBe(true)
     expect(MAX_CODIGOS_POR_VENTANA).toBe(3)
+  })
+})
+
+describe('correoDelCodigo', () => {
+  const sitio = 'https://tu-parrilla.cl'
+  const enlace = 'https://tu-parrilla.cl/ingresar/codigo?correo=juana%2Bparrilla%40ejemplo.cl#codigo=123456'
+
+  it('el de siempre trae el código, el botón y el enlace, que abre el navegador y no la app', () => {
+    const { subject, text, html } = correoDelCodigo('123456', { correo: 'juana+parrilla@ejemplo.cl', sitio })
+    expect(subject).toBe('123456 es tu código para entrar a Tu Parrilla')
+    expect(text).toContain('Tu código para entrar a Tu Parrilla es 123456. Vale diez minutos.')
+    expect(text).toContain(`Para entrar, abre este enlace y aprieta «Entrar»:\n${enlace}`)
+    expect(text).toContain('Si lo pediste en la app del teléfono, escribe el código en la app')
+    expect(html).toContain(`<a href="${enlace}"`)
+    expect(html).toContain('>Entrar a Tu Parrilla</a>')
+    expect(html).toContain('>123456</strong>')
+  })
+
+  it('la invitación saluda, trae el botón y dice dónde pedir otro', () => {
+    const { subject, text, html } = correoDelCodigo('123456', {
+      correo: 'juana+parrilla@ejemplo.cl',
+      sitio,
+      invitacion: { nombre: ' Juana Pérez ' },
+    })
+    expect(subject).toBe('Te invitaron a Tu Parrilla: tu código es 123456')
+    expect(text.startsWith('Hola Juana:\n\nTe invitaron a Tu Parrilla.')).toBe(true)
+    expect(text).toContain(enlace)
+    expect(text).toContain('O escribe este código: 123456. Vale diez minutos.')
+    expect(text).toContain('pide otro en https://tu-parrilla.cl/ingresar con este mismo correo (juana+parrilla@ejemplo.cl)')
+    expect(html).toContain('>Entrar a Tu Parrilla</a>')
+  })
+
+  it('lo que escribió el admin va escapado en el HTML', () => {
+    const { html } = correoDelCodigo('123456', { correo: 'a@ejemplo.cl', sitio, invitacion: { nombre: '<b>Juana</b>' } })
+    expect(html).toContain('Hola &lt;b&gt;Juana&lt;/b&gt;:')
+    expect(html).not.toContain('<b>')
+  })
+
+  it('sin dominio del producto, sin enlaces ni HTML: el de siempre queda como era', () => {
+    expect(correoDelCodigo('123456', { correo: 'juana@ejemplo.cl', sitio: '' })).toEqual({
+      subject: '123456 es tu código para entrar a Tu Parrilla',
+      text: 'Tu código para entrar a Tu Parrilla es 123456. Vale diez minutos. Si no lo pediste, ignora este correo.',
+    })
+    const invitacion = correoDelCodigo('123456', { correo: 'juana@ejemplo.cl', sitio: '', invitacion: { nombre: null } })
+    expect(invitacion.text.startsWith('Hola:')).toBe(true)
+    expect(invitacion.text).toContain('escribe este código en la pantalla de ingreso de Tu Parrilla: 123456')
+    expect(invitacion.text).not.toContain('http')
+    expect(invitacion.html).toBeUndefined()
   })
 })

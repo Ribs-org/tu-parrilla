@@ -95,9 +95,9 @@ vi.mock('@/db', async (importOriginal) => {
 
 // Doble de `enviarCorreo`: anota cada mensaje que `pedir()` intentó mandar y responde según
 // lo que el test dejó cargado, sin llamar a Resend de verdad.
-const correo = vi.hoisted(() => ({ enviado: true, mandados: [] as { to: string; subject: string; text: string }[] }))
+const correo = vi.hoisted(() => ({ enviado: true, mandados: [] as { to: string; subject: string; text: string; html?: string }[] }))
 vi.mock('./correo', () => ({
-  enviarCorreo: async (mensaje: { to: string; subject: string; text: string }) => {
+  enviarCorreo: async (mensaje: { to: string; subject: string; text: string; html?: string }) => {
     correo.mandados.push(mensaje)
     return correo.enviado
   },
@@ -311,6 +311,23 @@ describe('pedir', () => {
     expect(await pedir(usuarioRevision.correo)).toBe(false)
     expect(db.borrados).toHaveLength(1)
     error.mockRestore()
+  })
+
+  it('el correo lleva el enlace al dominio del producto, y la invitación es la suya', async () => {
+    vi.stubEnv('DOMINIO_PRODUCTO', 'tu-parrilla.cl')
+    expect(await pedir(usuarioRevision.correo)).toBe(true)
+    expect(correo.mandados[0]!.subject).toMatch(/^\d{6} es tu código para entrar a Tu Parrilla$/)
+    expect(correo.mandados[0]!.text).toContain('https://tu-parrilla.cl/ingresar/codigo?correo=revision%40tu-parrilla.cl#codigo=')
+    expect(correo.mandados[0]!.html).toContain('Entrar a Tu Parrilla')
+    expect(await pedir(usuarioRevision.correo, { invitacion: true })).toBe(true)
+    expect(correo.mandados[1]!.subject).toMatch(/^Te invitaron a Tu Parrilla: tu código es \d{6}$/)
+  })
+
+  it('sin dominio del producto, el correo de siempre, sin enlace', async () => {
+    vi.stubEnv('DOMINIO_PRODUCTO', '')
+    expect(await pedir(usuarioRevision.correo)).toBe(true)
+    expect(correo.mandados[0]!.text).not.toContain('http')
+    expect(correo.mandados[0]!.html).toBeUndefined()
   })
 
   // La puerta del revisor de Meta (§4b de la spec): con las dos variables puestas y ese

@@ -55,7 +55,10 @@ No hay nada más: ni contraseña, ni opción para crear una cuenta o recuperar u
 
 - «Parrilla» y el título «Tu código»;
 - la frase «Si tu correo está invitado, te llegará un código en un minuto. Vale diez minutos.»;
-- un campo para los seis dígitos, con el texto de ejemplo «000000»;
+  si se llegó desde el botón del correo, en cambio, «Tu código ya está puesto: aprieta
+  «Entrar».»;
+- un campo para los seis dígitos, con el texto de ejemplo «000000» (ya lleno, si se llegó desde
+  el botón del correo);
 - el botón «Entrar», que mientras trabaja dice «Entrando…»;
 - debajo, el enlace «Usar otro correo», que vuelve al paso 1.
 
@@ -65,10 +68,23 @@ válido en la dirección, vuelve al paso 1.
 
 ### El correo que llega
 
-El asunto es «NNNNNN es tu código para entrar a Tu Parrilla» (con los seis dígitos delante) y el
-cuerpo, «Tu código para entrar a Tu Parrilla es NNNNNN. Vale diez minutos. Si no lo pediste,
-ignora este correo.». No trae enlace: el código se escribe a mano en el paso 2. La invitación
-del admin manda este mismo correo.
+El asunto es «NNNNNN es tu código para entrar a Tu Parrilla» (con los seis dígitos delante). El
+cuerpo dice «Tu código para entrar a Tu Parrilla es NNNNNN. Vale diez minutos.», con el código en
+grande; un botón «Entrar a Tu Parrilla»; «Si lo pediste en la app del teléfono, escribe el código
+en la app: el enlace abre el navegador.» y «Si no lo pediste, ignora este correo.». Quien lee el
+correo sin HTML ve, en vez del botón, «Para entrar, abre este enlace y aprieta «Entrar»:» y la
+dirección.
+
+El botón abre el paso 2 con el correo y el código ya puestos, en el aparato donde se abre el
+correo, aunque el código se haya pedido en otro. **Abrirlo no entra**: hay que apretar «Entrar»
+(los filtros de correo abren los enlaces antes que la persona, y así no gastan el código). Vale
+lo mismo que el código: diez minutos, un solo uso y los mismos topes.
+
+La invitación del admin manda otro correo, con el asunto «Te invitaron a Tu Parrilla: tu código
+es NNNNNN». Dice «Hola <nombre>:» (o «Hola:»), «Te invitaron a Tu Parrilla.», el mismo botón, «O
+escribe este código: NNNNNN. Vale diez minutos.», dónde pedir otro si se venció
+(`https://tu-parrilla.cl/ingresar`, con el mismo correo) y que en la app del teléfono se entra
+igual.
 
 ### Si algo se rompe al preparar el ingreso
 
@@ -84,7 +100,9 @@ botón «Reintentar».
 2. Escribir el correo con el que te invitaron y apretar «Mandarme un código».
 3. Buscar en el correo el mensaje «… es tu código para entrar a Tu Parrilla». Puede tardar un
    minuto; si no aparece, mirar en spam o promociones.
-4. Escribir los seis dígitos, sin espacios, y apretar «Entrar». Se abre La Parrilla.
+4. Escribir los seis dígitos, sin espacios, y apretar «Entrar». Se abre La Parrilla. O, en vez de
+   escribirlos, apretar «Entrar a Tu Parrilla» en el correo y, en la pantalla que se abre,
+   «Entrar».
 
 ### Para pedir otro código
 
@@ -170,7 +188,9 @@ Sale de:
 - `src/app/admin/login/page.tsx`: la dirección antigua.
 - `src/lib/ingreso.ts`: las frases, los diez minutos, los cinco intentos, los tres códigos
   cada quince minutos y los diez errores por día.
-- `src/lib/usuarios.ts`: pedir y canjear el código, y el texto del correo.
+- `src/lib/usuarios.ts`: pedir y canjear el código.
+- `src/lib/ingreso.ts` (`correoDelCodigo`): los dos correos, el de siempre y el de la invitación.
+- `src/lib/enlace-de-entrada.ts`: el enlace del botón, con el código en el fragmento (`#codigo=`).
 - `src/lib/limite-ip.ts`: el freno por conexión.
 - `src/lib/sesion-token.ts` y `src/lib/auth.ts`: los treinta días y adónde manda sin sesión.
 - `src/lib/tema-servidor.ts`: el modo, de noche o de día, con que se pintan las dos pantallas.
