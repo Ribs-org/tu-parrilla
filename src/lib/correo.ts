@@ -4,9 +4,10 @@ import { env } from './env'
 /**
  * Un correo por Resend. Mejor esfuerzo: sin clave no manda y devuelve false; un fallo de
  * Resend va al log y devuelve false. Quien llama decide qué decirle al usuario, que en el
- * ingreso es siempre la misma frase neutra.
+ * ingreso es siempre la misma frase neutra. Con `html`, el correo va en los dos: el texto es para
+ * quien no muestra HTML.
  */
-export async function enviarCorreo(mensaje: { to: string; subject: string; text: string }): Promise<boolean> {
+export async function enviarCorreo(mensaje: { to: string; subject: string; text: string; html?: string }): Promise<boolean> {
   const apiKey = env('RESEND_API_KEY')
   if (!apiKey) return false
   try {

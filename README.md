@@ -11,7 +11,7 @@ tus números.
 | URL | Qué es |
 | --- | --- |
 | `/` | En el dominio del producto (`DOMINIO_PRODUCTO`), la portada de Tu Parrilla, con los enlaces a privacidad y términos, los creadores que trabajan con Tu Parrilla (cada uno dio su permiso; sus fotos, en `public/creadores/`) y un contador de las vistas y los «me gusta» de todas las cuentas conectadas, sin YouTube (`src/lib/portada-numeros.ts`). En cualquier otro, la página principal del dueño del dominio: cada usuario tiene una, pero solo la del admin se sirve en la raíz |
-| `/ingresar` | La entrada al panel: el correo y el código de seis dígitos que llega a ese correo. Como el panel, se abre en el dominio del producto |
+| `/ingresar` | La entrada al panel: el correo y el código de seis dígitos que llega a ese correo, con un botón que abre `/ingresar/codigo` con el código puesto (en el fragmento, `#codigo=`, que no llega al servidor). Como el panel, se abre en el dominio del producto |
 | `/borrar-mis-datos` | Cómo pedir que se borre una cuenta con todos sus datos, qué se borra y qué se guarda (los respaldos, 90 días). Pública y sin sesión: es la «Delete data URL» de la ficha de Google Play, que la revisa (`docs/play-store.md`). El borrado lo hace hoy el equipo a mano (ver `docs/pendientes.md`) |
 | `/privacidad`, `/terminos` | La política de privacidad y los términos, públicos y sin sesión. Google y Meta los revisan para verificar la app. Además los enlaza, junto con `/`, el *Branding* de `rclone-servidor`, otra app de Google de Infraestructura (#294): si alguna de las tres cambia de ruta o se baja, avisar en `VicentePareja/servidor_propio` |
 | `/<slug>` | La página de un usuario. Cada dominio sirve solo las de su dueño; el del producto las sirve todas |
@@ -1582,7 +1582,7 @@ Vercel y bajan con `vercel env pull .env.local`.
 | `R2_BUCKET` | Nombre del bucket de R2 | No — sin ella no puedes subir media |
 | `R2_PUBLIC_BASE` | URL pública del bucket de R2 | No — sin ella no puedes subir media |
 | `R2_ENDPOINT` | Solo en local: el de otro almacén compatible con S3 (un S3Mock o un MinIO en Docker), para probar las subidas sin R2. Sin ella, el de R2 | No — en producción no va |
-| `DOMINIO_PRODUCTO` | El dominio donde vive la landing del producto. Ese dominio sirve las páginas de todos; los demás, solo las de su dueño. Es también el único donde se abre el panel | No — sin ella ningún dominio es el del producto y todos sirven solo lo del dueño |
+| `DOMINIO_PRODUCTO` | El dominio donde vive la landing del producto. Ese dominio sirve las páginas de todos; los demás, solo las de su dueño. Es también el único donde se abre el panel, y al que lleva el botón del correo del código (sin ella, el correo va sin botón) | No — sin ella ningún dominio es el del producto y todos sirven solo lo del dueño |
 | `SITE_TIMEZONE` | Zona por defecto de los usuarios nuevos y del sitio público; cada usuario cambia la suya en Tu Cuenta. Si no es una zona IANA conocida, se avisa por consola y se usa `America/Santiago` | No — por defecto `America/Santiago` |
 | `YOUTUBE_API_KEY` | Lee las estadísticas públicas de los canales conectados | No — sin ella YouTube no trae métricas |
 | `YOUTUBE_CHANNEL_ID` | Deja creada la tarjeta del canal del dueño del despliegue; se sincroniza recién cuando lo conecta con OAuth | No |
