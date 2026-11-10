@@ -4,6 +4,7 @@ import { and, asc, desc, eq, gt, isNull, lt, sql } from 'drizzle-orm'
 import { codigosIngreso, getDb, profiles, users, type Usuario } from '@/db'
 import { esChoqueCon } from './choque-de-unicidad'
 import { enviarCorreo } from './correo'
+import { dominioProducto } from './dominios'
 import { env } from './env'
 import { direccionBase, primeraDireccionLibre } from './slugs'
 import {
@@ -20,6 +21,7 @@ import {
   VIGENCIA_MS,
   codigoCoincide,
   codigoDeRevision,
+  correoDelCodigo,
   generarCodigo,
   hashCodigo,
   normalizarCorreo,
@@ -199,9 +201,10 @@ export async function pedidosRecientes(userId: string, now: Date): Promise<Date[
 /**
  * Manda un código nuevo al correo, si ese correo está invitado y no pasó el tope. Devuelve
  * si el correo salió; quien llama desde el camino público lo ignora a propósito, porque la
- * respuesta al visitante es la misma exista o no el usuario.
+ * respuesta al visitante es la misma exista o no el usuario. El correo lleva el botón para entrar
+ * (`correoDelCodigo`); con `invitacion`, es el de la invitación, que saluda y dice qué es.
  */
-export async function pedir(correo: string): Promise<boolean> {
+export async function pedir(correo: string, opciones: { invitacion?: boolean } = {}): Promise<boolean> {
   // El admin se asegura solo cuando el que pide es él, que es para lo que existe: su primer
   // ingreso funciona sin ningún paso previo. Antes corría en cada pedido, así que cada pedido
   // de código —de cualquier correo, invitado o no— era una escritura en `users`.
@@ -234,10 +237,14 @@ export async function pedir(correo: string): Promise<boolean> {
     console.log(`[ingreso] código para ${usuario.correo}: ${codigo}`)
   }
   if (fijo !== null) return true
+  const dominio = dominioProducto()
   const enviado = await enviarCorreo({
     to: usuario.correo,
-    subject: `${codigo} es tu código para entrar a Tu Parrilla`,
-    text: `Tu código para entrar a Tu Parrilla es ${codigo}. Vale diez minutos. Si no lo pediste, ignora este correo.`,
+    ...correoDelCodigo(codigo, {
+      correo: usuario.correo,
+      sitio: dominio ? `https://${dominio}` : '',
+      invitacion: opciones.invitacion ? { nombre: usuario.nombre } : undefined,
+    }),
   })
   if (!enviado) {
     // Fuera de producción el código ya salió por la consola, que es la entrega: la fila se

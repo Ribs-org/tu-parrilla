@@ -113,7 +113,8 @@ está mal y dónde está.
 
 ## 4. Flujos y detalles
 
-- **Entrar:** el correo del código no trae enlace ni dirección (`src/lib/usuarios.ts:249-250`);
+- **Entrar:** el correo del código no trae enlace ni dirección (`src/lib/usuarios.ts:249-250`;
+  desde el 2026-11-10 trae el botón «Entrar a Tu Parrilla»);
   la pantalla del código no dice a qué correo se mandó (`ingresar/formularios.tsx:33-34`); y
   la frase de sesión vencida existe pero no se usa, así que quien pierde la sesión cae en
   «Entra con tu correo» sin explicación (`src/lib/ingreso.ts:11`).

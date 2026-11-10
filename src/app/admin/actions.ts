@@ -1143,8 +1143,9 @@ export async function invitarUsuario(_prev: FormState, formData: FormData): Prom
     return { error: 'No se pudo invitar: la página del usuario no se pudo crear. Intenta de nuevo.' }
   }
   if ('error' in resultado) return { error: resultado.error }
-  // El primer código sale con la invitación: el invitado entra sin pedir nada.
-  const enviado = await pedir(resultado.usuario.correo)
+  // El primer código sale con la invitación, con el enlace para entrar: el invitado entra sin
+  // pedir nada y sabe dónde.
+  const enviado = await pedir(resultado.usuario.correo, { invitacion: true })
   revalidatePath('/admin/usuarios')
   if (!enviado) return { ok: true, aviso: 'Invitado, pero el correo no salió: revisa Resend.' }
   return { ok: true }

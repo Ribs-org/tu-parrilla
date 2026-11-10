@@ -120,13 +120,13 @@ Las fechas van en números (día-mes-año).
    «invitado <fecha>».
 
 La invitación hace tres cosas: deja entrar a ese correo, le manda de inmediato un código para
-entrar (el mismo correo de siempre, «NNNNNN es tu código para entrar a Tu Parrilla», que vale diez
-minutos y **no trae enlace**), y le crea su página pública, ya publicada, que después edita en
+entrar (el correo «Te invitaron a Tu Parrilla: tu código es NNNNNN», con el botón «Entrar a Tu
+Parrilla»; el código vale diez minutos), y le crea su página pública, ya publicada, que después edita en
 La Vitrina (tus páginas públicas, [la-vitrina.md](la-vitrina.md)). La dirección de esa página sale de lo que va antes
 de la @ del correo, con un número al final si ya está tomada.
 
-Conviene decirle a la persona dónde entrar: `https://tu-parrilla.cl/ingresar`. Si el código de
-la invitación se le venció, ahí pide otro con su correo ([ingresar.md](ingresar.md)).
+El correo ya dice dónde entrar y, si el código se le venció, dónde pedir otro:
+`https://tu-parrilla.cl/ingresar`, con su correo ([ingresar.md](ingresar.md)).
 
 ### Para quitar una invitación
 
@@ -244,7 +244,7 @@ Para devolverla, se traspasa de vuelta, con estos mismos pasos.
 | «La prioridad es un número entero de 0 a 9.» | Lo escrito en «Prioridad» no es un número de 0 a 9. | Corregirlo. |
 | «La fecha no se entendió: elige un día, o déjala vacía para que sea sin fecha.» | En «Plan», la fecha de la cortesía no se pudo leer. | Elegirla de nuevo con el calendario. |
 | «La cortesía tiene que terminar después de hoy.» | En «Plan», el día elegido ya pasó. | Elegir uno que no haya pasado, o dejarla sin fecha. |
-| «Invitado. Le llegó su primer código.» | Quedó invitado y el correo con el código salió. | Decirle a la persona que entre en `https://tu-parrilla.cl/ingresar` y que el código vale diez minutos. |
+| «Invitado. Le llegó su primer código.» | Quedó invitado y el correo con el código salió. | Avisarle que busque «Te invitaron a Tu Parrilla» en su correo (o en spam) y apriete el botón: el código vale diez minutos. |
 | «Invitado, pero el correo no salió: revisa Resend.» | Quedó invitado, pero el envío del código falló. Resend es el servicio que manda los correos. | Revisar el servicio de correo. Mientras tanto, la persona puede pedir un código en `/ingresar`; si el correo sigue sin salir, tampoco le va a llegar. |
 | «Ese correo no se ve bien.» | Lo escrito en «Correo» no tiene forma de correo. | Corregirlo. |
 | «Ese correo ya está invitado.» | Ya hay alguien con ese correo en «Invitados». | Nada que invitar. Si no le llega el código, que lo pida en `/ingresar`. |

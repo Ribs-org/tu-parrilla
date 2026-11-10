@@ -842,16 +842,6 @@ diciendo «Sin suscripción», y es cierto.
   Pixabay (su API no trae música), la biblioteca de audio de YouTube (sin API), Uppbeat (sin API) y
   Mubert (la sublicencia, desde US$499 al mes).
 
-- **El correo del código, con un enlace para entrar** (2026-11-02, lo pidió el dueño). Hoy dice
-  «NNNNNN es tu código para entrar a Tu Parrilla» y nada más (`pedir` en `src/lib/usuarios.ts`):
-  hay que copiar el código a mano. Sumar un botón que entre directo, sin sacar el código, que
-  sigue sirviendo para la app y para abrir el correo en otro aparato. Al diseñarlo: los filtros de
-  correo abren los enlaces antes que la persona, así que el enlace no puede gastar el código al
-  abrirse —que lleve a una página con «Entrar» que lo canjee al apretar—; que valga lo mismo que el
-  código (diez minutos, un solo uso, el mismo cupo de intentos); y que entre en el aparato donde se
-  abre, aunque el código se haya pedido en otro. La wiki (`ingresar.md`, `los-maestros.md`) dice
-  hoy que el correo «no trae enlace».
-
 - **Lo que todavía dibuja el navegador** (2026-11-02). Las preguntas, los calendarios, el color,
   los avisos de los formularios y los globitos ya son del panel (rama `ventanas-propias`, ver
   «Las ventanas del panel» en `public/docs/ui/index.md`). Quedan, a propósito:

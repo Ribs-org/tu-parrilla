@@ -3,6 +3,7 @@
 // lib/usuarios.ts y en las acciones de /ingresar.
 import { createHash, randomInt, timingSafeEqual } from 'node:crypto'
 import { env } from './env'
+import { enlaceDeEntrada } from './enlace-de-entrada'
 import { normalizarCorreo } from './forma-del-correo'
 
 // Las frases viven en `ingreso-frases.ts`, y la forma de un correo en `forma-del-correo.ts`: el
@@ -70,4 +71,72 @@ export function vigente(fila: { expiraEn: Date; usadoEn: Date | null; intentos: 
 export function puedePedir(pedidosRecientes: Date[], now: Date): boolean {
   const desde = now.getTime() - VENTANA_MS
   return pedidosRecientes.filter((d) => d.getTime() > desde).length < MAX_CODIGOS_POR_VENTANA
+}
+
+/** El color del botón del correo: la brasa del tema de día, que sobre blanco se lee con letra blanca. */
+const BRASA_DEL_CORREO = '#b83d0b'
+
+function escaparHtml(texto: string): string {
+  return texto.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+}
+
+/**
+ * El correo que lleva el código, con el botón «Entrar a Tu Parrilla» y el código escrito, que
+ * sigue sirviendo para la app y para abrir el correo en otro aparato. El de la invitación le llega
+ * a alguien que no pidió nada: saluda, dice qué es y dónde pedir otro código si este venció. Sin
+ * dominio del producto (`sitio` vacío: local, un preview) va sin enlaces ni botón, para no mandar a
+ * nadie a producción desde una prueba.
+ */
+export function correoDelCodigo(
+  codigo: string,
+  destino: { correo: string; sitio: string; invitacion?: { nombre: string | null } },
+): { subject: string; text: string; html?: string } {
+  const { correo, sitio, invitacion } = destino
+  if (!sitio && !invitacion) {
+    return {
+      subject: `${codigo} es tu código para entrar a Tu Parrilla`,
+      text: `Tu código para entrar a Tu Parrilla es ${codigo}. Vale diez minutos. Si no lo pediste, ignora este correo.`,
+    }
+  }
+  // Cada párrafo, en texto y en HTML: los dos dicen lo mismo, y el botón es el enlace del texto.
+  type Parrafo = { texto: string; html: string }
+  const simple = (texto: string): Parrafo => ({ texto, html: `<p>${escaparHtml(texto)}</p>` })
+  const enlace = sitio ? enlaceDeEntrada(sitio, correo, codigo) : ''
+  const boton: Parrafo = {
+    texto: `Para entrar, abre este enlace y aprieta «Entrar»:\n${enlace}`,
+    html: `<p><a href="${escaparHtml(enlace)}" style="display:inline-block;background:${BRASA_DEL_CORREO};color:#ffffff;text-decoration:none;font-weight:600;padding:12px 24px;border-radius:12px">Entrar a Tu Parrilla</a></p>`,
+  }
+  const elCodigo = (antes: string, despues: string): Parrafo => ({
+    texto: `${antes}${codigo}${despues}`,
+    html: `<p>${escaparHtml(antes)}<strong style="font-size:20px;letter-spacing:4px">${codigo}</strong>${escaparHtml(despues)}</p>`,
+  })
+
+  let subject: string
+  let parrafos: Parrafo[]
+  if (invitacion) {
+    const nombre = invitacion.nombre?.trim().split(/\s+/)[0]
+    subject = `Te invitaron a Tu Parrilla: tu código es ${codigo}`
+    parrafos = [
+      simple(`Hola${nombre ? ` ${nombre}` : ''}:`),
+      simple('Te invitaron a Tu Parrilla.'),
+      ...(sitio ? [boton, elCodigo('O escribe este código: ', '. Vale diez minutos.')] : [
+        elCodigo('Para entrar, escribe este código en la pantalla de ingreso de Tu Parrilla: ', '. Vale diez minutos.'),
+      ]),
+      simple(`Si se te venció, pide otro${sitio ? ` en ${sitio}/ingresar` : ''} con este mismo correo (${correo}).`),
+      simple('En la app de Tu Parrilla, en el teléfono, se entra igual: con tu correo y el código que te llegue.'),
+      simple('El equipo que hace Tu Parrilla'),
+    ]
+  } else {
+    subject = `${codigo} es tu código para entrar a Tu Parrilla`
+    parrafos = [
+      elCodigo('Tu código para entrar a Tu Parrilla es ', '. Vale diez minutos.'),
+      boton,
+      simple('Si lo pediste en la app del teléfono, escribe el código en la app: el enlace abre el navegador.'),
+      simple('Si no lo pediste, ignora este correo.'),
+    ]
+  }
+  const text = parrafos.map((p) => p.texto).join('\n\n')
+  if (!sitio) return { subject, text }
+  const html = `<div style="font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;font-size:15px;line-height:1.5;color:#16181a;max-width:480px">${parrafos.map((p) => p.html).join('')}</div>`
+  return { subject, text, html }
 }

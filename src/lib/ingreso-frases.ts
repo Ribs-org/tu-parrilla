@@ -5,6 +5,7 @@
 
 export const CORREO_INVALIDO = 'Ese correo no se ve bien.'
 export const CODIGO_ENVIADO = 'Si tu correo está invitado, te llegará un código en un minuto.'
+export const CODIGO_DEL_ENLACE = 'Tu código ya está puesto: aprieta «Entrar».'
 export const CODIGO_INCORRECTO = 'Ese código no es válido o ya venció.'
 export const PUENTE_VENCIDO = 'Este enlace ya no sirve: vale dos minutos y una sola vez.'
 export const DEMASIADOS_INTENTOS = 'Demasiados intentos. Pide un código nuevo.'

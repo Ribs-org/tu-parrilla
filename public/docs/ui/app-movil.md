@@ -329,6 +329,8 @@ Si el post no está entre lo descargado: «Vuelve a la lista y ábrelo de nuevo:
 
 El enlace que abre el navegador vale dos minutos y una sola vez: si dice «Este enlace ya no sirve: vale dos minutos y una sola vez.», vuelve a la app y tócalo de nuevo.
 
+El botón «Entrar a Tu Parrilla» del correo abre el navegador, no la app: entra al panel web. Para la app, los seis dígitos se escriben a mano.
+
 Si el código no llega, revisa el spam y que el correo esté bien escrito; «Usar otro correo» vuelve al primer paso para pedir otro. Son a lo más tres códigos cada quince minutos.
 
 ### Para que la app te avise en el teléfono
