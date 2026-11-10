@@ -785,6 +785,12 @@ diciendo «Sin suscripción», y es cierto.
 
 ## Features y trabajo de código
 
+- **Lo que trajo: la app que se siente red social** (pedido y diseñado el 2026-11-10). En cada
+  corte de los últimos siete días, un circulito con lo nuevo desde que se miró —«me gusta»,
+  comentarios y visitas—, en una fila arriba de La Parrilla de la app; el número en el ícono; los
+  números cada hora para lo reciente; hitos, racha y un aviso de lo bueno al día. Cuatro fases,
+  ninguna hecha todavía: el diseño, con lo que cada red da y lo que YouTube no deja, en
+  `docs/superpowers/specs/2026-11-10-lo-que-trajo-design.md`. Después: llevarlo al panel.
 - **La Cocina en la portada (#324)** (2026-11-09). Una sección en `tu-parrilla.cl` que cuente
   qué entrega La Cocina, en cuánto tiempo y cómo se pide. Decidido por el dueño: el ejemplo del
   antes y el después son **solo sus dos mejores cortos**, que el equipo de contenido identifica
