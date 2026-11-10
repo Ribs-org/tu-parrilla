@@ -171,7 +171,11 @@ Lo justo para partir, sin un recorrido por cada pantalla (el porqué, en
 Lo que recuerda —la bienvenida a medias o vista, las aperturas y el chef— va en AsyncStorage
 (`primera-vuelta`, `src/lib/primera-vuelta.ts`) y es de la cuenta: se borra al salir y al entrar.
 Todo es JavaScript: llega por aire, también a la 1.1.0 (usa `Linking`, `AppState` y `BackHandler`
-de React Native y AsyncStorage, que ya están en los dos builds).
+de React Native y AsyncStorage, que ya están en los dos builds). Salió por aire a la 1.1.0 el
+2026-11-10, con el servidor ya en producción, en el commit `3765d0b` de `ota-1.1.0` —que también
+lleva, de #372, el texto de Los Números que ya no promete los números «mañana»—, a los dos
+canales. Lo probado en esa rama: `tsc`, los tests, el lint y `expo export`; no se probó en un
+teléfono.
 
 ## Cómo publicar desde el teléfono
 
