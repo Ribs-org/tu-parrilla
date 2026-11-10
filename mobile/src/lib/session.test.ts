@@ -52,10 +52,17 @@ describe('cerrarEnElTelefono', () => {
   it('entrar también borra lo de la cuenta de antes: quien canceló el candado pudo entrar con otro correo', async () => {
     await writeCache('fierros', { cuentas: ['@ana'] })
     vi.stubGlobal('fetch', async () => new Response(JSON.stringify({ token: 'token-de-beto' }), { status: 200 }))
-    await expect(entrar('beto@ejemplo.cl', '123456')).resolves.toEqual({ token: 'token-de-beto' })
+    await expect(entrar('beto@ejemplo.cl', '123456')).resolves.toEqual({ token: 'token-de-beto', sinRedes: false })
     expect(await readToken()).toBe('token-de-beto')
     expect(await readCache('fierros')).toBeNull()
     expect([...almacen.disco.keys()]).toEqual(['tema'])
+  })
+
+  it('entrar dice si la cuenta no tiene redes, para la bienvenida; y borra la primera vuelta de antes', async () => {
+    almacen.disco.set('primera-vuelta', JSON.stringify({ bienvenida: 'vista', aperturas: 9 }))
+    vi.stubGlobal('fetch', async () => new Response(JSON.stringify({ token: 't', sinRedes: true }), { status: 200 }))
+    await expect(entrar('beto@ejemplo.cl', '123456')).resolves.toEqual({ token: 't', sinRedes: true })
+    expect(almacen.disco.has('primera-vuelta')).toBe(false)
   })
 
   it('si el llavero falla, lo guardado se borra igual', async () => {

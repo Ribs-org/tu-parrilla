@@ -168,8 +168,8 @@ export default function LosNumeros() {
         <Etiqueta margenArriba>Lo que más creció</Etiqueta>
         {redes.loQueMasCrecio.length === 0 ? (
           <Text style={{ color: colores.suave, fontSize: 13 }}>
-            Ninguna publicación ganó views en este período. Las métricas llegan con la sincronización diaria, así que lo
-            publicado hoy aparece mañana.
+            Ninguna publicación ganó views en este período. Lo publicado hoy aparece con la lectura de cada hora; lo de
+            YouTube, mañana.
           </Text>
         ) : (
           <View style={{ gap: 6 }}>

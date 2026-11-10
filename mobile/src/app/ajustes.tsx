@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import { Linking, Text, View } from 'react-native'
+import { Text, View } from 'react-native'
 import Constants from 'expo-constants'
 import * as Updates from 'expo-updates'
 import { useFocusEffect } from 'expo-router'
@@ -9,7 +9,8 @@ import { useSesion } from '../components/sesion'
 import { useColores, useTema } from '../components/tema'
 import { useVentanas } from '../components/ventana'
 import { useFierros } from '../components/boton-ajustes'
-import { API_BASE } from '../lib/config'
+import { SesionCaducada } from '../lib/api'
+import { abrirLosFierros } from '../lib/puente'
 import { LibroDeSugerencias } from '../components/libro-de-sugerencias'
 import { LOS_FIERROS, otroTema, type Tema } from '../lib/tema'
 import { NOMBRE_RED, type Fierros } from '../lib/tipos'
@@ -54,8 +55,8 @@ function fierroDe(
 export default function Ajustes() {
   const colores = useColores()
   const { tema, cambiarTema } = useTema()
-  const { salir } = useSesion()
-  const { preguntar } = useVentanas()
+  const { salir, token } = useSesion()
+  const { preguntar, avisar } = useVentanas()
   const { data, cargando, error, sello, refrescar, refrescarSiVieja } = useFierros()
 
   useFocusEffect(
@@ -75,6 +76,17 @@ export default function Ajustes() {
     // Borra también lo que la app guardó de la cuenta y vuelve a la entrada sin pila detrás: no
     // queda pantalla de la cuenta a la que volver atrás.
     if (seguir) await salir()
+  }
+
+  // Por el puente: Los Fierros del panel con la sesión ya abierta, sin pedir otro código.
+  async function abrirElPanel() {
+    if (!token) return
+    try {
+      await abrirLosFierros(token)
+    } catch (error) {
+      if (error instanceof SesionCaducada) return void salir()
+      await avisar('No se pudo abrir el panel', 'Revisa la señal y prueba de nuevo.')
+    }
   }
 
   // La versión del build y la de la última actualización por aire: lo primero que hay que
@@ -116,7 +128,7 @@ export default function Ajustes() {
       <View style={{ flexDirection: 'row' }}>
         <Boton
           texto={`Abrir ${LOS_FIERROS[tema]} en el panel`}
-          onPress={() => void Linking.openURL(`${API_BASE}/admin/accounts`)}
+          onPress={() => void abrirElPanel()}
         />
       </View>
 
