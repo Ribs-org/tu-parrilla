@@ -944,6 +944,22 @@ diciendo «Sin suscripción», y es cierto.
   (`src/lib/push/`, ver «Avisos al teléfono» en el `README.md`): un juego que avise usa ese mismo
   camino. Se cruza con «Mientras no mirabas», de la entrada de arriba, que también necesita guardar
   la última visita por usuario.
+- **Un mensaje a cada seguidor nuevo** (2026-11-11, lo pidió el dueño). Que cuando alguien
+  empieza a seguir una cuenta conectada le llegue un mensaje directo de bienvenida, escrito por el
+  dueño (o con la IA, como los borradores de La Mesa). Antes de diseñar, verificar en la
+  documentación de cada red qué se puede, porque hasta donde se sabe es lo que lo frena:
+  - ninguna de las APIs que se usan avisa de un seguidor nuevo ni entrega quién es: hoy solo se lee
+    cuántos hay (`src/lib/social/account-metrics.ts`);
+  - en Instagram y Facebook, una empresa no puede abrirle una conversación a alguien que no le
+    escribió antes; puede contestar dentro de las 24 horas desde su último mensaje, o mandarle un
+    privado a quien comenta, que es lo que ya está construido y espera la aprobación de Meta
+    («El privado de Meta», abajo);
+  - TikTok y YouTube no tienen mensajes directos en sus APIs.
+
+  Si se confirma, lo posible está cerca: el privado a quien comenta (ya hecho), y un mensaje de
+  bienvenida o «ice breakers» para quien escribe por primera vez, en Instagram y Messenger. Se
+  cruza con «Gamificar las notificaciones de cada red», arriba, que tampoco tiene cómo enterarse
+  de un seguidor nuevo.
 - **Cupos y reparto de los crons por usuario** (`docs/levantamiento-terceros.md` §5.4). Hace
   falta cuando la beta pase de unos diez usuarios. Desde el 2026-11-08 la prioridad del plan ordena
   las colas (README, «Los planes»); falta el cupo por usuario y la cola de trabajo.
