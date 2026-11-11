@@ -1,4 +1,4 @@
-import { and, desc, eq, gt, inArray, isNotNull, or } from 'drizzle-orm'
+import { and, desc, eq, gt, inArray, isNotNull, max, or } from 'drizzle-orm'
 import { cobros, getDb, suscripciones, users, type ClavePlan } from '@/db'
 import { normalizarCorreo } from '@/lib/forma-del-correo'
 import { claveQueRige } from '@/lib/planes/plan'
@@ -7,6 +7,7 @@ import { esUuid } from '@/lib/uuid'
 import { mercadoPago, mercadoPagoConfigurado, MercadoPagoFallo, type SuscripcionMP } from './mercadopago'
 import {
   CORREO_PAGADOR_ILEGIBLE,
+  ENLACE_VALE_DIAS,
   MERCADOPAGO_NO_RESPONDIO,
   PAGOS_CERRADOS,
   SIN_SUSCRIPCION,
@@ -14,15 +15,14 @@ import {
   YA_TIENES_EL_PAGADO,
   cuerpoDeSuscripcion,
   estadoDeMercadoPago,
-  hastaConGracia,
+  hastaDelPagado,
 } from './reglas'
 
 // Las suscripciones al plan pagado contra la base y contra Mercado Pago: empezar una, dejarla al día
 // con lo que dice Mercado Pago, anotar sus cobros, cancelarla y releerlas cada día. Lo que cambia el
 // plan de la persona sale siempre de volver a leer a Mercado Pago, nunca del cuerpo de un webhook.
 
-/** Un `init_point` sin usar sirve un día: después se pide otro. */
-const ENLACE_VALE_MS = 86_400_000
+const ENLACE_VALE_MS = ENLACE_VALE_DIAS * 86_400_000
 
 /** La suscripción viva del dueño —la que cobra o está en pausa—, si tiene una. */
 export async function suscripcionVivaDe(ownerId: string) {
@@ -76,11 +76,11 @@ export async function empezarSuscripcion(
   const conPrueba = !persona.pruebaUsadaEn && pagado.diasDePrueba > 0
   const [fila] = await db
     .insert(suscripciones)
-    .values({ ownerId, plan: 'pagado', montoClp: pagado.precioClp, correoPagador, conPrueba })
+    .values({ ownerId, plan: 'pagado', montoClp: pagado.precioClp, correoPagador, conPrueba, creadaEn: ahora })
     .returning({ id: suscripciones.id })
   try {
     const creada = await mercadoPago.crearSuscripcion(
-      cuerpoDeSuscripcion({ plan: pagado, suscripcionId: fila!.id, correoPagador, volverA, conPrueba }),
+      cuerpoDeSuscripcion({ plan: pagado, suscripcionId: fila!.id, correoPagador, volverA, conPrueba, ahora }),
       fila!.id,
     )
     if (!creada.id || !creada.init_point) throw new MercadoPagoFallo(200, 'la suscripción vino sin id o sin init_point')
@@ -98,8 +98,9 @@ export async function empezarSuscripcion(
 
 /**
  * Deja la fila al día con lo que Mercado Pago dice de la suscripción `externoId`, y el plan de la
- * persona con ella: autorizada, el pagado hasta el próximo cobro más la gracia. Pausada o cancelada,
- * el plan no se toca: queda lo pagado (o la prueba) y después vuelve solo al gratis.
+ * persona con ella: autorizada, el pagado hasta lo que den su último cobro, su prueba o la
+ * autorización recién hecha (`hastaDelPagado`). Pausada o cancelada, el plan no se toca: queda lo
+ * pagado (o la prueba) y después vuelve solo al gratis.
  */
 export async function sincronizarSuscripcion(externoId: string, ahora = new Date()): Promise<void> {
   const mp = await mercadoPago.leerSuscripcion(externoId)
@@ -137,8 +138,27 @@ async function aplicarSuscripcion(mp: SuscripcionMP, ahora: Date): Promise<void>
     })
     .where(eq(suscripciones.id, fila.id))
 
-  if (estado !== 'autorizada' || !fila.ownerId || !proximoCobro || Number.isNaN(proximoCobro.getTime())) return
-  await extenderPlan(fila.ownerId, fila.plan, hastaConGracia(proximoCobro), fila.conPrueba, ahora)
+  if (estado !== 'autorizada' || !fila.ownerId) return
+  // El último cobro que entró: el que dice Mercado Pago en el resumen de la suscripción, o el último
+  // aprobado que llegó por el webhook, el que sea más nuevo. Así un aviso perdido no deja sin plan a
+  // quien pagó, y la relectura diaria no se lo alarga a quien no paga.
+  const [{ ultimo } = { ultimo: null }] = await db
+    .select({ ultimo: max(cobros.cobradoEn) })
+    .from(cobros)
+    .where(and(eq(cobros.suscripcionId, fila.id), eq(cobros.estadoPago, 'approved')))
+  const delResumen = mp.summarized?.last_charged_date ? new Date(mp.summarized.last_charged_date) : null
+  const ultimoCobro = [ultimo, delResumen]
+    .filter((d): d is Date => d instanceof Date && !Number.isNaN(d.getTime()))
+    .reduce<Date | null>((a, b) => (!a || b > a ? b : a), null)
+  const { pagado } = await leerPlanes(db)
+  const hasta = hastaDelPagado({
+    conPrueba: fila.conPrueba,
+    diasDePrueba: pagado.diasDePrueba,
+    pedidaEn: fila.creadaEn,
+    proximoCobro: proximoCobro && !Number.isNaN(proximoCobro.getTime()) ? proximoCobro : null,
+    ultimoCobro,
+  })
+  if (hasta) await extenderPlan(fila.ownerId, fila.plan, hasta, fila.conPrueba, ahora)
 }
 
 /**
@@ -162,7 +182,7 @@ async function extenderPlan(ownerId: string, plan: ClavePlan, hasta: Date, conPr
 
 /**
  * Un cobro de una suscripción: se anota tal como lo dice Mercado Pago y, si se aprobó, la suscripción
- * se vuelve a leer, que trae la fecha del cobro siguiente.
+ * se vuelve a leer, que trae la fecha del cobro siguiente: con el cobro ya anotado, corre el plan.
  */
 export async function registrarCobro(cobroId: string, ahora = new Date()): Promise<void> {
   const mp = await mercadoPago.leerCobro(cobroId)

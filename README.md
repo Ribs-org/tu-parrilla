@@ -2237,27 +2237,36 @@ asociado por persona (`src/lib/pagos/`):
 1. «Pasar a Maestro Parrillero» pide el correo de la cuenta de Mercado Pago con que se va a pagar —Mercado Pago lo
    compara al autorizar—, crea una fila de `suscripciones` y la suscripción en Mercado Pago
    (`POST /preapproval`, con el id de la fila como `external_reference`, el precio del plan en CLP y,
-   si la persona nunca los usó, los días de prueba), y manda a la persona a su `init_point`. Tu
-   Parrilla nunca ve una tarjeta. Un enlace de menos de un día se reusa.
+   si la persona nunca los usó, los días de prueba como `start_date`, el día del primer cobro: en una
+   suscripción sin plan, `free_trial` no está entre lo que se manda), y manda a la persona a su
+   `init_point`. Tu Parrilla nunca ve una tarjeta. Un enlace de menos de un día se reusa.
 2. La vuelta es Tu Cuenta con `?plan=vuelta`, que relee la suscripción sin esperar al webhook.
 3. El webhook (`/api/pagos/mercadopago`) verifica la firma (`x-signature`: HMAC-SHA256 de
    `id:<data.id>;request-id:<x-request-id>;ts:<ts>;`, y no más vieja que 15 minutos) y vuelve a leer
    en Mercado Pago la suscripción o el cobro del aviso: del cuerpo solo se cree el id. Un id que
-   Mercado Pago no conoce —el de «Simular notificación», en su panel— se contesta `200` y no se mira.
-4. Autorizada, la persona tiene el pagado hasta el próximo cobro más cinco días de gracia
-   (`GRACIA_DIAS`, una suposición: la documentación de Mercado Pago no se deja leer desde un servidor
-   y no se pudo confirmar cuántos días reintenta un cobro rechazado). Cada cobro aprobado se anota en
-   `cobros` y corre la fecha; uno rechazado no, y si en la gracia no entra, el plan cae solo al
-   gratis. Nunca acorta lo que ya tenía: una cortesía sin fecha se queda.
-5. «Cancelar la suscripción» la cancela en Mercado Pago; el pagado sigue hasta el fin de lo pagado (o
-   de la prueba), y después, el gratis.
+   Mercado Pago no conoce —el de un aviso de prueba— se contesta `200` y no se mira.
+4. Autorizada, la persona tiene el pagado según lo que pasó (`hastaDelPagado`, en
+   `src/lib/pagos/reglas.ts`): con prueba, hasta el primer cobro; sin prueba, unos días mientras llega
+   el primero, que Mercado Pago hace como una hora después de autorizar; y con cada cobro aprobado,
+   hasta el próximo. Siempre con 11 días de gracia (`GRACIA_DIAS`): Mercado Pago reintenta un cobro
+   rechazado hasta 4 veces en 10 días. **Solo un cobro corre la fecha**, el que llega por el webhook o
+   el último que dice la suscripción (`summarized.last_charged_date`): mientras Mercado Pago
+   reintenta, la fecha del próximo cobro puede seguir avanzando, y alargar el plan con ella dejaría
+   meses pagado a quien no paga. Cada cobro se anota en `cobros`; si en la gracia no entra ninguno, el
+   plan cae solo al gratis, y tras 3 cuotas rechazadas Mercado Pago cancela la suscripción. Nunca
+   acorta lo que ya tenía: una cortesía sin fecha se queda.
+5. «Cancelar la suscripción» la cancela en Mercado Pago (`canceled`, como lo escribe su referencia, y
+   `cancelled`, como su SDK, si el primero no pasa); el pagado sigue hasta el fin de lo pagado (o de
+   la prueba), y después, el gratis.
 6. Cada día, la sincronización relee las suscripciones vivas y las que esperan desde hace menos de
    una semana (`releerSuscripciones`).
 
 En Mercado Pago, la aplicación lleva el webhook `https://tu-parrilla.cl/api/pagos/mercadopago` con
 el evento «Planes y suscripciones». Ponerlo en marcha, con los usuarios de prueba y cada clic, está
-en `docs/mercadopago-paso-a-paso.md`. Los nombres de los campos y la firma salen del SDK oficial de
-Node (`mercadopago` 3.6.1), no de su documentación. Al borrar a una persona, sus suscripciones y
+en `docs/mercadopago-paso-a-paso.md`. Los campos, los estados, la firma y los reintentos se
+contrastaron el 2026-11-11 con la documentación de Mercado Pago para Chile, que se lee en texto
+agregándole `.md` a la dirección de cada página (la HTML da 403 desde un servidor); lo que todavía no
+se vio funcionar está en esa guía, «Lo que la prueba tiene que mirar». Al borrar a una persona, sus suscripciones y
 cobros se quedan sin dueño, para la contabilidad. La app del teléfono no cobra ni enlaza al cobro: lo
 que se vende dentro de una app de Android tiene que ir por Google Play Billing.
 
