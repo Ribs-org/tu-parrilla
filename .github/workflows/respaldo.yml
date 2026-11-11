@@ -14,7 +14,9 @@ name: Respaldo de la base
 
 on:
   schedule:
-    # 06:40 UTC ≈ 03:40 en Chile: la base está tranquila y el volcado no compite con nadie.
+    # Se pide a las 06:40 UTC (≈ 03:40 en Chile), pero GitHub encola los programados: en
+    # noviembre de 2026 salieron entre las 13 y las 17 UTC. Da igual la hora exacta: lo que
+    # importa es que haya uno por día.
     - cron: '40 6 * * *'
   workflow_dispatch:
 
@@ -34,10 +36,22 @@ jobs:
       # Publicarla no abre nada: solo sirve para cifrar.
       DESTINATARIO: age1pksey0x576yzrqauqwf8sh564dhy7lzzh46knyhwxdtaagrvdqeq37nght
     steps:
+      # Desde su versión publicada en GitHub y no con `apt`: el 2026-11-11 los servidores de
+      # Ubuntu no resolvían desde los runners y el respaldo falló dos veces seguidas, y github.com
+      # tiene que responder igual para que corra cualquier paso. La huella es la que GitHub
+      # publica para ese archivo (`gh release view v1.3.2 --repo FiloSottile/age --json assets`):
+      # si el archivo cambia, el paso falla en vez de cifrar con un binario que no es el de age.
       - name: Instalar age
+        env:
+          VERSION: v1.3.2
+          HUELLA: cbe24006683f8eb669266162894b9a522a1af52f2665fbc63a4bb032ed26ac10
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq age
+          curl -fsSL --retry 5 --retry-all-errors -o age.tgz \
+            "https://github.com/FiloSottile/age/releases/download/$VERSION/age-$VERSION-linux-amd64.tar.gz"
+          echo "$HUELLA  age.tgz" | sha256sum -c -
+          tar -xzf age.tgz
+          sudo install -m 0755 age/age /usr/local/bin/age
+          age --version
 
       - name: Volcar la base, cifrada
         # `bash` explícito trae `pipefail`: si `pg_dump` se cae a mitad, el paso falla en vez
