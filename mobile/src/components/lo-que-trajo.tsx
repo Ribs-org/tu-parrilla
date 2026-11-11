@@ -46,7 +46,8 @@ export function FilaLoQueTrajo({ datos }: { datos: LoQueTrajo | null }) {
         horizontal
         showsHorizontalScrollIndicator={false}
         style={{ marginHorizontal: -16 }}
-        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 4, gap: 12 }}
+        // Arriba, el aire del circulito, que asoma sobre la burbuja: la fila corta lo que se sale.
+        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 8, gap: 12 }}
       >
         {cortes.map((corte) => (
           <Burbuja
