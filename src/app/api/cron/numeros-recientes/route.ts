@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { detectarHitosEnLaCorrida } from '@/lib/hitos'
 import { leerLoReciente } from '@/lib/social/reciente'
 import { env } from '@/lib/env'
 import { cronAutorizado } from '@/lib/cron-auth'
@@ -11,7 +12,8 @@ export const maxDuration = 240
 
 /**
  * Los números de cada hora: lo publicado en las últimas 48 horas en Instagram, Facebook y TikTok,
- * leído de nuevo (`social/reciente.ts`).
+ * leído de nuevo (`social/reciente.ts`), y después los hitos que esas lecturas dejaron
+ * (`hitos.ts`).
  */
 export async function GET(request: Request) {
   // Cerrada sin secreto, como las demás: cada corrida gasta llamadas a las redes.
@@ -20,8 +22,10 @@ export async function GET(request: Request) {
   }
   try {
     // Con cuentas que fallaron contesta 200 igual: cada una dejó su error en el informe y en el
-    // log, y la hora siguiente lo intenta de nuevo.
-    return NextResponse.json({ informe: await leerLoReciente() })
+    // log, y la hora siguiente lo intenta de nuevo. Los hitos, después de leer y por su cuenta: si
+    // fallan, la lectura ya quedó escrita.
+    const informe = await leerLoReciente()
+    return NextResponse.json({ informe, hitos: await detectarHitosEnLaCorrida(new Date()) })
   } catch (error) {
     // Acá llega solo si la corrida entera se rompió (la base, casi siempre). Cuerpo fijo: el
     // error de verdad va al log.

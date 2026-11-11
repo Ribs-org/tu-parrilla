@@ -94,6 +94,12 @@ export function corteDe(ownerId: string, postId: string): Promise<CorteCargado[]
   return cargar(ownerId, [eq(scheduledPosts.id, postId)])
 }
 
+/** Unos cortes del dueño por sus ids, los que sean suyos: los hitos por celebrar (`hitos.ts`). */
+export async function cortesPorIds(ownerId: string, postIds: readonly string[]): Promise<CorteCargado[]> {
+  if (postIds.length === 0) return []
+  return cargar(ownerId, [enIds(scheduledPosts.id, postIds)])
+}
+
 /**
  * Los cortes con algún destino quemado y sin archivar, de cuando sean, con todos sus destinos:
  * es lo que «Se quemó» muestra (`quemados`, en `lib/fuego.ts`), y esa lista no tiene ventana de

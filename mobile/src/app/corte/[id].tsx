@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { RefreshControl, ScrollView, Text, View } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
+import { Llama } from '../../components/llama'
 import { Pieza } from '../../components/pieza'
 import { useSesion } from '../../components/sesion'
 import { useColores } from '../../components/tema'
@@ -8,15 +9,15 @@ import { Boton, Cargando, Etiqueta, Tarjeta } from '../../components/ui'
 import { RechazoApi, SesionCaducada, apiGet, apiPost } from '../../lib/api'
 import { anotarCambio } from '../../lib/cambios'
 import { num, shortDate } from '../../lib/format'
-import { fraseDelNuevo, totalDe, tituloDelNuevo, type DetalleDelCorte, type RedDelCorte } from '../../lib/lo-que-trajo'
+import { fraseDelNuevo, renglonDelHito, totalDe, tituloDelNuevo, type DetalleDelCorte, type RedDelCorte } from '../../lib/lo-que-trajo'
 import { ponerNumero } from '../../lib/numero-del-icono'
 import { carneDe, coccionDe, selloPorEstado } from '../../lib/parrilla'
 import { SIN_SENAL, etiquetaCuenta } from '../../lib/publicar'
 
 /**
  * El detalle de un corte, al tocar su burbuja en «Lo que trajo» o su renglón servido en La Parrilla:
- * lo nuevo desde la última vez que se miró, lo que lleva cada red tal como la red lo da, y las
- * visitas a tu página. Sin caché a propósito: mirarlo deja la marca (`POST …/visto`) y el circulito
+ * lo nuevo desde la última vez que se miró, los hitos que pasó, lo que lleva cada red tal como la
+ * red lo da, y las visitas a tu página. Sin caché a propósito: mirarlo deja la marca (`POST …/visto`) y el circulito
  * vuelve a cero, así que lo nuevo tiene que ser lo que el servidor dice ahora, no lo de la vez
  * anterior. La marca se deja después de leer, para que lo nuevo alcance a mostrarse.
  */
@@ -81,6 +82,7 @@ export default function DetalleDeUnCorte() {
   }
 
   const { corte, nuevo, vistoEn, redes, visitas } = detalle
+  const hitos = detalle.hitos ?? []
   const estados = corte.redes.map((r) => r.estado)
   const hayNuevo = totalDe(nuevo) > 0
   return (
@@ -118,6 +120,21 @@ export default function DetalleDeUnCorte() {
           {fraseDelNuevo(nuevo, vistoEn)}
         </Text>
       </Tarjeta>
+
+      {hitos.length > 0 ? (
+        <Tarjeta>
+          <Etiqueta>Los hitos</Etiqueta>
+          {/* Del más alto al más bajo: el que manda arriba. */}
+          {[...hitos].reverse().map((hito) => (
+            <View key={hito.umbral} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <View style={{ width: 14, alignItems: 'center' }}>
+                <Llama alto={16} />
+              </View>
+              <Text style={{ color: colores.texto, fontSize: 14 }}>{renglonDelHito(hito)}</Text>
+            </View>
+          ))}
+        </Tarjeta>
+      ) : null}
 
       <Etiqueta margenArriba>Lo que lleva en cada red</Etiqueta>
       {redes.map((red) => (

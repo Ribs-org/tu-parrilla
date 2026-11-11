@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { aceptaChoripan, corteParaElTelefono } from '@/lib/cortes-movil'
+import { hitosDeLosCortes } from '@/lib/hitos'
 import { CORTE_NO_ESTA, leerCorte, seguidoresDe } from '@/lib/lo-que-trajo'
 import { isoInZone } from '@/lib/metrics-api'
 import { requireMobileUser } from '@/lib/mobile-guardia'
@@ -10,7 +11,8 @@ export const dynamic = 'force-dynamic'
 /**
  * El detalle de un corte en el teléfono: el corte, lo nuevo desde que se miró (`vistoEn`, null si
  * nunca), lo que lleva cada red tal como la red lo da —con los seguidores donde los da—, y las
- * visitas a las páginas del dueño desde sus publicaciones. No deja la marca: eso es
+ * visitas a las páginas del dueño desde sus publicaciones, y los hitos que pasó, de menor a mayor
+ * (`alcanzadoEn` nulo en los que ya traía al estrenarse los hitos). No deja la marca: eso es
  * `POST /api/mobile/cortes/{id}/visto`, que la app llama después de mostrar lo nuevo. 404 si no
  * existe, es de otro o todavía no salió, sin distinguir.
  */
@@ -21,7 +23,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   const corte = await leerCorte(usuario.id, (await params).id)
   if (!corte) return NextResponse.json({ error: CORTE_NO_ESTA }, { status: 404 })
 
-  const seguidores = await seguidoresDe(usuario.id, corte.servidos)
+  const [seguidores, hitos] = await Promise.all([
+    seguidoresDe(usuario.id, corte.servidos),
+    hitosDeLosCortes(usuario.id, [corte.corte.post.id]),
+  ])
   return NextResponse.json({
     corte: corteParaElTelefono(corte.corte, usuario.zona, aceptaChoripan(request)),
     nuevo: corte.nuevo,
@@ -38,5 +43,9 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       segunLaRed: sinMetricasDerivadas(s.red),
     })),
     visitas: corte.visitas,
+    hitos: (hitos.get(corte.corte.post.id) ?? []).map((h) => ({
+      umbral: h.umbral,
+      alcanzadoEn: h.alcanzadoEn ? isoInZone(h.alcanzadoEn, usuario.zona) : null,
+    })),
   })
 }

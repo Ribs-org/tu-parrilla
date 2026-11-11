@@ -1,6 +1,6 @@
 # Lo que trajo: la app que se siente red social
 
-Fecha: 2026-11-10. **Las fases 1 y 2 están hechas; la 3 y la 4, sin implementar.** Cuatro fases,
+Fecha: 2026-11-10. **Las fases 1, 2 y 3 están hechas; la 4, sin implementar.** Cuatro fases,
 cada una en su PR y cada una sostenida sola; el orden está en «Las fases», al final. Es de la app del teléfono: el panel no
 cambia en esta entrega (ver «Lo que no entra»).
 
@@ -95,7 +95,7 @@ Arriba de la agenda, debajo de «La Mesa», una fila que se desliza de lado:
 - **con algo nuevo**: el anillo de la burbuja en brasa y el circulito rojo arriba a la derecha,
   «+37» (con más de mil, «+1,2 mil»);
 - **sin nada nuevo**: el anillo apagado y sin circulito;
-- con un hito sin celebrar, una llamita chica con el umbral: «1 mil»;
+- con un hito, una llamita chica con el umbral más alto que pasó: «1 mil»;
 - tocar una abre su detalle.
 
 Si en siete días no salió nada, la fila no aparece. Se llama **«Lo que trajo»**, en los dos modos:
@@ -181,6 +181,16 @@ alcanzó). Se detectan después de cada lectura.
 - Al estrenar la función, los cortes que ya pasaron un umbral lo ganan sin celebración: se
   celebran solo los que se alcanzan desde ese día.
 
+Como se hizo (fase 3): la detección es una sola consulta para todos los dueños
+(`detectarHitos`, en `src/lib/hitos.ts`), al final de la lectura de cada hora y de la del día. La
+app celebra el hito más alto de cada corte, hasta tres por vuelta, y celebrarlo deja celebrados los
+de abajo. Los que los cortes ya traían al estrenar los puso la migración 0041, ya celebrados y con
+`alcanzado_en` nulo, porque no se sabe cuándo se pasaron; el detalle los muestra sin día. La
+llamita de la burbuja es el hito más alto, celebrado o no. La celebración, la llama y la racha
+están dibujadas con vistas y `Animated` del núcleo, para que lleguen por aire también a la 1.1.0,
+que no tiene `react-native-svg`. Lo cuentan el README («Lo que trajo, en el teléfono») y
+`mobile/README.md` («Lo que trajo»).
+
 ## La racha
 
 **Cuántos días seguidos salió al menos un corte**, en la zona del dueño, contados desde lo que Tu
@@ -212,8 +222,9 @@ No hay aviso de la racha que se apaga: el dueño pidió avisos de lo bueno.
 - **`cortes_vistos`**: `post_id` (único, a `scheduled_posts` en cascada), `owner_id`,
   `visto_en`, `me_gusta`, `comentarios`. Los dos contadores son la suma, sin YouTube, en el
   momento de mirarlo.
-- **`hitos`**: `post_id` (a `scheduled_posts` en cascada), `owner_id`, `umbral`, `alcanzado_en`,
-  `celebrado_en`, `avisado_en`; único por `(post_id, umbral)`.
+- **`hitos`**: `post_id` (a `scheduled_posts` en cascada), `owner_id`, `umbral`, `alcanzado_en`
+  (nulo en los del estreno), `celebrado_en`; único por `(post_id, umbral)`. Hecho en la fase 3;
+  `avisado_en` llega con el aviso, en la 4.
 - **`post_metrics.seguidores`**: entero, nulo donde la red no lo da. Hecho en la fase 1, solo con
   los de Instagram.
 - **`users.push_bueno`** (por defecto encendido) y **`users.push_bueno_en`**.
@@ -223,7 +234,7 @@ Todo con su dueño en el `where`, como pide el arnés de aislamiento (`src/lib/a
 ## La API del teléfono
 
 - `GET /api/mobile/lo-que-trajo`: la fila —cada corte con su dibujo, su hora, lo nuevo y su
-  hito sin celebrar—, la racha y el número del ícono.
+  hito más alto—, la racha, los hitos por celebrar y el número del ícono.
 - `GET /api/mobile/cortes/{id}`: el detalle.
 - `POST /api/mobile/cortes/{id}/visto`: deja la marca; contesta el número del ícono nuevo.
 - `POST /api/mobile/hitos/{id}/celebrado`.
