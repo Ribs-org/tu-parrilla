@@ -264,6 +264,23 @@ sección.
   reemplazar el valor en Vercel y redesplegar; lo que se juntó mientras tanto sale solo en la
   sincronización diaria siguiente (README, «El libro de sugerencias»).
 
+- **Revisar cómo habla el sitio de Vercel con el servidor 2** (2026-11-11, lo pidió el dueño). Se
+  entiende que es el servidor propio del chef de La Cocina, donde corre el pipeline de
+  `marca-personal`: confirmarlo con el dueño antes de empezar. Hoy el chef es quien llama, a
+  `/api/cocina/…` con `COCINA_SECRET` en `Authorization: Bearer` (`docs/cocina-api.md`, README «La
+  Cocina»). Lo que hay que mirar:
+  - el secreto: uno solo para todos los dueños, dónde vive en el servidor 2, cómo se cambia sin
+    cortar la cocina y qué puede hacer quien lo tenga;
+  - si el sitio le habla de vuelta al servidor 2, o solo escucha, y qué queda expuesto a internet
+    en cada lado;
+  - los enlaces de los insumos (`GET /api/cocina/insumos/{id}/enlace`): cuánto duran y quién más
+    podría usarlos;
+  - qué pasa si uno de los dos se cae a mitad de una comanda: el latido (`src/lib/cocina/latido.ts`),
+    los reintentos y los plazos;
+  - los logs de cada lado: que no guarden el secreto ni datos de los dueños;
+  - que el servidor 2 tenga sus parches al día, su firewall y sus respaldos, que no se ven desde este
+    repositorio.
+
 ## Trámites con las plataformas
 
 Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataforma.
