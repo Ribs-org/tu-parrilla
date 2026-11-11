@@ -8,9 +8,9 @@
 #   instalado, y las versiones de los módulos nativos las fija el SDK de Expo: subir uno solo
 #   puede dejar al JavaScript pidiendo algo que el binario no trae, y la app se cae al abrir.
 #   Se actualiza con el SDK entero (`npx expo install --fix`) y un build nuevo, a mano. Los
-#   avisos de seguridad de GitHub (las alertas de Dependabot) la cubren igual, pero solo con el
-#   grafo de dependencias encendido en Settings → Code security: el 2026-11-11 las alertas
-#   estaban encendidas y no listaban ninguna, ni la crítica de Next (`docs/pendientes.md`).
+#   avisos de seguridad de GitHub (las alertas de Dependabot) la cubren igual: miran el grafo de
+#   dependencias (Settings → Code security), que estuvo apagado hasta el 2026-11-11 y por eso no
+#   avisaron de la crítica de Next.
 version: 2
 updates:
   - package-ecosystem: npm

@@ -1015,38 +1015,35 @@ diciendo «Sin suscripción», y es cierto.
 - **DevOps y seguridad: lo que falta** (revisado el 2026-11-11, lo pidió el dueño; reemplaza la
   revisión «no urgente» del 2026-11-02). Ya hecho ese día: Next a 16.4.3 por dos avisos críticos
   (#386), `npm audit --omit=dev --audit-level=critical` en el CI, el respaldo, que fallaba al
-  instalar `age` con `apt`, y las protecciones de GitHub (punto 1). Lo que sigue, en orden:
-  1. **[dueño]** Encender el grafo de dependencias: GitHub → Settings → Code security del
-     repositorio → «Dependency graph» → «Enable». Sin él, las alertas de Dependabot no ven las
-     dependencias: el 2026-11-11 no listaban ninguna, ni el aviso crítico de Next que tenía
-     producción. Es un clic en la página; por la API no se pudo (la organización lo tiene apagado
-     para los repositorios nuevos). Lo demás de esa página quedó encendido ese día: el escaneo de
-     secretos con push protection, las actualizaciones de seguridad de Dependabot, el reporte
-     privado de vulnerabilidades y CodeQL (README, «Cómo entra un cambio»). También ese día, la
-     reja de `main` pasó a pedir pull request y a valer para el admin.
-  2. **[dueño]** Que tu cuenta de GitHub tenga la verificación en dos pasos, y más adelante exigirla
-     en la organización (Settings de `Ribs-org` → Authentication security). Exigirla saca de la
-     organización a quien no la tenga: primero confirmar que todos la tienen.
-  3. **[dueño]** Un vigía que avise si algo deja de pasar: Healthchecks.io gratis, con un aviso al
+  instalar `age` con `apt`, y las protecciones de GitHub. Lo que sigue, en orden:
+  1. **[dueño]** Exigir la verificación en dos pasos en la organización (Settings de `Ribs-org` →
+     Authentication security → «Require two-factor authentication…»). El dueño ya la tiene; el
+     colaborador externo de la organización no (2026-11-11), y exigirla ahora le quita el acceso:
+     primero que la active (github.com/settings/security), o sacarlo si ya no trabaja en el repo.
+     Lo demás de GitHub quedó encendido ese día: el grafo de dependencias, el escaneo de secretos con
+     push protection, las actualizaciones de seguridad de Dependabot, el reporte privado de
+     vulnerabilidades y CodeQL (README, «Cómo entra un cambio»), y la reja de `main` pasó a pedir pull
+     request y a valer para el admin.
+  2. **[dueño]** Un vigía que avise si algo deja de pasar: Healthchecks.io gratis, con un aviso al
      terminar `publish-social` (cada 5 minutos, por el pinger de cron-job.org, que ya se cayó una
      vez en silencio) y otro al terminar `respaldo.yml`. Hoy, si el pinger se cae o el respaldo
      falla, nadie se entera. Falta la cuenta; el código de los avisos es corto.
-  4. **[dueño]** Sentry (gratis) o similar en el sitio: hoy los errores solo quedan en los logs de
+  3. **[dueño]** Sentry (gratis) o similar en el sitio: hoy los errores solo quedan en los logs de
      Vercel, que en el plan Hobby duran poco. Falta la cuenta y su DSN en Vercel.
-  5. **[dueño]** Restaurar un respaldo una vez: la entrada «Probar una vez que un respaldo se
+  4. **[dueño]** Restaurar un respaldo una vez: la entrada «Probar una vez que un respaldo se
      restaura», arriba. De paso, que el respaldo use un rol de la base de solo lectura.
-  6. Los secretos de Actions (`DATABASE_URL_UNPOOLED`, `EXPO_TOKEN`) en un environment limitado a
+  5. Los secretos de Actions (`DATABASE_URL_UNPOOLED`, `EXPO_TOKEN`) en un environment limitado a
      `main`, y no a nivel de repositorio, donde los lee cualquier rama. **[dueño]** para crearlo.
-  7. Escribir cómo se vuelve atrás: el rollback de un despliegue en Vercel, una migración que no
+  6. Escribir cómo se vuelve atrás: el rollback de un despliegue en Vercel, una migración que no
      tiene reversa y restaurar un respaldo.
-  8. Un formateador (Prettier) con `--check` en el CI. El primer pase cambia casi todos los
+  7. Un formateador (Prettier) con `--check` en el CI. El primer pase cambia casi todos los
      archivos, así que va solo, sin otras ramas abiertas que lo choquen.
-  9. Lo que ya estaba en `docs/deuda-tecnica.md`: la CSP (en modo Report-Only primero) y el límite
+  8. Lo que ya estaba en `docs/deuda-tecnica.md`: la CSP (en modo Report-Only primero) y el límite
      de intentos compartido entre instancias.
-  10. Las dependencias que quedan: #288 (las otras 17 del sitio, que reemplazó a la #242) y #241
+  9. Las dependencias que quedan: #288 (las otras 17 del sitio, que reemplazó a la #242) y #241
       (las acciones), con su CI; los dos avisos altos de `undici` y `zod` que trae `ai`; y los de
       la app, que vienen de las herramientas de Expo y se arreglan con el SDK 58.
-  11. Más adelante: pruebas de punta a punta de entrar, programar y publicar, y una prueba de
+  10. Más adelante: pruebas de punta a punta de entrar, programar y publicar, y una prueba de
       humo después de cada despliegue.
 - **[dueño] Borrar el almacén viejo de Vercel Blob** (2026-10-22). La media ya vive en R2 y el
   código no lo usa; no se borró porque borrar es irreversible y pide el sí del dueño. Antes,
