@@ -1,10 +1,11 @@
-import { useEffect } from 'react'
+import { useEffect, useSyncExternalStore } from 'react'
 import { Tabs } from 'expo-router'
 import { TIPO_TITULO } from '../../components/ui'
 import { useColores, useTema } from '../../components/tema'
 import { BotonPublicar, IconoCocina, IconoNumeros, IconoParrilla } from '../../components/iconos'
 import { BotonAjustes } from '../../components/boton-ajustes'
 import { AvisosAlTelefono } from '../../components/avisos'
+import { escucharNumero, leerNumero } from '../../lib/numero-del-icono'
 import { LA_PARRILLA } from '../../lib/tema'
 
 /**
@@ -20,6 +21,8 @@ import { LA_PARRILLA } from '../../lib/tema'
 export default function TabsLayout() {
   const colores = useColores()
   const { tema, sincronizar } = useTema()
+  // El número del ícono, también en la pestaña: los cortes con algo nuevo y lo que espera en La Mesa.
+  const numero = useSyncExternalStore(escucharNumero, leerNumero)
   // Recién entrado, el modo de la cuenta: al abrir la app todavía no había sesión que preguntar.
   useEffect(() => {
     sincronizar()
@@ -52,7 +55,12 @@ export default function TabsLayout() {
         {/* `color` ya llega resuelto por los dos tintes de arriba: el icono no decide su color. */}
         <Tabs.Screen
           name="index"
-          options={{ title: LA_PARRILLA[tema], tabBarIcon: ({ color }) => <IconoParrilla color={color} /> }}
+          options={{
+            title: LA_PARRILLA[tema],
+            tabBarIcon: ({ color }) => <IconoParrilla color={color} />,
+            tabBarBadge: numero > 0 ? (numero > 99 ? '99+' : numero) : undefined,
+            tabBarBadgeStyle: { backgroundColor: colores.rojo, color: '#ffffff', fontSize: 11, fontWeight: '700' },
+          }}
         />
         <Tabs.Screen
           name="publicar"

@@ -281,6 +281,13 @@
       "when": 1794339635940,
       "tag": "0039_puentes",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1794365795065,
+      "tag": "0040_cortes_vistos",
+      "breakpoints": true
     }
   ]
 }
