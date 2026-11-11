@@ -428,8 +428,9 @@ abrir. Con la app cerrada, el número solo cambia si llega un aviso.
 de antes la fila no aparece (la ruta contesta 404), y tocar un renglón servido abre el detalle con
 «No se pudo conectar. Revisa tu señal.».
 Salió por aire a la 1.1.0 el 2026-11-11, con el servidor ya en producción, en el commit
-`08c880c` de `ota-1.1.0`, a los dos canales. Lo probado en esa rama: `tsc`, los tests, el lint
-y `expo export`; no se probó en un teléfono.
+`08c880c` de `ota-1.1.0`, a los dos canales. Los hitos, la llamita y la racha (#379) salieron el
+mismo día, en el commit `14f7698`. Lo probado en esa rama, las dos veces: `tsc`, los tests, el
+lint y `expo export`; no se probó en un teléfono.
 
 ## La Cocina desde el teléfono
 
