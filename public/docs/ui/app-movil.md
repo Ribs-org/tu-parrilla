@@ -57,6 +57,15 @@ Tiene dos pasos, uno detrás del otro en la misma pantalla:
 
 Si algo falla, el mensaje sale en rojo debajo del campo.
 
+### Cuando hay una versión nueva en la tienda
+
+La app compara su versión, la que se instaló desde la Play Store, con la que pide el servidor. Lo que llega solo al abrirla (las actualizaciones por aire) no cuenta: eso no cambia la versión. Hay dos casos:
+
+- **Una versión nueva que conviene.** Unos tres segundos después de abrir, una ventana: «Hay una versión nueva», con lo que trae (hoy, «Trae los avisos al teléfono y grabar video con la cámara.») y «Se instala desde la tienda, encima de esta: no pierdes nada.», y los botones «Después» y «Actualizar». «Actualizar» abre la página de Tu Parrilla en la Play Store. Sale una sola vez por versión: con «Después» no vuelve, y queda el botón al pie de Ajustes («Actualizar la app», ver «Ajustes», abajo). Hoy le sale a quien tiene la 1.1.0.
+- **Una versión demasiado vieja.** En lugar de toda la app —también de la pantalla de entrada—, una pantalla sin pestañas ni vuelta atrás: el título «Actualiza Tu Parrilla», «Esta versión de la app ya no funciona. Actualízala en la tienda para seguir: se instala encima de esta y no pierdes nada.» con lo que trae la nueva, y un solo botón, «Ir a la Play Store». Hoy no le sale a nadie: solo se pide así una versión que ya esté en la tienda para todos.
+
+En un iPhone no sale ninguna de las dos: la app todavía no está en el App Store.
+
 ### La bienvenida
 
 Sale una sola vez, al entrar con el código, y solo si la cuenta no tiene ninguna red conectada. Quien ya tiene redes —porque partió en el panel web o porque entra en otro teléfono— no la ve: va directo a La Parrilla. No tiene pestañas ni cabecera. De arriba abajo:
@@ -297,6 +306,7 @@ Se abre con el botón de Ajustes de cualquier pestaña. Arriba, la flecha para v
 - **«El libro de sugerencias»** (de día, «La caja de sugerencias»), para escribirle al equipo que hace Tu Parrilla y leer lo que le respondió. Si hay respuestas que no abrió, al lado del rótulo va un punto naranjo y «1 respuesta nueva» (o «<N> respuestas nuevas»). Una tarjeta con dos botones redondeados arriba, «Escribir» y «Lo que nos escribiste» (este con un punto naranjo si hay algo sin leer); arranca en «Lo que nos escribiste» si hay respuestas sin leer, si no en «Escribir».
   - En «Escribir»: el dibujo de un libro abierto (de día, una caja de madera con una ranura), los botones «Una idea», «Algo no funciona» y «Otra cosa», un campo para escribir y el botón «Dejarlo en el libro» (de día, «Echarlo a la caja»). Es lo mismo que el libro del panel, con sus mismos textos y mensajes: está contado en [El libro de sugerencias](libro-de-sugerencias.md). En la app, en vez del navegador, el mensaje lleva la versión de la app, y al recibirse dice «Quedó en el libro.» (de día, «Quedó en la caja.») con «Escribir otra». Lo escrito no se borra al pasar a la otra pestaña.
   - En «Lo que nos escribiste»: lo que escribió, de lo más nuevo a lo más viejo, cada cosa en un recuadro con su tipo y su fecha («Una idea · 6 nov 2026»), a la derecha «Respuesta nueva» en naranjo con un punto, «Respondida» o «Sin respuesta todavía», y el primer renglón de lo que escribió. Tocarlo lo abre: el texto entero y, si hay respuesta, «Te respondió el equipo · <fecha>» en naranjo con la respuesta debajo; sin respuesta, «Todavía no te respondemos. Cuando lo hagamos, aparece acá y te llega un correo.». Abrir una respuesta nueva la deja leída: se apagan su «Respuesta nueva» y el punto del rótulo. Mientras carga, «Abriendo…»; sin nada escrito, «Todavía no nos escribes nada. Lo que escribas aparece acá, con lo que te respondamos.»; sin señal y sin nada guardado, «No se pudo actualizar.».
+- Si hay una versión nueva en la tienda (ver «Cuando hay una versión nueva en la tienda», arriba): «Hay una versión nueva de la app en la tienda.» con lo que trae, y el botón «Actualizar la app», que abre la Play Store. Sin versión nueva, no está.
 - Al pie, la versión de la app: «Versión 1.2.0» (o «Versión 1.1.0» en un teléfono que todavía no se actualiza desde la tienda: esa tiene La Cocina sin grabar) y, si llegó una actualización por aire, « · actualización » seguido de ocho letras y números que la identifican. Sirve para saber qué versión tiene alguien que pide ayuda.
 
 Aquí no se conecta ni se desconecta nada: eso es del panel web.
@@ -803,6 +813,8 @@ En La Mesa, toca «Enviados»: lo respondido desde Tu Parrilla, por la respuesta
 - «No me llega el código» → revisar el spam y que el correo esté bien escrito. Si sigue sin llegar, ese correo puede no estar invitado: lo invita quien administra el sitio, en [Los Maestros](los-maestros.md).
 - «Me dice que espere 24 horas» → se equivocó diez veces en un día con el código; ver [Entrar al panel](ingresar.md).
 - «¿Dónde quedó el Resumen?», «el Calendario», «Contenido» o «Cuentas» → desde el 2026-10-16 la app tiene las pestañas del panel. Lo programado y lo que salió está en «La Parrilla»; los números, en «Los Números»; la lista de publicaciones, en «Los Números» → «Ver todas las publicaciones →»; los seguidores de cada red, en «Los Números» → «⋯ Más: tus cuentas».
+- «Me sale "Actualiza Tu Parrilla" y no puedo entrar» → su versión de la app ya no funciona: tocar «Ir a la Play Store» y, ahí, «Actualizar». Se instala encima y no pierde nada; al abrirla de nuevo, entra como siempre. Si la Play Store no ofrece «Actualizar», avisarle a quien administra el sitio.
+- «Me sale "Hay una versión nueva"» → es la versión que trae lo nuevo que necesita al teléfono (hoy, los avisos y grabar con la cámara). Conviene instalarla, pero no es obligatorio: «Después» la deja para otro momento, y el botón queda en Ajustes, al pie.
 - «Me pide desbloquear cada vez» → es el bloqueo del propio teléfono; se usa el PIN, patrón, huella o cara del teléfono.
 - «Quiero cerrar sesión» → el botón de arriba a la derecha (el cuchillo y el trinche) → «Cerrar sesión», y confirmar.
 - «El botón de Ajustes (o "el engranaje") tiene un punto» → una cuenta se está enfriando (ámbar) o se apagó (rojo). En «Ajustes» se ve cuál; se reconecta en el panel web, con «Abrir Los Fierros en el panel». En la app, ese botón no avisa de las respuestas del libro de sugerencias: esas se ven en el rótulo del libro, al final de «Ajustes».
@@ -954,6 +966,7 @@ Lo que describe sale de estos archivos:
 - `mobile/src/lib/session.ts`
 - `mobile/src/lib/ingreso.ts`
 - `mobile/src/lib/api.ts`
+- `mobile/src/components/version.tsx`, `mobile/src/lib/version.ts` y `src/lib/version-de-la-app.ts` (el aviso de la versión nueva, la pantalla «Actualiza Tu Parrilla» y el botón de Ajustes, con lo que pide el servidor)
 - `mobile/src/lib/cache.ts`
 - `mobile/src/lib/useScreenData.ts`
 - `mobile/src/lib/format.ts`

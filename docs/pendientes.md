@@ -656,6 +656,21 @@ permisos «por decidir»** de la tabla red por red, para pedirlos todos en una m
      y el corte.
 
   Y en el App Store cuando exista la cuenta de Apple (ver «La app en iPhone», abajo).
+- **Revisar el aviso de actualizar la app, y subir la mínima a su tiempo** (2026-11-11). La app
+  avisa cuando hay una versión nueva en la tienda y, por debajo de la mínima, no deja seguir
+  (`src/lib/version-de-la-app.ts`; el detalle en `mobile/README.md`, «Cuando hay que ir a la
+  tienda»). Hoy la recomendada es la 1.2.0 y la mínima la 1.1.0, que no bloquea a nadie. Falta:
+  1. **[dueño]** probarlo en un teléfono con la 1.1.0, ya con la actualización por aire: que salga
+     «Hay una versión nueva» unos segundos después de abrir, que «Actualizar» abra la Play Store, que
+     «Después» no vuelva a preguntar y que quede «Actualizar la app» al pie de Ajustes. Nada de esto
+     se probó en un teléfono.
+  2. Subir la mínima a 1.2.0 **solo cuando la 1.2.0 esté en producción en la Play Store para todos**
+     (hoy está en la pista interna): antes, quien no es probador queda bloqueado sin poder
+     actualizar. Antes de subirla, confirmar en la Play Console que la versión publicada es la 1.2.0.
+  3. La app de prueba «Vicente · Números» (el APK instalado a mano en septiembre, otro
+     identificador) también recibe el aviso, pero su botón lleva a «Tu Parrilla», que es otra app:
+     desinstalarla en vez de actualizarla.
+  4. Cuando exista la app de iPhone, llenar `ios` con la dirección del App Store.
 - **[dueño] Las credenciales de los avisos al teléfono (FCM), antes del build 1.2.0**
   (2026-11-07). El código está (`src/lib/push/`, `mobile/src/lib/avisos.ts`); sin esto, en Android
   «Avisarme» dice que no se pudieron encender. Lo pide la documentación de Expo SDK 57, «Add Android
