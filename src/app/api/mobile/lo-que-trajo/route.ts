@@ -15,8 +15,8 @@ export const dynamic = 'force-dynamic'
  * (`src/lib/hitos.ts`). `numero`, el del ícono de la app y de la pestaña: los cortes con algo nuevo
  * más los comentarios que esperan respuesta en La Mesa. `racha`, los días seguidos con algo servido
  * (`src/lib/racha.ts`). `porCelebrar`, los hitos que la app celebra al abrir, de cualquier fecha,
- * con su corte. `hoy`, el día en la zona del dueño, para que la app diga «hoy» y «ayer» sin el
- * reloj del teléfono.
+ * con su corte: solo los raros para el dueño (`esRaro`). `hoy`, el día en la zona del dueño, para
+ * que la app diga «hoy» y «ayer» sin el reloj del teléfono.
  */
 export async function GET(request: Request) {
   const usuario = await requireMobileUser(request)
@@ -26,7 +26,7 @@ export async function GET(request: Request) {
   const [{ cortes, numero }, racha, celebraciones] = await Promise.all([
     leerLoQueTrajo(usuario.id, ahora),
     leerRacha(usuario.id, ahora, usuario.zona),
-    porCelebrar(usuario.id),
+    porCelebrar(usuario.id, ahora),
   ])
   const hitos = await hitosDeLosCortes(
     usuario.id,

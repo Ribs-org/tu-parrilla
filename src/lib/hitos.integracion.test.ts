@@ -118,19 +118,50 @@ describe.skipIf(!URL_PRUEBAS)('Los hitos y la racha, contra una Postgres de verd
     await publicada(d.id, d.ig, 'instagram', 'ig-c', [['2026-11-10', 1500]])
     await detectarHitos(ahora)
 
-    const celebraciones = await porCelebrar(d.id)
+    const celebraciones = await porCelebrar(d.id, ahora)
     expect(celebraciones.map((c) => [c.corte.post.id, c.umbral])).toEqual([[id, 1000]])
-    expect(await porCelebrar(otro.id)).toEqual([])
+    expect(await porCelebrar(otro.id, ahora)).toEqual([])
 
     expect(await celebrar(otro.id, celebraciones[0]!.id, ahora)).toBe(false)
     expect(await celebrar(d.id, 'no-es-un-id', ahora)).toBe(false)
-    expect(await porCelebrar(d.id)).toHaveLength(1)
+    expect(await porCelebrar(d.id, ahora)).toHaveLength(1)
 
     expect(await celebrar(d.id, celebraciones[0]!.id, ahora)).toBe(true)
-    expect(await porCelebrar(d.id)).toEqual([])
+    expect(await porCelebrar(d.id, ahora)).toEqual([])
     const { hitos } = await esquema()
     const filas = await (await db()).select().from(hitos).where(eq(hitos.postId, id))
     expect(filas.map((h) => h.celebradoEn)).toEqual([ahora, ahora])
+  })
+
+  it('celebra solo lo raro para el dueño; lo de siempre queda resuelto sin celebración', async () => {
+    const d = await dueno()
+    const ahora = new Date()
+    const hace = (dias: number) => new Date(ahora.getTime() - dias * 864e5)
+    // Cuatro cortes del mes que pasan las 1.000: para este dueño, las 1.000 son lo normal.
+    for (const [i, vistas] of [1500, 2200, 1800, 3000].entries()) {
+      await corte(d.id, hace(i + 2), [[d.ig, 'instagram', 'published', `ig-m${i}`]])
+      await publicada(d.id, d.ig, 'instagram', `ig-m${i}`, [['2026-11-10', vistas]])
+    }
+    // Uno de hace dos meses con 50.000 no cuenta para comparar.
+    await corte(d.id, hace(60), [[d.ig, 'instagram', 'published', 'ig-viejo']])
+    await publicada(d.id, d.ig, 'instagram', 'ig-viejo', [['2026-09-10', 50_000]])
+    const normal = await corte(d.id, hace(1), [[d.ig, 'instagram', 'published', 'ig-normal']])
+    await publicada(d.id, d.ig, 'instagram', 'ig-normal', [['2026-11-10', 1200]])
+    const grande = await corte(d.id, hace(1), [[d.ig, 'instagram', 'published', 'ig-grande']])
+    await publicada(d.id, d.ig, 'instagram', 'ig-grande', [['2026-11-10', 12_000]])
+    // Los hitos de antes quedan resueltos, como los del estreno: aquí se mira solo lo nuevo.
+    await detectarHitos(hace(3))
+    const { hitos } = await esquema()
+    await (await db()).update(hitos).set({ celebradoEn: hace(3) }).where(eq(hitos.ownerId, d.id))
+    await (await db()).delete(hitos).where(inArray(hitos.postId, [normal, grande]))
+    await detectarHitos(ahora)
+
+    // Las 10.000 del grande son raras; sus 100 y 1.000, y las del normal, no.
+    expect((await porCelebrar(d.id, ahora)).map((c) => [c.corte.post.id, c.umbral])).toEqual([[grande, 10_000]])
+    const delNormal = await (await db()).select().from(hitos).where(eq(hitos.postId, normal)).orderBy(hitos.umbral)
+    expect(delNormal.map((h) => [h.umbral, h.celebradoEn])).toEqual([[100, ahora], [1000, ahora]])
+    // La llamita y el detalle los siguen teniendo.
+    expect((await hitosDeLosCortes(d.id, [normal])).get(normal)!.map((h) => h.umbral)).toEqual([100, 1000])
   })
 
   it('la racha: días seguidos en la zona del dueño, sin los borradores de la bandeja de TikTok', async () => {
