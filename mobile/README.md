@@ -462,6 +462,8 @@ Salió por aire a la 1.1.0 el 2026-11-11, con el servidor ya en producción, en 
 `08c880c` de `ota-1.1.0`, a los dos canales. Los hitos, la llamita y la racha (#379) salieron el
 mismo día, en el commit `14f7698`. Lo probado en esa rama, las dos veces: `tsc`, los tests, el
 lint y `expo export`; no se probó en un teléfono.
+A la 1.2.0 llegó entero —con el número del ícono y el aviso de lo bueno (#382), que necesitan
+`expo-notifications`— el mismo día, desde `main` (ver «Lo de la 1.2.0 sale de `main`», abajo).
 
 ## La Cocina desde el teléfono
 
@@ -594,6 +596,22 @@ cola que sigue después de cerrar la app y la subida nativa por partes. El 2026-
 web, contra una API falsa, lo de la cámara de frío y las comandas: elegir y cambiar el rol de cada
 video, las opciones con «Para cuándo», el cuerpo que sale al mandar, «Cambiar», «Sacar de la cámara»,
 «Lo que pasó», «Cancelar la comanda», y el camino corto contra un servidor de antes.
+
+### Lo de la 1.2.0 sale de `main`
+
+El build 1.2.0 de la Play Store (Android, pista interna) se armó el 2026-11-08 desde `85648a4`, y
+desde entonces `package.json` y `app.json` no cambiaron en `main`: lo nativo de `main` es lo del
+binario, así que su JavaScript le sirve tal cual. La primera actualización por aire de la 1.2.0
+salió el 2026-11-11 desde `f13bec4`, a los dos canales, con el servidor ya en producción: todo lo de
+`mobile/src` desde el build —los números cada hora (#372, la primera fase de «Lo que trajo»), la
+primera vuelta (#374) y las otras tres fases (#377, #379, #382)—. Se exportó solo Android e iOS y se publicó con
+`--skip-bundler` (ver «Si Metro se queda sin memoria», arriba). No se probó en un teléfono.
+
+Eso vale mientras `package.json` y `app.json` sigan como en el build. **Antes de publicar, compáralos
+con el del build** (`git diff 85648a4 main -- mobile/package.json mobile/app.json`, o el commit del
+último build de la 1.2.0 en `npx eas-cli build:list`): si `main` suma un módulo nativo o un plugin,
+su JavaScript puede pedir algo que el binario no trae y la app revienta al abrir. Ahí la 1.2.0 pasa
+a tener su rama, como `ota-1.1.0`, o el cambio espera a otro build con la versión subida.
 
 ### La Cocina por aire a la 1.1.0 (publicada el 2026-11-07)
 

@@ -655,7 +655,8 @@ permisos «por decidir»** de la tabla red por red, para pedirlos todos en una m
   5. en la Play Console, la seguridad de los datos con lo de «CUANDO SUBA LA 1.2.0» de
      `TEXTOS-FORMULARIO.txt` y el token de los avisos, y la versión publicada;
   6. probarla en el teléfono: la cámara y sus permisos, una subida de varios GB, «Avisarme», el mesón
-     y el corte.
+     y el corte; y, desde la actualización por aire del 2026-11-11, «Lo que trajo» con el número del
+     ícono y «Avisos de lo bueno» en Ajustes (`mobile/README.md`, «Lo de la 1.2.0 sale de `main`»).
 
   Y en el App Store cuando exista la cuenta de Apple (ver «La app en iPhone», abajo).
 - **Revisar el aviso de actualizar la app, y subir la mínima a su tiempo** (2026-11-11). La app
