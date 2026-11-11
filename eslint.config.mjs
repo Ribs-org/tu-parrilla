@@ -14,6 +14,9 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // La app Expo tiene su propio lint (`expo lint`, desde mobile/); no es código Next.
     "mobile/**",
+    // Las copias de trabajo que abren los agentes adentro del repositorio (`git worktree`): son
+    // otras ramas, con su propio lint, y sin esto `npm run lint` en local las revisa también.
+    ".claude/**",
   ]),
 ]);
 

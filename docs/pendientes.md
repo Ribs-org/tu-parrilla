@@ -253,7 +253,9 @@ sección.
 - **[dueño] Encender «Require a pull request before merging» en la protección de `main`**
   (2026-10-21). Hoy son obligatorias las comprobaciones `sitio` y `app` y que la rama esté al
   día, pero no el pull request (README, «Cómo entra un cambio»). Con cero aprobaciones
-  pedidas, para que el dueño siga fusionando solo.
+  pedidas, para que el dueño siga fusionando solo. Y encender también «Do not allow bypassing
+  the above settings» (`enforce_admins`, 2026-11-11): hoy la reja no se le aplica al admin, que es
+  la cuenta con que empujan los agentes.
 - **[dueño] Probar una vez que un respaldo se restaura** (2026-10-21). Desde el 2026-10-21 el
   flujo revisa el índice de cada volcado, pero nadie restauró uno entero todavía. Bajar el de
   un día, descifrarlo con la llave y restaurarlo en una Postgres desechable (README,
@@ -1000,14 +1002,42 @@ diciendo «Sin suscripción», y es cierto.
 - **Por revisar: «las notificaciones de Google»** (2026-10-23). El dueño las nombró al pedir
   los preparativos de YouTube y no quedó claro dónde las ve (¿correos de Google Cloud?, ¿el
   Verification Center?, ¿avisos en la app?). Preguntarle antes de tocar nada.
-- **No urgente: revisar el CI/CD y evaluar las dependencias** (2026-11-02, lo pidió el dueño).
-  - Ver si la reja de pull requests y el despliegue (README, «Cómo entra un cambio») cubren lo
-    que hace falta y cuánto tardan.
-  - Revisar las dependencias del sitio y de la app: cuáles sobran, cuáles traen avisos de
-    seguridad y cuáles se pueden reemplazar. Por ejemplo, `exceljs` se descartó para la planilla
-    por sus avisos.
-  - De paso, los pull requests de Dependabot que siguen abiertos (#241 y #288, que reemplazó a la
-    #242): que el CI pase y que no rompan nada antes de fusionarlos.
+- **DevOps y seguridad: lo que falta** (revisado el 2026-11-11, lo pidió el dueño; reemplaza la
+  revisión «no urgente» del 2026-11-02). Ya hecho ese día: Next a 16.4.3 por dos avisos críticos
+  (#386), `npm audit --omit=dev --audit-level=critical` en el CI, y el respaldo, que fallaba al
+  instalar `age` con `apt`. Lo que sigue, en orden:
+  1. **[dueño]** En GitHub → Settings → Code security del repositorio: encender el grafo de
+     dependencias, «Dependabot security updates», «Secret scanning» con «Push protection», y
+     «Private vulnerability reporting». Las alertas de Dependabot están encendidas pero no listan
+     nada, ni siquiera el aviso crítico de Next que tenía producción: sin el grafo no ven las
+     dependencias. El repositorio es público y los agentes empujan con la cuenta admin: el escaneo
+     de secretos es lo que frena una clave subida por error. Se puede hacer desde `gh` con el sí
+     del dueño.
+  2. **[dueño]** CodeQL con la configuración por defecto (Code security → Code scanning), gratis
+     en un repositorio público.
+  3. **[dueño]** Que la reja de `main` valga también para el admin: la entrada «Encender "Require a
+     pull request before merging"», arriba, que desde el 2026-11-11 suma `enforce_admins`.
+  4. **[dueño]** Un vigía que avise si algo deja de pasar: Healthchecks.io gratis, con un aviso al
+     terminar `publish-social` (cada 5 minutos, por el pinger de cron-job.org, que ya se cayó una
+     vez en silencio) y otro al terminar `respaldo.yml`. Hoy, si el pinger se cae o el respaldo
+     falla, nadie se entera. Falta la cuenta; el código de los avisos es corto.
+  5. **[dueño]** Sentry (gratis) o similar en el sitio: hoy los errores solo quedan en los logs de
+     Vercel, que en el plan Hobby duran poco. Falta la cuenta y su DSN en Vercel.
+  6. **[dueño]** Restaurar un respaldo una vez: la entrada «Probar una vez que un respaldo se
+     restaura», arriba. De paso, que el respaldo use un rol de la base de solo lectura.
+  7. Los secretos de Actions (`DATABASE_URL_UNPOOLED`, `EXPO_TOKEN`) en un environment limitado a
+     `main`, y no a nivel de repositorio, donde los lee cualquier rama. **[dueño]** para crearlo.
+  8. Escribir cómo se vuelve atrás: el rollback de un despliegue en Vercel, una migración que no
+     tiene reversa y restaurar un respaldo.
+  9. Un formateador (Prettier) con `--check` en el CI. El primer pase cambia casi todos los
+     archivos, así que va solo, sin otras ramas abiertas que lo choquen.
+  10. Lo que ya estaba en `docs/deuda-tecnica.md`: la CSP (en modo Report-Only primero) y el límite
+      de intentos compartido entre instancias.
+  11. Las dependencias que quedan: #288 (las otras 17 del sitio, que reemplazó a la #242) y #241
+      (las acciones), con su CI; los dos avisos altos de `undici` y `zod` que trae `ai`; y los de
+      la app, que vienen de las herramientas de Expo y se arreglan con el SDK 58.
+  12. Más adelante: pruebas de punta a punta de entrar, programar y publicar, y una prueba de
+      humo después de cada despliegue.
 - **[dueño] Borrar el almacén viejo de Vercel Blob** (2026-10-22). La media ya vive en R2 y el
   código no lo usa; no se borró porque borrar es irreversible y pide el sí del dueño. Antes,
   mirar que no quede nada que se quiera guardar.

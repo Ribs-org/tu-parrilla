@@ -71,8 +71,10 @@ a la app pidiendo algo que el binario no trae. Se actualiza con el SDK entero y 
 
 `main` está protegida: los dos trabajos son obligatorios, y la rama tiene que estar al día con
 `main` antes de fusionar, para que la reja haya corrido sobre el código que de verdad va a
-quedar. Un empujón directo no entra, porque su commit no trae esas dos comprobaciones: el CI
-corre sobre pull requests.
+quedar. Un empujón directo de quien no es admin no entra, porque su commit no trae esas dos
+comprobaciones: el CI corre sobre pull requests. **El admin sí puede empujar directo**: la regla no
+se le aplica (`enforce_admins` apagado), y la única cuenta que empuja es admin. Que la reja valga
+también para el admin está en `docs/pendientes.md`.
 
 Por eso Vercel no espera a nadie. Lo que llega a `main` ya pasó por la reja.
 
@@ -1539,8 +1541,11 @@ archivo y el `when` del journal.
 ## Respaldos
 
 El plan gratis de Supabase no respalda nada, así que `.github/workflows/respaldo.yml` vuelca
-la base entera cada día a las 06:40 UTC y la deja como artefacto de GitHub Actions por 90
-días. Necesita el secreto `DATABASE_URL_UNPOOLED` en el repositorio.
+la base entera una vez al día y la deja como artefacto de GitHub Actions por 90 días. Se pide a las
+06:40 UTC, pero GitHub encola los programados: en noviembre de 2026 salieron entre las 13 y las 17
+UTC. Necesita el secreto `DATABASE_URL_UNPOOLED` en el repositorio. `age` se instala desde su
+versión publicada en GitHub, con la huella del archivo fijada en el workflow, y no con `apt`: el
+2026-11-11 los servidores de Ubuntu no resolvían desde los runners y el respaldo falló.
 
 **El volcado sale cifrado, y tiene que seguir así.** El repositorio es público, y los
 artefactos de un repositorio público los baja cualquiera con cuenta de GitHub: un respaldo
