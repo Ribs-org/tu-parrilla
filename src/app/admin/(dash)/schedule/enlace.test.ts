@@ -36,6 +36,11 @@ describe('scheduleHref', () => {
     ).toBe('/admin/schedule?semana=2026-10-12')
   })
 
+  it('el corte abierto en «Lo que trajo» no viaja: cerrar su panel es navegar sin él', () => {
+    expect(scheduleHref({ corte: 'p1', vista: 'lista' }, {})).toBe('/admin/schedule?vista=lista')
+    expect(scheduleHref({ corte: 'p1', vista: 'lista' }, { corte: 'p2' })).toBe('/admin/schedule?vista=lista&corte=p2')
+  })
+
   it('la cuenta del «+» de la vista «Día» no viaja; el día que se mira, sí', () => {
     expect(scheduleHref({ vista: 'dia', fecha: '2026-10-17', componer: '1', dia: '2026-10-17', cuenta: 'c1' }, {})).toBe(
       '/admin/schedule?vista=dia&fecha=2026-10-17',

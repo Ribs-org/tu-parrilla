@@ -1264,6 +1264,20 @@
   display: none;
 }
 
+/*
+ * La llama de «Lo que trajo» (`llamita.tsx`): fuego de noche y la llama azul del soplete de día,
+ * los mismos colores de la app del teléfono. Como dibujo pasan 3:1 sobre la chapa de cada modo.
+ */
+.llamita {
+  --llama-fuera: #e8621f;
+  --llama-dentro: #f7c04a;
+}
+
+[data-tema='dia'] .llamita {
+  --llama-fuera: #2f6fe4;
+  --llama-dentro: #bfe2ff;
+}
+
 @keyframes drift-a {
   from {
     transform: translate3d(0, 0, 0) scale(1);
@@ -1431,6 +1445,23 @@
     transform: scaleY(1.08) scaleX(0.95);
     opacity: 1;
   }
+}
+
+/*
+ * La celebración de un hito (`celebracion.tsx`): una fila de llamas cruza la pantalla por abajo,
+ * de izquierda a derecha, una vez. Entra desde afuera y sale por el otro lado.
+ */
+@keyframes cruza {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100vw);
+  }
+}
+
+.llamas-que-cruzan {
+  animation: cruza 2.6s cubic-bezier(0.45, 0.05, 0.55, 0.95) 0.15s both;
 }
 
 @keyframes vaiven {
@@ -1838,5 +1869,10 @@
   .tibio {
     animation: none !important;
     filter: brightness(0.8);
+  }
+
+  /* La celebración de un hito, sin las llamas que cruzan: la tarjeta dice lo mismo. */
+  .llamas-que-cruzan {
+    display: none;
   }
 }

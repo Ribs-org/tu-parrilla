@@ -3,6 +3,7 @@
 import { usePathname, useSearchParams } from 'next/navigation'
 import { Brasa, Cargando, Renglon } from '@/components/esqueleto'
 import { Encabezado } from '@/components/ui'
+import { FilaCargando } from './fila-cargando'
 
 /**
  * La carga de La Parrilla, con la forma de lo que viene: la semana, la semana por hora, el día
@@ -25,6 +26,8 @@ export default function Loading() {
         </Encabezado>
       </header>
       <Cargando>
+        {/* «Lo que trajo», que casi siempre está: sin él, el calendario bajaría al llegar. */}
+        <FilaCargando className="mb-6" />
         {/* «Calendario», «Por hora», «Día», «Lista». */}
         <div className="mb-3 flex items-center gap-1.5">
           <Renglon className="h-6 w-[5.5rem] rounded-full" />

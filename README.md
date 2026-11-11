@@ -16,7 +16,7 @@ tus números.
 | `/borrar-mis-datos` | Cómo pedir que se borre una cuenta con todos sus datos, qué se borra y qué se guarda (los respaldos, 90 días). Pública y sin sesión: es la «Delete data URL» de la ficha de Google Play, que la revisa (`docs/play-store.md`). El borrado lo hace hoy el equipo a mano (ver `docs/pendientes.md`) |
 | `/privacidad`, `/terminos` | La política de privacidad y los términos, públicos y sin sesión. Google y Meta los revisan para verificar la app. Además los enlaza, junto con `/`, el *Branding* de `rclone-servidor`, otra app de Google de Infraestructura (#294): si alguna de las tres cambia de ruta o se baja, avisar en `VicentePareja/servidor_propio` |
 | `/<slug>` | La página de un usuario. Cada dominio sirve solo las de su dueño; el del producto las sirve todas |
-| `/admin` | Tu panel: entra a La Parrilla, el calendario con lo que se quemó arriba; adentro, los números, los comentarios, el editor y La Cocina (`/admin/ia`): el chef de la casa, con la cámara de frío donde se guarda el material (`/admin/ia/bodega`), y, en «Tu propio chef», las llaves para tu agente, con el manual del parrillero (`/admin/ia/manual`). Se abre en el dominio del producto: en cualquier otro, `/admin` e `/ingresar` redirigen ahí con la misma ruta |
+| `/admin` | Tu panel: entra a La Parrilla, el calendario con lo que se quemó y lo que trajo cada corte de la semana arriba; adentro, los números, los comentarios, el editor y La Cocina (`/admin/ia`): el chef de la casa, con la cámara de frío donde se guarda el material (`/admin/ia/bodega`), y, en «Tu propio chef», las llaves para tu agente, con el manual del parrillero (`/admin/ia/manual`). Se abre en el dominio del producto: en cualquier otro, `/admin` e `/ingresar` redirigen ahí con la misma ruta |
 | `/borrado/<código>` | El estado de un borrado que pidió Meta: cuándo fue y cuántas cuentas. Pública, sin sesión; el código es la llave |
 | `/docs/…` | Las guías para LLMs, públicas y sin sesión: la de la API (`api-llm.md`, `api-editor.md`, `api.json`) y la wiki de la interfaz (`ui/index.md`), para guiar a quien se pierde en el panel |
 | `/api/social/meta/baja` | `POST` de Meta cuando alguien quita la app desde Facebook: deja sin credencial sus cuentas de Instagram y Facebook |
@@ -1760,7 +1760,7 @@ detalle— (`src/lib/lo-que-trajo.ts`), sumado en sus redes:
   solo a páginas del dueño, la regla de Los Números.
 
 Mirarlo deja la marca en `cortes_vistos` —la hora y los dos contadores de ese momento—, una fila
-por corte y del servidor, así que dos teléfonos de la misma cuenta ven lo mismo. Un corte que nunca
+por corte y del servidor, así que dos teléfonos de la misma cuenta, y el panel, ven lo mismo. Un corte que nunca
 se miró cuenta todo desde que salió. Un corte entra a la fila si salió en al menos una red (un
 borrador en la bandeja de TikTok todavía no salió), con la hora de La Parrilla; lo publicado fuera
 de Tu Parrilla no tiene burbuja. Los números se mueven con la lectura de cada hora (arriba).
@@ -1770,15 +1770,14 @@ algo nuevo, más cuántos comentarios esperan respuesta en La Mesa**. La app lo 
 lee la fila; en el ícono, solo desde la 1.2.0 y en los lanzadores que muestran números (ver
 `mobile/README.md`, «Lo que trajo»).
 
-| Ruta | Qué hace |
-|---|---|
 **Los hitos** (`src/lib/hitos.ts`): cuando las vistas de un corte —la última lectura de cada
 publicación, sumada en sus redes **sin YouTube**, que no deja sumar sus números con los de otra
 red— pasan 100, 1.000, 10.000, 100.000 o 1.000.000, el corte gana ese hito, una fila de `hitos` por
 corte y umbral. Los busca `detectarHitos` después de cada lectura de los números, la de cada hora y
 la del día (ver «Los números cada hora» y el cron de sincronización), para todos los dueños a la
 vez; si falla, la lectura ya quedó escrita y la corrida siguiente encuentra lo que faltó. La app
-celebra cada hito una vez —el más alto de cada corte, hasta tres por vuelta— y avisa que lo hizo;
+—o La Parrilla del panel, donde se vea primero— celebra cada hito una vez —el más alto de cada
+corte, hasta tres por vuelta— y avisa que lo hizo;
 eso deja celebrados también los más bajos del mismo corte. **Solo se celebra lo raro para el
 dueño** (`esRaro`): un hito cuyo número alcanzó menos de la mitad de sus otros cortes del último
 mes; con menos de tres cortes para comparar, todos. Lo demás queda resuelto sin celebración la
@@ -1790,7 +1789,7 @@ solo se celebra lo que se alcanza desde ese día.
 **La racha** (`src/lib/racha.ts`): cuántos días seguidos salió al menos un corte, en la zona del
 dueño, por la hora del corte, como el pie de ayer de La Parrilla. Es lo que Tu Parrilla publicó, así
 que YouTube cuenta como las demás; un borrador en la bandeja de TikTok no. Si hoy todavía no salió
-nada cuenta hasta ayer: se apaga a medianoche. La app la muestra desde dos días.
+nada cuenta hasta ayer: se apaga a medianoche. La app y el panel la muestran desde dos días.
 
 | Ruta | Qué hace |
 |---|---|
@@ -1803,6 +1802,35 @@ Un corte que no existe, es de otro o no salió contesta `404` con «Ese corte no
 salió en ninguna red.», sin distinguir; un hito, con «Ese hito no está.». El aviso de lo bueno al
 teléfono —un hito raro, o lo que trajo el día— está en «Avisos al teléfono». El diseño entero, en
 `docs/superpowers/specs/2026-11-10-lo-que-trajo-design.md`.
+
+### Lo que trajo, en el panel
+
+La Parrilla del panel muestra lo mismo arriba del calendario, debajo de «Se quemó»
+(`src/app/admin/(dash)/schedule/lo-que-trajo.tsx`): la racha al lado del título, la fila con el
+circulito y la llamita de cada corte, y la celebración de los hitos. Una burbuja abre el detalle
+del corte en el panel lateral, por la dirección (`/admin/schedule?corte=<id>`,
+`detalle-del-corte.tsx`), con lo mismo que el detalle del teléfono más los enlaces a la pieza de
+Los Números y al editor. Las frases son las de la app, con las fechas como las escribe el panel
+(`src/lib/lo-que-trajo-frases.ts`).
+
+No pasa por la API del teléfono: lee en el servidor con las mismas funciones (`filaDeLoQueTrajo`,
+`leerCorte`, `hitosDeLosCortes`, `porCelebrar`, `leerRacha`) y anota con dos acciones del servidor
+(`src/app/admin/lo-que-trajo-actions.ts`), con el dueño de la sesión: `mirarCortePropio`, la misma
+marca de `cortes_vistos`, y `celebrarHitoPropio`. Por eso lo mirado en el panel deja de ser nuevo
+en el teléfono, y un hito celebrado en un lado no se celebra en el otro ni llega como aviso. Las
+dos las llama el navegador con la pestaña a la vista y no revalidan nada: lo nuevo sigue a la vista
+hasta cerrar el panel, y un `prefetch` del enlace no deja la marca sin que nadie lo vea.
+
+Tres diferencias con el teléfono, a propósito:
+
+- **Carga aparte**, detrás de un `<Suspense>`: son unas diez consultas, en serie como el resto de
+  la página, y el calendario no las espera. Si fallan, la sección no aparece y el error va al log.
+- **No sigue el filtro por red** (`?red=`), como «Se quemó».
+- **Sin número**: el panel no le pone a su pestaña el del ícono de la app. Contarlo en cada
+  pantalla del panel sería leer la fila entera en el layout.
+
+La celebración no sale con un panel lateral abierto, para no tapar el compositor a mitad de
+escribir.
 
 ### Avisos por correo
 
@@ -2524,6 +2552,7 @@ src/
       (dash)/              panel protegido
   components/
     corte.tsx              el corte dibujado de La Parrilla: silueta, carne, marcas, halo y humo
+    llamita.tsx            la llama de «Lo que trajo»: la racha, los hitos y la celebración; de día, la del soplete
     pieza-sushi.tsx        el mismo corte en el modo día: nigiri, roll, sashimi y temaki
     escena-cocina.tsx      la escena de La Cocina: el parrillero y el asado al palo de noche, el maestro de sushi y el atún de día; el fuego y el farol dicen si la cocina está abierta
     estacion-comanda.tsx   la estación de cada comanda en su tarjeta: un dibujo que se mueve según en qué va, la parrilla de noche y la barra de sushi de día
@@ -2589,8 +2618,9 @@ src/
     cocina/                La Cocina: la cámara de frío (lo que se guarda, su cuota y sus nombres por tamaño en bodega.ts; lo de adentro en materiales.ts), los estados de una comanda, la fila del chef, lo que entrega, lo que lee y escribe su API (/api/cocina), las subidas por partes del panel, del teléfono y de la API (subidas-http.ts, que sirve a /api/admin/cocina, /api/mobile/cocina y /api/bodega; la puerta de la llave en llave-api.ts), colgar una comanda, la comanda que pide el teléfono (telefono.ts), cancelar, cambiar y sacar para el panel y el teléfono (del-dueno.ts), el pulso de las tarjetas vivas, cómo atiende la cocina según el latido (latido.ts), las preguntas del chef con su plazo (pregunta.ts y preguntar.ts), la alarma al admin (alarma.ts), los correos de la comanda que entregó o terminó y de la pregunta, la entrega que el dueño todavía no vio (tarjeta.ts), y el mesón (lo que manda al teléfono, en meson-telefono.ts)
     color-de-red.ts        el color de marca de cada red en La Parrilla, como clases de Tailwind escritas enteras
     piezas.ts              la pieza de una publicación: sus destinos programados unidos a lo publicado
-    lo-que-trajo.ts        «Lo que trajo» del teléfono: lo nuevo de cada corte desde que se miró, la marca y el número del ícono
-    hitos.ts               los hitos de cada corte (100, 1.000… vistas): la detección después de cada lectura y lo que la app celebra
+    lo-que-trajo.ts        «Lo que trajo», del teléfono y del panel: lo nuevo de cada corte desde que se miró, la marca y el número del ícono
+    lo-que-trajo-frases.ts lo que dicen en el panel el circulito, el detalle, los hitos y la racha (sin base)
+    hitos.ts               los hitos de cada corte (100, 1.000… vistas): la detección después de cada lectura y lo que la app y el panel celebran
     racha.ts               la racha: los días seguidos con algo servido, en la zona del dueño
     cortes-movil.ts        un corte de La Parrilla en la forma de la app del teléfono: su dibujo y sus redes (sin base)
     auth.ts                sesión del panel

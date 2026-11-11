@@ -1,8 +1,10 @@
 import Link from 'next/link'
+import { Suspense } from 'react'
 import { Plus } from 'lucide-react'
 import { ENLACE_BOTON, ENLACE_BOTON_SECUNDARIO } from '@/components/boton'
 import { Corte } from '@/components/corte'
 import { DeNocheYDeDia, NombreDe } from '@/components/de-noche-y-de-dia'
+import { Cargando } from '@/components/esqueleto'
 import { Encabezado } from '@/components/ui'
 import { requireUser } from '@/lib/auth'
 import { fechaParaDia, idDeBorrador, primero, textoDe } from '@/lib/borrador'
@@ -30,12 +32,15 @@ import { cn, toZonedInput } from '@/lib/utils'
 import { BatchUpload } from './batch-upload'
 import { WeekCalendar } from './calendar'
 import { Composer } from './composer'
+import { DetalleDelCorte } from './detalle-del-corte'
 import { columnasDelDia, normalizarFecha } from './dia'
 import { dibujoDe } from './dibujo'
 import { scheduleHref } from './enlace'
 import { borradoresDelFiltro, conAlguno, filtroDeLaUrl, hayQueFiltrar, opcionesDelFiltro, recortar } from './filtro-red'
 import { FiltroDeRedes } from './filtro-redes'
 import { ListaBorradores } from './lista-borradores'
+import { LoQueTrajo } from './lo-que-trajo'
+import { FilaCargando } from './fila-cargando'
 import { ordenarCola } from './orden'
 import { Queue } from './queue'
 import { SeQuemo } from './se-quemo'
@@ -49,11 +54,12 @@ export const dynamic = 'force-dynamic'
  * La Parrilla, que es también la entrada del panel (`/admin` lleva acá).
  *
  * De arriba abajo: lo que se quemó —lo único que pide una acción sin que nadie la busque—,
- * el calendario de la semana (o la misma semana por hora, un día por cuenta o la lista, a un
+ * «Lo que trajo» cada corte de la semana (`lo-que-trajo.tsx`), el calendario de la semana (o la misma semana por hora, un día por cuenta o la lista, a un
  * clic) y, al pie, cuánto
  * salió ayer. Componer,
- * abrir un borrador y subir un CSV pasan en un panel lateral que la URL abre
- * (`?componer=1`, `?borrador=…`, `?panel=…`), para que el calendario siga a la vista detrás.
+ * abrir un borrador, subir un CSV y mirar lo que trajo un corte pasan en un panel lateral que la
+ * URL abre (`?componer=1`, `?borrador=…`, `?panel=…`, `?corte=…`), para que el calendario siga a
+ * la vista detrás.
  */
 export default async function SchedulePage({
   searchParams,
@@ -152,6 +158,13 @@ export default async function SchedulePage({
     const cerrarHref = scheduleHref(params, {})
     const pedido = idDeBorrador(texto('borrador'))
 
+    // «Lo que trajo» de un corte, desde su burbuja o desde la celebración de un hito.
+    if (texto('corte')) {
+      return (
+        <DetalleDelCorte ownerId={ownerId} postId={texto('corte')} zona={zona} frias={frias} cerrarHref={cerrarHref} volver={volver} />
+      )
+    }
+
     if (texto('componer') === '1' || pedido) {
       const borrador = pedido ? await cargarBorrador(ownerId, pedido) : null
       if (pedido && !borrador) return listaDeBorradores(cerrarHref)
@@ -243,6 +256,27 @@ export default async function SchedulePage({
         {hayConectada ? null : <PrimerDia />}
 
         <SeQuemo filas={quemados(conQuemados)} now={now} zone={zona} volver={volver} frias={frias} />
+
+        {/* Carga aparte: el calendario no espera sus consultas. Sin redes conectadas no hay qué
+            mostrar, ni la forma de la carga. */}
+        {hayConectada ? (
+          <Suspense
+            fallback={
+              <Cargando>
+                <FilaCargando />
+              </Cargando>
+            }
+          >
+            <LoQueTrajo
+              ownerId={ownerId}
+              zona={zona}
+              frias={frias}
+              abierto={texto('corte') || null}
+              celebrar={panel === null}
+              hrefDelCorte={(id) => scheduleHref(params, { corte: id })}
+            />
+          </Suspense>
+        ) : null}
 
         <div>
           <div className="mb-3 flex flex-wrap items-start justify-between gap-x-4 gap-y-2">

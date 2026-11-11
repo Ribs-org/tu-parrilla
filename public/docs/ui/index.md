@@ -77,7 +77,7 @@ se ve arriba, grande y en mayúsculas.
 
 | Nombre en pantalla | Subtítulo (lo que es en llano) | Dirección | Dónde está | Página |
 |---|---|---|---|---|
-| La Parrilla | lo que viene y cómo salió lo que ya se fue | `/admin/schedule` | Primera pestaña. Es la entrada: se llega acá al entrar, y `/admin` lleva acá. El calendario: programar, borradores, lo que se quemó, editar, reprogramar | [la-parrilla.md](la-parrilla.md) |
+| La Parrilla | lo que viene y cómo salió lo que ya se fue | `/admin/schedule` | Primera pestaña. Es la entrada: se llega acá al entrar, y `/admin` lleva acá. El calendario: programar, borradores, lo que se quemó, lo que trajo cada corte de la semana, editar, reprogramar | [la-parrilla.md](la-parrilla.md) |
 | La Mesa | lo que te responden y tus respuestas | `/admin/comments` | Pestaña. Los comentarios y sus respuestas | [la-mesa.md](la-mesa.md) |
 | Los Números | cómo te fue en las redes y en tu página | `/admin/analytics` | Pestaña. Un tablero con dos mitades: «En las redes» (views y seguidores ganados) y «En tu página» (visitas y clicks en su página de links); en algunas cuentas, entre las dos, «Lo pagado» (sus anuncios de Meta) y «Tu canal de YouTube» (lo que cuenta YouTube Analytics: día a día, de dónde llegó la gente y quién mira), y, en la pieza de cada publicación, «Promocionar» (`/admin/analytics/publicaciones/<id>/promocionar`), que la convierte en un anuncio. Un clic adentro, «Tus publicaciones» (`/admin/analytics/publicaciones`): cada publicación con sus números y su etiqueta `?s=`; la pieza de cada una, con sus versiones (`/admin/analytics/publicaciones/<id>`); «Comparar por atributo» (`/admin/analytics/comparar`); «Tu mejor 10 %» (`/admin/analytics/mejores`), lo que más rindió —o lo que menos, con «Lo peor»— y qué tiene en común; y «Lado a lado» (`/admin/analytics/lado-a-lado`), dos publicaciones con su portada, el link a la red y cómo crecieron. Al lado del título, «Llevar para la casa»: todo en una planilla de Excel | [los-numeros.md](los-numeros.md) |
 | La Cocina | el chef de la casa y tu propio chef | `/admin/ia` | Cuarta pestaña, la última. Arriba, el chef de la casa: el editor de videos, que se enciende por cuenta, sus comandas, la cámara de frío (`/admin/ia/bodega`; de día, la nevera), donde se guarda el material en bruto, «Pedir una comanda» (`/admin/ia/pedir`), donde se elige de la cámara, y el mesón (`/admin/ia/meson`), donde espera lo que el chef entregó. Abajo, «Tu propio chef»: generar y revocar las llaves de API de la IA propia, y las guías que tiene que leer. Al final, el manual del parrillero (`/admin/ia/manual`): esta misma wiki, para que la lea la persona. Hasta el 2026-10-22 se llamaba «Tu IA» | [la-cocina.md](la-cocina.md) |
@@ -158,8 +158,8 @@ teléfono](app-movil.md).
 | Invitar a alguien; cerrar las sesiones de alguien; encenderle la cocina | Los Maestros, solo el admin ([los-maestros.md](los-maestros.md)) |
 | Publicar desde el teléfono | [La app del teléfono](app-movil.md) |
 | Responder comentarios desde el teléfono | La app del teléfono → La Parrilla → la tarjeta «La Mesa» ([app-movil.md](app-movil.md)); las instrucciones de la IA, solo en el panel ([la-mesa.md](la-mesa.md)) |
-| Ver qué trajo cada corte desde la última vez («me gusta», comentarios, visitas); qué es el número rojo de la pestaña o del ícono | La app del teléfono → La Parrilla → la fila «Lo que trajo» ([app-movil.md](app-movil.md)) |
-| Qué es la llamita de una burbuja, la celebración de las 1.000 vistas o «La parrilla lleva 5 días prendida» | La app del teléfono → La Parrilla: los hitos y la racha ([app-movil.md](app-movil.md)) |
+| Ver qué trajo cada corte desde la última vez («me gusta», comentarios, visitas); qué es el número rojo de la pestaña o del ícono | La Parrilla → la tarjeta «Lo que trajo», arriba del calendario ([la-parrilla.md](la-parrilla.md)); en el teléfono, La Parrilla → la fila «Lo que trajo» ([app-movil.md](app-movil.md)). El número rojo de la pestaña y del ícono es solo de la app |
+| Qué es la llamita de una burbuja, la celebración de las 1.000 vistas o «La parrilla lleva 5 días prendida» | La Parrilla, en la tarjeta «Lo que trajo» ([la-parrilla.md](la-parrilla.md)), y la app del teléfono → La Parrilla: los hitos y la racha ([app-movil.md](app-movil.md)) |
 | Grabar un video con el teléfono y mandárselo al chef de la casa | La app del teléfono → pestaña «La Cocina» ([app-movil.md](app-movil.md)) |
 | Ver, renombrar o sacar lo de la cámara de frío desde el teléfono, o cancelar una comanda | La app del teléfono → «La Cocina» → «La cámara de frío» o «Tus comandas» ([app-movil.md](app-movil.md)) |
 | Pedir una función, reclamar algo que no funciona o decirle algo a quienes hacen Tu Parrilla | «Ajustes» → «El libro de sugerencias», al final del menú; en el teléfono, al final de «Ajustes» ([libro-de-sugerencias.md](libro-de-sugerencias.md)) |
@@ -266,6 +266,9 @@ vale para la de día:
 | «un corte» | «un trozo» | El tamaño de un material de la cámara, de lo más chico a lo más grande ([la-camara-de-frio.md](la-camara-de-frio.md)) |
 | «un lomo» | «un filete» | El tamaño de un material de la cámara, de lo más chico a lo más grande ([la-camara-de-frio.md](la-camara-de-frio.md)) |
 | «un cuarto» | «un salmón entero» | El tamaño de un material de la cámara, de lo más chico a lo más grande ([la-camara-de-frio.md](la-camara-de-frio.md)) |
+| «La parrilla lleva 5 días prendida» | «La barra lleva 5 días abierta» | La racha de «Lo que trajo», en La Parrilla del panel y de la app |
+| «Tu corte pasó las 1.000 vistas» | «Tu pieza pasó las 1.000 vistas» | La celebración de un hito, en el panel y en la app, y su aviso al teléfono |
+| «Ver el corte» | «Ver la pieza» | El botón de la celebración de un hito |
 | «media res» | «un atún» | El tamaño de un material de la cámara, de lo más chico a lo más grande ([la-camara-de-frio.md](la-camara-de-frio.md)) |
 | «la vaca entera» | «un atún gigante» | El tamaño de un material de la cámara, de lo más chico a lo más grande ([la-camara-de-frio.md](la-camara-de-frio.md)) |
 | «una longaniza» | «un tentáculo» | El tamaño de un material de la cámara, de lo más chico a lo más grande ([la-camara-de-frio.md](la-camara-de-frio.md)) |
@@ -299,6 +302,7 @@ equivalencia con lo que dicen las páginas:
 | Una marca del fierro por destino | Una banda de alga oscura (nori) por destino | Cómo le fue a cada red |
 | La marca carbonizada, con una brasa adentro | La banda pasada, cruzada por una línea roja | Esa red falló |
 | El humo | Una llama azul de soplete, encima de la pieza | Está saliendo ahora |
+| La llama naranja de la racha, de la llamita de un hito y de la celebración | Una llama azul de soplete | «Lo que trajo», en La Parrilla del panel y de la app |
 | El halo rojo y la banderita | Iguales | Falló, en todas las redes o en alguna |
 | La sección «Se quemó» | La sección «Se echó a perder» | Lo que falló, con su motivo y el arreglo |
 | La parrilla fría | La tabla vacía, sin color | Un día sin nada |

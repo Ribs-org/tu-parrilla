@@ -1,8 +1,8 @@
 # Lo que trajo: la app que se siente red social
 
 Fecha: 2026-11-10. **Las cuatro fases están hechas.** Cuatro fases,
-cada una en su PR y cada una sostenida sola; el orden está en «Las fases», al final. Es de la app del teléfono: el panel no
-cambia en esta entrega (ver «Lo que no entra»).
+cada una en su PR y cada una sostenida sola; el orden está en «Las fases», al final. Es de la app
+del teléfono; La Parrilla del panel la recibió después, el 2026-11-11 (ver «En el panel»).
 
 ## Lo que pidió el dueño
 
@@ -281,10 +281,39 @@ Cada fase deja al día, en su PR, la página de la app en la wiki
 (`public/docs/ui/app-movil.md`), el README (las rutas del teléfono, los crons, el modelo) y
 `docs/pendientes.md`.
 
+## En el panel
+
+Agregado el 2026-11-11, después de las cuatro fases: La Parrilla del panel muestra lo mismo que la
+app, con las mismas marcas. Lo que se decidió al llevarlo:
+
+- **Dónde va**: arriba del calendario, debajo de «Se quemó», en una tarjeta con el título «Lo
+  que trajo» y la racha al lado. «Se quemó» sigue primero porque es lo único que pide una acción.
+  No sigue el filtro por red, como «Se quemó».
+- **El detalle va en el panel lateral** (`?corte=<id>`), como el compositor y los borradores: el
+  calendario sigue a la vista detrás, y cerrar es navegar. Suma lo que el panel tiene a mano: la
+  pieza de cada red en Los Números y el editor del post.
+- **Las mismas marcas.** Mirar un corte en el panel deja la marca de `cortes_vistos`, y celebrar
+  un hito su `celebrado_en`: lo visto en un lado no es nuevo en el otro, y un hito se celebra una
+  vez, donde se vea primero. Las dejan acciones del servidor que el navegador llama con la pestaña
+  a la vista, después de mostrar: un `prefetch` del enlace no pone nada en cero.
+- **La celebración no sale con un panel lateral abierto**: taparía el compositor a mitad de
+  escribir. Sale la próxima vez que se abra La Parrilla sin panel.
+- **Carga aparte**, detrás de un `<Suspense>`: son unas diez consultas más, y el calendario no las
+  espera. La forma de la fila va también en la carga de toda la pantalla, para que el calendario
+  no salte al llegar.
+
+Como se hizo: `src/app/admin/(dash)/schedule/lo-que-trajo.tsx` (la tarjeta y la celebración),
+`detalle-del-corte.tsx` y `panel-del-corte.tsx` (el detalle), `celebracion.tsx`, las acciones en
+`src/app/admin/lo-que-trajo-actions.ts` y las frases en `src/lib/lo-que-trajo-frases.ts`, que son
+las de la app con las fechas como las escribe el panel («lun 9 de nov»). La llama es un dibujo
+del panel (`src/components/llamita.tsx`), con los colores de la app. Lo cuentan el README («Lo que
+trajo, en el panel») y la wiki (`public/docs/ui/la-parrilla.md`).
+
 ## Lo que no entra
 
-- **El panel.** La fila, el detalle y los hitos son de la app. Llevarlos a La Parrilla del panel
-  queda anotado en `docs/pendientes.md`.
+- **El número del ícono en el panel.** La pestaña La Parrilla del panel no lleva el número de la
+  app: contarlo en cada pantalla sería leer la fila entera en el layout, y lo nuevo ya está en el
+  circulito de cada burbuja.
 - **Lo publicado fuera de Tu Parrilla.** Un reel subido directo en Instagram está en Los Números,
   pero no es un corte: no tiene burbuja. El circulito es de lo que se cocinó acá.
 - **Los seguidores de Facebook y los de los reels de Instagram**, que las redes no dan.
