@@ -132,6 +132,37 @@ npx eas-cli update --skip-bundler --channel preview    --environment preview    
 npx eas-cli update --skip-bundler --channel production --environment production --message "qué cambió"
 ```
 
+## Cuando hay que ir a la tienda
+
+Lo que llega por aire no alcanza para todo (ver «La 1.2.0 necesita un build nativo y pasar por las
+tiendas», abajo): un teléfono que no actualiza desde la tienda se queda con su binario. Para eso la
+app pregunta al abrir, y cada vez que vuelve al frente, qué versión pide el servidor
+(`GET /api/mobile/version`, sin token, que sale de `src/lib/version-de-la-app.ts` en la raíz), y la
+compara con la suya (`src/lib/version.ts`, `src/components/version.tsx`):
+
+- **Por debajo de la `recomendada`**, la ventana «Hay una versión nueva», con «Después» y
+  «Actualizar», que abre la página de la tienda. Sale una vez por versión (`version-avisada` en
+  AsyncStorage), y después queda el botón «Actualizar la app» al pie de Ajustes.
+- **Por debajo de la `minima`**, la pantalla «Actualiza Tu Parrilla» en lugar de toda la app,
+  también de la entrada, con un solo botón a la tienda. Arranca con la última respuesta guardada
+  (`version-del-servidor`), así que sin señal sigue ahí; una falla de red no la levanta ni la baja.
+
+**La versión propia es la del binario**: `Updates.runtimeVersion`, que con `"policy":
+"appVersion"` es la versión de `app.json` con la que se armó el build. No cambia con lo que llega
+por aire, a diferencia de `Constants.expoConfig.version`, que viene con cada actualización. En
+desarrollo no hay `runtimeVersion` y vale la de `app.json`.
+
+Para pedir otra versión basta cambiar los números en `src/lib/version-de-la-app.ts` y desplegar el
+sitio; la app no se vuelve a publicar. **La `minima` solo sube cuando esa versión ya está en la
+tienda para todos**, no solo en la pista de pruebas: a quien no es probador la tienda no se la
+ofrece, y con la mínima arriba se queda sin app. Por eso hoy la recomendada es la 1.2.0 y la mínima
+la 1.1.0: el aviso le sale a quien tiene la 1.1.0, y la pantalla, a nadie. iPhone está en `null`
+hasta que la app esté en el App Store: ahí no sale nada.
+
+Es puro JavaScript (`Linking`, `AppState`, AsyncStorage, `expo-updates`, que están en los dos
+builds), así que llega por aire también a la 1.1.0, que es a la que le sirve. Contra un sitio sin la
+ruta (404), la app sigue como si nada.
+
 ## Cómo instalarla en el teléfono
 
 1. Abre ese link **desde el navegador del teléfono** (no hace falta cable ni

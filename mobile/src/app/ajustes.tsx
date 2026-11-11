@@ -13,6 +13,7 @@ import { SesionCaducada } from '../lib/api'
 import { abrirLosFierros } from '../lib/puente'
 import { LibroDeSugerencias } from '../components/libro-de-sugerencias'
 import { AjusteDeAvisos } from '../components/avisos'
+import { ActualizarDesdeAjustes } from '../components/version'
 import { LOS_FIERROS, otroTema, type Tema } from '../lib/tema'
 import { NOMBRE_RED, type Fierros } from '../lib/tipos'
 
@@ -156,6 +157,9 @@ export default function Ajustes() {
           para escribirle al equipo que hace Tu Parrilla y leer lo que respondió. Trae su propio
           rótulo, que lleva el punto de las respuestas sin leer. */}
       <LibroDeSugerencias />
+
+      {/* Con una versión nueva en la tienda, lo que trae y el botón: el aviso sale una sola vez. */}
+      <ActualizarDesdeAjustes />
 
       <Text style={{ color: colores.tenue, fontSize: 11, marginTop: 16 }}>
         Versión {version}
