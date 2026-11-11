@@ -816,8 +816,9 @@ export const cortesVistos = pgTable(
  * detecta cada lectura de los números (`detectarHitos`) y no se borran si las vistas bajan.
  *
  * `alcanzadoEn` es nulo en los que el corte ya traía al estrenarse los hitos: la migración 0041 los
- * dejó puestos y celebrados, sin fecha, porque no se sabe cuándo los pasó. `celebradoEn`: cuando la
- * app mostró la celebración; nulo, todavía por celebrar.
+ * dejó puestos y celebrados, sin fecha, porque no se sabe cuándo los pasó. `celebradoEn`: cuando
+ * quedó resuelto —la app mostró la celebración, o no era raro para el dueño y se pasó sin celebrar
+ * (`esRaro`)—; nulo, todavía por resolver.
  */
 export const hitos = pgTable(
   'hitos',

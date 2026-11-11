@@ -511,11 +511,16 @@ describe('aislamiento por dueño (SQL generado, sin base)', () => {
     esperarFiltradoPorDueno((await todasLasConsultas(() => hitosDeLosCortes(DUENO, ['post-1'])))[0]!)
     capturas.length = 0
 
-    // porCelebrar: los hitos del dueño, y después el corte de cada uno, también por dueño.
-    const porCelebrarSql = await consultasEncadenadas(() => porCelebrar(DUENO), [[['hito-1', 'post-1', 1000]]])
-    expect(porCelebrarSql).toHaveLength(2)
-    esperarFiltradoPorDueno(porCelebrarSql[0]!)
-    esperarFiltradoPorDueno(porCelebrarSql[1]!)
+    // porCelebrar: los hitos del dueño, las vistas de sus cortes del mes para ver cuáles son raros,
+    // lo que no lo es queda resuelto, y después el corte de cada uno: todo por dueño.
+    const porCelebrarSql = await consultasEncadenadas(() => porCelebrar(DUENO, new Date('2026-11-11T12:00:00Z')), [
+      [['hito-1', 'post-1', 1000], ['hito-2', 'post-1', 100]],
+      [{ post_id: 'post-2', vistas: 5000 }, { post_id: 'post-3', vistas: 500 }, { post_id: 'post-4', vistas: 50 }],
+      [],
+    ])
+    expect(porCelebrarSql).toHaveLength(4)
+    for (const consulta of porCelebrarSql) esperarFiltradoPorDueno(consulta)
+    expect(porCelebrarSql[2]!.params.flat()).toContain('hito-2') // las 100, que no son raras.
     capturas.length = 0
 
     // celebrar: el hito tiene que ser del dueño, y lo que marca también va atado a él.

@@ -174,7 +174,11 @@ Cuando las vistas de un corte —sumadas en sus redes, sin YouTube— pasan **10
 100.000 o 1.000.000**, el corte gana ese hito (`hitos`, uno por corte y umbral, con cuándo se
 alcanzó). Se detectan después de cada lectura.
 
-- La primera vez que la app lo ve, **lo celebra**: una animación que cruza la pantalla —fuego de
+- **Solo se celebra lo raro para el dueño**: un número que alcanzó menos de la mitad de sus otros
+  cortes del último mes (con menos de tres para comparar, todos). Lo demás queda puesto, sin
+  celebración. Lo pidió el dueño el 2026-11-11, al ver que con muchos cortes sobre las 100 la
+  celebración de cada corte nuevo iba a ser varias veces al día.
+- La primera vez que la app lo ve, si es raro, **lo celebra**: una animación que cruza la pantalla —fuego de
   noche, la llama del soplete de día— con «Tu corte pasó las 1.000 vistas» y el corte. Una vez:
   la app avisa que lo celebró (`celebrado_en`).
 - Queda marcado en la burbuja (la llamita con el umbral) y en el detalle.
@@ -184,7 +188,8 @@ alcanzó). Se detectan después de cada lectura.
 Como se hizo (fase 3): la detección es una sola consulta para todos los dueños
 (`detectarHitos`, en `src/lib/hitos.ts`), al final de la lectura de cada hora y de la del día. La
 app celebra el hito más alto de cada corte, hasta tres por vuelta, y celebrarlo deja celebrados los
-de abajo. Los que los cortes ya traían al estrenar los puso la migración 0041, ya celebrados y con
+de abajo; lo que no es raro (`esRaro`) se resuelve sin celebrar cuando la app pregunta qué hay
+que celebrar (`porCelebrar`). Los que los cortes ya traían al estrenar los puso la migración 0041, ya celebrados y con
 `alcanzado_en` nulo, porque no se sabe cuándo se pasaron; el detalle los muestra sin día. La
 llamita de la burbuja es el hito más alto, celebrado o no. La celebración, la llama y la racha
 están dibujadas con vistas y `Animated` del núcleo, para que lleguen por aire también a la 1.1.0,
