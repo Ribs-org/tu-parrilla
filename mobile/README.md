@@ -117,6 +117,21 @@ manda `redes` para una red con dos cuentas ahora conectadas recibe un rechazo pi
 app nueva pide un endpoint que el backend todavía no tiene — degrada bien, con
 reintento, pero no publica hasta que la web la alcance.
 
+### Si Metro se queda sin memoria
+
+`eas update` arma el paquete de las tres plataformas, también la web, que una actualización
+por aire no usa, y el armado estático de la web es lo que más memoria pide. En el servidor de
+desarrollo la sesión tiene un tope de 5 GB, y al pasarlo el núcleo mata a Metro: el comando
+termina en `exited with signal: SIGKILL`, sin otro aviso. Entonces se arma solo Android e iOS
+y se publica ese paquete, el mismo para los dos canales mientras ninguno tenga variables en
+EAS (`npx eas-cli env:list --environment preview` y `production` dicen «No variables found»):
+
+```bash
+npx expo export --output-dir dist --dump-sourcemap --dump-assetmap --platform android --platform ios
+npx eas-cli update --skip-bundler --channel preview    --environment preview    --message "qué cambió"
+npx eas-cli update --skip-bundler --channel production --environment production --message "qué cambió"
+```
+
 ## Cómo instalarla en el teléfono
 
 1. Abre ese link **desde el navegador del teléfono** (no hace falta cable ni
@@ -398,6 +413,9 @@ abrir. Con la app cerrada, el número solo cambia si llega un aviso.
 **Se publica después del servidor**, como siempre que cambia `src/app/api/mobile/`. Con un sitio
 de antes la fila no aparece (la ruta contesta 404), y tocar un renglón servido abre el detalle con
 «No se pudo conectar. Revisa tu señal.».
+Salió por aire a la 1.1.0 el 2026-11-11, con el servidor ya en producción, en el commit
+`08c880c` de `ota-1.1.0`, a los dos canales. Lo probado en esa rama: `tsc`, los tests, el lint
+y `expo export`; no se probó en un teléfono.
 
 ## La Cocina desde el teléfono
 
