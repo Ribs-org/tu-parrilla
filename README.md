@@ -29,7 +29,7 @@ tus números.
 | `/api/sugerencias/respuesta` | `POST` con una llave **del admin** (o `SCHEDULE_API_KEY`): la respuesta del equipo a lo que alguien escribió en el libro de sugerencias, por el número de su issue o por su id, para responder sin el navegador. Con la llave de otra cuenta, `403` (ver «El libro de sugerencias») |
 | `/api/bodega…` | Con la misma llave: lo que hay en la cámara de frío de La Cocina (`GET /api/bodega`) y las subidas por partes para guardar ahí (`/api/bodega/subidas…`), las mismas del panel y del teléfono (ver «La Cocina») |
 | `/api/admin/…` | Lo que el panel llama desde el navegador, con la cookie de la sesión: la firma de una subida directa (`upload-url`), las subidas por partes a la cámara de frío de La Cocina (`cocina/subidas…`) y el pulso que mantiene al día sus tarjetas (`cocina/pulso`; ver «La Cocina») y la planilla de Excel de Los Números (`planilla`, y `planilla/adelanto` para lo que no cabe; ver «Llevar para la casa») |
-| `/api/mobile/…` | La API de la app del teléfono, con el token de su sesión (ver `mobile/README.md`); `cocina…` es La Cocina desde el teléfono: lo que muestra, las subidas por partes a la cámara de frío, cambiar y sacar lo de adentro, «Mandar al chef», cancelar, contestarle al chef y el mesón con «Programar» y «Descartar» (ver «La Cocina»); `comentarios…` es La Mesa desde el teléfono: la cola, el número de La Parrilla, «Enviar», «Descartar» y otro borrador (ver «Responder comentarios»); `push` registra el teléfono para los avisos y `push/{token}` lo borra (ver «Avisos al teléfono»); `puente` da la dirección de un solo uso de `/ingresar/puente` (ver `mobile/README.md`, «La primera vuelta»); `session`, al canjear el código, devuelve el token y `sinRedes`, si la cuenta no tiene ninguna red conectada; `schedule/accounts/{id}/tiktok` es `creator_info` para el bloque de TikTok de Publicar (ver `mobile/README.md`, «TikTok y la palabra clave») |
+| `/api/mobile/…` | La API de la app del teléfono, con el token de su sesión (ver `mobile/README.md`); `cocina…` es La Cocina desde el teléfono: lo que muestra, las subidas por partes a la cámara de frío, cambiar y sacar lo de adentro, «Mandar al chef», cancelar, contestarle al chef y el mesón con «Programar» y «Descartar» (ver «La Cocina»); `comentarios…` es La Mesa desde el teléfono: la cola, el número de La Parrilla, «Enviar», «Descartar» y otro borrador (ver «Responder comentarios»); `push` registra el teléfono para los avisos y `push/{token}` lo borra (ver «Avisos al teléfono»); `puente` da la dirección de un solo uso de `/ingresar/puente` (ver `mobile/README.md`, «La primera vuelta»); `lo-que-trajo` es la fila de La Parrilla con lo nuevo de cada corte y el número del ícono, y `cortes/{id}` su detalle y la marca de que se miró (ver «Lo que trajo, en el teléfono»); `session`, al canjear el código, devuelve el token y `sinRedes`, si la cuenta no tiene ninguna red conectada; `schedule/accounts/{id}/tiktok` es `creator_info` para el bloque de TikTok de Publicar (ver `mobile/README.md`, «TikTok y la palabra clave») |
 | `/api/cron/…` | Las corridas programadas: la publicación, la sincronización —que también reintenta los mensajes del libro de sugerencias que no salieron a GitHub y relee en Mercado Pago las suscripciones del plan pagado— y los números de cada hora. Solo con `CRON_SECRET` |
 | `/api/pagos/mercadopago` | `POST` de Mercado Pago cuando cambia una suscripción al plan pagado o uno de sus cobros. Pública y sin sesión: la llave es la firma (`MERCADOPAGO_WEBHOOK_SECRET`). Ver «Los planes» |
 | `/api/track/…` | Las balizas de visitas y clics de las páginas públicas |
@@ -367,7 +367,7 @@ Los dos perfiles de ejemplo están para que los edites, no para que los borres y
 de cero.
 
 Cada fila de cada tabla (perfiles, cuentas, posts, borradores, comentarios, ajustes, llaves
-de API, anuncios y promociones —por la cuenta conectada de la que cuelgan—, lo escrito en el libro de sugerencias con su respuesta, y las marcas, comandas, insumos, materiales de la cámara de frío, subidas y creativos de La
+de API, anuncios y promociones —por la cuenta conectada de la que cuelgan—, lo escrito en el libro de sugerencias con su respuesta, la última vez que miraste cada corte en el teléfono, y las marcas, comandas, insumos, materiales de la cámara de frío, subidas y creativos de La
 Cocina, con las preguntas del chef) tiene dueño: el panel solo te muestra lo tuyo, nunca lo de otro usuario invitado. Lo mismo
 la API: lo que entra con una llave es del dueño de la llave, y un agente con la tuya no ve
 ni toca lo de nadie más. Tu fila de usuario —el nombre, la zona y el modo del panel— la
@@ -1737,6 +1737,42 @@ lo que no alcanzó dice `saltada` en el informe y queda para la hora siguiente. 
 falla deja su error en el informe y en el log (`[reciente] …`) y las demás siguen; la ruta
 contesta 200 igual, y 500 solo si se rompió la corrida entera.
 
+### Lo que trajo, en el teléfono
+
+Arriba de La Parrilla de la app, debajo de La Mesa, una fila con una burbuja por cada corte que
+salió en los últimos siete días; la de un corte con algo nuevo lleva el anillo en brasa y un
+circulito con cuánto («+37»). Lo nuevo es lo que llegó desde que el dueño miró el corte —abrir su
+detalle— (`src/lib/lo-que-trajo.ts`), sumado en sus redes:
+
+- los «me gusta» y comentarios: la última lectura de cada publicación (`post_metrics`) menos lo
+  que tenía al mirarlo, sin bajar de cero. **Sin YouTube**: es una resta, y sus políticas no la
+  dejan (`politica-youtube.ts`);
+- los comentarios de YouTube que entraron a La Mesa después de mirarlo: filas guardadas, no una
+  resta;
+- las visitas a sus páginas con la etiqueta `?s=` de cualquiera de sus publicaciones, sin bots y
+  solo a páginas del dueño, la regla de Los Números.
+
+Mirarlo deja la marca en `cortes_vistos` —la hora y los dos contadores de ese momento—, una fila
+por corte y del servidor, así que dos teléfonos de la misma cuenta ven lo mismo. Un corte que nunca
+se miró cuenta todo desde que salió. Un corte entra a la fila si salió en al menos una red (un
+borrador en la bandeja de TikTok todavía no salió), con la hora de La Parrilla; lo publicado fuera
+de Tu Parrilla no tiene burbuja. Los números se mueven con la lectura de cada hora (arriba).
+
+El número del ícono de la app y de la pestaña La Parrilla es **cuántos cortes de la fila tienen
+algo nuevo, más cuántos comentarios esperan respuesta en La Mesa**. La app lo pone cada vez que
+lee la fila; en el ícono, solo desde la 1.2.0 y en los lanzadores que muestran números (ver
+`mobile/README.md`, «Lo que trajo»).
+
+| Ruta | Qué hace |
+|---|---|
+| `GET /api/mobile/lo-que-trajo` | La fila: cada corte como lo dibuja La Parrilla (`src/lib/cortes-movil.ts`) con `nuevo` (`meGusta`, `comentarios` y `visitas`), del más nuevo al más viejo; `numero`, el del ícono, y `hoy`, el día del dueño. |
+| `GET /api/mobile/cortes/{id}` | El detalle: el corte, lo nuevo, `vistoEn` (null si nunca se miró), lo que lleva cada red tal como la red lo da —con los seguidores donde los da: las fotos y carruseles de Instagram, TikTok for Business y los suscriptores de YouTube Analytics— y todas sus visitas. No deja la marca. |
+| `POST /api/mobile/cortes/{id}/visto` | Deja la marca y devuelve `{ numero }`, el del ícono que queda. La app la llama después de mostrar el detalle. |
+
+Un corte que no existe, es de otro o no salió contesta `404` con «Ese corte no está, o todavía no
+salió en ninguna red.», sin distinguir. Lo que viene después —los hitos, la racha y el aviso de lo
+bueno— está en el diseño (`docs/superpowers/specs/2026-11-10-lo-que-trajo-design.md`).
+
 ### Avisos por correo
 
 Seis correos, todos con el remitente `PUBLISH_ALERT_FROM` y al correo del dueño (o a
@@ -2507,6 +2543,8 @@ src/
     cocina/                La Cocina: la cámara de frío (lo que se guarda, su cuota y sus nombres por tamaño en bodega.ts; lo de adentro en materiales.ts), los estados de una comanda, la fila del chef, lo que entrega, lo que lee y escribe su API (/api/cocina), las subidas por partes del panel, del teléfono y de la API (subidas-http.ts, que sirve a /api/admin/cocina, /api/mobile/cocina y /api/bodega; la puerta de la llave en llave-api.ts), colgar una comanda, la comanda que pide el teléfono (telefono.ts), cancelar, cambiar y sacar para el panel y el teléfono (del-dueno.ts), el pulso de las tarjetas vivas, cómo atiende la cocina según el latido (latido.ts), las preguntas del chef con su plazo (pregunta.ts y preguntar.ts), la alarma al admin (alarma.ts), los correos de la comanda que entregó o terminó y de la pregunta, la entrega que el dueño todavía no vio (tarjeta.ts), y el mesón (lo que manda al teléfono, en meson-telefono.ts)
     color-de-red.ts        el color de marca de cada red en La Parrilla, como clases de Tailwind escritas enteras
     piezas.ts              la pieza de una publicación: sus destinos programados unidos a lo publicado
+    lo-que-trajo.ts        «Lo que trajo» del teléfono: lo nuevo de cada corte desde que se miró, la marca y el número del ícono
+    cortes-movil.ts        un corte de La Parrilla en la forma de la app del teléfono: su dibujo y sus redes (sin base)
     auth.ts                sesión del panel
     puente.ts              el puente del teléfono al panel: una llave de dos minutos y un solo uso que abre la sesión del panel sin código
     llaves.ts              las llaves de API de cada usuario, y a nombre de quién entra cada petición

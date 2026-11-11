@@ -4,6 +4,7 @@ import { useFocusEffect, useRouter } from 'expo-router'
 import { TarjetaDelChef } from '../../components/tarjeta-del-chef'
 import { CorteProgramado, CorteServido } from '../../components/corte-programado'
 import { FiltroDeRedes } from '../../components/filtro-de-redes'
+import { FilaLoQueTrajo, useLoQueTrajo } from '../../components/lo-que-trajo'
 import { IconoPoner } from '../../components/iconos'
 import { AccesoALaMesa } from '../../components/mesa'
 import { Grilla, LineaDeAhora, MezclaDelDia, ResumenDelDia, RotuloDia } from '../../components/parrilla'
@@ -110,11 +111,18 @@ export default function LaParrilla() {
   // Al volver a esta pestaña: si Publicar acaba de crear un post, o la caché ya es vieja,
   // refresca sola. Es lo que hace aparecer el post recién programado.
   useFocusEffect(refrescarSiVieja)
+  // La fila «Lo que trajo» y el número del ícono: se refrescan solos al volver, como lo de arriba.
+  const loQueTrajo = useLoQueTrajo()
+  // Tirar hacia abajo refresca las dos cosas.
+  function refrescarTodo() {
+    void refrescar()
+    void loQueTrajo.refrescar()
+  }
 
   if (!data && cargando) return <Cargando />
   if (!data) {
     return (
-      <Pantalla refrescando={cargando} onRefrescar={refrescar}>
+      <Pantalla refrescando={cargando} onRefrescar={refrescarTodo}>
         <ErrorConReintento mensaje={error ?? 'No se pudo cargar.'} onReintentar={refrescar} />
       </Pantalla>
     )
@@ -157,6 +165,10 @@ export default function LaParrilla() {
     router.navigate({ pathname: '/(tabs)/publicar', params: { dia, borrador: '', n: marcaDeToque() } })
   }
 
+  function abrirCorte(id: string) {
+    router.push({ pathname: '/corte/[id]', params: { id } })
+  }
+
   function abrirProgramado(id: string) {
     router.push({ pathname: '/programado/[id]', params: { id } })
   }
@@ -166,7 +178,7 @@ export default function LaParrilla() {
   }
 
   return (
-    <Pantalla refrescando={cargando} onRefrescar={refrescar}>
+    <Pantalla refrescando={cargando} onRefrescar={refrescarTodo}>
       <Text style={{ color: colores.suave, fontSize: 13 }}>lo que viene y cómo salió lo que ya se fue</Text>
       <Sello texto={sello} />
 
@@ -175,6 +187,9 @@ export default function LaParrilla() {
 
       {/* Los comentarios que esperan respuesta: La Mesa, un toque adentro. */}
       <AccesoALaMesa />
+
+      {/* Lo que trajo cada corte de la semana: una burbuja por corte, con su circulito si llegó algo. */}
+      <FilaLoQueTrajo datos={loQueTrajo.data} />
 
       {quemados.length > 0 ? (
         <View style={{ gap: 8 }}>
@@ -283,7 +298,7 @@ export default function LaParrilla() {
         // Una tarjeta se toca para corregirla; la pantalla dice si ya salió y no se puede.
         const filas = posts.map((post) =>
           servidoEnTodas(post) ? (
-            <CorteServido key={post.id} post={post} />
+            <CorteServido key={post.id} post={post} onAbrir={() => abrirCorte(post.id)} />
           ) : (
             <CorteProgramado key={post.id} post={post} onAbrir={() => abrirProgramado(post.id)} />
           ),

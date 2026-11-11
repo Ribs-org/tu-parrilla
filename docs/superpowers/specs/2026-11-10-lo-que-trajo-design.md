@@ -1,6 +1,6 @@
 # Lo que trajo: la app que se siente red social
 
-Fecha: 2026-11-10. **La fase 1 está hecha; las otras tres, sin implementar.** Cuatro fases,
+Fecha: 2026-11-10. **Las fases 1 y 2 están hechas; la 3 y la 4, sin implementar.** Cuatro fases,
 cada una en su PR y cada una sostenida sola; el orden está en «Las fases», al final. Es de la app del teléfono: el panel no
 cambia en esta entrega (ver «Lo que no entra»).
 
@@ -120,13 +120,22 @@ El número sobre el ícono de la app es **cuántos cortes de la fila tienen algo
 comentarios esperan respuesta en La Mesa**. Es chico a propósito: baja a medida que se mira, y no
 llega a «1.234» como el de TikTok.
 
-- **Con la app abierta**, la app lo pone cada vez que trae la fila (`setBadgeCountAsync`, de
-  `expo-notifications`, que ya está en el build: va por actualización en el aire). La pestaña
-  La Parrilla lleva el mismo número (`tabBarBadge`).
+- **Con la app abierta**, la app lo pone cada vez que trae la fila (el módulo nativo de
+  `expo-notifications`, que está en el build 1.2.0: va por actualización en el aire). La pestaña
+  La Parrilla lleva el mismo número (`tabBarBadge`). La 1.1.0 no trae ese módulo: ahí está el
+  de la pestaña y el ícono no cambia.
 - **Con la app cerrada**, el número solo cambia si llega un aviso. En iPhone el aviso lo trae
   (`badge`, en el envío de Expo). En Android, que es donde hoy sale la app, depende del teléfono:
   Samsung y otros muestran el número; un Pixel muestra un punto mientras haya un aviso sin abrir.
   Ni Expo ni Firebase dejan fijar el número en Android desde el servidor.
+
+Como se hizo (fase 2): la fila, el detalle y la marca están en `src/lib/lo-que-trajo.ts`, con
+las rutas del teléfono de abajo; el número lo cuenta el servidor y viene con la fila y con cada
+marca. La app le habla directo al módulo nativo del ícono (`ExpoBadgeModule`), sin cargar
+`expo-notifications`, para que lo mismo llegue por aire a la 1.1.0, que no lo tiene en
+`package.json`. El detalle no usa la caché del teléfono: lee y después marca. Tocar el renglón de
+un corte servido en La Parrilla abre el mismo detalle. Lo cuentan el README («Lo que trajo, en el
+teléfono») y `mobile/README.md` («Lo que trajo»).
 
 ## Los números cada hora
 
@@ -230,8 +239,9 @@ Todo con su dueño en el `where`, como pide el arnés de aislamiento (`src/lib/a
 3. **Los hitos y la racha.** `hitos`, la celebración, la llamita y la racha.
 4. **El aviso de lo bueno.** El aviso, su interruptor en Ajustes y el `badge` en los avisos.
 
-La app cambia solo en JavaScript —`expo-notifications` y `react-native-reanimated` ya están en
-el build—, así que cada fase llega por actualización en el aire, sin pasar por la tienda.
+La app cambia solo en JavaScript, así que cada fase llega por actualización en el aire, sin pasar
+por la tienda. `react-native-reanimated` está en los dos builds; `expo-notifications`, solo en la
+1.2.0: lo que lo pida (el número del ícono, los avisos) no hace nada en la 1.1.0.
 
 Cada fase deja al día, en su PR, la página de la app en la wiki
 (`public/docs/ui/app-movil.md`), el README (las rutas del teléfono, los crons, el modelo) y
