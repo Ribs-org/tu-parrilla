@@ -1778,7 +1778,11 @@ corte y umbral. Los busca `detectarHitos` después de cada lectura de los númer
 la del día (ver «Los números cada hora» y el cron de sincronización), para todos los dueños a la
 vez; si falla, la lectura ya quedó escrita y la corrida siguiente encuentra lo que faltó. La app
 celebra cada hito una vez —el más alto de cada corte, hasta tres por vuelta— y avisa que lo hizo;
-eso deja celebrados también los más bajos del mismo corte. **Al estrenarse** (migración 0041) los
+eso deja celebrados también los más bajos del mismo corte. **Solo se celebra lo raro para el
+dueño** (`esRaro`): un hito cuyo número alcanzó menos de la mitad de sus otros cortes del último
+mes; con menos de tres cortes para comparar, todos. Lo demás queda resuelto sin celebración la
+primera vez que la app pregunta, y la llamita y el detalle lo siguen mostrando. Así, a quien sus
+cortes suelen pasar las 1.000 no se le celebran las 100 de cada corte nuevo. **Al estrenarse** (migración 0041) los
 cortes que ya habían pasado un umbral lo ganaron sin fecha y ya celebrados (`alcanzado_en` nulo):
 solo se celebra lo que se alcanza desde ese día.
 

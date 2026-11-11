@@ -1,5 +1,5 @@
 import 'server-only'
-import { and, desc, eq, isNull, lte, sql } from 'drizzle-orm'
+import { and, desc, eq, gte, isNull, lte, sql, type SQL } from 'drizzle-orm'
 import { enIds, getDb, hitos, postMetrics, scheduledPosts, scheduledPostTargets, socialPosts } from '@/db'
 import { REDES_SIN_DERIVADAS } from './social/politica-youtube'
 import { cortesPorIds, type CorteCargado } from './social/publish/cortes'
@@ -7,7 +7,7 @@ import { esUuid } from './uuid'
 
 // Los hitos de «Lo que trajo» (`docs/superpowers/specs/2026-11-10-lo-que-trajo-design.md`): cuando
 // las vistas de un corte, sumadas en sus redes sin YouTube, pasan un umbral, el corte gana ese hito
-// y la app lo celebra una vez. Las lecturas del dueño van con él en el `where`, como pide el arnés
+// y la app lo celebra una vez, si es raro para el dueño (`esRaro`). Las lecturas del dueño van con él en el `where`, como pide el arnés
 // de aislamiento (`aislamiento.test.ts`); la detección es de todos, como la sincronización.
 
 /** Las vistas que hacen un hito. */
@@ -21,13 +21,67 @@ export const HITO_NO_ESTA = 'Ese hito no está.'
  */
 export const CELEBRACIONES_POR_VEZ = 3
 
+/** Contra qué se mide si un hito es raro: los otros cortes del dueño de estos últimos días. */
+export const DIAS_PARA_COMPARAR = 30
+
+/** Con menos otros cortes que estos en el mes no hay con qué comparar, y todo hito se celebra. */
+export const MINIMO_PARA_COMPARAR = 3
+
 /**
- * Busca los hitos nuevos de todos los cortes y los deja puestos, con `ahora` como la hora en que
- * se alcanzaron. Las vistas de un corte son la última lectura (`post_metrics`) de cada publicación
- * que salió desde Tu Parrilla, sumadas sin YouTube: sus políticas no dejan sumar sus números con
- * los de otra red (§III.E.4.h, `politica-youtube.ts`). La lectura de cada red se cruza con su
- * publicación por cuenta e id de la red, como `numerosDeLosCortes`. Un hito ya puesto no se toca.
- * La llaman las dos lecturas de los números, la de cada hora y la del día. Devuelve cuántos puso.
+ * Si un hito merece celebración: solo si menos de la mitad de los otros cortes del mes llegó a
+ * ese número. A quien sus cortes suelen pasar las 1.000 no se le celebran ni las 100 ni las 1.000,
+ * y sí las 10.000: celebrar lo de siempre, varias veces al día, dejaba de ser una celebración. Lo
+ * pidió el dueño el 2026-11-11. Con pocos cortes para comparar, se celebra.
+ */
+export function esRaro(umbral: number, vistasDeLosOtros: readonly number[]): boolean {
+  if (vistasDeLosOtros.length < MINIMO_PARA_COMPARAR) return true
+  const llegan = vistasDeLosOtros.filter((v) => v >= umbral).length
+  return llegan * 2 < vistasDeLosOtros.length
+}
+
+/**
+ * Las vistas de cada corte que salió: la última lectura (`post_metrics`) de cada publicación que
+ * salió desde Tu Parrilla, sumadas sin YouTube —sus políticas no dejan sumar sus números con los de
+ * otra red (§III.E.4.h, `politica-youtube.ts`)—. La lectura de cada red se cruza con su publicación
+ * por cuenta e id de la red, como `numerosDeLosCortes`. `filtro` acota los cortes; un corte sin
+ * ninguna lectura fuera de YouTube no sale.
+ */
+function vistasPorCorte(filtro: SQL) {
+  return sql`
+    select ${scheduledPostTargets.postId} as post_id, ${scheduledPosts.ownerId} as owner_id,
+           sum(coalesce(m.views, 0)) as vistas
+    from ${scheduledPostTargets}
+    join ${scheduledPosts} on ${scheduledPosts.id} = ${scheduledPostTargets.postId}
+    join ${socialPosts} on ${socialPosts.accountId} = ${scheduledPostTargets.accountId}
+      and ${socialPosts.externalId} = ${scheduledPostTargets.externalId}
+      and ${socialPosts.ownerId} = ${scheduledPosts.ownerId}
+    join lateral (
+      select ${postMetrics.views} as views from ${postMetrics}
+      where ${postMetrics.postId} = ${socialPosts.id}
+      order by ${postMetrics.day} desc
+      limit 1
+    ) m on true
+    where ${scheduledPostTargets.status} = 'published'
+      and ${scheduledPostTargets.externalId} is not null
+      and not (${scheduledPostTargets.network} = any(${sql.param([...REDES_SIN_DERIVADAS])}::text[]))
+      and ${filtro}
+    group by ${scheduledPostTargets.postId}, ${scheduledPosts.ownerId}
+  `
+}
+
+/** Las vistas de los cortes del dueño que salieron en los últimos `DIAS_PARA_COMPARAR` días, por corte. */
+async function vistasDelMes(ownerId: string, ahora: Date): Promise<Map<string, number>> {
+  const desde = new Date(ahora.getTime() - DIAS_PARA_COMPARAR * 864e5)
+  const filas = (await getDb().execute(
+    vistasPorCorte(and(gte(scheduledPosts.scheduledAt, desde), eq(scheduledPosts.ownerId, ownerId))!),
+  )) as unknown as Array<{ post_id: string; vistas: string | number }>
+  return new Map(filas.map((f) => [f.post_id, Number(f.vistas)]))
+}
+
+/**
+ * Busca los hitos nuevos de todos los cortes (`vistasPorCorte`) y los deja puestos, con `ahora`
+ * como la hora en que se alcanzaron. Un hito ya puesto no se toca. La llaman las dos lecturas de
+ * los números, la de cada hora y la del día. Devuelve cuántos puso.
  *
  * La migración 0041 corrió esta misma consulta una vez, al estrenar, con los hitos ya celebrados.
  */
@@ -35,25 +89,7 @@ export async function detectarHitos(ahora: Date): Promise<number> {
   const filas = (await getDb().execute(sql`
     insert into ${hitos} (post_id, owner_id, umbral, alcanzado_en)
     select v.post_id, v.owner_id, u.umbral, ${ahora.toISOString()}::timestamptz
-    from (
-      select ${scheduledPostTargets.postId} as post_id, ${scheduledPosts.ownerId} as owner_id,
-             sum(coalesce(m.views, 0)) as vistas
-      from ${scheduledPostTargets}
-      join ${scheduledPosts} on ${scheduledPosts.id} = ${scheduledPostTargets.postId}
-      join ${socialPosts} on ${socialPosts.accountId} = ${scheduledPostTargets.accountId}
-        and ${socialPosts.externalId} = ${scheduledPostTargets.externalId}
-        and ${socialPosts.ownerId} = ${scheduledPosts.ownerId}
-      join lateral (
-        select ${postMetrics.views} as views from ${postMetrics}
-        where ${postMetrics.postId} = ${socialPosts.id}
-        order by ${postMetrics.day} desc
-        limit 1
-      ) m on true
-      where ${scheduledPostTargets.status} = 'published'
-        and ${scheduledPostTargets.externalId} is not null
-        and not (${scheduledPostTargets.network} = any(${sql.param([...REDES_SIN_DERIVADAS])}::text[]))
-      group by ${scheduledPostTargets.postId}, ${scheduledPosts.ownerId}
-    ) v
+    from (${vistasPorCorte(sql`true`)}) v
     join unnest(${sql.param([...UMBRALES])}::int[]) as u(umbral) on v.vistas >= u.umbral
     on conflict (post_id, umbral) do nothing
     returning post_id
@@ -98,18 +134,35 @@ export function hitoMasAlto(lista: readonly HitoDeUnCorte[] | undefined): number
 export type PorCelebrar = { id: string; umbral: number; corte: CorteCargado }
 
 /**
- * Lo que la app tiene que celebrar: de cada corte con hitos sin celebrar, el más alto —un corte que
- * pasó 100 y 1.000 entre dos lecturas celebra las 1.000—, hasta `CELEBRACIONES_POR_VEZ`, del umbral
- * más alto al más bajo.
+ * Lo que la app tiene que celebrar: de cada corte con hitos sin celebrar y raros para el dueño
+ * (`esRaro`, contra sus otros cortes del mes), el más alto —un corte que pasó 100 y 1.000 entre dos
+ * lecturas celebra las 1.000—, hasta `CELEBRACIONES_POR_VEZ`, del umbral más alto al más bajo. Los
+ * que no son raros quedan resueltos sin celebración (`celebrado_en` con `ahora`): no se vuelven a
+ * mirar, y la llamita y el detalle los siguen mostrando.
  */
-export async function porCelebrar(ownerId: string): Promise<PorCelebrar[]> {
-  const filas = await getDb()
+export async function porCelebrar(ownerId: string, ahora: Date): Promise<PorCelebrar[]> {
+  const db = getDb()
+  const filas = await db
     .select({ id: hitos.id, postId: hitos.postId, umbral: hitos.umbral })
     .from(hitos)
     .where(and(isNull(hitos.celebradoEn), eq(hitos.ownerId, ownerId)))
     .orderBy(desc(hitos.umbral), desc(hitos.alcanzadoEn))
+  if (filas.length === 0) return []
+
+  const vistas = [...(await vistasDelMes(ownerId, ahora)).entries()]
+  const pasados: string[] = []
   const delCorte = new Map<string, { id: string; umbral: number }>()
-  for (const { postId, ...hito } of filas) if (!delCorte.has(postId)) delCorte.set(postId, hito)
+  for (const { postId, ...hito } of filas) {
+    const otros = vistas.filter(([id]) => id !== postId).map(([, v]) => v)
+    if (!esRaro(hito.umbral, otros)) pasados.push(hito.id)
+    else if (!delCorte.has(postId)) delCorte.set(postId, hito)
+  }
+  if (pasados.length > 0) {
+    await db
+      .update(hitos)
+      .set({ celebradoEn: ahora })
+      .where(and(enIds(hitos.id, pasados), isNull(hitos.celebradoEn), eq(hitos.ownerId, ownerId)))
+  }
   const elegidos = [...delCorte.entries()].slice(0, CELEBRACIONES_POR_VEZ)
   const cortes = new Map((await cortesPorIds(ownerId, elegidos.map(([postId]) => postId))).map((c) => [c.post.id, c]))
   return elegidos.flatMap(([postId, hito]) => {
