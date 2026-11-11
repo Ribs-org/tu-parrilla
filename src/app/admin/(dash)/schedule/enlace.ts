@@ -6,13 +6,15 @@ const UN_SOLO_USO = new Set([
   // El desenlace de una vuelta de OAuth.
   'mensaje',
   // Los que abren el panel lateral: el compositor (nuevo, en un día —y con una cuenta, desde
-  // la vista «Día»— o con un borrador), la lista de borradores y la carga por CSV. Cerrar el
-  // panel es navegar sin ellos.
+  // la vista «Día»— o con un borrador), la lista de borradores, la carga por CSV y lo que trajo
+  // un corte. Cerrar el panel es navegar sin ellos.
   'componer',
   'dia',
   'cuenta',
   'borrador',
   'panel',
+  // «Lo que trajo» de un corte, también en el panel lateral.
+  'corte',
   // El aviso de que algo se programó, que se lee una vez al volver del compositor, y el post
   // recién puesto, que se enciende una vez en su día para que se vea dónde cayó.
   'hecho',

@@ -785,12 +785,6 @@ diciendo «Sin suscripción», y es cierto.
 
 ## Features y trabajo de código
 
-- **Lo que trajo, en el panel** (2026-11-11). Las cuatro fases de «Lo que trajo» están hechas en la
-  app del teléfono —la fila con lo nuevo de cada corte, el número del ícono, los hitos con su
-  celebración, la racha y el aviso de lo bueno—; el panel web no tiene nada de eso. Llevarlo a La
-  Parrilla del panel quedó fuera a propósito (el diseño, «Lo que no entra»:
-  `docs/superpowers/specs/2026-11-10-lo-que-trajo-design.md`). Las rutas y la lógica ya están en el
-  servidor (`src/lib/lo-que-trajo.ts`, `hitos.ts`, `racha.ts`).
 - **La Cocina en la portada (#324)** (2026-11-09). Una sección en `tu-parrilla.cl` que cuente
   qué entrega La Cocina, en cuánto tiempo y cómo se pide. Decidido por el dueño: el ejemplo del
   antes y el después son **solo sus dos mejores cortos**, que el equipo de contenido identifica

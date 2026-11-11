@@ -9,7 +9,7 @@ import { corteDe, cortesEntre, type CorteCargado } from './social/publish/cortes
 import { videosAFondo } from './social/tiktok-numeros-guardar'
 import { esUuid } from './uuid'
 
-// «Lo que trajo», en la app del teléfono: lo nuevo de cada corte desde que su dueño lo miró
+// «Lo que trajo», en la app del teléfono y en La Parrilla del panel: lo nuevo de cada corte desde que su dueño lo miró
 // (`docs/superpowers/specs/2026-11-10-lo-que-trajo-design.md`). Todas las lecturas van atadas al
 // dueño en el `where`, directo o por los ids que ya filtró la anterior, como pide el arnés de
 // aislamiento (`aislamiento.test.ts`).
@@ -223,12 +223,17 @@ export async function numerosDeLosCortes(ownerId: string, cortes: CorteCargado[]
  * respuesta en La Mesa.
  */
 export async function leerLoQueTrajo(ownerId: string, ahora: Date): Promise<{ cortes: CorteConNumeros[]; numero: number }> {
-  const desde = new Date(ahora.getTime() - DIAS_DE_LA_FILA * 864e5)
-  const cortes = (await numerosDeLosCortes(ownerId, await cortesEntre(ownerId, desde, ahora))).sort(
-    (a, b) => b.corte.post.scheduledAt.getTime() - a.corte.post.scheduledAt.getTime(),
-  )
+  const cortes = await filaDeLoQueTrajo(ownerId, ahora)
   const pendientes = await contarPendientes(ownerId, null)
   return { cortes, numero: cortes.filter((c) => totalDe(c.nuevo) > 0).length + pendientes }
+}
+
+/** La fila sola, sin el número del ícono: la de La Parrilla del panel, que no lo lleva. */
+export async function filaDeLoQueTrajo(ownerId: string, ahora: Date): Promise<CorteConNumeros[]> {
+  const desde = new Date(ahora.getTime() - DIAS_DE_LA_FILA * 864e5)
+  return (await numerosDeLosCortes(ownerId, await cortesEntre(ownerId, desde, ahora))).sort(
+    (a, b) => b.corte.post.scheduledAt.getTime() - a.corte.post.scheduledAt.getTime(),
+  )
 }
 
 /**
@@ -277,17 +282,24 @@ export async function seguidoresDe(ownerId: string, servidos: readonly DestinoSe
 }
 
 /**
- * Mirar un corte: deja la marca con la hora y lo que lleva ahora, y devuelve el número del ícono
- * que queda. Null si el corte no es del dueño. La marca es una por corte (`cortes_vistos`), así que
- * mirarlo otra vez la pisa.
+ * Mirar un corte: deja la marca con la hora y lo que lleva ahora. False si el corte no es del
+ * dueño, no existe o no salió. La marca es una por corte (`cortes_vistos`), así que mirarlo otra
+ * vez la pisa. La deja el detalle del teléfono (`marcarVisto`) y el del panel, que no lleva el
+ * número del ícono.
  */
-export async function marcarVisto(ownerId: string, postId: string, ahora: Date): Promise<number | null> {
+export async function dejarLaMarca(ownerId: string, postId: string, ahora: Date): Promise<boolean> {
   const corte = await leerCorte(ownerId, postId)
-  if (!corte) return null
+  if (!corte) return false
   const valores = { ownerId, vistoEn: ahora, meGusta: corte.actual.meGusta, comentarios: corte.actual.comentarios }
   await getDb()
     .insert(cortesVistos)
     .values({ postId: corte.corte.post.id, ...valores })
     .onConflictDoUpdate({ target: cortesVistos.postId, set: valores })
+  return true
+}
+
+/** Mirar un corte desde el teléfono: la marca, y el número del ícono que queda. Null si el corte no es del dueño. */
+export async function marcarVisto(ownerId: string, postId: string, ahora: Date): Promise<number | null> {
+  if (!(await dejarLaMarca(ownerId, postId, ahora))) return null
   return (await leerLoQueTrajo(ownerId, ahora)).numero
 }

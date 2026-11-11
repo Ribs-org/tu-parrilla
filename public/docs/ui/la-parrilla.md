@@ -61,19 +61,24 @@ llama «Se echó a perder». La equivalencia está en «El modo día», en [inde
     en «Fecha y hora», y con `&cuenta=<id de la cuenta>`, con esa cuenta marcada;
   - `?borrador=<id>`: ese borrador, abierto en el compositor;
   - `?panel=borradores`: el panel «Borradores»;
-  - `?panel=csv`: el panel «Subir CSV».
+  - `?panel=csv`: el panel «Subir CSV»;
+  - `?corte=<id del post>`: «Lo que trajo» de ese corte, en el panel lateral (ver «Lo que trajo
+    de un corte»).
 
 ## Qué se ve
 
 De arriba abajo: el encabezado con sus botones, el aviso «Programado.» (solo cuando se acaba
 de programar), la tarjeta «Conecta tu primera red» (solo sin ninguna red conectada), la
-sección «Se quemó» (solo si algo falló), los botones «Calendario», «Por hora», «Día» y «Lista»
-—con el filtro por red al lado— y lo programado debajo, y el pie de ayer. El formulario para programar, la lista de borradores y la carga por
-CSV no están en la página: se abren en un panel que se desliza desde la derecha (ver «El panel
-lateral», más abajo).
+sección «Se quemó» (solo si algo falló), «Lo que trajo» (solo si algo salió en la última
+semana), los botones «Calendario», «Por hora», «Día» y «Lista»
+—con el filtro por red al lado— y lo programado debajo, y el pie de ayer. El formulario para
+programar, la lista de borradores, la carga por CSV y lo que trajo un corte no están en la
+página: se abren en un panel que se desliza desde la derecha (ver «El panel lateral», más
+abajo).
 
-Mientras carga se ve la forma de lo que viene, sin texto salvo el título «La Parrilla»: el
-lugar de los botones, el de «Calendario», «Por hora», «Día» y «Lista», y siete parrillas tibias, sin
+Mientras carga se ve la forma de lo que viene, sin texto salvo los títulos «La Parrilla» y «Lo
+que trajo»: el lugar de los botones, cinco burbujas tibias en la tarjeta de «Lo que trajo», el
+de «Calendario», «Por hora», «Día» y «Lista», y siete parrillas tibias, sin
 cortes, que se encienden y se apagan de a poco como brasas, una un poco después de la otra
 (con «reducir movimiento» activado en el sistema, quietas a media luz). No son días vacíos:
 un día vacío es gris ceniza y no se mueve. En «Día» son tres columnas y en «Por hora» siete, con
@@ -151,6 +156,89 @@ líneas:
   se queda con su motivo y el calendario lo sigue mostrando quemado; tampoco sale en el resumen
   del día. Se desarchiva desde el editor del post (ver «El editor de un post»), y vuelve solo
   si se reprograma y se quema de nuevo.
+
+### «Lo que trajo»
+
+Arriba del calendario, debajo de «Se quemó», solo si algún corte salió en los últimos siete días
+en al menos una red: una tarjeta con el título «Lo que trajo» y una fila de burbujas redondas,
+una por corte, del más nuevo al más viejo, como las historias de Instagram. Si no caben, la fila
+se desliza de lado. No sigue el filtro por red: muestra todo, como «Se quemó». Es lo mismo que la
+[app del teléfono](app-movil.md) muestra arriba de su La Parrilla, y lo que se mira en un lado
+deja de ser nuevo en el otro.
+
+- **La racha**, a la derecha del título (en un teléfono, debajo), solo si salió al menos un
+  corte dos días seguidos o más: una llama naranja y «La parrilla lleva <N> días prendida» (de
+  día, una llama azul de soplete y «La barra lleva <N> días abierta»). La llama crece con los
+  días, hasta los diez. Si hoy todavía no salió nada pero ayer sí, debajo, en ámbar: «Hoy todavía
+  no sale nada: la racha se apaga a medianoche.». Cuenta los días, en tu zona horaria, en que
+  salió algo en cualquier red, YouTube incluido; lo que está en la bandeja de TikTok no cuenta
+  hasta publicarlo allá. Con un día solo no aparece.
+- **Cada burbuja** lleva adentro el corte dibujado y, debajo, el día: «hoy», «ayer» o «<día>
+  <número>» («lun 9»). Si llegó algo desde la última vez que se abrió ese corte —«me gusta»,
+  comentarios o visitas a tu página—, el borde va en naranjo y arriba a la derecha lleva un
+  círculo rojo con cuánto: «+37», «+1,2 mil», «+12 mil». Sin nada nuevo, el borde va apagado y
+  sin círculo. Un corte que nunca se abrió cuenta todo lo que trajo desde que salió. Los «me
+  gusta» de YouTube no cuentan (YouTube no deja restar sus números); sus comentarios sí, los
+  que llegaron a La Mesa.
+- **La llamita**: si el corte pasó las 100 vistas o más, abajo, montada sobre el borde de la
+  burbuja, una llamita con el número más alto que pasó: «100», «1 mil», «10 mil», «100 mil» o
+  «1 M» (ver «La celebración de un hito», abajo).
+
+Un clic en una burbuja abre «Lo que trajo» de ese corte en el panel lateral. Un lector de
+pantalla lee cada burbuja con su día, el texto, «+37 desde la última vez» o «Nada nuevo» y, si
+tiene llamita, «Pasó las 1 mil vistas». Lo publicado fuera de Tu Parrilla —un reel subido
+directo en Instagram— no tiene burbuja: está en [Los Números](los-numeros.md).
+
+### «Lo que trajo» de un corte
+
+El panel lateral que abre una burbuja, o «Ver el corte» en la celebración de un hito. Arriba,
+«Lo que trajo» y la ✕. De arriba abajo:
+
+- El corte dibujado y, al lado, el día y la hora en que salió («mar 10 de nov · 10:58»), su
+  texto (o «(sin texto)») y el enlace «Abrir el post →», que abre su editor.
+- **«Desde la última vez»** (o **«Desde que salió»**, si nunca se había abierto): lo que llegó,
+  en naranjo y grande, por ejemplo «+31 me gusta · +4 comentarios · +2 visitas» —solo lo que
+  subió, y en singular cuando es uno: «+1 comentario»—. Sin nada: «Nada nuevo desde el <día>
+  <número> de <mes> a las HH:MM.» (por ejemplo «Nada nuevo desde el mié 11 de nov a las
+  13:00.»), o «Todavía no llega nada.» si nunca se había abierto.
+- **«Los hitos»**, solo si el corte pasó las 100 vistas: una llamita por cada número que pasó,
+  del más alto al más bajo, con el día en que lo pasó: «1.000 vistas · mié 11 de nov». Los que
+  ya tenía cuando llegaron los hitos (el 11 de noviembre de 2026) van sin día: «100 vistas».
+- **«Lo que lleva en cada red»**: una tarjeta por red donde salió, con el ícono de la red, «<Red>
+  · <cuenta>» y lo que lleva en total, tal como lo da la red: «1450 vistas · 180 me gusta · 22
+  comentarios» (desde diez mil, abreviado: «12 mil»). Donde la red lo da, debajo y en verde, «+8
+  seguidores» (las fotos y los carruseles de Instagram, y TikTok si la cuenta tiene TikTok for
+  Business) o «+8 suscriptores» (YouTube). La de YouTube dice además «Según YouTube.». Una red de
+  la que todavía no llegan números dice «Todavía sin números de esta red: llegan con la próxima
+  lectura.». Al pie de la tarjeta, «Ver en Los Números», con una flecha, abre esa publicación en
+  [Los Números](los-numeros.md), cuando la red ya la entregó.
+- **«Visitas a tu página»**: cuántas visitas llegaron por el enlace de sus publicaciones, desde
+  siempre, con «Las cuenta Tu Parrilla: las que llegaron por el enlace de estas publicaciones.».
+
+Abrirlo cuenta como mirarlo, también para la app del teléfono: mientras el panel está abierto,
+lo de «Desde la última vez» se queda a la vista y la burbuja de ese corte ya va sin círculo, y la
+vez siguiente muestra lo que llegó después. Si La Parrilla está en una pestaña del navegador que
+no se ve, cuenta recién al mirarla. Si el corte no existe, es de otra cuenta o todavía no sale,
+el panel dice «Ese corte no está, o todavía no salió en ninguna red.».
+
+### La celebración de un hito
+
+Cuando las vistas de un corte, sumadas en todas sus redes menos YouTube, pasan 100, 1.000,
+10.000, 100.000 o 1.000.000, el corte gana ese hito. La primera vez que se abre La Parrilla
+después de un hito, sin ningún panel lateral abierto, la pantalla se oscurece, cruza por abajo
+una fila de llamas de izquierda a derecha —de día, llamas azules de soplete— y en el centro
+aparece una tarjeta con el corte dibujado, «Tu corte pasó las 1.000 vistas» (de día, «Tu pieza
+pasó las 1.000 vistas»; con el millón, «pasó el millón de vistas»), el comienzo de su texto y
+dos botones: «Seguir», que la cierra, y el naranjo «Ver el corte» (de día, «Ver la pieza»), que
+abre «Lo que trajo» de ese corte. La tecla Escape o un clic fuera de la tarjeta también la
+cierran. Con «reducir movimiento» activado en el sistema, la tarjeta aparece sin las llamas.
+
+Solo se celebra lo raro para la cuenta: un número que alcanzó menos de la mitad de sus otros
+cortes del último mes; mientras tenga menos de tres cortes en el mes, se celebra todo. De cada
+corte se celebra el número más alto que pasó. Si hay varios cortes por celebrar, salen uno detrás
+de otro, hasta tres; los demás, la vez siguiente. Cada hito se celebra una sola vez, en el
+primer lugar donde se vea: aquí o en la app del teléfono. Uno que ya se celebró no llega
+después como aviso al teléfono.
 
 ### El corte
 
@@ -420,10 +508,10 @@ Cuenta cortes y no redes: uno que salió en tres redes es un corte.
 
 ### El panel lateral
 
-El formulario para programar, la lista de borradores y la carga por CSV se abren en un panel
-que se desliza desde la derecha, encima de la pantalla, que queda oscurecida detrás. En un
-teléfono ocupa la pantalla entera. Arriba lleva su título —«Nueva publicación», «Borrador»,
-«Borradores» o «Subir CSV»— y a la derecha una ✕ para cerrarlo (un lector de pantalla la lee
+El formulario para programar, la lista de borradores, la carga por CSV y lo que trajo un corte
+se abren en un panel que se desliza desde la derecha, encima de la pantalla, que queda
+oscurecida detrás. En un teléfono ocupa la pantalla entera. Arriba lleva su título —«Nueva
+publicación», «Borrador», «Borradores», «Subir CSV» o «Lo que trajo»— y a la derecha una ✕ para cerrarlo (un lector de pantalla la lee
 «Cerrar»). También se cierra con la tecla Escape o con un clic en la parte oscurecida, fuera
 del panel; seleccionar un texto arrastrando el mouse y soltarlo afuera no lo cierra. Cerrar el compositor no pierde lo escrito: queda como borrador (ver «Los
 borradores», más abajo).
@@ -1044,6 +1132,16 @@ Para quitarla, borrar la palabra y guardar.
 Hasta 50 filas por archivo. Los archivos van por dirección de descarga directa; aquí no se
 suben archivos sueltos.
 
+### Para ver lo que trajo cada corte
+
+1. Mirar la tarjeta «Lo que trajo», arriba del calendario: las burbujas con un círculo rojo son
+   los cortes de la semana que trajeron algo desde la última vez.
+2. Un clic en una burbuja abre «Lo que trajo» de ese corte: arriba, lo nuevo desde la última
+   vez; debajo, los hitos que pasó, lo que lleva en cada red y las visitas a tu página.
+3. «Ver en Los Números» abre la publicación de esa red en Los Números; «Abrir el post →», su
+   editor.
+4. Cerrar el panel con la ✕: la burbuja queda sin círculo hasta que llegue algo nuevo.
+
 ### Para ver qué hay en una semana
 
 1. Mirar el «Calendario», que es la vista con que abre la pantalla.
@@ -1148,6 +1246,9 @@ alguna, hay que borrarlo en la red misma.
 | Un día con los fierros en gris ceniza y nada encima, sin «+» | Ese día ya pasó y no tuvo nada | Nada |
 | Bloques sin texto que se encienden y se apagan de a poco, en tonos de brasa | La pantalla está cargando | Esperar |
 | «Ayer no salió nada.» | Ningún corte de ayer salió en ninguna red | Si algo debía salir, mirar «Se quemó» |
+| «Hoy todavía no sale nada: la racha se apaga a medianoche.» | Ayer salió algo y hoy todavía no: la racha de «Lo que trajo» se corta si hoy no sale nada | Si hay algo programado para hoy, va a salir; si no, programar algo para hoy |
+| «Ese corte no está, o todavía no salió en ninguna red.» (en «Lo que trajo» de un corte) | El corte se borró, es de otra cuenta o todavía no sale (lo que está en la bandeja de TikTok tampoco cuenta como salido) | Cerrar el panel |
+| «Todavía sin números de esta red: llegan con la próxima lectura.» (en «Lo que trajo» de un corte) | La red todavía no entregó los números de esa publicación | Esperar: lo publicado en las últimas 48 horas en Instagram, Facebook y TikTok se lee cada hora; lo de YouTube y lo más viejo, una vez al día |
 | El motivo en rojo bajo una fila de «Se quemó» | Por qué no salió en esa red (ver «Motivos de un destino que no salió») | El botón de abajo: «Reconectar» o «Cambiar el archivo» cuando el motivo lo pide; si no, «Reprogramar» |
 | «Algo se rompió», con «No fue nada que hicieras. Vuelve a intentarlo; el detalle quedó en la consola del navegador.» (a veces con «Si se repite, este código ayuda a encontrarlo: <código>.») y el botón «Reintentar» | Algo falló en el servidor; no fue la persona. Si falló la pantalla principal de La Parrilla, no aparece «Ir a La Parrilla» | «Reintentar» |
 
@@ -1543,7 +1644,33 @@ editor.
 - **Cambié la fecha de un post ya publicado.** No lo vuelve a publicar: solo cambia el día
   en que aparece en el calendario.
 
+- **¿Qué es el círculo rojo de las burbujas? / ¿Qué es «+37»?** Lo que llegó a ese corte desde la
+  última vez que se abrió: «me gusta», comentarios y visitas a su página, sumados en sus redes
+  (los «me gusta» de YouTube no cuentan). Se va al abrir la burbuja, aquí o en la app del
+  teléfono.
+- **No veo «Lo que trajo».** Aparece solo si algún corte salió en los últimos siete días desde Tu
+  Parrilla; lo que está en la bandeja de TikTok no cuenta hasta publicarlo allá, y lo subido
+  directo en una red no es un corte.
+- **¿Qué es la llamita de una burbuja? / ¿Qué es «1 mil»?** El número más alto de vistas que pasó
+  ese corte, sumando sus redes menos YouTube. En «Lo que trajo» del corte, en «Los hitos», están
+  todos los que pasó con su día.
+- **Mi corte pasó las 1.000 vistas y no lo celebró.** Se celebra solo lo raro para la cuenta: si
+  la mitad o más de sus otros cortes del último mes también pasó las 1.000, no se celebra (queda
+  en la llamita y en «Los hitos»). Tampoco si ya se celebró en la app del teléfono, ni si las
+  tenía antes del 11 de noviembre de 2026. Los números llegan cada hora para lo de las últimas 48
+  horas y una vez al día para lo demás; se celebra la próxima vez que se abra La Parrilla después
+  de esa lectura, sin un panel lateral abierto.
+- **¿Qué es «La parrilla lleva 5 días prendida»?** La racha: cuántos días seguidos salió al menos
+  un corte en alguna red. Si hoy todavía no salió nada, se apaga a medianoche.
+- **¿Dónde está el número rojo de la pestaña La Parrilla?** Es de la app del teléfono: el panel no
+  pone un número en su pestaña. Aquí, lo nuevo está en el círculo rojo de cada burbuja.
+
 ## Lo que esta pantalla no hace
+
+- No pone un número en la pestaña «La Parrilla» con lo que trajeron los cortes: eso es de la app
+  del teléfono, en su pestaña y en su ícono.
+- No avisa al teléfono: los avisos de lo bueno, como «Lo que trajo hoy», los manda la app del
+  teléfono y se apagan en su Ajustes ([app-movil.md](app-movil.md)).
 
 - No muestra ni deja oír el reel con la canción de «Música de Instagram» puesta: Instagram no lo
   permite antes de publicar. Solo se escucha la muestra de la canción sola.
@@ -1578,7 +1705,8 @@ editor.
   visitas: vive en la dirección (`?red=`), y entrar a La Parrilla desde la barra lo saca.
 - No publica en Threads ni en X / Twitter, que dicen «Próximamente» (ver [Los Fierros](los-fierros.md)).
 - No conecta cuentas: eso es [Los Fierros](los-fierros.md). No muestra cómo le fue a lo
-  publicado: eso es [Los Números](los-numeros.md) (cómo te fue en las redes y en tu página; cada
+  publicado más allá de «Lo que trajo» —lo nuevo de la semana y lo que lleva cada corte—: eso es
+  [Los Números](los-numeros.md) (cómo te fue en las redes y en tu página; cada
   publicación, en «Tus publicaciones», un clic adentro). No responde
   comentarios: eso es [La Mesa](la-mesa.md) (lo que te responden y tus respuestas). No cambia
   la zona horaria: eso es [Tu Cuenta](tu-cuenta.md).
@@ -1602,6 +1730,7 @@ Lo que describe esta página sale de:
   - `src/app/admin/(dash)/schedule/reja-de-horas.tsx` y `src/app/admin/(dash)/schedule/horas.ts` (la reja de horas de «Día» y «Por hora»: el canal de las horas, los carriles y lo rayado)
   - `src/app/admin/(dash)/schedule/filtro-redes.tsx` y `src/app/admin/(dash)/schedule/filtro-red.ts` (el filtro por red)
   - `src/app/admin/(dash)/schedule/se-quemo.tsx`, `src/app/admin/(dash)/schedule/lista-quemados.tsx` y `src/app/admin/(dash)/schedule/filtro-quemados.ts` («Se quemó»)
+  - `src/app/admin/(dash)/schedule/lo-que-trajo.tsx`, `src/app/admin/(dash)/schedule/fila-cargando.tsx`, `src/app/admin/(dash)/schedule/detalle-del-corte.tsx`, `src/app/admin/(dash)/schedule/panel-del-corte.tsx` y `src/app/admin/(dash)/schedule/celebracion.tsx` («Lo que trajo»: la racha, la fila y su carga, el detalle de un corte y la celebración de un hito), con `src/components/llamita.tsx` (la llama) y `src/lib/lo-que-trajo-frases.ts` (sus frases)
   - `src/app/admin/(dash)/schedule/queue.tsx`
   - `src/app/admin/(dash)/schedule/reprogramar.tsx`
   - `src/app/admin/(dash)/schedule/copiar-texto.tsx` («Copiar el texto» de lo que espera en la bandeja de TikTok)
@@ -1633,6 +1762,12 @@ Lo que describe esta página sale de:
 - «Se quemó» y el pie de ayer:
   - `src/lib/fuego.ts`
   - `src/lib/social/publish/cortes.ts`
+- «Lo que trajo» (qué cuenta como nuevo, la marca de un corte mirado, los hitos, la celebración, la
+  racha y la frase de un corte que no está):
+  - `src/lib/lo-que-trajo.ts`
+  - `src/lib/hitos.ts`
+  - `src/lib/racha.ts`
+  - `src/app/admin/lo-que-trajo-actions.ts`
 - Cómo se llega y lo que rodea a la pantalla:
   - `src/app/admin/(dash)/page.tsx`
   - `src/app/admin/(dash)/nav.tsx`

@@ -7,7 +7,7 @@ import { esUuid } from './uuid'
 
 // Los hitos de «Lo que trajo» (`docs/superpowers/specs/2026-11-10-lo-que-trajo-design.md`): cuando
 // las vistas de un corte, sumadas en sus redes sin YouTube, pasan un umbral, el corte gana ese hito
-// y la app lo celebra una vez, si es raro para el dueño (`esRaro`). Las lecturas del dueño van con él en el `where`, como pide el arnés
+// y la app o el panel lo celebran una vez, donde se vea primero, si es raro para el dueño (`esRaro`). Las lecturas del dueño van con él en el `where`, como pide el arnés
 // de aislamiento (`aislamiento.test.ts`); la detección es de todos, como la sincronización.
 
 /** Las vistas que hacen un hito. */
@@ -154,7 +154,7 @@ export function hitoMasAlto(lista: readonly HitoDeUnCorte[] | undefined): number
 export type PorCelebrar = { id: string; umbral: number; corte: CorteCargado }
 
 /**
- * Lo que la app tiene que celebrar: de cada corte con hitos sin celebrar y raros para el dueño
+ * Lo que la app o el panel tienen que celebrar: de cada corte con hitos sin celebrar y raros para el dueño
  * (`esRaro`, contra sus otros cortes del mes), el más alto —un corte que pasó 100 y 1.000 entre dos
  * lecturas celebra las 1.000—, hasta `CELEBRACIONES_POR_VEZ`, del umbral más alto al más bajo. Los
  * que no son raros quedan resueltos sin celebración (`celebrado_en` con `ahora`): no se vuelven a
@@ -188,7 +188,7 @@ export async function porCelebrar(ownerId: string, ahora: Date): Promise<PorCele
 }
 
 /**
- * La app celebró un hito: queda celebrado, con los más bajos del mismo corte que esperaban, que ya
+ * La app o el panel celebró un hito: queda celebrado, con los más bajos del mismo corte que esperaban, que ya
  * no se celebran solos. False si el hito no es del dueño o no existe.
  */
 export async function celebrar(ownerId: string, hitoId: string, ahora: Date): Promise<boolean> {

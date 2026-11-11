@@ -413,6 +413,10 @@ gusta», está en el README de la raíz («Lo que trajo, en el teléfono»).
   (`hitos-celebrados`, los últimos 50): lo guardado de la vez anterior puede traer un hito que ya
   se celebró, y sin esa lista se celebraría otra vez al abrir, antes de que llegue lo nuevo. Con
   «Quitar animaciones», sin las llamas.
+- **El panel comparte las marcas.** La Parrilla del panel muestra lo mismo (README de la raíz,
+  «Lo que trajo, en el panel»): un corte abierto allá vuelve aquí sin circulito, y un hito que se
+  celebró allá ya no viene en `porCelebrar`. La lista de AsyncStorage solo sabe de lo que
+  celebró este teléfono.
 - **La llama** (`src/components/llama.tsx`) está dibujada con vistas —un cuadrado con tres esquinas
   redondas, girado y estirado— y con `Animated` del núcleo, no con SVG ni Reanimated: `react-native-svg`
   no está en la 1.1.0, y así lo mismo le llega por aire. De día es la llama azul del soplete.
