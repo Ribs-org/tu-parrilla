@@ -45,6 +45,11 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      # Ninguna dependencia de producción con un aviso crítico conocido: el 2026-11-11 el sitio
+      # llevaba semanas con dos avisos críticos de Next sin que nada lo frenara (#386). Solo lo
+      # crítico y solo lo que se despliega: lo alto y lo de las herramientas se revisa con
+      # Dependabot, sin trabar cada pull request por un aviso que no se puede arreglar hoy.
+      - run: npm audit --omit=dev --audit-level=critical
       - run: npm test
         env:
           DATABASE_URL_PRUEBAS: postgres://postgres:postgres@localhost:5432/postgres

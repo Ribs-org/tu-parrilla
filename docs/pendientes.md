@@ -253,7 +253,9 @@ sección.
 - **[dueño] Encender «Require a pull request before merging» en la protección de `main`**
   (2026-10-21). Hoy son obligatorias las comprobaciones `sitio` y `app` y que la rama esté al
   día, pero no el pull request (README, «Cómo entra un cambio»). Con cero aprobaciones
-  pedidas, para que el dueño siga fusionando solo.
+  pedidas, para que el dueño siga fusionando solo. Y encender también «Do not allow bypassing
+  the above settings» (`enforce_admins`, 2026-11-11): hoy la reja no se le aplica al admin, que es
+  la cuenta con que empujan los agentes.
 - **[dueño] Probar una vez que un respaldo se restaura** (2026-10-21). Desde el 2026-10-21 el
   flujo revisa el índice de cada volcado, pero nadie restauró uno entero todavía. Bajar el de
   un día, descifrarlo con la llave y restaurarlo en una Postgres desechable (README,
@@ -657,6 +659,21 @@ permisos «por decidir»** de la tabla red por red, para pedirlos todos en una m
      ícono y «Avisos de lo bueno» en Ajustes (`mobile/README.md`, «Lo de la 1.2.0 sale de `main`»).
 
   Y en el App Store cuando exista la cuenta de Apple (ver «La app en iPhone», abajo).
+- **Revisar el aviso de actualizar la app, y subir la mínima a su tiempo** (2026-11-11). La app
+  avisa cuando hay una versión nueva en la tienda y, por debajo de la mínima, no deja seguir
+  (`src/lib/version-de-la-app.ts`; el detalle en `mobile/README.md`, «Cuando hay que ir a la
+  tienda»). Hoy la recomendada es la 1.2.0 y la mínima la 1.1.0, que no bloquea a nadie. Falta:
+  1. **[dueño]** probarlo en un teléfono con la 1.1.0, ya con la actualización por aire: que salga
+     «Hay una versión nueva» unos segundos después de abrir, que «Actualizar» abra la Play Store, que
+     «Después» no vuelva a preguntar y que quede «Actualizar la app» al pie de Ajustes. Nada de esto
+     se probó en un teléfono.
+  2. Subir la mínima a 1.2.0 **solo cuando la 1.2.0 esté en producción en la Play Store para todos**
+     (hoy está en la pista interna): antes, quien no es probador queda bloqueado sin poder
+     actualizar. Antes de subirla, confirmar en la Play Console que la versión publicada es la 1.2.0.
+  3. La app de prueba «Vicente · Números» (el APK instalado a mano en septiembre, otro
+     identificador) también recibe el aviso, pero su botón lleva a «Tu Parrilla», que es otra app:
+     desinstalarla en vez de actualizarla.
+  4. Cuando exista la app de iPhone, llenar `ios` con la dirección del App Store.
 - **[dueño] Las credenciales de los avisos al teléfono (FCM), antes del build 1.2.0**
   (2026-11-07). El código está (`src/lib/push/`, `mobile/src/lib/avisos.ts`); sin esto, en Android
   «Avisarme» dice que no se pudieron encender. Lo pide la documentación de Expo SDK 57, «Add Android
@@ -752,18 +769,19 @@ funciones y distintos topes, espacio, tokens de IA y prioridad en las colas; el 
 el pagado como cortesía en Los Maestros (README, «Los planes»). Nadie paga todavía: el README sigue
 diciendo «Sin suscripción», y es cierto.
 
-- **[dueño] Probar y abrir el cobro con Mercado Pago** (2026-11-08). Está escrito y **cerrado** detrás
-  de `PAGOS_ABIERTO_PARA` (README, «Los planes»; el diseño en
-  `docs/superpowers/specs/2026-11-08-planes-design.md`). No se probó contra Mercado Pago: los campos
-  y la firma salen de su SDK de Node, porque su documentación no se deja leer desde un servidor. En
-  orden, y con cada clic, en `docs/mercadopago-paso-a-paso.md` (los PRs ya entraron, #359 y #360): la
-  cuenta de Pyxis con el retiro al Santander; la aplicación; los usuarios de prueba, vendedor y
-  comprador, y el token del vendedor de prueba; el webhook `https://tu-parrilla.cl/api/pagos/mercadopago`
-  con «Planes y suscripciones»; las tres variables en Vercel; la prueba completa; y, con lo de abajo
-  listo, el token de producción y `PAGOS_ABIERTO_PARA=1`. Lo que hay que mirar en la prueba: que el
-  webhook pase la firma (con `401`, revisar el secreto y si Mercado Pago firma el `data.id` en
-  minúsculas); si sin prueba el primer cobro sale al autorizar; y cuántos días reintenta un cobro
-  rechazado, para ajustar `GRACIA_DIAS` (5, en `src/lib/pagos/reglas.ts`).
+- **[dueño] Probar y abrir el cobro con Mercado Pago** (2026-11-08; contrastado con la
+  documentación el 2026-11-11). Está escrito y **cerrado** detrás de `PAGOS_ABIERTO_PARA` (README,
+  «Los planes»; el diseño en `docs/superpowers/specs/2026-11-08-planes-design.md`). No se probó
+  contra Mercado Pago. El 2026-11-11 se leyó por fin su documentación (agregándole `.md` a cada
+  dirección) y se corrigió lo que decía distinto: la prueba gratis va como `start_date`, la
+  cancelación acepta `canceled` y `cancelled`, la gracia es de 11 días porque reintenta 4 veces en
+  10, y solo un cobro de verdad alarga el plan. Lo que falta es del dueño, en orden y con cada clic,
+  en `docs/mercadopago-paso-a-paso.md`: la cuenta de Pyxis con el retiro al Santander; la
+  aplicación; un comprador de prueba y las credenciales de prueba de la aplicación; el webhook
+  `https://tu-parrilla.cl/api/pagos/mercadopago` con «Planes y suscripciones» y «Pagos»; las tres
+  variables en Vercel; la prueba completa, con un cobro aprobado y uno rechazado; y, con lo de abajo
+  listo, el token de producción y `PAGOS_ABIERTO_PARA=1`. Lo que hay que mirar en la prueba está en
+  esa guía, «Lo que la prueba tiene que mirar».
 
   Se cobra solo en la web: lo que se vende dentro de una app de Android tiene que ir por Google Play
   Billing, con su comisión, y cobrar en la web sin botón ni enlace de pago en la app no lo exige. Si
@@ -1000,14 +1018,42 @@ diciendo «Sin suscripción», y es cierto.
 - **Por revisar: «las notificaciones de Google»** (2026-10-23). El dueño las nombró al pedir
   los preparativos de YouTube y no quedó claro dónde las ve (¿correos de Google Cloud?, ¿el
   Verification Center?, ¿avisos en la app?). Preguntarle antes de tocar nada.
-- **No urgente: revisar el CI/CD y evaluar las dependencias** (2026-11-02, lo pidió el dueño).
-  - Ver si la reja de pull requests y el despliegue (README, «Cómo entra un cambio») cubren lo
-    que hace falta y cuánto tardan.
-  - Revisar las dependencias del sitio y de la app: cuáles sobran, cuáles traen avisos de
-    seguridad y cuáles se pueden reemplazar. Por ejemplo, `exceljs` se descartó para la planilla
-    por sus avisos.
-  - De paso, los pull requests de Dependabot que siguen abiertos (#241 y #288, que reemplazó a la
-    #242): que el CI pase y que no rompan nada antes de fusionarlos.
+- **DevOps y seguridad: lo que falta** (revisado el 2026-11-11, lo pidió el dueño; reemplaza la
+  revisión «no urgente» del 2026-11-02). Ya hecho ese día: Next a 16.4.3 por dos avisos críticos
+  (#386), `npm audit --omit=dev --audit-level=critical` en el CI, y el respaldo, que fallaba al
+  instalar `age` con `apt`. Lo que sigue, en orden:
+  1. **[dueño]** En GitHub → Settings → Code security del repositorio: encender el grafo de
+     dependencias, «Dependabot security updates», «Secret scanning» con «Push protection», y
+     «Private vulnerability reporting». Las alertas de Dependabot están encendidas pero no listan
+     nada, ni siquiera el aviso crítico de Next que tenía producción: sin el grafo no ven las
+     dependencias. El repositorio es público y los agentes empujan con la cuenta admin: el escaneo
+     de secretos es lo que frena una clave subida por error. Se puede hacer desde `gh` con el sí
+     del dueño.
+  2. **[dueño]** CodeQL con la configuración por defecto (Code security → Code scanning), gratis
+     en un repositorio público.
+  3. **[dueño]** Que la reja de `main` valga también para el admin: la entrada «Encender "Require a
+     pull request before merging"», arriba, que desde el 2026-11-11 suma `enforce_admins`.
+  4. **[dueño]** Un vigía que avise si algo deja de pasar: Healthchecks.io gratis, con un aviso al
+     terminar `publish-social` (cada 5 minutos, por el pinger de cron-job.org, que ya se cayó una
+     vez en silencio) y otro al terminar `respaldo.yml`. Hoy, si el pinger se cae o el respaldo
+     falla, nadie se entera. Falta la cuenta; el código de los avisos es corto.
+  5. **[dueño]** Sentry (gratis) o similar en el sitio: hoy los errores solo quedan en los logs de
+     Vercel, que en el plan Hobby duran poco. Falta la cuenta y su DSN en Vercel.
+  6. **[dueño]** Restaurar un respaldo una vez: la entrada «Probar una vez que un respaldo se
+     restaura», arriba. De paso, que el respaldo use un rol de la base de solo lectura.
+  7. Los secretos de Actions (`DATABASE_URL_UNPOOLED`, `EXPO_TOKEN`) en un environment limitado a
+     `main`, y no a nivel de repositorio, donde los lee cualquier rama. **[dueño]** para crearlo.
+  8. Escribir cómo se vuelve atrás: el rollback de un despliegue en Vercel, una migración que no
+     tiene reversa y restaurar un respaldo.
+  9. Un formateador (Prettier) con `--check` en el CI. El primer pase cambia casi todos los
+     archivos, así que va solo, sin otras ramas abiertas que lo choquen.
+  10. Lo que ya estaba en `docs/deuda-tecnica.md`: la CSP (en modo Report-Only primero) y el límite
+      de intentos compartido entre instancias.
+  11. Las dependencias que quedan: #288 (las otras 17 del sitio, que reemplazó a la #242) y #241
+      (las acciones), con su CI; los dos avisos altos de `undici` y `zod` que trae `ai`; y los de
+      la app, que vienen de las herramientas de Expo y se arreglan con el SDK 58.
+  12. Más adelante: pruebas de punta a punta de entrar, programar y publicar, y una prueba de
+      humo después de cada despliegue.
 - **[dueño] Borrar el almacén viejo de Vercel Blob** (2026-10-22). La media ya vive en R2 y el
   código no lo usa; no se borró porque borrar es irreversible y pide el sí del dueño. Antes,
   mirar que no quede nada que se quiera guardar.

@@ -172,7 +172,9 @@ El flujo:
    `reason` («Tu Parrilla — Maestro Parrillero»), `external_reference`, `payer_email`, `back_url`
    (Tu Cuenta), `status: pending` y `auto_recurring` con `frequency: 1`, `frequency_type: months`,
    `transaction_amount` (el precio del plan), `currency_id: CLP` y, si nunca usó la prueba,
-   `free_trial: { frequency: 7, frequency_type: days }`. Redirige al `init_point`.
+   `start_date` a 7 días con un `end_date` a diez años. Redirige al `init_point`. (Se diseñó con
+   `free_trial`; el 2026-11-11 la referencia de Mercado Pago mostró que en una suscripción sin plan
+   `free_trial` solo viene en la respuesta, y que `start_date` pide `end_date`.)
 3. La vuelta a Tu Cuenta lee la suscripción en Mercado Pago (`GET /preapproval/{id}`) y la deja al
    día, sin esperar el webhook.
 4. **El webhook** (`POST /api/pagos/mercadopago`) verifica la firma (`x-signature` con
@@ -181,11 +183,14 @@ El flujo:
    `subscription_authorized_payment` → el cobro (`GET /authorized_payments/{id}`). Nunca cree lo
    que trae el cuerpo: solo el id.
 5. **Lo que cambia el plan:**
-   - autorizada: `plan = pagado`, `plan_origen = suscripcion`, `plan_hasta` = el próximo cobro
-     (`next_payment_date`) más 5 días de gracia; si traía prueba, `prueba_usada_en`;
-   - cada cobro aprobado corre `plan_hasta` al próximo cobro más la gracia;
-   - un cobro rechazado no la corre: Mercado Pago lo reintenta, y si en la gracia no entra, el
-     plan cae solo al gratis;
+   - autorizada: `plan = pagado`, `plan_origen = suscripcion`, `plan_hasta` = el fin de la prueba
+     más la gracia, o, sin prueba, unos días mientras llega el primer cobro; si traía prueba,
+     `prueba_usada_en`;
+   - cada cobro aprobado corre `plan_hasta` al próximo cobro más la gracia, 11 días: Mercado Pago
+     reintenta un cobro rechazado hasta 4 veces en 10 días (se diseñó con 5, a ciegas);
+   - un cobro rechazado no la corre, ni la relectura diaria, aunque `next_payment_date` avance:
+     solo un cobro aprobado (el del webhook o `summarized.last_charged_date`). Si en la gracia no
+     entra, el plan cae solo al gratis;
    - cancelada (por la persona, desde «Tu plan», o en Mercado Pago): no cambia `plan_hasta`; queda
      pagado hasta el fin de lo que pagó (o de la prueba) y después, gratis.
 6. **Cada día**, la sincronización relee las suscripciones vivas: un webhook perdido no deja a

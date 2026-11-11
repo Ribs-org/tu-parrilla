@@ -15,10 +15,11 @@ const TOLERANCIA_S = 15 * 60
  *
  * Es público y sin sesión, así que la única llave es la firma (`x-signature`, ver `firmaValida`). Del
  * aviso solo se cree el id: el estado se vuelve a leer en Mercado Pago, y de ahí sale lo que cambia el
- * plan de la persona. Un aviso de otro tema se contesta `200` y no se mira, y uno cuyo id Mercado Pago
- * no conoce —el de «Simular notificación», en su panel, es inventado— también: reintentarlo no lo
- * haría aparecer. Si leer o escribir falla, `500`, y Mercado Pago lo reintenta; la relectura diaria
- * cubre el caso de que nunca llegue.
+ * plan de la persona. Un aviso de otro tema —el de «Pagos», que Mercado Pago pide encender también—
+ * se contesta `200` y no se mira, pero su tipo queda en el log; y uno cuyo id Mercado Pago no conoce
+ * —el de un aviso de prueba, con un id inventado— también: reintentarlo no lo haría aparecer. Si leer
+ * o escribir falla, `500`, y Mercado Pago lo reintenta cada 15 minutos; la relectura diaria cubre el
+ * caso de que nunca llegue. Tiene 22 segundos para contestar (`PLAZO_MS`, en `mercadopago.ts`).
  */
 export async function POST(request: Request) {
   const secreto = env('MERCADOPAGO_WEBHOOK_SECRET')
@@ -32,7 +33,10 @@ export async function POST(request: Request) {
   } catch {
     // Un aviso sin JSON puede traer todo en la URL; se sigue con ella.
   }
-  const dataId = url.searchParams.get('data.id') ?? (typeof cuerpo.data?.id === 'string' ? cuerpo.data.id : null)
+  const idDelCuerpo = cuerpo.data?.id
+  const dataId =
+    url.searchParams.get('data.id') ??
+    (typeof idDelCuerpo === 'string' || typeof idDelCuerpo === 'number' ? String(idDelCuerpo) : null)
   const tipo = url.searchParams.get('type') ?? (typeof cuerpo.type === 'string' ? cuerpo.type : null)
 
   const valida = firmaValida({
@@ -49,6 +53,8 @@ export async function POST(request: Request) {
     const tema = temaDeAviso(tipo)
     if (tema === 'suscripcion') await sincronizarSuscripcion(dataId)
     if (tema === 'cobro') await registrarCobro(dataId)
+    // Sin nombre de persona ni monto: solo el tipo, para ver en la prueba qué manda Mercado Pago.
+    if (tema === 'otro') console.info(`[pagos] webhook: aviso de tipo ${String(tipo).slice(0, 60)}, sin mirar`)
   } catch (error) {
     if (error instanceof MercadoPagoFallo && error.status === 404) {
       console.warn(`[pagos] webhook: Mercado Pago no conoce ${tipo ?? 'el aviso'} ${dataId.slice(0, 40)}`)
