@@ -292,6 +292,7 @@ Se abre con el botón de Ajustes de cualquier pestaña. Arriba, la flecha para v
   - Si el teléfono no deja: «El teléfono no deja que Tu Parrilla te avise. Actívalo en los ajustes del teléfono, en Notificaciones.», con los botones «Abrir los ajustes del teléfono» y «Apagar los avisos».
   - En una app que todavía no tiene la versión 1.2.0 desde la tienda: «Este teléfono todavía no tiene los avisos: llegan con la versión nueva de la app, la que se instala desde la tienda.», sin botón.
   De día dice «lo que se echó a perder» y «las cuentas que se desafilan o quedan sin filo». Apagarlos o encenderlos vale solo para este teléfono; los correos no cambian.
+  - Con los avisos encendidos, debajo, **«Avisos de lo bueno»**: «Uno al día como mucho, entre las 9 y las 22: cuando un corte pasa un número de vistas que no es lo de siempre, o desde las 19:00, lo que trajeron tus cortes en el día.» (de día, «una pieza» y «tus piezas») y el botón «Apagar los avisos de lo bueno». Apagados, dice «Apagados. Encendidos, te llega: uno al día como mucho…» con el botón «Encender los avisos de lo bueno». Estos se apagan para toda la cuenta, en todos sus teléfonos, y los demás avisos siguen llegando. Sin señal, se ve el texto sin el botón.
 - **«Tu sesión»**, con «Cerrar sesión» en rojo. Pregunta «¿Cerrar sesión en este teléfono?» / «Para volver a entrar te va a llegar un código a tu correo.», con «Cancelar» y «Cerrar sesión» (en rojo). Al confirmar, la app vuelve a la pantalla de entrada y borra del teléfono lo que guardó de la cuenta —lo último que mostró cada pantalla—: quien entre después en ese teléfono no lo ve, y «atrás» ya no vuelve a ninguna pantalla de la cuenta. Las cuentas conectadas, lo programado y los borradores no se tocan: están en la cuenta, no en el teléfono.
 - **«El libro de sugerencias»** (de día, «La caja de sugerencias»), para escribirle al equipo que hace Tu Parrilla y leer lo que le respondió. Si hay respuestas que no abrió, al lado del rótulo va un punto naranjo y «1 respuesta nueva» (o «<N> respuestas nuevas»). Una tarjeta con dos botones redondeados arriba, «Escribir» y «Lo que nos escribiste» (este con un punto naranjo si hay algo sin leer); arranca en «Lo que nos escribiste» si hay respuestas sin leer, si no en «Escribir».
   - En «Escribir»: el dibujo de un libro abierto (de día, una caja de madera con una ranura), los botones «Una idea», «Algo no funciona» y «Otra cosa», un campo para escribir y el botón «Dejarlo en el libro» (de día, «Echarlo a la caja»). Es lo mismo que el libro del panel, con sus mismos textos y mensajes: está contado en [El libro de sugerencias](libro-de-sugerencias.md). En la app, en vez del navegador, el mensaje lleva la versión de la app, y al recibirse dice «Quedó en el libro.» (de día, «Quedó en la caja.») con «Escribir otra». Lo escrito no se borra al pasar a la otra pestaña.
@@ -340,6 +341,8 @@ Solo se celebra lo que es raro para ti: un número que alcanzó menos de la mita
 
 Cada hito se celebra una vez. Si un corte pasó dos de una vez (de 90 a 1.200 vistas entre dos lecturas), se celebra el más alto. Si hay varios cortes por celebrar, salen uno detrás de otro, hasta tres; los demás, la vez siguiente. Los cortes que ya habían pasado un número cuando llegaron los hitos (el 11 de noviembre de 2026) lo tienen marcado, pero no se celebraron.
 
+Con los avisos encendidos (desde la versión 1.2.0), un hito que se celebra también puede llegar como aviso al teléfono, apenas pasa (ver «Para que la app te avise en el teléfono»).
+
 ## Qué se puede hacer
 
 ### Para ver lo que trajo cada corte
@@ -369,12 +372,19 @@ Si el código no llega, revisa el spam y que el correo esté bien escrito; «Usa
 
 ### Para que la app te avise en el teléfono
 
-La primera vez que entras, unos segundos después, la app pregunta «¿Te avisamos al teléfono?» —«Cuando algo se quema, una cuenta se enfría, el chef te pregunta o te deja una comanda, el equipo te responde o te llegan comentarios a La Mesa. Se apagan cuando quieras en Ajustes.»— con «Ahora no» y «Avisarme».
+La primera vez que entras, unos segundos después, la app pregunta «¿Te avisamos al teléfono?» —«Cuando algo se quema, una cuenta se enfría, el chef te pregunta o te deja una comanda, el equipo te responde, te llegan comentarios a La Mesa o tus cortes traen algo bueno. Se apagan cuando quieras en Ajustes.»— con «Ahora no» y «Avisarme».
 
 1. Toca «Avisarme».
 2. Si el teléfono pregunta si Tu Parrilla puede mandar notificaciones, toca «Permitir».
 
-Si tocaste «Ahora no», no vuelve a preguntar: se encienden en Ajustes → «Los avisos» → «Encender los avisos». Tocar un aviso abre su pantalla: lo que se quemó, en La Parrilla; una cuenta que se enfría o se apaga y la respuesta del equipo, en Ajustes; una pregunta del chef o una comanda, en «Tus comandas» de La Cocina; los comentarios nuevos, en La Mesa. Los comentarios llegan como un resumen («3 comentarios nuevos en La Mesa», con las redes), uno por hora como mucho.
+Si tocaste «Ahora no», no vuelve a preguntar: se encienden en Ajustes → «Los avisos» → «Encender los avisos». Tocar un aviso abre su pantalla: lo que se quemó, en La Parrilla; una cuenta que se enfría o se apaga y la respuesta del equipo, en Ajustes; una pregunta del chef o una comanda, en «Tus comandas» de La Cocina; los comentarios nuevos, en La Mesa; un hito, en «Lo que trajo» de ese corte; lo que trajo el día, en La Parrilla. Los comentarios llegan como un resumen («3 comentarios nuevos en La Mesa», con las redes), uno por hora como mucho.
+
+Lo bueno de tus cortes llega una vez al día como mucho, entre las 9 y las 22 de tu hora, sin correo:
+
+- **Un hito**, apenas un corte pasa un número de vistas que no es lo de siempre para ti (ver «Los hitos»): «Tu corte pasó las 1.000 vistas» (de día, «Tu pieza…»), con el comienzo del texto y «Míralo en Lo que trajo.». Si ya lo celebraste en la app, no llega.
+- **Si en el día no hubo hito**, desde las 19:00: «Lo que trajo hoy» con «Hoy: +120 me gusta y +9 comentarios en tus cortes.» (de día, «en tus piezas»), solo lo que subió. Sin los «me gusta» de YouTube. Si no llegó nada, no hay aviso.
+
+En iPhone, el aviso de lo bueno y el de los comentarios ponen además el número del ícono.
 
 ### Para apagar los avisos
 
@@ -800,6 +810,8 @@ En La Mesa, toca «Enviados»: lo respondido desde Tu Parrilla, por la respuesta
 - «¿Qué versión tengo?» → «Ajustes», al pie.
 - «No me llegan los avisos» o «quiero notificaciones» → «Ajustes» → «Los avisos»: si dice «Apagados en este teléfono», tocar «Encender los avisos» y permitir las notificaciones; si dice que el teléfono no deja, «Abrir los ajustes del teléfono». Si dice que llegan con la versión nueva, hay que instalar la app desde la tienda. Los comentarios llegan como resumen, uno por hora como mucho.
 - «Me llegan demasiados avisos» o «quiero apagarlos» → «Ajustes» → «Los avisos» → «Apagar los avisos». Los correos siguen llegando.
+- «No quiero el aviso de lo bueno» o «el de "Lo que trajo hoy"» → «Ajustes» → «Los avisos» → «Apagar los avisos de lo bueno». Los demás avisos siguen llegando. Es uno al día como mucho, entre las 9 y las 22.
+- «No me llegó el aviso de que mi corte pasó las 1.000 vistas» → llega solo si el número no es lo de siempre para la cuenta, si la app no lo celebró antes, y uno al día como mucho (si ese día ya llegó otro, no). Los avisos son solo desde la versión 1.2.0 de la app, con «Los avisos» encendidos.
 - «El video llegó a TikTok sin el texto» → es así con lo que va a la bandeja de TikTok. En «La Parrilla», la tarjeta del post tiene «Copiar el texto» (o «Pasar el texto…»); ver «Para copiar el texto de lo que llegó a TikTok».
 - «Toco "Pasar el texto…" y no aparece "Copiar"» → esa versión de la app no trae el portapapeles y la lista de compartir de ese teléfono no ofrece copiar. Abrir la publicación y mantener apretado el texto; una versión más nueva de la app, instalada desde la tienda, copia directo.
 - «¿Qué es el número rojo de La Parrilla?» o «¿qué es el número del ícono?» → los cortes de la semana con algo nuevo desde la última vez que se abrieron, más los comentarios que esperan respuesta en La Mesa. Baja abriendo los cortes de «Lo que trajo» (los de círculo rojo) y respondiendo en La Mesa. En el ícono sale desde la versión 1.2.0 y si el teléfono muestra números; con la app cerrada solo cambia si llega un aviso.
@@ -915,7 +927,7 @@ Lo que describe sale de estos archivos:
 - `mobile/src/components/corte-programado.tsx`
 - `mobile/src/components/copiar-texto.tsx`, `mobile/src/lib/portapapeles.ts` y `mobile/src/lib/bandeja.ts` («Copiar el texto» o «Pasar el texto…» de lo que espera en la bandeja de TikTok)
 - `mobile/src/app/ajustes.tsx` y `mobile/src/components/boton-ajustes.tsx` (Ajustes y su botón en la cabecera)
-- `mobile/src/components/avisos.tsx` y `mobile/src/lib/avisos.ts` (los avisos al teléfono: la pregunta de la primera vez, «Los avisos» de Ajustes, sus frases y adónde lleva tocar uno), y `src/lib/push/avisos.ts` (lo que dice cada aviso)
+- `mobile/src/components/avisos.tsx` y `mobile/src/lib/avisos.ts` (los avisos al teléfono: la pregunta de la primera vez, «Los avisos» y «Avisos de lo bueno» de Ajustes, sus frases y adónde lleva tocar uno), `src/lib/push/avisos.ts` (lo que dice cada aviso), `src/lib/push/bueno.ts` (cuándo sale el aviso de lo bueno) y `src/app/api/mobile/push/bueno/route.ts` (su interruptor)
 - `mobile/src/components/libro-de-sugerencias.tsx` y `mobile/src/lib/sugerencias.ts` (el libro de sugerencias, al final de Ajustes, con «Lo que nos escribiste»), y `src/app/api/mobile/sugerencias/route.ts` y `src/app/api/mobile/sugerencias/[id]/leida/route.ts` (lo que lee y marca leído)
 - `src/app/api/mobile/fierros/route.ts` (lo que muestran)
 - `mobile/src/components/pieza.tsx`, `mobile/src/lib/corte.ts`, `mobile/src/components/pieza-sushi.tsx` y `mobile/src/components/lienzo.tsx` (el corte dibujado, de noche y de día)

@@ -116,3 +116,40 @@ export function avisoDeRespuesta(s: { id: string; respuesta: string }, tema: Tem
     id: s.id,
   }
 }
+
+/** «1.200»: el punto de los miles escrito a mano; el `Intl` en español no agrupa los de cuatro cifras. */
+function conMiles(n: number): string {
+  return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+}
+
+/**
+ * Un hito de «Lo que trajo» (`src/lib/hitos.ts`), apenas se alcanza: «Tu corte pasó las 1.000
+ * vistas» —de día, la pieza— con el comienzo de su texto. Lleva al detalle del corte.
+ */
+export function avisoDeHito(h: { postId: string; umbral: number; texto: string }, tema: Tema): AvisoAlTelefono {
+  const vistas = h.umbral === 1_000_000 ? 'el millón de vistas' : `las ${conMiles(h.umbral)} vistas`
+  const texto = recortar(h.texto, 60)
+  return {
+    titulo: `${tema === 'dia' ? 'Tu pieza' : 'Tu corte'} pasó ${vistas}`,
+    cuerpo: texto ? `«${texto}». Míralo en Lo que trajo.` : 'Míralo en Lo que trajo.',
+    tipo: 'hito',
+    id: h.postId,
+  }
+}
+
+/**
+ * Lo que trajeron los cortes en el día, si no hubo hito: «Hoy: +120 me gusta y +9 comentarios en
+ * tus cortes.», solo lo que subió. Sin los «me gusta» de YouTube, que no deja restar
+ * (`politica-youtube.ts`). Lleva a La Parrilla.
+ */
+export function avisoDelDia(d: { meGusta: number; comentarios: number }, tema: Tema): AvisoAlTelefono {
+  const partes = [
+    d.meGusta > 0 ? `+${conMiles(d.meGusta)} me gusta` : null,
+    d.comentarios > 0 ? `+${conMiles(d.comentarios)} ${d.comentarios === 1 ? 'comentario' : 'comentarios'}` : null,
+  ].filter((p): p is string => p !== null)
+  return {
+    titulo: 'Lo que trajo hoy',
+    cuerpo: `Hoy: ${enLista(partes)} en tus ${tema === 'dia' ? 'piezas' : 'cortes'}.`,
+    tipo: 'bueno',
+  }
+}

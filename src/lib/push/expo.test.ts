@@ -47,6 +47,12 @@ describe('el mensaje', () => {
     })
   })
 
+  it('lleva el número del ícono solo si el aviso lo trae', () => {
+    expect(mensajeExpo(TOKEN, { ...aviso, badge: 3 }).badge).toBe(3)
+    expect(mensajeExpo(TOKEN, { ...aviso, badge: 0 }).badge).toBe(0)
+    expect('badge' in mensajeExpo(TOKEN, aviso)).toBe(false)
+  })
+
   it('recorta un texto largo, sin pasarse de lo que el teléfono muestra', () => {
     const m = mensajeExpo(TOKEN, { ...aviso, cuerpo: 'palabra '.repeat(100) })
     expect(m.body.length).toBeLessThanOrEqual(240)

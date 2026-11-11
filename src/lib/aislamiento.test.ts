@@ -133,6 +133,7 @@ const { leerProgramados } = await import('./schedule-leer')
 const { numerosDeLosCortes } = await import('./lo-que-trajo')
 const { celebrar, hitosDeLosCortes, porCelebrar } = await import('./hitos')
 const { leerRacha } = await import('./racha')
+const { loDeHoy } = await import('./push/bueno')
 const { listarLlaves, crearLlave } = await import('./llaves')
 const { leerResumen } = await import('./avisos/run')
 const { archivarQuemados, archivarDestino } = await import('./social/publish/archivar')
@@ -531,6 +532,12 @@ describe('aislamiento por dueño (SQL generado, sin base)', () => {
     expect(celebrarSql).toHaveLength(2)
     esperarFiltradoPorDueno(celebrarSql[0]!)
     esperarFiltradoPorDueno(celebrarSql[1]!)
+  })
+
+  it('push/bueno: loDeHoy suma solo las publicaciones de los cortes del dueño', async () => {
+    const consultas = await todasLasConsultas(() => loDeHoy(DUENO, '2026-11-11'))
+    expect(consultas).toHaveLength(1)
+    esperarFiltradoPorDueno(consultas[0]!)
   })
 
   it('racha: leerRacha cuenta solo lo publicado del dueño', async () => {

@@ -231,6 +231,19 @@ export async function leerLoQueTrajo(ownerId: string, ahora: Date): Promise<{ co
   return { cortes, numero: cortes.filter((c) => totalDe(c.nuevo) > 0).length + pendientes }
 }
 
+/**
+ * El número del ícono, para un aviso al teléfono que lo lleva (`badge`): el mismo de la fila. Si no
+ * se puede contar, undefined: el aviso sale igual, sin tocar el ícono.
+ */
+export async function numeroDelIcono(ownerId: string, ahora: Date): Promise<number | undefined> {
+  try {
+    return (await leerLoQueTrajo(ownerId, ahora)).numero
+  } catch (error) {
+    console.error('[push] No se pudo contar el número del ícono:', String(error).slice(0, 300))
+    return undefined
+  }
+}
+
 /** Un corte del dueño con sus números, o null si no es suyo, no existe o no salió en ninguna red. */
 export async function leerCorte(ownerId: string, postId: string): Promise<CorteConNumeros | null> {
   if (!esUuid(postId)) return null

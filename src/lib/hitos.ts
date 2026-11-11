@@ -69,6 +69,26 @@ function vistasPorCorte(filtro: SQL) {
   `
 }
 
+/**
+ * Unos hitos del dueño, separados en los raros para él (`esRaro`, contra las vistas de sus otros
+ * cortes del mes) y los de siempre, en el mismo orden en que vinieron. Lo usan la celebración
+ * (`porCelebrar`) y el aviso de lo bueno (`push/bueno.ts`).
+ */
+export async function separarLosRaros<H extends { postId: string; umbral: number }>(
+  ownerId: string,
+  ahora: Date,
+  lista: readonly H[],
+): Promise<{ raros: H[]; comunes: H[] }> {
+  const vistas = [...(await vistasDelMes(ownerId, ahora)).entries()]
+  const raros: H[] = []
+  const comunes: H[] = []
+  for (const hito of lista) {
+    const otros = vistas.filter(([id]) => id !== hito.postId).map(([, v]) => v)
+    ;(esRaro(hito.umbral, otros) ? raros : comunes).push(hito)
+  }
+  return { raros, comunes }
+}
+
 /** Las vistas de los cortes del dueño que salieron en los últimos `DIAS_PARA_COMPARAR` días, por corte. */
 async function vistasDelMes(ownerId: string, ahora: Date): Promise<Map<string, number>> {
   const desde = new Date(ahora.getTime() - DIAS_PARA_COMPARAR * 864e5)
@@ -149,14 +169,10 @@ export async function porCelebrar(ownerId: string, ahora: Date): Promise<PorCele
     .orderBy(desc(hitos.umbral), desc(hitos.alcanzadoEn))
   if (filas.length === 0) return []
 
-  const vistas = [...(await vistasDelMes(ownerId, ahora)).entries()]
-  const pasados: string[] = []
+  const { raros, comunes } = await separarLosRaros(ownerId, ahora, filas)
+  const pasados = comunes.map((h) => h.id)
   const delCorte = new Map<string, { id: string; umbral: number }>()
-  for (const { postId, ...hito } of filas) {
-    const otros = vistas.filter(([id]) => id !== postId).map(([, v]) => v)
-    if (!esRaro(hito.umbral, otros)) pasados.push(hito.id)
-    else if (!delCorte.has(postId)) delCorte.set(postId, hito)
-  }
+  for (const { postId, ...hito } of raros) if (!delCorte.has(postId)) delCorte.set(postId, hito)
   if (pasados.length > 0) {
     await db
       .update(hitos)

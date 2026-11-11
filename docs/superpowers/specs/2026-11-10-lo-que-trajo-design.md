@@ -1,6 +1,6 @@
 # Lo que trajo: la app que se siente red social
 
-Fecha: 2026-11-10. **Las fases 1, 2 y 3 están hechas; la 4, sin implementar.** Cuatro fases,
+Fecha: 2026-11-10. **Las cuatro fases están hechas.** Cuatro fases,
 cada una en su PR y cada una sostenida sola; el orden está en «Las fases», al final. Es de la app del teléfono: el panel no
 cambia en esta entrega (ver «Lo que no entra»).
 
@@ -222,14 +222,31 @@ que las demás.
 
 No hay aviso de la racha que se apaga: el dueño pidió avisos de lo bueno.
 
+Como se hizo (fase 4): `avisarLoBueno` (`src/lib/push/bueno.ts`) corre al final de la lectura de
+cada hora, que llama el pinger a los 30 minutos, así que lo del día sale a las 19:30 y no a las
+19:00 en punto. Tres decisiones que el diseño no decía:
+
+- **un horario**, de 9 a 22 en la zona del dueño: la lectura corre toda la noche, y un hito a las
+  3 de la mañana no es una buena noticia. Lo que se alcanza de noche sale a las 9, si sigue entre
+  las 24 horas;
+- **el hito tiene que ser raro** (`esRaro`, la misma regla de la celebración) y **no estar ya
+  celebrado**: si la app ya lo mostró, el aviso no agrega nada. Uno de más de 24 horas ya no se
+  avisa;
+- **lo del día** es la lectura de hoy de cada publicación de los cortes menos la anterior
+  (`loDeHoy`), sin bajar de cero; una publicación leída por primera vez hoy cuenta entera.
+
+El `badge` lo llevan el aviso de lo bueno y el resumen de La Mesa (`numeroDelIcono`). Solo llega a
+la 1.2.0 en adelante, que es la que trae `expo-notifications`. Lo cuenta el README, en «Avisos al
+teléfono».
+
 ## El modelo de datos
 
 - **`cortes_vistos`**: `post_id` (único, a `scheduled_posts` en cascada), `owner_id`,
   `visto_en`, `me_gusta`, `comentarios`. Los dos contadores son la suma, sin YouTube, en el
   momento de mirarlo.
 - **`hitos`**: `post_id` (a `scheduled_posts` en cascada), `owner_id`, `umbral`, `alcanzado_en`
-  (nulo en los del estreno), `celebrado_en`; único por `(post_id, umbral)`. Hecho en la fase 3;
-  `avisado_en` llega con el aviso, en la 4.
+  (nulo en los del estreno), `celebrado_en`, `avisado_en`; único por `(post_id, umbral)`. Hecho en
+  la fase 3; `avisado_en`, en la 4.
 - **`post_metrics.seguidores`**: entero, nulo donde la red no lo da. Hecho en la fase 1, solo con
   los de Instagram.
 - **`users.push_bueno`** (por defecto encendido) y **`users.push_bueno_en`**.
@@ -243,7 +260,7 @@ Todo con su dueño en el `where`, como pide el arnés de aislamiento (`src/lib/a
 - `GET /api/mobile/cortes/{id}`: el detalle.
 - `POST /api/mobile/cortes/{id}/visto`: deja la marca; contesta el número del ícono nuevo.
 - `POST /api/mobile/hitos/{id}/celebrado`.
-- `PUT /api/mobile/push/bueno`: enciende o apaga los avisos de lo bueno.
+- `GET` y `PUT /api/mobile/push/bueno`: lee, y enciende o apaga, los avisos de lo bueno.
 
 ## Las fases
 
