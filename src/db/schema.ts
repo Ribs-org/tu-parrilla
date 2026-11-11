@@ -106,6 +106,17 @@ export const users = pgTable('users', {
    * dos resúmenes.
    */
   pushComentariosHasta: timestamp('push_comentarios_hasta', { withTimezone: true }),
+  /**
+   * Si le llegan al teléfono los avisos de lo bueno de «Lo que trajo» —un hito, o lo que trajeron
+   * los cortes en el día—. Se apagan aparte de los demás, en Ajustes de la app
+   * (`PUT /api/mobile/push/bueno`). Encendidos de entrada.
+   */
+  pushBueno: boolean('push_bueno').notNull().default(true),
+  /**
+   * Cuándo salió el último aviso de lo bueno: sale uno al día como mucho, en la zona del dueño. La
+   * escribe `avisarLoBueno` (`src/lib/push/bueno.ts`).
+   */
+  pushBuenoEn: timestamp('push_bueno_en', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 }).enableRLS()
@@ -833,6 +844,9 @@ export const hitos = pgTable(
     umbral: integer('umbral').notNull(),
     alcanzadoEn: timestamp('alcanzado_en', { withTimezone: true }),
     celebradoEn: timestamp('celebrado_en', { withTimezone: true }),
+    // Cuándo se resolvió su aviso al teléfono (`avisarLoBueno`): salió, o salió el de otro hito del
+    // mismo dueño, que se lleva los que esperaban. Nulo, todavía por resolver.
+    avisadoEn: timestamp('avisado_en', { withTimezone: true }),
   },
   (t) => [unique('hitos_post_umbral_key').on(t.postId, t.umbral), index('hitos_owner_idx').on(t.ownerId)],
 ).enableRLS()

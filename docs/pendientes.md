@@ -785,12 +785,12 @@ diciendo «Sin suscripción», y es cierto.
 
 ## Features y trabajo de código
 
-- **Lo que trajo: la app que se siente red social** (pedido y diseñado el 2026-11-10). En cada
-  corte de los últimos siete días, un circulito con lo nuevo desde que se miró —«me gusta»,
-  comentarios y visitas—, en una fila arriba de La Parrilla de la app; el número en el ícono;
-  hitos, racha y un aviso de lo bueno al día. Las fases 1 (los números cada hora), 2 (la fila, el
-  detalle y el número del ícono) y 3 (los hitos y la racha) están hechas; falta la 4 (el aviso). El diseño, con lo que cada red da y lo que YouTube no deja, en
-  `docs/superpowers/specs/2026-11-10-lo-que-trajo-design.md`. Después: llevarlo al panel.
+- **Lo que trajo, en el panel** (2026-11-11). Las cuatro fases de «Lo que trajo» están hechas en la
+  app del teléfono —la fila con lo nuevo de cada corte, el número del ícono, los hitos con su
+  celebración, la racha y el aviso de lo bueno—; el panel web no tiene nada de eso. Llevarlo a La
+  Parrilla del panel quedó fuera a propósito (el diseño, «Lo que no entra»:
+  `docs/superpowers/specs/2026-11-10-lo-que-trajo-design.md`). Las rutas y la lógica ya están en el
+  servidor (`src/lib/lo-que-trajo.ts`, `hitos.ts`, `racha.ts`).
 - **La Cocina en la portada (#324)** (2026-11-09). Una sección en `tu-parrilla.cl` que cuente
   qué entrega La Cocina, en cuánto tiempo y cómo se pide. Decidido por el dueño: el ejemplo del
   antes y el después son **solo sus dos mejores cortos**, que el equipo de contenido identifica

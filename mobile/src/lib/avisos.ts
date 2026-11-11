@@ -5,10 +5,11 @@ import { requireOptionalNativeModule } from 'expo'
 import { Platform } from 'react-native'
 import type * as Notificaciones from 'expo-notifications'
 
-import { RechazoApi, SesionCaducada, apiDelete, apiPost } from './api'
+import { RechazoApi, SesionCaducada, apiDelete, apiGet, apiPost, apiPut } from './api'
 
 // Los avisos al teléfono: lo que se quemó, un fierro que se enfría o se apaga, la pregunta del chef,
-// una comanda que terminó, la respuesta del equipo y el resumen de La Mesa. Los manda el servidor por
+// una comanda que terminó, la respuesta del equipo, el resumen de La Mesa y lo bueno de «Lo que
+// trajo» —un hito, o lo que trajo el día—, que se apaga aparte (`leerLoBueno`). Los manda el servidor por
 // el servicio de push de Expo (`src/lib/push/` en la raíz); acá se pide el permiso, se saca el token
 // de este teléfono y se registra, y se borra al apagarlos o al cerrar sesión.
 //
@@ -58,19 +59,25 @@ export type RutaDelAviso =
   | { pathname: '/(tabs)' }
   | { pathname: '/ajustes' }
   | { pathname: '/mesa' }
+  | { pathname: '/corte/[id]'; params: { id: string } }
   | { pathname: '/(tabs)/cocina'; params: { vista: 'comandas'; n: string } }
 
 /**
  * Adónde lleva tocar un aviso, según su tipo (`data.tipo`, que pone el servidor): el fierro y la
  * respuesta del equipo, a Ajustes (Los Fierros arriba, el libro al final); la pregunta del chef y la
- * comanda, a «Tus comandas» de La Cocina; el resumen de comentarios, a La Mesa; lo quemado, a La
- * Parrilla, y lo que no se reconoce, igual. `n` cambia en cada
+ * comanda, a «Tus comandas» de La Cocina; el resumen de comentarios, a La Mesa; un hito, al detalle
+ * de su corte (`data.id`); lo quemado y lo que trajo el día, a La Parrilla, y lo que no se
+ * reconoce, igual. `n` cambia en cada
  * toque, para que La Cocina vuelva a «Tus comandas» aunque ya estuviera abierta en otra parte.
  */
 export function rutaDelAviso(data: unknown, n: string = String(Date.now())): RutaDelAviso {
   const tipo = data && typeof data === 'object' ? (data as { tipo?: unknown }).tipo : null
   if (tipo === 'fierro' || tipo === 'sugerencia') return { pathname: '/ajustes' }
   if (tipo === 'comentarios') return { pathname: '/mesa' }
+  if (tipo === 'hito') {
+    const id = (data as { id?: unknown }).id
+    if (typeof id === 'string' && id) return { pathname: '/corte/[id]', params: { id } }
+  }
   if (tipo === 'pregunta' || tipo === 'comanda') return { pathname: '/(tabs)/cocina', params: { vista: 'comandas', n } }
   return { pathname: '/(tabs)' }
 }
@@ -115,7 +122,7 @@ async function prepararCanal(N: Modulo): Promise<void> {
   if (Platform.OS !== 'android') return
   await N.setNotificationChannelAsync(CANAL, {
     name: 'Avisos',
-    description: 'Lo que se quemó, las cuentas que se enfrían, el chef y La Mesa.',
+    description: 'Lo que se quemó, las cuentas que se enfrían, el chef, La Mesa y lo bueno de tus cortes.',
     importance: N.AndroidImportance.HIGH,
   })
 }
@@ -231,3 +238,26 @@ export async function reintentarBorrado(): Promise<void> {
 export function moduloDeAvisos(): Modulo | null {
   return modulo()
 }
+
+/**
+ * Si a la cuenta le llegan los avisos de lo bueno (`GET /api/mobile/push/bueno`). Null sin señal o
+ * con un sitio de antes que no tiene la ruta: Ajustes no muestra el botón.
+ */
+export async function leerLoBueno(token: string): Promise<boolean | null> {
+  try {
+    const { encendido } = await apiGet<{ encendido?: unknown }>('/api/mobile/push/bueno', token)
+    return typeof encendido === 'boolean' ? encendido : null
+  } catch (error) {
+    if (error instanceof SesionCaducada) throw error
+    return null
+  }
+}
+
+/** Enciende o apaga los avisos de lo bueno para la cuenta, en todos sus teléfonos. Devuelve cómo quedaron. */
+export async function guardarLoBueno(token: string, encendido: boolean): Promise<boolean> {
+  const r = await apiPut<{ encendido: boolean }>('/api/mobile/push/bueno', token, { encendido })
+  return r.encendido
+}
+
+export const NO_SE_PUDO_LO_BUENO = 'No se pudo cambiar. Revisa tu conexión y vuelve a intentarlo.'
+

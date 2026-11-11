@@ -1,6 +1,7 @@
 import 'server-only'
 import { and, eq, exists, gt, isNull, lte, or, sql } from 'drizzle-orm'
 import { getDb, postComments, pushTokens, socialAccounts, users } from '@/db'
+import { numeroDelIcono } from '@/lib/lo-que-trajo'
 import { avisoDeComentarios } from './avisos'
 import { avisarAlTelefono, noSalio } from './enviar'
 
@@ -19,7 +20,8 @@ export const MINUTOS_ENTRE_RESUMENES = 60
  *
  * La marca (`users.push_comentarios_hasta`) se toma antes de mandar, con el valor que se leyó en el
  * `where`, porque dos corridas pueden cruzarse; si Expo no aceptó ninguno, se suelta para la pasada
- * siguiente. Lo automático de una palabra clave ya se respondió solo, y no cuenta. Nunca lanza.
+ * siguiente. Lo automático de una palabra clave ya se respondió solo, y no cuenta. Lleva el número
+ * del ícono (`badge`), que estos comentarios acaban de subir. Nunca lanza.
  */
 export async function resumirComentarios(ahora: Date = new Date()): Promise<{ avisados: number }> {
   let avisados = 0
@@ -69,7 +71,8 @@ export async function resumirComentarios(ahora: Date = new Date()): Promise<{ av
         )
         .returning({ id: users.id })
       if (tomada.length === 0) continue
-      const enviado = await avisarAlTelefono(ownerId, () => avisoDeComentarios(d.n, d.redes))
+      const badge = await numeroDelIcono(ownerId, ahora)
+      const enviado = await avisarAlTelefono(ownerId, () => ({ ...avisoDeComentarios(d.n, d.redes), badge }))
       if (noSalio(enviado)) {
         await db
           .update(users)

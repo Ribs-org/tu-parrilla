@@ -22,7 +22,7 @@ export const PLATAFORMA_INVALIDA = '«plataforma» tiene que ser android o ios.'
  * Adónde lleva tocar el aviso. La app traduce cada uno a su pantalla (`rutaDelAviso`, en
  * `mobile/src/lib/avisos.ts`): el servidor no sabe las rutas del teléfono.
  */
-export type TipoDeAviso = 'comentarios' | 'quemado' | 'fierro' | 'pregunta' | 'comanda' | 'sugerencia'
+export type TipoDeAviso = 'comentarios' | 'quemado' | 'fierro' | 'pregunta' | 'comanda' | 'sugerencia' | 'hito' | 'bueno'
 
 /** Un aviso para el teléfono: lo que se lee en la notificación y adónde lleva tocarla. */
 export type AvisoAlTelefono = {
@@ -31,6 +31,11 @@ export type AvisoAlTelefono = {
   tipo: TipoDeAviso
   /** El id de lo que avisa (la comanda, el post, la sugerencia), si la pantalla lo usa. */
   id?: string
+  /**
+   * El número del ícono de la app (`numeroDelIcono`, en `src/lib/lo-que-trajo.ts`). Lo pone el
+   * iPhone al recibir el aviso; Android no lo usa. Sin él, el ícono no cambia.
+   */
+  badge?: number
 }
 
 export type MensajeExpo = {
@@ -41,6 +46,7 @@ export type MensajeExpo = {
   sound: 'default'
   priority: 'high'
   channelId: string
+  badge?: number
 }
 
 /**
@@ -74,6 +80,7 @@ export function mensajeExpo(token: string, aviso: AvisoAlTelefono): MensajeExpo 
     sound: 'default',
     priority: 'high',
     channelId: CANAL_ANDROID,
+    ...(aviso.badge !== undefined ? { badge: aviso.badge } : {}),
   }
 }
 

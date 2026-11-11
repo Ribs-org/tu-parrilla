@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest'
 import {
   avisoDeComanda,
   avisoDeComentarios,
+  avisoDeHito,
+  avisoDelDia,
   avisoDeFierro,
   avisoDePregunta,
   avisoDeQuemado,
@@ -82,5 +84,29 @@ describe('lo que dice cada aviso al teléfono', () => {
       id: 's-1',
     })
     expect(avisoDeRespuesta({ id: 's-1', respuesta: 'Ya quedó.' }, 'dia').titulo).toBe('Te respondimos en la caja de sugerencias')
+  })
+})
+
+describe('los avisos de lo bueno', () => {
+  it('un hito: corte de noche, pieza de día, con el comienzo del texto, y lleva al corte', () => {
+    expect(avisoDeHito({ postId: 'c-1', umbral: 1000, texto: 'El asado del domingo' }, 'noche')).toEqual({
+      titulo: 'Tu corte pasó las 1.000 vistas',
+      cuerpo: '«El asado del domingo». Míralo en Lo que trajo.',
+      tipo: 'hito',
+      id: 'c-1',
+    })
+    expect(avisoDeHito({ postId: 'c-1', umbral: 1_000_000, texto: '' }, 'dia')).toMatchObject({
+      titulo: 'Tu pieza pasó el millón de vistas',
+      cuerpo: 'Míralo en Lo que trajo.',
+    })
+  })
+
+  it('lo del día: solo lo que subió, en singular cuando es uno', () => {
+    expect(avisoDelDia({ meGusta: 1200, comentarios: 9 }, 'noche')).toEqual({
+      titulo: 'Lo que trajo hoy',
+      cuerpo: 'Hoy: +1.200 me gusta y +9 comentarios en tus cortes.',
+      tipo: 'bueno',
+    })
+    expect(avisoDelDia({ meGusta: 0, comentarios: 1 }, 'dia').cuerpo).toBe('Hoy: +1 comentario en tus piezas.')
   })
 })

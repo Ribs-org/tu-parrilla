@@ -710,7 +710,8 @@ JavaScript sobre el build 1.2.0 (ver `docs/pendientes.md`).
 Desde la 1.2.0 (2026-11-07), la app avisa en el teléfono lo mismo que el correo: lo que se quemó, una
 cuenta que se enfría o se apaga, una pregunta del chef, una comanda que terminó y la respuesta del
 equipo en el libro de sugerencias; y, sin correo, un resumen de los comentarios nuevos de La Mesa, uno
-por hora como mucho. Los manda el servidor (`src/lib/push/` en la raíz; ver «Avisos al teléfono» en el
+por hora como mucho, y lo bueno de «Lo que trajo» —un hito, o lo que trajo el día—, uno al día como
+mucho. Los manda el servidor (`src/lib/push/` en la raíz; ver «Avisos al teléfono» en el
 `README.md` de la raíz). Acá, `src/lib/avisos.ts` y `src/components/avisos.tsx`:
 
 - **Cuándo pregunta.** No al abrir: unos ocho segundos después de entrar, la primera vez, con la
@@ -728,8 +729,13 @@ por hora como mucho. Los manda el servidor (`src/lib/push/` en la raíz; ver «A
   se revocó (`MOBILE_TOKEN_VERSION`, «Si se pierde el teléfono»).
 - **Tocar un aviso** abre su pantalla (`rutaDelAviso`): el fierro y la respuesta del equipo, Ajustes;
   la pregunta del chef y la comanda, «Tus comandas» de La Cocina (`/cocina?vista=comandas`); los
-  comentarios, La Mesa (`/mesa`); lo quemado, La Parrilla. También si el aviso abrió la app cerrada
+  comentarios, La Mesa (`/mesa`); un hito, el detalle de su corte (`/corte/[id]`, con el `id` del
+  aviso); lo quemado y lo que trajo el día, La Parrilla. También si el aviso abrió la app cerrada
   (`getLastNotificationResponse`). Con la app abierta, el aviso se muestra igual, arriba.
+
+- **«Avisos de lo bueno»**, en Ajustes, debajo de «Los avisos» cuando están encendidos: se apagan
+  aparte, y son de la cuenta, no del teléfono (`GET`/`PUT /api/mobile/push/bueno`, en
+  `leerLoBueno` y `guardarLoBueno`). Sin señal, o con un sitio de antes, se ve el texto sin el botón.
 
 **Con y sin el módulo nativo**, como el portapapeles y el audio: `expo-notifications` es nativo y
 entra con el build 1.2.0; un binario que no lo trae revienta al cargarlo, porque pide sus módulos

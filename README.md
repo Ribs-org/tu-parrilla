@@ -29,7 +29,7 @@ tus números.
 | `/api/sugerencias/respuesta` | `POST` con una llave **del admin** (o `SCHEDULE_API_KEY`): la respuesta del equipo a lo que alguien escribió en el libro de sugerencias, por el número de su issue o por su id, para responder sin el navegador. Con la llave de otra cuenta, `403` (ver «El libro de sugerencias») |
 | `/api/bodega…` | Con la misma llave: lo que hay en la cámara de frío de La Cocina (`GET /api/bodega`) y las subidas por partes para guardar ahí (`/api/bodega/subidas…`), las mismas del panel y del teléfono (ver «La Cocina») |
 | `/api/admin/…` | Lo que el panel llama desde el navegador, con la cookie de la sesión: la firma de una subida directa (`upload-url`), las subidas por partes a la cámara de frío de La Cocina (`cocina/subidas…`) y el pulso que mantiene al día sus tarjetas (`cocina/pulso`; ver «La Cocina») y la planilla de Excel de Los Números (`planilla`, y `planilla/adelanto` para lo que no cabe; ver «Llevar para la casa») |
-| `/api/mobile/…` | La API de la app del teléfono, con el token de su sesión (ver `mobile/README.md`); `cocina…` es La Cocina desde el teléfono: lo que muestra, las subidas por partes a la cámara de frío, cambiar y sacar lo de adentro, «Mandar al chef», cancelar, contestarle al chef y el mesón con «Programar» y «Descartar» (ver «La Cocina»); `comentarios…` es La Mesa desde el teléfono: la cola, el número de La Parrilla, «Enviar», «Descartar» y otro borrador (ver «Responder comentarios»); `push` registra el teléfono para los avisos y `push/{token}` lo borra (ver «Avisos al teléfono»); `puente` da la dirección de un solo uso de `/ingresar/puente` (ver `mobile/README.md`, «La primera vuelta»); `lo-que-trajo` es la fila de La Parrilla con lo nuevo de cada corte y el número del ícono, y `cortes/{id}` su detalle y la marca de que se miró (ver «Lo que trajo, en el teléfono»); `session`, al canjear el código, devuelve el token y `sinRedes`, si la cuenta no tiene ninguna red conectada; `schedule/accounts/{id}/tiktok` es `creator_info` para el bloque de TikTok de Publicar (ver `mobile/README.md`, «TikTok y la palabra clave») |
+| `/api/mobile/…` | La API de la app del teléfono, con el token de su sesión (ver `mobile/README.md`); `cocina…` es La Cocina desde el teléfono: lo que muestra, las subidas por partes a la cámara de frío, cambiar y sacar lo de adentro, «Mandar al chef», cancelar, contestarle al chef y el mesón con «Programar» y «Descartar» (ver «La Cocina»); `comentarios…` es La Mesa desde el teléfono: la cola, el número de La Parrilla, «Enviar», «Descartar» y otro borrador (ver «Responder comentarios»); `push` registra el teléfono para los avisos, `push/{token}` lo borra y `push/bueno` enciende o apaga los avisos de lo bueno (ver «Avisos al teléfono»); `puente` da la dirección de un solo uso de `/ingresar/puente` (ver `mobile/README.md`, «La primera vuelta»); `lo-que-trajo` es la fila de La Parrilla con lo nuevo de cada corte, sus hitos, la racha y el número del ícono, `cortes/{id}` su detalle y la marca de que se miró, y `hitos/{id}/celebrado` la marca de una celebración (ver «Lo que trajo, en el teléfono»); `session`, al canjear el código, devuelve el token y `sinRedes`, si la cuenta no tiene ninguna red conectada; `schedule/accounts/{id}/tiktok` es `creator_info` para el bloque de TikTok de Publicar (ver `mobile/README.md`, «TikTok y la palabra clave») |
 | `/api/cron/…` | Las corridas programadas: la publicación, la sincronización —que también reintenta los mensajes del libro de sugerencias que no salieron a GitHub y relee en Mercado Pago las suscripciones del plan pagado— y los números de cada hora. Solo con `CRON_SECRET` |
 | `/api/pagos/mercadopago` | `POST` de Mercado Pago cuando cambia una suscripción al plan pagado o uno de sus cobros. Pública y sin sesión: la llave es la firma (`MERCADOPAGO_WEBHOOK_SECRET`). Ver «Los planes» |
 | `/api/track/…` | Las balizas de visitas y clics de las páginas públicas |
@@ -1739,7 +1739,8 @@ falla deja su error en el informe y en el log (`[reciente] …`) y las demás si
 contesta 200 igual, y 500 solo si se rompió la corrida entera.
 
 Después de leer, la misma corrida busca los hitos nuevos de «Lo que trajo» (`detectarHitos`, abajo)
-y la respuesta queda `{"informe": […], "hitos": {"nuevos": n}}`; la sincronización diaria hace lo
+y manda el aviso de lo bueno a quien le toque (`avisarLoBueno`, ver «Avisos al teléfono»); la
+respuesta queda `{"informe": […], "hitos": {"nuevos": n}, "bueno": {"avisados": n}}`; la sincronización diaria hace lo
 mismo apenas termina, y lo devuelve como `hitos` junto a su `report`. Si la detección falla, `hitos`
 trae `{"error": …}`, el detalle va al log y la lectura igual quedó escrita.
 
@@ -1799,8 +1800,9 @@ nada cuenta hasta ayer: se apaga a medianoche. La app la muestra desde dos días
 | `POST /api/mobile/hitos/{id}/celebrado` | La app mostró la celebración: queda celebrado, con los más bajos del mismo corte. Devuelve `{ celebrado: true }`. |
 
 Un corte que no existe, es de otro o no salió contesta `404` con «Ese corte no está, o todavía no
-salió en ninguna red.», sin distinguir; un hito, con «Ese hito no está.». Lo que viene después —el
-aviso de lo bueno— está en el diseño (`docs/superpowers/specs/2026-11-10-lo-que-trajo-design.md`).
+salió en ninguna red.», sin distinguir; un hito, con «Ese hito no está.». El aviso de lo bueno al
+teléfono —un hito raro, o lo que trajo el día— está en «Avisos al teléfono». El diseño entero, en
+`docs/superpowers/specs/2026-11-10-lo-que-trajo-design.md`.
 
 ### Avisos por correo
 
@@ -1853,7 +1855,7 @@ el teléfono falla, el correo no se entera.
 Salen por el servicio de push de Expo (`https://exp.host/--/api/v2/push/send`), que los entrega por
 Firebase Cloud Messaging en Android y por el servicio de Apple en iPhone. El código, en
 `src/lib/push/`: el cliente de Expo y los textos sin base (`expo.ts`, `avisos.ts`), y lo que lee y
-borra (`enviar.ts`, `comentarios.ts`).
+borra (`enviar.ts`, `comentarios.ts`, `bueno.ts`).
 
 - **Una publicación que se quemó**: «Se quemó: <Red>» (de día, «Se echó a perder»), con el comienzo
   del texto y el motivo. Uno por destino, cuando sale el correo.
@@ -1870,7 +1872,22 @@ borra (`enviar.ts`, `comentarios.ts`).
   La Mesa», con las redes, sin el texto de nadie. Sale en la pasada del cron siguiente a que entre un
   comentario pendiente, y después como mucho uno por hora; cuenta los que entraron desde el resumen
   anterior y siguen esperando respuesta, sin lo que respondió una palabra clave. La marca es
-  `users.push_comentarios_hasta`. Este no tiene correo.
+  `users.push_comentarios_hasta`. Este no tiene correo. Lleva el número del ícono (`badge`, ver
+  abajo).
+- **Lo bueno de «Lo que trajo»** (`bueno.ts`), uno al día como mucho, entre las 9 y las 22 del
+  dueño, sin correo: un **hito** raro de las últimas 24 horas que la app no haya celebrado todavía
+  («Tu corte pasó las 1.000 vistas», con el comienzo del texto; abre el detalle del corte) o, si en el
+  día no hubo, desde las 19:00, **lo que trajo el día** («Hoy: +120 me gusta y +9 comentarios en tus
+  cortes.»: la lectura de hoy de cada publicación de sus cortes menos la anterior, sin YouTube). Lo
+  manda la lectura de cada hora (`/api/cron/numeros-recientes`), después de buscar los hitos. La
+  marca es `users.push_bueno_en` y la de cada hito `hitos.avisado_en`; avisado uno, los demás que
+  esperaban quedan resueltos. Se apaga aparte, para toda la cuenta: `users.push_bueno`, con `GET` y
+  `PUT /api/mobile/push/bueno` (`{ "encendido": false }`, o `400` con ««encendido» tiene que ser
+  true o false.»).
+
+**El número del ícono** viaja como `badge` en el resumen de La Mesa y en el aviso de lo bueno: el
+mismo de la fila de «Lo que trajo» (`numeroDelIcono`). Lo pone el iPhone al recibir el aviso;
+Android no lo usa.
 
 Cada teléfono registra su token de Expo en `push_tokens` (`POST /api/mobile/push`), una fila por
 instalación, del dueño de la sesión. El token es único: si en el mismo teléfono entra otra cuenta, la
@@ -2592,7 +2609,7 @@ src/
     empresa.ts             quién presta el servicio: lo leen la portada, privacidad y términos
     portada-numeros.ts     el contador de la portada: las vistas y los «me gusta» de todas las cuentas conectadas, sumados, sin YouTube (§III.E.4.h) y guardados un cuarto de hora
     avisos/                la caída de una cuenta y el resumen del día: las reglas sin base y lo que lee y manda
-    push/                  los avisos al teléfono por el servicio de push de Expo: el cliente y los textos sin base, el token de cada teléfono, y el resumen de La Mesa
+    push/                  los avisos al teléfono por el servicio de push de Expo: el cliente y los textos sin base, el token de cada teléfono, el resumen de La Mesa y el aviso de lo bueno de «Lo que trajo»
     sugerencias/           el libro de sugerencias: qué se acepta y cómo queda el issue (sin base), el cliente de GitHub, guardar y reintentar, y la respuesta del equipo (lo que se acepta, el correo y el comentario sin base en respuestas.ts; guardarla, leerla y avisar en responder.ts)
     social/
       instagram-login.ts   el login de Instagram, sin página de Facebook: el host, los permisos y cómo leer su token

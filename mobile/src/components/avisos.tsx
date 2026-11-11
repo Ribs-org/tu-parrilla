@@ -5,12 +5,15 @@ import { useFocusEffect, useRouter, type Href } from 'expo-router'
 import { SesionCaducada } from '../lib/api'
 import {
   NO_SE_PUDO_APAGAR,
+  NO_SE_PUDO_LO_BUENO,
   SIN_PERMISO,
   ahoraNo,
   alAbrir,
   apagar,
   encender,
+  guardarLoBueno,
   hayAvisos,
+  leerLoBueno,
   leerPermiso,
   leerPreferencia,
   moduloDeAvisos,
@@ -31,9 +34,9 @@ const ESPERA_PARA_PREGUNTAR_MS = 8_000
 /** Lo que se le cuenta en la pregunta de la primera vez, con las palabras del modo. */
 const PARA_QUE: Record<Tema, string> = {
   noche:
-    'Cuando algo se quema, una cuenta se enfría, el chef te pregunta o te deja una comanda, el equipo te responde o te llegan comentarios a La Mesa. Se apagan cuando quieras en Ajustes.',
+    'Cuando algo se quema, una cuenta se enfría, el chef te pregunta o te deja una comanda, el equipo te responde, te llegan comentarios a La Mesa o tus cortes traen algo bueno. Se apagan cuando quieras en Ajustes.',
   dia:
-    'Cuando algo se echa a perder, una cuenta se desafila, el chef te pregunta o te deja una comanda, el equipo te responde o te llegan comentarios a La Mesa. Se apagan cuando quieras en Ajustes.',
+    'Cuando algo se echa a perder, una cuenta se desafila, el chef te pregunta o te deja una comanda, el equipo te responde, te llegan comentarios a La Mesa o tus piezas traen algo bueno. Se apagan cuando quieras en Ajustes.',
 }
 
 /**
@@ -121,6 +124,13 @@ const QUE_AVISA: Record<Tema, string> = {
   dia: 'lo que se echó a perder, las cuentas que se desafilan o quedan sin filo, las preguntas del chef, las comandas que terminan, las respuestas del equipo y, una vez por hora como mucho, los comentarios nuevos de La Mesa. El correo te sigue llegando igual.',
 }
 
+/** Qué trae el aviso de lo bueno (`src/lib/push/bueno.ts` en la raíz), con las palabras del modo. */
+const QUE_ES_LO_BUENO: Record<Tema, string> = {
+  noche:
+    'Uno al día como mucho, entre las 9 y las 22: cuando un corte pasa un número de vistas que no es lo de siempre, o desde las 19:00, lo que trajeron tus cortes en el día.',
+  dia: 'Uno al día como mucho, entre las 9 y las 22: cuando una pieza pasa un número de vistas que no es lo de siempre, o desde las 19:00, lo que trajeron tus piezas en el día.',
+}
+
 /**
  * El bloque «Los avisos» de Ajustes: encenderlos o apagarlos en este teléfono. Apagar borra el token
  * del servidor, así que ya no sale ninguno a este teléfono; el correo sigue igual. Sin el módulo
@@ -194,6 +204,69 @@ export function AjusteDeAvisos() {
           />
         </View>
       ) : null}
+      {estado === 'encendidos' ? <AvisosDeLoBueno /> : null}
     </>
+  )
+}
+
+/**
+ * «Avisos de lo bueno», debajo de los avisos cuando están encendidos: se apagan aparte, y son de la
+ * cuenta, no del teléfono (`PUT /api/mobile/push/bueno`). Sin señal o con un sitio de antes, solo
+ * el texto, sin el botón.
+ */
+function AvisosDeLoBueno() {
+  const colores = useColores()
+  const { tema } = useTema()
+  const { token, salir } = useSesion()
+  const { avisar } = useVentanas()
+  const [encendido, setEncendido] = useState<boolean | null>(null)
+  const [ocupado, setOcupado] = useState(false)
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!token) return
+      let vigente = true
+      leerLoBueno(token)
+        .then((valor) => {
+          if (vigente) setEncendido(valor)
+        })
+        .catch((error) => {
+          if (error instanceof SesionCaducada) void salir()
+        })
+      return () => {
+        vigente = false
+      }
+    }, [token, salir]),
+  )
+
+  async function cambiar() {
+    if (!token || encendido === null) return
+    setOcupado(true)
+    try {
+      setEncendido(await guardarLoBueno(token, !encendido))
+    } catch (error) {
+      if (error instanceof SesionCaducada) return void salir()
+      await avisar('No se pudo cambiar', NO_SE_PUDO_LO_BUENO)
+    } finally {
+      setOcupado(false)
+    }
+  }
+
+  return (
+    <View style={{ gap: 6, marginTop: 6 }}>
+      <Text style={{ color: colores.texto, fontSize: 14, fontWeight: '600' }}>Avisos de lo bueno</Text>
+      <Text style={{ color: colores.suave, fontSize: 12 }}>
+        {encendido === false ? `Apagados. Encendidos, te llega: ${QUE_ES_LO_BUENO[tema].charAt(0).toLowerCase()}${QUE_ES_LO_BUENO[tema].slice(1)}` : QUE_ES_LO_BUENO[tema]}
+      </Text>
+      {encendido !== null ? (
+        <View style={{ flexDirection: 'row' }}>
+          <Boton
+            texto={encendido ? 'Apagar los avisos de lo bueno' : 'Encender los avisos de lo bueno'}
+            onPress={() => void cambiar()}
+            deshabilitado={ocupado}
+          />
+        </View>
+      ) : null}
+    </View>
   )
 }

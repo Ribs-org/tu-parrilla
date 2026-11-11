@@ -19,6 +19,8 @@ const USUARIO: Usuario = {
   cocinaDesde: null,
   bodegaBytes: null,
   pushComentariosHasta: null,
+  pushBueno: true,
+  pushBuenoEn: null,
   plan: 'gratis',
   planHasta: null,
   planOrigen: null,
