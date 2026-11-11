@@ -4,8 +4,8 @@ import { prepararBase, URL_PRUEBAS } from '@/lib/pruebas/base-de-pruebas'
 
 // Las suscripciones contra una Postgres de verdad, con Mercado Pago doblado: empezar una deja la fila
 // y el enlace (y lo reusa), autorizarla da el pagado hasta el próximo cobro más la gracia, un cobro
-// aprobado se anota y corre la fecha, cancelar deja lo pagado, una cortesía sin fecha no se acorta, y
-// nadie ve la suscripción de otro.
+// aprobado se anota y corre la fecha, releerla sin un cobro nuevo no la corre, cancelar deja lo
+// pagado, una cortesía sin fecha no se acorta, y nadie ve la suscripción de otro.
 
 vi.mock('server-only', () => ({}))
 vi.stubEnv('MERCADOPAGO_ACCESS_TOKEN', 'TEST-token')
@@ -65,8 +65,9 @@ describe.skipIf(!URL_PRUEBAS)('las suscripciones, contra una Postgres de verdad'
     expect(cuerpo).toMatchObject({
       payer_email: ana.correo,
       back_url: VOLVER,
-      auto_recurring: { transaction_amount: 34990, currency_id: 'CLP', free_trial: { frequency: 7, frequency_type: 'days' } },
+      auto_recurring: { transaction_amount: 34990, currency_id: 'CLP', start_date: '2026-11-15T12:00:00.000Z' },
     })
+    expect((cuerpo as { auto_recurring: object }).auto_recurring).not.toHaveProperty('free_trial')
 
     expect(await s.empezarSuscripcion(ana.id, ana.correo, VOLVER, AHORA)).toEqual(r)
     expect(mp.crearSuscripcion).toHaveBeenCalledTimes(1)
@@ -140,6 +141,57 @@ describe.skipIf(!URL_PRUEBAS)('las suscripciones, contra una Postgres de verdad'
     expect(despues.persona.planHasta!.getTime()).toBe(hasta.getTime())
     // Y pasada la fecha, el gratis, sin que nadie lo escriba.
     expect((await planDe(ana.id, new Date(hasta.getTime() + 1))).plan.clave).toBe('gratis')
+  })
+
+  it('releer cada día no alarga la prueba aunque el próximo cobro se corra', async () => {
+    const ana = await persona()
+    comoLaCrea('pre-sin-pagar')
+    await s.empezarSuscripcion(ana.id, ana.correo, VOLVER, AHORA)
+    const referencia = (mp.crearSuscripcion.mock.calls[0]![0] as { external_reference: string }).external_reference
+    const autorizada = { id: 'pre-sin-pagar', status: 'authorized', external_reference: referencia }
+    mp.leerSuscripcion.mockResolvedValueOnce({ ...autorizada, next_payment_date: PROXIMO })
+    await s.sincronizarSuscripcion('pre-sin-pagar', AHORA)
+    const primera = (await planDe(ana.id, AHORA)).persona.planHasta!
+
+    // El primer cobro se rechaza y Mercado Pago lo reintenta: la fecha avanza, pero no entra nada.
+    for (const dia of ['2026-11-25', '2026-12-05', '2026-12-15']) {
+      mp.leerSuscripcion.mockResolvedValueOnce({ ...autorizada, next_payment_date: `${dia}T12:00:00.000-03:00` })
+      await s.sincronizarSuscripcion('pre-sin-pagar', new Date(`${dia}T00:00:00Z`))
+    }
+    const despues = (await planDe(ana.id, AHORA)).persona.planHasta!
+    // Lo más que da la prueba: sus 7 días, el día que vale el enlace y la gracia, desde que se pidió.
+    expect(despues.getTime()).toBeLessThanOrEqual(AHORA.getTime() + (7 + 1 + GRACIA_DIAS) * 86_400_000)
+    expect(despues.getTime() - primera.getTime()).toBeLessThanOrEqual(86_400_000)
+  })
+
+  it('sin prueba: unos días al autorizar, y el resumen de Mercado Pago cuenta como cobro; cancelar con «canceled»', async () => {
+    const { users } = await esquema()
+    const ana = await persona()
+    await (await db()).update(users).set({ pruebaUsadaEn: new Date('2026-01-01T00:00:00Z') }).where(eq(users.id, ana.id))
+    comoLaCrea('pre-sin-prueba')
+    await s.empezarSuscripcion(ana.id, ana.correo, VOLVER, AHORA)
+    const referencia = (mp.crearSuscripcion.mock.calls[0]![0] as { external_reference: string }).external_reference
+    expect((mp.crearSuscripcion.mock.calls[0]![0] as { auto_recurring: object }).auto_recurring).not.toHaveProperty('start_date')
+    const autorizada = { id: 'pre-sin-prueba', status: 'authorized', external_reference: referencia }
+
+    mp.leerSuscripcion.mockResolvedValueOnce({ ...autorizada, next_payment_date: '2026-11-08T13:00:00.000Z' })
+    await s.sincronizarSuscripcion('pre-sin-prueba', AHORA)
+    expect((await planDe(ana.id, AHORA)).persona.planHasta!.getTime()).toBe(AHORA.getTime() + 3 * 86_400_000)
+
+    // El aviso del cobro se perdió, pero la suscripción dice cuándo cobró la última vez.
+    mp.leerSuscripcion.mockResolvedValueOnce({
+      ...autorizada,
+      next_payment_date: '2026-12-08T13:00:00.000Z',
+      summarized: { last_charged_date: '2026-11-08T13:05:00.000Z', charged_quantity: 1, semaphore: 'green' },
+    })
+    await s.sincronizarSuscripcion('pre-sin-prueba', AHORA)
+    expect((await planDe(ana.id, AHORA)).persona.planHasta!.getTime()).toBe(
+      new Date('2026-12-08T13:00:00.000Z').getTime() + GRACIA_DIAS * 86_400_000,
+    )
+
+    mp.cancelarSuscripcion.mockResolvedValueOnce({ ...autorizada, status: 'canceled' })
+    expect(await s.cancelarSuscripcionDe(ana.id, AHORA)).toEqual({ ok: true })
+    expect(await s.suscripcionVivaDe(ana.id)).toBeNull()
   })
 
   it('una cortesía sin fecha no se acorta por una suscripción', async () => {
