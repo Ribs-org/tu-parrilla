@@ -288,6 +288,13 @@
       "when": 1794365795065,
       "tag": "0040_cortes_vistos",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1794402095735,
+      "tag": "0041_hitos",
+      "breakpoints": true
     }
   ]
 }

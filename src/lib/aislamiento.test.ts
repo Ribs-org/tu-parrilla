@@ -131,6 +131,8 @@ const { leerAjuste } = await import('./ajustes')
 const { leerLoPagado, tieneAnuncios } = await import('./lo-pagado')
 const { leerProgramados } = await import('./schedule-leer')
 const { numerosDeLosCortes } = await import('./lo-que-trajo')
+const { celebrar, hitosDeLosCortes, porCelebrar } = await import('./hitos')
+const { leerRacha } = await import('./racha')
 const { listarLlaves, crearLlave } = await import('./llaves')
 const { leerResumen } = await import('./avisos/run')
 const { archivarQuemados, archivarDestino } = await import('./social/publish/archivar')
@@ -503,6 +505,33 @@ describe('aislamiento por dueño (SQL generado, sin base)', () => {
     expect(comentarios.sql).toMatch(/from "social_accounts" where "social_accounts"."owner_id" = \$/)
     // YouTube no entra en los «me gusta»; sus comentarios de La Mesa, sí.
     expect(resultado[0]!.nuevo).toEqual({ meGusta: 10, comentarios: 3, visitas: 2 })
+  })
+
+  it('hitos: hitosDeLosCortes, porCelebrar y celebrar atan los hitos al dueño, y el corte por celebrar también', async () => {
+    esperarFiltradoPorDueno((await todasLasConsultas(() => hitosDeLosCortes(DUENO, ['post-1'])))[0]!)
+    capturas.length = 0
+
+    // porCelebrar: los hitos del dueño, y después el corte de cada uno, también por dueño.
+    const porCelebrarSql = await consultasEncadenadas(() => porCelebrar(DUENO), [[['hito-1', 'post-1', 1000]]])
+    expect(porCelebrarSql).toHaveLength(2)
+    esperarFiltradoPorDueno(porCelebrarSql[0]!)
+    esperarFiltradoPorDueno(porCelebrarSql[1]!)
+    capturas.length = 0
+
+    // celebrar: el hito tiene que ser del dueño, y lo que marca también va atado a él.
+    const celebrarSql = await consultasEncadenadas(
+      () => celebrar(DUENO, '6f1c2a4e-1b7d-4c3a-9e0f-2a5b8c7d9e10', new Date('2026-11-11T12:00:00Z')),
+      [[['post-1', 1000]]],
+    )
+    expect(celebrarSql).toHaveLength(2)
+    esperarFiltradoPorDueno(celebrarSql[0]!)
+    esperarFiltradoPorDueno(celebrarSql[1]!)
+  })
+
+  it('racha: leerRacha cuenta solo lo publicado del dueño', async () => {
+    const consultas = await todasLasConsultas(() => leerRacha(DUENO, new Date('2026-11-11T12:00:00Z'), 'America/Santiago'))
+    expect(consultas).toHaveLength(1)
+    esperarFiltradoPorDueno(consultas[0]!)
   })
 
   it('schedule-leer: leerProgramados ata los posts al dueño, y su media va por los ids ya filtrados', async () => {

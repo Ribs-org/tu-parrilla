@@ -811,6 +811,32 @@ export const cortesVistos = pgTable(
 ).enableRLS()
 
 /**
+ * Los hitos de un corte: cuando sus vistas, sumadas en sus redes sin YouTube, pasan 100, 1.000,
+ * 10.000, 100.000 o 1.000.000 (`UMBRALES`, en `src/lib/hitos.ts`). Uno por corte y umbral; los
+ * detecta cada lectura de los números (`detectarHitos`) y no se borran si las vistas bajan.
+ *
+ * `alcanzadoEn` es nulo en los que el corte ya traía al estrenarse los hitos: la migración 0041 los
+ * dejó puestos y celebrados, sin fecha, porque no se sabe cuándo los pasó. `celebradoEn`: cuando la
+ * app mostró la celebración; nulo, todavía por celebrar.
+ */
+export const hitos = pgTable(
+  'hitos',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    postId: uuid('post_id')
+      .notNull()
+      .references(() => scheduledPosts.id, { onDelete: 'cascade' }),
+    ownerId: uuid('owner_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    umbral: integer('umbral').notNull(),
+    alcanzadoEn: timestamp('alcanzado_en', { withTimezone: true }),
+    celebradoEn: timestamp('celebrado_en', { withTimezone: true }),
+  },
+  (t) => [unique('hitos_post_umbral_key').on(t.postId, t.umbral), index('hitos_owner_idx').on(t.ownerId)],
+).enableRLS()
+
+/**
  * La palabra clave de un post programado y qué responder cuando alguien la comenta. Una
  * por post; se edita después de publicar (a diferencia de `opciones`), así que vive en
  * su propia tabla y no en el post. `palabra` se guarda ya normalizada.

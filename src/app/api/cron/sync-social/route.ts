@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { enviarResumenes } from '@/lib/avisos/run'
+import { detectarHitosEnLaCorrida } from '@/lib/hitos'
 import { purgarYoutubeViejo } from '@/lib/social/retencion-youtube'
 import { syncAll } from '@/lib/social/sync'
 import { clienteGithub } from '@/lib/sugerencias/github'
@@ -24,6 +25,9 @@ export async function GET(request: Request) {
     // the orchestrator running correctly and telling us three connectors failed: each one
     // wrote its own `lastSyncError`, so the connection cards will say so. Nothing is lost.
     const report = await syncAll()
+    // Los hitos que dejó la lectura del día (`hitos.ts`), en cuanto termina. Si fallan, la
+    // lectura ya quedó escrita y la de la hora siguiente los encuentra.
+    const hitos = await detectarHitosEnLaCorrida(new Date())
     // Después del sync y por su cuenta: si la retención falla, el sync del día ya quedó
     // escrito, y lo que no se borró hoy se borra mañana. El error va al log con su
     // nombre, porque es la única señal de que un dato de YouTube se está pasando del
@@ -62,7 +66,7 @@ export async function GET(request: Request) {
       console.error('Falló la relectura de las suscripciones:', String(error).slice(0, 300))
       pagos = { error: 'La relectura de las suscripciones falló; ver el log.' }
     }
-    return NextResponse.json({ report, retencion, resumenes, sugerencias, pagos })
+    return NextResponse.json({ report, hitos, retencion, resumenes, sugerencias, pagos })
   } catch (error) {
     // Reaching here is the other case entirely: syncAll settles every network on its own,
     // so a throw is the orchestrator itself breaking, before any per-network catch could

@@ -788,8 +788,8 @@ diciendo «Sin suscripción», y es cierto.
 - **Lo que trajo: la app que se siente red social** (pedido y diseñado el 2026-11-10). En cada
   corte de los últimos siete días, un circulito con lo nuevo desde que se miró —«me gusta»,
   comentarios y visitas—, en una fila arriba de La Parrilla de la app; el número en el ícono;
-  hitos, racha y un aviso de lo bueno al día. Las fases 1 (los números cada hora) y 2 (la fila, el
-  detalle y el número del ícono) están hechas; faltan la 3 (hitos y racha) y la 4 (el aviso). El diseño, con lo que cada red da y lo que YouTube no deja, en
+  hitos, racha y un aviso de lo bueno al día. Las fases 1 (los números cada hora), 2 (la fila, el
+  detalle y el número del ícono) y 3 (los hitos y la racha) están hechas; falta la 4 (el aviso). El diseño, con lo que cada red da y lo que YouTube no deja, en
   `docs/superpowers/specs/2026-11-10-lo-que-trajo-design.md`. Después: llevarlo al panel.
 - **La Cocina en la portada (#324)** (2026-11-09). Una sección en `tu-parrilla.cl` que cuente
   qué entrega La Cocina, en cuánto tiempo y cómo se pide. Decidido por el dueño: el ejemplo del

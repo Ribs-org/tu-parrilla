@@ -4,7 +4,8 @@ import { useFocusEffect, useRouter } from 'expo-router'
 import { TarjetaDelChef } from '../../components/tarjeta-del-chef'
 import { CorteProgramado, CorteServido } from '../../components/corte-programado'
 import { FiltroDeRedes } from '../../components/filtro-de-redes'
-import { FilaLoQueTrajo, useLoQueTrajo } from '../../components/lo-que-trajo'
+import { CelebracionDeHitos } from '../../components/celebracion'
+import { FilaLoQueTrajo, RachaDeLaParrilla, useLoQueTrajo } from '../../components/lo-que-trajo'
 import { IconoPoner } from '../../components/iconos'
 import { AccesoALaMesa } from '../../components/mesa'
 import { Grilla, LineaDeAhora, MezclaDelDia, ResumenDelDia, RotuloDia } from '../../components/parrilla'
@@ -179,6 +180,8 @@ export default function LaParrilla() {
 
   return (
     <Pantalla refrescando={cargando} onRefrescar={refrescarTodo}>
+      {/* Los días seguidos con algo servido, desde dos. */}
+      <RachaDeLaParrilla racha={loQueTrajo.data?.racha} />
       <Text style={{ color: colores.suave, fontSize: 13 }}>lo que viene y cómo salió lo que ya se fue</Text>
       <Sello texto={sello} />
 
@@ -358,6 +361,8 @@ export default function LaParrilla() {
         {pieDeAyer(servidosAyer(data.posts, hoy), tema)}
       </Text>
       {selector}
+      {/* Un corte que pasó 100, 1.000, 10.000… vistas: el fuego cruza la pantalla, una vez. */}
+      <CelebracionDeHitos hitos={loQueTrajo.data?.porCelebrar} />
     </Pantalla>
   )
 }

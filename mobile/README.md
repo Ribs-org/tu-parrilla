@@ -403,6 +403,20 @@ gusta», está en el README de la raíz («Lo que trajo, en el teléfono»).
   `setBadgeCountAsync` en Android), sin cargar `expo-notifications`. Al salir de la cuenta vuelve
   a cero.
 
+- **La racha** (`RachaDeLaParrilla`, en el mismo archivo) va primera en La Parrilla, con lo que
+  trae la fila (`racha`); desde dos días. **La llamita** de una burbuja es su hito más alto
+  (`hito`), y el detalle lista todos.
+- **La celebración** (`src/components/celebracion.tsx`) sale sobre La Parrilla con lo que trae la
+  fila en `porCelebrar`, uno detrás de otro: un `Modal` con una fila de llamas que cruza con
+  `Animated` y la tarjeta del corte. Al mostrarla avisa al servidor
+  (`POST /api/mobile/hitos/{id}/celebrado`) y anota el id en AsyncStorage
+  (`hitos-celebrados`, los últimos 50): lo guardado de la vez anterior puede traer un hito que ya
+  se celebró, y sin esa lista se celebraría otra vez al abrir, antes de que llegue lo nuevo. Con
+  «Quitar animaciones», sin las llamas.
+- **La llama** (`src/components/llama.tsx`) está dibujada con vistas —un cuadrado con tres esquinas
+  redondas, girado y estirado— y con `Animated` del núcleo, no con SVG ni Reanimated: `react-native-svg`
+  no está en la 1.1.0, y así lo mismo le llega por aire. De día es la llama azul del soplete.
+
 **El número del ícono es solo de la 1.2.0**: el módulo nativo entró con los avisos, y la 1.1.0 no
 lo trae. Ahí `requireOptionalNativeModule` devuelve null y el ícono no cambia; la fila, el detalle
 y el número de la pestaña andan igual. Por eso no se importa `expo-notifications`: la rama

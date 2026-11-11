@@ -367,7 +367,7 @@ Los dos perfiles de ejemplo están para que los edites, no para que los borres y
 de cero.
 
 Cada fila de cada tabla (perfiles, cuentas, posts, borradores, comentarios, ajustes, llaves
-de API, anuncios y promociones —por la cuenta conectada de la que cuelgan—, lo escrito en el libro de sugerencias con su respuesta, la última vez que miraste cada corte en el teléfono, y las marcas, comandas, insumos, materiales de la cámara de frío, subidas y creativos de La
+de API, anuncios y promociones —por la cuenta conectada de la que cuelgan—, lo escrito en el libro de sugerencias con su respuesta, la última vez que miraste cada corte en el teléfono y los hitos de cada uno, y las marcas, comandas, insumos, materiales de la cámara de frío, subidas y creativos de La
 Cocina, con las preguntas del chef) tiene dueño: el panel solo te muestra lo tuyo, nunca lo de otro usuario invitado. Lo mismo
 la API: lo que entra con una llave es del dueño de la llave, y un agente con la tuya no ve
 ni toca lo de nadie más. Tu fila de usuario —el nombre, la zona y el modo del panel— la
@@ -1738,6 +1738,11 @@ lo que no alcanzó dice `saltada` en el informe y queda para la hora siguiente. 
 falla deja su error en el informe y en el log (`[reciente] …`) y las demás siguen; la ruta
 contesta 200 igual, y 500 solo si se rompió la corrida entera.
 
+Después de leer, la misma corrida busca los hitos nuevos de «Lo que trajo» (`detectarHitos`, abajo)
+y la respuesta queda `{"informe": […], "hitos": {"nuevos": n}}`; la sincronización diaria hace lo
+mismo apenas termina, y lo devuelve como `hitos` junto a su `report`. Si la detección falla, `hitos`
+trae `{"error": …}`, el detalle va al log y la lectura igual quedó escrita.
+
 ### Lo que trajo, en el teléfono
 
 Arriba de La Parrilla de la app, debajo de La Mesa, una fila con una burbuja por cada corte que
@@ -1766,13 +1771,32 @@ lee la fila; en el ícono, solo desde la 1.2.0 y en los lanzadores que muestran 
 
 | Ruta | Qué hace |
 |---|---|
-| `GET /api/mobile/lo-que-trajo` | La fila: cada corte como lo dibuja La Parrilla (`src/lib/cortes-movil.ts`) con `nuevo` (`meGusta`, `comentarios` y `visitas`), del más nuevo al más viejo; `numero`, el del ícono, y `hoy`, el día del dueño. |
-| `GET /api/mobile/cortes/{id}` | El detalle: el corte, lo nuevo, `vistoEn` (null si nunca se miró), lo que lleva cada red tal como la red lo da —con los seguidores donde los da: las fotos y carruseles de Instagram, TikTok for Business y los suscriptores de YouTube Analytics— y todas sus visitas. No deja la marca. |
+**Los hitos** (`src/lib/hitos.ts`): cuando las vistas de un corte —la última lectura de cada
+publicación, sumada en sus redes **sin YouTube**, que no deja sumar sus números con los de otra
+red— pasan 100, 1.000, 10.000, 100.000 o 1.000.000, el corte gana ese hito, una fila de `hitos` por
+corte y umbral. Los busca `detectarHitos` después de cada lectura de los números, la de cada hora y
+la del día (ver «Los números cada hora» y el cron de sincronización), para todos los dueños a la
+vez; si falla, la lectura ya quedó escrita y la corrida siguiente encuentra lo que faltó. La app
+celebra cada hito una vez —el más alto de cada corte, hasta tres por vuelta— y avisa que lo hizo;
+eso deja celebrados también los más bajos del mismo corte. **Al estrenarse** (migración 0041) los
+cortes que ya habían pasado un umbral lo ganaron sin fecha y ya celebrados (`alcanzado_en` nulo):
+solo se celebra lo que se alcanza desde ese día.
+
+**La racha** (`src/lib/racha.ts`): cuántos días seguidos salió al menos un corte, en la zona del
+dueño, por la hora del corte, como el pie de ayer de La Parrilla. Es lo que Tu Parrilla publicó, así
+que YouTube cuenta como las demás; un borrador en la bandeja de TikTok no. Si hoy todavía no salió
+nada cuenta hasta ayer: se apaga a medianoche. La app la muestra desde dos días.
+
+| Ruta | Qué hace |
+|---|---|
+| `GET /api/mobile/lo-que-trajo` | La fila: cada corte como lo dibuja La Parrilla (`src/lib/cortes-movil.ts`) con `nuevo` (`meGusta`, `comentarios` y `visitas`) y `hito` (el umbral más alto que pasó, o null), del más nuevo al más viejo; `numero`, el del ícono; `racha` (`dias` y `hoy`, si ya salió algo hoy); `porCelebrar`, los hitos que la app celebra al abrir, de cualquier fecha, con su corte, y `hoy`, el día del dueño. |
+| `GET /api/mobile/cortes/{id}` | El detalle: el corte, lo nuevo, `vistoEn` (null si nunca se miró), lo que lleva cada red tal como la red lo da —con los seguidores donde los da: las fotos y carruseles de Instagram, TikTok for Business y los suscriptores de YouTube Analytics—, todas sus visitas y sus `hitos` de menor a mayor, con `alcanzadoEn` (null en los de antes del estreno). No deja la marca. |
 | `POST /api/mobile/cortes/{id}/visto` | Deja la marca y devuelve `{ numero }`, el del ícono que queda. La app la llama después de mostrar el detalle. |
+| `POST /api/mobile/hitos/{id}/celebrado` | La app mostró la celebración: queda celebrado, con los más bajos del mismo corte. Devuelve `{ celebrado: true }`. |
 
 Un corte que no existe, es de otro o no salió contesta `404` con «Ese corte no está, o todavía no
-salió en ninguna red.», sin distinguir. Lo que viene después —los hitos, la racha y el aviso de lo
-bueno— está en el diseño (`docs/superpowers/specs/2026-11-10-lo-que-trajo-design.md`).
+salió en ninguna red.», sin distinguir; un hito, con «Ese hito no está.». Lo que viene después —el
+aviso de lo bueno— está en el diseño (`docs/superpowers/specs/2026-11-10-lo-que-trajo-design.md`).
 
 ### Avisos por correo
 
@@ -2545,6 +2569,8 @@ src/
     color-de-red.ts        el color de marca de cada red en La Parrilla, como clases de Tailwind escritas enteras
     piezas.ts              la pieza de una publicación: sus destinos programados unidos a lo publicado
     lo-que-trajo.ts        «Lo que trajo» del teléfono: lo nuevo de cada corte desde que se miró, la marca y el número del ícono
+    hitos.ts               los hitos de cada corte (100, 1.000… vistas): la detección después de cada lectura y lo que la app celebra
+    racha.ts               la racha: los días seguidos con algo servido, en la zona del dueño
     cortes-movil.ts        un corte de La Parrilla en la forma de la app del teléfono: su dibujo y sus redes (sin base)
     auth.ts                sesión del panel
     puente.ts              el puente del teléfono al panel: una llave de dos minutos y un solo uso que abre la sesión del panel sin código
