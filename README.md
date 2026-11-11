@@ -1726,7 +1726,8 @@ publica cuando termine (`esMediaNoLista`, en `social/publish/instagram.ts`).
 y TikTok (ver «Y cada hora, lo de las últimas 48 horas», en «Conectar y sincronizar»). Como la
 publicación, la llama **el pinger externo, cada hora**, con el mismo header `Authorization:
 Bearer <CRON_SECRET>`: el plan Hobby de Vercel no deja más crons que los dos diarios de
-`vercel.json`. **Hay que darlo de alta en cron-job.org**, a los 30 minutos de cada hora: así no
+`vercel.json`. Está dado de alta en cron-job.org desde el 2026-11-11 (la tarea «Parrilla números
+cada hora»), a los 30 minutos de cada hora: así no
 cae encima de la sincronización diaria de las 9:00 UTC, que escribe las mismas filas. Sin esa
 entrada la ruta existe y no la llama nadie: los números siguen llegando una vez al día, sin
 ningún error a la vista.
