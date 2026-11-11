@@ -250,12 +250,6 @@ sección.
   está cerrada. **[dueño]** Algunos no se cierran con código sino desde los paneles de Vercel
   y de GitHub: los pasos están en el archivo de la auditoría del 2026-10-21, en «Lo que hace
   el dueño».
-- **[dueño] Encender «Require a pull request before merging» en la protección de `main`**
-  (2026-10-21). Hoy son obligatorias las comprobaciones `sitio` y `app` y que la rama esté al
-  día, pero no el pull request (README, «Cómo entra un cambio»). Con cero aprobaciones
-  pedidas, para que el dueño siga fusionando solo. Y encender también «Do not allow bypassing
-  the above settings» (`enforce_admins`, 2026-11-11): hoy la reja no se le aplica al admin, que es
-  la cuenta con que empujan los agentes.
 - **[dueño] Probar una vez que un respaldo se restaura** (2026-10-21). Desde el 2026-10-21 el
   flujo revisa el índice de cada volcado, pero nadie restauró uno entero todavía. Bajar el de
   un día, descifrarlo con la llave y restaurarlo en una Postgres desechable (README,
@@ -412,10 +406,10 @@ permisos «por decidir»** de la tabla red por red, para pedirlos todos en una m
      mínimo → «Revisar» (se ve lo máximo que se gasta) → marcar la casilla → «Crear y activar» →
      el estado en «Tus promociones» → «Pausar» → «Sincronizar ahora» → «Lo pagado» con lo que
      alcanzó a hacer. Detenerla al final, para no seguir gastando.
-  5. **[dueño]** Mandarlo cuando Meta conteste la solicitud de la segunda vuelta que está en curso,
+  4. **[dueño]** Mandarlo cuando Meta conteste la solicitud de la segunda vuelta que está en curso,
      no antes. El acceso estándar a la Marketing API se apoya en la verificación del negocio (la
      de Pyxis, más arriba): sin ella, Meta puede aprobar los permisos solo con acceso de desarrollo.
-  6. Aprobado: `ANUNCIOS_ABIERTO_PARA=1` para todos, y sacar de la wiki (`los-numeros.md`,
+  5. Aprobado: `ANUNCIOS_ABIERTO_PARA=1` para todos, y sacar de la wiki (`los-numeros.md`,
      `los-fierros.md`, `index.md`) que «Lo pagado» y «Promocionar» se ven solo en algunas cuentas.
 - **[dueño] Decidir los permisos «por decidir»** (2026-10-21; la pasada, el 2026-11-07). La
   tabla red por red —lo pedido, lo aprobado, lo que falta y en qué vuelta va— está en
@@ -482,7 +476,7 @@ permisos «por decidir»** de la tabla red por red, para pedirlos todos en una m
        consulta en «Ideas para…».
      Empezar por Los Fierros → «Activar TikTok for Business (comentarios y números) →» con la
      pantalla de permisos de TikTok a la vista. El molde es `docs/tiktok-revision-guion.md`.
-  7. Funcionando: `TIKTOK_COMENTARIOS_ABIERTO_PARA=1`, y pasar a la cuenta lo que vive en
+  6. Funcionando: `TIKTOK_COMENTARIOS_ABIERTO_PARA=1`, y pasar a la cuenta lo que vive en
      `ajustes` (`docs/deuda-tecnica.md`). Al abrirlo, cambiar también la frase «En TikTok todavía
      no hay cola de comentarios.» del bloque de la palabra clave —en el panel
      (`schedule/regla-clave.tsx`) y en el teléfono (`mobile/src/lib/regla.ts`, que sale por aire)—
@@ -691,7 +685,7 @@ permisos «por decidir»** de la tabla red por red, para pedirlos todos en una m
   7. Arma el build 1.2.0 (la entrada de arriba). Para probar: entra en la app, toca «Avisarme» y
      contéstale algo desde Las Sugerencias a una sugerencia tuya; tiene que llegar «Te respondimos
      en el libro de sugerencias».
-  8. Solo si un día enciendes la seguridad extra de push de Expo (expo.dev/settings/access-tokens),
+  7. Solo si un día enciendes la seguridad extra de push de Expo (expo.dev/settings/access-tokens),
      crea ahí un access token y ponlo en Vercel como `EXPO_ACCESS_TOKEN`; si no, Expo rechaza cada
      aviso. En iPhone, el build de iOS ofrece crear la llave de push de Apple cuando exista la
      cuenta.
@@ -1020,39 +1014,39 @@ diciendo «Sin suscripción», y es cierto.
   Verification Center?, ¿avisos en la app?). Preguntarle antes de tocar nada.
 - **DevOps y seguridad: lo que falta** (revisado el 2026-11-11, lo pidió el dueño; reemplaza la
   revisión «no urgente» del 2026-11-02). Ya hecho ese día: Next a 16.4.3 por dos avisos críticos
-  (#386), `npm audit --omit=dev --audit-level=critical` en el CI, y el respaldo, que fallaba al
-  instalar `age` con `apt`. Lo que sigue, en orden:
-  1. **[dueño]** En GitHub → Settings → Code security del repositorio: encender el grafo de
-     dependencias, «Dependabot security updates», «Secret scanning» con «Push protection», y
-     «Private vulnerability reporting». Las alertas de Dependabot están encendidas pero no listan
-     nada, ni siquiera el aviso crítico de Next que tenía producción: sin el grafo no ven las
-     dependencias. El repositorio es público y los agentes empujan con la cuenta admin: el escaneo
-     de secretos es lo que frena una clave subida por error. Se puede hacer desde `gh` con el sí
-     del dueño.
-  2. **[dueño]** CodeQL con la configuración por defecto (Code security → Code scanning), gratis
-     en un repositorio público.
-  3. **[dueño]** Que la reja de `main` valga también para el admin: la entrada «Encender "Require a
-     pull request before merging"», arriba, que desde el 2026-11-11 suma `enforce_admins`.
-  4. **[dueño]** Un vigía que avise si algo deja de pasar: Healthchecks.io gratis, con un aviso al
+  (#386), `npm audit --omit=dev --audit-level=critical` en el CI, el respaldo, que fallaba al
+  instalar `age` con `apt`, y las protecciones de GitHub (punto 1). Lo que sigue, en orden:
+  1. **[dueño]** Encender el grafo de dependencias: GitHub → Settings → Code security del
+     repositorio → «Dependency graph» → «Enable». Sin él, las alertas de Dependabot no ven las
+     dependencias: el 2026-11-11 no listaban ninguna, ni el aviso crítico de Next que tenía
+     producción. Es un clic en la página; por la API no se pudo (la organización lo tiene apagado
+     para los repositorios nuevos). Lo demás de esa página quedó encendido ese día: el escaneo de
+     secretos con push protection, las actualizaciones de seguridad de Dependabot, el reporte
+     privado de vulnerabilidades y CodeQL (README, «Cómo entra un cambio»). También ese día, la
+     reja de `main` pasó a pedir pull request y a valer para el admin.
+  2. **[dueño]** Que tu cuenta de GitHub tenga la verificación en dos pasos, y más adelante exigirla
+     en la organización (Settings de `Ribs-org` → Authentication security). Exigirla saca de la
+     organización a quien no la tenga: primero confirmar que todos la tienen.
+  3. **[dueño]** Un vigía que avise si algo deja de pasar: Healthchecks.io gratis, con un aviso al
      terminar `publish-social` (cada 5 minutos, por el pinger de cron-job.org, que ya se cayó una
      vez en silencio) y otro al terminar `respaldo.yml`. Hoy, si el pinger se cae o el respaldo
      falla, nadie se entera. Falta la cuenta; el código de los avisos es corto.
-  5. **[dueño]** Sentry (gratis) o similar en el sitio: hoy los errores solo quedan en los logs de
+  4. **[dueño]** Sentry (gratis) o similar en el sitio: hoy los errores solo quedan en los logs de
      Vercel, que en el plan Hobby duran poco. Falta la cuenta y su DSN en Vercel.
-  6. **[dueño]** Restaurar un respaldo una vez: la entrada «Probar una vez que un respaldo se
+  5. **[dueño]** Restaurar un respaldo una vez: la entrada «Probar una vez que un respaldo se
      restaura», arriba. De paso, que el respaldo use un rol de la base de solo lectura.
-  7. Los secretos de Actions (`DATABASE_URL_UNPOOLED`, `EXPO_TOKEN`) en un environment limitado a
+  6. Los secretos de Actions (`DATABASE_URL_UNPOOLED`, `EXPO_TOKEN`) en un environment limitado a
      `main`, y no a nivel de repositorio, donde los lee cualquier rama. **[dueño]** para crearlo.
-  8. Escribir cómo se vuelve atrás: el rollback de un despliegue en Vercel, una migración que no
+  7. Escribir cómo se vuelve atrás: el rollback de un despliegue en Vercel, una migración que no
      tiene reversa y restaurar un respaldo.
-  9. Un formateador (Prettier) con `--check` en el CI. El primer pase cambia casi todos los
+  8. Un formateador (Prettier) con `--check` en el CI. El primer pase cambia casi todos los
      archivos, así que va solo, sin otras ramas abiertas que lo choquen.
-  10. Lo que ya estaba en `docs/deuda-tecnica.md`: la CSP (en modo Report-Only primero) y el límite
-      de intentos compartido entre instancias.
-  11. Las dependencias que quedan: #288 (las otras 17 del sitio, que reemplazó a la #242) y #241
+  9. Lo que ya estaba en `docs/deuda-tecnica.md`: la CSP (en modo Report-Only primero) y el límite
+     de intentos compartido entre instancias.
+  10. Las dependencias que quedan: #288 (las otras 17 del sitio, que reemplazó a la #242) y #241
       (las acciones), con su CI; los dos avisos altos de `undici` y `zod` que trae `ai`; y los de
       la app, que vienen de las herramientas de Expo y se arreglan con el SDK 58.
-  12. Más adelante: pruebas de punta a punta de entrar, programar y publicar, y una prueba de
+  11. Más adelante: pruebas de punta a punta de entrar, programar y publicar, y una prueba de
       humo después de cada despliegue.
 - **[dueño] Borrar el almacén viejo de Vercel Blob** (2026-10-22). La media ya vive en R2 y el
   código no lo usa; no se borró porque borrar es irreversible y pide el sí del dueño. Antes,

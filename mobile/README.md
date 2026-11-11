@@ -163,6 +163,12 @@ Es puro JavaScript (`Linking`, `AppState`, AsyncStorage, `expo-updates`, que est
 builds), así que llega por aire también a la 1.1.0, que es a la que le sirve. Contra un sitio sin la
 ruta (404), la app sigue como si nada.
 
+Salió por aire el 2026-11-11, con el servidor ya en producción, a los dos canales: a la 1.2.0 desde
+`main` (`062029e`) y a la 1.1.0 desde `ota-1.1.0` (`5559643`). En esa rama, `src/app/_layout.tsx` y
+`src/app/ajustes.tsx` se tocaron a mano, porque la 1.1.0 no tiene los avisos al teléfono; los otros
+tres archivos se copiaron tal cual. Lo probado en las dos: `tsc`, los tests, el lint y `expo export`;
+no se probó en un teléfono.
+
 ## Cómo instalarla en el teléfono
 
 1. Abre ese link **desde el navegador del teléfono** (no hace falta cable ni
@@ -605,7 +611,9 @@ binario, así que su JavaScript le sirve tal cual. La primera actualización por
 salió el 2026-11-11 desde `f13bec4`, a los dos canales, con el servidor ya en producción: todo lo de
 `mobile/src` desde el build —los números cada hora (#372, la primera fase de «Lo que trajo»), la
 primera vuelta (#374) y las otras tres fases (#377, #379, #382)—. Se exportó solo Android e iOS y se publicó con
-`--skip-bundler` (ver «Si Metro se queda sin memoria», arriba). No se probó en un teléfono.
+`--skip-bundler` (ver «Si Metro se queda sin memoria», arriba). No se probó en un teléfono. La
+segunda, el mismo día desde `062029e`, trajo el aviso de una versión nueva (ver «Cuando hay que ir a
+la tienda», arriba).
 
 Eso vale mientras `package.json` y `app.json` sigan como en el build. **Antes de publicar, compáralos
 con el del build** (`git diff 85648a4 main -- mobile/package.json mobile/app.json`, o el commit del
