@@ -69,19 +69,27 @@ misma reja. La app del teléfono queda fuera a propósito. Su JavaScript llega p
 binario ya instalado, y sus módulos nativos los fija el SDK de Expo: subir uno solo puede dejar
 a la app pidiendo algo que el binario no trae. Se actualiza con el SDK entero y un build nuevo.
 
-`main` está protegida: los dos trabajos son obligatorios, y la rama tiene que estar al día con
-`main` antes de fusionar, para que la reja haya corrido sobre el código que de verdad va a
-quedar. Un empujón directo de quien no es admin no entra, porque su commit no trae esas dos
-comprobaciones: el CI corre sobre pull requests. **El admin sí puede empujar directo**: la regla no
-se le aplica (`enforce_admins` apagado), y la única cuenta que empuja es admin. Que la reja valga
-también para el admin está en `docs/pendientes.md`.
+`main` está protegida: todo entra por pull request, los dos trabajos son obligatorios, y la rama
+tiene que estar al día con `main` antes de fusionar, para que la reja haya corrido sobre el código
+que de verdad va a quedar. Un empujón directo no entra, **tampoco el del admin**: desde el
+2026-11-11 la regla se le aplica (`enforce_admins`), porque la única cuenta que empuja —también la
+de los agentes— es admin. El pull request no pide aprobaciones, para que el dueño siga fusionando
+solo.
+
+Además de la reja, GitHub vigila el repositorio (Settings → Code security, encendido el
+2026-11-11): CodeQL, con la configuración por defecto, revisa el código en cada pull request
+(«Analyze», que no es obligatorio); el escaneo de secretos con *push protection* rechaza un empujón
+que traiga una clave; Dependabot abre solo los pull requests de seguridad; y el reporte privado de
+vulnerabilidades deja que alguien de afuera avise sin hacerlo público.
 
 Por eso Vercel no espera a nadie. Lo que llega a `main` ya pasó por la reja.
 
 Si alguna vez hay que reconfigurar esto, la protección vive en **Settings → Branches →
-Branch protection rules** del repositorio, sobre `main`. Hoy tiene encendidas dos casillas:
-exigir que las comprobaciones `sitio` y `app` pasen, y exigir que la rama esté al día. La de
-exigir pull request antes de fusionar está apagada; encenderla está en `docs/pendientes.md`.
+Branch protection rules** del repositorio, sobre `main`. Tiene encendidas: exigir pull request
+antes de fusionar (con cero aprobaciones), exigir que las comprobaciones `sitio` y `app` pasen,
+exigir que la rama esté al día, y «Do not allow bypassing the above settings», que es la que
+alcanza al admin. Si un día el CI se rompe por algo ajeno y hay que entrar un arreglo igual, se
+apaga esa última, se fusiona y se vuelve a encender.
 
 ---
 
