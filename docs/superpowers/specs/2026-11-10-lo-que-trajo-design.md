@@ -233,7 +233,8 @@ Todo con su dueño en el `where`, como pide el arnés de aislamiento (`src/lib/a
 
 1. **Los números cada hora.** La ruta nueva, la lectura de lo reciente y `post_metrics.seguidores`.
    Solo servidor; ya sirve sola, porque Los Números quedan más al día. Del dueño: dar de alta la
-   ruta en cron-job.org, cada hora, con el mismo header que la de publicar.
+   ruta en cron-job.org, cada hora, con el mismo header que la de publicar. Dada de alta el
+   2026-11-11.
 2. **Lo que trajo.** `cortes_vistos`, la fila, el detalle, el número del ícono y el de la pestaña.
    Es el núcleo.
 3. **Los hitos y la racha.** `hitos`, la celebración, la llamita y la racha.
