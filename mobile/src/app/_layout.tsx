@@ -138,6 +138,19 @@ function Raiz() {
                 contentStyle: { backgroundColor: colores.fondo },
               }}
             />
+            {/* El detalle de un corte que ya salió: se abre desde «Lo que trajo» o su renglón en La
+                Parrilla, y vuelve ahí. */}
+            <Stack.Screen
+              name="corte/[id]"
+              options={{
+                headerShown: true,
+                title: 'Lo que trajo',
+                headerTitleStyle: { color: colores.texto, fontFamily: TIPO_TITULO },
+                headerTintColor: colores.brasa,
+                headerStyle: { backgroundColor: colores.tarjeta },
+                contentStyle: { backgroundColor: colores.fondo },
+              }}
+            />
             {/* Corregir un post programado: se abre al tocar su tarjeta en La Parrilla y vuelve ahí. */}
             <Stack.Screen
               name="programado/[id]"

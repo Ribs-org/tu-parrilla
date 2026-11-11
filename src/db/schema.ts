@@ -786,6 +786,31 @@ export const scheduledPostMedia = pgTable(
 ).enableRLS()
 
 /**
+ * La última vez que el dueño miró un corte en el teléfono (abrir su detalle), con lo que llevaba
+ * en ese momento: lo nuevo del circulito de «Lo que trajo» es lo que llegó después
+ * (`src/lib/lo-que-trajo.ts`). Los dos contadores son la suma de sus redes sin YouTube, que no
+ * deja restar sus números (`politica-youtube.ts`). Una fila por corte: es del servidor y no del
+ * teléfono, así que dos teléfonos de la misma cuenta ven lo mismo. Un corte sin fila nunca se miró.
+ */
+export const cortesVistos = pgTable(
+  'cortes_vistos',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    postId: uuid('post_id')
+      .notNull()
+      .unique()
+      .references(() => scheduledPosts.id, { onDelete: 'cascade' }),
+    ownerId: uuid('owner_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    vistoEn: timestamp('visto_en', { withTimezone: true }).notNull(),
+    meGusta: integer('me_gusta').notNull(),
+    comentarios: integer('comentarios').notNull(),
+  },
+  (t) => [index('cortes_vistos_owner_idx').on(t.ownerId)],
+).enableRLS()
+
+/**
  * La palabra clave de un post programado y qué responder cuando alguien la comenta. Una
  * por post; se edita después de publicar (a diferencia de `opciones`), así que vive en
  * su propia tabla y no en el post. `palabra` se guarda ya normalizada.

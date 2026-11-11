@@ -87,6 +87,14 @@ export function cortesEntre(ownerId: string, desde: Date, hasta: Date): Promise<
 }
 
 /**
+ * Un corte por su id, en una lista de uno o vacía si no es del dueño: el detalle de «Lo que trajo»
+ * en el teléfono (`lo-que-trajo.ts`). El id tiene que ser un uuid; lo revisa quien llama.
+ */
+export function corteDe(ownerId: string, postId: string): Promise<CorteCargado[]> {
+  return cargar(ownerId, [eq(scheduledPosts.id, postId)])
+}
+
+/**
  * Los cortes con algún destino quemado y sin archivar, de cuando sean, con todos sus destinos:
  * es lo que «Se quemó» muestra (`quemados`, en `lib/fuego.ts`), y esa lista no tiene ventana de
  * fecha. Lo archivado ya no pide una acción (`archivar.ts`).

@@ -130,6 +130,7 @@ const { cuentaTiktokDelDueno } = await import('./social/tiktok-numeros-guardar')
 const { leerAjuste } = await import('./ajustes')
 const { leerLoPagado, tieneAnuncios } = await import('./lo-pagado')
 const { leerProgramados } = await import('./schedule-leer')
+const { numerosDeLosCortes } = await import('./lo-que-trajo')
 const { listarLlaves, crearLlave } = await import('./llaves')
 const { leerResumen } = await import('./avisos/run')
 const { archivarQuemados, archivarDestino } = await import('./social/publish/archivar')
@@ -464,6 +465,44 @@ describe('aislamiento por dueño (SQL generado, sin base)', () => {
     const consultas = await consultasEncadenadas(() => leerResumen(DUENO, new Date('2026-10-17T12:00:00Z')), [[], [], [], [], []])
     expect(consultas).toHaveLength(5)
     for (const c of consultas) esperarFiltradoPorDueno(c)
+  })
+
+  it('lo-que-trajo: numerosDeLosCortes ata al dueño las publicaciones, la marca, las visitas y los comentarios de YouTube', async () => {
+    // Un corte ya leído del dueño, con un destino en Instagram y otro en YouTube.
+    const destino = { postId: 'post-1', status: 'published', opciones: null, lastError: null, handle: null }
+    const corte = {
+      post: { id: 'post-1', scheduledAt: new Date('2026-11-10T12:00:00Z') },
+      targets: [
+        { ...destino, id: 'd-ig', network: 'instagram', accountId: 'cuenta-ig', externalId: 'ig-1' },
+        { ...destino, id: 'd-yt', network: 'youtube', accountId: 'cuenta-yt', externalId: 'yt-1' },
+      ],
+      media: [],
+    } as unknown as Parameters<typeof numerosDeLosCortes>[1][number]
+    let resultado: Awaited<ReturnType<typeof numerosDeLosCortes>> = []
+    const consultas = await consultasEncadenadas(
+      async () => {
+        resultado = await numerosDeLosCortes(DUENO, [corte])
+      },
+      [
+        [['sp-ig', 'cuenta-ig', 'ig-1', 'ig-1'], ['sp-yt', 'cuenta-yt', 'yt-1', 'yt-1']],
+        [['sp-ig', 100, 10, 2, null], ['sp-yt', 900, 50, 7, null]],
+        [],
+        [{ corte: 'post-1', nuevas: 2, total: 2 }],
+        [{ corte: 'post-1', nuevos: 1 }],
+      ],
+    )
+    expect(consultas).toHaveLength(5)
+    const [publicaciones, lecturas, marcas, visitas, comentarios] = consultas as [Captura, Captura, Captura, Captura, Captura]
+    esperarFiltradoPorDueno(publicaciones)
+    expect(lecturas.params.flat()).toContain('sp-ig') // post_metrics: por los ids que ya filtró la anterior.
+    esperarFiltradoPorDueno(marcas)
+    // Las visitas, solo a páginas del dueño; los comentarios, solo de sus cuentas.
+    esperarFiltradoPorDueno(visitas)
+    expect(visitas.sql).toMatch(/from "profiles" where "profiles"."owner_id" = \$/)
+    esperarFiltradoPorDueno(comentarios)
+    expect(comentarios.sql).toMatch(/from "social_accounts" where "social_accounts"."owner_id" = \$/)
+    // YouTube no entra en los «me gusta»; sus comentarios de La Mesa, sí.
+    expect(resultado[0]!.nuevo).toEqual({ meGusta: 10, comentarios: 3, visitas: 2 })
   })
 
   it('schedule-leer: leerProgramados ata los posts al dueño, y su media va por los ids ya filtrados', async () => {

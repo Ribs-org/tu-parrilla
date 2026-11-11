@@ -145,9 +145,10 @@ export function CorteProgramado({ post, onAbrir }: { post: PostProgramado; onAbr
  * (`servidoEnTodas`). Un renglón —el corte en chico y apagado, la hora, el punto de cada red, un
  * «✓» y el texto—, sin borde y sobre un fondo más hondo que la tarjeta: de noche el fondo, de día
  * un tostado, porque el fondo del día es casi tan claro como la tarjeta. Con decenas al día, lo
- * de la mañana en tarjetas enteras empujaba lo que viene media pantalla hacia abajo.
+ * de la mañana en tarjetas enteras empujaba lo que viene media pantalla hacia abajo. Se toca para
+ * abrir lo que trajo (`app/corte/[id].tsx`).
  */
-export function CorteServido({ post }: { post: PostProgramado }) {
+export function CorteServido({ post, onAbrir }: { post: PostProgramado; onAbrir?: () => void }) {
   const colores = useColores()
   const { tema } = useTema()
   const estados = post.redes.map((r) => r.estado)
@@ -155,18 +156,23 @@ export function CorteServido({ post }: { post: PostProgramado }) {
   const hora = post.cuando.slice(11, 16)
   const texto = post.texto || '(sin texto)'
   return (
-    <View
-      accessible
+    // Se toca para ver lo que trajo (el detalle del corte); sin `onAbrir`, es solo un renglón.
+    <Pressable
+      onPress={onAbrir}
+      disabled={!onAbrir}
+      accessibilityRole={onAbrir ? 'button' : undefined}
       accessibilityLabel={`${hora} · ${texto} · ${post.redes.map((r) => `${etiquetaCuenta(r)}: publicado`).join(', ')}`}
-      style={{
+      style={({ pressed }) => ({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 8,
         borderRadius: 8,
         paddingVertical: 3,
         paddingHorizontal: 6,
+        minHeight: 32,
         backgroundColor: tema === 'dia' ? `${colores.acero}b3` : `${colores.fondo}bf`,
-      }}
+        opacity: pressed ? 0.7 : 1,
+      })}
     >
       {/* La pieza a menos de la mitad: el lienzo mide 83 × 54 y aquí caben 37 × 24. */}
       <View style={{ width: 38, height: 24, overflow: 'hidden', opacity: 0.55 }}>
@@ -184,6 +190,6 @@ export function CorteServido({ post }: { post: PostProgramado }) {
       <Text style={{ flex: 1, color: colores.suave, fontSize: 13 }} numberOfLines={1}>
         {texto}
       </Text>
-    </View>
+    </Pressable>
   )
 }

@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import * as LocalAuthentication from 'expo-local-authentication'
 import { olvidarAlSalir, reintentarBorrado } from '../lib/avisos'
 import { barrerCachesViejas } from '../lib/cache'
+import { ponerNumero } from '../lib/numero-del-icono'
 import { cerrarEnElTelefono, readToken } from '../lib/session'
 
 /**
@@ -69,6 +70,8 @@ export function ProveedorDeSesion({ children }: { children: ReactNode }) {
     // Antes que el token de la sesión, que es con lo que se borra el de los avisos del servidor.
     await olvidarAlSalir(sesion.token).catch(() => undefined)
     await cerrarEnElTelefono()
+    // El número del ícono y de la pestaña es de la cuenta: afuera no hay nada que mirar.
+    ponerNumero(0)
     setSesion({ estado: 'fuera', token: null })
   }, [sesion.token])
 

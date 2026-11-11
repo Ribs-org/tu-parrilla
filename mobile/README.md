@@ -363,6 +363,42 @@ se abre, pero solo para decir que eso se corrige en el panel web. El editor del 
 corregir lo que falta de un post a medio publicar mostrando qué cuenta ya salió; en el
 teléfono, sin esa vista, era fácil creer que se estaba corrigiendo también lo publicado.
 
+## Lo que trajo
+
+Arriba de La Parrilla, debajo de La Mesa, la fila **«Lo que trajo»**: una burbuja por corte que
+salió en los últimos siete días, del más nuevo al más viejo, con su dibujo de siempre. La de un
+corte con algo nuevo lleva el anillo en brasa y un circulito rojo con cuánto («+37», «+1,2 mil»);
+la de uno sin nada, el anillo apagado. Tocar una —o el renglón de un corte que ya salió en todas
+sus redes— abre su detalle (`src/app/corte/[id].tsx`): lo nuevo, lo que lleva cada red tal como
+la red lo da y las visitas a tu página. Qué cuenta como nuevo, y por qué YouTube no suma sus «me
+gusta», está en el README de la raíz («Lo que trajo, en el teléfono»).
+
+- **La fila** (`src/components/lo-que-trajo.tsx`) lee `GET /api/mobile/lo-que-trajo` con
+  `useScreenData`, como lo demás de La Parrilla: lo guardado apenas abre, y se refresca al volver
+  a la pestaña y al tirar hacia abajo. Sin cortes en la semana no aparece.
+- **El detalle no usa la caché**: abrirlo deja la marca (`POST /api/mobile/cortes/{id}/visto`) y
+  el circulito vuelve a cero, así que lo que muestra tiene que ser lo de ahora. Primero lee y
+  después marca, para que lo nuevo alcance a verse; si la marca no llega, el circulito sigue hasta
+  la próxima vez. Marcar anota un cambio (`anotarCambio`), y La Parrilla vuelve a leer la fila al
+  volver.
+- **El número** —los cortes con algo nuevo más los comentarios que esperan en La Mesa— lo cuenta
+  el servidor y viene con la fila y con cada marca. `src/lib/numero-del-icono.ts` lo guarda en
+  memoria para la pestaña La Parrilla (`tabBarBadge`) y lo pone en el ícono hablándole directo al
+  módulo nativo de `expo-notifications` (`ExpoBadgeModule`, lo mismo que hace
+  `setBadgeCountAsync` en Android), sin cargar `expo-notifications`. Al salir de la cuenta vuelve
+  a cero.
+
+**El número del ícono es solo de la 1.2.0**: el módulo nativo entró con los avisos, y la 1.1.0 no
+lo trae. Ahí `requireOptionalNativeModule` devuelve null y el ícono no cambia; la fila, el detalle
+y el número de la pestaña andan igual. Por eso no se importa `expo-notifications`: la rama
+`ota-1.1.0` no lo tiene en `package.json` y Metro no armaría el paquete. Aun en la 1.2.0 depende
+del teléfono: Samsung y otros muestran el número; un Pixel, un punto mientras haya un aviso sin
+abrir. Con la app cerrada, el número solo cambia si llega un aviso.
+
+**Se publica después del servidor**, como siempre que cambia `src/app/api/mobile/`. Con un sitio
+de antes la fila no aparece (la ruta contesta 404), y tocar un renglón servido abre el detalle con
+«No se pudo conectar. Revisa tu señal.».
+
 ## La Cocina desde el teléfono
 
 La cuarta pestaña, desde la versión 1.2.0 (2026-11-02), y desde el 2026-11-06 con lo mismo que el
