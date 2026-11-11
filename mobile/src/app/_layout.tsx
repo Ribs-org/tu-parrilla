@@ -13,6 +13,7 @@ import { ProveedorDeSesion, useSesion } from '../components/sesion'
 import { Cargando, TIPO_TITULO } from '../components/ui'
 import { ProveedorDeTema, useColores, useTema } from '../components/tema'
 import { ProveedorDeVentanas } from '../components/ventana'
+import { AvisoDeVersionNueva, PantallaDeActualizar, ProveedorDeVersion, useVersion } from '../components/version'
 import { borrarCaches } from '../lib/cache'
 
 /**
@@ -23,11 +24,13 @@ export default function RootLayout() {
   return (
     <ProveedorDeTema>
       <ProveedorDeVentanas>
-        <ProveedorDeSesion>
-          <ProveedorDePrimeraVuelta>
-            <Raiz />
-          </ProveedorDePrimeraVuelta>
-        </ProveedorDeSesion>
+        <ProveedorDeVersion>
+          <ProveedorDeSesion>
+            <ProveedorDePrimeraVuelta>
+              <Raiz />
+            </ProveedorDePrimeraVuelta>
+          </ProveedorDeSesion>
+        </ProveedorDeVersion>
       </ProveedorDeVentanas>
     </ProveedorDeTema>
   )
@@ -99,112 +102,120 @@ function Raiz() {
   // las pestañas. Hay que esperar a leerla para no mostrar La Parrilla un instante antes.
   const { cargada, vuelta } = usePrimeraVuelta()
   const bienvenida = dentro && vuelta.bienvenida === 'abierta'
+  // Por debajo de la versión mínima (`components/version.tsx`), la pantalla de actualizar en lugar
+  // de todo: ni la entrada ni las pestañas.
+  const { toca, servidor } = useVersion()
 
   return (
     <ThemeProvider value={navegacion}>
       {/* La hora y la batería, claras sobre la noche y oscuras sobre el papel de arroz. */}
       <StatusBar style={tema === 'dia' ? 'dark' : 'light'} />
-      {estado !== 'arrancando' && cargada && (fuentesListas || errorFuentes) ? (
-        <Stack
-          screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colores.fondo } }}
-        >
-          {/* Cada pantalla de la cuenta, detrás de la sesión: afuera no se llega a ninguna, ni por
-              un enlace ni volviendo atrás, y al salir se van todas de la pila. Una ruta que no
-              esté nombrada acá queda fuera de la reja: expo-router la agrega igual, sin guardia. */}
-          {/* La bienvenida va primera: con ella abierta, las pestañas no están, y la raíz cae en la
-              primera pantalla que sí. Al terminarla se va de la pila y cae en las pestañas, como al
-              entrar desde la pantalla de entrada. Mientras dura no sale la pregunta de los avisos,
-              que vive en las pestañas. */}
-          <Stack.Protected guard={bienvenida}>
-            <Stack.Screen name="bienvenida" />
-          </Stack.Protected>
-          <Stack.Protected guard={dentro && !bienvenida}>
-            <Stack.Screen name="(tabs)" />
-          </Stack.Protected>
-          <Stack.Protected guard={dentro}>
-            {/* La única pantalla con cabecera: el detalle se empuja sobre esta pila y sin
-                ella no hay cómo volver ni queda libre la franja de la hora. Declararla
-                acá y no en el propio archivo la deja puesta también mientras el detalle
-                busca en la caché y cuando no encuentra el post — ese archivo vuelve
-                antes con `Cargando`. */}
-            <Stack.Screen
-              name="post/[id]"
-              options={{
-                headerShown: true,
-                title: 'Publicación',
-                headerTitleStyle: { color: colores.texto, fontFamily: TIPO_TITULO },
-                headerTintColor: colores.brasa,
-                headerStyle: { backgroundColor: colores.tarjeta },
-                contentStyle: { backgroundColor: colores.fondo },
-              }}
-            />
-            {/* El detalle de un corte que ya salió: se abre desde «Lo que trajo» o su renglón en La
-                Parrilla, y vuelve ahí. */}
-            <Stack.Screen
-              name="corte/[id]"
-              options={{
-                headerShown: true,
-                title: 'Lo que trajo',
-                headerTitleStyle: { color: colores.texto, fontFamily: TIPO_TITULO },
-                headerTintColor: colores.brasa,
-                headerStyle: { backgroundColor: colores.tarjeta },
-                contentStyle: { backgroundColor: colores.fondo },
-              }}
-            />
-            {/* Corregir un post programado: se abre al tocar su tarjeta en La Parrilla y vuelve ahí. */}
-            <Stack.Screen
-              name="programado/[id]"
-              options={{
-                headerShown: true,
-                title: 'Editar publicación',
-                headerTitleStyle: { color: colores.texto, fontFamily: TIPO_TITULO },
-                headerTintColor: colores.brasa,
-                headerStyle: { backgroundColor: colores.tarjeta },
-                contentStyle: { backgroundColor: colores.fondo },
-              }}
-            />
-            {/* Ajustes se abre desde el botón de Ajustes de cualquier pestaña y vuelve ahí. */}
-            <Stack.Screen
-              name="ajustes"
-              options={{
-                headerShown: true,
-                title: 'Ajustes',
-                headerTitleStyle: { color: colores.texto, fontFamily: TIPO_TITULO },
-                headerTintColor: colores.brasa,
-                headerStyle: { backgroundColor: colores.tarjeta },
-                contentStyle: { backgroundColor: colores.fondo },
-              }}
-            />
-            {/* La Mesa se abre desde La Parrilla y vuelve ahí: la misma cabecera. */}
-            <Stack.Screen
-              name="mesa"
-              options={{
-                headerShown: true,
-                title: 'La Mesa',
-                headerTitleStyle: { color: colores.texto, fontFamily: TIPO_TITULO },
-                headerTintColor: colores.brasa,
-                headerStyle: { backgroundColor: colores.tarjeta },
-                contentStyle: { backgroundColor: colores.fondo },
-              }}
-            />
-            {/* «Tus publicaciones» se abre desde Los Números y vuelve ahí: la misma cabecera. */}
-            <Stack.Screen
-              name="publicaciones"
-              options={{
-                headerShown: true,
-                title: 'Tus publicaciones',
-                headerTitleStyle: { color: colores.texto, fontFamily: TIPO_TITULO },
-                headerTintColor: colores.brasa,
-                headerStyle: { backgroundColor: colores.tarjeta },
-                contentStyle: { backgroundColor: colores.fondo },
-              }}
-            />
-          </Stack.Protected>
-          {/* Y la entrada, solo afuera: entrar la saca de la pila, y no se vuelve a ella atrás. */}
-          <Stack.Protected guard={!dentro}>
-            <Stack.Screen name="login" />
-          </Stack.Protected>
-        </Stack>
+      {toca === 'obligada' && servidor ? (
+        <PantallaDeActualizar servidor={servidor} />
+      ) : estado !== 'arrancando' && cargada && (fuentesListas || errorFuentes) ? (
+        <>
+          <AvisoDeVersionNueva />
+          <Stack
+            screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colores.fondo } }}
+          >
+            {/* Cada pantalla de la cuenta, detrás de la sesión: afuera no se llega a ninguna, ni por
+                un enlace ni volviendo atrás, y al salir se van todas de la pila. Una ruta que no
+                esté nombrada acá queda fuera de la reja: expo-router la agrega igual, sin guardia. */}
+            {/* La bienvenida va primera: con ella abierta, las pestañas no están, y la raíz cae en la
+                primera pantalla que sí. Al terminarla se va de la pila y cae en las pestañas, como al
+                entrar desde la pantalla de entrada. Mientras dura no sale la pregunta de los avisos,
+                que vive en las pestañas. */}
+            <Stack.Protected guard={bienvenida}>
+              <Stack.Screen name="bienvenida" />
+            </Stack.Protected>
+            <Stack.Protected guard={dentro && !bienvenida}>
+              <Stack.Screen name="(tabs)" />
+            </Stack.Protected>
+            <Stack.Protected guard={dentro}>
+              {/* La única pantalla con cabecera: el detalle se empuja sobre esta pila y sin
+                  ella no hay cómo volver ni queda libre la franja de la hora. Declararla
+                  acá y no en el propio archivo la deja puesta también mientras el detalle
+                  busca en la caché y cuando no encuentra el post — ese archivo vuelve
+                  antes con `Cargando`. */}
+              <Stack.Screen
+                name="post/[id]"
+                options={{
+                  headerShown: true,
+                  title: 'Publicación',
+                  headerTitleStyle: { color: colores.texto, fontFamily: TIPO_TITULO },
+                  headerTintColor: colores.brasa,
+                  headerStyle: { backgroundColor: colores.tarjeta },
+                  contentStyle: { backgroundColor: colores.fondo },
+                }}
+              />
+              {/* El detalle de un corte que ya salió: se abre desde «Lo que trajo» o su renglón en La
+                  Parrilla, y vuelve ahí. */}
+              <Stack.Screen
+                name="corte/[id]"
+                options={{
+                  headerShown: true,
+                  title: 'Lo que trajo',
+                  headerTitleStyle: { color: colores.texto, fontFamily: TIPO_TITULO },
+                  headerTintColor: colores.brasa,
+                  headerStyle: { backgroundColor: colores.tarjeta },
+                  contentStyle: { backgroundColor: colores.fondo },
+                }}
+              />
+              {/* Corregir un post programado: se abre al tocar su tarjeta en La Parrilla y vuelve ahí. */}
+              <Stack.Screen
+                name="programado/[id]"
+                options={{
+                  headerShown: true,
+                  title: 'Editar publicación',
+                  headerTitleStyle: { color: colores.texto, fontFamily: TIPO_TITULO },
+                  headerTintColor: colores.brasa,
+                  headerStyle: { backgroundColor: colores.tarjeta },
+                  contentStyle: { backgroundColor: colores.fondo },
+                }}
+              />
+              {/* Ajustes se abre desde el botón de Ajustes de cualquier pestaña y vuelve ahí. */}
+              <Stack.Screen
+                name="ajustes"
+                options={{
+                  headerShown: true,
+                  title: 'Ajustes',
+                  headerTitleStyle: { color: colores.texto, fontFamily: TIPO_TITULO },
+                  headerTintColor: colores.brasa,
+                  headerStyle: { backgroundColor: colores.tarjeta },
+                  contentStyle: { backgroundColor: colores.fondo },
+                }}
+              />
+              {/* La Mesa se abre desde La Parrilla y vuelve ahí: la misma cabecera. */}
+              <Stack.Screen
+                name="mesa"
+                options={{
+                  headerShown: true,
+                  title: 'La Mesa',
+                  headerTitleStyle: { color: colores.texto, fontFamily: TIPO_TITULO },
+                  headerTintColor: colores.brasa,
+                  headerStyle: { backgroundColor: colores.tarjeta },
+                  contentStyle: { backgroundColor: colores.fondo },
+                }}
+              />
+              {/* «Tus publicaciones» se abre desde Los Números y vuelve ahí: la misma cabecera. */}
+              <Stack.Screen
+                name="publicaciones"
+                options={{
+                  headerShown: true,
+                  title: 'Tus publicaciones',
+                  headerTitleStyle: { color: colores.texto, fontFamily: TIPO_TITULO },
+                  headerTintColor: colores.brasa,
+                  headerStyle: { backgroundColor: colores.tarjeta },
+                  contentStyle: { backgroundColor: colores.fondo },
+                }}
+              />
+            </Stack.Protected>
+            {/* Y la entrada, solo afuera: entrar la saca de la pila, y no se vuelve a ella atrás. */}
+            <Stack.Protected guard={!dentro}>
+              <Stack.Screen name="login" />
+            </Stack.Protected>
+          </Stack>
+        </>
       ) : (
         <Cargando />
       )}
