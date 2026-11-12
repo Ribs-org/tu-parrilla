@@ -281,6 +281,31 @@ sección.
   - que el servidor 2 tenga sus parches al día, su firewall y sus respaldos, que no se ven desde este
     repositorio.
 
+- **[dueño] Pasar este repositorio a privado** (2026-11-12, lo pidió el dueño). Hoy es público: el
+  código, el README, los pendientes y la historia los lee cualquiera, y por eso los hallazgos abiertos
+  viven aparte, en `tu-parrilla-privado`. Lo que se ve en el sitio (`tu-parrilla.cl/docs`: las guías
+  de la API y la wiki de la UI) sigue público igual, porque lo sirve Vercel y no GitHub. El cambio es
+  un clic (Settings → General → Danger Zone → «Change visibility»), pero en el plan gratis de la
+  organización tiene costos que hay que mirar antes:
+  - **la reja de `main` deja de valer**: las reglas de protección de rama en un repositorio privado
+    piden el plan Team de GitHub; sin él, se puede volver a empujar directo y fusionar sin el CI;
+  - **se apagan el escaneo de secretos con push protection y CodeQL**, encendidos el 2026-11-11: en
+    uno privado son de pago (Secret Protection y Code Security). Las alertas y las actualizaciones de
+    seguridad de Dependabot siguen gratis;
+  - **los minutos de Actions pasan a tener tope**: 2.000 al mes en el plan gratis. Hoy son más de cien
+    corridas en doce días (cada pull request corre `sitio`, `app` y CodeQL), más el respaldo diario:
+    medir el gasto de un mes antes de decidir. El almacenamiento de artefactos, 500 MB; los respaldos
+    ocupan unos 90 MB;
+  - **Vercel**: verificar si el plan Hobby despliega un repositorio privado de una organización, o si
+    pide Pro, que de todas formas ya hace falta antes de cobrar («Finanzas: planes y pagos»);
+  - verificar que `SUGERENCIAS_GITHUB_TOKEN` siga abriendo issues, y que el equipo de contenido, que
+    usa la misma cuenta, siga viendo los suyos.
+
+  Lo que ya se publicó no se despublica: lo que alguien clonó o guardó en caché queda. No tiene forks.
+  Al pasarlo, cambian las frases que dicen «el repositorio es público» (README, «Respaldos» y el
+  libro de sugerencias, `respaldo.yml`, y la entrada de arriba de esta sección); el cifrado del
+  respaldo y el formato de las sugerencias se quedan igual, porque siguen protegiendo.
+
 ## Trámites con las plataformas
 
 Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataforma.
