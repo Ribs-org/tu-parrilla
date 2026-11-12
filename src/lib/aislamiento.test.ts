@@ -138,6 +138,7 @@ const { listarLlaves, crearLlave } = await import('./llaves')
 const { leerResumen } = await import('./avisos/run')
 const { archivarQuemados, archivarDestino } = await import('./social/publish/archivar')
 const { CONSERVAR, editarPostProgramado } = await import('./social/publish/editar')
+const { cambiarFecha } = await import('./social/publish/cambiar-fecha')
 const { postParaEditarEnElTelefono } = await import('./editar-movil')
 const { recibirSugerencia } = await import('./sugerencias/guardar')
 const { misSugerencias, respuestasSinLeer, marcarRespuestaLeida } = await import('./sugerencias/responder')
@@ -877,6 +878,15 @@ describe('aislamiento por dueño, escrituras (SQL generado, sin base)', () => {
         atributos: CONSERVAR,
         regla: CONSERVAR,
       }),
+    )
+    expect(consultas).toHaveLength(1)
+    esperarFiltradoPorDueno(consultas[0]!)
+  })
+
+  // La API que mueve la fecha (issue #375) pasa por la misma puerta del editor.
+  it('social/publish/cambiar-fecha: cambiarFecha lee el post atado al dueño antes de seguir', async () => {
+    const consultas = await todasLasConsultas(() =>
+      cambiarFecha(DUENO, '6f1c2a54-9b1e-4c3d-8f00-0123456789ab', '2030-11-25 10:00', 'America/Santiago'),
     )
     expect(consultas).toHaveLength(1)
     esperarFiltradoPorDueno(consultas[0]!)
