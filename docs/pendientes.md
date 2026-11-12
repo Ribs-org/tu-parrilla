@@ -962,6 +962,23 @@ diciendo «Sin suscripción», y es cierto.
   (`src/lib/push/`, ver «Avisos al teléfono» en el `README.md`): un juego que avise usa ese mismo
   camino. Se cruza con «Mientras no mirabas», de la entrada de arriba, que también necesita guardar
   la última visita por usuario.
+- **Por explorar: que La Cocina entregue creativos «editables», el Word frente al PDF**
+  (2026-11-12, idea del dueño). Hoy el chef entrega cada creativo terminado, como un PDF: el video
+  con sus subtítulos, su letra, su música y su portada ya quemados, para programar o descartar en
+  el mesón (`src/lib/cocina/`, README «La Cocina»). La idea es entregar también algo como un Word:
+  un creativo que la persona pueda retocar antes de publicarlo. Lo que hay que decidir antes de
+  diseñar:
+  - qué es «editable»: las piezas por separado (el video limpio, los subtítulos como `.srt`, la
+    música, la portada en capas), un proyecto de un editor (CapCut, Premiere, DaVinci) o una
+    plantilla;
+  - dónde se edita: dentro de Tu Parrilla (cambiar el texto de los subtítulos, la letra, la portada)
+    o afuera, descargando, y cómo vuelve lo editado al mesón para programarlo;
+  - qué tiene que exportar el pipeline del chef (`marca-personal`, en el servidor 2) además del
+    video final, y cuánto pesa en la cámara de frío y en R2;
+  - si es para todos o del plan pagado, y si cambia lo que se promete en la portada.
+
+  Se cruza con «Revisar cómo habla el sitio de Vercel con el servidor 2», en «Seguridad», que es por
+  donde llegarían esos archivos.
 - **Un mensaje a cada seguidor nuevo** (2026-11-11, lo pidió el dueño). Que cuando alguien
   empieza a seguir una cuenta conectada le llegue un mensaje directo de bienvenida, escrito por el
   dueño (o con la IA, como los borradores de La Mesa). Antes de diseñar, verificar en la
