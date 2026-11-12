@@ -264,6 +264,23 @@ sección.
   reemplazar el valor en Vercel y redesplegar; lo que se juntó mientras tanto sale solo en la
   sincronización diaria siguiente (README, «El libro de sugerencias»).
 
+- **Revisar cómo habla el sitio de Vercel con el servidor 2** (2026-11-11, lo pidió el dueño). Se
+  entiende que es el servidor propio del chef de La Cocina, donde corre el pipeline de
+  `marca-personal`: confirmarlo con el dueño antes de empezar. Hoy el chef es quien llama, a
+  `/api/cocina/…` con `COCINA_SECRET` en `Authorization: Bearer` (`docs/cocina-api.md`, README «La
+  Cocina»). Lo que hay que mirar:
+  - el secreto: uno solo para todos los dueños, dónde vive en el servidor 2, cómo se cambia sin
+    cortar la cocina y qué puede hacer quien lo tenga;
+  - si el sitio le habla de vuelta al servidor 2, o solo escucha, y qué queda expuesto a internet
+    en cada lado;
+  - los enlaces de los insumos (`GET /api/cocina/insumos/{id}/enlace`): cuánto duran y quién más
+    podría usarlos;
+  - qué pasa si uno de los dos se cae a mitad de una comanda: el latido (`src/lib/cocina/latido.ts`),
+    los reintentos y los plazos;
+  - los logs de cada lado: que no guarden el secreto ni datos de los dueños;
+  - que el servidor 2 tenga sus parches al día, su firewall y sus respaldos, que no se ven desde este
+    repositorio.
+
 ## Trámites con las plataformas
 
 Plan completo y tiempos en `docs/levantamiento-terceros.md`; un guion por plataforma.
@@ -944,6 +961,22 @@ diciendo «Sin suscripción», y es cierto.
   (`src/lib/push/`, ver «Avisos al teléfono» en el `README.md`): un juego que avise usa ese mismo
   camino. Se cruza con «Mientras no mirabas», de la entrada de arriba, que también necesita guardar
   la última visita por usuario.
+- **Un mensaje a cada seguidor nuevo** (2026-11-11, lo pidió el dueño). Que cuando alguien
+  empieza a seguir una cuenta conectada le llegue un mensaje directo de bienvenida, escrito por el
+  dueño (o con la IA, como los borradores de La Mesa). Antes de diseñar, verificar en la
+  documentación de cada red qué se puede, porque hasta donde se sabe es lo que lo frena:
+  - ninguna de las APIs que se usan avisa de un seguidor nuevo ni entrega quién es: hoy solo se lee
+    cuántos hay (`src/lib/social/account-metrics.ts`);
+  - en Instagram y Facebook, una empresa no puede abrirle una conversación a alguien que no le
+    escribió antes; puede contestar dentro de las 24 horas desde su último mensaje, o mandarle un
+    privado a quien comenta, que es lo que ya está construido y espera la aprobación de Meta
+    («El privado de Meta», abajo);
+  - TikTok y YouTube no tienen mensajes directos en sus APIs.
+
+  Si se confirma, lo posible está cerca: el privado a quien comenta (ya hecho), y un mensaje de
+  bienvenida o «ice breakers» para quien escribe por primera vez, en Instagram y Messenger. Se
+  cruza con «Gamificar las notificaciones de cada red», arriba, que tampoco tiene cómo enterarse
+  de un seguidor nuevo.
 - **Cupos y reparto de los crons por usuario** (`docs/levantamiento-terceros.md` §5.4). Hace
   falta cuando la beta pase de unos diez usuarios. Desde el 2026-11-08 la prioridad del plan ordena
   las colas (README, «Los planes»); falta el cupo por usuario y la cola de trabajo.
