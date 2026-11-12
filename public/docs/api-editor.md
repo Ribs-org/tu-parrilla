@@ -501,7 +501,7 @@ algo más, bórralo (`DELETE /api/schedule/posts/{id}`) y mándalo de nuevo; una
 | Tope general | 11 o más archivos, con alguna red además de `tiktok` (una fila solo con `tiktok` admite hasta 35 fotos) | `Máximo diez archivos por publicación.` |
 | Al menos un destino | sin `cuentas` y sin `redes` (o ambas vacías) | `Elige al menos una cuenta o una red.` |
 | Fecha futura | hora ya pasada | `La hora debe estar en el futuro.` |
-| Tope del plan | el plan del dueño de la llave ya tiene su máximo de publicaciones esperando salir (10 en el gratis; contando las filas de esta misma llamada, y cada publicación una vez aunque salga a varias redes) | `Tu plan <nombre> deja hasta <N> publicaciones esperando a la vez: espera a que salga alguna o borra una.` |
+| Tope del plan | el plan del dueño de la llave ya tiene su máximo de publicaciones esperando salir (cuántas son y cuántas esperan ahora lo dice `GET /api/schedule/plan`, sección 3g; contando las filas de esta misma llamada, y cada publicación una vez aunque salga a varias redes) | `Tu plan <nombre> deja hasta <N> publicaciones esperando a la vez: espera a que salga alguna o borra una.` |
 
 Las reglas de `x` y de `threads` quedan para cuando salgan de «Próximamente»: hoy esas filas
 se rechazan antes, con la frase de la primera.
@@ -1551,6 +1551,40 @@ arriba. Cada fila se mueve o se queda sola: un rechazo no deshace las otras. Un 
 rechaza la segunda vez (`Ese post ya viene más arriba en el lote.`); una fila sin `id`, con
 `El cuerpo debe ser JSON con { posts: [{ id, fecha }] }.`. Con más de 50, `400`
 `Máximo 50 posts por lote.` y no se mueve ninguno.
+
+---
+
+# 3g. El plan y sus topes — `GET /api/schedule/plan`
+
+```http
+GET /api/schedule/plan
+Authorization: Bearer <tu llave>
+```
+
+```json
+{
+  "plan": "Maestro Parrillero",
+  "vence": "2026-12-08T13:00:00-03:00",
+  "esperando": { "ahora": 544, "tope": null, "libres": null },
+  "cuentas": { "ahora": 5, "tope": 15, "libres": 10 },
+  "camara": { "ahora": 5368709120, "tope": 214748364800, "libres": 209379655680 },
+  "tokens": { "ahora": 1200, "tope": 2000000, "libres": 1998800, "mes": "2026-11" }
+}
+```
+
+El plan del dueño de la llave, con cada tope y lo que lleva usado: es lo mismo que el dueño ve en
+«Tu plan», en Tu Cuenta. Antes de mandar una tanda, compara `esperando.libres` con las filas:
+las que no caben vuelven con la frase del tope del plan (sección 1). Sirve también para comprobar
+que un cambio de plan quedó.
+
+- `plan`: el nombre, como sale en esa frase. `vence`: hasta cuándo rige un plan pagado con fecha
+  (una suscripción o una cortesía que vence), con la zona del dueño; `null` en el gratis o sin
+  fecha.
+- `esperando` cuenta como el rechazo: una publicación una vez aunque vaya a varias redes, y lo que
+  ya salió no cuenta. `cuentas`, las conectadas; `camara`, la cámara de frío en bytes; `tokens`, los
+  de IA del `mes` en curso.
+- `tope` es el máximo y `libres` lo que queda, nunca negativo; los dos `null` si el plan no tiene
+  tope ahí. Los números de cada plan los cambia el admin: léelos acá, no de esta guía.
 
 ---
 

@@ -23,7 +23,7 @@ tus números.
 | `/api/social/meta/borrado` | `POST` de Meta cuando alguien pide borrar sus datos: borra lo que vino de esas dos redes y devuelve el código de estado |
 | `/api/social/instagram/baja`, `/api/social/instagram/borrado` | Lo mismo, del caso de uso de Instagram de la app de Meta: solo para las cuentas de Instagram conectadas con el login de Instagram (ver «Instagram sin página de Facebook: el login de Instagram») |
 | `/api/social/tiktok/comentarios/vuelta/` | La vuelta de la app de TikTok for Business, registrada así, con la barra final, en su portal: guarda la credencial de TikTok for Business (comentarios y números) de una cuenta de TikTok. Cerrada salvo para quien diga `TIKTOK_COMENTARIOS_ABIERTO_PARA` (ver «TikTok for Business: comentarios y números») |
-| `/api/schedule/…`, `/api/metrics/…` | La API para tu agente, con una llave de La Cocina («Tu propio chef»): cargar, ver, cambiar de fecha y sacar lo programado, archivar lo quemado, las cuentas y los números (ver «Carga masiva por API» y las secciones que le siguen) |
+| `/api/schedule/…`, `/api/metrics/…` | La API para tu agente, con una llave de La Cocina («Tu propio chef»): cargar, ver, cambiar de fecha y sacar lo programado, el plan y sus topes, archivar lo quemado, las cuentas y los números (ver «Carga masiva por API» y las secciones que le siguen) |
 | `/api/cocina/…` | La API de La Cocina, con `COCINA_SECRET`: el servidor del chef toma las comandas, baja sus insumos, informa cada estado, le pregunta al dueño y lee lo que contestó, y entrega lo cocinado al mesón del dueño (ver «La Cocina» y `docs/cocina-api.md`) |
 | `/api/media` | `POST` con la misma llave: firma la subida de un archivo directo a R2, para nombrarlo después en varias filas del lote sin que se vuelva a bajar (ver «Carga masiva por API») |
 | `/api/sugerencias/respuesta` | `POST` con una llave **del admin** (o `SCHEDULE_API_KEY`): la respuesta del equipo a lo que alguien escribió en el libro de sugerencias, por el número de su issue o por su id, para responder sin el navegador. Con la llave de otra cuenta, `403` (ver «El libro de sugerencias») |
@@ -1642,7 +1642,7 @@ Vercel y bajan con `vercel env pull .env.local`.
 | `CRON_SECRET` | Autoriza las corridas programadas: el sync diario, la publicación cada 5 minutos y los números cada hora. Vercel la manda sola a su cron; el pinger externo la manda en `Authorization: Bearer …` | Sí — Vercel no la crea: se genera igual que `AUTH_SECRET` y se agrega. Sin ella los crons responden `401` y no corre nada |
 | `MIGRAR_PREVIEWS` | Que los previews migren la base | Solo cuando el preview tenga una base propia; contra la de producción, no |
 | `DATABASE_URL_PRUEBAS` | Solo para las pruebas de integración: una Postgres desechable donde cada archivo crea y migra su propia base (ver «Comandos»). No va en Vercel | No — sin ella esas pruebas se saltan. Nunca la de producción |
-| `SCHEDULE_API_KEY` | La llave del despliegue: abre `POST /api/schedule/batch` (carga masiva), `POST /api/media` (subir un archivo una vez), `GET`, `PATCH` y `DELETE /api/schedule/posts/{id}` (un post, cambiarle la fecha o sacarlo), `PATCH /api/schedule/posts` (cambiar la fecha de varios), `POST /api/schedule/posts/{id}/archivar` y `…/desarchivar` (archivar lo quemado), `GET /api/schedule/posts` (calendario), `GET /api/schedule/resumen` (el resumen del día), `GET /api/schedule/cuentas` (las cuentas), `GET /api/metrics/posts` (métricas), `GET /api/metrics/mejores` (el mejor X %), `GET /api/metrics/que-funciona` (qué tema, estilo y formato funcionan, y si la música ayuda) y `/api/bodega…` (la cámara de frío de La Cocina) a nombre del admin. Es anterior a las llaves por usuario y sigue para el agente que ya la usa | No — sin ella esos endpoints aceptan solo las llaves que cada usuario genera en La Cocina («Tu propio chef»); si la pones, genérala igual que `CRON_SECRET` |
+| `SCHEDULE_API_KEY` | La llave del despliegue: abre `POST /api/schedule/batch` (carga masiva), `POST /api/media` (subir un archivo una vez), `GET`, `PATCH` y `DELETE /api/schedule/posts/{id}` (un post, cambiarle la fecha o sacarlo), `PATCH /api/schedule/posts` (cambiar la fecha de varios), `POST /api/schedule/posts/{id}/archivar` y `…/desarchivar` (archivar lo quemado), `GET /api/schedule/posts` (calendario), `GET /api/schedule/resumen` (el resumen del día), `GET /api/schedule/cuentas` (las cuentas), `GET /api/schedule/plan` (el plan y sus topes), `GET /api/metrics/posts` (métricas), `GET /api/metrics/mejores` (el mejor X %), `GET /api/metrics/que-funciona` (qué tema, estilo y formato funcionan, y si la música ayuda) y `/api/bodega…` (la cámara de frío de La Cocina) a nombre del admin. Es anterior a las llaves por usuario y sigue para el agente que ya la usa | No — sin ella esos endpoints aceptan solo las llaves que cada usuario genera en La Cocina («Tu propio chef»); si la pones, genérala igual que `CRON_SECRET` |
 | `RESEND_API_KEY` | Manda los códigos de ingreso y los avisos: la publicación que se quemó, la cuenta que se cayó, el resumen del día y la comanda de La Cocina que entregó o terminó (ver «Avisos por correo») | Sí — sin ella nadie puede entrar al panel |
 | `PUBLISH_ALERT_TO` | Adónde va un aviso sin dueño con correo: un post o una cuenta de antes de los usuarios, y la alarma de La Cocina si falta `ADMIN_EMAIL`. Lo demás va al correo de su dueño | No — sin ella, lo que no tiene dueño no avisa; el calendario y Los Fierros lo siguen mostrando |
 | `PUBLISH_ALERT_FROM` | Remitente de los avisos | Opcional; default `onboarding@resend.dev`, que solo entrega al correo de la cuenta de Resend |
@@ -2203,6 +2203,17 @@ nada; Los Fierros y el compositor lo muestran como aviso. Sin parámetros. Antes
 ya programado, y para una recién conectada había que pedirle al dueño que lo copiara de Los
 Fierros. Lo puro está en `src/lib/cuentas-api.ts`.
 
+### El plan por API
+
+`GET /api/schedule/plan` con el mismo `Authorization` devuelve el plan que rige para el dueño de la
+llave (`plan`, con el nombre de la frase del tope, y `vence`) y cada tope con lo que lleva usado:
+`esperando`, `cuentas`, `camara` (en bytes) y `tokens` (del mes), cada uno `{ ahora, tope, libres }`,
+con `null` donde el plan no tiene tope (issue #394). Lee lo mismo que «Tu plan» en Tu Cuenta
+(`usoDelPlan`), y `esperando` se cuenta como el rechazo del lote (`esperandoEnLaParrilla`), así que
+lo que dice y lo que rechaza el lote no pueden diferir. Antes, el tope solo se descubría cuando el
+lote rechazaba filas, y no había cómo comprobar un cambio de plan sin programar algo. Lo puro está
+en `src/lib/planes/plan-api.ts`.
+
 ## Los planes
 
 Dos planes, el gratis y el pagado («Maestro Parrillero»), con las mismas funciones: lo que cambia son los
@@ -2626,6 +2637,7 @@ src/
     hitos.ts               los hitos de cada corte (100, 1.000… vistas): la detección después de cada lectura y lo que la app celebra
     racha.ts               la racha: los días seguidos con algo servido, en la zona del dueño
     version-de-la-app.ts   la versión recomendada y la mínima de la app del teléfono, para el aviso de actualizar
+    planes/plan-api.ts     el plan del dueño de la llave para GET /api/schedule/plan: cada tope con lo usado y lo que queda (sin base)
     cortes-movil.ts        un corte de La Parrilla en la forma de la app del teléfono: su dibujo y sus redes (sin base)
     auth.ts                sesión del panel
     puente.ts              el puente del teléfono al panel: una llave de dos minutos y un solo uso que abre la sesión del panel sin código

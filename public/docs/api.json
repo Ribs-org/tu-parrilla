@@ -8,7 +8,7 @@
   "properties": {
     "posts": {
       "type": "array",
-      "description": "Un lote. Cada fila se valida y se programa por separado; una fila mala no tumba a las demás (éxito parcial).",
+      "description": "Un lote. Cada fila se valida y se programa por separado; una fila mala no tumba a las demás (éxito parcial). Antes de mandarlo, GET /api/schedule/plan dice cuántas publicaciones más caben en el plan del dueño (esperando.libres; sección 3j de api-llm.md): las que no caben vuelven rechazadas con la frase del tope del plan.",
       "maxItems": 50,
       "items": {
         "type": "object",
