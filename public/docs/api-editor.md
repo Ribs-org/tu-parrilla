@@ -483,9 +483,10 @@ validarse —aunque su hora haya pasado desde el primer envío—, y se programa
 faltaban.
 
 La `ref` **no compara contenidos**: si cambiaste el texto de una fila y la reenvías con la
-misma `ref`, vuelve el post de antes, sin el cambio. Para cambiar un post, bórralo
-(`DELETE /api/schedule/posts/{id}`) y mándalo de nuevo; una vez borrado, su `ref` queda
-libre. Sin `ref`, reenviar una fila la programa otra vez.
+misma `ref`, vuelve el post de antes, sin el cambio. Para cambiarle **solo la fecha**, no lo
+reenvíes: `PATCH /api/schedule/posts/{id}` la mueve sin borrar nada (sección 3f). Para cambiar
+algo más, bórralo (`DELETE /api/schedule/posts/{id}`) y mándalo de nuevo; una vez borrado, su
+`ref` queda libre. Sin `ref`, reenviar una fila la programa otra vez.
 
 ## Reglas por red (las que rechazan una fila)
 
@@ -500,7 +501,7 @@ libre. Sin `ref`, reenviar una fila la programa otra vez.
 | Tope general | 11 o más archivos, con alguna red además de `tiktok` (una fila solo con `tiktok` admite hasta 35 fotos) | `Máximo diez archivos por publicación.` |
 | Al menos un destino | sin `cuentas` y sin `redes` (o ambas vacías) | `Elige al menos una cuenta o una red.` |
 | Fecha futura | hora ya pasada | `La hora debe estar en el futuro.` |
-| Tope del plan | el plan del dueño de la llave ya tiene su máximo de publicaciones esperando salir (10 en el gratis; contando las filas de esta misma llamada, y cada publicación una vez aunque salga a varias redes) | `Tu plan <nombre> deja hasta <N> publicaciones esperando a la vez: espera a que salga alguna o borra una.` |
+| Tope del plan | el plan del dueño de la llave ya tiene su máximo de publicaciones esperando salir (cuántas son y cuántas esperan ahora lo dice `GET /api/schedule/plan`, sección 3g; contando las filas de esta misma llamada, y cada publicación una vez aunque salga a varias redes) | `Tu plan <nombre> deja hasta <N> publicaciones esperando a la vez: espera a que salga alguna o borra una.` |
 
 Las reglas de `x` y de `threads` quedan para cuando salgan de «Próximamente»: hoy esas filas
 se rechazan antes, con la frase de la primera.
@@ -1344,7 +1345,7 @@ Parámetros, ambos opcionales:
 - **`fallidos`**: los destinos que se quemaron en las últimas `horas` y nadie archivó, el más
   reciente primero. `fecha` es la hora de salida del post; `error`, la misma frase de
   `/api/schedule/posts`. Para reprogramarlo, el dueño tiene «Reprogramar» en su panel; por
-  API, se borra y se programa de nuevo. Lo que ya no pide nada —lo programaste aparte, o era
+  API, `PATCH /api/schedule/posts/{id}` con la fecha nueva (sección 3f) lo vuelve a la cola. Lo que ya no pide nada —lo programaste aparte, o era
   una prueba— se archiva (sección 3d) y deja de salir acá.
 - **`cuentas`**: las que hay que reconectar. `fierro` `frio` ya no publica (la conexión
   falló, venció, o el dueño quitó la app desde Facebook); `enfriandose` vence en menos de
@@ -1497,6 +1498,96 @@ vuelve a aparecer sin leer, sin otro correo. La respuesta puede tener hasta 4000
 
 ---
 
+# 3f. Cambiar la fecha sin borrar — `PATCH /api/schedule/posts/{id}`
+
+```http
+PATCH /api/schedule/posts/3f2a…
+Authorization: Bearer <tu llave>
+Content-Type: application/json
+
+{ "fecha": "2026-11-25 10:00" }
+```
+
+Corre un post programado a otra hora **sin borrarlo**: el caso de cada semana, cuando entra una
+noticia que tiene que salir antes y lo que ya estaba puesto se posterga. `fecha` tiene la forma
+del lote, `YYYY-MM-DD HH:MM` (o con `T`), en la zona del dueño. Cambia solo la hora: se quedan el
+`id` —así las métricas y el calendario siguen apuntando al mismo post—, el texto, la media ya
+guardada (no se vuelve a bajar), la portada, los `atributos`, las `opciones` de cada destino, la
+`regla` y la `ref`. Pasan las mismas reglas que al programar —la hora en el futuro, las cuentas
+todavía conectadas, lo que cada red acepta—, y si algo no pasa, el post sigue en su fecha de
+antes.
+
+| Respuesta | Cuándo |
+|---|---|
+| `200` con el post | Se movió: el post como lo da `GET /api/schedule/posts/{id}`, con la `fecha` nueva. |
+| `400` `{ "error": "La fecha no se entendió (usa YYYY-MM-DD HH:MM)." }` | Falta `fecha` o no tiene la forma (con segundos o con `Z` tampoco). |
+| `400` `{ "error": "La hora debe estar en el futuro." }` | La fecha nueva ya pasó, aunque sea la que tenía. |
+| `400` `{ "error": "Solo se cambia «fecha»: el texto, la media y las cuentas no se editan por API." }` | El cuerpo trae algo más que `fecha`. Nada cambió. |
+| `400` con otra frase | La que daría el lote al programarlo hoy (una cuenta que se desconectó, por ejemplo). |
+| `404` `{ "error": "Ese post no existe." }` | No hay un post con ese id para este dueño. No distingue «no existe» de «no es tuyo». |
+| `409` `{ "error": "Ya salió en alguna cuenta: su fecha ya no se cambia." }` | Algún destino ya se publicó. |
+| `409` `{ "error": "Hay una publicación en curso. Vuelve en un minuto." }` | Algún destino está saliendo ahora. |
+
+Un destino que se quemó vuelve a la cola, sin intentos, para la hora nueva: es «Reprogramar» por
+API.
+
+**Una semana entera de una vez** — `PATCH /api/schedule/posts`, hasta 50 filas, cada una a su
+fecha:
+
+```http
+PATCH /api/schedule/posts
+Authorization: Bearer <tu llave>
+Content-Type: application/json
+
+{ "posts": [
+  { "id": "3f2a…", "fecha": "2026-11-18 09:00" },
+  { "id": "7c1e…", "fecha": "2026-11-25 22:30" }
+] }
+```
+
+Responde `200` con `{ "resultados": [...] }`, uno por fila y en orden, como el lote que programa:
+`{ "id", "ok": true, "fecha" }` o `{ "id", "ok": false, "error" }`, con las frases de la tabla de
+arriba. Cada fila se mueve o se queda sola: un rechazo no deshace las otras. Un `id` repetido se
+rechaza la segunda vez (`Ese post ya viene más arriba en el lote.`); una fila sin `id`, con
+`El cuerpo debe ser JSON con { posts: [{ id, fecha }] }.`. Con más de 50, `400`
+`Máximo 50 posts por lote.` y no se mueve ninguno.
+
+---
+
+# 3g. El plan y sus topes — `GET /api/schedule/plan`
+
+```http
+GET /api/schedule/plan
+Authorization: Bearer <tu llave>
+```
+
+```json
+{
+  "plan": "Maestro Parrillero",
+  "vence": "2026-12-08T13:00:00-03:00",
+  "esperando": { "ahora": 544, "tope": null, "libres": null },
+  "cuentas": { "ahora": 5, "tope": 15, "libres": 10 },
+  "camara": { "ahora": 5368709120, "tope": 214748364800, "libres": 209379655680 },
+  "tokens": { "ahora": 1200, "tope": 2000000, "libres": 1998800, "mes": "2026-11" }
+}
+```
+
+El plan del dueño de la llave, con cada tope y lo que lleva usado: es lo mismo que el dueño ve en
+«Tu plan», en Tu Cuenta. Antes de mandar una tanda, compara `esperando.libres` con las filas:
+las que no caben vuelven con la frase del tope del plan (sección 1). Sirve también para comprobar
+que un cambio de plan quedó.
+
+- `plan`: el nombre, como sale en esa frase. `vence`: hasta cuándo rige un plan pagado con fecha
+  (una suscripción o una cortesía que vence), con la zona del dueño; `null` en el gratis o sin
+  fecha.
+- `esperando` cuenta como el rechazo: una publicación una vez aunque vaya a varias redes, y lo que
+  ya salió no cuenta. `cuentas`, las conectadas; `camara`, la cámara de frío en bytes; `tokens`, los
+  de IA del `mes` en curso.
+- `tope` es el máximo y `libres` lo que queda, nunca negativo; los dos `null` si el plan no tiene
+  tope ahí. Los números de cada plan los cambia el admin: léelos acá, no de esta guía.
+
+---
+
 # 4. El ciclo completo
 
 1. **Mira** `/api/schedule/cuentas` para saber a qué cuentas puedes programar,
@@ -1535,10 +1626,11 @@ patrones. Con menos de ~10 posts por valor de atributo, desconfía de la diferen
 - **No pide comandas ni toca lo que ya está en la cámara de frío.** Por API se lee la cámara y
   se guarda en ella (sección 1c); renombrar, sacar y pedir una comanda los hace el dueño en su
   panel.
-- **No edita por API**: para corregir un post ya programado, o lo borras con
-  `DELETE /api/schedule/posts/{id}` y lo programas de nuevo, o el dueño lo cambia en su
-  panel (`/admin/schedule`), donde puede tocar texto, hora, redes, media, portada y
-  atributos, y ver la semana en calendario.
+- **No edita por API, salvo la fecha**: la hora se cambia sin borrar nada con
+  `PATCH /api/schedule/posts/{id}` (sección 3f). Para corregir lo demás de un post ya
+  programado, o lo borras con `DELETE /api/schedule/posts/{id}` y lo programas de nuevo, o el
+  dueño lo cambia en su panel (`/admin/schedule`), donde puede tocar texto, hora, redes, media,
+  portada y atributos, y ver la semana en calendario.
 - **Sí borra por API**, con la regla del panel: `DELETE /api/schedule/posts/{id}` (el `postId`
   que devolvió el lote, o el `id` de `GET /api/schedule/posts`) saca el post entero con sus
   destinos, su media y su regla. Si algún destino ya se publicó o está publicando —también uno

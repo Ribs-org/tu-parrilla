@@ -14,7 +14,7 @@ la llave, qué significa un error que le salió—, la wiki de la interfaz está
 Esta guía nombra las pantallas como se ven de noche; en el modo día, La Parrilla es «La Barra»
 y Los Fierros, «Los Cuchillos» (la wiki las da todas, en «El modo día»).
 
-Cinco endpoints de escritura: `POST /api/schedule/batch` programa, `DELETE /api/schedule/posts/{id}` saca lo programado (sección 3b), `POST /api/schedule/posts/{id}/archivar` y `…/desarchivar` archivan lo quemado sin borrarlo (sección 3f), y `POST /api/media` sube un archivo una vez para nombrarlo en varias filas (sección 3e). Aparte del calendario, `POST /api/bodega/subidas` guarda material en bruto en la cámara de frío de La Cocina (sección 3h). Autenticación en todos los
+Siete endpoints de escritura: `POST /api/schedule/batch` programa, `PATCH /api/schedule/posts/{id}` cambia la fecha de lo programado sin borrarlo y `PATCH /api/schedule/posts` hace lo mismo con varios a la vez (sección 3i), `DELETE /api/schedule/posts/{id}` saca lo programado (sección 3b), `POST /api/schedule/posts/{id}/archivar` y `…/desarchivar` archivan lo quemado sin borrarlo (sección 3f), y `POST /api/media` sube un archivo una vez para nombrarlo en varias filas (sección 3e). Aparte del calendario, `POST /api/bodega/subidas` guarda material en bruto en la cámara de frío de La Cocina (sección 3h). Autenticación en todos los
 endpoints:
 
 ```
@@ -137,7 +137,7 @@ no por subcadena parcial ni regex:
 | `X / Twitter todavía no está disponible en Tu Parrilla: próximamente.` | `x` en `redes`, o una cuenta de X en `cuentas`: está en «Próximamente» |
 | `Hay redes repetidas en la fila.` | `redes` con la misma red dos veces |
 | `No se pudo leer una media de la fila.` | `media` o `portada`: descarga fallida, timeout, o tipo ajeno; el porqué viene en `motivo` (abajo) |
-| `Tu plan <nombre> deja hasta <N> publicaciones esperando a la vez: espera a que salga alguna o borra una.` (por ejemplo, `Tu plan Gratis deja hasta 50 publicaciones esperando a la vez: espera a que salga alguna o borra una.`) | ninguno: el plan del dueño de la llave ya tiene ese número de publicaciones esperando salir, contando las de esta misma llamada. Una publicación cuenta una vez aunque salga a varias redes; las que ya salieron no cuentan. No se arregla reenviando: hay que esperar a que salga alguna o borrarla (`DELETE /api/schedule/posts/{id}`) |
+| `Tu plan <nombre> deja hasta <N> publicaciones esperando a la vez: espera a que salga alguna o borra una.` (por ejemplo, `Tu plan Gratis deja hasta 50 publicaciones esperando a la vez: espera a que salga alguna o borra una.`) | ninguno: el plan del dueño de la llave ya tiene ese número de publicaciones esperando salir, contando las de esta misma llamada. Una publicación cuenta una vez aunque salga a varias redes; las que ya salieron no cuentan. No se arregla reenviando: hay que esperar a que salga alguna o borrarla (`DELETE /api/schedule/posts/{id}`). Antes de mandar una tanda, `GET /api/schedule/plan` dice cuántas caben (sección 3j) |
 | `Al lote se le acabó el tiempo antes de terminar esta fila. Reenvíala.` | el lote llegó a su tiempo máximo (unos tres minutos) antes de terminar la fila; reenviarla con su `ref` es seguro |
 | `La portada requiere un video en media.` | `portada` sin video en `media` |
 | `La portada debe ser una imagen.` | `portada` resultó ser video u otra cosa |
@@ -205,6 +205,10 @@ curl -X DELETE https://tu-parrilla.cl/api/schedule/posts/<id> \
 `<id>` es el del post: el `postId` que `POST /api/schedule/batch` devolvió en esa fila, o el
 `id` que lista `GET /api/schedule/posts`. Se borra el post **entero** —todos sus destinos, su
 media y su regla—; no hay forma de sacar una sola cuenta de un post con varias.
+
+**Para correrlo de fecha, no lo borres:** `PATCH /api/schedule/posts/{id}` cambia solo la hora y
+deja todo lo demás (sección 3i). Borrar y volver a mandarlo pierde el `id`, vuelve a bajar la
+media entera, y si el reenvío falla, lo borrado queda sin programar.
 
 | Respuesta | Cuándo |
 |---|---|
@@ -409,10 +413,92 @@ Frases literales (`{ error }`):
 Por API no se renombra, no se saca nada de la cámara y no se pide una comanda: eso lo hace el
 dueño en su panel.
 
+## 3i. Cambiar la fecha de un post programado, sin borrarlo
+
+```bash
+curl -X PATCH https://tu-parrilla.cl/api/schedule/posts/<id> \
+  -H "Authorization: Bearer $LLAVE_PARRILLA" \
+  -H "Content-Type: application/json" \
+  -d '{ "fecha": "2026-11-25 10:00" }'
+```
+
+`fecha` va con la misma forma que en el lote, `YYYY-MM-DD HH:MM` (también con `T` en vez del
+espacio), en la zona del dueño. Cambia **solo la hora**: el `id`, el texto, la media ya guardada
+(no se vuelve a bajar), la portada, los `atributos`, las `opciones` de cada destino, la `regla` y
+la `ref` quedan como estaban. Pasan las mismas reglas que al programar: la hora en el futuro, las
+cuentas todavía conectadas y lo que cada red acepta. Si algo no pasa, el post se queda en su fecha
+de antes: nunca hay un momento en que no exista.
+
+| Respuesta | Cuándo |
+|---|---|
+| `200` con el post | Se movió. Es el post como lo da `GET /api/schedule/posts/{id}` (sección 3g), ya con la `fecha` nueva. |
+| `400` `{ "error": "La fecha no se entendió (usa YYYY-MM-DD HH:MM)." }` | `fecha` falta o no tiene la forma. Una con segundos o con `Z` tampoco vale: la hora es la del dueño. |
+| `400` `{ "error": "La hora debe estar en el futuro." }` | La fecha nueva ya pasó, aunque sea la misma que tenía. |
+| `400` `{ "error": "Solo se cambia «fecha»: el texto, la media y las cuentas no se editan por API." }` | El cuerpo trae algo más que `fecha`. Nada se cambió. |
+| `400` con otra frase | Lo que diría el lote al programarlo hoy, por ejemplo una cuenta que se desconectó. |
+| `404` `{ "error": "Ese post no existe." }` | No hay un post con ese id para este dueño. No distingue «no existe» de «no es tuyo». |
+| `409` `{ "error": "Ya salió en alguna cuenta: su fecha ya no se cambia." }` | Algún destino ya se publicó. |
+| `409` `{ "error": "Hay una publicación en curso. Vuelve en un minuto." }` | Algún destino está saliendo ahora. |
+
+Un post con un destino que se quemó **sí** se mueve: ese destino vuelve a la cola, sin intentos,
+para la hora nueva, como al guardarlo en el editor del panel.
+
+**Varios a la vez**, hasta 50, cada uno a su fecha:
+
+```bash
+curl -X PATCH https://tu-parrilla.cl/api/schedule/posts \
+  -H "Authorization: Bearer $LLAVE_PARRILLA" \
+  -H "Content-Type: application/json" \
+  -d '{ "posts": [ { "id": "<id>", "fecha": "2026-11-25 10:00" }, { "id": "<otro>", "fecha": "2026-11-26 10:00" } ] }'
+```
+
+Responde `200` con `{ "resultados": [...] }`, uno por fila y en el mismo orden: `{ "id", "ok":
+true, "fecha" }` si se movió, o `{ "id", "ok": false, "error" }` con la frase de la tabla de
+arriba. Cada fila se mueve o se queda sola: un rechazo no deshace las demás ni es un error del
+lote. Un `id` repetido en el mismo lote se rechaza la segunda vez con `Ese post ya viene más arriba
+en el lote.`, y una fila sin `id` con `El cuerpo debe ser JSON con { posts: [{ id, fecha }] }.`.
+Con más de 50, `400` `Máximo 50 posts por lote.` y no se mueve ninguno.
+
+## 3j. El plan de la cuenta y sus topes
+
+```bash
+curl https://tu-parrilla.cl/api/schedule/plan -H "Authorization: Bearer $LLAVE_PARRILLA"
+```
+
+```json
+{
+  "plan": "Gratis",
+  "vence": null,
+  "esperando": { "ahora": 44, "tope": 50, "libres": 6 },
+  "cuentas": { "ahora": 3, "tope": 7, "libres": 4 },
+  "camara": { "ahora": 5368709120, "tope": 21474836480, "libres": 16106127360 },
+  "tokens": { "ahora": 1200, "tope": 100000, "libres": 98800, "mes": "2026-11" }
+}
+```
+
+El plan que rige para el dueño de la llave y cada tope, con lo que lleva usado. **Míralo antes de
+mandar una tanda**: si `esperando.libres` es menor que las filas, las que sobran vuelven con
+`Tu plan <nombre> deja hasta <N> publicaciones esperando a la vez…` (sección 3). También sirve
+para comprobar que un cambio de plan quedó, sin programar nada de prueba.
+
+- `plan`: el nombre, como sale en la frase del rechazo.
+- `vence`: hasta cuándo rige, con la zona del dueño, si es un plan pagado con fecha (una
+  suscripción o una cortesía que vence); `null` en el gratis o sin fecha. Pasada esa fecha, rige
+  el gratis.
+- `esperando`: las publicaciones esperando salir, contadas como el rechazo: una publicación cuenta
+  una vez aunque vaya a varias redes, y lo que ya salió no cuenta.
+- `cuentas`: las conectadas. `camara`: la cámara de frío de La Cocina, en bytes (lo guardado más
+  lo que se está subiendo). `tokens`: los de IA del `mes` en curso, en la zona del dueño.
+- En cada uno, `tope` es el máximo y `libres` lo que queda (nunca negativo); los dos son `null`
+  si el plan no tiene tope ahí.
+
+Los números de cada plan los cambia el admin, así que no los copies de esta guía: léelos acá.
+
 ## 4. Lo que esta API no hace
 
-- **No edita un post programado.** Para cambiar texto, hora, destinos o media hay que
-  borrarlo (sección 3b) y programarlo de nuevo, o corregirlo a mano en `/admin/schedule`.
+- **No edita un post programado, salvo su fecha.** Para cambiar texto, destinos o media hay que
+  borrarlo (sección 3b) y programarlo de nuevo, o corregirlo a mano en `/admin/schedule`. La
+  fecha se cambia sin borrar nada (sección 3i).
 - **No es para responder sugerencias, salvo que seas el equipo de Tu Parrilla.**
   `POST /api/sugerencias/respuesta` (`{ "issue": 321, "respuesta": "…" }`) responde lo que alguien
   escribió en el libro de sugerencias, y solo con una llave del admin: con cualquier otra, `403`
