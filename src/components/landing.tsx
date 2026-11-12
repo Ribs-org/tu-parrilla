@@ -33,7 +33,7 @@ import { FOTO, SEMANA, VIDEO, fotos, type CorteDeMuestra, type DiaDeMuestra, typ
 import { PiezaDefs } from '@/components/pieza-sushi'
 import type { Tema } from '@/lib/tema'
 import { cn } from '@/lib/utils'
-import { SE_ENFRIA, SE_QUEMO, nombreDe } from '@/lib/vocabulario'
+import { CAMARA, SE_ENFRIA, SE_QUEMO, nombreDe } from '@/lib/vocabulario'
 
 /**
  * La cara pública del producto, en el dominio del producto.
@@ -483,6 +483,68 @@ function Creadores() {
 }
 
 /**
+ * Dos cortos que hizo el chef de la casa, con cómo les fue: el ejemplo de La Cocina en la portada
+ * (issue #324). Los eligió el dueño el 2026-11-09: los dos mejores de @vicente_pareja_j por
+ * `contraSuCuenta` a las 48 horas. No salieron de una comanda —ninguna comanda había salido en esa
+ * cuenta—, pero los editó el mismo chef. Las vistas van como piso («más de»), porque solo suben; las
+ * veces sobre la mediana son las de las 48 horas, que ya no cambian. Cuando lleguen los archivos,
+ * cada uno suma su antes (el tramo del video largo) y su después.
+ */
+const CORTOS_DEL_CHEF: ReadonlyArray<{ titulo: string; estilo: string; vistas: string; veces: number; enlace: string }> = [
+  {
+    titulo: 'Tu título chileno no existe afuera',
+    estilo: 'Pantalla partida',
+    vistas: 'Más de 80 mil vistas',
+    veces: 81,
+    enlace: 'https://www.instagram.com/reel/DfAapBciCJt/',
+  },
+  {
+    titulo: 'La visa secreta de los chilenos',
+    estilo: 'Explicador',
+    vistas: 'Más de 35 mil vistas',
+    veces: 69,
+    enlace: 'https://www.instagram.com/reel/DezQUNTDTWM/',
+  },
+]
+
+/** Los dos cortos del chef, cada uno enlazado a su reel, con lo que trajo. */
+function CortosDelChef() {
+  return (
+    <div className="w-full max-w-xl space-y-3">
+      <p className="font-titulo text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-fg-faint">
+        Hechos por el chef de la casa · @vicente_pareja_j
+      </p>
+      <ul className="grid gap-3 sm:grid-cols-2">
+        {CORTOS_DEL_CHEF.map((c) => (
+          <li key={c.enlace}>
+            <a
+              href={c.enlace}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="chapa chapa-hover group flex h-full flex-col gap-3 rounded-xl p-4"
+            >
+              <span className="flex items-center justify-between gap-2 font-mono text-[0.68rem] text-fg-faint">
+                <span className="flex items-center gap-1">
+                  <Icon name="instagram" className={cn('h-3 w-3 shrink-0', colorDeRed('instagram'))} />
+                  Reel · {c.estilo}
+                </span>
+                <ArrowUpRight className="h-4 w-4 shrink-0 transition-colors group-hover:text-fg" aria-hidden />
+              </span>
+              <span className="text-balance text-base leading-snug text-fg">«{c.titulo}»</span>
+              <span className="mt-auto font-mono text-[0.78rem] leading-relaxed">
+                <span className="block text-fg-muted">{c.vistas}</span>
+                <span className="block text-brasa">{c.veces} veces lo de siempre en la cuenta, a las 48 horas</span>
+              </span>
+              <span className="sr-only">(se abre en otra pestaña)</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+/**
  * «Instagram, Facebook y TikTok»: las que publican hoy, menos las que no dejan sumar sus cifras
  * (YouTube, `politica-youtube.ts`). Son las que entran al contador.
  */
@@ -625,6 +687,29 @@ export function Landing({
           </div>
           {numeros ? <ElContador numeros={numeros} /> : null}
         </section>
+
+        {/* La Cocina (#324), justo después de quiénes la usan: es lo que ningún programador de posts
+            trae, la edición hecha y conectada al calendario. Sin plazo de entrega: lo decidió el
+            dueño el 2026-11-09, y el texto va por el lado de que el chef edita mientras esperas. */}
+        <Rasgo donde={<NombreDe ruta="/admin/ia" />} titulo="Los cortos te llegan hechos" muestra={<CortosDelChef />}>
+          <p>
+            Le llevas al chef de la casa tu video largo y te devuelve clips verticales con subtítulos y
+            portada, o carruseles, en varios estilos. Tú no editas nada: esperas mientras el chef edita
+            por ti.
+          </p>
+          <ol className="list-decimal space-y-1.5 pl-5">
+            <li>
+              Guardas el material en <DeNocheYDeDia noche={CAMARA.noche.toLowerCase()} dia={CAMARA.dia.toLowerCase()} />,
+              desde el panel o grabándolo con el teléfono.
+            </li>
+            <li>Pides una comanda: clips verticales o carruseles, y cuántos, más o menos. Los estilos los elige el chef.</li>
+            <li>
+              Lo terminado llega <DeNocheYDeDia noche="al mesón" dia="a la bandeja" />, listo para programar:
+              programas lo que te guste y descartas lo que no.
+            </li>
+          </ol>
+          <p className="text-[0.8rem] text-fg-faint">En piloto: el chef de la casa se enciende cuenta por cuenta.</p>
+        </Rasgo>
 
         {/* La leyenda del corte, para tocarla: la sección más ancha, porque es la que enseña. */}
         <section className="py-12 sm:py-16">

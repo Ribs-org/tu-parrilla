@@ -821,12 +821,13 @@ diciendo «Sin suscripción», y es cierto.
   Parrilla del panel quedó fuera a propósito (el diseño, «Lo que no entra»:
   `docs/superpowers/specs/2026-11-10-lo-que-trajo-design.md`). Las rutas y la lógica ya están en el
   servidor (`src/lib/lo-que-trajo.ts`, `hitos.ts`, `racha.ts`).
-- **La Cocina en la portada (#324)** (2026-11-09). Una sección en `tu-parrilla.cl` que cuente
-  qué entrega La Cocina, en cuánto tiempo y cómo se pide. Decidido por el dueño: el ejemplo del
-  antes y el después son **solo sus dos mejores cortos**, que el equipo de contenido identifica
-  (pedido en el issue), y **no se promete un plazo**: en vez de un tiempo, algo como «espera
-  mientras el chef edita por ti». Falta solo que el equipo de contenido mande los dos cortos con
-  su original.
+- **[dueño] El antes y el después de La Cocina en la portada (#324)** (2026-11-09; la sección
+  está desde el 2026-11-12, `src/components/landing.tsx`, «Los cortos te llegan hechos»). Hoy
+  muestra los dos mejores cortos de @vicente_pareja_j (los eligió el dueño) como tarjetas que
+  enlazan a cada reel, sin plazo de entrega prometido. Falta el antes y el después de cada uno: el
+  tramo del video largo (el video 10, de 7:53 a 8:59 y de 10:14 a 11:27) y el corto terminado. Los
+  archivos los pasa el dueño por privado, no por el issue, porque el repo es público; con ellos, cada
+  tarjeta suma sus dos videos.
 - **«Sincronizar ahora» le puede quitar a una publicación su lectura de las 48 horas** (2026-11-08,
   al sumar `viewsA48h`, #358). La lectura del día (`post_metrics`, una por publicación y día) se
   reescribe entera en cada sincronización, también su `captured_at`. La ventana de las 48 horas
