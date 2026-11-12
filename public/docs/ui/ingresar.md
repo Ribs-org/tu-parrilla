@@ -23,7 +23,15 @@ desde la próxima vez. La de error sigue siempre de noche.
   panel, y no guarda nada. Justo después de la semana, «Creadores que trabajan con Tu Parrilla»
   muestra a cada uno con su foto y enlaza a su perfil; al lado va un contador: las vistas y los
   «me gusta» de todas las cuentas de Instagram, Facebook y TikTok conectadas, sumados, sin
-  YouTube.
+  YouTube. Después viene La Cocina, «Los cortos te llegan hechos»: qué hace el chef de la casa
+  (clips verticales con subtítulos y portada, o carruseles, en varios estilos), los tres pasos para
+  pedirlo —guardar el material en la cámara de frío (de día, la nevera), pedir una comanda, y lo
+  terminado llega al mesón (de día, a la bandeja)— y «En piloto: el chef de la casa se enciende
+  cuenta por cuenta.». Al lado, «Hechos por el chef de la casa · @vicente_pareja_j» y dos tarjetas
+  de reels, «Tu título chileno no existe afuera» y «La visa secreta de los chilenos», con sus
+  vistas; cada una abre el reel en Instagram, en otra pestaña. La portada no promete un plazo de
+  entrega, y no se pide nada desde ahí: las comandas se piden en el panel, en La Cocina
+  ([la-cocina.md](la-cocina.md)), con la cocina encendida.
 - Abriendo cualquier dirección del panel (`/admin` o lo que cuelgue de ahí) sin sesión: lleva a
   `/ingresar`. Al entrar se llega siempre a La Parrilla, la entrada del panel
   ([la-parrilla.md](la-parrilla.md)), no a la dirección que se había abierto.
