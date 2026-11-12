@@ -27,11 +27,15 @@ import { ZONA_POR_DEFECTO } from '@/lib/zona'
 import { REDES_PROXIMAMENTE } from '@/lib/networks'
 import { proximamentePara } from '@/lib/redes-abiertas'
 
+/** Lo que dice una fila, o `PATCH /api/schedule/posts`, con una fecha que no tiene la forma. */
+export const FECHA_ILEGIBLE = 'La fecha no se entendió (usa YYYY-MM-DD HH:MM).'
+
 /**
  * Parse a fecha string (YYYY-MM-DD HH:MM format) to a Date in the owner's timezone.
- * Returns null if the date cannot be parsed.
+ * Returns null if the date cannot be parsed. La comparten el lote y el cambio de fecha
+ * (`cambiarFecha`), para que una fecha valga lo mismo al programar que al moverla.
  */
-function parseFecha(fecha: string, zone: string): Date | null {
+export function parseFecha(fecha: string, zone: string): Date | null {
   // fromZonedInput slices to 16 chars, which would silently discard a Z or seconds
   // an API caller sent — reinterpreting their UTC instant as the owner's wall-clock time.
   if (!/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}$/.test(fecha.trim())) return null
@@ -386,7 +390,7 @@ export function validateBatchItem(
   proximamente: ReadonlySet<string> = REDES_PROXIMAMENTE,
 ): string | null {
   const scheduledAt = parseFecha(item.fecha, zone)
-  if (!scheduledAt) return 'La fecha no se entendió (usa YYYY-MM-DD HH:MM).'
+  if (!scheduledAt) return FECHA_ILEGIBLE
 
   const pedido = destinoPedido(item)
   if ('redes' in pedido && pedido.redes.length === 0) {

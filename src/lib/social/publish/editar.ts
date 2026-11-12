@@ -38,11 +38,12 @@ type Conservar = typeof CONSERVAR
  *
  * El panel manda todo; la app del teléfono, que solo edita el texto y la hora y quita cuentas,
  * manda `CONSERVAR` en lo demás, y eso queda tal como está guardado: los archivos, la portada,
- * los atributos y la palabra clave. Las opciones de cada destino (TikTok, el trial reel, la
+ * los atributos y la palabra clave. La API, que solo mueve la fecha (`cambiarFecha`), conserva
+ * también el texto. Las opciones de cada destino (TikTok, el trial reel, la
  * historia) no las cambia ninguno de los dos: viven en el destino, y este no las toca.
  */
 export type EdicionDePost = {
-  caption: string
+  caption: Conservar | string
   /** `conservar`: la hora guardada, aunque ya haya pasado (corregir el texto de lo que falló). */
   scheduledAt: Conservar | Date | null
   /** Los ids de cuenta elegidos, o las de ahora menos los destinos de `quitar` (el teléfono). */
@@ -103,7 +104,7 @@ export async function editarPostProgramado(
     .where(eq(scheduledPostMedia.postId, postId))
     .orderBy(asc(scheduledPostMedia.position))
 
-  const { caption } = edicion
+  const caption = edicion.caption === CONSERVAR ? post.caption : edicion.caption
   const scheduledAt = edicion.scheduledAt === CONSERVAR ? post.scheduledAt : edicion.scheduledAt
   // Quitar destinos es elegir las cuentas de los demás: el teléfono no suma cuentas, y un id que
   // no es de este post no quita nada.

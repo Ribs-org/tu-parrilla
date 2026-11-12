@@ -16,6 +16,12 @@ vi.mock('@/lib/social/publish/borrar', () => ({
   borrarPostProgramado: (...args: unknown[]) => borrar(...args),
 }))
 
+const mover = vi.fn()
+vi.mock('@/lib/social/publish/cambiar-fecha', async (original) => ({
+  ...(await original<typeof import('@/lib/social/publish/cambiar-fecha')>()),
+  cambiarFecha: (...args: unknown[]) => mover(...args),
+}))
+
 const leer = vi.fn()
 vi.mock('@/lib/schedule-leer', () => ({
   leerProgramados: (...args: unknown[]) => leer(...args),
@@ -24,7 +30,7 @@ vi.mock('@/lib/usuarios', () => ({
   buscarPorId: async () => ({ zona: 'America/Santiago' }),
 }))
 
-const { DELETE, GET } = await import('./route')
+const { DELETE, GET, PATCH } = await import('./route')
 
 function peticion(): Request {
   return new Request('https://ejemplo.cl/api/schedule/posts/p1', {
@@ -39,6 +45,7 @@ beforeEach(() => {
   dueno.mockResolvedValue('usuario-7')
   borrar.mockReset()
   leer.mockReset()
+  mover.mockReset()
 })
 
 describe('DELETE /api/schedule/posts/{id}', () => {
@@ -105,5 +112,52 @@ describe('GET /api/schedule/posts/{id}', () => {
     const r = await GET(lectura(), { params })
     expect(r.status).toBe(404)
     expect(leer).not.toHaveBeenCalled()
+  })
+})
+
+describe('PATCH /api/schedule/posts/{id}', () => {
+  function cambio(cuerpo: unknown): Request {
+    return new Request('https://ejemplo.cl/api/schedule/posts/p1', {
+      method: 'PATCH',
+      headers: { authorization: 'Bearer tp_llave', 'content-type': 'application/json' },
+      body: typeof cuerpo === 'string' ? cuerpo : JSON.stringify(cuerpo),
+    })
+  }
+
+  it('sin una llave válida es 401 y no mueve nada', async () => {
+    dueno.mockResolvedValueOnce(null)
+    expect((await PATCH(cambio({ fecha: '2030-11-25 10:00' }), { params })).status).toBe(401)
+    expect(mover).not.toHaveBeenCalled()
+  })
+
+  it('mueve a nombre del dueño de la llave, en su zona, y contesta el post como el GET', async () => {
+    mover.mockResolvedValueOnce({ ok: true })
+    leer.mockResolvedValueOnce([{ id: 'p1', fecha: '2030-11-25 10:00' }])
+    const r = await PATCH(cambio({ fecha: '2030-11-25 10:00' }), { params })
+    expect(r.status).toBe(200)
+    expect(await r.json()).toEqual({ id: 'p1', fecha: '2030-11-25 10:00' })
+    expect(mover).toHaveBeenCalledWith('usuario-7', 'p1', '2030-11-25 10:00', 'America/Santiago')
+  })
+
+  it('cada rechazo sale con su código y su frase', async () => {
+    for (const [status, error] of [
+      [404, 'Ese post no existe.'],
+      [409, 'Ya salió en alguna cuenta: su fecha ya no se cambia.'],
+      [400, 'La hora debe estar en el futuro.'],
+    ] as const) {
+      mover.mockResolvedValueOnce({ status, error })
+      const r = await PATCH(cambio({ fecha: '2030-11-25 10:00' }), { params })
+      expect(r.status).toBe(status)
+      expect(await r.json()).toEqual({ error })
+    }
+  })
+
+  it('un cuerpo que no es JSON, o que trae algo más que la fecha, es 400 sin tocar nada', async () => {
+    expect((await PATCH(cambio('no es json'), { params })).status).toBe(400)
+    expect((await PATCH(cambio(['2030-11-25 10:00']), { params })).status).toBe(400)
+    const r = await PATCH(cambio({ fecha: '2030-11-25 10:00', texto: 'otro' }), { params })
+    expect(r.status).toBe(400)
+    expect(await r.json()).toEqual({ error: 'Solo se cambia «fecha»: el texto, la media y las cuentas no se editan por API.' })
+    expect(mover).not.toHaveBeenCalled()
   })
 })

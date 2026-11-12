@@ -23,7 +23,7 @@ tus números.
 | `/api/social/meta/borrado` | `POST` de Meta cuando alguien pide borrar sus datos: borra lo que vino de esas dos redes y devuelve el código de estado |
 | `/api/social/instagram/baja`, `/api/social/instagram/borrado` | Lo mismo, del caso de uso de Instagram de la app de Meta: solo para las cuentas de Instagram conectadas con el login de Instagram (ver «Instagram sin página de Facebook: el login de Instagram») |
 | `/api/social/tiktok/comentarios/vuelta/` | La vuelta de la app de TikTok for Business, registrada así, con la barra final, en su portal: guarda la credencial de TikTok for Business (comentarios y números) de una cuenta de TikTok. Cerrada salvo para quien diga `TIKTOK_COMENTARIOS_ABIERTO_PARA` (ver «TikTok for Business: comentarios y números») |
-| `/api/schedule/…`, `/api/metrics/…` | La API para tu agente, con una llave de La Cocina («Tu propio chef»): cargar, ver y sacar lo programado, archivar lo quemado, las cuentas y los números (ver «Carga masiva por API» y las secciones que le siguen) |
+| `/api/schedule/…`, `/api/metrics/…` | La API para tu agente, con una llave de La Cocina («Tu propio chef»): cargar, ver, cambiar de fecha y sacar lo programado, archivar lo quemado, las cuentas y los números (ver «Carga masiva por API» y las secciones que le siguen) |
 | `/api/cocina/…` | La API de La Cocina, con `COCINA_SECRET`: el servidor del chef toma las comandas, baja sus insumos, informa cada estado, le pregunta al dueño y lee lo que contestó, y entrega lo cocinado al mesón del dueño (ver «La Cocina» y `docs/cocina-api.md`) |
 | `/api/media` | `POST` con la misma llave: firma la subida de un archivo directo a R2, para nombrarlo después en varias filas del lote sin que se vuelva a bajar (ver «Carga masiva por API») |
 | `/api/sugerencias/respuesta` | `POST` con una llave **del admin** (o `SCHEDULE_API_KEY`): la respuesta del equipo a lo que alguien escribió en el libro de sugerencias, por el número de su issue o por su id, para responder sin el navegador. Con la llave de otra cuenta, `403` (ver «El libro de sugerencias») |
@@ -1642,7 +1642,7 @@ Vercel y bajan con `vercel env pull .env.local`.
 | `CRON_SECRET` | Autoriza las corridas programadas: el sync diario, la publicación cada 5 minutos y los números cada hora. Vercel la manda sola a su cron; el pinger externo la manda en `Authorization: Bearer …` | Sí — Vercel no la crea: se genera igual que `AUTH_SECRET` y se agrega. Sin ella los crons responden `401` y no corre nada |
 | `MIGRAR_PREVIEWS` | Que los previews migren la base | Solo cuando el preview tenga una base propia; contra la de producción, no |
 | `DATABASE_URL_PRUEBAS` | Solo para las pruebas de integración: una Postgres desechable donde cada archivo crea y migra su propia base (ver «Comandos»). No va en Vercel | No — sin ella esas pruebas se saltan. Nunca la de producción |
-| `SCHEDULE_API_KEY` | La llave del despliegue: abre `POST /api/schedule/batch` (carga masiva), `POST /api/media` (subir un archivo una vez), `GET` y `DELETE /api/schedule/posts/{id}` (un post, o sacarlo), `POST /api/schedule/posts/{id}/archivar` y `…/desarchivar` (archivar lo quemado), `GET /api/schedule/posts` (calendario), `GET /api/schedule/resumen` (el resumen del día), `GET /api/schedule/cuentas` (las cuentas), `GET /api/metrics/posts` (métricas), `GET /api/metrics/mejores` (el mejor X %), `GET /api/metrics/que-funciona` (qué tema, estilo y formato funcionan, y si la música ayuda) y `/api/bodega…` (la cámara de frío de La Cocina) a nombre del admin. Es anterior a las llaves por usuario y sigue para el agente que ya la usa | No — sin ella esos endpoints aceptan solo las llaves que cada usuario genera en La Cocina («Tu propio chef»); si la pones, genérala igual que `CRON_SECRET` |
+| `SCHEDULE_API_KEY` | La llave del despliegue: abre `POST /api/schedule/batch` (carga masiva), `POST /api/media` (subir un archivo una vez), `GET`, `PATCH` y `DELETE /api/schedule/posts/{id}` (un post, cambiarle la fecha o sacarlo), `PATCH /api/schedule/posts` (cambiar la fecha de varios), `POST /api/schedule/posts/{id}/archivar` y `…/desarchivar` (archivar lo quemado), `GET /api/schedule/posts` (calendario), `GET /api/schedule/resumen` (el resumen del día), `GET /api/schedule/cuentas` (las cuentas), `GET /api/metrics/posts` (métricas), `GET /api/metrics/mejores` (el mejor X %), `GET /api/metrics/que-funciona` (qué tema, estilo y formato funcionan, y si la música ayuda) y `/api/bodega…` (la cámara de frío de La Cocina) a nombre del admin. Es anterior a las llaves por usuario y sigue para el agente que ya la usa | No — sin ella esos endpoints aceptan solo las llaves que cada usuario genera en La Cocina («Tu propio chef»); si la pones, genérala igual que `CRON_SECRET` |
 | `RESEND_API_KEY` | Manda los códigos de ingreso y los avisos: la publicación que se quemó, la cuenta que se cayó, el resumen del día y la comanda de La Cocina que entregó o terminó (ver «Avisos por correo») | Sí — sin ella nadie puede entrar al panel |
 | `PUBLISH_ALERT_TO` | Adónde va un aviso sin dueño con correo: un post o una cuenta de antes de los usuarios, y la alarma de La Cocina si falta `ADMIN_EMAIL`. Lo demás va al correo de su dueño | No — sin ella, lo que no tiene dueño no avisa; el calendario y Los Fierros lo siguen mostrando |
 | `PUBLISH_ALERT_FROM` | Remitente de los avisos | Opcional; default `onboarding@resend.dev`, que solo entrega al correo de la cuenta de Resend |
@@ -2151,8 +2151,19 @@ entero —destinos, media y regla— con la regla del panel, que comparten en
 `borrarPostProgramado`: si algún destino ya se publicó o está publicando —también uno que el
 publicador está intentando en ese momento—, responde `409`
 con `Ya se publicó (o está publicando): elimínalo en la red.`, porque borrar la fila no
-despublica nada; si el id no existe (o no es del dueño), `404`; borrado, `200`. No hay
-edición por API: para cambiar algo se borra y se programa de nuevo.
+despublica nada; si el id no existe (o no es del dueño), `404`; borrado, `200`.
+
+`PATCH /api/schedule/posts/{id}` con `{ "fecha": "YYYY-MM-DD HH:MM" }` (la forma del lote, en la
+zona del dueño) cambia solo la fecha, sin borrar el post (issue #375): se quedan el `id`, el texto,
+la media ya guardada —no se vuelve a bajar—, las opciones, los atributos, la regla y la `ref`.
+`PATCH /api/schedule/posts` con `{ "posts": [{ "id", "fecha" }] }` mueve hasta 50, con un resultado
+por fila, como el lote. Pasan por la regla del editor del panel y del teléfono
+(`editarPostProgramado`, desde `src/lib/social/publish/cambiar-fecha.ts`), con todo lo demás
+conservado y la reja del teléfono: `409` si algún destino ya salió o está saliendo, la hora siempre
+en el futuro, y un destino quemado vuelve a la cola con la hora nueva. Antes, la única forma era
+borrar y reenviar: se perdía el `id`, la media se bajaba de nuevo y, si el reenvío fallaba, lo
+borrado quedaba sin programar. Es la única edición por API: para cambiar algo más se borra y se
+programa de nuevo.
 
 `POST /api/schedule/posts/{id}/archivar` archiva lo quemado sin borrarlo —con
 `{ "cuentaId": "…" }`, ese destino; sin cuerpo, todos los quemados del post—, y `…/desarchivar`
@@ -2653,6 +2664,7 @@ src/
       promocionar.ts       promocionar una publicación: qué se acepta, el gasto máximo, lo que se le manda a Meta y sus errores en castellano (sin base); promocionar-meta.ts crea, pausa y detiene
       publish/secuencia.ts las historias de una secuencia salen en orden: cada una espera a la anterior
       publish/editar.ts    guardar los cambios de un post programado: la regla que comparten el editor del panel y la app del teléfono
+      publish/cambiar-fecha.ts  mover un post programado a otra fecha sin borrarlo: PATCH /api/schedule/posts, por la regla del editor
       publish/tiktok-cuenta.ts  creator_info de una cuenta del dueño y «Música de TikTok» recordada: lo que comparten el compositor y Publicar del teléfono
 public/docs/
   api-llm.md, api-editor.md, api.json   las guías de la API para un LLM
