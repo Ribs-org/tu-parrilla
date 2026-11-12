@@ -137,7 +137,7 @@ no por subcadena parcial ni regex:
 | `X / Twitter todavía no está disponible en Tu Parrilla: próximamente.` | `x` en `redes`, o una cuenta de X en `cuentas`: está en «Próximamente» |
 | `Hay redes repetidas en la fila.` | `redes` con la misma red dos veces |
 | `No se pudo leer una media de la fila.` | `media` o `portada`: descarga fallida, timeout, o tipo ajeno; el porqué viene en `motivo` (abajo) |
-| `Tu plan <nombre> deja hasta <N> publicaciones esperando a la vez: espera a que salga alguna o borra una.` (por ejemplo, `Tu plan Gratis deja hasta 50 publicaciones esperando a la vez: espera a que salga alguna o borra una.`) | ninguno: el plan del dueño de la llave ya tiene ese número de publicaciones esperando salir, contando las de esta misma llamada. Una publicación cuenta una vez aunque salga a varias redes; las que ya salieron no cuentan. No se arregla reenviando: hay que esperar a que salga alguna o borrarla (`DELETE /api/schedule/posts/{id}`) |
+| `Tu plan <nombre> deja hasta <N> publicaciones esperando a la vez: espera a que salga alguna o borra una.` (por ejemplo, `Tu plan Gratis deja hasta 50 publicaciones esperando a la vez: espera a que salga alguna o borra una.`) | ninguno: el plan del dueño de la llave ya tiene ese número de publicaciones esperando salir, contando las de esta misma llamada. Una publicación cuenta una vez aunque salga a varias redes; las que ya salieron no cuentan. No se arregla reenviando: hay que esperar a que salga alguna o borrarla (`DELETE /api/schedule/posts/{id}`). Antes de mandar una tanda, `GET /api/schedule/plan` dice cuántas caben (sección 3j) |
 | `Al lote se le acabó el tiempo antes de terminar esta fila. Reenvíala.` | el lote llegó a su tiempo máximo (unos tres minutos) antes de terminar la fila; reenviarla con su `ref` es seguro |
 | `La portada requiere un video en media.` | `portada` sin video en `media` |
 | `La portada debe ser una imagen.` | `portada` resultó ser video u otra cosa |
@@ -408,6 +408,41 @@ Frases literales (`{ error }`):
 
 Por API no se renombra, no se saca nada de la cámara y no se pide una comanda: eso lo hace el
 dueño en su panel.
+
+## 3j. El plan de la cuenta y sus topes
+
+```bash
+curl https://tu-parrilla.cl/api/schedule/plan -H "Authorization: Bearer $LLAVE_PARRILLA"
+```
+
+```json
+{
+  "plan": "Gratis",
+  "vence": null,
+  "esperando": { "ahora": 44, "tope": 50, "libres": 6 },
+  "cuentas": { "ahora": 3, "tope": 7, "libres": 4 },
+  "camara": { "ahora": 5368709120, "tope": 21474836480, "libres": 16106127360 },
+  "tokens": { "ahora": 1200, "tope": 100000, "libres": 98800, "mes": "2026-11" }
+}
+```
+
+El plan que rige para el dueño de la llave y cada tope, con lo que lleva usado. **Míralo antes de
+mandar una tanda**: si `esperando.libres` es menor que las filas, las que sobran vuelven con
+`Tu plan <nombre> deja hasta <N> publicaciones esperando a la vez…` (sección 3). También sirve
+para comprobar que un cambio de plan quedó, sin programar nada de prueba.
+
+- `plan`: el nombre, como sale en la frase del rechazo.
+- `vence`: hasta cuándo rige, con la zona del dueño, si es un plan pagado con fecha (una
+  suscripción o una cortesía que vence); `null` en el gratis o sin fecha. Pasada esa fecha, rige
+  el gratis.
+- `esperando`: las publicaciones esperando salir, contadas como el rechazo: una publicación cuenta
+  una vez aunque vaya a varias redes, y lo que ya salió no cuenta.
+- `cuentas`: las conectadas. `camara`: la cámara de frío de La Cocina, en bytes (lo guardado más
+  lo que se está subiendo). `tokens`: los de IA del `mes` en curso, en la zona del dueño.
+- En cada uno, `tope` es el máximo y `libres` lo que queda (nunca negativo); los dos son `null`
+  si el plan no tiene tope ahí.
+
+Los números de cada plan los cambia el admin, así que no los copies de esta guía: léelos acá.
 
 ## 4. Lo que esta API no hace
 
