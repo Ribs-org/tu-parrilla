@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from 'next'
 import { headers } from 'next/headers'
+import { redirect } from 'next/navigation'
 import { Landing, metadataLanding } from '@/components/landing'
+import { usuarioActual } from '@/lib/auth'
 import { esDominioDelProducto } from '@/lib/dominios'
 import { numerosDeLaPortada } from '@/lib/portada-numeros'
 import { COLOR_DE_BARRA, temaDelEnlace } from '@/lib/tema'
@@ -54,6 +56,12 @@ export default async function HomePage({
   searchParams: Promise<SearchParams>
 }) {
   if (await enElProducto()) {
+    // Con la sesión abierta, la raíz es el panel, como en cualquier producto: quien ya tiene cuenta
+    // escribe tu-parrilla.cl para trabajar, no para leer la portada (lo pidió el dueño el
+    // 2026-11-13). La portada sigue en `/landing`, para quien quiera verla con la sesión abierta.
+    // Una cookie vencida o revocada no lleva a ningún lado: `usuarioActual` devuelve null y se ve la
+    // portada, sin ida y vuelta con `/ingresar`.
+    if (await usuarioActual()) redirect('/admin')
     const [{ tema, delEnlace }, numeros] = await Promise.all([
       temaDeLaPortada((await searchParams).modo),
       numerosDeLaPortada(),
