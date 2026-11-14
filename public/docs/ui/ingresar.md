@@ -16,6 +16,9 @@ desde la próxima vez. La de error sigue siempre de noche.
 ## Cómo se llega
 
 - Escribiendo `https://tu-parrilla.cl/ingresar`.
+- Con la sesión ya abierta, escribir `https://tu-parrilla.cl` lleva directo al panel, a La
+  Parrilla, sin pasar por la portada. La portada se sigue viendo en
+  `https://tu-parrilla.cl/landing`.
 - Desde la portada de tu-parrilla.cl: el botón «Entrar», arriba a la derecha, o al final, bajo
   «Tu Parrilla es por invitación.» y «No hay registro abierto. Si ya te invitaron, entra con tu
   correo.», el botón «Entrar con tu correo». La portada no tiene registro: todo lo demás que se
@@ -176,6 +179,9 @@ abren la sesión del panel solos (ver «Desde la app», arriba).
 
 ## Si el humano dice…
 
+- **«Entro a tu-parrilla.cl y no veo la portada: me lleva al panel».** Es a propósito: con la
+  sesión abierta, la dirección lleva a La Parrilla. La portada está en
+  `https://tu-parrilla.cl/landing`.
 - **«No me llega el código».** En orden: esperar un minuto y mirar spam y promociones;
   confirmar que el correo es exactamente el de la invitación (la pantalla no lo muestra: mirar
   la barra de direcciones, o volver con «Usar otro correo» y escribirlo de nuevo); si pidió
