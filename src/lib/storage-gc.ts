@@ -6,6 +6,7 @@ import {
   insumos,
   links,
   materiales,
+  pasePiezas,
   profiles,
   reglasClave,
   scheduledPostMedia,
@@ -104,6 +105,9 @@ export const COLUMNAS_DE_ARCHIVO = [
   { tabla: 'insumos', columna: 'url', ref: insumos.url },
   { tabla: 'creativos', columna: 'portada_url', ref: creativos.portadaUrl },
   { tabla: 'creativo_media', columna: 'url', ref: creativoMedia.url },
+  // El Pase: los shorts y las imágenes que se revisan. Se van con su pase (el borrado en cascada
+  // deja la fila sin nadie que la nombre), no antes.
+  { tabla: 'pase_piezas', columna: 'url', ref: pasePiezas.url },
 ] as const
 
 export async function urlsReferenciadas(): Promise<Set<string>> {

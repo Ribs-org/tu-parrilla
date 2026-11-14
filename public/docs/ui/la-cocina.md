@@ -1,7 +1,8 @@
 # La Cocina — el chef de la casa y tu propio chef
 
-`/admin/ia`, la cuarta pestaña de la barra de arriba, la última, con el dibujo de un maestro
-cocinero al lado del nombre. La ven todos los usuarios.
+`/admin/ia`, la cuarta pestaña de la barra de arriba, con el dibujo de un maestro cocinero al lado
+del nombre. La ven todos los usuarios, y es la última salvo para el admin, que ve después El Pase
+([el-pase.md](el-pase.md)).
 
 La Cocina junta a los dos chefs que pueden cocinar para la persona:
 

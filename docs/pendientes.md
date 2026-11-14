@@ -978,6 +978,18 @@ diciendo «Sin suscripción», y es cierto.
   bienvenida o «ice breakers» para quien escribe por primera vez, en Instagram y Messenger. Se
   cruza con «Gamificar las notificaciones de cada red», arriba, que tampoco tiene cómo enterarse
   de un seguidor nuevo.
+- **El Pase: lo que quedó fuera de la primera entrega** (2026-11-13; el diseño en
+  `docs/superpowers/specs/2026-11-13-el-pase-design.md`, README «El Pase»).
+  - **[dueño]** Decidir el modelo de permisos: si cada usuario crea sus pases (hoy solo el admin),
+    si quien revisa tiene cuenta o sigue entrando con el enlace, y si un pase es de un usuario o de
+    un equipo. Hoy los códigos son la llave y el nombre de quien revisa no se comprueba.
+  - Probar la subida de punta a punta contra el almacén de verdad: el enlace firmado y el `PUT`
+    desde el navegador solo se probaron con el almacén doblado. Sube igual que el panel (solo con
+    `Content-Type`), así que el CORS de R2 no debería estorbar.
+  - Que el chef de La Cocina lea su crítica solo (`docs/cocina-api.md`): hoy se le pasa el enlace de
+    editar, o se le copia la crítica con «Para tu IA».
+  - Avisar por correo o al teléfono cuando llega una crítica o una versión nueva.
+  - El modo día adentro de un pase, y dibujar a mano alzada, flechas o notas de voz.
 - **Cupos y reparto de los crons por usuario** (`docs/levantamiento-terceros.md` §5.4). Hace
   falta cuando la beta pase de unos diez usuarios. Desde el 2026-11-08 la prioridad del plan ordena
   las colas (README, «Los planes»); falta el cupo por usuario y la cola de trabajo.

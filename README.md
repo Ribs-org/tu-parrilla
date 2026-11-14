@@ -17,8 +17,10 @@ tus números.
 | `/privacidad`, `/terminos` | La política de privacidad y los términos, públicos y sin sesión. Google y Meta los revisan para verificar la app. Además los enlaza, junto con `/`, el *Branding* de `rclone-servidor`, otra app de Google de Infraestructura (#294): si alguna de las tres cambia de ruta o se baja, avisar en `VicentePareja/servidor_propio` |
 | `/<slug>` | La página de un usuario. Cada dominio sirve solo las de su dueño; el del producto las sirve todas |
 | `/admin` | Tu panel: entra a La Parrilla, el calendario con lo que se quemó arriba; adentro, los números, los comentarios, el editor y La Cocina (`/admin/ia`): el chef de la casa, con la cámara de frío donde se guarda el material (`/admin/ia/bodega`), y, en «Tu propio chef», las llaves para tu agente, con el manual del parrillero (`/admin/ia/manual`). Se abre en el dominio del producto: en cualquier otro, `/admin` e `/ingresar` redirigen ahí con la misma ruta |
+| `/pase/<código>` | Adentro de un pase de El Pase: los shorts o imágenes de un editor para criticarlos (`rev_…`, quien revisa) o arreglarlos (`edi_…`, quien edita). Pública, sin sesión y sin indexar: el código es la llave (ver «El Pase») |
+| `/api/pase/<código>/…` | La API de El Pase, con el mismo código: el pase en JSON o como lista de tareas (`?formato=texto`), las críticas, el veredicto, y subir piezas y versiones. Es la de la pantalla y la de una IA que edita (`/docs/pase-api.md`) |
 | `/borrado/<código>` | El estado de un borrado que pidió Meta: cuándo fue y cuántas cuentas. Pública, sin sesión; el código es la llave |
-| `/docs/…` | Las guías para LLMs, públicas y sin sesión: la de la API (`api-llm.md`, `api-editor.md`, `api.json`) y la wiki de la interfaz (`ui/index.md`), para guiar a quien se pierde en el panel |
+| `/docs/…` | Las guías para LLMs, públicas y sin sesión: la de la API (`api-llm.md`, `api-editor.md`, `api.json`), la de El Pase para una IA que edita (`pase-api.md`) y la wiki de la interfaz (`ui/index.md`), para guiar a quien se pierde en el panel |
 | `/api/social/meta/baja` | `POST` de Meta cuando alguien quita la app desde Facebook: deja sin credencial sus cuentas de Instagram y Facebook |
 | `/api/social/meta/borrado` | `POST` de Meta cuando alguien pide borrar sus datos: borra lo que vino de esas dos redes y devuelve el código de estado |
 | `/api/social/instagram/baja`, `/api/social/instagram/borrado` | Lo mismo, del caso de uso de Instagram de la app de Meta: solo para las cuentas de Instagram conectadas con el login de Instagram (ver «Instagram sin página de Facebook: el login de Instagram») |
@@ -396,6 +398,12 @@ solo al admin: el nombre y el correo del cliente, la comanda y lo que pidió. La
 segundo recibe un aviso, no la cuenta de otro. Eso es entre dos usuarios distintos: un
 mismo dueño sí puede conectar varias cuentas suyas de la misma red y elegir a cuáles sale
 cada publicación — ver «Varias cuentas de una misma red», más abajo.
+
+**El Pase** tiene dueño (`pases.owner_id`, el admin que lo creó, y sus piezas y críticas cuelgan
+del pase), pero adentro no se entra por el dueño sino por **uno de sus dos códigos**: el enlace
+de revisar o el de editar, sin cuenta. Desde el código, cada consulta va acotada a ese pase: una
+pieza o una crítica de otro pase no existe para él. Es un parche a propósito, mientras se decide
+el modelo de permisos (ver «El Pase»).
 
 **Traspasar una cuenta**, en Los Maestros, es lo único del panel que cruza dueños, y por eso solo
 lo hace el admin (`src/lib/social/traspasar.ts`). Cambia de dueño la cuenta, sus publicaciones y
@@ -2300,6 +2308,36 @@ se vio funcionar está en esa guía, «Lo que la prueba tiene que mirar». Al bo
 cobros se quedan sin dueño, para la contabilidad. La app del teléfono no cobra ni enlaza al cobro: lo
 que se vende dentro de una app de Android tiene que ir por Google Play Billing.
 
+## El Pase
+
+Para criticar los shorts o las imágenes de un editor —una persona, el chef de La Cocina u otra
+IA— y devolverle la crítica ordenada: pegada al momento (o a un tramo) del video y a una zona del
+cuadro, con una etiqueta, para que arregle y suba la versión siguiente, o varias variantes para
+comparar. El diseño, con el porqué de cada pieza, está en
+`docs/superpowers/specs/2026-11-13-el-pase-design.md`; la pantalla, en la wiki de la UI
+(`public/docs/ui/el-pase.md`); y la API para una IA, en `public/docs/pase-api.md`.
+
+- **El admin** crea los pases en el panel (`/admin/pase`, una pestaña solo suya). Cada pase tiene
+  dos códigos, y con ellos dos enlaces, `/pase/rev_…` y `/pase/edi_…`. «Cambiar los enlaces» deja
+  sin entrada a quien tenía los de antes; «Archivar» los cierra hasta desarchivar.
+- **Quien revisa** ve el video con su hora siempre a la vista, pausa y escribe: la crítica nace
+  pegada a ese momento. Puede marcar un tramo, dibujar una zona, elegir la etiqueta y dar el
+  veredicto de la pieza. **Quien edita** lee la crítica como lista de tareas, la contesta, la marca
+  hecha y sube la versión siguiente diciendo qué críticas arregla.
+- **Las tablas**: `pases`; `pase_piezas`, donde las versiones de un creativo comparten `grupo` y
+  `variante` separa las alternativas; y `pase_comentarios`, con `desde_ms`, `hasta_ms` y `zona`
+  (fracciones del cuadro, que no dependen de la resolución).
+- **Los archivos** van al almacén, en `pase/<pase>/`, con un enlace firmado que pide la pantalla
+  (o la IA) y que se sube directo, sin pasar por una función; o se copian desde una URL pública. El
+  barrido de huérfanos los cuida (`pase_piezas.url`).
+- **La API es la misma para la pantalla y para una IA**: `GET /api/pase/<código>` (con
+  `?formato=texto`, la crítica como lista de tareas en Markdown), `POST …/comentarios`,
+  `PATCH`/`DELETE …/comentarios/<id>`, `PUT …/piezas/<id>/estado`, `POST …/subidas` y
+  `POST …/piezas`. El código decide el rol: lo que no le toca es `403`.
+
+Lo que no entra todavía (cuentas para quien revisa, avisos, que el chef lea su crítica solo, el
+modo día adentro de un pase) está en `docs/pendientes.md`.
+
 ## La Cocina
 
 La Cocina es la fábrica de creativos de cada usuario dentro de Tu Parrilla:
@@ -2637,6 +2675,7 @@ src/
     hitos.ts               los hitos de cada corte (100, 1.000… vistas): la detección después de cada lectura y lo que la app celebra
     racha.ts               la racha: los días seguidos con algo servido, en la zona del dueño
     version-de-la-app.ts   la versión recomendada y la mínima de la app del teléfono, para el aviso de actualizar
+    pase/                  El Pase: lo puro (reglas.ts: los códigos, las etiquetas, lo que vale una crítica, la crítica en texto para una IA), lo que lee y escribe la base (pase.ts) y la puerta de su API (http.ts)
     planes/plan-api.ts     el plan del dueño de la llave para GET /api/schedule/plan: cada tope con lo usado y lo que queda (sin base)
     cortes-movil.ts        un corte de La Parrilla en la forma de la app del teléfono: su dibujo y sus redes (sin base)
     auth.ts                sesión del panel
