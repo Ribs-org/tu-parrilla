@@ -1003,23 +1003,8 @@ diciendo «Sin suscripción», y es cierto.
   - si es para todos o del plan pagado, y si cambia lo que se promete en la portada.
 
   Se cruza con «Revisar cómo habla el sitio de Vercel con el servidor 2», en «Seguridad», que es por
-  donde llegarían esos archivos.
-- **Por explorar: un visor de videos para criticarlos** (2026-11-12, idea del dueño). Ver un
-  video y dejarle la crítica pegada al momento: un comentario en el segundo 0:12, o marcado sobre el
-  cuadro, como se revisa un corte con un editor. Hoy, en el mesón, el creativo del chef se ve y se
-  programa o se descarta, con el motivo de un toque y una nota opcional, pero no se puede decir «acá,
-  en este segundo, esto». Lo que hay que decidir antes de diseñar:
-  - qué videos: los creativos del chef en el mesón (para pedirle otra vuelta con las críticas), lo
-    propio antes de programarlo, o también lo ya publicado, al lado de lo que trajo;
-  - qué se deja: texto en un segundo, un tramo, un dibujo sobre el cuadro, o una nota de voz;
-  - a quién le llega: al chef, por la API de La Cocina (`docs/cocina-api.md`, que hoy no tiene cómo
-    leer críticas ni rehacer una pieza), y si las críticas le enseñan lo que le gusta a cada persona
-    para la próxima comanda;
-  - dónde: el panel, el teléfono o los dos (el teléfono ya reproduce el mesón desde la 1.2.0, con
-    `expo-video`).
-
-  Se cruza con «creativos editables», arriba: criticar es la otra forma de llegar a lo que uno
-  quiere sin editarlo.
+  donde llegarían esos archivos, y con El Pase (README, «El Pase»), que ya deja criticar el video
+  terminado: criticar y retocar son las dos formas de llegar a lo que uno quiere.
 - **Un mensaje a cada seguidor nuevo** (2026-11-11, lo pidió el dueño). Que cuando alguien
   empieza a seguir una cuenta conectada le llegue un mensaje directo de bienvenida, escrito por el
   dueño (o con la IA, como los borradores de La Mesa). Antes de diseñar, verificar en la
