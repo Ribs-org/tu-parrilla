@@ -52,6 +52,15 @@ export const PANTALLAS: readonly Pantalla[] = [
   { ruta: '/admin/comments', nombre: 'La Mesa', subtitulo: 'lo que te responden y tus respuestas', grupo: 'pestana' },
   { ruta: '/admin/analytics', nombre: 'Los Números', subtitulo: 'cómo te fue en las redes y en tu página', grupo: 'pestana' },
   { ruta: '/admin/ia', nombre: 'La Cocina', subtitulo: 'el chef de la casa y tu propio chef', grupo: 'pestana' },
+  // El Pase (2026-11-13): donde alguien critica los shorts de un editor y se los devuelve. Solo el
+  // admin mientras se decide el modelo de permisos (`docs/superpowers/specs/2026-11-13-el-pase-design.md`).
+  {
+    ruta: '/admin/pase',
+    nombre: 'El Pase',
+    subtitulo: 'la crítica de los shorts, de vuelta al editor',
+    grupo: 'pestana',
+    soloAdmin: true,
+  },
   {
     ruta: '/admin/accounts',
     nombre: 'Los Fierros',

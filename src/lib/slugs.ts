@@ -19,6 +19,8 @@ export const RESERVADOS: ReadonlySet<string> = new Set([
   'borrar-mis-datos',
   'ingresar',
   'landing',
+  // El Pase: adentro de un pase, `/pase/<código>` (2026-11-13).
+  'pase',
   'privacidad',
   'terminos',
   // Archivos servidos desde la raíz. Una dirección generada nunca los alcanza, porque

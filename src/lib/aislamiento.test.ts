@@ -139,6 +139,7 @@ const { leerResumen } = await import('./avisos/run')
 const { archivarQuemados, archivarDestino } = await import('./social/publish/archivar')
 const { CONSERVAR, editarPostProgramado } = await import('./social/publish/editar')
 const { cambiarFecha } = await import('./social/publish/cambiar-fecha')
+const { pasesDe } = await import('./pase/pase')
 const { postParaEditarEnElTelefono } = await import('./editar-movil')
 const { recibirSugerencia } = await import('./sugerencias/guardar')
 const { misSugerencias, respuestasSinLeer, marcarRespuestaLeida } = await import('./sugerencias/responder')
@@ -889,6 +890,13 @@ describe('aislamiento por dueño, escrituras (SQL generado, sin base)', () => {
       cambiarFecha(DUENO, '6f1c2a54-9b1e-4c3d-8f00-0123456789ab', '2030-11-25 10:00', 'America/Santiago'),
     )
     expect(consultas).toHaveLength(1)
+    esperarFiltradoPorDueno(consultas[0]!)
+  })
+
+  // El Pase: el panel lista los pases del admin por su dueño; lo de adentro se abre con un código.
+  it('pase: pasesDe lee los pases atados al dueño', async () => {
+    const consultas = await todasLasConsultas(() => pasesDe(DUENO))
+    expect(consultas.length).toBeGreaterThanOrEqual(1)
     esperarFiltradoPorDueno(consultas[0]!)
   })
 

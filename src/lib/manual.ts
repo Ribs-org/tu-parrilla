@@ -7,7 +7,7 @@ import { Marked } from 'marked'
 
 /**
  * Las páginas de la wiki, en el orden del manual: la de entrada, la puerta, las cuatro
- * pestañas, lo de Ajustes —con el libro de sugerencias al final— y la app del teléfono. Un test exige que estén todas las de la
+ * pestañas (y El Pase, la del admin), lo de Ajustes —con el libro de sugerencias al final— y la app del teléfono. Un test exige que estén todas las de la
  * carpeta: una página nueva de la wiki tiene que entrar acá para salir en el manual.
  */
 export const PAGINAS = [
@@ -18,6 +18,7 @@ export const PAGINAS = [
   'los-numeros',
   'la-cocina',
   'la-camara-de-frio',
+  'el-pase',
   'los-fierros',
   'la-vitrina',
   'los-maestros',
