@@ -1668,3 +1668,96 @@ export const cobros = pgTable(
   },
   (t) => [uniqueIndex('cobros_externo_key').on(t.externoId), index('cobros_owner_idx').on(t.ownerId)],
 ).enableRLS()
+
+/**
+ * El Pase: una tanda de shorts o imágenes para que alguien los critique y el editor los arregle
+ * (`docs/superpowers/specs/2026-11-13-el-pase-design.md`). Se entra con uno de sus dos códigos, sin
+ * cuenta: `codigo_revisor` deja ver y criticar, `codigo_editor` deja ver la crítica, contestarla y
+ * subir versiones. Mientras se decide el modelo de permisos, los crea el admin, que queda de dueño.
+ */
+export const pases = pgTable(
+  'pases',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    ownerId: uuid('owner_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'restrict' }),
+    titulo: text('titulo').notNull(),
+    /** Lo que quien revisa tiene que mirar: el objetivo, la marca, lo que importa. */
+    instrucciones: text('instrucciones').notNull().default(''),
+    codigoRevisor: text('codigo_revisor').notNull(),
+    codigoEditor: text('codigo_editor').notNull(),
+    creadoEn: timestamp('creado_en', { withTimezone: true }).notNull().defaultNow(),
+    actualizadoEn: timestamp('actualizado_en', { withTimezone: true }).notNull().defaultNow(),
+    archivadoEn: timestamp('archivado_en', { withTimezone: true }),
+  },
+  (t) => [
+    uniqueIndex('pases_codigo_revisor_key').on(t.codigoRevisor),
+    uniqueIndex('pases_codigo_editor_key').on(t.codigoEditor),
+    index('pases_owner_idx').on(t.ownerId),
+  ],
+).enableRLS()
+
+/** El veredicto de quien revisa sobre una pieza. */
+export type EstadoPiezaDelPase = 'en_revision' | 'aprobada' | 'cambios' | 'descartada'
+
+/**
+ * Un archivo del pase, un video o una imagen. Las versiones de un mismo creativo comparten `grupo`;
+ * `version` cuenta desde 1, y `variante` (A, B…) separa alternativas de una misma versión para
+ * compararlas. `responde_a` es la pieza que esta versión corrige; `notas`, lo que dice el editor.
+ */
+export const pasePiezas = pgTable(
+  'pase_piezas',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    paseId: uuid('pase_id')
+      .notNull()
+      .references(() => pases.id, { onDelete: 'cascade' }),
+    grupo: uuid('grupo').notNull(),
+    version: integer('version').notNull().default(1),
+    variante: text('variante'),
+    titulo: text('titulo').notNull(),
+    tipo: text('tipo').$type<'video' | 'imagen'>().notNull(),
+    url: text('url').notNull(),
+    notas: text('notas').notNull().default(''),
+    respondeA: uuid('responde_a'),
+    estado: text('estado').$type<EstadoPiezaDelPase>().notNull().default('en_revision'),
+    estadoPor: text('estado_por'),
+    estadoEn: timestamp('estado_en', { withTimezone: true }),
+    creadaEn: timestamp('creada_en', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('pase_piezas_pase_idx').on(t.paseId), index('pase_piezas_grupo_idx').on(t.grupo)],
+).enableRLS()
+
+/** Una zona del cuadro, en fracciones del ancho y el alto (0 a 1): no depende de la resolución. */
+export type ZonaDelCuadro = { x: number; y: number; ancho: number; alto: number }
+
+/**
+ * Una crítica a una pieza: en un momento (`desde_ms`), en un tramo (`desde_ms` y `hasta_ms`), en una
+ * zona del cuadro, o general. El editor la contesta (`respuesta`) y la marca resuelta, a veces con
+ * la versión que la arregló (`resuelto_en`).
+ */
+export const paseComentarios = pgTable(
+  'pase_comentarios',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    paseId: uuid('pase_id')
+      .notNull()
+      .references(() => pases.id, { onDelete: 'cascade' }),
+    piezaId: uuid('pieza_id')
+      .notNull()
+      .references(() => pasePiezas.id, { onDelete: 'cascade' }),
+    autor: text('autor').notNull(),
+    desdeMs: integer('desde_ms'),
+    hastaMs: integer('hasta_ms'),
+    zona: jsonb('zona').$type<ZonaDelCuadro>(),
+    etiqueta: text('etiqueta').notNull().default('otro'),
+    texto: text('texto').notNull(),
+    estado: text('estado').$type<'abierto' | 'resuelto'>().notNull().default('abierto'),
+    respuesta: text('respuesta'),
+    resueltoEn: uuid('resuelto_en'),
+    resueltoAt: timestamp('resuelto_at', { withTimezone: true }),
+    creadoEn: timestamp('creado_en', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('pase_comentarios_pase_idx').on(t.paseId), index('pase_comentarios_pieza_idx').on(t.piezaId)],
+).enableRLS()

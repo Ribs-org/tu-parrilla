@@ -543,6 +543,15 @@ publicación, cada cinco minutos. No es el proceso, es lo que avisa si el proces
 conviene corregir la `eta` cada vez que la cola se atrasa. Una comanda en `pregunta` no suena,
 porque espera al dueño.
 
+## La crítica de una persona: El Pase
+
+Aparte de las comandas, el admin puede poner lo que hizo el chef en un pase de El Pase para que una
+persona lo critique pegado al momento y a la zona del cuadro. El chef lo lee y devuelve la versión
+siguiente con el enlace de editar, que es también su API: `GET /api/pase/<código>?formato=texto` da
+la crítica como lista de tareas, y `POST /api/pase/<código>/piezas` sube la versión con las
+críticas que arregla. La guía, en `public/docs/pase-api.md`. Hoy no está atado a una comanda: se le
+pasa el enlace (ver `docs/pendientes.md`, «El Pase»).
+
 ## Lo que viene
 
 - **Fase 1:**

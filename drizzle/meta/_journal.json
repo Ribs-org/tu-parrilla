@@ -302,6 +302,13 @@
       "when": 1794405242119,
       "tag": "0042_aviso_de_lo_bueno",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1794617846134,
+      "tag": "0043_el_pase",
+      "breakpoints": true
     }
   ]
 }

@@ -188,14 +188,14 @@ describe('el vocabulario del panel', () => {
     expect(new Set(nombres).size).toBe(nombres.length)
   })
 
-  it('cuatro pestañas con La Parrilla primera y La Cocina al final, y Ajustes con tres entradas para un usuario y cinco para el admin', () => {
+  it('cuatro pestañas con La Parrilla primera y La Cocina al final (el admin suma El Pase), y Ajustes con tres entradas para un usuario y cinco para el admin', () => {
     expect(pestanas(false).map((p) => p.ruta)).toEqual([
       '/admin/schedule',
       '/admin/comments',
       '/admin/analytics',
       '/admin/ia',
     ])
-    expect(pestanas(true)).toEqual(pestanas(false))
+    expect(pestanas(true).map((p) => p.ruta)).toEqual([...pestanas(false).map((p) => p.ruta), '/admin/pase'])
     expect(ajustes(false).map((p) => p.ruta)).toEqual(['/admin/accounts', '/admin/profiles', '/admin/cuenta'])
     expect(ajustes(true).map((p) => p.ruta)).toEqual([
       '/admin/accounts',
