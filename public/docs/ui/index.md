@@ -214,7 +214,8 @@ fondo claro, color papel de arroz, y piezas de sushi en vez de cortes de carne. 
 botón del modo de la barra de arriba, y queda guardado en la cuenta: el panel entra en ese modo
 en cualquier equipo donde la persona entre. La pantalla para entrar con el correo sigue el modo
 con que se usó el panel la última vez en ese equipo, porque se ve antes de saber de quién es. La
-portada, `https://tu-parrilla.cl`, también tiene los dos modos, con el mismo botón al lado de
+portada, `https://tu-parrilla.cl` (con la sesión abierta esa dirección lleva al panel, y la portada
+se ve en `/landing`), también tiene los dos modos, con el mismo botón al lado de
 «Entrar»; de día su marca es un nigiri. No cambian las páginas legales, el 404 ni la página
 pública de cada creador; tampoco la vista previa de La Vitrina, que es esa página. La app del
 teléfono tiene los dos modos y va con la cuenta: se cambia también en su Ajustes, con «Modo día»
